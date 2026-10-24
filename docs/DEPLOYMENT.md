@@ -2,6 +2,8 @@
 
 **Built candidate, unverified in game. Nothing has been installed. Explicit authorization to install new runtime/game-root files is still required.** This document describes a future manual procedure; neither build nor packaging scripts copy into GTA, launch RPH, alter security/anti-cheat settings or start the game.
 
+**Phase 2.1:** runtime acquisition/inventory is complete. Use the [current readiness report](PHASE2_1_READINESS.md) and [exact 26-file proposal](../evidence/phase2.1/deployment-manifest.json), including the separately signed VC2010 x64 prerequisite and eight-source logging configuration. These supersede the initial runtime-acquisition/default-32-source instructions below for the first test. The proposal remains conditional on prerequisite review and explicit installation approval, with first-load stop conditions for API binding, DirectStorage and unsupported/security setup.
+
 ## Package
 
 Create a reviewable RichAudio-only archive with `tools/Package-Telemetry.ps1`. `evidence/phase2/package.json` records the actual package location, contents, sizes and SHA-256 hashes. The package contains:
@@ -18,7 +20,7 @@ Only the first two files are proposed for later installation into the game's Plu
 
 ## Preflight before seeking deployment approval
 
-1. Obtain the exact author-supplied RPH runtime from the [1158.16-supporting official release](https://www.lcpdfr.com/downloads/gta5mods/g17media/52970-lspd-first-response-enhanced-preview/). Inspect the archive without installing it: exact launcher/runtime/proxy versions, SHA-256s, readme and bundled licenses/dependencies. The current report has verified the release claim and SDK only; this runtime inventory is still pending.
+1. The exact author-supplied RPH runtime from the [1158.16-supporting official release](https://www.lcpdfr.com/downloads/gta5mods/g17media/52970-lspd-first-response-enhanced-preview/) is now checksum-verified and inventoried without installation. Review the Phase 2.1 report for exact launcher/runtime/proxy versions, SHA-256s, signatures, readme and bundled licenses/dependencies. Recheck these before deployment.
 2. Prepare a manifest of the specific runtime files required for **standalone RPH**, separated from LSPDFR gameplay files. Do not assume extracting the whole LSPDFR bundle is a standalone installation. If the author's supported configuration requires extra components, resolve and authorize that concrete dependency list first. No blanket proxy-DLL overwrite is acceptable.
 3. Verify the session is a supported single-player modding environment. The operator must complete any author-required Story Mode setup through normal supported procedures. Do not bypass anti-cheat, change antivirus/security settings, enter Online or use executable/offset patches. If the runtime cannot run under those constraints, stop and report it.
 4. Preserve the current game-root listing/hashes and any existing Plugins/RPH configuration. Keep original archives unchanged. Current inspection found no installed loader/RPH and only a zero-byte OpenIV.asi; do not remove, repair or replace it automatically. OpenRPF is unnecessary for this telemetry test and its coexistence remains untested.

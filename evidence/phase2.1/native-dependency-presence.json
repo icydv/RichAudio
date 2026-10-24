@@ -1,0 +1,261 @@
+[
+  {
+    "Name": "ADVAPI32.dll",
+    "ResolvedName": "ADVAPI32.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "CFGMGR32.dll",
+    "ResolvedName": "CFGMGR32.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "d2d1.dll",
+    "ResolvedName": "d2d1.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "d3d10_1.dll",
+    "ResolvedName": "d3d10_1.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "d3d10.dll",
+    "ResolvedName": "d3d10.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "d3d11.dll",
+    "ResolvedName": "d3d11.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "d3d9.dll",
+    "ResolvedName": "d3d9.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "D3DCOMPILER_43.dll",
+    "ResolvedName": "D3DCOMPILER_43.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "d3dcsx_43.dll",
+    "ResolvedName": "d3dcsx_43.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "d3dx10_43.dll",
+    "ResolvedName": "d3dx10_43.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "d3dx11_43.dll",
+    "ResolvedName": "d3dx11_43.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "d3dx9_43.dll",
+    "ResolvedName": "d3dx9_43.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "DEVOBJ.dll",
+    "ResolvedName": "DEVOBJ.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "DINPUT8.dll",
+    "ResolvedName": "DINPUT8.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "discord-rpc.dll",
+    "ResolvedName": "discord-rpc.dll",
+    "InPackage": true,
+    "System32Present": false,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "DSOUND.dll",
+    "ResolvedName": "DSOUND.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "DWrite.dll",
+    "ResolvedName": "DWrite.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "dxgi.dll",
+    "ResolvedName": "dxgi.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "EasyHook32.dll",
+    "ResolvedName": "EasyHook32.dll",
+    "InPackage": false,
+    "System32Present": false,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "EasyHook64.dll",
+    "ResolvedName": "EasyHook64.dll",
+    "InPackage": true,
+    "System32Present": false,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "fusion.dll",
+    "ResolvedName": "fusion.dll",
+    "InPackage": false,
+    "System32Present": false,
+    "ClrDirectoryPresent": true
+  },
+  {
+    "Name": "GDI32.dll",
+    "ResolvedName": "GDI32.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "kernel32",
+    "ResolvedName": "kernel32.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "KERNEL32.dll",
+    "ResolvedName": "KERNEL32.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "mscoree.dll",
+    "ResolvedName": "mscoree.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "MSVCP100.dll",
+    "ResolvedName": "MSVCP100.dll",
+    "InPackage": false,
+    "System32Present": false,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "MSVCP140.dll",
+    "ResolvedName": "MSVCP140.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "MSVCR100.dll",
+    "ResolvedName": "MSVCR100.dll",
+    "InPackage": false,
+    "System32Present": false,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "msvcrt.dll",
+    "ResolvedName": "msvcrt.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "ole32.dll",
+    "ResolvedName": "ole32.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "PSAPI.DLL",
+    "ResolvedName": "PSAPI.DLL",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "SHELL32.dll",
+    "ResolvedName": "SHELL32.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "USER32.dll",
+    "ResolvedName": "USER32.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "VCRUNTIME140.dll",
+    "ResolvedName": "VCRUNTIME140.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "WINMM.dll",
+    "ResolvedName": "WINMM.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "X3DAudio1_7.dll",
+    "ResolvedName": "X3DAudio1_7.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  },
+  {
+    "Name": "XINPUT1_3.dll",
+    "ResolvedName": "XINPUT1_3.dll",
+    "InPackage": false,
+    "System32Present": true,
+    "ClrDirectoryPresent": false
+  }
+]

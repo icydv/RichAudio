@@ -2,6 +2,10 @@
 
 Physically informed acoustic research for **GTA V Enhanced, PC, single-player**.
 
+## Phase 2.1 deployment review
+
+The user-supplied official Enhanced bundle now matches its publisher checksum. Its RPH **1.132.1428.17748** runtime is inventoried in the separate development workspace. [Readiness report](docs/PHASE2_1_READINESS.md) and [exact proposed manifest](evidence/phase2.1/deployment-manifest.json) cover 26 currently absent game-file destinations, rollback, bounded logging and numerical A–E criteria. A missing checked VC++ 2010 x64 prerequisite has a signed Microsoft installer staged **but not run**. No GTA files or launcher/security settings were changed. Actual standalone startup, API binding, DirectStorage compatibility and all in-game telemetry/performance results remain unverified. Explicit installation approval is required; this is a conditional first-load proposal, not gameplay validation.
+
 ## Phase 2 current status
 
 **Built but unverified in game:** P2-01 now has a runtime-independent C# telemetry library, a standalone RAGE Plugin Hook adapter, bounded asynchronous JSONL logging, offline analysis and tested mocks. The [official Enhanced release](https://www.lcpdfr.com/downloads/gta5mods/g17media/52970-lspd-first-response-enhanced-preview/) advertises RPH support for 1158.16, so RPH is the selected candidate instead of assuming unsupported Script Hook V compatibility. Compilation used the authentic author-hosted SDK and the existing .NET Framework compiler; no C++ toolchain installation was needed.

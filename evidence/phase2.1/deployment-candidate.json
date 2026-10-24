@@ -1,0 +1,688 @@
+{
+  "SchemaVersion": 1,
+  "GeneratedUtc": "2026-10-24T22:13:04.3025413Z",
+  "AdapterBaseCommit": "648199c57f4da3f19efb17880211fac8ba59e8a4",
+  "State": "BLOCKED",
+  "FinalDeploymentManifest": false,
+  "InstallationAuthorised": false,
+  "GameWritesPerformed": false,
+  "GameLaunched": false,
+  "ExpectedGameVersion": "1.0.1158.16",
+  "Game": {
+    "Path": "__GAME_ROOT__\\GTA5_Enhanced.exe",
+    "Bytes": 55819384,
+    "SHA256": "69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5",
+    "FileVersion": "1.0.1158.16",
+    "ProductVersion": "1.0.1158.16",
+    "AssemblyIdentity": null,
+    "SignatureStatus": "Valid",
+    "Signer": "CN=\"Rockstar Games, Inc.\", OU=Rockstar Partners, O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+    "SignerThumbprint": "AD00A9C3007FD1450A559D0634547B075AD3E688"
+  },
+  "CompileSdk": {
+    "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\sdk\\RagePluginHookSDK.dll",
+    "Bytes": 219648,
+    "SHA256": "5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0",
+    "FileVersion": "1.124.1393.17586",
+    "ProductVersion": "1.124.1393.17586",
+    "AssemblyIdentity": "RagePluginHook, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "SignatureStatus": "NotSigned",
+    "Signer": null,
+    "SignerThumbprint": null
+  },
+  "Plugin": {
+    "Path": "__USER_HOME__\\Documents\\RichAudio\\build\\telemetry\\RichAudio.Telemetry.Rph.dll",
+    "Bytes": 34304,
+    "SHA256": "DBC5F600C37AD7579F49EBA92A352BEE1AAF452F6EF820CEF87B86B8547D5BE0",
+    "FileVersion": "0.0.0.0",
+    "ProductVersion": "0.0.0.0",
+    "AssemblyIdentity": "RichAudio.Telemetry.Rph, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "SignatureStatus": "NotSigned",
+    "Signer": null,
+    "SignerThumbprint": null
+  },
+  "ProposedRichAudioFiles": [
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\build\\telemetry\\RichAudio.Telemetry.Rph.dll",
+      "Destination": "__GAME_ROOT__\\Plugins\\RichAudio.Telemetry.Rph.dll",
+      "SHA256": "DBC5F600C37AD7579F49EBA92A352BEE1AAF452F6EF820CEF87B86B8547D5BE0",
+      "Bytes": 34304,
+      "Action": "Add only after approval; if destination exists, back up and review first."
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\config\\RichAudio.Telemetry.Rph.json",
+      "Destination": "__GAME_ROOT__\\Plugins\\RichAudio.Telemetry.Rph.json",
+      "SHA256": "0368AEF28338874FF099324B46A02DCE98F3FBC23B4FCCE749A515656EC1557E",
+      "Bytes": 285,
+      "Action": "Candidate only: acknowledgements/capture remain false; final approved test configuration needs its own exact hash."
+    }
+  ],
+  "SelectedRuntimeFiles": [],
+  "RuntimeInventory": [
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\cursor_32_2.png",
+      "Bytes": 21781,
+      "SHA256": "BBAC461B7BA311CC476CD5780FD2787628479E37D91CF3A2CCC91560F6200A1A"
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\DdsConvert.dll",
+      "Bytes": 14848,
+      "SHA256": "D115D8C9A817B67C3CD042E51BB941D74539DCA655DE7BE8A3CBAD058D3B2764",
+      "FileVersion": "1.0.0.0",
+      "ProductVersion": "1.0.0.0",
+      "AssemblyIdentity": "DdsConvert, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\DefaultSkin.png",
+      "Bytes": 41365,
+      "SHA256": "333D5611913A3907296DC787625C0F5043277285DAA49CDA0C8976820AB50FA4"
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\discord-rpc.dll",
+      "Bytes": 399880,
+      "SHA256": "5CC2E504800CF4ED2F4781364F661EA22349658DDC391B5D54195E573109D87B",
+      "FileVersion": null,
+      "ProductVersion": null,
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=Discord Inc., O=Discord Inc., L=San Francisco, S=California, C=US, SERIALNUMBER=5128862, OID.2.5.4.15=Private Organization, OID.1.3.6.1.4.1.311.60.2.1.2=Delaware, OID.1.3.6.1.4.1.311.60.2.1.3=US",
+      "SignerThumbprint": "ADC0E27A6076311553127E50969B7862D3384D35"
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\DiscordRpcNet.dll",
+      "Bytes": 6656,
+      "SHA256": "952605857477708168DAFFFA8E9879494F9832CF979A5B116DAA3D903A154569",
+      "FileVersion": "1.0.0.0",
+      "ProductVersion": "1.0.0.0",
+      "AssemblyIdentity": "DiscordRpcNet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\EasyHook.dll",
+      "Bytes": 52224,
+      "SHA256": "3153844BDAEE8A55C812D072B0E25F992E716174FC7D987944F4B8CF6DDD1F83",
+      "FileVersion": "2.7.6578.0",
+      "ProductVersion": "2.7.6578.0",
+      "AssemblyIdentity": "EasyHook, Version=2.7.6578.0, Culture=neutral, PublicKeyToken=4b580fca19d0b0c5",
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\EasyHook64.dll",
+      "Bytes": 310272,
+      "SHA256": "62842ECD61D855199C086600526B697941DCB56A10D4D6EF7D610FFC6369F6D6",
+      "FileVersion": "2.7.6578.0",
+      "ProductVersion": "2.7.6578.0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\EasyLoad64.dll",
+      "Bytes": 7680,
+      "SHA256": "F7766C70B4C82341F32783C72B2CE1430AAE95C6D713A3431DAED7B1F4E40DE7",
+      "FileVersion": "2.7.6578.0",
+      "ProductVersion": "2.7.6578.0",
+      "AssemblyIdentity": "EasyLoad64, Version=2.7.6578.0, Culture=neutral, PublicKeyToken=6491e78701b29b9d",
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\FW1FontWrapper.dll",
+      "Bytes": 156160,
+      "SHA256": "1BA5BB9FFEA32A8C30B5C8B7139E15DDC36A43130465B4D1CE4C7B77FA6FCE25",
+      "FileVersion": null,
+      "ProductVersion": null,
+      "AssemblyIdentity": null,
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Gwen.dll",
+      "Bytes": 196096,
+      "SHA256": "33275AF76FCD12157732A80DF4795590D409A1DF46B2B32A5112CA11D6AA5267",
+      "FileVersion": "1.0.0.0",
+      "ProductVersion": "1.0.0.0",
+      "AssemblyIdentity": "Gwen, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Gwen.UnitTest.dll",
+      "Bytes": 42496,
+      "SHA256": "CF68F7773FEB5756E050A4503F142C67B17C1E4BECF23A878649960B58259017",
+      "FileVersion": "1.0.0.0",
+      "ProductVersion": "1.0.0.0",
+      "AssemblyIdentity": "Gwen.UnitTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\licenses\\DotNetZip.license",
+      "Bytes": 2659,
+      "SHA256": "3907B72D92CD01809F502FD5D583AD9C1EF9A1E924C4BEB91D6D96E9C68A6E81"
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\licenses\\FW1FontWrapper.license",
+      "Bytes": 1083,
+      "SHA256": "925A5C6C941AF37CBB09D7D92A64781A7816A57F57F27EDCF355899C3A3A8578"
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\licenses\\Gwen.license",
+      "Bytes": 1132,
+      "SHA256": "F03204828F08C93ABEFD71404ABBF78BF806A33B5749D09FD8D2DB8290B64DDF"
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\licenses\\Mono.Cecil.license",
+      "Bytes": 1086,
+      "SHA256": "1928552113B063DDE74F2E301E3443051B27C773650A6E381D74F7B8BFD62EE3"
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\licenses\\SlimDX.license",
+      "Bytes": 1078,
+      "SHA256": "DB676FB5779BD2331D6B749F5713D6938DB6C47A871FD930247C3717169AE3B9"
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\LMS.Common.dll",
+      "Bytes": 14336,
+      "SHA256": "8D5593ABB8A939519365293D3325B83428F8304B56C59CCA37929637E7D6FB50",
+      "FileVersion": "1.0.0.0",
+      "ProductVersion": "1.0.0.0",
+      "AssemblyIdentity": "LMS.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\LMS.PortableExecutable.dll",
+      "Bytes": 61440,
+      "SHA256": "4389B18342461CC11B48EC7A35C76BEA20BEB0A76724BA77C2ED0406E5517ED2",
+      "FileVersion": "1.0.0.0",
+      "ProductVersion": "1.0.0.0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Microsoft.Expression.Drawing.dll",
+      "Bytes": 144496,
+      "SHA256": "1D69EAF538008E0FE1A7EB2CE0124A49B95C491797749640C8351ED4643F5C97",
+      "FileVersion": "3.0.40218.0",
+      "ProductVersion": "3.0.40218.0",
+      "AssemblyIdentity": "Microsoft.Expression.Drawing, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
+      "SignatureStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, OU=MOPR, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "SignerThumbprint": "AC1FD0922A4A2A6E5779ACDD628747C28394B0B9"
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll",
+      "Bytes": 98440,
+      "SHA256": "FCCBC0612BD7F71D8038918F15C40A0B6C5426D4B0890496450D28D924E8EC01",
+      "FileVersion": "15.0.26228.0",
+      "ProductVersion": "15.0.26228.0",
+      "AssemblyIdentity": "Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
+      "SignatureStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, OU=MOPR, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "SignerThumbprint": "98ED99A67886D020C564923B7DF25E9AC019DF26"
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.dll",
+      "Bytes": 280576,
+      "SHA256": "0F6465CE57A0CBABC37013C8E3C9F110672DE1C127B6192177D59EB1C7809772",
+      "FileVersion": "0.9.6.0",
+      "ProductVersion": "0.9.6.0",
+      "AssemblyIdentity": "Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756",
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.Mdb.dll",
+      "Bytes": 45056,
+      "SHA256": "B8625ACE855A3086E2086AF418E17DAF24A30A4FBFFC559C42F329EDEC52806E",
+      "FileVersion": "0.9.6.0",
+      "ProductVersion": "0.9.6.0",
+      "AssemblyIdentity": "Mono.Cecil.Mdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756",
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.Pdb.dll",
+      "Bytes": 81920,
+      "SHA256": "25EB34CF9A7038D71CA15DDBFB3C180B4A2119219D487FD760437F5DA7EDF292",
+      "FileVersion": "0.9.6.0",
+      "ProductVersion": "0.9.6.0",
+      "AssemblyIdentity": "Mono.Cecil.Pdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756",
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.Rocks.dll",
+      "Bytes": 23552,
+      "SHA256": "822C94D1C2AB96EFEB19BC5F1D304586E70A004D2F44F372377F33F2545EB921",
+      "FileVersion": "0.9.6.0",
+      "ProductVersion": "0.9.6.0",
+      "AssemblyIdentity": "Mono.Cecil.Rocks, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756",
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\RAGEPluginHook.exe",
+      "Bytes": 12237182,
+      "SHA256": "73F05B3F7973D4731F4151AE061DD3C991065E8BF3ECE51EA1D9AB728B9B42AC",
+      "FileVersion": "1.132.1428.17748",
+      "ProductVersion": "1.132.1428.17748",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\RPH_Readme.txt",
+      "Bytes": 1409,
+      "SHA256": "DAE5B2742A2FA0313C89B4135A4266BA9D14AFA24E8A38C23765829B6DE91B48"
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\SlimDX.dll",
+      "Bytes": 3718656,
+      "SHA256": "194968B5010BE986E33669928B9F966A67C6EB4E1CF4AC4DA6B90728E242A516",
+      "FileVersion": null,
+      "ProductVersion": null,
+      "AssemblyIdentity": "SlimDX, Version=4.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9",
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\System.ValueTuple.dll",
+      "Bytes": 79200,
+      "SHA256": "79FAC2E8355A7BBB94D40D25FE0E34D5CEDF5426A176F20F1CCD5E0606F0F082",
+      "FileVersion": "4.6.25519.03",
+      "ProductVersion": "4.6.25519.03 built by: dlab-DDVSOWINAGE013. Commit Hash: 8321c729934c0f8be754953439b88e6e1c120c24",
+      "AssemblyIdentity": "System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51",
+      "SignatureStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, OU=MOPR, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "SignerThumbprint": "98ED99A67886D020C564923B7DF25E9AC019DF26"
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\XInput1_4.dll",
+      "Bytes": 34816,
+      "SHA256": "BD0BA909DE46470E0DDBF88CD72D7CF6F1EB04B709616366692EAEA87B4C0551",
+      "FileVersion": "6.2.9200.16384 (win8_rtm.120725-1247)",
+      "ProductVersion": "6.2.9200.16384",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "NotSigned",
+      "Signer": null,
+      "SignerThumbprint": null
+    }
+  ],
+  "BundledSdkComparison": [],
+  "ExistingGameFiles": [
+    {
+      "Path": "__GAME_ROOT__\\amd_ags_x64.dll",
+      "Bytes": 177128,
+      "SHA256": "9FAEEAD3A037A724C16A354B30A7AC3F60ECEFD0B43058863C061ACC31A1CF7F",
+      "FileVersion": "6.1.0.0",
+      "ProductVersion": "6.1.0.0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "565932392989B3616F2968E1B1D6F974561B1F32"
+    },
+    {
+      "Path": "__GAME_ROOT__\\amd_fidelityfx_dx12.dll",
+      "Bytes": 6675664,
+      "SHA256": "12A5081257EC95B0B53AD51B4A87FB3C03F97FE0BBB59F9496968F8D50EF93A6",
+      "FileVersion": "1.0.1.41314",
+      "ProductVersion": "1.0.1.0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=Advanced Micro Devices, O=Advanced Micro Devices, S=California, C=US",
+      "SignerThumbprint": "33D35682079E201671B738B7209B4586103BC271"
+    },
+    {
+      "Path": "__GAME_ROOT__\\bink2w64.dll",
+      "Bytes": 394960,
+      "SHA256": "3A324D128477D09EB318C65EE74A68708D5A0804EBC99912E89922A6B29E748A",
+      "FileVersion": "2020.07",
+      "ProductVersion": "2020.07",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"RAD Game Tools, Inc.\", O=\"RAD Game Tools, Inc.\", STREET=\"550 Kirkland Way,\", STREET=Suite 406, L=Kirkland, S=Washington, PostalCode=98033, C=US, OID.2.5.4.15=Private Organization, OID.1.3.6.1.4.1.311.60.2.1.2=Washington, OID.1.3.6.1.4.1.311.60.2.1.3=US, SERIALNUMBER=601850660",
+      "SignerThumbprint": "FF8A334559518C9EA01443F9B597D69AFBC36457"
+    },
+    {
+      "Path": "__GAME_ROOT__\\dstorage.dll",
+      "Bytes": 206880,
+      "SHA256": "8A7F9809B4630D22796445AB9AA44181458D0F73F03705B1DFAFD79410E07334",
+      "FileVersion": "1.2.2311.1405",
+      "ProductVersion": "1.2.2",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "SignerThumbprint": "72105B6D5F370B62FD5C82F1512F7AD7DEE5F2C0"
+    },
+    {
+      "Path": "__GAME_ROOT__\\dstoragecore.dll",
+      "Bytes": 1468960,
+      "SHA256": "77C7B3ACF5B5A9ACEC6AD3ED7AA3C33E1AD43E73116B437ADFCD26965A079B2B",
+      "FileVersion": "1.2.2311.1405",
+      "ProductVersion": "1.2.2",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "SignerThumbprint": "72105B6D5F370B62FD5C82F1512F7AD7DEE5F2C0"
+    },
+    {
+      "Path": "__GAME_ROOT__\\fvad.dll",
+      "Bytes": 34280,
+      "SHA256": "2211110F2B9AEC1D11F0BF010B3D9473E18114133BD493A171EF9F2FFD1D4A12",
+      "FileVersion": null,
+      "ProductVersion": null,
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "565932392989B3616F2968E1B1D6F974561B1F32"
+    },
+    {
+      "Path": "__GAME_ROOT__\\GFSDK_Aftermath_Lib.x64.dll",
+      "Bytes": 5148256,
+      "SHA256": "71977F42BE7A99785B262A2DA351C47DA2C1608DBC6539A49CE37C523A6EFC45",
+      "FileVersion": "2.21.0.0",
+      "ProductVersion": "2.21",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=NVIDIA Corporation, OU=1-G, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+      "SignerThumbprint": "9EA06F2F21DCCF7E67AFA4DFA1BCD49681ECD509"
+    },
+    {
+      "Path": "__GAME_ROOT__\\GTA5_Enhanced_BE.exe",
+      "Bytes": 1473144,
+      "SHA256": "F67ECC62EBCE3BE67A5B1CC5531525EA2A46E938DEC9EB533F89F7E0B889A36B",
+      "FileVersion": "1, 0, 0, 1",
+      "ProductVersion": "1, 0, 0, 1",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", OU=Rockstar Partners, O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "AD00A9C3007FD1450A559D0634547B075AD3E688"
+    },
+    {
+      "Path": "__GAME_ROOT__\\GTA5_Enhanced.exe",
+      "Bytes": 55819384,
+      "SHA256": "69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5",
+      "FileVersion": "1.0.1158.16",
+      "ProductVersion": "1.0.1158.16",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", OU=Rockstar Partners, O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "AD00A9C3007FD1450A559D0634547B075AD3E688"
+    },
+    {
+      "Path": "__GAME_ROOT__\\GTA5.exe",
+      "Bytes": 55203448,
+      "SHA256": "FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF",
+      "FileVersion": "1.0.1013.34",
+      "ProductVersion": "1.0.1013.34",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", OU=Rockstar Partners, O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "AD00A9C3007FD1450A559D0634547B075AD3E688"
+    },
+    {
+      "Path": "__GAME_ROOT__\\installscript_sdk.vdf",
+      "Bytes": 829,
+      "SHA256": "2D06BBF59AFC649F45A1822CB9671EB2C544CDD3F70A8FB61E6D657B4C5BEB60"
+    },
+    {
+      "Path": "__GAME_ROOT__\\installscript.vdf",
+      "Bytes": 600,
+      "SHA256": "58F9F8257ED948B4F6D149A7E6B809C061B89FBD7A9C6561FCD2A7D197415624"
+    },
+    {
+      "Path": "__GAME_ROOT__\\libcurl.dll",
+      "Bytes": 545256,
+      "SHA256": "92865FE41B747455F7B7EE36DA0C29082A5BE62936791E4B1B0E9E8E022D6816",
+      "FileVersion": "8.4.0-DEV",
+      "ProductVersion": "8.4.0-DEV",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "565932392989B3616F2968E1B1D6F974561B1F32"
+    },
+    {
+      "Path": "__GAME_ROOT__\\libtox.dll",
+      "Bytes": 269800,
+      "SHA256": "0442C5A0A3BB7D2261520FC7C2D1BD77537B3A17F63ECC64C7D5647661DDB6AD",
+      "FileVersion": null,
+      "ProductVersion": null,
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "565932392989B3616F2968E1B1D6F974561B1F32"
+    },
+    {
+      "Path": "__GAME_ROOT__\\nvngx_dlss.dll",
+      "Bytes": 29981808,
+      "SHA256": "E88A27B9629C1CD3A51BF25C605DEF1798C44D038267C520830E23D5959C985B",
+      "FileVersion": "310,4,0,0",
+      "ProductVersion": "310,4,0,0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=NVIDIA Corporation, OU=1-G, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+      "SignerThumbprint": "9EA06F2F21DCCF7E67AFA4DFA1BCD49681ECD509"
+    },
+    {
+      "Path": "__GAME_ROOT__\\nvngx_dlssg.dll",
+      "Bytes": 7509024,
+      "SHA256": "FA7B99551EF8E089D2573D936EBC560855D2868323A791859D5F2CF94235A6ED",
+      "FileVersion": "310,4,0,0",
+      "ProductVersion": "310,4,0,0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=NVIDIA Corporation, OU=1-G, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+      "SignerThumbprint": "9EA06F2F21DCCF7E67AFA4DFA1BCD49681ECD509"
+    },
+    {
+      "Path": "__GAME_ROOT__\\oo2core_5_win64.dll",
+      "Bytes": 945640,
+      "SHA256": "D245BD988B2756B28DFA30143AEB261317D531C06FD5B0D0DCB874B201B63322",
+      "FileVersion": null,
+      "ProductVersion": null,
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "565932392989B3616F2968E1B1D6F974561B1F32"
+    },
+    {
+      "Path": "__GAME_ROOT__\\OpenIV.asi",
+      "Bytes": 0,
+      "SHA256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "FileVersion": null,
+      "ProductVersion": null,
+      "AssemblyIdentity": null,
+      "SignatureStatus": "UnknownError",
+      "Signer": null,
+      "SignerThumbprint": null
+    },
+    {
+      "Path": "__GAME_ROOT__\\opus.dll",
+      "Bytes": 407016,
+      "SHA256": "F01C713CDD9A09320A1945B53C038597DB1C0803FC6F61381C025E805681E7AD",
+      "FileVersion": null,
+      "ProductVersion": null,
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "565932392989B3616F2968E1B1D6F974561B1F32"
+    },
+    {
+      "Path": "__GAME_ROOT__\\opusenc.dll",
+      "Bytes": 59368,
+      "SHA256": "DCB88CE5B7D12CDE2D0D0765E914276B104FE28DF32813CD144239973DBABD8B",
+      "FileVersion": null,
+      "ProductVersion": null,
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "565932392989B3616F2968E1B1D6F974561B1F32"
+    },
+    {
+      "Path": "__GAME_ROOT__\\PlayGTAV.exe",
+      "Bytes": 572536,
+      "SHA256": "DA21B92B968D5B6A52FEEE483E7DE15500813F27F345C4D170490F0C17B1DDDC",
+      "FileVersion": "1.0.0.112",
+      "ProductVersion": "1.0.0.112",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", OU=Rockstar Partners, O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "AD00A9C3007FD1450A559D0634547B075AD3E688"
+    },
+    {
+      "Path": "__GAME_ROOT__\\rpf.cache",
+      "Bytes": 16129206,
+      "SHA256": "A71D4F9755FF26A6B2C8E04696BF78C4A5DD8AC88A9275072470BD98967F6845"
+    },
+    {
+      "Path": "__GAME_ROOT__\\sl.common.dll",
+      "Bytes": 674432,
+      "SHA256": "752218C5559C857E21923B6965FCABEF67EC3113FD1C92ABBB2326F5C26284D8",
+      "FileVersion": "2,9,1,0",
+      "ProductVersion": "2,9,1,0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=NVIDIA Corporation, OU=2-J, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+      "SignerThumbprint": "15F760D82C79D22446CC7D4806540BF632B1E104"
+    },
+    {
+      "Path": "__GAME_ROOT__\\sl.dlss_g.dll",
+      "Bytes": 456320,
+      "SHA256": "992F1B442406CF63AD8300EF3863474E307482E4C45A58F3DA8BB92E2BD06764",
+      "FileVersion": "2,9,1,0",
+      "ProductVersion": "2,9,1,0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=NVIDIA Corporation, OU=2-J, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+      "SignerThumbprint": "15F760D82C79D22446CC7D4806540BF632B1E104"
+    },
+    {
+      "Path": "__GAME_ROOT__\\sl.dlss.dll",
+      "Bytes": 240256,
+      "SHA256": "E42B0DBBFF6797A0EBA75CA140F56B7571D036D7FB79DF176FF3CB368F53392D",
+      "FileVersion": "2,9,1,0",
+      "ProductVersion": "2,9,1,0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=NVIDIA Corporation, OU=2-J, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+      "SignerThumbprint": "15F760D82C79D22446CC7D4806540BF632B1E104"
+    },
+    {
+      "Path": "__GAME_ROOT__\\sl.interposer.dll",
+      "Bytes": 557184,
+      "SHA256": "CB23F17D8360D42D323B457DFE621BB6DA0FF0012333966E7E796804550557DB",
+      "FileVersion": "2,9,1,0",
+      "ProductVersion": "2,9,1,0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=NVIDIA Corporation, OU=2-J, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+      "SignerThumbprint": "15F760D82C79D22446CC7D4806540BF632B1E104"
+    },
+    {
+      "Path": "__GAME_ROOT__\\sl.pcl.dll",
+      "Bytes": 176256,
+      "SHA256": "1EC44FA023F30DE1E3BF82B0771BDA31ED0790571E0C701F93A29A7A5A252C79",
+      "FileVersion": "2,9,1,0",
+      "ProductVersion": "2,9,1,0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=NVIDIA Corporation, OU=2-J, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+      "SignerThumbprint": "15F760D82C79D22446CC7D4806540BF632B1E104"
+    },
+    {
+      "Path": "__GAME_ROOT__\\sl.reflex.dll",
+      "Bytes": 200320,
+      "SHA256": "0128460876F169306B1B25E689EFBA7C3974016D5A1CC41CC61DFE7835963CCA",
+      "FileVersion": "2,9,1,0",
+      "ProductVersion": "2,9,1,0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=NVIDIA Corporation, OU=2-J, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+      "SignerThumbprint": "15F760D82C79D22446CC7D4806540BF632B1E104"
+    },
+    {
+      "Path": "__GAME_ROOT__\\steam_api64.dll",
+      "Bytes": 300392,
+      "SHA256": "1ADD7F151FA644870A735AE86E68D1F019F296130D8E7C0A7ED3ECC7482DCCBC",
+      "FileVersion": "08.97.99.70",
+      "ProductVersion": "01.00.00.01",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=Valve Corp., O=Valve Corp., L=Bellevue, S=Washington, C=US",
+      "SignerThumbprint": "935767D66FAD4AD2D1F03A095C49370DC74DF607"
+    },
+    {
+      "Path": "__GAME_ROOT__\\title.rgl",
+      "Bytes": 2144,
+      "SHA256": "C4A6C8D0442586E38E67A0027A4814379047131E703157CC7FB4406FA7049C21"
+    },
+    {
+      "Path": "__GAME_ROOT__\\XCurl.dll",
+      "Bytes": 198240,
+      "SHA256": "736218B8E504F7C8CCE1111C41F79B2608FD85F614B758AAF7B8E9095536B819",
+      "FileVersion": "2403.3.0.0 (WinBuild.160101.0800)",
+      "ProductVersion": "2403.3.0.0",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "SignerThumbprint": "CB9C4FBEA1D87D2D468AC5A9CAAB0163F6AD8401"
+    },
+    {
+      "Path": "__GAME_ROOT__\\zlib1.dll",
+      "Bytes": 99304,
+      "SHA256": "3EFBE55F0486B7EB90E73DD19C2BF0D01EF63B771A09860F930BE38A6A4B9D27",
+      "FileVersion": "1.2.12",
+      "ProductVersion": "1.2.12",
+      "AssemblyIdentity": null,
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "565932392989B3616F2968E1B1D6F974561B1F32"
+    }
+  ],
+  "ExistingLoaders": [
+    {
+      "Path": "__GAME_ROOT__\\OpenIV.asi",
+      "Bytes": 0,
+      "SHA256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "FileVersion": null,
+      "ProductVersion": null,
+      "AssemblyIdentity": null,
+      "SignatureStatus": "UnknownError",
+      "Signer": null,
+      "SignerThumbprint": null
+    }
+  ],
+  "Blockers": [
+    "Runtime public-member binding cannot be proved by the standard metadata reader; SDK 1.124 vs runtime 1.132 requires an authorised load test. No bundled SDK exists in this official archive.",
+    "Supported Story Mode launch must satisfy the no-security-changes constraint. No antivirus, anti-cheat, exclusions or launcher protections are changed by this tool.",
+    "Standalone RPH startup, DirectStorage/proxy compatibility and all in-game A-E tests remain unexecuted.",
+    "Explicit user approval for system prerequisite installation and exact game-file additions is still required.",
+    "Bundled x64 SlimDX imports VC2010 libraries absent from the checked System32 paths; resolve the signed prerequisite before deployment. See host-prerequisites.json for additional probes."
+  ],
+  "DependencyEvidence": "Real package inventoried; native/delay imports and readable CLR references are in pe-dependencies.json. Dynamic dependency closure and runtime public-member ABI remain unverified; no runtime code executed.",
+  "BackupProcedure": "Before authorised replacement, copy each exact existing destination to a separate timestamped development backup; verify matching SHA256; journal originally absent paths and configuration. Stop on drift.",
+  "RollbackProcedure": "Exit game/RPH. Remove only unchanged files introduced by the approved final manifest; restore verified pre-existing files and configuration. Preserve edited files and captures. Recheck baseline hashes. Never restore/delete original RPF archives."
+}

@@ -1,0 +1,292 @@
+{
+  "SchemaVersion": 1,
+  "GeneratedUtc": "2026-10-24T22:13:04.4743528Z",
+  "Scope": "Exact proposed first standalone-load file set, not a validated runtime installation",
+  "State": "AWAITING_PREREQUISITE_REVIEW_AND_EXPLICIT_APPROVAL",
+  "InstallationAuthorised": false,
+  "GameWritesPerformed": false,
+  "ReadyForGameplay": false,
+  "ExpectedGameVersion": "1.0.1158.16",
+  "ExpectedGameSHA256": "69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5",
+  "ExpectedRuntimeVersion": "1.132.1428.17748",
+  "PackageSHA256": "8524E534F219C7F33634ED45CED055F3C7B0B461FA8302FF2F0AC46470C7ED34",
+  "GameRoot": "__GAME_ROOT__",
+  "Files": [
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\cursor_32_2.png",
+      "Destination": "__GAME_ROOT__\\cursor_32_2.png",
+      "SHA256": "BBAC461B7BA311CC476CD5780FD2787628479E37D91CF3A2CCC91560F6200A1A",
+      "Bytes": 21781,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\DdsConvert.dll",
+      "Destination": "__GAME_ROOT__\\DdsConvert.dll",
+      "SHA256": "D115D8C9A817B67C3CD042E51BB941D74539DCA655DE7BE8A3CBAD058D3B2764",
+      "Bytes": 14848,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\DefaultSkin.png",
+      "Destination": "__GAME_ROOT__\\DefaultSkin.png",
+      "SHA256": "333D5611913A3907296DC787625C0F5043277285DAA49CDA0C8976820AB50FA4",
+      "Bytes": 41365,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\discord-rpc.dll",
+      "Destination": "__GAME_ROOT__\\discord-rpc.dll",
+      "SHA256": "5CC2E504800CF4ED2F4781364F661EA22349658DDC391B5D54195E573109D87B",
+      "Bytes": 399880,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\DiscordRpcNet.dll",
+      "Destination": "__GAME_ROOT__\\DiscordRpcNet.dll",
+      "SHA256": "952605857477708168DAFFFA8E9879494F9832CF979A5B116DAA3D903A154569",
+      "Bytes": 6656,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\EasyHook.dll",
+      "Destination": "__GAME_ROOT__\\EasyHook.dll",
+      "SHA256": "3153844BDAEE8A55C812D072B0E25F992E716174FC7D987944F4B8CF6DDD1F83",
+      "Bytes": 52224,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\EasyHook64.dll",
+      "Destination": "__GAME_ROOT__\\EasyHook64.dll",
+      "SHA256": "62842ECD61D855199C086600526B697941DCB56A10D4D6EF7D610FFC6369F6D6",
+      "Bytes": 310272,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\EasyLoad64.dll",
+      "Destination": "__GAME_ROOT__\\EasyLoad64.dll",
+      "SHA256": "F7766C70B4C82341F32783C72B2CE1430AAE95C6D713A3431DAED7B1F4E40DE7",
+      "Bytes": 7680,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\FW1FontWrapper.dll",
+      "Destination": "__GAME_ROOT__\\FW1FontWrapper.dll",
+      "SHA256": "1BA5BB9FFEA32A8C30B5C8B7139E15DDC36A43130465B4D1CE4C7B77FA6FCE25",
+      "Bytes": 156160,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Gwen.dll",
+      "Destination": "__GAME_ROOT__\\Gwen.dll",
+      "SHA256": "33275AF76FCD12157732A80DF4795590D409A1DF46B2B32A5112CA11D6AA5267",
+      "Bytes": 196096,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Gwen.UnitTest.dll",
+      "Destination": "__GAME_ROOT__\\Gwen.UnitTest.dll",
+      "SHA256": "CF68F7773FEB5756E050A4503F142C67B17C1E4BECF23A878649960B58259017",
+      "Bytes": 42496,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\LMS.Common.dll",
+      "Destination": "__GAME_ROOT__\\LMS.Common.dll",
+      "SHA256": "8D5593ABB8A939519365293D3325B83428F8304B56C59CCA37929637E7D6FB50",
+      "Bytes": 14336,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\LMS.PortableExecutable.dll",
+      "Destination": "__GAME_ROOT__\\LMS.PortableExecutable.dll",
+      "SHA256": "4389B18342461CC11B48EC7A35C76BEA20BEB0A76724BA77C2ED0406E5517ED2",
+      "Bytes": 61440,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Microsoft.Expression.Drawing.dll",
+      "Destination": "__GAME_ROOT__\\Microsoft.Expression.Drawing.dll",
+      "SHA256": "1D69EAF538008E0FE1A7EB2CE0124A49B95C491797749640C8351ED4643F5C97",
+      "Bytes": 144496,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll",
+      "Destination": "__GAME_ROOT__\\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll",
+      "SHA256": "FCCBC0612BD7F71D8038918F15C40A0B6C5426D4B0890496450D28D924E8EC01",
+      "Bytes": 98440,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.dll",
+      "Destination": "__GAME_ROOT__\\Mono.Cecil.dll",
+      "SHA256": "0F6465CE57A0CBABC37013C8E3C9F110672DE1C127B6192177D59EB1C7809772",
+      "Bytes": 280576,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.Mdb.dll",
+      "Destination": "__GAME_ROOT__\\Mono.Cecil.Mdb.dll",
+      "SHA256": "B8625ACE855A3086E2086AF418E17DAF24A30A4FBFFC559C42F329EDEC52806E",
+      "Bytes": 45056,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.Pdb.dll",
+      "Destination": "__GAME_ROOT__\\Mono.Cecil.Pdb.dll",
+      "SHA256": "25EB34CF9A7038D71CA15DDBFB3C180B4A2119219D487FD760437F5DA7EDF292",
+      "Bytes": 81920,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.Rocks.dll",
+      "Destination": "__GAME_ROOT__\\Mono.Cecil.Rocks.dll",
+      "SHA256": "822C94D1C2AB96EFEB19BC5F1D304586E70A004D2F44F372377F33F2545EB921",
+      "Bytes": 23552,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\RAGEPluginHook.exe",
+      "Destination": "__GAME_ROOT__\\RAGEPluginHook.exe",
+      "SHA256": "73F05B3F7973D4731F4151AE061DD3C991065E8BF3ECE51EA1D9AB728B9B42AC",
+      "Bytes": 12237182,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\RPH_Readme.txt",
+      "Destination": "__GAME_ROOT__\\RPH_Readme.txt",
+      "SHA256": "DAE5B2742A2FA0313C89B4135A4266BA9D14AFA24E8A38C23765829B6DE91B48",
+      "Bytes": 1409,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\SlimDX.dll",
+      "Destination": "__GAME_ROOT__\\SlimDX.dll",
+      "SHA256": "194968B5010BE986E33669928B9F966A67C6EB4E1CF4AC4DA6B90728E242A516",
+      "Bytes": 3718656,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\System.ValueTuple.dll",
+      "Destination": "__GAME_ROOT__\\System.ValueTuple.dll",
+      "SHA256": "79FAC2E8355A7BBB94D40D25FE0E34D5CEDF5426A176F20F1CCD5E0606F0F082",
+      "Bytes": 79200,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\XInput1_4.dll",
+      "Destination": "__GAME_ROOT__\\XInput1_4.dll",
+      "SHA256": "BD0BA909DE46470E0DDBF88CD72D7CF6F1EB04B709616366692EAEA87B4C0551",
+      "Bytes": 34816,
+      "Role": "Vendor-prescribed runtime root file; not a proven minimum dependency closure",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\build\\telemetry\\RichAudio.Telemetry.Rph.dll",
+      "Destination": "__GAME_ROOT__\\Plugins\\RichAudio.Telemetry.Rph.dll",
+      "SHA256": "DBC5F600C37AD7579F49EBA92A352BEE1AAF452F6EF820CEF87B86B8547D5BE0",
+      "Bytes": 34304,
+      "Role": "Telemetry-only plugin; manually load after standalone RPH baseline",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\config\\phase2.1\\StoryMode-test.json",
+      "Destination": "__GAME_ROOT__\\Plugins\\RichAudio.Telemetry.Rph.json",
+      "SHA256": "B0CCA8C1B0AB7B894C2319BBDE36C8C718C96A4A92222B7D59D798267ADCF249",
+      "Bytes": 283,
+      "Role": "Prepared Story Mode test config; capture disabled; deployment requires operator acknowledgement",
+      "PriorState": "ABSENT",
+      "PriorSHA256": null
+    }
+  ],
+  "GameFileCount": 26,
+  "TotalCopyBytes": 18105124.0,
+  "Excluded": "All lspdfr/ and plugins/ archive entries; SDK; OpenRPF; ASI loaders; audio/geometry archives. licenses/ remains beside the authentic package in the development workspace, per RPH readme.",
+  "PrerequisiteReport": "__USER_HOME__\\Documents\\RichAudio\\evidence\\phase2.1\\vc2010-prerequisite.json",
+  "MissingCheckedVc100Libraries": [
+    "MSVCR100.dll",
+    "MSVCP100.dll"
+  ],
+  "PrerequisiteInstaller": {
+    "Source": "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist/",
+    "Download": "https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe",
+    "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\prerequisites\\vcredist2010_x64.exe",
+    "SHA256": "F3B7A76D84D23F91957AA18456A14B4E90609E4CE8194C5653384ED38DADA6F3",
+    "Bytes": 10277328,
+    "FileVersion": "10.0.40219.325",
+    "SignatureStatus": "Valid",
+    "Signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+    "SignerThumbprint": "ABDCA79AF9DD48A0EA702AD45260B3C03093FB4B",
+    "Executed": false,
+    "Installed": false,
+    "Reason": "Bundled x64 SlimDX imports MSVCR100.dll and MSVCP100.dll; these were absent from checked System32/SxS/VC2010 registry locations. Requires approval before installation; not a game-root copy."
+  },
+  "LaunchProcedure": "Only after approval and confirmed supported Story Mode environment: run the installed RAGEPluginHook.exe normally, select no startup plugins, stop for any security/DirectStorage/version warning. Establish standalone baseline; F4/help; LoadPlugin RichAudio.Telemetry.Rph.dll; RichAudioStatus; RichAudioMark urban_TestA; RichAudioStart; RichAudioStop; graceful UnloadPlugin using runtime help.",
+  "KnownConflicts": [
+    "Existing zero-byte OpenIV.asi stays untouched; any loader/ASI error is a stop condition.",
+    "No co-installation test with supplied OpenRPF 0.1.0; do not add it.",
+    "Bundled XInput1_4.dll must not overwrite another proxy. NVMe DirectStorage warning requires separate author-supported dependency review.",
+    "Do not change antivirus, exclusions, launcher security or anti-cheat settings. No Online.",
+    "No LSPDFR gameplay assets or plugins are included; standalone startup and runtime API binding remain unverified."
+  ],
+  "BackupProcedure": "Before authorised replacement, copy each exact existing destination to a separate timestamped development backup; verify matching SHA256; journal originally absent paths and configuration. Stop on drift.",
+  "RollbackProcedure": "Exit game/RPH. Remove only unchanged files introduced by the approved final manifest; restore verified pre-existing files and configuration. Preserve edited files and captures. Recheck baseline hashes. Never restore/delete original RPF archives.",
+  "RuntimeGeneratedFiles": "RPH may create logs/settings on first launch. Snapshot root/Plugins before launch; preserve and review new paths separately. Never recursively delete directories or assume every new path belongs to RPH.",
+  "ValidationChecklist": [
+    "Re-hash source, game executable and every destination immediately before copying; abort on drift/reparse points.",
+    "Resolve/approve the separately signed VC2010 x64 prerequisite before copying game files.",
+    "Confirm supported Story Mode setup without changing protections.",
+    "No unexpected startup plugins; no security/DirectStorage/version warnings.",
+    "Standalone RPH baseline first; then validate command registration and runtime API binding.",
+    "Run A-E with quantitative acceptance in docs/PHASE2_1_READINESS.md; valid JSONL header/footer and writer status.",
+    "Measure matched baseline/RPH-only/capture-off/capture-on runs; no game-performance claim from offline tests."
+  ]
+}

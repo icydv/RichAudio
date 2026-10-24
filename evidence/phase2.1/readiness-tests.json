@@ -1,0 +1,168 @@
+{
+  "ExecutedUtc": "2026-10-24T22:13:05.1223709Z",
+  "Passed": true,
+  "Assertions": 40,
+  "Scope": "Inspector boundaries and staged/manifest integrity; not runtime execution",
+  "Tests": [
+    {
+      "Name": "Reject unverified archive before extraction",
+      "Passed": true
+    },
+    {
+      "Name": "Reject game-root report output before any write",
+      "Passed": true
+    },
+    {
+      "Name": "Reject protected source folder as runtime stage",
+      "Passed": true
+    },
+    {
+      "Name": "Authentic package checksum and complete ZIP directory recorded",
+      "Passed": true
+    },
+    {
+      "Name": "LSPDFR assets/plugins excluded from extraction",
+      "Passed": true
+    },
+    {
+      "Name": "No bundled SDK claimed where none exists",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: cursor_32_2.png",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: DdsConvert.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: DefaultSkin.png",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: discord-rpc.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: DiscordRpcNet.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: EasyHook.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: EasyHook64.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: EasyLoad64.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: FW1FontWrapper.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: Gwen.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: Gwen.UnitTest.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: licenses/DotNetZip.license",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: licenses/FW1FontWrapper.license",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: licenses/Gwen.license",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: licenses/Mono.Cecil.license",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: licenses/SlimDX.license",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: LMS.Common.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: LMS.PortableExecutable.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: Microsoft.Expression.Drawing.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: Mono.Cecil.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: Mono.Cecil.Mdb.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: Mono.Cecil.Pdb.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: Mono.Cecil.Rocks.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: RAGEPluginHook.exe",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: RPH_Readme.txt",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: SlimDX.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: System.ValueTuple.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Staged bytes match: XInput1_4.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Proposal never reports approval, installation or gameplay validation",
+      "Passed": true
+    },
+    {
+      "Name": "26 proposed destinations were absent at inspection",
+      "Passed": true
+    },
+    {
+      "Name": "No duplicate install destinations",
+      "Passed": true
+    },
+    {
+      "Name": "Prepared test starts capture-disabled with bounded eight-source configuration",
+      "Passed": true
+    },
+    {
+      "Name": "Game-root non-archive file set and hashes unchanged across boundary tests",
+      "Passed": true
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "Scope": "One authored 32-source paced mock record trimmed and serialized by the existing production serializer. Arithmetic projections, not GTA or physical disk throughput measurements; real sizes vary.",
+  "Rows": [
+    {
+      "Sources": 1,
+      "BytesPerSyntheticRecord": 3565,
+      "ProjectedBytesPerSecondAt20Hz": 71300,
+      "ProjectedMiBPerMinuteAt20Hz": 4.08
+    },
+    {
+      "Sources": 8,
+      "BytesPerSyntheticRecord": 19797,
+      "ProjectedBytesPerSecondAt20Hz": 395940,
+      "ProjectedMiBPerMinuteAt20Hz": 22.66
+    },
+    {
+      "Sources": 16,
+      "BytesPerSyntheticRecord": 38369,
+      "ProjectedBytesPerSecondAt20Hz": 767380,
+      "ProjectedMiBPerMinuteAt20Hz": 43.91
+    },
+    {
+      "Sources": 32,
+      "BytesPerSyntheticRecord": 75521,
+      "ProjectedBytesPerSecondAt20Hz": 1510420,
+      "ProjectedMiBPerMinuteAt20Hz": 86.43
+    }
+  ]
+}

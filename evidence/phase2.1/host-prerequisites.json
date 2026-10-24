@@ -1,0 +1,15 @@
+{
+  "ObservedUtc": "2026-10-24T22:09:22.4202634Z",
+  "RuntimeFrameworkRelease": 533509,
+  "Drive": [
+    {
+      "Number": 1,
+      "FriendlyName": "WDC WDS100T2B0C-00PXH0",
+      "BusType": "NVMe"
+    }
+  ],
+  "Vc2010Registry": [],
+  "Vc100SxS": [],
+  "ClrFusionPresent": true,
+  "PluginsDirectoryExists": false
+}

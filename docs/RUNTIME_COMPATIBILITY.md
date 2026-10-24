@@ -2,11 +2,13 @@
 
 24 October 2026. **Selected target: RAGE Plugin Hook (RPH), a standalone managed plugin. Built against an authentic SDK; unverified in game.** No runtime or loader was installed and no RPH executable was launched.
 
+**Phase 2.1 update:** the authentic user-supplied runtime archive is now acquired and checksum-verified. Actual RPH version: **1.132.1428.17748**. See [full readiness report](PHASE2_1_READINESS.md) for hashes/signatures, missing checked VC2010 x64 dependency, SDK comparison limits, NVMe caveat and the exact conditional deployment proposal. Acquisition is resolved; installation and live validation remain pending.
+
 ## Why the Phase 1 integration choice changed
 
 The installed `GTA5_Enhanced.exe` still reports 1.0.1158.16. Alexander Blade's [official Script Hook V page](https://www.dev-c.com/gtav/scripthookv/) still lists Enhanced 1158.13. It remains unsuitable as an assumed-supported 1158.16 dependency.
 
-The [official LSPDFR Enhanced release](https://www.lcpdfr.com/downloads/gta5mods/g17media/52970-lspd-first-response-enhanced-preview/) states that the September 17, 2026 bundle updates RPH for Enhanced 1158.16. This is an explicit author support claim, not a local compatibility test. The LSPDFR gameplay version is 0.4.9 build 9695; **that is not an RPH binary version**. The exact supporting runtime binary has not been downloaded/fingerprinted/installed in this investigation and must be inspected before deployment.
+The [official LSPDFR Enhanced release](https://www.lcpdfr.com/downloads/gta5mods/g17media/52970-lspd-first-response-enhanced-preview/) states that the September 17, 2026 bundle updates RPH for Enhanced 1158.16. This is an explicit author support claim, not a local compatibility test. The LSPDFR gameplay version is 0.4.9 build 9695; **that is not an RPH binary version**. Phase 2.1 fingerprinted its actual RPH 1.132.1428.17748 binary; it has not been installed or executed.
 
 [RPH's own description](https://ragepluginhook.net/About.aspx?lang=en-US) describes an independent CLI/.NET plugin interface. A plugin can target the RPH SDK without referencing LSPDFR assemblies. Our successfully compiled assembly references RPH and the .NET Framework only. It contains its own Plugin attribute/entry/exit methods and commands, and does not implement LSPDFR callouts or police gameplay. API compilation supports this separation; running that arrangement on the installed build is still UNTESTED.
 
@@ -19,7 +21,7 @@ Downloaded `RPH_SDK_3717.zip` from the attachment posted by **LMS** in the [offi
 Archive SHA-256: `791145D78E99619189951FB8ABFF4CDA6353850AD2AC5F011B66F325CE2E9BA6`.
 SDK DLL SHA-256: `5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0`.
 
-The [RPH download notice](https://ragepluginhook.net/Downloads.aspx/html?lang=en-US) forbids redistribution with plugins. The official SDK attachment authorizes the intended development use; it is not treated as an open-source redistribution license. We keep the SDK/ZIP in ignored `.local/rph`, reference it locally, and exclude it from Git and the RichAudio package. No third-party mirror, NuGet repack, homemade SDK stub, assembly rewrite, offset patch or signature edit is used. The actual runtime and its bundled dependency notices must be obtained from its author separately; our package does not redistribute them.
+The [RPH download notice](https://ragepluginhook.net/Downloads.aspx/html?lang=en-US) forbids redistribution with plugins. The official SDK attachment authorizes the intended development use; it is not treated as an open-source redistribution license. We keep the SDK/ZIP in ignored `.local/rph`, reference it locally, and exclude it from Git and the RichAudio package. No third-party mirror, NuGet repack, homemade SDK stub, assembly rewrite, offset patch or signature edit is used. The actual runtime and its bundled dependency notices are now retained from the authentic user-supplied package in ignored local staging; our package does not redistribute them.
 
 ## Documented telemetry surface
 
@@ -47,4 +49,4 @@ RPH is therefore the strongest current candidate. The C# implementation also avo
 
 ## Deployment gate
 
-Pending: explicit installation authorization; acquisition and fingerprinting of the exact supporting RPH runtime and its dependency/license inventory; a clean standalone load without LSPDFR gameplay; supported single-player setup; then tests A–E. The official runtime download endpoint returned HTTP **403** in the shell and a redirect loop through the web tool; no access controls were bypassed and no mirror substituted. The artifact is a **built, offline-tested candidate**, not a validated runtime plugin. See [DEPLOYMENT.md](DEPLOYMENT.md).
+Phase 2.1 resolves runtime acquisition, fingerprinting and dependency/license inventory using the user-supplied authentic archive. Pending: explicit installation approval, VC2010 x64 prerequisite review, supported single-player launch, any actual DirectStorage conflict, standalone load/member binding and tests A–E. Earlier shell/web download failures remain historical evidence; no controls were bypassed. The artifact is a **built, offline-tested candidate**, not a validated runtime plugin. See [PHASE2_1_READINESS.md](PHASE2_1_READINESS.md) and [DEPLOYMENT.md](DEPLOYMENT.md).

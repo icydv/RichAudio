@@ -1,0 +1,524 @@
+{
+  "SchemaVersion": 1,
+  "InspectedUtc": "2026-10-24T22:09:22.3818457Z",
+  "Files": [
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\DdsConvert.dll",
+      "SHA256": "D115D8C9A817B67C3CD042E51BB941D74539DCA655DE7BE8A3CBAD058D3B2764",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "DdsConvert, Version=1.0.0.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0",
+        "System.Drawing, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\discord-rpc.dll",
+      "SHA256": "5CC2E504800CF4ED2F4781364F661EA22349658DDC391B5D54195E573109D87B",
+      "Machine": "Amd64",
+      "PEKind": "PE32Plus",
+      "HasClrMetadata": false,
+      "AssemblyIdentity": null,
+      "MetadataError": null,
+      "NativeImports": [
+        "ADVAPI32.dll",
+        "KERNEL32.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\DiscordRpcNet.dll",
+      "SHA256": "952605857477708168DAFFFA8E9879494F9832CF979A5B116DAA3D903A154569",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "DiscordRpcNet, Version=1.0.0.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": [
+        "discord-rpc.dll"
+      ]
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\EasyHook.dll",
+      "SHA256": "3153844BDAEE8A55C812D072B0E25F992E716174FC7D987944F4B8CF6DDD1F83",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "EasyHook, Version=2.7.6578.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0",
+        "System, Version=4.0.0.0",
+        "System.Runtime.Remoting, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": [
+        "EasyHook32.dll",
+        "EasyHook64.dll",
+        "fusion.dll",
+        "kernel32",
+        "kernel32.dll"
+      ]
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\EasyHook64.dll",
+      "SHA256": "62842ECD61D855199C086600526B697941DCB56A10D4D6EF7D610FFC6369F6D6",
+      "Machine": "Amd64",
+      "PEKind": "PE32Plus",
+      "HasClrMetadata": false,
+      "AssemblyIdentity": null,
+      "MetadataError": null,
+      "NativeImports": [
+        "PSAPI.DLL",
+        "KERNEL32.dll",
+        "ADVAPI32.dll",
+        "ole32.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\EasyLoad64.dll",
+      "SHA256": "F7766C70B4C82341F32783C72B2CE1430AAE95C6D713A3431DAED7B1F4E40DE7",
+      "Machine": "Amd64",
+      "PEKind": "PE32Plus",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "EasyLoad64, Version=2.7.6578.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0",
+        "EasyHook, Version=2.7.6578.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\FW1FontWrapper.dll",
+      "SHA256": "1BA5BB9FFEA32A8C30B5C8B7139E15DDC36A43130465B4D1CE4C7B77FA6FCE25",
+      "Machine": "Amd64",
+      "PEKind": "PE32Plus",
+      "HasClrMetadata": false,
+      "AssemblyIdentity": null,
+      "MetadataError": null,
+      "NativeImports": [
+        "KERNEL32.dll",
+        "USER32.dll",
+        "GDI32.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Gwen.dll",
+      "SHA256": "33275AF76FCD12157732A80DF4795590D409A1DF46B2B32A5112CA11D6AA5267",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "Gwen, Version=1.0.0.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0",
+        "System.Drawing, Version=4.0.0.0",
+        "System.Windows.Forms, Version=4.0.0.0",
+        "System, Version=4.0.0.0",
+        "System.Core, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Gwen.UnitTest.dll",
+      "SHA256": "CF68F7773FEB5756E050A4503F142C67B17C1E4BECF23A878649960B58259017",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "Gwen.UnitTest, Version=1.0.0.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "Gwen, Version=1.0.0.0",
+        "mscorlib, Version=4.0.0.0",
+        "System.Drawing, Version=4.0.0.0",
+        "System, Version=4.0.0.0",
+        "System.Core, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\LMS.Common.dll",
+      "SHA256": "8D5593ABB8A939519365293D3325B83428F8304B56C59CCA37929637E7D6FB50",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "LMS.Common, Version=1.0.0.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0",
+        "System.Core, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\LMS.PortableExecutable.dll",
+      "SHA256": "4389B18342461CC11B48EC7A35C76BEA20BEB0A76724BA77C2ED0406E5517ED2",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": null,
+      "MetadataError": "Exception calling \"GetMetadataReader\" with \"1\" argument(s): \"Illegal tables in compressed metadata stream.\"",
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Microsoft.Expression.Drawing.dll",
+      "SHA256": "1D69EAF538008E0FE1A7EB2CE0124A49B95C491797749640C8351ED4643F5C97",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "Microsoft.Expression.Drawing, Version=4.5.0.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "PresentationFramework, Version=4.0.0.0",
+        "mscorlib, Version=4.0.0.0",
+        "WindowsBase, Version=4.0.0.0",
+        "System, Version=4.0.0.0",
+        "PresentationCore, Version=4.0.0.0",
+        "System.Xaml, Version=4.0.0.0",
+        "System.Core, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll",
+      "SHA256": "FCCBC0612BD7F71D8038918F15C40A0B6C5426D4B0890496450D28D924E8EC01",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=2.0.0.0",
+        "System, Version=2.0.0.0",
+        "System.Data, Version=2.0.0.0",
+        "System.Web, Version=2.0.0.0",
+        "System.Configuration, Version=2.0.0.0",
+        "System.Web.Services, Version=2.0.0.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.dll",
+      "SHA256": "0F6465CE57A0CBABC37013C8E3C9F110672DE1C127B6192177D59EB1C7809772",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "Mono.Cecil, Version=0.9.6.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.Mdb.dll",
+      "SHA256": "B8625ACE855A3086E2086AF418E17DAF24A30A4FBFFC559C42F329EDEC52806E",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "Mono.Cecil.Mdb, Version=0.9.6.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0",
+        "Mono.Cecil, Version=0.9.6.0",
+        "System, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.Pdb.dll",
+      "SHA256": "25EB34CF9A7038D71CA15DDBFB3C180B4A2119219D487FD760437F5DA7EDF292",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "Mono.Cecil.Pdb, Version=0.9.6.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0",
+        "Mono.Cecil, Version=0.9.6.0"
+      ],
+      "PInvokeLibraries": [
+        "ole32.dll"
+      ]
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.Rocks.dll",
+      "SHA256": "822C94D1C2AB96EFEB19BC5F1D304586E70A004D2F44F372377F33F2545EB921",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "Mono.Cecil.Rocks, Version=0.9.6.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0",
+        "Mono.Cecil, Version=0.9.6.0",
+        "System.Core, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\RAGEPluginHook.exe",
+      "SHA256": "73F05B3F7973D4731F4151AE061DD3C991065E8BF3ECE51EA1D9AB728B9B42AC",
+      "Machine": "Amd64",
+      "PEKind": "PE32Plus",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": null,
+      "MetadataError": "Exception calling \"GetMetadataReader\" with \"1\" argument(s): \"Illegal tables in compressed metadata stream.\"",
+      "NativeImports": [],
+      "DelayImports": [],
+      "ManagedReferences": [],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\SlimDX.dll",
+      "SHA256": "194968B5010BE986E33669928B9F966A67C6EB4E1CF4AC4DA6B90728E242A516",
+      "Machine": "Amd64",
+      "PEKind": "PE32Plus",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "SlimDX, Version=4.0.13.43",
+      "MetadataError": null,
+      "NativeImports": [
+        "MSVCR100.dll",
+        "KERNEL32.dll",
+        "ole32.dll",
+        "USER32.dll",
+        "GDI32.dll",
+        "WINMM.dll",
+        "ADVAPI32.dll",
+        "MSVCP100.dll",
+        "mscoree.dll"
+      ],
+      "DelayImports": [
+        "d3d9.dll",
+        "d3dx9_43.dll",
+        "dxgi.dll",
+        "d3d10.dll",
+        "d3dx10_43.dll",
+        "d3d10_1.dll",
+        "DINPUT8.dll",
+        "XINPUT1_3.dll",
+        "X3DAudio1_7.dll",
+        "DSOUND.dll",
+        "D3DCOMPILER_43.dll",
+        "d3d11.dll",
+        "d3dx11_43.dll",
+        "d2d1.dll",
+        "DWrite.dll",
+        "d3dcsx_43.dll"
+      ],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0",
+        "System.Core, Version=4.0.0.0",
+        "System.Data, Version=4.0.0.0",
+        "System, Version=4.0.0.0",
+        "System.Drawing, Version=4.0.0.0",
+        "System.Windows.Forms, Version=4.0.0.0",
+        "System.Xml, Version=4.0.0.0",
+        "Microsoft.VisualC, Version=10.0.0.0"
+      ],
+      "PInvokeLibraries": [
+        "KERNEL32.dll",
+        "MSVCR100.dll"
+      ]
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\System.ValueTuple.dll",
+      "SHA256": "79FAC2E8355A7BBB94D40D25FE0E34D5CEDF5426A176F20F1CCD5E0606F0F082",
+      "Machine": "I386",
+      "PEKind": "PE32",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "System.ValueTuple, Version=4.0.2.0",
+      "MetadataError": null,
+      "NativeImports": [
+        "mscoree.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0",
+        "System, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\XInput1_4.dll",
+      "SHA256": "BD0BA909DE46470E0DDBF88CD72D7CF6F1EB04B709616366692EAEA87B4C0551",
+      "Machine": "Amd64",
+      "PEKind": "PE32Plus",
+      "HasClrMetadata": false,
+      "AssemblyIdentity": null,
+      "MetadataError": null,
+      "NativeImports": [
+        "msvcrt.dll",
+        "api-ms-win-eventing-classicprovider-l1-1-0.dll",
+        "api-ms-win-core-handle-l1-1-0.dll",
+        "api-ms-win-core-sysinfo-l1-2-0.dll",
+        "api-ms-win-core-synch-l1-2-0.dll",
+        "api-ms-win-core-processthreads-l1-1-1.dll",
+        "api-ms-win-core-errorhandling-l1-1-1.dll",
+        "api-ms-win-core-io-l1-1-1.dll",
+        "api-ms-win-core-com-l1-1-0.dll",
+        "api-ms-win-core-file-l1-2-0.dll",
+        "api-ms-win-core-heap-l1-2-0.dll",
+        "api-ms-win-core-profile-l1-1-0.dll",
+        "api-ms-win-core-rtlsupport-l1-2-0.dll",
+        "CFGMGR32.dll",
+        "DEVOBJ.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\build\\telemetry\\RichAudio.Telemetry.Rph.dll",
+      "SHA256": "DBC5F600C37AD7579F49EBA92A352BEE1AAF452F6EF820CEF87B86B8547D5BE0",
+      "Machine": "Amd64",
+      "PEKind": "PE32Plus",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "RichAudio.Telemetry.Rph, Version=0.0.0.0",
+      "MetadataError": null,
+      "NativeImports": [],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0",
+        "System.Core, Version=4.0.0.0",
+        "RagePluginHook, Version=0.0.0.0",
+        "System, Version=4.0.0.0",
+        "System.Runtime.Serialization, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\sdk\\RagePluginHookSDK.dll",
+      "SHA256": "5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0",
+      "Machine": "Amd64",
+      "PEKind": "PE32Plus",
+      "HasClrMetadata": true,
+      "AssemblyIdentity": "RagePluginHook, Version=0.0.0.0",
+      "MetadataError": null,
+      "NativeImports": [],
+      "DelayImports": [],
+      "ManagedReferences": [
+        "mscorlib, Version=4.0.0.0",
+        "Gwen, Version=1.0.0.0",
+        "Gwen.UnitTest, Version=1.0.0.0",
+        "Microsoft.CSharp, Version=4.0.0.0",
+        "Mono.Cecil, Version=0.9.6.0",
+        "Mono.Cecil.Mdb, Version=0.9.6.0",
+        "Mono.Cecil.Pdb, Version=0.9.6.0",
+        "Mono.Cecil.Rocks, Version=0.9.6.0",
+        "SlimDX, Version=4.0.13.43",
+        "System.Core, Version=4.0.0.0",
+        "System.Data, Version=4.0.0.0",
+        "System, Version=4.0.0.0",
+        "System.Drawing, Version=4.0.0.0",
+        "System.IO.Compression, Version=4.2.0.0",
+        "System.IO.Compression.FileSystem, Version=4.0.0.0",
+        "System.Management, Version=4.0.0.0",
+        "System.Windows.Forms, Version=4.0.0.0",
+        "System.Xml, Version=4.0.0.0"
+      ],
+      "PInvokeLibraries": []
+    },
+    {
+      "Path": "__USER_HOME__\\Downloads\\6d0158-OpenRPF\\OpenRPF.asi",
+      "SHA256": "57D6CC782D8608C32B5B43B74882A3AD162796E0215C58B8FCB2F7C7D9E9D3A8",
+      "Machine": "Amd64",
+      "PEKind": "PE32Plus",
+      "HasClrMetadata": false,
+      "AssemblyIdentity": null,
+      "MetadataError": null,
+      "NativeImports": [
+        "KERNEL32.dll",
+        "SHELL32.dll",
+        "USER32.dll",
+        "MSVCP140.dll",
+        "VCRUNTIME140.dll",
+        "api-ms-win-crt-stdio-l1-1-0.dll",
+        "api-ms-win-crt-math-l1-1-0.dll",
+        "api-ms-win-crt-runtime-l1-1-0.dll",
+        "api-ms-win-crt-filesystem-l1-1-0.dll",
+        "api-ms-win-crt-convert-l1-1-0.dll",
+        "api-ms-win-crt-heap-l1-1-0.dll",
+        "api-ms-win-crt-locale-l1-1-0.dll",
+        "api-ms-win-crt-string-l1-1-0.dll"
+      ],
+      "DelayImports": [],
+      "ManagedReferences": [],
+      "PInvokeLibraries": []
+    }
+  ],
+  "Scope": "PE headers, import tables and CLR dependency metadata only. No IL/body inspection, unpacking, patching or dependency execution.",
+  "Limitation": "Static imports do not reveal every dynamically loaded component. The runtime CLR metadata is not readable by the standard reader; runtime API binding remains a smoke-test gate."
+}

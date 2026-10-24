@@ -1,0 +1,14 @@
+{
+  "Source": "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist/",
+  "Download": "https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe",
+  "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\prerequisites\\vcredist2010_x64.exe",
+  "SHA256": "F3B7A76D84D23F91957AA18456A14B4E90609E4CE8194C5653384ED38DADA6F3",
+  "Bytes": 10277328,
+  "FileVersion": "10.0.40219.325",
+  "SignatureStatus": "Valid",
+  "Signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+  "SignerThumbprint": "ABDCA79AF9DD48A0EA702AD45260B3C03093FB4B",
+  "Executed": false,
+  "Installed": false,
+  "Reason": "Bundled x64 SlimDX imports MSVCR100.dll and MSVCP100.dll; these were absent from checked System32/SxS/VC2010 registry locations. Requires approval before installation; not a game-root copy."
+}

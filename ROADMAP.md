@@ -4,6 +4,8 @@ Date: 24 October 2026. All future milestones are **UNTESTED** until a run record
 
 Phase 2 current record: [validation](docs/PHASE2_VALIDATION.md), [standalone RPH compatibility](docs/RUNTIME_COMPATIBILITY.md), [deployment](docs/DEPLOYMENT.md). P2-01 is built/offline-tested but unverified in game; no live capture or Phase 3 implementation has occurred.
 
+Phase 2.1: official RPH 1.132.1428.17748 package acquired and fingerprinted, 26-file conditional proposal prepared, signed Microsoft prerequisite staged but unrun. Next gate: explicit prerequisite/install approval, standalone startup/API binding, then A–E and paired performance measurements. See [readiness](docs/PHASE2_1_READINESS.md). NVMe DirectStorage and actual session setup remain launch-time checks; no acoustic work proceeds from this static inspection.
+
 | Stage | Deliverable | Acceptance / dependency | Current status |
 |---|---|---|---|
 | 1. Resource investigation | Versioned docs, read-only parsers, real vehicle chain, derived evidence | Actual files/GUI inspected; no archive writes; unknowns classified; local Git commit | Accessible investigation complete; runtime facts deliberately incomplete |
