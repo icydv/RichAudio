@@ -1,0 +1,22 @@
+{
+  "PackageDirectory": "__USER_HOME__\\Documents\\RichAudio\\build\\P2-01-20261024-214717-768",
+  "Zip": "__USER_HOME__\\Documents\\RichAudio\\build\\P2-01-20261024-214717-768.zip",
+  "Scope": "RichAudio-only candidate; no RPH/SDK/ASI loader or game asset included; not installed",
+  "Files": [
+    {
+      "Path": "READ_BEFORE_INSTALL.md",
+      "Bytes": 8464,
+      "SHA256": "476DE118F2DBF18E70FBB3FF3FB917FA2A7829C5B1A513002B1D300332C2EC57"
+    },
+    {
+      "Path": "Plugins\\RichAudio.Telemetry.Rph.dll",
+      "Bytes": 34304,
+      "SHA256": "DBC5F600C37AD7579F49EBA92A352BEE1AAF452F6EF820CEF87B86B8547D5BE0"
+    },
+    {
+      "Path": "Plugins\\RichAudio.Telemetry.Rph.json",
+      "Bytes": 285,
+      "SHA256": "0368AEF28338874FF099324B46A02DCE98F3FBC23B4FCCE749A515656EC1557E"
+    }
+  ]
+}

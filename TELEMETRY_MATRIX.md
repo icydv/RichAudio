@@ -1,5 +1,13 @@
 # Telemetry matrix
 
+## Phase 2 adapter mapping
+
+No live values have been obtained yet. Current implemented getters use RPH Entity.Position/Velocity/Rotation/Orientation, Vehicle.Model.Hash/IsEngineOn/EngineRevolutionsRatio/CurrentGear and full PoolHandle.Value/Index/Counter. The camera proxy uses documented GET_FINAL_RENDERED_CAM_COORD/ROT through RPH. Player classification is validity-aware; an unavailable player-vehicle query does not silently classify every source as NPC.
+
+Position/motion/engine/ratio/gear are **observed getter readings when returned**, not yet established reliable on this installed runtime. Listener orientation/velocity, vehicle acceleration and distance are **estimated** calculations. Engine load, physical crankshaft RPM and unexposed distant traffic state are **unavailable**; no offset/signature workaround is used. Every physical field carries status, nullable value, units, origin and reason. [Implementation details](docs/TELEMETRY_IMPLEMENTATION.md) and [distance investigation](docs/NPC_STREAMING.md) supersede the original adapter assumptions below.
+
+## Preserved Phase 1 source assessment
+
 No row is runtime-verified on the installed Enhanced 1158.16 build. **VERIFIED source** means the named API/property exists in the pinned native or SHVDNE source, not that an installed framework returned a correct value. All live calls are currently **BLOCKED** on the compatibility gate in [TOOL_COMPATIBILITY.md](TOOL_COMPATIBILITY.md).
 
 Sources: pinned Cfx native definitions [S3–S5, S17] and SHVDNE source [S8]. Cfx-specific runtime additions are not assumed to be stock GTA natives. No stock vehicle RPM/current drivetrain gear/throttle-state getter was located in the native corpus inspected; the corresponding SHVDNE getters use memory offsets.

@@ -1,5 +1,7 @@
 # Risks and fallback decisions
 
+Phase 2 update: RPH is now the selected public-API adapter candidate on author evidence of 1158.16 support, and the managed prototype compiles using the existing .NET Framework compiler. Exact runtime binary preflight, standalone operation, OpenRPF coexistence, live getter reliability, NPC coverage and gameplay performance remain unverified. No runtime was installed. See [compatibility](docs/RUNTIME_COMPATIBILITY.md) and [validation](docs/PHASE2_VALIDATION.md); the Phase 1 matrix below remains a historical risk record, not a statement that C++ is required for the current logger.
+
 24 October 2026. Severity concerns the eventual project, not an observed failure in the game. Phase 1 did not run GTA or install hooks.
 
 | Risk | Evidence/status | Mitigation and stop/fallback |

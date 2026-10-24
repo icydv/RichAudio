@@ -33,3 +33,7 @@ obj/
 *.log
 *.user
 .vs/
+captures/
+dist/
+*.jsonl
+!tests/fixtures/*.jsonl

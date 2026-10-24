@@ -1,0 +1,26 @@
+﻿[
+    {
+        "File":  "src\\telemetry\\Analysis\\Program.cs",
+        "SHA256":  "94DEB91DCB5F989694F202DBFD4E745E16218090C872858ACC559245E141D4F4"
+    },
+    {
+        "File":  "src\\telemetry\\Core\\Model.cs",
+        "SHA256":  "B571E8C6961B79138320AB54C454EDB314B78639A263B59B8E20FA2D394C9095"
+    },
+    {
+        "File":  "src\\telemetry\\Core\\Sampling.cs",
+        "SHA256":  "F478AEF73DD58C830E64391505CA35A9DD03CE2CA64D1DE30FB96A78B6536F5E"
+    },
+    {
+        "File":  "src\\telemetry\\Core\\Storage.cs",
+        "SHA256":  "DDDF31EA6D3465C62B9E266032F2250D4B1723252FE8C78CB3DB6B27EF01420B"
+    },
+    {
+        "File":  "src\\telemetry\\Rph\\Plugin.cs",
+        "SHA256":  "409A11209861A8456F12EB40AD9FC93BD3AED169C20C0771EE7AFDB13917288C"
+    },
+    {
+        "File":  "tests\\telemetry\\TestCore.cs",
+        "SHA256":  "997B18B6DD35A103871AD2FD925CA065B0D69E7E925239FB23111C5344727F2A"
+    }
+]

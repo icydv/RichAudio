@@ -2,12 +2,14 @@
 
 Date: 24 October 2026. All future milestones are **UNTESTED** until a run record exists. Gates are cumulative, not calendar promises.
 
+Phase 2 current record: [validation](docs/PHASE2_VALIDATION.md), [standalone RPH compatibility](docs/RUNTIME_COMPATIBILITY.md), [deployment](docs/DEPLOYMENT.md). P2-01 is built/offline-tested but unverified in game; no live capture or Phase 3 implementation has occurred.
+
 | Stage | Deliverable | Acceptance / dependency | Current status |
 |---|---|---|---|
 | 1. Resource investigation | Versioned docs, read-only parsers, real vehicle chain, derived evidence | Actual files/GUI inspected; no archive writes; unknowns classified; local Git commit | Accessible investigation complete; runtime facts deliberately incomplete |
-| 2a. Compatibility + telemetry | P2-01 logger and replay schema | Exact Enhanced build supported; compiler/SDK available; 10-min native-only run passes telemetry, lifecycle and timing criteria | BLOCKED: scripting compatibility/build tools |
+| 2a. Compatibility + telemetry | P2-01 logger and replay schema | Exact Enhanced runtime preflight; compiled SDK target; authorized A–E/10-min run passes telemetry, lifecycle and timing criteria | Core/RPH/analyzer compiled and offline-tested; deployment authorization/runtime preflight and all live tests PENDING |
 | 2b. Source ownership | P2-02 native profile/isolation matrix | Per-instance engine isolation, collateral sound preservation, known-state restore and failure recovery demonstrated | UNTESTED, critical go/no-go |
-| 3. Standalone acoustics | Owned synthetic sources, free field/plane/corner/portal tests | Correct transforms, analytic direct attenuation/arrival times, bounded energy, measured latency and no starvation | UNTESTED; can proceed offline while 2a is blocked |
+| 3. Standalone acoustics | Owned synthetic sources, free field/plane/corner/portal tests | P2-01 live acceptance first; then transforms, analytic attenuation/arrival times, bounded energy, latency and no starvation | Deferred until P2-01 validation; no acoustic implementation in Phase 2 |
 | 4. Local geometry pipeline | One validated acoustic tile + tunnel/interior samples | Correct placements, primitive conversion, materials with provenance, doors/portals, cache invalidation by build and state | YBN data accessible; conversion and world match UNTESTED |
 | 5. One owned vehicle | Source profile + direct rendering + chosen native ownership policy | RPM/load calibration, source direction, no duplicated direct engine, no unrelated sound loss; A/B capture and failure test | UNTESTED; depends on 2a/2b/3 |
 | 6. Environmental slice | Four scenario experiments | Valid paths and geometry-dependent response; documented approximations; acceptable CPU/latency and listening results | UNTESTED; depends on 4/5 |

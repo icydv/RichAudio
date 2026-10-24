@@ -2,6 +2,21 @@
 
 Physically informed acoustic research for **GTA V Enhanced, PC, single-player**.
 
+## Phase 2 current status
+
+**Built but unverified in game:** P2-01 now has a runtime-independent C# telemetry library, a standalone RAGE Plugin Hook adapter, bounded asynchronous JSONL logging, offline analysis and tested mocks. The [official Enhanced release](https://www.lcpdfr.com/downloads/gta5mods/g17media/52970-lspd-first-response-enhanced-preview/) advertises RPH support for 1158.16, so RPH is the selected candidate instead of assuming unsupported Script Hook V compatibility. Compilation used the authentic author-hosted SDK and the existing .NET Framework compiler; no C++ toolchain installation was needed.
+
+See [implementation](docs/TELEMETRY_IMPLEMENTATION.md), [runtime compatibility](docs/RUNTIME_COMPATIBILITY.md), [deployment boundary](docs/DEPLOYMENT.md), [NPC investigation](docs/NPC_STREAMING.md) and [executed validation](docs/PHASE2_VALIDATION.md). No runtime, loader or plugin has been installed into GTA. Live telemetry, meaningful tracking distances, game stability and frame-time impact remain unverified. Explicit deployment authorization and exact runtime preflight are still required. No acoustic renderer, sound replacement or native audio modification is implemented.
+
+```powershell
+.\tools\Test-Telemetry.ps1
+.\tools\Build-Telemetry.ps1           # requires reviewed SDK in .local/rph/sdk
+.\tools\Test-Telemetry.ps1 -BuildAdapter
+.\tools\Package-Telemetry.ps1         # writes only build/, never installs
+```
+
+The following Phase 1 sections remain a dated record of commit `e00878d`; current telemetry implementation supersedes their unimplemented-source description.
+
 Phase 1 investigation date: **24 October 2026**. This repository is a technical foundation, not an installed mod or working audio overhaul. No game was launched, no runtime hook was installed, and no original game archive was written.
 
 ## Result
@@ -59,7 +74,7 @@ The GUI was started with the installed `CodeWalker.exe explorer` command after t
 
 ## Repository boundaries
 
-`src/telemetry`, `src/acoustics` and `src/playback` contain component contracts, not an engine implementation. `tools/` contains the tested read-only investigation utilities. `.local/` contains local third-party source checkouts and proprietary exports and is ignored. `evidence/` contains only derived facts, hashes and reference identifiers, never audio samples or mesh coordinates.
+`src/telemetry` now contains the core, RPH adapter and analyzer; `src/acoustics` and `src/playback` remain unimplemented component contracts. `tools/` contains read-only investigation utilities and development-only build/test/package scripts. `.local/` contains dependencies, proprietary exports and captures and is ignored. `evidence/` contains derived facts, hashes, reference identifiers and test measurements, never audio samples or mesh coordinates. The sole committed JSONL fixture is explicitly authored mock data.
 
 No Rockstar audio, geometry, executables, keys or third-party binaries belong in Git. The repository has no redistributable asset license yet. Steam Audio, CodeWalker and other dependencies retain their own licenses; none is vendored here.
 

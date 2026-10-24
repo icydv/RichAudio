@@ -1,0 +1,22 @@
+﻿[
+    {
+        "File":  "RichAudio.Telemetry.Analysis.exe",
+        "Bytes":  11264,
+        "SHA256":  "27B46BDB1A8293369913D7F737941176322C8587B830904BD7594CC6D1D2F0D6"
+    },
+    {
+        "File":  "RichAudio.Telemetry.Core.dll",
+        "Bytes":  20992,
+        "SHA256":  "50DBE2A7D2FB1FAB0F18B19592BABBF2829ED7C310E5274C7B0E034C7A3F69D1"
+    },
+    {
+        "File":  "RichAudio.Telemetry.Rph.dll",
+        "Bytes":  34304,
+        "SHA256":  "DBC5F600C37AD7579F49EBA92A352BEE1AAF452F6EF820CEF87B86B8547D5BE0"
+    },
+    {
+        "File":  "RichAudio.Telemetry.Tests.exe",
+        "Bytes":  29696,
+        "SHA256":  "3D4B975E4BFF125CF476140A1FF5980F9555A6EBF5139A225007B42BB5C0E2A6"
+    }
+]

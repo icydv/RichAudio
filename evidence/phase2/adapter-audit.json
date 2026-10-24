@@ -1,0 +1,37 @@
+﻿{
+    "Scope":  "Compiled attribute/reference metadata and static source audit; not runtime execution",
+    "Commands":  [
+                     {
+                         "Method":  "Mark",
+                         "CommandName":  "RichAudioMark"
+                     },
+                     {
+                         "Method":  "StartCapture",
+                         "CommandName":  "RichAudioStart"
+                     },
+                     {
+                         "Method":  "StopCapture",
+                         "CommandName":  "RichAudioStop"
+                     },
+                     {
+                         "Method":  "Status",
+                         "CommandName":  "RichAudioStatus"
+                     }
+                 ],
+    "NativeCallNames":  [
+                            "GET_FINAL_RENDERED_CAM_COORD",
+                            "GET_FINAL_RENDERED_CAM_ROT",
+                            "NETWORK_IS_GAME_IN_PROGRESS",
+                            "NETWORK_IS_SESSION_STARTED"
+                        ],
+    "PluginReferences":  [
+                             "mscorlib",
+                             "System.Core",
+                             "RagePluginHook",
+                             "System",
+                             "System.Runtime.Serialization"
+                         ],
+    "EntryPoint":  "Void Main()",
+    "ExitPoint":  "Void OnUnload(Boolean)",
+    "Passed":  true
+}

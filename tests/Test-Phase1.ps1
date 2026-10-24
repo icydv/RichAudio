@@ -1,6 +1,6 @@
 # Offline tests: no game or CodeWalker installation required.
 [CmdletBinding()]
-param([switch]$WithLocalExports)
+param([switch]$WithLocalExports,[string]$ReportPath='')
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
 $results=New-Object System.Collections.Generic.List[object]
@@ -79,5 +79,6 @@ foreach($name in $required){
     }
 }
 $report=[ordered]@{ExecutedAtUTC=[DateTime]::UtcNow.ToString('o');Scope='Repository evidence consistency, authored offline fixture, write-boundary guards, ignore rules; not an in-game/audio test';WithLocalExports=[bool]$WithLocalExports;Passed=$true;Checks=$results.ToArray();FixtureDirectory=$fixture}
-$report | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $repo 'evidence\validation.json') -Encoding UTF8
+if(!$ReportPath){$ReportPath=Join-Path $repo 'evidence\validation.json'}
+$report | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $ReportPath -Encoding UTF8
 Write-Output ('PASS: '+$results.Count+' checks. No runtime/acoustic integration test was performed.')

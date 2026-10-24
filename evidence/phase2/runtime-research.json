@@ -1,0 +1,18 @@
+﻿{
+    "CheckedDate":  "2026-10-24",
+    "Framework":  "RAGE Plugin Hook",
+    "SupportStatus":  "Author advertises Enhanced 1158.16 support; not live verified",
+    "SupportSource":  "https://www.lcpdfr.com/downloads/gta5mods/g17media/52970-lspd-first-response-enhanced-preview/",
+    "AuthorReleaseDate":  "2026-09-17",
+    "SdkSource":  "https://www.lcpdfr.com/forums/topic/154295-rph-sdk/",
+    "SdkAttachmentId":  239104,
+    "SdkArchiveSHA256":  "791145D78E99619189951FB8ABFF4CDA6353850AD2AC5F011B66F325CE2E9BA6",
+    "SdkDllSHA256":  "5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0",
+    "SdkFileVersion":  "1.124.1393.17586",
+    "SdkAssemblyIdentity":  "RagePluginHook, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "RuntimeDownloadAttempt":  "Official download returned HTTP 403; web redirect loop; no workaround or mirror",
+    "RuntimeBinaryAcquired":  false,
+    "RuntimeInstalled":  false,
+    "LiveGameTest":  false,
+    "RedistributedDependency":  false
+}

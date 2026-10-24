@@ -2,6 +2,12 @@
 
 **INFERRED recommendation; implementation and all timing budgets below are UNTESTED.** Build a hybrid, externally rendered acoustic system only after proving source ownership and telemetry. Do not assume the native engine exposes a general DSP insertion point.
 
+## Phase 2 implementation boundary
+
+P2-01 now implements the telemetry portion in C# using `ITelemetrySource`, validity-aware fields, a session-local tracker, monotonic deadline scheduler, bounded SPSC queue and background JSONL writer. A standalone RPH adapter is compiled against the authentic SDK; the core and analyzer do not reference RPH. The reason for this adapter choice is new author evidence for Enhanced 1158.16 support plus a working managed compiler, not a change to the acoustic architecture. See [current implementation](docs/TELEMETRY_IMPLEMENTATION.md) and [runtime evidence](docs/RUNTIME_COMPATIBILITY.md).
+
+Managed DTOs contain copied scalar/vector values and no live game entities; these are not claimed allocation-free POD or an audio callback implementation. The logger's writer runs in-process on a background thread. Future acoustic worker/IPC/rendering choices remain unimplemented and gated on P2-01 validation. Offline benchmark measurements are in [the validation report](docs/PHASE2_VALIDATION.md); the gameplay budgets below remain targets, not measured game performance. No Phase 3 work proceeds until live P2-01 acceptance.
+
 ## Options and decisions
 
 | Option | Integration feasibility | Benefits / costs | Decision gate |
@@ -39,7 +45,7 @@ flowchart LR
 
 The game adapter is the only component permitted to call game/framework APIs. All workers use snapshots, not live game pointers. The native engine continues to mix dialogue, radio, ambience, collisions, horns and any unowned vehicle sources. No processing of the final game mix is proposed: that cannot reconstruct isolated moving sources or remove their existing reverb.
 
-Begin with an out-of-process recorder/replay tool and standalone renderer for resilience. A future adapter can send versioned bounded telemetry through a local IPC channel, with epochs, capabilities and monotonic timestamps. An in-process renderer may reduce IPC complexity but shares crashes and thread risks with the game. Choose only after measuring. Neither topology has been implemented here.
+The current recorder is a minimal in-process managed plugin with off-fiber disk writes and offline replay/analysis. A future adapter can send versioned bounded telemetry through a local IPC channel, with epochs, capabilities and monotonic timestamps. An in-process renderer may reduce IPC complexity but shares crashes and thread risks with the game. Choose only after measuring; neither renderer topology has been implemented here.
 
 ## Source and listener state
 

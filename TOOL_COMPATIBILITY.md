@@ -1,5 +1,7 @@
 # Tool compatibility
 
+**Phase 2 update:** the authentic RPH SDK 1.124.1393.17586 has been downloaded into ignored local development storage and used successfully to compile a managed telemetry-only plugin. The official Enhanced release advertises runtime support for 1158.16. Exact supporting runtime acquisition/preflight, installation authorization and in-game tests remain pending. See [RUNTIME_COMPATIBILITY.md](docs/RUNTIME_COMPATIBILITY.md) for hashes, source, licensing, SDK/runtime distinction and coexistence limitations. The dated Phase 1 C++ build-tools gap does not block this C# prototype; no new toolchain was installed.
+
 Snapshot: 24 October 2026. Exact binary fingerprints are in `evidence/binary-versions.json`. A file's presence, a successful metadata parse and in-game compatibility are three separate claims.
 
 ## Local environment
