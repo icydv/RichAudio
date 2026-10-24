@@ -4,6 +4,8 @@
 
 ## Phase 2 implementation boundary
 
+The first authorised runtime attempt stopped at an unsupported target/version reported by RPH before GTA or the adapter started. This supplies no evidence against the telemetry data model; it adds a runtime-selection readiness gate when multiple executable versions coexist. Keep the exact Enhanced guard and public-API boundary. [Actual outcome](docs/P2_01_FIRST_RUNTIME_ATTEMPT.md); original game files were preserved and deployment additions rolled back.
+
 Phase 2.1 acquired and inventoried the author-supplied Enhanced RPH runtime without changing the telemetry model or adapter. A conditional first-load manifest, system prerequisite review and numerical validation protocol are in [PHASE2_1_READINESS.md](docs/PHASE2_1_READINESS.md). No runtime-dependent facts about actual vehicle coverage or audio feasibility have been promoted to verified findings.
 
 P2-01 now implements the telemetry portion in C# using `ITelemetrySource`, validity-aware fields, a session-local tracker, monotonic deadline scheduler, bounded SPSC queue and background JSONL writer. A standalone RPH adapter is compiled against the authentic SDK; the core and analyzer do not reference RPH. The reason for this adapter choice is new author evidence for Enhanced 1158.16 support plus a working managed compiler, not a change to the acoustic architecture. See [current implementation](docs/TELEMETRY_IMPLEMENTATION.md) and [runtime evidence](docs/RUNTIME_COMPATIBILITY.md).

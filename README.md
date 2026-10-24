@@ -2,6 +2,10 @@
 
 Physically informed acoustic research for **GTA V Enhanced, PC, single-player**.
 
+## Latest: authorised runtime attempt stopped and rolled back
+
+On 24 October 2026 the approved Microsoft prerequisite installed successfully and all 26 approved additions were deployed/hash-verified. RPH reached Settings but reported **1.0.1013.34 Retail NOT SUPPORTED**, while the expected Enhanced executable remains **1.0.1158.16**. The attempt stopped before GTA startup/plugin load; the 26 additions were rolled back and original root/archive checks match baseline. VC2010 x64 remains installed. **No live telemetry or A–E results exist.** See the [actual attempt report](docs/P2_01_FIRST_RUNTIME_ATTEMPT.md); an author-supported target-selection plan is now the blocking gate. Earlier readiness/install-pending statements below are historical records.
+
 ## Phase 2.1 deployment review
 
 The user-supplied official Enhanced bundle now matches its publisher checksum. Its RPH **1.132.1428.17748** runtime is inventoried in the separate development workspace. [Readiness report](docs/PHASE2_1_READINESS.md) and [exact proposed manifest](evidence/phase2.1/deployment-manifest.json) cover 26 currently absent game-file destinations, rollback, bounded logging and numerical A–E criteria. A missing checked VC++ 2010 x64 prerequisite has a signed Microsoft installer staged **but not run**. No GTA files or launcher/security settings were changed. Actual standalone startup, API binding, DirectStorage compatibility and all in-game telemetry/performance results remain unverified. Explicit installation approval is required; this is a conditional first-load proposal, not gameplay validation.

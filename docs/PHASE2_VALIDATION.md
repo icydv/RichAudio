@@ -1,5 +1,7 @@
 # Phase 2 executed validation
 
+**Subsequent live-attempt status:** approved prerequisite/deployment succeeded, but RPH reported unsupported 1013.34 before game startup. The additions were rolled back and no game telemetry/performance measurement occurred. [Actual attempt report](P2_01_FIRST_RUNTIME_ATTEMPT.md). The offline measurements below remain unchanged historical results.
+
 **Built and offline-tested; no live gameplay validation.** Results below are measured in the local .NET Framework test process, not inferred from a successful build.
 
 ## Build and tests

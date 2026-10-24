@@ -1,0 +1,23 @@
+[
+  {
+    "Path": "__GAME_ROOT__\\GTA5.exe",
+    "Bytes": 55203448,
+    "FileVersion": "1.0.1013.34",
+    "ProductVersion": "1.0.1013.34",
+    "SHA256": "FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF"
+  },
+  {
+    "Path": "__GAME_ROOT__\\GTA5_Enhanced.exe",
+    "Bytes": 55819384,
+    "FileVersion": "1.0.1158.16",
+    "ProductVersion": "1.0.1158.16",
+    "SHA256": "69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5"
+  },
+  {
+    "Path": "__GAME_ROOT__\\RAGEPluginHook.exe",
+    "Bytes": 12237182,
+    "FileVersion": "1.132.1428.17748",
+    "ProductVersion": "1.132.1428.17748",
+    "SHA256": "73F05B3F7973D4731F4151AE061DD3C991065E8BF3ECE51EA1D9AB728B9B42AC"
+  }
+]

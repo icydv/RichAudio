@@ -1,5 +1,7 @@
 # P2-01 runtime compatibility report
 
+**Latest authorised attempt:** RPH 1.132 ran after approved deployment but its Settings UI reported unsupported 1.0.1013.34, matching the version of the existing GTA5.exe, rather than the expected GTA5_Enhanced.exe 1158.16. Target-selection cause is unproved. The attempt stopped before game startup; all 26 additions were rolled back, original-file checks match, and VC2010 remains installed. No RichAudio plugin load or telemetry occurred. See [the actual report](P2_01_FIRST_RUNTIME_ATTEMPT.md). The earlier statements below describe pre-deployment findings.
+
 24 October 2026. **Selected target: RAGE Plugin Hook (RPH), a standalone managed plugin. Built against an authentic SDK; unverified in game.** No runtime or loader was installed and no RPH executable was launched.
 
 **Phase 2.1 update:** the authentic user-supplied runtime archive is now acquired and checksum-verified. Actual RPH version: **1.132.1428.17748**. See [full readiness report](PHASE2_1_READINESS.md) for hashes/signatures, missing checked VC2010 x64 dependency, SDK comparison limits, NVMe caveat and the exact conditional deployment proposal. Acquisition is resolved; installation and live validation remain pending.

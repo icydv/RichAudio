@@ -1,5 +1,7 @@
 # P2-01 deployment boundary and reversible test instructions
 
+**Latest outcome:** deployment was explicitly approved and executed; RPH then reported an unexpected unsupported 1013.34 target. The experiment stopped before GTA startup and the approved additions were rolled back. The approved shared VC2010 prerequisite remains installed. Do not re-run the old proposal until an author-supported target-selection plan is reviewed. [Actual deployment/rollback evidence and blocker](P2_01_FIRST_RUNTIME_ATTEMPT.md). The procedure below remains the historical preparation record.
+
 **Built candidate, unverified in game. Nothing has been installed. Explicit authorization to install new runtime/game-root files is still required.** This document describes a future manual procedure; neither build nor packaging scripts copy into GTA, launch RPH, alter security/anti-cheat settings or start the game.
 
 **Phase 2.1:** runtime acquisition/inventory is complete. Use the [current readiness report](PHASE2_1_READINESS.md) and [exact 26-file proposal](../evidence/phase2.1/deployment-manifest.json), including the separately signed VC2010 x64 prerequisite and eight-source logging configuration. These supersede the initial runtime-acquisition/default-32-source instructions below for the first test. The proposal remains conditional on prerequisite review and explicit installation approval, with first-load stop conditions for API binding, DirectStorage and unsupported/security setup.

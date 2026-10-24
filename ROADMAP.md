@@ -1,5 +1,7 @@
 # Roadmap
 
+Latest P2-01 gate: the approved 24 October runtime attempt reached RPH Settings but reported unsupported 1013.34 instead of the expected Enhanced 1158.16. Game-file additions were rolled back; the approved VC2010 prerequisite remains installed. Establish an author-supported target-selection/launch plan before another deployment or A–E run. No live player/NPC data or meaningful distance has been obtained. See [actual attempt evidence](docs/P2_01_FIRST_RUNTIME_ATTEMPT.md). Phase 3 stays blocked.
+
 Date: 24 October 2026. All future milestones are **UNTESTED** until a run record exists. Gates are cumulative, not calendar promises.
 
 Phase 2 current record: [validation](docs/PHASE2_VALIDATION.md), [standalone RPH compatibility](docs/RUNTIME_COMPATIBILITY.md), [deployment](docs/DEPLOYMENT.md). P2-01 is built/offline-tested but unverified in game; no live capture or Phase 3 implementation has occurred.

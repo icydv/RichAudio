@@ -1,0 +1,76 @@
+{
+  "SchemaVersion": 1,
+  "RecordedUtc": "2026-10-24T22:22:51.4620866Z",
+  "Outcome": "STOPPED_RUNTIME_TARGET_MISMATCH",
+  "Authorisation": "Explicit current-chat approval",
+  "PrerequisiteInstalled": true,
+  "PrerequisiteExitCode": 0,
+  "DeployedFiles": 26,
+  "RolledBackFiles": 26,
+  "GameFileState": "Original root-file baseline restored",
+  "RphVersion": "1.132.1428.17748",
+  "RuntimeUiReportedGameVersion": "1.0.1013.34",
+  "RuntimeUiSupport": "NOT SUPPORTED",
+  "ExpectedEnhancedVersion": "1.0.1158.16",
+  "GameLaunchedByAgent": false,
+  "GameProcessObserved": false,
+  "RichAudioLoaded": false,
+  "TelemetryFiles": 0,
+  "LivePlayerObservations": 0,
+  "LiveNpcObservations": 0,
+  "SmokeTest": "STOPPED at framework compatibility gate before game startup",
+  "Tests": [
+    {
+      "Test": "A",
+      "Status": "NOT_RUN",
+      "Reason": "Smoke-test prerequisite failed"
+    },
+    {
+      "Test": "B",
+      "Status": "NOT_RUN",
+      "Reason": "Smoke-test prerequisite failed"
+    },
+    {
+      "Test": "C",
+      "Status": "NOT_RUN",
+      "Reason": "Smoke-test prerequisite failed"
+    },
+    {
+      "Test": "D",
+      "Status": "NOT_RUN",
+      "Reason": "Smoke-test prerequisite failed"
+    },
+    {
+      "Test": "E",
+      "Status": "NOT_RUN",
+      "Reason": "Smoke-test prerequisite failed"
+    }
+  ],
+  "Measurements": {
+    "LiveSamplingHz": null,
+    "LiveSamplingDelayMs": null,
+    "QueueDrops": null,
+    "NpcAvailability": null,
+    "MaximumMeaningfulNpcDistanceM": null,
+    "GameFrameTimeMs": null,
+    "GameCpuPercent": null,
+    "GameStability": "Not exercised",
+    "ObservedGameCrashes": 0
+  },
+  "FrameworkUiSnapshot": {
+    "CpuTimeSeconds": 3.390625,
+    "WorkingSetBytes": 131751936,
+    "Scope": "Single RPH disclaimer-stage process snapshot, not game CPU utilisation or peak memory"
+  },
+  "Screenshot": {
+    "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\deployment-P2-01-20261024\\rph-unsupported-version.png",
+    "SHA256": "FF7843559073682833F72B0F27D0932C37BB4A34F0A0C28BB08497451B8E86AD"
+  },
+  "RawDiagnosticsDirectory": "__USER_HOME__\\Documents\\RichAudio\\.local\\deployment-P2-01-20261024",
+  "RetryAttempted": false,
+  "SecurityChanges": false,
+  "OnlineAccess": false,
+  "AudioOrVehicleChanges": false,
+  "Phase3Started": false,
+  "RphLogFoundInGameRoot": false
+}

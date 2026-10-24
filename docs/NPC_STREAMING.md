@@ -1,5 +1,7 @@
 # Distant NPC investigation
 
+The first authorised runtime attempt stopped before GTA startup on an RPH target/version mismatch. No player/NPC getters ran, so maximum meaningful distance remains **unknown**. [Attempt and rollback evidence](P2_01_FIRST_RUNTIME_ATTEMPT.md); no distance inference is drawn from the framework UI failure.
+
 **Live results: none. Maximum actual sampled GTA distance, natural urban/rural availability, drivetrain reliability at range, handle recycling frequency and low-detail traffic representation are all UNTESTED.** The committed fixture is authored mock data; its distances are not game evidence.
 
 ## What the prototype can observe
