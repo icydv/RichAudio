@@ -1,0 +1,214 @@
+{
+  "SchemaVersion": 1,
+  "InspectedUtc": "2026-10-24T22:37:42.3887114Z",
+  "Binaries": [
+    {
+      "Path": "__GAME_ROOT__\\GTA5.exe",
+      "Bytes": 55203448,
+      "SHA256": "FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF",
+      "FileVersion": "1.0.1013.34",
+      "ProductVersion": "1.0.1013.34",
+      "OriginalFilename": "GTA5_Enhanced.exe",
+      "FileDescription": "Grand Theft Auto V Enhanced",
+      "CreationUtc": "2026-06-18T18:26:44.7295415Z",
+      "LastWriteUtc": "2026-04-08T21:57:34.3405456Z",
+      "Attributes": "Archive",
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", OU=Rockstar Partners, O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "AD00A9C3007FD1450A559D0634547B075AD3E688",
+      "TimestampSigner": "CN=DigiCert SHA256 RSA4096 Timestamp Responder 2025 1, O=\"DigiCert, Inc.\", C=US",
+      "Streams": [
+        {
+          "Stream": ":$DATA",
+          "Length": 55203448
+        }
+      ],
+      "HardLinks": [
+        "\\Games\\steamapps\\common\\Grand Theft Auto V Enhanced\\GTA5.exe"
+      ]
+    },
+    {
+      "Path": "__GAME_ROOT__\\GTA5_Enhanced.exe",
+      "Bytes": 55819384,
+      "SHA256": "69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5",
+      "FileVersion": "1.0.1158.16",
+      "ProductVersion": "1.0.1158.16",
+      "OriginalFilename": "GTA5_Enhanced.exe",
+      "FileDescription": "Grand Theft Auto V Enhanced",
+      "CreationUtc": "2026-09-16T18:13:33.7937905Z",
+      "LastWriteUtc": "2026-09-16T18:12:17.7275041Z",
+      "Attributes": "Archive",
+      "SignatureStatus": "Valid",
+      "Signer": "CN=\"Rockstar Games, Inc.\", OU=Rockstar Partners, O=\"Rockstar Games, Inc.\", L=New York, S=New York, C=US",
+      "SignerThumbprint": "AD00A9C3007FD1450A559D0634547B075AD3E688",
+      "TimestampSigner": "CN=DigiCert SHA256 RSA4096 Timestamp Responder 2026 1, O=\"DigiCert, Inc.\", C=US",
+      "Streams": [
+        {
+          "Stream": ":$DATA",
+          "Length": 55819384
+        }
+      ],
+      "HardLinks": [
+        "\\Games\\steamapps\\common\\Grand Theft Auto V Enhanced\\GTA5_Enhanced.exe"
+      ]
+    }
+  ],
+  "Backup": {
+    "Path": "__USER_HOME__\\Documents\\RichAudio\\.local\\phase2.2\\pre-rename\\GTA5.exe",
+    "SHA256": "FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF",
+    "Bytes": 55203448,
+    "MatchesOriginal": true
+  },
+  "ProposedRename": {
+    "Source": "__GAME_ROOT__\\GTA5.exe",
+    "Destination": "__GAME_ROOT__\\_GTA5.exe",
+    "DestinationAbsent": true,
+    "Method": "System.IO.File.Move(source,destination), two-argument no-overwrite same-volume rename; not executed",
+    "RestoreMethod": "After game/RPH exit and hash checks, same no-overwrite rename back; refuse an occupied GTA5.exe"
+  },
+  "OpenIV": {
+    "ConfigPath": "__USER_HOME__\\AppData\\Local\\New Technology Studio\\OpenIV\\Application.xml",
+    "ConfiguredGamePaths": [
+      "__GAME_ROOT__\\"
+    ],
+    "CreatorOfCompatibilityFile": "UNKNOWN; user states they did not create it"
+  },
+  "RockstarLauncherEvidence": [
+    {
+      "File": "launcher.01.log",
+      "Line": 194,
+      "Text": "[2026-10-16 23:54:25.391] [DISPLAY] [ 7936] [gamelaunch] Launch Path: __GAME_ROOT__\\GTA5_Enhanced.exe"
+    },
+    {
+      "File": "launcher.01.log",
+      "Line": 196,
+      "Text": "[2026-10-16 23:54:25.397] [DISPLAY] [ 7936] [fileutils] File version 1.0.1158.16 (for __GAME_ROOT__\\GTA5_Enhanced.exe)"
+    },
+    {
+      "File": "launcher.01.log",
+      "Line": 199,
+      "Text": "[2026-10-16 23:54:25.399] [DISPLAY] [ 7936] [fileutils] File version 1.0.1158.16 (for __GAME_ROOT__\\GTA5_Enhanced.exe)"
+    },
+    {
+      "File": "launcher.01.log",
+      "Line": 200,
+      "Text": "[2026-10-16 23:54:25.399] [DISPLAY] [ 7936] [gamelaunch] Grand Theft Auto V Enhanced is up to date (current: 1.0.1158.16, minimum: 1.0.812.5)"
+    },
+    {
+      "File": "launcher.02.log",
+      "Line": 189,
+      "Text": "[2026-09-08 00:45:29.696] [DISPLAY] [15372] [gamelaunch] Launch Path: __GAME_ROOT__\\GTA5_Enhanced.exe"
+    },
+    {
+      "File": "launcher.02.log",
+      "Line": 195,
+      "Text": "[2026-09-08 00:45:29.703] [DISPLAY] [15372] [gamelaunch] Grand Theft Auto V Enhanced is up to date (current: 1.0.1158.13, minimum: 1.0.812.5)"
+    },
+    {
+      "File": "launcher.04.log",
+      "Line": 162,
+      "Text": "[2026-08-30 02:39:00.319] [DISPLAY] [24712] [gamelaunch] Launch Path: __GAME_ROOT__\\GTA5_Enhanced.exe"
+    },
+    {
+      "File": "launcher.04.log",
+      "Line": 166,
+      "Text": "[2026-08-30 02:39:00.321] [DISPLAY] [24712] [gamelaunch] Grand Theft Auto V Enhanced is up to date (current: 1.0.1158.13, minimum: 1.0.812.5)"
+    },
+    {
+      "File": "launcher.05.log",
+      "Line": 162,
+      "Text": "[2026-08-30 00:13:11.596] [DISPLAY] [13332] [gamelaunch] Launch Path: __GAME_ROOT__\\GTA5_Enhanced.exe"
+    },
+    {
+      "File": "launcher.05.log",
+      "Line": 166,
+      "Text": "[2026-08-30 00:13:11.598] [DISPLAY] [13332] [gamelaunch] Grand Theft Auto V Enhanced is up to date (current: 1.0.1158.13, minimum: 1.0.812.5)"
+    },
+    {
+      "File": "launcher.06.log",
+      "Line": 162,
+      "Text": "[2026-08-29 16:49:22.007] [DISPLAY] [22396] [gamelaunch] Launch Path: __GAME_ROOT__\\GTA5_Enhanced.exe"
+    },
+    {
+      "File": "launcher.06.log",
+      "Line": 166,
+      "Text": "[2026-08-29 16:49:22.010] [DISPLAY] [22396] [gamelaunch] Grand Theft Auto V Enhanced is up to date (current: 1.0.1158.13, minimum: 1.0.812.5)"
+    },
+    {
+      "File": "launcher.07.log",
+      "Line": 162,
+      "Text": "[2026-08-29 03:56:45.722] [DISPLAY] [21064] [gamelaunch] Launch Path: __GAME_ROOT__\\GTA5_Enhanced.exe"
+    },
+    {
+      "File": "launcher.07.log",
+      "Line": 166,
+      "Text": "[2026-08-29 03:56:45.724] [DISPLAY] [21064] [gamelaunch] Grand Theft Auto V Enhanced is up to date (current: 1.0.1158.13, minimum: 1.0.812.5)"
+    },
+    {
+      "File": "launcher.08.log",
+      "Line": 162,
+      "Text": "[2026-08-29 02:09:04.531] [DISPLAY] [19896] [gamelaunch] Launch Path: __GAME_ROOT__\\GTA5_Enhanced.exe"
+    },
+    {
+      "File": "launcher.08.log",
+      "Line": 166,
+      "Text": "[2026-08-29 02:09:04.534] [DISPLAY] [19896] [gamelaunch] Grand Theft Auto V Enhanced is up to date (current: 1.0.1158.13, minimum: 1.0.812.5)"
+    },
+    {
+      "File": "launcher.09.log",
+      "Line": 162,
+      "Text": "[2026-08-28 19:40:11.902] [DISPLAY] [14184] [gamelaunch] Launch Path: __GAME_ROOT__\\GTA5_Enhanced.exe"
+    },
+    {
+      "File": "launcher.09.log",
+      "Line": 166,
+      "Text": "[2026-08-28 19:40:11.908] [DISPLAY] [14184] [gamelaunch] Grand Theft Auto V Enhanced is up to date (current: 1.0.1158.13, minimum: 1.0.812.5)"
+    },
+    {
+      "File": "launcher.log",
+      "Line": 193,
+      "Text": "[2026-10-21 23:27:08.299] [DISPLAY] [22380] [gamelaunch] Launch Path: __GAME_ROOT__\\GTA5_Enhanced.exe"
+    },
+    {
+      "File": "launcher.log",
+      "Line": 195,
+      "Text": "[2026-10-21 23:27:08.305] [DISPLAY] [22380] [fileutils] File version 1.0.1158.16 (for __GAME_ROOT__\\GTA5_Enhanced.exe)"
+    },
+    {
+      "File": "launcher.log",
+      "Line": 198,
+      "Text": "[2026-10-21 23:27:08.306] [DISPLAY] [22380] [fileutils] File version 1.0.1158.16 (for __GAME_ROOT__\\GTA5_Enhanced.exe)"
+    },
+    {
+      "File": "launcher.log",
+      "Line": 199,
+      "Text": "[2026-10-21 23:27:08.306] [DISPLAY] [22380] [gamelaunch] Grand Theft Auto V Enhanced is up to date (current: 1.0.1158.16, minimum: 1.0.812.5)"
+    }
+  ],
+  "AvailableRphFiles": [
+    {
+      "Path": "__GAME_ROOT__\\RagePluginHook.ini",
+      "Present": false
+    },
+    {
+      "Path": "__GAME_ROOT__\\RagePluginHook.log",
+      "Present": false
+    },
+    {
+      "Path": "__GAME_ROOT__\\RagePluginHookLauncher.log",
+      "Present": false
+    },
+    {
+      "Path": "__GAME_ROOT__\\startup.rphs",
+      "Present": false
+    },
+    {
+      "Path": "__GAME_ROOT__\\commandline.txt",
+      "Present": false
+    }
+  ],
+  "RunningRelevantProcesses": [],
+  "GameWritesPerformed": false,
+  "RenamePerformed": false,
+  "RuntimeStarted": false
+}

@@ -1,5 +1,7 @@
 # Roadmap
 
+Phase 2.2 preparation: six installed Steam depot manifests and normal Rockstar logs corroborate the extra-executable selection hypothesis. The exact temporary rename/26-file redeployment experiment is prepared with a verified backup, awaiting fresh approval. Positive local RPH Enhanced 1158.16 identification and a successful telemetry smoke test remain gates; no new game launch or A–E result exists. [Investigation](docs/PHASE2_2_EXECUTABLE_SELECTION.md).
+
 Latest P2-01 gate: the approved 24 October runtime attempt reached RPH Settings but reported unsupported 1013.34 instead of the expected Enhanced 1158.16. Game-file additions were rolled back; the approved VC2010 prerequisite remains installed. Establish an author-supported target-selection/launch plan before another deployment or A–E run. No live player/NPC data or meaningful distance has been obtained. See [actual attempt evidence](docs/P2_01_FIRST_RUNTIME_ATTEMPT.md). Phase 3 stays blocked.
 
 Date: 24 October 2026. All future milestones are **UNTESTED** until a run record exists. Gates are cumulative, not calendar promises.

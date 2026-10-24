@@ -1,0 +1,63 @@
+{
+  "CheckedUtc": "2026-10-24T22:39:51.5386716Z",
+  "OriginalRootFiles": 32,
+  "RootFileDifferences": [],
+  "ArchiveMetadataRows": 179,
+  "ArchiveMetadataDifferences": [],
+  "KnownArchiveHashes": [
+    {
+      "Path": "common.rpf",
+      "SHA256": "FC4D22F8A715AC492E67975254CB92FC8D6DC615B28417744F7822735D2A355C",
+      "MatchesPhase1": true
+    },
+    {
+      "Path": "update\\update.rpf",
+      "SHA256": "C3A68386A7D067772D6D6038AC505040E7280640205B230FDC1F829567CEC913",
+      "MatchesPhase1": true
+    },
+    {
+      "Path": "update\\x64\\dlcpacks\\mp2025_02_g9ec\\dlc.rpf",
+      "SHA256": "5D938A428748B4955038F3D17303F6D7AC68DDF3C99497EF989BBDB53C645D3C",
+      "MatchesPhase1": true
+    },
+    {
+      "Path": "update\\x64\\dlcpacks\\mp2025_02\\dlc.rpf",
+      "SHA256": "53FB02E854AF1A63CC6576317AAAB616EF01D2B869B9969A82BE19C1D2B6498C",
+      "MatchesPhase1": true
+    },
+    {
+      "Path": "update\\x64\\dlcpacks\\mpbiker\\dlc.rpf",
+      "SHA256": "BBA97B80C2B7FC6423DE61D70DE4CA8D648E700932FB5F2763B102EB23057CA0",
+      "MatchesPhase1": true
+    },
+    {
+      "Path": "x64\\audio\\audio_rel.rpf",
+      "SHA256": "FBFC8457F494C54EB1A8CFA070C3BAEE9F6631CCA39F2C7DBE211C1AD46AE347",
+      "MatchesPhase1": true
+    },
+    {
+      "Path": "x64\\audio\\occlusion.rpf",
+      "SHA256": "0380D9E3F170F7157A3DA0CDEAFD1B020ABDC2C33D0546FE5F7A89564055E9DD",
+      "MatchesPhase1": true
+    },
+    {
+      "Path": "x64\\audio\\sfx\\STREAMED_VEHICLES_GRANULAR_NPC.rpf",
+      "SHA256": "9EE025DAA5839720AB24914BCB79BBD2DB17E6FD26DF963B82FC90E43E7EF3E7",
+      "MatchesPhase1": true
+    },
+    {
+      "Path": "x64\\audio\\sfx\\STREAMED_VEHICLES_GRANULAR.rpf",
+      "SHA256": "F31CC031E06D1CFE5E863E8307857AB3C59B0736739E824277368EBEE5DF7EEF",
+      "MatchesPhase1": true
+    },
+    {
+      "Path": "x64a.rpf",
+      "SHA256": "9350F1A5A0FE14FEDA0F56F651CD4C2BD61310CDD169EA4427E0859D23611111",
+      "MatchesPhase1": true
+    }
+  ],
+  "BothExecutableNamesIntact": true,
+  "TemporaryRenameTargetAbsent": true,
+  "RphInstalled": false,
+  "NoGameWritesPerformedByInvestigation": true
+}

@@ -1,0 +1,112 @@
+TAP version 13
+# Subtest: text VDF preserves nested depot IDs and escaped paths
+ok 1 - text VDF preserves nested depot IDs and escaped paths
+  ---
+  duration_ms: 1.4368
+  type: 'test'
+  ...
+# Subtest: duplicate text keys fail instead of silently selecting a depot
+ok 2 - duplicate text keys fail instead of silently selecting a depot
+  ---
+  duration_ms: 0.3321
+  type: 'test'
+  ...
+# Subtest: incomplete text nesting fails
+ok 3 - incomplete text nesting fails
+  ---
+  duration_ms: 0.5822
+  type: 'test'
+  ...
+# Subtest: protobuf retains manifest integers above JS safe-number range
+ok 4 - protobuf retains manifest integers above JS safe-number range
+  ---
+  duration_ms: 0.4385
+  type: 'test'
+  ...
+# Subtest: truncated length-delimited field fails
+ok 5 - truncated length-delimited field fails
+  ---
+  duration_ms: 0.1433
+  type: 'test'
+  ...
+# Subtest: unsupported wire types fail
+ok 6 - unsupported wire types fail
+  ---
+  duration_ms: 0.1176
+  type: 'test'
+  ...
+# Subtest: zero field number fails
+ok 7 - zero field number fails
+  ---
+  duration_ms: 0.121
+  type: 'test'
+  ...
+# Subtest: uint64 varint overflow fails
+ok 8 - uint64 varint overflow fails
+  ---
+  duration_ms: 0.14
+  type: 'test'
+  ...
+# Subtest: complete depot produces filename, length, content hash and exact manifest ID
+ok 9 - complete depot produces filename, length, content hash and exact manifest ID
+  ---
+  duration_ms: 0.4772
+  type: 'test'
+  ...
+# Subtest: encrypted filenames never support a false absence conclusion
+ok 10 - encrypted filenames never support a false absence conclusion
+  ---
+  duration_ms: 0.2579
+  type: 'test'
+  ...
+# Subtest: missing depot end marker fails
+ok 11 - missing depot end marker fails
+  ---
+  duration_ms: 0.1792
+  type: 'test'
+  ...
+# Subtest: duplicate depot section fails
+ok 12 - duplicate depot section fails
+  ---
+  duration_ms: 0.174
+  type: 'test'
+  ...
+# Subtest: v41 app cache parses the requested record and verifies binary hash
+ok 13 - v41 app cache parses the requested record and verifies binary hash
+  ---
+  duration_ms: 0.6865
+  type: 'test'
+  ...
+# Subtest: corrupt app metadata fails hash verification
+ok 14 - corrupt app metadata fails hash verification
+  ---
+  duration_ms: 0.1597
+  type: 'test'
+  ...
+# Subtest: unknown appinfo versions fail closed
+ok 15 - unknown appinfo versions fail closed
+  ---
+  duration_ms: 0.1434
+  type: 'test'
+  ...
+# Subtest: out-of-range string-table keys fail even with a valid payload checksum
+ok 16 - out-of-range string-table keys fail even with a valid payload checksum
+  ---
+  duration_ms: 0.3359
+  type: 'test'
+  ...
+# Subtest: absent requested app is reported explicitly
+ok 17 - absent requested app is reported explicitly
+  ---
+  duration_ms: 0.1691
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 83.039

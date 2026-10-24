@@ -2,6 +2,10 @@
 
 Physically informed acoustic research for **GTA V Enhanced, PC, single-player**.
 
+## Phase 2.2: selection hypothesis investigated; approval pending
+
+The extra signed Enhanced executable named GTA5.exe is absent from all six current installed Steam depot manifests; the current GTA5_Enhanced.exe matches its depot content hash. Existing Rockstar logs select Enhanced 1158.16. This corroborates the community-described RPH filename-priority conflict, while the extra file's creator/purpose remains unproved. No supported explicit RPH selector was established. A verified independent backup and [exact reversible test proposal](evidence/phase2.2/controlled-test-plan.json) are ready for new approval. **Neither executable was renamed or modified, and RPH was not redeployed/restarted in this investigation.** See [the Phase 2.2 report](docs/PHASE2_2_EXECUTABLE_SELECTION.md).
+
 ## Latest: authorised runtime attempt stopped and rolled back
 
 On 24 October 2026 the approved Microsoft prerequisite installed successfully and all 26 approved additions were deployed/hash-verified. RPH reached Settings but reported **1.0.1013.34 Retail NOT SUPPORTED**, while the expected Enhanced executable remains **1.0.1158.16**. The attempt stopped before GTA startup/plugin load; the 26 additions were rolled back and original root/archive checks match baseline. VC2010 x64 remains installed. **No live telemetry or A–E results exist.** See the [actual attempt report](docs/P2_01_FIRST_RUNTIME_ATTEMPT.md); an author-supported target-selection plan is now the blocking gate. Earlier readiness/install-pending statements below are historical records.

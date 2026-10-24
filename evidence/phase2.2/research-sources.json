@@ -1,0 +1,26 @@
+{
+  "CheckedUtc": "2026-10-24T22:38:37.4666695Z",
+  "PrimarySupport": {
+    "URL": "https://www.lcpdfr.com/forums/topic/155663-rage-plugin-hook-is-stuck-on-launching-game/",
+    "Date": "2026-03-19",
+    "Author": "Ouxlaw",
+    "AcknowledgedBy": "Gan Ceann, Community Team",
+    "Paraphrase": "An extra GTA5.exe used for OpenIV can take precedence in RPH; temporarily rename it for gameplay and retain it for the tool.",
+    "Classification": "Community explanation acknowledged by support staff, not a publisher configuration contract or a local experimental result"
+  },
+  "PublisherRuntime": "https://www.lcpdfr.com/downloads/gta5mods/g17media/52970-lspd-first-response-enhanced-preview/",
+  "PublisherPagesUnavailable": [
+    "https://ragepluginhook.net/Downloads.aspx",
+    "https://ragepluginhook.net/Documentation.aspx"
+  ],
+  "PublisherPageResult": "HTTP 404",
+  "ExplicitSelectorResult": "No current author-documented executable override established in checked package/readme, available local files or focused official-domain searches. Unseen UI tabs were not inspected.",
+  "FormatReferences": [
+    "https://raw.githubusercontent.com/SteamRE/SteamKit/master/SteamKit2/SteamKit2/Types/DepotManifest.cs",
+    "https://raw.githubusercontent.com/SteamTracking/Protobufs/master/steam/content_manifest.proto",
+    "https://github.com/xPaw/SteamAppInfo/blob/master/README.md"
+  ],
+  "NoOverwriteRenameReference": "https://learn.microsoft.com/en-us/dotnet/api/system.io.file.move",
+  "ExternalCodeVendored": false,
+  "UserOriginStatement": "User states they did not create GTA5.exe; file creator remains unknown."
+}

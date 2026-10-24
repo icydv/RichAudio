@@ -1,0 +1,441 @@
+{
+  "ExecutedAtUTC": "2026-10-24T22:41:10.4458587Z",
+  "Scope": "Repository evidence consistency, authored offline fixture, write-boundary guards, ignore rules; not an in-game/audio test",
+  "WithLocalExports": true,
+  "Passed": true,
+  "Checks": [
+    {
+      "Name": "Document: README.md",
+      "Passed": true
+    },
+    {
+      "Name": "Document: ARCHITECTURE.md",
+      "Passed": true
+    },
+    {
+      "Name": "Document: GTA_AUDIO_RESEARCH.md",
+      "Passed": true
+    },
+    {
+      "Name": "Document: TOOL_COMPATIBILITY.md",
+      "Passed": true
+    },
+    {
+      "Name": "Document: TELEMETRY_MATRIX.md",
+      "Passed": true
+    },
+    {
+      "Name": "Document: ACOUSTIC_DESIGN.md",
+      "Passed": true
+    },
+    {
+      "Name": "Document: EXPERIMENT_PLAN.md",
+      "Passed": true
+    },
+    {
+      "Name": "Document: ROADMAP.md",
+      "Passed": true
+    },
+    {
+      "Name": "Document: RISKS.md",
+      "Passed": true
+    },
+    {
+      "Name": "Document: SOURCES.md",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Audit-Telemetry.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Build-Telemetry.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Inspect-ExecutableSelection.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Inspect-GameAudio.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Inspect-PeDependencies.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Inspect-RuntimePackage.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Invoke-P2Deployment.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Measure-TelemetryRecordSize.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Package-Telemetry.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Prepare-RuntimeReadiness.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Test-Telemetry.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Trace-VehicleAudio.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Test-Phase1.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Test-RenameSafety.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "PowerShell syntax: Test-RuntimeReadiness.ps1",
+      "Passed": true
+    },
+    {
+      "Name": "Ten physical archive evidence rows",
+      "Passed": true
+    },
+    {
+      "Name": "Stored archive before/after observations match",
+      "Passed": true
+    },
+    {
+      "Name": "All ten final archive hashes match",
+      "Passed": true
+    },
+    {
+      "Name": "45 distinct REL parse results without reported errors",
+      "Passed": true
+    },
+    {
+      "Name": "Bati trace expected identity",
+      "Passed": true
+    },
+    {
+      "Name": "Player and NPC paths plus actual parsed containers",
+      "Passed": true
+    },
+    {
+      "Name": "Referenced stream exists: EngineAccel/engine_accel",
+      "Passed": true
+    },
+    {
+      "Name": "Referenced stream exists: EngineAccel/exhaust_accel",
+      "Passed": true
+    },
+    {
+      "Name": "Referenced stream exists: EngineAccel/engine_decel",
+      "Passed": true
+    },
+    {
+      "Name": "Referenced stream exists: EngineAccel/exhaust_decel",
+      "Passed": true
+    },
+    {
+      "Name": "Referenced stream exists: EngineAccel/engine_idle",
+      "Passed": true
+    },
+    {
+      "Name": "Referenced stream exists: EngineAccel/exhaust_idle",
+      "Passed": true
+    },
+    {
+      "Name": "Referenced stream exists: EngineAccelNPC/engine_accel",
+      "Passed": true
+    },
+    {
+      "Name": "Referenced stream exists: EngineAccelNPC/exhaust_accel",
+      "Passed": true
+    },
+    {
+      "Name": "Referenced stream exists: EngineAccelNPC/engine_idle",
+      "Passed": true
+    },
+    {
+      "Name": "Referenced stream exists: EngineAccelNPC/exhaust_idle",
+      "Passed": true
+    },
+    {
+      "Name": "AWC parser reports no errors",
+      "Passed": true
+    },
+    {
+      "Name": "Collision summary has six populated geometry children",
+      "Passed": true
+    },
+    {
+      "Name": "Independent authored fixture trace executes",
+      "Passed": true
+    },
+    {
+      "Name": "Known Jenkins model hash and bank-path hash resolve",
+      "Passed": true
+    },
+    {
+      "Name": "Exhaust channel binding retained separately",
+      "Passed": true
+    },
+    {
+      "Name": "Missing model fails without writing a trace",
+      "Passed": true
+    },
+    {
+      "Name": "Inspector rejects output beneath protected-game",
+      "Passed": true
+    },
+    {
+      "Name": "Inspector rejects output beneath protected-codewalker",
+      "Passed": true
+    },
+    {
+      "Name": "Inspector rejects output beneath protected-openrpf",
+      "Passed": true
+    },
+    {
+      "Name": "Local actual metadata trace reruns",
+      "Passed": true
+    },
+    {
+      "Name": "Rerun agrees with stored reference chain",
+      "Passed": true
+    },
+    {
+      "Name": "Git excludes .local/probe.xml",
+      "Passed": true
+    },
+    {
+      "Name": "Git excludes exports/probe.xml",
+      "Passed": true
+    },
+    {
+      "Name": "Git excludes probe.rpf",
+      "Passed": true
+    },
+    {
+      "Name": "Git excludes probe.awc",
+      "Passed": true
+    },
+    {
+      "Name": "Git excludes probe.rel",
+      "Passed": true
+    },
+    {
+      "Name": "Git excludes probe.ybn",
+      "Passed": true
+    },
+    {
+      "Name": "Git excludes probe.ymt",
+      "Passed": true
+    },
+    {
+      "Name": "Git excludes probe.meta",
+      "Passed": true
+    },
+    {
+      "Name": "Git excludes probe.dll",
+      "Passed": true
+    },
+    {
+      "Name": "Git excludes probe.asi",
+      "Passed": true
+    },
+    {
+      "Name": "No proprietary resource or binary paths tracked",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> evidence/phase2.2/controlled-test-plan.json",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> docs/PHASE2_2_EXECUTABLE_SELECTION.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> docs/P2_01_FIRST_RUNTIME_ATTEMPT.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> docs/PHASE2_1_READINESS.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> evidence/phase2.1/deployment-manifest.json",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> docs/TELEMETRY_IMPLEMENTATION.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> docs/RUNTIME_COMPATIBILITY.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> docs/DEPLOYMENT.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> docs/NPC_STREAMING.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> docs/PHASE2_VALIDATION.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> GTA_AUDIO_RESEARCH.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> TOOL_COMPATIBILITY.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> TELEMETRY_MATRIX.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> ARCHITECTURE.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> ACOUSTIC_DESIGN.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> EXPERIMENT_PLAN.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> ROADMAP.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> RISKS.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> SOURCES.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> evidence/",
+      "Passed": true
+    },
+    {
+      "Name": "Local link README.md -> evidence/GUI_OBSERVATIONS.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link ARCHITECTURE.md -> docs/P2_01_FIRST_RUNTIME_ATTEMPT.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link ARCHITECTURE.md -> docs/PHASE2_1_READINESS.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link ARCHITECTURE.md -> docs/TELEMETRY_IMPLEMENTATION.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link ARCHITECTURE.md -> docs/RUNTIME_COMPATIBILITY.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link ARCHITECTURE.md -> docs/PHASE2_VALIDATION.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link GTA_AUDIO_RESEARCH.md -> SOURCES.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link TOOL_COMPATIBILITY.md -> docs/RUNTIME_COMPATIBILITY.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link TOOL_COMPATIBILITY.md -> SOURCES.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link TOOL_COMPATIBILITY.md -> docs/PHASE2_2_EXECUTABLE_SELECTION.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link TELEMETRY_MATRIX.md -> docs/TELEMETRY_IMPLEMENTATION.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link TELEMETRY_MATRIX.md -> docs/NPC_STREAMING.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link TELEMETRY_MATRIX.md -> TOOL_COMPATIBILITY.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link TELEMETRY_MATRIX.md -> ARCHITECTURE.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link TELEMETRY_MATRIX.md -> EXPERIMENT_PLAN.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link ACOUSTIC_DESIGN.md -> GTA_AUDIO_RESEARCH.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link EXPERIMENT_PLAN.md -> docs/DEPLOYMENT.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link ROADMAP.md -> docs/PHASE2_2_EXECUTABLE_SELECTION.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link ROADMAP.md -> docs/P2_01_FIRST_RUNTIME_ATTEMPT.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link ROADMAP.md -> docs/PHASE2_VALIDATION.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link ROADMAP.md -> docs/RUNTIME_COMPATIBILITY.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link ROADMAP.md -> docs/DEPLOYMENT.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link ROADMAP.md -> docs/PHASE2_1_READINESS.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link RISKS.md -> docs/RUNTIME_COMPATIBILITY.md",
+      "Passed": true
+    },
+    {
+      "Name": "Local link RISKS.md -> docs/PHASE2_VALIDATION.md",
+      "Passed": true
+    }
+  ],
+  "FixtureDirectory": "__USER_HOME__\\Documents\\RichAudio\\.local\\test-fixture-5d73473632fb49ff86c4711e39fad29f"
+}

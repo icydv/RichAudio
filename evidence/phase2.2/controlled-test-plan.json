@@ -1,0 +1,221 @@
+{
+  "SchemaVersion": 1,
+  "PreparedUtc": "2026-10-24T22:37:42.4675174Z",
+  "Status": "AWAITING_NEW_EXPLICIT_APPROVAL",
+  "InstallationAuthorised": false,
+  "RenameAuthorised": false,
+  "GameRoot": "__GAME_ROOT__",
+  "ExpectedEnhancedVersion": "1.0.1158.16",
+  "ExpectedEnhancedSHA256": "69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5",
+  "RenameSource": "__GAME_ROOT__\\GTA5.exe",
+  "RenameDestination": "__GAME_ROOT__\\_GTA5.exe",
+  "RenameSHA256": "FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF",
+  "VerifiedBackup": "__USER_HOME__\\Documents\\RichAudio\\.local\\phase2.2\\pre-rename\\GTA5.exe",
+  "FileAdditions": [
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\cursor_32_2.png",
+      "Destination": "__GAME_ROOT__\\cursor_32_2.png",
+      "SHA256": "BBAC461B7BA311CC476CD5780FD2787628479E37D91CF3A2CCC91560F6200A1A",
+      "Bytes": 21781,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\DdsConvert.dll",
+      "Destination": "__GAME_ROOT__\\DdsConvert.dll",
+      "SHA256": "D115D8C9A817B67C3CD042E51BB941D74539DCA655DE7BE8A3CBAD058D3B2764",
+      "Bytes": 14848,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\DefaultSkin.png",
+      "Destination": "__GAME_ROOT__\\DefaultSkin.png",
+      "SHA256": "333D5611913A3907296DC787625C0F5043277285DAA49CDA0C8976820AB50FA4",
+      "Bytes": 41365,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\discord-rpc.dll",
+      "Destination": "__GAME_ROOT__\\discord-rpc.dll",
+      "SHA256": "5CC2E504800CF4ED2F4781364F661EA22349658DDC391B5D54195E573109D87B",
+      "Bytes": 399880,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\DiscordRpcNet.dll",
+      "Destination": "__GAME_ROOT__\\DiscordRpcNet.dll",
+      "SHA256": "952605857477708168DAFFFA8E9879494F9832CF979A5B116DAA3D903A154569",
+      "Bytes": 6656,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\EasyHook.dll",
+      "Destination": "__GAME_ROOT__\\EasyHook.dll",
+      "SHA256": "3153844BDAEE8A55C812D072B0E25F992E716174FC7D987944F4B8CF6DDD1F83",
+      "Bytes": 52224,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\EasyHook64.dll",
+      "Destination": "__GAME_ROOT__\\EasyHook64.dll",
+      "SHA256": "62842ECD61D855199C086600526B697941DCB56A10D4D6EF7D610FFC6369F6D6",
+      "Bytes": 310272,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\EasyLoad64.dll",
+      "Destination": "__GAME_ROOT__\\EasyLoad64.dll",
+      "SHA256": "F7766C70B4C82341F32783C72B2CE1430AAE95C6D713A3431DAED7B1F4E40DE7",
+      "Bytes": 7680,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\FW1FontWrapper.dll",
+      "Destination": "__GAME_ROOT__\\FW1FontWrapper.dll",
+      "SHA256": "1BA5BB9FFEA32A8C30B5C8B7139E15DDC36A43130465B4D1CE4C7B77FA6FCE25",
+      "Bytes": 156160,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Gwen.dll",
+      "Destination": "__GAME_ROOT__\\Gwen.dll",
+      "SHA256": "33275AF76FCD12157732A80DF4795590D409A1DF46B2B32A5112CA11D6AA5267",
+      "Bytes": 196096,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Gwen.UnitTest.dll",
+      "Destination": "__GAME_ROOT__\\Gwen.UnitTest.dll",
+      "SHA256": "CF68F7773FEB5756E050A4503F142C67B17C1E4BECF23A878649960B58259017",
+      "Bytes": 42496,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\LMS.Common.dll",
+      "Destination": "__GAME_ROOT__\\LMS.Common.dll",
+      "SHA256": "8D5593ABB8A939519365293D3325B83428F8304B56C59CCA37929637E7D6FB50",
+      "Bytes": 14336,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\LMS.PortableExecutable.dll",
+      "Destination": "__GAME_ROOT__\\LMS.PortableExecutable.dll",
+      "SHA256": "4389B18342461CC11B48EC7A35C76BEA20BEB0A76724BA77C2ED0406E5517ED2",
+      "Bytes": 61440,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Microsoft.Expression.Drawing.dll",
+      "Destination": "__GAME_ROOT__\\Microsoft.Expression.Drawing.dll",
+      "SHA256": "1D69EAF538008E0FE1A7EB2CE0124A49B95C491797749640C8351ED4643F5C97",
+      "Bytes": 144496,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll",
+      "Destination": "__GAME_ROOT__\\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll",
+      "SHA256": "FCCBC0612BD7F71D8038918F15C40A0B6C5426D4B0890496450D28D924E8EC01",
+      "Bytes": 98440,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.dll",
+      "Destination": "__GAME_ROOT__\\Mono.Cecil.dll",
+      "SHA256": "0F6465CE57A0CBABC37013C8E3C9F110672DE1C127B6192177D59EB1C7809772",
+      "Bytes": 280576,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.Mdb.dll",
+      "Destination": "__GAME_ROOT__\\Mono.Cecil.Mdb.dll",
+      "SHA256": "B8625ACE855A3086E2086AF418E17DAF24A30A4FBFFC559C42F329EDEC52806E",
+      "Bytes": 45056,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.Pdb.dll",
+      "Destination": "__GAME_ROOT__\\Mono.Cecil.Pdb.dll",
+      "SHA256": "25EB34CF9A7038D71CA15DDBFB3C180B4A2119219D487FD760437F5DA7EDF292",
+      "Bytes": 81920,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\Mono.Cecil.Rocks.dll",
+      "Destination": "__GAME_ROOT__\\Mono.Cecil.Rocks.dll",
+      "SHA256": "822C94D1C2AB96EFEB19BC5F1D304586E70A004D2F44F372377F33F2545EB921",
+      "Bytes": 23552,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\RAGEPluginHook.exe",
+      "Destination": "__GAME_ROOT__\\RAGEPluginHook.exe",
+      "SHA256": "73F05B3F7973D4731F4151AE061DD3C991065E8BF3ECE51EA1D9AB728B9B42AC",
+      "Bytes": 12237182,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\RPH_Readme.txt",
+      "Destination": "__GAME_ROOT__\\RPH_Readme.txt",
+      "SHA256": "DAE5B2742A2FA0313C89B4135A4266BA9D14AFA24E8A38C23765829B6DE91B48",
+      "Bytes": 1409,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\SlimDX.dll",
+      "Destination": "__GAME_ROOT__\\SlimDX.dll",
+      "SHA256": "194968B5010BE986E33669928B9F966A67C6EB4E1CF4AC4DA6B90728E242A516",
+      "Bytes": 3718656,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\System.ValueTuple.dll",
+      "Destination": "__GAME_ROOT__\\System.ValueTuple.dll",
+      "SHA256": "79FAC2E8355A7BBB94D40D25FE0E34D5CEDF5426A176F20F1CCD5E0606F0F082",
+      "Bytes": 79200,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\.local\\rph\\runtime-9695-1158.16\\XInput1_4.dll",
+      "Destination": "__GAME_ROOT__\\XInput1_4.dll",
+      "SHA256": "BD0BA909DE46470E0DDBF88CD72D7CF6F1EB04B709616366692EAEA87B4C0551",
+      "Bytes": 34816,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\build\\telemetry\\RichAudio.Telemetry.Rph.dll",
+      "Destination": "__GAME_ROOT__\\Plugins\\RichAudio.Telemetry.Rph.dll",
+      "SHA256": "DBC5F600C37AD7579F49EBA92A352BEE1AAF452F6EF820CEF87B86B8547D5BE0",
+      "Bytes": 34304,
+      "DestinationAbsent": true
+    },
+    {
+      "Source": "__USER_HOME__\\Documents\\RichAudio\\config\\phase2.1\\StoryMode-test.json",
+      "Destination": "__GAME_ROOT__\\Plugins\\RichAudio.Telemetry.Rph.json",
+      "SHA256": "B0CCA8C1B0AB7B894C2319BBDE36C8C718C96A4A92222B7D59D798267ADCF249",
+      "Bytes": 283,
+      "DestinationAbsent": true
+    }
+  ],
+  "OriginalManifestPath": "__USER_HOME__\\Documents\\RichAudio\\evidence\\phase2.1\\deployment-manifest.json",
+  "OriginalManifestSHA256": "A53A9B4FBB039E91F805ED2F7CA2A637E80D79309D456BF8700123245AA7F051",
+  "Prerequisite": "VC2010 x64 already installed; do not reinstall",
+  "ProposedNewGameFileCount": 26,
+  "RequiredPreconditions": [
+    "New user approval for rename and redeployment; no game/tool processes; no original or destination hash drift.",
+    "Check all 26 destinations absent immediately before CreateNew copies.",
+    "Check _GTA5.exe absent and the independent backup hash before the no-overwrite rename.",
+    "Keep OpenIV/CodeWalker closed while the compatibility name is hidden.",
+    "No Steam verification/update, file replacement, security changes or additional compatibility fixes."
+  ],
+  "PositiveEvidenceRequired": [
+    "RPH explicitly reports Enhanced 1.0.1158.16 as supported; capture its UI and launcher/runtime logs.",
+    "Actual running process path is the unchanged GTA5_Enhanced.exe, with expected SHA256/version and supported Story Mode launch.",
+    "RPH runtime log identifies Enhanced; RichAudio header records the exact game/framework versions."
+  ],
+  "LoggingPlan": "Enable startup logging through the previously observed publisher Restart with logging settings button before the single game launch; capture any emitted RPH logs locally. No fabricated INI selector or extra commandline file.",
+  "StopConditions": [
+    "Unexpected target/version, unsupported condition, DirectStorage/security/loader warning, crash or file conflict: exit, collect diagnostics, roll back additions, restore the old executable name."
+  ],
+  "FinalRestoration": "Exit game/RPH before restoration. Move only unchanged introduced runtime files to development quarantine; restore _GTA5.exe to GTA5.exe only if target absent and bytes match. Verify both original executable hashes and archive baseline. Never overwrite a file created while the experiment was running; preserve both and request review.",
+  "SelectionStatus": "Community-described filename-priority mechanism, corroborated by local version evidence; not yet demonstrated on this host",
+  "TelemetryScope": "One authorised Enhanced smoke test, then A-E only on success and continuing compatible deployment. No Phase 3."
+}

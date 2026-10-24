@@ -1,5 +1,7 @@
 # P2-01 runtime compatibility report
 
+**Phase 2.2 investigation:** current Steam depots exclude GTA5.exe and positively match GTA5_Enhanced.exe; normal Rockstar logs select 1158.16. The community-supported temporary alias rename is a strongly corroborated diagnostic, with an independent verified backup and no-overwrite procedure prepared. No official explicit selector or local causal confirmation has been established. Both original filenames remain intact; new rename/redeployment approval is pending. [Selection report and proposal](PHASE2_2_EXECUTABLE_SELECTION.md).
+
 **Latest authorised attempt:** RPH 1.132 ran after approved deployment but its Settings UI reported unsupported 1.0.1013.34, matching the version of the existing GTA5.exe, rather than the expected GTA5_Enhanced.exe 1158.16. Target-selection cause is unproved. The attempt stopped before game startup; all 26 additions were rolled back, original-file checks match, and VC2010 remains installed. No RichAudio plugin load or telemetry occurred. See [the actual report](P2_01_FIRST_RUNTIME_ATTEMPT.md). The earlier statements below describe pre-deployment findings.
 
 24 October 2026. **Selected target: RAGE Plugin Hook (RPH), a standalone managed plugin. Built against an authentic SDK; unverified in game.** No runtime or loader was installed and no RPH executable was launched.

@@ -13,7 +13,7 @@ Snapshot: 24 October 2026. Exact binary fingerprints are in `evidence/binary-ver
 | GPU | NVIDIA GeForce RTX 2080 SUPER | VERIFIED, CIM; no GPU acoustic benchmark |
 | Physical memory | 34,264,506,368 bytes reported | VERIFIED, CIM |
 | GTA Enhanced | `GTA5_Enhanced.exe` 1.0.1158.16, x64 | VERIFIED, file version / PE inspection |
-| Co-located GTA5.exe | 1.0.1013.34 | VERIFIED; not treated as the current Enhanced build |
+| Extra file named GTA5.exe | 1.0.1013.34 | Valid signed older Enhanced binary; original filename GTA5_Enhanced.exe; absent from current Steam depots. Creator/purpose unknown; see Phase 2.2 |
 | Steam | app 3240220, local manifest build ID 25261616 | VERIFIED, appmanifest; not a running-game observation |
 | PowerShell | 7.6.5; Windows PowerShell 5.1 also executed | VERIFIED |
 | .NET Framework | registry Version 4.8.09221, Release 533509 | VERIFIED; Framework csc file 4.8.9221.0 |
@@ -37,6 +37,8 @@ The initial .NET Framework `Assembly.LoadFrom` call failed with `0x80131515`. Lo
 Upstream reference: [CodeWalker](https://github.com/dexyfex/CodeWalker), pinned source commit in [SOURCES.md](SOURCES.md). Consult its license before embedding or shipping its code. This repository does not redistribute it or keys extracted during read-only operation.
 
 ## OpenIV and OpenRPF
+
+Phase 2.2 found OpenIV locally configured to this Enhanced directory. Community support describes extra GTA5.exe copies used for OpenIV and an RPH filename-priority conflict. This explains a possible role, not this file's proven origin. A temporary rename proposal keeps OpenIV/CodeWalker closed and restores the exact original name/hash after the experiment. [Evidence and approval boundary](docs/PHASE2_2_EXECUTABLE_SELECTION.md). No tool or original executable was changed during that investigation.
 
 **VERIFIED:** OpenIV is installed at `__USER_HOME__\AppData\Local\New Technology Studio\Apps\OpenIV\OpenIV.exe`, file version 4.1.0.1502, product 4.1.0.0. It was inspected for version/presence, not launched or used to open Enhanced archives. Enhanced compatibility of this installation is **UNTESTED**.
 

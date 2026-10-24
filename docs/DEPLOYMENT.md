@@ -1,5 +1,7 @@
 # P2-01 deployment boundary and reversible test instructions
 
+**Phase 2.2 proposal:** [exact selection-test plan](../evidence/phase2.2/controlled-test-plan.json) adds a temporary GTA5.exe -> _GTA5.exe rename to the unchanged 26-file proposal. A verified byte backup exists; no rename/redeployment occurred. New explicit approval is required. [Evidence, dependency limits and mandatory final restoration](PHASE2_2_EXECUTABLE_SELECTION.md). Do not execute the old attempt's blocked helper or alter its receipts.
+
 **Latest outcome:** deployment was explicitly approved and executed; RPH then reported an unexpected unsupported 1013.34 target. The experiment stopped before GTA startup and the approved additions were rolled back. The approved shared VC2010 prerequisite remains installed. Do not re-run the old proposal until an author-supported target-selection plan is reviewed. [Actual deployment/rollback evidence and blocker](P2_01_FIRST_RUNTIME_ATTEMPT.md). The procedure below remains the historical preparation record.
 
 **Built candidate, unverified in game. Nothing has been installed. Explicit authorization to install new runtime/game-root files is still required.** This document describes a future manual procedure; neither build nor packaging scripts copy into GTA, launch RPH, alter security/anti-cheat settings or start the game.

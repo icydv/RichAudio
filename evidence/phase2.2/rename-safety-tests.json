@@ -1,0 +1,49 @@
+{
+  "ExecutedUtc": "2026-10-24T22:41:06.7356451Z",
+  "Passed": true,
+  "Assertions": 10,
+  "Scope": "Authored development text files only; no actual game-file rename. Verifies Windows no-overwrite move and restoration behavior.",
+  "ProbeDirectory": "__USER_HOME__\\Documents\\RichAudio\\.local\\phase2.2\\rename-probe-6e0a4e176a9c48b980b469a8fa14906e",
+  "Tests": [
+    {
+      "Name": "Two-argument move refuses an occupied rename target",
+      "Passed": true
+    },
+    {
+      "Name": "Refused rename preserves source bytes",
+      "Passed": true
+    },
+    {
+      "Name": "Refused rename preserves conflicting destination bytes",
+      "Passed": true
+    },
+    {
+      "Name": "Same-volume rename removes only the old name",
+      "Passed": true
+    },
+    {
+      "Name": "Renamed file has identical content hash",
+      "Passed": true
+    },
+    {
+      "Name": "Restoration refuses a newly occupied original path",
+      "Passed": true
+    },
+    {
+      "Name": "Refused restoration preserves both files",
+      "Passed": true
+    },
+    {
+      "Name": "Conflict-free restoration is byte-for-byte identical",
+      "Passed": true
+    },
+    {
+      "Name": "Same-volume round trip preserves creation timestamp in this probe",
+      "Passed": true
+    },
+    {
+      "Name": "Same-volume round trip preserves last-write timestamp in this probe",
+      "Passed": true
+    }
+  ]
+}

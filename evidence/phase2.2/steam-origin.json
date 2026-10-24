@@ -1,0 +1,101 @@
+{
+  "SchemaVersion": 1,
+  "InspectedUtc": "2026-10-24T22:35:41.959Z",
+  "AppId": "3240220",
+  "Name": "Grand Theft Auto V Enhanced",
+  "InstalledBuildId": "25261616",
+  "InstalledLastUpdatedUtc": "2026-09-16T18:13:35.000Z",
+  "SteamCacheBinarySHA1Matched": true,
+  "LaunchEntries": [
+    {
+      "Entry": "0",
+      "Executable": "PlayGTAV.exe",
+      "Platform": "windows"
+    }
+  ],
+  "InstalledDepots": [
+    {
+      "DepotId": "1899671",
+      "ManifestId": "3914969219305676290",
+      "CachePath": "C:\\Program Files (x86)\\Steam\\depotcache\\1899671_3914969219305676290.manifest",
+      "SHA256": "E368B60F73E8677E240587CD4B028D53F00DE33DA61F589B43E6653764936249",
+      "FileCount": 3,
+      "PlaintextNames": true
+    },
+    {
+      "DepotId": "3240221",
+      "ManifestId": "7738940149188702855",
+      "CachePath": "C:\\Program Files (x86)\\Steam\\depotcache\\3240221_7738940149188702855.manifest",
+      "SHA256": "609E038942907CDC3172CC6354A90B7652E84E2170FD1AAD19CBD3E4FA0644C1",
+      "FileCount": 1,
+      "PlaintextNames": true
+    },
+    {
+      "DepotId": "3240222",
+      "ManifestId": "8737726049140786475",
+      "CachePath": "C:\\Program Files (x86)\\Steam\\depotcache\\3240222_8737726049140786475.manifest",
+      "SHA256": "DFD6159681A6B7006594CDDEC9911D7ACAB7727905FEF839FA9AC073B6787369",
+      "FileCount": 63,
+      "PlaintextNames": true
+    },
+    {
+      "DepotId": "3240223",
+      "ManifestId": "619408595394031782",
+      "CachePath": "C:\\Program Files (x86)\\Steam\\depotcache\\3240223_619408595394031782.manifest",
+      "SHA256": "8C074186CA20F12DFC2B3EBD05794A75845C9986CA9EF1B7AE383E6E664CAE0F",
+      "FileCount": 56,
+      "PlaintextNames": true
+    },
+    {
+      "DepotId": "3240224",
+      "ManifestId": "7913232881396830533",
+      "CachePath": "C:\\Program Files (x86)\\Steam\\depotcache\\3240224_7913232881396830533.manifest",
+      "SHA256": "1F697D9A968067A8521BFB45F52D4F43091883553678C24E184856D8DFE53B61",
+      "FileCount": 97,
+      "PlaintextNames": true
+    },
+    {
+      "DepotId": "3240225",
+      "ManifestId": "8056253801324815442",
+      "CachePath": "C:\\Program Files (x86)\\Steam\\depotcache\\3240225_8056253801324815442.manifest",
+      "SHA256": "F011D4A4A19FC57990EADE65F2A4A2E10A5B30343F47EDC1EF679EC329DF6CC7",
+      "FileCount": 77,
+      "PlaintextNames": true
+    }
+  ],
+  "ExecutableEntries": [
+    {
+      "Name": "GTA5_Enhanced.exe",
+      "Bytes": "55819384",
+      "SHA1": "B75BE57D1E2C12CEE850DF5A6A9BC433D5774A28",
+      "DepotId": "3240225",
+      "ManifestId": "8056253801324815442",
+      "Present": true,
+      "ActualSHA1": "B75BE57D1E2C12CEE850DF5A6A9BC433D5774A28",
+      "ContentMatches": true
+    },
+    {
+      "Name": "GTA5_Enhanced_BE.exe",
+      "Bytes": "1473144",
+      "SHA1": "518C3405BCFFB026710C1DB74830007096429A59",
+      "DepotId": "3240225",
+      "ManifestId": "8056253801324815442",
+      "Present": true,
+      "ActualSHA1": "518C3405BCFFB026710C1DB74830007096429A59",
+      "ContentMatches": true
+    },
+    {
+      "Name": "PlayGTAV.exe",
+      "Bytes": "572536",
+      "SHA1": "C023A6B14B87F93F4071A6FD876EB43F59DF360E",
+      "DepotId": "3240225",
+      "ManifestId": "8056253801324815442",
+      "Present": true,
+      "ActualSHA1": "C023A6B14B87F93F4071A6FD876EB43F59DF360E",
+      "ContentMatches": true
+    }
+  ],
+  "OldGta5ExeListed": false,
+  "AllInstalledDepotsInspected": true,
+  "Scope": "Local Steam metadata only. No Steam verification/download performed; depot signatures not independently cryptographically validated. No account, PICS token or unrelated app data exported."
+}
