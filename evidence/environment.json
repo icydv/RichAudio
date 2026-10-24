@@ -1,0 +1,27 @@
+{
+  "InvestigationDate": "2026-10-24",
+  "Timezone": "Europe/London",
+  "OS": "Microsoft Windows 11 Pro",
+  "OSVersion": "10.0.26200",
+  "OSArchitecture": "64-bit",
+  "CPU": "AMD Ryzen 7 5800X 8-Core Processor             ",
+  "Cores": 8,
+  "LogicalProcessors": 16,
+  "GPU": [
+    "NVIDIA GeForce RTX 2080 SUPER"
+  ],
+  "PhysicalMemoryBytes": 34264506368,
+  "PowerShell": "7.6.5",
+  "FrameworkVersion": "4.8.09221",
+  "FrameworkRelease": 533509,
+  "GitVersion": "git version 2.55.0.windows.3",
+  "NodeVersion": "v24.19.0",
+  "EnhancedPEMachine": "0x8664",
+  "SteamAppId": "3240220",
+  "SteamBuildId": "25261616",
+  "CurrentEnhancedVersion": "1.0.1158.16",
+  "CoLocatedGTA5ExeVersion": "1.0.1013.34",
+  "CppToolchain": "Not located in PATH or checked standard locations; not exhaustive",
+  "ScriptHookV": "Not installed in inspected game root; official page lists 1158.13",
+  "RuntimeTestPerformed": false
+}

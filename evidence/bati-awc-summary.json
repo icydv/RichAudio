@@ -1,0 +1,104 @@
+[
+  {
+    "Path": "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+    "Bytes": 3270560,
+    "Version": 1,
+    "StreamCount": 8,
+    "Error": null,
+    "Streams": [
+      {
+        "Hash": "03AB9171",
+        "Name": "exhaust_accel",
+        "Samples": 328251,
+        "SampleRate": 48000,
+        "CodecId": 0
+      },
+      {
+        "Hash": "0E804842",
+        "Name": "exhaust_decel",
+        "Samples": 374180,
+        "SampleRate": 48000,
+        "CodecId": 0
+      },
+      {
+        "Hash": "179DDCAA",
+        "Name": "exhaust_idle",
+        "Samples": 40350,
+        "SampleRate": 48000,
+        "CodecId": 0
+      },
+      {
+        "Hash": "18648298",
+        "Name": "engine_decel",
+        "Samples": 424508,
+        "SampleRate": 48000,
+        "CodecId": 0
+      },
+      {
+        "Hash": "1B393DEA",
+        "Name": "0x1B393DEA",
+        "Samples": 40320,
+        "SampleRate": 48000,
+        "CodecId": 0
+      },
+      {
+        "Hash": "1D18B9A1",
+        "Name": "engine_idle",
+        "Samples": 40350,
+        "SampleRate": 48000,
+        "CodecId": 0
+      },
+      {
+        "Hash": "1D64B840",
+        "Name": "0x1D64B840",
+        "Samples": 53760,
+        "SampleRate": 48000,
+        "CodecId": 0
+      },
+      {
+        "Hash": "1F7402AA",
+        "Name": "engine_accel",
+        "Samples": 328251,
+        "SampleRate": 48000,
+        "CodecId": 0
+      }
+    ]
+  },
+  {
+    "Path": "x64\\audio\\sfx\\streamed_vehicles_granular_npc.rpf\\v_twin_2_npc.awc",
+    "Bytes": 656638,
+    "Version": 1,
+    "StreamCount": 4,
+    "Error": null,
+    "Streams": [
+      {
+        "Hash": "03AB9171",
+        "Name": "exhaust_accel",
+        "Samples": 122455,
+        "SampleRate": 48000,
+        "CodecId": 0
+      },
+      {
+        "Hash": "179DDCAA",
+        "Name": "exhaust_idle",
+        "Samples": 40350,
+        "SampleRate": 48000,
+        "CodecId": 0
+      },
+      {
+        "Hash": "1D18B9A1",
+        "Name": "engine_idle",
+        "Samples": 40350,
+        "SampleRate": 48000,
+        "CodecId": 0
+      },
+      {
+        "Hash": "1F7402AA",
+        "Name": "engine_accel",
+        "Samples": 123810,
+        "SampleRate": 48000,
+        "CodecId": 0
+      }
+    ]
+  }
+]

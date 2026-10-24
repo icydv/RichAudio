@@ -1,0 +1,14 @@
+[
+  {
+    "File": "update_update.rpf_x64_audio_config_game.dat151.rel.xml",
+    "Type": "Vehicle",
+    "Engine": "hash_A46D1B50",
+    "Granular": "hash_61F3BD06"
+  },
+  {
+    "File": "x64_audio_audio_rel.rpf_config_game.dat151.rel.xml",
+    "Type": "Vehicle",
+    "Engine": "hash_A46D1B50",
+    "Granular": "hash_61F3BD06"
+  }
+]

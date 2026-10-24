@@ -1,0 +1,72 @@
+[
+  {
+    "Path": "common.rpf",
+    "Length": 19351552,
+    "SHA256": "FC4D22F8A715AC492E67975254CB92FC8D6DC615B28417744F7822735D2A355C",
+    "AllObservedHashesMatch": true,
+    "ObservationCount": 1
+  },
+  {
+    "Path": "update\\update.rpf",
+    "Length": 3122239488,
+    "SHA256": "C3A68386A7D067772D6D6038AC505040E7280640205B230FDC1F829567CEC913",
+    "AllObservedHashesMatch": true,
+    "ObservationCount": 2
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mp2025_02_g9ec\\dlc.rpf",
+    "Length": 17782784,
+    "SHA256": "5D938A428748B4955038F3D17303F6D7AC68DDF3C99497EF989BBDB53C645D3C",
+    "AllObservedHashesMatch": true,
+    "ObservationCount": 1
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mp2025_02\\dlc.rpf",
+    "Length": 1128505344,
+    "SHA256": "53FB02E854AF1A63CC6576317AAAB616EF01D2B869B9969A82BE19C1D2B6498C",
+    "AllObservedHashesMatch": true,
+    "ObservationCount": 1
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mpbiker\\dlc.rpf",
+    "Length": 1541324800,
+    "SHA256": "BBA97B80C2B7FC6423DE61D70DE4CA8D648E700932FB5F2763B102EB23057CA0",
+    "AllObservedHashesMatch": true,
+    "ObservationCount": 1
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf",
+    "Length": 3196928,
+    "SHA256": "FBFC8457F494C54EB1A8CFA070C3BAEE9F6631CCA39F2C7DBE211C1AD46AE347",
+    "AllObservedHashesMatch": true,
+    "ObservationCount": 1
+  },
+  {
+    "Path": "x64\\audio\\occlusion.rpf",
+    "Length": 710656,
+    "SHA256": "0380D9E3F170F7157A3DA0CDEAFD1B020ABDC2C33D0546FE5F7A89564055E9DD",
+    "AllObservedHashesMatch": true,
+    "ObservationCount": 2
+  },
+  {
+    "Path": "x64\\audio\\sfx\\STREAMED_VEHICLES_GRANULAR_NPC.rpf",
+    "Length": 42283008,
+    "SHA256": "9EE025DAA5839720AB24914BCB79BBD2DB17E6FD26DF963B82FC90E43E7EF3E7",
+    "AllObservedHashesMatch": true,
+    "ObservationCount": 3
+  },
+  {
+    "Path": "x64\\audio\\sfx\\STREAMED_VEHICLES_GRANULAR.rpf",
+    "Length": 207796224,
+    "SHA256": "F31CC031E06D1CFE5E863E8307857AB3C59B0736739E824277368EBEE5DF7EEF",
+    "AllObservedHashesMatch": true,
+    "ObservationCount": 3
+  },
+  {
+    "Path": "x64a.rpf",
+    "Length": 101433344,
+    "SHA256": "9350F1A5A0FE14FEDA0F56F651CD4C2BD61310CDD169EA4427E0859D23611111",
+    "AllObservedHashesMatch": true,
+    "ObservationCount": 1
+  }
+]

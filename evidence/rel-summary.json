@@ -1,0 +1,317 @@
+[
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\audioconfig.dat4.rel",
+    "RelType": 4,
+    "Records": 136,
+    "Bytes": 11920,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\categories.dat22.rel",
+    "RelType": 22,
+    "Records": 233,
+    "Bytes": 14940,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\curves.dat16.rel",
+    "RelType": 16,
+    "Records": 815,
+    "Bytes": 43916,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\dlc_gtao_game.dat151.rel",
+    "RelType": 151,
+    "Records": 829,
+    "Bytes": 104920,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\dlc_gtao_mix.dat15.rel",
+    "RelType": 15,
+    "Records": 298,
+    "Bytes": 27026,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\dlc_gtao_sounds.dat54.rel",
+    "RelType": 54,
+    "Records": 2698,
+    "Bytes": 179696,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\dlc_gtao_speech.dat4.rel",
+    "RelType": 4,
+    "Records": 29,
+    "Bytes": 654,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\dlcg9ec_amp.dat10.rel",
+    "RelType": 10,
+    "Records": 201,
+    "Bytes": 79500,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\dlcg9ec_game.dat151.rel",
+    "RelType": 151,
+    "Records": 5729,
+    "Bytes": 985868,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\dlcg9ec_mix.dat15.rel",
+    "RelType": 15,
+    "Records": 2,
+    "Bytes": 135,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\dlcg9ec_sounds.dat54.rel",
+    "RelType": 54,
+    "Records": 1661,
+    "Bytes": 113534,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\dlcg9ec_speech.dat4.rel",
+    "RelType": 4,
+    "Records": 0,
+    "Bytes": 32,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\dynamix.dat15.rel",
+    "RelType": 15,
+    "Records": 3257,
+    "Bytes": 213750,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\game.dat151.rel",
+    "RelType": 151,
+    "Records": 18944,
+    "Bytes": 2083428,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\optamp.dat10.rel",
+    "RelType": 10,
+    "Records": 1690,
+    "Bytes": 664153,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\sounds.dat54.rel",
+    "RelType": 54,
+    "Records": 56648,
+    "Bytes": 3154506,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\sp_sounds.dat54.rel",
+    "RelType": 54,
+    "Records": 4013,
+    "Bytes": 224441,
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\config\\speech2.dat4.rel",
+    "RelType": 4,
+    "Records": 89093,
+    "Bytes": 1395001,
+    "Error": null
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mp2025_02\\dlc.rpf\\x64\\audio\\dlc25-2_amp.dat10.rel",
+    "RelType": 10,
+    "Records": 27,
+    "Bytes": 15412,
+    "Error": null
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mp2025_02\\dlc.rpf\\x64\\audio\\dlc25-2_game.dat151.rel",
+    "RelType": 151,
+    "Records": 370,
+    "Bytes": 34776,
+    "Error": null
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mp2025_02\\dlc.rpf\\x64\\audio\\dlc25-2_mix.dat15.rel",
+    "RelType": 15,
+    "Records": 38,
+    "Bytes": 1976,
+    "Error": null
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mp2025_02\\dlc.rpf\\x64\\audio\\dlc25-2_sounds.dat54.rel",
+    "RelType": 54,
+    "Records": 863,
+    "Bytes": 44525,
+    "Error": null
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mp2025_02\\dlc.rpf\\x64\\audio\\dlc25-2_speech.dat4.rel",
+    "RelType": 4,
+    "Records": 1105,
+    "Bytes": 17414,
+    "Error": null
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mpbiker\\dlc.rpf\\x64\\audio\\dlcbiker_amp.dat10.rel",
+    "RelType": 10,
+    "Records": 131,
+    "Bytes": 82700,
+    "Error": null
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mpbiker\\dlc.rpf\\x64\\audio\\dlcbiker_game.dat151.rel",
+    "RelType": 151,
+    "Records": 603,
+    "Bytes": 69676,
+    "Error": null
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mpbiker\\dlc.rpf\\x64\\audio\\dlcbiker_mix.dat15.rel",
+    "RelType": 15,
+    "Records": 38,
+    "Bytes": 2095,
+    "Error": null
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mpbiker\\dlc.rpf\\x64\\audio\\dlcbiker_sounds.dat54.rel",
+    "RelType": 54,
+    "Records": 1927,
+    "Bytes": 123608,
+    "Error": null
+  },
+  {
+    "Path": "update\\x64\\dlcpacks\\mpbiker\\dlc.rpf\\x64\\audio\\dlcbiker_speech.dat4.rel",
+    "RelType": 4,
+    "Records": 550,
+    "Bytes": 8403,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\audioconfig.dat4.rel",
+    "RelType": 4,
+    "Records": 136,
+    "Bytes": 11888,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\categories.dat22.rel",
+    "RelType": 22,
+    "Records": 233,
+    "Bytes": 14940,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\curves.dat16.rel",
+    "RelType": 16,
+    "Records": 815,
+    "Bytes": 43916,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\dlc_gtao_game.dat151.rel",
+    "RelType": 151,
+    "Records": 829,
+    "Bytes": 105032,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\dlc_gtao_mix.dat15.rel",
+    "RelType": 15,
+    "Records": 287,
+    "Bytes": 25290,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\dlc_gtao_sounds.dat54.rel",
+    "RelType": 54,
+    "Records": 2588,
+    "Bytes": 170259,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\dlc_gtao_speech.dat4.rel",
+    "RelType": 4,
+    "Records": 29,
+    "Bytes": 654,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\dlctu_curves.dat16.rel",
+    "RelType": 16,
+    "Records": 1,
+    "Bytes": 80,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\dlctu_game.dat151.rel",
+    "RelType": 151,
+    "Records": 1,
+    "Bytes": 52,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\dlctu_mix.dat15.rel",
+    "RelType": 15,
+    "Records": 1,
+    "Bytes": 77,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\dlctu_sounds.dat54.rel",
+    "RelType": 54,
+    "Records": 2,
+    "Bytes": 118,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\dynamix.dat15.rel",
+    "RelType": 15,
+    "Records": 3256,
+    "Bytes": 213550,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\game.dat151.rel",
+    "RelType": 151,
+    "Records": 18945,
+    "Bytes": 2083440,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\optamp.dat10.rel",
+    "RelType": 10,
+    "Records": 1681,
+    "Bytes": 657637,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\sounds.dat54.rel",
+    "RelType": 54,
+    "Records": 56599,
+    "Bytes": 3150073,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\sp_sounds.dat54.rel",
+    "RelType": 54,
+    "Records": 4013,
+    "Bytes": 224441,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\audio_rel.rpf\\config\\speech2.dat4.rel",
+    "RelType": 4,
+    "Records": 89096,
+    "Bytes": 1395053,
+    "Error": null
+  }
+]

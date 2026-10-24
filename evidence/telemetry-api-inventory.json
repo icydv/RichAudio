@@ -1,0 +1,54 @@
+[
+  {
+    "API": "GET_ENTITY_COORDS",
+    "Found": true
+  },
+  {
+    "API": "GET_ENTITY_MATRIX",
+    "Found": true
+  },
+  {
+    "API": "GET_ENTITY_VELOCITY",
+    "Found": true
+  },
+  {
+    "API": "GET_FINAL_RENDERED_CAM_COORD",
+    "Found": true
+  },
+  {
+    "API": "GET_FINAL_RENDERED_CAM_ROT",
+    "Found": true
+  },
+  {
+    "API": "GET_IS_VEHICLE_ENGINE_RUNNING",
+    "Found": true
+  },
+  {
+    "API": "GET_CONTROL_NORMAL",
+    "Found": true
+  },
+  {
+    "API": "GET_ENTITY_MODEL",
+    "Found": true
+  },
+  {
+    "API": "GET_VEHICLE_CLASS",
+    "Found": true
+  },
+  {
+    "API": "GET_ENTITY_BONE_INDEX_BY_NAME",
+    "Found": true
+  },
+  {
+    "API": "GET_WORLD_POSITION_OF_ENTITY_BONE",
+    "Found": true
+  },
+  {
+    "API": "DOES_ENTITY_EXIST",
+    "Found": true
+  },
+  {
+    "API": "GET_INTERIOR_FROM_ENTITY",
+    "Found": true
+  }
+]

@@ -1,0 +1,44 @@
+[
+  {
+    "Name": "GTA5_Enhanced.exe",
+    "Length": 55819384,
+    "FileVersion": "1.0.1158.16",
+    "ProductVersion": "1.0.1158.16",
+    "SHA256": "69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5"
+  },
+  {
+    "Name": "GTA5.exe",
+    "Length": 55203448,
+    "FileVersion": "1.0.1013.34",
+    "ProductVersion": "1.0.1013.34",
+    "SHA256": "FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF"
+  },
+  {
+    "Name": "CodeWalker.exe",
+    "Length": 3334656,
+    "FileVersion": "1.0.0.0",
+    "ProductVersion": "1.0.0",
+    "SHA256": "264BFAB08F0CB6B7F1C8C196B6C64318C23FC69019F729122CC6D24D59EDB633"
+  },
+  {
+    "Name": "CodeWalker.Core.dll",
+    "Length": 4321792,
+    "FileVersion": "1.0.0.0",
+    "ProductVersion": "1.0.0",
+    "SHA256": "3D2BB91B35CF0D1888C12772A9AF25441ADEA3CCC8510A149FCF0D47C8E71CA8"
+  },
+  {
+    "Name": "OpenRPF.asi",
+    "Length": 1173504,
+    "FileVersion": "0.1.0",
+    "ProductVersion": "0.1.0",
+    "SHA256": "57D6CC782D8608C32B5B43B74882A3AD162796E0215C58B8FCB2F7C7D9E9D3A8"
+  },
+  {
+    "Name": "OpenIV.exe",
+    "Length": 32012288,
+    "FileVersion": "4.1.0.1502",
+    "ProductVersion": "4.1.0.0",
+    "SHA256": "51BAD3DEA5D533CF53779F852B106DACC356991E5FFD0878C3C7ABE9CD6BD9D8"
+  }
+]

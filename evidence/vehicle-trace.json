@@ -1,0 +1,153 @@
+﻿{
+    "Model":  "bati",
+    "VehicleMeta":  "update/update.rpf/common/data/levels/gta5/vehicles.meta",
+    "AudioNameHash":  "",
+    "IdentifierUsed":  "bati",
+    "BlankIdentifierFallback":  "INFERRED runtime default; matching model-hash record VERIFIED",
+    "VehicleRecord":  "hash_F9300CC5",
+    "EngineRecord":  "hash_A46D1B50",
+    "GranularRecord":  "hash_61F3BD06",
+    "Paths":  [
+                  {
+                      "Layer":  "EngineAccel",
+                      "Route":  [
+                                    {
+                                        "Hash":  "hash_0346A636",
+                                        "Type":  "GranularSound"
+                                    }
+                                ],
+                      "Channels":  [
+                                       {
+                                           "Channel":  "Channel0",
+                                           "ContainerHash":  "hash_8B2BACBC",
+                                           "Stream":  "engine_accel",
+                                           "ContainerMatch":  {
+                                                                  "Path":  "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+                                                                  "HashInput":  "streamed_vehicles_granular/v_twin_2"
+                                                              }
+                                       },
+                                       {
+                                           "Channel":  "Channel1",
+                                           "ContainerHash":  "hash_8B2BACBC",
+                                           "Stream":  "exhaust_accel",
+                                           "ContainerMatch":  {
+                                                                  "Path":  "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+                                                                  "HashInput":  "streamed_vehicles_granular/v_twin_2"
+                                                              }
+                                       },
+                                       {
+                                           "Channel":  "Channel2",
+                                           "ContainerHash":  "hash_8B2BACBC",
+                                           "Stream":  "engine_decel",
+                                           "ContainerMatch":  {
+                                                                  "Path":  "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+                                                                  "HashInput":  "streamed_vehicles_granular/v_twin_2"
+                                                              }
+                                       },
+                                       {
+                                           "Channel":  "Channel3",
+                                           "ContainerHash":  "hash_8B2BACBC",
+                                           "Stream":  "exhaust_decel",
+                                           "ContainerMatch":  {
+                                                                  "Path":  "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+                                                                  "HashInput":  "streamed_vehicles_granular/v_twin_2"
+                                                              }
+                                       },
+                                       {
+                                           "Channel":  "Channel4",
+                                           "ContainerHash":  "hash_8B2BACBC",
+                                           "Stream":  "engine_idle",
+                                           "ContainerMatch":  {
+                                                                  "Path":  "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+                                                                  "HashInput":  "streamed_vehicles_granular/v_twin_2"
+                                                              }
+                                       },
+                                       {
+                                           "Channel":  "Channel5",
+                                           "ContainerHash":  "hash_8B2BACBC",
+                                           "Stream":  "exhaust_idle",
+                                           "ContainerMatch":  {
+                                                                  "Path":  "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+                                                                  "HashInput":  "streamed_vehicles_granular/v_twin_2"
+                                                              }
+                                       }
+                                   ]
+                  },
+                  {
+                      "Layer":  "EngineAccelNPC",
+                      "Route":  [
+                                    {
+                                        "Hash":  "hash_D7852424",
+                                        "Type":  "GranularSound"
+                                    }
+                                ],
+                      "Channels":  [
+                                       {
+                                           "Channel":  "Channel0",
+                                           "ContainerHash":  "hash_1E71436C",
+                                           "Stream":  "engine_accel",
+                                           "ContainerMatch":  {
+                                                                  "Path":  "x64\\audio\\sfx\\streamed_vehicles_granular_npc.rpf\\v_twin_2_npc.awc",
+                                                                  "HashInput":  "streamed_vehicles_granular_npc/v_twin_2_npc"
+                                                              }
+                                       },
+                                       {
+                                           "Channel":  "Channel1",
+                                           "ContainerHash":  "hash_1E71436C",
+                                           "Stream":  "exhaust_accel",
+                                           "ContainerMatch":  {
+                                                                  "Path":  "x64\\audio\\sfx\\streamed_vehicles_granular_npc.rpf\\v_twin_2_npc.awc",
+                                                                  "HashInput":  "streamed_vehicles_granular_npc/v_twin_2_npc"
+                                                              }
+                                       },
+                                       {
+                                           "Channel":  "Channel2",
+                                           "ContainerHash":  "0",
+                                           "Stream":  "",
+                                           "ContainerMatch":  null
+                                       },
+                                       {
+                                           "Channel":  "Channel3",
+                                           "ContainerHash":  "0",
+                                           "Stream":  "",
+                                           "ContainerMatch":  null
+                                       },
+                                       {
+                                           "Channel":  "Channel4",
+                                           "ContainerHash":  "hash_1E71436C",
+                                           "Stream":  "engine_idle",
+                                           "ContainerMatch":  {
+                                                                  "Path":  "x64\\audio\\sfx\\streamed_vehicles_granular_npc.rpf\\v_twin_2_npc.awc",
+                                                                  "HashInput":  "streamed_vehicles_granular_npc/v_twin_2_npc"
+                                                              }
+                                       },
+                                       {
+                                           "Channel":  "Channel5",
+                                           "ContainerHash":  "hash_1E71436C",
+                                           "Stream":  "exhaust_idle",
+                                           "ContainerMatch":  {
+                                                                  "Path":  "x64\\audio\\sfx\\streamed_vehicles_granular_npc.rpf\\v_twin_2_npc.awc",
+                                                                  "HashInput":  "streamed_vehicles_granular_npc/v_twin_2_npc"
+                                                              }
+                                       }
+                                   ]
+                  }
+              ],
+    "ChannelBindings":  [
+                            {
+                                "Layer":  "ExhaustAccel",
+                                "Hash":  "hash_411A8C83",
+                                "Type":  "EnvironmentSound",
+                                "ChannelID":  "1",
+                                "Interpretation":  "Channel binding inferred; no container pointer in this record."
+                            },
+                            {
+                                "Layer":  "ExhaustAccelNPC",
+                                "Hash":  "hash_411A8C83",
+                                "Type":  "EnvironmentSound",
+                                "ChannelID":  "1",
+                                "Interpretation":  "Channel binding inferred; no container pointer in this record."
+                            }
+                        ],
+    "Scope":  "Update game.dat151 + sounds.dat54, base AWC inventory; not proof of runtime mount precedence"
+}

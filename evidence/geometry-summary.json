@@ -1,0 +1,77 @@
+[
+  {
+    "Path": "update\\update.rpf\\dlc_patch\\mpapartment\\x64\\levels\\gta5\\_hills\\cityhills_02\\ch2_04.rpf\\apa_ch2_04_0.ybn",
+    "Kind": "CollisionYbn",
+    "Bytes": 294912,
+    "Loaded": true,
+    "BoundsType": "BoundComposite",
+    "Nodes": [
+      {
+        "Type": "BoundComposite",
+        "Vertices": 0,
+        "Polygons": 0,
+        "Materials": 0,
+        "ChildTransforms": 6
+      },
+      {
+        "Type": "BoundBVH",
+        "Vertices": 1515,
+        "Polygons": 2091,
+        "Materials": 73,
+        "ChildTransforms": 0
+      },
+      {
+        "Type": "BoundBVH",
+        "Vertices": 4155,
+        "Polygons": 3423,
+        "Materials": 16,
+        "ChildTransforms": 0
+      },
+      {
+        "Type": "BoundBVH",
+        "Vertices": 84,
+        "Polygons": 42,
+        "Materials": 18,
+        "ChildTransforms": 0
+      },
+      {
+        "Type": "BoundBVH",
+        "Vertices": 4534,
+        "Polygons": 1477,
+        "Materials": 23,
+        "ChildTransforms": 0
+      },
+      {
+        "Type": "BoundBVH",
+        "Vertices": 34,
+        "Polygons": 15,
+        "Materials": 2,
+        "ChildTransforms": 0
+      },
+      {
+        "Type": "BoundBVH",
+        "Vertices": 647,
+        "Polygons": 327,
+        "Materials": 4,
+        "ChildTransforms": 0
+      }
+    ],
+    "Error": null
+  },
+  {
+    "Path": "update\\update.rpf\\x64\\audio\\occlusion.rpf\\1002641087.ymt",
+    "Kind": "OcclusionYmt",
+    "Bytes": 1496,
+    "Loaded": true,
+    "XmlChars": 7787,
+    "Error": null
+  },
+  {
+    "Path": "x64\\audio\\occlusion.rpf\\1002169370.ymt",
+    "Kind": "OcclusionYmt",
+    "Bytes": 2288,
+    "Loaded": true,
+    "XmlChars": 13520,
+    "Error": null
+  }
+]
