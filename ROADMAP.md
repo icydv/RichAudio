@@ -1,5 +1,7 @@
 # Roadmap
 
+**P2-03 offline milestone:** [successful stock PCM decoding and deterministic private references](docs/P2_03_STOCK_AUDIO_RECONSTRUCTION.md), conservatively Outcome B. Human listening rejected the grain prototype and favoured continuous recordings, with deceleration phasing unresolved. Next useful experiment is isolated engine/exhaust deceleration A/B listening. Live RPM, native ownership and full telemetry/Phase 3 release gates are not advanced by file playback.
+
 **P2-02 parallel offline checkpoint:** [six-route ownership feasibility and tests](docs/P2_02_AUDIO_OWNERSHIP.md) are independent of RPM recovery. Native playback remains the default; no engine-only isolation, native tap or crash-safe recovery passed the gate. The first audible engine-change experiment is blocked on a supported control/baseline/restoration contract; a siren-only positive-control candidate cannot certify engines. No live mutation or Phase 3 is authorised by this study.
 
 **Latest P2-01 RPM decision, 25 October:** retain the proven RPH motion integration; its RPM getter is unusable in the completed manual experiment. The [offline cross-framework review](docs/RPM_SOURCE_INVESTIGATION.md) prepares vendor evidence and identifies SHVDNE as an independent source-supported candidate, with exact-build/dependency/identity gates still open. No second framework, new launch, full live certification or Phase 3 is approved by this review. Historical checkpoint statements below retain their dated context.

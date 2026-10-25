@@ -1,5 +1,7 @@
 # Proposed architecture
 
+**P2-03 offline source slice:** [stock decoding and file playback](docs/P2_03_STOCK_AUDIO_RECONSTRUCTION.md) lives separately in `src/offline-audio`, with no RPH reference or telemetry/schema change. Engine/exhaust buffers remain separate; synthetic offline controls are never live observations. This clears a waveform-access milestone, not native ownership or live acoustic integration. P2-02/Phase 3 gates remain intact.
+
 ## Master vision alignment — 25 October 2026
 
 **P2-02 offline follow-up:** [native audio ownership investigation](docs/P2_02_AUDIO_OWNERSHIP.md) distinguishes source access, native control and rendering. Prior real telemetry captures establish the RPH motion foundation; no native engine/exhaust ownership is established. Test-only synthetic ownership checks do not unlock Phase 3 or alter the telemetry core.
