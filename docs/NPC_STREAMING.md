@@ -1,3 +1,7 @@
+# Latest runtime result — 25 October 2026
+
+The controlled Enhanced process launched, but RPH crashed before plugin loading or telemetry. Tests A–E did not run. **Streamed counts, source onset/loss distances, meaningful far RPM/engine state, handle recycling and synthetic distant traffic remain unmeasured.** There is no observed maximum NPC distance to publish. The investigation plan below remains required; architectural distant continuity is an uncertain, bounded future technique, not a workaround already providing unloaded vehicle state. See [actual attempt](P2_01_ENHANCED_RUNTIME_ATTEMPT.md).
+
 # Distant NPC investigation
 
 The first authorised runtime attempt stopped before GTA startup on an RPH target/version mismatch. No player/NPC getters ran, so maximum meaningful distance remains **unknown**. [Attempt and rollback evidence](P2_01_FIRST_RUNTIME_ATTEMPT.md); no distance inference is drawn from the framework UI failure.

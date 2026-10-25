@@ -39,3 +39,14 @@ dist/
 !tests/fixtures/*.jsonl
 # Raw runtime journals contain local paths. Keep portable summaries separately.
 /evidence/phase2.2/controlled-attempt-01/
+# Credentials, private diagnostic captures and local signing material.
+.env
+.env.*
+!.env.example
+*.pem
+*.pfx
+*.p12
+*.dmp
+*.etl
+*.evtx
+*.wpr

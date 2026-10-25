@@ -1,5 +1,52 @@
 # Proposed architecture
 
+## Master vision alignment — 25 October 2026
+
+The existing adapter/snapshot/worker/output separation supports the broader vision without changing the telemetry checkpoint. The three responsibilities below refine the future workers; they do not introduce an audio engine into P2-01. Current implementation is managed telemetry only. A reusable C++ acoustic core remains proposed, with no portable C++ build target yet. The [latest runtime attempt](docs/P2_01_ENHANCED_RUNTIME_ATTEMPT.md) resolved executable selection but failed before hook/plugin verification.
+
+| Responsibility | Consumes / produces | Independent future validation |
+|---|---|---|
+| A. Source Sound System | Validity-aware state, authoritative events, licensed/local source material and optional authored profiles → isolated source voices, physical radiator locations, band emission/directivity and timing | Engine identity/load response, rotor modulation, jet power/direction, authentic impulses; no invented events or calibrated RPM without evidence |
+| B. Acoustic World Simulation | Source/listener snapshots, geometry/material confidence, atmosphere assumptions → versioned direct/indirect path delays, band losses, directions and bounded reflection state | Analytic free field/plane/portal scenes, energy/delay checks, geometry-driven obstruction, diffraction approximation limits |
+| C. Perceptual Rendering and Mixing | Owned voices plus path state → bounded PCM/output, device routing and diagnostics | Consumer stereo/headphones, spatial clarity and source scale, dynamic contrast, controlled contextual shaping, headroom and endpoint recovery |
+
+```mermaid
+flowchart LR
+  SP["Enhanced single-player adapter"] --> SNAP["Normalized state + validity + capability + lifecycle"]
+  FM["Future permitted FiveM adapter"] -.-> SNAP
+  REPLAY["Offline fixtures / replay"] --> SNAP
+  SNAP --> A["A Source Sound System"]
+  SNAP --> B["B Acoustic World Simulation"]
+  ASSET["Stock/custom source provider; access and rights gated"] -.-> A
+  GEO["Validated local geometry + materials"] --> B
+  A --> C["C Perceptual Rendering and Mixing"]
+  B --> C
+  C --> OUT["Owned output; device/backend undecided"]
+```
+
+Only adapters call platform APIs. Core contracts carry copied values, explicit metres/metres-per-second, monotonic times, epochs, source generations and per-field observed/estimated/unavailable status. Platform pause/time scaling, camera cuts and discontinuities must be explicit. A source-provider capability contract declares supported formats, provenance, native overlap and restore policy; the acoustic simulation must not depend on a sound-pack filename or RPH entity type. No final PCM/IPC ABI is frozen until measured requirements justify it.
+
+### Stock and custom source routing gate
+
+| Route | What it enables | Current evidence / boundary |
+|---|---|---|
+| Isolated native sound processing before mix | Preserve native voice while applying independent source DSP | No supported isolated PCM insertion point established; not interchangeable with metadata access |
+| Reproduce installed stock assets through an owned renderer | Independent propagation using stock source material without changing original archives | Containers/references inspected; usable dry source reconstruction, synchronized behavior, local-use/redistribution rights and native suppression remain unresolved |
+| Supported native audio configuration | Alter native playback within supported configuration capability | Metadata formats researched; runtime behavior/rollback requires a separate approved experiment; not arbitrary PCM DSP |
+| Process final mixed output | Whole-mix tonal/dynamic processing | Cannot recover independently positioned voices, undo baked reflections or provide per-source ownership; insufficient for the core vision |
+
+Stock archives remain untouched and wholesale replacement is not a base-product requirement. Local asset access does not authorize asset distribution. Where a route is unsupported, keep native playback rather than claiming a stock-compatible overhaul. New licensed/owned optional packs are permissible future source providers, not the default substitute for proving stock support. Every route must prove duplication-free direct sound, restoration and unrelated native audio preservation before enabling output.
+
+Custom-content compatibility is tracked per format and integration: **native compatible**, **adapter required**, or **unsupported/unverified**. No arbitrary existing pack is currently certified. Optional profiles can declare engine layout/calibration, exhaust/rotor characteristics, event category, radiation and provenance. Omitted metadata stays unknown; inferred metadata must retain confidence. Changing a pack should not require rewriting propagation or device mixing.
+
+### Continuity and future platforms
+
+Source identity combines session/adapter epoch and generation; recycled handles never establish persistent identity alone. Future acoustic continuity may retain a bounded last-known trajectory with an explicit prediction age/error envelope, then fade and terminate. Unloaded RPM/load remain unknown. Reacquisition requires authoritative identity evidence or a labelled uncertain match; it must not merge unrelated vehicles or create indefinite ghosts. Smooth fading is a future rendering responsibility, not implemented telemetry behavior.
+
+FiveM affects contracts now, not scope: optional client integration must respect platform/server permissions, available APIs and player opt-out. A future server resource might relay authorized distant state with ownership, ordering, timestamps, interpolation bounds, rate/bandwidth caps and access controls. Client/server clock mapping cannot assume a common monotonic origin. Evaluate fairness and information disclosure before sending otherwise unstreamed positions. Ordinary resources are not assumed to deploy arbitrary native C++ renderers. No FiveM runtime or network implementation is authorized here.
+
+Aircraft and impulses need additional capability contracts: rotor configuration/loading, jet power, authoritative supersonic state and event timestamps are not supplied by the current vehicle logger. Preserve engine/rotor/exhaust distinctions and finite source extents; do not generate arbitrary backfires or shockwaves. Geometry, source emission and perceptual translation remain independently testable with one coherent scene.
+
 **INFERRED recommendation; implementation and all timing budgets below are UNTESTED.** Build a hybrid, externally rendered acoustic system only after proving source ownership and telemetry. Do not assume the native engine exposes a general DSP insertion point.
 
 ## Phase 2 implementation boundary
@@ -55,7 +102,7 @@ The current recorder is a minimal in-process managed plugin with off-fiber disk 
 
 A snapshot carries schema version, monotonically increasing sequence, simulation time, capture clock, source handle+generation, model hash, position, basis, velocity, engine state and per-field validity. Raw normalized RPM, estimated physical RPM and estimated load are distinct fields. Listener pose includes its camera mode and an epoch changed on a cut. Collect exact source family from authored model profiles; never derive cylinder count from vehicle class.
 
-The source layer exposes owned engine, intake, mechanical, exhaust and optional tire components. A new component needs a declared native overlap policy. A native granular bank is useful research evidence, but extracting it does not provide a licensed library of dry, calibrated source recordings. No native PCM tap was established. Owned recordings, licensed synthesis or newly authored procedural signals are required for distributable rendering.
+The proposed source layer separates engine, intake, mechanical, exhaust and optional tire components. A new component needs a declared native overlap policy. A native granular bank is useful research evidence, but extraction does not establish a dry, calibrated source library or redistribution rights. No native PCM tap was established. Locally accessed stock/custom content is a gated provider option; any distributed source material must be original or appropriately licensed. Mandatory replacement recordings are not the product requirement.
 
 ## Geometry pipeline
 

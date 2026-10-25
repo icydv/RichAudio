@@ -1,6 +1,25 @@
 # Experiment plan
 
-Every in-game experiment below remains **UNTESTED**. Phase 2 has compiled a C# RPH logger against an authentic SDK and executed offline mocks; the author-advertised 1158.16 runtime remains to be acquired/preflighted and explicitly authorized for deployment. The authoritative current A–E procedure is [DEPLOYMENT.md](docs/DEPLOYMENT.md). Acoustic experiments remain future designs; no sound change is implemented.
+The controlled Enhanced startup was attempted and stopped at an RPH IOException; hook/plugin and telemetry operation remain **UNVERIFIED**. See [actual findings](docs/P2_01_ENHANCED_RUNTIME_ATTEMPT.md). Tests A–E have not run. The authoritative A–E procedure is [DEPLOYMENT.md](docs/DEPLOYMENT.md), with the reviewed eight-source first-load configuration in [Phase 2.1 readiness](docs/PHASE2_1_READINESS.md). Future acoustic experiments below remain designs; no sound change is implemented. Historical initial experiment constraints do not undo the separately approved, completed temporary filename test.
+
+## Future immersion and physical-realism acceptance
+
+These ten tests are **aspirational acceptance designs**, not current functionality or reported passes. Execute only after P2-01 live validation, source-ownership and relevant renderer/geometry gates. Record build, source provenance, calibration/confidence, scene/weather, output device, gains, path settings and exact repeatable trajectories. Use original-versus-RichAudio A/B captures, randomized level-matched timbre/space comparisons and separate fixed-gain absolute-audibility comparisons. Report listener count, rating method and uncertainty rather than claiming realism from preference alone.
+
+| Future test | Physical/objective evidence | Structured perceptual acceptance |
+|---|---|---|
+| 1. Stock V8 idle/cruise/acceleration | Observed state vs authored calibration; band spectra, transients and level contrast; no invalid physical RPM claim | Recognizable engine identity and physical presence; quiet idle retained; no blanket bass/loudness advantage |
+| 2. Inline-four through city and away | Path delay/loss, band-energy rolloff, Doppler, occlusion and noise floor over repeatable trajectory | Clear high-load character, believable direction/around-corner response, gradual disappearance into masking; no arbitrary radius cutoff |
+| 3. Genuine urban backfire | Authoritative event timing/direction, first-reflection arrival errors, energy and decay | Sharp onset/body and distinct facade echoes appropriate to the street; no invented event or universal reverb |
+| 4. Tunnel entry/acceleration/exit | Portal/state changes, direct/wet energy and decay continuity, no discontinuous IR reset | Convincing enclosure transition and natural tail outside; no clicks or hard handoff |
+| 5. Heavy helicopter | Blade/rotor parameters or labelled approximation, modulation spectrum, height/range/direction and band levels | Nearby rotor scale/pulses and subtle distant rhythm; heavy/tandem reference without making every aircraft equally loud |
+| 6. Fighter jet flypast | Power/state validity, directivity, retarded path timing and Doppler; shockwave only with authoritative supersonic state | Credible buildup/flypast/decay and scale without unlimited audible range |
+| 7. Same weapon in room/street/field | Repeatable event/source, valid early paths, decay and obstruction changes | Clearly environment-dependent transients, echoes and tail; open terrain stays appropriately dry |
+| 8. Stock versus supported custom sounds | Provider/format classification, metadata provenance, isolated routing and identical propagation inputs | Both retain their character in the same coherent acoustic world; unsupported packs explicitly excluded |
+| 9. Native/RichAudio coexistence | Isolated direct-stem/correlation, collateral-category checks, restoration latency and failures | No doubled engines, comb filtering, accidental muting or abrupt source changes |
+| 10. Performance and stability | Paired CPU/frame percentiles, underruns, memory high-water, source/ray caps, pause/endpoint recovery, stress/soak | Improvement without distracting latency, glitches, crashes or unacceptable frame spikes |
+
+Before each experiment, preregister numerical tolerances appropriate to the scene and measurement chain. Initial scheduling/CPU budgets in the architecture are targets, not measured outcomes; do not manufacture a universal audibility distance or listening score. Always publish raw counts, missing bands/fields and failed trials. Combine analytic attenuation/arrival-time checks, source confidence and energy bounds with listening evidence. Limiter counts/true peaks and fixed playback settings document gain behavior; digital measurements alone do not certify safe physical SPL.
 
 ## P2-01 — first in-game experiment: telemetry without changing sound
 

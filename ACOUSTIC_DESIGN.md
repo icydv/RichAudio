@@ -1,5 +1,26 @@
 # Acoustic design
 
+## Immersion-first design contract
+
+The long-term objective is convincing physical presence, scale and character across the whole world: road vehicles, rotorcraft, jets, sirens, gunfire, explosions, backfires, weather, ambience and interiors. These are aspirations, not completed acoustic features. The current telemetry-only checkpoint produces no sound. Source Sound System, Acoustic World Simulation and Perceptual Rendering/Mixing have distinct responsibilities as defined in [ARCHITECTURE.md](ARCHITECTURE.md).
+
+Physical models constrain propagation and source behavior; listening tests establish whether the result translates convincingly to ordinary headphones and speakers. Preserve quiet idling/background traffic and distant rhythmic aircraft alongside stronger high-load sources. Source-specific spectral balance, transients, harmonics, modulation and directivity should create size and power. Never manufacture impact through blanket bass boost, loudness inflation or excessive compression. Perceptual processing must be bounded, context-sensitive, optional where appropriate and evaluated against calibrated/reference behavior.
+
+Stock sound preservation and compatible custom providers are first-class requirements. Processing should surround isolated source material where ownership is proven, keeping original archives untouched. Final-mix processing cannot provide independent engine/aircraft/event propagation. Stock/custom availability, license and duplication-free playback are separate gates; none has passed. The recorded/procedural techniques below are candidates, not a mandatory replacement pack.
+
+## Additional source families — future investigation
+
+| Family | Physical/source cues | Required evidence and perceptual check |
+|---|---|---|
+| V8 | Firing layout, exhaust/intake/mechanical components, load-dependent spectrum and transients | Authored or measured calibration; convincing idle rumble and acceleration scale with quiet/loud contrast, not a generic low shelf |
+| High-revving inline-four | Distinct firing harmonics, intake/exhaust energy and overrun/gear transitions | Engine-specific RPM calibration and load confidence; high-load scream decays through band loss, geometry and masking rather than an RPM radius |
+| Heavy/tandem rotorcraft | Blade-passage modulation, rotor interaction/loading, blade slap and turbine contributions | Rotor geometry/operating state or explicitly authored approximation; Chinook-like listening reference, nearby dominant pulses and plausible faint distant rhythm |
+| Fighter/civil aircraft | Broadband jet noise, tones, power/angle dependence and motion | Validated state and directivity; delay/Doppler once per modeled path; supersonic shocks only with supported authoritative state |
+| Impulsive events | Time, source position/extent, exhaust/weapon direction and transient/body | Genuine observed backfire/weapon/explosion events first; distinct early paths and geometry-dependent decay; no fabricated gameplay event |
+| Sirens/ambience/weather | Source identity, environment and spatial extent | Separate ownership/event/state research; preserve native categories until isolation is demonstrated |
+
+Consumer playback cannot reproduce a real jet's pressure or helicopter vibration. Digital limiting and gain management reduce software peaks but cannot guarantee hearing-safe physical SPL at arbitrary device volume. Keep sensible defaults, measured headroom and user control; do not equate loudness with realism. Future acceptance combines objective path/energy/performance checks and structured listening in [EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md).
+
 **UNTESTED engineering design.** Equations here describe the proposed model, not measured Rockstar behavior. GTA metadata observations are separated in [GTA_AUDIO_RESEARCH.md](GTA_AUDIO_RESEARCH.md). Use physical structure where inputs support it and label perceptual approximations explicitly.
 
 ## Source generation

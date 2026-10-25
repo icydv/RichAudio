@@ -1,6 +1,18 @@
 # RichAudio
 
-Physically informed acoustic research for **GTA V Enhanced, PC, single-player**.
+Immersion-first, physics-informed acoustic simulation and audio enhancement, initially for **GTA V Enhanced, PC, single-player**. The product ambition covers vehicles, aircraft, impulsive events, sirens, ambience, weather and interiors in one coherent acoustic world. Physical presence and meaningful quiet/loud contrast matter as much as equations. Blanket bass boosts, louder replacement packs and generic reverb do not meet this standard.
+
+## Current checkpoint — 25 October 2026
+
+P2-01 is **implemented, built and offline-tested; unverified in game**. The controlled filename experiment fixed RPH's observed version selection: Enhanced **1.0.1158.16** was identified and launched. RPH then crashed with an unhandled append-related IOException before hook/plugin/Story Mode verification. **No live telemetry, NPC distance, game performance delta or A–E result exists.** All 26 deployed additions were removed and executable/root/archive checks passed. See the [actual Enhanced attempt](docs/P2_01_ENHANCED_RUNTIME_ATTEMPT.md). Diagnosing that startup failure remains the immediate engineering priority; Phase 3 is blocked.
+
+The expanded [architecture](ARCHITECTURE.md) separates **Source Sound System**, **Acoustic World Simulation**, and **Perceptual Rendering and Mixing**, behind platform-specific adapters. Stock archives stay untouched; stock-source reproduction and custom-pack compatibility are requirements subject to source-access, ownership and licensing gates. They are not demonstrated capabilities. Steam Audio and XAudio2 remain candidates. FiveM is future research after single-player integration and rendering have been proven.
+
+The private GitHub destination is [icydv/RichAudio](https://github.com/icydv/RichAudio). It is connected as origin but **has no pushed commits or remote branch**. The first history audit found 220 personal-directory references in historical blobs; upload is held under the project's privacy rule. All original commits remain local and unchanged. See [repository governance and remediation](PROJECT_GOVERNANCE.md), [feasibility matrix](RISKS.md), [future acceptance tests](EXPERIMENT_PLAN.md), and the [roadmap](ROADMAP.md). No public license or release has been selected.
+
+Run `tools/Test-Offline.ps1` from the repository to compile and validate the framework-independent telemetry core, analyzer, fixtures, Phase 1 checks and metadata parser. No game resources or proprietary SDK are required. The prepared CI workflow runs only these offline checks; it has not run on GitHub while upload is blocked. A future portable C++ core is a design goal, not an existing build target.
+
+The checkpoints below are preserved **historical records**. Their pending approvals, installation statements and earlier blockers describe their respective dates; the current checkpoint above governs new work.
 
 ## Phase 2.2: selection hypothesis investigated; approval pending
 

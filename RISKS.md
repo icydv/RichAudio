@@ -1,5 +1,29 @@
 # Risks and fallback decisions
 
+## Feasibility and uncertainty matrix — 25 October 2026
+
+The mission now covers a coherent, immersion-first world-wide overhaul with stock preservation and custom-content support. That is an **aspiration**, not a feasibility conclusion. The historical Phase 1/2 risk records below are preserved; their runtime-not-installed wording is superseded by the controlled attempt and rollback.
+
+| Requirement / capability | Evidence class now | Decisive uncertainty / next gate |
+|---|---|---|
+| REL/AWC reference research and one collision composite | Established file/GUI observations | Does not establish a dry voice API, full acoustic geometry, source ownership or redistribution rights |
+| Runtime-independent telemetry, bounded logger, replay analysis | Implemented, built, offline-tested | Real getters, frame impact, lifecycle and time behavior still require live acceptance |
+| Enhanced executable selection | In-environment verified for this installation | Supported version identified and Enhanced process launched; RPH append-related IOException blocked hook/Story Mode/plugin verification |
+| Independent standalone RPH plugin | Built against authentic SDK; unverified in game | SDK/runtime binding, non-LSPDFR operation and coexistence must actually run; OpenRPF coexistence not tested |
+| Useful distant NPCs and aircraft | Untested hypothesis | Streaming, synthetic visual traffic, field detail and handle recycling; no observed maximum distance exists |
+| Stock audio through per-source processing | Product requirement; unproven | Isolated native PCM or legitimate local reproduction plus suppression/restore; final-mix DSP cannot meet this gate |
+| Custom sound packs | Product requirement; unproven | Per-format native/adapter/unsupported classification, optional metadata and provenance; no automatic universal compatibility claim |
+| Source identity, engine/rotor/jet/impulse character | Design / aspiration | Calibrated state, genuine event access, source emission references and consumer listening results |
+| Geometry-driven propagation and perceptual rendering | Design; not implemented | World transforms/state/material confidence, path/energy validity, bounded CPU/DSP and device behavior |
+| Smooth distant continuity | Design hypothesis | Prediction TTL/uncertainty/fades/reacquisition; cannot create indefinite ghost vehicles or know unloaded RPM |
+| Optional FiveM client/server adapters | Future research only | Platform permissions, native renderer delivery, server policy, authoritative distant state, fairness, clock mapping and budgets |
+| Private GitHub distribution | Destination created; upload held | Personal-directory references in reachable history; preserve original commits pending explicit remediation decision |
+| Production/release readiness | Not established | Integration, licensing, installation, listening and stability criteria all remain incomplete |
+
+The largest product risks remain **source access/ownership**, **distant-state coverage**, **matching acoustic geometry to the live world**, and **convincing consumer playback within a measured budget**. Renderer sophistication alone resolves none of these. Preserve dynamic contrast and avoid turning physical presence into indiscriminate loudness. Hearing-safe digital gain management is a requirement, not a guarantee of physical SPL safety on unknown hardware.
+
+The verified RPH failure is a separate immediate integration blocker. Its file-append stack does not establish antivirus, permission or storage causation. Do not add security exceptions, undocumented patches or repeated uncontrolled starts. Repository pattern screening found no prohibited binary or credential-pattern match in the initial five-commit audit; that is a bounded audit result, not proof of complete legal/security clearance. [Governance](PROJECT_GOVERNANCE.md) records the upload hold.
+
 Phase 2 update: RPH is now the selected public-API adapter candidate on author evidence of 1158.16 support, and the managed prototype compiles using the existing .NET Framework compiler. Exact runtime binary preflight, standalone operation, OpenRPF coexistence, live getter reliability, NPC coverage and gameplay performance remain unverified. No runtime was installed. See [compatibility](docs/RUNTIME_COMPATIBILITY.md) and [validation](docs/PHASE2_VALIDATION.md); the Phase 1 matrix below remains a historical risk record, not a statement that C++ is required for the current logger.
 
 24 October 2026. Severity concerns the eventual project, not an observed failure in the game. Phase 1 did not run GTA or install hooks.

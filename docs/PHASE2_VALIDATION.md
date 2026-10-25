@@ -1,5 +1,22 @@
 # Phase 2 executed validation
 
+## 25 October 2026: offline regression and integration status
+
+The [controlled Enhanced attempt](P2_01_ENHANCED_RUNTIME_ATTEMPT.md) confirmed 1158.16 selection and process launch, then stopped at an RPH IOException. RichAudio did not execute. **No game performance, live telemetry or distance results exist.** Earlier runtime-status paragraphs below are historical checkpoints.
+
+The new `tools/Test-Offline.ps1` completed successfully: **17 metadata parser tests, 123 Phase 1 syntax/evidence/fixture/ignore/local-link checks, and 48 telemetry assertions**. Core/analyzer/test executables rebuilt with warnings as errors, without proprietary SDK input. The RPH adapter was not rebuilt in this regression; its existing DLL still matches `DBC5F600C37AD7579F49EBA92A352BEE1AAF452F6EF820CEF87B86B8547D5BE0`. Telemetry source and tests remain byte-for-byte at commit 648199c. Synthetic fixture analysis completed with no invalid lines. An initial aggregate run caught two documentation EOF whitespace errors; those were fixed and the rerun passed.
+
+Actual local mock microbenchmarks from the successful run (AMD Ryzen 7 5800X workstation; optimized .NET Framework process, **not game performance**):
+
+| Workload | Sources | Frames | Mean µs/frame | p95 µs | p99 µs |
+|---|---:|---:|---:|---:|---:|
+| Mock acquisition + tracking | 1 | 310,000 | 1.626 | 2.3 | 2.9 |
+| Mock acquisition + tracking | 32 | 20,000 | 27.137 | 31.0 | 94.0 |
+| Mock acquisition + tracking | 128 | 5,000 | 119.358 | 253.5 | 404.3 |
+| Mock acquisition + tracking + JSON serialization | 32 | 600 | 861.846 | 1,133.6 | 1,410.1 |
+
+The separate paced test produced **40 frames, zero missed deadlines and zero queue drops**; its reported 2,114.8127 ms wall duration includes test/drain overhead. Busy-loop benchmark CPU consumption is not projected to a 20 Hz gameplay workload. It excludes actual RPH getter/census cost, game scheduling and contention. Exact reports remain in ignored local validation storage; a [portable summary](../evidence/architecture-alignment-validation.json) preserves the measurements. Hosted CI is prepared but has not run because the initial push is held for historical personal paths.
+
 **Subsequent live-attempt status:** approved prerequisite/deployment succeeded, but RPH reported unsupported 1013.34 before game startup. The additions were rolled back and no game telemetry/performance measurement occurred. [Actual attempt report](P2_01_FIRST_RUNTIME_ATTEMPT.md). The offline measurements below remain unchanged historical results.
 
 **Built and offline-tested; no live gameplay validation.** Results below are measured in the local .NET Framework test process, not inferred from a successful build.

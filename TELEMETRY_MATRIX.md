@@ -1,3 +1,9 @@
+# Current evidence and future capability boundary — 25 October 2026
+
+The [controlled Enhanced launch](docs/P2_01_ENHANCED_RUNTIME_ATTEMPT.md) fixed observed executable selection but RPH crashed before RichAudio execution. The matrix below describes source/API availability and implementation evidence, **not live certification**. No player/NPC property, meaningful tracking distance or physical RPM calibration has been validated in game. Preserve per-field observed/estimated/unavailable status and explicit units/times in every future adapter.
+
+Future road/aircraft/impulse providers need separately declared capabilities for throttle/load, engine calibration, rotor speed/loading/configuration, jet power, event emission time, and supersonic state. None is established merely by position/velocity or a generic vehicle model. Weather labels do not supply measured humidity/temperature. Unloaded sources have unavailable continuing engine state; bounded extrapolated movement is estimated, never observed. FiveM adapters must carry authority, update age, clock mapping and ownership separately from raw handles. No FiveM implementation is present.
+
 # Telemetry matrix
 
 ## Phase 2 adapter mapping

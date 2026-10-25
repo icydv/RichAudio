@@ -1,0 +1,26 @@
+name: Offline validation (no game runtime)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: offline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # publisher v6 ref, reviewed 2026-10-25
+        with:
+          persist-credentials: false
+      - name: Build core and run offline fixtures, evidence and documentation checks
+        shell: pwsh
+        run: ./tools/Test-Offline.ps1

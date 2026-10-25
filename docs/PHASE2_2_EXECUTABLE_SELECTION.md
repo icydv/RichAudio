@@ -1,3 +1,7 @@
+# Subsequent controlled outcome — 25 October 2026
+
+The separately approved experiment below has now run: hiding the extra filename selected Enhanced 1.0.1158.16 and launched GTA5_Enhanced.exe. RPH then failed with an unhandled append-related IOException before plugin/Story Mode verification. Both executable filenames and hashes were restored, all 26 additions removed, and root/archive checks passed. See [actual outcome and next gate](P2_01_ENHANCED_RUNTIME_ATTEMPT.md). Pending-approval and unverified-causality wording in the preserved investigation describes its earlier checkpoint.
+
 # Phase 2.2: RPH Enhanced executable-selection investigation
 
 24 October 2026, continuing `e3fc0e0`. **Read-only investigation completed; rename, redeployment and a new smoke test await explicit approval.** Both game executables retain their original names and hashes. All work/backup files are in the separate RichAudio workspace. The telemetry implementation is unchanged.
