@@ -4,6 +4,8 @@ Status: implemented, compiled and offline-tested; the original approved adapter 
 
 ## Components and build
 
+The bounded [drivetrain diagnostic experiment](P2_01_DRIVETRAIN_VALIDATION.md) now confirms a constant out-of-range player RPM getter through user-controlled revving/driving, with partial gear-transition corroboration. Its separate, opt-in diagnostic schema leaves the production schema unchanged; do not infer physical RPM or silently normalize its raw scalar. The final capture/restoration results are distinct from the earlier recovery smoke test.
+
 - `src/telemetry/Core`: runtime-independent model, deadline scheduler, tracker, SPSC queue, JSONL serialization and asynchronous writer. No `Rage` reference.
 - `src/telemetry/Rph`: documented getter adapter and plugin lifecycle/commands. No LSPDFR reference, memory offsets or game setter calls.
 - `src/telemetry/Analysis`: inspectable JSON summary of JSONL sessions, cadence, omissions, errors, lifecycle and sampled NPC distance bands.
