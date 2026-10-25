@@ -1,5 +1,9 @@
 # Phase 2 executed validation
 
+## First genuine telemetry smoke test: 25 October 2026
+
+One authorised DirectStorageFix/ASI-loader recovery attempt loaded RPH and the unchanged RichAudio DLL in Enhanced 1158.16 Story Mode. The closed JSONL capture contains 2,113 samples, 19.998774 Hz over 105.606473 s, zero queue drops/missed deadlines/sequence gaps and actual player/NPC observations. It is **in-game smoke-tested**, not A–E certified. Every player/driver-present NPC RPM reading failed range validation; no frame-time baseline or repeat stability result exists. The installation was restored against 32 root file hashes, 179 archive metadata records, ten archive hashes and both signed executable fingerprints. [Detailed runtime report](RPH_IO_FAILURE_INVESTIGATION.md) and [portable actual results](../evidence/publication/directstoragefix-result.json). Earlier no-live-data statements below retain their historical meaning.
+
 ## 25 October 2026: offline regression and integration status
 
 The [controlled Enhanced attempt](P2_01_ENHANCED_RUNTIME_ATTEMPT.md) confirmed 1158.16 selection and process launch, then stopped at an RPH IOException. RichAudio did not execute. **No game performance, live telemetry or distance results exist.** Earlier runtime-status paragraphs below are historical checkpoints.

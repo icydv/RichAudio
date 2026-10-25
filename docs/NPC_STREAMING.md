@@ -6,7 +6,7 @@ The controlled Enhanced process launched, but RPH crashed before plugin loading 
 
 The first authorised runtime attempt stopped before GTA startup on an RPH target/version mismatch. No player/NPC getters ran, so maximum meaningful distance remains **unknown**. [Attempt and rollback evidence](P2_01_FIRST_RUNTIME_ATTEMPT.md); no distance inference is drawn from the framework UI failure.
 
-**Live results: none. Maximum actual sampled GTA distance, natural urban/rural availability, drivetrain reliability at range, handle recycling frequency and low-detail traffic representation are all UNTESTED.** The committed fixture is authored mock data; its distances are not game evidence.
+**First limited live result, 25 October 2026:** a rural smoke capture returned 2–6 available vehicles, 7,505 selected observations and 20 session tracking IDs. The largest getter-derived driver-present non-player distance was **3,494.327 m** (model hash 3013282534); source category and visual distant fidelity were not established. This is not a road-traffic streaming radius or meaningful engine-telemetry range. Every driver-present NPC RPM reading was unavailable after range validation. No urban comparison, systematic access boundary, handle-counter recycling or low-detail/synthetic-traffic attribution was established. [Full evidence and caveats](RPH_IO_FAILURE_INVESTIGATION.md), [portable summary](../evidence/publication/directstoragefix-result.json). The existing fixture remains mock data.
 
 ## What the prototype can observe
 
