@@ -100,6 +100,24 @@ namespace RichAudio.Tests
             string fixture=Path.Combine(dir,"mock-session.jsonl");using(var writer=new StreamWriter(fixture,false,new UTF8Encoding(false)))foreach(var r in records)writer.WriteLine(JsonLines.Serialize(r));
             var report=Program.Analyze(fixture);Check(report.Complete&&report.Samples==12&&Math.Abs(report.ObservedSampleHz-20)<1e-9,"Offline analyzer checks complete mock capture and cadence");Check(report.MaximumSampledNpcDistanceM>60&&report.DistanceBands[0].Observations>0,"Analyzer derives sampled NPC distances and bands");
             Check(report.IndexesWithMultipleCounters==4,"Analyzer distinguishes observed pool index counter changes");
+            Check(!report.AcquisitionBudgetKnown&&report.AcquisitionBudgetEvaluatedSamples==0,"Missing capture budget is unknown, not a passing measurement");
+            // The first live recordings will use the configured soft acquisition budget.
+            // All numbers in this fixture are authored, not gameplay measurements.
+            string budgetPath=Path.Combine(dir,"budget-fixture.jsonl");
+            var budgetRecords=new[]{
+                new CaptureRecord{Kind="session_start",SessionId="budget-fixture",Sequence=0,Metadata=new SessionMetadata{AcquisitionBudgetMs=2}},
+                new CaptureRecord{Kind="sample",SessionId="budget-fixture",Sequence=1,TimestampSeconds=0,AcquisitionMs=2},
+                new CaptureRecord{Kind="sample",SessionId="budget-fixture",Sequence=2,TimestampSeconds=0.05,AcquisitionMs=3.2,BudgetOmitted=4},
+                new CaptureRecord{Kind="sample",SessionId="budget-fixture",Sequence=3,TimestampSeconds=0.1,AcquisitionMs=1.1},
+                new CaptureRecord{Kind="session_end",SessionId="budget-fixture",Sequence=4,TimestampSeconds=0.15}
+            };
+            File.WriteAllLines(budgetPath,Array.ConvertAll(budgetRecords,x=>JsonLines.Serialize(x)));
+            var budgetReport=Program.Analyze(budgetPath);
+            Check(budgetReport.Complete&&budgetReport.AcquisitionBudgetKnown&&budgetReport.AcquisitionBudgetMs==2,"Analyzer reads positive declared acquisition budget from session metadata");
+            Check(budgetReport.AcquisitionBudgetEvaluatedSamples==3&&budgetReport.AcquisitionOverBudgetSamples==1,"Acquisition equals budget is not an overrun; larger sample is");
+            Check(budgetReport.BudgetPressureSamples==1&&budgetReport.BudgetOmitted==4,"Budget-driven source omissions remain separately visible");
+            Check(Math.Abs(budgetReport.AcquisitionOverBudgetPercentage-100.0/3)<1e-9&&Math.Abs(budgetReport.PeakAcquisitionMs-3.2)<1e-9,"Analyzer reports accurate overrun percentage and peak acquisition duration");
+
             var rolesTracker=new Tracker("role-mock");var roles=Frame(0,3);roles.Vehicles[1].DriverPresent=Field<bool>.Observed(false,"boolean","parked mock");roles.Vehicles[2].PlayerVehicle=Field<bool>.Missing("boolean","mock player query failed");var rolesRecord=rolesTracker.Process(roles);var rolesEnd=rolesTracker.Stop(0.05,"end");rolesEnd.Kind="session_end";
             string rolesPath=Path.Combine(dir,"roles.jsonl");File.WriteAllLines(rolesPath,new[]{JsonLines.Serialize(new CaptureRecord{Kind="session_start",SessionId="role-mock",Sequence=0}),JsonLines.Serialize(rolesRecord),JsonLines.Serialize(rolesEnd)});var rolesReport=Program.Analyze(rolesPath);Check(rolesReport.MaximumSampledNpcDistanceM==0&&rolesReport.MaximumSampledNonPlayerVehicleDistanceM==20,"Parked and unknown-player-role vehicles are not silently counted as driven NPC traffic");
             File.WriteAllText(Path.Combine(dir,"truncated.jsonl"),JsonLines.Serialize(records[0])+"\n{invalid\n");var corrupt=Program.Analyze(Path.Combine(dir,"truncated.jsonl"));Check(!corrupt.Complete&&corrupt.InvalidLines==1,"Truncation/corruption reported as incomplete, not a passing capture");
