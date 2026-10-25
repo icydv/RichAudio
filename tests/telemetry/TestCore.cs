@@ -82,6 +82,16 @@ namespace RichAudio.Tests
             var gapTracker=new Tracker("gap");gapTracker.Process(Frame(0,1));Check(!gapTracker.Process(Frame(0.3,1)).Vehicles[0].Acceleration.Value.HasValue,"Stale velocity pair is not differentiated across long sample gap");
             tracker=new Tracker("camera");var raw=Frame(0,0);var snap=tracker.Process(raw);raw.Listener.Position=Field<Vec3>.Observed(new Vec3(999,0,0),"m","mutated mock");Check(snap.Listener.Position.Value.Value.X==0,"Listener snapshot independent of mutable input DTO");
             var cut=Frame(0.05,0);cut.Listener.Position=Field<Vec3>.Observed(new Vec3(100,0,0),"m","cut");Check(!tracker.Process(cut).Listener.Velocity.Value.HasValue,"Large camera cut suppresses velocity estimate");
+            var nativeListenerTracker=new Tracker("listener-provenance");
+            var nativeOne=Frame(0,0);nativeOne.Listener.Velocity=Field<Vec3>.Observed(new Vec3(3,0,0),"m/s","observed test sensor");
+            nativeListenerTracker.Process(nativeOne);
+            var nativeTwo=Frame(0.05,0);nativeTwo.Listener.Position=Field<Vec3>.Observed(new Vec3(1,0,0),"m","authored");
+            nativeTwo.Listener.Velocity=Field<Vec3>.Observed(new Vec3(4,0,0),"m/s","observed test sensor");
+            var retainedVelocity=nativeListenerTracker.Process(nativeTwo).Listener.Velocity;
+            Check(retainedVelocity.Status=="observed"&&retainedVelocity.Value.Value.X==4&&retainedVelocity.Origin=="observed test sensor","Observed listener velocity is not overwritten with finite differences");
+            var nativeThree=Frame(0.1,0);nativeThree.Listener.Position=Field<Vec3>.Observed(new Vec3(2,0,0),"m","authored");
+            var fallbackVelocity=nativeListenerTracker.Process(nativeThree).Listener.Velocity;
+            Check(fallbackVelocity.Status=="estimated"&&Math.Abs(fallbackVelocity.Value.Value.X-20)<1e-8,"Unavailable listener velocity receives a bounded finite difference");
             var q=new SpscQueue<CaptureRecord>(2);Check(q.TryWrite(first)&&q.TryWrite(second)&&!q.TryWrite(second),"Bounded queue rejects full without overwriting");CaptureRecord read;Check(q.TryRead(out read)&&object.ReferenceEquals(read,first),"Queue FIFO first");Check(q.TryRead(out read)&&object.ReferenceEquals(read,second)&&!q.TryRead(out read),"Queue FIFO second then empty");
             var stress=new SpscQueue<CaptureRecord>(8);int received=0;bool ordered=true;
             var consumer=new Thread(()=>{while(received<10000){CaptureRecord r;if(stress.TryRead(out r)){if(r.Sequence!=received)ordered=false;received++;}else Thread.Yield();}});consumer.Start();
@@ -118,6 +128,29 @@ namespace RichAudio.Tests
             Check(budgetReport.BudgetPressureSamples==1&&budgetReport.BudgetOmitted==4,"Budget-driven source omissions remain separately visible");
             Check(Math.Abs(budgetReport.AcquisitionOverBudgetPercentage-100.0/3)<1e-9&&Math.Abs(budgetReport.PeakAcquisitionMs-3.2)<1e-9,"Analyzer reports accurate overrun percentage and peak acquisition duration");
 
+            // All counts below concern hand-authored selected entities, not unseen GTA traffic.
+            var coverageTracker=new Tracker("coverage-mock");
+            var coverageA=Frame(0,2);coverageA.Listener.Position=Field<Vec3>.Missing("m","authored listener gap");
+            coverageA.Vehicles[1].Position=Field<Vec3>.Missing("m","authored vehicle gap");
+            coverageA.Vehicles[0].RpmRatio=Field<double>.Missing("ratio","authored RPM gap");
+            var coverageSampleA=coverageTracker.Process(coverageA);coverageSampleA.SourceLimitOmitted=2;
+            var coverageB=Frame(0.1,1);coverageB.Listener.Velocity=Field<Vec3>.Observed(new Vec3(1,0,0),"m/s","authored sensor");
+            coverageB.Vehicles[0].Velocity=Field<Vec3>.Missing("m/s","authored velocity gap");
+            var coverageSampleB=coverageTracker.Process(coverageB);
+            var coverageEnd=coverageTracker.Stop(0.15,"authored end");coverageEnd.Kind="session_end";
+            string coveragePath=Path.Combine(dir,"coverage-fixture.jsonl");
+            File.WriteAllLines(coveragePath,new[]{
+                JsonLines.Serialize(new CaptureRecord{Kind="session_start",SessionId="coverage-mock",Sequence=0}),
+                JsonLines.Serialize(coverageSampleA),JsonLines.Serialize(coverageSampleB),JsonLines.Serialize(coverageEnd)
+            });
+            var coverageReport=Program.Analyze(coveragePath);
+            Check(coverageReport.Complete&&coverageReport.Samples==2&&coverageReport.SampledVehicleObservations==3,"Coverage analyzer counts actual sampled source observations");
+            Check(coverageReport.ListenerPositionAvailableSamples==1&&coverageReport.ListenerVelocityAvailableSamples==1&&coverageReport.ListenerPositionCoveragePercent==50&&coverageReport.ListenerVelocityCoveragePercent==50,"Listener position and velocity availability are independently measured");
+            Check(coverageReport.VehiclePositionAvailableObservations==2&&coverageReport.VehicleVelocityAvailableObservations==2&&coverageReport.VehicleRpmAvailableObservations==2,"Each vehicle channel reports independent availability");
+            Check(Math.Abs(coverageReport.VehiclePositionCoveragePercent-200.0/3)<1e-9&&Math.Abs(coverageReport.VehicleVelocityCoveragePercent-200.0/3)<1e-9&&Math.Abs(coverageReport.VehicleRpmCoveragePercent-200.0/3)<1e-9,"Coverage rates use selected vehicle observations as denominator");
+            Check(coverageReport.DistinctTrackingIds==2&&coverageReport.SourceLimitPressureSamples==1&&coverageReport.EmptySelectionSamples==0,"Track count and source-limit pressure do not claim full-world population");
+            Check(Math.Abs(coverageReport.MaximumSampleGapMs-100)<1e-8,"Maximum sample interval catches the largest gap");
+            Check(budgetReport.SampledVehicleObservations==0&&budgetReport.VehiclePositionCoveragePercent==0&&!double.IsNaN(budgetReport.VehicleRpmCoveragePercent),"No vehicles results in zero, not NaN coverage");
             var rolesTracker=new Tracker("role-mock");var roles=Frame(0,3);roles.Vehicles[1].DriverPresent=Field<bool>.Observed(false,"boolean","parked mock");roles.Vehicles[2].PlayerVehicle=Field<bool>.Missing("boolean","mock player query failed");var rolesRecord=rolesTracker.Process(roles);var rolesEnd=rolesTracker.Stop(0.05,"end");rolesEnd.Kind="session_end";
             string rolesPath=Path.Combine(dir,"roles.jsonl");File.WriteAllLines(rolesPath,new[]{JsonLines.Serialize(new CaptureRecord{Kind="session_start",SessionId="role-mock",Sequence=0}),JsonLines.Serialize(rolesRecord),JsonLines.Serialize(rolesEnd)});var rolesReport=Program.Analyze(rolesPath);Check(rolesReport.MaximumSampledNpcDistanceM==0&&rolesReport.MaximumSampledNonPlayerVehicleDistanceM==20,"Parked and unknown-player-role vehicles are not silently counted as driven NPC traffic");
             File.WriteAllText(Path.Combine(dir,"truncated.jsonl"),JsonLines.Serialize(records[0])+"\n{invalid\n");var corrupt=Program.Analyze(Path.Combine(dir,"truncated.jsonl"));Check(!corrupt.Complete&&corrupt.InvalidLines==1,"Truncation/corruption reported as incomplete, not a passing capture");
