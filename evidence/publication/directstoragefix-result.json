@@ -1,0 +1,606 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-25",
+  "scope": "Single authorised offline Story Mode recovery and telemetry smoke test; no A-E certification",
+  "canonicalBase": "31840d3e91e745c04129463c61b362f22d35573d",
+  "branch": "compat/directstoragefix-recovery",
+  "launches": 1,
+  "gameVersion": "1.0.1158.16",
+  "rphVersion": "1.132.1428.17748",
+  "sourceReview": {
+    "project": "alloc8or/DirectStorageFix",
+    "version": "1.2",
+    "commit": "1728ae079ea10b292ba9bb35c91eb36ba0781895",
+    "sourceUrl": "https://github.com/alloc8or/DirectStorageFix/tree/1728ae079ea10b292ba9bb35c91eb36ba0781895",
+    "packageUrl": "https://www.gta5-mods.com/scripts/directstoragefix",
+    "zipSHA256": "24F6120B816C983F5FF05850809617F821878E0BA31CA3EEE65D0DC606160D4B",
+    "binarySourceCorrespondence": "Strong timestamp/log/import evidence; unsigned, no reproducible build or source attestation",
+    "mechanism": "Existing MinHook detour of fiDeviceDirectStorage::RegisterFile; exact .rpf/.cache extension filter",
+    "buildGuard": "Enhanced module name; excludes builds below 1013, not an exact 1158.16 allowlist",
+    "offlinePatternCheck": "Zero disk matches in both executables; inconclusive for runtime image",
+    "runtimeHookEvidence": "Init finished at 15:29:41.240Z on build 1158.16; allowed registrations followed",
+    "licensing": "No explicit project redistribution licence found; private author-directed use only; no source or binaries redistributed"
+  },
+  "loader": {
+    "author": "Alexander Blade",
+    "officialPackageUrl": "https://www.dev-c.com/files/ScriptHookV_3889.0_1158.13.zip",
+    "zipSHA256": "B64C97C3353906F14621E7E9511E4AEC2A7D436ECC21ED124D3816585E2E6188",
+    "version": "1.0.0.2",
+    "build": "2025-03-22",
+    "noScriptHookVImports": true,
+    "scriptHookScriptingDllInstalled": false,
+    "licensing": "Official package readme prohibits archive redistribution; loader not redistributed"
+  },
+  "diagnosticCleanup": {
+    "passed": true,
+    "bootUtc": "2026-10-25T11:43:00.5Z",
+    "procmon25AbsentBeforeAndAfter": true,
+    "newKernelCapture": false,
+    "retainedApplicationSettingsUntouched": true
+  },
+  "deployment": {
+    "finalFileCount": 27,
+    "originalPlanSHA256": "9A12B751A312549150B1484151F41898F5BCF8E5A7BEC29653EA629DBD976906",
+    "privateRevisedManifestSHA256": "5C4474296DF44BB553A7476B0E0FCB9B665F9FAE871B2B437119828550B63BF8",
+    "description": "Original 26-path set with reviewed temporary XInput replacement, fix addition and explicit output-directory-only JSON change",
+    "originalFilesOverwritten": 0,
+    "rename": "GTA5.exe -> _GTA5.exe -> GTA5.exe; no overwrite; hash verified",
+    "rphArguments": "-forcesettings -log",
+    "offlineGameArgumentVerified": "-nobattleye",
+    "files": [
+      {
+        "relativeDestination": "cursor_32_2.png",
+        "category": "Unchanged approved RPH file",
+        "bytes": 21781,
+        "sha256": "BBAC461B7BA311CC476CD5780FD2787628479E37D91CF3A2CCC91560F6200A1A",
+        "previousApprovedSHA256": "BBAC461B7BA311CC476CD5780FD2787628479E37D91CF3A2CCC91560F6200A1A"
+      },
+      {
+        "relativeDestination": "DdsConvert.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 14848,
+        "sha256": "D115D8C9A817B67C3CD042E51BB941D74539DCA655DE7BE8A3CBAD058D3B2764",
+        "previousApprovedSHA256": "D115D8C9A817B67C3CD042E51BB941D74539DCA655DE7BE8A3CBAD058D3B2764"
+      },
+      {
+        "relativeDestination": "DefaultSkin.png",
+        "category": "Unchanged approved RPH file",
+        "bytes": 41365,
+        "sha256": "333D5611913A3907296DC787625C0F5043277285DAA49CDA0C8976820AB50FA4",
+        "previousApprovedSHA256": "333D5611913A3907296DC787625C0F5043277285DAA49CDA0C8976820AB50FA4"
+      },
+      {
+        "relativeDestination": "discord-rpc.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 399880,
+        "sha256": "5CC2E504800CF4ED2F4781364F661EA22349658DDC391B5D54195E573109D87B",
+        "previousApprovedSHA256": "5CC2E504800CF4ED2F4781364F661EA22349658DDC391B5D54195E573109D87B"
+      },
+      {
+        "relativeDestination": "DiscordRpcNet.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 6656,
+        "sha256": "952605857477708168DAFFFA8E9879494F9832CF979A5B116DAA3D903A154569",
+        "previousApprovedSHA256": "952605857477708168DAFFFA8E9879494F9832CF979A5B116DAA3D903A154569"
+      },
+      {
+        "relativeDestination": "EasyHook.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 52224,
+        "sha256": "3153844BDAEE8A55C812D072B0E25F992E716174FC7D987944F4B8CF6DDD1F83",
+        "previousApprovedSHA256": "3153844BDAEE8A55C812D072B0E25F992E716174FC7D987944F4B8CF6DDD1F83"
+      },
+      {
+        "relativeDestination": "EasyHook64.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 310272,
+        "sha256": "62842ECD61D855199C086600526B697941DCB56A10D4D6EF7D610FFC6369F6D6",
+        "previousApprovedSHA256": "62842ECD61D855199C086600526B697941DCB56A10D4D6EF7D610FFC6369F6D6"
+      },
+      {
+        "relativeDestination": "EasyLoad64.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 7680,
+        "sha256": "F7766C70B4C82341F32783C72B2CE1430AAE95C6D713A3431DAED7B1F4E40DE7",
+        "previousApprovedSHA256": "F7766C70B4C82341F32783C72B2CE1430AAE95C6D713A3431DAED7B1F4E40DE7"
+      },
+      {
+        "relativeDestination": "FW1FontWrapper.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 156160,
+        "sha256": "1BA5BB9FFEA32A8C30B5C8B7139E15DDC36A43130465B4D1CE4C7B77FA6FCE25",
+        "previousApprovedSHA256": "1BA5BB9FFEA32A8C30B5C8B7139E15DDC36A43130465B4D1CE4C7B77FA6FCE25"
+      },
+      {
+        "relativeDestination": "Gwen.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 196096,
+        "sha256": "33275AF76FCD12157732A80DF4795590D409A1DF46B2B32A5112CA11D6AA5267",
+        "previousApprovedSHA256": "33275AF76FCD12157732A80DF4795590D409A1DF46B2B32A5112CA11D6AA5267"
+      },
+      {
+        "relativeDestination": "Gwen.UnitTest.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 42496,
+        "sha256": "CF68F7773FEB5756E050A4503F142C67B17C1E4BECF23A878649960B58259017",
+        "previousApprovedSHA256": "CF68F7773FEB5756E050A4503F142C67B17C1E4BECF23A878649960B58259017"
+      },
+      {
+        "relativeDestination": "LMS.Common.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 14336,
+        "sha256": "8D5593ABB8A939519365293D3325B83428F8304B56C59CCA37929637E7D6FB50",
+        "previousApprovedSHA256": "8D5593ABB8A939519365293D3325B83428F8304B56C59CCA37929637E7D6FB50"
+      },
+      {
+        "relativeDestination": "LMS.PortableExecutable.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 61440,
+        "sha256": "4389B18342461CC11B48EC7A35C76BEA20BEB0A76724BA77C2ED0406E5517ED2",
+        "previousApprovedSHA256": "4389B18342461CC11B48EC7A35C76BEA20BEB0A76724BA77C2ED0406E5517ED2"
+      },
+      {
+        "relativeDestination": "Microsoft.Expression.Drawing.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 144496,
+        "sha256": "1D69EAF538008E0FE1A7EB2CE0124A49B95C491797749640C8351ED4643F5C97",
+        "previousApprovedSHA256": "1D69EAF538008E0FE1A7EB2CE0124A49B95C491797749640C8351ED4643F5C97"
+      },
+      {
+        "relativeDestination": "Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 98440,
+        "sha256": "FCCBC0612BD7F71D8038918F15C40A0B6C5426D4B0890496450D28D924E8EC01",
+        "previousApprovedSHA256": "FCCBC0612BD7F71D8038918F15C40A0B6C5426D4B0890496450D28D924E8EC01"
+      },
+      {
+        "relativeDestination": "Mono.Cecil.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 280576,
+        "sha256": "0F6465CE57A0CBABC37013C8E3C9F110672DE1C127B6192177D59EB1C7809772",
+        "previousApprovedSHA256": "0F6465CE57A0CBABC37013C8E3C9F110672DE1C127B6192177D59EB1C7809772"
+      },
+      {
+        "relativeDestination": "Mono.Cecil.Mdb.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 45056,
+        "sha256": "B8625ACE855A3086E2086AF418E17DAF24A30A4FBFFC559C42F329EDEC52806E",
+        "previousApprovedSHA256": "B8625ACE855A3086E2086AF418E17DAF24A30A4FBFFC559C42F329EDEC52806E"
+      },
+      {
+        "relativeDestination": "Mono.Cecil.Pdb.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 81920,
+        "sha256": "25EB34CF9A7038D71CA15DDBFB3C180B4A2119219D487FD760437F5DA7EDF292",
+        "previousApprovedSHA256": "25EB34CF9A7038D71CA15DDBFB3C180B4A2119219D487FD760437F5DA7EDF292"
+      },
+      {
+        "relativeDestination": "Mono.Cecil.Rocks.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 23552,
+        "sha256": "822C94D1C2AB96EFEB19BC5F1D304586E70A004D2F44F372377F33F2545EB921",
+        "previousApprovedSHA256": "822C94D1C2AB96EFEB19BC5F1D304586E70A004D2F44F372377F33F2545EB921"
+      },
+      {
+        "relativeDestination": "RAGEPluginHook.exe",
+        "category": "Unchanged approved RPH file",
+        "bytes": 12237182,
+        "sha256": "73F05B3F7973D4731F4151AE061DD3C991065E8BF3ECE51EA1D9AB728B9B42AC",
+        "previousApprovedSHA256": "73F05B3F7973D4731F4151AE061DD3C991065E8BF3ECE51EA1D9AB728B9B42AC"
+      },
+      {
+        "relativeDestination": "RPH_Readme.txt",
+        "category": "Unchanged approved RPH file",
+        "bytes": 1409,
+        "sha256": "DAE5B2742A2FA0313C89B4135A4266BA9D14AFA24E8A38C23765829B6DE91B48",
+        "previousApprovedSHA256": "DAE5B2742A2FA0313C89B4135A4266BA9D14AFA24E8A38C23765829B6DE91B48"
+      },
+      {
+        "relativeDestination": "SlimDX.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 3718656,
+        "sha256": "194968B5010BE986E33669928B9F966A67C6EB4E1CF4AC4DA6B90728E242A516",
+        "previousApprovedSHA256": "194968B5010BE986E33669928B9F966A67C6EB4E1CF4AC4DA6B90728E242A516"
+      },
+      {
+        "relativeDestination": "System.ValueTuple.dll",
+        "category": "Unchanged approved RPH file",
+        "bytes": 79200,
+        "sha256": "79FAC2E8355A7BBB94D40D25FE0E34D5CEDF5426A176F20F1CCD5E0606F0F082",
+        "previousApprovedSHA256": "79FAC2E8355A7BBB94D40D25FE0E34D5CEDF5426A176F20F1CCD5E0606F0F082"
+      },
+      {
+        "relativeDestination": "Plugins\\RichAudio.Telemetry.Rph.dll",
+        "category": "Unchanged approved telemetry binary",
+        "bytes": 34304,
+        "sha256": "DBC5F600C37AD7579F49EBA92A352BEE1AAF452F6EF820CEF87B86B8547D5BE0",
+        "previousApprovedSHA256": "DBC5F600C37AD7579F49EBA92A352BEE1AAF452F6EF820CEF87B86B8547D5BE0"
+      },
+      {
+        "relativeDestination": "Plugins\\RichAudio.Telemetry.Rph.json",
+        "category": "Temporary telemetry configuration; OutputDirectory only",
+        "bytes": 356,
+        "sha256": "063C858286C730DF88C8E2BC0D1847F9C5735B0573D21C2A792F32D1B50BED2B",
+        "previousApprovedSHA256": "B0CCA8C1B0AB7B894C2319BBDE36C8C718C96A4A92222B7D59D798267ADCF249"
+      },
+      {
+        "relativeDestination": "XInput1_4.dll",
+        "category": "Alternative publisher-recommended ASI loader",
+        "bytes": 133632,
+        "sha256": "A1A8BDE409ED75D94A0439C37CF881BC354B13C2F8CD32E4BEF3B10F308F1392",
+        "previousApprovedSHA256": "BD0BA909DE46470E0DDBF88CD72D7CF6F1EB04B709616366692EAEA87B4C0551"
+      },
+      {
+        "relativeDestination": "DirectStorageFix.asi",
+        "category": "Author-published DirectStorage correction",
+        "bytes": 592384,
+        "sha256": "7F50B8A9A2E8A376E2ADB7D46BC9483C2754BBBDD964F0918787D4F6F1B76E2C",
+        "previousApprovedSHA256": null
+      }
+    ]
+  },
+  "checkpoints": {
+    "enhancedSelection": "PASS",
+    "fixInitialisation": "PASS",
+    "previousSharingFailureAvoided": "PASS",
+    "rphStartup": "PASS",
+    "storyMode": "PASS",
+    "richAudioInitialisation": "PASS",
+    "genuineVehicleTelemetry": "PASS",
+    "controlledShutdown": "PASS",
+    "fullRestoration": "PASS",
+    "fullAtoE": "NOT TESTED",
+    "frameTimeImpact": "NOT TESTED"
+  },
+  "capture": {
+    "sha256": "A77275FF286AEC85BC00D84710DE90C7C1CF35BFBFEF9B5FF8C74B2B3528A36A",
+    "samples": 2113,
+    "records": 2116,
+    "complete": true,
+    "durationSeconds": 105.60647309999999,
+    "observedHz": 19.998774109235924,
+    "intervalP95Ms": 56.686299999995526,
+    "scheduleDelayP95Ms": 13.307000005113423,
+    "scheduleDelayMaxMs": 41.27840000327865,
+    "acquisitionP95Ms": 0.1825,
+    "acquisitionMaxMs": 9.761800000000001,
+    "processingP95Ms": 0.0154,
+    "processingMaxMs": 1.2530000000000001,
+    "queueDrops": 0,
+    "missedDeadlines": 0,
+    "sequenceGaps": 0,
+    "invalidJsonLines": 0,
+    "nonMonotonicSamples": 0,
+    "vehicleObservations": 7505,
+    "distinctTrackingIds": 20,
+    "playerObservations": 786,
+    "npcDriverPresentObservations": 3019,
+    "unoccupiedObservations": 3700,
+    "playerModelHashes": [
+      4278019151
+    ],
+    "playerGearValues": [
+      1
+    ],
+    "playerRpmObserved": 0,
+    "npcDriverPresentRpmObserved": 0,
+    "unoccupiedInRangeRpmReadings": 1884,
+    "rpmRejectedCount": 5621,
+    "rpmRejectedReason": "invalid_out_of_range_RPM_ratio",
+    "availableCountMin": 2,
+    "availableCountMax": 6,
+    "maxSelectedCount": 6,
+    "censusTruncatedSamples": 10,
+    "budgetOmissions": 1,
+    "sourceLimitOmissions": 0,
+    "duplicateIdentitySamples": 0,
+    "poolIndexes": 20,
+    "indexesWithMultipleCounters": 0,
+    "lifeCycleCounts": [
+      {
+        "Kind": "despawn_or_stream_out",
+        "Count": 1
+      },
+      {
+        "Kind": "first_observation",
+        "Count": 20
+      },
+      {
+        "Kind": "invalid_entity",
+        "Count": 15
+      },
+      {
+        "Kind": "tracking_termination",
+        "Count": 20
+      },
+      {
+        "Kind": "unavailable_telemetry",
+        "Count": 5621
+      }
+    ],
+    "maximumGetterDerivedNpcDistanceM": 3494.3270503911804,
+    "farthestModelHash": 3013282534,
+    "distanceLimitEstablished": false,
+    "distanceCaveat": "Source category, visual match and distant fidelity unverified; not a road-traffic radius or meaningful drivetrain range",
+    "npcDistanceBands": [
+      {
+        "range": "[0,25)m",
+        "observations": 663,
+        "distinctIds": 4,
+        "rpmAvailable": 0,
+        "gearAvailable": 663,
+        "engineStateAvailable": 663
+      },
+      {
+        "range": "[25,50)m",
+        "observations": 226,
+        "distinctIds": 4,
+        "rpmAvailable": 0,
+        "gearAvailable": 226,
+        "engineStateAvailable": 226
+      },
+      {
+        "range": "[50,100)m",
+        "observations": 479,
+        "distinctIds": 5,
+        "rpmAvailable": 0,
+        "gearAvailable": 479,
+        "engineStateAvailable": 479
+      },
+      {
+        "range": "[100,200)m",
+        "observations": 877,
+        "distinctIds": 9,
+        "rpmAvailable": 0,
+        "gearAvailable": 877,
+        "engineStateAvailable": 877
+      },
+      {
+        "range": "[200,400)m",
+        "observations": 561,
+        "distinctIds": 4,
+        "rpmAvailable": 0,
+        "gearAvailable": 561,
+        "engineStateAvailable": 561
+      },
+      {
+        "range": "[400,infinity)m",
+        "observations": 213,
+        "distinctIds": 2,
+        "rpmAvailable": 0,
+        "gearAvailable": 213,
+        "engineStateAvailable": 213
+      }
+    ],
+    "reconciledAnalyzer": {
+      "canonicalMain": "e5fbd8f3502d3e28169a224caa07471e090e368f",
+      "complete": true,
+      "acquisitionBudgetMs": 2,
+      "acquisitionOverBudgetSamples": 2,
+      "acquisitionOverBudgetPercent": 0.09465215333648841,
+      "maximumSampleGapMs": 86.4866999999947,
+      "listenerPositionCoveragePercent": 100,
+      "listenerVelocityCoveragePercent": 99.95267392333176,
+      "vehiclePositionCoveragePercent": 100,
+      "vehicleVelocityCoveragePercent": 100,
+      "allVehicleRpmAvailabilityPercent": 25.103264490339775,
+      "rpmInterpretation": "All accepted values on unoccupied entities; no accepted player or driven NPC RPM",
+      "emptySelectionSamples": 10
+    }
+  },
+  "performance": {
+    "entireGameProcess": {
+      "ElapsedSeconds": 92.6217003,
+      "GameCpuSeconds": 317.546875,
+      "MeanLogicalCores": 3.4284284781155114,
+      "LogicalProcessors": 16,
+      "CpuPercentAllLogical": 21.427677988221944,
+      "WorkingSetMinMiB": 3962.77734375,
+      "WorkingSetMaxMiB": 4060.1015625
+    },
+    "richAudioCpuDelta": "NOT TESTED",
+    "frameTimeDelta": "NOT TESTED",
+    "matchingApplicationFailureEvents": 0,
+    "stabilityScope": "One short session; no observed crash; no baseline A-B or soak test",
+    "warnings": [
+      "Existing RTSS D3D12 warning and swap-chain reinitialisation",
+      "Existing zero-byte OpenIV.asi failed ASI load and was preserved",
+      "RPH manual unload aborted plugin fiber; ThreadAbortException logged; valid footer and no writer error"
+    ]
+  },
+  "restoration": {
+    "passed": true,
+    "rootFiles": 32,
+    "archiveMetadata": 179,
+    "archiveSampleHashes": 10,
+    "absentTemporaryPaths": 27,
+    "rootDirectoriesMatch": true,
+    "runtimeProcessesAbsent": true,
+    "procmon25Absent": true,
+    "executables": [
+      {
+        "Name": "GTA5.exe",
+        "SHA256": "FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF",
+        "Signature": "Valid",
+        "Version": "1.0.1013.34"
+      },
+      {
+        "Name": "GTA5_Enhanced.exe",
+        "SHA256": "69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5",
+        "Signature": "Valid",
+        "Version": "1.0.1158.16"
+      }
+    ],
+    "generatedRootFilesPreservedAndRemoved": 7,
+    "generatedDirectory": "ExecuteCode containing BOM-only Code1.cs; preserved and removed",
+    "originalAndBackupFileMatchesEach": 9359,
+    "bundleSHA256": "719CB10452AA269ADB1C66B63FEABFD3AED8478362AF29FCC157809F34FABE26",
+    "userCompletedNormalQuitPrompt": true
+  },
+  "nextStep": "Offline public-API/SDK review of rejected RPM, then separately authorised bounded drivetrain validation before full A-E",
+  "privacy": "Raw logs, capture, source snapshots, binaries, manifests with absolute paths and diagnostic data remain private outside Git",
+  "offlineValidation": {
+    "scope": "Pre-reconciliation regression on original sanitised baseline; unchanged approved runtime adapter",
+    "passed": true,
+    "telemetryAssertions": 48,
+    "parserTests": 17,
+    "phase1Checks": 126,
+    "configurationAssertions": 9,
+    "appendExpectations": 8,
+    "benchmarks": [
+      {
+        "CpuMs": 484.375,
+        "Frames": 330000,
+        "GcHeapDeltaBytes": 6178080,
+        "MachineCpuPercent": 6.02408035254479,
+        "MicrosecondsPerFrame": 1.522849696969697,
+        "P50Microseconds": 1.4,
+        "P95Microseconds": 1.6,
+        "P99Microseconds": 2.2,
+        "PrivateBytesAfter": 37838848,
+        "SerializedBytes": 0,
+        "Sources": 1,
+        "WallMs": 502.54040000000003,
+        "Workload": "mock acquisition + tracking"
+      },
+      {
+        "CpuMs": 578.125,
+        "Frames": 20000,
+        "GcHeapDeltaBytes": 4166264,
+        "MachineCpuPercent": 6.348275978995571,
+        "MicrosecondsPerFrame": 28.458760000000005,
+        "P50Microseconds": 25.7,
+        "P95Microseconds": 43.1,
+        "P99Microseconds": 101.8,
+        "PrivateBytesAfter": 30593024,
+        "SerializedBytes": 0,
+        "Sources": 32,
+        "WallMs": 569.1752,
+        "Workload": "mock acquisition + tracking"
+      },
+      {
+        "CpuMs": 515.625,
+        "Frames": 4000,
+        "GcHeapDeltaBytes": 2049320,
+        "MachineCpuPercent": 6.258038203543674,
+        "MicrosecondsPerFrame": 128.740675,
+        "P50Microseconds": 103.5,
+        "P95Microseconds": 255,
+        "P99Microseconds": 448.1,
+        "PrivateBytesAfter": 30539776,
+        "SerializedBytes": 0,
+        "Sources": 128,
+        "WallMs": 514.9627,
+        "Workload": "mock acquisition + tracking"
+      },
+      {
+        "CpuMs": 671.875,
+        "Frames": 600,
+        "GcHeapDeltaBytes": 7271424,
+        "MachineCpuPercent": 6.053125118021862,
+        "MicrosecondsPerFrame": 1156.2123333333334,
+        "P50Microseconds": 1070.5,
+        "P95Microseconds": 1744.6,
+        "P99Microseconds": 2234.6,
+        "PrivateBytesAfter": 33275904,
+        "SerializedBytes": 45138829,
+        "Sources": 32,
+        "WallMs": 693.7274,
+        "Workload": "mock acquisition + tracking + JSON serialization"
+      }
+    ],
+    "pacedFrames": 40,
+    "pacedQueueDrops": 0,
+    "pacedMissedDeadlines": 0
+  },
+  "repositoryState": {
+    "visibility": "public",
+    "visibilityIntentionallyChangedByUser": true,
+    "updatedMain": "e5fbd8f3502d3e28169a224caa07471e090e368f",
+    "initialExperimentBase": "31840d3e91e745c04129463c61b362f22d35573d",
+    "rawPrivateEvidenceUploaded": false
+  },
+  "reconciledOfflineValidation": {
+    "passed": true,
+    "telemetryAssertions": 65,
+    "parserTests": 17,
+    "phase1Checks": 101,
+    "phase1CountReason": "Preserved new main README has fewer local documentation links",
+    "configurationChecks": 9,
+    "appendExpectations": 8,
+    "benchmarks": [
+      {
+        "CpuMs": 500,
+        "Frames": 325000,
+        "GcHeapDeltaBytes": 7866752,
+        "MachineCpuPercent": 6.185151164104827,
+        "MicrosecondsPerFrame": 1.5545916923076923,
+        "P50Microseconds": 1.5,
+        "P95Microseconds": 1.6,
+        "P99Microseconds": 2.3,
+        "PrivateBytesAfter": 37863424,
+        "SerializedBytes": 0,
+        "Sources": 1,
+        "WallMs": 505.2423,
+        "Workload": "mock acquisition + tracking"
+      },
+      {
+        "CpuMs": 515.625,
+        "Frames": 20000,
+        "GcHeapDeltaBytes": 3897448,
+        "MachineCpuPercent": 5.958365111280592,
+        "MicrosecondsPerFrame": 27.043125000000007,
+        "P50Microseconds": 25.4,
+        "P95Microseconds": 28.2,
+        "P99Microseconds": 88.5,
+        "PrivateBytesAfter": 30322688,
+        "SerializedBytes": 0,
+        "Sources": 32,
+        "WallMs": 540.8625000000001,
+        "Workload": "mock acquisition + tracking"
+      },
+      {
+        "CpuMs": 578.125,
+        "Frames": 5000,
+        "GcHeapDeltaBytes": 2712696,
+        "MachineCpuPercent": 6.27853945745339,
+        "MicrosecondsPerFrame": 115.09942000000002,
+        "P50Microseconds": 102.3,
+        "P95Microseconds": 242.3,
+        "P99Microseconds": 364.5,
+        "PrivateBytesAfter": 30580736,
+        "SerializedBytes": 0,
+        "Sources": 128,
+        "WallMs": 575.4971,
+        "Workload": "mock acquisition + tracking"
+      },
+      {
+        "CpuMs": 515.625,
+        "Frames": 600,
+        "GcHeapDeltaBytes": 7271192,
+        "MachineCpuPercent": 6.37359552839539,
+        "MicrosecondsPerFrame": 842.7101666666667,
+        "P50Microseconds": 795.2,
+        "P95Microseconds": 1310,
+        "P99Microseconds": 1578.7,
+        "PrivateBytesAfter": 33292288,
+        "SerializedBytes": 45139176,
+        "Sources": 32,
+        "WallMs": 505.6261,
+        "Workload": "mock acquisition + tracking + JSON serialization"
+      }
+    ],
+    "pacedFrames": 40,
+    "pacedDrops": 0,
+    "pacedMissedDeadlines": 0
+  },
+  "securityReview": {
+    "indexFindings": 0,
+    "historyCredentialPathBinaryFindings": 0,
+    "historyIdentityReviewFlags": 4,
+    "flagsReviewedAs": "GitHub public service committer noreply address on existing canonical main commits; authors use GitHub account noreply address",
+    "historyRewritten": false,
+    "auditorRulesWeakened": false,
+    "privateDiagnosticsPublished": false
+  }
+}

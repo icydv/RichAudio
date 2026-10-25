@@ -1,6 +1,6 @@
 # P2-01 telemetry implementation
 
-Status: implemented and compiled, offline tests executed; no live GTA observations yet. Acoustic rendering, source audio and native audio configuration are untouched.
+Status: implemented, compiled and offline-tested; the original approved adapter has now completed one live Enhanced 1158.16 Story Mode smoke capture. Player/NPC observations exist, but all operating-player/driver-present NPC RPM readings failed range validation. This is not full P2-01 certification. [Evidence and remaining gates](RPH_IO_FAILURE_INVESTIGATION.md). Acoustic rendering, source audio and native audio configuration are untouched.
 
 ## Components and build
 

@@ -1,6 +1,6 @@
 # RichAudio performance and immersion guardrails
 
-**Status:** Engineering design and offline instrumentation, 25 October 2026. No acoustic renderer is operational and no in-game performance claim has been measured.
+**Status:** Engineering design and offline instrumentation, 25 October 2026. No acoustic renderer is operational. One live telemetry smoke capture now provides acquisition timings and whole-game process samples, but no comparative frame-time or RichAudio CPU-overhead measurement. [Actual measurements and limits](RPH_IO_FAILURE_INVESTIGATION.md).
 
 ## Principle
 
@@ -14,7 +14,7 @@ The P2-01 telemetry prototype implements a limited, read-only acquisition path:
 - The scheduler skips missed deadlines rather than creating a catch-up burst.
 - Full queues cause records to be dropped and counted instead of blocking the sampling fiber.
 - The offline capture analyzer now reports the declared budget, measured samples, the number/percentage exceeding it, peak acquisition time and how often sampling omitted sources for budget reasons.
-- The analyzer **does not enforce** the budget; it measures it. These measurements are available only for captures with valid budget metadata, and are not currently live GTA results.
+- The analyzer **does not enforce** the budget; it measures it. These measurements require valid budget metadata. The first live capture recorded two of 2,113 samples above 2 ms, with a 9.7618 ms peak; this is acquisition timing, not frame-time overhead or a hard execution bound.
 
 **Important limitation:** `World.GetAllVehicles()` and individual framework getter calls are not preemptible from our code. A configured 2 ms acquisition budget is **not** a 2 ms upper bound on RPH execution time. The current first-N candidate selection is not a perceptual priority system. Do not imply that either is solved.
 

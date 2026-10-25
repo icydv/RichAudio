@@ -40,7 +40,9 @@ We're also keeping potential **FiveM support** in mind. That is a future possibi
 
 We've researched GTA V's audio files, designed the foundations of the new system and built an early vehicle-data prototype that passes offline tests.
 
-The next challenge is getting that prototype running reliably inside GTA V, then proving we can enhance individual sounds without clashing with the game's existing audio.
+Our first controlled Story Mode smoke test has now loaded RichAudio and captured genuine player-vehicle and NPC data at about 20 Hz. The game was restored afterward. Engine RPM readings still need investigation, and full gameplay validation remains ahead. See the [evidence-backed runtime report](docs/RPH_IO_FAILURE_INVESTIGATION.md).
+
+The next challenge is making those vehicle readings trustworthy, then proving we can enhance individual sounds without clashing with the game's existing audio.
 
 **There is no finished audio engine or public release yet.** We're working through the difficult parts one step at a time, and we'll share real progress rather than promise features before they work.
 
