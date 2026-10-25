@@ -1,0 +1,232 @@
+{
+  "SchemaVersion": 1,
+  "ExperimentDate": "2026-10-25",
+  "CanonicalBase": "31840d3e91e745c04129463c61b362f22d35573d",
+  "Branch": "compat/rph-file-sharing-trace",
+  "RphVersion": "1.132.1428.17748",
+  "RphSHA256": "73F05B3F7973D4731F4151AE061DD3C991065E8BF3ECE51EA1D9AB728B9B42AC",
+  "GameVersion": "1.0.1158.16",
+  "RuntimeAttempts": 1,
+  "RphArguments": [
+    "-forcesettings",
+    "-log"
+  ],
+  "ArgumentsRecoveredFromPriorDump": true,
+  "StoryModeOnly": true,
+  "NoBattlEyeArgumentObserved": true,
+  "OriginalPlanPinUnchanged": "9A12B751A312549150B1484151F41898F5BCF8E5A7BEC29653EA629DBD976906",
+  "DeployedAdditions": 26,
+  "TelemetryBinaryUnchanged": true,
+  "OnlyTelemetryConfigChange": "OutputDirectory relocated to ignored current development workspace; original bytes restored before removal",
+  "CaptureInitiallyEnabled": false,
+  "Diagnostic": {
+    "Tool": "Microsoft Process Monitor",
+    "Version": "4.12",
+    "Authenticode": "Valid Microsoft signatures on all supplied executables",
+    "Source": "https://download.sysinternals.com/files/ProcessMonitor.zip",
+    "X64SHA256": "28495E642B2A465474A4EDC58380EAF8B7EE580F3FBCB4141061DEADAFE9B885",
+    "MaximumSeconds": 300,
+    "WatchdogGiB": 8,
+    "NativeTraceBytes": 2708403074,
+    "NativeTraceSHA256": "56FAEDAD66A938EFDA553A6D2B6DFF453E17484B628CFBF5F2DD28D9CF08DF3B",
+    "ReportedNativeEvents": 6172078,
+    "ExportedDisplayedRows": 4269722,
+    "DisplayExcludedClasses": [
+      "Profiling",
+      "IPC"
+    ],
+    "ExportEndUtc": "2026-10-25T10:55:08.5259723Z",
+    "ExactGameLogEvents": 23811,
+    "PrivateHistoricalCopyEventsExcluded": 34,
+    "StacksExportedEvents": 23811,
+    "ObserverReadLiveGameLog": false,
+    "RawArtifactsCommitted": false
+  },
+  "Failure": {
+    "File": "GAME_ROOT/RagePluginHookLauncher.log",
+    "Operation": "CreateFile for append write access",
+    "HResult": "0x80070020",
+    "EventUtc": "2026-10-25T10:54:59.306699Z",
+    "EventId": 1026,
+    "EventRecord": 34631,
+    "Process": "RAGEPluginHook.exe",
+    "PID": 16800,
+    "TID": 13048,
+    "DumpBytes": 47011624,
+    "DumpSHA256": "F886D45E012E490A9241683B829DC7E018825D5077FC4726F6C25ACEB3D7EFFF"
+  },
+  "ConflictingOpen": {
+    "Confidence": "CONFIRMED for this attempt at process/module path level",
+    "Process": "GTA5_Enhanced.exe",
+    "PID": 9460,
+    "TID": 24948,
+    "OpenUtc": "2026-10-25T10:54:55.6952805Z",
+    "DesiredAccess": "Generic Read",
+    "ShareMode": "Read",
+    "Options": [
+      "No Buffering",
+      "Non-Directory File"
+    ],
+    "GameOpenCount": 1,
+    "GameCloseCountDuringCapture": 0,
+    "StackModules": [
+      "GTA5_Enhanced.exe",
+      "dstoragecore.dll",
+      "KernelBase.dll",
+      "ntdll.dll",
+      "ntoskrnl.exe",
+      "FLTMGR.SYS"
+    ],
+    "NumericHandleUnavailable": true,
+    "FinalCloseAfterCaptureNotObserved": true,
+    "PermanentLeakNotEstablished": true,
+    "PriorUntracedAttemptOwnerNotRetroactivelyEstablished": true
+  },
+  "Chronology": [
+    {
+      "Time of Day": "10:54:53.2200992",
+      "Process Name": "RAGEPluginHook.exe",
+      "PID": "16800",
+      "Operation": "CreateFile",
+      "Result": "SUCCESS",
+      "Detail": "Desired Access: Generic Write, Read Attributes, Disposition: OpenIf, Options: Sequential Access, Synchronous IO Non-Alert, Non-Directory File, Open No Recall, Attributes: n/a, ShareMode: Read, AllocationSize: 0, OpenResult: Opened",
+      "TID": "13048",
+      "ExportRow": "3533363"
+    },
+    {
+      "Time of Day": "10:54:53.2203831",
+      "Process Name": "RAGEPluginHook.exe",
+      "PID": "16800",
+      "Operation": "CloseFile",
+      "Result": "SUCCESS",
+      "Detail": "",
+      "TID": "13048",
+      "ExportRow": "3533378"
+    },
+    {
+      "Time of Day": "10:54:53.2204542",
+      "Process Name": "RAGEPluginHook.exe",
+      "PID": "16800",
+      "Operation": "IRP_MJ_CLOSE",
+      "Result": "SUCCESS",
+      "Detail": "",
+      "TID": "13048",
+      "ExportRow": "3533379"
+    },
+    {
+      "Time of Day": "10:54:55.6952805",
+      "Process Name": "GTA5_Enhanced.exe",
+      "PID": "9460",
+      "Operation": "CreateFile",
+      "Result": "SUCCESS",
+      "Detail": "Desired Access: Generic Read, Disposition: Open, Options: No Buffering, Non-Directory File, Attributes: N, ShareMode: Read, AllocationSize: n/a, OpenResult: Opened",
+      "TID": "24948",
+      "ExportRow": "3660387"
+    },
+    {
+      "Time of Day": "10:54:59.3043600",
+      "Process Name": "RAGEPluginHook.exe",
+      "PID": "16800",
+      "Operation": "CreateFile",
+      "Result": "SHARING VIOLATION",
+      "Detail": "Desired Access: Generic Write, Read Attributes, Disposition: OpenIf, Options: Sequential Access, Synchronous IO Non-Alert, Non-Directory File, Open No Recall, Attributes: n/a, ShareMode: Read, AllocationSize: 0",
+      "TID": "13048",
+      "ExportRow": "3866827"
+    },
+    {
+      "Time of Day": "10:54:59.3058375",
+      "Process Name": "RAGEPluginHook.exe",
+      "PID": "16800",
+      "Operation": "CreateFile",
+      "Result": "SHARING VIOLATION",
+      "Detail": "Desired Access: Generic Write, Read Attributes, Disposition: OpenIf, Options: Sequential Access, Synchronous IO Non-Alert, Non-Directory File, Open No Recall, Attributes: n/a, ShareMode: Read, AllocationSize: 0",
+      "TID": "13048",
+      "ExportRow": "3866893"
+    }
+  ],
+  "Checkpoints": {
+    "Capture": "PASS",
+    "EnhancedSelection": "PASS",
+    "RphStartup": "FAIL",
+    "StoryMode": "BLOCKED",
+    "PluginMetadataDiscovery": "PASS",
+    "RichAudioInitialisation": "NOT TESTED",
+    "LiveTelemetry": "BLOCKED",
+    "GameplayStabilityAndPerformance": "NOT TESTED",
+    "NormalGameShutdown": "PASS",
+    "GameInstallationRestoration": "PASS",
+    "DiagnosticCleanup": "BLOCKED"
+  },
+  "Telemetry": {
+    "PlayerSamples": 0,
+    "NpcSamples": 0,
+    "MaximumNpcDistanceMetres": null,
+    "MeasuredCadenceHz": null,
+    "MeasuredGamePerformanceDelta": null,
+    "AECompleted": false,
+    "Phase3Started": false
+  },
+  "Restoration": {
+    "OriginalRootFilesCompared": 32,
+    "RootDifferences": 0,
+    "ArchiveMetadataCompared": 179,
+    "ArchiveMetadataDifferences": 0,
+    "SampleHashesCompared": 10,
+    "SampleHashDifferences": 0,
+    "RemainingAdditions": 0,
+    "RootDirectoryDifferences": 0,
+    "RenameTargetAbsent": true,
+    "Executables": [
+      {
+        "Name": "GTA5_Enhanced.exe",
+        "Bytes": 55819384,
+        "SHA256": "69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5"
+      },
+      {
+        "Name": "GTA5.exe",
+        "Bytes": 55203448,
+        "SHA256": "FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF"
+      }
+    ],
+    "OriginalAndBackupFilesEach": 9359,
+    "OriginalAndBackupDifferences": 0,
+    "GeneratedFilesPreservedAndRemoved": [
+      "commandline.txt",
+      "RagePluginHook.ini",
+      "RagePluginHookLauncher.log",
+      "startup.rphs"
+    ],
+    "SharedVc2010Retained": true
+  },
+  "DiagnosticResiduals": {
+    "CaptureAndWatchdogExited": true,
+    "AllProcmonProcessesExited": true,
+    "Filter": "PROCMON25",
+    "AttachedInstances": 0,
+    "SupportedUnloadResult": "0x801f0010; refused",
+    "ForcedUnloadAttempted": false,
+    "AutomaticRebootAttempted": false,
+    "ApplicationSettingsRemain": true,
+    "ApplicationSettingsRemovalBlockedByAutomaticApprovalReview": true,
+    "ReviewReason": "blocked by policy; no further reason supplied",
+    "RequiredFollowUp": "User-controlled normal restart, then verify filter absence; app settings cleanup remains pending"
+  },
+  "Decision": {
+    "AnotherImmediateLaunchJustified": false,
+    "RphCorrectionReview": "Publisher-recommended DirectStorageFix matches mechanism but uses MinHook/pattern scanning and a different proxy loader; requires exact-build/license/manifest review and separate approval, not installed",
+    "Alternative": "Minimal SHV ASI adapter is contingent on publisher support for exact Enhanced 1158.16; currently advertised 1158.13 is insufficient",
+    "Phase2Blocked": true
+  },
+  "OfflineValidation": {
+    "TelemetryAssertions": 48,
+    "ParserTests": 17,
+    "Phase1ChecksBeforeFinalDocs": 126,
+    "ConfigurationAssertions": 9,
+    "AppendExpectations": 8,
+    "DeploymentNegativeChecks": 2,
+    "GameRuntimeUsed": false,
+    "FinalPhase1Checks": 128,
+    "FinalPassed": true,
+    "FinalRunScope": "Core/analyzer/config/append compiled and tested outside GTA; no adapter rebuild or game certification"
+  }
+}

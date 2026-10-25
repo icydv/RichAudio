@@ -1,14 +1,19 @@
 # Explicitly approved Phase 2.2 experiment only. No launch, executable-content or archive edits.
 [CmdletBinding()]
-param([Parameter(Mandatory=$true)][ValidateSet('Begin','Restore')][string]$Action)
+param(
+    [Parameter(Mandatory=$true)][ValidateSet('Begin','Restore')][string]$Action,
+    [Parameter(Mandatory=$true)][string]$PlanPath,
+    [Parameter(Mandatory=$true)][string]$AttemptDirectory
+)
 $ErrorActionPreference='Stop'
 $repo=[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot)).TrimEnd('\')
-$game='__GAME_ROOT__'
-$evi=Join-Path $repo 'evidence\phase2.2\controlled-attempt-01'
-$local=Join-Path $repo '.local\phase2.2\controlled-attempt-01'
-$planPath=Join-Path $repo 'evidence\phase2.2\controlled-test-plan.json'
+$planPath=[IO.Path]::GetFullPath($PlanPath)
 if((Get-FileHash -LiteralPath $planPath).Hash -ne '9A12B751A312549150B1484151F41898F5BCF8E5A7BEC29653EA629DBD976906'){throw 'Reviewed plan bytes changed.'}
 $plan=Get-Content -LiteralPath $planPath -Raw | ConvertFrom-Json
+$game=[IO.Path]::GetFullPath($plan.GameRoot).TrimEnd('\')
+$local=[IO.Path]::GetFullPath($AttemptDirectory).TrimEnd('\')
+if(!$local.StartsWith((Join-Path $repo '.local')+'\',[StringComparison]::OrdinalIgnoreCase)){throw 'Attempt journal must stay in ignored development storage.'}
+$evi=Join-Path $local 'journal'
 function Parents([string]$Path){for($d=[IO.DirectoryInfo]::new($Path);$null -ne $d;$d=$d.Parent){if($d.Exists -and ($d.Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Reparse-point path rejected: '+$d.FullName}}}
 foreach($p in @($game,$evi,$local)){Parents $p}
 if(@(Get-Process -Name GTA5,GTA5_Enhanced,RAGEPluginHook,OpenIV,CodeWalker -ErrorAction SilentlyContinue).Count){throw 'Close all game/runtime/tool processes before changing the file state.'}
