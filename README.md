@@ -44,6 +44,10 @@ The next challenge is getting that prototype running reliably inside GTA V, then
 
 **There is no finished audio engine or public release yet.** We're working through the difficult parts one step at a time, and we'll share real progress rather than promise features before they work.
 
+## Open-source direction
+
+The project is intentionally developed in public. **RichAudio is intended to be open source**, with community visibility and future contributions in mind. A specific source licence and contribution policy have **not yet been selected**, so public access to the repository does not by itself grant permission to copy, modify or redistribute its contents. Licensing will be settled before inviting source reuse or a public software release. Rockstar game assets, proprietary runtime components and third-party sound packs are not covered by any prospective RichAudio source licence.
+
 ## Follow the project
 
 Interested in where this is heading? Watch or star the repository to follow development.
