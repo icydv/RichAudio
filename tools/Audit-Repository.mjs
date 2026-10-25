@@ -15,9 +15,27 @@ const rules = [
   ['personal-directory', /[A-Z]:[\\/]+Users[\\/]+(?!Public(?:[\\/]|$)|Default(?:[\\/]|$))[^\s"'<>]+/i],
   ['private-key', /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/],
   ['credential-pattern', /\b(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|sk-(?:proj-)?[A-Za-z0-9_-]{32,}|AKIA[A-Z0-9]{16})\b/],
+  ['signed-or-authenticated-url-review', /[?&](?:access_token|auth_token|api_key|X-Amz-Signature|csrfKey)=[^\s"'&]+/i],
   ['machine-identifier-review', /["']?(?:ComputerName|MachineName|MachineGuid|SerialNumber|HardwareId)["']?\s*[:=]\s*["'][^"']+["']/i]
 ];
 const findings = []; let blobs = 0, bytes = 0;
+if (!current) {
+  for (const ref of git('for-each-ref', '--format=%(refname)').toString().trim().split('\n').filter(Boolean)) {
+    if (rules[0][1].test(ref)) findings.push({path: '<ref-name>', category: 'personal-directory'});
+  }
+  for (const oid of git('rev-list', '--all').toString().trim().split('\n').filter(Boolean)) {
+    const metadata = git('cat-file', 'commit', oid).toString('utf8');
+    for (const [category, pattern] of rules) if (pattern.test(metadata)) findings.push({oid, path: '<commit-metadata>', category});
+    for (const line of metadata.split('\n').filter(l => /^(author|committer) /.test(l))) {
+      if (!/ <[^<>]+@(?:users\.noreply\.github\.com|richaudio\.invalid)> /.test(line)) {
+        findings.push({oid, path: '<commit-identity>', category: 'nonapproved-email-review'});
+      }
+    }
+    for (const name of git('ls-tree', '-r', '--name-only', oid).toString().split('\n')) {
+      if (rules[0][1].test(name)) findings.push({oid, path: '<historical-filename>', category: 'personal-directory'});
+    }
+  }
+}
 for (const [oid, path] of objects) {
   if (git('cat-file', '-t', oid).toString().trim() !== 'blob') continue;
   const content = git('cat-file', 'blob', oid); blobs++; bytes += content.length;

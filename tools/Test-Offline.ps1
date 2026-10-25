@@ -26,6 +26,16 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Offline telemetry tests failed.'}
     & (Join-Path $build 'RichAudio.Telemetry.Analysis.exe') (Join-Path $output 'mock-session.jsonl') (Join-Path $output 'mock-analysis.json')
     if($LASTEXITCODE -ne 0){throw 'Fixture analysis failed.'}
+    $configTest=Join-Path $build 'RichAudio.Config.Tests.exe'
+    & $compiler /nologo /optimize+ /warnaserror+ /r:System.Runtime.Serialization.dll ('/r:'+(Join-Path $build 'RichAudio.Telemetry.Core.dll')) ('/out:'+$configTest) (Join-Path $repo 'src\telemetry\Rph\Configuration.cs') (Join-Path $repo 'tests\diagnostics\TestConfig.cs')
+    if($LASTEXITCODE -ne 0){throw 'Configuration test compilation failed.'}
+    & $configTest (Join-Path $output 'config-fixtures')
+    if($LASTEXITCODE -ne 0){throw 'Configuration boundary tests failed.'}
+    $appendTest=Join-Path $build 'RichAudio.Append.Tests.exe'
+    & $compiler /nologo /optimize+ /warnaserror+ /r:System.Runtime.Serialization.dll ('/out:'+$appendTest) (Join-Path $repo 'tests\diagnostics\AppendProbe.cs')
+    if($LASTEXITCODE -ne 0){throw 'Append probe compilation failed.'}
+    & $appendTest (Join-Path $output 'append-fixtures') (Join-Path $output 'append-results.json')
+    if($LASTEXITCODE -ne 0){throw 'Append sharing tests failed.'}
     & git diff --check
     if($LASTEXITCODE -ne 0){throw 'Whitespace check failed.'}
     Write-Output ('OFFLINE ONLY: reports and benchmarks at '+$output)

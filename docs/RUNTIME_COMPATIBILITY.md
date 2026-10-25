@@ -1,5 +1,7 @@
 # P2-01 runtime compatibility report
 
+**Postmortem update:** a matching existing crash dump identifies HRESULT **0x80070020** and **RagePluginHookLauncher.log** as the blocked append target. The incompatible handle owner is unresolved; DirectStorage is not established as its cause. See [investigation and approval boundary](RPH_IO_FAILURE_INVESTIGATION.md). No subsequent game experiment occurred.
+
 **Current, 25 October 2026:** the approved temporary filename test positively identified Enhanced 1.0.1158.16 and launched its real executable with `-nobattleye`. RPH then crashed with an unhandled IOException in an append operation before successful hook/plugin/Story Mode verification. All 26 additions were removed and original integrity verified. Standalone API binding and OpenRPF coexistence remain untested. The previous pending-selection/approval paragraphs below are historical records. See [actual Enhanced attempt](P2_01_ENHANCED_RUNTIME_ATTEMPT.md); no additional deployment is part of the architectural update.
 
 **Phase 2.2 investigation:** current Steam depots exclude GTA5.exe and positively match GTA5_Enhanced.exe; normal Rockstar logs select 1158.16. The community-supported temporary alias rename is a strongly corroborated diagnostic, with an independent verified backup and no-overwrite procedure prepared. No official explicit selector or local causal confirmation has been established. Both original filenames remain intact; new rename/redeployment approval is pending. [Selection report and proposal](PHASE2_2_EXECUTABLE_SELECTION.md).

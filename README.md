@@ -1,5 +1,11 @@
 # RichAudio
 
+## Sanitised publication copy — 25 October 2026
+
+Seven historical milestones have been rewritten in a disposable clone, with an exact old/new [mapping and preservation check](evidence/publication/history-integrity.json). The original development repository and all private evidence remain unchanged and independently backed up. Personal paths/commit identities and 11 raw session files were removed from publication history. [Sanitisation report and upload boundary](docs/REPOSITORY_SANITISATION.md): first upload still requires explicit approval. Historical deployment manifests contain placeholders and are not installers; do not update their pins to make them run.
+
+Postmortem evidence now identifies the startup failure as **0x80070020 sharing violation while appending RagePluginHookLauncher.log**. Its conflicting handle owner remains unknown. [Evidence and smallest proposed experiment](docs/RPH_IO_FAILURE_INVESTIGATION.md). No new GTA deployment/rename/test occurred. P2-01 still has no genuine live telemetry validation.
+
 Immersion-first, physics-informed acoustic simulation and audio enhancement, initially for **GTA V Enhanced, PC, single-player**. The product ambition covers vehicles, aircraft, impulsive events, sirens, ambience, weather and interiors in one coherent acoustic world. Physical presence and meaningful quiet/loud contrast matter as much as equations. Blanket bass boosts, louder replacement packs and generic reverb do not meet this standard.
 
 ## Current checkpoint — 25 October 2026

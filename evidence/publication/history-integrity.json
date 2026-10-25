@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "historicalMilestones": 7,
+  "mappedCommits": {
+    "45757b5510a1e4c8baee914c9c21c4e66c523f5c": "cd21c5d8e8758c6c5e700b8d7e0047c3fcc86046",
+    "648199c57f4da3f19efb17880211fac8ba59e8a4": "78ffe201b4234646e8f643fa66421a0d7d9dd9b9",
+    "67138ab1f1db106235450be9fd019ef5dfbeee3d": "546458685d4858bbf82ac1105aa390de91159d60",
+    "83b2c482feeef315f63a77987ef0e8d809e40ae7": "c962b141ffa958af6981d2dec2737427ce6688ce",
+    "bce9a278d8f1f0ff92935ef61886cb6bb2a7fc57": "ecd75740899b2daedcc151f04fdc90d53e597e9f",
+    "e00878dc5b68ec4cdba32bbbc986da26572f0be0": "daacdb33c9d07d85e1c86c41909d81387a046524",
+    "e3fc0e062da2b306bbcc33c908775c1141009ad7": "ac34a6f89aa415047bc072f6e7ece48d9ea06252"
+  },
+  "retainedFileVersionsCompared": 547,
+  "sourceTestToolVersionsCompared": 159,
+  "removedRawPaths": [
+    "evidence/phase2.1/live-attempt-20261024/all-archive-metadata-before.json",
+    "evidence/phase2.1/live-attempt-20261024/application-events.json",
+    "evidence/phase2.1/live-attempt-20261024/archive-hashes-before.json",
+    "evidence/phase2.1/live-attempt-20261024/deployment-receipt.json",
+    "evidence/phase2.1/live-attempt-20261024/launch-attempt.json",
+    "evidence/phase2.1/live-attempt-20261024/phase1-regression.json",
+    "evidence/phase2.1/live-attempt-20261024/preflight.json",
+    "evidence/phase2.1/live-attempt-20261024/prerequisite-install.json",
+    "evidence/phase2.1/live-attempt-20261024/rollback-receipt.json",
+    "evidence/phase2.1/live-attempt-20261024/root-baseline.json",
+    "evidence/phase2.1/live-attempt-20261024/runtime-generated-files.json"
+  ],
+  "parentGraphPreserved": true,
+  "commitMessagesAndDatesPreserved": true,
+  "onlyDeclaredContentTransforms": true,
+  "refs": [
+    "refs/heads/main ecd75740899b2daedcc151f04fdc90d53e597e9f"
+  ],
+  "originalSourceReadFromVerifiedBackup": true
+}

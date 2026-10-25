@@ -1,5 +1,7 @@
 # Repository, evidence and release governance
 
+**Publication update, 25 October 2026:** the user subsequently authorised an independently backed-up disposable-clone rewrite. The [sanitisation report](docs/REPOSITORY_SANITISATION.md) supersedes the initial hold/remediation status below; the original remains unchanged, all seven milestones have mapped successors, and this copy awaits explicit first-upload approval after final audits. Never push the original ancestry or merge it into the sanitised branch. Public licensing remains undecided. The expanded audit now covers commit identities and signed URLs as well as paths/binaries, and the offline suite adds nine configuration and eight append checks.
+
 Status: 25 October 2026. This governance update preserves the original local repository and development gates. The product vision is defined by the README, architecture and acoustic design; no renderer or FiveM implementation is added here.
 
 ## Repository destination and upload hold

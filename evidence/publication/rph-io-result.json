@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "failingProcess": "RAGEPluginHook.exe",
+  "eventRecordId": 34610,
+  "utc": "2026-10-25T01:54:57.5997543Z",
+  "eventId": 1026,
+  "exceptionType": "System.IO.IOException",
+  "nativeExceptionCode": "0xe0434352",
+  "exceptionParameter0": "0xffffffff80070020",
+  "decodedHResult": "0x80070020",
+  "win32Code": 32,
+  "win32Name": "ERROR_SHARING_VIOLATION",
+  "failingFile": "GAME_ROOT/RagePluginHookLauncher.log",
+  "operation": "File.InternalAppendAllText -> StreamWriter -> FileStream open",
+  "dumpSHA256": "FFF0C8AD90D86A167F6F9FE7D93DDD32748AE1310EF117431EBCC32A4E0D3522",
+  "dumpHasHandleDataStream": false,
+  "immediateIoFailureEstablished": true,
+  "conflictingHandleOwner": null,
+  "directStorageCausationEstablished": false,
+  "permissionsCausationEstablished": false,
+  "richAudioExecuted": false,
+  "rawDumpRedistributable": false
+}

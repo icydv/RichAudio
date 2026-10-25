@@ -1,0 +1,76 @@
+{
+  "SchemaVersion": 1,
+  "Scope": "Sanitised checkout offline regression; no gameplay",
+  "ExecutedUtc": "2026-10-25T02:29:22.9185566Z",
+  "MetadataParserTestsPassed": 17,
+  "Phase1ChecksPassed": 126,
+  "TelemetryAssertionsPassed": 48,
+  "ConfigurationAssertionsPassed": 9,
+  "AppendExpectationsPassed": 8,
+  "PacedFrames": 40,
+  "PacedMissedDeadlines": 0,
+  "PacedQueueDrops": 0,
+  "AppendResults": [
+    {
+      "Case": "normal-existing-file",
+      "ExceptionType": null,
+      "HResult": null,
+      "Message": null,
+      "Success": true
+    },
+    {
+      "Case": "missing-file-created",
+      "ExceptionType": null,
+      "HResult": null,
+      "Message": null,
+      "Success": true
+    },
+    {
+      "Case": "reader-denies-writers",
+      "ExceptionType": "System.IO.IOException",
+      "HResult": "0x80070020",
+      "Message": "The process cannot access the file '<PROBE_ROOT>\\append.txt' because it is being used by another process.",
+      "Success": false
+    },
+    {
+      "Case": "writer-denies-writers",
+      "ExceptionType": "System.IO.IOException",
+      "HResult": "0x80070020",
+      "Message": "The process cannot access the file '<PROBE_ROOT>\\append.txt' because it is being used by another process.",
+      "Success": false
+    },
+    {
+      "Case": "reader-allows-writers",
+      "ExceptionType": null,
+      "HResult": null,
+      "Message": null,
+      "Success": true
+    },
+    {
+      "Case": "directory-as-file",
+      "ExceptionType": "System.UnauthorizedAccessException",
+      "HResult": "0x80070005",
+      "Message": "Access to the path '<PROBE_ROOT>' is denied.",
+      "Success": false
+    },
+    {
+      "Case": "read-only-file",
+      "ExceptionType": "System.UnauthorizedAccessException",
+      "HResult": "0x80070005",
+      "Message": "Access to the path '<PROBE_ROOT>\\append.txt' is denied.",
+      "Success": false
+    },
+    {
+      "Case": "missing-parent-directory",
+      "ExceptionType": "System.IO.DirectoryNotFoundException",
+      "HResult": "0x80070003",
+      "Message": "Could not find a part of the path '<PROBE_ROOT>\\absent\\file.txt'.",
+      "Success": false
+    }
+  ],
+  "AdapterCompiledAgainstAuthenticLocalSdk": true,
+  "AdapterSHA256": "7953B39A8E726980DC30D908844C32D8E7DE2DF6D8F809097A9844B48390B127",
+  "NoSdkOrRuntimeVendored": true,
+  "HostedCiExecuted": false,
+  "GameTestingPerformed": false
+}

@@ -7,5 +7,5 @@
   "CensusLimit": 128,
   "AcquisitionBudgetMs": 2.0,
   "ReadDrivetrain": true,
-  "OutputDirectory": "__USER_HOME__\\Documents\\RichAudio\\.local\\captures"
+  "OutputDirectory": ""
 }

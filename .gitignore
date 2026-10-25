@@ -50,3 +50,11 @@ dist/
 *.etl
 *.evtx
 *.wpr
+*.bundle
+*.pml
+*.wer
+/evidence/phase2.1/live-attempt-*/*.json
+!/evidence/phase2.1/live-attempt-*/result.json
+!/evidence/phase2.1/live-attempt-*/post-rollback-integrity.json
+!/evidence/phase2.1/live-attempt-*/game-executable-metadata.json
+!/evidence/phase2.1/live-attempt-*/startup-binary-versions.json
