@@ -1,0 +1,294 @@
+{
+  "SchemaVersion": 1,
+  "RecordedUtc": "2026-10-25T10:18:30.3183802Z",
+  "BaseCommit": "31840d3e91e745c04129463c61b362f22d35573d",
+  "Branch": "compat/rph-launcher-logging-recovery",
+  "Decision": "BLOCKED_BEFORE_DEPLOYMENT",
+  "BlockingCondition": "Supported version-specific suppression of launcher-log append not established",
+  "RphVersion": "1.132.1428.17748",
+  "RphSHA256": "73F05B3F7973D4731F4151AE061DD3C991065E8BF3ECE51EA1D9AB728B9B42AC",
+  "ExpectedEnhancedBuild": "1.0.1158.16",
+  "KnownFailureHResult": "0x80070020",
+  "KnownFailureFile": "GAME_ROOT/RagePluginHookLauncher.log",
+  "VerifiedDisableMechanism": null,
+  "NormalInvocationProvesSuppression": false,
+  "FirstLoggedDependencyCheckUtc": "2026-10-25T01:53:11.919Z",
+  "FirstObservedIniStageUtc": "2026-10-25T01:53:13.501Z",
+  "EarlyLoggerActiveBeforeObservedIniStage": true,
+  "StagedFiles": [
+    {
+      "RelativeDestination": "cursor_32_2.png",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "BBAC461B7BA311CC476CD5780FD2787628479E37D91CF3A2CCC91560F6200A1A"
+    },
+    {
+      "RelativeDestination": "DdsConvert.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "D115D8C9A817B67C3CD042E51BB941D74539DCA655DE7BE8A3CBAD058D3B2764"
+    },
+    {
+      "RelativeDestination": "DefaultSkin.png",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "333D5611913A3907296DC787625C0F5043277285DAA49CDA0C8976820AB50FA4"
+    },
+    {
+      "RelativeDestination": "discord-rpc.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "5CC2E504800CF4ED2F4781364F661EA22349658DDC391B5D54195E573109D87B"
+    },
+    {
+      "RelativeDestination": "DiscordRpcNet.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "952605857477708168DAFFFA8E9879494F9832CF979A5B116DAA3D903A154569"
+    },
+    {
+      "RelativeDestination": "EasyHook.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "3153844BDAEE8A55C812D072B0E25F992E716174FC7D987944F4B8CF6DDD1F83"
+    },
+    {
+      "RelativeDestination": "EasyHook64.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "62842ECD61D855199C086600526B697941DCB56A10D4D6EF7D610FFC6369F6D6"
+    },
+    {
+      "RelativeDestination": "EasyLoad64.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "F7766C70B4C82341F32783C72B2CE1430AAE95C6D713A3431DAED7B1F4E40DE7"
+    },
+    {
+      "RelativeDestination": "FW1FontWrapper.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "1BA5BB9FFEA32A8C30B5C8B7139E15DDC36A43130465B4D1CE4C7B77FA6FCE25"
+    },
+    {
+      "RelativeDestination": "Gwen.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "33275AF76FCD12157732A80DF4795590D409A1DF46B2B32A5112CA11D6AA5267"
+    },
+    {
+      "RelativeDestination": "Gwen.UnitTest.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "CF68F7773FEB5756E050A4503F142C67B17C1E4BECF23A878649960B58259017"
+    },
+    {
+      "RelativeDestination": "LMS.Common.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "8D5593ABB8A939519365293D3325B83428F8304B56C59CCA37929637E7D6FB50"
+    },
+    {
+      "RelativeDestination": "LMS.PortableExecutable.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "4389B18342461CC11B48EC7A35C76BEA20BEB0A76724BA77C2ED0406E5517ED2"
+    },
+    {
+      "RelativeDestination": "Microsoft.Expression.Drawing.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "1D69EAF538008E0FE1A7EB2CE0124A49B95C491797749640C8351ED4643F5C97"
+    },
+    {
+      "RelativeDestination": "Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "FCCBC0612BD7F71D8038918F15C40A0B6C5426D4B0890496450D28D924E8EC01"
+    },
+    {
+      "RelativeDestination": "Mono.Cecil.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "0F6465CE57A0CBABC37013C8E3C9F110672DE1C127B6192177D59EB1C7809772"
+    },
+    {
+      "RelativeDestination": "Mono.Cecil.Mdb.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "B8625ACE855A3086E2086AF418E17DAF24A30A4FBFFC559C42F329EDEC52806E"
+    },
+    {
+      "RelativeDestination": "Mono.Cecil.Pdb.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "25EB34CF9A7038D71CA15DDBFB3C180B4A2119219D487FD760437F5DA7EDF292"
+    },
+    {
+      "RelativeDestination": "Mono.Cecil.Rocks.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "822C94D1C2AB96EFEB19BC5F1D304586E70A004D2F44F372377F33F2545EB921"
+    },
+    {
+      "RelativeDestination": "RAGEPluginHook.exe",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "73F05B3F7973D4731F4151AE061DD3C991065E8BF3ECE51EA1D9AB728B9B42AC"
+    },
+    {
+      "RelativeDestination": "RPH_Readme.txt",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "DAE5B2742A2FA0313C89B4135A4266BA9D14AFA24E8A38C23765829B6DE91B48"
+    },
+    {
+      "RelativeDestination": "SlimDX.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "194968B5010BE986E33669928B9F966A67C6EB4E1CF4AC4DA6B90728E242A516"
+    },
+    {
+      "RelativeDestination": "System.ValueTuple.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "79FAC2E8355A7BBB94D40D25FE0E34D5CEDF5426A176F20F1CCD5E0606F0F082"
+    },
+    {
+      "RelativeDestination": "XInput1_4.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "BD0BA909DE46470E0DDBF88CD72D7CF6F1EB04B709616366692EAEA87B4C0551"
+    },
+    {
+      "RelativeDestination": "Plugins\\RichAudio.Telemetry.Rph.dll",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "DBC5F600C37AD7579F49EBA92A352BEE1AAF452F6EF820CEF87B86B8547D5BE0"
+    },
+    {
+      "RelativeDestination": "Plugins\\RichAudio.Telemetry.Rph.json",
+      "SourceAvailable": true,
+      "SourceHashMatches": true,
+      "DestinationExists": false,
+      "ExpectedSHA256": "B0CCA8C1B0AB7B894C2319BBDE36C8C718C96A4A92222B7D59D798267ADCF249"
+    }
+  ],
+  "OriginalRootRecordsCompared": 32,
+  "RootDifferenceCount": 0,
+  "ArchiveMetadataRecordsCompared": 179,
+  "ArchiveMetadataDifferenceCount": 0,
+  "SampledArchiveHashes": [
+    {
+      "Path": "common.rpf",
+      "SHA256": "FC4D22F8A715AC492E67975254CB92FC8D6DC615B28417744F7822735D2A355C",
+      "MatchesBefore": true
+    },
+    {
+      "Path": "update\\update.rpf",
+      "SHA256": "C3A68386A7D067772D6D6038AC505040E7280640205B230FDC1F829567CEC913",
+      "MatchesBefore": true
+    },
+    {
+      "Path": "update\\x64\\dlcpacks\\mp2025_02_g9ec\\dlc.rpf",
+      "SHA256": "5D938A428748B4955038F3D17303F6D7AC68DDF3C99497EF989BBDB53C645D3C",
+      "MatchesBefore": true
+    },
+    {
+      "Path": "update\\x64\\dlcpacks\\mp2025_02\\dlc.rpf",
+      "SHA256": "53FB02E854AF1A63CC6576317AAAB616EF01D2B869B9969A82BE19C1D2B6498C",
+      "MatchesBefore": true
+    },
+    {
+      "Path": "update\\x64\\dlcpacks\\mpbiker\\dlc.rpf",
+      "SHA256": "BBA97B80C2B7FC6423DE61D70DE4CA8D648E700932FB5F2763B102EB23057CA0",
+      "MatchesBefore": true
+    },
+    {
+      "Path": "x64\\audio\\audio_rel.rpf",
+      "SHA256": "FBFC8457F494C54EB1A8CFA070C3BAEE9F6631CCA39F2C7DBE211C1AD46AE347",
+      "MatchesBefore": true
+    },
+    {
+      "Path": "x64\\audio\\occlusion.rpf",
+      "SHA256": "0380D9E3F170F7157A3DA0CDEAFD1B020ABDC2C33D0546FE5F7A89564055E9DD",
+      "MatchesBefore": true
+    },
+    {
+      "Path": "x64\\audio\\sfx\\STREAMED_VEHICLES_GRANULAR_NPC.rpf",
+      "SHA256": "9EE025DAA5839720AB24914BCB79BBD2DB17E6FD26DF963B82FC90E43E7EF3E7",
+      "MatchesBefore": true
+    },
+    {
+      "Path": "x64\\audio\\sfx\\STREAMED_VEHICLES_GRANULAR.rpf",
+      "SHA256": "F31CC031E06D1CFE5E863E8307857AB3C59B0736739E824277368EBEE5DF7EEF",
+      "MatchesBefore": true
+    },
+    {
+      "Path": "x64a.rpf",
+      "SHA256": "9350F1A5A0FE14FEDA0F56F651CD4C2BD61310CDD169EA4427E0859D23611111",
+      "MatchesBefore": true
+    }
+  ],
+  "BackupExecutableSHA256": "FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF",
+  "TemporaryRenameDestinationAbsent": true,
+  "RuntimeProcessStarts": 0,
+  "FilesDeployed": 0,
+  "ExecutableRenames": 0,
+  "ConfigurationChanges": 0,
+  "GameWrites": 0,
+  "NewTelemetryObservations": 0,
+  "Checkpoints": {
+    "LoggingControl": "BLOCKED",
+    "EnhancedSelection": "NOT TESTED",
+    "LoggingFailureRecurrence": "NOT TESTED",
+    "StoryMode": "NOT TESTED",
+    "RichAudioLoad": "NOT TESTED",
+    "LiveTelemetry": "NOT TESTED",
+    "NormalShutdown": "NOT TESTED",
+    "InstallationIntegrity": "PASS"
+  },
+  "Phase2Blocked": true,
+  "FullAEJustified": false,
+  "Phase3Started": false,
+  "Sources": [
+    "https://www.lcpdfr.com/forums/topic/155261-unknown-game-has-crashed-when-trying-to-load-into-lspdfr/",
+    "https://www.lcpdfr.com/forums/topic/156124-rage-plugin-hook-doesnt-open/",
+    "https://docs.ragepluginhook.net/html/M_Rage_Game_LogVerbose.htm"
+  ],
+  "OfflineValidation": {
+    "Passed": true,
+    "ExecutedUtc": "2026-10-25T10:18:35.129694Z",
+    "TelemetryAssertions": 48,
+    "MetadataParserTests": 17,
+    "Phase1Checks": 127,
+    "ConfigurationAssertions": 9,
+    "AppendExpectations": 8,
+    "GameRuntimeUsed": false
+  }
+}

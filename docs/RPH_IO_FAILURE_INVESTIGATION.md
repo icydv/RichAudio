@@ -1,5 +1,56 @@
 # RPH append failure: postmortem investigation
 
+## Recovery preflight — BLOCKED before deployment, 25 October 2026
+
+The canonical private repository was fetched before this investigation. Both local HEAD and `origin/main` were `31840d3e91e745c04129463c61b362f22d35573d`. Work proceeds on `compat/rph-launcher-logging-recovery`, descended only from the sanitised history. The archival checkout was not used for Git development or modified.
+
+The user's new authorization permits exactly one reversible runtime experiment **only after a supported mechanism disabling the specific launcher-log operation is verified**. That evidence gate has not passed. No deployment, executable rename, RPH/game launch, configuration edit, new dependency or security change was performed. The normal-start proposal in the earlier section remains a candidate, not a verified suppression mechanism. This is an evidence blocker, not a request to repeat the authorization already given.
+
+### What was verified
+
+- Authentic staged RPH **1.132.1428.17748**, 12,237,182 bytes, SHA-256 `73F05B3F7973D4731F4151AE061DD3C991065E8BF3ECE51EA1D9AB728B9B42AC`, matches the reviewed package. It is Authenticode-unsigned; provenance is the previously verified official package, not a claimed publisher signature. There is no deployed RPH executable currently in the game root.
+- Both Rockstar executable signatures are valid. GTA5.exe remains **1.0.1013.34**, SHA-256 `FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF`; GTA5_Enhanced.exe remains **1.0.1158.16**, SHA-256 `69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5`. The independent pre-rename backup matches the older executable hash. The temporary rename destination is absent.
+- All **26** previously approved source additions exist and match their original manifest hashes; all **26** destinations are absent. This includes the original reviewed telemetry DLL/config, not a silent substitution of the newer publication build.
+- No GTA, RPH, FiveM, OpenIV or CodeWalker process was observed. Exact comparisons against the saved manifests found **zero differences** for 32 root-file size/hash records and 179 archive metadata records; all ten sampled archive SHA-256s also match. These are comparisons of the actual records, not acceptance based on counts. No original file requires restoration because none was changed.
+
+### Logging-control evidence and limits
+
+| Material checked | Establishes | Does not establish |
+|---|---|---|
+| Authentic bundle RPH_Readme | Ordinary executable startup is the documented launch procedure | No disable-log configuration, argument or initialization-order contract |
+| Preserved Settings UI from this exact runtime/hash | “Restart with logging” explicitly enables startup logging in a restarted process | No explicit off control was observed; ordinary startup has not been proved to suppress every launcher-log append |
+| Preserved INI/startup script and Advanced/Game settings text | Existing settings contain render/version text, plugin timeout, developer mode and console key; inspected advanced switches concern rendering/loading behavior | None is a verified control for RagePluginHookLauncher.log |
+| Enhanced support staff instructions | `-log` enables collection of RagePluginHookLauncher.log | The inverse behavior in all 1.132 startup paths is not a documented disable contract |
+| Legacy Game.LogVerbose API documentation | Runtime/plugin logging is filtered by verbosity in the old documented API | Applicability to this launcher's early logger or this runtime version |
+| Narrow app-specific profile configuration inventory | No matching RPH app-data config or application registry key was located in the inspected locations | An exhaustive assertion that no other configuration store exists |
+
+Relevant primary references: [Enhanced support staff on enabling launcher logging](https://www.lcpdfr.com/forums/topic/155261-unknown-game-has-crashed-when-trying-to-load-into-lspdfr/), [another Enhanced support case](https://www.lcpdfr.com/forums/topic/156124-rage-plugin-hook-doesnt-open/), and [the version-labelled Game.LogVerbose documentation](https://docs.ragepluginhook.net/html/M_Rage_Game_LogVerbose.htm). The latter labels v0.56 ALPHA and is not substituted for a v1.132 launcher specification. The vendor landing page, Documentation.aspx and documentation root returned 404 during this review; the specific legacy API page remained retrievable.
+
+The recorded logged run already wrote its first dependency-check entry at **01:53:11.919 UTC**, before the first observed INI-path/read stage at **01:53:13.501 UTC**. Thus that log was active before the Settings/INI stage in the observed logged process. It is unsafe to invent a later INI/runtime-verbosity key and assume it prevents early startup writes. The sequence does not prove the logger's mode-selection implementation or behavior of a fresh ordinary process.
+
+No new RPH process was executed in a staging folder: an off-game working directory alone is not a verified guarantee that RPH cannot discover/launch the installed game. The eight existing isolated .NET append tests reproduce sharing semantics, not RPH's log-mode switch. No protected binary was patched, unpacked or debug-hooked to manufacture an unsupported setting.
+
+### Checkpoint results for this request
+
+| Checkpoint | Status | Evidence |
+|---|---|---|
+| Supported suppression mechanism | **BLOCKED** | No version-specific verified control for the failing operation |
+| A. Enhanced selection | **NOT TESTED** | Executable version/hash inspected; no new launcher run |
+| B. Original 0x80070020 recurrence/avoidance | **NOT TESTED** | Prior dump conclusion unchanged; no new append attempt |
+| C. Story Mode startup | **NOT TESTED** | No game process launched |
+| D. RichAudio load | **NOT TESTED** | No runtime initialization |
+| E. Live telemetry | **NOT TESTED** | Zero new player/NPC observations; unavailable data is not fabricated |
+| Normal shutdown | **NOT TESTED** | No processes were started or needed closing |
+| Installation integrity | **PASS** | Original names/hashes and exact root/archive comparisons match; 26 additions remain absent |
+
+The [portable preflight record](../evidence/publication/rph-logging-recovery-preflight.json) records the verified inputs and decision. Raw configuration/event/dump details and local paths remain only in the protected local investigation area. No deployment journal is created or reused as though an experiment happened; the durable decision record states zero starts and zero installation mutations. The archived rollback procedure remains preserved but was not executed, altered or repinned.
+
+### Smallest next justified step
+
+Obtain a publisher-maintained answer/configuration reference for **RPH 1.132.1428.17748**: does a fresh normal process without the opt-in logging action disable **all RagePluginHookLauncher.log append calls before INI handling**, or is there a supported off/redirect control, and when is it read? Provide only the runtime version, target build, redacted failing basename/HRESULT and initialization timing. Do not send the private dump or contact the publisher automatically. This is narrower than installing a loader fix or repeating a game launch.
+
+If that contract is established, the already conditionally authorized one-attempt plan can be prepared with fresh safety checks and the exact reviewed 26-file set. Otherwise, a separately scoped diagnostic plan must address the missing guarantee; do not reinterpret the current condition as approval to launch on an assumption. Phase 2 and full A–E testing remain blocked, and Phase 3 is not started.
+
 25 October 2026. No game launch, executable rename, deployment, security change or audio change occurred during this investigation.
 
 ## Immediate failure established; handle owner unresolved

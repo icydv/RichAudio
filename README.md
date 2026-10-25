@@ -1,5 +1,7 @@
 # RichAudio
 
+Latest runtime recovery review: **BLOCKED before deployment**. No supported version-specific mechanism suppressing the failing launcher-log append was established; the conditional experiment was not run. [Evidence and checkpoint results](docs/RPH_IO_FAILURE_INVESTIGATION.md). Game files, executable names and the 26 absent deployment destinations remain unchanged; no new live telemetry exists.
+
 ## Sanitised publication copy — 25 October 2026
 
 Seven historical milestones have been rewritten in a disposable clone, with an exact old/new [mapping and preservation check](evidence/publication/history-integrity.json). The original development repository and all private evidence remain unchanged and independently backed up. Personal paths/commit identities and 11 raw session files were removed from publication history. [Sanitisation report and upload boundary](docs/REPOSITORY_SANITISATION.md): first upload still requires explicit approval. Historical deployment manifests contain placeholders and are not installers; do not update their pins to make them run.
