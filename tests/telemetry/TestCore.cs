@@ -51,6 +51,9 @@ namespace RichAudio.Tests
         private static ObservationFrame Frame(double time,int count) {return new MockSource{Count=count}.Read(time);}
         private static void Save<T>(string path,T o) {using(var fs=File.Create(path))new DataContractJsonSerializer(typeof(T)).WriteObject(fs,o);}
         private static void RunTests(string dir) {
+            Throws(()=>new DeadlineScheduler(double.NaN,0),"NaN scheduler frequency rejected");
+            Throws(()=>new DeadlineScheduler(double.PositiveInfinity,0),"Positive infinite scheduler frequency rejected");
+            Throws(()=>new DeadlineScheduler(double.NegativeInfinity,0),"Negative infinite scheduler frequency rejected");
             var schedule=new DeadlineScheduler(20,0);int count=0;
             for(int i=0;i<=1000;i++)if(schedule.TryTake(i/1000.0))count++;
             Check(count==21,"20 Hz deadlines include t=0 and t=1; not frame-count based");Check(schedule.Missed==0,"No deadline losses at 1 ms polling");
