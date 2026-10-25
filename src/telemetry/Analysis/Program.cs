@@ -20,9 +20,9 @@ namespace RichAudio.Analysis
         [DataMember] public string Input,SessionId,Scope="Descriptive capture analysis. Counts concern selected sampled entities; cannot establish all-world population or acoustic audibility.";
         [DataMember] public int SchemaVersion=1,Records,Samples,InvalidLines,UnknownSchemas,SequenceGaps,NonMonotonicSequences,NonMonotonicSamples,MaximumAvailableCount,MaximumSelectedCount,TruncatedCensusSamples,SourceLimitOmitted,BudgetOmitted;
         [DataMember] public bool HasHeader,HasFooter,Complete,AcquisitionBudgetKnown;
-        [DataMember] public long ReportedDrops,MissedDeadlines,InvalidValues;
-        [DataMember] public int DistinctPoolIndexes,IndexesWithMultipleCounters,AcquisitionBudgetEvaluatedSamples,AcquisitionOverBudgetSamples,BudgetPressureSamples;
-        [DataMember] public double DurationSeconds,ObservedSampleHz,ScheduleDelayP95Ms,AcquisitionP95Ms,ProcessingP95Ms,SampleIntervalP95Ms,MaximumSampledNpcDistanceM,MaximumSampledNonPlayerVehicleDistanceM,AcquisitionBudgetMs,AcquisitionOverBudgetPercentage,PeakAcquisitionMs;
+        [DataMember] public long ReportedDrops,MissedDeadlines,InvalidValues,SampledVehicleObservations,VehiclePositionAvailableObservations,VehicleVelocityAvailableObservations,VehicleRpmAvailableObservations;
+        [DataMember] public int DistinctPoolIndexes,IndexesWithMultipleCounters,AcquisitionBudgetEvaluatedSamples,AcquisitionOverBudgetSamples,BudgetPressureSamples,ListenerPositionAvailableSamples,ListenerVelocityAvailableSamples,EmptySelectionSamples,SourceLimitPressureSamples,DistinctTrackingIds;
+        [DataMember] public double DurationSeconds,ObservedSampleHz,ScheduleDelayP95Ms,AcquisitionP95Ms,ProcessingP95Ms,SampleIntervalP95Ms,MaximumSampledNpcDistanceM,MaximumSampledNonPlayerVehicleDistanceM,AcquisitionBudgetMs,AcquisitionOverBudgetPercentage,PeakAcquisitionMs,MaximumSampleGapMs,ListenerPositionCoveragePercent,ListenerVelocityCoveragePercent,VehiclePositionCoveragePercent,VehicleVelocityCoveragePercent,VehicleRpmCoveragePercent;
         [DataMember] public Band[] DistanceBands;
         [DataMember] public string[] Contexts,LifecycleKinds;
     }
@@ -32,7 +32,7 @@ namespace RichAudio.Analysis
         public static Report Analyze(string path) {
             var r=new Report{Input=Path.GetFileName(path),DistanceBands=new[]{new Band{Range="[0,25)m"},new Band{Range="[25,50)m"},new Band{Range="[50,100)m"},new Band{Range="[100,200)m"},new Band{Range="[200,400)m"},new Band{Range="[400,infinity)m"}}};
             var delays=new List<double>();var acquisition=new List<double>();var processing=new List<double>();var intervals=new List<double>();var contexts=new HashSet<string>();var lifecycle=new HashSet<string>();
-            var counters=new Dictionary<uint,HashSet<int>>();
+            var counters=new Dictionary<uint,HashSet<int>>();var trackingIds=new HashSet<string>();
             double first=-1,last=-1;long seq=-1;bool ended=false;
             foreach(string line in File.ReadLines(path)) {
                 if(string.IsNullOrWhiteSpace(line))continue;
@@ -52,7 +52,7 @@ namespace RichAudio.Analysis
                 if(c.Events!=null)foreach(var e in c.Events)lifecycle.Add(e.Kind);
                 if(c.Kind!="sample")continue;
                 r.Samples++;if(first<0)first=c.TimestampSeconds;
-                if(last>=0){if(c.TimestampSeconds<=last)r.NonMonotonicSamples++;else intervals.Add((c.TimestampSeconds-last)*1000);}last=c.TimestampSeconds;
+                if(last>=0){if(c.TimestampSeconds<=last)r.NonMonotonicSamples++;else {double gapMs=(c.TimestampSeconds-last)*1000;intervals.Add(gapMs);r.MaximumSampleGapMs=Math.Max(r.MaximumSampleGapMs,gapMs);}}last=c.TimestampSeconds;
                 delays.Add(c.ScheduleDelayMs);acquisition.Add(c.AcquisitionMs);processing.Add(c.ProcessingMs);
                 if(Validity.Finite(c.AcquisitionMs)&&c.AcquisitionMs>=0) {
                     r.PeakAcquisitionMs=Math.Max(r.PeakAcquisitionMs,c.AcquisitionMs);
@@ -62,8 +62,17 @@ namespace RichAudio.Analysis
                     }
                 }
                 if(c.BudgetOmitted>0)r.BudgetPressureSamples++;
+                if(c.SourceLimitOmitted>0)r.SourceLimitPressureSamples++;
+                if(c.Listener!=null&&c.Listener.Position!=null&&c.Listener.Position.Value.HasValue)r.ListenerPositionAvailableSamples++;
+                if(c.Listener!=null&&c.Listener.Velocity!=null&&c.Listener.Velocity.Value.HasValue)r.ListenerVelocityAvailableSamples++;
+                if(c.Vehicles.Count==0)r.EmptySelectionSamples++;
                 r.MaximumAvailableCount=Math.Max(r.MaximumAvailableCount,c.AvailableCount);r.MaximumSelectedCount=Math.Max(r.MaximumSelectedCount,c.Vehicles.Count);if(c.CensusTruncated)r.TruncatedCensusSamples++;r.SourceLimitOmitted+=c.SourceLimitOmitted;r.BudgetOmitted+=c.BudgetOmitted;
                 foreach(var v in c.Vehicles) {
+                    r.SampledVehicleObservations++;
+                    if(!string.IsNullOrEmpty(v.TrackingId))trackingIds.Add(v.TrackingId);
+                    if(v.Position!=null&&v.Position.Value.HasValue)r.VehiclePositionAvailableObservations++;
+                    if(v.Velocity!=null&&v.Velocity.Value.HasValue)r.VehicleVelocityAvailableObservations++;
+                    if(v.RpmRatio!=null&&v.RpmRatio.Value.HasValue)r.VehicleRpmAvailableObservations++;
                     if(v.PoolIndex!=null&&v.PoolIndex.Value.HasValue&&v.PoolCounter!=null&&v.PoolCounter.Value.HasValue){uint poolIndex=v.PoolIndex.Value.Value;if(!counters.ContainsKey(poolIndex))counters[poolIndex]=new HashSet<int>();counters[poolIndex].Add(v.PoolCounter.Value.Value);}
                     if(v.PlayerVehicle==null||v.PlayerVehicle.Value!=false||v.DistanceFromListener==null||!v.DistanceFromListener.Value.HasValue)continue;
                     double d=v.DistanceFromListener.Value.Value;r.MaximumSampledNonPlayerVehicleDistanceM=Math.Max(r.MaximumSampledNonPlayerVehicleDistanceM,d);
@@ -77,6 +86,12 @@ namespace RichAudio.Analysis
             }
             r.Complete=r.HasHeader&&ended&&r.InvalidLines==0&&r.UnknownSchemas==0&&r.NonMonotonicSamples==0&&r.NonMonotonicSequences==0;r.DurationSeconds=Math.Max(0,last-first);r.ObservedSampleHz=r.DurationSeconds>0?(r.Samples-1)/r.DurationSeconds:0;
             r.AcquisitionOverBudgetPercentage=r.AcquisitionBudgetEvaluatedSamples>0?100.0*r.AcquisitionOverBudgetSamples/r.AcquisitionBudgetEvaluatedSamples:0;
+            r.ListenerPositionCoveragePercent=r.Samples>0?100.0*r.ListenerPositionAvailableSamples/r.Samples:0;
+            r.ListenerVelocityCoveragePercent=r.Samples>0?100.0*r.ListenerVelocityAvailableSamples/r.Samples:0;
+            r.VehiclePositionCoveragePercent=r.SampledVehicleObservations>0?100.0*r.VehiclePositionAvailableObservations/r.SampledVehicleObservations:0;
+            r.VehicleVelocityCoveragePercent=r.SampledVehicleObservations>0?100.0*r.VehicleVelocityAvailableObservations/r.SampledVehicleObservations:0;
+            r.VehicleRpmCoveragePercent=r.SampledVehicleObservations>0?100.0*r.VehicleRpmAvailableObservations/r.SampledVehicleObservations:0;
+            r.DistinctTrackingIds=trackingIds.Count;
             r.ScheduleDelayP95Ms=P95(delays);r.AcquisitionP95Ms=P95(acquisition);r.ProcessingP95Ms=P95(processing);r.SampleIntervalP95Ms=P95(intervals);r.Contexts=contexts.OrderBy(x=>x).ToArray();r.LifecycleKinds=lifecycle.OrderBy(x=>x).ToArray();r.DistinctPoolIndexes=counters.Count;r.IndexesWithMultipleCounters=counters.Values.Count(x=>x.Count>1);return r;
         }
         public static int Main(string[] args) {
