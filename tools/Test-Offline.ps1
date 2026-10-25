@@ -15,6 +15,8 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Metadata parser tests failed.'}
     & node --test tests/Test-DrivetrainAnalysis.mjs
     if($LASTEXITCODE -ne 0){throw 'Drivetrain analysis tests failed.'}
+    & node --test tests/Test-AudioOwnership.mjs
+    if($LASTEXITCODE -ne 0){throw 'Synthetic ownership tests failed.'}
     & (Join-Path $repo 'tests\Test-Phase1.ps1') -ReportPath (Join-Path $output 'phase1-results.json')
     & (Join-Path $PSScriptRoot 'Build-Telemetry.ps1') -CoreOnly
     $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
