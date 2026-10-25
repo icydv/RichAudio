@@ -1,10 +1,20 @@
 # Repository, evidence and release governance
 
-**Publication update, 25 October 2026:** the user subsequently authorised an independently backed-up disposable-clone rewrite. The [sanitisation report](docs/REPOSITORY_SANITISATION.md) supersedes the initial hold/remediation status below; the original remains unchanged, all seven milestones have mapped successors, and this copy awaits explicit first-upload approval after final audits. Never push the original ancestry or merge it into the sanitised branch. Public licensing remains undecided. The expanded audit now covers commit identities and signed URLs as well as paths/binaries, and the offline suite adds nine configuration and eight append checks.
+## Current status — 25 October 2026
+
+- **GitHub upload completed:** the audited sanitised history was uploaded to [icydv/RichAudio](https://github.com/icydv/RichAudio). The approved published baseline was `31840d3e91e745c04129463c61b362f22d35573d`; seven historical milestones remain represented. The unsanitised checkout and complete backup are archival only and must never be merged or pushed into this history.
+- **Visibility needs owner review:** the GitHub repository API reported **public** visibility during the latest check on 25 October 2026, although it was originally created private. This document does not record an authorised visibility change. Public licensing remains undecided; do not infer permission to distribute third-party binaries, Rockstar assets or proprietary diagnostics.
+- **Immediate technical blocker:** the [one-run ProcMon investigation](docs/RPH_IO_FAILURE_INVESTIGATION.md) and [PR #3](https://github.com/icydv/RichAudio/pull/3) identified a GTA Enhanced `dstoragecore.dll` read handle to `RagePluginHookLauncher.log` incompatible with RPH's attempted append (`0x80070020`). RichAudio still has **no in-game telemetry**. The proposed DirectStorageFix/ASI-loader combination remains a reviewed *candidate*, not a tested solution.
+- **Residual diagnostic cleanup:** `PROCMON25` remained registered after a supported unload failed; a user-controlled restart and subsequent verification are required before another GTA runtime experiment. Do not forcibly remove diagnostic drivers or override blocked registry actions.
+- **Future benchmark:** [Acoustic Benchmark design issue #8](https://github.com/icydv/RichAudio/issues/8) captures controlled flybys, aircraft acoustic-component tests, fixed audio listener, valid A/B procedures and honest performance metrics. It is design-only and does not change the P2-01/P2-02/Phase 3 gates.
+
+The pre-upload narrative below is retained as **historical evidence** and is superseded by this current-status section. PR #2 and PR #3 remain independent, unmerged investigation branches unless their status changes.
+
+
 
 Status: 25 October 2026. This governance update preserves the original local repository and development gates. The product vision is defined by the README, architecture and acoustic design; no renderer or FiveM implementation is added here.
 
-## Repository destination and upload hold
+## Historical: repository destination and upload hold (superseded)
 
 The GitHub connector and authenticated local CLI both identified **icydv**. The CLI confirmed RichAudio did not exist, then created **[icydv/RichAudio](https://github.com/icydv/RichAudio)** as **private**, with the requested description. `origin` points to that repository. It has **no commits, files, remote branch or releases** while the first push is held. Local branch is `main`. Repository creation used the authenticated CLI because the available connector did not provide repository creation; issue tracking uses the connector.
 
