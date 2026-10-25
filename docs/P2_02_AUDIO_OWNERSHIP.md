@@ -1,5 +1,7 @@
 # P2-02: native audio ownership and stock-source feasibility
 
+**Subsequent P2-03 checkpoint:** [real stock WAVs and private offline playback](P2_03_STOCK_AUDIO_RECONSTRUCTION.md) now establish usable waveform data. This historical P2-02 report's source-access unknown is narrowed; engine-only native suppression, per-instance ownership and crash-safe handoff remain unverified. No native control was exercised by the decoding task.
+
 Offline investigation, 25 October 2026. Target: Enhanced 1.0.1158.16 / RPH 1.132.1428.17748. Based on PR #12, commit `5a997d74d9fe27680f092ab513af219217a3593c`. Fetched main remains `e5fbd8f3502d3e28169a224caa07471e090e368f`; PRs #10, #11 and #12 remain open and unmerged. This review neither reruns the RPM investigation nor makes audio-source research wait for RPM recovery.
 
 ## Executive decision
