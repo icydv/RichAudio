@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "experiment": "P2-01 Enhanced executable selection and startup",
+  "dateUtc": "2026-10-25",
+  "runtimeVersion": "1.132.1428.17748",
+  "enhancedVersionObserved": "1.0.1158.16",
+  "selectionHypothesisConfirmedOnThisInstallation": true,
+  "enhancedProcessObserved": true,
+  "noBattlEyeArgumentObserved": true,
+  "storyModeVerified": false,
+  "hookInitializationVerified": false,
+  "richAudioPluginLoaded": false,
+  "livePlayerSamples": 0,
+  "liveNpcSamples": 0,
+  "maximumNpcDistanceMetres": null,
+  "gameSamplingStatistics": null,
+  "gamePerformanceDelta": null,
+  "testsAThroughEPerformed": false,
+  "failure": {
+    "component": "RAGEPluginHook.exe",
+    "eventId": 1026,
+    "utc": "2026-10-25T01:54:57.5997543Z",
+    "exception": "System.IO.IOException",
+    "observedStackOperation": "File.InternalAppendAllText",
+    "failingPath": null,
+    "underlyingOsError": null
+  },
+  "restoration": {
+    "originalNameRestored": true,
+    "oldExecutableSha256": "FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF",
+    "enhancedExecutableSha256": "69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5",
+    "deployedAdditionsRemoved": 26,
+    "originalRootFilesHashMatched": 32,
+    "remainingExtraRootFiles": 0,
+    "archiveMetadataMatched": 179,
+    "freshArchiveHashesMatched": 10,
+    "allArchivesFreshContentHashed": false,
+    "generatedFilesPreservedOutsideGame": true,
+    "sharedVc2010Retained": true
+  },
+  "status": "BUILT_OFFLINE_TESTED_IN_GAME_UNVERIFIED"
+}

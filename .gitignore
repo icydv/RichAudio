@@ -37,3 +37,5 @@ captures/
 dist/
 *.jsonl
 !tests/fixtures/*.jsonl
+# Raw runtime journals contain local paths. Keep portable summaries separately.
+/evidence/phase2.2/controlled-attempt-01/
