@@ -10,7 +10,7 @@ namespace RichAudio.Telemetry
         private double next,last=-1;
         public long Missed {get;private set;}
         public double DelayMs {get;private set;}
-        public DeadlineScheduler(double hz,double start) {if(hz<1||hz>100||!Validity.Finite(start)||start<0)throw new ArgumentOutOfRangeException();period=1/hz;next=start;}
+        public DeadlineScheduler(double hz,double start) {if(!Validity.Finite(hz)||hz<1||hz>100||!Validity.Finite(start)||start<0)throw new ArgumentOutOfRangeException();period=1/hz;next=start;}
         public bool TryTake(double now) {
             if(!Validity.Finite(now)||now<0||now<last)throw new ArgumentException("Clock must be finite and monotonic");
             last=now;if(now+1e-9<next)return false;
