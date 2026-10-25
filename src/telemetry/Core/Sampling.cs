@@ -10,7 +10,7 @@ namespace RichAudio.Telemetry
         private double next,last=-1;
         public long Missed {get;private set;}
         public double DelayMs {get;private set;}
-        public DeadlineScheduler(double hz,double start) {if(hz<1||hz>100||!Validity.Finite(start)||start<0)throw new ArgumentOutOfRangeException();period=1/hz;next=start;}
+        public DeadlineScheduler(double hz,double start) {if(!Validity.Finite(hz)||hz<1||hz>100||!Validity.Finite(start)||start<0)throw new ArgumentOutOfRangeException();period=1/hz;next=start;}
         public bool TryTake(double now) {
             if(!Validity.Finite(now)||now<0||now<last)throw new ArgumentException("Clock must be finite and monotonic");
             last=now;if(now+1e-9<next)return false;
@@ -42,7 +42,7 @@ namespace RichAudio.Telemetry
             r.Listener=new ListenerState{Position=f.Listener.Position,Rotation=f.Listener.Rotation,Orientation=f.Listener.Orientation,Velocity=f.Listener.Velocity,Policy=f.Listener.Policy};r.AcquisitionMs=f.AcquisitionMs;r.DiscoveryMs=f.DiscoveryMs;r.AvailableCount=f.AvailableCount;r.CensusExamined=f.CensusExamined;r.CensusInvalid=f.CensusInvalid;r.CensusAgeSeconds=f.CensusAgeSeconds;r.CensusTruncated=f.CensusTruncated;r.SourceLimitOmitted=f.SourceLimitOmitted;r.BudgetOmitted=f.BudgetOmitted;
             r.Listener.SampleTimestamp=Field<double>.Observed(f.Time,"monotonic seconds since session start","capture clock");
             double ldt=f.Time-previousListenerTime;
-            if(previousListenerPosition!=null&&previousListenerPosition.Value.HasValue&&f.Listener.Position.Value.HasValue&&ldt>0&&ldt<=0.25&&(f.Listener.Position.Value.Value-previousListenerPosition.Value.Value).Length<25)
+            if((r.Listener.Velocity==null||!r.Listener.Velocity.Value.HasValue)&&previousListenerPosition!=null&&previousListenerPosition.Value.HasValue&&f.Listener.Position.Value.HasValue&&ldt>0&&ldt<=0.25&&(f.Listener.Position.Value.Value-previousListenerPosition.Value.Value).Length<25)
                 r.Listener.Velocity=Field<Vec3>.Estimated((f.Listener.Position.Value.Value-previousListenerPosition.Value.Value)/ldt,"m/s","camera position finite difference; cuts below threshold may remain undetected");
             previousListenerPosition=f.Listener.Position;previousListenerTime=f.Time;
             Count(r.Listener.Position);Count(r.Listener.Rotation);Count(r.Listener.Orientation);

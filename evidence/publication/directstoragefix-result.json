@@ -371,7 +371,22 @@
         "gearAvailable": 213,
         "engineStateAvailable": 213
       }
-    ]
+    ],
+    "reconciledAnalyzer": {
+      "canonicalMain": "e5fbd8f3502d3e28169a224caa07471e090e368f",
+      "complete": true,
+      "acquisitionBudgetMs": 2,
+      "acquisitionOverBudgetSamples": 2,
+      "acquisitionOverBudgetPercent": 0.09465215333648841,
+      "maximumSampleGapMs": 86.4866999999947,
+      "listenerPositionCoveragePercent": 100,
+      "listenerVelocityCoveragePercent": 99.95267392333176,
+      "vehiclePositionCoveragePercent": 100,
+      "vehicleVelocityCoveragePercent": 100,
+      "allVehicleRpmAvailabilityPercent": 25.103264490339775,
+      "rpmInterpretation": "All accepted values on unoccupied entities; no accepted player or driven NPC RPM",
+      "emptySelectionSamples": 10
+    }
   },
   "performance": {
     "entireGameProcess": {
@@ -504,5 +519,88 @@
     "updatedMain": "e5fbd8f3502d3e28169a224caa07471e090e368f",
     "initialExperimentBase": "31840d3e91e745c04129463c61b362f22d35573d",
     "rawPrivateEvidenceUploaded": false
+  },
+  "reconciledOfflineValidation": {
+    "passed": true,
+    "telemetryAssertions": 65,
+    "parserTests": 17,
+    "phase1Checks": 101,
+    "phase1CountReason": "Preserved new main README has fewer local documentation links",
+    "configurationChecks": 9,
+    "appendExpectations": 8,
+    "benchmarks": [
+      {
+        "CpuMs": 500,
+        "Frames": 325000,
+        "GcHeapDeltaBytes": 7866752,
+        "MachineCpuPercent": 6.185151164104827,
+        "MicrosecondsPerFrame": 1.5545916923076923,
+        "P50Microseconds": 1.5,
+        "P95Microseconds": 1.6,
+        "P99Microseconds": 2.3,
+        "PrivateBytesAfter": 37863424,
+        "SerializedBytes": 0,
+        "Sources": 1,
+        "WallMs": 505.2423,
+        "Workload": "mock acquisition + tracking"
+      },
+      {
+        "CpuMs": 515.625,
+        "Frames": 20000,
+        "GcHeapDeltaBytes": 3897448,
+        "MachineCpuPercent": 5.958365111280592,
+        "MicrosecondsPerFrame": 27.043125000000007,
+        "P50Microseconds": 25.4,
+        "P95Microseconds": 28.2,
+        "P99Microseconds": 88.5,
+        "PrivateBytesAfter": 30322688,
+        "SerializedBytes": 0,
+        "Sources": 32,
+        "WallMs": 540.8625000000001,
+        "Workload": "mock acquisition + tracking"
+      },
+      {
+        "CpuMs": 578.125,
+        "Frames": 5000,
+        "GcHeapDeltaBytes": 2712696,
+        "MachineCpuPercent": 6.27853945745339,
+        "MicrosecondsPerFrame": 115.09942000000002,
+        "P50Microseconds": 102.3,
+        "P95Microseconds": 242.3,
+        "P99Microseconds": 364.5,
+        "PrivateBytesAfter": 30580736,
+        "SerializedBytes": 0,
+        "Sources": 128,
+        "WallMs": 575.4971,
+        "Workload": "mock acquisition + tracking"
+      },
+      {
+        "CpuMs": 515.625,
+        "Frames": 600,
+        "GcHeapDeltaBytes": 7271192,
+        "MachineCpuPercent": 6.37359552839539,
+        "MicrosecondsPerFrame": 842.7101666666667,
+        "P50Microseconds": 795.2,
+        "P95Microseconds": 1310,
+        "P99Microseconds": 1578.7,
+        "PrivateBytesAfter": 33292288,
+        "SerializedBytes": 45139176,
+        "Sources": 32,
+        "WallMs": 505.6261,
+        "Workload": "mock acquisition + tracking + JSON serialization"
+      }
+    ],
+    "pacedFrames": 40,
+    "pacedDrops": 0,
+    "pacedMissedDeadlines": 0
+  },
+  "securityReview": {
+    "indexFindings": 0,
+    "historyCredentialPathBinaryFindings": 0,
+    "historyIdentityReviewFlags": 4,
+    "flagsReviewedAs": "GitHub public service committer noreply address on existing canonical main commits; authors use GitHub account noreply address",
+    "historyRewritten": false,
+    "auditorRulesWeakened": false,
+    "privateDiagnosticsPublished": false
   }
 }
