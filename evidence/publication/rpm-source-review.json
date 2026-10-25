@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-25",
+  "scope": "Offline source/metadata review; no new live compatibility claim",
+  "main": "e5fbd8f3502d3e28169a224caa07471e090e368f",
+  "parentPr": 11,
+  "parentCommit": "495643e4e844fa8d4f0e0e835f375992f26c47c0",
+  "previousPrsMerged": false,
+  "gameLaunches": 0,
+  "gameWrites": 0,
+  "frameworkExecutions": 0,
+  "deployments": 0,
+  "productCodeChanged": false,
+  "productionSchemaChanged": false,
+  "rpmValidatorChanged": false,
+  "maintainersContacted": false,
+  "rphSdk": {
+    "fileVersion": "1.124.1393.17586",
+    "sha256": "5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0",
+    "inspection": "PE/CLI metadata; no target assembly code invoked",
+    "rpmProperty": "Rage.Vehicle.EngineRevolutionsRatio",
+    "returnType": "System.Single",
+    "getterRva": 0,
+    "alternateSupportedRpmRouteIdentified": false,
+    "vendorCause": "UNRESOLVED"
+  },
+  "sources": [
+    {
+      "id": "shvdne",
+      "repository": "https://github.com/Chiheb-Bacha/ScriptHookVDotNetEnhanced",
+      "head": "b5314686ab534d9cec8914625a0f5ab2dde528ea",
+      "release": "v1.1.0.6",
+      "releaseCommit": "d756d479337a677cce9853b0cce63471c1fc7b7c",
+      "advertisedEnhancedBuild": "1.0.1158.13",
+      "mechanism": "Independent entity-address float read at Enhanced-pattern-derived CurrentRpmOffset",
+      "invalidFallback": "Zero on missing address/offset; ambiguous with real zero",
+      "rpmCodeDiffersBetweenReleaseAndHead": false,
+      "exactBuildEvidence": "Issue 19 names exe 1.0.1158.16 but tests player-info, not RPM",
+      "exactBuildRpmVerified": false,
+      "classification": "SOURCE-SUPPORTED, UNTESTED; deployment BLOCKED BY COMPATIBILITY",
+      "licence": "zlib plus copyright and third-party notices"
+    },
+    {
+      "id": "steavn-hud",
+      "authorPage": "https://www.nexusmods.com/gta5enhanced/mods/1599?tab=description",
+      "version": "2.3.0",
+      "archiveSha256": "842793B96FF345A89820B3F3F1D467C0DDA4935D93C51EB03ACB76F077CADDA7",
+      "sourceSha256": "C92FD3A40A9248CE43BF29B73E7F4A41B4A581DFF25536907D9B0549F22279BE",
+      "mechanism": "SHVDNE CurrentRPM with estimated idle/redline conversion and display-only startup interpolation",
+      "classification": "SOURCE-SUPPORTED display; not independent acquisition",
+      "licence": "No open-source grant; modification/use require author permission; reupload restricted"
+    },
+    {
+      "id": "nfsgauge",
+      "authorPage": "https://www.gta5-mods.com/scripts/nfsgauge-rpm-gear-speedometer",
+      "version": "2.63.2",
+      "versionDate": "2017-12-30",
+      "sourceAvailableInReview": false,
+      "mechanism": "UNRESOLVED",
+      "licence": "Reupload restricted; no source reuse permission established"
+    },
+    {
+      "id": "ikt-manual-transmission",
+      "repository": "https://github.com/ikt32/GTAVManualTransmission",
+      "head": "74019c831a50ac99ebad9dea08f865b03c1dca11",
+      "releaseTag": "v5.6.2",
+      "releaseCommit": "adb5bdb190c436f2e150eda5dc1fd21570228a60",
+      "mechanism": "Legacy-pattern-derived float; player/NPC callers; whole mod also writes drivetrain state",
+      "classification": "SOURCE-SUPPORTED historical reader; runtime excluded",
+      "licence": "Project-wide reuse permission unresolved"
+    },
+    {
+      "id": "ikt-nfsu-speedometer",
+      "repository": "https://github.com/ikt32/GTAVSpeedo",
+      "head": "ea8898bd290897c1a76b1b6b070aa05c95cce363",
+      "mechanism": "VExt GetCurrentRPM plus frame-time needle interpolation",
+      "licence": "MPL-2.0; assets/dependencies require separate review"
+    },
+    {
+      "id": "ikt-lefix",
+      "repository": "https://github.com/ikt32/gta5-speedometer",
+      "head": "2054f6e143be1ce1f8ddcb4d162a0788825adc1d",
+      "release": "v1.4.0",
+      "advertisedEnhancedBuild": "1.0.1013.34",
+      "mechanism": "Enhanced gear-displacement pattern plus relative layout to RPM float",
+      "invalidFallback": "Zero on missing address/offset",
+      "classification": "SOURCE-SUPPORTED, UNTESTED; deployment BLOCKED BY COMPATIBILITY",
+      "licence": "GPL-3.0"
+    }
+  ],
+  "apiDistinctions": {
+    "scriptHookVOfficialListing": "v3889.0 / 1158.13; released 2026-07-15",
+    "scriptHookVExact1158_16SupportEstablished": false,
+    "nativeDbCommit": "424fb51b089049a9fbcebcc641500b1d44d255b4",
+    "stockNamedCurrentRpmGetterIdentified": false,
+    "cfxCommit": "46de79bc1d4dd7c64f16c5cfbadf94612b5ab3d9",
+    "cfxCurrentRpm": "Custom memory-backed handler, not stock Story Mode native",
+    "xinputLoaderProvesScriptHookVRuntimeSupport": false
+  },
+  "decision": {
+    "selectedOption": 4,
+    "direction": "Keep proven RPH motion telemetry; RPM unavailable pending supported correction or verified independent provider",
+    "strongestIndependentSourceCandidate": "shvdne",
+    "providerContract": "Design revision 0 only; no bridge or public ABI",
+    "newLiveCandidatePassedCompatibilityGate": false,
+    "nextLiveExperimentPermittedHere": false,
+    "phase3Ready": false
+  }
+}
