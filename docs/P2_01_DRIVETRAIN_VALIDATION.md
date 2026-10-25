@@ -43,4 +43,87 @@ The 240-second diagnostic lifetime is an upper bound, not a requirement to exten
 
 ## Runtime result
 
-Pending the conditional experiment. Offline compilation alone is not drivetrain validation. No reliable physical RPM mapping or gear semantics have been established by this diagnostic implementation.
+**One launch completed; original installation restored. RPM: UNUSABLE as dynamic engine-speed telemetry in the observed conditions. Gear: PARTIALLY VALIDATED for one driven car, not a complete gearbox contract.** The original 0–1 boundary was retained. No trustworthy alternative RPM interpretation or physical calibration was established. [Portable outcome and relative file manifest](../evidence/publication/drivetrain-result.json).
+
+### Configuration and independently observed checkpoints
+
+The test used Enhanced **1.0.1158.16**, RPH **1.132.1428.17748**, DirectStorageFix **1.2** and the same official Alexander Blade XInput ASI loader **1.0.0.2** as the successful recovery. All original source/runtime pins matched. The new RichAudio DLL was built against the authentic pinned SDK and sealed at SHA-256 **C75C44A47F1BF87552CF863E126C8C11BD8095343AD4C8F72C63F93877DDBA37**, source commit **66ea1a938977670556ac6ba3ba702b9a218022af**. The previous known-good DLL was preserved separately and still matches **DBC5F600C37AD7579F49EBA92A352BEE1AAF452F6EF820CEF87B86B8547D5BE0**.
+
+The actual deployment contained **27 final paths**: unchanged approved RPH files and known-working fix/loader, with the new RichAudio DLL and a temporary JSON configuration enabling permission for initially disabled diagnostics. Exact private manifest SHA-256: **FB59838AA32424D6E6C225A0D0AC2EACE56AD815F0000E1653A316E6B0D77AC1**. Its portable counterpart excludes absolute paths. The existing no-overwrite rename and pinned 26-file helper were reused, with independently journalled overlays for the introduced loader, plugin, configuration and fix. No original game file was overwritten. No SDK, ScriptHookV.dll, trainer or additional runtime dependency was installed.
+
+RPH settings positively selected 1158.16 with autoload disabled. The actual Enhanced process included the established `-nobattleye` option. DirectStorageFix reported build 1158.16 and `Init finished` at **16:23:46.153 UTC**. Story Mode and the RPH console were observed, and the rebuilt plugin loaded at **16:25:42.961 UTC**. The user manually entered and operated the same road car throughout the test. The agent did not automate driving, spawn vehicles, force engine/gear states, or access Online. The plugin's existing single-player guards remained active.
+
+### Completed manual scenarios
+
+Rows below describe the actual labelled sidecar windows, including response/setup time, not exactly timed throttle application. Audible revving and a natural shift were **confirmed by the user**; no audio recording or numerical tachometer calibration was made. All 1,683 player diagnostic observations were finite and engine-on, with **raw minimum = maximum = 48.333335876464844** and zero validated RPM ratios.
+
+| Scenario | Diagnostic samples / labelled span | Speed range, m/s | Gear indices | Result |
+|---|---:|---:|---|---|
+| A_idle | 302 / 42.999 s | 0–0 | 0 | User-confirmed stationary idle; no raw RPM variation |
+| B_rev | 525 / 74.556 s | 0–0.03474 | 0, 1 | User confirmed audible stationary revving; raw getter stayed constant |
+| C/D acceleration and shifts | 463 / 65.793 s | 0–33.9063 | 1, 2, 3, 4 | Motion recorded; user noticed a natural shift; getter changes consistent with acceleration, RPM unchanged |
+| E_decelerate | 282 / 39.992 s | 0–20.6733 | 0, 1, 2 | User confirmed braking to rest/idle; source motion decreased, RPM unchanged |
+| F_npc_idle | 111 / 15.691 s | Player 0–0 | Player 0 | Small naturally occurring traffic comparison; no range survey |
+
+There were **12 player gear-getter transitions**, including 1→2→3→4 during the acceleration window and a return to 0 while stopped. Not all 12 transitions were individually corroborated by a synchronized visual/audio reference. Zero is left as an unverified index: it is not silently labelled neutral or reverse. Motorcycle behaviour, reverse, engine-off/start transitions and multiple player vehicle models are **NOT TESTED**. This session provides partial evidence that gear state responds; it does not establish all gear meanings or automatic-transmission internals.
+
+### Raw values, occupancy and interpretation
+
+The new sidecar recorded **13,447 vehicle observations** linked to existing session/tracking identities and production sample sequences. Every diagnostic sequence matched a normal telemetry sample. No raw getter exception or NaN/infinity was observed. SDK-derived classification is retained as evidence, not independent proof of every NPC occupant's presence.
+
+| SDK-derived role | Observations | Engine state | Raw value range | Validated ratio observations |
+|---|---:|---|---:|---:|
+| Player vehicle | 1,683 | On | Constant 48.3333358765 | 0 |
+| Driven non-player | 193 | On | 43.3333396912–50.0000038147 | 0 |
+| Non-player, occupants but no reported driver | 445 | On | 36.6666717529–50.6666717529 | 0 |
+| Unoccupied | 11,126 | Off | Constant 0 | 11,126 |
+
+The driven-NPC subset covered five model hashes and four distinct raw values. Each model's available readings were constant; two models had only one/four observations, so that limited subset cannot establish a universal rule. Engine-on/occupied state correlated with an out-of-range finite scalar; off/unoccupied state correlated with zero. This does **not** prove that occupancy causes the failure. There was no controlled engine-off/start test on the player car.
+
+**CONFIRMED:** the getter returned finite numbers outside the historical ratio contract; the explicit range rejection is correctly exercised before production serialization; the same unscaled player value persisted despite verified operating-condition changes. These are not reconstructed values from the earlier capture. **UNDETERMINED:** whether the runtime getter reads an incorrect field, the old SDK/runtime integration is responsible, or another Enhanced implementation issue exists. **HYPOTHESIS only:** the model-dependent constant may describe another vehicle parameter. No comparison measured such a parameter and no alternative semantics are claimed. Dividing the constant would still not create an RPM response to revving, so arbitrary normalization is unjustified.
+
+The entire normal capture had 43,034 selected vehicle observations and 8,145 invalid RPM values. Its aggregate RPM availability of roughly 81% is dominated by zero readings on inactive entities and must not be presented as reliable drivetrain coverage. Position and velocity fields were available in all selected observations, but availability alone is not calibrated accuracy. Load and physical crankshaft RPM remain unavailable.
+
+### Timing, volume and output integrity
+
+Both **schema-1 normal telemetry** and **diagnostic-schema-1 sidecar** parsed completely after writer finalisation, with valid headers/footers and no malformed lines. All timings are actual capture measurements; no matched game-performance baseline was obtained.
+
+| Measurement | Actual result |
+|---|---:|
+| Normal samples / first-to-last sample span | 5,397 / 269.862369 s |
+| Normal cadence | 19.995378 Hz |
+| Queue drops / missed deadlines / sequence gaps | 0 / 1 / 0 |
+| Interval p50 / p95 / p99 / maximum | 55.7561 / 56.6758 / 56.9946 / 112.5041 ms |
+| Acquisition p50 / p95 / p99 / maximum | 0.2036 / 0.5266 / 0.6416 / 10.8388 ms |
+| Processing p50 / p95 / p99 / maximum | 0.0136 / 0.0181 / 0.0221 / 1.3909 ms |
+| Acquisition samples above 2 ms soft budget | 3 / 5,397 (0.05559%) |
+| Diagnostic frames / first-to-last span | 1,683 / 239.640439 s |
+| Diagnostic observed cadence | About 7.019 Hz; configured 10 Hz is an upper cap, not achieved average |
+| Diagnostic preparation p50 / p95 / p99 / maximum | 0.0019 / 0.0031 / 0.0039 / 15.1285 ms |
+| Diagnostic queue drops / byte-limit omissions | 0 / 1 |
+| Final normal / sidecar sizes | 138,450,420 / 16,766,937 bytes |
+
+The raw sidecar remained below its 16 MiB file cap and 2,400-frame limit. One over-budget frame was deliberately omitted and counted; this is not a queue drop or an interruption-induced loss. Diagnostic-due acquisition p95 was **0.5807 ms**, versus **0.2844 ms** on other frames. These subsets are not randomized and have census/timing differences. Compared with the prior different rural smoke scene, acquisition p95 rose from 0.1825 to 0.5266 ms; this is a descriptive comparison, not a controlled estimate of instrumentation cost. The extra occupancy read and sidecar preparation are real work; neither their small p95 nor whole-game CPU measurements establish zero frame-time impact. The 15.1285 ms preparation outlier and one missed deadline are retained, without inventing their cause. Comparative frame-time/CPU overhead remains **NOT TESTED**.
+
+Normal output SHA-256: **8800B3C421FF6A06A117D8D62BD03BB9D1A128CD075EB07E68AD161FF4A5571E**. Sidecar SHA-256: **974A4478B5A73EF147C1458B59915D8C5703A57ECDC4ECB6B81B7C1F7CC910CC**. Raw files, exact labels/timestamps, source identities and original logs remain in protected local evidence outside Git; only aggregate findings are published.
+
+### Usage-limit interruption and resumption
+
+The interruption happened **after `RichAudioDiagnosticsStop` and `RichAudioStop`**, outside an active recording period. At 16:30:31 and 16:30:53 UTC the status was capture disabled, zero drops and no writer errors. No unload or quit had yet occurred. The pending step was writer finalisation, followed by normal exit/restoration; all labelled driving observations had already been performed.
+
+At resumption, the same game PID/start time and deployed fingerprints were verified, the visible scene/console responded and a fresh status at **17:08:17.570 UTC** again reported capture disabled with no writer errors. No restart, reload, recording reset or repeat driving occurred. Private fixed-length snapshots preserved the then-open files. Their incomplete final lines and missing footers were pending writer buffers, not evidence that a recording was interrupted: finalisation subsequently produced completely parseable original files. One diagnostic sample that was partial in the snapshot became fully available on closure; snapshots were not substituted for the completed evidence.
+
+The original 12-minute operational launch window was exceeded because the user deliberately kept GTA open through the usage-limit gap. The measured recording remained about 270 seconds and the bounded sidecar about 240 seconds; the longer process lifetime is **not** claimed as a controlled soak test. The user separately approved finalisation. Computer Use was also interrupted by the physical Esc key requested for console access; that stopped automation, not GTA. After continuation, the user entered the one-time unload when automated text input did not reach the console, then exited through the normal quit prompt. No forced termination occurred. RPH logged its known unload `ThreadAbortException`; both writer footers completed. No matching Application 1000/1001/1026 game/RPH/fix failure event was found during this session.
+
+### Restoration, reproducibility and next decision
+
+After normal quit, no GTA/RPH/PlayGTAV process remained. All 27 temporary paths were removed. Seven generated root files and RPH's BOM-only code-template directory were preserved and removed. Both original names and valid Rockstar signatures returned, with hashes:
+
+- `GTA5.exe`: **FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF**.
+- `GTA5_Enhanced.exe`: **69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5**.
+
+Exact saved comparisons passed for **32 original root files**, **179 archive metadata records**, **10 sampled archive hashes** and original root directory sets. PROCMON25 and diagnostic processes were absent. The original archival checkout and independent backup each still matched all **9,359** saved files; the Git bundle hash also matched. Existing loader preferences/shared prerequisite were retained; no archive, audio, vehicle physics, executable content or security protection was changed. The exact known-working integration and diagnostic configuration are reproducible from private pinned packages, the sealed candidate DLL and journal, subject to the same version/safety gates and new runtime authorisation. Reproducibility does not make RPM reliable.
+
+The next smallest action is an **offline vendor-facing reproduction/SDK-parity review**, retaining the raw-constant evidence and public getter signatures. A read-only public `NumberOfGears` or engine-state getter may provide additional discrete context, but cannot recover engine speed. No independent supported stock-game RPM native was verified; platform-specific natives must not be assumed present in Story Mode. Speed/acceleration estimation cannot explain stationary revving or clutch/wheelspin and must not be relabelled observed RPM. Leave the RPM ratio unavailable for these running-vehicle readings until a verified public API correction or authoritative contract is established. Do not change the loader or repeat this identical experiment without new evidence.
+
+**Engineering answers:** reliable live RPM **no**; normalized-ratio interpretation **not validated**; current value's physical meaning **unknown**; gear behaviour **partially corroborated on one car**; occupied/off-state behaviour **different in observed SDK groups, causality unknown**; full A–E certification **not ready**; Phase 2 **incomplete**. No further GTA work is necessary for this checkpoint. Any additional targeted run needs a specific new hypothesis and authorisation. No Phase 3 or audio implementation occurred.
