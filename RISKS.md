@@ -1,5 +1,7 @@
 # Risks and fallback decisions
 
+**Latest P2-02 offline evidence:** [ownership report](docs/P2_02_AUDIO_OWNERSHIP.md). RPH motion integration is now live-proven in two short sessions; RPM and full A–E remain incomplete. No public engine-only control/PCM tap/fail-open recovery was established. Synthetic tests expose overlap/silence from independently delayed commands and persistent mute after controller failure; their hypothetical atomic selector is not a GTA capability. Historical startup/upload holds below are superseded by the preserved recovery and public sanitised publication history.
+
 ## Feasibility and uncertainty matrix — 25 October 2026
 
 The mission now covers a coherent, immersion-first world-wide overhaul with stock preservation and custom-content support. That is an **aspiration**, not a feasibility conclusion. The historical Phase 1/2 risk records below are preserved; their runtime-not-installed wording is superseded by the controlled attempt and rollback.

@@ -1,5 +1,7 @@
 # Acoustic design
 
+**P2-02 ownership gate:** [six-route review and synthetic policy checks](docs/P2_02_AUDIO_OWNERSHIP.md) preserve native audio wherever isolated material, native suppression and independent recovery are not established. A known synthetic common-clock selector is not available evidence about GTA's engine. In particular, helicopter LF loop metadata prevents assuming low-frequency supplementation is a distinct missing component. No propagation/rendering code is introduced by this study.
+
 ## Immersion-first design contract
 
 The long-term objective is convincing physical presence, scale and character across the whole world: road vehicles, rotorcraft, jets, sirens, gunfire, explosions, backfires, weather, ambience and interiors. These are aspirations, not completed acoustic features. The current telemetry-only checkpoint produces no sound. Source Sound System, Acoustic World Simulation and Perceptual Rendering/Mixing have distinct responsibilities as defined in [ARCHITECTURE.md](ARCHITECTURE.md).
