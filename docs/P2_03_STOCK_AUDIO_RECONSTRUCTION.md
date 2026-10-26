@@ -1,5 +1,7 @@
 # P2-03: stock Bati decoding and offline source playback
 
+Subsequent [P2-03.1 isolation](P2_03_1_DECELERATION_REFINEMENT.md) implicated engine/exhaust combination through local listening. A modest balance candidate helped slightly but did not eliminate the ghosting. The accepted reference below remains unchanged and reproducible; no phase/timing correction is established.
+
 25 October 2026. Offline-only, stacked on open PR #13 / `d7c961a22ccbfc75d0b1cbf74079b307a49fbcc2`; main inspected at `e5fbd8f3502d3e28169a224caa07471e090e368f`. PRs #10–#13 remained open and unmerged. No telemetry/schema/RPM-validator/in-game integration change.
 
 ## Executive result
