@@ -1,6 +1,8 @@
 // Offline research only: synthetic relative state, never physical/live RPM.
 import {validateAudio,sample} from '../../src/offline-audio/stock-source.mjs';
 import {cycleSchedule} from './cycle-experiment.mjs';
+import {recentSelection} from './recent-cycle-selection.mjs';
+import {performance} from 'node:perf_hooks';
 const rate=48000,low=14,high=28,maxDuration=15,maxStep=3,seam=96;
 const preparedSources=new WeakSet();
 export function validateControl(points,duration){
@@ -45,12 +47,16 @@ function boundaryMismatch(prepared,p,length,previous){
 }
 export function renderResponsive(prepared,points,options={}){
   const duration=options.duration??5,engineScale=options.engineScale??0.35;
+  const selectionMode=options.selectionMode??'reference';
+  if(!['reference','recent-seeded-v1'].includes(selectionMode)||selectionMode==='reference'&&options.selectionSeed!==undefined)throw Error('explicit research selection mode required');
+  const research=selectionMode==='recent-seeded-v1'?recentSelection(options.selectionSeed):null;
   validateControl(points,duration);
   if(!Number.isFinite(engineScale)||engineScale<0||engineScale>1||!preparedSources.has(prepared))throw Error('render settings');
   validateAudio(prepared.engine.audio);validateAudio(prepared.exhaust.audio);
   const frames=Math.round(duration*rate),engine=new Float64Array(frames),exhaust=new Float64Array(frames),schedule=[];
-  let clock=0,start=0,previous=null,previousValue=null,direction=1,rejected=0,fallbacks=0,screened=0;
+  let clock=0,start=0,previous=null,previousValue=null,direction=1,rejected=0,fallbacks=0,screened=0,schedulingMs=0;
   while(start<frames){
+    const schedulingStart=performance.now();
     if(schedule.length>=512)throw Error('cycle count bound');
     const state=controlAt(points,start/rate),value=low+(high-low)*state,nextClock=clock+rate/value,end=Math.round(nextClock),length=end-start;
     const pool=prepared.pairs.map((p,index)=>({...p,index})).filter(p=>compatible(p,value,length));
@@ -62,7 +68,9 @@ export function renderResponsive(prepared,points,options={}){
       if(!candidates.length)throw Error('unsupported source traversal');
     }
     const nearest=items=>[...items].sort((a,b)=>Math.abs(a.engineState-value)-Math.abs(b.engineState-value)||a.index-b.index);
-    if(previous&&Math.abs(delta)<1e-8){
+    if(research){
+      candidates=research.order(candidates,previous?.index??null);
+    }else if(previous&&Math.abs(delta)<1e-8){
       // Deterministic adjacent walk varies original cycles, never pitch/gain/phase.
       if((((Math.imul(schedule.length+1,1664525)+1013904223)>>>0)%7)===0)direction=-direction;
       if(!candidates.some(p=>p.index===previous.index+direction))direction=-direction;
@@ -76,6 +84,7 @@ export function renderResponsive(prepared,points,options={}){
     const row={index:chosen.index,start,end,state,value,engineIndex:chosen.engineIndex,exhaustIndex:chosen.exhaustIndex,
       engineStart:chosen.start,engineEnd:chosen.end,exhaustStart:chosen.exhaustStart,exhaustEnd:chosen.exhaustEnd,
       engineState:chosen.engineState,exhaustState:chosen.exhaustState,engineSpeed:(chosen.end-chosen.start)/length,exhaustSpeed:(chosen.exhaustEnd-chosen.exhaustStart)/length,rawJoinMismatch:gaps.get(chosen.index)};
+    schedulingMs+=performance.now()-schedulingStart;
     for(const [component,a,target]of [['engine',prepared.engine.audio,engine],['exhaust',prepared.exhaust.audio,exhaust]]){
       const sourceStart=row[component+'Start'],speed=row[component+'Speed'];
       for(let j=0;j<Math.min(length,frames-start);j++){
@@ -93,6 +102,6 @@ export function renderResponsive(prepared,points,options={}){
   }
   const audio=data=>({rate,channels:1,data});
   return {engine:audio(engine),exhaust:audio(exhaust),preferred:audio(preferred),referenceGain:audio(referenceGain),
-    diagnostics:{range:[low,high],frames,cycles:schedule.length,rejectedSegments:rejected,screenedCandidates:screened,fallbacks,sourceLookups:frames*2+screened*4+schedule.slice(1).reduce((n,s)=>n+2*Math.min(seam,Math.max(0,frames-s.start)),0),schedule,
+    diagnostics:{range:[low,high],frames,cycles:schedule.length,schedulingMs,selection:research?research.diagnostics():{mode:'reference'},rejectedSegments:rejected,screenedCandidates:screened,fallbacks,sourceLookups:frames*2+screened*4+schedule.slice(1).reduce((n,s)=>n+2*Math.min(seam,Math.max(0,frames-s.start)),0),schedule,
       limitations:['Synthetic relative state only','Deceleration-family timbre in both directions, not modelled load','Adjacent original-cycle walk may still sound repetitive','Two-ms convex joins are estimated','No effects or physical RPM calibration']}};
 }

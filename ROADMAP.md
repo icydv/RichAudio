@@ -1,5 +1,7 @@
 # Roadmap
 
+**Latest offline source checkpoint, 26 October — P2-03.4:** [cycle-order recurrence experiment](docs/P2_03_4_CYCLE_RECURRENCE.md) is PARTIAL. The measured 0.667-second PCM repeat is removed under fixed state/gain/rate/join rules, but I found the candidate less repetitive and still artificial. The three-pair bank is unchanged. No sweep or further tuning followed; read-only cycle-model investigation is the next proposed step. Accepted references, telemetry and native ownership/Phase 3 gates remain unchanged.
+
 **P2-03 offline milestone:** [successful stock PCM decoding and deterministic private references](docs/P2_03_STOCK_AUDIO_RECONSTRUCTION.md), conservatively Outcome B. Human listening rejected the grain prototype and favoured continuous recordings, with deceleration phasing unresolved. Next useful experiment is isolated engine/exhaust deceleration A/B listening. Live RPM, native ownership and full telemetry/Phase 3 release gates are not advanced by file playback.
 
 **P2-02 parallel offline checkpoint:** [six-route ownership feasibility and tests](docs/P2_02_AUDIO_OWNERSHIP.md) are independent of RPM recovery. Native playback remains the default; no engine-only isolation, native tap or crash-safe recovery passed the gate. The first audible engine-change experiment is blocked on a supported control/baseline/restoration contract; a siren-only positive-control candidate cannot certify engines. No live mutation or Phase 3 is authorised by this study.
