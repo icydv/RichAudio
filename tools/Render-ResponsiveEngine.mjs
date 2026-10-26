@@ -25,7 +25,7 @@ export function run(manifestPath,scenariosFile,name,output){
   const out=privatePath(output);if(fs.existsSync(out))throw Error('existing output rejected');
   const settings=json(scenariosFile);if(settings.schemaVersion!==1||!['A_hold','B_sweep','C_steps'].includes(name)||!settings.scenarios?.[name])throw Error('unknown scenario');
   const preparationStart=performance.now(),source=loadSources(manifestPath),preparationMs=performance.now()-preparationStart;
-  const cpu=process.cpuUsage(),start=performance.now(),result=renderResponsive(source.prepared,settings.scenarios[name].points,{duration:settings.scenarios[name].duration,engineScale:settings.engineScale});
+  const cpu=process.cpuUsage(),start=performance.now(),result=renderResponsive(source.prepared,settings.scenarios[name].points,{duration:settings.scenarios[name].duration,engineScale:settings.engineScale,selectionMode:settings.selectionMode,selectionSeed:settings.selectionSeed});
   const renderMs=performance.now()-start,used=process.cpuUsage(cpu),names={engine:'engine.wav',exhaust:'exhaust.wav',preferred:'mix_exhaust_led.wav',referenceGain:'mix_reference_gain.wav'},pending={},outputs={};
   for(const [key,file]of Object.entries(names)){const b=encodeWav(result[key]),stats=measure(decodeWav(b));if(stats.clippedSamples||stats.allZero)throw Error('silent/clipped output');pending[file]=b;outputs[file]={sha256:hash(b),...stats};}
   const report={schemaVersion:1,rendererVersion:2,scenario:name,perceptualAcceptance:'Not established by rendering; consult checkpoint listening evidence',classification:'Synthetic normalised operating state; deceleration-family cycles in both directions; not physical RPM/load',
