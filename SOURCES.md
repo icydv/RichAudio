@@ -1,5 +1,11 @@
 # Evidence and sources
 
+## ACOUSTICS-03 reconstruction and lifecycle — 26 October 2026
+
+- [Microsoft .NET Framework ThreadAbortException](https://learn.microsoft.com/en-us/dotnet/api/system.threading.threadabortexception?view=netframework-4.8.1): abort/rethrow/finally semantics for interpreting the prior shutdown warning; not proof of proprietary RPH internals.
+- [RPH GameFiber.SleepUntil](https://docs.ragepluginhook.net/html/M_Rage_GameFiber_SleepUntil.htm): historical predicate-wait contract, checked against the pinned SDK by compilation; exact-build runtime behaviour remains a live gate.
+- [CGAL PCA manual](https://doc.cgal.org/latest/Principal_component_analysis/index.html): mathematical reference for orthogonal least-squares fitting through covariance eigenanalysis. Our implementation/fixtures are original; no CGAL code/dependency is included.
+
 Checked 24 October 2026. Local observations are primary evidence for this installation. Upstream reverse-engineering code is primary evidence for what that project implements, not an official Rockstar guarantee. Web support/version claims are time-sensitive and must be refreshed before deployment.
 
 ## Local evidence index
