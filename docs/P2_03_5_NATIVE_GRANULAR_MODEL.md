@@ -1,5 +1,7 @@
 # P2-03.5: native granular model investigation
 
+Follow-up: the [P2-03.6 controlled internal-join comparison](P2_03_6_EXHAUST_JOIN_ABLATION.md) achieved isolation and a slight listening improvement. It does not establish native scheduling or replace this report's model uncertainties.
+
 26 October 2026. **Outcome: PARTIAL. Model assessment: important assumptions unverified.** Markers support a relative state/period coordinate, not the proposition that each adjacent interval is a complete interchangeable playback unit. The current scheduler is an experiment, not an established native reconstruction. It omits authored groups/context and graph controls; the omissions are confirmed, but their perceptual contribution remains unknown.
 
 I found the P2-03.4 hold less repetitive but still artificial. No new listening, stock-audio rendering or tuning occurred here. This work is stacked on open PR #18 at `e8618e31ebe70f2459b54b653d3642fd4c9e5c76`; main was fetched at `e5fbd8f3502d3e28169a224caa07471e090e368f`. Earlier PRs remain unmerged, and renderer defaults, telemetry and accepted audio are unchanged.

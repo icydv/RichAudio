@@ -1,5 +1,7 @@
 # Roadmap
 
+**Latest controlled source experiment, 26 October — P2-03.6:** [exhaust internal-join ablation](docs/P2_03_6_EXHAUST_JOIN_ABLATION.md) is PARTIAL. A/B differ only inside the prescribed internal blend windows; I heard a slight improvement without them. External wraps and all other settings remain identical. No additional audio variant followed. A single wrap-only ablation is proposed for separate authorisation; existing renderers, source material, telemetry and Phase 3 gates remain unchanged.
+
 **Latest source-model review, 26 October — P2-03.5:** [native granular model investigation](docs/P2_03_5_NATIVE_GRANULAR_MODEL.md) is PARTIAL. Historical authoring evidence and measured group/context structure identify omissions in the adjacent-interval model; native rules remain unknown. No new stock audio or renderer was made. The sole proposed follow-up is an exhaust-only coherent-context ablation, not another seed or broader synthesis implementation. Telemetry, ownership and Phase 3 gates remain unchanged.
 
 **Latest offline source checkpoint, 26 October — P2-03.4:** [cycle-order recurrence experiment](docs/P2_03_4_CYCLE_RECURRENCE.md) is PARTIAL. The measured 0.667-second PCM repeat is removed under fixed state/gain/rate/join rules, but I found the candidate less repetitive and still artificial. The three-pair bank is unchanged. No sweep or further tuning followed; read-only cycle-model investigation is the next proposed step. Accepted references, telemetry and native ownership/Phase 3 gates remain unchanged.

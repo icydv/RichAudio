@@ -29,6 +29,8 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Offline cycle recurrence tests failed.'}
     & node --test tests/Test-GranularModel.mjs
     if($LASTEXITCODE -ne 0){throw 'Offline granular-model diagnostic tests failed.'}
+    & node --test tests/Test-ExhaustJoinAblation.mjs
+    if($LASTEXITCODE -ne 0){throw 'Offline exhaust join-ablation tests failed.'}
     & (Join-Path $PSScriptRoot 'Build-OfflineAudio.ps1')
     & (Join-Path $repo 'tests\Test-OfflineAudioGuards.ps1')
     & (Join-Path $repo 'tests\Test-Phase1.ps1') -ReportPath (Join-Path $output 'phase1-results.json')
