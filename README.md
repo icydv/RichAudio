@@ -64,8 +64,9 @@ For the technical side, see the [roadmap](ROADMAP.md), [architecture](ARCHITECTU
 - **Vehicle sound research — offline:** We have decoded and studied original vehicle-audio sources privately, with promising fixed-state motorcycle exhaust listening experiments. A reliable full acceleration/deceleration renderer is not yet proven. [Source research milestone](https://github.com/icydv/RichAudio/pull/25).
 - **Environmental acoustics — offline:** A local geometry model calculates valid first-order sound paths, including ground and wall reflections and blocked routes, in original synthetic scenes. [ACOUSTICS-01](https://github.com/icydv/RichAudio/pull/26).
 - **Real GTA geometry — verified in-game:** A supervised, single collision trace on Enhanced 1158.16 returned a validated point and normal from a wall; the installation was restored after the test. This does **not** establish the wall's size, material or real audible reflections. [ACOUSTICS-02](https://github.com/icydv/RichAudio/pull/27).
+- **Real surface reconstruction — qualified in-game result:** Nine controlled collision traces produced a consistent, bounded **inferred** surface patch (approximately 1.48 × 0.98 native game units). Its true edges, solidity between observations, physical scale and material remain unknown; it is **not** certified reflection geometry. [ACOUSTICS-03](https://github.com/icydv/RichAudio/pull/29).
 
-**Next research goal:** Reconstruct a small, defensible surface patch from several bounded GTA observations. This is proposed work, not a completed capability.
+**Next research goal:** Investigate bounded discovery and maintenance of several nearby inferred surfaces in one small diagnostic acoustic tile. This is proposed work, not a completed capability.
 
 **Still to solve:** Continuous responsive vehicle audio, reliable RPM, duplicate-free ownership of GTA's original engine sounds, automatic geometry coverage, and real-time acoustic rendering. **There is no playable public release yet.**
 
