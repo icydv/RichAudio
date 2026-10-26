@@ -1,5 +1,7 @@
 # Roadmap
 
+**ACOUSTICS-02 preparation — 26 October:** I've prepared a separate [one-shot world geometry observer](docs/ACOUSTICS_02_LIVE_GEOMETRY.md) on the independent acoustics ancestry. Authentic-SDK compilation and original-fixture tests support readiness only; a fresh host/inventory check passes, but deployment and one supervised trace require a separate go-ahead. No GTA geometry observation, real reflection, sound output or P2-03.12 work has occurred at this checkpoint.
+
 **Parallel ACOUSTICS-01 — 26 October:** I've implemented and offline-tested a [bounded local geometry tile and first-order reflection prototype](docs/ACOUSTICS_01_LOCAL_GEOMETRY.md), with original open-road, urban and obstruction scenes and calculated visualisations. Actual GTA geometry acquisition remains untested, materials unknown and live audio ownership unresolved. One separately authorised exact-build world observation is the next proposed acoustic step; no live experiment, source-synthesis change, P2-03.12 trajectory audit or Phase 3 integration is started here.
 
 ## Current governing roadmap — 25 October 2026
