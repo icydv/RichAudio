@@ -1,0 +1,311 @@
+{
+  "schemaVersion": 1,
+  "milestone": "P2-03.10",
+  "outcome": "NEGATIVE for the single per-provider eligibility contract",
+  "parentCommit": "e116160f6433c2e9c9d1f4bd571205d43ca81362",
+  "policy": {
+    "id": "shared-interval-v1",
+    "transfer": "Retain successful legacy boundary decisions; otherwise first legal integer frame inside the same shared active interval, to the next existing path context only",
+    "reads": "Target plus existing 96-frame outer continuation calculations; all 24 memory loads count, including zero-weight or discarded work",
+    "eligibility": "The nominal event and each contributing provider interval retain the conservative 2% state, both rounded-period rates, actual rate and source-bound checks. This per-provider interpretation is the candidate contract.",
+    "preservation": "Ownership metadata only: no cursor, fraction, rate, source identity, event extent, cumulative clock or control change",
+    "stop": "First failed read or ownership condition; no alternate policy/path/trajectory"
+  },
+  "sourceSha256": "574DBB61C486F18848839300C9D72219957258CEEA6B1F93710EB72EF6270F2F",
+  "manifestSha256": "60C7226D1ACA1CB983F7C0CB40CADF9001B7803104959A25029BF416709A0AF5",
+  "metadataSha256": "A46E440BE76E42ABF55F37444836C3BF4B392E9CE3292A5755579DB383697288",
+  "reproducedBaselineSha256": "0EB50CD5DDF9D0605C71DC8675C92C1641AF33FEFB54CCBA2DF85FE7FEFFEC6A",
+  "originalFailure": {
+    "time": 11.143875,
+    "frame": 534906,
+    "plannedEndFrame": 536924,
+    "requestedState": 23.784352956374892,
+    "stateRange": [
+      23.721482011715246,
+      23.784352956374892
+    ],
+    "activeRegion": [
+      78,
+      79,
+      80
+    ],
+    "activeBand": [
+      23.726532745098392,
+      24.05729693877517
+    ],
+    "previousIndex": 79,
+    "nextRegion": [
+      79,
+      80,
+      81
+    ],
+    "nextBand": [
+      23.389881764706228,
+      23.777448010203745
+    ],
+    "sharedIndices": [
+      79,
+      80
+    ],
+    "cursorCompatible": true,
+    "candidateWholeEventEligible": false,
+    "reason": "Whole-event context eligibility fails under the one fixed event-boundary handoff policy; no alternate context, time curve or within-event handoff is attempted."
+  },
+  "newFailure": {
+    "frame": 0,
+    "time": 0,
+    "kind": "provider_state_tolerance",
+    "operation": "target",
+    "activeInterval": 93,
+    "providerInterval": 92,
+    "providerState": 21.528776399999998,
+    "providerSourceRange": [
+      148928,
+      151154
+    ],
+    "providerUseFrames": [
+      0,
+      12
+    ],
+    "requestedState": 21,
+    "stateErrorAtFailure": 0.025179828571428482,
+    "rate": 0.9838145231846019,
+    "sourceCursor": 151154,
+    "fractionalCursor": 0,
+    "requiredTapRange": [
+      151143,
+      151166
+    ],
+    "firstRequiredSourceIndex": 151143,
+    "tapIndex": 0,
+    "eligibility": {
+      "passed": false,
+      "reason": "provider_state_tolerance",
+      "stateRange": [
+        21,
+        21
+      ],
+      "stateError": 0.025179828571428482,
+      "roundedEventLengths": [
+        2285,
+        2286
+      ],
+      "periodReadRates": [
+        0.9741794310722101,
+        0.973753280839895
+      ],
+      "band": [
+        21.106643529412075,
+        21.968139183673156
+      ]
+    },
+    "category": "actual_read",
+    "eventStart": 0,
+    "eventEnd": 2286,
+    "context": [
+      93,
+      94,
+      95,
+      96,
+      97
+    ],
+    "proposedContext": [
+      92,
+      93,
+      94
+    ],
+    "eventClockStart": 0,
+    "eventClockEnd": 2285.714285714286,
+    "sourceFingerprint": "574DBB61C486F18848839300C9D72219957258CEEA6B1F93710EB72EF6270F2F"
+  },
+  "interpretation": "Same numerical limits, explicitly applied separately to every interpolation/continuation provider. This is the new conservative candidate, not a retrospective native-semantics or old-waveform failure claim.",
+  "criticalHandoff": {
+    "requiredVerdict": "B: an actual-read blocker stops the trajectory",
+    "atOriginalFrame534906": "NOT REACHED / NOT TESTED",
+    "actualTransferWitnessAvailable": false,
+    "originalActive80Eligibility": "Historical nominal eligibility remains valid; indirect reads there were not bypass-tested after the earlier failure"
+  },
+  "readDependencySummary": [
+    {
+      "kind": "target",
+      "activeInterval": 93,
+      "startFrame": 0,
+      "endFrame": 2286,
+      "footprint": [
+        151143,
+        153414
+      ],
+      "providers": [
+        {
+          "interval": 92,
+          "firstFrame": 0,
+          "endFrame": 12,
+          "passed": false,
+          "reason": "provider_state_tolerance",
+          "stateRange": [
+            21,
+            21
+          ],
+          "stateError": 0.025179828571428482,
+          "roundedEventLengths": [
+            2285,
+            2286
+          ],
+          "periodReadRates": [
+            0.9741794310722101,
+            0.973753280839895
+          ],
+          "band": [
+            21.106643529412075,
+            21.968139183673156
+          ]
+        },
+        {
+          "interval": 93,
+          "firstFrame": 0,
+          "endFrame": 2286,
+          "passed": true,
+          "reason": null,
+          "stateRange": [
+            21,
+            21
+          ],
+          "stateError": 0.01637735714285714,
+          "roundedEventLengths": [
+            2285,
+            2286
+          ],
+          "periodReadRates": [
+            0.9842450765864332,
+            0.9838145231846019
+          ],
+          "band": [
+            21,
+            21.779514795918058
+          ]
+        },
+        {
+          "interval": 94,
+          "firstFrame": 2274,
+          "endFrame": 2286,
+          "passed": true,
+          "reason": null,
+          "stateRange": [
+            21,
+            21
+          ],
+          "stateError": 0.008110385714285854,
+          "roundedEventLengths": [
+            2285,
+            2286
+          ],
+          "periodReadRates": [
+            0.9943107221006564,
+            0.9938757655293088
+          ],
+          "band": [
+            21,
+            21.602365408162964
+          ]
+        }
+      ],
+      "passed": false
+    }
+  ],
+  "independentWitness": {
+    "legacyEligibility": {
+      "active93": true,
+      "provider92": false
+    },
+    "syntheticImpulseProbe": {
+      "sourceIndex": 151143,
+      "coefficient": -0.00015235103862449166,
+      "stockPCMUsed": false
+    },
+    "samplerFootprint": [
+      151143,
+      151166
+    ],
+    "provider92UseFrames": [
+      0,
+      12
+    ],
+    "actualSourceBounds": [
+      0,
+      374180
+    ],
+    "note": "Independent legacy eligibility and unchanged sampler evaluated with wholly original impulse data; no stock output and no policy retry"
+  },
+  "trajectoryPlanning": {
+    "targetFrames": 720000,
+    "targetSeconds": 15,
+    "controlUnchanged": true,
+    "validPrefixFrames": 0,
+    "acceptedEvents": 0,
+    "firstProposedEventFrames": 2286,
+    "ownershipTransfers": 0,
+    "activePreservingTransfers": 0,
+    "intraEventTransfers": 0,
+    "acceptedLocalWraps": 0,
+    "committedSourceIntervals": 0,
+    "nominalIntervalsProposed": 1,
+    "providersInventoried": 3,
+    "stopFrame": 0,
+    "minimumObservedStateHeadroom": -0.005179828571428482,
+    "observedReadRate": 0.9838145231846019,
+    "readRateScope": "First proposed operation only; not a full-trajectory maximum"
+  },
+  "evidenceBoundary": {
+    "analyticalCoverage": "Established by unchanged P2-03.9 analysis",
+    "metadataOnlyTransferIdentity": "Offline tested on wholly original synthetic fixtures",
+    "actualGTASourceHandoff": "NOT ESTABLISHED",
+    "completeTimedPlan": "NOT ESTABLISHED",
+    "PCMRendering": "NOT TESTED; no output",
+    "waveformContinuity": "NOT TESTED",
+    "perceptualNaturalness": "NOT TESTED",
+    "realTimeSuitability": "NOT TESTED"
+  },
+  "performance": {
+    "sourceAndBaselinePreparationMs": 36.1164,
+    "planningMs": 0.6587999999999994,
+    "eligibilityEvaluations": 4,
+    "ownershipChecks": 0,
+    "readRangeChecks": 1,
+    "rssBytes": 56827904,
+    "cpuUserMs": 0,
+    "cpuSystemMs": 0,
+    "caveat": "Sub-millisecond first-failure analysis; CPU counters below useful resolution do not imply zero CPU cost; no full-trajectory or rendering claim"
+  },
+  "validation": {
+    "newOriginalTests": 21,
+    "combinedWithOldFeasibilityTests": 38,
+    "fullOfflineSuite": "PASS",
+    "phase1BeforeRoadmap": 131,
+    "phase1AfterRoadmap": 132,
+    "hostedCi": "Verified separately on the PR"
+  },
+  "preservation": {
+    "previousProtectedFiles": 3009,
+    "previousLinkTargets": 63,
+    "protectedFiles": 3544,
+    "protectedLinkTargets": 83,
+    "historicalPreviewsMatched": 3,
+    "oldPolicyAndRendererDefaultsUnchanged": true,
+    "noGameLaunchArchiveAccessOrStockTransitionOutput": true
+  },
+  "nextDecision": "I propose one separately authorised diagnostic audit of interpolation-support eligibility semantics, before any exemption, ownership retry or rendering. No numerical tolerance widening or alternative policy is implemented.",
+  "actualReportedProgress": [
+    0,
+    10,
+    30,
+    50,
+    70,
+    85
+  ],
+  "limitations": [
+    "The original failure is reproduced; the new contract stops earlier, not at the critical handoff",
+    "No actual-source ownership transfer took place",
+    "No actual-source policy retry after the first failure",
+    "No audio output, stock PCM, raw metadata blob, full source event trace or private absolute path is published"
+  ]
+}
