@@ -1,0 +1,393 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "parentPr": 19,
+  "parentCommit": "bf36af90d2bc884ba43bd5ad42912e40f2b7f2aa",
+  "outcome": "PARTIAL",
+  "rootCauseImplication": {
+    "choice": 2,
+    "text": "Internal joins contribute only slightly in this listening comparison; the general cause remains unresolved"
+  },
+  "listening": {
+    "APlayed": true,
+    "BPlayed": true,
+    "observation": "I heard a slight improvement in B.",
+    "newClicksOrPitchChanges": "Not separately assessed",
+    "fullNaturalness": "Not established",
+    "furtherVariants": "None"
+  },
+  "source": {
+    "sha256": "574DBB61C486F18848839300C9D72219957258CEEA6B1F93710EB72EF6270F2F",
+    "manifestSha256": "60C7226D1ACA1CB983F7C0CB40CADF9001B7803104959A25029BF416709A0AF5",
+    "metadataSha256": "A46E440BE76E42ABF55F37444836C3BF4B392E9CE3292A5755579DB383697288",
+    "intervals": [
+      {
+        "index": 93,
+        "start": 151154,
+        "end": 153403,
+        "state": 21.3439245
+      },
+      {
+        "index": 94,
+        "start": 153403,
+        "end": 155675,
+        "state": 21.170318100000003
+      },
+      {
+        "index": 95,
+        "start": 155675,
+        "end": 157952,
+        "state": 21.0519509
+      },
+      {
+        "index": 96,
+        "start": 157952,
+        "end": 160249,
+        "state": 20.891970899999997
+      },
+      {
+        "index": 97,
+        "start": 160249,
+        "end": 162568,
+        "state": 20.74339895
+      }
+    ],
+    "scheduledFrames": 11414,
+    "originalDurationSeconds": 0.23779166666666668,
+    "stateRange": [
+      20.74339895,
+      21.3439245
+    ],
+    "readRates": [
+      0.9838145231846019,
+      1.0148796498905908
+    ],
+    "existingContextReads": {
+      "minimumRequestedPosition": 151154,
+      "maximumRequestedPosition": 162664.41356673962,
+      "interpolationSampleBounds": [
+        151143,
+        162676
+      ],
+      "note": "The unchanged outer wrap continuation reads a short tail beyond the scheduled five intervals; sinc support also reaches outside marker boundaries. This existing A/B-identical context is not an added scheduled interval."
+    }
+  },
+  "settings": {
+    "rate": 48000,
+    "frames": 240000,
+    "seconds": 5,
+    "normalisedState": 0.5,
+    "markerState": 21,
+    "seam": 96,
+    "gain": 0.15,
+    "edge": 1200
+  },
+  "events": 105,
+  "internalJoins": 84,
+  "wrapJoins": 20,
+  "passes": 21,
+  "floatComparison": {
+    "all": {
+      "samples": 240000,
+      "changedSamples": 8001,
+      "maxAbsoluteDifference": 0.0006205792429527582,
+      "rmsDifference": 0.00003271025874684943
+    },
+    "internal": {
+      "samples": 8064,
+      "changedSamples": 8001,
+      "maxAbsoluteDifference": 0.0006205792429527582,
+      "rmsDifference": 0.00017844909132027246
+    },
+    "unaffected": {
+      "samples": 231936,
+      "changedSamples": 0,
+      "maxAbsoluteDifference": 0,
+      "rmsDifference": 0
+    },
+    "wrap": {
+      "samples": 1920,
+      "changedSamples": 0,
+      "maxAbsoluteDifference": 0,
+      "rmsDifference": 0
+    },
+    "internalBoundaries": 84,
+    "wrapBoundaries": 20,
+    "quantisationResolutionGate": {
+      "affectedRmsAtLeastOneLsb": true,
+      "maxAtLeastTwoLsb": true,
+      "caution": "Numerical screening only; not a validated audibility threshold. No subjective comparison if differences vanish at PCM16."
+    }
+  },
+  "pcmComparison": {
+    "all": {
+      "samples": 240000,
+      "changedSamples": 6573,
+      "maxAbsoluteDifference": 0.0006103515625,
+      "rmsDifference": 0.00003275330261465837
+    },
+    "internal": {
+      "samples": 8064,
+      "changedSamples": 6573,
+      "maxAbsoluteDifference": 0.0006103515625,
+      "rmsDifference": 0.00017868391487079407
+    },
+    "unaffected": {
+      "samples": 231936,
+      "changedSamples": 0,
+      "maxAbsoluteDifference": 0,
+      "rmsDifference": 0
+    },
+    "wrap": {
+      "samples": 1920,
+      "changedSamples": 0,
+      "maxAbsoluteDifference": 0,
+      "rmsDifference": 0
+    },
+    "internalBoundaries": 84,
+    "wrapBoundaries": 20,
+    "quantisationResolutionGate": {
+      "affectedRmsAtLeastOneLsb": true,
+      "maxAtLeastTwoLsb": true,
+      "caution": "Numerical screening only; not a validated audibility threshold. No subjective comparison if differences vanish at PCM16."
+    }
+  },
+  "outputs": {
+    "A_existing_internal_joins.wav": {
+      "sha256": "53C2DE3C3934A6393CB3ADFA69D69F19C053B10B81EBBCD94F46B04A9A3D38A2",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 240000,
+      "durationSeconds": 5,
+      "peak": 0.11962890625,
+      "rms": 0.06635824909781128,
+      "dc": -0.0019155311584472656,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.008514404296875,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 250
+    },
+    "B_continuous_internal.wav": {
+      "sha256": "FFA2F9369004B3A49659AC84A79A6BE964A2A3C6FD7B318494F8C7AAE1E85F64",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 240000,
+      "durationSeconds": 5,
+      "peak": 0.11962890625,
+      "rms": 0.06635811804164024,
+      "dc": -0.0019154209136962891,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.008514404296875,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 250
+    }
+  },
+  "boundaries": {
+    "A": {
+      "internal": {
+        "count": 84,
+        "initialStep": {
+          "min": 0.00274658203125,
+          "max": 0.0035400390625,
+          "mean": 0.0030059814453125
+        },
+        "maximumLocalStep": {
+          "min": 0.005218505859375,
+          "max": 0.006744384765625,
+          "mean": 0.00568389892578125
+        },
+        "localRms": {
+          "min": 0.04686680040039657,
+          "max": 0.049931523339407376,
+          "mean": 0.04822974893113105
+        }
+      },
+      "wrap": {
+        "count": 20,
+        "initialStep": {
+          "min": 0.0030517578125,
+          "max": 0.0030517578125,
+          "mean": 0.0030517578125
+        },
+        "maximumLocalStep": {
+          "min": 0.006195068359375,
+          "max": 0.006195068359375,
+          "mean": 0.006195068359375
+        },
+        "localRms": {
+          "min": 0.048756998574145026,
+          "max": 0.04876490646018621,
+          "mean": 0.04876216810681615
+        }
+      }
+    },
+    "B": {
+      "internal": {
+        "count": 84,
+        "initialStep": {
+          "min": 0.00274658203125,
+          "max": 0.0035400390625,
+          "mean": 0.0030059814453125
+        },
+        "maximumLocalStep": {
+          "min": 0.00531005859375,
+          "max": 0.006805419921875,
+          "mean": 0.005803789411272321
+        },
+        "localRms": {
+          "min": 0.04685920443927818,
+          "max": 0.049933852405508905,
+          "mean": 0.04822436346599563
+        }
+      },
+      "wrap": {
+        "count": 20,
+        "initialStep": {
+          "min": 0.0030517578125,
+          "max": 0.0030517578125,
+          "mean": 0.0030517578125
+        },
+        "maximumLocalStep": {
+          "min": 0.006195068359375,
+          "max": 0.006195068359375,
+          "mean": 0.006195068359375
+        },
+        "localRms": {
+          "min": 0.048756998574145026,
+          "max": 0.04876490646018621,
+          "mean": 0.04876216810681615
+        }
+      }
+    }
+  },
+  "maximumInternalReadRateStep": 0.010496198916054467,
+  "originalInternalSource": [
+    {
+      "index": 94,
+      "adjacentStep": 0.01849365234375,
+      "slopeChange": 0.006500244140625
+    },
+    {
+      "index": 95,
+      "adjacentStep": 0.023895263671875,
+      "slopeChange": 0.007965087890625
+    },
+    {
+      "index": 96,
+      "adjacentStep": 0.018646240234375,
+      "slopeChange": 0.004486083984375
+    },
+    {
+      "index": 97,
+      "adjacentStep": 0.019012451171875,
+      "slopeChange": 0.00274658203125
+    }
+  ],
+  "spectral": {
+    "windowFrames": 4096,
+    "windows": 82,
+    "edgeFadesExcluded": true,
+    "oneJoinPerWindow": true,
+    "relativeComplexSpectrumDifference": {
+      "min": 0.00013231017458331635,
+      "max": 0.0008846501255399484,
+      "mean": 0.0006151459503529996
+    },
+    "note": "Complex-spectrum difference, not an audibility or naturalness score"
+  },
+  "periods": {
+    "A": {
+      "trimFrames": 4800,
+      "maxLagFrames": 96000,
+      "anchorLength": 1024,
+      "anchorMatches": 6,
+      "limited": false,
+      "exactPeriods": [
+        {
+          "lagFrames": 80000,
+          "comparedSamples": 150400,
+          "differentSamples": 0,
+          "rmsDifference": 0,
+          "normalisedCorrelation": 1
+        }
+      ]
+    },
+    "B": {
+      "trimFrames": 4800,
+      "maxLagFrames": 96000,
+      "anchorLength": 1024,
+      "anchorMatches": 6,
+      "limited": false,
+      "exactPeriods": [
+        {
+          "lagFrames": 80000,
+          "comparedSamples": 150400,
+          "differentSamples": 0,
+          "rmsDifference": 0,
+          "normalisedCorrelation": 1
+        }
+      ]
+    }
+  },
+  "note": "Both use the same anchored piecewise-continuous source path and rate changes; only internal continuation blends are omitted in B. No new phase model.",
+  "performance": {
+    "preparationMs": 40.2893,
+    "A": {
+      "renderMs": 30.2324,
+      "interpolationCalls": 249984,
+      "internalBlendOperations": 84,
+      "wrapBlendOperations": 20
+    },
+    "B": {
+      "renderMs": 26.33210000000001,
+      "interpolationCalls": 241920,
+      "internalBlendOperations": 0,
+      "wrapBlendOperations": 20
+    },
+    "repeatPreparationMs": 40.9064,
+    "repeatRendering": {
+      "A": {
+        "renderMs": 29.23700000000001,
+        "interpolationCalls": 249984,
+        "internalBlendOperations": 84,
+        "wrapBlendOperations": 20
+      },
+      "B": {
+        "renderMs": 25.949899999999985,
+        "interpolationCalls": 241920,
+        "internalBlendOperations": 0,
+        "wrapBlendOperations": 20
+      }
+    },
+    "cpuUserMs": 78,
+    "cpuSystemMs": 47,
+    "rssBytes": 66863104,
+    "limitation": "A runs first and B second; JIT/filter warm-up may affect the comparison. Offline timing, not real-time certification."
+  },
+  "preservation": {
+    "currentPrivateFilesMatched": 1742,
+    "currentFixtureLinksUnchanged": 27,
+    "priorPrivateFilesVerified": 1175,
+    "priorLinksVerified": 15,
+    "sourceAndHistoricalWavsVerified": true,
+    "defaultRenderersUnchanged": true,
+    "gameAccess": false,
+    "archiveAccess": false,
+    "gameWrites": 0,
+    "proprietaryAudioPublished": false
+  },
+  "nextStep": "One separately authorised wrap-only ablation using B as the fixed reference. Keep internal blends omitted and all other settings identical; do not start a duration sweep or widen source eligibility.",
+  "validation": {
+    "newTests": 10,
+    "preListeningTestsPassed": 38,
+    "fullRegression": "PASS",
+    "ci": "Recorded separately",
+    "phase1Checks": 128
+  }
+}
