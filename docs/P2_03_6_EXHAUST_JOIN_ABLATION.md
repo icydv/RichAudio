@@ -1,5 +1,7 @@
 # P2-03.6: coherent exhaust playback and internal join ablation
 
+Subsequent bounded result: [P2-03.7 outer wrap ablation](P2_03_7_OUTER_WRAP_ABLATION.md) reproduces this B exactly as its A. I heard a clear improvement and natural-sounding result from removing only outer mixtures at that fixed state. The historical findings and files below are preserved.
+
 26 October 2026. **PARTIAL.** My labelled A/B verdict was **“Slight improvement”** for B. The best-supported implication is **2: internal joins contribute only slightly in this comparison**. This does not quantify their share of the remaining defect, establish complete naturalness or reconstruct native scheduling. Clicks, roughness and pitch changes were not separately assessed in my reply.
 
 The single comparison is finished. No additional blend duration, ordering, source region, wrap variant, engine layer or effect was tried. Work is stacked on open PR #19 at `bf36af90d2bc884ba43bd5ad42912e40f2b7f2aa`; earlier PRs remain unmerged. No GTA/RPH launch, game/archive access, dependency installation, native mutation or Phase 3 work occurred.
