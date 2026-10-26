@@ -1,0 +1,383 @@
+{
+  "schemaVersion": 1,
+  "milestone": "P2-03.11",
+  "parentCommit": "c891bd8a1c1508f4065f1fd688084140ec6b3051",
+  "outcome": "PASS for bounded same-original-stream reconstruction support; no trajectory or native-scheduler verdict",
+  "contract": {
+    "id": "scheduled-interval-bounded-support-v1",
+    "selection": "Unchanged 2% scheduled-interval state tolerance, both rounded-period rates and actual read rate 0.95–1.05, source margins and event clock",
+    "support": "All 24 loads must preserve authenticated original-stream identity and unit-stride absolute source mapping, within known contiguous provenance and bounds. Metadata markers do not independently schedule filter taps.",
+    "ownership": "Not evaluated or changed",
+    "transition": "Not evaluated or changed; a separate continuation read head is not authorised merely as interpolation support",
+    "scope": "Opt-in interpretation for the existing linear FIR sampler, not native Rockstar scheduling or a trajectory pass"
+  },
+  "sourceSha256": "574DBB61C486F18848839300C9D72219957258CEEA6B1F93710EB72EF6270F2F",
+  "pcmSha256": "E21A779780B24755250BBA1674E673C6436C3B58E3CC6AEA0E9CDE00D6E5D70F",
+  "manifestSha256": "60C7226D1ACA1CB983F7C0CB40CADF9001B7803104959A25029BF416709A0AF5",
+  "metadataSha256": "A46E440BE76E42ABF55F37444836C3BF4B392E9CE3292A5755579DB383697288",
+  "sourceContinuity": {
+    "codec": 0,
+    "rate": 48000,
+    "channels": 1,
+    "samples": 374180,
+    "rawPayloadMatchesRecordedOriginal": true,
+    "marker": 151154,
+    "adjacentOriginalIndices": [
+      151153,
+      151154
+    ],
+    "metadataIntervalsTouch": true,
+    "segmentationDifferingSamples": 0,
+    "localWindowFrames": 128,
+    "markerStep": 0.020416259765625,
+    "maximumLocalStep": 0.03424072265625,
+    "localRms": 0.28425801511818555,
+    "boundarySlopeChange": 0.002655029296875,
+    "limitation": "Stored PCM adjacency and fidelity do not prove an unedited physical capture or native scheduling semantics"
+  },
+  "event": {
+    "interval": 93,
+    "start": 0,
+    "end": 2286,
+    "clockStart": 0,
+    "clockEnd": 2285.714285714286,
+    "requestedState": 21,
+    "stateRange": [
+      21,
+      21
+    ],
+    "sourceStart": 151154,
+    "sourceEnd": 153403,
+    "rate": 0.9838145231846019,
+    "sourceKey": "574DBB61C486F18848839300C9D72219957258CEEA6B1F93710EB72EF6270F2F"
+  },
+  "interpretationA": {
+    "passed": false,
+    "failure": {
+      "frame": 0,
+      "time": 0,
+      "kind": "provider_state_tolerance",
+      "operation": "target",
+      "activeInterval": 93,
+      "providerInterval": 92,
+      "providerState": 21.528776399999998,
+      "providerSourceRange": [
+        148928,
+        151154
+      ],
+      "providerUseFrames": [
+        0,
+        12
+      ],
+      "requestedState": 21,
+      "stateErrorAtFailure": 0.025179828571428482,
+      "rate": 0.9838145231846019,
+      "sourceCursor": 151154,
+      "fractionalCursor": 0,
+      "requiredTapRange": [
+        151143,
+        151166
+      ],
+      "firstRequiredSourceIndex": 151143,
+      "tapIndex": 0,
+      "eligibility": {
+        "passed": false,
+        "reason": "provider_state_tolerance",
+        "stateRange": [
+          21,
+          21
+        ],
+        "stateError": 0.025179828571428482,
+        "roundedEventLengths": [
+          2285,
+          2286
+        ],
+        "periodReadRates": [
+          0.9741794310722101,
+          0.973753280839895
+        ],
+        "band": [
+          21.106643529412075,
+          21.968139183673156
+        ]
+      }
+    },
+    "providers": [
+      {
+        "interval": 92,
+        "firstFrame": 0,
+        "endFrame": 12,
+        "passed": false,
+        "reason": "provider_state_tolerance",
+        "stateRange": [
+          21,
+          21
+        ],
+        "stateError": 0.025179828571428482,
+        "roundedEventLengths": [
+          2285,
+          2286
+        ],
+        "periodReadRates": [
+          0.9741794310722101,
+          0.973753280839895
+        ],
+        "band": [
+          21.106643529412075,
+          21.968139183673156
+        ]
+      },
+      {
+        "interval": 93,
+        "firstFrame": 0,
+        "endFrame": 2286,
+        "passed": true,
+        "reason": null,
+        "stateRange": [
+          21,
+          21
+        ],
+        "stateError": 0.01637735714285714,
+        "roundedEventLengths": [
+          2285,
+          2286
+        ],
+        "periodReadRates": [
+          0.9842450765864332,
+          0.9838145231846019
+        ],
+        "band": [
+          21,
+          21.779514795918058
+        ]
+      },
+      {
+        "interval": 94,
+        "firstFrame": 2274,
+        "endFrame": 2286,
+        "passed": true,
+        "reason": null,
+        "stateRange": [
+          21,
+          21
+        ],
+        "stateError": 0.008110385714285854,
+        "roundedEventLengths": [
+          2285,
+          2286
+        ],
+        "periodReadRates": [
+          0.9943107221006564,
+          0.9938757655293088
+        ],
+        "band": [
+          21,
+          21.602365408162964
+        ]
+      }
+    ]
+  },
+  "interpretationB": {
+    "passed": true,
+    "selection": {
+      "passed": true,
+      "reasons": [],
+      "interval": 93,
+      "stateError": 0.01637735714285714,
+      "periodRates": [
+        0.9842450765864332,
+        0.9838145231846019
+      ],
+      "anchor": {
+        "asset": "v_twin_2:0E804842",
+        "originalIndex": 151154,
+        "decodedIndex": 151154
+      }
+    },
+    "points": [
+      {
+        "frame": 0,
+        "position": 151154,
+        "rate": 0.9838145231846019,
+        "indices": [
+          151143,
+          151144,
+          151145,
+          151146,
+          151147,
+          151148,
+          151149,
+          151150,
+          151151,
+          151152,
+          151153,
+          151154,
+          151155,
+          151156,
+          151157,
+          151158,
+          151159,
+          151160,
+          151161,
+          151162,
+          151163,
+          151164,
+          151165,
+          151166
+        ],
+        "phase": 0,
+        "rateBucket": 126,
+        "weights": [
+          -0.00015235103862449166,
+          2.3502075938989635e-18,
+          0.0016005880816865015,
+          -0.00584694636343586,
+          0.013633716629388365,
+          -0.025228154523831526,
+          0.040070402769880414,
+          -0.056763347678620964,
+          0.07327021815618014,
+          -0.08728440358989094,
+          0.09668963022793257,
+          0.9000212946586716,
+          0.09668963022793257,
+          -0.08728440358989094,
+          0.07327021815618014,
+          -0.056763347678620964,
+          0.040070402769880414,
+          -0.025228154523831526,
+          0.013633716629388365,
+          -0.00584694636343586,
+          0.0016005880816865015,
+          2.3502075938989635e-18,
+          -0.00015235103862449166,
+          0
+        ],
+        "positiveWeights": 13,
+        "negativeWeights": 10,
+        "weightSum": 1,
+        "memoryReads": 24,
+        "numericallyNonzeroWeights": 23,
+        "nonzeroActualTerms": 23,
+        "finalNonzeroWeights": 0,
+        "finalNonzeroTerms": 0,
+        "neighbourNonzeroWeights": 11,
+        "neighbourNonzeroTerms": 11,
+        "fade": 0,
+        "finalGain": 0,
+        "existingSamplerAgreement": 0
+      },
+      {
+        "frame": 1,
+        "position": 151154.98381452318,
+        "rate": 0.9838145231846019,
+        "indices": [
+          151143,
+          151144,
+          151145,
+          151146,
+          151147,
+          151148,
+          151149,
+          151150,
+          151151,
+          151152,
+          151153,
+          151154,
+          151155,
+          151156,
+          151157,
+          151158,
+          151159,
+          151160,
+          151161,
+          151162,
+          151163,
+          151164,
+          151165,
+          151166
+        ],
+        "phase": 125,
+        "rateBucket": 126,
+        "weights": [
+          1.6012269075084883e-7,
+          -0.00019210538521852912,
+          0.00014479131374544295,
+          0.0012931226527907029,
+          -0.005373387050655253,
+          0.013095330685389863,
+          -0.02487829129354598,
+          0.04035974962439782,
+          -0.05840694415738662,
+          0.0774336820846243,
+          -0.0963325932139851,
+          0.11906645883881231,
+          0.8993546891789611,
+          0.07495242049126105,
+          -0.07809153587688401,
+          0.06886887372526758,
+          -0.054899121716978944,
+          0.03960840556357167,
+          -0.02545836814161245,
+          0.014098595710263756,
+          -0.006281077556689493,
+          0.001889955346400355,
+          -0.00013766245112559457,
+          -0.00011514849409454217
+        ],
+        "positiveWeights": 13,
+        "negativeWeights": 11,
+        "weightSum": 1.0000000000000004,
+        "memoryReads": 24,
+        "numericallyNonzeroWeights": 24,
+        "nonzeroActualTerms": 24,
+        "finalNonzeroWeights": 24,
+        "finalNonzeroTerms": 24,
+        "neighbourNonzeroWeights": 11,
+        "neighbourNonzeroTerms": 11,
+        "fade": 0.0008333333333333334,
+        "finalGain": 0.000125,
+        "existingSamplerAgreement": 0
+      }
+    ]
+  },
+  "interpretationC": "Required if provenance, original mapping or independent-read authorisation cannot be established; native scheduler semantics remain unresolved",
+  "performance": {
+    "preparationMs": 41.906099999999995,
+    "analysisMs": 2.231499999999997,
+    "rssBytes": 60538880,
+    "isolatedQueries": 2,
+    "filterLoadsPerQuery": 24
+  },
+  "validation": {
+    "newSyntheticTests": 26,
+    "nodeTotal": 219,
+    "telemetryAssertions": 65,
+    "configAssertions": 9,
+    "drivetrainAssertions": 35,
+    "appendExpectations": 8,
+    "extractionGuards": 8,
+    "protectedFiles": 4074,
+    "protectedLinkTargets": 106,
+    "acceptedPreviewFingerprints": 3,
+    "historicalSourceUnchanged": true,
+    "phase1Checks": 133,
+    "publicationIndexFindings": 0,
+    "validLocalDocumentationLinks": 32,
+    "historicalReviewedExceptions": [
+      "e5fbd8f3502d3e28169a224caa07471e090e368f",
+      "71466d02189251b2df99a2d69b954473bd1dba4f",
+      "ec94b546ae4a610dedfb0337706a6f36ec031666",
+      "00c1fe03242fa2ee4a6f9cff1a481aa5b91da4ca"
+    ]
+  },
+  "trajectoryRetried": false,
+  "laterHandoffAttempted": false,
+  "audioGenerated": false,
+  "productionDefaultsChanged": false,
+  "history": {
+    "pairedIntervalRule": "ae710742779cd61c38357c82b5d9812bf8fe65bb",
+    "scheduledRequestedStateRule": "9d108d54510268ab6a33c93aa490701527531138",
+    "perProviderInterpretation": "c891bd8a1c1508f4065f1fd688084140ec6b3051"
+  }
+}
