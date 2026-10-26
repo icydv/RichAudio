@@ -38,9 +38,9 @@ We're also keeping potential **FiveM support** in mind. That is a future possibi
 
 ## Where we are now
 
-We've researched GTA V's audio files, designed the foundations of the new system and built an early vehicle-data prototype that passes offline tests.
+We've verified vehicle movement telemetry inside GTA V Enhanced and privately decoded original vehicle sound material. Our geometry research has now reconstructed separate inferred wall and ground patches from 18 live collision observations, with a temporary in-game visual debugger.
 
-The next challenge is getting that prototype running reliably inside GTA V, then proving we can enhance individual sounds without clashing with the game's existing audio.
+The next geometry challenge is safely maintaining a bounded local tile as the listener moves. Reliable RPM, responsive source playback and duplicate-free control of individual native sounds remain unresolved.
 
 **There is no finished audio engine or public release yet.** We're working through the difficult parts one step at a time, and we'll share real progress rather than promise features before they work.
 
@@ -55,3 +55,21 @@ For the technical side, see the [roadmap](ROADMAP.md), [architecture](ARCHITECTU
 **RichAudio — Don't just hear the world. Feel its presence.**
 
 *RichAudio is an independent fan-made project, not affiliated with or endorsed by Rockstar Games or Take-Two Interactive. No Rockstar game files are distributed in this repository. No public software licence or playable release has been announced.*
+
+## Development progress
+
+*Last reviewed: 26 October 2026. These are **research results**, not features in a playable release. The linked milestone PRs are open and unmerged, so their changes are not yet part of `main`.*
+
+- **In-game vehicle data — verified:** RichAudio has run in GTA V Enhanced Story Mode and captured vehicle/player movement data. Reliable live engine RPM remains unresolved.
+- **Vehicle sound research — offline:** We have decoded and studied original vehicle-audio sources privately, with promising fixed-state motorcycle exhaust listening experiments. A reliable full acceleration/deceleration renderer is not yet proven. [Source research milestone](https://github.com/icydv/RichAudio/pull/25).
+- **Environmental acoustics — offline:** A local geometry model calculates valid first-order sound paths, including ground and wall reflections and blocked routes, in original synthetic scenes. [ACOUSTICS-01](https://github.com/icydv/RichAudio/pull/26).
+- **Real GTA geometry — verified in-game:** A supervised, single collision trace on Enhanced 1158.16 returned a validated point and normal from a wall; the installation was restored after the test. This does **not** establish the wall's size, material or real audible reflections. [ACOUSTICS-02](https://github.com/icydv/RichAudio/pull/27).
+- **Real surface reconstruction — qualified in-game result:** Nine controlled collision traces produced a consistent, bounded **inferred** surface patch (approximately 1.48 × 0.98 native game units). Its true edges, solidity between observations, physical scale and material remain unknown; it is **not** certified reflection geometry. [ACOUSTICS-03](https://github.com/icydv/RichAudio/pull/29).
+
+- **Multi-surface tile and visual debugger — verified in one supervised game test:** Eighteen valid collision observations supported separate **inferred** wall and ground patches. In Enhanced 1158.16, I could see the measurement rays, hit markers, normals and yellow candidate outlines. Hide/clear/replay kept the query count at 18, and the original installation was independently restored. This does not establish continuous world coverage, material, physical scale or audible acoustics. [ACOUSTICS-04 evidence and limits](docs/ACOUSTICS_04_MULTISURFACE_VISUAL_DEBUG.md), [PR #30](https://github.com/icydv/RichAudio/pull/30).
+
+**Next research goal:** Investigate bounded local-tile maintenance along one short, manually walked path, with predefined observation stops and explicit expiry/invalidation. This is proposed work requiring separate authorisation; no continuous scanner or acoustic output is implemented.
+
+**Still to solve:** Continuous responsive vehicle audio, reliable RPM, duplicate-free ownership of GTA's original engine sounds, automatic geometry coverage, and real-time acoustic rendering. **There is no playable public release yet.**
+
+> **Keeping this up to date:** Every completed milestone or significant validated development should update this section in the same pull request, including the date, evidence link and what remains unproven. The [pull request checklist](.github/PULL_REQUEST_TEMPLATE.md) prompts this review; updates are **not automatic**.

@@ -19,6 +19,9 @@ try {
     & node --test tests/Test-SurfaceReconstruction.mjs tests/Test-SurfacePrivatePaths.mjs
     if($LASTEXITCODE-ne0){throw 'Surface reconstruction/privacy tests failed.'}
     & (Join-Path $repo 'tests\Test-SurfaceAcquisition.ps1')
+    & (Join-Path $repo 'tests\Test-DiagnosticTile.ps1')
+    & node --test tests/Test-TileReplay.mjs
+    if($LASTEXITCODE-ne0){throw 'Tile replay and separation tests failed.'}
     & (Join-Path $repo 'tests\Test-Phase1.ps1') -ReportPath (Join-Path $output 'phase1-results.json')
     & (Join-Path $PSScriptRoot 'Build-Telemetry.ps1') -CoreOnly
     $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'

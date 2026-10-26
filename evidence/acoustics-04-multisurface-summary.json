@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "milestone": "ACOUSTICS-04",
+  "date": "2026-10-26",
+  "outcome": "PASS-bounded-diagnostic-only",
+  "runtime": {
+    "game": "1.0.1158.16",
+    "rph": "1.132.1428.17748",
+    "directStorageFix": "1.2",
+    "xinputLoader": "1.0.0.2",
+    "launches": 1,
+    "restarts": 0,
+    "worldDrawing": "ordinary DRAW_LINE",
+    "hudDrawing": "RPH FrameRender / Graphics.DrawText",
+    "worldAndHudVerifiedInGame": true,
+    "existingRtssWarning": true,
+    "securitySettingsChanged": false
+  },
+  "acquisition": {
+    "plan": "wall-ground-two-groups-v1",
+    "groups": 2,
+    "maximumCalls": 18,
+    "actualCalls": 18,
+    "validHits": 18,
+    "rejectedHits": 0,
+    "candidates": 2,
+    "noAutomaticRetry": true
+  },
+  "groups": [
+    {
+      "group": "wall",
+      "calls": 9,
+      "validHits": 9,
+      "rejectedHits": 0,
+      "orientation": "predominantly-vertical",
+      "maximumFitResidualNativeUnits": 0.000009658195581364636,
+      "fitRmsNativeUnits": 0.000006829375576934664,
+      "normalAgreementMaxDegrees": 0.0003271346002222793,
+      "planeToleranceNativeUnits": 0.005,
+      "inferredFootprintVertices": 4,
+      "inferredFootprintAreaNativeUnitsSquared": 1.4507515908678745,
+      "acquisitionMs": 113.55419999999867,
+      "traceMinimumMs": 0.046400000000000004,
+      "traceMaximumMs": 1.5001,
+      "traceTotalMs": 1.8932999999999995,
+      "reconstructionMs": 19.9744,
+      "tileUpdateIncludingDefensiveFitMs": 0.8442000000000001,
+      "snapshotGenerationMs": 0.0785
+    },
+    {
+      "group": "ground",
+      "calls": 9,
+      "validHits": 9,
+      "rejectedHits": 0,
+      "orientation": "horizontal-or-gently-sloping",
+      "maximumFitResidualNativeUnits": 0.0024901718300885875,
+      "fitRmsNativeUnits": 0.0011136834562762825,
+      "normalAgreementMaxDegrees": 1.5073002094314483,
+      "planeToleranceNativeUnits": 0.005,
+      "inferredFootprintVertices": 5,
+      "inferredFootprintAreaNativeUnitsSquared": 2.1922291539818772,
+      "acquisitionMs": 112.70530000000144,
+      "traceMinimumMs": 0.044000000000000004,
+      "traceMaximumMs": 0.054400000000000004,
+      "traceTotalMs": 0.4269000000000001,
+      "reconstructionMs": 0.029400000000000003,
+      "tileUpdateIncludingDefensiveFitMs": 0.018500000000000003,
+      "snapshotGenerationMs": 0.0354
+    }
+  ],
+  "visualisation": {
+    "recordedPrimitives": 105,
+    "maximumPrimitives": 192,
+    "independentPrimitiveMatch": true,
+    "hideClearReplayVerified": true,
+    "statusCallsAfterControls": 18,
+    "finalSnapshotIdenticalToAcquisitionSnapshot": true,
+    "normalStopAndDetachedDrawing": true,
+    "screenshotOrRecordingFilesPublished": false,
+    "liveScreenViewingSeparatelyAuthorised": true
+  },
+  "performance": {
+    "worldSubmissionTicks": 13225,
+    "lineSubmissions": 883293,
+    "worldSubmissionMeanMs": 0.05812353119092632,
+    "worldSubmissionMaximumMs": 12.1231,
+    "hudCallbacks": 13229,
+    "hudSubmissionMeanMs": 0.006300476226472201,
+    "hudSubmissionMaximumMs": 1.4251,
+    "managedHeapSnapshotBytes": 10891104,
+    "limitations": "CPU submission only, mixed zero/partial/full snapshots, not GPU/frame time or per-plugin/peak memory; cold/warm timing and RTSS confounders not isolated"
+  },
+  "restoration": {
+    "passed": true,
+    "originalRootFiles": 32,
+    "archiveMetadataRecords": 179,
+    "sampledArchiveHashes": 10,
+    "temporaryPathsAbsent": 27,
+    "originalExecutableNamesAndSignaturesVerified": true,
+    "normalShutdown": true,
+    "forcedTermination": false
+  },
+  "preservation": {
+    "privateFiles": 4857,
+    "linkTargets": 139,
+    "priorAcousticsArtifacts": 473,
+    "unchanged": true,
+    "sourceSynthesisCommit": "24e1be70eb75c8f7b43e95fe495d3c71dba5dc42"
+  },
+  "limits": {
+    "material": "unknown",
+    "physicalUnitCalibration": "unverified",
+    "continuityBetweenRays": "unknown",
+    "actualEdges": "unknown",
+    "permanence": "unverified",
+    "currentValidityMs": 1000,
+    "acousticSimulation": false,
+    "audioOutput": false,
+    "interiorTransitionsLiveTested": false,
+    "productionReady": false
+  }
+}
