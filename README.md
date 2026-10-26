@@ -55,3 +55,18 @@ For the technical side, see the [roadmap](ROADMAP.md), [architecture](ARCHITECTU
 **RichAudio — Don't just hear the world. Feel its presence.**
 
 *RichAudio is an independent fan-made project, not affiliated with or endorsed by Rockstar Games or Take-Two Interactive. No Rockstar game files are distributed in this repository. No public software licence or playable release has been announced.*
+
+## Development progress
+
+*Last reviewed: 26 October 2026. These are **research results**, not features in a playable release. The linked milestone PRs are open and unmerged, so their changes are not yet part of `main`.*
+
+- **In-game vehicle data — verified:** RichAudio has run in GTA V Enhanced Story Mode and captured vehicle/player movement data. Reliable live engine RPM remains unresolved.
+- **Vehicle sound research — offline:** We have decoded and studied original vehicle-audio sources privately, with promising fixed-state motorcycle exhaust listening experiments. A reliable full acceleration/deceleration renderer is not yet proven. [Source research milestone](https://github.com/icydv/RichAudio/pull/25).
+- **Environmental acoustics — offline:** A local geometry model calculates valid first-order sound paths, including ground and wall reflections and blocked routes, in original synthetic scenes. [ACOUSTICS-01](https://github.com/icydv/RichAudio/pull/26).
+- **Real GTA geometry — verified in-game:** A supervised, single collision trace on Enhanced 1158.16 returned a validated point and normal from a wall; the installation was restored after the test. This does **not** establish the wall's size, material or real audible reflections. [ACOUSTICS-02](https://github.com/icydv/RichAudio/pull/27).
+
+**Next research goal:** Reconstruct a small, defensible surface patch from several bounded GTA observations. This is proposed work, not a completed capability.
+
+**Still to solve:** Continuous responsive vehicle audio, reliable RPM, duplicate-free ownership of GTA's original engine sounds, automatic geometry coverage, and real-time acoustic rendering. **There is no playable public release yet.**
+
+> **Keeping this up to date:** Every completed milestone or significant validated development should update this section in the same pull request, including the date, evidence link and what remains unproven. The [pull request checklist](.github/PULL_REQUEST_TEMPLATE.md) prompts this review; updates are **not automatic**.
