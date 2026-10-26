@@ -1,5 +1,7 @@
 # P2-03.7: outer wrap boundary ablation
 
+Subsequent bounded generalisation: [P2-03.8](P2_03_8_SECOND_STATE_VALIDATION.md) independently selects state 27. I found direct wrapping slightly more natural there, a PARTIAL result. This state-21 report and its successful private reference remain unchanged apart from this cross-reference.
+
 26 October 2026. **PASS for this fixed-state, five-second exhaust hold.** My first reply was **“B sounds better”**; when asked about the strength of the improvement and remaining artificiality, I answered **“Clear improvement, natural-sounding.”** This supports consequence **1: outer wrap blending materially contributes to artificiality in this comparison**. It does not establish a complete responsive engine, the native synthesis algorithm, generalisation to other states or safe in-game audio ownership.
 
 The single labelled A/B is finished. No further variant, effect, engine layer, source expansion or tuning followed. This work is stacked on PR #20, `568d3d8278cd5af940e8f7d19d3e7d6d03bb75d2`; earlier PRs remain unmerged. GTA/RPH stayed closed. There was no game/archive access, dependency installation, native mutation, RPM change or Phase 3 work.
