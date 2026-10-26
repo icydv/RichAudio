@@ -1,0 +1,985 @@
+{
+  "schemaVersion": 1,
+  "milestone": "P2-03.7",
+  "outcome": "PASS",
+  "scope": "One fixed-state, five-second exhaust-only outer-wrap ablation; not complete engine or native synthesis",
+  "parentCommit": "568d3d8278cd5af940e8f7d19d3e7d6d03bb75d2",
+  "sourceSha256": "574DBB61C486F18848839300C9D72219957258CEEA6B1F93710EB72EF6270F2F",
+  "manifestSha256": "60C7226D1ACA1CB983F7C0CB40CADF9001B7803104959A25029BF416709A0AF5",
+  "metadataSha256": "A46E440BE76E42ABF55F37444836C3BF4B392E9CE3292A5755579DB383697288",
+  "baselineSha256": "FFA2F9369004B3A49659AC84A79A6BE964A2A3C6FD7B318494F8C7AAE1E85F64",
+  "baselineReproduced": true,
+  "settings": {
+    "rate": 48000,
+    "frames": 240000,
+    "seconds": 5,
+    "normalisedState": 0.5,
+    "markerState": 21,
+    "seam": 96,
+    "gain": 0.15,
+    "edge": 1200
+  },
+  "selectedIntervals": [
+    {
+      "index": 93,
+      "start": 151154,
+      "end": 153403,
+      "state": 21.3439245
+    },
+    {
+      "index": 94,
+      "start": 153403,
+      "end": 155675,
+      "state": 21.170318100000003
+    },
+    {
+      "index": 95,
+      "start": 155675,
+      "end": 157952,
+      "state": 21.0519509
+    },
+    {
+      "index": 96,
+      "start": 157952,
+      "end": 160249,
+      "state": 20.891970899999997
+    },
+    {
+      "index": 97,
+      "start": 160249,
+      "end": 162568,
+      "state": 20.74339895
+    }
+  ],
+  "eventCount": 105,
+  "internalBoundaryCount": 84,
+  "outerBoundaryCount": 20,
+  "float": {
+    "all": {
+      "samples": 240000,
+      "changedSamples": 1920,
+      "maxAbsoluteDifference": 0.009830497980999726,
+      "rmsDifference": 0.00032199348750713277
+    },
+    "targeted": {
+      "samples": 1920,
+      "changedSamples": 1920,
+      "maxAbsoluteDifference": 0.009830497980999726,
+      "rmsDifference": 0.0035999966318908906
+    },
+    "unaffected": {
+      "samples": 238080,
+      "changedSamples": 0,
+      "maxAbsoluteDifference": 0,
+      "rmsDifference": 0
+    },
+    "internalWindows": {
+      "samples": 8064,
+      "changedSamples": 0,
+      "maxAbsoluteDifference": 0,
+      "rmsDifference": 0
+    }
+  },
+  "pcm": {
+    "all": {
+      "samples": 240000,
+      "changedSamples": 1886,
+      "maxAbsoluteDifference": 0.00982666015625,
+      "rmsDifference": 0.0003219304364574994
+    },
+    "targeted": {
+      "samples": 1920,
+      "changedSamples": 1886,
+      "maxAbsoluteDifference": 0.00982666015625,
+      "rmsDifference": 0.003599291699725726
+    },
+    "unaffected": {
+      "samples": 238080,
+      "changedSamples": 0,
+      "maxAbsoluteDifference": 0,
+      "rmsDifference": 0
+    },
+    "internalWindows": {
+      "samples": 8064,
+      "changedSamples": 0,
+      "maxAbsoluteDifference": 0,
+      "rmsDifference": 0
+    },
+    "measurements": {
+      "A": {
+        "rate": 48000,
+        "channels": 1,
+        "frames": 240000,
+        "durationSeconds": 5,
+        "peak": 0.11962890625,
+        "rms": 0.06635811804164024,
+        "dc": -0.0019154209136962891,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.008514404296875,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 250
+      },
+      "B": {
+        "rate": 48000,
+        "channels": 1,
+        "frames": 240000,
+        "durationSeconds": 5,
+        "peak": 0.11962890625,
+        "rms": 0.06634646333302342,
+        "dc": -0.0019312636057535807,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.008514404296875,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 250
+      }
+    },
+    "safety": {
+      "passed": true,
+      "reasons": [],
+      "addedSpliceResidualLimit": 0.0375,
+      "pcmAllowance": 0.000030517578125,
+      "maxAddedSpliceResidualB": 0.003118684208560087,
+      "basis": "Retain the existing raw 0.25 continuation-mismatch bound, scaled by the unchanged gain. Compare to natural continuation, never reject a natural derivative. Technical screen, not a universal audibility threshold."
+    },
+    "resolution": {
+      "meaningfulAtPcm16": true,
+      "note": "Resolution check only, not perceptual acceptance"
+    }
+  },
+  "boundaries": [
+    {
+      "ordinal": 5,
+      "frame": 11429,
+      "endFrame": 11525,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9842450765864332,
+      "rateStep": -0.03019061895162456,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429838014735787
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.04213228332335249
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000015220857446197195,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013384962441061255
+    },
+    {
+      "ordinal": 10,
+      "frame": 22857,
+      "endFrame": 22953,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03062117235345585,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429892718299379
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.042137689740625005
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013400708497575336
+    },
+    {
+      "ordinal": 15,
+      "frame": 34286,
+      "endFrame": 34382,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9842450765864332,
+      "rateStep": -0.03019061895162456,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429838014735787
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.04213228332335249
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000015220857446197195,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013384962441061255
+    },
+    {
+      "ordinal": 20,
+      "frame": 45714,
+      "endFrame": 45810,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0148796498905908,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03106512670598882,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.04299126111248549
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.0421393138960495
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013429211370038704
+    },
+    {
+      "ordinal": 25,
+      "frame": 57143,
+      "endFrame": 57239,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03062117235345585,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429892718299379
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.042137689740625005
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013400708497575336
+    },
+    {
+      "ordinal": 30,
+      "frame": 68571,
+      "endFrame": 68667,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0148796498905908,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03106512670598882,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.04299126111248549
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.0421393138960495
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013429211370038704
+    },
+    {
+      "ordinal": 35,
+      "frame": 80000,
+      "endFrame": 80096,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03062117235345585,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429892718299379
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.042137689740625005
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013400708497575336
+    },
+    {
+      "ordinal": 40,
+      "frame": 91429,
+      "endFrame": 91525,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9842450765864332,
+      "rateStep": -0.03019061895162456,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429838014735787
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.04213228332335249
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000015220857446197195,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013384962441061255
+    },
+    {
+      "ordinal": 45,
+      "frame": 102857,
+      "endFrame": 102953,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03062117235345585,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429892718299379
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.042137689740625005
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013400708497575336
+    },
+    {
+      "ordinal": 50,
+      "frame": 114286,
+      "endFrame": 114382,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9842450765864332,
+      "rateStep": -0.03019061895162456,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429838014735787
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.04213228332335249
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000015220857446197195,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013384962441061255
+    },
+    {
+      "ordinal": 55,
+      "frame": 125714,
+      "endFrame": 125810,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0148796498905908,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03106512670598882,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.04299126111248549
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.0421393138960495
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013429211370038704
+    },
+    {
+      "ordinal": 60,
+      "frame": 137143,
+      "endFrame": 137239,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03062117235345585,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429892718299379
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.042137689740625005
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013400708497575336
+    },
+    {
+      "ordinal": 65,
+      "frame": 148571,
+      "endFrame": 148667,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0148796498905908,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03106512670598882,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.04299126111248549
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.0421393138960495
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013429211370038704
+    },
+    {
+      "ordinal": 70,
+      "frame": 160000,
+      "endFrame": 160096,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03062117235345585,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429892718299379
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.042137689740625005
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013400708497575336
+    },
+    {
+      "ordinal": 75,
+      "frame": 171429,
+      "endFrame": 171525,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9842450765864332,
+      "rateStep": -0.03019061895162456,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429838014735787
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.04213228332335249
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000015220857446197195,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013384962441061255
+    },
+    {
+      "ordinal": 80,
+      "frame": 182857,
+      "endFrame": 182953,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03062117235345585,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429892718299379
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.042137689740625005
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013400708497575336
+    },
+    {
+      "ordinal": 85,
+      "frame": 194286,
+      "endFrame": 194382,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9842450765864332,
+      "rateStep": -0.03019061895162456,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429838014735787
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.04213228332335249
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000015220857446197195,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013384962441061255
+    },
+    {
+      "ordinal": 90,
+      "frame": 205714,
+      "endFrame": 205810,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0148796498905908,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03106512670598882,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.04299126111248549
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.0421393138960495
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013429211370038704
+    },
+    {
+      "ordinal": 95,
+      "frame": 217143,
+      "endFrame": 217239,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0144356955380578,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03062117235345585,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.0429892718299379
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.042137689740625005
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013400708497575336
+    },
+    {
+      "ordinal": 100,
+      "frame": 228571,
+      "endFrame": 228667,
+      "sourceEnd": 162568,
+      "targetStart": 151154,
+      "endpointJump": -11414,
+      "previousReadRate": 1.0148796498905908,
+      "currentReadRate": 0.9838145231846019,
+      "rateStep": -0.03106512670598882,
+      "A": {
+        "before": -0.00091552734375,
+        "after": 0.00213623046875,
+        "signedStep": 0.0030517578125,
+        "absoluteStep": 0.0030517578125,
+        "maximumLocalStep": 0.006195068359375,
+        "localRms": 0.04299126111248549
+      },
+      "B": {
+        "before": -0.00091552734375,
+        "after": -0.0009765625,
+        "signedStep": -0.00006103515625,
+        "absoluteStep": 0.00006103515625,
+        "maximumLocalStep": 0.0052490234375,
+        "localRms": 0.0421393138960495
+      },
+      "naturalContinuation": 0.002142121708560087,
+      "directTargetErrorB": 0.000014455207860614161,
+      "addedSpliceResidualA": 0.000005891239810087209,
+      "addedSpliceResidualB": 0.003118684208560087,
+      "relativeComplexSpectrumDifference": 0.013429211370038704
+    }
+  ],
+  "outputs": {
+    "A_existing_outer_wraps.wav": {
+      "sha256": "FFA2F9369004B3A49659AC84A79A6BE964A2A3C6FD7B318494F8C7AAE1E85F64",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 240000,
+      "durationSeconds": 5,
+      "peak": 0.11962890625,
+      "rms": 0.06635811804164024,
+      "dc": -0.0019154209136962891,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.008514404296875,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 250
+    },
+    "B_outer_blends_removed.wav": {
+      "sha256": "3BD4C814A3EB88B5B6D6616581B9220623BA3B49515F85D7F9BBCDC3B99CC81F",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 240000,
+      "durationSeconds": 5,
+      "peak": 0.11962890625,
+      "rms": 0.06634646333302342,
+      "dc": -0.0019312636057535807,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.008514404296875,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 250
+    }
+  },
+  "recurrence": {
+    "A": {
+      "exact": {
+        "trimFrames": 4800,
+        "maxLagFrames": 96000,
+        "anchorLength": 1024,
+        "anchorMatches": 6,
+        "limited": false,
+        "exactPeriods": [
+          {
+            "lagFrames": 80000,
+            "comparedSamples": 150400,
+            "differentSamples": 0,
+            "rmsDifference": 0,
+            "normalisedCorrelation": 1
+          }
+        ]
+      },
+      "historicalLag": {
+        "lagFrames": 80000,
+        "comparedSamples": 150400,
+        "differentSamples": 0,
+        "rmsDifference": 0,
+        "normalisedCorrelation": 1
+      },
+      "nearPassLag": {
+        "lagFrames": 11429,
+        "comparedSamples": 218971,
+        "differentSamples": 141234,
+        "rmsDifference": 0.0010703282082334077,
+        "normalisedCorrelation": 0.999870915729171
+      }
+    },
+    "B": {
+      "exact": {
+        "trimFrames": 4800,
+        "maxLagFrames": 96000,
+        "anchorLength": 1024,
+        "anchorMatches": 6,
+        "limited": false,
+        "exactPeriods": [
+          {
+            "lagFrames": 80000,
+            "comparedSamples": 150400,
+            "differentSamples": 0,
+            "rmsDifference": 0,
+            "normalisedCorrelation": 1
+          }
+        ]
+      },
+      "historicalLag": {
+        "lagFrames": 80000,
+        "comparedSamples": 150400,
+        "differentSamples": 0,
+        "rmsDifference": 0,
+        "normalisedCorrelation": 1
+      },
+      "nearPassLag": {
+        "lagFrames": 11429,
+        "comparedSamples": 218971,
+        "differentSamples": 141199,
+        "rmsDifference": 0.0010694777221363137,
+        "normalisedCorrelation": 0.999871074000137
+      }
+    }
+  },
+  "rendering": {
+    "A": {
+      "renderMs": 33.929,
+      "sharedReferenceRenderMs": 30.390900000000002,
+      "overwriteMs": 0.012000000000000455,
+      "actualInterpolationCalls": 241920,
+      "overwrittenSamples": 0,
+      "signalWrapBlends": 20,
+      "computedReferenceWrapBlends": 20,
+      "note": "B includes a fresh reference computation whose wrap results are overwritten. Actual computation counts include that discarded work; not an optimisation benchmark."
+    },
+    "B": {
+      "renderMs": 29.796300000000016,
+      "sharedReferenceRenderMs": 26.024899999999988,
+      "overwriteMs": 0.4773000000000138,
+      "actualInterpolationCalls": 243840,
+      "overwrittenSamples": 1920,
+      "signalWrapBlends": 0,
+      "computedReferenceWrapBlends": 20,
+      "note": "B includes a fresh reference computation whose wrap results are overwritten. Actual computation counts include that discarded work; not an optimisation benchmark."
+    }
+  },
+  "performance": {
+    "preparationMs": 42.78470000000001,
+    "cpuUserMs": 93,
+    "cpuSystemMs": 0,
+    "rssBytes": 62738432,
+    "repeatOrder": "B then A",
+    "repeatRendering": {
+      "A": {
+        "renderMs": 28.828000000000003,
+        "sharedReferenceRenderMs": 25.455700000000007,
+        "overwriteMs": 0.00909999999998945,
+        "actualInterpolationCalls": 241920,
+        "overwrittenSamples": 0,
+        "signalWrapBlends": 20,
+        "computedReferenceWrapBlends": 20,
+        "note": "B includes a fresh reference computation whose wrap results are overwritten. Actual computation counts include that discarded work; not an optimisation benchmark."
+      },
+      "B": {
+        "renderMs": 34.5252,
+        "sharedReferenceRenderMs": 30.448999999999998,
+        "overwriteMs": 0.43720000000000425,
+        "actualInterpolationCalls": 243840,
+        "overwrittenSamples": 1920,
+        "signalWrapBlends": 0,
+        "computedReferenceWrapBlends": 20,
+        "note": "B includes a fresh reference computation whose wrap results are overwritten. Actual computation counts include that discarded work; not an optimisation benchmark."
+      }
+    },
+    "repeatHashesMatch": true,
+    "caveat": "Fresh reference computations and discarded wrap work included in B; order/warm-up confounds speed comparison; not a real-time benchmark."
+  },
+  "listening": {
+    "schemaVersion": 1,
+    "comparison": "A existing outer wraps, then B outer blends omitted; one labelled playback each",
+    "initial": "B sounds better",
+    "clarification": "Clear improvement, natural-sounding",
+    "assessment": "I preferred B and found it a clear improvement and natural-sounding.",
+    "limits": "Not blind or repeated listening; no separate click/roughness/pitch clearance; fixed-state exhaust only",
+    "outcome": "PASS for this bounded comparison"
+  },
+  "preservation": {
+    "files": 1990,
+    "linkTargets": 35,
+    "priorFiles": 1742,
+    "priorLinkTargets": 27,
+    "originalRenderersUnchanged": true,
+    "gameAndArchiveAccess": false
+  },
+  "validation": {
+    "newSyntheticTests": 10,
+    "focusedCombinedTests": 30,
+    "localFullSuite": "PASS",
+    "phase1BeforeDocumentation": 128,
+    "phase1AfterDocumentation": 129,
+    "hostedCi": "Reported independently on the PR; not established by local tests"
+  },
+  "nextDecision": "I propose one separately authorised second-state generalisation comparison with existing eligibility/rate/safety bounds; not implemented.",
+  "limitations": [
+    "No live game audio or native suppression",
+    "No expanded source bank, engine layer or effects",
+    "Unchanged exact PCM recurrence",
+    "No new source ownership or dynamic RPM capability",
+    "No third-party recordings or full proprietary schedules included"
+  ]
+}
