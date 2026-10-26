@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "milestone": "ACOUSTICS-02",
+  "outcome": "PASS-point-normal-observation-only",
+  "gameVersion": "1.0.1158.16",
+  "frameworkVersion": "1.132.1428.17748",
+  "query": {
+    "count": 1,
+    "flagsName": "IntersectWorld",
+    "flagsValue": 1,
+    "maximumDistanceNativeUnits": 8,
+    "completion": "hit",
+    "playerStationary": true,
+    "supervisedTarget": "plain exterior wall; visually consistent, no architectural identity proven"
+  },
+  "validation": {
+    "recordValid": true,
+    "surfaceValid": true,
+    "reasons": [],
+    "segmentParameter": 0.6158411472701592,
+    "offSegmentNativeUnits": 2.8755214691560142E-06,
+    "positionToleranceNativeUnits": 0.0007598786032758653,
+    "normalLength": 0.9999999475965972,
+    "normalRayDot": -0.9990776450333533,
+    "normalOrientation": "against_ray",
+    "wallLike": true,
+    "nonGrazing": true,
+    "entityStatus": "none_returned_static_unproven",
+    "coordinateSpace": "gta-native-units-unverified",
+    "finiteExtentKnown": false,
+    "acousticMaterialKnown": false,
+    "permanentStaticIdentityKnown": false
+  },
+  "timings": {
+    "sampleCount": 1,
+    "combinedTraceMs": 1.7488000000000001,
+    "conversionMs": 0.0815,
+    "validationAndRetentionMs": 8.2192,
+    "managedHeapSnapshotBytes": 10188664,
+    "realtimeCertified": false
+  },
+  "preservation": {
+    "restored": true,
+    "originalRootFiles": 32,
+    "archiveMetadataRecords": 179,
+    "sampledArchiveHashes": 10,
+    "temporaryPathsAbsent": 27,
+    "originalSignaturesValid": true,
+    "protectedPrivateFiles": 4857,
+    "protectedLinkTargets": 139
+  },
+  "limitations": [
+    "Point and normal only; no finite patch or real reflection",
+    "No physical-unit calibration or complete coordinate convention proof",
+    "Absent entity handle is not proof of static permanence",
+    "One cold observation is not a performance benchmark",
+    "Normal unload logged ThreadAbortException after the completed observation"
+  ]
+}
