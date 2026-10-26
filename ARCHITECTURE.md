@@ -1,5 +1,7 @@
 # Proposed architecture
 
+**Parallel ACOUSTICS-01 research:** [local geometry and first-order paths](docs/ACOUSTICS_01_LOCAL_GEOMETRY.md) now have an independent original-fixture prototype under `src/acoustics/research`. It provides no game adapter, source synthesis or audio output. This narrowly authorised offline work does not clear telemetry, native ownership or live Phase 3 gates; the broader proposals below remain future architecture.
+
 ## Master vision alignment — 25 October 2026
 
 The existing adapter/snapshot/worker/output separation supports the broader vision without changing the telemetry checkpoint. The three responsibilities below refine the future workers; they do not introduce an audio engine into P2-01. Current implementation is managed telemetry only. A reusable C++ acoustic core remains proposed, with no portable C++ build target yet. The [latest runtime attempt](docs/P2_01_ENHANCED_RUNTIME_ATTEMPT.md) resolved executable selection but failed before hook/plugin verification.

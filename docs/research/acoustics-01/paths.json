@@ -1,0 +1,1281 @@
+{
+  "schemaVersion": 1,
+  "origin": "Wholly original synthetic metre-scale scenes",
+  "scenes": [
+    {
+      "name": "open-road",
+      "tile": {
+        "schemaVersion": 1,
+        "id": "open-road",
+        "coordinateSpace": "research-rh-z-up-metres-v1",
+        "timeUnit": "monotonic-ms",
+        "bounds": {
+          "min": [
+            -20,
+            -14,
+            -2
+          ],
+          "max": [
+            20,
+            14,
+            10
+          ]
+        },
+        "listenerAnchor": [
+          5,
+          0,
+          1
+        ],
+        "coverage": "complete-synthetic",
+        "surfaces": [
+          {
+            "id": "ground",
+            "coordinateSpace": "research-rh-z-up-metres-v1",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "normal": [
+              0,
+              0,
+              1
+            ],
+            "u": [
+              1,
+              0,
+              0
+            ],
+            "v": [
+              0,
+              1,
+              0
+            ],
+            "half": [
+              18,
+              12
+            ],
+            "corners": [
+              [
+                -18,
+                -12,
+                0
+              ],
+              [
+                -18,
+                12,
+                0
+              ],
+              [
+                18,
+                12,
+                0
+              ],
+              [
+                18,
+                -12,
+                0
+              ]
+            ],
+            "motion": "static",
+            "reflectiveSide": "front",
+            "provenance": {
+              "kind": "synthetic",
+              "reference": "authored-fixture-v1"
+            },
+            "confidence": 1,
+            "material": {
+              "observedId": null,
+              "observedConfidence": null,
+              "acoustic": {
+                "energyReflection": 0.7,
+                "confidence": 1,
+                "kind": "synthetic-assumption",
+                "reason": "Explicit illustrative energy reflection coefficient, not a GTA material measurement"
+              }
+            },
+            "version": 1,
+            "observedAt": 0,
+            "validUntil": 1000,
+            "openings": []
+          }
+        ],
+        "missingRegions": [],
+        "version": 1,
+        "createdAt": 0,
+        "validUntil": 1000,
+        "build": "synthetic-v1",
+        "session": "fixture",
+        "interior": "outdoors",
+        "dynamicEpoch": 0,
+        "observationKey": "cb9446f777264c2d27640d50fad721b4e4ca03bc8ee12f9a5006dd51c7067a17"
+      },
+      "result": {
+        "schemaVersion": 1,
+        "tileId": "open-road",
+        "tileVersion": 1,
+        "source": [
+          -5,
+          0,
+          1
+        ],
+        "listener": [
+          5,
+          0,
+          1
+        ],
+        "speedOfSound": 343,
+        "referenceDistance": 1,
+        "direct": {
+          "distance": 10,
+          "arrivalSeconds": 0.029154518950437316,
+          "arrivalDirection": [
+            -1,
+            0,
+            0
+          ],
+          "visibility": "clear",
+          "query": {
+            "visibility": "clear",
+            "hits": [],
+            "ambiguous": [],
+            "unknown": [],
+            "surfaceTests": 1,
+            "claim": "Visibility within represented geometry only"
+          },
+          "pressureGain": 0.1,
+          "energyGain": 0.010000000000000002
+        },
+        "candidates": [
+          {
+            "surfaceId": "ground",
+            "status": "valid",
+            "reason": null,
+            "point": [
+              0,
+              0,
+              0
+            ],
+            "image": [
+              -5,
+              0,
+              -1
+            ],
+            "distance": 10.19803902718557,
+            "arrivalSeconds": 0.029731892207538108,
+            "excessDelaySeconds": 0.0005773732571007894,
+            "arrivalDirection": [
+              -0.9805806756909201,
+              0,
+              -0.19611613513818402
+            ],
+            "segments": [
+              {
+                "visibility": "clear",
+                "hits": [],
+                "ambiguous": [],
+                "unknown": [],
+                "surfaceTests": 1,
+                "claim": "Visibility within represented geometry only"
+              },
+              {
+                "visibility": "clear",
+                "hits": [],
+                "ambiguous": [],
+                "unknown": [],
+                "surfaceTests": 1,
+                "claim": "Visibility within represented geometry only"
+              }
+            ],
+            "energyReflection": 0.7,
+            "materialBasis": "synthetic-assumption",
+            "geometricPressure": 0.09805806756909201,
+            "geometricEnergy": 0.009615384615384614,
+            "pressureGain": 0.08204126541423669,
+            "energyGain": 0.006730769230769229
+          }
+        ],
+        "counts": {
+          "surfaces": 1,
+          "candidates": 1,
+          "valid": 1,
+          "rejected": 0,
+          "uncertain": 0,
+          "segmentQueries": 3,
+          "surfaceTests": 3
+        },
+        "scope": "First-order geometric paths; no diffraction, transmission, audio, native integration or total-energy certification"
+      }
+    },
+    {
+      "name": "urban-street",
+      "tile": {
+        "schemaVersion": 1,
+        "id": "urban-street",
+        "coordinateSpace": "research-rh-z-up-metres-v1",
+        "timeUnit": "monotonic-ms",
+        "bounds": {
+          "min": [
+            -20,
+            -14,
+            -2
+          ],
+          "max": [
+            20,
+            14,
+            10
+          ]
+        },
+        "listenerAnchor": [
+          5,
+          0,
+          1
+        ],
+        "coverage": "complete-synthetic",
+        "surfaces": [
+          {
+            "id": "ground",
+            "coordinateSpace": "research-rh-z-up-metres-v1",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "normal": [
+              0,
+              0,
+              1
+            ],
+            "u": [
+              1,
+              0,
+              0
+            ],
+            "v": [
+              0,
+              1,
+              0
+            ],
+            "half": [
+              18,
+              12
+            ],
+            "corners": [
+              [
+                -18,
+                -12,
+                0
+              ],
+              [
+                -18,
+                12,
+                0
+              ],
+              [
+                18,
+                12,
+                0
+              ],
+              [
+                18,
+                -12,
+                0
+              ]
+            ],
+            "motion": "static",
+            "reflectiveSide": "front",
+            "provenance": {
+              "kind": "synthetic",
+              "reference": "authored-fixture-v1"
+            },
+            "confidence": 1,
+            "material": {
+              "observedId": null,
+              "observedConfidence": null,
+              "acoustic": {
+                "energyReflection": 0.7,
+                "confidence": 1,
+                "kind": "synthetic-assumption",
+                "reason": "Explicit illustrative energy reflection coefficient, not a GTA material measurement"
+              }
+            },
+            "version": 1,
+            "observedAt": 0,
+            "validUntil": 1000,
+            "openings": []
+          },
+          {
+            "id": "north-wall",
+            "coordinateSpace": "research-rh-z-up-metres-v1",
+            "center": [
+              0,
+              6,
+              4
+            ],
+            "normal": [
+              0,
+              -1,
+              0
+            ],
+            "u": [
+              1,
+              0,
+              0
+            ],
+            "v": [
+              0,
+              0,
+              1
+            ],
+            "half": [
+              16,
+              4
+            ],
+            "corners": [
+              [
+                -16,
+                6,
+                0
+              ],
+              [
+                -16,
+                6,
+                8
+              ],
+              [
+                16,
+                6,
+                8
+              ],
+              [
+                16,
+                6,
+                0
+              ]
+            ],
+            "motion": "static",
+            "reflectiveSide": "front",
+            "provenance": {
+              "kind": "synthetic",
+              "reference": "authored-fixture-v1"
+            },
+            "confidence": 1,
+            "material": {
+              "observedId": null,
+              "observedConfidence": null,
+              "acoustic": {
+                "energyReflection": 0.7,
+                "confidence": 1,
+                "kind": "synthetic-assumption",
+                "reason": "Explicit illustrative energy reflection coefficient, not a GTA material measurement"
+              }
+            },
+            "version": 1,
+            "observedAt": 0,
+            "validUntil": 1000,
+            "openings": []
+          },
+          {
+            "id": "south-wall",
+            "coordinateSpace": "research-rh-z-up-metres-v1",
+            "center": [
+              0,
+              -6,
+              4
+            ],
+            "normal": [
+              0,
+              1,
+              0
+            ],
+            "u": [
+              1,
+              0,
+              0
+            ],
+            "v": [
+              0,
+              0,
+              -1
+            ],
+            "half": [
+              16,
+              4
+            ],
+            "corners": [
+              [
+                -16,
+                -6,
+                8
+              ],
+              [
+                -16,
+                -6,
+                0
+              ],
+              [
+                16,
+                -6,
+                0
+              ],
+              [
+                16,
+                -6,
+                8
+              ]
+            ],
+            "motion": "static",
+            "reflectiveSide": "front",
+            "provenance": {
+              "kind": "synthetic",
+              "reference": "authored-fixture-v1"
+            },
+            "confidence": 1,
+            "material": {
+              "observedId": null,
+              "observedConfidence": null,
+              "acoustic": {
+                "energyReflection": 0.7,
+                "confidence": 1,
+                "kind": "synthetic-assumption",
+                "reason": "Explicit illustrative energy reflection coefficient, not a GTA material measurement"
+              }
+            },
+            "version": 1,
+            "observedAt": 0,
+            "validUntil": 1000,
+            "openings": []
+          }
+        ],
+        "missingRegions": [],
+        "version": 1,
+        "createdAt": 0,
+        "validUntil": 1000,
+        "build": "synthetic-v1",
+        "session": "fixture",
+        "interior": "outdoors",
+        "dynamicEpoch": 0,
+        "observationKey": "e2decf3960089bbc2dccc3357218de7a280b1adedda925298ffdb5cc6982538b"
+      },
+      "result": {
+        "schemaVersion": 1,
+        "tileId": "urban-street",
+        "tileVersion": 1,
+        "source": [
+          -5,
+          0,
+          1
+        ],
+        "listener": [
+          5,
+          0,
+          1
+        ],
+        "speedOfSound": 343,
+        "referenceDistance": 1,
+        "direct": {
+          "distance": 10,
+          "arrivalSeconds": 0.029154518950437316,
+          "arrivalDirection": [
+            -1,
+            0,
+            0
+          ],
+          "visibility": "clear",
+          "query": {
+            "visibility": "clear",
+            "hits": [],
+            "ambiguous": [],
+            "unknown": [],
+            "surfaceTests": 3,
+            "claim": "Visibility within represented geometry only"
+          },
+          "pressureGain": 0.1,
+          "energyGain": 0.010000000000000002
+        },
+        "candidates": [
+          {
+            "surfaceId": "ground",
+            "status": "valid",
+            "reason": null,
+            "point": [
+              0,
+              0,
+              0
+            ],
+            "image": [
+              -5,
+              0,
+              -1
+            ],
+            "distance": 10.19803902718557,
+            "arrivalSeconds": 0.029731892207538108,
+            "excessDelaySeconds": 0.0005773732571007894,
+            "arrivalDirection": [
+              -0.9805806756909201,
+              0,
+              -0.19611613513818402
+            ],
+            "segments": [
+              {
+                "visibility": "clear",
+                "hits": [],
+                "ambiguous": [],
+                "unknown": [],
+                "surfaceTests": 3,
+                "claim": "Visibility within represented geometry only"
+              },
+              {
+                "visibility": "clear",
+                "hits": [],
+                "ambiguous": [],
+                "unknown": [],
+                "surfaceTests": 3,
+                "claim": "Visibility within represented geometry only"
+              }
+            ],
+            "energyReflection": 0.7,
+            "materialBasis": "synthetic-assumption",
+            "geometricPressure": 0.09805806756909201,
+            "geometricEnergy": 0.009615384615384614,
+            "pressureGain": 0.08204126541423669,
+            "energyGain": 0.006730769230769229
+          },
+          {
+            "surfaceId": "north-wall",
+            "status": "valid",
+            "reason": null,
+            "point": [
+              0,
+              6,
+              1
+            ],
+            "image": [
+              -5,
+              12,
+              1
+            ],
+            "distance": 15.620499351813312,
+            "arrivalSeconds": 0.045540814436773505,
+            "excessDelaySeconds": 0.016386295486336185,
+            "arrivalDirection": [
+              -0.6401843996644797,
+              0.7682212795973757,
+              0
+            ],
+            "segments": [
+              {
+                "visibility": "clear",
+                "hits": [],
+                "ambiguous": [],
+                "unknown": [],
+                "surfaceTests": 3,
+                "claim": "Visibility within represented geometry only"
+              },
+              {
+                "visibility": "clear",
+                "hits": [],
+                "ambiguous": [],
+                "unknown": [],
+                "surfaceTests": 3,
+                "claim": "Visibility within represented geometry only"
+              }
+            ],
+            "energyReflection": 0.7,
+            "materialBasis": "synthetic-assumption",
+            "geometricPressure": 0.06401843996644797,
+            "geometricEnergy": 0.004098360655737703,
+            "pressureGain": 0.053561669680998486,
+            "energyGain": 0.002868852459016392
+          },
+          {
+            "surfaceId": "south-wall",
+            "status": "valid",
+            "reason": null,
+            "point": [
+              0,
+              -6,
+              1
+            ],
+            "image": [
+              -5,
+              -12,
+              1
+            ],
+            "distance": 15.620499351813312,
+            "arrivalSeconds": 0.045540814436773505,
+            "excessDelaySeconds": 0.016386295486336185,
+            "arrivalDirection": [
+              -0.6401843996644797,
+              -0.7682212795973757,
+              0
+            ],
+            "segments": [
+              {
+                "visibility": "clear",
+                "hits": [],
+                "ambiguous": [],
+                "unknown": [],
+                "surfaceTests": 3,
+                "claim": "Visibility within represented geometry only"
+              },
+              {
+                "visibility": "clear",
+                "hits": [],
+                "ambiguous": [],
+                "unknown": [],
+                "surfaceTests": 3,
+                "claim": "Visibility within represented geometry only"
+              }
+            ],
+            "energyReflection": 0.7,
+            "materialBasis": "synthetic-assumption",
+            "geometricPressure": 0.06401843996644797,
+            "geometricEnergy": 0.004098360655737703,
+            "pressureGain": 0.053561669680998486,
+            "energyGain": 0.002868852459016392
+          }
+        ],
+        "counts": {
+          "surfaces": 3,
+          "candidates": 3,
+          "valid": 3,
+          "rejected": 0,
+          "uncertain": 0,
+          "segmentQueries": 7,
+          "surfaceTests": 21
+        },
+        "scope": "First-order geometric paths; no diffraction, transmission, audio, native integration or total-energy certification"
+      }
+    },
+    {
+      "name": "building-obstruction",
+      "tile": {
+        "schemaVersion": 1,
+        "id": "building-obstruction",
+        "coordinateSpace": "research-rh-z-up-metres-v1",
+        "timeUnit": "monotonic-ms",
+        "bounds": {
+          "min": [
+            -20,
+            -14,
+            -2
+          ],
+          "max": [
+            20,
+            14,
+            10
+          ]
+        },
+        "listenerAnchor": [
+          5,
+          0,
+          1
+        ],
+        "coverage": "complete-synthetic",
+        "surfaces": [
+          {
+            "id": "box-east",
+            "coordinateSpace": "research-rh-z-up-metres-v1",
+            "center": [
+              1,
+              0,
+              2
+            ],
+            "normal": [
+              1,
+              0,
+              0
+            ],
+            "u": [
+              0,
+              1,
+              0
+            ],
+            "v": [
+              0,
+              0,
+              1
+            ],
+            "half": [
+              2,
+              2
+            ],
+            "corners": [
+              [
+                1,
+                -2,
+                0
+              ],
+              [
+                1,
+                -2,
+                4
+              ],
+              [
+                1,
+                2,
+                4
+              ],
+              [
+                1,
+                2,
+                0
+              ]
+            ],
+            "motion": "static",
+            "reflectiveSide": "front",
+            "provenance": {
+              "kind": "synthetic",
+              "reference": "authored-fixture-v1"
+            },
+            "confidence": 1,
+            "material": {
+              "observedId": null,
+              "observedConfidence": null,
+              "acoustic": {
+                "energyReflection": 0.7,
+                "confidence": 1,
+                "kind": "synthetic-assumption",
+                "reason": "Explicit illustrative energy reflection coefficient, not a GTA material measurement"
+              }
+            },
+            "version": 1,
+            "observedAt": 0,
+            "validUntil": 1000,
+            "openings": []
+          },
+          {
+            "id": "box-north",
+            "coordinateSpace": "research-rh-z-up-metres-v1",
+            "center": [
+              0,
+              2,
+              2
+            ],
+            "normal": [
+              0,
+              1,
+              0
+            ],
+            "u": [
+              1,
+              0,
+              0
+            ],
+            "v": [
+              0,
+              0,
+              -1
+            ],
+            "half": [
+              1,
+              2
+            ],
+            "corners": [
+              [
+                -1,
+                2,
+                4
+              ],
+              [
+                -1,
+                2,
+                0
+              ],
+              [
+                1,
+                2,
+                0
+              ],
+              [
+                1,
+                2,
+                4
+              ]
+            ],
+            "motion": "static",
+            "reflectiveSide": "front",
+            "provenance": {
+              "kind": "synthetic",
+              "reference": "authored-fixture-v1"
+            },
+            "confidence": 1,
+            "material": {
+              "observedId": null,
+              "observedConfidence": null,
+              "acoustic": {
+                "energyReflection": 0.7,
+                "confidence": 1,
+                "kind": "synthetic-assumption",
+                "reason": "Explicit illustrative energy reflection coefficient, not a GTA material measurement"
+              }
+            },
+            "version": 1,
+            "observedAt": 0,
+            "validUntil": 1000,
+            "openings": []
+          },
+          {
+            "id": "box-south",
+            "coordinateSpace": "research-rh-z-up-metres-v1",
+            "center": [
+              0,
+              -2,
+              2
+            ],
+            "normal": [
+              0,
+              -1,
+              0
+            ],
+            "u": [
+              1,
+              0,
+              0
+            ],
+            "v": [
+              0,
+              0,
+              1
+            ],
+            "half": [
+              1,
+              2
+            ],
+            "corners": [
+              [
+                -1,
+                -2,
+                0
+              ],
+              [
+                -1,
+                -2,
+                4
+              ],
+              [
+                1,
+                -2,
+                4
+              ],
+              [
+                1,
+                -2,
+                0
+              ]
+            ],
+            "motion": "static",
+            "reflectiveSide": "front",
+            "provenance": {
+              "kind": "synthetic",
+              "reference": "authored-fixture-v1"
+            },
+            "confidence": 1,
+            "material": {
+              "observedId": null,
+              "observedConfidence": null,
+              "acoustic": {
+                "energyReflection": 0.7,
+                "confidence": 1,
+                "kind": "synthetic-assumption",
+                "reason": "Explicit illustrative energy reflection coefficient, not a GTA material measurement"
+              }
+            },
+            "version": 1,
+            "observedAt": 0,
+            "validUntil": 1000,
+            "openings": []
+          },
+          {
+            "id": "box-top",
+            "coordinateSpace": "research-rh-z-up-metres-v1",
+            "center": [
+              0,
+              0,
+              4
+            ],
+            "normal": [
+              0,
+              0,
+              1
+            ],
+            "u": [
+              1,
+              0,
+              0
+            ],
+            "v": [
+              0,
+              1,
+              0
+            ],
+            "half": [
+              1,
+              2
+            ],
+            "corners": [
+              [
+                -1,
+                -2,
+                4
+              ],
+              [
+                -1,
+                2,
+                4
+              ],
+              [
+                1,
+                2,
+                4
+              ],
+              [
+                1,
+                -2,
+                4
+              ]
+            ],
+            "motion": "static",
+            "reflectiveSide": "front",
+            "provenance": {
+              "kind": "synthetic",
+              "reference": "authored-fixture-v1"
+            },
+            "confidence": 1,
+            "material": {
+              "observedId": null,
+              "observedConfidence": null,
+              "acoustic": {
+                "energyReflection": 0.7,
+                "confidence": 1,
+                "kind": "synthetic-assumption",
+                "reason": "Explicit illustrative energy reflection coefficient, not a GTA material measurement"
+              }
+            },
+            "version": 1,
+            "observedAt": 0,
+            "validUntil": 1000,
+            "openings": []
+          },
+          {
+            "id": "box-west",
+            "coordinateSpace": "research-rh-z-up-metres-v1",
+            "center": [
+              -1,
+              0,
+              2
+            ],
+            "normal": [
+              -1,
+              0,
+              0
+            ],
+            "u": [
+              0,
+              1,
+              0
+            ],
+            "v": [
+              0,
+              0,
+              -1
+            ],
+            "half": [
+              2,
+              2
+            ],
+            "corners": [
+              [
+                -1,
+                -2,
+                4
+              ],
+              [
+                -1,
+                -2,
+                0
+              ],
+              [
+                -1,
+                2,
+                0
+              ],
+              [
+                -1,
+                2,
+                4
+              ]
+            ],
+            "motion": "static",
+            "reflectiveSide": "front",
+            "provenance": {
+              "kind": "synthetic",
+              "reference": "authored-fixture-v1"
+            },
+            "confidence": 1,
+            "material": {
+              "observedId": null,
+              "observedConfidence": null,
+              "acoustic": {
+                "energyReflection": 0.7,
+                "confidence": 1,
+                "kind": "synthetic-assumption",
+                "reason": "Explicit illustrative energy reflection coefficient, not a GTA material measurement"
+              }
+            },
+            "version": 1,
+            "observedAt": 0,
+            "validUntil": 1000,
+            "openings": []
+          },
+          {
+            "id": "ground",
+            "coordinateSpace": "research-rh-z-up-metres-v1",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "normal": [
+              0,
+              0,
+              1
+            ],
+            "u": [
+              1,
+              0,
+              0
+            ],
+            "v": [
+              0,
+              1,
+              0
+            ],
+            "half": [
+              18,
+              12
+            ],
+            "corners": [
+              [
+                -18,
+                -12,
+                0
+              ],
+              [
+                -18,
+                12,
+                0
+              ],
+              [
+                18,
+                12,
+                0
+              ],
+              [
+                18,
+                -12,
+                0
+              ]
+            ],
+            "motion": "static",
+            "reflectiveSide": "front",
+            "provenance": {
+              "kind": "synthetic",
+              "reference": "authored-fixture-v1"
+            },
+            "confidence": 1,
+            "material": {
+              "observedId": null,
+              "observedConfidence": null,
+              "acoustic": {
+                "energyReflection": 0.7,
+                "confidence": 1,
+                "kind": "synthetic-assumption",
+                "reason": "Explicit illustrative energy reflection coefficient, not a GTA material measurement"
+              }
+            },
+            "version": 1,
+            "observedAt": 0,
+            "validUntil": 1000,
+            "openings": []
+          }
+        ],
+        "missingRegions": [],
+        "version": 1,
+        "createdAt": 0,
+        "validUntil": 1000,
+        "build": "synthetic-v1",
+        "session": "fixture",
+        "interior": "outdoors",
+        "dynamicEpoch": 0,
+        "observationKey": "39b19a1aa4e462fb92f624635ba14d01a74c301dec9935406211d5a220e2851e"
+      },
+      "result": {
+        "schemaVersion": 1,
+        "tileId": "building-obstruction",
+        "tileVersion": 1,
+        "source": [
+          -5,
+          0,
+          1
+        ],
+        "listener": [
+          5,
+          0,
+          1
+        ],
+        "speedOfSound": 343,
+        "referenceDistance": 1,
+        "direct": {
+          "distance": 10,
+          "arrivalSeconds": 0.029154518950437316,
+          "arrivalDirection": [
+            -1,
+            0,
+            0
+          ],
+          "visibility": "blocked",
+          "query": {
+            "visibility": "blocked",
+            "hits": [
+              {
+                "id": "box-west",
+                "t": 0.4,
+                "point": [
+                  -1,
+                  0,
+                  1
+                ]
+              },
+              {
+                "id": "box-east",
+                "t": 0.6,
+                "point": [
+                  1,
+                  0,
+                  1
+                ]
+              }
+            ],
+            "ambiguous": [],
+            "unknown": [],
+            "surfaceTests": 6,
+            "claim": "Visibility within represented geometry only"
+          },
+          "pressureGain": null,
+          "energyGain": null
+        },
+        "candidates": [
+          {
+            "surfaceId": "box-east",
+            "status": "rejected",
+            "reason": "not_same_reflecting_side",
+            "point": null
+          },
+          {
+            "surfaceId": "box-north",
+            "status": "rejected",
+            "reason": "not_same_reflecting_side",
+            "point": null
+          },
+          {
+            "surfaceId": "box-south",
+            "status": "rejected",
+            "reason": "not_same_reflecting_side",
+            "point": null
+          },
+          {
+            "surfaceId": "box-top",
+            "status": "rejected",
+            "reason": "not_same_reflecting_side",
+            "point": null
+          },
+          {
+            "surfaceId": "box-west",
+            "status": "rejected",
+            "reason": "not_same_reflecting_side",
+            "point": null
+          },
+          {
+            "surfaceId": "ground",
+            "status": "rejected",
+            "reason": "blocked_segment",
+            "point": [
+              0,
+              0,
+              0
+            ],
+            "image": [
+              -5,
+              0,
+              -1
+            ],
+            "distance": 10.19803902718557,
+            "arrivalSeconds": 0.029731892207538108,
+            "excessDelaySeconds": 0.0005773732571007894,
+            "arrivalDirection": [
+              -0.9805806756909201,
+              0,
+              -0.19611613513818402
+            ],
+            "segments": [
+              {
+                "visibility": "blocked",
+                "hits": [
+                  {
+                    "id": "box-west",
+                    "t": 0.8,
+                    "point": [
+                      -1,
+                      0,
+                      0.19999999999999996
+                    ]
+                  }
+                ],
+                "ambiguous": [],
+                "unknown": [],
+                "surfaceTests": 6,
+                "claim": "Visibility within represented geometry only"
+              },
+              {
+                "visibility": "blocked",
+                "hits": [
+                  {
+                    "id": "box-east",
+                    "t": 0.2,
+                    "point": [
+                      1,
+                      0,
+                      0.2
+                    ]
+                  }
+                ],
+                "ambiguous": [],
+                "unknown": [],
+                "surfaceTests": 6,
+                "claim": "Visibility within represented geometry only"
+              }
+            ],
+            "energyReflection": 0.7,
+            "materialBasis": "synthetic-assumption",
+            "geometricPressure": 0.09805806756909201,
+            "geometricEnergy": 0.009615384615384614,
+            "pressureGain": null,
+            "energyGain": null
+          }
+        ],
+        "counts": {
+          "surfaces": 6,
+          "candidates": 6,
+          "valid": 0,
+          "rejected": 6,
+          "uncertain": 0,
+          "segmentQueries": 3,
+          "surfaceTests": 18
+        },
+        "scope": "First-order geometric paths; no diffraction, transmission, audio, native integration or total-energy certification"
+      }
+    }
+  ]
+}
