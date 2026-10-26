@@ -38,9 +38,9 @@ We're also keeping potential **FiveM support** in mind. That is a future possibi
 
 ## Where we are now
 
-We've verified vehicle movement telemetry inside GTA V Enhanced and privately decoded original vehicle sound material. Separate geometry research has also reconstructed a small inferred surface patch from nine live collision observations.
+We've verified vehicle movement telemetry inside GTA V Enhanced and privately decoded original vehicle sound material. Our geometry research has now reconstructed separate inferred wall and ground patches from 18 live collision observations, with a temporary in-game visual debugger.
 
-We're now investigating bounded geometry discovery and a temporary visual debugger, while reliable RPM, responsive source playback and duplicate-free control of individual native sounds remain unresolved.
+The next geometry challenge is safely maintaining a bounded local tile as the listener moves. Reliable RPM, responsive source playback and duplicate-free control of individual native sounds remain unresolved.
 
 **There is no finished audio engine or public release yet.** We're working through the difficult parts one step at a time, and we'll share real progress rather than promise features before they work.
 
@@ -66,9 +66,9 @@ For the technical side, see the [roadmap](ROADMAP.md), [architecture](ARCHITECTU
 - **Real GTA geometry — verified in-game:** A supervised, single collision trace on Enhanced 1158.16 returned a validated point and normal from a wall; the installation was restored after the test. This does **not** establish the wall's size, material or real audible reflections. [ACOUSTICS-02](https://github.com/icydv/RichAudio/pull/27).
 - **Real surface reconstruction — qualified in-game result:** Nine controlled collision traces produced a consistent, bounded **inferred** surface patch (approximately 1.48 × 0.98 native game units). Its true edges, solidity between observations, physical scale and material remain unknown; it is **not** certified reflection geometry. [ACOUSTICS-03](https://github.com/icydv/RichAudio/pull/29).
 
-- **Multi-surface tile and visual debugger — offline preparation:** Original wall/ground and failure fixtures validate separate inferred candidates and recorded-data replay. The optional Enhanced overlay compiles against the pinned SDK. Its fixed 18-ray supervised experiment still requires separate approval; **live drawing and multi-surface GTA results are not yet verified**. [ACOUSTICS-04 preparation and limits](docs/ACOUSTICS_04_MULTISURFACE_VISUAL_DEBUG.md).
+- **Multi-surface tile and visual debugger — verified in one supervised game test:** Eighteen valid collision observations supported separate **inferred** wall and ground patches. In Enhanced 1158.16, I could see the measurement rays, hit markers, normals and yellow candidate outlines. Hide/clear/replay kept the query count at 18, and the original installation was independently restored. This does not establish continuous world coverage, material, physical scale or audible acoustics. [ACOUSTICS-04 evidence and limits](docs/ACOUSTICS_04_MULTISURFACE_VISUAL_DEBUG.md), [PR #30](https://github.com/icydv/RichAudio/pull/30).
 
-**Next research goal:** With separate approval, test the prepared two-group wall/ground plan and verify the in-game overlay against saved observations, followed by independent installation restoration. This live step is pending; no automatic discovery or acoustic output is implemented.
+**Next research goal:** Investigate bounded local-tile maintenance along one short, manually walked path, with predefined observation stops and explicit expiry/invalidation. This is proposed work requiring separate authorisation; no continuous scanner or acoustic output is implemented.
 
 **Still to solve:** Continuous responsive vehicle audio, reliable RPM, duplicate-free ownership of GTA's original engine sounds, automatic geometry coverage, and real-time acoustic rendering. **There is no playable public release yet.**
 

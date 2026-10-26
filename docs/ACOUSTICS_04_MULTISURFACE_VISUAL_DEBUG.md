@@ -1,12 +1,14 @@
 # ACOUSTICS-04: my bounded multi-surface tile and visual debugger
 
-26 October 2026. **Offline preparation; live approval pending.** I've built a separate opt-in research observer, a two-candidate diagnostic tile and a recorded-data visual debugger. Synthetic wall/ground, corner, incomplete, conflicting and stale examples pass offline validation. **I have not launched GTA for this milestone, verified the overlay in Enhanced, or acquired new GTA geometry.** No audio, native muting, source-synthesis or RPM changes are included.
+26 October 2026. **PASS for one bounded, supervised Enhanced diagnostic experiment, including independent restoration.** I've acquired eighteen valid observations and reconstructed separate inferred wall and ground patches. Ordinary world lines and the RPH text HUD worked on the target build: rays, hit markers, white normal indicators and yellow inferred outlines were visible. Display controls kept the count at eighteen. This is not continuous world discovery, certified acoustic geometry or an audio engine. No audio, native muting, source-synthesis or RPM changes are included.
 
 ## Continuity and progress
 
 I've started `research/acoustics-04-multisurface-visual-debug` at PR #29's `b9ba543a3af8cf716318da37701df07ed849fccc`, after verifying #29 remains open/unmerged. PRs #26/#27 remain preserved. There is no merge, rebase or source-synthesis ancestry import. The independent synthesis checkout remains clean at `24e1be70eb75c8f7b43e95fe495d3c71dba5dc42`.
 
-Communicated weighted checkpoints are **0%, 10%, 25%**, then **50% once the prepared implementation, tests and sealed preflight have passed**. Stages 1–3 account for 50%; the separately approved experiment, independent live validation/restoration and final publication account for the remaining 50%. Offline preparation is not milestone completion. No earlier launch approval authorises this test.
+The in-game tested source is preparation commit `58240b627f7a13c9fefe0af5baff1cf2a32cf1c0`, built into the sealed observer below. The subsequent result commit changes only this report, README and sanitised scalar evidence. Exact final commit and completed hosted CI readback are recorded on [PR #30](https://github.com/icydv/RichAudio/pull/30); the preparation's green run alone is not proof of the final revision.
+
+Communicated checkpoints before final publication are **0%, 10%, 25%, 50%, 55%, 60%, 65%, 70% and 85%**. Stages 1–3 accounted for 50%; separately approved live testing brought the result to 70%; independent validation/performance/restoration to 85%. At that checkpoint the remaining 15% covered final documentation, publication screening and verified GitHub/CI readback. Only after those checks may the final report communicate 100%. No earlier launch approval was reused for this test.
 
 PR #28 is open on a parallel README branch. I've deliberately copied its reviewed bottom progress section and maintainership template from `4f9419e2202877e18a4d0540677d10819c16e2a8`, retaining its five prior results and adding this explicitly pending preparation. I've corrected the older introductory statement that live telemetry had not yet run. No PR #28 history is merged. Final reconciliation remains necessary when those PRs are integrated.
 
@@ -18,7 +20,7 @@ I've selected ordinary [DRAW_LINE](https://www.lcpdfr.com/resources/nativedb/ind
 
 The ordinary [GET_INTERIOR_FROM_ENTITY declaration](https://github.com/citizenfx/natives/blob/master/INTERIOR/GetInteriorFromEntity.md), hash `0x2107BA504071A6BB`, identifies an interior handle (zero outdoors). This is a base-game native declaration in the community reference, not a Cfx-only extension. Its exact-build invocation remains a live guard: failure stops acquisition rather than substituting guessed context. Generic Enhanced support is not exact-build proof.
 
-If drawing throws, it is disabled and reported unavailable; no alternative native or hook is tried. Console status and the private offline replay remain available. A silent/no-op line implementation still requires my visual confirmation to detect. **Compilation and a nonthrowing call cannot prove visible output.** World lines may be depth-occluded; inferred outlines are not displaced off their measured plane to make them artificially visible. No projection-based live markers or fallback screen-origin points are fabricated. Transparent fills and reflection paths are deferred.
+If drawing throws, it is disabled and reported unavailable; no alternative native or hook is tried. Console status and the private offline replay remain available. A silent/no-op implementation would require direct visual confirmation to detect. **Compilation and a nonthrowing call cannot prove visible output.** In this run I separately observed the actual world primitives and HUD. World lines can still be depth-occluded or faint at some viewing angles; inferred outlines are not displaced off their measured plane to make them artificially visible. No projection-based live markers or fallback screen-origin points are fabricated. Transparent fills and reflection paths remain deferred.
 
 ## Predetermined experiment: two groups, eighteen queries
 
@@ -45,7 +47,7 @@ After separate deployment/launch approval, I will select offline Story Mode, sta
 6. Review the combined tile and repeat only display/status controls, checking that the total stays at eighteen or the lower actual stopped count.
 7. `RichAudioTileStop` — cooperative cancellation, detach drawing and flush final snapshot/metrics. Verify CLOSED before a normal game quit. Explicit unload is only needed if normal completion fails, after preserving evidence.
 
-The observer lifetime is bounded at fifteen minutes, and each Show has a sixty-second visibility timeout. Pause suppresses display without replenishing claims. Nothing automatically starts another group or extends the budget. I will provide visual observations directly; **no automatic screenshots or recordings are taken**. Any separately recorded footage remains private.
+The observer lifetime is bounded at fifteen minutes, and each Show has a sixty-second visibility timeout. Pause suppresses display without replenishing claims. Nothing automatically starts another group or extends the budget. Initial launcher checks were text-only. I subsequently explicitly authorised live screen viewing for the supervised check. Transient game views were used to inspect the results; **no screenshot or recording files were saved to the research outputs or published**. Public visual demonstrations contain original synthetic geometry only.
 
 ## Geometry and immutable presentation contracts
 
@@ -95,18 +97,66 @@ Sealed ready manifest SHA-256: `321365EF908B187A78AF933CCFA73B9A4FB23073D92F8F98
 
 Observer candidate SHA-256: `5B3D653C767D0021B26A3349BC65840DA9FB12C3DAE9525FE280490AF4C0482A`.
 
-Private helper Verify passes without mutation. Begin additionally requires new explicit approval and an unused journal; it verifies the fresh baseline/seals, records intent before each rename/addition, uses CreateNew, hashes every file and never overwrites an original/unexpected path. Restore requires game/RPH/tools exited, reverses the filename, preserves only known introduced/generated files privately, rejects unexpected changes, removes only known empty created directories, and independently rechecks exact root names/hashes/signatures, directories, archive metadata/sample hashes and absence of all 27 paths. No driver or security setting is introduced. A discrepancy blocks further work. This run's restoration is **NOT TESTED**, because deployment has not occurred.
+Private helper Verify passed without mutation. After my separate explicit approval, Begin verified the fresh baseline/seals, recorded intent before each rename/addition, used CreateNew, hashed every file and did not overwrite originals. Restore subsequently ran after GTA/RPH/PlayGTAV exited: it reversed the filename, preserved only known introduced/generated files privately, removed known empty created directories, and independently rechecked root names/hashes/signatures, directories, archive metadata/sample hashes and absence of all 27 paths. No unexpected modification remained. No driver or security setting was introduced. A discrepancy would have blocked further work.
 
-## Runtime evidence and performance gates
+## Actual supervised runtime result
 
-All live outcomes are **NOT TESTED**: Enhanced launch, new plugin initialisation, world-line visibility, HUD visibility, live wall/ground inference, display-control query-count invariance, controlled shutdown and this run's restoration. At preparation the installation is unchanged; that is distinct from a post-test restoration receipt.
+I separately approved this exact two-group experiment. The launcher showed RPH `1.132.1428.17748` and Enhanced `1.0.1158.16`; startup script preview and the saved startup script were empty. The previously approved `-nobattleye` Story Mode launch option was rechecked without change. RPH was started once with the approved settings/log arguments. Screen control was interrupted by Escape during launch, before observer loading or measurement. On resumption, the same running Enhanced process was retained; there was no restart or second launch.
 
-The adapter records individual trace/conversion/validation duration, complete group time, fit time, tile update time (including its defensive second fit), snapshot generation, managed-memory snapshot and separate world/HUD submission totals/max/counts. These measure CPU submission, not GPU cost, frame rate, audio-thread suitability or certified real-time performance. No disk write occurs per displayed frame. Warm-up/scheduling/GC remain confounders; no synthetic timing is represented as live performance. The existing quadratic reflection-solver limitation remains; no reflection calculation is added to the display path.
+The RPH log confirms actual observer initialisation and READY, beyond assembly discovery. The initial HUD showed zero observations/hits/patches, and only the session reservation existed. After the two separately entered acquisition commands, the saved evidence and the live status agreed on **18 calls / 18 records / 2 inferred candidates**, with drawing available. No retry or additional group ran. Camera review did not trigger a scan.
 
-After approval, independent readback must establish actual authorised counts and group identity, nine-hit support or explicit rejection, normals/residuals/bounds, separate candidates, truthful visual mapping, no new traces from display controls, my direct visual observations, clean stop and new restoration receipt. If the overlay fails, I will retain valid geometry evidence and report PARTIAL rather than inventing visual success or changing rendering APIs mid-test.
+| Live checkpoint | Outcome and evidence |
+|---|---|
+| Exact Enhanced/RPH selection and Story Mode | PASS — launcher text, running module version, startup log and supervised game view |
+| New observer initialised | PASS — plugin READY log, private reservation and zero-count HUD |
+| Wall group | PASS — 9/9 valid hits, one predominantly vertical candidate |
+| Ground group | PASS — 9/9 valid hits, one horizontal/gently sloping candidate |
+| World primitives and HUD | PASS — visible blue rays, green crosses, white normals, yellow inferred outlines and uncertainty/status text |
+| Snapshot truthfulness | PASS — all 105 primitives independently recomputed/matched to saved observations and inferred support |
+| Hide / show / clear / replay | PASS — supervised controls, final live counter 18, byte-identical final versus acquisition snapshot |
+| Stop and normal quit | PASS — CLOSED log, flushed final JSON, detached drawing, normal quit confirmation, no forced termination |
+| Independent restoration | PASS — exact fresh manifests, original names/hashes/signatures, 27 paths absent, no relevant runtime/tool/filter remains |
+
+My actual feedback was: **“yes I can see the markers”**, then **“yes I can see both”** after the combined wall/ground question, and **“yes it worked, didnt notice anything wrong”** after the display-control/performance question. These are bounded visual observations, not an FPS benchmark or an audio listening result. The yellow outlines were fainter/angle-dependent on the wall, but visible from the later oblique view. No geometry/presentation parameters were tuned during the run.
+
+The observer was stopped with `RichAudioTileStop`; final metrics explicitly record `Stopped=true`, `DrawingUnavailable=false` and `ActualCalls=18`. The final snapshot is byte-identical to the ground-result snapshot, so show/hide/clear/replay did not alter its geometry. Its current-candidate count expired to zero while historical inferred outlines remained explicitly labelled. No automatic reacquisition occurred. Interior changes, candidate replacement, moving acquisition, negative live targets and all failure paths remain **offline tested only**, not live-certified here.
+
+Independent primitive matching validates the data submitted for drawing, not a pixel-calibrated GPU reconstruction or visibility of every segment. The snapshot contains both continuous measured and dashed fitted-normal indicators; all were submitted using the prescribed styles. Depth occlusion, render-mesh versus collision-mesh differences and viewing angle can affect visibility. No stronger universal visibility claim follows from this one scene.
+
+## Independent geometry and measured performance
+
+The public [scalar evidence](../evidence/acoustics-04-multisurface-summary.json) excludes all raw GTA positions, normals, polygons and session identifiers. Private full records, original query/result data, closed snapshots, independent analysis and generated HTML/SVG replay remain under ignored `.local` storage.
+
+| Measured property | Wall | Ground |
+|---|---:|---:|
+| Valid hits / planned calls | 9 / 9 | 9 / 9 |
+| Maximum orthogonal fit residual, native units | 0.00000965820 | 0.00249017 |
+| Fit RMS, native units | 0.00000682938 | 0.00111368 |
+| Maximum normal disagreement | 0.000327135° | 1.50730° |
+| Retained plane tolerance, native units | 0.005 | 0.005 |
+| Inferred footprint vertices | 4 | 5 |
+| Inferred footprint area, native units² | 1.45075 | 2.19223 |
+| Individual trace min–max, ms | 0.0464–1.5001 | 0.0440–0.0544 |
+| Total trace CPU duration, ms | 1.8933 | 0.4269 |
+| Acquisition clock duration, ms | 113.5542 | 112.7053 |
+| First reconstruction, ms | 19.9744 | 0.0294 |
+| Tile update, including defensive repeated fit, ms | 0.8442 | 0.0185 |
+| Snapshot generation, ms | 0.0785 | 0.0354 |
+
+Acquisition duration includes the bounded yields and excludes the subsequent reconstruction. The first fit includes uncontrolled initial-use overhead; the later ground fit is not an equivalent warmed comparison, and no optimisation claim follows from their timing difference. The five-vertex ground footprint follows its measured hull rather than forcing a perfect rectangle. Ground is measurably imperfectly planar but passes the original limits. Neither candidate is merged with its perpendicular neighbour or promoted to a known acoustic material.
+
+Across **13,225 world-submission ticks**, CPU submission averaged **0.05812 ms**, maximum **12.1231 ms**. Across **13,229 HUD callbacks**, mean submission was **0.006300 ms**, maximum **1.4251 ms**. There were **883,293 line submissions**, not collision queries. These aggregates mix READY/partial/full snapshots (zero through 105 primitives); they do not isolate the cost of one full tile. The maximum remains relevant and is not hidden by the mean. The final managed-heap snapshot was **10,891,104 bytes**, process-wide CLR memory, not isolated plugin or peak allocation.
+
+These are CPU submission observations, not GPU time, whole-frame latency, FPS, audio-thread suitability or real-time certification. RPH reported a pre-existing RTSS/D3D12 compatibility warning; no settings or software were changed to suppress it. Its effect was not isolated, so no causal attribution or universally stable overlay claim is made. The existing quadratic reflection-solver limitation remains; reflection calculations did not run on the drawing path.
+
+## Verified restoration and retained uncertainty
+
+After the normal quit, GTA, RPH and PlayGTAV were absent. Original `GTA5.exe` and `GTA5_Enhanced.exe` names, hashes and valid signatures were restored. The independent receipt matches **32 original root files, 179 archive metadata records and 10 sampled hashes**, and all **27 introduced paths are absent**. Known generated logs/configuration were preserved privately outside GTA; there were no unexpected files requiring removal. PROCMON25 and diagnostic/game-file tools were absent. The protected **4,857 private files, 139 link targets and 473 prior acoustics artifacts** remain unchanged, as does the separate synthesis checkout.
+
+The game is closed and restored. A bounded inferred footprint is not a verified complete wall/road, between-ray solidity, calibrated metres, permanent map geometry or acoustic reflection. This run did not test interior transitions, arbitrary scenes, large tile caches, moving acquisition, continuous discovery, rendered acoustics, RPM or native sound ownership.
 
 ## Publication and next decision
 
-The staged publication screen has zero findings. Full reachable-history screening retains exactly the four previously reviewed GitHub committer-identity exceptions; these are not newly introduced findings and no history is rewritten to hide them. Git integrity checking reports no corruption; existing dangling objects are preserved. Final commit/PR readback and completed hosted CI must be recorded before claiming those gates passed. Raw geometry, private paths, SDK/RPH/loader/fix binaries, audio, recordings and logs are excluded. No licence is selected. The draft preparation is not the completed ACOUSTICS-04 result.
+The preparation publication screen had zero findings, and its completed hosted CI passed. The final documentation/evidence revision requires its own screening, commit/PR readback and completed hosted CI before those gates are claimed. Full reachable-history screening retains exactly the four previously reviewed GitHub committer-identity exceptions; these are not newly introduced findings and no history is rewritten to hide them. Git integrity checking reports no corruption; existing dangling objects are preserved. Raw geometry, private paths, SDK/RPH/loader/fix binaries, audio, recordings and logs are excluded. No licence is selected. PR #30 remains stacked on open PR #29; no previous PR is merged or rebased.
 
-**Exactly one next action:** request the separately approved, supervised eighteen-ray wall/ground visual test, then independently validate and restore. No continuous scanner, new source synthesis, acoustic output or later milestone begins automatically.
+**Exactly one recommended next milestone:** bounded local-tile maintenance along one short manually walked path, with predefined acquisition stops/query limits, explicit expiry/invalidation and truthful replay. It needs a new offline design and separate live approval. No continuous scanner, new source synthesis, acoustic output or later milestone begins automatically.
