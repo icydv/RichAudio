@@ -1,6 +1,6 @@
-# ACOUSTICS-02: my first bounded GTA geometry observation — preparation
+# ACOUSTICS-02: my first bounded GTA geometry observation
 
-26 October 2026. **PREPARED; LIVE APPROVAL PENDING.** I've built and offline-tested a separate one-shot geometry observer. No deployment, GTA/RPH launch or live geometry query has occurred. This is not a PASS for the live milestone. Stage 4 and the live validation/restoration stages remain NOT TESTED.
+26 October 2026. **PASS for one supervised point/normal observation and verified restoration.** I've completed one approved Enhanced Story Mode launch and exactly one world-only trace. The returned point and normal pass independent readback validation and are consistent with the supervised plain exterior wall. I've retained them as a point-normal-only observation, without inventing dimensions, material or a real reflection. GTA closed normally, and the saved installation comparisons pass. This is not full world-geometry, acoustic playback or real-time certification.
 
 ## Ancestry and preservation
 
@@ -10,7 +10,7 @@ I've reverified the previous 4,601-file/129-link preservation receipt and captur
 
 ## Runtime and installation preflight
 
-The existing host package and original installation currently match the saved successful-runtime records:
+The existing host package and original installation matched the saved successful-runtime records before deployment and again after restoration:
 
 | Item | Fresh result |
 |---|---|
@@ -24,7 +24,7 @@ The existing host package and original installation currently match the saved su
 | Destination conflicts | None; no observer, prior telemetry plugin, RPH settings/log or rename alias present |
 | Diagnostic cleanup | PROCMON25 absent; no GTA/RPH/ProcMon/CodeWalker/OpenIV process |
 
-The successful historical RPH motion integration establishes a credible exact-build host, not correctness of the new trace. Geometry behaviour is the hypothesis to test. Full telemetry certification, native audio ownership, real reflection geometry and Phase 3 remain separate gates. Sources and game hashes must be checked again immediately before an approved deployment; drift blocks the attempt.
+The successful historical RPH motion integration established a credible exact-build host; this new trace now provides separate live evidence for the geometry API. Full telemetry certification, native audio ownership, real reflection geometry and Phase 3 remain separate gates. Sources and game hashes were checked again immediately before the approved deployment with no drift.
 
 ## Verified API and one-shot implementation
 
@@ -64,7 +64,7 @@ For a geometrically valid hit, `ObservationRules.Retain` creates a **point-norma
 
 It is deliberately not converted into an ACOUSTICS-01 rectangular surface or a complete acoustic tile. A single trace cannot establish finite extents, openings, roughness, scale, all axes/handedness, global placement or a verified reflection path. Keeping this unresolved observation separate preserves the existing tile's confidence contract. No actual GTA reflection, echo or sound can be claimed from this task.
 
-## Proposed deployment and restoration — approval required
+## Approved deployment and restoration
 
 The private sealed plan contains **27 final additions**. The prior 23 common RPH files, official alternative loader and DirectStorageFix are retained; the two temporary telemetry paths are replaced in the plan by `Plugins/RichAudio.Geometry.Rph.dll` and its private configuration. No existing game/user file is overwritten, and no telemetry plugin runs. This is an explicitly revised observer-only manifest, not a claim that all prior 27 files are unchanged.
 
@@ -73,7 +73,7 @@ Private plan SHA: `CBF39037BFED9C0C0D362B12A1838042473AA6CD201C8D8FC687888CF9FFF
 
 The established temporary obsolete-executable rename, `CreateNew` copies, exact-hash checks and durable deployment/restoration journal procedure are retained with the revised list. The original public deployment helper/history is unchanged. The new private plan helper has explicit Verify/Begin/Restore actions; Begin refuses to mutate without a separate approval flag. Verify has passed without game writes. Sources, backup, original inventory, clear destinations and no runtime are rechecked immediately before mutation. Partial deployment remains journalled; restoration recovers the original executable name first and stops for review if an introduced file unexpectedly changed.
 
-One RPH launch would use the previous `-forcesettings -log` procedure and the established offline Story Mode configuration, including the previously verified offline launch option. No guessed arguments, security changes or new dependency are proposed. Autoload remains disabled/checked during supervised settings, and the observer is manually loaded after the target is ready. I must stop if the correct Enhanced executable/build is not selected.
+After the separate go-ahead, one RPH launch used the previous `-forcesettings -log` procedure and the established offline Story Mode configuration. The existing Steam `-nobattleye` launch option was checked and left unchanged; no anti-cheat bypass or security change was introduced. Correct Enhanced build selection, DirectStorageFix initialisation and disabled plugin autoload were observed. The observer was manually loaded only after Story Mode and the target were ready. No telemetry plugin, new dependency or guessed argument was added.
 
 After the single result, unload the observer, quit normally with assistance if necessary, preserve raw evidence outside the installation, quarantine the exact temporary files and recognised generated logs/configuration, reverse the filename change and verify the saved 32/179/10 comparisons, signatures, directory set, absence of all temporary paths and processes. The known BOM-only generated code template is handled only under its existing exact fingerprint. Unexpected generated files or modified binaries are preserved and block a restoration PASS pending review; no recursive delete or force overwrite is used. Normal quit alone is not restoration evidence.
 
@@ -87,13 +87,13 @@ The [offline test script](../tests/Test-GeometryObservation.ps1) builds only the
 
 [Read-only result inspector](../tools/Inspect-GeometryObservation.ps1) independently deserialises and revalidates a private record. Its output omits session identifiers, coordinates and private paths. It was exercised with an original synthetic record, not GTA data.
 
-At runtime `TraceDurationMs` measures the synchronous RPH call's combined dispatch/completion time; those components cannot be separated by this public wrapper. Conversion and validation times are measured separately, and `GC.GetTotalMemory(false)` is an approximate managed-heap snapshot, not per-observation allocation or total game memory. No live timing exists yet, no benchmark loop is proposed and no real-time/audio-thread claim follows from one measurement.
+At runtime `TraceDurationMs` measures the synchronous RPH call's combined dispatch/completion time; those components cannot be separated by this public wrapper. Conversion and validation/retention times are measured separately, and `GC.GetTotalMemory(false)` is an approximate managed-heap snapshot, not per-observation allocation or total game memory. The single live measurement below is not a benchmark loop or evidence of stable real-time/audio-thread performance.
 
-## Current checkpoint and live procedure
+## Historical preparation checkpoint and executed procedure
 
-Completed progress stages are repository 10%, host/restoration preflight 20%, observer implementation/tests 20% once final checks are sealed: **50% readiness**, with live stages NOT TESTED. No live success or restoration claim is made. The next interaction is the explicit go-ahead required by my ACOUSTICS-02 brief.
+At the prepared commit `e08cca4d1898cc029da37acd34333e30666b4d5d`, repository verification, host/restoration preflight and observer implementation/tests totalled **50% readiness**. The live stage was then NOT TESTED. The separate reply, "Go ahead with the one supervised test", authorised the sealed deployment, single launch/trace and restoration. No extra launch was performed.
 
-After that approval, the agreed sequence is:
+After that approval, I've completed the agreed sequence:
 
 1. Keep GTA closed while the sealed temporary files are verified/deployed; launch RPH once and confirm Enhanced 1158.16/offline Story Mode.
 2. Walk normally to a simple nearby exterior wall. Stop on foot, face it from about 2–5 units away, and confirm the target/setup. No teleporting or spawning.
@@ -101,6 +101,57 @@ After that approval, the agreed sequence is:
 4. Enter `RichAudioGeometryObserve` once. Verify the one result/reservation, field validity and consistency with the intended surface. Do not retry on miss/error.
 5. Unload, quit normally, restore and independently verify the installation.
 
-GitHub publication of final findings and hosted CI follow the live result and restoration, or an honestly documented blocked/pending outcome. Raw records, private session IDs, raw coordinates, screenshots and local runtime logs stay out of Git. No licence is chosen.
+Raw records, private session IDs, raw coordinates, screenshots and local runtime logs stay out of Git. Only the [sanitised scalar summary](../evidence/acoustics-02-observation-summary.json) is published. No licence is chosen.
 
-**Next milestone only if this observation succeeds:** separately authorised bounded multi-observation surface reconstruction, with enough evidence to infer a finite patch. That expansion is not part of ACOUSTICS-02 and has not begun.
+## Live result and evidence limits
+
+I've stood on foot facing a broad, plain exterior masonry-looking wall. The supervised view showed the central ray target clear of the two flanking bollards, doors, traffic and pedestrians. Readiness was confirmed before the console trigger. The SDK reported zero player velocity. This supports identification of the intended local wall surface; it does not identify a particular building, certify permanence or prove that a visual finish matches an acoustic material.
+
+The log sequence was READY with no trace, one `RichAudioGeometryObserve`, then FINISHED with `hit` and `geometry valid=True`. One private reservation and one closed record were retained. Independent inspection re-deserialised and revalidated the record rather than trusting the embedded success flag. No second command, reload, alternative ray or scan occurred.
+
+| Measurement / outcome | Actual result |
+|---|---|
+| Correct Enhanced selection / Story Mode / observer ready | PASS; 1.0.1158.16 / RPH 1.132.1428.17748 |
+| World-only trace calls | Exactly 1; `IntersectWorld`, SDK flag value 1; player ignored |
+| Hit / position / normal | PASS; finite observed values, record and surface validation true |
+| Hit projection along segment | 0.615841147270159; approximately 4.92673 native units from origin |
+| Perpendicular residual / fixed tolerance | 0.000002875521 / 0.000759878603 native units |
+| Normal length | 0.999999947596597 |
+| Normal/ray dot | -0.999077645033353; against this ray; no assumed global sign convention |
+| Wall-like / nongrazing setup classifiers | Both true under the predetermined screens |
+| Entity identifier | None returned; permanent static identity unproven |
+| Material / finite extent / acoustic reflectance | Unavailable / unknown / null |
+| Query combined dispatch/completion | 1.7488 ms, one sample |
+| Result conversion | 0.0815 ms, one sample |
+| Validation plus retention (including revalidation) | 8.2192 ms, one cold-path sample |
+| Managed heap snapshot | 10,188,664 bytes; not observation allocation or total game memory |
+
+The horizontal same-Z query and near-horizontal normal support **local positional consistency and a vertical-wall interpretation**. I keep the observed coordinates in `gta-native-units-unverified`, with no axis remapping. This single observation does not establish metre calibration, complete handedness, every axis convention or a universal normal orientation. The reported distance is not an independently surveyed physical distance.
+
+My retained `PointNormalObservation` copies source provenance, time, build, point and normal. Its width, height and acoustic reflectance remain null; material is unknown and static classification unverified. The private record still requires supervised target confirmation as a separate evidential condition; I have not rewritten the raw record to manufacture an architectural identity. This report records the visual consistency assessment. No ACOUSTICS-01 finite patch or reflection solve is made from the point alone. Fresh live-cache validity is not inferred from offline readback.
+
+### Shutdown and independently verified restoration
+
+I've unloaded the observer once after the completed record. RPH logged `ThreadAbortException` from the observer's sleeping main fiber during that explicit unload, followed by plugin unloading. The catch prints `NOT READY`, which is a misleading shutdown diagnostic after FINISHED; it was not a failed trace, a second query or an observed game crash. The record remained intact. I have preserved this limitation rather than changing/reloading the sealed runtime candidate during the experiment.
+
+I've closed GTA through its normal Quit confirmation. No process was force-killed. GTA, RPH, PlayGTAV and relevant diagnostic/editing processes were absent before the final verification. PROCMON25 remains absent; no kernel trace was started.
+
+The journalled restoration preserved the 27 exact-hash additions and recognised generated logs/settings outside the game, restored the obsolete executable name and verified:
+
+- Both original executable hashes above and valid signatures.
+- Exact saved 32 root-file hashes and root-directory set.
+- All 179 archive metadata records and ten sampled archive hashes.
+- Absence of all 27 deployment paths, the rename alias and unexpected generated files.
+- No remaining runtime processes or diagnostic filter.
+
+The post-test protected inventory again matches **4,857 files and 139 link targets**, and the independent source-synthesis checkout remains clean at its original commit. No source audio, renderer, RPM validation, telemetry schema, reflection mathematics, original executable contents or game archive was modified. Normal Story Mode operation may update normal save/profile data outside the installation; this installation verification does not claim to restore all external application state.
+
+## Regression and publication checkpoint
+
+The post-restoration full relevant offline suite passes: **17 metadata tests, 40 acoustic-geometry tests, 73 observation assertions, 107 repository checks, 65 telemetry assertions, nine configuration assertions and eight append expectations**. The neutral geometry and telemetry components compile. The observer's authentic-SDK compilation passed before sealing; no proprietary SDK is required on hosted runners. The independent source-synthesis checkout and its tests/defaults are unchanged.
+
+The communicated progress checkpoints are **0 → 10 → 30 → 50 → 70 → 85%**. The six weights are repository 10%, runtime preflight 20%, implementation/tests 20%, single supervised observation 20%, validation/restoration/performance 15%, and documentation/audit/GitHub 15%. The final stage is complete only after remote PR contents and completed hosted CI are independently read back; this report does not turn pending CI into a green result.
+
+My current-content publication audit has **zero findings**. Full-history review retains only the four previously reviewed GitHub service-committer identity exceptions, not newly introduced personal information; the unqualified automated history gate therefore remains flagged for those reviewed identities. The ten-file publication allowlist and 17 local documentation links pass. Public scalar measurements match the private record, and private output is ignored. Git integrity passes; unreachable dangling objects are retained without rewriting or pruning history. The exact remote commit, PR contents and hosted CI are independently checked before reporting publication completion. No raw observation, proprietary resource, binary dependency, private path, session identifier or audio is included.
+
+**My one next engineering decision:** propose a separately authorised bounded multi-observation surface-reconstruction milestone, with enough independently validated hits to infer and test a finite wall patch before supplying it to the existing reflection solver. It requires a fresh safety/approval gate and must retain unknown material/extent where evidence is inadequate. That expansion, audio rendering and further game launches have not begun.
