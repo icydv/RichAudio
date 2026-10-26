@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "milestone": "ACOUSTICS-03",
+  "outcome": "PASS-qualified-bounded-inferred-surface",
+  "gameVersion": "1.0.1158.16",
+  "frameworkVersion": "1.132.1428.17748",
+  "planId": "parallel-wall-grid-3x3-v1",
+  "counts": {
+    "planned": 9,
+    "records": 9,
+    "validHits": 9,
+    "validMisses": 0
+  },
+  "queryCalls": 9,
+  "geometry": {
+    "units": "gta-native-units-unverified",
+    "fitRms": 0.000006829375576934664,
+    "maxFitResidual": 0.000009658195581364636,
+    "planeTolerance": 0.005,
+    "maxNormalAngleDegrees": 0.0003271346002222793,
+    "independentThreeCornerMaxResidual": 0.000014487293345244456,
+    "independentPlaneVsTlsNormalDegrees": 0,
+    "interiorLateralSpan": 1.4803587661917246,
+    "interiorVerticalSpan": 0.98,
+    "interiorArea": 1.45075159086789,
+    "inset": 0.01,
+    "entityStatus": "none_returned_static_unproven",
+    "continuity": "inferred-between-rays; sub-grid openings unknown",
+    "trueEdgesKnown": false,
+    "materialKnown": false,
+    "physicalScaleVerified": false,
+    "certifiedAcousticGeometry": false
+  },
+  "performance": {
+    "sampleCount": 1,
+    "individualCombinedTraceMs": [
+      1.3205,
+      0.0579,
+      0.0748,
+      0.0533,
+      0.058800000000000005,
+      0.0688,
+      0.066,
+      0.0543,
+      0.0516
+    ],
+    "combinedTraceSumMs": 1.806,
+    "conversionSumMs": 0.08220000000000001,
+    "inGameValidationSumMs": 7.012800000000001,
+    "batchDurationMs": 107.21950000000288,
+    "offlineValidationAndFitMs": 1.8500000000000014,
+    "inGameManagedHeapSnapshotBytes": 112949176,
+    "initialInspectorRssSnapshotBytes": 39051264,
+    "finalJsonPublicationMs": null,
+    "realtimeCertified": false
+  },
+  "hypotheticalReflection": {
+    "classification": "calculated-reflection-hypothesis-only",
+    "pathLengthNativeUnits": 4.0199502484483745,
+    "arrivalSeconds": null,
+    "excessDelaySeconds": null,
+    "pressureGain": null,
+    "energyGain": null,
+    "visibility": "unknown-unobserved-paths",
+    "certified": false
+  },
+  "lifecycle": {
+    "mainEndedAfterResult": true,
+    "priorWarningRecurrence": false,
+    "unloadRequestedOnce": true,
+    "separateUnloadCompletionLineObserved": false,
+    "normalGameProcessExitObserved": true
+  },
+  "restoration": {
+    "passed": true,
+    "rootFiles": 32,
+    "archiveMetadata": 179,
+    "sampledArchiveHashes": 10,
+    "temporaryPathsAbsent": 27,
+    "originalSignaturesValid": true,
+    "protectedPrivateFiles": 4857,
+    "protectedLinks": 139,
+    "additionalProtectedAcousticsFiles": 256
+  },
+  "publication": {
+    "rawObservationsIncluded": false,
+    "worldPlaneOrPolygonIncluded": false,
+    "liveDiagramIncluded": false,
+    "publicDiagrams": "original synthetic fixtures only"
+  }
+}
