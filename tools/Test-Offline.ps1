@@ -39,6 +39,8 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Offline transition feasibility tests failed.'}
     & node --test tests/Test-SharedIntervalHandoff.mjs
     if($LASTEXITCODE -ne 0){throw 'Offline shared-interval ownership tests failed.'}
+    & node --test tests/Test-InterpolationEligibility.mjs
+    if($LASTEXITCODE -ne 0){throw 'Offline interpolation-support diagnostic tests failed.'}
     & (Join-Path $PSScriptRoot 'Build-OfflineAudio.ps1')
     & (Join-Path $repo 'tests\Test-OfflineAudioGuards.ps1')
     & (Join-Path $repo 'tests\Test-Phase1.ps1') -ReportPath (Join-Path $output 'phase1-results.json')
