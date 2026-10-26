@@ -1,5 +1,7 @@
 # P2-03.2: engine/exhaust cycle and state evidence
 
+Subsequent [P2-03.3 responsive playback](P2_03_3_RESPONSIVE_ENGINE.md) implements synthetic-state holds and transitions, but listening rejects their naturalness. Its partial result does not replace the successful bounded excerpt or the accepted continuous-recording reference below.
+
 26 October 2026. Offline-only, stacked on open PR #15 at `d011364127d5e2095e501802d015a708f1c45567`; main inspected at `e5fbd8f3502d3e28169a224caa07471e090e368f`. Earlier PRs remain unmerged. No production telemetry, RPM validator, runtime adapter or accepted renderer change.
 
 ## Result and scope
