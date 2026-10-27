@@ -1,6 +1,8 @@
 # BENCHMARK-01: blanket requests with bounded streamed-pool observations
 
-27 October 2026. **Built and offline tested; no deployment or launch.** I've replaced the proposed road-box setup with an explicitly opt-in observation mode for my next separately approved traffic calibration. This is not the motorcycle benchmark. Combined ACOUSTICS-05 + BENCHMARK-01 progress remains **60%**.
+27 October 2026. **Live calibration result: PARTIAL; installation restoration PASS.** My existing RPH/loader/fix stack started successfully on the Steam-updated executable. The single approved calibration completed baseline and suppression, then stopped on its camera guard at 123.834 seconds during restoration. The controller finalized its private evidence and issued no requests after the suppression window. This is not a traffic-free route certification or motorcycle benchmark. Combined ACOUSTICS-05 + BENCHMARK-01 progress remains **60%**.
+
+The preparation sections below retain the conditions established before approval. The separate execution section at the end records the actual attempt; earlier no-launch/approval-pending statements refer to the preparation checkpoint.
 
 ## Compatibility review and decision
 
@@ -74,3 +76,63 @@ This preparation does not silently extend the previous consumed single-launch au
 - Public deliverables contain original code/tests, this report and scalar preparation evidence. No binaries, raw Steam logs, private paths, geometry, recordings or proprietary metadata are included. No licence is selected. Publication screening, Git integrity, remote readback and exact-head hosted CI are reported with the PR after verification.
 
 **Next single action after preparation:** subject to fresh unchanged preflight and separate approval, conduct this one bounded compatibility/traffic calibration, then independently interpret request receipts, streamed-pool observations and restoration. No city-wide traffic-free or motorcycle-benchmark claim is made in advance.
+
+## Approved live execution: PARTIAL
+
+### Startup and bounded acquisition
+
+I approved the revised one-launch experiment after its local tests, hosted CI and remote readback passed. Fresh read-only preflight matched the sealed 27-file package and separately reviewed Steam-updated installation. It verified signatures, backup, original names, destination absence, archive metadata, sampled hashes, protected research and the unchanged previously approved Story Mode launch option. I deployed only the prepared additions and temporary old-executable filename change.
+
+RPH **1.132.1428.17748** recognized Enhanced **1.0.1158.16** as supported. The official loader and DirectStorageFix initialized, Story Mode loaded and the new observer actually reached READY. No RPH, loader or fix update was needed for these observed operations on executable SHA-256 `B48E80F5FC899EB89E5DCC9F3B68E9551CC8DCFAC78B2A940B207E569E9987EA`. This does not certify every RPH feature or a future executable. No recurrence of the previous sharing violation was observed; preserved logs contain no matching prior sharing-failure entries. No ProcMon session was started.
+
+Story Mode resumed on a safe pavement beside Legion Square with ordinary traffic visible. No movement, teleport or road-box alignment was required. Plugin autoload remained OFF. My tools entered the reviewed LoadPlugin, Prepare and Begin commands, then closed F4. No further game input was sent by the tools during acquisition. The input/observer chronology is retained privately.
+
+| Phase | Samples | Streamed count min–max | Mean streamed count | First → last count | Detailed cohort |
+|---|---:|---:|---:|---:|---:|
+| Baseline, 0–45 s | 213 | 59–67 | 62.7840 | 60 → 66 | 32 per sample |
+| Requests, 45–90 s | 213 | 44–65 | 50.1831 | 65 → 45 | 32 per sample |
+| Restoration, 90–123.834 s | 161 | 45–61 | 54.8758 | 45 → 60 | 32 per sample |
+
+These are streamed enumeration counts, including retained stationary vehicles, not newly spawned counts or road occupancy. The detailed cohort omitted 6,557 / 3,873 / 3,683 **reading occurrences** respectively; these are repeated per-sample omissions, not distinct vehicles. All phases retain PARTIAL coverage. Every accepted observation had zero read errors. The 587 samples had a mean interval of **211.271 ms** (approximately **4.73 Hz**, despite the nominal 5 Hz request), maximum **213.014 ms**, and zero gaps exceeding the predefined 400 ms screen.
+
+### Request receipts and remaining traffic
+
+The ledger contains **9,585 successful request returns across 3,195 frames**, exactly three per frame. Every receipt has all three success bits; partial and missed request-frame counters are zero. The first receipt is at **45,001.2475 ms**, the last at **89,987.1891 ms**, and the maximum inter-receipt gap is **15.4161 ms**. The independent validator reports `controlsClean: true` and **zero requests after suppression**. A successful void-call return is not an independent observation of the native's internal effect.
+
+Within the nearest cohort, baseline included 51 distinct identities, including 21 first-observed moving ambient-category identities. Suppression retained 33 identities previously observed during baseline and also recorded nine first-observed identities, four moving ambient-category. Stationary identities and one emergency-category identity were present during suppression. These category/identity getters were exercised, but category accuracy was not independently certified. New cohort membership can reflect selection, streaming or motion rather than creation.
+
+During the partial restoration window, 23 identities were first observed in the detailed cohort, including 21 moving ambient-category identities. Enumerated counts rose from 45 to 60. Counts decreasing during requests and increasing after cessation are consistent with an effect, but this single sequential trial does not establish causation, complete suppression, exact spawn events or normal population behavior everywhere. Existing vehicles were never removed. The route remains uncertified and no Bati was spawned.
+
+### Automatic stop and scientific limitation
+
+At **123,834.0023 ms**, the unchanged camera guard raised `InvalidOperationException: camera changed`. The core evidence records FAILED as the terminal acquisition state; the independent scientific interpretation is **PARTIAL**, with meaningful baseline and clean request receipts but incomplete windows. Approximately **11.166 seconds** of the planned restoration observation were not executed. The guard was not bypassed and no retry, extension, re-Prepare or second launch occurred.
+
+The last accepted observation had zero listener displacement and a maximum component camera deviation of approximately 0.756 degrees from the first recorded camera. A later screen inspection showed a substantially changed view. The rejecting camera vector is not persisted, so its exact angle and initiating cause cannot be recovered from the accepted samples. My tools had sent no game input since closing F4 at the start. An idle/cinematic camera change is a **hypothesis**, not a confirmed cause or evidence that I manually moved the camera.
+
+The pinned [ordinary GTA `INVALIDATE_IDLE_CAM` reference](https://github.com/citizenfx/natives/blob/64c6064c488d6d6cf992840eccce49e447066472/CAM/InvalidateIdleCam.md), hash `0xF4F2C0D4EE209E20`, describes resetting the idle timer. That is a read-only research lead for a later explicitly scoped setup policy, not a FiveM-only setting, root-cause proof or authorization to add another native now. It was **not called or implemented** in this attempt. The existing camera tolerance remains unchanged.
+
+### Normal shutdown and independent restoration: PASS
+
+The observer wrote CLOSED and finalized a **4,993,824-byte** private dataset plus its closed metrics. The request loop detached and HUD disappeared. I then requested unload, closed F4, invoked normal Alt+F4 and accepted the displayed Quit confirmation. Game/launcher processes exited without force termination. Shutdown was observed this time rather than inferred solely from process absence.
+
+At **11:08:02 UTC on 27 October 2026**, independent restoration matched the exact pre-test **Steam-updated** baseline: all **32 root files**, original executable names/hashes/signatures, **179 archive metadata records** and **ten sampled archive hashes**. All **27 temporary paths** were absent. The main executable retained SHA-256 `B48E80F5FC899EB89E5DCC9F3B68E9551CC8DCFAC78B2A940B207E569E9987EA`; the obsolete original retained `FD330FAE0C92A52E0B277FBA8A6856C81BD931FC4FCD1D81FBA02772A2A814CF`. No downgrade or original-content patch occurred. Diagnostics were preserved outside GTA. Protected source/audio files and link targets, prior acoustics artifacts and the historical baseline/package remained unchanged.
+
+### Measured costs and limits
+
+| Instrument | Calls/submissions | Total CPU ms | Mean CPU ms | Maximum CPU ms |
+|---|---:|---:|---:|---:|
+| Controller tick, all phases | 8,792 | 19.9685 | 0.00227 | 0.7929 |
+| Successful guards | 8,792 | 480.9409 | 0.05470 | 0.6301 |
+| Vehicle observations | 587 | 345.4151 | 0.58844 | 11.1824 |
+| Text HUD | 13,104 | 33.0671 | 0.00252 | 1.0164 |
+| World-outline drawing | 0 | 0 | N/A | 0 |
+
+The controller mean includes baseline/restoration no-request ticks; it is not a per-native-call benchmark. The terminating guard's thrown path is not included in successful-guard timings. Managed memory at closure was **13,465,104 bytes**, process-wide CLR usage rather than plugin-isolated allocation or a peak. These measurements do not certify GPU/FPS costs, real-time suitability or long-run stability.
+
+### Outcome, progress and next action
+
+**PARTIAL:** startup on the updated executable and the bounded three-request lifecycle were exercised successfully. Genuine observations and receipt accounting passed independent interpretation. The restoration observation was shortened by a camera safety stop, population restoration remains observationally unverified, and complete traffic isolation was not established. No combined motorcycle/walking live-stage credit is awarded: progress remains **60%**.
+
+I've selected a quiet airport section as the proposed next controlled setting: "I'm going to use a part of the airport" with very little driving traffic. That is a site preference, not a clearance measurement. Legion Square remains the later urban reference. **My single next action is an offline airport-calibration readiness plan**, including an explicit review of idle-camera handling without weakening the guard. It should keep local interference checks simple and distinguish site choice from proven emptiness. No airport travel, new deployment, extra native, Bati spawn or additional test is authorized or performed here.
+
+The applicable offline regressions, publication audit, Git integrity, exact-head hosted CI and remote readback are reported with the updated PR. Preparation CI alone is not used as verification of the final execution report. Raw vehicle identities/positions, session IDs and logs remain private; only sanitized scalar findings are published.
