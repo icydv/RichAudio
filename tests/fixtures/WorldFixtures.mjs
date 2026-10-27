@@ -1,0 +1,10 @@
+// Original synthetic data only. No GTA route coordinates or extracted geometry.
+import {tileFixture} from './TileFixtures.mjs';import {digest} from '../../src/acoustics/research/world-cache-format.mjs';
+export const clone=x=>structuredClone(x);
+export function world(){return {version:1,build:'1.0.1158.16',schema:1,algorithm:'orthogonal-plane-jacobi-v1',coordinates:'gta-native-units-unverified',environment:'synthetic-open-world',interior:'outside',mapFamily:'synthetic-city',evidence:'synthetic-complete',resources:[{id:'base',fingerprint:digest('synthetic-base-v1'),scope:null}]};}
+export function tileInput(id='tile-a'){return {id,world:world(),bounds:{min:[-16,-16,-16],max:[16,16,16]},groups:[tileFixture('wall'),tileFixture('ground')],savedUtc:'2026-10-27T00:00:00.000Z'};}
+export function walkingGroup(index,offset,started){const kind=['wall','ground','wall'][index],g=tileFixture(kind),shift=p=>{p.X+=offset;};g.Name='stop-'+index;g.Session='walk-session';g.StartedMs=started;g.FinishedMs=started+10;shift(g.Player);for(const [i,s]of g.Samples.entries()){s.Id=g.Name+'-ray-'+i;s.Observation.SessionId=g.Session;s.Observation.ObservedAtMs+=started;for(const p of [s.Ray.Origin,s.Ray.End,s.Observation.Origin,s.Observation.End,s.Observation.HitPosition])shift(p);}return g;}
+export const syntheticRoute=()=>({version:1,id:'synthetic-straight-route',evidence:'synthetic-validated',liveValidated:false,checkpoints:[[-4,0,0],[0,0,0],[4,0,0]],listener:[0,3,0],width:2});
+export const entities=(nonce='pass-one')=>[{handle:1,generation:1,session:'bench-session',model:'bati',nonce},{handle:2,generation:1,session:'bench-session',model:'synthetic-rider',nonce}];
+export function traffic(at,vehicles=[]){return {domain:'original-synthetic-fixture',at,vehicles,coveredSegments:[true,true],controlsObservedEffective:true};}
+export function vehicleFrame(at,position,owned){return {at,vehicle:{identity:clone(owned[0]),position,velocity:[20,0,0],simulation:'observed-current',collision:false,engineRunning:true},rider:{identity:clone(owned[1]),seated:true,alive:true},listener:{at,position:[0,3,0],stationary:true,cameraStable:true}};}
