@@ -1,6 +1,8 @@
 # BENCHMARK-01: traffic-isolation calibration preparation
 
-27 October 2026. **Offline preparation complete only after exact-head CI/readback; live experiment NOT TESTED and requires separate approval.** I've prepared one narrow calibration, not the Bati benchmark. Combined ACOUSTICS-05 + BENCHMARK-01 progress remains **60%**. The existing cache remains PASS OFFLINE with its negative tiny-fixture timing result; none of its geometry, identity or source-synthesis behavior is changed.
+27 October 2026. **Execution update: my one approved launch reached observer setup, then stopped before acquisition because the proposed footprint included a junction. Traffic-control effectiveness remains NOT TESTED.** Installation restoration passed at the end of that attempt. A later read-only resumption check found two changed original executables, so another deployment is blocked pending provenance and compatibility review. Combined ACOUSTICS-05 + BENCHMARK-01 progress remains **60%**. The existing cache remains PASS OFFLINE with its negative tiny-fixture timing result; none of its geometry, identity or source-synthesis behavior is changed.
+
+The preparation sections below preserve the conditions recorded before the approved attempt. Their statements that deployment or launch had not occurred describe that preparation checkpoint; the separate execution and resumption sections at the end record what actually happened.
 
 ## Baseline, hypothesis and evidence boundary
 
@@ -99,3 +101,72 @@ Actual baseline/suppression/restoration traffic counts, exact-build native effec
 My offline preparation can be ready for this separately approved supervised calibration while its scientific outcome remains pending. A correct request lifecycle is not effective isolation; reduced arrivals are not an empty road; observed returning traffic is not proof of every population subsystem restoring. The wider route, existing-vehicle exclusion, Bati/rider identity, distance tracking and repeatability remain independent gates. No live-stage credit is added to the combined milestone.
 
 **Exactly one next action:** conduct the sealed single-area, single-sequence traffic calibration **only after explicit approval**, then independently assess the resulting request and traffic observations before deciding whether any motorcycle-controller development is justified. No Bati benchmark or wider route experiment is included.
+
+## Approved execution: stopped before acquisition
+
+### Outcome: BLOCKED at setup; traffic effectiveness NOT TESTED
+
+I used the single approved launch with the sealed 27-file package. RPH selected Enhanced **1.0.1158.16**, RPH **1.132.1428.17748** completed startup, and DirectStorageFix reported initialization complete. Plugin autoload remained disabled. My traffic observer loaded, registered its commands and reported READY. I then captured one player-relative proposed observation area beside Legion Square.
+
+The proposed rectangle reached the junction. I described it as: "it includes the junction". This did not meet the predefined straight-road setup requirement. My development tools should have identified the overlap directly from the displayed scene before asking me to certify it. Neither `RichAudioTrafficConfirm` nor `RichAudioTrafficBegin` was executed. I did not recapture an area or retry the launch.
+
+| Planned activity | Actual result |
+|---|---|
+| 45-second traffic baseline | NOT TESTED; no acquisition started |
+| 45-second density suppression | NOT TESTED; no controller ticks or requests |
+| 45-second traffic-return observation | NOT TESTED |
+| Bati/rider, route and long-distance tracking | NOT TESTED; no entities spawned |
+| Geometry queries / audio changes | None |
+
+The private output contains the session claim, single area claim, proposed area and closed metrics. It contains **no calibration claim and no traffic-evidence dataset**. I have not fabricated an empty traffic dataset or passed setup metrics to the calibration validator as if they were vehicle observations.
+
+### Stop, evidence discrepancy and shutdown
+
+I issued `RichAudioTrafficStop`, observed CLOSED and unloaded the plugin. Closed metrics report **zero controller ticks, zero observations and request detachment**. The display disappeared. Raw metrics contain an incorrect `EndReason` of `readiness expired`: the command chronology establishes a manual stop before the ten-minute readiness limit. Static inspection explains the labeling defect: the adapter initializes that reason before its loop, while `Stop()` changes flags without assigning a reason. I preserve the raw evidence and record this contradiction rather than silently correcting it or treating it as a timeout. This report does not change or rebuild the sealed adapter.
+
+GTA, RPH and PlayGTAV processes were absent before rollback. I did **not** independently observe the final exit mechanism, so I cannot certify a normal quit or attribute the exit to a crash.
+
+### Independent restoration: PASS at the end of the attempt
+
+The existing journaled restoration procedure completed at **02:23:33 UTC on 27 October 2026**. It independently matched the saved original names, file hashes and executable signatures; **32 original root files, 179 archive metadata records and ten sampled archive hashes** passed their exact historical comparisons. All **27 temporary deployment paths** were absent. Introduced binaries and generated diagnostics were preserved privately outside GTA, not published. The executable-selection filename change was reversed.
+
+This is a restoration result for that checkpoint, not a promise that Steam or another later operation cannot change the installation.
+
+### Actual setup-display costs
+
+The private final metrics report 22,960 HUD submissions totaling 48.1641 ms (maximum 1.2864 ms) and 20,489 outline submissions totaling 290.5494 ms (maximum 0.6397 ms). Process-wide managed memory at closure was 8,266,464 bytes. These are measured setup-display CPU costs and one CLR memory snapshot, not controller/observation performance, GPU time, FPS, isolated allocations or real-time certification. Zero controller/observation costs mean those operations did not run.
+
+### Progress and preservation
+
+Actual execution updates reached **0%, 15% and 25%** before setup was rejected; stop and restoration were then reported without awarding unperformed acquisition stages. The live calibration is not 100% complete. Combined progress remains **60%**. The later resumption check reverified **4,857 protected source/audio files, 139 protected link targets and 1,045 prior acoustics artifacts**, all unchanged. The source-synthesis checkout remains clean at its recorded checkpoint. No earlier PR was merged, no renderer or telemetry behavior changed, and no original or private recordings are included here.
+
+## Resumption gate: original executable contents changed
+
+On resumption, GTA/RPH were closed and all 27 temporary paths were still absent. Read-only verification rejected two original root-file hashes:
+
+| Original file | Historical SHA-256 | Current SHA-256 |
+|---|---|---|
+| `GTA5_Enhanced.exe` | `69DA07FF67D05E9DED11289E597E8B8DC5855B0A429C085F37D148DC267CB2C5` | `B48E80F5FC899EB89E5DCC9F3B68E9551CC8DCFAC78B2A940B207E569E9987EA` |
+| `GTA5_Enhanced_BE.exe` | `F67ECC62EBCE3BE67A5B1CC5531525EA2A46E938DEC9EB533F89F7E0B889A36B` | `5E7B36949A50A2D72D1F5519622A2086F0005B7C6530FC3FC3ADDFBD2F0C64BD` |
+
+Both currently have valid Authenticode signatures and a last-write time of **10:07:36 UTC on 27 October 2026**. The main executable still reports **1.0.1158.16**; the BE executable changed size from 1,473,144 to 1,593,976 bytes. The original root set has no other content mismatch. The helper stopped at this root-file check; its subsequent archive/signature/package stages must not be represented as a completed fresh full verification.
+
+I then inspected only the relevant local Steam app manifest and update-log entries. Steam records an automatic update of Enhanced app **3240220**, changed depot **3240225**, committing successfully at **10:07:37 UTC** to build ID **25971420**. It staged two files totaling **57,413,360 bytes**, exactly the current combined size of these two executables. An automatic update is directly evidenced; attribution of each individual file is strongly supported by timing and the two-file size match, rather than a per-file trace. Raw Steam logs and unrelated activity remain private. This does not establish RPH/loader/fix compatibility with the newly fingerprinted binaries.
+
+I have not repaired files, overwritten the historical baseline, disabled security or performed another deployment/launch. The successful earlier restoration receipt remains intact. Exact-compatibility review is required before a new baseline or runtime attempt can be considered.
+
+## Simplified follow-up direction: blanket requests, bounded observations
+
+My revised requirement is blanket suppression of naturally occurring traffic during the benchmark. The three prepared native calls already take only a multiplier, **no area argument**. The yellow rectangle limits evidence collection; it never limits where density requests are sent. The existing preparation should therefore not be described as an area-specific traffic-disabling mechanism.
+
+After the installation discrepancy is resolved, the next proposed calibration should remove the artificial requirement to align that rectangle to lane markings or exclude a junction. It should observe a bounded sample of the currently streamed vehicle pool from one stationary, safe pavement location, including junction arrivals, while retaining the same 45/45/45-second phases and 150-second hard cap. Position, camera, enumeration limits, read errors, first-observed versus previously observed identities, class/population categories and request receipts must remain explicit. An independently checked evidence schema must identify this changed observation domain; old corridor recordings must not be reinterpreted as pool observations. This is a **design proposal, not an implemented or sealed replacement package**.
+
+I do not equate blanket density requests with complete traffic removal. Existing moving/parked vehicles can remain; dispatch and scenario behavior are unverified. No entity deletion, global dispatch switch or invented city-wide visibility is proposed. Empty enumeration cannot certify a distant road. The motorcycle benchmark remains blocked until route interference and reversible control are genuinely established.
+
+The previous one-launch authorization has been consumed. This resumption adds no launch. The next single engineering action is to review runtime compatibility with the newly fingerprinted Steam-updated executables before preparing a revised, separately reviewable calibration. No further supervised experiment is authorized by this report.
+
+## Resumption validation and publication
+
+The complete current offline suite passes: **204 Node tests**, 73 geometry-observation assertions, 53 acquisition assertions, 164 tile assertions, independent C#/JS replay checks, 50 focused traffic assertions plus 13,511 repeated synthetic request-argument checks, 43 independent traffic interpretation checks, 119 Phase 1 checks, 65 telemetry assertions, nine configuration assertions and eight append-sharing expectations. No new tests are added for this documentation-only update. The sealed traffic source fingerprints are unchanged; no production behavior or defaults are changed.
+
+Publication screening and exact-head hosted CI are reported with the updated draft PR after completion. Historical preparation evidence is retained separately from the new sanitized execution summary. No private logs, original audio, source positions, local session identifiers or binaries are included. Git history is preserved and no licence is selected. I retain combined progress at **60%**, with traffic effectiveness and the full motorcycle route still unverified.
