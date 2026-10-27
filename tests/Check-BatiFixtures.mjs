@@ -15,8 +15,8 @@ for(let i=0;i<run.Samples.length;i++){
 for(const u of run.Upgrades){test([11,12,13,15,18].includes(u.Category),'performance allowlist');if(u.Category!==18&&u.Count>0)test(u.Requested===u.Count-1&&u.Observed===u.Requested,'highest count-index and readback');}
 const adapter=fs.readFileSync(new URL('../src/benchmark/Bati/BatiAdapter.Rph.cs',import.meta.url),'utf8');
 const core=fs.readFileSync(new URL('../src/benchmark/Bati/BatiController.cs',import.meta.url),'utf8');
-test(adapter.includes('public static void Require(){throw new NotSupportedException('),'hard closed live gate');
-for(const start of ['public Identity CreateBike','public Identity CreateRider','public void InstallKit','public void SetMod','public void EnableTurbo','public void Drive','public void StopOwnedTask','public void DeleteOwned']){const body=adapter.slice(adapter.indexOf(start));test(body.slice(0,body.indexOf('\n')).includes('LiveGate.Require();'),'mutation gate '+start);}
+test(adapter.includes('if(!active)throw new NotSupportedException(')&&adapter.includes('approval.Validate(nonce,binary,candidate,DateTime.UtcNow)'),'default-closed approval-bound live gate');
+for(const start of ['public Identity CreateBike','public Identity CreateRider','public void InstallKit','public void SetMod','public void EnableTurbo','public void Drive','public void Brake','public void StopOwnedTask','public void DeleteOwned']){const body=adapter.slice(adapter.indexOf(start));test(body.slice(0,body.indexOf('\n')).includes('LiveGate.Require();'),'mutation gate '+start);}
 const draw=adapter.slice(adapter.indexOf('private static void Draw('),adapter.indexOf('[ConsoleCommand',adapter.indexOf('private static void Draw(')));
 test(!/NativeFunction|Save|Write|Position|Capture|Spawn|CreateBike/.test(draw),'cached draw no acquisition/mutation/IO');
 for(const c of ['Load','Status','Show','Hide','Arm','Start','Review','Cleanup','Abort'])test(adapter.includes('Name="RichAudioBati'+c+'"'),'actual command '+c);

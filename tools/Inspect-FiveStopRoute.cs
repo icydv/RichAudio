@@ -1,0 +1,6 @@
+using System;using System.IO;using System.Linq;using System.Runtime.Serialization;using System.Runtime.Serialization.Json;using RichAudio.BatiResearch;
+public static class InspectFiveStopRoute
+{
+ [DataContract]public sealed class Input{[DataMember]public string MarkerFile,MarkerFingerprint,MarkerSession,SurveyDirectory,OutputFile;[DataMember]public string[] Fingerprints;}
+ public static int Main(string[] args){try{Check.That(args.Length==1,"explicit private validation manifest required");PrivateFiles.RequireLocal(args[0]);Check.That(new FileInfo(args[0]).Length<=16384,"manifest size");Input i;using(var f=File.OpenRead(args[0]))i=(Input)new DataContractJsonSerializer(typeof(Input)).ReadObject(f);var m=MarkerSet.Load(i.MarkerFile,i.MarkerFingerprint,3,i.MarkerSession,"runtime-observation");var c=FiveStopRoute.Load(i.SurveyDirectory,m,i.Fingerprints);PrivateFiles.WriteNew(i.OutputFile,c);Console.WriteLine("PASS: five genuine cumulative stop records and final closure validated, 30 observations; candidate saved privately. RUNOUT not required; continuous clearance/current admission NOT certified.");return 0;}catch(Exception e){Console.Error.WriteLine("Five-stop validation rejected: "+e.GetType().Name+": "+e.Message);return 1;}}
+}
