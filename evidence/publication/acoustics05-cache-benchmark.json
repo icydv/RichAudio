@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "domain": "original-synthetic-only",
+  "fixtureTiles": 1,
+  "fixturePatches": 2,
+  "sourceObservations": 18,
+  "iterations": 40,
+  "executionOrders": "alternating reconstruction-then-cache / cache-then-reconstruction; four warmups",
+  "coldMeaning": "raw source read/parse/validation/reconstruction path; OS file cache not flushed",
+  "cold": {
+    "totalMs": {
+      "median": 0.7754000000000048,
+      "p90": 0.9566000000000017,
+      "minimum": 0.6122000000000014,
+      "maximum": 1.0897000000000077
+    },
+    "diskMs": {
+      "median": 0.07140000000001123,
+      "p90": 0.0818000000000012,
+      "minimum": 0.06350000000000477,
+      "maximum": 0.08689999999999998
+    },
+    "parseMs": {
+      "median": 0.07680000000000575,
+      "p90": 0.0835000000000008,
+      "minimum": 0.07250000000000512,
+      "maximum": 0.18019999999999925
+    },
+    "validationAndReconstructionMs": {
+      "median": 0.6287999999999982,
+      "p90": 0.7815000000000012,
+      "minimum": 0.4662000000000148,
+      "maximum": 0.9386000000000081
+    },
+    "reconstructionCallsPerIteration": 2
+  },
+  "cached": {
+    "totalMs": {
+      "median": 1.4982000000000255,
+      "p90": 1.723700000000001,
+      "minimum": 1.4107000000000056,
+      "maximum": 2.4814000000000007
+    },
+    "diskMs": {
+      "median": 0.07390000000000896,
+      "p90": 0.08109999999999928,
+      "minimum": 0.07059999999999889,
+      "maximum": 0.09620000000001028
+    },
+    "checksumSchemaCompatibilityValidationMs": {
+      "median": 0.269999999999996,
+      "p90": 0.32979999999999876,
+      "minimum": 0.24790000000001555,
+      "maximum": 0.40330000000000155
+    },
+    "guardAndBookkeepingMs": {
+      "median": 1.150899999999993,
+      "p90": 1.3507000000000033,
+      "minimum": 1.0677999999999912,
+      "maximum": 2.0752000000000024
+    },
+    "reconstructionCallsPerIteration": 0,
+    "collisionQueries": 0,
+    "loadedState": "historical-not-authoritative"
+  },
+  "disk": {
+    "rawSourceBytes": 20012,
+    "cacheBytes": 2255
+  },
+  "memory": {
+    "before": {
+      "rss": 48099328,
+      "heapTotal": 11788288,
+      "heapUsed": 7313288,
+      "external": 2334309,
+      "arrayBuffers": 143647
+    },
+    "after": {
+      "rss": 49569792,
+      "heapTotal": 12050432,
+      "heapUsed": 7538200,
+      "external": 2530957,
+      "arrayBuffers": 340255
+    },
+    "residentTiles": 1,
+    "maximumResidentTiles": 4,
+    "limitations": "process snapshots, not isolated or peak allocations; no forced GC"
+  },
+  "node": "v24.19.0",
+  "platform": "win32",
+  "ratioColdMedianToCachedMedian": 0.5175543986116617,
+  "scope": "small synthetic fixture; no game-startup, city-scale, physical-IO or real-time performance claim"
+}

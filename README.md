@@ -40,7 +40,7 @@ We're also keeping potential **FiveM support** in mind. That is a future possibi
 
 We've verified vehicle movement telemetry inside GTA V Enhanced and privately decoded original vehicle sound material. Our geometry research has now reconstructed separate inferred wall and ground patches from 18 live collision observations, with a temporary in-game visual debugger.
 
-The next geometry challenge is safely maintaining a bounded local tile as the listener moves. Reliable RPM, responsive source playback and duplicate-free control of individual native sounds remain unresolved.
+The next geometry challenge is safely maintaining a bounded local tile as the listener moves. An offline cache prototype can preserve inferred tiles between sessions without new collision queries, but live installation-aware mapping is not implemented. Reliable RPM, responsive source playback and duplicate-free control of individual native sounds remain unresolved.
 
 **There is no finished audio engine or public release yet.** We're working through the difficult parts one step at a time, and we'll share real progress rather than promise features before they work.
 
@@ -58,7 +58,7 @@ For the technical side, see the [roadmap](ROADMAP.md), [architecture](ARCHITECTU
 
 ## Development progress
 
-*Last reviewed: 26 October 2026. These are **research results**, not features in a playable release. The linked milestone PRs are open and unmerged, so their changes are not yet part of `main`.*
+*Last reviewed: 27 October 2026. These are **research results**, not features in a playable release. The linked research milestone PRs remain open and unmerged; the progress-summary process itself was merged through PR #28.*
 
 - **In-game vehicle data — verified:** RichAudio has run in GTA V Enhanced Story Mode and captured vehicle/player movement data. Reliable live engine RPM remains unresolved.
 - **Vehicle sound research — offline:** We have decoded and studied original vehicle-audio sources privately, with promising fixed-state motorcycle exhaust listening experiments. A reliable full acceleration/deceleration renderer is not yet proven. [Source research milestone](https://github.com/icydv/RichAudio/pull/25).
@@ -66,9 +66,10 @@ For the technical side, see the [roadmap](ROADMAP.md), [architecture](ARCHITECTU
 - **Real GTA geometry — verified in-game:** A supervised, single collision trace on Enhanced 1158.16 returned a validated point and normal from a wall; the installation was restored after the test. This does **not** establish the wall's size, material or real audible reflections. [ACOUSTICS-02](https://github.com/icydv/RichAudio/pull/27).
 - **Real surface reconstruction — qualified in-game result:** Nine controlled collision traces produced a consistent, bounded **inferred** surface patch (approximately 1.48 × 0.98 native game units). Its true edges, solidity between observations, physical scale and material remain unknown; it is **not** certified reflection geometry. [ACOUSTICS-03](https://github.com/icydv/RichAudio/pull/29).
 
-- **Multi-surface tile and visual debugger — verified in one supervised game test:** Eighteen valid collision observations supported separate **inferred** wall and ground patches. In Enhanced 1158.16, I could see the measurement rays, hit markers, normals and yellow candidate outlines. Hide/clear/replay kept the query count at 18, and the original installation was independently restored. This does not establish continuous world coverage, material, physical scale or audible acoustics. [ACOUSTICS-04 evidence and limits](docs/ACOUSTICS_04_MULTISURFACE_VISUAL_DEBUG.md), [PR #30](https://github.com/icydv/RichAudio/pull/30).
+- **Multi-surface visual debugger — verified in-game:** Eighteen bounded collision observations yielded separate **inferred** wall and ground patches, displayed using GTA world-space lines and an RPH text overlay. Review/hide/clear issued no extra traces. Material, physical scale, actual boundaries and audible reflections remain unverified. [ACOUSTICS-04](https://github.com/icydv/RichAudio/pull/30).
+- **Persistent acoustic-tile foundation — offline tested:** Original synthetic tiles roundtrip through bounded local storage, retain historical uncertainty and reject incompatible/corrupt data without collision scans or reconstruction. The tiny guarded cached load was slower than rebuilding the fixture; full-world mapping and startup benefits remain unproven. [Cache design](docs/INSTALLATION_AWARE_ACOUSTIC_CACHE.md).
 
-**Next research goal:** Investigate bounded local-tile maintenance along one short, manually walked path, with predefined observation stops and explicit expiry/invalidation. This is proposed work requiring separate authorisation; no continuous scanner or acoustic output is implemented.
+**Next research gate:** The combined manually walked geometry and traffic-free Bati benchmark remains **blocked before live readiness**. Offline safety models pass, but the intended route and reliable reversible traffic isolation are not yet verified. No new game launch, Bati spawn or automatic scanner has occurred. [ACOUSTICS-05 + BENCHMARK-01 findings](docs/ACOUSTICS_05_BENCHMARK_01.md).
 
 **Still to solve:** Continuous responsive vehicle audio, reliable RPM, duplicate-free ownership of GTA's original engine sounds, automatic geometry coverage, and real-time acoustic rendering. **There is no playable public release yet.**
 
