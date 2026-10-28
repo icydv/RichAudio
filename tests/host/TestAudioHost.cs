@@ -28,6 +28,15 @@ namespace RichAudio.Beacon.Tests
                     Console.WriteLine("PASS: "+checks+" silent actual-device starvation assertions; no automatic restart.");return 0;
                 }
                 if(args.Length!=0)throw new ArgumentException("Unsupported test option");
+                Check(HostProgram.BeaconFrequencyArguments(95,"harmonic",false)=="","default producer invocation preserved");
+                Check(HostProgram.BeaconFrequencyArguments(600,"harmonic",false)==" --beacon-frequency-hz 600","owned frequency forwarded invariantly");
+                foreach(double hz in new double[]{double.NaN,double.PositiveInfinity,0,19.9,2000.1})Throws(delegate{HostProgram.BeaconFrequencyArguments(hz,"harmonic",false);},"invalid frequency rejected before endpoint");
+                Throws(delegate{HostProgram.BeaconFrequencyArguments(600,"pulse",false);},"custom pulse frequency out of scope");
+                Throws(delegate{HostProgram.BeaconFrequencyArguments(600,"harmonic",true);},"WAV cannot masquerade as tuned beacon");
+                Check(HostProgram.BeaconLevelArguments(.22,"harmonic",false)=="","default source level invocation preserved");
+                Check(HostProgram.BeaconLevelArguments(.44,"harmonic",false)==" --beacon-level 0.44","source level forwarded invariantly");
+                foreach(double level in new double[]{double.NaN,-.01,.51})Throws(delegate{HostProgram.BeaconLevelArguments(level,"harmonic",false);},"invalid source level rejected");
+                Throws(delegate{HostProgram.BeaconLevelArguments(.44,"harmonic",true);},"WAV custom level rejected");
                 // Deterministic baseline: accepted age 5 ms, encoding 10 ms, queue wait 20 ms.
                 double legacyForwarded=5+20;
                 double corrected=HostProgram.ObservationAgeAtWrite(1000,1035,1000);

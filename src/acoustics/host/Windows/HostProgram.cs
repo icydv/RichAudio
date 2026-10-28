@@ -39,6 +39,8 @@ namespace RichAudio.Beacon.Windows
         {
             string root = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "..", ".."));
             string scene = "open-road", beacon = "harmonic", outputPath = null, wav = null; int device = -1, seconds = 15, sources = 1; float gain = .08f;
+            double beaconFrequencyHz = 95;
+            double beaconLevel = .22;
             bool autostart = false, exercise = false, loopback = false, listenerPipe = false, list = false, probe = false;
             try
             {
@@ -57,6 +59,8 @@ namespace RichAudio.Beacon.Windows
                         if (key == "--root") root = Path.GetFullPath(value);
                         else if (key == "--scene") scene = value;
                         else if (key == "--beacon") beacon = value;
+                        else if (key == "--beacon-frequency-hz") beaconFrequencyHz = double.Parse(value, CultureInfo.InvariantCulture);
+                        else if (key == "--beacon-level") beaconLevel = double.Parse(value, CultureInfo.InvariantCulture);
                         else if (key == "--output") outputPath = value;
                         else if (key == "--wav") wav = Path.GetFullPath(value);
                         else if (key == "--device") device = value == "default" ? -1 : int.Parse(value, CultureInfo.InvariantCulture);
@@ -72,9 +76,11 @@ namespace RichAudio.Beacon.Windows
                 if(!new List<string>{"harmonic","pulse","impulse"}.Contains(beacon))throw new ArgumentException("Unknown owned beacon");
                 if(wav!=null&&listenerPipe)throw new ArgumentException("The listener bridge requires incremental rendering; known-WAV playback cannot respond to telemetry");
                 if (float.IsNaN(gain) || float.IsInfinity(gain) || gain < 0 || gain > .25f) throw new ArgumentException("Gain must be 0..0.25; initial default is 0.08");
+                BeaconFrequencyArguments(beaconFrequencyHz, beacon, wav != null);
+                BeaconLevelArguments(beaconLevel, beacon, wav != null);
                 outputPath = PrivateOutput(root, outputPath ?? Path.Combine(".local", "acoustics07-host-" + Guid.NewGuid().ToString("N")));
                 Directory.CreateDirectory(outputPath);
-                return Run(root, scene, beacon, sources, seconds, gain, device, autostart, exercise, loopback, listenerPipe, wav, outputPath);
+                return Run(root, scene, beacon, sources, seconds, gain, device, autostart, exercise, loopback, listenerPipe, wav, outputPath, beaconFrequencyHz, beaconLevel);
             }
             catch (Exception ex) { Console.Error.WriteLine(ex.GetType().Name + ": " + ex.Message); return 1; }
         }
@@ -88,7 +94,21 @@ namespace RichAudio.Beacon.Windows
             return target;
         }
 
-        private static int Run(string root, string scene, string beacon, int sources, int seconds, float gain, int device, bool autostart, bool exercise, bool loopbackEnabled, bool listenerPipe, string wav, string directory)
+        internal static string BeaconFrequencyArguments(double hz, string beacon, bool knownWav)
+        {
+            if (double.IsNaN(hz) || double.IsInfinity(hz) || hz < 20 || hz > 2000) throw new ArgumentException("Beacon frequency must be finite, 20..2000 Hz");
+            if (hz != 95 && (beacon != "harmonic" || knownWav)) throw new ArgumentException("Custom frequency requires incremental harmonic beacon");
+            return hz == 95 ? "" : " --beacon-frequency-hz " + hz.ToString("R", CultureInfo.InvariantCulture);
+        }
+
+        internal static string BeaconLevelArguments(double level, string beacon, bool knownWav)
+        {
+            if (double.IsNaN(level) || double.IsInfinity(level) || level < 0 || level > .5) throw new ArgumentException("Beacon level must be finite, 0..0.5");
+            if (level != .22 && (beacon != "harmonic" || knownWav)) throw new ArgumentException("Custom level requires incremental harmonic beacon");
+            return level == .22 ? "" : " --beacon-level " + level.ToString("R", CultureInfo.InvariantCulture);
+        }
+
+        private static int Run(string root, string scene, string beacon, int sources, int seconds, float gain, int device, bool autostart, bool exercise, bool loopbackEnabled, bool listenerPipe, string wav, string directory, double beaconFrequencyHz, double beaconLevel)
         {
             AppDomain.MonitoringIsEnabled = true;
             long initialAllocated = AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
@@ -104,7 +124,7 @@ namespace RichAudio.Beacon.Windows
                 if (wav == null)
                 {
                     string script = Path.Combine(root, "tools", "Run-Acoustics07.mjs"); if (!File.Exists(script)) throw new FileNotFoundException("Streaming worker is not built", "Run-Acoustics07.mjs");
-                    child = new Process { StartInfo = new ProcessStartInfo { FileName = "node.exe", Arguments = Quote(script) + " --scene " + scene + " --sources " + sources + " --beacon " + beacon + (listenerPipe ? " --listener-input required" : ""), WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true } };
+                    child = new Process { StartInfo = new ProcessStartInfo { FileName = "node.exe", Arguments = Quote(script) + " --scene " + scene + " --sources " + sources + " --beacon " + beacon + BeaconFrequencyArguments(beaconFrequencyHz, beacon, false) + BeaconLevelArguments(beaconLevel, beacon, false) + (listenerPipe ? " --listener-input required" : ""), WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true } };
                     child.Start();
                     inputWriter = new Thread(WriteControls); inputWriter.IsBackground = true; inputWriter.Start();
                     stderr = new Thread(ReadDiagnostics); stderr.IsBackground = true; stderr.Start();
@@ -167,6 +187,8 @@ namespace RichAudio.Beacon.Windows
                     {"receivedBlocks",receivedBlocks},{"rejectedBlocks",rejectedBlocks},{"producerError",producerError},{"rendererExitCode",child != null && child.HasExited ? (object)child.ExitCode : null},
                     {"audio",output != null ? output.Metrics() : null},{"actions",actions},{"rendererDiagnosticsDropped",droppedLogLines},{"listening","not confirmed"},{"loopback",capture != null ? capture.Metrics() : null}
                 };
+                result["beaconFrequencyHz"] = beaconFrequencyHz;
+                result["beaconLevel"] = beaconLevel;
                 result["listenerForwarding"]=new Dictionary<string,object>{{"written",listenerMessagesWritten},{"maxHostQueueAgeMs",maxListenerHostQueueAgeMs},{"first128Receipts",listenerReceipts},{"remainingClockUncertainty","Anonymous-pipe transit after write plus Windows device buffering are separate from acoustic delay"}};
 #if STATE_TRANSPORT
                 if (pipe != null) result["transport"] = new Dictionary<string,object>{{"accepted",pipe.Accepted},{"rejected",pipe.Rejected},{"connections",pipe.Connections},{"lastAgeMs",pipe.Accepted>0?(object)pipe.LastAgeMs:null},{"error",pipe.Error},{"diagnostic",pipe.Diagnostic},{"strict",true},{"outputMuted",output==null||output.Muted},{"hostStopped",stop}};
