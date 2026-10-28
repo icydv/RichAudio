@@ -24,7 +24,7 @@ namespace RichAudio.Beacon.Rph
         [ConsoleCommand(Name="RichAudioBeaconStop",Description="Stop listener telemetry; host freshness gate fades its owned beacon")]
         public static void Stop(){requested=false;}
         [ConsoleCommand(Name="RichAudioBeaconStatus",Description="Print listener counters only; no world coordinates")]
-        public static void Status(){var p=publisher;var d=p==null?lastTransport:p.Diagnostic;Game.Console.Print("RichAudio beacon bridge ready="+ready+" requested="+requested+" observations="+Interlocked.Read(ref observations)+" missed="+Interlocked.Read(ref missed)+" sent="+(p==null?lastSent:p.Sent)+" attempts="+(p==null?(d==null?0:d.Connection):p.Attempts)+" terminal="+(d==null?"none":d.Stage+"/"+d.Code+"/"+d.Outcome)+"; one Start per plugin instance; no native audio control.");}
+        public static void Status(){var p=publisher;var d=p==null?lastTransport:p.Diagnostic;var expired=p==null?(d==null?null:d.FirstExpiredUnsent):p.FirstExpiredUnsent;Game.Console.Print("RichAudio beacon bridge ready="+ready+" requested="+requested+" observations="+Interlocked.Read(ref observations)+" missed="+Interlocked.Read(ref missed)+" sent="+(p==null?lastSent:p.Sent)+" attempts="+(p==null?(d==null?0:d.Connection):p.Attempts)+" terminal="+(d==null?"none":d.Stage+"/"+d.Code+"/"+d.Outcome)+" expiredUnsentBefore="+(p==null?(d==null?0:d.ExpiredBeforeEncoding):p.ExpiredBeforeEncoding)+" expiredUnsentAfter="+(p==null?(d==null?0:d.ExpiredAfterEncoding):p.ExpiredAfterEncoding)+" firstExpiredAgeMs="+(expired==null?"none":expired.AgeMs.ToString("F3",System.Globalization.CultureInfo.InvariantCulture))+"; one Start per plugin instance; no native audio control.");}
         public static void Main()
         {
             try

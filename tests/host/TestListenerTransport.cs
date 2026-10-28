@@ -85,6 +85,8 @@ internal static class TestListenerTransport
                 var x=State();x.ObservationTicks=9007199254740000;var b=Protocol.Encode(x);var y=Protocol.Decode(b,b.Length);Require(x.ObservationTicks==y.ObservationTicks&&x.ClockFrequency==y.ClockFrequency,"timestamp preservation");
                 foreach(int ms in new int[]{251,300}){var v=new StateValidator();Reject(()=>v.Accept(y,y.ObservationTicks+Stopwatch.Frequency*ms/1000));Require(v.AgeClass=="too-old","post encode/decode delay must count");}
             });
+            Test("expired unsent observation counted before encoding",delegate{string name=Pipe();using(var server=Server(name,null,true))using(var p=new StatePublisher(name)){var old=State(0);old.ObservationTicks-=Stopwatch.Frequency;p.Publish(old);server.Start();p.Start();Until(()=>p.ExpiredBeforeEncoding==1);p.Publish(State(1));Until(()=>p.Sent==1);p.RequestStop();Until(()=>p.Finished&&server.Finished);Require(p.ExpiredAfterEncoding==0&&p.Diagnostic.ExpiredBeforeEncoding==1&&p.FirstTransmittedSequence==1&&server.Rejected==0&&p.Attempts==1,"unsent drop misclassified");}});
+            Test("unsent expiry remains inclusive and does not discard future-dated frames",delegate{long f=Stopwatch.Frequency;Require(!StatePublisher.ExpiredUnsent(f,f+f/4),"250 boundary");Require(StatePublisher.ExpiredUnsent(f,f+f/4+1),"next tick expired");Require(!StatePublisher.ExpiredUnsent(f,f-f/100),"future data must still reach rejection");});
             Test("roundtrip explicit units and empty source identity",delegate{var s=State();var d=Decode(Protocol.EncodeJson(s));Require(d.Sequence==0&&d.SourceId==null&&d.Position[2]==1&&d.Units=="metres","roundtrip");});
             Test("all fields mandatory",delegate
             {
