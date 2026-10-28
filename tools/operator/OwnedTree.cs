@@ -55,9 +55,10 @@ class OwnedTree {
    }
    Check(GetExitCodeProcess(pi.process,out exit));
    // All potentially blocking reporting occurs AFTER deadline execution/verification.
+   if(!verified&&job!=IntPtr.Zero){CloseHandle(job);job=IntPtr.Zero;}
    Console.WriteLine("OWNER_RESULT "+"{\"verifiedTreeExit\":"+verified.ToString().ToLowerInvariant()+",\"forcedTreeCleanup\":"+forced.ToString().ToLowerInvariant()+",\"elapsedMs\":"+clock.ElapsedMilliseconds+",\"supervisorExit\":"+exit+",\"totalOwnedProcesses\":"+total+",\"peakActiveProcesses\":"+peakActive+"}");
    return verified&&exit==0?0:92;
-  } catch(Exception e) { if(pi.process!=IntPtr.Zero&&!assigned) {TerminateProcess(pi.process,93);WaitForSingleObject(pi.process,5000);} Console.Error.WriteLine("Containment failure: "+e.GetType().Name);return 93; }
+  } catch(Exception e) { if(pi.process!=IntPtr.Zero&&!assigned) {TerminateProcess(pi.process,93);WaitForSingleObject(pi.process,5000);} if(job!=IntPtr.Zero){CloseHandle(job);job=IntPtr.Zero;} Console.Error.WriteLine("Containment failure: "+e.GetType().Name);return 93; }
   finally {if(job!=IntPtr.Zero)CloseHandle(job);if(pi.thread!=IntPtr.Zero)CloseHandle(pi.thread);if(pi.process!=IntPtr.Zero)CloseHandle(pi.process);}
  }
 }
