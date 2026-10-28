@@ -49,6 +49,8 @@ public static class ModKitTests
             if(fault.Key.StartsWith("later-"))Yes(r.ModKit.VerifiedIndexedCategories==1&&r.Upgrades[0].Status=="VERIFIED"&&r.ModKit.Verification=="FAILED","earlier successful modification cannot hide incomplete later setup");
             cases.Add(new Case{Name=fault.Key,Started=false,Kit=r.ModKit,Upgrades=r.Upgrades});
         }
+        Yes(new ModKitDiagnostic().InstallerReturnType=="System.Void"&&new ModKitDiagnostic().InvocationReturnType=="System.Int32","native and invocation return types distinguished");
+        using(var b=new MemoryStream(System.Text.Encoding.UTF8.GetBytes("{\"InstallerReturnType\":\"System.Void\"}"))){var old=(ModKitDiagnostic)new DataContractJsonSerializer(typeof(ModKitDiagnostic)).ReadObject(b);Yes(old.InvocationReturnType==null&&old.InstallerReturnType=="System.Void","older invocation type remains unavailable");}
         var direct=new FakeWorld();var id=direct.CreateBike(new MarkerPoint(),"direct-kit","bike");var tuning=new StockTuning();Yes(tuning.Apply(direct,id),"direct functional confirmation");Reject(()=>tuning.Apply(direct,id),"no direct tuning retry");
         var file=Path.Combine(root,"kit-cases.json");PrivateFiles.WriteNew(file,cases.ToArray());var data=File.ReadAllBytes(file);Yes(data.SequenceEqual(Json(cases.ToArray())),"deterministic persisted diagnostics");
         var text=System.Text.Encoding.UTF8.GetString(data);Yes(!text.Contains("private paths")&&!text.Contains("private diagnostic")&&!text.Contains("Handle")&&!text.Contains("Generation")&&!text.Contains("ScopeNonce"),"new diagnostic contains neither exception messages nor private creation identifiers");
