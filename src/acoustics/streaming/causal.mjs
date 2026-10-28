@@ -264,6 +264,7 @@ export class CausalSimulation {
           rate,
           bands: p.bands,
           pan: p.pan,
+          arrivalDirection: p.arrivalDirection,
           distance: p.distance,
           delay: p.delay,
           order: p.order,
