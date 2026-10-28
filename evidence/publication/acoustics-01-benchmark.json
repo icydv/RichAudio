@@ -1,0 +1,172 @@
+{
+  "scope": "Serial original-fixture diagnostic timings; no GTA/frame-time/audio-thread certification",
+  "limits": {
+    "surfaces": 128,
+    "missingRegions": 32,
+    "openings": 8,
+    "tileSide": 256,
+    "coordinate": 100000,
+    "epsilon": 1e-8
+  },
+  "rows": [
+    {
+      "surfaces": 1,
+      "measuredRuns": 25,
+      "warmupRuns": 5,
+      "construction": {
+        "medianMs": 0.024399999999999977,
+        "p95Ms": 0.051399999999993895,
+        "maximumMs": 0.18090000000000117
+      },
+      "planning": {
+        "medianMs": 0.01559999999999917,
+        "p95Ms": 0.024300000000003763,
+        "maximumMs": 0.044799999999995066
+      },
+      "directQuery": {
+        "medianMs": 0.0016999999999995907,
+        "p95Ms": 0.0025000000000048317,
+        "maximumMs": 0.025399999999997647
+      },
+      "serializedTileBytes": 1063,
+      "counts": {
+        "surfaces": 1,
+        "candidates": 1,
+        "valid": 1,
+        "rejected": 0,
+        "uncertain": 0,
+        "segmentQueries": 3,
+        "surfaceTests": 3
+      },
+      "maximumSurfaceTests": 3
+    },
+    {
+      "surfaces": 16,
+      "measuredRuns": 25,
+      "warmupRuns": 5,
+      "construction": {
+        "medianMs": 0.1606999999999985,
+        "p95Ms": 0.2739999999999938,
+        "maximumMs": 0.3603999999999985
+      },
+      "planning": {
+        "medianMs": 0.46059999999999945,
+        "p95Ms": 0.5653999999999968,
+        "maximumMs": 0.5891999999999982
+      },
+      "directQuery": {
+        "medianMs": 0.004699999999999704,
+        "p95Ms": 0.005200000000002092,
+        "maximumMs": 0.009199999999999875
+      },
+      "serializedTileBytes": 10414,
+      "counts": {
+        "surfaces": 16,
+        "candidates": 16,
+        "valid": 1,
+        "rejected": 15,
+        "uncertain": 0,
+        "segmentQueries": 33,
+        "surfaceTests": 528
+      },
+      "maximumSurfaceTests": 528
+    },
+    {
+      "surfaces": 32,
+      "measuredRuns": 25,
+      "warmupRuns": 5,
+      "construction": {
+        "medianMs": 0.2704999999999984,
+        "p95Ms": 0.34029999999999916,
+        "maximumMs": 0.5832999999999942
+      },
+      "planning": {
+        "medianMs": 1.2922999999999973,
+        "p95Ms": 1.884200000000007,
+        "maximumMs": 2.6706000000000074
+      },
+      "directQuery": {
+        "medianMs": 0.008699999999990382,
+        "p95Ms": 0.015600000000006276,
+        "maximumMs": 0.019599999999996953
+      },
+      "serializedTileBytes": 20536,
+      "counts": {
+        "surfaces": 32,
+        "candidates": 32,
+        "valid": 1,
+        "rejected": 31,
+        "uncertain": 0,
+        "segmentQueries": 65,
+        "surfaceTests": 2080
+      },
+      "maximumSurfaceTests": 2080
+    },
+    {
+      "surfaces": 64,
+      "measuredRuns": 25,
+      "warmupRuns": 5,
+      "construction": {
+        "medianMs": 0.5588999999999942,
+        "p95Ms": 1.09050000000002,
+        "maximumMs": 1.4292000000000087
+      },
+      "planning": {
+        "medianMs": 4.349899999999991,
+        "p95Ms": 6.2853000000000065,
+        "maximumMs": 6.375700000000023
+      },
+      "directQuery": {
+        "medianMs": 0.015199999999992997,
+        "p95Ms": 0.021500000000003183,
+        "maximumMs": 0.028800000000018144
+      },
+      "serializedTileBytes": 40935,
+      "counts": {
+        "surfaces": 64,
+        "candidates": 64,
+        "valid": 1,
+        "rejected": 63,
+        "uncertain": 0,
+        "segmentQueries": 129,
+        "surfaceTests": 8256
+      },
+      "maximumSurfaceTests": 8256
+    },
+    {
+      "surfaces": 128,
+      "measuredRuns": 25,
+      "warmupRuns": 5,
+      "construction": {
+        "medianMs": 1.0454000000000292,
+        "p95Ms": 1.2942999999999074,
+        "maximumMs": 1.321899999999971
+      },
+      "planning": {
+        "medianMs": 16.767899999999997,
+        "p95Ms": 20.42429999999996,
+        "maximumMs": 20.448300000000017
+      },
+      "directQuery": {
+        "medianMs": 0.030200000000036198,
+        "p95Ms": 0.04050000000000864,
+        "maximumMs": 0.04570000000001073
+      },
+      "serializedTileBytes": 82054,
+      "counts": {
+        "surfaces": 128,
+        "candidates": 128,
+        "valid": 1,
+        "rejected": 127,
+        "uncertain": 0,
+        "segmentQueries": 257,
+        "surfaceTests": 32896
+      },
+      "maximumSurfaceTests": 32896
+    }
+  ],
+  "memory": {
+    "rssBytes": 227778560,
+    "heapUsedBytes": 51731696
+  }
+}

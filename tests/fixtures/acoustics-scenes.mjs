@@ -1,0 +1,10 @@
+// Wholly original metre-scale synthetic geometry, unrelated to GTA coordinates.
+import {coordinateSpace,timeUnit,createTile} from '../../src/acoustics/research/local-geometry.mjs';
+export function patch(id,center,normal,u,half,edit={}){return {id,coordinateSpace,center,normal,u,half,motion:'static',reflectiveSide:'front',provenance:{kind:'synthetic',reference:'authored-fixture-v1'},confidence:1,version:1,observedAt:0,validUntil:1000,material:{observedId:null,observedConfidence:null,acoustic:{energyReflection:.7,confidence:1,kind:'synthetic-assumption',reason:'Explicit illustrative energy reflection coefficient, not a GTA material measurement'}},...edit};}
+export function sceneInput(name='open-road'){
+  const ground=patch('ground',[0,0,0],[0,0,1],[1,0,0],[18,12]),walls=[patch('north-wall',[0,6,4],[0,-1,0],[1,0,0],[16,4]),patch('south-wall',[0,-6,4],[0,1,0],[1,0,0],[16,4])],box=[patch('box-west',[-1,0,2],[-1,0,0],[0,1,0],[2,2]),patch('box-east',[1,0,2],[1,0,0],[0,1,0],[2,2]),patch('box-north',[0,2,2],[0,1,0],[1,0,0],[1,2]),patch('box-south',[0,-2,2],[0,-1,0],[1,0,0],[1,2]),patch('box-top',[0,0,4],[0,0,1],[1,0,0],[1,2])];
+  if(!['open-road','urban-street','building-obstruction'].includes(name))throw Error('unknown original scene');
+  return {schemaVersion:1,id:name,coordinateSpace,timeUnit,bounds:{min:[-20,-14,-2],max:[20,14,10]},listenerAnchor:[5,0,1],coverage:'complete-synthetic',surfaces:name==='open-road'?[ground]:name==='urban-street'?[ground,...walls]:[ground,...box],missingRegions:[],version:1,createdAt:0,validUntil:1000,build:'synthetic-v1',session:'fixture',interior:'outdoors',dynamicEpoch:0};
+}
+export function contextFor(tile,edit={}){return {now:1,id:tile.id,observationKey:tile.observationKey,coordinateSpace:tile.coordinateSpace,timeUnit:tile.timeUnit,build:tile.build,session:tile.session,interior:tile.interior,version:tile.version,dynamicEpoch:tile.dynamicEpoch,listener:[5,0,1],maxListenerMove:5,...edit};}
+export function scene(name){const tile=createTile(sceneInput(name));return {tile,source:[-5,0,1],listener:[5,0,1],context:contextFor(tile)};}

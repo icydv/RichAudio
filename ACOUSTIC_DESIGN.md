@@ -1,5 +1,7 @@
 # Acoustic design
 
+**ACOUSTICS-01 offline checkpoint:** [finite-surface geometry and first-reflection calculations](docs/ACOUSTICS_01_LOCAL_GEOMETRY.md) are now tested on three wholly original synthetic scenes. Unknown geometry/materials remain explicit, and no audio is produced. This is a bounded parallel research exception to the unimplemented proposals below, not GTA geometry validation or a native audio-integration release.
+
 ## Immersion-first design contract
 
 The long-term objective is convincing physical presence, scale and character across the whole world: road vehicles, rotorcraft, jets, sirens, gunfire, explosions, backfires, weather, ambience and interiors. These are aspirations, not completed acoustic features. The current telemetry-only checkpoint produces no sound. Source Sound System, Acoustic World Simulation and Perceptual Rendering/Mixing have distinct responsibilities as defined in [ARCHITECTURE.md](ARCHITECTURE.md).

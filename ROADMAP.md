@@ -1,5 +1,7 @@
 # Roadmap
 
+**Parallel ACOUSTICS-01 — 26 October:** I've implemented and offline-tested a [bounded local geometry tile and first-order reflection prototype](docs/ACOUSTICS_01_LOCAL_GEOMETRY.md), with original open-road, urban and obstruction scenes and calculated visualisations. Actual GTA geometry acquisition remains untested, materials unknown and live audio ownership unresolved. One separately authorised exact-build world observation is the next proposed acoustic step; no live experiment, source-synthesis change, P2-03.12 trajectory audit or Phase 3 integration is started here.
+
 ## Current governing roadmap — 25 October 2026
 
 The expanded world-wide audio vision broadens future source families and acceptance criteria while preserving the existing stage gates. Historical checkpoint paragraphs below retain their original context; their pending-selection statements are superseded by [the controlled attempt](docs/P2_01_ENHANCED_RUNTIME_ATTEMPT.md).
