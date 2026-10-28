@@ -1,0 +1,999 @@
+{
+  "schemaVersion": 1,
+  "milestone": "ACOUSTICS-06",
+  "domain": "original-synthetic-metre-scenes-only",
+  "parent": "49c5c6533fa6bab8856fd2f07e863fbba099c707",
+  "physics": {
+    "version": 1,
+    "sampleRate": 48000,
+    "soundSpeedMetresPerSecond": 343,
+    "direct": {
+      "distanceMetres": 10,
+      "delaySeconds": 0.029154518950437316,
+      "arrivalSample": 1399.4169096209912
+    },
+    "ground": {
+      "distanceMetres": 10.198039027185569,
+      "delaySeconds": 0.0297318922075381,
+      "arrivalSample": 1427.1308259618288,
+      "excessMilliseconds": 0.5773732571007842
+    },
+    "twoWallBounces": {
+      "distanceMetres": 26,
+      "delaySeconds": 0.07580174927113703
+    },
+    "doppler": [
+      {
+        "name": "stationary",
+        "expectedHz": 1000,
+        "observedHz": 1000.0000000000001,
+        "errorHz": 1.1368683772161603e-13
+      },
+      {
+        "name": "approach",
+        "expectedHz": 1095.846645367412,
+        "observedHz": 1095.8466446089387,
+        "errorHz": -7.58473333917209e-7
+      },
+      {
+        "name": "departure",
+        "expectedHz": 919.5710455764075,
+        "observedHz": 919.5710456123113,
+        "errorHz": 3.590378128137672e-8
+      },
+      {
+        "name": "moving-listener",
+        "expectedHz": 1087.463556851312,
+        "observedHz": 1087.4635568456263,
+        "errorHz": -5.685706128133461e-9
+      }
+    ],
+    "maximumDelayInterpolationErrorSamples": 0.4104618652860381,
+    "maximumRetardedResidualSeconds": 9.956924174048254e-11
+  },
+  "demonstrations": [
+    {
+      "name": "open-road",
+      "files": {
+        "dry": "A_open-road_dry.wav",
+        "processed": "A_open-road_processed.wav"
+      },
+      "sha256": "a147f0c167b7774528df22d9de55b9a89c729c2c2e6c9defb9578fd785307241",
+      "dryMetrics": {
+        "peak": 0.2743598222732544,
+        "rms": 0.11684178005377514,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 93602,
+        "maximumAdjacentStep": 0.022728294134140015
+      },
+      "processedMetrics": {
+        "peak": 0.023015465587377548,
+        "rms": 0.009223567921535987,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 272394,
+        "maximumAdjacentStep": 0.0010780622251331806
+      },
+      "render": {
+        "frames": 336000,
+        "sampleRate": 48000,
+        "channels": 2,
+        "blocks": 657,
+        "blockSize": 512,
+        "blockDeadlineMs": 10.666666666666666,
+        "processingMs": 21.09659999999971,
+        "medianBlockMs": 0.024799999999999045,
+        "p95BlockMs": 0.03509999999999991,
+        "p99BlockMs": 0.2897000000000105,
+        "maximumBlockMs": 0.601399999999984,
+        "limitedFrames": 0,
+        "maximumPreLimit": 0.023015465587377548,
+        "rendererArrayBytes": 3520768,
+        "pathSlots": 2
+      },
+      "preparationMs": 7.224899999999991,
+      "simulation": {
+        "queries": 3,
+        "surfaceTests": 3,
+        "cacheHits": 560,
+        "cacheMisses": 2,
+        "prunedTracks": 0,
+        "rejections": {},
+        "maximumRetardedResidual": 0
+      },
+      "paths": [
+        {
+          "id": "direct",
+          "peak": 0.09998848773724686
+        },
+        {
+          "id": "r:ground",
+          "peak": 0.08203163357515632
+        }
+      ],
+      "comparison": {
+        "file": "A_open-road_direct-only.wav",
+        "sha256": "da97ad54bdac02d450537b0ecba9a9c55b72675fea258ed2f66771299bd58fcc",
+        "metrics": {
+          "peak": 0.013532089069485664,
+          "rms": 0.005352516451503001,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 273114,
+          "maximumAdjacentStep": 0.0010439762845635414
+        },
+        "render": {
+          "frames": 336000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 657,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 8.429500000000019,
+          "medianBlockMs": 0.013300000000015189,
+          "p95BlockMs": 0.013700000000000045,
+          "p99BlockMs": 0.015699999999981173,
+          "maximumBlockMs": 0.035499999999984766,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.013532089069485664,
+          "rendererArrayBytes": 3502784,
+          "pathSlots": 1
+        },
+        "onlyChange": "direct-only"
+      }
+    },
+    {
+      "name": "urban-street",
+      "files": {
+        "dry": "B_urban-street_dry.wav",
+        "processed": "B_urban-street_processed.wav"
+      },
+      "sha256": "ce207c315d12627918b3ee22262feac2e535b12b6fd7ee06573277cc880db4ae",
+      "dryMetrics": {
+        "peak": 0.2743598222732544,
+        "rms": 0.11684178005377514,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 93602,
+        "maximumAdjacentStep": 0.022728294134140015
+      },
+      "processedMetrics": {
+        "peak": 0.02027391828596592,
+        "rms": 0.0061457169973331,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 259194,
+        "maximumAdjacentStep": 0.001215688418596983
+      },
+      "render": {
+        "frames": 336000,
+        "sampleRate": 48000,
+        "channels": 2,
+        "blocks": 657,
+        "blockSize": 512,
+        "blockDeadlineMs": 10.666666666666666,
+        "processingMs": 44.81080000000031,
+        "medianBlockMs": 0.07200000000000273,
+        "p95BlockMs": 0.07509999999996353,
+        "p99BlockMs": 0.08070000000003574,
+        "maximumBlockMs": 0.105700000000013,
+        "limitedFrames": 0,
+        "maximumPreLimit": 0.02027391828596592,
+        "rendererArrayBytes": 3592704,
+        "pathSlots": 6
+      },
+      "preparationMs": 7.403099999999995,
+      "simulation": {
+        "queries": 13,
+        "surfaceTests": 39,
+        "cacheHits": 2800,
+        "cacheMisses": 10,
+        "prunedTracks": 0,
+        "rejections": {
+          "wrong-reflection-order": 1124
+        },
+        "maximumRetardedResidual": 0
+      },
+      "paths": [
+        {
+          "id": "direct",
+          "peak": 0.09998848773724686
+        },
+        {
+          "id": "r:ground",
+          "peak": 0.08203163357515632
+        },
+        {
+          "id": "r:north-wall",
+          "peak": 0.06004382083725142
+        },
+        {
+          "id": "r:south-wall",
+          "peak": 0.06004382083725142
+        },
+        {
+          "id": "r:north-wall>south-wall",
+          "peak": 0.033836023987936246
+        },
+        {
+          "id": "r:south-wall>north-wall",
+          "peak": 0.033836023987936246
+        }
+      ],
+      "comparison": {
+        "file": "B_urban-street_absorptive-walls.wav",
+        "sha256": "4f8d015d890413ae1d91b1b674b2f52f93bdba2c89d27bff861d358bd034d4e3",
+        "metrics": {
+          "peak": 0.020569564774632454,
+          "rms": 0.006303310701737423,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 259082,
+          "maximumAdjacentStep": 0.0010117823258042336
+        },
+        "render": {
+          "frames": 336000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 657,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 45.131499999999505,
+          "medianBlockMs": 0.0725999999999658,
+          "p95BlockMs": 0.07560000000000855,
+          "p99BlockMs": 0.07900000000000773,
+          "maximumBlockMs": 0.08710000000002083,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.020569564774632454,
+          "rendererArrayBytes": 3592704,
+          "pathSlots": 6
+        },
+        "onlyChange": "absorptive-walls"
+      }
+    },
+    {
+      "name": "obstructed-corner",
+      "files": {
+        "dry": "C_obstructed-corner_dry.wav",
+        "processed": "C_obstructed-corner_processed.wav"
+      },
+      "sha256": "e2920822ae3b81f45933bb0ee4ad5275b3a11f0f8b50ed1fef0bf2370d758ebb",
+      "dryMetrics": {
+        "peak": 0.2743598222732544,
+        "rms": 0.11684178005377514,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 93602,
+        "maximumAdjacentStep": 0.022728294134140015
+      },
+      "processedMetrics": {
+        "peak": 0.010485663078725338,
+        "rms": 0.0027603821675173446,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 267982,
+        "maximumAdjacentStep": 0.0008091960335150361
+      },
+      "render": {
+        "frames": 336000,
+        "sampleRate": 48000,
+        "channels": 2,
+        "blocks": 657,
+        "blockSize": 512,
+        "blockDeadlineMs": 10.666666666666666,
+        "processingMs": 15.426999999999794,
+        "medianBlockMs": 0.024499999999989086,
+        "p95BlockMs": 0.02539999999999054,
+        "p99BlockMs": 0.027400000000056934,
+        "maximumBlockMs": 0.030000000000086402,
+        "limitedFrames": 0,
+        "maximumPreLimit": 0.010485663078725338,
+        "rendererArrayBytes": 3520768,
+        "pathSlots": 2
+      },
+      "preparationMs": 4.858200000000011,
+      "simulation": {
+        "queries": 5,
+        "surfaceTests": 15,
+        "cacheHits": 2800,
+        "cacheMisses": 10,
+        "prunedTracks": 0,
+        "rejections": {
+          "blocked-reflection": 281,
+          "parallel": 1405,
+          "wrong-reflection-order": 562
+        },
+        "maximumRetardedResidual": 0
+      },
+      "paths": [
+        {
+          "id": "r:corner-reflector",
+          "peak": 0.06004382083725142
+        },
+        {
+          "id": "direct",
+          "peak": 0.015809568052275784
+        }
+      ]
+    },
+    {
+      "name": "enclosure",
+      "files": {
+        "dry": "D_enclosure_dry.wav",
+        "processed": "D_enclosure_processed.wav"
+      },
+      "sha256": "b5fb900eb8ff78036d30940998581afe27ca2dd744e107492b7afa3fe112a1e6",
+      "dryMetrics": {
+        "peak": 0.2743598222732544,
+        "rms": 0.11684178005377514,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 93602,
+        "maximumAdjacentStep": 0.022728294134140015
+      },
+      "processedMetrics": {
+        "peak": 0.02656090259552002,
+        "rms": 0.007810411044869933,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 249246,
+        "maximumAdjacentStep": 0.001521228812634945
+      },
+      "render": {
+        "frames": 336000,
+        "sampleRate": 48000,
+        "channels": 2,
+        "blocks": 657,
+        "blockSize": 512,
+        "blockDeadlineMs": 10.666666666666666,
+        "processingMs": 86.53969999999902,
+        "medianBlockMs": 0.13859999999999673,
+        "p95BlockMs": 0.14199999999993906,
+        "p99BlockMs": 0.14430000000004384,
+        "maximumBlockMs": 0.15949999999998,
+        "limitedFrames": 0,
+        "maximumPreLimit": 0.02656090259552002,
+        "rendererArrayBytes": 3700608,
+        "pathSlots": 12
+      },
+      "preparationMs": 10.972299999999905,
+      "simulation": {
+        "queries": 55,
+        "surfaceTests": 330,
+        "cacheHits": 10360,
+        "cacheMisses": 37,
+        "prunedTracks": 9,
+        "rejections": {
+          "wrong-reflection-order": 2248,
+          "outside-finite-patch-or-opening": 2248
+        },
+        "maximumRetardedResidual": 0
+      },
+      "paths": [
+        {
+          "id": "direct",
+          "peak": 0.09998848773724686
+        },
+        {
+          "id": "r:ground",
+          "peak": 0.08203163357515632
+        },
+        {
+          "id": "r:north",
+          "peak": 0.06004382083725142
+        },
+        {
+          "id": "r:south",
+          "peak": 0.06004382083725142
+        },
+        {
+          "id": "r:ceiling",
+          "peak": 0.05451417666876564
+        },
+        {
+          "id": "r:ceiling>ground",
+          "peak": 0.041588285555536335
+        },
+        {
+          "id": "r:ground>ceiling",
+          "peak": 0.041588285555536335
+        },
+        {
+          "id": "r:north>south",
+          "peak": 0.033836023987936246
+        },
+        {
+          "id": "r:south>north",
+          "peak": 0.033836023987936246
+        },
+        {
+          "id": "r:east",
+          "peak": 0.026047067488764276
+        },
+        {
+          "id": "r:west",
+          "peak": 0.026047067488764276
+        },
+        {
+          "id": "r:north>east",
+          "peak": 0.023179907012958446
+        }
+      ]
+    },
+    {
+      "name": "flyby",
+      "files": {
+        "dry": "E_flyby_dry.wav",
+        "processed": "E_flyby_processed.wav"
+      },
+      "sha256": "4fae4729313149ff9569a809a06899154c0f2bd78c6ccee89846153ec8b91ba1",
+      "dryMetrics": {
+        "peak": 0.27574095129966736,
+        "rms": 0.14405283106987282,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 1,
+        "maximumAdjacentStep": 0.023224027827382088
+      },
+      "processedMetrics": {
+        "peak": 0.03642350807785988,
+        "rms": 0.005469534962928292,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 91218,
+        "maximumAdjacentStep": 0.0017390092834830284
+      },
+      "render": {
+        "frames": 624000,
+        "sampleRate": 48000,
+        "channels": 2,
+        "blocks": 1219,
+        "blockSize": 512,
+        "blockDeadlineMs": 10.666666666666666,
+        "processingMs": 56.58549999999855,
+        "medianBlockMs": 0.04719999999997526,
+        "p95BlockMs": 0.048900000000003274,
+        "p99BlockMs": 0.05899999999996908,
+        "maximumBlockMs": 0.2277000000001408,
+        "limitedFrames": 0,
+        "maximumPreLimit": 0.03642350807785988,
+        "rendererArrayBytes": 7074176,
+        "pathSlots": 4
+      },
+      "preparationMs": 54.20190000000002,
+      "simulation": {
+        "queries": 4168,
+        "surfaceTests": 8336,
+        "cacheHits": 0,
+        "cacheMisses": 2605,
+        "prunedTracks": 0,
+        "rejections": {
+          "outside-finite-patch-or-opening": 521
+        },
+        "maximumRetardedResidual": 9.956924174048254e-11
+      },
+      "paths": [
+        {
+          "id": "direct",
+          "peak": 0.14378352411939735
+        },
+        {
+          "id": "r:ground",
+          "peak": 0.11412200857354712
+        },
+        {
+          "id": "r:facade",
+          "peak": 0.026968621431169404
+        },
+        {
+          "id": "r:facade>ground",
+          "peak": 0.022513576824847566
+        }
+      ]
+    }
+  ],
+  "performance": {
+    "version": 1,
+    "node": "v24.19.0",
+    "platform": "win32",
+    "cpuModel": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "logicalCpus": 16,
+    "blockDeadlineMs": 10.666666666666666,
+    "measurement": "Offline Node process; includes JIT/GC/OS scheduling. Heap deltas are not allocation counts or a real-time certification.",
+    "allocationAudit": {
+      "preparation": "allocates source copies, bands, path records and grids",
+      "processorConstruction": "allocates owned bands and numeric path grids",
+      "process": "no explicit arrays, objects, I/O, geometry queries or locks in normal sample loop; JavaScript VM allocation/GC is not instrumented"
+    },
+    "results": [
+      {
+        "name": "direct-only",
+        "order": "forward",
+        "sources": 1,
+        "surfaces": 0,
+        "preparationMs": 2.0615999999999985,
+        "simulation": {
+          "queries": 1,
+          "surfaceTests": 0,
+          "cacheHits": 80,
+          "cacheMisses": 1,
+          "prunedTracks": 0,
+          "rejections": {},
+          "maximumRetardedResidual": 0
+        },
+        "dsp": {
+          "frames": 96000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 188,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 2.429299999999998,
+          "medianBlockMs": 0.01290000000000191,
+          "p95BlockMs": 0.013199999999997658,
+          "p99BlockMs": 0.017799999999994043,
+          "maximumBlockMs": 0.019199999999997885,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.0006997646414674819,
+          "rendererArrayBytes": 1185984,
+          "pathSlots": 1
+        },
+        "rssDeltaBytes": 3072000,
+        "heapUsedDeltaBytes": 1599584,
+        "peakRssBytes": 55025664,
+        "fixedArrayIdentityPreserved": true
+      },
+      {
+        "name": "early-reflections",
+        "order": "forward",
+        "sources": 1,
+        "surfaces": 3,
+        "preparationMs": 6.000499999999988,
+        "simulation": {
+          "queries": 13,
+          "surfaceTests": 39,
+          "cacheHits": 800,
+          "cacheMisses": 10,
+          "prunedTracks": 0,
+          "rejections": {
+            "wrong-reflection-order": 324
+          },
+          "maximumRetardedResidual": 0
+        },
+        "dsp": {
+          "frames": 96000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 188,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 13.159899999999922,
+          "medianBlockMs": 0.07059999999999889,
+          "p95BlockMs": 0.0724999999999909,
+          "p99BlockMs": 0.07609999999999673,
+          "maximumBlockMs": 0.08859999999999957,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.001021148986183107,
+          "rendererArrayBytes": 1211904,
+          "pathSlots": 6
+        },
+        "rssDeltaBytes": 5771264,
+        "heapUsedDeltaBytes": 1023504,
+        "peakRssBytes": 60342272,
+        "fixedArrayIdentityPreserved": true
+      },
+      {
+        "name": "four-moving",
+        "order": "forward",
+        "sources": 4,
+        "surfaces": 3,
+        "preparationMs": 69.57540000000003,
+        "simulation": {
+          "queries": 6156,
+          "surfaceTests": 18468,
+          "cacheHits": 0,
+          "cacheMisses": 3240,
+          "prunedTracks": 0,
+          "rejections": {
+            "outside-finite-patch-or-opening": 324,
+            "wrong-reflection-order": 324
+          },
+          "maximumRetardedResidual": 9.996647953869342e-11
+        },
+        "dsp": {
+          "frames": 96000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 188,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 69.16229999999973,
+          "medianBlockMs": 0.37000000000000455,
+          "p95BlockMs": 0.3813000000000102,
+          "p99BlockMs": 0.5452000000000226,
+          "maximumBlockMs": 0.5704999999999814,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.008779308758676052,
+          "rendererArrayBytes": 4889088,
+          "pathSlots": 32
+        },
+        "rssDeltaBytes": 16736256,
+        "heapUsedDeltaBytes": 4605488,
+        "peakRssBytes": 79065088,
+        "fixedArrayIdentityPreserved": true
+      },
+      {
+        "name": "sixteen-moving",
+        "order": "forward",
+        "sources": 16,
+        "surfaces": 3,
+        "preparationMs": 243.16499999999996,
+        "simulation": {
+          "queries": 24138,
+          "surfaceTests": 72414,
+          "cacheHits": 0,
+          "cacheMisses": 12960,
+          "prunedTracks": 0,
+          "rejections": {
+            "outside-finite-patch-or-opening": 1215,
+            "wrong-reflection-order": 1539
+          },
+          "maximumRetardedResidual": 9.996647953869342e-11
+        },
+        "dsp": {
+          "frames": 96000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 188,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 275.6799,
+          "medianBlockMs": 1.4487000000000307,
+          "p95BlockMs": 1.7212999999999283,
+          "p99BlockMs": 1.7525000000000546,
+          "maximumBlockMs": 1.7817999999999756,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.02905803918838501,
+          "rendererArrayBytes": 19545984,
+          "pathSlots": 126
+        },
+        "rssDeltaBytes": 73695232,
+        "heapUsedDeltaBytes": 26635976,
+        "peakRssBytes": 172257280,
+        "fixedArrayIdentityPreserved": true
+      },
+      {
+        "name": "sixteen-enclosed",
+        "order": "forward",
+        "sources": 16,
+        "surfaces": 6,
+        "preparationMs": 38.26159999999982,
+        "simulation": {
+          "queries": 880,
+          "surfaceTests": 5280,
+          "cacheHits": 47360,
+          "cacheMisses": 592,
+          "prunedTracks": 144,
+          "rejections": {
+            "wrong-reflection-order": 10368,
+            "outside-finite-patch-or-opening": 10368
+          },
+          "maximumRetardedResidual": 0
+        },
+        "dsp": {
+          "frames": 96000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 188,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 448.67019999999775,
+          "medianBlockMs": 2.568000000000211,
+          "p95BlockMs": 2.6467999999999847,
+          "p99BlockMs": 2.907199999999648,
+          "maximumBlockMs": 3.1224999999999454,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.019062254577875137,
+          "rendererArrayBytes": 19888128,
+          "pathSlots": 192
+        },
+        "rssDeltaBytes": 23638016,
+        "heapUsedDeltaBytes": -6048384,
+        "peakRssBytes": 194740224,
+        "fixedArrayIdentityPreserved": true
+      },
+      {
+        "name": "128-surfaces",
+        "order": "forward",
+        "sources": 1,
+        "surfaces": 128,
+        "preparationMs": 77.28670000000056,
+        "simulation": {
+          "queries": 243,
+          "surfaceTests": 31104,
+          "cacheHits": 0,
+          "cacheMisses": 5265,
+          "prunedTracks": 0,
+          "rejections": {
+            "outside-finite-patch-or-opening": 1134,
+            "wrong-reflection-order": 3969
+          },
+          "maximumRetardedResidual": 2.6170551836735e-11
+        },
+        "dsp": {
+          "frames": 96000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 188,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 5.307400000005146,
+          "medianBlockMs": 0.028400000000146974,
+          "p95BlockMs": 0.02970000000004802,
+          "p99BlockMs": 0.0305000000007567,
+          "maximumBlockMs": 0.03120000000035361,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.0018405643058940768,
+          "rendererArrayBytes": 1191168,
+          "pathSlots": 2
+        },
+        "rssDeltaBytes": -3301376,
+        "heapUsedDeltaBytes": 14652736,
+        "peakRssBytes": 194740224,
+        "fixedArrayIdentityPreserved": true
+      },
+      {
+        "name": "128-surfaces",
+        "order": "reverse",
+        "sources": 1,
+        "surfaces": 128,
+        "preparationMs": 68.98209999999926,
+        "simulation": {
+          "queries": 243,
+          "surfaceTests": 31104,
+          "cacheHits": 0,
+          "cacheMisses": 5265,
+          "prunedTracks": 0,
+          "rejections": {
+            "outside-finite-patch-or-opening": 1134,
+            "wrong-reflection-order": 3969
+          },
+          "maximumRetardedResidual": 2.6170551836735e-11
+        },
+        "dsp": {
+          "frames": 96000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 188,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 5.33900000000358,
+          "medianBlockMs": 0.028599999999642023,
+          "p95BlockMs": 0.029500000000552973,
+          "p99BlockMs": 0.03110000000015134,
+          "maximumBlockMs": 0.04809999999997672,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.0018405643058940768,
+          "rendererArrayBytes": 1191168,
+          "pathSlots": 2
+        },
+        "rssDeltaBytes": -44806144,
+        "heapUsedDeltaBytes": 14940376,
+        "peakRssBytes": 194740224,
+        "fixedArrayIdentityPreserved": true
+      },
+      {
+        "name": "sixteen-enclosed",
+        "order": "reverse",
+        "sources": 16,
+        "surfaces": 6,
+        "preparationMs": 49.38239999999951,
+        "simulation": {
+          "queries": 880,
+          "surfaceTests": 5280,
+          "cacheHits": 47360,
+          "cacheMisses": 592,
+          "prunedTracks": 144,
+          "rejections": {
+            "wrong-reflection-order": 10368,
+            "outside-finite-patch-or-opening": 10368
+          },
+          "maximumRetardedResidual": 0
+        },
+        "dsp": {
+          "frames": 96000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 188,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 472.3721999999998,
+          "medianBlockMs": 2.5793000000003303,
+          "p95BlockMs": 2.608999999999469,
+          "p99BlockMs": 2.667199999999866,
+          "maximumBlockMs": 2.718399999999747,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.019062254577875137,
+          "rendererArrayBytes": 19888128,
+          "pathSlots": 192
+        },
+        "rssDeltaBytes": 40992768,
+        "heapUsedDeltaBytes": 17631224,
+        "peakRssBytes": 201891840,
+        "fixedArrayIdentityPreserved": true
+      },
+      {
+        "name": "sixteen-moving",
+        "order": "reverse",
+        "sources": 16,
+        "surfaces": 3,
+        "preparationMs": 241.40459999999985,
+        "simulation": {
+          "queries": 24138,
+          "surfaceTests": 72414,
+          "cacheHits": 0,
+          "cacheMisses": 12960,
+          "prunedTracks": 0,
+          "rejections": {
+            "outside-finite-patch-or-opening": 1215,
+            "wrong-reflection-order": 1539
+          },
+          "maximumRetardedResidual": 9.996647953869342e-11
+        },
+        "dsp": {
+          "frames": 96000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 188,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 275.3621000000039,
+          "medianBlockMs": 1.4501000000000204,
+          "p95BlockMs": 1.6982000000007247,
+          "p99BlockMs": 1.718499999999949,
+          "maximumBlockMs": 1.7192000000004555,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.02905803918838501,
+          "rendererArrayBytes": 19545984,
+          "pathSlots": 126
+        },
+        "rssDeltaBytes": 24489984,
+        "heapUsedDeltaBytes": 23305936,
+        "peakRssBytes": 246149120,
+        "fixedArrayIdentityPreserved": true
+      },
+      {
+        "name": "four-moving",
+        "order": "reverse",
+        "sources": 4,
+        "surfaces": 3,
+        "preparationMs": 52.82209999999941,
+        "simulation": {
+          "queries": 6156,
+          "surfaceTests": 18468,
+          "cacheHits": 0,
+          "cacheMisses": 3240,
+          "prunedTracks": 0,
+          "rejections": {
+            "outside-finite-patch-or-opening": 324,
+            "wrong-reflection-order": 324
+          },
+          "maximumRetardedResidual": 9.996647953869342e-11
+        },
+        "dsp": {
+          "frames": 96000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 188,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 69.03449999999975,
+          "medianBlockMs": 0.36890000000130385,
+          "p95BlockMs": 0.3937999999998283,
+          "p99BlockMs": 0.459500000000844,
+          "maximumBlockMs": 0.5061999999998079,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.008779308758676052,
+          "rendererArrayBytes": 4889088,
+          "pathSlots": 32
+        },
+        "rssDeltaBytes": 11886592,
+        "heapUsedDeltaBytes": 32638800,
+        "peakRssBytes": 246153216,
+        "fixedArrayIdentityPreserved": true
+      },
+      {
+        "name": "early-reflections",
+        "order": "reverse",
+        "sources": 1,
+        "surfaces": 3,
+        "preparationMs": 1.2071999999989202,
+        "simulation": {
+          "queries": 13,
+          "surfaceTests": 39,
+          "cacheHits": 800,
+          "cacheMisses": 10,
+          "prunedTracks": 0,
+          "rejections": {
+            "wrong-reflection-order": 324
+          },
+          "maximumRetardedResidual": 0
+        },
+        "dsp": {
+          "frames": 96000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 188,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 13.30519999999342,
+          "medianBlockMs": 0.07159999999930733,
+          "p95BlockMs": 0.07420000000092841,
+          "p99BlockMs": 0.07639999999992142,
+          "maximumBlockMs": 0.08449999999902502,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.001021148986183107,
+          "rendererArrayBytes": 1211904,
+          "pathSlots": 6
+        },
+        "rssDeltaBytes": -47075328,
+        "heapUsedDeltaBytes": 4762008,
+        "peakRssBytes": 246153216,
+        "fixedArrayIdentityPreserved": true
+      },
+      {
+        "name": "direct-only",
+        "order": "reverse",
+        "sources": 1,
+        "surfaces": 0,
+        "preparationMs": 0.6849000000001979,
+        "simulation": {
+          "queries": 1,
+          "surfaceTests": 0,
+          "cacheHits": 80,
+          "cacheMisses": 1,
+          "prunedTracks": 0,
+          "rejections": {},
+          "maximumRetardedResidual": 0
+        },
+        "dsp": {
+          "frames": 96000,
+          "sampleRate": 48000,
+          "channels": 2,
+          "blocks": 188,
+          "blockSize": 512,
+          "blockDeadlineMs": 10.666666666666666,
+          "processingMs": 2.431799999996656,
+          "medianBlockMs": 0.012899999999717693,
+          "p95BlockMs": 0.013100000000122236,
+          "p99BlockMs": 0.0183999999990192,
+          "maximumBlockMs": 0.03170000000136497,
+          "limitedFrames": 0,
+          "maximumPreLimit": 0.0006997646414674819,
+          "rendererArrayBytes": 1185984,
+          "pathSlots": 1
+        },
+        "rssDeltaBytes": -9129984,
+        "heapUsedDeltaBytes": 4912608,
+        "peakRssBytes": 246153216,
+        "fixedArrayIdentityPreserved": true
+      }
+    ]
+  },
+  "validation": {
+    "newNodeTests": 43,
+    "totalNodeTests": 247,
+    "managedAndPowerShellAssertions": 493,
+    "subjectiveListening": "pending",
+    "gameRuntime": "not-launched",
+    "thirdPartyRuntimeDependencies": [],
+    "historicalResearchChanged": false,
+    "publication": {
+      "indexFindings": 0,
+      "reviewedHistoricalGithubCommitterExceptions": 5,
+      "gitIntegrity": "pass",
+      "audioCommitted": false
+    }
+  }
+}
