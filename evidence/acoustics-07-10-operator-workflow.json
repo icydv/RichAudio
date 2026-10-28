@@ -1,0 +1,76 @@
+{
+  "runtimeSourceChanges": 0,
+  "protectedChanges": 0,
+  "protectedFiles": 95,
+  "liveReady": false,
+  "newFocusedTests": 10,
+  "base": "a1abb28f4f5ae1a8ca86e24a987f492dbe261a2e",
+  "runtime": "b5143db8c99decef49a8c9fdf1473f0c3db4840f",
+  "remainingBlockers": [
+    "Reviewed live launch adapter and immutable artifact bindings",
+    "Owned producer cleanup verification",
+    "Human RPH delivery and separate sender acknowledgement evidence"
+  ],
+  "offlineOnly": true,
+  "helperFingerprints": [
+    {
+      "file": "tools/operator/policy.mjs",
+      "sha256": "707751BCD4EDEAA6BF922D4E049C4DA45646C40F575EF210F0D1C842130FDAB6"
+    },
+    {
+      "file": "tools/operator/supervisor.mjs",
+      "sha256": "865268FB92FC55A089C6236553CDEAC558DA44F10AE2FB1A1FCF76C72274B091"
+    },
+    {
+      "file": "tools/Run-OperatorFixture.mjs",
+      "sha256": "71D654F7E7B0A34289E5909ABD4D85F489ACB33F33A86DAF2A413E125DD8A5EA"
+    },
+    {
+      "file": "tests/operator/host-fixture.mjs",
+      "sha256": "7F09B14E1482642E84C7893BE0F46932159B38474629F98DB5F06453D991F980"
+    },
+    {
+      "file": "tests/Test-OperatorDeadlines.mjs",
+      "sha256": "A81D95E25B3998AF9DEBB0CF3D3E35B95DC8BA42A4A927DDFEAE3FBB6A2F8924"
+    }
+  ],
+  "wallClockFixtures": [
+    {
+      "fixture": "normal",
+      "elapsedMs": 887.9041,
+      "killed": false,
+      "normalStop": true
+    },
+    {
+      "fixture": "cached",
+      "elapsedMs": 618.1393,
+      "killed": false,
+      "normalStop": false
+    },
+    {
+      "fixture": "missing",
+      "elapsedMs": 614.5890999999999,
+      "killed": false,
+      "normalStop": false
+    },
+    {
+      "fixture": "malformed",
+      "elapsedMs": 49.3509,
+      "killed": false,
+      "normalStop": false
+    },
+    {
+      "fixture": "no-ack",
+      "elapsedMs": 1117.2132,
+      "killed": false,
+      "normalStop": false
+    },
+    {
+      "fixture": "blocked",
+      "elapsedMs": 924.9732,
+      "killed": true,
+      "normalStop": false
+    }
+  ],
+  "combinedProgress": 60
+}
