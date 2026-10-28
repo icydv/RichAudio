@@ -1,0 +1,120 @@
+{
+  "base": "62cf9eb029b2cad77a45b90fe62bdc891e1d0a46",
+  "runtime": "b5143db8c99decef49a8c9fdf1473f0c3db4840f",
+  "offlineOnly": true,
+  "protectedFiles": 95,
+  "protectedChanges": 0,
+  "runtimeSourceChanges": 0,
+  "focusedTests": 23,
+  "cadenceMs": 1002.6666666666666,
+  "pollMs": 250,
+  "schedulingMarginMs": 250,
+  "operatorProgressMs": 1510,
+  "oldReplay": {
+    "startMs": 2010,
+    "reason": "status-progress-expired",
+    "abortMs": 4020
+  },
+  "fullOfflineSuite": "passed",
+  "hostSHA256": "847D5B59464A75DF67D9D2B51E5E444F1DF9D1D934C1CE8AD6F1F6ED20C5BAB7",
+  "bridgeSHA256": "96EE4100BA2C2CCB2AB75A0664A3047A3BC293D5A8F43A3D37F21D09247EAFAD",
+  "manifestSHA256": "64FC1B32CDEAE1877FA82B124EC827F0307005833A6EF36E9F444303E3A71BBA",
+  "candidateReadyForSeparateReview": true,
+  "liveAuthorised": false,
+  "acoustics079": "incomplete; failed Stop timing",
+  "combinedProgress": 60,
+  "helperHashes": [
+    {
+      "file": "tools/operator/adapter-worker.mjs",
+      "localSHA256": "9C806D2825B7ECDD413A1931342FD8412F60DE1B06F37823B593648B7F29C79F"
+    },
+    {
+      "file": "tools/operator/adapter.mjs",
+      "localSHA256": "3F7DCFA2A1890FA75796A9FAE2A0907BAE78FD376F46D4FCC4BE71E4C2738BA4"
+    },
+    {
+      "file": "tools/operator/approval-gate.mjs",
+      "localSHA256": "83A4055D2709EA36B92138522FAB48D9E6D8C870BDB0A49409C4B5E3A636A71F"
+    },
+    {
+      "file": "tools/operator/Build-Owner.ps1",
+      "localSHA256": "661862ECEE4F3C0E7513C81F55A6E1292A7559C921AD84DEE353764B19823257"
+    },
+    {
+      "file": "tools/operator/OwnedTree.cs",
+      "localSHA256": "0E51046259F340D5DE91D39E582966D5F90A0BDE89DE884FF917F3E9DC588AFC"
+    },
+    {
+      "file": "tools/operator/policy.mjs",
+      "localSHA256": "9F661AE0C9EDDF0E73FAE01A23A17A4FD36E37F3B9A4AE56D35B009677CF7993"
+    },
+    {
+      "file": "tools/operator/stop-evidence.mjs",
+      "localSHA256": "322BF538F5BB2DAB560DE89613143607F5ED7D5E2F48DE6E3F46F638BD14B118"
+    },
+    {
+      "file": "tools/operator/supervisor.mjs",
+      "localSHA256": "8D8FEBBFC8280A03D24A79314A3AA2BC294E9082AAD54E2AA8BDD4BE90F63305"
+    },
+    {
+      "file": "tools/Run-LaunchAdapter.mjs",
+      "localSHA256": "605771D37573B08F8B815D1A8270609E30CFD463C96F43A5C18611648367F2BF"
+    }
+  ],
+  "ownedTreeFixtures": [
+    {
+      "mode": "normal",
+      "verifiedTreeExit": true,
+      "forcedTreeCleanup": false,
+      "elapsedMs": 970,
+      "supervisorExit": 0,
+      "totalOwnedProcesses": 5,
+      "peakActiveProcesses": 5
+    },
+    {
+      "mode": "orphan",
+      "verifiedTreeExit": true,
+      "forcedTreeCleanup": true,
+      "elapsedMs": 1189,
+      "supervisorExit": 0,
+      "totalOwnedProcesses": 5,
+      "peakActiveProcesses": 5
+    },
+    {
+      "mode": "producer-stuck",
+      "verifiedTreeExit": true,
+      "forcedTreeCleanup": true,
+      "elapsedMs": 1417,
+      "supervisorExit": 0,
+      "totalOwnedProcesses": 5,
+      "peakActiveProcesses": 5
+    },
+    {
+      "mode": "unresponsive",
+      "verifiedTreeExit": true,
+      "forcedTreeCleanup": true,
+      "elapsedMs": 1422,
+      "supervisorExit": 0,
+      "totalOwnedProcesses": 5,
+      "peakActiveProcesses": 5
+    },
+    {
+      "mode": "disconnected",
+      "verifiedTreeExit": true,
+      "forcedTreeCleanup": true,
+      "elapsedMs": 991,
+      "supervisorExit": 0,
+      "totalOwnedProcesses": 5,
+      "peakActiveProcesses": 5
+    },
+    {
+      "mode": "blocked",
+      "verifiedTreeExit": true,
+      "forcedTreeCleanup": true,
+      "elapsedMs": 1415,
+      "supervisorExit": 0,
+      "totalOwnedProcesses": 5,
+      "peakActiveProcesses": 5
+    }
+  ]
+}
