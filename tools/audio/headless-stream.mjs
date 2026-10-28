@@ -97,6 +97,7 @@ export async function runHeadless({
   diagnostics = true,
   producerScript = null,
   autoStart = true,
+  boundaryMessages = [],
 } = {}) {
   if (
     !Number.isFinite(seconds) ||
@@ -189,7 +190,20 @@ export async function runHeadless({
       let end;
       while ((end = text.indexOf("\n")) >= 0) {
         if (logs.length > 20000) throw Error("Trace bound");
-        logs.push(JSON.parse(text.slice(0, end)));
+        const entry = JSON.parse(text.slice(0, end));
+        logs.push(entry);
+        if (entry.type === "selection-barrier") {
+          const messages = boundaryMessages
+            .filter((e) => e.frame === entry.frame)
+            .map((e) => e.message);
+          if (messages.length > 4)
+            throw Error("Headless boundary message budget");
+          for (const message of messages) send(message);
+          if (
+            !messages.some((m) => m.type === "control" && m.command === "stop")
+          )
+            send({ type: "headless-release" });
+        }
         text = text.slice(end + 1);
       }
     } catch (e) {
