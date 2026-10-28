@@ -1,5 +1,7 @@
 # Acoustic design
 
+**ACOUSTICS-06 implementation:** [Direct propagation, finite first/second-order reflections, three-band loss, obstruction, retarded-time Doppler and directional stereo now process original PCM](docs/ACOUSTICS_06_AUDIO_PROPAGATION_ENGINE.md) in five reproducible synthetic demonstrations. Materials and atmosphere are authored assumptions; late diffuse reverb, diffraction, HRTF and live GTA audio remain unimplemented. This supersedes the earlier offline no-audio statement for the new standalone engine only. Telemetry, native ownership and the separate source-synthesis research are unchanged.
+
 **ACOUSTICS-01 offline checkpoint:** [finite-surface geometry and first-reflection calculations](docs/ACOUSTICS_01_LOCAL_GEOMETRY.md) are now tested on three wholly original synthetic scenes. Unknown geometry/materials remain explicit, and no audio is produced. This is a bounded parallel research exception to the unimplemented proposals below, not GTA geometry validation or a native audio-integration release.
 
 ## Immersion-first design contract

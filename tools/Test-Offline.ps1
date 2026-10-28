@@ -15,6 +15,8 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Metadata parser tests failed.'}
     & node --test tests/Test-AcousticGeometry.mjs
     if($LASTEXITCODE -ne 0){throw 'Offline acoustic geometry research tests failed.'}
+    & node --test tests/Test-AcousticRenderer.mjs tests/Test-AcousticMotion.mjs tests/Test-AcousticDemo.mjs
+    if($LASTEXITCODE -ne 0){throw 'Original synthetic acoustic PCM tests failed.'}
     & (Join-Path $repo 'tests\Test-GeometryObservation.ps1')
     & node --test tests/Test-SurfaceReconstruction.mjs tests/Test-SurfacePrivatePaths.mjs
     if($LASTEXITCODE-ne0){throw 'Surface reconstruction/privacy tests failed.'}
