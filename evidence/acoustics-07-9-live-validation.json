@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "runtimeSource": "b5143db8c99decef49a8c9fdf1473f0c3db4840f",
+  "outcome": "INCOMPLETE_LISTENING_AND_FAILED_STOP_TIMING",
+  "launches": 1,
+  "bridgeLoads": 1,
+  "bridgeActivations": 1,
+  "publisherAttempts": 1,
+  "receiverConnections": 1,
+  "hostSessions": 1,
+  "beaconStarts": 0,
+  "sender": {
+    "acknowledged": 1626,
+    "missed": 0,
+    "observations": 1633,
+    "expiredUnsentAfter": 1,
+    "expiredUnsentBefore": 0,
+    "firstExpiredAgeMsDisplayed": 372.53
+  },
+  "receiver": {
+    "firstDecisionAgeMs": 51.6178,
+    "accepted": 1626,
+    "rejected": 0,
+    "firstSequence": 7,
+    "headerMs": 382.3136
+  },
+  "hostForwarded": 1626,
+  "rendererConsumed": 1626,
+  "fixedProfile": {
+    "masterGain": 0.2,
+    "experimentalOrientation": false,
+    "spatialBufferMs": 100,
+    "outputTrimDb": 24,
+    "orientationBufferMs": 100,
+    "frequencyHz": 600,
+    "sourceLevel": 0.44
+  },
+  "trim": {
+    "db": 24,
+    "gain": 15.848931924611133,
+    "peakLimit": 0.5,
+    "peakBefore": 0,
+    "peakAfter": 0,
+    "blocks": 10108,
+    "rejectedBlocks": 0
+  },
+  "dsp": {
+    "startupStatus": "idle",
+    "updates": 10108,
+    "missingHistory": 0,
+    "limited": 0
+  },
+  "audio": {
+    "error": null,
+    "rmsSubmitted": 0,
+    "underflowFrames": 0,
+    "channels": 2,
+    "peakSubmitted": 0,
+    "sampleRate": 48000
+  },
+  "stop": {
+    "receiver": "connection/sender-stop/deliberate-stop",
+    "below120SecondCap": true,
+    "hostDurationSeconds": 107.9157901,
+    "sender": "connection/sender-stop/deliberate-stop",
+    "wrapperObservedMs": 107951,
+    "targetMet": false,
+    "before90Seconds": false,
+    "receiverElapsedMs": 107842.8343
+  },
+  "hostExit": 0,
+  "rendererExit": 0,
+  "listening": "NOT_OBSERVED_EMISSION_NEVER_ENABLED",
+  "restoration": {
+    "pass": true,
+    "signatures": "Valid",
+    "directories": 5,
+    "introducedPathsAbsent": true,
+    "rootFiles": 32,
+    "ownedProcessesAbsent": true,
+    "sampledHashes": 10,
+    "archiveMetadata": 179
+  },
+  "combinedMilestonePercent": 60
+}
