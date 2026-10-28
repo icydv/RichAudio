@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "229a31bf3f46624dfc8f706afc40f2e366b37184",
+  "historicalCause": "Exact first rejection not retained; two attempts already observed during early streaming",
+  "liveRetry": false,
+  "strictPublisherAttempts": 1,
+  "strictServerConnections": 1,
+  "bridgeActivationPermit": "atomic one-use per plugin instance",
+  "cleanStopAcknowledged": true,
+  "transportCases": 63,
+  "hostAssertions": 645,
+  "registeredNodeTests": 333,
+  "sdkSha256": "5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0",
+  "pluginSha256": "864008701A1EFB99A5CD7E2B6B6F4D0BF36AAA634D6EEF74DAFCD20D3DDCA7C6",
+  "liveCompatibility": "not tested",
+  "protectedPathsUnchanged": [
+    "src/acoustics/engine",
+    "src/acoustics/streaming",
+    "src/acoustics/research",
+    "docs/ACOUSTICS_07_1_FIRST_GTA_AUDIO.md",
+    "evidence/acoustics07-1-live-result.json"
+  ],
+  "gtaLaunched": false,
+  "deploymentPerformed": false
+}

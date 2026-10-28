@@ -13,6 +13,8 @@ using RichAudio.Beacon.Transport;
 
 internal static class TestListenerTransport
 {
+    // Legacy development fixtures explicitly opt into reconnect; strict cases pass true.
+    private static StatePipeServer Server(string name,Action<ListenerState,double> consumer,bool strict=false,Action<TransportResult> terminal=null){return new StatePipeServer(name,consumer,strict,terminal);}
     private static int tests;private static readonly string Session=new string('a',32);
     private static void Require(bool value,string message){if(!value)throw new Exception(message);}
     private static void Test(string name,Action action){action();tests++;Console.WriteLine("PASS "+name);}
@@ -28,8 +30,8 @@ internal static class TestListenerTransport
     private static int MeasureTransport()
     {
         const int count=100;var ages=new double[count];int received=0;string pipe=Pipe();long memoryBefore=GC.GetTotalMemory(true);int collections=GC.CollectionCount(0);var watch=Stopwatch.StartNew();
-        using(var server=new StatePipeServer(pipe,delegate(ListenerState s,double age){int index=received;if(index<count){ages[index]=age;Interlocked.Increment(ref received);}}))
-        using(var writer=new StatePublisher(pipe))
+        using(var server=Server(pipe,delegate(ListenerState s,double age){int index=received;if(index<count){ages[index]=age;Interlocked.Increment(ref received);}}))
+        using(var writer=new StatePublisher(pipe,8,false))
         {
             server.Start();writer.Start();Until(()=>server.Connections==1);
             long pacingStart=Stopwatch.GetTimestamp();for(int i=0;i<count;i++){Pace(pacingStart,i);writer.Publish(State(i));}
@@ -55,6 +57,17 @@ internal static class TestListenerTransport
             }
             Thread.Sleep(100);publisher.RequestStop();
             Console.WriteLine("{\"mode\":\"synthetic-listener-sender\",\"sent\":"+publisher.Sent+",\"replaced\":"+publisher.Replaced+",\"attempts\":"+publisher.Attempts+",\"step\":"+(step?"true":"false")+",\"stepQpcTicks\":"+stepTicks+",\"clockFrequency\":"+Stopwatch.Frequency+",\"stepAtSenderMs\":"+stepAtMs.ToString("R",System.Globalization.CultureInfo.InvariantCulture)+"}");return publisher.Sent>0?0:2;
+        }
+    }
+    private static void StrictFailure(string expected,Action<NamedPipeClientStream> action)
+    {
+        string pipe=Pipe();int endings=0;
+        using(var server=Server(pipe,null,true,delegate{Interlocked.Increment(ref endings);})){
+            server.Start();using(var c=new NamedPipeClientStream(".",pipe,PipeDirection.InOut,PipeOptions.Asynchronous)){c.Connect(1000);action(c);}
+            Until(()=>server.Finished);Require(server.Diagnostic.Stage==expected,"wrong attribution: "+server.Diagnostic.Stage);
+            Require(server.Connections==1&&endings==1&&server.Diagnostic.Terminal,"strict receiver rearmed");
+            Require(!server.Diagnostic.AnotherAttempt,"retry diagnostic");
+            using(var next=new NamedPipeClientStream(".",pipe,PipeDirection.Out)){Reject(()=>next.Connect(40));}
         }
     }
     public static int Main(string[] args)
@@ -120,33 +133,49 @@ internal static class TestListenerTransport
             });
             Test("actual pipe fragmented framing and clean producer shutdown",delegate
             {
-                string pipe=Pipe();long observed=-1;using(var server=new StatePipeServer(pipe,delegate(ListenerState s,double age){Require(age>=0&&age<=250,"receipt age");Interlocked.Exchange(ref observed,s.Sequence);}))
+                string pipe=Pipe();long observed=-1;using(var server=Server(pipe,delegate(ListenerState s,double age){Require(age>=0&&age<=250,"receipt age");Interlocked.Exchange(ref observed,s.Sequence);}))
                 {
                     server.Start();using(var c=Client(pipe)){var bytes=Protocol.Frame(State(7));for(int i=0;i<bytes.Length;i++)c.Write(bytes,i,1);Until(()=>server.Accepted==1);Require(Interlocked.Read(ref observed)==7&&server.Connections==1,"received value");}
                     Require(server.LastAgeMs>=0&&server.LastAgeMs<1000,"dynamic freshness");
                 }
             });
-            Test("oversized frame rejected before payload",delegate{string pipe=Pipe();using(var server=new StatePipeServer(pipe,null)){server.Start();using(var c=Client(pipe)){var size=BitConverter.GetBytes(4097);c.Write(size,0,4);Until(()=>server.Rejected==1);}Require(server.Accepted==0,"invalid frame accepted");}});
-            Test("truncated payload rejected",delegate{string pipe=Pipe();using(var server=new StatePipeServer(pipe,null)){server.Start();using(var c=Client(pipe)){var size=BitConverter.GetBytes(100);c.Write(size,0,4);c.WriteByte(1);}Until(()=>server.Rejected==1);Require(server.Accepted==0,"truncated frame accepted");}});
-            Test("truncated header rejected",delegate{string pipe=Pipe();using(var server=new StatePipeServer(pipe,null)){server.Start();using(var c=Client(pipe)){c.WriteByte(100);}Until(()=>server.Rejected==1);Require(server.Accepted==0,"truncated header accepted");}});
-            Test("idle connection times out",delegate{string pipe=Pipe();using(var server=new StatePipeServer(pipe,null)){server.Start();using(var c=Client(pipe)){Until(()=>server.Rejected==1,2000);}Require(server.Accepted==0,"idle accepted");}});
-            Test("stale frame rejected by actual receiver",delegate{string pipe=Pipe();using(var server=new StatePipeServer(pipe,null)){server.Start();using(var c=Client(pipe)){var s=State();s.ObservationTicks-=Stopwatch.Frequency;Send(c,s);Until(()=>server.Rejected==1);}Require(server.Accepted==0,"stale accepted");}});
+            Test("oversized frame rejected before payload",delegate{string pipe=Pipe();using(var server=Server(pipe,null)){server.Start();using(var c=Client(pipe)){var size=BitConverter.GetBytes(4097);c.Write(size,0,4);Until(()=>server.Rejected==1);}Require(server.Accepted==0,"invalid frame accepted");}});
+            Test("truncated payload rejected",delegate{string pipe=Pipe();using(var server=Server(pipe,null)){server.Start();using(var c=Client(pipe)){var size=BitConverter.GetBytes(100);c.Write(size,0,4);c.WriteByte(1);}Until(()=>server.Rejected==1);Require(server.Accepted==0,"truncated frame accepted");}});
+            Test("truncated header rejected",delegate{string pipe=Pipe();using(var server=Server(pipe,null)){server.Start();using(var c=Client(pipe)){c.WriteByte(100);}Until(()=>server.Rejected==1);Require(server.Accepted==0,"truncated header accepted");}});
+            Test("idle connection times out",delegate{string pipe=Pipe();using(var server=Server(pipe,null)){server.Start();using(var c=Client(pipe)){Until(()=>server.Rejected==1,2000);}Require(server.Accepted==0,"idle accepted");}});
+            Test("stale frame rejected by actual receiver",delegate{string pipe=Pipe();using(var server=Server(pipe,null)){server.Start();using(var c=Client(pipe)){var s=State();s.ObservationTicks-=Stopwatch.Frequency;Send(c,s);Until(()=>server.Rejected==1);}Require(server.Accepted==0,"stale accepted");}});
             Test("actual producer restart and consumer reconnect",delegate
             {
-                string pipe=Pipe();using(var server=new StatePipeServer(pipe,null)){server.Start();using(var c=Client(pipe)){Send(c,State(5));Until(()=>server.Accepted==1);}using(var c=Client(pipe)){var s=State();s.Session=new string('b',32);Send(c,s);Until(()=>server.Accepted==2);}Require(server.Connections==2,"reconnect missing");}
+                string pipe=Pipe();using(var server=Server(pipe,null)){server.Start();using(var c=Client(pipe)){Send(c,State(5));Until(()=>server.Accepted==1);}using(var c=Client(pipe)){var s=State();s.Session=new string('b',32);Send(c,s);Until(()=>server.Accepted==2);}Require(server.Connections==2,"reconnect missing");}
             });
             Test("publisher sends latest state and survives consumer disappearance",delegate
             {
-                string pipe=Pipe();var server=new StatePipeServer(pipe,null);server.Start();using(var writer=new StatePublisher(pipe,2))
+                string pipe=Pipe();var server=Server(pipe,null);server.Start();using(var writer=new StatePublisher(pipe,2,false))
                 {
                     writer.Start();long seq=0;Until(delegate{writer.Publish(State(seq++));return server.Accepted>0;});server.Dispose();
                     for(int i=0;i<15;i++){writer.Publish(State(seq++));Thread.Sleep(20);}writer.RequestStop();Until(()=>writer.Finished);Require(writer.Sent>0&&writer.Attempts<=2,"publisher bounds");
                 }
             });
-            Test("absent host has finite reconnect budget",delegate{using(var writer=new StatePublisher(Pipe(),2)){writer.Start();Until(()=>writer.Finished,3000);Require(writer.Attempts==2&&writer.Sent==0,"unbounded reconnect");}});
-            Test("receiver stop while waiting is bounded",delegate{var server=new StatePipeServer(Pipe(),null);server.Start();Thread.Sleep(30);var w=Stopwatch.StartNew();server.Dispose();Require(w.ElapsedMilliseconds<1200,"shutdown blocked");});
-            Test("same pipe can restart after shutdown",delegate{string pipe=Pipe();for(int i=0;i<3;i++)using(var server=new StatePipeServer(pipe,null)){server.Start();using(var c=Client(pipe)){Send(c,State());Until(()=>server.Accepted==1);}}});
-            Test("lifecycle misuse fails on calling thread",delegate{var p=new StatePublisher(Pipe());p.Dispose();p.Dispose();Reject(()=>p.Start());var s=new StatePipeServer(Pipe(),null);s.Dispose();Reject(()=>s.Start());Reject(()=>new StatePublisher("../remote"));});
+            Test("absent host has finite reconnect budget",delegate{using(var writer=new StatePublisher(Pipe(),2,false)){writer.Start();Until(()=>writer.Finished,3000);Require(writer.Attempts==2&&writer.Sent==0,"unbounded reconnect");}});
+            Test("receiver stop while waiting is bounded",delegate{var server=Server(Pipe(),null);server.Start();Thread.Sleep(30);var w=Stopwatch.StartNew();server.Dispose();Require(w.ElapsedMilliseconds<1200,"shutdown blocked");});
+            Test("same pipe can restart after shutdown",delegate{string pipe=Pipe();for(int i=0;i<3;i++)using(var server=Server(pipe,null)){server.Start();using(var c=Client(pipe)){Send(c,State());Until(()=>server.Accepted==1);}}});
+            Test("lifecycle misuse fails on calling thread",delegate{var p=new StatePublisher(Pipe());p.Dispose();p.Dispose();Reject(()=>p.Start());var s=Server(Pipe(),null);s.Dispose();Reject(()=>s.Start());Reject(()=>new StatePublisher("../remote"));});
+            Test("strict absent host consumes one attempt and cannot restart",delegate{using(var writer=new StatePublisher(Pipe())){writer.Start();Until(()=>writer.Finished);Require(writer.Attempts==1&&writer.Diagnostic.Stage=="connection"&&writer.Diagnostic.Terminal,"initial budget");Reject(()=>writer.Start());}});
+            Test("strict acknowledged clean sender Stop agrees at both ends",delegate{string p=Pipe();using(var server=Server(p,null,true))using(var writer=new StatePublisher(p)){server.Start();writer.Start();long n=0;Until(delegate{writer.Publish(State(n++));return server.Accepted>0;});var watch=Stopwatch.StartNew();writer.RequestStop();Require(watch.ElapsedMilliseconds<50,"Stop blocks calling game thread");Until(()=>writer.Finished&&server.Finished);Require(server.Rejected==0&&writer.Error==null&&writer.Diagnostic.Outcome=="deliberate-stop"&&server.Diagnostic.Outcome=="deliberate-stop","clean stop mismatch");Require(writer.Attempts==1&&server.Connections==1,"retry");}});
+            Test("strict invalid length attribution",delegate{StrictFailure("length",c=>c.Write(BitConverter.GetBytes(4097),0,4));});
+            Test("strict truncated header attribution",delegate{StrictFailure("header",c=>c.WriteByte(1));});
+            Test("strict truncated payload attribution",delegate{StrictFailure("payload",delegate(NamedPipeClientStream c){c.Write(BitConverter.GetBytes(100),0,4);c.WriteByte(1);});});
+            Test("strict invalid UTF8 attribution",delegate{StrictFailure("decoding",delegate(NamedPipeClientStream c){c.Write(BitConverter.GetBytes(1),0,4);c.WriteByte(255);});});
+            Test("strict first schema rejection attribution",delegate{StrictFailure("schema",delegate(NamedPipeClientStream c){var b=Encoding.UTF8.GetBytes("{}");c.Write(BitConverter.GetBytes(b.Length),0,4);c.Write(b,0,b.Length);});});
+            Test("strict stale first frame attribution",delegate{StrictFailure("freshness",delegate(NamedPipeClientStream c){var s=State();s.ObservationTicks-=Stopwatch.Frequency;Send(c,s);});});
+            Test("strict duplicate after accepted frame attribution",delegate{StrictFailure("sequence",delegate(NamedPipeClientStream c){var s=State();Send(c,s);TransportStop.Ack(c,1);Send(c,s);});});
+            Test("strict clean EOF is terminal but not an invalid frame",delegate{string p=Pipe();using(var server=Server(p,null,true)){server.Start();using(var c=Client(p)){Until(()=>server.Connections==1);}Until(()=>server.Finished);Require(server.Rejected==0&&server.Diagnostic.Code=="clean-eof"&&server.Diagnostic.Outcome=="unexpected-eof","EOF classification");}});
+            Test("strict midstream EOF is terminal without reconnect",delegate{StrictFailure("connection",delegate(NamedPipeClientStream c){Send(c,State());TransportStop.Ack(c,1);});});
+            Test("strict timeout attribution",delegate{StrictFailure("header",c=>Thread.Sleep(850));});
+            Test("strict callback failure attribution and sanitisation",delegate{string p=Pipe();using(var server=Server(p,delegate{throw new Exception("PRIVATE-PAYLOAD-DO-NOT-LOG");},true)){server.Start();using(var c=Client(p)){Send(c,State());Until(()=>server.Finished);}Require(server.Diagnostic.Stage=="callback"&&server.Diagnostic.Code=="consumer-failed"&&!server.Diagnostic.HadAcceptedFrame,"callback attribution");using(var ms=new MemoryStream()){new System.Runtime.Serialization.Json.DataContractJsonSerializer(typeof(TransportResult)).WriteObject(ms,server.Diagnostic);string json=Encoding.UTF8.GetString(ms.ToArray());Require(!json.Contains("PRIVATE")&&!json.Contains(Session)&&!json.Contains("position")&&!json.Contains("velocity"),"private diagnostics leaked");}}});
+            Test("strict host disappears before sender and worker terminates",delegate{string p=Pipe();var server=Server(p,null,true);using(var writer=new StatePublisher(p)){server.Start();writer.Start();long n=0;Until(delegate{writer.Publish(State(n++));return server.Accepted>0;});server.Dispose();writer.Publish(State(n++));Until(()=>writer.Finished);Require(writer.Attempts==1&&writer.Diagnostic.Outcome=="failed","unexpected consumer exit hidden");}});
+            Test("strict rejection terminates both ends without new attempt",delegate{string p=Pipe();using(var server=Server(p,null,true))using(var writer=new StatePublisher(p)){server.Start();writer.Start();writer.Publish(State(0));Until(()=>server.Accepted==1);writer.Publish(State(0));Until(()=>writer.Finished&&server.Finished);Require(server.Diagnostic.Stage=="sequence"&&writer.Diagnostic.Outcome=="failed"&&writer.Attempts==1,"peer rejection recovered");}});
+            Test("activation permit cannot rearm after failure or stop",delegate{var permit=new SessionPermit();Require(permit.TryConsume(),"initial activation");for(int i=0;i<20;i++)Require(!permit.TryConsume(),"second activation reused approval");});
             Console.WriteLine("{\"suite\":\"listener-transport\",\"passed\":"+tests+",\"failed\":0,\"liveGta\":false}");return 0;
         }
         catch(Exception e){Console.Error.WriteLine("FAIL "+e);return 1;}
