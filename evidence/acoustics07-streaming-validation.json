@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "milestone": "ACOUSTICS-07",
+  "domain": "original-synthetic-metric",
+  "priorReferenceCommit": "a695d34581fb167cc6ffacb696b23729b5162708",
+  "scope": "Independent offline oracle comparisons and producer DSP measurements; no audio device or GTA claim",
+  "physics": {
+    "sampleRate": 48000,
+    "alignment": "fixed 0.3-second dry-signal offset in both implementations; no fitted temporal alignment",
+    "predeclaredAcceptance": {
+      "stationaryRelativeRms": 0.001,
+      "linearMotionRelativeRms": 0.05,
+      "flybyRelativeRms": 0.12,
+      "frequencyErrorHz": 0.5,
+      "flatImpulseAmplitudeError": 2e-7,
+      "alignment": "No fitted timing or phase correction"
+    },
+    "silentChannelRule": "Relative error is undefined below reference RMS 1e-12; absolute error is always reported.",
+    "comparisons": [
+      {
+        "name": "stationary",
+        "knownFixedWarmupSeconds": 0.3,
+        "blockFrames": 512,
+        "referenceLeftRms": 0,
+        "referenceRightRms": 0.002119915228849722,
+        "relativeLeftError": null,
+        "relativeRightError": 0,
+        "absoluteLeftError": 0,
+        "absoluteRightError": 0,
+        "peak": 0.0029978302773088217,
+        "pathCount": 1,
+        "relativeStereoError": 0,
+        "measuredHz": 999.9999999999999,
+        "oracleHz": 999.9999999999999,
+        "analyticalHz": 1000,
+        "absoluteFrequencyErrorHz": 1.1368683772161603e-13
+      },
+      {
+        "name": "approach",
+        "knownFixedWarmupSeconds": 0.3,
+        "blockFrames": 512,
+        "referenceLeftRms": 4.002767364404356e-12,
+        "referenceRightRms": 0.001986798577826091,
+        "relativeLeftError": 3.399686431126759,
+        "relativeRightError": 0.007127982451554676,
+        "absoluteLeftError": 1.360815389572251e-11,
+        "absoluteRightError": 0.000014161865397518164,
+        "peak": 0.007499024737626314,
+        "pathCount": 1,
+        "relativeStereoError": 0.007127982451557967,
+        "measuredHz": 1061.9195046376717,
+        "oracleHz": 1061.9195046295188,
+        "analyticalHz": 1061.919504643963,
+        "absoluteFrequencyErrorHz": 6.291202225838788e-9
+      },
+      {
+        "name": "departure",
+        "knownFixedWarmupSeconds": 0.3,
+        "blockFrames": 512,
+        "referenceLeftRms": 4.758654254736958e-12,
+        "referenceRightRms": 0.0019692041497938414,
+        "relativeLeftError": 2.8128421872755367,
+        "relativeRightError": 0.006178890199612973,
+        "absoluteLeftError": 1.3385343442382344e-11,
+        "absoluteRightError": 0.000012167496222198364,
+        "peak": 0.005716624669730663,
+        "pathCount": 1,
+        "relativeStereoError": 0.006178890199616712,
+        "measuredHz": 944.9035812779448,
+        "oracleHz": 944.9035812869203,
+        "analyticalHz": 944.9035812672176,
+        "absoluteFrequencyErrorHz": 1.0727148946898524e-8
+      },
+      {
+        "name": "moving-listener",
+        "knownFixedWarmupSeconds": 0.3,
+        "blockFrames": 512,
+        "referenceLeftRms": 2.233095647550892e-12,
+        "referenceRightRms": 0.0021098930175836588,
+        "relativeLeftError": 1,
+        "relativeRightError": 0.007128133045244226,
+        "absoluteLeftError": 2.233095647550892e-12,
+        "absoluteRightError": 0.000015039598140568137,
+        "peak": 0.007499684579670429,
+        "pathCount": 1,
+        "relativeStereoError": 0.007128133045244305,
+        "measuredHz": 1058.309037914982,
+        "oracleHz": 1058.3090379095197,
+        "analyticalHz": 1058.3090379008747,
+        "absoluteFrequencyErrorHz": 1.410717231919989e-8
+      },
+      {
+        "name": "flyby",
+        "knownFixedWarmupSeconds": 0.3,
+        "blockFrames": 512,
+        "referenceLeftRms": 0.007572473093169134,
+        "referenceRightRms": 0.007808354404237971,
+        "relativeLeftError": 0.11347822707444177,
+        "relativeRightError": 0.10862514793366151,
+        "absoluteLeftError": 0.0008593108211817474,
+        "absoluteRightError": 0.000848183652278807,
+        "peak": 0.019235709682106972,
+        "pathCount": 1,
+        "relativeStereoError": 0.11100377815441376
+      },
+      {
+        "name": "ground",
+        "knownFixedWarmupSeconds": 0.3,
+        "blockFrames": 512,
+        "referenceLeftRms": 0.004292791103364284,
+        "referenceRightRms": 0.004292791103364284,
+        "relativeLeftError": 6.434763955543899e-8,
+        "relativeRightError": 6.434763955543899e-8,
+        "absoluteLeftError": 2.7623097460608014e-10,
+        "absoluteRightError": 2.7623097460608014e-10,
+        "peak": 0.006092263385653496,
+        "pathCount": 2,
+        "relativeStereoError": 6.434763955543897e-8
+      },
+      {
+        "name": "canyon",
+        "knownFixedWarmupSeconds": 0.3,
+        "blockFrames": 512,
+        "referenceLeftRms": 0.0050003124368668455,
+        "referenceRightRms": 0.005000312392171355,
+        "relativeLeftError": 7.649087992706683e-8,
+        "relativeRightError": 8.727369506632249e-8,
+        "absoluteLeftError": 3.824782982062008e-10,
+        "absoluteRightError": 4.3639573895071644e-10,
+        "peak": 0.009730313904583454,
+        "pathCount": 6,
+        "relativeStereoError": 8.205958977097783e-8
+      },
+      {
+        "name": "obstruction",
+        "knownFixedWarmupSeconds": 0.3,
+        "blockFrames": 512,
+        "referenceLeftRms": 0.0018966169953756962,
+        "referenceRightRms": 0.005388149011002058,
+        "relativeLeftError": 4.7415020172687636e-8,
+        "relativeRightError": 4.143070099490543e-8,
+        "absoluteLeftError": 8.992813309560085e-11,
+        "absoluteRightError": 2.2323479059082166e-10,
+        "peak": 0.007765731308609247,
+        "pathCount": 2,
+        "relativeStereoError": 4.213213935710088e-8
+      }
+    ]
+  },
+  "rejectedCadence": {
+    "observationAndControlFrames": 1024,
+    "updatesPerSecond": 46.875,
+    "flybyRelativeLeftError": 0.19955850143918177,
+    "flybyRelativeRightError": 0.19126645241608406,
+    "unchangedMaximumError": 0.12,
+    "outcome": "Rejected for host movement;512-frame update cadence retained"
+  },
+  "performance": [
+    {
+      "scene": "stationary",
+      "sources": 1,
+      "maximumPaths": 1,
+      "blockFrames": 512,
+      "blockDeadlineMs": 10.666666666666666,
+      "dsp": {
+        "count": 103,
+        "medianMs": 0.056500000000028194,
+        "p95Ms": 0.0809999999999036,
+        "maximumMs": 0.1555999999999358
+      },
+      "observationAndSimulation": {
+        "count": 103,
+        "medianMs": 0.022699999999986176,
+        "p95Ms": 0.05040000000008149,
+        "maximumMs": 0.3525000000000773
+      },
+      "ownedTypedArrayBytes": 2881152,
+      "processHeapUsedDeltaBytes": -12167672,
+      "processRssAfterBytes": 103751680,
+      "peakBeforeLimiter": 0.00007999841583956514,
+      "limitedFrames": 0,
+      "geometryQueries": 150,
+      "surfaceTests": 0,
+      "allocationLimitation": "Heap delta is retained-process usage, not an allocation total. JavaScript iterator/control allocations and GC remain; this is not a device callback or hard real-time certification."
+    },
+    {
+      "scene": "ground",
+      "sources": 1,
+      "maximumPaths": 2,
+      "blockFrames": 512,
+      "blockDeadlineMs": 10.666666666666666,
+      "dsp": {
+        "count": 103,
+        "medianMs": 0.042799999999942884,
+        "p95Ms": 0.04629999999997381,
+        "maximumMs": 0.054700000000025284
+      },
+      "observationAndSimulation": {
+        "count": 103,
+        "medianMs": 0.030799999999999272,
+        "p95Ms": 0.04070000000001528,
+        "maximumMs": 0.084699999999998
+      },
+      "ownedTypedArrayBytes": 2881152,
+      "processHeapUsedDeltaBytes": -3786192,
+      "processRssAfterBytes": 106020864,
+      "peakBeforeLimiter": 0.00047977992551742946,
+      "limitedFrames": 0,
+      "geometryQueries": 450,
+      "surfaceTests": 450,
+      "allocationLimitation": "Heap delta is retained-process usage, not an allocation total. JavaScript iterator/control allocations and GC remain; this is not a device callback or hard real-time certification."
+    },
+    {
+      "scene": "canyon",
+      "sources": 1,
+      "maximumPaths": 6,
+      "blockFrames": 512,
+      "blockDeadlineMs": 10.666666666666666,
+      "dsp": {
+        "count": 103,
+        "medianMs": 0.0809999999999036,
+        "p95Ms": 0.08600000000001273,
+        "maximumMs": 0.11619999999993524
+      },
+      "observationAndSimulation": {
+        "count": 103,
+        "medianMs": 0.10349999999993997,
+        "p95Ms": 0.1308999999999969,
+        "maximumMs": 0.32169999999996435
+      },
+      "ownedTypedArrayBytes": 2881152,
+      "processHeapUsedDeltaBytes": 6842328,
+      "processRssAfterBytes": 105504768,
+      "peakBeforeLimiter": 0.0007578771803118303,
+      "limitedFrames": 0,
+      "geometryQueries": 1950,
+      "surfaceTests": 5850,
+      "allocationLimitation": "Heap delta is retained-process usage, not an allocation total. JavaScript iterator/control allocations and GC remain; this is not a device callback or hard real-time certification."
+    },
+    {
+      "scene": "canyon",
+      "sources": 4,
+      "maximumPaths": 24,
+      "blockFrames": 512,
+      "blockDeadlineMs": 10.666666666666666,
+      "dsp": {
+        "count": 103,
+        "medianMs": 0.39030000000002474,
+        "p95Ms": 0.5315999999999121,
+        "maximumMs": 0.5425999999999931
+      },
+      "observationAndSimulation": {
+        "count": 103,
+        "medianMs": 0.39220000000000255,
+        "p95Ms": 0.6195999999999913,
+        "maximumMs": 0.7464999999999691
+      },
+      "ownedTypedArrayBytes": 11524608,
+      "processHeapUsedDeltaBytes": -9103736,
+      "processRssAfterBytes": 98988032,
+      "peakBeforeLimiter": 0.0022606712966242253,
+      "limitedFrames": 0,
+      "geometryQueries": 7800,
+      "surfaceTests": 23400,
+      "allocationLimitation": "Heap delta is retained-process usage, not an allocation total. JavaScript iterator/control allocations and GC remain; this is not a device callback or hard real-time certification."
+    },
+    {
+      "scene": "enclosure",
+      "sources": 16,
+      "maximumPaths": 192,
+      "blockFrames": 512,
+      "blockDeadlineMs": 10.666666666666666,
+      "dsp": {
+        "count": 103,
+        "medianMs": 3.178899999999885,
+        "p95Ms": 3.389499999999771,
+        "maximumMs": 4.007699999999659
+      },
+      "observationAndSimulation": {
+        "count": 103,
+        "medianMs": 6.636300000000119,
+        "p95Ms": 7.254199999999855,
+        "maximumMs": 8.298599999999851
+      },
+      "ownedTypedArrayBytes": 46098432,
+      "processHeapUsedDeltaBytes": 15438776,
+      "processRssAfterBytes": 185712640,
+      "peakBeforeLimiter": 0.006345704841723893,
+      "limitedFrames": 0,
+      "geometryQueries": 132000,
+      "surfaceTests": 792000,
+      "allocationLimitation": "Heap delta is retained-process usage, not an allocation total. JavaScript iterator/control allocations and GC remain; this is not a device callback or hard real-time certification."
+    }
+  ],
+  "preservation": {
+    "historicalWavs": 16,
+    "unchangedEngineModules": 4,
+    "allMatch": true,
+    "freshRegenerationWavMatches": 16
+  },
+  "verification": {
+    "streamingAndReplayTests": 44,
+    "actualChildProducerTests": 25,
+    "fullOfflineNodeTests": 333,
+    "windowsHostAssertions": 642,
+    "listenerTransportCases": 47,
+    "priorManagedAndFileAssertions": 498,
+    "allPassed": true,
+    "deviceOpenedByOfflineSuite": false,
+    "gameAccessed": false,
+    "retrospectiveListenerPlayoutTests": 17
+  },
+  "limitations": [
+    "No subjective listening acceptance inferred",
+    "No real-time guarantee from producer benchmarks",
+    "No live GTA deployment or unit calibration",
+    "1024-frame moving flyby failed the original waveform tolerance",
+    "Heap deltas are not allocation totals; GC and operating-system scheduling remain",
+    "Control and PCM processing exceptions are fatal; partially updated renderer instances are discarded"
+  ],
+  "reviewedSafetyCorrections": [
+    "Atomic rejection of invalid session replacement",
+    "Undeclared teleport and antipodal orientation rejection",
+    "Collision-free session/source generation identities",
+    "Bounded source-generation retirement and PCM history tags",
+    "Declared 240 Hz observation cap retains history duration",
+    "Overlapping PCM buffer-view rejection",
+    "Measured 1024-frame flyby rejected without widening tolerance",
+    "Negative pre-host mapped observation time withheld instead of promoted to fresh",
+    "Actual child producer listener-envelope validation and in-flight credit accounting",
+    "Explicit 100 ms retrospective listener buffering after actual unbuffered 20 Hz PCM gaps; the 50 ms forecast bound is unchanged"
+  ],
+  "listenerPlayout": {
+    "controlDelaySeconds": 0.1,
+    "maximumExtrapolationSeconds": 0.05,
+    "observationHz": 20,
+    "testedDeliveryLagSeconds": [0.012, 0.04],
+    "continuousSyntheticPcmFramesChecked": 120000,
+    "model": "Already received retrospective pose is presented as an explicitly delayed virtual listener; the external source remains stationary.",
+    "deviceContinuity": "Recorded separately in acoustics07-device-validation.json; no endpoint claim inferred from synthetic tests."
+  }
+}
