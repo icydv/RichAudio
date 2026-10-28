@@ -3,13 +3,33 @@
 import { Worker } from "node:worker_threads";
 import { StreamingRenderer } from "../src/acoustics/streaming/causal.mjs";
 import { ListenerPlayout } from "../src/acoustics/streaming/listener-playout.mjs";
+import { StartupGate } from "../src/acoustics/streaming/startup-gate.mjs";
 
 const args = process.argv.slice(2),
-  options = { scene: "open-road", sources: 1, beacon: "harmonic" };
+  options = {
+    scene: "open-road",
+    sources: 1,
+    beacon: "harmonic",
+    delayMs: 100,
+    headless: false,
+    trace: false,
+    required: false,
+    diagnostics: false,
+  };
 for (let i = 0; i < args.length; i += 2) {
   if (args[i] === "--scene") options.scene = args[i + 1];
   else if (args[i] === "--sources") options.sources = Number(args[i + 1]);
   else if (args[i] === "--beacon") options.beacon = args[i + 1];
+  else if (args[i] === "--listener-delay-ms")
+    options.delayMs = Number(args[i + 1]);
+  else if (args[i] === "--headless-clock" && args[i + 1] === "audio")
+    options.headless = true;
+  else if (args[i] === "--trace-blocks" && args[i + 1] === "yes")
+    options.trace = true;
+  else if (args[i] === "--listener-input" && args[i + 1] === "required")
+    options.required = true;
+  else if (args[i] === "--history-diagnostics" && args[i + 1] === "yes")
+    options.diagnostics = true;
   else throw Error("Unknown producer option");
 }
 if (
@@ -29,7 +49,10 @@ if (
 const FS = 48000,
   BLOCK = 512,
   ids = Array.from({ length: options.sources }, (_, i) => "beacon-" + i);
-const renderer = new StreamingRenderer({ sourceIds: ids }),
+const renderer = new StreamingRenderer({
+    sourceIds: ids,
+    historyDiagnostics: options.diagnostics,
+  }),
   worker = new Worker(
     new URL(
       "../src/acoustics/streaming/simulation-worker.mjs",
@@ -37,7 +60,14 @@ const renderer = new StreamingRenderer({ sourceIds: ids }),
     ),
     { workerData: { scene: options.scene } },
   );
-const listenerPlayout = new ListenerPlayout();
+const listenerPlayout = new ListenerPlayout({ delayMs: options.delayMs });
+const startup = new StartupGate();
+let startupIdentity = null,
+  lifecycle = "initial-priming",
+  priorPaths = "";
+// Explicit silent replay clock. The normal host continues to use the monotonic wall clock.
+const receiptClock = () =>
+  options.headless ? (renderer.frame / FS) * 1000 : performance.now();
 const inputs = Object.fromEntries(
   ids.map((id) => [id, new Float32Array(BLOCK)]),
 );
@@ -111,13 +141,18 @@ async function finish(error) {
       dspMs: summary(stats.dspMs),
     },
     dsp: renderer.stats,
+    historyDiagnostics: renderer.historyDiagnostics,
+    startup,
     simulation: lastControl?.stats ?? null,
     listenerPlayout: listenerPlayout.stats,
     ownedArrayBytes: renderer.ownedArrayBytes,
     memory,
-    clockModel:
-      "Receipt age plus Node queue age; audio render clock leads endpoint by bounded queues, no hardware timestamp alignment",
-    subjectiveListening: "pending",
+    clockModel: options.headless
+      ? "Explicit silent replay: receipt clock equals produced audio frames; no endpoint or hardware latency"
+      : "Receipt age plus Node queue age; audio render clock leads endpoint by bounded queues, no hardware timestamp alignment",
+    subjectiveListening: options.headless
+      ? "not assessed; silent offline run"
+      : "pending",
   });
   process.stdin.pause();
   process.exitCode = error ? 1 : 0;
@@ -180,18 +215,18 @@ function snapshot(now) {
       time: now,
       session: "synthetic-owned",
       generation: 1,
-      listener: baseListener(),
+      listener: { ...baseListener(), valid: !options.required },
       sources: sourceStates(now, false),
       paused: false,
     };
   if (external.pendingReceipt) {
     stats.maxNodeQueueAgeMs = Math.max(
       stats.maxNodeQueueAgeMs,
-      performance.now() - external.receivedAt,
+      receiptClock() - external.receivedAt,
     );
     external.pendingReceipt = false;
   }
-  lastPlayout = listenerPlayout.sample(now, performance.now());
+  lastPlayout = listenerPlayout.sample(now, receiptClock());
   const s = lastPlayout.state ?? external.state;
   const native = s.coordinates === "gta-native-unscaled";
   const listener = {
@@ -229,7 +264,23 @@ async function pump() {
       const result = await simulate(snapshot(now), now);
       if (stopping) break;
       lastControl = result.control;
+      const identity = Object.values(lastControl.sourceGenerations).join(":");
+      if (identity && startupIdentity !== identity) {
+        startup.reset(renderer.frame);
+        lifecycle =
+          startupIdentity === null
+            ? "initial-priming"
+            : "source-generation-change";
+        startupIdentity = identity;
+      }
       renderer.accept(result.control);
+      const ready =
+        (!options.required || external !== null) &&
+        renderer.historyReady(result.control);
+      const previousMissing = renderer.stats.missingHistory;
+      const diagnosticsBefore = renderer.historyDiagnostics
+        ? { ...renderer.historyDiagnostics }
+        : null;
       stats.simulationMs.push(result.milliseconds);
       stats.pathMinimum = Math.min(
         stats.pathMinimum,
@@ -264,7 +315,11 @@ async function pump() {
       }
       const started = performance.now();
       renderer.process(inputs, left, right, BLOCK);
-      stats.dspMs.push(performance.now() - started);
+      startup.apply(left, right, renderer.frame - BLOCK, ready);
+      if (startup.status === "deadline-expired")
+        throw Error("Startup priming deadline exceeded");
+      const dspMilliseconds = performance.now() - started;
+      stats.dspMs.push(dspMilliseconds);
       packet.write("RA07", 0, "ascii");
       packet.writeUInt32LE(sequence++, 4);
       packet.writeUInt32LE(BLOCK, 8);
@@ -278,6 +333,58 @@ async function pump() {
       );
       stats.blocks++;
       inFlight = 0;
+      if (options.trace)
+        log({
+          type: "block",
+          frame: renderer.frame - BLOCK,
+          dspMilliseconds,
+          simulationMilliseconds: result.milliseconds,
+          paths: lastControl.paths.length,
+          missingHistory: renderer.stats.missingHistory,
+          mode:
+            lastPlayout?.mode ??
+            (options.required ? "waiting-for-listener" : "synthetic"),
+          targetTime: lastPlayout?.targetTime ?? now,
+          age: lastPlayout?.newestAgeSeconds ?? 0,
+          prediction: lastPlayout?.extrapolationSeconds ?? 0,
+          orientationAgeSeconds: lastPlayout?.state
+            ? lastPlayout.playoutSeconds +
+              (lastPlayout.mode === "predicted"
+                ? lastPlayout.extrapolationSeconds
+                : 0)
+            : null,
+          pan: lastControl.paths.find((p) => p.order === 0)?.pan ?? null,
+          delays: lastControl.paths.map((p) => p.delay),
+          pathIds: lastControl.paths.map((p) => p.id),
+          emitting: enabled,
+          missingDelta: renderer.stats.missingHistory - previousMissing,
+          historyDelta: diagnosticsBefore
+            ? Object.fromEntries(
+                Object.entries(renderer.historyDiagnostics)
+                  .filter(([k]) => !["firstFrame", "lastFrame"].includes(k))
+                  .map(([k, v]) => [k, v - diagnosticsBefore[k]]),
+              )
+            : null,
+          historyFirstFrame: renderer.historyDiagnostics?.firstFrame ?? null,
+          historyLastFrame: renderer.historyDiagnostics?.lastFrame ?? null,
+          lifecycle:
+            startup.status !== "ready"
+              ? lifecycle === "source-generation-change"
+                ? lifecycle
+                : lastPlayout?.mode === "warming"
+                  ? "listener-buffer-warmup"
+                  : "initial-priming"
+              : !enabled
+                ? "emission-stop-tail"
+                : lastPlayout && !lastPlayout.state
+                  ? "unavailable-input"
+                  : priorPaths !== lastControl.paths.map((p) => p.id).join("|")
+                    ? "path-change"
+                    : "valid-steady",
+          startup: startup.status,
+          readyFrame: startup.readyFrame,
+        });
+      priorPaths = lastControl.paths.map((p) => p.id).join("|");
       if (stats.blocks % 94 === 0)
         log({
           type: "status",
@@ -291,6 +398,7 @@ async function pump() {
           listenerControlDelaySeconds: lastPlayout?.playoutSeconds ?? 0,
           peak: renderer.stats.peak,
           limited: renderer.stats.limited,
+          startupStatus: startup.status,
         });
     }
   } catch (e) {
@@ -319,12 +427,12 @@ function receive(m) {
     else if (m.command === "stop") void finish();
     else throw Error("Unknown control");
   } else if (m.type === "listener") {
-    m = listenerPlayout.add(m, renderer.frame / FS, performance.now());
+    m = listenerPlayout.add(m, renderer.frame / FS, receiptClock());
     const s = m.state;
     external = {
       state: s,
       receiptAgeMs: Math.max(0, m.receiptAgeMs),
-      receivedAt: performance.now(),
+      receivedAt: receiptClock(),
       pendingReceipt: true,
       audioTime: renderer.frame / FS,
     };

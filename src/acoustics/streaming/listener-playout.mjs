@@ -10,8 +10,10 @@ const unit = (v) => {
 // A fixed presentation delay permits interpolation between observations which
 // have ALREADY arrived. This is control latency, never extra acoustic distance.
 export class ListenerPlayout {
-  constructor() {
-    this.delay = 0.1;
+  constructor({ delayMs = 100 } = {}) {
+    if (![100, 75, 50].includes(delayMs))
+      throw Error("Experimental listener delay");
+    this.delay = delayMs / 1000;
     this.extrapolation = 0.05;
     this.records = [];
     this.lastState = null;
