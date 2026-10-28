@@ -33,7 +33,7 @@ export function supervise(command,args,{limits=budget,onEvent=()=>{},onDone=()=>
   },10);
   child.on('close',(code,signal)=>{
     exited=true;clearInterval(timer);
-    if(policy.state!=='complete'&&policy.state!=='aborted')policy.abort(now(),'unexpected-child-exit');
+    policy.closed(code,signal,now());
     onDone({state:policy.state,normalStop:policy.state==='complete'&&stopAck,receiverStop:policy.state==='complete',senderStopConfirmed:stopAck,elapsedMs:now(),events:policy.events,killed,verifiedExit:true,exitCode:code,signal});
   });
   return {control(message){

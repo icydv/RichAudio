@@ -18,6 +18,8 @@ test('late, stale, invalid and incomplete readiness cannot Start',()=>{
 test('normal EOF is not acknowledged Stop; malformed status and terminal failure abort',()=>{
  const p=ready();assert.deepEqual(p.line('{invalid',100),['mute','stop']);assert.equal(p.state,'aborted');
  const q=ready();assert.deepEqual(q.line('Listener terminal {}',100),['mute','stop']);
+ const eof=ready();eof.closed(0,null,100);assert.equal(eof.state,'aborted');
+ const failed=ready();failed.state='complete';failed.closed(1,null,100);assert.equal(failed.state,'aborted');
 });
 test('cutoff race, absent sender evidence, progress expiry and terminal immutability',()=>{
  assert.throws(()=>new Policy({...budget,ready:NaN}));assert.throws(()=>new Policy({...budget,end:90000}));assert.throws(()=>new Policy({...budget,stop:100}));

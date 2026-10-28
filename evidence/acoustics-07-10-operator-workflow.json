@@ -15,11 +15,11 @@
   "helperFingerprints": [
     {
       "file": "tools/operator/policy.mjs",
-      "sha256": "707751BCD4EDEAA6BF922D4E049C4DA45646C40F575EF210F0D1C842130FDAB6"
+      "sha256": "9617047DF0320B4A05797AE1A7B596A61FB0E675E2AFC05EB9400B8EA066CB29"
     },
     {
       "file": "tools/operator/supervisor.mjs",
-      "sha256": "865268FB92FC55A089C6236553CDEAC558DA44F10AE2FB1A1FCF76C72274B091"
+      "sha256": "B08A0BB11630DD62206FA078327687FBF05E202CE5FBAA3083029A61F42057DB"
     },
     {
       "file": "tools/Run-OperatorFixture.mjs",
@@ -31,43 +31,43 @@
     },
     {
       "file": "tests/Test-OperatorDeadlines.mjs",
-      "sha256": "A81D95E25B3998AF9DEBB0CF3D3E35B95DC8BA42A4A927DDFEAE3FBB6A2F8924"
+      "sha256": "79F564572C19C22FC226C36474A83F943EE53628077CA10C85A0F0BE63056E7D"
     }
   ],
   "wallClockFixtures": [
     {
       "fixture": "normal",
-      "elapsedMs": 887.9041,
+      "elapsedMs": 884.8618,
       "killed": false,
       "normalStop": true
     },
     {
       "fixture": "cached",
-      "elapsedMs": 618.1393,
+      "elapsedMs": 614.8152,
       "killed": false,
       "normalStop": false
     },
     {
       "fixture": "missing",
-      "elapsedMs": 614.5890999999999,
+      "elapsedMs": 615.5075,
       "killed": false,
       "normalStop": false
     },
     {
       "fixture": "malformed",
-      "elapsedMs": 49.3509,
+      "elapsedMs": 46.67190000000001,
       "killed": false,
       "normalStop": false
     },
     {
       "fixture": "no-ack",
-      "elapsedMs": 1117.2132,
+      "elapsedMs": 1119.105,
       "killed": false,
       "normalStop": false
     },
     {
       "fixture": "blocked",
-      "elapsedMs": 924.9732,
+      "elapsedMs": 924.0517000000001,
       "killed": true,
       "normalStop": false
     }

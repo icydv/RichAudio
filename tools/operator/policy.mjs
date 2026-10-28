@@ -8,6 +8,10 @@ export class Policy {
   }
   record(at, code) { if(this.events.length<256)this.events.push({at,code}); }
   abort(at,code) { if(this.state==='aborted'||this.state==='complete')return []; this.state='aborted';this.record(at,code);return ['mute','stop']; }
+  closed(code,signal,at) {
+    if(this.state==='complete'&&(code!==0||signal)){this.state='aborted';this.record(at,'abnormal-exit-after-stop');}
+    else if(!['complete','aborted'].includes(this.state))this.abort(at,'unexpected-child-exit');
+  }
   tick(at) {
     if(this.state==='aborted'||this.state==='complete')return [];
     if(!this.started&&at>=this.limits.ready)return this.abort(at,'readiness-deadline');
