@@ -143,6 +143,7 @@ namespace RichAudio.BatiResearch
     {
         [DataMember]public int Category,Count;
         [DataMember]public int? Requested,Observed;
+        [DataMember]public bool RequestReturnedNormally;
         [DataMember]public string Status;
     }
     [DataContract]public sealed class RunRecord
@@ -153,6 +154,7 @@ namespace RichAudio.BatiResearch
         [DataMember]public Identity Bike,Rider;
         [DataMember]public Policy Settings;
         [DataMember]public Upgrade[] Upgrades;
+        [DataMember]public ModKitDiagnostic ModKit;
         [DataMember]public SpeedPoint[] Samples;
         [DataMember]public string[] Lifecycle;
         [DataMember]public SpeedSummary Summary;
