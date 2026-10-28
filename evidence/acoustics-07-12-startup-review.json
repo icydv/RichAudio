@@ -1,0 +1,59 @@
+{
+  "base": "49848ace586f45d8a192542972f28cdd23f05379",
+  "runtime": "b5143db8c99decef49a8c9fdf1473f0c3db4840f",
+  "offlineOnly": true,
+  "focusedNewTests": 7,
+  "completeOperatorTests": 31,
+  "fullOfflineSuite": "passed",
+  "protectedFiles": 171,
+  "protectedChanges": 0,
+  "runtimeSourceChanges": 0,
+  "oldCandidateHash": "DDC1CFF0AC8FC2980D3277680664A5DC58E268A7F7CEF9F1DA15203DDA6608B4",
+  "statusProgressMs": 1510,
+  "cutoffsMs": [
+    25000,
+    45000,
+    60000,
+    65000,
+    70000
+  ],
+  "startupFixtures": [
+    {
+      "mode": "startup-delayed",
+      "launchAt": 0,
+      "activationAt": 370.0448,
+      "cleanupAt": 1009,
+      "started": true
+    },
+    {
+      "mode": "startup-duplicate",
+      "launchAt": 0,
+      "activationAt": 383.1376,
+      "cleanupAt": 1006,
+      "started": true
+    },
+    {
+      "mode": "startup-missing",
+      "launchAt": 0,
+      "activationAt": null,
+      "cleanupAt": 1331,
+      "started": false
+    },
+    {
+      "mode": "startup-late",
+      "launchAt": 0,
+      "activationAt": null,
+      "cleanupAt": 1422,
+      "started": false
+    }
+  ],
+  "correctedMissingProductionBindings": [
+    "tools/acoustics-06-scenes.mjs",
+    "tests/fixtures/acoustics-scenes.mjs"
+  ],
+  "brokerPathsMatchedOldPackage": true,
+  "brokerEqualityNowEnforced": true,
+  "combinedProgress": 60,
+  "acoustics079": "incomplete; failed Stop timing",
+  "liveAuthorised": false
+}

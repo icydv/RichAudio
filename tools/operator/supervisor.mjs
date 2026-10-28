@@ -20,8 +20,10 @@ export function supervise(command,args,{limits=budget,onEvent=()=>{},onDone=()=>
  child.stdout.on('data',chunk=>{
   bytes+=chunk.length;if(bytes>1048576){abort('output-budget');return;}
   buffer+=chunk.toString('utf8');if(buffer.length>16384){abort('line-budget');buffer='';return;}
-  let index;while((index=buffer.indexOf('\n'))>=0){const line=buffer.slice(0,index).trimEnd();buffer=buffer.slice(index+1);const at=now(),prior=policy.state;
+  let index;while((index=buffer.indexOf('\n'))>=0){const line=buffer.slice(0,index).trimEnd();buffer=buffer.slice(index+1);const at=now(),prior=policy.state,wasVisible=policy.visible;
    send(policy.line(line,at));
+   // Existing banner follows listener thread startup; it is NOT a pipe-bound ACK.
+   if(!wasVisible&&policy.visible)onEvent({at,code:'bridge-activation-required'});
    if(line.startsWith('{')){try{const s=JSON.parse(line);if(s.type==='status'&&s.sourceEmitting===true&&policy.started)emissionObserved=true;}catch{}}
    if(prior!=='complete'&&policy.state==='complete'){let elapsed=null;try{elapsed=JSON.parse(line.slice(18,line.lastIndexOf('}')+1)).ElapsedMs??null;}catch{}evidence.receiverObserved(at,elapsed);onEvent({at,code:'receiver-stop-observed'});}
   }
