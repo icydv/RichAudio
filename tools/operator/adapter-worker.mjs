@@ -1,10 +1,13 @@
 // This worker is launched suspended inside OwnedTree before it can spawn a host.
 import readline from 'node:readline';
+import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {supervise} from './supervisor.mjs';
 import {preflight} from './adapter.mjs';
 import {approval,consume} from './approval-gate.mjs';
 const [mode,value]=process.argv.slice(2);
+const job=process.env.RICHAUDIO_OPERATOR_JOB;if(!job)throw Error('Owned broker required before worker execution');
+execFileSync(fileURLToPath(new URL('../../.local/operator/OwnedTree.exe',import.meta.url)),['--check-job',job,String(process.pid)],{windowsHide:true,stdio:'pipe',timeout:1000});
 let command,args,cwd,env,limits;
 if(mode==='fixture'){
  if(!['normal','orphan','unresponsive','producer-stuck'].includes(value))throw Error('Explicit disposable fixture required');

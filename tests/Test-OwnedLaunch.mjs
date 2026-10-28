@@ -1,4 +1,4 @@
-import {spawn} from 'node:child_process';
+import {spawn,spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -14,4 +14,10 @@ for(const mode of ['normal','orphan','producer-stuck','unresponsive','disconnect
  if(mode==='normal'){const r=JSON.parse(lines.find(x=>x.startsWith('SESSION_RESULT ')).slice(15));assert.equal(r.normalStop,true);assert.equal(owner.forcedTreeCleanup,false);}
  if(['orphan','producer-stuck'].includes(mode))assert.equal(owner.forcedTreeCleanup,true);
  console.log(JSON.stringify({mode,...owner}));
+});
+
+test('direct worker invocation cannot bypass containment',()=>{
+ const env={...process.env};delete env.RICHAUDIO_OPERATOR_JOB;
+ const r=spawnSync(process.execPath,[fileURLToPath(new URL('../tools/operator/adapter-worker.mjs',import.meta.url)),'fixture','normal'],{env,encoding:'utf8',windowsHide:true,timeout:2000});
+ assert.notEqual(r.status,0);assert.match(r.stderr,/Owned broker required/);assert.equal(r.stdout,'');
 });

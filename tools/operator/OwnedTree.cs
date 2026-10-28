@@ -19,6 +19,9 @@ class OwnedTree {
  [DllImport("kernel32.dll",SetLastError=true)] static extern bool TerminateJobObject(IntPtr j,uint code);
  [DllImport("kernel32.dll",SetLastError=true)] static extern bool TerminateProcess(IntPtr p,uint code);
  [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern bool CreateProcess(string app,StringBuilder cmd,IntPtr pa,IntPtr ta,bool inherit,uint flags,IntPtr env,string cwd,ref SI si,out PI pi);
+  [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern IntPtr OpenJobObject(uint access,bool inherit,string name);
+ [DllImport("kernel32.dll",SetLastError=true)] static extern IntPtr OpenProcess(uint access,bool inherit,uint pid);
+ [DllImport("kernel32.dll",SetLastError=true)] static extern bool IsProcessInJob(IntPtr process,IntPtr job,out bool result);
  [DllImport("kernel32.dll")] static extern IntPtr GetStdHandle(int n);
  [DllImport("kernel32.dll")] static extern uint ResumeThread(IntPtr t);
  [DllImport("kernel32.dll")] static extern uint WaitForSingleObject(IntPtr h,uint ms);
@@ -27,11 +30,16 @@ class OwnedTree {
  static void Check(bool ok) { if(!ok)throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error()); }
  static string Quote(string s) { return "\""+System.Text.RegularExpressions.Regex.Replace(s,@"(\\*)\""", "$1$1\\\"")+new string('\\',s.Length-s.TrimEnd('\\').Length)+"\""; }
  static int Main(string[] args) {
+    if(args.Length==3&&args[0]=="--check-job"){
+   IntPtr j=OpenJobObject(4,false,args[1]),p=OpenProcess(0x1000,false,uint.Parse(args[2]));
+   try {bool member;return j!=IntPtr.Zero&&p!=IntPtr.Zero&&IsProcessInJob(p,j,out member)&&member?0:96;}
+   finally {if(j!=IntPtr.Zero)CloseHandle(j);if(p!=IntPtr.Zero)CloseHandle(p);}
+  }
   IntPtr job=IntPtr.Zero; PI pi=new PI(); bool assigned=false,forced=false,verified=false; uint exit=99; var clock=new Stopwatch();
   try {
    if(args.Length<4)throw new ArgumentException("kill-ms end-ms executable arguments required");
    int kill=int.Parse(args[0]),end=int.Parse(args[1]); if(kill<=0||kill>65000||end<=kill||end>70000)throw new ArgumentException("bounded budget");
-   job=CreateJobObject(IntPtr.Zero,null);Check(job!=IntPtr.Zero); var ext=new EXT();ext.basic.flags=0x2000; // KILL_ON_JOB_CLOSE; no breakaway flags, handle not inheritable
+   string jobName="Local\\RichAudio-Operator-"+Guid.NewGuid().ToString("N"); Environment.SetEnvironmentVariable("RICHAUDIO_OPERATOR_JOB",jobName);job=CreateJobObject(IntPtr.Zero,jobName);Check(job!=IntPtr.Zero); var ext=new EXT();ext.basic.flags=0x2000; // KILL_ON_JOB_CLOSE; no breakaway flags, handle not inheritable
    Check(SetInformationJobObject(job,9,ref ext,(uint)Marshal.SizeOf(ext)));
    var si=new SI();si.cb=(uint)Marshal.SizeOf(si);si.flags=0x100;si.input=GetStdHandle(-10);si.output=GetStdHandle(-11);si.error=GetStdHandle(-12);
    var cmd=new StringBuilder();for(int i=2;i<args.Length;i++){if(i>2)cmd.Append(' ');cmd.Append(Quote(args[i]));}

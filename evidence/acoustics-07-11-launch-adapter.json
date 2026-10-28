@@ -5,7 +5,7 @@
   "protectedFiles": 95,
   "protectedChanges": 0,
   "runtimeSourceChanges": 0,
-  "focusedTests": 23,
+  "focusedTests": 24,
   "cadenceMs": 1002.6666666666666,
   "pollMs": 250,
   "schedulingMarginMs": 250,
@@ -26,7 +26,7 @@
   "helperHashes": [
     {
       "file": "tools/operator/adapter-worker.mjs",
-      "localSHA256": "9C806D2825B7ECDD413A1931342FD8412F60DE1B06F37823B593648B7F29C79F"
+      "localSHA256": "612F533D54F437FE6B4F80AFC44E22DDC5D2E81DCB98935995DCBC1C88019679"
     },
     {
       "file": "tools/operator/adapter.mjs",
@@ -42,7 +42,7 @@
     },
     {
       "file": "tools/operator/OwnedTree.cs",
-      "localSHA256": "0E51046259F340D5DE91D39E582966D5F90A0BDE89DE884FF917F3E9DC588AFC"
+      "localSHA256": "AE15AD9B188903891CCF9B5A763441667CEEB60853D40C111B1D197BECCC843D"
     },
     {
       "file": "tools/operator/policy.mjs",
@@ -66,18 +66,18 @@
       "mode": "normal",
       "verifiedTreeExit": true,
       "forcedTreeCleanup": false,
-      "elapsedMs": 970,
+      "elapsedMs": 992,
       "supervisorExit": 0,
-      "totalOwnedProcesses": 5,
+      "totalOwnedProcesses": 7,
       "peakActiveProcesses": 5
     },
     {
       "mode": "orphan",
       "verifiedTreeExit": true,
       "forcedTreeCleanup": true,
-      "elapsedMs": 1189,
+      "elapsedMs": 1234,
       "supervisorExit": 0,
-      "totalOwnedProcesses": 5,
+      "totalOwnedProcesses": 7,
       "peakActiveProcesses": 5
     },
     {
@@ -86,7 +86,7 @@
       "forcedTreeCleanup": true,
       "elapsedMs": 1417,
       "supervisorExit": 0,
-      "totalOwnedProcesses": 5,
+      "totalOwnedProcesses": 7,
       "peakActiveProcesses": 5
     },
     {
@@ -95,25 +95,25 @@
       "forcedTreeCleanup": true,
       "elapsedMs": 1422,
       "supervisorExit": 0,
-      "totalOwnedProcesses": 5,
+      "totalOwnedProcesses": 7,
       "peakActiveProcesses": 5
     },
     {
       "mode": "disconnected",
       "verifiedTreeExit": true,
       "forcedTreeCleanup": true,
-      "elapsedMs": 991,
+      "elapsedMs": 1028,
       "supervisorExit": 0,
-      "totalOwnedProcesses": 5,
+      "totalOwnedProcesses": 7,
       "peakActiveProcesses": 5
     },
     {
       "mode": "blocked",
       "verifiedTreeExit": true,
       "forcedTreeCleanup": true,
-      "elapsedMs": 1415,
+      "elapsedMs": 1416,
       "supervisorExit": 0,
-      "totalOwnedProcesses": 5,
+      "totalOwnedProcesses": 7,
       "peakActiveProcesses": 5
     }
   ]
