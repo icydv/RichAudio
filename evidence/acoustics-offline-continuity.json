@@ -1,0 +1,2058 @@
+{
+  "schema": 1,
+  "scope": "Silent synthetic pre-device measurements; no subjective or strict-live acceptance",
+  "base": "2631b01e0c77ed404610b130b3e6a19e010f9551",
+  "baselineReproductionBitIdentical": true,
+  "baseline": [
+    {
+      "name": "startup",
+      "sha256": "97d83aa06d8255035f1d18e91e1a5b0a91214d263dd962cb6fa147c94d2a092d",
+      "missingHistory": 5654,
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.02
+        },
+        {
+          "start": 0.24,
+          "end": 0.3
+        }
+      ],
+      "referenceRms": 0.009661435216060736
+    },
+    {
+      "name": "stationary",
+      "sha256": "3b858d2141e40f8382e5ea52e0d9699ab2754af31b805c3fab0fca01d475f47e",
+      "missingHistory": 5654,
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.12
+        }
+      ],
+      "referenceRms": 0.009661435216060736
+    },
+    {
+      "name": "step",
+      "sha256": "330974a4d25b18fa24f5bc09e95e913f265f0ba67159063cf5df478cf9feb33b",
+      "missingHistory": 5654,
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.12
+        }
+      ],
+      "referenceRms": 0.009661435216060736
+    },
+    {
+      "name": "turn",
+      "sha256": "4662d0ac26a75282e7af1379c873f48e9db0edbac4464ad20e2fbb924f1080bf",
+      "missingHistory": 5654,
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.12
+        }
+      ],
+      "referenceRms": 0.009661307927703547
+    },
+    {
+      "name": "jitter",
+      "sha256": "3b858d2141e40f8382e5ea52e0d9699ab2754af31b805c3fab0fca01d475f47e",
+      "missingHistory": 5654,
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.12
+        }
+      ],
+      "referenceRms": 0.009661435216060736
+    },
+    {
+      "name": "short-gap",
+      "sha256": "a1cf918658561d97673c6b8a84d101d29ed6316636e3225be125fda8a39b87c1",
+      "missingHistory": 5654,
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.12
+        }
+      ],
+      "referenceRms": 0.009661435216060736
+    },
+    {
+      "name": "expired",
+      "sha256": "080d0f2dc49829bf105672f6b7a40fb0bd13a75ca773b2f085eeb51416e49ffc",
+      "missingHistory": 5654,
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.12
+        },
+        {
+          "start": 1.64,
+          "end": 2.2
+        }
+      ],
+      "referenceRms": 0.009661435216060736
+    },
+    {
+      "name": "pause",
+      "sha256": "4d29cd5a217eff4e56227f93bad7b160eb63c6d6dafff63598a7d72ba0754cb4",
+      "missingHistory": 11308,
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.12
+        },
+        {
+          "start": 1.56,
+          "end": 2.12
+        }
+      ],
+      "referenceRms": 0.009661435216060736
+    },
+    {
+      "name": "replacement",
+      "sha256": "1e6e30c4b62e3f57bf94cb6378ae3742054e0803ccec3a4526e2c9144511ac38",
+      "missingHistory": 11308,
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.12
+        },
+        {
+          "start": 2.06,
+          "end": 2.12
+        }
+      ],
+      "referenceRms": 0.009661435216060736
+    },
+    {
+      "name": "emission-stop",
+      "sha256": "f1345389b822c3535239587a2e50795f9756a13989fd04d9fd97fe6153a5932c",
+      "missingHistory": 5654,
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.12
+        },
+        {
+          "start": 2.1,
+          "end": 4
+        }
+      ],
+      "referenceRms": 0.009661435216060736
+    },
+    {
+      "name": "stop",
+      "sha256": "16c6f7ac3006ede13122d26caa6b2a5e09ee394e60dbdc67fc141c5e6c4d3e74",
+      "missingHistory": 5654,
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.12
+        }
+      ],
+      "referenceRms": 0.009661435216060736
+    },
+    {
+      "name": "failure",
+      "sha256": "16c6f7ac3006ede13122d26caa6b2a5e09ee394e60dbdc67fc141c5e6c4d3e74",
+      "missingHistory": 5654,
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.12
+        }
+      ],
+      "referenceRms": 0.009661435216060736
+    }
+  ],
+  "baselineAttribution": [
+    {
+      "name": "startup",
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 5654,
+      "zeroWeightUnavailable": 0,
+      "affectedFrames": 1428,
+      "firstFrame": 13824,
+      "lastFrame": 15251
+    },
+    {
+      "name": "stationary",
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 5654,
+      "zeroWeightUnavailable": 0,
+      "affectedFrames": 1428,
+      "firstFrame": 5120,
+      "lastFrame": 6547
+    },
+    {
+      "name": "step",
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 5654,
+      "zeroWeightUnavailable": 0,
+      "affectedFrames": 1428,
+      "firstFrame": 5120,
+      "lastFrame": 6547
+    },
+    {
+      "name": "turn",
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 5654,
+      "zeroWeightUnavailable": 0,
+      "affectedFrames": 1428,
+      "firstFrame": 5120,
+      "lastFrame": 6547
+    },
+    {
+      "name": "jitter",
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 5654,
+      "zeroWeightUnavailable": 0,
+      "affectedFrames": 1428,
+      "firstFrame": 5120,
+      "lastFrame": 6547
+    },
+    {
+      "name": "short-gap",
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 5654,
+      "zeroWeightUnavailable": 0,
+      "affectedFrames": 1428,
+      "firstFrame": 5120,
+      "lastFrame": 6547
+    },
+    {
+      "name": "expired",
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 5654,
+      "zeroWeightUnavailable": 0,
+      "affectedFrames": 1428,
+      "firstFrame": 5120,
+      "lastFrame": 6547
+    },
+    {
+      "name": "pause",
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 11308,
+      "zeroWeightUnavailable": 0,
+      "affectedFrames": 2856,
+      "firstFrame": 5120,
+      "lastFrame": 102291
+    },
+    {
+      "name": "replacement",
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 11308,
+      "zeroWeightUnavailable": 0,
+      "affectedFrames": 2856,
+      "firstFrame": 5120,
+      "lastFrame": 102291
+    },
+    {
+      "name": "emission-stop",
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 5654,
+      "zeroWeightUnavailable": 0,
+      "affectedFrames": 1428,
+      "firstFrame": 5120,
+      "lastFrame": 6547
+    },
+    {
+      "name": "stop",
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 5654,
+      "zeroWeightUnavailable": 0,
+      "affectedFrames": 1428,
+      "firstFrame": 5120,
+      "lastFrame": 6547
+    },
+    {
+      "name": "failure",
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 5654,
+      "zeroWeightUnavailable": 0,
+      "affectedFrames": 1428,
+      "firstFrame": 5120,
+      "lastFrame": 6547
+    }
+  ],
+  "results": [
+    {
+      "name": "startup",
+      "delayMs": 100,
+      "sha256": "92d49835f3333bb14fae946e4230ff0e5985c55b49ed7dca8058de83cd46340d",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009312217603343298,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.28
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 100,
+        "max": 100
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 8,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "stationary",
+      "delayMs": 100,
+      "sha256": "3a62b4c839c55e0287689002e5b90455b4786d39daf482e97e7ad3472f6c73ff",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009537900714421814,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.1
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 100,
+        "max": 100
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 8,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "step",
+      "delayMs": 100,
+      "sha256": "908a558f91aab65c12ac5093be6bbdcb5b5082fa06734637d2a0f1482082fb0b",
+      "frames": 192000,
+      "peak": 0.02125367894768715,
+      "rms": 0.00953130690698684,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.1
+        }
+      ],
+      "responseFromObservationIntervalMs": [
+        80.00000000000007,
+        100.00000000000007
+      ],
+      "responseFromReceiptIntervalMs": [
+        54.66666666666664,
+        74.66666666666664
+      ],
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 100,
+        "max": 100
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 8,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "turn",
+      "delayMs": 100,
+      "sha256": "0ef0633e95f189d1b4a3c2864fdfcfb4c30e88f165c9d1ca4bd1359c4c497a38",
+      "frames": 192000,
+      "peak": 0.02007131651043892,
+      "rms": 0.009537833131787077,
+      "referenceRms": 0.009661307927703547,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.1
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": 0.1303722675819325,
+      "smoothTurnErrorToPresented": 0.018465520648370648,
+      "orientationAgeMs": {
+        "median": 100,
+        "max": 100
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 8,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "jitter",
+      "delayMs": 100,
+      "sha256": "3a62b4c839c55e0287689002e5b90455b4786d39daf482e97e7ad3472f6c73ff",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009537900714421814,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.1
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 100,
+        "max": 100
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 8,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "short-gap",
+      "delayMs": 100,
+      "sha256": "7ae68d4240f69a50a276c88f2e881b5046b1612458d9ce5196ba9d48c6d097f6",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009520789373415333,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0,
+        "unavailable-input": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.1
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 100,
+        "max": 149.99999999999983
+      },
+      "predictionBlocks": 5,
+      "maximumPredictionSeconds": 0.04999999999999982,
+      "unavailableBlocks": 9,
+      "terminalError": null,
+      "controlPathTransitions": 3
+    },
+    {
+      "name": "expired",
+      "delayMs": 100,
+      "sha256": "dc2104d418968e6fdd7d4376a2757f87a06e354ca3e0077203c4ce4cf41eb8ce",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.008761680934500445,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0,
+        "unavailable-input": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.1
+        },
+        {
+          "start": 1.64,
+          "end": 2.2
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 100,
+        "max": 149.99999999999983
+      },
+      "predictionBlocks": 5,
+      "maximumPredictionSeconds": 0.04999999999999982,
+      "unavailableBlocks": 64,
+      "terminalError": null,
+      "controlPathTransitions": 3
+    },
+    {
+      "name": "pause",
+      "delayMs": 100,
+      "sha256": "ca8864a1ac7cdb1dd5f2a66baa1ffa3ce53c36c4f256e0109e1e357d50c7a24b",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.008789533179085216,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0,
+        "unavailable-input": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.1
+        },
+        {
+          "start": 1.56,
+          "end": 2.1
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 100,
+        "max": 100
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 62,
+      "terminalError": null,
+      "controlPathTransitions": 3
+    },
+    {
+      "name": "replacement",
+      "delayMs": 100,
+      "sha256": "c58e5daacc14d1d631674c924b29f107ad6540a367b8a23073974ba8a809c2ed",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009424482663466816,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.1
+        },
+        {
+          "start": 2.04,
+          "end": 2.1
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 100,
+        "max": 100
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 15,
+      "terminalError": null,
+      "controlPathTransitions": 3
+    },
+    {
+      "name": "emission-stop",
+      "delayMs": 100,
+      "sha256": "518ca4966ebaca72223ea60f48e5c03a417098f23cc4c51cfe663876678a7854",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.006705154833602352,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0,
+        "emission-stop-tail": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.1
+        },
+        {
+          "start": 2.1,
+          "end": 4
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 100,
+        "max": 100
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 8,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "stop",
+      "delayMs": 100,
+      "sha256": "e9b0808066c48a75bae91bf254157c5dd6aa667ff4432cef6c2270aa4c533752",
+      "frames": 96256,
+      "peak": 0.015060855075716972,
+      "rms": 0.009381835460605567,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.1
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 100,
+        "max": 100
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 8,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "failure",
+      "delayMs": 100,
+      "sha256": "e9b0808066c48a75bae91bf254157c5dd6aa667ff4432cef6c2270aa4c533752",
+      "frames": 96256,
+      "peak": 0.015060855075716972,
+      "rms": 0.009381835460605567,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.1
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 100,
+        "max": 100
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 8,
+      "terminalError": "Unknown message",
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "startup",
+      "delayMs": 75,
+      "sha256": "3a53fb55d24f53fad085237d46df4c7dbc616937bfc19d8d83380b4889be21fd",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009352396127730313,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.24
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 75,
+        "max": 75
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 5,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "stationary",
+      "delayMs": 75,
+      "sha256": "1f81c06fcf4be30152e6bbc79198205244fde3238dceb8a756048a38f30eb2c2",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009564112051090609,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.08
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 75,
+        "max": 75
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 6,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "step",
+      "delayMs": 75,
+      "sha256": "c4e603600ebf28af4fda901a358d069390fd0d5c2b7a234dfa3c61c8d034f56d",
+      "frames": 192000,
+      "peak": 0.02125367894768715,
+      "rms": 0.009557466758727526,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.08
+        }
+      ],
+      "responseFromObservationIntervalMs": [
+        60.00000000000006,
+        80.00000000000006
+      ],
+      "responseFromReceiptIntervalMs": [
+        34.66666666666662,
+        54.66666666666663
+      ],
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 75,
+        "max": 75
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 6,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "turn",
+      "delayMs": 75,
+      "sha256": "d45472eaf0b3d40b272da84102245c0ffb977491dc4526065c1dc911e1b079ec",
+      "frames": 192000,
+      "peak": 0.02007286064326763,
+      "rms": 0.009564043620986206,
+      "referenceRms": 0.009661312884165869,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.08
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": 0.10298031474963767,
+      "smoothTurnErrorToPresented": 0.019221622999748892,
+      "orientationAgeMs": {
+        "median": 75,
+        "max": 88.00000000000011
+      },
+      "predictionBlocks": 40,
+      "maximumPredictionSeconds": 0.013000000000000123,
+      "unavailableBlocks": 6,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "jitter",
+      "delayMs": 75,
+      "sha256": "1f81c06fcf4be30152e6bbc79198205244fde3238dceb8a756048a38f30eb2c2",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009564112051090609,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.08
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 75,
+        "max": 88.00000000000011
+      },
+      "predictionBlocks": 40,
+      "maximumPredictionSeconds": 0.013000000000000123,
+      "unavailableBlocks": 6,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "short-gap",
+      "delayMs": 75,
+      "sha256": "1490535fba9654aad3057697eb3dd43c176716bf7febda11e9af82fbfdb4b78e",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.00950159264352849,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0,
+        "unavailable-input": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.08
+        },
+        {
+          "start": 1.6,
+          "end": 1.62
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 75,
+        "max": 117.99999999999993
+      },
+      "predictionBlocks": 5,
+      "maximumPredictionSeconds": 0.04299999999999993,
+      "unavailableBlocks": 10,
+      "terminalError": null,
+      "controlPathTransitions": 3
+    },
+    {
+      "name": "expired",
+      "delayMs": 75,
+      "sha256": "29f0c26b2df74bffda3d423223a0e995a8a2156181ccae855d52fc52595e8cb9",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.00879025430146355,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0,
+        "unavailable-input": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.08
+        },
+        {
+          "start": 1.6,
+          "end": 2.16
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 75,
+        "max": 117.99999999999993
+      },
+      "predictionBlocks": 5,
+      "maximumPredictionSeconds": 0.04299999999999993,
+      "unavailableBlocks": 62,
+      "terminalError": null,
+      "controlPathTransitions": 3
+    },
+    {
+      "name": "pause",
+      "delayMs": 75,
+      "sha256": "dc337ca2c2ce7e232e31fc61531a3f6e0b54bada8fe1726a8654c4de41d51c93",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.008846263844354932,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0,
+        "unavailable-input": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.08
+        },
+        {
+          "start": 1.56,
+          "end": 2.08
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 75,
+        "max": 75
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 58,
+      "terminalError": null,
+      "controlPathTransitions": 3
+    },
+    {
+      "name": "replacement",
+      "delayMs": 75,
+      "sha256": "7b8cc7e4ac7044aa21257eecfaa42ea583c478cce431110bdc545e5a8c09e9f1",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009477413358701184,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.08
+        },
+        {
+          "start": 2.04,
+          "end": 2.08
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 75,
+        "max": 75
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 11,
+      "terminalError": null,
+      "controlPathTransitions": 3
+    },
+    {
+      "name": "emission-stop",
+      "delayMs": 75,
+      "sha256": "5d19702d3bc5bc10e58f3ee049c04e50ed289104cc8c32297210ccb36945e376",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.0067423876060509124,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0,
+        "emission-stop-tail": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.08
+        },
+        {
+          "start": 2.1,
+          "end": 4
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 75,
+        "max": 75
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 6,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "stop",
+      "delayMs": 75,
+      "sha256": "b5891a29636c81b74988041407a364b055593d368676a8a80a3982969c766678",
+      "frames": 96256,
+      "peak": 0.015060855075716972,
+      "rms": 0.009434911337383107,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.08
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 75,
+        "max": 75
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 6,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "failure",
+      "delayMs": 75,
+      "sha256": "b5891a29636c81b74988041407a364b055593d368676a8a80a3982969c766678",
+      "frames": 96256,
+      "peak": 0.015060855075716972,
+      "rms": 0.009434911337383107,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.08
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 75,
+        "max": 75
+      },
+      "predictionBlocks": 0,
+      "maximumPredictionSeconds": 0,
+      "unavailableBlocks": 6,
+      "terminalError": "Unknown message",
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "startup",
+      "delayMs": 50,
+      "sha256": "df00b461ca87359437586e3c686237599708ed11a407b5d925841fdf81dffa25",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.00937909667813375,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.22
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 50,
+        "max": 69.33333333333343
+      },
+      "predictionBlocks": 137,
+      "maximumPredictionSeconds": 0.019333333333333425,
+      "unavailableBlocks": 3,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "stationary",
+      "delayMs": 50,
+      "sha256": "50acf341abe5c714401f276b32418aa3594766739e033896e62740393640e176",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009602712168155421,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.04
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 50,
+        "max": 69.33333333333343
+      },
+      "predictionBlocks": 144,
+      "maximumPredictionSeconds": 0.019333333333333425,
+      "unavailableBlocks": 3,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "step",
+      "delayMs": 50,
+      "sha256": "ecf5eece749d99118049773e44a74a32fa8c7db786427b45a9a482b1df8a0774",
+      "frames": 192000,
+      "peak": 0.02125367894768715,
+      "rms": 0.009596028082481162,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.04
+        }
+      ],
+      "responseFromObservationIntervalMs": [
+        40.000000000000036,
+        60.00000000000004
+      ],
+      "responseFromReceiptIntervalMs": [
+        14.666666666666606,
+        34.66666666666661
+      ],
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 50,
+        "max": 69.33333333333343
+      },
+      "predictionBlocks": 144,
+      "maximumPredictionSeconds": 0.019333333333333425,
+      "unavailableBlocks": 3,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "turn",
+      "delayMs": 50,
+      "sha256": "a0ab414a59f44e303833973904989d55965bb7213d3b5b380dec17d7eb6a13c8",
+      "frames": 192000,
+      "peak": 0.02007327228784561,
+      "rms": 0.009602643177456323,
+      "referenceRms": 0.009661316640565683,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.04
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": 0.08355552266828341,
+      "smoothTurnErrorToPresented": 0.028342863253775653,
+      "orientationAgeMs": {
+        "median": 51.333333333333634,
+        "max": 88.00000000000026
+      },
+      "predictionBlocks": 194,
+      "maximumPredictionSeconds": 0.038000000000000256,
+      "unavailableBlocks": 3,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "jitter",
+      "delayMs": 50,
+      "sha256": "50acf341abe5c714401f276b32418aa3594766739e033896e62740393640e176",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009602712168155421,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.04
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 51.333333333333634,
+        "max": 88.00000000000026
+      },
+      "predictionBlocks": 194,
+      "maximumPredictionSeconds": 0.038000000000000256,
+      "unavailableBlocks": 3,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "short-gap",
+      "delayMs": 50,
+      "sha256": "8151f3e4c3aec18ed3c1ef7499c1149034e77b9212a89d584e3cd1649796d713",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009514205249325676,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0,
+        "unavailable-input": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.04
+        },
+        {
+          "start": 1.58,
+          "end": 1.62
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 50,
+        "max": 96.66666666666642
+      },
+      "predictionBlocks": 144,
+      "maximumPredictionSeconds": 0.04666666666666641,
+      "unavailableBlocks": 9,
+      "terminalError": null,
+      "controlPathTransitions": 3
+    },
+    {
+      "name": "expired",
+      "delayMs": 50,
+      "sha256": "a281cd9c6b9e8c0eec9548ab8c89d0e9cb60483ba3f5345c57068d0599fdff04",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.008832251530684067,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0,
+        "unavailable-input": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.04
+        },
+        {
+          "start": 1.58,
+          "end": 2.14
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 50,
+        "max": 96.66666666666642
+      },
+      "predictionBlocks": 126,
+      "maximumPredictionSeconds": 0.04666666666666641,
+      "unavailableBlocks": 59,
+      "terminalError": null,
+      "controlPathTransitions": 3
+    },
+    {
+      "name": "pause",
+      "delayMs": 50,
+      "sha256": "4e03c3964873be9563a6e1e9d26999b5fe861d73e03cb51e1bf6c80309c8f48f",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.008916046534953204,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0,
+        "unavailable-input": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.04
+        },
+        {
+          "start": 1.56,
+          "end": 2.04
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 50,
+        "max": 69.33333333333343
+      },
+      "predictionBlocks": 127,
+      "maximumPredictionSeconds": 0.019333333333333425,
+      "unavailableBlocks": 53,
+      "terminalError": null,
+      "controlPathTransitions": 3
+    },
+    {
+      "name": "replacement",
+      "delayMs": 50,
+      "sha256": "5469c45cfc5bd6a581f365e6baa77032f7eb668129b2a784b70a6380d9b8a4ba",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.009542581714672286,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.04
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 50,
+        "max": 69.33333333333343
+      },
+      "predictionBlocks": 144,
+      "maximumPredictionSeconds": 0.019333333333333425,
+      "unavailableBlocks": 6,
+      "terminalError": null,
+      "controlPathTransitions": 3
+    },
+    {
+      "name": "emission-stop",
+      "delayMs": 50,
+      "sha256": "248199ebee849f788731df5a9f1fa93e391b305ad3f019e55028998d079faac7",
+      "frames": 192000,
+      "peak": 0.015060855075716972,
+      "rms": 0.006797031137846337,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0,
+        "emission-stop-tail": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.04
+        },
+        {
+          "start": 2.1,
+          "end": 4
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 50,
+        "max": 69.33333333333343
+      },
+      "predictionBlocks": 144,
+      "maximumPredictionSeconds": 0.019333333333333425,
+      "unavailableBlocks": 3,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "stop",
+      "delayMs": 50,
+      "sha256": "a3c6d7a2a061bd415773a44f12bfd1a54dc7417862fdfc550009a1ddb2ceea19",
+      "frames": 96256,
+      "peak": 0.015060855075716972,
+      "rms": 0.009512796641028142,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.04
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 50,
+        "max": 69.33333333333331
+      },
+      "predictionBlocks": 70,
+      "maximumPredictionSeconds": 0.019333333333333313,
+      "unavailableBlocks": 3,
+      "terminalError": null,
+      "controlPathTransitions": 1
+    },
+    {
+      "name": "failure",
+      "delayMs": 50,
+      "sha256": "a3c6d7a2a061bd415773a44f12bfd1a54dc7417862fdfc550009a1ddb2ceea19",
+      "frames": 96256,
+      "peak": 0.015060855075716972,
+      "rms": 0.009512796641028142,
+      "referenceRms": 0.009661435216060736,
+      "clipped": 0,
+      "missingHistory": 0,
+      "missingByLifecycle": {
+        "initial-priming": 0,
+        "source-generation-change": 0,
+        "path-change": 0,
+        "valid-steady": 0
+      },
+      "lowEnvelopeIntervals": [
+        {
+          "start": 0,
+          "end": 0.04
+        }
+      ],
+      "responseFromObservationIntervalMs": null,
+      "responseFromReceiptIntervalMs": null,
+      "smoothTurnErrorToCurrent": null,
+      "smoothTurnErrorToPresented": null,
+      "orientationAgeMs": {
+        "median": 50,
+        "max": 69.33333333333331
+      },
+      "predictionBlocks": 70,
+      "maximumPredictionSeconds": 0.019333333333333313,
+      "unavailableBlocks": 3,
+      "terminalError": "Unknown message",
+      "controlPathTransitions": 1
+    }
+  ],
+  "profile": {
+    "rows": [
+      {
+        "sources": 1,
+        "diagnostics": false,
+        "seconds": 15,
+        "clock": "accelerated / synthetic receipt clock",
+        "blocks": 1407,
+        "sourceHash": "ae2bb549c7f88ebc28f2dfc159b48a98558e6639aa9e3b9df506459e9be60e14",
+        "startupDspMs": {
+          "median": 0.12949999999999307,
+          "p95": 1.2250999999999976,
+          "max": 1.4147999999999996
+        },
+        "steadyDspMs": {
+          "median": 0.04099999999999682,
+          "p95": 0.05069999999994934,
+          "max": 0.08419999999999561
+        },
+        "simulationMs": {
+          "count": 1407,
+          "median": 0.05310000000000059,
+          "p95": 0.08639999999999759,
+          "max": 1.174599999999998
+        },
+        "cpuSeconds": 0.735,
+        "wallSeconds": 0.500584,
+        "memory": {
+          "rss": 72540160,
+          "heapTotal": 12836864,
+          "heapUsed": 8450376,
+          "external": 6026733,
+          "arrayBuffers": 3887906
+        },
+        "ownedArrayBytes": 2881152,
+        "maxPaths": 2,
+        "missingHistory": 0,
+        "creditDepth": 1
+      },
+      {
+        "sources": 1,
+        "diagnostics": true,
+        "seconds": 15,
+        "clock": "accelerated / synthetic receipt clock",
+        "blocks": 1407,
+        "sourceHash": "ae2bb549c7f88ebc28f2dfc159b48a98558e6639aa9e3b9df506459e9be60e14",
+        "startupDspMs": {
+          "median": 0.12689999999999202,
+          "p95": 1.2261999999999915,
+          "max": 1.559899999999999
+        },
+        "steadyDspMs": {
+          "median": 0.04169999999999163,
+          "p95": 0.05179999999998586,
+          "max": 0.08740000000000236
+        },
+        "simulationMs": {
+          "count": 1407,
+          "median": 0.05369999999999209,
+          "p95": 0.08710000000000662,
+          "max": 1.171699999999987
+        },
+        "cpuSeconds": 0.922,
+        "wallSeconds": 0.5060009,
+        "memory": {
+          "rss": 73228288,
+          "heapTotal": 13099008,
+          "heapUsed": 8355016,
+          "external": 6156548,
+          "arrayBuffers": 4017721
+        },
+        "ownedArrayBytes": 2881152,
+        "maxPaths": 2,
+        "missingHistory": 0,
+        "creditDepth": 1
+      },
+      {
+        "sources": 1,
+        "diagnostics": true,
+        "seconds": 15,
+        "clock": "accelerated / synthetic receipt clock",
+        "blocks": 1407,
+        "sourceHash": "ae2bb549c7f88ebc28f2dfc159b48a98558e6639aa9e3b9df506459e9be60e14",
+        "startupDspMs": {
+          "median": 0.12490000000001089,
+          "p95": 1.3286999999999978,
+          "max": 1.4487999999999914
+        },
+        "steadyDspMs": {
+          "median": 0.041399999999995885,
+          "p95": 0.050800000000037926,
+          "max": 0.08400000000000318
+        },
+        "simulationMs": {
+          "count": 1407,
+          "median": 0.0544999999999618,
+          "p95": 0.08810000000005402,
+          "max": 1.1694999999999993
+        },
+        "cpuSeconds": 0.891,
+        "wallSeconds": 0.5145062,
+        "memory": {
+          "rss": 74186752,
+          "heapTotal": 12836864,
+          "heapUsed": 8308864,
+          "external": 6155862,
+          "arrayBuffers": 4017035
+        },
+        "ownedArrayBytes": 2881152,
+        "maxPaths": 2,
+        "missingHistory": 0,
+        "creditDepth": 1
+      },
+      {
+        "sources": 1,
+        "diagnostics": false,
+        "seconds": 15,
+        "clock": "accelerated / synthetic receipt clock",
+        "blocks": 1407,
+        "sourceHash": "ae2bb549c7f88ebc28f2dfc159b48a98558e6639aa9e3b9df506459e9be60e14",
+        "startupDspMs": {
+          "median": 0.12649999999999295,
+          "p95": 1.2223999999999933,
+          "max": 1.4287000000000063
+        },
+        "steadyDspMs": {
+          "median": 0.04099999999999682,
+          "p95": 0.050800000000009504,
+          "max": 0.32730000000000814
+        },
+        "simulationMs": {
+          "count": 1407,
+          "median": 0.052600000000012415,
+          "p95": 0.08629999999999427,
+          "max": 1.1805999999999983
+        },
+        "cpuSeconds": 0.735,
+        "wallSeconds": 0.4946964,
+        "memory": {
+          "rss": 73093120,
+          "heapTotal": 12574720,
+          "heapUsed": 9200208,
+          "external": 6029218,
+          "arrayBuffers": 3890391
+        },
+        "ownedArrayBytes": 2881152,
+        "maxPaths": 2,
+        "missingHistory": 0,
+        "creditDepth": 1
+      },
+      {
+        "sources": 4,
+        "diagnostics": true,
+        "seconds": 15,
+        "clock": "accelerated / synthetic receipt clock",
+        "blocks": 1407,
+        "sourceHash": "b545f4ff0ff5c1b296eb4db541b789a8a48ddeb3cb0acaa4ca6cb9d96ab643b6",
+        "startupDspMs": {
+          "median": 0.21659999999998547,
+          "p95": 1.5324999999999989,
+          "max": 8.746799999999993
+        },
+        "steadyDspMs": {
+          "median": 0.19369999999997844,
+          "p95": 0.23910000000000764,
+          "max": 0.4467999999999961
+        },
+        "simulationMs": {
+          "count": 1407,
+          "median": 0.1460999999999899,
+          "p95": 0.19780000000002929,
+          "max": 1.69850000000001
+        },
+        "cpuSeconds": 1.437,
+        "wallSeconds": 1.0313325,
+        "memory": {
+          "rss": 91344896,
+          "heapTotal": 12312576,
+          "heapUsed": 8881952,
+          "external": 15263894,
+          "arrayBuffers": 13125067
+        },
+        "ownedArrayBytes": 11524608,
+        "maxPaths": 8,
+        "missingHistory": 0,
+        "creditDepth": 1
+      },
+      {
+        "sources": 4,
+        "diagnostics": false,
+        "seconds": 15,
+        "clock": "accelerated / synthetic receipt clock",
+        "blocks": 1407,
+        "sourceHash": "b545f4ff0ff5c1b296eb4db541b789a8a48ddeb3cb0acaa4ca6cb9d96ab643b6",
+        "startupDspMs": {
+          "median": 0.21569999999999823,
+          "p95": 1.4168999999999983,
+          "max": 5.05319999999999
+        },
+        "steadyDspMs": {
+          "median": 0.22870000000000346,
+          "p95": 0.2785000000000082,
+          "max": 0.40800000000001546
+        },
+        "simulationMs": {
+          "count": 1407,
+          "median": 0.1449000000000069,
+          "p95": 0.20010000000002037,
+          "max": 1.6616999999999962
+        },
+        "cpuSeconds": 1.515,
+        "wallSeconds": 1.0672065,
+        "memory": {
+          "rss": 90136576,
+          "heapTotal": 11788288,
+          "heapUsed": 8614712,
+          "external": 14936272,
+          "arrayBuffers": 12797445
+        },
+        "ownedArrayBytes": 11524608,
+        "maxPaths": 8,
+        "missingHistory": 0,
+        "creditDepth": 1
+      },
+      {
+        "sources": 4,
+        "diagnostics": false,
+        "seconds": 15,
+        "clock": "accelerated / synthetic receipt clock",
+        "blocks": 1407,
+        "sourceHash": "b545f4ff0ff5c1b296eb4db541b789a8a48ddeb3cb0acaa4ca6cb9d96ab643b6",
+        "startupDspMs": {
+          "median": 0.20539999999999736,
+          "p95": 1.4180000000000064,
+          "max": 4.803700000000006
+        },
+        "steadyDspMs": {
+          "median": 0.19719999999995252,
+          "p95": 0.2401999999999589,
+          "max": 1.9620000000000175
+        },
+        "simulationMs": {
+          "count": 1407,
+          "median": 0.148399999999981,
+          "p95": 0.19969999999999288,
+          "max": 1.7006999999999977
+        },
+        "cpuSeconds": 1.328,
+        "wallSeconds": 1.0301879,
+        "memory": {
+          "rss": 90836992,
+          "heapTotal": 12050432,
+          "heapUsed": 8472984,
+          "external": 15132822,
+          "arrayBuffers": 12993995
+        },
+        "ownedArrayBytes": 11524608,
+        "maxPaths": 8,
+        "missingHistory": 0,
+        "creditDepth": 1
+      },
+      {
+        "sources": 4,
+        "diagnostics": true,
+        "seconds": 15,
+        "clock": "accelerated / synthetic receipt clock",
+        "blocks": 1407,
+        "sourceHash": "b545f4ff0ff5c1b296eb4db541b789a8a48ddeb3cb0acaa4ca6cb9d96ab643b6",
+        "startupDspMs": {
+          "median": 0.20539999999999736,
+          "p95": 1.4077000000000055,
+          "max": 4.893500000000003
+        },
+        "steadyDspMs": {
+          "median": 0.18600000000003547,
+          "p95": 0.226099999999974,
+          "max": 0.46550000000002
+        },
+        "simulationMs": {
+          "count": 1407,
+          "median": 0.14929999999998245,
+          "p95": 0.20240000000001146,
+          "max": 1.6923999999999921
+        },
+        "cpuSeconds": 1.391,
+        "wallSeconds": 1.0298359,
+        "memory": {
+          "rss": 91209728,
+          "heapTotal": 12312576,
+          "heapUsed": 8544984,
+          "external": 15132193,
+          "arrayBuffers": 12993366
+        },
+        "ownedArrayBytes": 11524608,
+        "maxPaths": 8,
+        "missingHistory": 0,
+        "creditDepth": 1
+      },
+      {
+        "sources": 1,
+        "clock": "wall-clock-paced / synthetic receipt clock",
+        "wallMs": 2022.3140000000003,
+        "renderedSeconds": 2.005333333333333,
+        "missingHistory": 0,
+        "dsp": {
+          "count": 188,
+          "median": 0.051300000000082946,
+          "p95": 0.15610000000000923,
+          "max": 1.5267999999999944
+        },
+        "memory": {
+          "rss": 66482176,
+          "heapTotal": 12050432,
+          "heapUsed": 7217544,
+          "external": 5304456,
+          "arrayBuffers": 3165629
+        }
+      },
+      {
+        "sources": 4,
+        "clock": "wall-clock-paced / synthetic receipt clock",
+        "wallMs": 2028.177599999999,
+        "renderedSeconds": 2.005333333333333,
+        "missingHistory": 0,
+        "dsp": {
+          "count": 188,
+          "median": 0.20580000000001064,
+          "p95": 0.3523000000000138,
+          "max": 2.088300000000004
+        },
+        "memory": {
+          "rss": 79659008,
+          "heapTotal": 11788288,
+          "heapUsed": 7105400,
+          "external": 14016158,
+          "arrayBuffers": 11877331
+        }
+      },
+      {
+        "sources": 4,
+        "seconds": 60,
+        "clock": "accelerated / synthetic receipt clock",
+        "blocks": 5625,
+        "cpuSeconds": 4.187,
+        "wallSeconds": 3.6540219,
+        "dsp": {
+          "count": 5625,
+          "median": 0.18659999999999854,
+          "p95": 0.22530000000006112,
+          "max": 8.758200000000002
+        },
+        "simulation": {
+          "count": 5625,
+          "median": 0.1376999999997679,
+          "p95": 0.17599999999998772,
+          "max": 1.7356999999999942
+        },
+        "memory": {
+          "rss": 113860608,
+          "heapTotal": 17555456,
+          "heapUsed": 11765936,
+          "external": 16906444,
+          "arrayBuffers": 14767617
+        },
+        "ownedArrayBytes": 11524608,
+        "missingHistory": 0,
+        "maxPaths": 8,
+        "limited": 0
+      }
+    ],
+    "limitations": "No endpoint, device deadlines or hardware latency; Node GC/worker/IPC scheduling are not audio callback certification. RSS is end-of-run, not a measured peak; no per-object allocation profiler attached."
+  }
+}

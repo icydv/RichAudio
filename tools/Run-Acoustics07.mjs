@@ -277,6 +277,17 @@ async function pump() {
       const ready =
         (!options.required || external !== null) &&
         renderer.historyReady(result.control);
+      // An intentionally idle host may wait for manual Start. Priming's bounded
+      // deadline begins with requested emission, not process creation.
+      if (!enabled && startup.readyFrame === null) {
+        startup.reset(renderer.frame);
+        startup.status = "idle";
+      } else if (enabled && startup.status === "idle") {
+        startup.reset(renderer.frame);
+      }
+      startup.update(renderer.frame, ready);
+      if (startup.status === "deadline-expired")
+        throw Error("Startup priming deadline exceeded");
       const previousMissing = renderer.stats.missingHistory;
       const diagnosticsBefore = renderer.historyDiagnostics
         ? { ...renderer.historyDiagnostics }
@@ -316,8 +327,6 @@ async function pump() {
       const started = performance.now();
       renderer.process(inputs, left, right, BLOCK);
       startup.apply(left, right, renderer.frame - BLOCK, ready);
-      if (startup.status === "deadline-expired")
-        throw Error("Startup priming deadline exceeded");
       const dspMilliseconds = performance.now() - started;
       stats.dspMs.push(dspMilliseconds);
       packet.write("RA07", 0, "ascii");
@@ -340,6 +349,7 @@ async function pump() {
           dspMilliseconds,
           simulationMilliseconds: result.milliseconds,
           paths: lastControl.paths.length,
+          activePaths: renderer.activePaths,
           missingHistory: renderer.stats.missingHistory,
           mode:
             lastPlayout?.mode ??

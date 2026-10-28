@@ -20,7 +20,7 @@ export class StartupGate {
     this.status = "priming";
     this.silentFrames = 0;
   }
-  apply(left, right, frame, ready) {
+  update(frame, ready) {
     if (this.status === "priming") {
       if (frame - this.start >= this.deadlineFrames)
         this.status = "deadline-expired";
@@ -29,6 +29,9 @@ export class StartupGate {
         this.readyFrame = frame;
       }
     }
+  }
+  apply(left, right, frame, ready) {
+    this.update(frame, ready);
     for (let j = 0; j < left.length; j++) {
       const g =
         this.status === "ready"

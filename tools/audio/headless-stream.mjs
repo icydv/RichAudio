@@ -96,6 +96,7 @@ export async function runHeadless({
   required = true,
   diagnostics = true,
   producerScript = null,
+  autoStart = true,
 } = {}) {
   if (
     !Number.isFinite(seconds) ||
@@ -214,7 +215,7 @@ export async function runHeadless({
     if (failure) throw failure;
   }
   try {
-    send({ type: "control", command: "start" });
+    if (autoStart) send({ type: "control", command: "start" });
     while (blocks * BLOCK < frames && !closed) {
       const time = (blocks * BLOCK) / FS;
       while (
@@ -308,11 +309,11 @@ export function measure(result) {
   const step = windows.find(
     (w) => w.start >= 1.5 && Math.abs(w.balance ?? 0) >= 0.5,
   );
-  const delay = trace.find((t) => t.mode !== "synthetic")?.targetTime;
-  const delaySeconds =
-    delay == null
-      ? 0
-      : trace.find((t) => t.mode !== "synthetic").frame / FS - delay;
+  const presented = trace.find((t) =>
+    ["interpolated", "predicted", "exact"].includes(t.mode),
+  );
+  const delay = presented?.targetTime;
+  const delaySeconds = delay == null ? 0 : presented.frame / FS - delay;
   const tracking = windows.filter(
     (w) => w.start >= 0.5 && w.end <= 3.8 && w.balance != null,
   );
@@ -346,12 +347,17 @@ export function measure(result) {
     referenceRms: rms,
     lowEnvelopeIntervals: silence,
     stepHalfResponseSeconds: step ? step.start - 1.5 : null,
-    stepHalfResponseIntervalSeconds: step ? [step.start-1.5,step.end-1.5] : null,
+    stepHalfResponseIntervalSeconds: step
+      ? [step.start - 1.5, step.end - 1.5]
+      : null,
     responseWindowUncertaintyMs: 10,
     controlBlockUncertaintyMs: (BLOCK / FS) * 1000,
     stepHalfResponseFromReceiptSeconds:
       step && stepReceipt != null ? step.start - stepReceipt : null,
-    stepHalfResponseFromReceiptIntervalSeconds: step && stepReceipt!=null ? [step.start-stepReceipt,step.end-stepReceipt] : null,
+    stepHalfResponseFromReceiptIntervalSeconds:
+      step && stepReceipt != null
+        ? [step.start - stepReceipt, step.end - stepReceipt]
+        : null,
     smoothTurnErrorToCurrent: trackingRms(0),
     smoothTurnErrorToPresented: trackingRms(delaySeconds),
     predictionBlocks: predictions.length,

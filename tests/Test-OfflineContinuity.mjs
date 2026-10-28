@@ -12,12 +12,24 @@ import {
   runHeadless,
   measure,
   listenerMessage,
+  sequence,
 } from "../tools/audio/headless-stream.mjs";
 const hash = (r) =>
   createHash("sha256")
     .update(Buffer.from(r.left.buffer))
     .update(Buffer.from(r.right.buffer))
     .digest("hex");
+
+test("Intentional idle does not consume priming's deadline before emission is requested", async () => {
+  const events = sequence("stationary", 4);
+  events.push({ receipt: 3, message: { type: "control", command: "start" } });
+  events.sort((a, b) => a.receipt - b.receipt);
+  const r = await runHeadless({ autoStart: false, events });
+  assert.equal(r.exitCode, 0);
+  assert.ok(r.left.slice(0, 3 * 48000).every((x) => x === 0));
+  assert.ok(r.left.slice(3.2 * 48000).some((x) => Math.abs(x) > 0.001));
+  assert.ok(r.trace.some((t) => t.frame > 2.5 * 48000 && t.startup === "idle"));
+});
 test("Only three experimental presentation policies; freshness and prediction do not change", () => {
   for (const ms of [100, 75, 50]) {
     const p = new ListenerPlayout({ delayMs: ms });
@@ -215,12 +227,51 @@ test("The same headless producer preserves moving-source Doppler without externa
     required: false,
     seconds: 6,
   });
-  const { toneFrequency } = await import("../tools/Measure-Acoustics07.mjs");
   const sum = Float32Array.from(r.left, (v, i) => v + r.right[i]);
-  const approach = toneFrequency(sum, 1, 2),
-    departure = toneFrequency(sum, 4, 5);
-  assert.ok(approach > 95 && approach < 100, `${approach}`);
-  assert.ok(departure < 95 && departure > 90, `${departure}`);
+  // Multipath interference can add zero crossings. Measure the fundamental's
+  // Hann-windowed spectral peak, not the count of waveform zero crossings.
+  const peak = (start) => {
+    let best = 0,
+      frequency = 0;
+    for (let hz = 90; hz <= 101; hz += 0.1) {
+      let re = 0,
+        im = 0;
+      for (let i = 0; i < 48000; i++) {
+        const x =
+            sum[start * 48000 + i] *
+            (0.5 - 0.5 * Math.cos((2 * Math.PI * i) / 47999)),
+          a = (2 * Math.PI * hz * i) / 48000;
+        re += x * Math.cos(a);
+        im += x * Math.sin(a);
+      }
+      if (re * re + im * im > best) {
+        best = re * re + im * im;
+        frequency = hz;
+      }
+    }
+    return frequency;
+  };
+  const expected = (time) => {
+    let emission = time;
+    for (let i = 0; i < 8; i++) {
+      const x = 35 * Math.sin((emission - 3) * 0.35);
+      emission = time - Math.hypot(x, 6) / 343;
+    }
+    const a = (emission - 3) * 0.35,
+      x = 35 * Math.sin(a),
+      v = 12.25 * Math.cos(a);
+    return 95 / (1 + (x * v) / (Math.hypot(x, 6) * 343));
+  };
+  const approach = peak(1),
+    departure = peak(4);
+  assert.ok(
+    Math.abs(approach - expected(1.5)) < 0.7,
+    `${approach} / ${expected(1.5)}`,
+  );
+  assert.ok(
+    Math.abs(departure - expected(4.5)) < 0.7,
+    `${departure} / ${expected(4.5)}`,
+  );
   assert.equal(r.final.dsp.missingHistory, 0);
   assert.equal(r.final.dsp.limited, 0);
 });
