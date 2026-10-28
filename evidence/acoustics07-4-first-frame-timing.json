@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "baseline": "90b4342e5e9c579a8f65f368bf40a1798ccbb265",
+  "unchangedMatrixPairs": 12,
+  "unchangedCleanStops": 12,
+  "instrumentedGroups": [
+    {
+      "sender": "cold",
+      "receiver": "cold",
+      "trials": 3,
+      "cleanStops": 3,
+      "decisionAgesMs": [
+        50.5898,
+        46.6052,
+        47.1183
+      ],
+      "encodeMs": [
+        12.3528,
+        11.8338,
+        12.1038
+      ],
+      "decodeMs": [
+        18.6724,
+        18.0155,
+        17.9121
+      ],
+      "ackWaitMs": [
+        22.0497,
+        21.3786,
+        21.2211
+      ],
+      "warmPreparationMs": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "sender": "cold",
+      "receiver": "warm",
+      "trials": 3,
+      "cleanStops": 3,
+      "decisionAgesMs": [
+        30.0604,
+        30.2036,
+        27.8446
+      ],
+      "encodeMs": [
+        11.3692,
+        11.2266,
+        11.9262
+      ],
+      "decodeMs": [
+        0.0949,
+        0.0929,
+        0.1081
+      ],
+      "ackWaitMs": [
+        1.4486,
+        1.3991,
+        1.6217
+      ],
+      "warmPreparationMs": [
+        0,
+        0,
+        0,
+        24.5147,
+        24.310000000000002,
+        24.5069
+      ]
+    },
+    {
+      "sender": "warm",
+      "receiver": "cold",
+      "trials": 3,
+      "cleanStops": 3,
+      "decisionAgesMs": [
+        44.6955,
+        46.0368,
+        46.4106
+      ],
+      "encodeMs": [
+        0.0529,
+        0.0692,
+        0.0562
+      ],
+      "decodeMs": [
+        18.2195,
+        18.3707,
+        18.0771
+      ],
+      "ackWaitMs": [
+        21.6257,
+        21.8807,
+        21.4487
+      ],
+      "warmPreparationMs": [
+        24.2236,
+        23.8996,
+        23.855,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "sender": "warm",
+      "receiver": "warm",
+      "trials": 3,
+      "cleanStops": 3,
+      "decisionAgesMs": [
+        26.3952,
+        27.7033,
+        26.9243
+      ],
+      "encodeMs": [
+        0.0481,
+        0.0614,
+        0.0701
+      ],
+      "decodeMs": [
+        0.106,
+        0.1155,
+        0.091
+      ],
+      "ackWaitMs": [
+        1.5315,
+        1.6866,
+        1.4476
+      ],
+      "warmPreparationMs": [
+        23.754,
+        23.9936,
+        23.5223,
+        24.056800000000003,
+        24.343700000000002,
+        24.8698
+      ]
+    }
+  ],
+  "runtimeCorrection": "none: no natural failure reproduced",
+  "historicalAge": "unavailable",
+  "hostHandoff": "Production codec re-encoding exercised; exact host queue/child stdin not exercised",
+  "deviceFree": true
+}

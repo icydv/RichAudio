@@ -76,6 +76,15 @@ internal static class TestListenerTransport
         {
             if(args.Length>0&&(args[0]=="--send"||args[0]=="--send-step"))return SyntheticSender(args);
             if(args.Length==1&&args[0]=="--measure")return MeasureTransport();
+            Test("signed freshness exact boundaries and rejected bookkeeping",delegate{
+                long f=Stopwatch.Frequency,origin=f*100;
+                foreach(long delta in new long[]{-f/500,f/4}){var v=new StateValidator();var x=State();x.ObservationTicks=origin;v.Accept(x,origin+delta);Require(v.AgeClass=="within-bounds","inclusive boundary");}
+                foreach(long delta in new long[]{-f/500-1,f/4+1}){var v=new StateValidator();var x=State();x.ObservationTicks=origin;Reject(()=>v.Accept(x,origin+delta));Require(v.LastAgeMs==0&&v.DecisionAgeMs!=0,"rejection bookkeeping");Require(v.AgeClass==(delta<0?"future-dated":"too-old"),"signed classification");}
+            });
+            Test("timestamp exact codec and decision clock after synthetic work",delegate{
+                var x=State();x.ObservationTicks=9007199254740000;var b=Protocol.Encode(x);var y=Protocol.Decode(b,b.Length);Require(x.ObservationTicks==y.ObservationTicks&&x.ClockFrequency==y.ClockFrequency,"timestamp preservation");
+                foreach(int ms in new int[]{251,300}){var v=new StateValidator();Reject(()=>v.Accept(y,y.ObservationTicks+Stopwatch.Frequency*ms/1000));Require(v.AgeClass=="too-old","post encode/decode delay must count");}
+            });
             Test("roundtrip explicit units and empty source identity",delegate{var s=State();var d=Decode(Protocol.EncodeJson(s));Require(d.Sequence==0&&d.SourceId==null&&d.Position[2]==1&&d.Units=="metres","roundtrip");});
             Test("all fields mandatory",delegate
             {
@@ -167,6 +176,8 @@ internal static class TestListenerTransport
             Test("strict truncated payload attribution",delegate{StrictFailure("payload",delegate(NamedPipeClientStream c){c.Write(BitConverter.GetBytes(100),0,4);c.WriteByte(1);});});
             Test("strict invalid UTF8 attribution",delegate{StrictFailure("decoding",delegate(NamedPipeClientStream c){c.Write(BitConverter.GetBytes(1),0,4);c.WriteByte(255);});});
             Test("strict first schema rejection attribution",delegate{StrictFailure("schema",delegate(NamedPipeClientStream c){var b=Encoding.UTF8.GetBytes("{}");c.Write(BitConverter.GetBytes(b.Length),0,4);c.Write(b,0,b.Length);});});
+            Test("strict signed future rejection diagnostics and peer termination",delegate{string p=Pipe();using(var server=Server(p,null,true))using(var writer=new StatePublisher(p)){server.Start();writer.Start();var x=State();x.ObservationTicks+=Stopwatch.Frequency;writer.Publish(x);Until(()=>writer.Finished&&server.Finished);Require(server.Accepted==0&&server.Diagnostic.Stage=="freshness"&&server.Diagnostic.FirstFrame.DecisionAgeMs < -2&&server.Diagnostic.FirstFrame.AgeClass=="future-dated","future signed evidence");Require(writer.Sent==0&&writer.Attempts==1&&!server.Diagnostic.AnotherAttempt,"strict peer terminal");}});
+            Test("strict stale rejection retains actual decision age",delegate{string p=Pipe();using(var server=Server(p,null,true)){server.Start();using(var c=Client(p)){var x=State();x.ObservationTicks-=Stopwatch.Frequency;Send(c,x);Until(()=>server.Finished);}Require(server.Diagnostic.FirstFrame.DecisionAgeMs>250&&server.Diagnostic.FirstFrame.AgeClass=="too-old"&&!server.Diagnostic.HadAcceptedFrame,"stale signed evidence");}});
             Test("strict stale first frame attribution",delegate{StrictFailure("freshness",delegate(NamedPipeClientStream c){var s=State();s.ObservationTicks-=Stopwatch.Frequency;Send(c,s);});});
             Test("strict duplicate after accepted frame attribution",delegate{StrictFailure("sequence",delegate(NamedPipeClientStream c){var s=State();Send(c,s);TransportStop.Ack(c,1);Send(c,s);});});
             Test("strict clean EOF is terminal but not an invalid frame",delegate{string p=Pipe();using(var server=Server(p,null,true)){server.Start();using(var c=Client(p)){Until(()=>server.Connections==1);}Until(()=>server.Finished);Require(server.Rejected==0&&server.Diagnostic.Code=="clean-eof"&&server.Diagnostic.Outcome=="unexpected-eof","EOF classification");}});
