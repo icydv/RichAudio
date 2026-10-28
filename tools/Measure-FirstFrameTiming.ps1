@@ -24,4 +24,3 @@ foreach($s in @('cold','warm')){foreach($r in @('cold','warm')){foreach($i in 1.
 }}
 }
 Get-ChildItem $out -Filter '*receiver.json'|ForEach-Object {Get-Content $_.FullName}
-
