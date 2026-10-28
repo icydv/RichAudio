@@ -57,6 +57,7 @@ namespace RichAudio.BatiRph
         public Reading CopyObservation(Identity bike,Identity rider,MarkerSet markers,double now)
         {
             var v=Bike(bike);var p=Game.LocalPlayer.Character;Check.That(p!=null&&p.IsValid(),"player unavailable");Vector3 vel=v.Velocity;var r=new Reading{At=now,Domain="runtime-observation",Bike=bike,Rider=rider,Position=Point(v.Position),Velocity=Point(vel),Speed=Math.Sqrt(vel.X*vel.X+vel.Y*vel.Y+vel.Z*vel.Z),PlayerPosition=Point(p.Position),PlayerVelocity=Point(p.Velocity),Rotation=new MarkerPoint(v.Rotation.Pitch,v.Rotation.Roll,v.Rotation.Yaw),Mounted=Mounted(rider,bike),EngineOn=v.IsEngineOn,Collision=NativeFunction.CallByName<bool>("HAS_ENTITY_COLLIDED_WITH_ANYTHING",v),Simulation="UNDETERMINED",Interference="UNKNOWN"};
+            try{r.ConsoleOpen=Game.Console.IsOpen;}catch{}try{r.GamePaused=Game.IsPaused;}catch{}try{r.GameTimeMs=Game.GameTime;}catch{}try{r.TaskState=((Ped)RequireOwned(rider)).Tasks.CurrentTaskStatus.ToString();}catch{r.TaskState="UNKNOWN";}
             try{r.Gear=v.CurrentGear;}catch{}try{double raw=v.EngineRevolutionsRatio;if(Check.Finite(raw))r.RawRpm=raw;}catch{}
             Check.That(Inspect(bike)==Presence.Present&&Inspect(rider)==Presence.Present,"changed identity during read");return r;
         }
