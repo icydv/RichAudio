@@ -525,7 +525,17 @@
       "maximumPredictionSeconds": 0.04999999999999982,
       "unavailableBlocks": 9,
       "terminalError": null,
-      "controlPathTransitions": 3
+      "controlPathTransitions": 3,
+      "referenceComparison": {
+        "rangeSeconds": [
+          1.4,
+          1.8
+        ],
+        "windowMs": 20,
+        "minimumWindowRmsRatio": 0.7525815675083782,
+        "minimumWindowStart": 1.62,
+        "relativePcmDifferenceRms": 0.07964655959144325
+      }
     },
     {
       "name": "expired",
@@ -987,7 +997,17 @@
       "maximumPredictionSeconds": 0.04299999999999993,
       "unavailableBlocks": 10,
       "terminalError": null,
-      "controlPathTransitions": 3
+      "controlPathTransitions": 3,
+      "referenceComparison": {
+        "rangeSeconds": [
+          1.4,
+          1.8
+        ],
+        "windowMs": 20,
+        "minimumWindowRmsRatio": 0,
+        "minimumWindowStart": 1.6,
+        "relativePcmDifferenceRms": 0.2946063151820948
+      }
     },
     {
       "name": "expired",
@@ -1449,7 +1469,17 @@
       "maximumPredictionSeconds": 0.04666666666666641,
       "unavailableBlocks": 9,
       "terminalError": null,
-      "controlPathTransitions": 3
+      "controlPathTransitions": 3,
+      "referenceComparison": {
+        "rangeSeconds": [
+          1.4,
+          1.8
+        ],
+        "windowMs": 20,
+        "minimumWindowRmsRatio": 0,
+        "minimumWindowStart": 1.58,
+        "relativePcmDifferenceRms": 0.37429559737350815
+      }
     },
     {
       "name": "expired",

@@ -13,6 +13,7 @@ import {
   measure,
   listenerMessage,
   sequence,
+  continuityAgainstReference,
 } from "../tools/audio/headless-stream.mjs";
 const hash = (r) =>
   createHash("sha256")
@@ -121,6 +122,13 @@ test("Short gaps expose the measured continuity cost of the lower policies", asy
     c = await runHeadless({ name: "short-gap", delayMs: 50 });
   const gaps = (r) =>
     measure(r).lowEnvelopeIntervals.filter((w) => w.start > 0.5);
+  const uninterrupted = await runHeadless();
+  const comparison = continuityAgainstReference(a, uninterrupted);
+  assert.ok(
+    comparison.minimumWindowRmsRatio > 0.6 &&
+      comparison.minimumWindowRmsRatio < 0.9,
+    "No full gap does not mean a defect-free reference envelope",
+  );
   assert.equal(gaps(a).length, 0);
   assert.ok(gaps(b).length > 0);
   assert.ok(

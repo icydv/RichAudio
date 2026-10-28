@@ -268,6 +268,46 @@ export async function runHeadless({
     if (!closed) child.kill();
   }
 }
+// Fixed time-aligned comparison, no gain normalisation or fitted alignment.
+export function continuityAgainstReference(actual, reference) {
+  for (const r of [actual, reference])
+    if (
+      !r ||
+      ![r.left, r.right].every(
+        (x) => x instanceof Float32Array && x.length >= 86400,
+      )
+    )
+      throw Error("Reference comparison needs 1.8 seconds of stereo PCM");
+  let minimumWindowRmsRatio = Infinity,
+    minimumWindowStart = null,
+    delta = 0,
+    energy = 0;
+  for (let start = 67200; start < 86400; start += 960) {
+    let a = 0,
+      b = 0;
+    for (let i = start; i < start + 960; i++)
+      for (const channel of ["left", "right"]) {
+        const x = actual[channel][i],
+          y = reference[channel][i];
+        a += x * x;
+        b += y * y;
+        delta += (x - y) ** 2;
+        energy += y * y;
+      }
+    const ratio = b > 0 ? Math.sqrt(a / b) : null;
+    if (ratio != null && ratio < minimumWindowRmsRatio) {
+      minimumWindowRmsRatio = ratio;
+      minimumWindowStart = start / FS;
+    }
+  }
+  return {
+    rangeSeconds: [1.4, 1.8],
+    windowMs: 20,
+    minimumWindowRmsRatio,
+    minimumWindowStart,
+    relativePcmDifferenceRms: Math.sqrt(delta / energy),
+  };
+}
 export function measure(result) {
   const { left: l, right: r, trace } = result,
     windows = [],

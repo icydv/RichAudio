@@ -2,7 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
-import { runHeadless, measure } from "./audio/headless-stream.mjs";
+import {
+  runHeadless,
+  measure,
+  continuityAgainstReference,
+} from "./audio/headless-stream.mjs";
 import { wav } from "../src/acoustics/engine/signals.mjs";
 import { privateStoragePath } from "../src/acoustics/research/research-private-storage.mjs";
 import { historicalProducer } from "./audio/historical-continuity.mjs";
@@ -39,6 +43,7 @@ const names = [
   "stop",
   "failure",
 ];
+const references = new Map();
 for (const delayMs of process.argv.includes("--baseline")
   ? [100]
   : [100, 75, 50])
@@ -60,6 +65,12 @@ for (const delayMs of process.argv.includes("--baseline")
       { flag: "wx" },
     );
     const m = measure(r);
+    if (name === "stationary") references.set(delayMs, r);
+    if (name === "short-gap")
+      m.referenceComparison = continuityAgainstReference(
+        r,
+        references.get(delayMs),
+      );
     delete m.windows;
     report.results.push({
       name,

@@ -115,6 +115,15 @@ are reported as intervals, not as exact transition instants; their centre has
 ±10 ms resolution, in addition to the 10.667 ms control-block quantisation.
 No fitted offset or post-hoc alignment is applied.
 
+The low-envelope screen is a 20 ms window below **0.1% of the steady reference
+RMS**; it is not an absence-of-zero-samples test. A separate matched,
+time-aligned comparison against uninterrupted PCM covers **1.4–1.8 s**. Its
+worst 20 ms RMS ratio is **0.75258 / 0 / 0** at 100/75/50 ms, and relative PCM
+difference RMS is **0.07965 / 0.29461 / 0.37430**. The 100 ms policy therefore
+still has an approximately **25% envelope dip**, despite avoiding a full gap.
+It does not perfectly bridge this missing-update case. No normalisation or
+time alignment is used to conceal the difference.
+
 | Presentation policy | PCM half-balance window after observation | After receipt | Missing-update low-envelope interval |
 | --- | --- | --- | --- |
 | 100 ms reference | 80–100 ms | 54.7–74.7 ms | None |
@@ -257,9 +266,11 @@ GitHub committer identity exceptions are preserved, not new defects.
 
 ## Publication and next decision
 
-Branch: `improve/acoustics-offline-continuity`, stacked on PR #50. Publication
-and exact-head hosted CI are completed as a separate gate; a passing local test
-alone does not fulfil that gate.
+Branch: `improve/acoustics-offline-continuity`, stacked on PR #50.
+[Draft PR #51](https://github.com/icydv/RichAudio/pull/51) records the exact
+published head and independently read-back hosted CI result. Run `git rev-parse
+HEAD` to identify a local checkout. Publication and exact-head hosted CI are
+separate gates; a passing local test alone does not fulfil them.
 
 The next decision is to review this primed 100 ms candidate for a separately
 authorised strict-transport device/GTA validation. That test is not requested or
