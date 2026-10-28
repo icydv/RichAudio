@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "kind": "offline-existing-evidence-analysis",
+  "units": "uncalibrated native game units",
+  "rawCount": 181,
+  "acceptedCount": 120,
+  "acceptedSeconds": 6.703728600000005,
+  "movement": {
+    "firstTaskAt": 36.329099299999996,
+    "firstDisplacementAndSpeedAt": 36.385186999999995,
+    "peakAt": 37.2306424,
+    "peakSpeed": 58.17793288696325,
+    "firstNegativeSpeedDerivativeAt": 37.286961399999996,
+    "lastAboveStationaryThresholdAt": 38.0188158,
+    "stationarySuffixBeginsAt": 38.075362999999996,
+    "stationarySuffixConfirmedAt": 39.0897505,
+    "stationaryDefinition": {
+      "speedAtMost": 0.25,
+      "unchangedSampledPosition": true,
+      "requiredSeconds": 1
+    },
+    "lastProgressAt": 38.0188158,
+    "terminationAt": 43.0328279,
+    "stallSeconds": 5.014012100000002,
+    "initialToPeakSeconds": 0.9015431000000049,
+    "path": 73.53708399652658,
+    "integratedSpeedDistance": 74.66539354474486,
+    "absoluteDistanceDifference": 1.128309548218283,
+    "relativeDistanceDifference": 0.015111546255255709,
+    "acceleration": {
+      "minimum": -1027.661736333266,
+      "maximum": 71.18199106390607,
+      "mean": 0.03338170877759503
+    },
+    "positionSpeed": {
+      "minimum": 0,
+      "maximum": 58.51966579958294,
+      "mean": 10.969659400351052
+    },
+    "distanceResidual": {
+      "minimum": -1.6430183019561826,
+      "maximum": 0.07718486668345442,
+      "mean": -0.009481592842170445
+    },
+    "vectorResidual": {
+      "minimum": 0,
+      "maximum": 1.6430183183315614,
+      "mean": 0.0239431374576179
+    },
+    "stopPair": {
+      "at": 38.075362999999996,
+      "dt": 0.05654719999999713,
+      "gameDeltaMs": 56,
+      "step": 0,
+      "positionSpeed": 0,
+      "reportedSpeed": 0,
+      "meanReportedSpeed": 29.055696868390758,
+      "acceleration": -1027.661736333266,
+      "distanceResidual": -1.6430183019561826,
+      "vectorResidual": 1.6430183183315614,
+      "progress": 73.40827375081236,
+      "gap": false,
+      "beforeSpeed": 58.111393736781515,
+      "positionExactlyUnchanged": true
+    }
+  },
+  "route": {
+    "startToMid1": 300.09602742628493,
+    "firstDistanceToMid1": 300.0958575106079,
+    "finalDistanceToMid1": 226.6880238737896,
+    "minimumDistanceToMid1": 226.6880238737896,
+    "maximumProjectedProgress": 73.40827375081236,
+    "maximumRecordedProgressError": 1.4210854715202004E-14,
+    "lookahead": 25,
+    "stopRange": 2,
+    "enteredLookahead": false,
+    "passedMid1": false,
+    "lifecycleLookaheadCalls": 0
+  },
+  "consistency": {
+    "maximumSpeedMagnitudeError": 1.984914881347777E-06,
+    "acceptedDt": {
+      "minimum": 0.05571429999999822,
+      "maximum": 0.057124999999999204,
+      "mean": 0.05633385378151265
+    },
+    "gameDeltaMs": {
+      "minimum": 56,
+      "maximum": 57,
+      "mean": 56.33613445378151
+    },
+    "missingGameClockPairs": 0,
+    "gapCount": 0
+  },
+  "transitions": [
+    {
+      "at": 36.385186999999995,
+      "field": "TaskState",
+      "before": "NoTask",
+      "after": "InProgress"
+    },
+    {
+      "at": 38.075362999999996,
+      "field": "Gear",
+      "before": 0,
+      "after": 1
+    },
+    {
+      "at": 40.103165399999995,
+      "field": "Gear",
+      "before": 1,
+      "after": 0
+    },
+    {
+      "at": 40.6103005,
+      "field": "Gear",
+      "before": 0,
+      "after": 1
+    },
+    {
+      "at": 42.694914,
+      "field": "Gear",
+      "before": 1,
+      "after": 0
+    }
+  ],
+  "counted": {
+    "TaskState": {
+      "NoTask": 1,
+      "InProgress": 119
+    },
+    "ConsoleOpen": {
+      "false": 120
+    },
+    "GamePaused": {
+      "false": 120
+    },
+    "Mounted": {
+      "true": 120
+    },
+    "EngineOn": {
+      "true": 120
+    },
+    "Collision": {
+      "false": 120
+    },
+    "Interference": {
+      "NONE_OBSERVED_IN_MONITORED_SCOPE": 120
+    }
+  },
+  "limits": "Copied observations corroborate motion and a stationary reporting suffix, not physical freeze, native task identity, navigation, or cause. Source getters are not independent physical instrumentation.",
+  "evidenceOrigin": "Existing PR #44 live recording; this analysis is offline only",
+  "testedRuntimeSource": "61743bceef6d31a4c2825eaaeb39c4b03c933fc6",
+  "parentReportCommit": "230f35b59318d1f4128cb4f8925df09051208187"
+}
