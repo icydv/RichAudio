@@ -16,6 +16,7 @@ namespace RichAudio.BatiResearch
         [DataMember] public bool RequestIssued;
         [DataMember] public bool? InstallerReturnedNormally;
         [DataMember] public string Installer="SET_VEHICLE_MOD_KIT",InstallerReturnType="System.Void",InstallerExceptionType;
+        [DataMember(EmitDefaultValue=false)] public string InvocationReturnType="System.Int32";
         [DataMember] public string Ownership="UNKNOWN",Indication="UNKNOWN",DocumentedKitIdentityValidity="UNKNOWN",Verification="NOT_VERIFIED",Reason="not attempted";
         [DataMember] public NativeIntegerObservation Before=new NativeIntegerObservation(),After=new NativeIntegerObservation(),AvailableKitCount=new NativeIntegerObservation();
         public ModKitDiagnostic Copy(){var c=(ModKitDiagnostic)MemberwiseClone();c.Before=Before.Copy();c.After=After.Copy();c.AvailableKitCount=AvailableKitCount.Copy();return c;}
