@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "testedCommit": "7af2030eb351ecce37502993b2826bc72a9128a8",
+  "game": "1.0.1158.16",
+  "rph": "1.132.1428.17748",
+  "launches": 1,
+  "attempts": 1,
+  "kitBefore": 65535,
+  "kitAfter": 7,
+  "kitCount": 1,
+  "installerReturnedNormally": true,
+  "indexedVerified": 3,
+  "upgradeReceipts": [
+    {
+      "Category": 11,
+      "Count": 4,
+      "Observed": 3,
+      "RequestReturnedNormally": true,
+      "Requested": 3,
+      "Status": "VERIFIED"
+    },
+    {
+      "Category": 13,
+      "Count": 3,
+      "Observed": 2,
+      "RequestReturnedNormally": true,
+      "Requested": 2,
+      "Status": "VERIFIED"
+    },
+    {
+      "Category": 12,
+      "Count": 3,
+      "Observed": 2,
+      "RequestReturnedNormally": true,
+      "Requested": 2,
+      "Status": "VERIFIED"
+    },
+    {
+      "Category": 15,
+      "Count": 0,
+      "Observed": null,
+      "RequestReturnedNormally": false,
+      "Requested": null,
+      "Status": "UNSUPPORTED"
+    },
+    {
+      "Category": 18,
+      "Count": 0,
+      "Observed": 1,
+      "RequestReturnedNormally": true,
+      "Requested": 1,
+      "Status": "ENABLED_READBACK_SUPPORT_EFFECT_UNVERIFIED"
+    }
+  ],
+  "outcome": "FAILED",
+  "reason": "stalled progression",
+  "readings": 88,
+  "highestMeasuredSpeed": 0,
+  "fullStreamSeconds": 5.0420887,
+  "acceptedAnalysisSeconds": 4.507283,
+  "analysisGaps": 0,
+  "taskState": "unavailable",
+  "finishReached": false,
+  "brakeRequested": false,
+  "cleanup": "VERIFIED_ABSENT",
+  "writerClosed": true,
+  "writerFailed": false,
+  "normalExit": true,
+  "runtimeSourceChanged": false,
+  "progressPercent": 60,
+  "restorationPassed": true,
+  "originalRootFiles": 32,
+  "archiveMetadata": 179,
+  "sampledHashes": 10,
+  "temporaryPathsAbsent": 27
+}
