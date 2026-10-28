@@ -10,6 +10,7 @@ import {
 } from "../src/acoustics/streaming/orientation-presentation.mjs";
 import { createHash } from "node:crypto";
 import { DEFAULT_BEACON_FREQUENCY_HZ, DEFAULT_BEACON_LEVEL, validateBeaconFrequencyHz, validateBeaconLevel } from "../src/acoustics/streaming/beacon-frequency.mjs";
+import { BeaconOutputTrim, validateAuditionProfile } from "../src/acoustics/streaming/beacon-output-trim.mjs";
 
 const args = process.argv.slice(2),
   options = {
@@ -18,6 +19,7 @@ const args = process.argv.slice(2),
     beacon: "harmonic",
     frequencyHz: DEFAULT_BEACON_FREQUENCY_HZ,
     level: DEFAULT_BEACON_LEVEL,
+    outputTrimDb: 0,
     delayMs: 100,
     headless: false,
     trace: false,
@@ -32,6 +34,7 @@ for (let i = 0; i < args.length; i += 2) {
   else if (args[i] === "--beacon") options.beacon = args[i + 1];
   else if (args[i] === "--beacon-frequency-hz") options.frequencyHz = Number(args[i + 1]);
   else if (args[i] === "--beacon-level") options.level = Number(args[i + 1]);
+  else if (args[i] === "--beacon-output-trim-db") options.outputTrimDb = Number(args[i + 1]);
   else if (args[i] === "--listener-delay-ms")
     options.delayMs = Number(args[i + 1]);
   else if (args[i] === "--headless-clock" && args[i + 1] === "audio")
@@ -68,6 +71,8 @@ if ((options.frequencyHz !== DEFAULT_BEACON_FREQUENCY_HZ || options.level !== DE
   throw Error("Custom frequency/level is supported for the harmonic beacon only");
 if (options.orientation && options.delayMs !== 100)
   throw Error("Orientation experiment requires the 100 ms spatial policy");
+validateAuditionProfile(options);
+const outputTrim = new BeaconOutputTrim(options.outputTrimDb);
 if (
   options.barrierFrame !== null &&
   (!options.headless ||
@@ -173,6 +178,7 @@ async function finish(error) {
     type: "final",
     beaconFrequencyHz: options.frequencyHz,
     beaconLevel: options.level,
+    outputTrim: outputTrim.stats,
     error: error?.message ?? null,
     frames: renderer.frame,
     wallSeconds: (performance.now() - wallStart) / 1000,
@@ -440,6 +446,8 @@ async function pump() {
         left.fill(0);
         right.fill(0);
       }
+      if (outputTrim.enabled && renderer.stats.limited !== 0) throw Error("Audition profile refuses previously limited renderer output");
+      outputTrim.apply(left, right);
       const dspMilliseconds = performance.now() - started;
       stats.dspMs.push(dspMilliseconds);
       packet.write("RA07", 0, "ascii");
@@ -532,6 +540,7 @@ async function pump() {
           type: "status",
           beaconFrequencyHz: options.frequencyHz,
           beaconLevel: options.level,
+          outputTrim: outputTrim.stats,
           frame: renderer.frame,
           paths: renderer.activePaths,
           sourceEmitting: enabled,
