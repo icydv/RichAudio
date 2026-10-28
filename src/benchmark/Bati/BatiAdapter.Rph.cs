@@ -28,7 +28,9 @@ namespace RichAudio.BatiRph
         private readonly Dictionary<uint,Entity> owned=new Dictionary<uint,Entity>();
         private readonly Dictionary<uint,Identity> keys=new Dictionary<uint,Identity>();
         private readonly HashSet<uint> nativeSeen=new HashSet<uint>();private readonly MarkerPoint? spawn;private readonly float heading;private readonly int drivingStyle;
-        public WorldOperations(MarkerPoint? spawnPoint=null,float initialHeading=0,int style=63){spawn=spawnPoint;heading=initialHeading;Check.That(style==63||style==(63|16777216),"reviewed driving mode");drivingStyle=style;}
+        private readonly StopBoundaryProbe stopBoundary;
+        public WorldOperations(MarkerPoint? spawnPoint=null,float initialHeading=0,int style=63,StopBoundaryProbe diagnostics=null){spawn=spawnPoint;heading=initialHeading;Check.That(style==63||style==(63|16777216),"reviewed driving mode");drivingStyle=style;stopBoundary=diagnostics;}
+        private void Diagnostic(Action read){try{read();}catch(Exception e){stopBoundary.Fault(e);}}
         private bool uncertain;
         public bool UnresolvedCreation {get{return uncertain;}}
         public bool OwnsExact(Entity e){Identity key;return e!=null&&e.IsValid()&&keys.TryGetValue(e.Handle.Value,out key)&&Inspect(key)==Presence.Present;}
@@ -50,16 +52,18 @@ namespace RichAudio.BatiRph
         public void EnableTurbo(Identity id){LiveGate.Require();NativeFunction.CallByName<uint>("TOGGLE_VEHICLE_MOD",Bike(id),18,true);/* one reviewed toggle/readback; availability and physical effect remain unproven */}
         public bool ReadTurbo(Identity id){return NativeFunction.CallByName<bool>("IS_TOGGLE_MOD_ON",Bike(id),18);}
         public bool Mounted(Identity rider,Identity bike){var p=RequireOwned(rider) as Ped;var v=Bike(bike);return p!=null&&p.CurrentVehicle!=null&&p.CurrentVehicle.IsValid()&&p.CurrentVehicle.Handle.Value==v.Handle.Value&&p.CurrentVehicle.Handle.Counter==v.Handle.Counter;}
-        public void Drive(Identity rider,Identity bike,MarkerPoint destination,double speed){LiveGate.Require();Check.That(Mounted(rider,bike)&&Check.Finite(speed)&&speed>0&&speed<=100,"driving prerequisites");var p=(Ped)RequireOwned(rider);NativeFunction.CallByName<uint>("TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE",p,Bike(bike),(float)destination.X,(float)destination.Y,(float)destination.Z,(float)speed,drivingStyle,2f);}
+        public void Drive(Identity rider,Identity bike,MarkerPoint destination,double speed){LiveGate.Require();Check.That(Mounted(rider,bike)&&Check.Finite(speed)&&speed>0&&speed<=100,"driving prerequisites");var p=(Ped)RequireOwned(rider);var v=Bike(bike);if(stopBoundary!=null)Diagnostic(()=>stopBoundary.BeginDrive(rider,bike,destination,speed,drivingStyle));try{NativeFunction.CallByName<uint>("TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE",p,v,(float)destination.X,(float)destination.Y,(float)destination.Z,(float)speed,drivingStyle,2f);}catch(Exception e){if(stopBoundary!=null)Diagnostic(()=>stopBoundary.EndDrive(false,e.GetType().Name));throw;}if(stopBoundary!=null)Diagnostic(()=>stopBoundary.EndDrive(true,null));}
         public void Brake(Identity rider,Identity bike,int durationMs){LiveGate.Require();Check.That(Mounted(rider,bike)&&durationMs>0&&durationMs<=20000,"owned bounded braking");((Ped)RequireOwned(rider)).Tasks.PerformDrivingManeuver(Bike(bike),VehicleManeuver.GoForwardStraightBraking,durationMs);}
         public void StopOwnedTask(Identity id){LiveGate.Require();((Ped)RequireOwned(id)).Tasks.Clear();}
         public void DeleteOwned(Identity id){LiveGate.Require();RequireOwned(id).Delete();/* Inspect independently queries the saved GUID; wrapper invalidity alone stays insufficient. */}
         public Reading CopyObservation(Identity bike,Identity rider,MarkerSet markers,double now)
         {
+            double wrapperStart=now;if(stopBoundary!=null)Diagnostic(()=>wrapperStart=stopBoundary.Now().Value);
             var v=Bike(bike);var p=Game.LocalPlayer.Character;Check.That(p!=null&&p.IsValid(),"player unavailable");Vector3 vel=v.Velocity;var r=new Reading{At=now,Domain="runtime-observation",Bike=bike,Rider=rider,Position=Point(v.Position),Velocity=Point(vel),Speed=Math.Sqrt(vel.X*vel.X+vel.Y*vel.Y+vel.Z*vel.Z),PlayerPosition=Point(p.Position),PlayerVelocity=Point(p.Velocity),Rotation=new MarkerPoint(v.Rotation.Pitch,v.Rotation.Roll,v.Rotation.Yaw),Mounted=Mounted(rider,bike),EngineOn=v.IsEngineOn,Collision=NativeFunction.CallByName<bool>("HAS_ENTITY_COLLIDED_WITH_ANYTHING",v),Simulation="UNDETERMINED",Interference="UNKNOWN"};
             try{r.ConsoleOpen=Game.Console.IsOpen;}catch{}try{r.GamePaused=Game.IsPaused;}catch{}try{r.GameTimeMs=Game.GameTime;}catch{}try{r.TaskState=((Ped)RequireOwned(rider)).Tasks.CurrentTaskStatus.ToString();}catch{r.TaskState="UNKNOWN";}
             try{r.Gear=v.CurrentGear;}catch{}try{double raw=v.EngineRevolutionsRatio;if(Check.Finite(raw))r.RawRpm=raw;}catch{}
-            Check.That(Inspect(bike)==Presence.Present&&Inspect(rider)==Presence.Present,"changed identity during read");return r;
+            Check.That(Inspect(bike)==Presence.Present&&Inspect(rider)==Presence.Present,"changed identity during read");
+            if(stopBoundary!=null)Diagnostic(()=>{double wrapperEnd=stopBoundary.Now().Value;r.StopBoundary=stopBoundary.Observe(r,wrapperStart,wrapperEnd,()=>NativeFunction.CallByName<int>("GET_SCRIPT_TASK_STATUS",rider.Handle,0x21D33957u),()=>NativeFunction.CallByName<float>("GET_ENTITY_SPEED",bike.Handle),()=>Inspect(bike)==Presence.Present&&Inspect(rider)==Presence.Present);});return r;
         }
         private static MarkerPoint Point(Vector3 p){return new MarkerPoint(p.X,p.Y,p.Z);}
     }
@@ -68,6 +72,7 @@ namespace RichAudio.BatiRph
         [DataMember]public int Version,Revision;
         [DataMember]public string MarkerFile,Fingerprint,MarkerSession,OutputDirectory,SurveyDirectory,CandidateFile,CandidateFingerprint,ApprovalFile,ScopeNonce,BinaryFingerprint;
         [DataMember]public string[] SurveyFingerprints;
+        [DataMember]public bool StopBoundaryDiagnostics; // Opt-in only; absent/false retains original calls.
     }
     public static class Entry
     {
