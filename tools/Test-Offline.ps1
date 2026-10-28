@@ -27,6 +27,9 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Opt-in orientation presentation and silent lifecycle tests failed.'}
     & node --test tests/Test-BeaconFrequency.mjs
     if($LASTEXITCODE -ne 0){throw 'Owned beacon frequency and device-free continuity tests failed.'}
+    & node --test tests/Test-BeaconOutputTrim.mjs
+    if($LASTEXITCODE -ne 0){throw 'Explicit audition trim and ceiling tests failed.'}
+    & (Join-Path $repo 'tools\Prepare-BeaconLiveCandidate.ps1') -Output ('.local/beacon-match-ci-'+[guid]::NewGuid().ToString('N'))
     & (Join-Path $repo 'tools\Prepare-Beacon600.ps1') -Output ('.local/beacon-ci-'+[guid]::NewGuid().ToString('N'))
     # Original PCM, bounded queues and local transport only: these tests never open an audio endpoint.
     & (Join-Path $repo 'tools\Build-AcousticsHost.ps1') -Tests
