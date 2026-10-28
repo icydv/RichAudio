@@ -40,5 +40,11 @@
   "newLiveCandidatePrepared": false,
   "newLiveExperimentProposed": false,
   "combinedMilestonePercent": 60,
-  "liveCorrectionVerified": false
+  "liveCorrectionVerified": false,
+  "affectedSurveyAssertions": 76,
+  "affectedSurveyIndependentChecks": 236,
+  "affectedSurveySdkBuildPassed": true,
+  "fullRegisteredOfflineSuitePassed": true,
+  "initialHostedCiFailed": true,
+  "initialHostedCiCause": "CS0246: data-only diagnostic omitted from shared survey build"
 }
