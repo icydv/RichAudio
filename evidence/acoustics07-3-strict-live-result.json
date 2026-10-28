@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "milestone": "ACOUSTICS-07.3",
+  "testedSource": "e08ad31d1822b052af169741476d94301b062e21",
+  "outcome": "STOPPED_AT_LAUNCH_DISPATCH",
+  "strictLiveValidation": "NOT EXECUTED",
+  "configuration": {
+    "scene": "synthetic open-road",
+    "beacon": "original harmonic",
+    "sources": 1,
+    "plannedGain": 0.12,
+    "initiallyMuted": true,
+    "experimentalOrientation": false,
+    "spatialBufferMs": 100,
+    "orientationBufferMs": 100,
+    "predictionMs": 50,
+    "freshnessMs": 250,
+    "hostCapSeconds": 120,
+    "capture": false
+  },
+  "builds": {
+    "hostSha256": "42D95BB0433E280A196CBEC602C325F67C6DE605D5F0B4CB44874810FB6EFC43",
+    "bridgeSha256": "ABE867C26A715A344A9192779BB3A9CE09959F4EA9019410E62A966C1C4C07DF",
+    "manifestSha256": "A125096B0C4D71F0F45811AFA400937745AA25B183A927BCFF3A039DE018E76E",
+    "sdkSha256": "5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0",
+    "sdkVersion": "1.124.1393.17586",
+    "rphRuntimeVersion": "1.132.1428.17748",
+    "gtaEnhancedVersion": "1.0.1158.16"
+  },
+  "counts": {
+    "rphLaunchRequests": 1,
+    "rphProcessStartConfirmed": false,
+    "gtaLaunchesObserved": 0,
+    "bridgeLoads": 0,
+    "bridgeActivations": 0,
+    "liveHostSessions": 0,
+    "publisherAttempts": 0,
+    "acceptedLiveConnections": 0,
+    "formatProbes": 1
+  },
+  "failure": {
+    "stage": "automation launch dispatch",
+    "diagnostic": "launched app did not expose a targetable window",
+    "exceptionType": null,
+    "runtimeCause": "unknown",
+    "runtimeLogsObserved": 0,
+    "retry": false
+  },
+  "transport": {
+    "executed": false,
+    "acceptedObservations": null,
+    "rejectedObservations": null,
+    "acknowledgedFrames": null,
+    "deliberateStop": null,
+    "terminalDiagnostic": null
+  },
+  "audio": {
+    "played": false,
+    "startupAssessed": false,
+    "listeningFeedback": "not applicable: no audio session started",
+    "underflowCounter": null,
+    "rendererUpdates": null
+  },
+  "offlineChecks": {
+    "hostAssertions": 645,
+    "transportCases": 63,
+    "expectedEndpointFormatSupported": true,
+    "formatProbeStartedStream": false,
+    "sourceCiRun": "40702624532",
+    "sourceCiCheckout": "32c84783b2c0612470c83d5c1caaba551ed174eb",
+    "sourceCiTreeMatches": true
+  },
+  "restoration": {
+    "passed": true,
+    "rootFiles": 32,
+    "originalSignatures": 2,
+    "directories": 5,
+    "temporaryPathsAbsent": 26,
+    "archiveMetadata": 179,
+    "sampledArchiveHashes": 10,
+    "relevantProcessesAbsent": true,
+    "selectedProducerProcessesAbsent": true
+  },
+  "combinedMilestonePercent": 60
+}
