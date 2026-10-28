@@ -5,7 +5,7 @@ $out=Join-Path $repo 'build\airport-survey'
 [IO.Directory]::CreateDirectory($out)|Out-Null
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 # Explicit allowlist excludes the Bati controller and every mutating runtime adapter.
-$sources=@('src\benchmark\BenchmarkMarkers.cs','src\benchmark\Bati\BatiData.cs','src\benchmark\Bati\ModKitDiagnostics.cs','src\benchmark\Bati\SpeedAnalysis.cs','src\acoustics\observation\GeometryObservation.cs','src\benchmark\Survey\AirportSurvey.cs')|ForEach-Object {Join-Path $repo $_}
+$sources=@('src\benchmark\BenchmarkMarkers.cs','src\benchmark\Bati\BatiData.cs','src\benchmark\Bati\StopBoundaryDiagnostics.cs','src\benchmark\Bati\ModKitDiagnostics.cs','src\benchmark\Bati\SpeedAnalysis.cs','src\acoustics\observation\GeometryObservation.cs','src\benchmark\Survey\AirportSurvey.cs')|ForEach-Object {Join-Path $repo $_}
 & $compiler /nologo /optimize+ /warnaserror+ /target:library /r:System.Runtime.Serialization.dll ('/out:'+(Join-Path $out 'RichAudio.Survey.Core.dll')) @sources
 if($LASTEXITCODE){throw 'Survey core compilation failed'}
 & $compiler /nologo /optimize+ /warnaserror+ /r:System.Runtime.Serialization.dll ('/r:'+(Join-Path $out 'RichAudio.Survey.Core.dll')) ('/out:'+(Join-Path $out 'Inspect-AirportSurvey.exe')) (Join-Path $repo 'tools\Inspect-AirportSurvey.cs')
