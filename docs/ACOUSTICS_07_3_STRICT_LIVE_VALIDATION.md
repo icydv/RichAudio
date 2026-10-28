@@ -1,35 +1,31 @@
 # ACOUSTICS-07.3 — Strict live transport and startup validation
 
-## Outcome: stopped at launcher dispatch; strict session not executed
+## Outcome: first-frame freshness rejection; fail-closed shutdown observed
 
-I authorised one supervised default-policy attempt using PR #52's reviewed
-source `e08ad31d1822b052af169741476d94301b062e21`. Preflight passed and the
-sealed temporary deployment was installed. I dispatched RPH once through
-the established computer-use launch interface. The tool returned **"launched
-app did not expose a targetable window"**. Follow-up window enumeration and
-process inspection found no RPH or GTA process/window, and no runtime log was
-created. I did not retry, use another launcher, change code or start the host.
+I've now executed one strict live session on Enhanced 1.0.1158.16 using the reviewed PR #52 implementation. The receiver accepted one connection, then rejected its first observation at **freshness / invalid-age**, with `InvalidDataException` and `HadAcceptedFrame=false`. The host muted/stopped automatically; the bridge stopped with another Start disabled. Neither end reconnected. No beacon emission was enabled and all submitted PCM was silent.
 
-This is **STOPPED AT LAUNCH DISPATCH**, not a transport rejection or a failed
-audio-quality test. I cannot establish whether RPH briefly started and exited
-or whether dispatch failed before process creation. The automation diagnostic
-does not identify the runtime cause. No GTA launch was observed. I consumed
-the authorised attempt rather than interpreting the absence of a game window
-as permission for another launch request.
+This **fails clean strict-session acceptance**. It establishes terminal failure handling, not successful telemetry, audible startup, camera response or acknowledged deliberate Stop. My original installation has been restored and independently verified. No implementation was changed to force a pass.
 
-The original executable selection and all temporary additions have been
-restored, with independent verification **PASS**. Strict live transport and
-startup validation remain **PENDING / NOT EXECUTED**.
+## Two separately authorised attempts
+
+My first attempt ended at launcher dispatch. One computer-use launch request returned **"launched app did not expose a targetable window"**. Follow-up inspection found no remaining GTA/RPH process or window and no runtime log. I did not retry under that approval. No bridge or live audio host started, and restoration passed. Whether RPH briefly started and exited is unknown. That stopped attempt remains recorded in the parent result commit and the `previousSeparatelyAuthorisedAttempt` evidence object.
+
+I subsequently requested **one additional attempt with computer control**. I used a fresh sealed manifest, approval receipt, deployment journal and private output directory, preserving the first attempt. RPH was launched visibly through File Explorer, its settings confirmed no startup plugins, and Save and launch was submitted once. Story Mode loaded; I loaded the bridge once, confirmed READY / sending OFF, then started one initially muted host and issued one bridge Start. This was a new authorisation, not automatic recovery from the first attempt. No third attempt was performed.
+
+| Event | First attempt | Additional attempt |
+| --- | --- | --- |
+| RPH launch requests | 1 | 1 |
+| RPH process observed | No remaining process | Yes |
+| GTA launches observed | 0 | 1 |
+| Bridge loads / activations | 0 / 0 | 1 / 1 |
+| Live audio host sessions | 0 | 1 |
+| Publisher connection attempts | 0 | 1 |
+| Accepted receiver connections | 0 | 1 |
+| Automatic reconnects / replacement hosts | 0 / 0 | 0 / 0 |
 
 ## Reviewed candidate and configuration
 
-I built the host and bridge in a separate validation worktree from the same
-reviewed revision. No acoustic, transport, camera, source or Windows backend
-implementation changed. The source CI run
-[40702624532](https://github.com/icydv/RichAudio/actions/runs/40702624532) passed;
-its actual checkout was generated merge
-`32c84783b2c0612470c83d5c1caaba551ed174eb`. Its tree matches the reviewed source
-tree `998d233acefa5d099dc5370e3142b9062d85d0d9`.
+Runtime source is unchanged from `e08ad31d1822b052af169741476d94301b062e21`, the verified open PR #52 head. This result branch is stacked on it. No source, tools or tests changed. The source CI run [40702624532](https://github.com/icydv/RichAudio/actions/runs/40702624532) passed using generated merge `32c84783b2c0612470c83d5c1caaba551ed174eb`; its tree matches candidate tree `998d233acefa5d099dc5370e3142b9062d85d0d9`.
 
 | Component | Verified value |
 | --- | --- |
@@ -39,116 +35,71 @@ tree `998d233acefa5d099dc5370e3142b9062d85d0d9`.
 | SDK SHA-256 | `5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0` |
 | Host SHA-256 | `42D95BB0433E280A196CBEC602C325F67C6DE605D5F0B4CB44874810FB6EFC43` |
 | Bridge SHA-256 | `ABE867C26A715A344A9192779BB3A9CE09959F4EA9019410E62A966C1C4C07DF` |
-| Sealed 26-file manifest SHA-256 | `A125096B0C4D71F0F45811AFA400937745AA25B183A927BCFF3A039DE018E76E` |
+| First sealed 26-file manifest SHA-256 | `A125096B0C4D71F0F45811AFA400937745AA25B183A927BCFF3A039DE018E76E` |
+| Additional attempt manifest SHA-256 | `72BD7127A96DF73A96EFE1EC9D7484DEFE2576CFCE904E6C9E961AEEFEC86D73` |
 
-The SDK pin is compile-time provenance, distinct from the supported runtime
-version and from actual successful execution. The 26-file set was freshly
-prepared from verified existing runtime dependencies and this new bridge
-build; previous approvals, binaries and packages were not overwritten.
+The SDK pin is compile-time provenance, distinct from the runtime version. Both builds used the selected validation worktree. The host launched that worktree's producer in normal wall-clock mode with required listener input.
 
-The prepared host invocation used the selected worktree's producer, one fixed
-original harmonic beacon in the existing synthetic open-road metric scene,
-48 kHz stereo Float32, strict listener pipe, 100 ms spatial and default
-orientation buffers, 50 ms prediction, 250 ms freshness and the 120-second
-cap. It was initially muted, without autostart, control exercise, capture,
-headless clock, test barrier or experimental producer arguments.
+Configuration: one original harmonic beacon in the synthetic open-road metric scene, 48 kHz stereo Float32, strict listener pipe, **100 ms spatial and orientation buffers**, 50 ms prediction, 250 ms freshness, 120-second cap. **Experimental orientation was OFF.** My request for a louder harmonic set the fixed host gain to **0.12**, approximately +3.52 dB relative to 0.08, before execution. It was initially muted, without autostart, control exercise, loopback, microphone capture, headless clock or test barriers. The host's Start control was never issued because the transport had already failed.
 
-**Experimental orientation was OFF.** My later instruction requested a
-slightly louder harmonic, so the planned fixed gain was **0.12**, replacing
-0.08 before execution (approximately +3.52 dB amplitude gain). No audio
-played, so this run establishes nothing about the new level's audibility.
+## Preflight and actual failure evidence
 
-## Preflight and execution counts
+Focused checks passed **645 host assertions** and **63 transport cases**; the pinned-SDK bridge compiled. Synthetic pipe tests used isolated identities. The format-only preflight probe confirmed the previously used endpoint's 48 kHz stereo Float32 support without starting a stream. The additional live host did open that endpoint, but submitted only zero-valued PCM. No live pipe probe, second host or implementation change was used.
 
-Focused checks passed **645 host assertions** and **63 transport cases**.
-Synthetic pipe tests used their own isolated test identities, not a probe
-connection to the live pipe. The selected source still enforces one publisher
-attempt, one accepted receiver connection, one-use bridge activation, frame
-acknowledgements and acknowledged deliberate Stop. Those remain offline
-capabilities until a real strict session is observed.
-
-The existing format-only probe resolved the same previously used endpoint
-and reported exact 48 kHz stereo Float32 support. It queries format support
-without starting a stream. It did not construct a producer, start a listener
-server, play a beacon or capture audio. Its process invocation is separate
-from the **zero live host playback sessions** below.
-
-| Event | Result |
+| Measurement | Additional attempt result |
 | --- | --- |
-| RPH launch requests | 1 |
-| RPH process creation confirmed | No; no process remained at follow-up |
-| GTA launches observed | 0 |
-| Bridge loads / activations | 0 / 0 |
-| Live audio host sessions | 0 |
-| Publisher connection attempts | 0 |
-| Accepted live receiver connections | 0 |
-| Automatic retries / replacement launches | 0 |
+| Accepted listener observations | 0 |
+| Receiver rejected counter | 1 |
+| Receiver failure | `freshness / invalid-age / InvalidDataException` |
+| Receiver connection / prior accepted frame | 1 / false |
+| Receiver terminal / another attempt | true / false |
+| Bridge observations / missed / acknowledged frames | 9 / 0 / 0 |
+| Bridge retained terminal | `callback / operation-failed / failed` |
+| Bridge requested flag after failure | false |
+| Host wall duration | 15.151519 s |
+| PCM blocks received / rejected | 1,410 / 0 |
+| Renderer control updates | 1,410, without a valid listener or active path |
+| Startup status / ready frame | idle / none |
+| Audio underflow frames / device error | 0 / none |
+| Submitted peak / RMS | 0 / 0 |
+| Host muted / stopped; producer exit code | true / true; 0 |
 
-There are no live accepted/rejected-observation counters, acknowledgement
-records, renderer updates, underflow metrics or transport terminal stages.
-They are **unavailable**, not measured zero-error results. No first frame was
-sent, and no `InvalidDataException` or other protocol rejection was observed.
-The only recorded failure is the launch-interface diagnostic above.
+The server's age inequality is `-2 <= ageMs <= 250`, evaluated after decoding against the local monotonic clock. This failure attribution establishes that the first observation failed that inequality. The retained diagnostic does **not** contain its actual age, so I cannot tell whether it was stale or future-dated, or attribute it to serialization, scheduling, queueing or clocks. Its 15,086.4564 ms elapsed field includes server connection waiting; it is **not the rejected observation's age**. The server records a terminal exception count, not proof that the JSON or framing was malformed.
 
-## Startup, listening and shutdown
+The publisher's callback failure is consistent with failure to receive the expected frame acknowledgement after the receiver rejected the observation. Its status does not independently preserve the receiver's freshness reason. I have not equated this rejection with PR #49's unidentified historical error.
 
-No owned audio session started. Startup priming, camera-responsive stereo,
-gaps, clicks, lag and delayed sound after Stop were not evaluated. I did not
-ask for listening feedback about sound that never played, and I have not
-converted my readiness confirmation into listening acceptance.
+## Startup, listening and shutdown boundaries
 
-There was no bridge to Stop or unload, and no host/producer worker to shut
-down. Acknowledged Stop was therefore **not exercised**. Process inspection
-confirmed the selected host, selected Node producer, RPH and GTA were absent.
-Unrelated applications were left alone; no process was killed.
+No owned sound played. Startup priming, louder-level acceptability, camera-responsive stereo, gaps, clicks, lag and audible Stop tails were not evaluated. I did not ask for listening acceptance of a beacon that never emitted. Zero underflows during silent submission do not prove reliable audible playback. A normal producer exit does not override the failed host transport result.
 
-## Independent restoration
+The host terminal callback muted/stopped output at the first rejection and exited well before its cap. The bridge retained `requested=False`, one attempt, zero acknowledgements and another Start disabled. I read its retained status, unloaded it and exited GTA through its normal quit confirmation. Host and selected producer termination were independently checked. No process was killed.
 
-I used the sealed existing session-restoration procedure, reversed the
-temporary executable-selection rename and quarantined only the 26 unchanged
-manifest-listed additions. Independent read-only checks then verified:
+The planned 45–60 second deliberate bridge Stop was inapplicable after terminal failure. **Acknowledged deliberate Stop was not exercised live.** Neither a camera sequence nor a clean-session PASS is claimed. Native audio setters, vehicle spawning, geometry acquisition and game configuration changes beyond the reviewed temporary launch procedure were not introduced.
 
-- All **32 original non-archive root files** matched their baseline hashes.
-- Both original executable signatures were **Valid**.
-- Original membership of **five top-level directories** matched.
-- All **26 temporary destination paths** and the temporary executable alias
-  were absent.
-- All **179 archive byte lengths and UTC timestamps** matched exactly.
-- All **10 existing sampled archive SHA-256s** matched.
-- Relevant game/runtime/host processes and the selected producer were absent.
+## Independent restoration and preservation
 
-No unexpected generated game files required quarantine. Vendor files,
-private receipts, backups and the unused host configuration are retained
-outside the installation. Root/signature/directory checks and archive
-metadata/sample-hash checks define this restoration PASS; I have not claimed
-a full content hash of every archive.
+I reversed the temporary executable-selection rename and preserved all 26 unchanged deployment additions outside the installation. Restoration's directory check correctly stopped when it found an additional `ExecuteCode` folder created during RPH startup. Its sole three-byte `Code1.cs` file was fingerprinted and preserved separately before the empty directory was removed. No code was executed from it. Known generated RPH/loader logs and configuration were also preserved. The initial restoration exception was not ignored.
 
-## Evidence, publication and historical boundaries
+Independent final checks verified:
 
-Public scalar evidence is
-`evidence/acoustics07-3-strict-live-result.json`. Full private manifests,
-fresh authorisation/readiness receipts, launch diagnostics, binaries,
-backups, probe identity and restoration receipts remain ignored. No raw
-coordinates, personal paths, approvals, third-party binaries or captures are
-published. No licence was selected.
+- **32 original non-archive root-file hashes** matched.
+- Both original executable signatures remained **Valid**.
+- **Five original top-level directories** matched exactly.
+- All **26 temporary paths** and the executable alias were absent.
+- **179 archive lengths and UTC timestamps** matched exactly.
+- **Ten existing sampled archive SHA-256s** matched.
+- GTA, RPH, host and the selected Node producer were absent.
 
-This result branch is stacked on PR #52. Publication screening, remote head
-and hosted CI are checked for the final result commit; the draft PR records
-the actual CI checkout and tree relationship. Documentation-only result
-publication does not change the tested implementation or repair the launch.
+Both attempts have separate restoration receipts. This PASS covers the specified root, metadata and sampled-hash baseline, not a full content hash of every archive. No unrelated application was terminated or modified. Previous acoustic demonstrations, private source material and Bati research were untouched. Original renderer defaults and historical reports remain intact.
 
-PR #49's qualified live connection and listening feedback remain historical.
-Its rejected frame's exact cause is still unknown. PR #50's strict session
-has not been live validated. PR #51's startup fix remains offline tested.
-PR #52's faster orientation experiment remains opt-in, disabled here and
-without device/listening acceptance. Earlier reports are unchanged.
+## Publication and historical conclusions
+
+Public evidence is `evidence/acoustics07-3-strict-live-result.json`: sanitised scalars and both attempt outcomes. Private manifests, approvals, logs, coordinates, endpoint identity, binaries, backups and diagnostics remain ignored. Publication screening and Git integrity checks apply to this documentation-only result. The draft PR records the final remote head and actual hosted CI checkout/tree relationship. No licence or PR merge was added.
+
+PR #49's qualified audible result remains valid historical evidence; its first rejection's exact cause remains unknown. PR #50's strict mechanism has now been exercised live and failed closed, but **clean strict-session validation remains incomplete**. PR #51's startup correction and PR #52's experimental orientation remain offline findings, without new perceptual acceptance from this run.
 
 ## Next engineering action
 
-My next action should be a narrow **offline investigation of the failed
-launcher dispatch**, using the preserved diagnostic and available read-only
-operating-system evidence. It should establish what prevented an observable
-RPH process/window before any separately authorised new attempt is considered.
-No alternate launch, retry or speculative runtime repair is performed here.
+My next action should be one **offline cold-start freshness investigation** that measures observation, publication, encoding, receipt, decoding and validation timing using isolated synthetic transport instances. It should distinguish stale from future-dated first observations without relaxing the existing age bounds. This result does not authorise another launch or perform that implementation investigation.
 
 The combined ACOUSTICS-05 + BENCHMARK-01 record remains **60%**.

@@ -1,9 +1,9 @@
 {
-  "schema": 1,
+  "schema": 2,
   "milestone": "ACOUSTICS-07.3",
   "testedSource": "e08ad31d1822b052af169741476d94301b062e21",
-  "outcome": "STOPPED_AT_LAUNCH_DISPATCH",
-  "strictLiveValidation": "NOT EXECUTED",
+  "outcome": "TERMINAL_FIRST_FRAME_FRESHNESS_REJECTION",
+  "strictLiveValidation": "EXECUTED / CLEAN-SESSION ACCEPTANCE FAILED",
   "configuration": {
     "scene": "synthetic open-road",
     "beacon": "original harmonic",
@@ -21,45 +21,153 @@
   "builds": {
     "hostSha256": "42D95BB0433E280A196CBEC602C325F67C6DE605D5F0B4CB44874810FB6EFC43",
     "bridgeSha256": "ABE867C26A715A344A9192779BB3A9CE09959F4EA9019410E62A966C1C4C07DF",
-    "manifestSha256": "A125096B0C4D71F0F45811AFA400937745AA25B183A927BCFF3A039DE018E76E",
+    "manifestSha256": "72BD7127A96DF73A96EFE1EC9D7484DEFE2576CFCE904E6C9E961AEEFEC86D73",
     "sdkSha256": "5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0",
     "sdkVersion": "1.124.1393.17586",
     "rphRuntimeVersion": "1.132.1428.17748",
     "gtaEnhancedVersion": "1.0.1158.16"
   },
-  "counts": {
+  "previousSeparatelyAuthorisedAttempt": {
+    "schema": 1,
+    "milestone": "ACOUSTICS-07.3",
+    "testedSource": "e08ad31d1822b052af169741476d94301b062e21",
+    "outcome": "STOPPED_AT_LAUNCH_DISPATCH",
+    "strictLiveValidation": "NOT EXECUTED",
+    "configuration": {
+      "scene": "synthetic open-road",
+      "beacon": "original harmonic",
+      "sources": 1,
+      "plannedGain": 0.12,
+      "initiallyMuted": true,
+      "experimentalOrientation": false,
+      "spatialBufferMs": 100,
+      "orientationBufferMs": 100,
+      "predictionMs": 50,
+      "freshnessMs": 250,
+      "hostCapSeconds": 120,
+      "capture": false
+    },
+    "builds": {
+      "hostSha256": "42D95BB0433E280A196CBEC602C325F67C6DE605D5F0B4CB44874810FB6EFC43",
+      "bridgeSha256": "ABE867C26A715A344A9192779BB3A9CE09959F4EA9019410E62A966C1C4C07DF",
+      "manifestSha256": "A125096B0C4D71F0F45811AFA400937745AA25B183A927BCFF3A039DE018E76E",
+      "sdkSha256": "5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0",
+      "sdkVersion": "1.124.1393.17586",
+      "rphRuntimeVersion": "1.132.1428.17748",
+      "gtaEnhancedVersion": "1.0.1158.16"
+    },
+    "counts": {
+      "rphLaunchRequests": 1,
+      "rphProcessStartConfirmed": false,
+      "gtaLaunchesObserved": 0,
+      "bridgeLoads": 0,
+      "bridgeActivations": 0,
+      "liveHostSessions": 0,
+      "publisherAttempts": 0,
+      "acceptedLiveConnections": 0,
+      "formatProbes": 1
+    },
+    "failure": {
+      "stage": "automation launch dispatch",
+      "diagnostic": "launched app did not expose a targetable window",
+      "exceptionType": null,
+      "runtimeCause": "unknown",
+      "runtimeLogsObserved": 0,
+      "retry": false
+    },
+    "transport": {
+      "executed": false,
+      "acceptedObservations": null,
+      "rejectedObservations": null,
+      "acknowledgedFrames": null,
+      "deliberateStop": null,
+      "terminalDiagnostic": null
+    },
+    "audio": {
+      "played": false,
+      "startupAssessed": false,
+      "listeningFeedback": "not applicable: no audio session started",
+      "underflowCounter": null,
+      "rendererUpdates": null
+    },
+    "offlineChecks": {
+      "hostAssertions": 645,
+      "transportCases": 63,
+      "expectedEndpointFormatSupported": true,
+      "formatProbeStartedStream": false,
+      "sourceCiRun": "40702624532",
+      "sourceCiCheckout": "32c84783b2c0612470c83d5c1caaba551ed174eb",
+      "sourceCiTreeMatches": true
+    },
+    "restoration": {
+      "passed": true,
+      "rootFiles": 32,
+      "originalSignatures": 2,
+      "directories": 5,
+      "temporaryPathsAbsent": 26,
+      "archiveMetadata": 179,
+      "sampledArchiveHashes": 10,
+      "relevantProcessesAbsent": true,
+      "selectedProducerProcessesAbsent": true
+    },
+    "combinedMilestonePercent": 60
+  },
+  "currentAttempt": {
+    "ordinal": 2,
+    "freshAuthorisation": true,
+    "manifestSha256": "72BD7127A96DF73A96EFE1EC9D7484DEFE2576CFCE904E6C9E961AEEFEC86D73",
     "rphLaunchRequests": 1,
-    "rphProcessStartConfirmed": false,
-    "gtaLaunchesObserved": 0,
-    "bridgeLoads": 0,
-    "bridgeActivations": 0,
-    "liveHostSessions": 0,
-    "publisherAttempts": 0,
-    "acceptedLiveConnections": 0,
-    "formatProbes": 1
-  },
-  "failure": {
-    "stage": "automation launch dispatch",
-    "diagnostic": "launched app did not expose a targetable window",
-    "exceptionType": null,
-    "runtimeCause": "unknown",
-    "runtimeLogsObserved": 0,
-    "retry": false
-  },
-  "transport": {
-    "executed": false,
-    "acceptedObservations": null,
-    "rejectedObservations": null,
-    "acknowledgedFrames": null,
-    "deliberateStop": null,
-    "terminalDiagnostic": null
-  },
-  "audio": {
-    "played": false,
-    "startupAssessed": false,
-    "listeningFeedback": "not applicable: no audio session started",
-    "underflowCounter": null,
-    "rendererUpdates": null
+    "gtaLaunchesObserved": 1,
+    "bridgeLoads": 1,
+    "bridgeActivations": 1,
+    "liveHostSessions": 1,
+    "publisherAttempts": 1,
+    "acceptedLiveConnections": 1,
+    "bridgeObservations": 9,
+    "bridgeMissed": 0,
+    "acknowledgedFrames": 0,
+    "bridgeRequestedAfterFailure": false,
+    "bridgeTerminal": "callback/operation-failed/failed",
+    "receiverTerminal": {
+      "Connection": 1,
+      "Stage": "freshness",
+      "Code": "invalid-age",
+      "ExceptionType": "InvalidDataException",
+      "Outcome": "failed",
+      "HadAcceptedFrame": false,
+      "Terminal": true,
+      "AnotherAttempt": false,
+      "ElapsedMs": 15086.456400000001
+    },
+    "acceptedObservations": 0,
+    "receiverRejectedCounter": 1,
+    "receiverRejectionMeaning": "Terminal exception while validating first observation freshness; does not establish malformed JSON",
+    "retry": false,
+    "deliberateStopAcknowledged": false,
+    "cleanStopTested": false,
+    "hostWallSeconds": 15.151518699999999,
+    "hostTerminatedBeforeCap": true,
+    "hostMuted": true,
+    "hostStopped": true,
+    "producerExitCode": 0,
+    "receivedPcmBlocks": 1410,
+    "rejectedPcmBlocks": 0,
+    "rendererControlUpdates": 1410,
+    "startupStatus": "idle",
+    "startupReadyFrame": null,
+    "underflowFrames": 0,
+    "peakSubmitted": 0,
+    "rmsSubmitted": 0,
+    "audioDeviceError": null,
+    "emissionStarted": false,
+    "audibleOwnedPcm": false,
+    "capture": false,
+    "listeningFeedback": "Not collected: no beacon emission was enabled; submitted PCM peak and RMS were zero",
+    "actualRejectedFrameAgeMs": null,
+    "freshnessCause": "Validator age outside minus 2 through 250 ms; exact age and stale-versus-future direction not preserved",
+    "hostAndProducerExited": true,
+    "bridgeUnloadedNormally": true,
+    "gameQuitNormally": true
   },
   "offlineChecks": {
     "hostAssertions": 645,
@@ -79,7 +187,8 @@
     "archiveMetadata": 179,
     "sampledArchiveHashes": 10,
     "relevantProcessesAbsent": true,
-    "selectedProducerProcessesAbsent": true
+    "selectedProducerAbsent": true,
+    "unexpectedGeneratedFilesPreserved": 1
   },
   "combinedMilestonePercent": 60
 }
