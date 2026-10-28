@@ -103,7 +103,7 @@ namespace RichAudio.Beacon.Windows
                 if (wav == null)
                 {
                     string script = Path.Combine(root, "tools", "Run-Acoustics07.mjs"); if (!File.Exists(script)) throw new FileNotFoundException("Streaming worker is not built", "Run-Acoustics07.mjs");
-                    child = new Process { StartInfo = new ProcessStartInfo { FileName = "node.exe", Arguments = Quote(script) + " --scene " + scene + " --sources " + sources + " --beacon " + beacon, WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true } };
+                    child = new Process { StartInfo = new ProcessStartInfo { FileName = "node.exe", Arguments = Quote(script) + " --scene " + scene + " --sources " + sources + " --beacon " + beacon + (listenerPipe ? " --listener-input required" : ""), WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true } };
                     child.Start();
                     inputWriter = new Thread(WriteControls); inputWriter.IsBackground = true; inputWriter.Start();
                     stderr = new Thread(ReadDiagnostics); stderr.IsBackground = true; stderr.Start();
