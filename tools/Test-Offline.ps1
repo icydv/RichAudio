@@ -28,6 +28,7 @@ try {
     # Original PCM, bounded queues and local transport only: these tests never open an audio endpoint.
     & (Join-Path $repo 'tools\Build-AcousticsHost.ps1') -Tests
     & (Join-Path $repo 'tools\Test-BeaconTransport.ps1')
+    & (Join-Path $repo 'tools\Test-HostHandoff.ps1')
     & (Join-Path $repo 'tools\Measure-FirstFrameTiming.ps1') -Output ('.local/timing-ci-'+[guid]::NewGuid().ToString('N'))
     & (Join-Path $repo 'tests\Test-GeometryObservation.ps1')
     & node --test tests/Test-SurfaceReconstruction.mjs tests/Test-SurfacePrivatePaths.mjs

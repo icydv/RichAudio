@@ -28,6 +28,12 @@ namespace RichAudio.Beacon.Tests
                     Console.WriteLine("PASS: "+checks+" silent actual-device starvation assertions; no automatic restart.");return 0;
                 }
                 if(args.Length!=0)throw new ArgumentException("Unsupported test option");
+                // Deterministic baseline: accepted age 5 ms, encoding 10 ms, queue wait 20 ms.
+                double legacyForwarded=5+20;
+                double corrected=HostProgram.ObservationAgeAtWrite(1000,1035,1000);
+                Check(legacyForwarded==25&&corrected==35,"callback time omitted by legacy formula, retained once by write age");
+                Check(HostProgram.ObservationAgeAtWrite(1001,1000,1000)==0,"permitted negative age remains nonnegative on forwarding");
+                Check(HostProgram.ObservationAgeAtWrite(1000,1251,1000)==251,"expired handoff remains expired, no clamping to limit");
                 var ring=new PcmRing();var input=new float[1024];for(int i=0;i<512;i++){input[i*2]=.2f;input[i*2+1]=-.1f;}
                 for(int i=0;i<PcmRing.Slots;i++)Check(ring.TryWrite(input,512),"ring accepts capacity");Check(!ring.TryWrite(input,512),"ring refuses overrun");Check(ring.Count==8,"count");
                 var output=new float[1024];fixed(float* p=output){Check(ring.Fill(p,256,.1f)==256,"partial block read");}
