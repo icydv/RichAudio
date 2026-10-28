@@ -37,7 +37,11 @@ export class Policy {
       } catch {}
       return this.abort(at,'transport-terminal');
     }
-    if(line.startsWith('RichAudio shared output:')&&line.endsWith('Maximum 120 seconds; gain 0.2'))this.visible=true;
+    if(line.startsWith('RichAudio shared output:')&&line.endsWith('Maximum 120 seconds; gain 0.2')) {
+      const due=this.tick(at);
+      if(due.length||['aborted','complete'].includes(this.state)||at>=this.limits.ready){this.record(at,'startup-evidence-rejected');return due;}
+      if(!this.visible){this.visible=true;this.record(at,'host-startup-observed');}
+    }
     if(line.startsWith('{')) {try{return this.status(JSON.parse(line),at);}catch{return this.abort(at,'malformed-status');}}
     return this.tick(at);
   }

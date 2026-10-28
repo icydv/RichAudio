@@ -1,6 +1,35 @@
 import {readFileSync,existsSync,statSync,realpathSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+export const executedPaths=Object.freeze({
+ entry:fileURLToPath(new URL('../Run-LaunchAdapter.mjs',import.meta.url)),
+ worker:fileURLToPath(new URL('./adapter-worker.mjs',import.meta.url)),
+ broker:fileURLToPath(new URL('../../.local/operator/OwnedTree.exe',import.meta.url))
+});
+export const operatorFiles=Object.freeze([executedPaths.entry,executedPaths.worker,...['adapter.mjs','approval-gate.mjs','policy.mjs','supervisor.mjs','stop-evidence.mjs'].map(f=>fileURLToPath(new URL(f,import.meta.url)))]);
+// Bounded source walk for the reviewed local ESM forms: static/dynamic literal
+// imports and literal new URL(..., import.meta.url) worker/module paths.
+// This does not claim to parse arbitrary JavaScript; source review complements it.
+export function moduleClosure(entries){
+ const seen=new Set(),pending=[...entries];
+ while(pending.length){
+  const file=path.resolve(pending.pop());if(seen.has(file))continue;seen.add(file);
+  const source=readFileSync(file,'utf8'),specs=[];
+  for(const re of [/^\s*(?:import|export)\s+(?:[^;]*?\bfrom\s*)?(['"])([^'"]+)\1/gm,/\bimport\s*\(\s*(['"])([^'"]+)\1\s*\)/g,/new URL\(\s*(['"])([^'"]+\.mjs)\1\s*,\s*import\.meta\.url/g])for(const m of source.matchAll(re))specs.push(m[2]);
+  for(const spec of specs){if(spec.startsWith('node:'))continue;if(!spec.startsWith('.'))throw Error('Unreviewed module resolution: '+spec);pending.push(path.resolve(path.dirname(file),spec));}
+ }
+ return [...seen].sort();
+}
+export function verifyExecutionBindings(p){
+ const key=f=>path.resolve(f).toLowerCase(),bound=new Set(p.bindings.map(b=>key(b.path)));
+ if(key(p.entry)!==key(executedPaths.entry)||key(p.broker)!==key(executedPaths.broker))throw Error('Executed adapter/broker path differs from reviewed candidate');
+ const manifest=JSON.parse(readFileSync(p.manifest,'utf8').replace(/^\uFEFF/,''));
+ if(manifest.Files.length!==26)throw Error('Deployment scope differs');
+ const required=[...moduleClosure([...operatorFiles,path.join(p.cwd,'tools/Run-Acoustics07.mjs')]),executedPaths.broker,p.node,p.executable,p.bridge,p.manifest,path.join(p.cwd,'tools/Run-Acoustics07.mjs'),...manifest.Files.map(f=>f.Source)];
+ for(const f of required)if(!bound.has(key(f)))throw Error('Executed/deployment file missing from bindings: '+path.basename(f));
+ return required;
+}
 export const hash=file=>createHash('sha256').update(readFileSync(file)).digest('hex').toUpperCase();
 export function preflight(file){
  const p=JSON.parse(readFileSync(file,'utf8').replace(/^\uFEFF/,''));
@@ -15,5 +44,6 @@ export function preflight(file){
  if(!statSync(p.cwd).isDirectory()||p.env.PATH!==path.dirname(p.node)||p.env.NODE_OPTIONS!==''||p.env.NODE_PATH!=='')throw Error('Environment drift');
  // CreateProcess search checks application/current/system directories before PATH.
  for(const dir of [path.dirname(p.executable),p.cwd,p.env.SystemRoot,path.join(p.env.SystemRoot,'System32')]){const f=path.join(dir,'node.exe');if(existsSync(f)&&realpathSync(f)!==realpathSync(p.node))throw Error('Shadow Node executable');}
+ verifyExecutionBindings(p);
  return p;
 }
