@@ -3,40 +3,40 @@
   "source": "original generated beacon; deterministic collision fixtures",
   "gameLaunched": false,
   "audioEndpointOpened": false,
-  "blocks": 344,
-  "frames": 176128,
-  "pcmFloat32SHA256": "03ea4f41a7f1fa4ba2fd96bfe57ef1e646ac54fccdc2e405a0775ed953a1c09c",
+  "blocks": 345,
+  "frames": 176640,
+  "pcmFloat32SHA256": "2a0a8251269177d9ad004698c88fcdaf6ad48df7b5f757aea04a08a9977337da",
   "exactControlReplay": true,
-  "matchedReflectionDifferenceRms": 0.003162799021426145,
+  "matchedReflectionDifferenceRms": 0.002889665551887191,
   "metrics": {
     "peak": 0.02589607983827591,
-    "rms": 0.0057621398196691705,
+    "rms": 0.00540124170768079,
     "clippedSamples": 0,
     "nonfiniteSamples": 0,
-    "zeroSamples": 247174,
+    "zeroSamples": 261510,
     "maximumAdjacentStep": 0.0005406842974480242
   },
   "rendererOwnedBytes": 2881152,
-  "processRssBytes": 73011200,
+  "processRssBytes": 73162752,
   "workerMs": {
-    "count": 344,
-    "median": 0.08019999999987704,
-    "p95": 0.2663000000000011,
-    "max": 9.514599999999973
+    "count": 345,
+    "median": 0.08519999999953143,
+    "p95": 0.29480000000012296,
+    "max": 9.527299999999968
   },
   "dspMs": {
-    "count": 344,
-    "median": 0.02819999999974243,
-    "p95": 0.11969999999999459,
-    "max": 2.011700000000019
+    "count": 345,
+    "median": 0.027999999999792635,
+    "p95": 0.10469999999986612,
+    "max": 2.248100000000022
   },
   "relay": {
     "forwarded": 4,
-    "transactions": 82,
-    "rejected": 5,
+    "transactions": 81,
+    "rejected": 6,
     "disconnects": 3,
-    "maximumAcceptedRoundTripMs": 1.1497,
-    "maximumObservedRoundTripMs": 37.3565
+    "maximumAcceptedRoundTripMs": 1.162,
+    "maximumObservedRoundTripMs": 36.7245
   },
   "sourceHistoryResets": 1,
   "unavailableHistoryFrames": 0,
@@ -45,7 +45,7 @@
   "subjectiveListening": "not performed",
   "scale": "declared model scale 10; physical GTA metres/materials unverified",
   "timing": "wall-paced fixture; no hardware or hard real-time scheduling claim",
-  "captureClockTransportAssertions": 48,
+  "captureClockTransportAssertions": 50,
   "assertionCountNote": "Includes output-ancestor checks; varies with checkout depth",
   "focusedNodeTests": 4,
   "combinedMilestonePercent": 60,

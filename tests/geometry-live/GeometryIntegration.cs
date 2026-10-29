@@ -127,12 +127,21 @@ namespace RichAudio.Beacon.Windows
                 using(var writer=new StreamWriter(memory,new System.Text.UTF8Encoding(true),1024,true)){writer.WriteLine("{\"type\":\"credit\",\"blocks\":1}");writer.Flush();}
                 bytes=memory.ToArray();}
             Check(bytes[0]==239&&bytes[1]==187&&bytes[2]==191,"legacy UTF-8 writer supplies a BOM before JSON");
-            using(var p=new Process{StartInfo=new ProcessStartInfo{FileName="node.exe",WorkingDirectory=root,
+            foreach(string mode in new[]{"single","double","later"})using(var p=new Process{StartInfo=new ProcessStartInfo{FileName="node.exe",WorkingDirectory=root,
                 Arguments="\""+Path.Combine(root,"tools","Run-Acoustics07.mjs")+"\" --geometry-input required",
                 UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true}}){
-                p.Start();var diagnostic=p.StandardError.ReadToEndAsync();p.StandardInput.BaseStream.Write(bytes,0,bytes.Length);p.StandardInput.BaseStream.Flush();
+                p.Start();var diagnostic=p.StandardError.ReadToEndAsync();
+                var stream=p.StandardInput.BaseStream;
+                // Framework Process primes its default AutoFlush writer during
+                // Start, before this fixture can own the underlying stream.
+                bool prefixed=p.StandardInput.Encoding.GetPreamble().Length>0;
+                if(mode=="double"&&!prefixed)stream.Write(bytes,0,3);
+                if(mode=="later"){byte[] first=System.Text.Encoding.UTF8.GetBytes("{\"type\":\"credit\",\"blocks\":1}\n");stream.Write(first,0,first.Length);}
+                int skip=mode=="single"&&prefixed?3:0;stream.Write(bytes,skip,bytes.Length-skip);
+                byte[] stop=System.Text.Encoding.UTF8.GetBytes("{\"type\":\"control\",\"command\":\"stop\"}\n");stream.Write(stop,0,stop.Length);stream.Flush();
                 if(!p.WaitForExit(3000)){p.Kill();throw new TimeoutException("legacy prefix reproduction");}
-                Check(diagnostic.Wait(1000)&&p.ExitCode==1&&diagnostic.Result.Contains("\ufeff"),"actual producer rejects the legacy BOM-prefixed frame");
+                Check(diagnostic.Wait(1000)&&(mode=="single"?p.ExitCode==0:p.ExitCode==1&&diagnostic.Result.Contains("\ufeff")),
+                    "actual producer stream-start BOM framing: "+mode);
             }
         }
         private static GeometryPacket ClockPacket(){var clock=new GeometryClock();var a=clock.Pair();Thread.Sleep(110);var b=clock.Pair();

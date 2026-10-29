@@ -643,8 +643,13 @@ function receive(m) {
   } else throw Error("Unknown message");
 }
 process.stdin.setEncoding("utf8");
+let initialControlChunk=true;
 process.stdin.on("data", (chunk) => {
   try {
+    // Framework Process can prime redirected stdin with the UTF-8 preamble
+    // before the host owns its writer. Allow exactly one stream-start BOM;
+    // later/repeated prefixes still fail ordinary JSON parsing and all bounds.
+    if(initialControlChunk&&chunk.length){initialControlChunk=false;if(chunk.charCodeAt(0)===0xfeff)chunk=chunk.slice(1);}
     inputText += chunk;
     const frameBound=options.geometry?liveGeometryLimits.bytes:16384;
     if (inputText.length > (options.geometry?liveGeometryLimits.bytes*2:65536)) throw Error("Control buffer bound");

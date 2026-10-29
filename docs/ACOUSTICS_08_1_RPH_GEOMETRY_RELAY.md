@@ -64,25 +64,25 @@ The first command compiles/runs the real C# components with deterministic analyt
 ./tools/Build-GeometryLive.ps1 -SdkPath <authentic-private-pinned-SDK-path>
 ```
 
-The 48 local capture/clock/transport/host assertions cover finite qualified support, query budget, on-foot/stationary/interior/session gates, non-renewal of old observations, actual peer rejection, oversize frames, inconsistent clock pairs, listener-context rejection and fresh private fixture destinations. Four focused Node tests cover staging/commit admission, slow/stale/reordered/unproven delivery, cancellation and uncertainty intervals. The end-to-end scenario includes wall/ground introduction and replacement, moving/rotating camera, deliberately delayed transport, invalid collision support, a new valid stream in a new interior, original expiry while the listener continues, and disconnect. The assertion count includes checking each output ancestor; it therefore varies with checkout depth.
+The 50 local capture/clock/transport/host assertions cover finite qualified support, query budget, on-foot/stationary/interior/session gates, non-renewal of old observations, actual peer rejection, oversize frames, inconsistent clock pairs, listener-context rejection and fresh private fixture destinations. Four focused Node tests cover staging/commit admission, slow/stale/reordered/unproven delivery, cancellation and uncertainty intervals. The end-to-end scenario includes wall/ground introduction and replacement, moving/rotating camera, deliberately delayed transport, invalid collision support, a new valid stream in a new interior, original expiry while the listener continues, and disconnect. The assertion count includes checking each output ancestor; it therefore varies with checkout depth.
 
-The new integration's initial hosted runs exposed a non-ASCII prefix before the first JSON control frame. A focused reproduction writes the legacy UTF-8 StreamWriter BOM into the actual producer and verifies its rejection. The host writer now explicitly uses UTF-8 without a BOM instead of inheriting the console-dependent Process input encoding. Default encoding/preamble diagnostics, bounded terminal errors and private failure logs support future diagnosis. No console/system setting or parser validation was changed. This evidence does not identify the separate historical CI failure's cause.
+The new integration's initial hosted runs exposed U+FEFF before the first JSON control frame; the same runner reported default redirected input encoding UTF-8 with preamble EF-BB-BF. Framework Process primes that default writer during Start, before the host can own its byte stream. The host now writes subsequent controls as explicit BOM-free UTF-8, and the producer recognizes exactly one optional stream-start UTF-8 BOM. Actual-producer regressions verify that route and reject double or later prefixes. Neutral listener framing and all JSON/schema/queue limits remain unchanged; no console/system setting was changed. Bounded terminal diagnostics and private failure logs are retained. This new integration failure does not identify the separate historical CI failure's cause.
 
 The checker reproduces **every actual streamed Float32 sample exactly** using the existing renderer with the recorded controls and original beacon synthesis. It then removes reflected orders while keeping those same source samples, histories, poses, direct controls and startup envelope. The resulting nonzero difference demonstrates an acoustic contribution, rather than a diagnostic-only change. Both first- and second-order reflected paths occur.
 
 | Local focused run | Result |
 |---|---:|
-| Credited blocks / stereo frames | 344 / 176,128 |
-| Matched reflection-difference RMS | 0.00316280 |
+| Credited blocks / stereo frames | 345 / 176,640 |
+| Matched reflection-difference RMS | 0.00288967 |
 | PCM peak / maximum adjacent step | 0.02589608 / 0.00054068 |
 | Clipped/nonfinite samples; limiter activation | 0 / 0 / 0 |
 | Unavailable weighted history reads; cursor resets; path overflow | 0 / 0 / 0 |
 | Source-history initializations / geometry streams | 1 / 2 |
-| Measured maximum accepted forwarding RTT | 1.1497 ms |
-| Deliberately delayed maximum RTT, rejected | 37.3565 ms |
-| Worker p95 / maximum | 0.2663 / 9.5146 ms |
-| DSP p95 / maximum | 0.1197 / 2.0117 ms |
-| Renderer-owned storage / producer RSS | 2,881,152 / 73,011,200 bytes |
+| Measured maximum accepted forwarding RTT | 1.1620 ms |
+| Deliberately delayed maximum RTT, rejected | 36.7245 ms |
+| Worker p95 / maximum | 0.2948 / 9.5273 ms |
+| DSP p95 / maximum | 0.1047 / 2.2481 ms |
+| Renderer-owned storage / producer RSS | 2,881,152 / 73,162,752 bytes |
 
 Valid steady-state windows are checked for unexpected silence; unavailable windows complete bounded release. The previous PR #70 controlled-feed PCM fingerprint remains unchanged. The required offline suite and final focused integration passed locally; hosted CI status is reported against the final PR contents.
 
