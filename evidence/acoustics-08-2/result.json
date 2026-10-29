@@ -9,6 +9,14 @@
     "ownedGpuBufferBytes": 270352,
     "observedProcessLocalVideoBytes": 7610368
   },
+  "firstHostedRun": {
+    "run": 40906613232,
+    "head": "4797db5bb05051d8dd92d8472ce142847f9c65a6",
+    "conclusion": "success",
+    "observedAdapter": "Microsoft Basic Render Driver",
+    "hardwareValidation": false,
+    "finding": "Flag-only software detection admitted Basic Render Driver; native and client admission must exclude its documented identity. This run is not hardware proof. RTX measurements are independent."
+  },
   "gameLaunched": false,
   "audioEndpointOpened": false,
   "subjectiveListening": "not performed",

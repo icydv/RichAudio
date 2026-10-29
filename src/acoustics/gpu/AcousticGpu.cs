@@ -10,6 +10,20 @@ using System.Text;
 using System.Threading;
 using System.Web.Script.Serialization;
 namespace RichAudio.AcousticGpu {
+    internal static class HardwareAdapterPolicy {
+        // DXGI documents that a primary Microsoft Basic Render Driver may have
+        // Flags==0. The flag alone is therefore not proof of hardware compute.
+        internal static bool IsEligible(Native.AdapterDesc desc) {
+            if((desc.Flags&2)!=0)return false;
+            if(desc.Vendor==0x1414&&desc.Device==0x008c)return false;
+            string name=System.Text.RegularExpressions.Regex.Replace((desc.Description??"").TrimEnd('\0').Trim(),"\\s+"," ");
+            if(name.Length==0)return false;
+            foreach(string software in new[]{"Microsoft Basic Render Driver","Microsoft Basic Display Adapter","Microsoft WARP","Microsoft WARP Adapter",
+                "Microsoft WARP Renderer","Microsoft Software Rasterizer","Microsoft Reference Rasterizer","WARP","Software Adapter"})
+                if(name.Equals(software,StringComparison.OrdinalIgnoreCase))return false;
+            return true;
+        }
+    }
     internal static class Native {
         [DllImport("dxgi.dll")] internal static extern int CreateDXGIFactory1(ref Guid iid,out IntPtr factory);
         [DllImport("d3d11.dll")] internal static extern int D3D11CreateDevice(IntPtr adapter,uint driver,IntPtr software,uint flags,uint[] levels,uint count,uint sdk,out IntPtr device,out uint level,out IntPtr context);
@@ -66,7 +80,7 @@ namespace RichAudio.AcousticGpu {
             var enumerate=Native.Method<Native.EnumAdapter>(factory,12);Native.AdapterDesc best=new Native.AdapterDesc();bool selected=false;
             for(uint i=0;i<16;i++){IntPtr candidate;int hr=enumerate(factory,i,out candidate);if(hr<0)break;
                 Native.AdapterDesc desc;try{Native.Check(Native.Method<Native.GetDesc>(candidate,10)(candidate,out desc),"GetDesc1");
-                    if((desc.Flags&2)!=0)continue;
+                    if(!HardwareAdapterPolicy.IsEligible(desc))continue;
                     if(!selected||desc.DedicatedVideo.ToUInt64()>best.DedicatedVideo.ToUInt64()){
                         IntPtr d,c;uint level;int result=Native.D3D11CreateDevice(candidate,0,IntPtr.Zero,0,new uint[]{0xb000},1,7,out d,out level,out c);
                         if(result<0){Native.Release(ref d);Native.Release(ref c);continue;}
@@ -157,7 +171,8 @@ namespace RichAudio.AcousticGpu {
             stream.Write(header,0,32);stream.Write(json,0,json.Length);stream.Write(masks,0,masks.Length);stream.Flush();}
         private static void Validate(byte[] bytes,int stride,bool surface,int count){for(int at=0;at<count;at+=stride){for(int k=0;k<stride;k+=4){float v=BitConverter.ToSingle(bytes,at+k);if(float.IsNaN(v)||float.IsInfinity(v)||Math.Abs(v)>512)throw new InvalidDataException("local finite bounds");}
             if(surface){double norm=0;for(int k=0;k<3;k++){float n=BitConverter.ToSingle(bytes,at+16+k*4);norm+=n*n;if(BitConverter.ToSingle(bytes,at+32+k*4)>BitConverter.ToSingle(bytes,at+48+k*4))throw new InvalidDataException("surface bounds");}if(norm<.99||norm>1.01)throw new InvalidDataException("surface normal");}}}
-        public static int Main(string[] args){Device device=null;var capability=new Dictionary<string,object>();try{try{device=new Device();capability=device.Capability;}catch(Exception e){capability=new Dictionary<string,object>{{"schemaVersion",1},{"supported",false},{"hardware",false},{"api","Direct3D11-ComputeShader5"},{"reason",e.GetType().Name+":"+e.HResult.ToString("X8")}};}
+        public static int Main(string[] args){Device device=null;var capability=new Dictionary<string,object>();try{try{device=new Device();capability=device.Capability;}catch(Exception e){capability=new Dictionary<string,object>{{"schemaVersion",1},{"supported",false},{"hardware",false},{"api","Direct3D11-ComputeShader5"},
+                {"reason",e is NotSupportedException?"No supported hardware compute adapter; software renderers excluded":e.GetType().Name+":"+e.HResult.ToString("X8")}};}
             if(args.Length>0&&args[0]=="--probe"){Console.WriteLine(Json.Serialize(capability));return capability.ContainsKey("supported")&&(bool)capability["supported"]?0:2;}
             var input=Console.OpenStandardInput();var output=Console.OpenStandardOutput();Initial(output,capability);if(device==null)return 0;uint previous=0;var life=Stopwatch.StartNew();
             var segmentInput=new byte[Device.Segments*32];var surfaceInput=new byte[Device.Surfaces*64];

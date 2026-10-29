@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([switch]$Probe,[switch]$RequireHardware)
+param([switch]$Probe,[switch]$RequireHardware,[switch]$Tests)
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
 $out=Join-Path $repo 'build\acoustic-gpu'
@@ -11,6 +11,14 @@ $shader=Join-Path $repo 'src\acoustics\gpu\FiniteCull.hlsl'
 $exe=Join-Path $out 'RichAudio.AcousticGpu.exe'
 & $compiler /nologo /optimize+ /warnaserror+ /platform:x64 /langversion:5 /r:System.Web.Extensions.dll ('/resource:'+$shader+',RichAudio.FiniteCull') ('/out:'+$exe) $source
 if($LASTEXITCODE-ne0){throw 'Acoustic GPU helper compilation failed'}
+if($Tests){
+    $testSource=Join-Path $repo 'tests\gpu\TestAdapterClassification.cs'
+    $testExe=Join-Path $out 'RichAudio.AcousticGpu.Classifier.Tests.exe'
+    & $compiler /nologo /optimize+ /warnaserror+ /platform:x64 /langversion:5 /r:System.Web.Extensions.dll /main:RichAudio.AcousticGpu.TestAdapterClassification ('/out:'+$testExe) $source $testSource
+    if($LASTEXITCODE-ne0){throw 'Actual GPU adapter classifier fixture compilation failed'}
+    & $testExe
+    if($LASTEXITCODE-ne0){throw 'Actual GPU adapter classifier regressions failed'}
+}
 if($Probe-or$RequireHardware){
     # Raw helper capability is private local IPC and includes adapter identity.
     # Public build/probe output has an explicit allowlist, never adapter LUID.

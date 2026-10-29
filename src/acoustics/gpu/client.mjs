@@ -10,6 +10,11 @@ const coordinate=v=>Array.isArray(v)&&v.length===3&&v.every(x=>Number.isFinite(x
 const stageCpuStamp=()=>typeof process.threadCpuUsage==='function'?process.threadCpuUsage():process.cpuUsage();
 const stageCpuMs=start=>{const end=stageCpuStamp();return (end.user-start.user+end.system-start.system)/1000;};
 const stageCpuAccounting=typeof process.threadCpuUsage==='function'?'Node-thread-synchronous-stages':'Node-process-synchronous-stages-includes-other-threads';
+const knownSoftwareNames=new Set(['microsoft basic render driver','microsoft basic display adapter','microsoft warp','microsoft warp adapter',
+  'microsoft warp renderer','microsoft software rasterizer','microsoft reference rasterizer','warp','software adapter']);
+const softwareAdapter=cap=>(Number.isInteger(cap.adapterFlags)&&(cap.adapterFlags&2)!==0)||
+  (cap.vendorId===0x1414&&cap.deviceId===0x008c)||
+  knownSoftwareNames.has(String(cap.device??'').replace(/\0+$/,'').trim().replace(/\s+/g,' ').toLowerCase());
 export class AcousticGpuClient {
   constructor({executable=defaultGpuExecutable,initializationDeadlineMs=5000}={}){
     check(typeof executable==='string'&&initializationDeadlineMs>=100&&initializationDeadlineMs<=10000,'GPU helper options');
@@ -42,6 +47,7 @@ export class AcousticGpuClient {
         if(this.buffer.length<4)return;const n=this.buffer.readUInt32LE(0);check(n>0&&n<=8192,'GPU capability frame bound');if(this.buffer.length<4+n)return;
         const cap=JSON.parse(this.buffer.subarray(4,4+n).toString('utf8'));this.buffer=this.buffer.subarray(4+n);
         check(cap&&cap.schemaVersion===1&&typeof cap.supported==='boolean'&&typeof cap.hardware==='boolean','GPU capability schema');
+        check(!cap.supported||!softwareAdapter(cap),'GPU software adapter is not hardware acceleration');
         check(!cap.supported||(cap.hardware&&cap.api==='Direct3D11-ComputeShader5'&&typeof cap.device==='string'&&cap.device.length<=128&&cap.maximumSegments===4096&&cap.maximumSurfaces===128),'GPU hardware capability');
         this.cap=Object.freeze(cap);clearTimeout(this.initialTimer);this.resolveCapability(cap);this.resolveCapability=null;
       }

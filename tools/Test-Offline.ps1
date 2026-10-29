@@ -7,7 +7,7 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
-    & (Join-Path $repo 'tools\Build-AcousticGpu.ps1')
+    & (Join-Path $repo 'tools\Build-AcousticGpu.ps1') -Tests
     & node --test tests/Test-AcousticQuality.mjs tests/Test-AcousticGpuScenes.mjs tests/Test-AcousticAcceleration.mjs tests/Test-AcousticAccelerationBenchmark.mjs
     if($LASTEXITCODE-ne0){throw 'Acoustic quality, CPU fallback, adaptive selection or benchmark contracts failed.'}
     # Hardware checks are deliberately sequential: concurrent compute probes

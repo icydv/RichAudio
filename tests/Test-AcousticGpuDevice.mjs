@@ -9,6 +9,20 @@ test('missing compute helper reports unavailable rather than claiming GPU execut
   const cap=await client.capability();assert.equal(cap.supported,false);assert.equal(cap.hardware,false);
   await assert.rejects(client.dispatch({}),/GPU unavailable/);client.close();
 });
+test('software Basic/WARP claims from older helpers cannot become hardware capability',async()=>{
+  const base={schemaVersion:1,supported:true,hardware:true,api:'Direct3D11-ComputeShader5',maximumSegments:4096,maximumSurfaces:128};
+  for(const identity of [
+    {device:'Microsoft Basic Render Driver',vendorId:0x1414,deviceId:0x008c},
+    {device:'  microsoft  basic render driver  ',vendorId:0,deviceId:0},
+    {device:'Localized or unknown renderer',vendorId:0x1414,deviceId:0x008c},
+    {device:'Microsoft WARP',vendorId:0,deviceId:0},
+    {device:'NVIDIA GeForce RTX 2080 SUPER',vendorId:0x10de,deviceId:0x1e81,adapterFlags:2},
+  ]){
+    const client=new AcousticGpuClient();let resolve;const result=new Promise(yes=>{resolve=yes;});client.resolveCapability=resolve;
+    const json=Buffer.from(JSON.stringify({...base,...identity})),frame=Buffer.alloc(json.length+4);frame.writeUInt32LE(json.length);json.copy(frame,4);
+    client.receive(frame);const cap=await result;assert.equal(cap.supported,false);assert.equal(cap.hardware,false);assert.match(cap.reason,/software adapter/);assert.equal(client.closed,true);
+  }
+});
 
 // Protocol-only fixture: synthetic completion frames exercise rejection logic;
 // these tests do not count as hardware verification or invoke a mock GPU kernel.
