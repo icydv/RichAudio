@@ -10,6 +10,7 @@ import {
 } from "../src/acoustics/streaming/orientation-presentation.mjs";
 import { createHash } from "node:crypto";
 import { DEFAULT_BEACON_FREQUENCY_HZ, DEFAULT_BEACON_LEVEL, validateBeaconFrequencyHz, validateBeaconLevel } from "../src/acoustics/streaming/beacon-frequency.mjs";
+import { liveGeometryLimits } from '../src/acoustics/streaming/observed-live.mjs';
 
 const args = process.argv.slice(2),
   options = {
@@ -25,6 +26,7 @@ const args = process.argv.slice(2),
     diagnostics: false,
     orientation: false,
     barrierFrame: null,
+    geometry: false,
   };
 for (let i = 0; i < args.length; i += 2) {
   if (args[i] === "--scene") options.scene = args[i + 1];
@@ -40,6 +42,7 @@ for (let i = 0; i < args.length; i += 2) {
     options.trace = true;
   else if (args[i] === "--listener-input" && args[i + 1] === "required")
     options.required = true;
+  else if (args[i] === '--geometry-input' && args[i+1] === 'required') options.geometry=true;
   else if (args[i] === "--history-diagnostics" && args[i + 1] === "yes")
     options.diagnostics = true;
   else if (args[i] === "--experimental-orientation" && args[i + 1] === "50ms")
@@ -68,6 +71,10 @@ if ((options.frequencyHz !== DEFAULT_BEACON_FREQUENCY_HZ || options.level !== DE
   throw Error("Custom frequency/level is supported for the harmonic beacon only");
 if (options.orientation && options.delayMs !== 100)
   throw Error("Orientation experiment requires the 100 ms spatial policy");
+if(options.geometry){
+  if(options.orientation)throw Error('Observed geometry uses the existing buffered pose policy; orientation experiment unsupported');
+  options.required=true;
+}
 if (
   options.barrierFrame !== null &&
   (!options.headless ||
@@ -84,13 +91,14 @@ const FS = 48000,
 const renderer = new StreamingRenderer({
     sourceIds: ids,
     historyDiagnostics: options.diagnostics,
+    generationReleaseGuard:options.geometry,
   }),
   worker = new Worker(
     new URL(
       "../src/acoustics/streaming/simulation-worker.mjs",
       import.meta.url,
     ),
-    { workerData: { scene: options.scene } },
+    { workerData: { scene: options.scene, geometry:options.geometry, sourceIds:ids, controlledClock:options.headless } },
   );
 const listenerPlayout = new ListenerPlayout({ delayMs: options.delayMs });
 const orientation = options.orientation ? new OrientationPresentation() : null;
@@ -137,6 +145,7 @@ let credits = 0,
   pending = null,
   inputText = "",
   external = null;
+let geometryEvents=[];
 let lastControl = null,
   lastPlayout = null;
 const phase = new Float64Array(options.sources);
@@ -188,6 +197,7 @@ async function finish(error) {
     historyDiagnostics: renderer.historyDiagnostics,
     startup,
     simulation: lastControl?.stats ?? null,
+    geometry: lastControl?.geometry ?? null,
     listenerPlayout: listenerPlayout.stats,
     orientation: orientation?.stats ?? null,
     ownedArrayBytes: renderer.ownedArrayBytes,
@@ -219,7 +229,10 @@ function simulate(snapshot, now) {
       reject(Error("Simulation worker deadline exceeded"));
     }, 1000);
     pending = { id, resolve, reject, timer };
-    worker.postMessage({ id, snapshot, now });
+    const events=geometryEvents;geometryEvents=[];
+    worker.postMessage({ id, snapshot, now, geometryEvents:events,
+      anchor:options.geometry&&external?{state:external.state,receiptAgeMs:external.receiptAgeMs,
+        queueAgeMs:Math.max(0,receiptClock()-external.receivedAt),dispatchNs:process.hrtime.bigint().toString()}:null });
   });
 }
 function baseListener() {
@@ -255,6 +268,15 @@ function sourceStates(time, externalMode) {
   });
 }
 function snapshot(now) {
+  if(options.geometry){
+    if(!external)return null;
+    lastPlayout=listenerPlayout.sample(now,receiptClock());
+    const s=lastPlayout.state??external.state;
+    stats.listenerMode='mapped-native-observed-geometry';
+    return {time:now,session:s.session,generation:s.generation,paused:s.paused,emitting:enabled,
+      listener:{...s,valid:Boolean(lastPlayout.state)&&
+        !(lastPlayout.mode==='predicted'&&s.velocityKind==='unavailable')}};
+  }
   if (!external)
     return {
       time: now,
@@ -375,7 +397,9 @@ async function pump() {
       lastControl = result.control;
       const identity = Object.values(lastControl.sourceGenerations).join(":");
       if (identity && startupIdentity !== identity) {
-        startup.reset(renderer.frame);
+        // Once primed, geometry-mode generation transitions use the renderer's
+        // existing old-path release bank while new retarded history becomes valid.
+        if(!options.geometry || startup.readyFrame===null)startup.reset(renderer.frame);
         lifecycle =
           startupIdentity === null
             ? "initial-priming"
@@ -463,6 +487,8 @@ async function pump() {
           orientationMilliseconds,
           simulationMilliseconds: result.milliseconds,
           paths: lastControl.paths.length,
+          sourceGenerations: options.geometry?lastControl.sourceGenerations:undefined,
+          geometry: lastControl.geometry,
           activePaths: renderer.activePaths,
           orientation: orientationDiagnostic,
           spatialFingerprint,
@@ -583,6 +609,10 @@ function receive(m) {
     };
     stats.listenerMessages++;
     stats.maxReceiptAgeMs = Math.max(stats.maxReceiptAgeMs, m.receiptAgeMs);
+  } else if(options.geometry && ['geometry-config','geometry','owned-sources'].includes(m.type)){
+    if(geometryEvents.length>=liveGeometryLimits.events || Buffer.byteLength(JSON.stringify(m))>liveGeometryLimits.bytes)
+      throw Error('Bounded geometry input queue');
+    geometryEvents.push(m);
   } else if (m.type === "headless-release" && options.headless && barrier) {
     const b = barrier;
     barrier = null;
@@ -594,15 +624,16 @@ process.stdin.setEncoding("utf8");
 process.stdin.on("data", (chunk) => {
   try {
     inputText += chunk;
-    if (inputText.length > 65536) throw Error("Control buffer bound");
+    const frameBound=options.geometry?liveGeometryLimits.bytes:16384;
+    if (inputText.length > (options.geometry?liveGeometryLimits.bytes*2:65536)) throw Error("Control buffer bound");
     let end;
     while ((end = inputText.indexOf("\n")) >= 0) {
       const line = inputText.slice(0, end);
       inputText = inputText.slice(end + 1);
-      if (line.length > 16384) throw Error("Control frame bound");
+      if (line.length > frameBound) throw Error("Control frame bound");
       if (line.trim()) receive(JSON.parse(line));
     }
-    if (inputText.length > 16384) throw Error("Unterminated control bound");
+    if (inputText.length > frameBound) throw Error("Unterminated control bound");
   } catch (e) {
     void finish(e);
   }
