@@ -58,9 +58,9 @@ test('filesystem flush failures cannot claim complete or playable owned output',
 
 test('service restart refreshes private capability and geometry, never resumes recording',async()=>{
  const root=temp();let service=await startSoundMap({root,port:0});const descriptor=path.join(service.privateRoot,'service.json'),port=service.server.address().port,client=new SoundMapClient(descriptor);
- const pause=()=>new Promise(resolve=>setTimeout(resolve,120));
- try{const value=fixture();client.offer(value.frame,value.geometry);await pause();assert.equal(service.status().accepted,1);const id=service.recorder.start().id;await service.close();service=await startSoundMap({root,port});
- client.offer({...value.frame,sequence:2});await pause();client.offer({...value.frame,sequence:3});await pause();assert.equal(service.status().accepted,1);assert.equal(service.recorder.active,null);assert.ok(client.stats.errors>=1);assert.equal(service.recorder.open(id).manifest.terminationReason,'service-shutdown');
+ const until=async predicate=>{const deadline=performance.now()+3000;while(!predicate()){assert.ok(performance.now()<deadline,'bounded network-worker completion');await new Promise(resolve=>setTimeout(resolve,5));}};
+ try{const value=fixture();client.offer(value.frame,value.geometry);await until(()=>service.status().accepted===1&&!client.busy);assert.equal(service.status().accepted,1);const id=service.recorder.start().id;await service.close();service=await startSoundMap({root,port});
+ client.offer({...value.frame,sequence:2});await until(()=>client.stats.errors>=1&&!client.busy);client.offer({...value.frame,sequence:3});await until(()=>service.status().accepted===1&&!client.busy);assert.equal(service.status().accepted,1);assert.equal(service.recorder.active,null);assert.ok(client.stats.errors>=1);assert.equal(service.recorder.open(id).manifest.terminationReason,'service-shutdown');
  const invalid=path.join(service.privateRoot,'invalid.json');fs.writeFileSync(invalid,'x'.repeat(8192));assert.throws(()=>readServiceConfiguration(invalid),/private/i);
  }finally{await client.close();await service.close();clean(root);}
 });

@@ -29,6 +29,6 @@ The historical audible +24 dB stationary audition had peak **0.055147**, RMS **0
 
 ## Revised candidate
 
-The fresh private package is `.local/combined-083-review-03`; previous packages remain preserved. It binds this follow-up source and current host with the explicit +12 dB argument. Existing plugin, GPU helper, menu behavior, Balanced/Auto startup, two bounded sensing sessions, ten-minute separate loading allowance, host +45 second Stop target and 60-second maximum audio phase remain in scope. Approval and deployment journal are absent. No deployment, launch, endpoint, playback or live recording was performed.
+The fresh private package is `.local/combined-083-review-04`; previous packages remain preserved. It binds this follow-up source and current host with the explicit +12 dB argument. Existing plugin, GPU helper, menu behavior, Balanced/Auto startup, two bounded sensing sessions, ten-minute separate loading allowance, host +45 second Stop target and 60-second maximum audio phase remain in scope. Approval and deployment journal are absent. No deployment, launch, endpoint, playback or live recording was performed.
 
 Reproduce affected checks with `node --test tests/Test-BeaconOutputTrim.mjs tests/Test-GeometryAudition.mjs tests/Test-BeaconFrequency.mjs tests/Test-SoundMapProducer.mjs tests/Test-RealtimeGeometry.mjs` and `pwsh -NoProfile -File tools/Build-AcousticsHost.ps1 -Tests`. The same tests are registered in the existing offline runner; no launcher or new test infrastructure is added.

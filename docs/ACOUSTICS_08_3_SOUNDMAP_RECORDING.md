@@ -154,7 +154,7 @@ menu/controller/geometry behavior is established by these tests.
 
 ## One proposed supervised GTA test
 
-The follow-up [bounded audition profile](ACOUSTICS_08_3_AUDITION_LEVEL.md) supersedes the initial untrimmed candidate below: fresh package `combined-083-review-03`, ten-minute loading allowance and explicitly guarded +12 dB trim. All other test limits remain unchanged. Exact bindings are presented separately for fresh approval.
+The follow-up [bounded audition profile](ACOUSTICS_08_3_AUDITION_LEVEL.md) supersedes the initial untrimmed candidate below: fresh package `combined-083-review-04`, ten-minute loading allowance and explicitly guarded +12 dB trim. All other test limits remain unchanged. Exact bindings are presented separately for fresh approval.
 
 The fresh private candidate is `.local/combined-083-review-01`. Its manifest binds
 the staged application, current host/GPU helper, original-generated beacon,
