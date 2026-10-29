@@ -59,7 +59,7 @@ def analyze(source, destination, sample_rate=48000, channels=2, intervals=None):
     rms = np.sqrt(np.array([np.mean(mono[k:k+n] ** 2) for k in starts]))
     peak = float(np.max(np.abs(samples)))
     sample_rms = float(np.sqrt(np.mean(samples ** 2)))
-    peaks, _ = signal.find_peaks(spectrum)
+    peaks, _ = signal.find_peaks(spectrum, height=max(float(spectrum.max()) * 1e-6, 1e-30))
     peaks = sorted(peaks, key=lambda k: spectrum[k], reverse=True)[:12]
     measured_intervals = []
     for start, end in intervals or []:
@@ -67,7 +67,7 @@ def analyze(source, destination, sample_rate=48000, channels=2, intervals=None):
         if not len(x):
             continue
         ff, pp = signal.welch(x, fs=sample_rate, nperseg=min(16384, len(x)))
-        indices, _ = signal.find_peaks(pp)
+        indices, _ = signal.find_peaks(pp, height=max(float(pp.max()) * 1e-6, 1e-30))
         indices = sorted(indices, key=lambda k: pp[k], reverse=True)[:8]
         measured_intervals.append({'start': start, 'end': end,
                                   'rmsDbfs': float(20 * np.log10(max(np.sqrt(np.mean(x*x)), 1e-12))),
@@ -93,7 +93,7 @@ def analyze(source, destination, sample_rate=48000, channels=2, intervals=None):
             'spectralCentroidHz': float(np.sum(f*spectrum)/max(np.sum(spectrum), 1e-30)),
             'bandPowerFractions': band_report, 'prominentHz': [round(float(f[k]), 2) for k in peaks],
             'intervals': measured_intervals, 'loudness': loudness(source),
-            'method': '4096-point Hann STFT, 512 hop, no padding; common dBFS display; not acoustic SPL'}
+            'method': '4096-point Hann STFT, 512 hop, no padding; peaks >= -60 dB relative power; common dBFS display; not acoustic SPL'}
 
 
 def main():

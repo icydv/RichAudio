@@ -6,6 +6,8 @@ through the existing causal acoustic engine. It is an implementation and offline
 validation milestone. Human realism/acceptance, live vehicle attachment, measured
 SPL and GTA-load timing are unverified.
 
+[Measured results and timing limitations](VEHICLE_PHYSICS_01_RESULTS.md).
+
 Base: `d6390f1c125264d4fa6f0c1e9b53eddeb1f15046` (reviewed PR #73).
 Branch: `feature/vehicle-physics-reference-engine`. The draft targets the frozen
 `baseline/vehicle-physics-01-d6390f1` ref so later PR #73 changes do not silently
