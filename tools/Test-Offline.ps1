@@ -30,6 +30,9 @@ try {
     if($LASTEXITCODE-ne0){throw 'Actual in-game acoustic settings integration failed.'}
     & node --test tests/Test-GeometryRelay.mjs
     if($LASTEXITCODE-ne0){throw 'Measured geometry relay admission failed.'}
+    & node --test tests/Test-ListenerOnlyStartup.mjs
+    if($LASTEXITCODE-ne0){throw 'Listener-only source context, conditional paths or geometry transitions failed.'}
+    & (Join-Path $repo 'tools\Test-ListenerStartup.ps1')
     & (Join-Path $repo 'tools\Test-GeometryLive.ps1')
     & node --test tests/Test-RealtimeGeometry.mjs
     if($LASTEXITCODE -ne 0){throw 'Actual observed geometry worker/RA07 integration failed.'}

@@ -87,7 +87,9 @@ export class CausalSimulation {
     this.scene = scene;
     this.candidates = scene ? candidatePaths(scene,this.processingSettings?{maxReflectors:this.processingSettings.maxReflectors}:{}) : [];
     this.geometryEpoch++;
-    this.previous.clear(); // Never interpret a new reflector delay as source velocity.
+    // A geometry replacement changes reflector identity, not the existing
+    // direct arrival history. Preserve its retarded-time rate/smoothing.
+    for(const id of this.previous.keys())if(!id.includes(':direct:g'))this.previous.delete(id);
     this.stats.sceneReplacements++;
   }
   setProcessingSettings({pathBudget,maxReflectors,earlyReflections=true}) {
@@ -215,7 +217,7 @@ export class CausalSimulation {
     this.stats.updates++;
     const prepareSequence=++this.prepareSequence,observations=this.stats.observations;
     const latest = this.records.at(-1), paths=[],sourceGenerations={};
-    const soundMap=this.captureSoundMap?{now,geometryTimeMs:geometryTimeMs??(this.scene?this.scene.tile.createdAt+now*1000:null),
+    const soundMap=this.captureSoundMap?{now,geometryTimeMs:geometryTimeMs??(this.scene?.tile?this.scene.tile.createdAt+now*1000:null),
       latest,listener:null,sources:[],candidates:[],unavailableSources:[],reason:null}:null;
     if(soundMap)this.soundMapState=soundMap;
     if (!latest){this.availablePaths=0;
@@ -362,7 +364,7 @@ export class CausalSimulation {
   async updateAccelerated(now,options,backend){
     const frame=this.prepareUpdate(now,options);
     if(frame.terminal)return this.completeUpdate(frame);
-    const queries=await backend.query(frame.scene.tile,frame.segments,{generation:frame.geometryEpoch});
+    const queries=frame.scene.directPath?null:await backend.query(frame.scene.tile,frame.segments,{generation:frame.geometryEpoch});
     return this.completeUpdate(frame,queries);
   }
 }

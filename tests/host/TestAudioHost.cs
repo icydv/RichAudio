@@ -99,6 +99,7 @@ namespace RichAudio.Beacon.Tests
                     unopened.Muted=false;typeof(HostProgram).GetField("output",flags).SetValue(null,unopened);
                     HostProgram.ListenerEnded(new RichAudio.Beacon.Transport.TransportResult{Outcome="failed",Stage="schema",Code="invalid-schema",Terminal=true});
                     Check(unopened.Muted,"terminal transport immediately mutes without opening endpoint");
+                    Check((bool)typeof(WasapiOutput).GetField("stop",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(unopened),"terminal transport stops consumption before its producer ends");
                     Check((bool)typeof(HostProgram).GetField("stop",flags).GetValue(null),"terminal transport stops host");
                     Check(((string)typeof(HostProgram).GetField("producerError",flags).GetValue(null)).Contains("schema/invalid-schema"),"terminal status visible");
                     typeof(HostProgram).GetField("output",flags).SetValue(null,null);

@@ -36,7 +36,7 @@ namespace RichAudio.Beacon.Tests
                 using(var client=new NamedPipeClientStream(".",pipe,PipeDirection.InOut,PipeOptions.Asynchronous)){
                     client.Connect(3000);
                     if(mode=="disconnect")return;
-                    if(mode=="controlled"){TransportStop.Write(client,TransportStop.Frame());TransportStop.Ack(client,TransportStop.Stopped);return;}
+                    if(mode=="controlled"||mode=="audio-stop-fault"){TransportStop.Write(client,TransportStop.Frame());TransportStop.Ack(client,TransportStop.Stopped);return;}
                     var state=Protocol.Synthetic(new string('a',32),0,0);state.ObservationTicks=Stopwatch.GetTimestamp()+Stopwatch.Frequency;
                     TransportStop.Write(client,Protocol.Frame(state));
                     try{TransportStop.ReadAck(client);}catch(InvalidDataException){}catch(IOException){}
@@ -44,15 +44,23 @@ namespace RichAudio.Beacon.Tests
             }catch(Exception error){senderError=error;}});sender.IsBackground=true;
             try{
                 if(mode=="evidence-failure")Directory.CreateDirectory(Path.Combine(directory,"renderer-diagnostics.txt"));
-                sender.Start();int result=HostProgram.RunShutdownFixture(root,directory,pipe,mode=="secondary");Require(sender.Join(3000),"sender terminated");Require(senderError==null,"actual pipe sender failure: "+senderError);
+                sender.Start();int result=HostProgram.RunShutdownFixture(root,directory,pipe,mode=="secondary",null,
+                    mode=="audio-stop-fault"||mode=="audio-after-listener-fault"?"InvalidOperationException: fixture producer starvation during output stop":null);
+                Require(sender.Join(3000),"sender terminated");Require(senderError==null,"actual pipe sender failure: "+senderError);
                 var summary=new JavaScriptSerializer().Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(directory,"host-result.json")));
                 Require((bool)summary["deviceFreeFixture"],"endpoint was not started");Require((bool)summary["ownedThreadsJoined"],"owned Process stream threads joined");
                 var transport=(Dictionary<string,object>)summary["transport"];Require((bool)transport["outputMuted"]&&(bool)transport["hostStopped"]&&(bool)transport["shutdownCompleted"],"muted and transport callback joined");
                 string primary=summary["producerError"] as string;
                 if(mode=="controlled"){Require(result==0&&primary==null,"controlled stop remains successful: "+primary);}
+                else if(mode=="audio-stop-fault"){
+                    Require(result==1&&primary!=null&&primary.Contains("fixture producer starvation"),"late audio fault promoted into truthful terminal result");
+                    Require(((Dictionary<string,object>)summary["primaryFailure"])["stage"].Equals("audio-output"),"late audio failure stage retained");
+                    Require(((Dictionary<string,object>)summary["audio"])["error"].Equals(primary),"summary audio fault agrees with primary failure");
+                }
                 else {Require(result==1&&primary!=null&&primary.StartsWith("Listener terminal:"),"original listener failure retained: "+primary);Require(primary.Contains(mode=="disconnect"?"connection/clean-eof":"freshness/invalid-age"),"specific first listener failure");}
                 var secondary=(System.Collections.IList)summary["secondaryFailures"];
                 if(mode=="secondary")Require(secondary.Count==1&&((Dictionary<string,object>)secondary[0])["stage"].Equals("fixture-secondary"),"secondary shutdown failure separately retained");
+                else if(mode=="audio-after-listener-fault")Require(secondary.Count==1&&((Dictionary<string,object>)secondary[0])["stage"].Equals("audio-output"),"late audio fault retained separately without replacing listener failure");
                 else if(mode=="evidence-failure")Require(secondary.Count==1&&((Dictionary<string,object>)secondary[0])["stage"].Equals("diagnostic-evidence"),"diagnostic write failure does not prevent terminal result");
                 else Require(secondary.Count==0,"no unexpected secondary shutdown failures");
                 if(mode!="evidence-failure")Require(File.Exists(Path.Combine(directory,"renderer-diagnostics.txt")),"diagnostic summary retained");

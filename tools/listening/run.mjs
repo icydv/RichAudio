@@ -44,7 +44,7 @@ async function main(){
     else if(m.command==='confirm-listener'){
       const deadline=performance.now()+5000;let accepted=false;
       while(op.alive()&&performance.now()<deadline){const f=await api('/api/frame');
-        if(f.frame?.streamId!==previousStream&&f.frame?.listenerSessionId&&f.frame.listener?.valid&&f.status?.connected&&f.status.ageMs<=250&&Date.now()-f.frame.producedAtUnixMs>=-2&&Date.now()-f.frame.producedAtUnixMs<=250){op.accepted(f.frame,f.status);accepted=true;break;}
+        if(f.frame?.streamId!==previousStream&&op.observeReadiness(f.frame,f.status).rendererReadyForOwnedEmission){op.accepted(f.frame,f.status);accepted=true;break;}
         await new Promise(resolve=>setTimeout(resolve,50));
       }if(!accepted)throw Error('Accepted listener confirmation deadline');
     }

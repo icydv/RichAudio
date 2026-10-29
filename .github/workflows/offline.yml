@@ -21,6 +21,8 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # publisher v6 ref, reviewed 2026-10-25
         with:
           persist-credentials: false
+          # The regression runs the exact pre-fix relay and producer source.
+          fetch-depth: 0
       - name: Build core and run offline fixtures, evidence and documentation checks
         shell: pwsh
         run: ./tools/Test-Offline.ps1

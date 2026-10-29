@@ -47,6 +47,7 @@ function pathSnapshot(trace,selected){
     delay:p.delay??null,distance:p.distance??null,bands:copyVector(p.bands),pan:p.pan??null,
     arrivalDirection:copyVector(p.arrivalDirection),emissionDirection:copyVector(p.emissionDirection),
     materialBasis:(p.materialBasis??[]).map(m=>({...m})),visibility:p.visibility??null,geometryEvidence:p.geometryEvidence??null,
+    visibilityAssumption:p.visibilityAssumption??null,
     generation:p.generation??null,rate:chosen?selected.get(identity).rate:null};
 }
 
@@ -75,10 +76,12 @@ export class SoundMapTelemetry {
   publish(simulation,control,{workerMs=null,producedAtUnixMs=Date.now()}={}){
     if(!simulation.captureSoundMap||!simulation.soundMapState)return {};
     const started=performance.now(),s=simulation.soundMapState,scene=simulation.scene;
-    let generation=scene?`${this.streamId}:${simulation.session??'uninitialised'}:geometry:${simulation.geometryEpoch}:${scene.geometryKey}`:null;
+    // A listener-only source context has no observed tile. Never publish a
+    // geometry generation, lease or empty geometry snapshot for that context.
+    let generation=scene?.tile?`${this.streamId}:${simulation.session??'uninitialised'}:geometry:${simulation.geometryEpoch}:${scene.geometryKey}`:null;
     let soundMapGeometry;
     if(generation!==this.cachedGeneration){
-      const g=scene?geometrySnapshot(simulation,generation,this.streamId):null;
+      const g=scene?.tile?geometrySnapshot(simulation,generation,this.streamId):null;
       if(g&&bytes(g)>soundMapLimits.geometryBytes){this.stats.oversizeGeometry++;generation=null;}
       this.cachedGeometry=generation?g:null;this.cachedGeneration=generation;
       if(this.cachedGeometry)soundMapGeometry=this.cachedGeometry;
@@ -98,7 +101,8 @@ export class SoundMapTelemetry {
     const frame={schemaVersion:1,streamId:this.streamId,sessionId:simulation.session??'uninitialised',listenerSessionId:simulation.session,
       sequence:++this.sequence,audioFrame:control.frame,
       producedAtUnixMs,arrivalTimeSeconds:s.now,observationTimeSeconds:current?.time??null,geometryTimeMs:s.geometryTimeMs,
-      coordinateSpace,calibration:scene?.observationModel?.calibration??s.coordinateContract??null,listenerObservation:s.listenerEvidence??null,
+      coordinateSpace,calibration:scene?.observationModel?.calibration??scene?.directPath?.calibration??s.coordinateContract??null,listenerObservation:s.listenerEvidence??null,
+      readiness:control.readiness??null,directPath:scene?.directPath??null,
       geometryGeneration:generation,geometryEpoch:simulation.geometryEpoch,listener,sources,paths,
       settings:{engine:scene?.config??null,processing:simulation.processingSettings,acoustic:control.acoustic??null},
       performance:{workerMs,telemetryMs:null,workerTotalMs:null},geometryStatus:control.geometry??null,

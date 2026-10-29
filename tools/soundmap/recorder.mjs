@@ -26,6 +26,7 @@ export class SessionRecorder {
     const manifest={schemaVersion:1,id,state:'recording',startedUnixMs:this.now(),durationMs:0,bytes:0,maxBytes,maxDurationSeconds,
       timelineClock:'Replay uses original engine audioFrame/48000 and actual host producer-frame lineage. Service receipt offsets, original observations and QPC anchors remain preserved separately.',
       telemetryScope:'Bounded sampled solver trace; producer.unsampledBlocksSinceLastFrame and transport drop counters disclose omitted states. Not an exhaustive every-block trace.',
+      propagationStates:[],
       audio:{kind:'RichAudio-owned-post-gain-WASAPI-submission',sampleRate:48000,channels:2,format:'f32le',file:'owned-output.f32le',index:'audio-index.jsonl',capturedFrames:0,gaps:[],
         claim:'Exact submitted owned samples; not microphone, desktop mix, endpoint loopback or proof of physical audibility'},
       integrity:{complete:false,files:{}},terminationReason:null};
@@ -44,6 +45,14 @@ export class SessionRecorder {
   event(type,detail={}) {if(!this.active)return;const m=this.active.manifest;this.write('events.jsonl',JSON.stringify({timeMs:this.now()-m.startedUnixMs,type,detail})+'\n');}
   frame(frame,geometry,receivedUnixMs=this.now(),cachedContext=false) {
     if(!this.active)return;const a=this.active;
+    // Retain the explicit conditional-clear assumption alongside original frame
+    // evidence; no inference of unobstructed world geometry is made by capture.
+    if(frame.readiness){const state={mode:['listener-only-conditional-direct','conditional-observed-geometry','observed-geometry','unavailable'].includes(frame.readiness.mode)?frame.readiness.mode:'unrecognised',
+      visibilityAssumption:frame.readiness.visibilityAssumption==='unobserved-space-assumed-clear'?'unobserved-space-assumed-clear':null,
+      genuineGeometryPresent:frame.readiness.genuineGeometryPresent===true};
+      if(!a.manifest.propagationStates.some(s=>JSON.stringify(s)===JSON.stringify(state))&&a.manifest.propagationStates.length<16){
+        a.manifest.propagationStates.push(state);this.event('propagation-state',state);
+      }}
     if(geometry&&!a.geometry.has(geometry.generation)){if(!this.write('timeline.jsonl',JSON.stringify({type:'geometry',timeMs:receivedUnixMs-a.manifest.startedUnixMs,geometry})+'\n'))return;a.geometry.add(geometry.generation);this.event('geometry-generation',{generation:geometry.generation});}
     this.write('timeline.jsonl',JSON.stringify({type:'frame',timeMs:receivedUnixMs-a.manifest.startedUnixMs,receivedUnixMs,cachedContext,frame})+'\n');
   }

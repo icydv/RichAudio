@@ -1,6 +1,18 @@
 // Runs in explicit Node, never in the UI REPL. No game API or pipe probe.
 import {spawn} from 'node:child_process';
 import {performance} from 'node:perf_hooks';
+export function emissionReadiness(frame,status,{now=Date.now()}={}){
+  const r=frame?.readiness,age=now-frame?.producedAtUnixMs;
+  const fresh=status?.connected===true&&Number.isFinite(status.ageMs)&&status.ageMs>=0&&status.ageMs<=250&&
+    Number.isFinite(age)&&age>=-2&&age<=250&&frame?.listener?.valid===true&&!!frame.listenerSessionId&&frame.sessionId===frame.listenerSessionId;
+  const transportAccepted=fresh&&r?.transportAccepted===true;
+  const contextInitialized=transportAccepted&&r.contextInitialized===true;
+  const conditional=r?.mode==='listener-only-conditional-direct'&&r.visibilityAssumption==='unobserved-space-assumed-clear';
+  const geometry=contextInitialized&&r.genuineGeometryPresent===true;
+  return {transportAccepted,contextInitialized,rendererReadyForOwnedEmission:contextInitialized&&r.rendererReadyForOwnedEmission===true&&(geometry||conditional),
+    genuineGeometryPresent:geometry,reflectionsActive:geometry&&r.reflectionsActive===true,mode:r?.mode??'unavailable',visibilityAssumption:r?.visibilityAssumption??null,
+    emissionUnavailableReason:r?.emissionUnavailableReason??null};
+}
 export class ListeningOperator {
   constructor({executable,args,cwd,emit=()=>{},readinessMs=15000,stopMs=45000,limitMs=60000,cleanupMs=65000,shutdownGraceMs=5000}){
     Object.assign(this,{executable,args,cwd,emit,readinessMs,stopMs,limitMs,cleanupMs,shutdownGraceMs});
@@ -47,9 +59,17 @@ export class ListeningOperator {
     return {permitted:true,pid:this.child.pid};
   }
   listenerIssued(){if(this.state!=='listener-permitted'||!this.alive())throw Error('Listener acknowledgement denied');this.state='awaiting-accepted-listener';this.event('listener-issued');}
+  observeReadiness(frame,status){
+    const readiness=emissionReadiness(frame,status),signature=JSON.stringify(readiness);
+    if(signature!==this.lastReadinessSignature){this.lastReadinessSignature=signature;this.event('acoustic-readiness',{sequence:frame?.sequence,listenerSessionId:frame?.listenerSessionId,...readiness});}
+    return readiness;
+  }
   accepted(frame,status){
-    if(this.state!=='awaiting-accepted-listener'||!this.alive()||!status?.connected||status.ageMs>250||!frame?.listener?.valid||!frame.listenerSessionId||frame.sessionId==='uninitialised')throw Error('Fresh actual solver listener required');
-    this.state='listener-accepted';this.event('listener-accepted',{sequence:frame.sequence,listenerSessionId:frame.listenerSessionId});
+    const readiness=this.observeReadiness(frame,status);
+    if(this.state!=='awaiting-accepted-listener'||!this.alive()||!readiness.rendererReadyForOwnedEmission)throw Error('Fresh accepted listener, initialized source context and owned renderer readiness required');
+    this.state='listener-accepted';this.readiness=readiness;
+    for(const type of ['listener-transport-accepted','listener-source-context-initialized','owned-renderer-ready'])this.event(type,{sequence:frame.sequence,listenerSessionId:frame.listenerSessionId,...readiness});
+    this.event('listener-accepted',{sequence:frame.sequence,listenerSessionId:frame.listenerSessionId,...readiness});
   }
   emitBeacon(){if(this.state!=='listener-accepted'||!this.alive()||this.emissions)throw Error('Emission denied before accepted listener');this.emissions++;this.state='listening';this.write('start');this.event('emission-start');}
   stop(reason='operator-stop',grace=false){if(this.finished)return;this.stopping=true;this.event(reason);this.event('recording-stop-required');this.event('geometry-and-listener-stop-required');this.write('emit-stop');if(!grace)this.write('stop');}

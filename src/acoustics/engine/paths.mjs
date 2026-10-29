@@ -30,6 +30,13 @@ export function pathGeometry(
 // Prepare finite reflection vertices once, then batch visibility independently.
 // The CPU and GPU-screened routes share the exact same path and material math.
 export function preparePathGeometry(scene,source,listener,surfaces) {
+  if(scene.directPath){
+    requireValue(!surfaces.length&&scene.directPath.mode==='listener-only-conditional-direct','conditional model permits direct path only');
+    if(!inBox(source,scene.modelBounds)||!inBox(listener,scene.modelBounds))return {status:'outside-tile'};
+    const delta=sub(source,listener),distance=length(delta);
+    return {status:'clear',distance,points:[],hits:[],arrivalDirection:distance>E?unit(delta):[0,0,0],
+      emissionDirection:distance>E?unit(scale(delta,-1)):[0,0,0]};
+  }
   const tile = scene.tile;
   const conditional = scene.observationModel?.visibilityAssumption === 'unobserved-space-assumed-clear';
   if (!inBox(source, tile.bounds) || !inBox(listener, tile.bounds))
@@ -119,6 +126,7 @@ export function finishPathGeometry(plan,queries=null,stats={queries:0,surfaceTes
 }
 export function candidatePaths(scene, {maxReflectors=scene.config.maxReflectors}={}) {
   requireValue(Number.isInteger(maxReflectors)&&maxReflectors>=1&&maxReflectors<=16,'bounded reflector candidates');
+  if(scene.directPath)return [{id:'direct',surfaces:[]}];
   // Stable deterministic cap by ID. No hidden change of material or invented echo when pruned.
   const s = [...scene.tile.surfaces]
       .sort((a, b) => a.id.localeCompare(b.id, "en"))
@@ -140,21 +148,21 @@ export function solvePath(
   arrivalTime,
   candidate,
   stats = { queries: 0, surfaceTests: 0 },
-  geometryTimeMs = scene.tile.createdAt + arrivalTime * 1000,
+  geometryTimeMs = (scene.tile?.createdAt??0) + arrivalTime * 1000,
 ) {
   return finishPath(preparePath(scene,source,listenerTrack,arrivalTime,candidate,geometryTimeMs),null,stats);
 }
 export function preparePath(scene,source,listenerTrack,arrivalTime,candidate,
-  geometryTimeMs=scene.tile.createdAt+arrivalTime*1000) {
+  geometryTimeMs=(scene.tile?.createdAt??0)+arrivalTime*1000) {
   if (
     !Number.isFinite(arrivalTime) ||
     arrivalTime < 0 ||
-    !Number.isFinite(geometryTimeMs) || geometryTimeMs < scene.tile.createdAt ||
+    (!scene.directPath && (!Number.isFinite(geometryTimeMs) || geometryTimeMs < scene.tile.createdAt ||
     geometryTimeMs >=
       Math.min(
         scene.tile.validUntil,
         ...scene.tile.surfaces.map((s) => s.validUntil),
-      )
+      )))
   )
     return { status: "geometry-time-unavailable" };
   const listener = pose(listenerTrack, arrivalTime);
@@ -243,10 +251,11 @@ export function finishPath(plan,queries=null,stats={queries:0,surfaceTests:0}) {
     arrivalDirection: g.arrivalDirection,
     emissionDirection: g.emissionDirection,
     materialBasis,
-    geometryEvidence: scene.observationModel ? 'conditional-finite-observed-model' : 'synthetic-model',
+    geometryEvidence: scene.directPath?'conditional-listener-only-no-geometry':scene.observationModel ? 'conditional-finite-observed-model' : 'synthetic-model',
+    visibilityAssumption:scene.directPath?.visibilityAssumption??scene.observationModel?.visibilityAssumption??null,
     generation: state.generation,
     visibility:
-      scene.observationModel
+      scene.directPath?'conditional-unobserved-space-assumed-clear':scene.observationModel
         ? (g.status === 'blocked' ? 'authored-transmission-in-partial-model' : 'conditional-observed-path')
         : g.status === "blocked" ? "authored-transmission" : "verified-synthetic-path",
     retardedResidual: residual,

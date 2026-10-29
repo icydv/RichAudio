@@ -10,6 +10,22 @@ import {SoundMapClient,readServiceConfiguration} from '../tools/soundmap/produce
 
 const fixture=()=>({frame:{schemaVersion:1,sessionId:'synthetic-test',sequence:1,audioFrame:512,producedAtUnixMs:1000,arrivalTimeSeconds:.0106667,observationTimeSeconds:.001,geometryTimeMs:100,geometryGeneration:'g1',paths:[{id:'actual-solver-path',status:'selected',vertices:[[0,0,0],[1,0,0]],delay:.003}],sources:[],listener:{position:[1,0,0]},settings:{quality:'balanced'}},geometry:{schemaVersion:1,generation:'g1',sessionId:'synthetic-test',surfaces:[],validUntil:123,clockDomain:'publisher-monotonic-ms'}});
 const temp=()=>fs.mkdtempSync(path.join(os.tmpdir(),'RichAudioSoundMap-'));
+test('recording manifest and timeline retain conditional-clear assumption and actual geometry transition',()=>{
+ const root=temp();try{const recorder=new SessionRecorder(root),{id}=recorder.start();
+ const value=fixture();value.frame.geometryGeneration=null;
+ value.frame.readiness={mode:'listener-only-conditional-direct',visibilityAssumption:'unobserved-space-assumed-clear',genuineGeometryPresent:false};
+ recorder.frame(value.frame,null);recorder.frame(value.frame,null);
+ const observed={...value.frame,sequence:2,readiness:{mode:'observed-geometry',visibilityAssumption:null,genuineGeometryPresent:true}};
+ recorder.frame(observed,value.geometry);
+ recorder.frame({...observed,readiness:{mode:'x'.repeat(40000),visibilityAssumption:'y'.repeat(40000)}},null);
+ recorder.stop();const replay=recorder.open(id);
+ assert.equal(replay.manifest.propagationStates.length,3);assert.equal(replay.manifest.propagationStates[0].visibilityAssumption,'unobserved-space-assumed-clear');
+ assert.equal(replay.manifest.propagationStates[0].genuineGeometryPresent,false);assert.equal(replay.manifest.propagationStates[1].genuineGeometryPresent,true);
+ assert.equal(replay.events.filter(e=>e.type==='propagation-state').length,3);assert.deepEqual(replay.manifest.propagationStates[2],{mode:'unrecognised',visibilityAssumption:null,genuineGeometryPresent:false});
+ assert.ok(Buffer.byteLength(JSON.stringify(replay.manifest.propagationStates))<1024);
+ assert.match(fs.readFileSync(path.join(replay.dir,'timeline.jsonl'),'utf8'),/unobserved-space-assumed-clear/);
+ }finally{clean(root);}
+});
 const clean=root=>{assert.equal(path.dirname(root),os.tmpdir());assert.ok(path.basename(root).startsWith('RichAudioSoundMap-'));fs.rmSync(root,{recursive:true});};
 const pcmMeta=(id,frame=0,frames=2)=>({recordingId:id,hostId:'synthetic-device-free',frames,submittedFrame:frame,anchorUnixMs:1000,anchorQpcTicks:1000000,qpcFrequency:1000000,submissions:[{submittedFrame:frame,consumedFrame:frame+frames,frames,qpcTicks:1000000+frame*1000000/48000|0}]});
 

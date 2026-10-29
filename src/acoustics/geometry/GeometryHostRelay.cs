@@ -29,8 +29,10 @@ namespace RichAudio.GeometryLive
         private readonly GeometryPipeServer pipe;private Thread thread;private volatile bool stopped;
         private ListenerState listener;private GeometryPacket latest;private long listenerSequence=-1,epoch,revision,transaction,cancelThrough;
         private string geometrySession;private double[] origin,source;private Dictionary<string,object> configuration;
+        private long contextEpoch,contextGeneration;private string contextSession;private bool contextConfigured;
+        private Dictionary<string,object> contextConfiguration;
         private long ackSequence=-1;private string ackKind;private bool ackAccepted;
-        public long Forwarded,Rejected,Delivered,Disconnects;public double MaximumAcceptedRoundTripMs,MaximumObservedRoundTripMs;
+        public long Forwarded,ContextsForwarded,Rejected,Delivered,Disconnects;public double MaximumAcceptedRoundTripMs,MaximumObservedRoundTripMs;
         public string Reason;public GeometryPacket LastRejected;
         public GeometryHostRelay(Action<string> send,Func<uint> listenerPid,GeometryModel model,string pipeName=GeometryWire.PipeName)
         {this.send=send;this.listenerPid=listenerPid;this.model=model;pipe=new GeometryPipeServer(pipeName,Received,Unavailable);}
@@ -68,24 +70,35 @@ namespace RichAudio.GeometryLive
             }catch{Rejected++;Reason="invalid-relay-diagnostic";return true;}
         }
         private static object[] Vec(double[] x){return new object[]{x[0],x[1],x[2]};}
-        private Dictionary<string,object> Configuration(GeometryPacket p,ListenerState s)
+        private Dictionary<string,object> ListenerConfiguration(ListenerState s)
         {
             if(origin==null){origin=(double[])s.Position.Clone();source=new double[3];for(int i=0;i<3;i++)source[i]=origin[i]+model.Offset[i];}
             var lo=new double[3];var hi=new double[3];for(int i=0;i<3;i++){lo[i]=origin[i]-12;hi[i]=origin[i]+12;}
-            var pairs=new List<object>();foreach(var pair in p.Pairs)pairs.Add(new Dictionary<string,object>{{"observationMs",pair.ObservationMs},
-                {"listenerTicks",pair.ListenerTicks},{"uncertaintyMs",pair.UncertaintyMs}});
-            var clock=new Dictionary<string,object>{{"id",p.ClockId},{"relation","paired-same-rate-monotonic"},{"basis","publisher-paired-samples"},
-                {"frequency",p.Frequency},{"samples",pairs}};
-            return new Dictionary<string,object>{{"epoch",epoch},{"geometrySession",p.GeometrySession},{"listenerSession",s.Session},
-                {"minimumListenerGeneration",s.Generation},{"build",p.Build},{"interior",p.Interior},
+            return new Dictionary<string,object>{{"contextEpoch",contextEpoch},{"listenerSession",s.Session},
+                {"minimumListenerGeneration",s.Generation},{"build","1.0.1158.16"},
                 {"coordinates",new Dictionary<string,object>{{"originNative",Vec(origin)},{"axes",new[]{new[]{1,0,0},new[]{0,1,0},new[]{0,0,1}}},
                     {"metresPerNativeUnit",model.Scale},{"basis","declared-demonstration-scale"},{"reference",model.Reference}}},
                 {"region",new Dictionary<string,object>{{"minNative",Vec(lo)},{"maxNative",Vec(hi)}}},
                 {"sources",new[]{new Dictionary<string,object>{{"id","beacon-0"},{"rights","original-generated"},{"reference","authored-native-beacon"},
                     {"generation",1},{"positionNative",Vec(source)},{"velocityNative",new[]{0,0,0}},{"forwardNative",new[]{1,0,0}},{"upNative",new[]{0,0,1}}}}},
-                {"clock",clock},{"materialsByKind",new Dictionary<string,object>{{"wall",new Dictionary<string,object>{{"reflection",new[]{.85,.6,.3}},{"transmission",new[]{.025,.004,.0004}},{"reference","authored-wall"}}},
-                    {"ground",new Dictionary<string,object>{{"reflection",new[]{.7,.45,.2}},{"reference","authored-ground"}}}}},
-                {"engine",new Dictionary<string,object>{{"order",2}}}};
+                {"engine",new Dictionary<string,object>{{"order",2}}},
+                {"directPath",new Dictionary<string,object>{{"mode","listener-only-conditional-direct"},{"sourceId","beacon-0"},{"rights","original-generated"},
+                    {"visibilityAssumption","unobserved-space-assumed-clear"}}}};
+        }
+        private Dictionary<string,object> Configuration(GeometryPacket p,ListenerState s)
+        {
+            // Geometry adds measured observations to the already established
+            // source context. It never moves the source or invents clock pairs.
+            var result=new Dictionary<string,object>(contextConfiguration);
+            result.Remove("contextEpoch");result.Remove("directPath");
+            result["epoch"]=epoch;result["geometrySession"]=p.GeometrySession;result["build"]=p.Build;result["interior"]=p.Interior;
+            var pairs=new List<object>();foreach(var pair in p.Pairs)pairs.Add(new Dictionary<string,object>{{"observationMs",pair.ObservationMs},
+                {"listenerTicks",pair.ListenerTicks},{"uncertaintyMs",pair.UncertaintyMs}});
+            var clock=new Dictionary<string,object>{{"id",p.ClockId},{"relation","paired-same-rate-monotonic"},{"basis","publisher-paired-samples"},
+                {"frequency",p.Frequency},{"samples",pairs}};
+            result["clock"]=clock;result["materialsByKind"]=new Dictionary<string,object>{{"wall",new Dictionary<string,object>{{"reflection",new[]{.85,.6,.3}},{"transmission",new[]{.025,.004,.0004}},{"reference","authored-wall"}}},
+                {"ground",new Dictionary<string,object>{{"reflection",new[]{.7,.45,.2}},{"reference","authored-ground"}}}};
+            return result;
         }
         private void Run()
         {
@@ -96,6 +109,14 @@ namespace RichAudio.GeometryLive
                 if(p!=null&&(p.ListenerSession!=s.Session||p.ListenerGeneration!=s.Generation)){Unavailable("listener-context-changed");p=null;}
                 if((Stopwatch.GetTimestamp()-s.ObservationTicks)*1000.0/Stopwatch.Frequency>250)continue;
                 var messages=new List<object>();
+                if(s.Valid&&!s.Paused){lock(sync){
+                    if(contextConfiguration==null||contextSession!=s.Session||contextGeneration!=s.Generation){
+                        contextEpoch++;contextSession=s.Session;contextGeneration=s.Generation;contextConfigured=false;
+                        origin=null;source=null;contextConfiguration=ListenerConfiguration(s);
+                        configuration=null;geometrySession=null;configured=false;committedSession=null;committedPacket=-1;
+                    }
+                    if(!contextConfigured)messages.Add(new Dictionary<string,object>{{"type","listener-context-config"},{"configuration",contextConfiguration}});
+                }}
                 if(p!=null&&p.Status=="snapshot"&&(p.GeometrySession!=committedSession||p.Sequence!=committedPacket)){
                     try{GeometryWire.Validate(p,Stopwatch.GetTimestamp());}catch(Exception e){LastRejected=p;Rejected++;Unavailable(e.GetType().Name);continue;}
                     lock(sync){
@@ -107,7 +128,11 @@ namespace RichAudio.GeometryLive
                             {"session",p.GeometrySession},{"build",p.Build},{"interior",p.Interior},{"groups",raw["Groups"]},{"publisherSequence",p.Sequence}});
                     }
                 }
-                long id,begin;lock(sync){id=++transaction;ackSequence=-1;ackKind=null;}
+                long id,begin;lock(sync){
+                    // A withdrawal can race preparation above. Never give a
+                    // superseded snapshot a new transaction after its close.
+                    if(p!=null&&!Object.ReferenceEquals(p,latest))continue;
+                    id=++transaction;ackSequence=-1;ackKind=null;}
                 ack.Reset();begin=Stopwatch.GetTimestamp();double age=(begin-s.ObservationTicks)*1000.0/Stopwatch.Frequency;
                 var state=json.DeserializeObject(Protocol.EncodeJson(s));
                 send(json.Serialize(new Dictionary<string,object>{{"type","geometry-relay-stage"},{"sequence",id},
@@ -121,14 +146,17 @@ namespace RichAudio.GeometryLive
                 MaximumAcceptedRoundTripMs=Math.Max(MaximumAcceptedRoundTripMs,roundTrip);
                 ack.Reset();send(json.Serialize(new Dictionary<string,object>{{"type","geometry-relay-commit"},{"sequence",id},{"maximumMs",roundTrip}}));
                 if(!WaitAck(id,"geometry-relay-result",100)||!ackAccepted){Rejected++;Reason="commit-rejected";continue;}
-                Delivered++;if(messages.Count>0){Forwarded++;configured=true;committedPacket=p.Sequence;committedSession=p.GeometrySession;}
+                Delivered++;
+                if(messages.Count>0){if(!contextConfigured)ContextsForwarded++;contextConfigured=true;
+                    if(p!=null&&p.Status=="snapshot"){Forwarded++;configured=true;committedPacket=p.Sequence;committedSession=p.GeometrySession;}}
             }}catch(Exception e){if(!stopped){Reason=e.GetType().Name;try{Unavailable(Reason);}catch{}}}
         }
         private bool WaitAck(long id,string kind,int milliseconds){var w=Stopwatch.StartNew();while(!stopped&&w.ElapsedMilliseconds<milliseconds){
             ack.WaitOne(Math.Max(1,milliseconds-(int)w.ElapsedMilliseconds));lock(sync)if(ackSequence==id&&ackKind==kind)return true;}return false;}
         public Dictionary<string,object> Metrics(){return new Dictionary<string,object>{{"forwarded",Forwarded},{"transactions",Delivered},{"rejected",Rejected},
             {"disconnects",Disconnects},{"maximumAcceptedRoundTripMs",MaximumAcceptedRoundTripMs},{"maximumObservedRoundTripMs",MaximumObservedRoundTripMs},
-            {"reason",Reason},{"pipeAccepted",pipe.Accepted},{"pipeRejected",pipe.Rejected},{"rejectedEvidenceAvailable",LastRejected!=null||pipe.LastRejectedBytes!=null}};}
+            {"reason",Reason},{"listenerContextsForwarded",ContextsForwarded},{"listenerContextEpoch",contextEpoch},{"listenerContextConfigured",contextConfigured},
+            {"pipeAccepted",pipe.Accepted},{"pipeRejected",pipe.Rejected},{"rejectedEvidenceAvailable",LastRejected!=null||pipe.LastRejectedBytes!=null}};}
         public byte[] RejectedEvidence(){return LastRejected!=null?GeometryWire.Encode(LastRejected):pipe.LastRejectedBytes;}
         public void Dispose(){stopped=true;pipe.Dispose();changed.Set();ack.Set();if(thread!=null&&thread!=Thread.CurrentThread)thread.Join(1000);}
     }

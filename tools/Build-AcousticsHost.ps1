@@ -24,7 +24,7 @@ if($Tests){
   if($LASTEXITCODE-ne0){throw 'Host shutdown test compilation failed.'}
   & (Join-Path $out 'RichAudio.Host.Shutdown.Tests.exe')
   if($LASTEXITCODE-ne0){throw 'Original disposal reproduction failed.'}
-  foreach($mode in @('future','disconnect','controlled','secondary','evidence-failure','blocked-callback')){
+  foreach($mode in @('future','disconnect','controlled','secondary','evidence-failure','blocked-callback','audio-stop-fault','audio-after-listener-fault')){
     & (Join-Path $out 'RichAudio.Host.Shutdown.Tests.exe') $repo $mode
     if($LASTEXITCODE-ne0){throw "Host device-free shutdown fixture failed: $mode"}
   }

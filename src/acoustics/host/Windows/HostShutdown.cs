@@ -26,6 +26,7 @@ namespace RichAudio.Beacon.Windows
             if(!File.Exists(diagnostics))ShutdownStep("diagnostic-evidence",delegate{lock(logLock)WriteNew(diagnostics,string.Join(Environment.NewLine,rendererLog.ToArray()));});
             lock(failureLock){result["producerError"]=producerError;result["primaryFailure"]=primaryFailure;result["secondaryFailures"]=secondaryFailures.ToArray();}
             result["listenerTerminal"]=listenerTerminal;result["controlsRejectedDuringShutdown"]=controlsRejectedDuringShutdown;
+            result["listenerTerminalBoundary"]=listenerTerminalBoundary;
             if(producerError!=null)result["terminationReason"]="failure";
             string target=Path.Combine(directory,"host-result.json");
             if(File.Exists(target))target=Path.Combine(directory,"host-terminal-fallback.json");
@@ -34,11 +35,12 @@ namespace RichAudio.Beacon.Windows
         // Accessible only to the compiled test assembly, never via host CLI.
         // Exercises the actual producer, listener terminal callback and Run's
         // finalization while leaving WasapiOutput unstarted (no endpoint access).
-        internal static int RunShutdownFixture(string root,string directory,string pipeName,bool injectSecondary=false,Action blockedListener=null)
+        internal static int RunShutdownFixture(string root,string directory,string pipeName,bool injectSecondary=false,Action blockedListener=null,string audioError=null)
         {
             if(!System.Reflection.Assembly.GetExecutingAssembly().GetName().Name.EndsWith(".Tests",StringComparison.Ordinal))throw new InvalidOperationException("Test assembly only");
             if(!Path.GetFullPath(directory).StartsWith(Path.GetFullPath(Path.GetTempPath()),StringComparison.OrdinalIgnoreCase))throw new ArgumentException("Disposable fixture directory required");
             if(injectSecondary)shutdownFixtureHook=delegate{throw new ObjectDisposedException("fixture-secondary","Deliberate secondary failure for first-error retention test");};
+            if(audioError!=null)shutdownFixtureHook=delegate{output.Error=audioError;};
             if(blockedListener!=null){listenerFixtureHook=blockedListener;
 #if GEOMETRY_LIVE
                 geometryRelay=new RichAudio.GeometryLive.GeometryHostRelay(Send,delegate{return 0;},new RichAudio.GeometryLive.GeometryModel{Scale=1,Offset=new double[]{-6,0,1},Reference="shutdown-fixture"},pipeName+".Geometry");geometryRelay.Start();}
