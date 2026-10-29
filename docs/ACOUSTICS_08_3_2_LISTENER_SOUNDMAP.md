@@ -41,6 +41,8 @@ Canvas and panels default to **#0A0E14**, dark shaded faces and bright **2.2 CSS
 
 Display selection is **15 / 20 / 30 / 60 FPS**, scheduled by animation frames. The HUD measures actual rendered FPS separately from incoming telemetry rate and original age. Network polling remains bounded independently at 20 Hz. Collision sampling, acoustic work and DSP do not increase when selecting 60. Original solver vertices are held between observations; visual frames do not invent acoustic results. Real browser screenshots and measured rates are retained privately and reported with their viewport/DPR/environment limitations. Browser rendering tests do not establish GTA performance.
 
+The visible native window measured 59.7 display FPS alongside 12.6 actual solver updates per second on an original synthetic enclosure. Interactive screenshots cover 1280×800 and 1920×1080 at measured DPR 1. Standalone headless render exports exercise measured DPR 1.5 and 2 with matching Canvas backing sizes; these verify pixel-density rendering, not physical second-monitor scaling or performance.
+
 Only genuine accepted finite wall/ground observations and actual solver paths are acoustic evidence. Without them the viewer shows a labelled reference grid. Imported private geometry remains historical visual-only context and requires exact calibration compatibility. This increment adds no city extraction or new local world-mesh investigation.
 
 ## Reproduction and next candidate

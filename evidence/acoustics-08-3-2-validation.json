@@ -63,6 +63,11 @@
     "simultaneousActualProducerTelemetryPerSecond": 12.6,
     "observedAgeMs": 99,
     "observedCanvasPaintMs": 0.3,
+    "interactiveScreenshotViewports": [[1280, 800], [1920, 1080]],
+    "interactiveDevicePixelRatio": 1,
+    "headlessExportDevicePixelRatios": [1.5, 2],
+    "headlessCanvasBackingMatchesMeasuredScale": true,
+    "physicalSecondMonitorScalingVerified": false,
     "measurementScope": "Visible native browser application, actual device-free producer with original synthetic enclosure; not GTA performance",
     "worldGeometry": "Real accepted sparse observations and genuine solver paths when available; reference grid otherwise; compatible imported context remains historical visual-only"
   },

@@ -40,14 +40,21 @@ namespace RichAudio.Beacon.Windows
             if(!Path.GetFullPath(directory).StartsWith(Path.GetFullPath(Path.GetTempPath()),StringComparison.OrdinalIgnoreCase))throw new ArgumentException("Disposable fixture directory required");
             if(injectSecondary)shutdownFixtureHook=delegate{throw new ObjectDisposedException("fixture-secondary","Deliberate secondary failure for first-error retention test");};
             if(blockedListener!=null){listenerFixtureHook=blockedListener;
+#if GEOMETRY_LIVE
                 geometryRelay=new RichAudio.GeometryLive.GeometryHostRelay(Send,delegate{return 0;},new RichAudio.GeometryLive.GeometryModel{Scale=1,Offset=new double[]{-6,0,1},Reference="shutdown-fixture"},pipeName+".Geometry");geometryRelay.Start();}
+#else
+                throw new NotSupportedException("Geometry callback fixture requires the geometry-enabled build");}
+#endif
             return Run(root,"open-road","harmonic",1,5,.08f,-1,false,false,false,true,null,directory,95,.22,null,null,null,null,"",pipeName);
         }
         internal static void StopShutdownFixture(){if(listenerFixtureHook==null)throw new InvalidOperationException("Blocked callback fixture required");Control("stop");}
         internal static void ReleaseShutdownFixtureResources()
         {
             if(shutdownFixturePipe!=null&&!shutdownFixturePipe.StopAndWait(1000))throw new TimeoutException("Released fixture listener failed to exit");
-            if(geometryRelay!=null)geometryRelay.Dispose();listenerFixtureHook=null;
+#if GEOMETRY_LIVE
+            if(geometryRelay!=null)geometryRelay.Dispose();
+#endif
+            listenerFixtureHook=null;
         }
     }
 }
