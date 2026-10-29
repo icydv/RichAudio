@@ -76,7 +76,7 @@ namespace RichAudio.Beacon.Rph
                         }
                         if((after-before)/(double)Stopwatch.Frequency>0.05){generation++;valid=false;reason="slow-observation";}
                         var state=new ListenerState{Version=1,Session=session,Generation=generation,Sequence=sequence++,ObservationTicks=observed,ClockFrequency=Stopwatch.Frequency,GameTimeMs=game,Position=p,Velocity=v,Forward=forward,Up=up,ListenerKind="camera",VelocityKind=velocityKind,Paused=paused,Valid=valid,Reason=reason,Coordinates="gta-native-unscaled",Units="native-unverified",SourceId=null};
-                        writer.Publish(state);Interlocked.Increment(ref observations);lastPosition=p;lastTick=observed;lastGame=game;lastPause=paused;
+                        writer.Publish(state);GeometryBridge.Observe(state);Interlocked.Increment(ref observations);lastPosition=p;lastTick=observed;lastGame=game;lastPause=paused;
                     }
                     catch(ThreadAbortException){throw;}
                     catch{break;} // Missing native/invalid state stops emission; host rejects stale state and fades.
@@ -88,7 +88,7 @@ namespace RichAudio.Beacon.Rph
                 long stoppingAt=Stopwatch.GetTimestamp();while(!writer.Finished&&!shutdown&&(Stopwatch.GetTimestamp()-stoppingAt)/(double)Stopwatch.Frequency<1)GameFiber.Sleep(5);
                 lastTransport=writer.Diagnostic;lastSent=writer.Sent;
             }
-            finally{writer.RequestStop();ThreadPool.QueueUserWorkItem(delegate{writer.Dispose();});}
+            finally{GeometryBridge.End();writer.RequestStop();ThreadPool.QueueUserWorkItem(delegate{writer.Dispose();});}
             publisher=null;Game.Console.Print("RichAudio beacon listener stopped. Terminal="+(lastTransport==null?"unknown":lastTransport.Stage+"/"+lastTransport.Code+"/"+lastTransport.Outcome)+"; another Start is disabled. No world state to restore.");
         }
         public static void OnUnload(){ready=false;requested=false;shutdown=true;var p=publisher;if(p!=null)p.RequestStop();}

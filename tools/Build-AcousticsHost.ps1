@@ -10,6 +10,9 @@ $sources=@(Get-ChildItem (Join-Path $repo 'src\acoustics\host\Windows') -Filter 
 $options=@('/nologo','/optimize+','/warnaserror+','/unsafe+','/platform:x64','/target:exe','/r:System.Web.Extensions.dll','/r:System.Runtime.Serialization.dll')
 $transport=Join-Path $repo 'src\acoustics\host\Transport'
 if(Test-Path -LiteralPath $transport){$sources+=@(Get-ChildItem $transport -Filter '*.cs' | ForEach-Object FullName);$options+='/define:STATE_TRANSPORT'}
+$sources+=@(Get-ChildItem (Join-Path $repo 'src\acoustics\geometry') -Filter '*.cs'|ForEach-Object FullName)
+$sources+=@('GeometryObservation.cs','SurfaceAcquisition.cs','DiagnosticTile.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\observation\'+$_)}
+$options=@($options|Where-Object{$_-notlike '/define:*'})+'/define:STATE_TRANSPORT,GEOMETRY_LIVE'
 & $compiler @options '/main:RichAudio.Beacon.Windows.HostProgram' ('/out:'+(Join-Path $out 'RichAudio.Acoustics.Host.exe')) @sources
 if($LASTEXITCODE-ne0){throw 'Windows audio host compilation failed.'}
 if($Tests){

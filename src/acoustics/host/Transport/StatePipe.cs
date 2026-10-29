@@ -31,6 +31,9 @@ namespace RichAudio.Beacon.Transport
     }
     public sealed class StatePipeServer:IDisposable
     {
+        [System.Runtime.InteropServices.DllImport("kernel32.dll",SetLastError=true)]
+        private static extern bool GetNamedPipeClientProcessId(Microsoft.Win32.SafeHandles.SafePipeHandle pipe,out uint pid);
+        public uint PeerProcessId{get;private set;}
         private readonly string name;private readonly Action<ListenerState,double> consumer;
         private RejectedFrameTiming offendingFrame;
         public readonly FirstFrameTiming FirstFrame=new FirstFrameTiming();
@@ -64,6 +67,7 @@ namespace RichAudio.Beacon.Transport
                     using(var pipe=new NamedPipeServerStream(name,strict?PipeDirection.InOut:PipeDirection.In,1,PipeTransmissionMode.Byte,PipeOptions.Asynchronous,4096,4096,CurrentUserSecurity()))
                     {
                         active=pipe;if(stopping)break;var connect=pipe.BeginWaitForConnection(null,null);using(var ready=connect.AsyncWaitHandle){if(!ready.WaitOne(30000))throw new TimeoutException("connection deadline");pipe.EndWaitForConnection(connect);}Interlocked.Increment(ref connections);FirstFrame.ConnectionMs=elapsed.Elapsed.TotalMilliseconds;var validator=new StateValidator();long previousGaps=0;
+                        uint peer; if(!GetNamedPipeClientProcessId(pipe.SafePipeHandle,out peer))throw new IOException("Pipe peer identity unavailable");PeerProcessId=peer;
                         while(!stopping)
                         {
                             bool first=Accepted==0;long mark=Stopwatch.GetTimestamp();stage="header";if(!ReadExactly(pipe,header,4,750)){stage="connection";break;}

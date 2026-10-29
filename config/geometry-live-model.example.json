@@ -1,0 +1,6 @@
+{
+  "basis": "declared-demonstration-scale",
+  "metresPerNativeUnit": 1,
+  "sourceOffsetNative": [-6, 0, 1],
+  "reference": "authored-native-beacon-model-not-physical-calibration"
+}
