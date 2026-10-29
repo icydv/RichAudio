@@ -94,7 +94,17 @@ namespace RichAudio.Beacon.Windows
                     if(!disconnected&&now>4.4){publisher.RequestStop();sensing=null;disconnected=true;}
                 }
                 if(now*1000>=nextCredit&&granted-Volatile.Read(ref blocks)<4){HostProgram.GeometryFixtureSend("{\"type\":\"credit\",\"blocks\":1}");granted++;nextCredit=now*1000+512000.0/48000;}
-                if(child.HasExited)throw new Exception("producer exited during geometry scenario");Thread.Sleep(1);
+                if(child.HasExited){
+                    HostProgram.GeometryFixtureDrainDiagnostics();var diagnostic=HostProgram.GeometryFixtureDiagnostics();
+                    File.WriteAllLines(Path.Combine(dest,"renderer-failure.txt"),diagnostic);
+                    string terminal="no terminal diagnostic";
+                    foreach(string line in diagnostic)if(line.StartsWith("{\"type\":\"final\",",StringComparison.Ordinal)){
+                        var final=new JavaScriptSerializer().DeserializeObject(line) as Dictionary<string,object>;
+                        string error=final["error"] as string;
+                        terminal=error==null?"no terminal error":System.Text.RegularExpressions.Regex.IsMatch(error,"\\A[A-Za-z0-9 .:()_-]{1,180}\\z")?error:"private terminal error retained";
+                    }
+                    throw new Exception("producer exited during geometry scenario; exit="+child.ExitCode+"; "+terminal);
+                }Thread.Sleep(1);
             }
             if(publisher!=null)publisher.Dispose();writer.RequestStop();writer.Dispose();listenerServer.Dispose();
             var metrics=HostProgram.EndGeometryFixture();reader.Join(1500);Check(readerError==null,"RA07 stream complete");Check(child.ExitCode==0,"producer clean shutdown");

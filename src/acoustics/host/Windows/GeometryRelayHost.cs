@@ -20,15 +20,17 @@ namespace RichAudio.Beacon.Windows
         // decoder, listener callback and relay without entering Main/Run/WASAPI.
 #if GEOMETRY_FIXTURE
         internal static Action BeforeFixtureStage;
+        private static Thread fixtureDiagnostics;
         internal static void BeginGeometryFixture(Process producer,GeometryModel model,Func<uint> peer,string pipeName)
         {
             child=producer;stop=false;inputStop=false;geometryRelay=new GeometryHostRelay(delegate(string text){
                 if(text.StartsWith("{\"type\":\"geometry-relay-stage\"",StringComparison.Ordinal)&&BeforeFixtureStage!=null)BeforeFixtureStage();Send(text);},peer,model,pipeName);
             inputWriter=new Thread(WriteControls){IsBackground=true};inputWriter.Start();
-            new Thread(ReadDiagnostics){IsBackground=true}.Start();geometryRelay.Start();
+            fixtureDiagnostics=new Thread(ReadDiagnostics){IsBackground=true};fixtureDiagnostics.Start();geometryRelay.Start();
         }
         internal static void GeometryFixtureSend(string text){Send(text);}
         internal static string[] GeometryFixtureDiagnostics(){lock(logLock)return rendererLog.ToArray();}
+        internal static void GeometryFixtureDrainDiagnostics(){fixtureDiagnostics.Join(1000);}
         internal static System.Collections.Generic.Dictionary<string,object> EndGeometryFixture()
         {
             geometryRelay.Dispose();var result=geometryRelay.Metrics();SendControl("stop");
