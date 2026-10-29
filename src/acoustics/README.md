@@ -1,5 +1,7 @@
 # RichAudio acoustics
 
+The [in-game settings extension](../../docs/ACOUSTICS_08_2_IN_GAME_SETTINGS.md) adds a separate gold-branded RPH overlay, persistent quality/acceleration and owned-output controls. `settings/InGame/` contains the SDK-independent model/layout/input policy; its private background bridge reuses the existing host settings path. The exact adapter is SDK-compiled, not yet verified in GTA.
+
 `engine/` implements finite direct, first- and second-order image-source propagation and the owned-source PCM renderer. `streaming/` and `host/` provide the existing bounded producer and Windows playback route. The observation and research modules retain acquisition, reconstruction, uncertainty and cache contracts.
 
 The opt-in [ACOUSTICS-08.2 controls](../../docs/ACOUSTICS_08_2_GPU_ACCELERATION.md) add persistent Auto/Performance/Balanced/Quality/Max budgets and independent Auto/CPU/GPU acceleration. `gpu/` implements real owned Direct3D11 compute visibility screening; exact finite geometry and DSP remain shared with CPU. RTX 2080 SUPER execution and bit-identical CPU/GPU PCM are verified offline. Max's 64-path capacity works, but the demanding four-source case exceeds the block budget; higher-order tracing, late reverberation and GTA performance benefits remain unverified/future work.

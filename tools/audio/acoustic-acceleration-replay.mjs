@@ -39,8 +39,7 @@ export async function replayAcousticAcceleration({quality='quality',acceleration
   });
   try{
     for(let b=0;b<blocks;b++){
-      for(const change of changes.filter(c=>c.block===b))send({type:'acoustic-settings',revision:change.revision,
-        quality:change.quality,acceleration:change.acceleration});
+      for(const change of changes.filter(c=>c.block===b)){const {block,...settings}=change;send({type:'acoustic-settings',...settings});}
       if(b===24)send({type:'control',command:'start'});
       if(b===blocks-24)send({type:'control',command:'emit-stop'});
       send({type:'credit',blocks:1});await until(()=>packets.length>b&&traces.length>b);
@@ -57,7 +56,7 @@ export async function replayAcousticAcceleration({quality='quality',acceleration
       assert.equal(traces[b].frame,b*512);
       for(const [id,g]of Object.entries(traces[b].sourceGenerations))identities.add(id+':'+g);
       for(let j=0;j<512;j++){channels[0][b*512+j]=packets[b].readFloatLE(j*8);channels[1][b*512+j]=packets[b].readFloatLE(j*8+4);}
-      if(b>40&&b<blocks-28){let energy=0;for(let j=0;j<512;j++)energy+=channels[0][b*512+j]**2+channels[1][b*512+j]**2;assert.ok(energy>1e-12);}
+      if(b>40&&b<blocks-28&&traces[b].acoustic?.richAudioEnabled!==false&&traces[b].acoustic?.outputLevel!==0){let energy=0;for(let j=0;j<512;j++)energy+=channels[0][b*512+j]**2+channels[1][b*512+j]**2;assert.ok(energy>1e-12);}
     }
     assert.equal(identities.size,sources);const metrics=audioMetrics(channels);
     assert.equal(metrics.nonfiniteSamples,0);assert.equal(metrics.clippedSamples,0);assert.ok(metrics.maximumAdjacentStep<.02);

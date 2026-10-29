@@ -88,11 +88,11 @@ namespace RichAudio.Settings
         }
         internal void SaveSelection()
         {
-            long current=File.Exists(path)?AcousticSettingsStore.Load(root,path).Revision:0;
+            AcousticSettings existing=File.Exists(path)?AcousticSettingsStore.Load(root,path):null;long current=existing==null?0:existing.Revision;
             long clock=(long)(DateTime.UtcNow-new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc)).TotalMilliseconds;
             revision=Math.Max(clock,Math.Max(revision,current)+1);
-            var selected=new AcousticSettings(AcousticSettings.Qualities[QualitySelector.Value],AcousticSettings.Accelerations[Math.Max(0,AccelerationSelector.SelectedIndex)],revision);
-            AcousticSettingsStore.Save(root,path,selected);selectionLabel.Text="Saved: "+selected.Quality+" / "+selected.Acceleration+". Awaiting actual host status.";
+            var selected=(existing??AcousticSettings.Defaults(1)).WithSelections(AcousticSettings.Qualities[QualitySelector.Value],AcousticSettings.Accelerations[Math.Max(0,AccelerationSelector.SelectedIndex)],revision);
+            AcousticSettingsStore.SaveExpected(root,path,selected,current);selectionLabel.Text="Saved: "+selected.Quality+" / "+selected.Acceleration+". Awaiting actual host status.";
             RefreshStatus();
         }
         internal void RefreshStatus()

@@ -7,14 +7,19 @@ export const qualityPresets=Object.freeze({performance:12,balanced:16,quality:32
 export const qualityReflectors=Object.freeze({performance:8,balanced:8,quality:12,max:16});
 const levels=Object.freeze(qualityNames.slice(1));
 const own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
+export const acousticDefaults=Object.freeze({acousticQuality:'auto',acousticAcceleration:'auto',
+  richAudioEnabled:true,outputLevel:1,earlyReflections:true,diagnosticsOverlay:false});
 
 export function validateAcousticSettings(value={}){
   if(!value||typeof value!=='object'||Array.isArray(value)||
-    Object.keys(value).some(k=>!['acousticQuality','acousticAcceleration'].includes(k)))throw Error('Acoustic settings object/fields');
+    Object.keys(value).some(k=>!own(acousticDefaults,k)))throw Error('Acoustic settings object/fields');
   const acousticQuality=own(value,'acousticQuality')?value.acousticQuality:'auto';
   const acousticAcceleration=own(value,'acousticAcceleration')?value.acousticAcceleration:'auto';
   if(!qualityNames.includes(acousticQuality)||!accelerationNames.includes(acousticAcceleration))throw Error('Acoustic quality/acceleration value');
-  return Object.freeze({acousticQuality,acousticAcceleration});
+  const result={...acousticDefaults,...value,acousticQuality,acousticAcceleration};
+  if(!['richAudioEnabled','earlyReflections','diagnosticsOverlay'].every(k=>typeof result[k]==='boolean')||
+    !Number.isFinite(result.outputLevel)||result.outputLevel<0||result.outputLevel>1)throw Error('Acoustic output/reflection settings');
+  return Object.freeze(result);
 }
 
 export class AcousticQualityController {

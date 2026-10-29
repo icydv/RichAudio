@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+<title>RichAudio controlled menu preview from actual drawing commands</title>
+<desc>Illustrative engine status. No GTA execution or in-game compatibility claim.</desc>
+<rect width="1920" height="1080" fill="#10181f"/>
+<rect x="87" y="60" width="760" height="960" fill="#0d1116" fill-opacity="0.9098039215686274"/>
+<rect x="87" y="60" width="760" height="3" fill="#d4af37" fill-opacity="1"/>
+<rect x="87" y="60" width="1" height="960" fill="#d4af37" fill-opacity="0.5411764705882353"/>
+<rect x="846" y="60" width="1" height="960" fill="#d4af37" fill-opacity="0.3607843137254902"/>
+<text x="118" y="80" font-family="Arial, sans-serif" font-size="45" dominant-baseline="text-before-edge" fill="#30250d" fill-opacity="1">RichAudio</text>
+<text x="118.81" y="80" font-family="Arial, sans-serif" font-size="45" dominant-baseline="text-before-edge" fill="#30250d" fill-opacity="1">RichAudio</text>
+<text x="117" y="77.5" font-family="Arial, sans-serif" font-size="45" dominant-baseline="text-before-edge" fill="#e6cf81" fill-opacity="1">RichAudio</text>
+<text x="117.81" y="77.5" font-family="Arial, sans-serif" font-size="45" dominant-baseline="text-before-edge" fill="#e6cf81" fill-opacity="1">RichAudio</text>
+<text x="117" y="79" font-family="Arial, sans-serif" font-size="45" dominant-baseline="text-before-edge" fill="#d4af37" fill-opacity="1">RichAudio</text>
+<text x="117.81" y="79" font-family="Arial, sans-serif" font-size="45" dominant-baseline="text-before-edge" fill="#d4af37" fill-opacity="1">RichAudio</text>
+<text x="120" y="133" font-family="Arial, sans-serif" font-size="15" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">ACOUSTIC SETTINGS</text>
+<text x="120.27" y="133" font-family="Arial, sans-serif" font-size="15" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">ACOUSTIC SETTINGS</text>
+<rect x="117" y="158" width="87.5" height="2" fill="#80651e" fill-opacity="1"/>
+<rect x="204.5" y="158" width="87.5" height="2" fill="#af8b29" fill-opacity="1"/>
+<rect x="292" y="158" width="87.5" height="2" fill="#d4af37" fill-opacity="1"/>
+<rect x="379.5" y="158" width="87.5" height="2" fill="#e6cf81" fill-opacity="1"/>
+<rect x="467" y="158" width="87.5" height="2" fill="#f3e2ab" fill-opacity="1"/>
+<rect x="554.5" y="158" width="87.5" height="2" fill="#e6cf81" fill-opacity="1"/>
+<rect x="642" y="158" width="87.5" height="2" fill="#d4af37" fill-opacity="1"/>
+<rect x="729.5" y="158" width="87.5" height="2" fill="#af8b29" fill-opacity="1"/>
+<rect x="103" y="172" width="728" height="96" fill="#222b33" fill-opacity="0.7098039215686275"/>
+<text x="117" y="182" font-family="Arial, sans-serif" font-size="13" dominant-baseline="text-before-edge" fill="#d4af37" fill-opacity="1">ACTIVE ENGINE</text>
+<text x="117.234" y="182" font-family="Arial, sans-serif" font-size="13" dominant-baseline="text-before-edge" fill="#d4af37" fill-opacity="1">ACTIVE ENGINE</text>
+<text x="117" y="205" font-family="Arial, sans-serif" font-size="20" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">Quality  /  cap 32 paths/source</text>
+<text x="117.36" y="205" font-family="Arial, sans-serif" font-size="20" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">Quality  /  cap 32 paths/source</text>
+<text x="629" y="205" font-family="Arial, sans-serif" font-size="20" dominant-baseline="text-before-edge" fill="#d4af37" fill-opacity="1">CPU</text>
+<text x="629.36" y="205" font-family="Arial, sans-serif" font-size="20" dominant-baseline="text-before-edge" fill="#d4af37" fill-opacity="1">CPU</text>
+<text x="117" y="231" font-family="Arial, sans-serif" font-size="13" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">Illustrative supported GPU</text>
+<text x="117" y="248" font-family="Arial, sans-serif" font-size="13" dominant-baseline="text-before-edge" fill="#e7c778" fill-opacity="1">Fallback: GPU deadline exceeded</text>
+<text x="117" y="274" font-family="Arial, sans-serif" font-size="15" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">ACOUSTICS</text>
+<text x="117.27" y="274" font-family="Arial, sans-serif" font-size="15" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">ACOUSTICS</text>
+<text x="469" y="274" font-family="Arial, sans-serif" font-size="13" dominant-baseline="text-before-edge" fill="#e7c778" fill-opacity="1">* Experimental: timing limits apply</text>
+<rect x="103" y="298" width="728" height="66" fill="#d4af37" fill-opacity="1"/>
+<text x="119" y="307" font-family="Arial, sans-serif" font-size="21" dominant-baseline="text-before-edge" fill="#111318" fill-opacity="1">Acoustic Quality</text>
+<text x="119.378" y="307" font-family="Arial, sans-serif" font-size="21" dominant-baseline="text-before-edge" fill="#111318" fill-opacity="1">Acoustic Quality</text>
+<text x="469" y="308" font-family="Arial, sans-serif" font-size="19" dominant-baseline="text-before-edge" fill="#111318" fill-opacity="1">Quality (experimental)</text>
+<text x="469.342" y="308" font-family="Arial, sans-serif" font-size="19" dominant-baseline="text-before-edge" fill="#111318" fill-opacity="1">Quality (experimental)</text>
+<rect x="469" y="333" width="60" height="24" fill="#303842" fill-opacity="0.6862745098039216"/>
+<text x="478" y="335" font-family="Arial, sans-serif" font-size="14" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">AUTO</text>
+<rect x="535" y="333" width="60" height="24" fill="#303842" fill-opacity="0.6862745098039216"/>
+<text x="544" y="335" font-family="Arial, sans-serif" font-size="14" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">12</text>
+<rect x="601" y="333" width="60" height="24" fill="#303842" fill-opacity="0.6862745098039216"/>
+<text x="610" y="335" font-family="Arial, sans-serif" font-size="14" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">16</text>
+<rect x="667" y="333" width="60" height="24" fill="#111318" fill-opacity="1"/>
+<text x="676" y="335" font-family="Arial, sans-serif" font-size="14" dominant-baseline="text-before-edge" fill="#d4af37" fill-opacity="1">32*</text>
+<text x="676.252" y="335" font-family="Arial, sans-serif" font-size="14" dominant-baseline="text-before-edge" fill="#d4af37" fill-opacity="1">32*</text>
+<rect x="733" y="333" width="60" height="24" fill="#303842" fill-opacity="0.6862745098039216"/>
+<text x="742" y="335" font-family="Arial, sans-serif" font-size="14" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">64*</text>
+<rect x="103" y="366" width="728" height="54" fill="#1e242b" fill-opacity="0.6627450980392157"/>
+<rect x="103" y="366" width="3" height="54" fill="#d4af37" fill-opacity="0.3607843137254902"/>
+<text x="119" y="375" font-family="Arial, sans-serif" font-size="21" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">Acoustic Acceleration</text>
+<rect x="469" y="379" width="104" height="29" fill="#303842" fill-opacity="0.6862745098039216"/>
+<text x="489" y="384" font-family="Arial, sans-serif" font-size="16" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">AUTO</text>
+<rect x="579" y="379" width="104" height="29" fill="#303842" fill-opacity="0.6862745098039216"/>
+<text x="599" y="384" font-family="Arial, sans-serif" font-size="16" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">CPU</text>
+<rect x="689" y="379" width="104" height="29" fill="#111318" fill-opacity="1"/>
+<text x="709" y="384" font-family="Arial, sans-serif" font-size="16" dominant-baseline="text-before-edge" fill="#d4af37" fill-opacity="1">GPU</text>
+<text x="709.288" y="384" font-family="Arial, sans-serif" font-size="16" dominant-baseline="text-before-edge" fill="#d4af37" fill-opacity="1">GPU</text>
+<text x="117" y="436" font-family="Arial, sans-serif" font-size="15" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">AUDIO</text>
+<text x="117.27" y="436" font-family="Arial, sans-serif" font-size="15" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">AUDIO</text>
+<text x="227" y="436" font-family="Arial, sans-serif" font-size="13" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">Active: On / 60% / early Off</text>
+<rect x="103" y="460" width="728" height="42" fill="#1e242b" fill-opacity="0.6627450980392157"/>
+<rect x="103" y="460" width="3" height="42" fill="#d4af37" fill-opacity="0.3607843137254902"/>
+<text x="119" y="469" font-family="Arial, sans-serif" font-size="21" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">RichAudio output</text>
+<text x="469" y="470" font-family="Arial, sans-serif" font-size="19" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">On</text>
+<rect x="103" y="504" width="728" height="60" fill="#1e242b" fill-opacity="0.6627450980392157"/>
+<rect x="103" y="504" width="3" height="60" fill="#d4af37" fill-opacity="0.3607843137254902"/>
+<text x="119" y="513" font-family="Arial, sans-serif" font-size="21" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">Output Level</text>
+<text x="469" y="514" font-family="Arial, sans-serif" font-size="19" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">75%</text>
+<rect x="469" y="542" width="326" height="5" fill="#4a525c" fill-opacity="1"/>
+<rect x="469" y="542" width="244.5" height="5" fill="#d4af37" fill-opacity="1"/>
+<rect x="709.5" y="537" width="8" height="15" fill="#d4af37" fill-opacity="1"/>
+<rect x="103" y="566" width="728" height="42" fill="#1e242b" fill-opacity="0.6627450980392157"/>
+<rect x="103" y="566" width="3" height="42" fill="#d4af37" fill-opacity="0.3607843137254902"/>
+<text x="119" y="575" font-family="Arial, sans-serif" font-size="21" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">Early Reflections</text>
+<text x="469" y="576" font-family="Arial, sans-serif" font-size="19" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">On</text>
+<rect x="103" y="610" width="728" height="42" fill="#1e242b" fill-opacity="0.6627450980392157"/>
+<rect x="103" y="610" width="3" height="42" fill="#d4af37" fill-opacity="0.3607843137254902"/>
+<text x="119" y="619" font-family="Arial, sans-serif" font-size="21" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">Doppler</text>
+<text x="469" y="620" font-family="Arial, sans-serif" font-size="19" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">On (fixed)</text>
+<rect x="103" y="654" width="728" height="42" fill="#1e242b" fill-opacity="0.6627450980392157"/>
+<rect x="103" y="654" width="3" height="42" fill="#d4af37" fill-opacity="0.3607843137254902"/>
+<text x="119" y="663" font-family="Arial, sans-serif" font-size="21" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">Diagnostics Overlay</text>
+<text x="469" y="664" font-family="Arial, sans-serif" font-size="19" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">Off</text>
+<rect x="103" y="698" width="728" height="36" fill="#1e242b" fill-opacity="0.6627450980392157"/>
+<rect x="103" y="698" width="3" height="36" fill="#d4af37" fill-opacity="0.3607843137254902"/>
+<text x="119" y="707" font-family="Arial, sans-serif" font-size="21" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">Environmental Reverb</text>
+<text x="469" y="708" font-family="Arial, sans-serif" font-size="19" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">Not available</text>
+<rect x="103" y="736" width="728" height="36" fill="#1e242b" fill-opacity="0.6627450980392157"/>
+<rect x="103" y="736" width="3" height="36" fill="#d4af37" fill-opacity="0.3607843137254902"/>
+<text x="119" y="745" font-family="Arial, sans-serif" font-size="21" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">Advanced Diffraction</text>
+<text x="469" y="746" font-family="Arial, sans-serif" font-size="19" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">Not available</text>
+<rect x="103" y="788" width="728" height="86" fill="#10171e" fill-opacity="0.6196078431372549"/>
+<rect x="103" y="788" width="3" height="86" fill="#d4af37" fill-opacity="1"/>
+<text x="118" y="801" font-family="Arial, sans-serif" font-size="17" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">Sets the maximum direct and early-path detail per</text>
+<text x="118" y="822" font-family="Arial, sans-serif" font-size="17" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">source. Auto adapts to measured workload. 32/64-path</text>
+<text x="118" y="843" font-family="Arial, sans-serif" font-size="17" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">tiers are experimental and can exceed audio deadlines.</text>
+<rect x="103" y="890" width="236" height="45" fill="#1e242b" fill-opacity="0.6627450980392157"/>
+<text x="121" y="903" font-family="Arial, sans-serif" font-size="17" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">APPLY CHANGES</text>
+<rect x="349" y="890" width="236" height="45" fill="#1e242b" fill-opacity="0.6627450980392157"/>
+<text x="367" y="903" font-family="Arial, sans-serif" font-size="17" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">RESET DEFAULTS</text>
+<rect x="595" y="890" width="236" height="45" fill="#1e242b" fill-opacity="0.6627450980392157"/>
+<text x="613" y="903" font-family="Arial, sans-serif" font-size="17" dominant-baseline="text-before-edge" fill="#eceff2" fill-opacity="1">BACK</text>
+<text x="117" y="952" font-family="Arial, sans-serif" font-size="15" dominant-baseline="text-before-edge" fill="#9ba4ad" fill-opacity="1">ARROWS  Navigate / adjust     ENTER  Select     ESC  Back</text>
+<text x="117" y="983" font-family="Arial, sans-serif" font-size="14" dominant-baseline="text-before-edge" fill="#e7c778" fill-opacity="1">Pending changes. Apply to save and update a configured host.</text>
+<text x="1115" y="90" font-family="Arial, sans-serif" font-size="16" fill="#b3c1cb">CONTROLLED DRAW-COMMAND PREVIEW</text>
+<text x="1115" y="114" font-family="Arial, sans-serif" font-size="16" fill="#b3c1cb">Illustrative status. No GTA execution or compatibility claim.</text>
+</svg>

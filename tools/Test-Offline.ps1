@@ -18,6 +18,9 @@ try {
     if($LASTEXITCODE-ne0){throw 'Actual quality/acceleration worker and RA07 integration failed.'}
     & (Join-Path $repo 'tools\Build-AcousticSettings.ps1') -Tests
     & (Join-Path $repo 'tools\Test-AcousticSettingsHandoff.ps1')
+    & (Join-Path $repo 'tools\Test-InGameMenu.ps1')
+    & node --test tests/Test-InGameAcousticControls.mjs
+    if($LASTEXITCODE-ne0){throw 'Actual in-game acoustic settings integration failed.'}
     & node --test tests/Test-GeometryRelay.mjs
     if($LASTEXITCODE-ne0){throw 'Measured geometry relay admission failed.'}
     & (Join-Path $repo 'tools\Test-GeometryLive.ps1')

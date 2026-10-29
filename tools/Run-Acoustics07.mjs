@@ -31,7 +31,10 @@ const args = process.argv.slice(2),
     barrierFrame: null,
     geometry: false,
     acousticQuality:null,acousticAcceleration:null,acousticBenchmark:null,
+    acousticPreferences:{},
   };
+const settingBoolean=v=>{if(v!=='true'&&v!=='false')throw Error('Boolean acoustic preference');return v==='true';};
+const settingNumber=v=>{if(typeof v!=='string'||!v.trim())throw Error('Numeric acoustic preference');return Number(v);};
 for (let i = 0; i < args.length; i += 2) {
   if (args[i] === "--scene") options.scene = args[i + 1];
   else if (args[i] === "--sources") options.sources = Number(args[i + 1]);
@@ -55,6 +58,10 @@ for (let i = 0; i < args.length; i += 2) {
     options.barrierFrame = Number(args[i + 1]);
   else if(args[i]==='--acoustic-quality')options.acousticQuality=args[i+1];
   else if(args[i]==='--acoustic-acceleration')options.acousticAcceleration=args[i+1];
+  else if(args[i]==='--rich-audio-enabled')options.acousticPreferences.richAudioEnabled=settingBoolean(args[i+1]);
+  else if(args[i]==='--rich-audio-output-level')options.acousticPreferences.outputLevel=settingNumber(args[i+1]);
+  else if(args[i]==='--early-reflections')options.acousticPreferences.earlyReflections=settingBoolean(args[i+1]);
+  else if(args[i]==='--acoustic-diagnostics-overlay')options.acousticPreferences.diagnosticsOverlay=settingBoolean(args[i+1]);
   else if(args[i]==='--acoustic-benchmark')options.acousticBenchmark=args[i+1];
   else throw Error("Unknown producer option");
 }
@@ -72,8 +79,8 @@ if (
   !["harmonic", "pulse", "impulse"].includes(options.beacon)
 )
   throw Error("Scene/source/beacon budget");
-options.acousticSettings=options.acousticQuality!==null||options.acousticAcceleration!==null?
-  validateAcousticSettings({acousticQuality:options.acousticQuality??'auto',acousticAcceleration:options.acousticAcceleration??'auto'}):null;
+options.acousticSettings=options.acousticQuality!==null||options.acousticAcceleration!==null||Object.keys(options.acousticPreferences).length?
+  validateAcousticSettings({...options.acousticPreferences,acousticQuality:options.acousticQuality??'auto',acousticAcceleration:options.acousticAcceleration??'auto'}):null;
 if(options.acousticBenchmark&&(!options.headless||!options.trace||!options.acousticSettings||options.geometry||
   !['small','enclosure','demanding'].includes(options.acousticBenchmark)))throw Error('Explicit device-free acoustic benchmark scope');
 validateBeaconFrequencyHz(options.frequencyHz);
@@ -439,7 +446,8 @@ async function pump() {
       lastControl = result.control;
       if(lastControl.acoustic){
         renderer.setPathBudget(lastControl.acoustic.pathBudget);
-        lastAcousticStatus={type:'acoustic-settings-status',...lastControl.acoustic};
+        renderer.setOutputPreferences(lastControl.acoustic);
+        lastAcousticStatus={type:'acoustic-settings-status',...lastControl.acoustic,outputGain:renderer.outputGain,outputTarget:renderer.outputTarget};
         const key=JSON.stringify([lastAcousticStatus.settingsRevision,lastAcousticStatus.activeQuality,lastAcousticStatus.activeAcceleration,lastAcousticStatus.fallbackReason]);
         if(key!==lastAcousticStatusKey||stats.blocks%94===0){log(lastAcousticStatus);lastAcousticStatusKey=key;}
       }
@@ -637,8 +645,9 @@ function receive(m) {
   if(geometryRelay?.receive(m))return;
   if(m.type==='acoustic-settings'){
     if(!options.acousticSettings||!Number.isSafeInteger(m.revision)||m.revision<=acousticRevision)throw Error('Acoustic settings startup/revision');
-    const validated=validateAcousticSettings({acousticQuality:m.quality,acousticAcceleration:m.acceleration});
-    acousticRevision=m.revision;pendingAcousticSettings={revision:m.revision,quality:validated.acousticQuality,acceleration:validated.acousticAcceleration};
+    const {type,revision,quality,acceleration,...preferences}=m;
+    const {acousticQuality,acousticAcceleration,...validated}=validateAcousticSettings({...preferences,acousticQuality:quality,acousticAcceleration:acceleration});
+    acousticRevision=revision;pendingAcousticSettings={revision,quality:acousticQuality,acceleration:acousticAcceleration,...validated};
   }else if (m.type === "credit") {
     if (
       !Number.isInteger(m.blocks) ||

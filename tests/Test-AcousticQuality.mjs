@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {qualityNames,qualityPresets,qualityReflectors,validateAcousticSettings,AcousticQualityController} from '../src/acoustics/streaming/acoustic-quality.mjs';
+import {qualityNames,qualityPresets,qualityReflectors,validateAcousticSettings,acousticDefaults,AcousticQualityController} from '../src/acoustics/streaming/acoustic-quality.mjs';
 import {StreamingRenderer} from '../src/acoustics/streaming/causal.mjs';
 import {acousticScene,ownedSource,bounds} from '../src/acoustics/engine/contracts.mjs';
 import {prepare} from '../src/acoustics/engine/renderer.mjs';
@@ -10,8 +10,8 @@ test('five quality positions and three acceleration modes validate independently
   assert.deepEqual(qualityNames,['auto','performance','balanced','quality','max']);
   assert.deepEqual(Object.values(qualityPresets),[12,16,32,64]);
   for(const acousticQuality of qualityNames)for(const acousticAcceleration of ['auto','cpu','gpu'])
-    assert.deepEqual(validateAcousticSettings({acousticQuality,acousticAcceleration}),{acousticQuality,acousticAcceleration});
-  assert.deepEqual(validateAcousticSettings(),{acousticQuality:'auto',acousticAcceleration:'auto'});
+    assert.deepEqual(validateAcousticSettings({acousticQuality,acousticAcceleration}),{...acousticDefaults,acousticQuality,acousticAcceleration});
+  assert.deepEqual(validateAcousticSettings(),acousticDefaults);
   for(const v of [null,[],{acousticQuality:'Ultra'},{acousticAcceleration:'CUDA'},{quality:'max'},{acousticQuality:null}])
     assert.throws(()=>validateAcousticSettings(v));
 });

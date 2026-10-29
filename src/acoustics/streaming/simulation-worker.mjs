@@ -15,6 +15,7 @@ const initial=workerData.acousticSettings?validateAcousticSettings(workerData.ac
 const quality=initial?new AcousticQualityController({selected:initial.acousticQuality}):null;
 const acceleration=initial?new AcousticAcceleration({mode:initial.acousticAcceleration}):null;
 let settingsRevision=0,busy=false;
+let processingPreferences=initial;
 process.on('exit',()=>acceleration?.close());
 parentPort.on("message", async (message) => {
   if(message.type==='acoustic-shutdown'){acceleration?.close();parentPort.postMessage({type:'acoustic-shutdown'});return;}
@@ -25,12 +26,15 @@ parentPort.on("message", async (message) => {
     if(message.acousticSettings){
       if(!quality||!acceleration||!Number.isSafeInteger(message.acousticSettings.revision)||message.acousticSettings.revision<=settingsRevision)
         throw Error('Acoustic settings revision or startup capacity');
-      const s=validateAcousticSettings({acousticQuality:message.acousticSettings.quality,acousticAcceleration:message.acousticSettings.acceleration});
+      const {revision,quality:requestedQuality,acceleration:requestedAcceleration,...preferences}=message.acousticSettings;
+      const s=validateAcousticSettings({...preferences,acousticQuality:requestedQuality,acousticAcceleration:requestedAcceleration});
+      processingPreferences=s;
       quality.select(s.acousticQuality);acceleration.setMode(s.acousticAcceleration);settingsRevision=message.acousticSettings.revision;
     }
     if(quality){
       if(message.acousticFeedback)quality.observe(message.acousticFeedback);
-      const active=quality.diagnostics();simulation.setProcessingSettings({pathBudget:active.pathBudget,maxReflectors:active.reflectorBudget});
+      const active=quality.diagnostics();simulation.setProcessingSettings({pathBudget:active.pathBudget,maxReflectors:active.reflectorBudget,
+        earlyReflections:processingPreferences.earlyReflections});
     }
     let control;
     if(observed){
@@ -51,6 +55,9 @@ parentPort.on("message", async (message) => {
       control = acceleration?await simulation.updateAccelerated(message.now,{},acceleration):simulation.update(message.now);
     }
     if(quality)control.acoustic={...quality.diagnostics(),...acceleration.diagnostics(),settingsRevision,
+      richAudioEnabled:processingPreferences.richAudioEnabled,outputLevel:processingPreferences.outputLevel,
+      earlyReflections:processingPreferences.earlyReflections,diagnosticsOverlay:processingPreferences.diagnosticsOverlay,
+      dopplerProcessing:'propagation-coupled',dopplerBypassSupported:false,
       actualPathCount:control.paths.length,sourceCount:Object.keys(control.sourceGenerations).length,
       availablePaths:simulation.availablePaths??0,maximumReflectionOrder:2,lateReverberation:'not-implemented'};
     parentPort.postMessage({

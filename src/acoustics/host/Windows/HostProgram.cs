@@ -49,6 +49,7 @@ namespace RichAudio.Beacon.Windows
                     "  --acoustic-quality auto|performance|balanced|quality|max\n"+
                     "  --acoustic-acceleration auto|cpu|gpu\n"+
                     "  --acoustic-settings <private .local JSON file>\n"+
+                    "  --rich-audio-enabled true|false; --rich-audio-output-level 0..1; --early-reflections true|false; --acoustic-diagnostics-overlay true|false\n"+
                     "Saved .local/acoustic-settings.json loads automatically on subsequent incremental launches.\n"+
                     "Build/run build/acoustic-settings/RichAudio.Settings.exe for the five-position slider and independent backend selector.\n"+
                     "Save once before host startup; later changes apply live to a configured host. Active/fallback diagnostics come from the producer.\n"+
@@ -63,6 +64,7 @@ namespace RichAudio.Beacon.Windows
             double beaconFrequencyHz = 95;
             double beaconLevel = .22;
             string acousticSettingsPath=null,acousticQuality=null,acousticAcceleration=null;
+            bool? richAudioEnabled=null,earlyReflections=null,diagnosticsOverlay=null;double? acousticOutputLevel=null;
             bool autostart = false, exercise = false, loopback = false, listenerPipe = false, list = false, probe = false;
             try
             {
@@ -87,6 +89,10 @@ namespace RichAudio.Beacon.Windows
                         else if (key == "--acoustic-settings") acousticSettingsPath=value;
                         else if (key == "--acoustic-quality") acousticQuality=value;
                         else if (key == "--acoustic-acceleration") acousticAcceleration=value;
+                        else if (key == "--rich-audio-enabled") richAudioEnabled=bool.Parse(value);
+                        else if (key == "--rich-audio-output-level") acousticOutputLevel=double.Parse(value,CultureInfo.InvariantCulture);
+                        else if (key == "--early-reflections") earlyReflections=bool.Parse(value);
+                        else if (key == "--acoustic-diagnostics-overlay") diagnosticsOverlay=bool.Parse(value);
                         else if (key == "--output") outputPath = value;
                         else if (key == "--wav") wav = Path.GetFullPath(value);
                         else if (key == "--device") device = value == "default" ? -1 : int.Parse(value, CultureInfo.InvariantCulture);
@@ -107,6 +113,9 @@ namespace RichAudio.Beacon.Windows
                 BeaconLevelArguments(beaconLevel, beacon, wav != null);
                 string resolvedSettingsPath;
                 var acousticSettings=AcousticSettingsStore.ResolveForLaunch(root,acousticSettingsPath,acousticQuality,acousticAcceleration,wav!=null,out resolvedSettingsPath);
+                if(richAudioEnabled.HasValue||acousticOutputLevel.HasValue||earlyReflections.HasValue||diagnosticsOverlay.HasValue){
+                    if(wav!=null)throw new ArgumentException("Acoustic processing controls require incremental rendering");
+                    acousticSettings=(acousticSettings??AcousticSettings.Defaults(1)).WithAudio(richAudioEnabled,acousticOutputLevel,earlyReflections,diagnosticsOverlay);}
                 outputPath = PrivateOutput(root, outputPath ?? Path.Combine(".local", "acoustics07-host-" + Guid.NewGuid().ToString("N")));
                 Directory.CreateDirectory(outputPath);
                 return Run(root, scene, beacon, sources, seconds, gain, device, autostart, exercise, loopback, listenerPipe, wav, outputPath, beaconFrequencyHz, beaconLevel,geometryModel,acousticSettings,resolvedSettingsPath);

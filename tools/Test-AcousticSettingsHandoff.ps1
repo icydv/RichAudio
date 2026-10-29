@@ -8,6 +8,7 @@ $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 $sources=@(Get-ChildItem (Join-Path $repo 'src\acoustics\host\Windows'),(Join-Path $repo 'src\acoustics\host\Transport'),(Join-Path $repo 'src\acoustics\geometry') -Filter '*.cs'|ForEach-Object FullName)
 $sources+=@('GeometryObservation.cs','SurfaceAcquisition.cs','DiagnosticTile.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\observation\'+$_)}
 $sources+=Join-Path $repo 'src\acoustics\settings\AcousticSettingsWindow.cs'
+$sources+=@(Get-ChildItem (Join-Path $repo 'src\acoustics\settings\InGame') -Filter '*.cs'|ForEach-Object FullName)
 $sources+=Join-Path $repo 'tests\host\AcousticSettingsHandoff.cs'
 $exe=Join-Path $out 'RichAudio.Settings.Handoff.exe'
 & $compiler /nologo /optimize+ /unsafe+ /warnaserror+ /platform:x64 /define:STATE_TRANSPORT,GEOMETRY_LIVE /r:System.Runtime.Serialization.dll /r:System.Web.Extensions.dll /r:System.Windows.Forms.dll /r:System.Drawing.dll /main:RichAudio.Beacon.Windows.AcousticSettingsHandoff ('/out:'+$exe) @sources

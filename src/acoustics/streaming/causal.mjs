@@ -87,12 +87,12 @@ export class CausalSimulation {
     this.previous.clear(); // Never interpret a new reflector delay as source velocity.
     this.stats.sceneReplacements++;
   }
-  setProcessingSettings({pathBudget,maxReflectors}) {
+  setProcessingSettings({pathBudget,maxReflectors,earlyReflections=true}) {
     requireValue(Number.isInteger(pathBudget)&&pathBudget>=1&&pathBudget<=64&&
-      Number.isInteger(maxReflectors)&&maxReflectors>=1&&maxReflectors<=16,'bounded acoustic processing settings');
+      Number.isInteger(maxReflectors)&&maxReflectors>=1&&maxReflectors<=16&&typeof earlyReflections==='boolean','bounded acoustic processing settings');
     const rebuild=this.processingSettings?.maxReflectors!==maxReflectors;
-    if(rebuild||this.processingSettings?.pathBudget!==pathBudget)this.prepareSequence++;
-    this.processingSettings={pathBudget,maxReflectors};
+    if(rebuild||this.processingSettings?.pathBudget!==pathBudget||this.processingSettings?.earlyReflections!==earlyReflections)this.prepareSequence++;
+    this.processingSettings={pathBudget,maxReflectors,earlyReflections};
     if(rebuild&&this.scene)this.candidates=candidatePaths(this.scene,{maxReflectors});
     // Quality/backend changes do not change geometric identity or PCM history.
   }
@@ -246,6 +246,7 @@ export class CausalSimulation {
       if (!track) continue;
       const source = { track, directivity: current.directivity }, plans=[];
       for (const candidate of this.candidates) {
+        if(this.processingSettings?.earlyReflections===false&&candidate.surfaces.length)continue;
         const plan=preparePath(this.scene,source,listener,now,candidate,geometryTimeMs),queries=pathSegments(plan),offset=segments.length;
         segments.push(...queries);plans.push({plan,candidate,offset,count:queries.length});
       }
@@ -387,6 +388,9 @@ export class StreamingRenderer {
         }
       : null;
     this.masterGain = masterGain;
+    // User output is attenuation of the existing calibrated mix, never a gain
+    // boost or a source/emission command. Rings keep advancing while muted.
+    this.outputGain=1;this.outputTarget=1;this.outputSmooth=1-Math.exp(-1/(.02*FS));
     this.historyFrames = Math.ceil(historySeconds * FS);
     this.maxPathsPerSource = maxPathsPerSource;
     this.pathCapacityPerSource = pathCapacityPerSource;
@@ -467,6 +471,10 @@ export class StreamingRenderer {
     // Source identity, ring contents, cursors and all filter histories survive.
     this.maxPathsPerSource = maxPathsPerSource;
     this.pathLimit = this.sources.size * maxPathsPerSource;
+  }
+  setOutputPreferences({richAudioEnabled=true,outputLevel=1}={}) {
+    requireValue(typeof richAudioEnabled==='boolean'&&Number.isFinite(outputLevel)&&outputLevel>=0&&outputLevel<=1,'bounded owned output preference');
+    this.outputTarget=richAudioEnabled?outputLevel:0;
   }
   historyReady(control) {
     return (
@@ -717,6 +725,11 @@ export class StreamingRenderer {
           slot.rate + (slot.correctionLeft > 0 ? slot.correction : 0);
         if (slot.correctionLeft > 0) slot.correctionLeft--;
       }
+      if(this.outputGain!==this.outputTarget){
+        this.outputGain+=this.outputSmooth*(this.outputTarget-this.outputGain);
+        if(Math.abs(this.outputTarget-this.outputGain)<1e-9)this.outputGain=this.outputTarget;
+      }
+      if(this.outputGain!==1){l*=this.outputGain;r*=this.outputGain;}
       l *= this.masterGain;
       r *= this.masterGain;
       const peak = Math.max(Math.abs(l), Math.abs(r));

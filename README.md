@@ -1,5 +1,7 @@
 # RichAudio
 
+**In-game settings, implemented offline:** A gold-branded RPH overlay adds F10, console and controller access to real quality/acceleration, smooth owned-output, reflection and diagnostic controls. This is a separate overlay; stock pause-menu insertion was not supported by the reviewed API evidence. Actual Enhanced rendering/input compatibility remains unverified. [Implementation, preview and limits](docs/ACOUSTICS_08_2_IN_GAME_SETTINGS.md).
+
 ### GTA V looks incredible. Now imagine if it sounded that way.
 
 **RichAudio is an ambitious, next-generation audio overhaul for Grand Theft Auto V Enhanced.** Our goal is simple: make Los Santos feel as real to your ears as it does to your eyes.
