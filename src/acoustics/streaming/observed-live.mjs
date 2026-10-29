@@ -32,7 +32,7 @@ export class ObservationClock {
     this.high=Math.max(this.high,this.low);
     this.frequency=c.frequency;this.id=c.id;this.basis=c.basis;
     this.deliveryMaximumMs=c.delivery.maximumMs;
-    this.lastSampleTicks=b.listenerTicks;this.lastNow=-Infinity;
+    this.lastSampleTicks=b.listenerTicks;this.lastNow=-Infinity;this.lastLower=-Infinity;
   }
   now(anchor) {
     requireValue(!anchor?.clockError,anchor?.clockError);
@@ -41,9 +41,17 @@ export class ObservationClock {
       anchor.queueAgeMs>=0 && anchor.queueAgeMs<=250 && m.receiptAgeMs+anchor.queueAgeMs<=250,'clock anchor freshness/frequency');
     const ticks=m.state.observationTicks+(m.receiptAgeMs+anchor.queueAgeMs)*this.frequency/1000;
     requireValue(ticks>=this.lastSampleTicks && ticks-this.lastSampleTicks<=this.frequency*120,'clock evidence horizon');
-    const lower=ticks/this.frequency*1000-this.high,upper=ticks/this.frequency*1000-this.low+this.deliveryMaximumMs;
-    requireValue(lower>=0 && upper>=this.lastNow-1e-7,'observation clock reversed');
-    this.lastNow=upper;return {lower,upper,uncertaintyMs:this.high-this.low+this.deliveryMaximumMs,basis:this.basis,clockId:this.id};
+    let bound=this.deliveryMaximumMs;
+    if(this.basis==='publisher-paired-samples'){
+      const d=anchor.delivery;
+      requireValue(d&&d.basis==='measured-forwarding-upper-bound'&&id(d.reference)&&Number.isFinite(d.maximumMs)&&d.maximumMs>0&&d.maximumMs<=10,
+        'per-message measured forwarding evidence required');bound=d.maximumMs;
+    }
+    const uncertainty=anchor.queueUncertaintyMs??0;
+    requireValue(Number.isFinite(uncertainty)&&uncertainty>=0&&uncertainty<=1,'dispatch pairing uncertainty');
+    const lower=Math.max(this.lastLower,ticks/this.frequency*1000-this.high-uncertainty),upper=ticks/this.frequency*1000-this.low+bound+uncertainty;
+    requireValue(lower>=0 && upper>=lower-1e-7,'observation clock reversed');
+    this.lastLower=lower;this.lastNow=upper;return {lower,upper,uncertaintyMs:upper-lower,basis:this.basis,clockId:this.id};
   }
 }
 
@@ -78,8 +86,9 @@ export class ObservedSimulationInput {
       /^[a-f0-9]{32}$/.test(c.listenerSession)&&id(c.build)&&Number.isSafeInteger(c.interior)&&c.interior>=0&&
       Number.isSafeInteger(c.minimumListenerGeneration)&&c.minimumListenerGeneration>0,'geometry configuration context/epoch');
     if(this.config && c.listenerSession===this.config.listenerSession){
-      const changed=JSON.stringify(c.coordinates)!==JSON.stringify(this.config.coordinates)||c.build!==this.config.build||
-        c.interior!==this.config.interior||c.geometrySession!==this.config.geometrySession||c.clock.id!==this.config.clock.id;
+      // A new observation session/interior does not change the native coordinate
+      // basis. Fresh configuration replaces geometry without retagging source PCM.
+      const changed=JSON.stringify(c.coordinates)!==JSON.stringify(this.config.coordinates)||c.build!==this.config.build;
       requireValue(!changed || c.minimumListenerGeneration>(this.lastListenerGeneration??this.config.minimumListenerGeneration),
         'coordinate/context change requires a new listener generation');
     }
@@ -103,6 +112,10 @@ export class ObservedSimulationInput {
           Number.isSafeInteger(event.revision)&&event.revision>this.lastRevision,'geometry context/revision');
         // A rejected revision cannot be replayed as a newly arrived observation.
         this.lastRevision=event.revision;
+        if(event.unavailableReason!==undefined){
+          requireValue(id(event.unavailableReason)&&Array.isArray(event.groups)&&!event.groups.length,'unavailable geometry notice');
+          this.clear(event.unavailableReason,'unavailable');continue;
+        }
         requireValue(anchor?.state.session===this.config.listenerSession,'listener/geometry session pairing missing');
         const t=this.clock.now(anchor);
         requireValue(t.upper-this.lastUpdate>=liveGeometryLimits.minimumUpdateMs-1e-7,'geometry update rate');
@@ -111,14 +124,16 @@ export class ObservedSimulationInput {
         requireValue(Number.isFinite(observedAt)&&observedAt<=t.lower+1e-7,'future/ambiguous geometry timestamp');
         if(!event.groups.length)requireValue(Number.isFinite(event.observedAtMs)&&event.observedAtMs>=0&&
           t.upper<event.observedAtMs+1000,'expired empty observation set');
+        for(const g of event.groups)requireValue(t.upper<g.FinishedMs+1000,'stale observation uncertainty/expiry');
         const scene=this.feed.publish({groups:event.groups,coordinates:this.coordinates,region:this.config.region,
           listenerNative:anchor.state.position,context:{session:this.config.geometrySession,build:this.config.build,
-            interior:this.config.interior,revision:event.revision,nowMs:t.upper},
+            interior:this.config.interior,revision:event.revision,nowMs:t.lower},
           emptyValidUntilMs:event.observedAtMs+1000,materialsByKind:this.config.materialsByKind,
           visibilityAssumption:'unobserved-space-assumed-clear',motionAssumption:'static-during-snapshot',engine:this.config.engine});
         this.simulation.replaceScene(scene);this.lastUpdate=t.upper;this.stats.accepted++;
         this.status={mode:'active',reason:null,revision:event.revision,calibration:'declared-demonstration-scale',
-          physicalCalibration:'unverified',geometryKey:scene.geometryKey,clock:t};
+          physicalCalibration:'unverified',geometryKey:scene.geometryKey,clock:t,
+          originalObservationTimes:scene.observationModel.evidence.map(e=>({kind:e.kind,finishedMs:e.finishedMs,validUntilMs:e.originalValidUntilMs}))};
       }catch(error){
         if(event?.type==='geometry-config'){this.config=null;this.owned=null;}
         this.stats.rejected++;this.clear(error.message);

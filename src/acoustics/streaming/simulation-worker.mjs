@@ -20,7 +20,8 @@ parentPort.on("message", (message) => {
         if(!/^\d{1,24}$/.test(message.anchor.dispatchNs??''))return {...message.anchor,clockError:'Worker dispatch clock missing'};
         const elapsed=Number(process.hrtime.bigint()-BigInt(message.anchor.dispatchNs))/1e6;
         if(elapsed<0||elapsed>250)return {...message.anchor,clockError:'Worker dispatch clock/freshness'};
-        return {...message.anchor,queueAgeMs:message.anchor.queueAgeMs+elapsed};
+        return {...message.anchor,queueAgeMs:message.anchor.queueAgeMs+elapsed,
+          queueUncertaintyMs:message.anchor.dispatchUncertaintyMs??0};
       };
       observed.consume(message.geometryEvents??[],anchor(),message.now);
       control=observed.update(message.snapshot,anchor(),message.now);

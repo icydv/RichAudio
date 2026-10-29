@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "source": "original generated beacon; deterministic collision fixtures",
+  "gameLaunched": false,
+  "audioEndpointOpened": false,
+  "blocks": 345,
+  "frames": 176640,
+  "pcmFloat32SHA256": "2a0a8251269177d9ad004698c88fcdaf6ad48df7b5f757aea04a08a9977337da",
+  "exactControlReplay": true,
+  "matchedReflectionDifferenceRms": 0.002889665551887191,
+  "metrics": {
+    "peak": 0.02589607983827591,
+    "rms": 0.00540124170768079,
+    "clippedSamples": 0,
+    "nonfiniteSamples": 0,
+    "zeroSamples": 261510,
+    "maximumAdjacentStep": 0.0005406842974480242
+  },
+  "rendererOwnedBytes": 2881152,
+  "processRssBytes": 73162752,
+  "workerMs": {
+    "count": 345,
+    "median": 0.08519999999953143,
+    "p95": 0.29480000000012296,
+    "max": 9.527299999999968
+  },
+  "dspMs": {
+    "count": 345,
+    "median": 0.027999999999792635,
+    "p95": 0.10469999999986612,
+    "max": 2.248100000000022
+  },
+  "relay": {
+    "forwarded": 4,
+    "transactions": 81,
+    "rejected": 6,
+    "disconnects": 3,
+    "maximumAcceptedRoundTripMs": 1.162,
+    "maximumObservedRoundTripMs": 36.7245
+  },
+  "sourceHistoryResets": 1,
+  "unavailableHistoryFrames": 0,
+  "geometryAccepted": 4,
+  "geometryExpired": 1,
+  "subjectiveListening": "not performed",
+  "scale": "declared model scale 10; physical GTA metres/materials unverified",
+  "timing": "wall-paced fixture; no hardware or hard real-time scheduling claim",
+  "captureClockTransportAssertions": 50,
+  "assertionCountNote": "Includes output-ancestor checks; varies with checkout depth",
+  "focusedNodeTests": 4,
+  "combinedMilestonePercent": 60,
+  "authenticSdkSha256": "5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0",
+  "adapterSha256": "0527D239F7F1A46F5E3BE54A9D52FE1CF5262CA149CE32DE800FDC7DCA4A1B9C"
+}
