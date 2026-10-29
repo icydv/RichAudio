@@ -24,9 +24,23 @@ namespace RichAudio.Beacon.Windows
             if(File.Exists(path)&&(File.GetAttributes(path)&FileAttributes.ReparsePoint)!=0)throw new InvalidDataException("Linked menu file rejected");
         }
         public static InGameSettingsLink Load(string pointerPath)
+        {MenuDiagnostic ignored;return Load(pointerPath,out ignored);}
+        public static string SidecarForGameExecutable(string executablePath)
         {
+            if(!Path.IsPathRooted(executablePath)||!String.Equals(Path.GetFileName(executablePath),"GTA5_Enhanced.exe",StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException("Reviewed game executable path required");
+            string pointer=Path.Combine(Path.GetDirectoryName(Path.GetFullPath(executablePath)),"Plugins","RichAudio.Menu.json");
+            // String resolution only on startup; Load performs every filesystem,
+            // fixed-drive and reparse check on the background worker.
+            return pointer;
+        }
+        internal static InGameSettingsLink Load(string pointerPath,out MenuDiagnostic diagnostic)
+        {
+            diagnostic=null;string stage="sidecar-path";try{
             pointerPath=Path.GetFullPath(pointerPath);LocalFile(pointerPath);
+            stage="sidecar-read";
             string text=AcousticSettingsStore.ReadBounded(pointerPath,4096);
+            stage="sidecar-schema";
             var d=new JavaScriptSerializer{MaxJsonLength=4096,RecursionLimit=4}.DeserializeObject(text) as Dictionary<string,object>;
             var fields=new[]{"schemaVersion","workspaceRoot","settingsPath","toggleKey","controllerEnabled"};
             if(d==null||d.Count!=fields.Length)throw new InvalidDataException("Menu connection schema");
@@ -37,9 +51,11 @@ namespace RichAudio.Beacon.Windows
             string rawRoot=(string)d["workspaceRoot"],relative=(string)d["settingsPath"],key=(string)d["toggleKey"];
             if(!Path.IsPathRooted(rawRoot)||Path.IsPathRooted(relative)||rawRoot.Length>1024||relative.Length>240||
                 !System.Text.RegularExpressions.Regex.IsMatch(key,"\\AF(?:[1-9]|1[0-2])\\z")||key=="F4")throw new InvalidDataException("Menu connection scope or shortcut");
+            stage="workspace-path";
             string root=Path.GetFullPath(rawRoot),path=AcousticSettingsStore.PrivatePath(root,relative);
             LocalFile(path);if(!Directory.Exists(root))throw new InvalidDataException("Workspace unavailable");
             return new InGameSettingsLink(root,path,key,(bool)d["controllerEnabled"]);
+            }catch(Exception e){diagnostic=MenuDiagnostic.Failure(stage,e);throw;}
         }
     }
 
@@ -49,11 +65,12 @@ namespace RichAudio.Beacon.Windows
         public readonly string StatusJson,Error,ToggleKey;
         public readonly bool Available,ControllerEnabled,Pending,ResetAvailable;
         public readonly long SavedRevision;
+        public readonly MenuDiagnostic Diagnostic;
         internal readonly string RecoveryDigest;
-        internal InGameSettingsSnapshot(AcousticSettings settings,string status,string error,bool available,string key,bool controller,long revision,bool pending,bool resetAvailable=false,string recoveryDigest=null)
-        {Settings=settings;StatusJson=status;Error=error;Available=available;ToggleKey=key;ControllerEnabled=controller;SavedRevision=revision;Pending=pending;ResetAvailable=available||resetAvailable;RecoveryDigest=recoveryDigest;}
+        internal InGameSettingsSnapshot(AcousticSettings settings,string status,string error,bool available,string key,bool controller,long revision,bool pending,bool resetAvailable=false,string recoveryDigest=null,MenuDiagnostic diagnostic=null)
+        {Settings=settings;StatusJson=status;Error=error;Available=available;ToggleKey=key;ControllerEnabled=controller;SavedRevision=revision;Pending=pending;ResetAvailable=available||resetAvailable;RecoveryDigest=recoveryDigest;Diagnostic=diagnostic??new MenuDiagnostic("preferences","loading");}
         internal InGameSettingsSnapshot WithPending(bool value,string error)
-        {return new InGameSettingsSnapshot(Settings,StatusJson,error,Available,ToggleKey,ControllerEnabled,SavedRevision,value,ResetAvailable,RecoveryDigest);}
+        {return new InGameSettingsSnapshot(Settings,StatusJson,error,Available,ToggleKey,ControllerEnabled,SavedRevision,value,ResetAvailable,RecoveryDigest,Diagnostic);}
     }
 
     public sealed class InGameSettingsBridge:IDisposable
@@ -101,10 +118,12 @@ namespace RichAudio.Beacon.Windows
                 {
                     var cadence=Stopwatch.StartNew();
                     string failure=null;
+                    string stage="connection-load";MenuDiagnostic diagnostic=null;
                     bool validatedPointer=false;
                     try
                     {
-                        var read=InGameSettingsLink.Load(pointerPath);
+                        var read=InGameSettingsLink.Load(pointerPath,out diagnostic);
+                        stage="connection-binding";
                         if(link!=null&&(!String.Equals(link.WorkspaceRoot,read.WorkspaceRoot,StringComparison.OrdinalIgnoreCase)||!String.Equals(link.SettingsPath,read.SettingsPath,StringComparison.OrdinalIgnoreCase)))
                             throw new InvalidDataException("Menu connection changed during this plugin lifetime");
                         link=read;
@@ -125,15 +144,18 @@ namespace RichAudio.Beacon.Windows
                             catch(UnauthorizedAccessException){failure="Preferences could not be saved. Existing files were preserved.";}
                             finally{Interlocked.Exchange(ref processing,0);}
                         }
-                        bool existed=File.Exists(link.SettingsPath);
-                        AcousticSettings settings=existed?AcousticSettingsStore.Load(link.WorkspaceRoot,link.SettingsPath):AcousticSettings.Defaults(1);
+                        stage="preferences-path";string validatedPath=AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,link.SettingsPath);
+                        bool existed=File.Exists(validatedPath);string preferenceText=null;
+                        if(existed){stage="preferences-read";preferenceText=AcousticSettingsStore.ReadBounded(validatedPath,4096);}
+                        stage="preferences-schema";
+                        AcousticSettings settings=existed?AcousticSettings.Parse(preferenceText):AcousticSettings.Defaults(1);
                         long saved=existed?settings.Revision:0;
-                        string status=null,target=AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,AcousticSettingsStore.StatusPath(link.SettingsPath));
+                        stage="host-status";string status=null,target=AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,AcousticSettingsStore.StatusPath(link.SettingsPath));
                         if(File.Exists(target))try{status=AcousticSettingsStore.ReadBounded(target,16384);}catch(IOException){}catch(ArgumentException){}
-                        Interlocked.Exchange(ref snapshot,new InGameSettingsSnapshot(settings,status,failure,true,link.ToggleKey,link.ControllerEnabled,saved,Volatile.Read(ref pending)!=null));
+                        Interlocked.Exchange(ref snapshot,new InGameSettingsSnapshot(settings,status,failure,true,link.ToggleKey,link.ControllerEnabled,saved,Volatile.Read(ref pending)!=null,false,null,new MenuDiagnostic("preferences",existed?"loaded":"defaults-unsaved")));
                         if(command!=null)Interlocked.Exchange(ref operationInFlight,0);
                     }
-                    catch(Exception)
+                    catch(Exception e)
                     {
                         Interlocked.Exchange(ref pending,null);Interlocked.Exchange(ref processing,0);
                         var old=Snapshot;
@@ -141,8 +163,10 @@ namespace RichAudio.Beacon.Windows
                         if(validatedPointer)try{recovery=AcousticSettingsStore.TryMalformedRecovery(link.WorkspaceRoot,link.SettingsPath,out digest);}catch{}
                         string message=recovery?"Saved preferences are invalid. Reset Defaults can preserve a backup and recover this file.":
                             "RichAudio menu preferences are unavailable or use an unsupported format. Existing files were preserved.";
+                        diagnostic=diagnostic??MenuDiagnostic.Failure(stage,e);
+                        message="Preferences unavailable: "+diagnostic.Summary+(recovery?". Reset preserves backup.":". Files preserved.");
                         Interlocked.Exchange(ref snapshot,new InGameSettingsSnapshot(old.Settings,null,message,false,
-                            link==null?"F10":link.ToggleKey,link==null||link.ControllerEnabled,old.SavedRevision,false,recovery,digest));
+                            link==null?"F10":link.ToggleKey,link==null||link.ControllerEnabled,old.SavedRevision,false,recovery,digest,diagnostic));
                         Interlocked.Exchange(ref operationInFlight,0);
                     }
                     while(Volatile.Read(ref stopped)==0&&cadence.ElapsedMilliseconds<250)wake.WaitOne(Math.Max(1,250-(int)cadence.ElapsedMilliseconds));

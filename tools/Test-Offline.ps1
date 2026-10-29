@@ -20,6 +20,7 @@ try {
     & (Join-Path $repo 'tools\Test-AcousticSettingsHandoff.ps1')
     & (Join-Path $repo 'tools\Test-InGameMenu.ps1')
     & (Join-Path $repo 'tools\Test-SoundMapMenu.ps1')
+    & (Join-Path $repo 'tools\Test-MenuDeploymentLayout.ps1')
     & node --test tests/Test-SoundMapTelemetry.mjs tests/Test-SoundMapViewer.mjs tests/Test-SoundMapService.mjs tests/Test-SoundMapProducer.mjs
     if($LASTEXITCODE-ne0){throw 'SoundMap telemetry, viewer, recording, replay or actual producer checks failed.'}
     & node --test tests/Test-InGameAcousticControls.mjs

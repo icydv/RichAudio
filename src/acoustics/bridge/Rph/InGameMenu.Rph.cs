@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using Rage;
@@ -30,6 +29,8 @@ namespace RichAudio.Beacon.Rph
         private static bool mouseDown,mouseVisible;
         private static float mouseX=-1,mouseY=-1;
         private static int layoutWidth,layoutHeight;
+        private static string lastDiagnostic;
+        private static int diagnosticReports;
 
         internal static void Start()
         {
@@ -37,7 +38,9 @@ namespace RichAudio.Beacon.Rph
             stopping=false;renderFailed=false;
             try
             {
-                string sidecar=Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),"RichAudio.Menu.json");
+                // RPH loads a cached copy of this assembly without its JSON sidecar.
+                // The exact-build guard already established the host executable.
+                string sidecar=InGameSettingsLink.SidecarForGameExecutable(Process.GetCurrentProcess().MainModule.FileName);
                 bridge=new InGameSettingsBridge(sidecar);bridge.Start();
                 recordingBridge=new InGameRecordingBridge(sidecar);recordingBridge.Start();
                 Game.RawFrameRender+=Render;
@@ -47,6 +50,16 @@ namespace RichAudio.Beacon.Rph
         }
         [ConsoleCommand(Name="RichAudioSettings",Description="Open Story Mode RichAudio settings after closing the RPH console; starts no audio")]
         public static void OpenSettings(){Interlocked.Exchange(ref consoleRequested,1);}
+        [ConsoleCommand(Name="RichAudioSettingsStatus",Description="Safe preference/host/recorder diagnostics; no paths, contents or tokens")]
+        public static void SettingsStatus()
+        {
+            var b=bridge;var s=b==null?null:b.Snapshot;var r=recordingBridge;var rs=r==null?null:r.Snapshot;
+            Game.Console.Print("RichAudio settings preferences="+(s!=null&&s.Available?"available":"unavailable")+" "+
+                (s==null?"stage=worker code=not-started exception=none":s.Diagnostic.Summary)+
+                " host="+(s==null||s.StatusJson==null?"stopped-or-no-status":"status-present")+
+                " recorder="+(rs!=null&&rs.Available?"connected":"disconnected")+
+                (rs==null?"":" "+rs.Diagnostic.Summary));
+        }
         internal static void Stop()
         {
             if(Interlocked.Exchange(ref started,0)==0)return;
@@ -68,6 +81,9 @@ namespace RichAudio.Beacon.Rph
                 while(!stopping)
                 {
                     var service=bridge;if(service==null)break;var state=service.Snapshot;
+                    string diagnosticKey=state.Available+" "+state.Diagnostic.Summary;
+                    if(diagnosticKey!=lastDiagnostic){lastDiagnostic=diagnosticKey;if(diagnosticReports++<8)
+                        Game.Console.Print("RichAudio preferences available="+state.Available+" "+state.Diagnostic.Summary);}
                     bool loading=Game.IsLoading,paused=Game.IsPaused,console=Game.Console.IsOpen;
                     bool story=!loading&&!NativeFunction.CallByName<bool>("NETWORK_IS_SESSION_STARTED")&&!NativeFunction.CallByName<bool>("NETWORK_IS_GAME_IN_PROGRESS");
                     // An offline frontend is not a playable Story session.

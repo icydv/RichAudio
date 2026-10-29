@@ -15,10 +15,11 @@ namespace RichAudio.Beacon.Windows
     {
         public readonly bool Available,Active,Pending;
         public readonly string RecordingId,Detail;
+        public readonly MenuDiagnostic Diagnostic;
         internal readonly string Binding;
         internal readonly long At;
-        internal InGameRecordingSnapshot(bool available,bool active,bool pending,string id,string detail,string binding)
-        {Available=available;Active=active;Pending=pending;RecordingId=id;Detail=detail;Binding=binding;At=Stopwatch.GetTimestamp();}
+        internal InGameRecordingSnapshot(bool available,bool active,bool pending,string id,string detail,string binding,MenuDiagnostic diagnostic=null)
+        {Available=available;Active=active;Pending=pending;RecordingId=id;Detail=detail;Binding=binding;At=Stopwatch.GetTimestamp();Diagnostic=diagnostic??new MenuDiagnostic("recorder",available?"connected":"disconnected");}
     }
 
     public sealed class InGameRecordingBridge:IDisposable
@@ -36,7 +37,8 @@ namespace RichAudio.Beacon.Windows
         public InGameRecordingSnapshot Snapshot
         {
             get {var current=Volatile.Read(ref snapshot);
-                if(!current.Available||(Stopwatch.GetTimestamp()-current.At)/(double)Stopwatch.Frequency>2)return unavailable;
+                if(!current.Available)return current;
+                if((Stopwatch.GetTimestamp()-current.At)/(double)Stopwatch.Frequency>2)return unavailable;
                 if(Volatile.Read(ref inFlight)!=0)return new InGameRecordingSnapshot(true,current.Active,true,current.RecordingId,"Recording request pending",current.Binding);
                 return current;}
         }
@@ -78,12 +80,14 @@ namespace RichAudio.Beacon.Windows
         {
             try{while(Volatile.Read(ref stopped)==0){
                 Command command=null;
+                string stage="recorder-connection";MenuDiagnostic diagnostic=null;
                 try{
-                    var link=InGameSettingsLink.Load(pointerPath);
+                    var link=InGameSettingsLink.Load(pointerPath,out diagnostic);
+                    stage="recorder-binding";
                     if(workspace!=null&&!String.Equals(workspace,link.WorkspaceRoot,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("Recorder workspace changed");
                     workspace=link.WorkspaceRoot;
                     string descriptor=AcousticSettingsStore.PrivatePath(workspace,Path.Combine(".local","soundmap","service.json"));
-                    var service=Object(AcousticSettingsStore.ReadBounded(descriptor,4096));object version;
+                    stage="recorder-descriptor";var service=Object(AcousticSettingsStore.ReadBounded(descriptor,4096));object version;
                     if(!service.TryGetValue("schemaVersion",out version)||!(version is int)||(int)version!=1)throw new InvalidDataException("Recorder descriptor version");
                     string url=RequiredString(service,"url",128),token=RequiredString(service,"token",128);
                     Uri uri;if(!Uri.TryCreate(url,UriKind.Absolute,out uri)||uri.Scheme!="http"||uri.Host!="127.0.0.1"||uri.Port<1024||uri.Port>65535||uri.UserInfo!=""||uri.AbsolutePath!="/"||uri.Query!=""||uri.Fragment!="")throw new InvalidDataException("Loopback recorder required");
@@ -97,7 +101,7 @@ namespace RichAudio.Beacon.Windows
                             new Dictionary<string,object>{{"maxDurationSeconds",120},{"maxBytes",67108864}}:
                             new Dictionary<string,object>{{"id",command.Id}});
                     }
-                    var status=Request(url,token,"/api/status");object raw;
+                    stage="recorder-service";var status=Request(url,token,"/api/status");object raw;
                     if(!status.TryGetValue("recording",out raw))throw new InvalidDataException("Recorder status missing");
                     bool active=false,isPending=false;string id=null;
                     if(raw!=null){var record=raw as Dictionary<string,object>;if(record==null)throw new InvalidDataException("Recorder status invalid");
@@ -105,7 +109,7 @@ namespace RichAudio.Beacon.Windows
                         if(state!="recording"&&state!="stopping")throw new InvalidDataException("Recorder state invalid");active=true;isPending=state=="stopping";}
                     Interlocked.Exchange(ref snapshot,new InGameRecordingSnapshot(true,active,isPending,id,
                         isPending?"Recording is stopping":active?"Recording privately; owned PCM only":"Ready; recording stays on this computer",binding));
-                }catch(Exception){Interlocked.Exchange(ref snapshot,unavailable);if(command==null)command=Interlocked.Exchange(ref pending,null);}
+                }catch(Exception e){diagnostic=diagnostic??MenuDiagnostic.Failure(stage,e);Interlocked.Exchange(ref snapshot,new InGameRecordingSnapshot(false,false,false,null,"Recorder unavailable: "+diagnostic.Summary,null,diagnostic));if(command==null)command=Interlocked.Exchange(ref pending,null);}
                 finally{if(command!=null)Interlocked.Exchange(ref inFlight,0);}
                 if(Volatile.Read(ref stopped)==0)wake.WaitOne(500);
             }}finally{Interlocked.Exchange(ref snapshot,unavailable);Interlocked.Exchange(ref pending,null);Interlocked.Exchange(ref inFlight,0);wake.Dispose();}

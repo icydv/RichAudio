@@ -7,6 +7,7 @@ $out=Join-Path $repo 'build\acoustic-settings'
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 $sources=@((Join-Path $repo 'src\acoustics\host\Windows\AcousticSettings.cs'),(Join-Path $repo 'src\acoustics\host\Windows\InGameSettingsBridge.cs'),(Join-Path $repo 'src\acoustics\settings\AcousticSettingsWindow.cs'))
 $options=@('/nologo','/optimize+','/warnaserror+','/platform:x64','/r:System.Web.Extensions.dll','/r:System.Windows.Forms.dll','/r:System.Drawing.dll')
+$sources+=Join-Path $repo 'src\acoustics\host\Windows\MenuDiagnostic.cs'
 & $compiler @options /target:winexe /main:RichAudio.Settings.SettingsProgram ('/out:'+(Join-Path $out 'RichAudio.Settings.exe')) @sources
 if($LASTEXITCODE-ne0){throw 'Acoustic settings UI compilation failed'}
 if($Tests){
