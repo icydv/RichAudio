@@ -26,7 +26,7 @@ export function splitBands(pcm) {
   return bands;
 }
 const validPlans = new WeakSet();
-export function prepare(scene, sources, listener, { duration = 10 } = {}) {
+export function prepare(scene, sources, listener, { duration = 10, pathOrders = [0,1,2] } = {}) {
   const begin = performance.now();
   requireValue(
     Number.isFinite(duration) && duration > 0 && duration <= bounds.duration,
@@ -51,10 +51,12 @@ export function prepare(scene, sources, listener, { duration = 10 } = {}) {
     validated.scene(scene) && validated.track(listener),
     "validated scene/listener required",
   );
+  requireValue(Array.isArray(pathOrders) && pathOrders.length>0 && pathOrders.length<=3 &&
+    new Set(pathOrders).size===pathOrders.length && pathOrders.every(x=>[0,1,2].includes(x)), 'bounded path-order selection');
   const step = sampleRate / scene.config.updateHz,
     frames = Math.round(duration * sampleRate),
     count = Math.ceil(frames / step) + 1,
-    candidates = candidatePaths(scene);
+    candidates = candidatePaths(scene).filter(p=>pathOrders.includes(p.surfaces.length));
   requireValue(
     count * candidates.length * sources.length <= 250000,
     "simulation grid budget exceeded",
@@ -130,6 +132,7 @@ export function prepare(scene, sources, listener, { duration = 10 } = {}) {
     coordinateSpace: scene.coordinateSpace,
     geometryKey: scene.geometryKey,
     generation: scene.generation,
+    observationModel: scene.observationModel,
     frames,
     step,
     sampleRate,

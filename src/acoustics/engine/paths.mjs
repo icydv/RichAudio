@@ -26,6 +26,7 @@ export function pathGeometry(
   stats = { queries: 0, surfaceTests: 0 },
 ) {
   const tile = scene.tile;
+  const conditional = scene.observationModel?.visibilityAssumption === 'unobserved-space-assumed-clear';
   if (!inBox(source, tile.bounds) || !inBox(listener, tile.bounds))
     return { status: "outside-tile" };
   if (!surfaces.length && length(sub(source, listener)) <= E)
@@ -81,7 +82,7 @@ export function pathGeometry(
     if (
       q.ambiguous.length ||
       q.unknown.length ||
-      tile.coverage !== "complete-synthetic"
+      (tile.coverage !== "complete-synthetic" && !conditional)
     )
       uncertain = true;
     distance += length(sub(b, a));
@@ -220,11 +221,12 @@ export function solvePath(
     arrivalDirection: g.arrivalDirection,
     emissionDirection: g.emissionDirection,
     materialBasis,
+    geometryEvidence: scene.observationModel ? 'conditional-finite-observed-model' : 'synthetic-model',
     generation: state.generation,
     visibility:
-      g.status === "blocked"
-        ? "authored-transmission"
-        : "verified-synthetic-path",
+      scene.observationModel
+        ? (g.status === 'blocked' ? 'authored-transmission-in-partial-model' : 'conditional-observed-path')
+        : g.status === "blocked" ? "authored-transmission" : "verified-synthetic-path",
     retardedResidual: residual,
   };
 }

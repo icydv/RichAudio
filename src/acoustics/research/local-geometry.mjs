@@ -37,8 +37,17 @@ function surface(s,bounds){
   if(material.acoustic){const a=material.acoustic;confidence(a.energyReflection);confidence(a.confidence);if(!['synthetic-assumption','authored-assumption'].includes(a.kind)||typeof a.reason!=='string'||!a.reason||a.reason.length>200)throw Error('explicit acoustic assumption required');}
   const openings=s.openings??[];if(!Array.isArray(openings)||openings.length>limits.openings)throw Error('opening limit');
   const holes=openings.map(h=>{if(!Array.isArray(h.min)||!Array.isArray(h.max)||h.min.length!==2||h.max.length!==2||h.min.some((x,i)=>!Number.isFinite(x)||!Number.isFinite(h.max[i])||h.max[i]<=x||x< -half[i]||h.max[i]>half[i]))throw Error('invalid opening');return {min:[...h.min],max:[...h.max]};});
+  // Optional convex support preserves an observed footprint instead of expanding
+  // its bounding rectangle into an invented reflector. Existing rectangles are unchanged.
+  let footprint;
+  if(s.footprint!==undefined){
+    if(!Array.isArray(s.footprint)||s.footprint.length<3||s.footprint.length>16)throw Error('bounded convex footprint required');
+    footprint=s.footprint.map(p=>{if(!Array.isArray(p)||p.length!==2||p.some((x,i)=>!Number.isFinite(x)||Math.abs(x)>half[i]+E))throw Error('footprint outside finite extent');return [...p];});
+    for(let i=0;i<footprint.length;i++){const a=footprint[i],b=footprint[(i+1)%footprint.length];if(Math.hypot(b[0]-a[0],b[1]-a[1])<=E||footprint.some(p=>(b[0]-a[0])*(p[1]-a[1])-(b[1]-a[1])*(p[0]-a[0])< -E))throw Error('convex counterclockwise footprint required');}
+    if(footprint.reduce((n,a,i)=>{const b=footprint[(i+1)%footprint.length];return n+a[0]*b[1]-a[1]*b[0];},0)<=E)throw Error('degenerate footprint');
+  }
   const materialValue={observedId:material.observedId,observedConfidence:material.observedConfidence,acoustic:material.acoustic?{energyReflection:material.acoustic.energyReflection,confidence:material.acoustic.confidence,kind:material.acoustic.kind,reason:material.acoustic.reason}:null};
-  return {id:identifier(s.id),coordinateSpace,center,normal,u,v,half,corners,motion:s.motion,reflectiveSide:s.reflectiveSide,provenance:{kind:s.provenance.kind,reference:identifier(s.provenance.reference)},confidence:confidence(s.confidence),material:materialValue,version:s.version,observedAt,validUntil,openings:holes};
+  return {id:identifier(s.id),coordinateSpace,center,normal,u,v,half,corners,...(footprint?{footprint}:{}),motion:s.motion,reflectiveSide:s.reflectiveSide,provenance:{kind:s.provenance.kind,reference:identifier(s.provenance.reference)},confidence:s.confidence===null?null:confidence(s.confidence),material:materialValue,version:s.version,observedAt,validUntil,openings:holes};
 }
 export function createTile(input){
   if(!input||input.schemaVersion!==1||input.coordinateSpace!==coordinateSpace||input.timeUnit!==timeUnit||!['complete-synthetic','partial'].includes(input.coverage))throw Error('unsupported tile schema, coordinates, time units or coverage');
@@ -64,7 +73,7 @@ export function cacheStatus(tile,c){
   if(!inBox(listener,tile.bounds)||length(sub(listener,tile.listenerAnchor))>movement)reasons.push('listener_moved');
   return {valid:reasons.length===0,reasons,coverage:tile.coverage,missingRegions:tile.missingRegions.length};
 }
-export function onPatch(s,p){const d=sub(p,s.center),u=dot(d,s.u),v=dot(d,s.v);return Math.abs(dot(d,s.normal))<=E&&Math.abs(u)<=s.half[0]+E&&Math.abs(v)<=s.half[1]+E&&!s.openings.some(h=>u>=h.min[0]-E&&u<=h.max[0]+E&&v>=h.min[1]-E&&v<=h.max[1]+E);}
+export function onPatch(s,p){const d=sub(p,s.center),u=dot(d,s.u),v=dot(d,s.v);return Math.abs(dot(d,s.normal))<=E&&Math.abs(u)<=s.half[0]+E&&Math.abs(v)<=s.half[1]+E&&(!s.footprint||s.footprint.every((a,i)=>{const b=s.footprint[(i+1)%s.footprint.length];return (b[0]-a[0])*(v-a[1])-(b[1]-a[1])*(u-a[0])>=-E;}))&&!s.openings.some(h=>u>=h.min[0]-E&&u<=h.max[0]+E&&v>=h.min[1]-E&&v<=h.max[1]+E);}
 function hitsBox(a,b,box){let lo=0,hi=1;const d=sub(b,a);for(let i=0;i<3;i++){if(Math.abs(d[i])<E){if(a[i]<box.min[i]||a[i]>box.max[i])return false;}else {let x=(box.min[i]-a[i])/d[i],y=(box.max[i]-a[i])/d[i];if(x>y)[x,y]=[y,x];lo=Math.max(lo,x);hi=Math.min(hi,y);if(lo>hi)return false;}}return true;}
 export function querySegment(tile,start,end,{reflectorId=null}={}){
   requireTile(tile);const a=vector(start),b=vector(end);if(!inBox(a,tile.bounds)||!inBox(b,tile.bounds)||length(sub(b,a))<=E)throw Error('segment extent');
