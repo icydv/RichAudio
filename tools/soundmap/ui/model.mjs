@@ -7,7 +7,69 @@ const finite = n => Number.isFinite(n);
 const ident = n => typeof n==='string'&&n.length>0&&n.length<=160;
 const fail = (ok,message) => { if(!ok)throw Error(message); };
 const immutable = x => { if(x&&typeof x==='object'){Object.values(x).forEach(immutable);Object.freeze(x);}return x; };
-export const clampFps = n => Math.max(15,Math.min(30,Math.round(Number(n)||20)));
+export const DISPLAY_RATES=Object.freeze([15,20,30,60]);
+export const TELEMETRY_POLL_FPS=20;
+export const clampFps = n => Math.max(15,Math.min(60,Math.round(Number(n)||20)));
+
+// Display scheduling is deliberately independent of the telemetry fetch loop.
+// Drift correction skips missed display slots; it never bursts catch-up frames.
+export class DisplayCadence {
+  constructor(fps=20){this.setRate(fps);}
+  setRate(fps){this.fps=clampFps(fps);this.periodMs=1000/this.fps;this.nextDue=null;}
+  due(now){
+    if(!Number.isFinite(now))return false;
+    if(this.nextDue===null){this.nextDue=now+this.periodMs;return true;}
+    if(now+.1<this.nextDue)return false;
+    this.nextDue+=Math.max(1,Math.floor((now-this.nextDue)/this.periodMs)+1)*this.periodMs;return true;
+  }
+  reset(){this.nextDue=null;}
+}
+export class RateMeter {
+  constructor(){this.times=[];}
+  mark(now){if(!Number.isFinite(now))return;this.times.push(now);this.trim(now);while(this.times.length>256)this.times.shift();}
+  trim(now){while(this.times.length&&this.times[0]<now-2000)this.times.shift();}
+  rate(now){this.trim(now);if(this.times.length<2)return 0;const elapsed=now-this.times[0];return elapsed>0?(this.times.length-1)*1000/elapsed:0;}
+  reset(){this.times=[];}
+}
+
+export function checkPassive(p){
+  fail(p?.schemaVersion===1&&p.kind==='passive-listener'&&ident(p.sessionId)&&ident(p.streamId),'Unsupported passive listener identity');
+  fail(Number.isSafeInteger(p.sequence)&&p.sequence>=0&&Number.isFinite(p.observedAtUnixMs),'Invalid passive observation clock');
+  fail(p.coordinateSpace==='gta-native-unscaled'&&p.units==='native-unverified','Passive coordinates must remain unscaled native units');
+  fail(p.listener&&typeof p.listener.valid==='boolean','Passive validity required');
+  if(p.listener.valid)fail(isPoint(p.listener.position)&&isPoint(p.listener.forward)&&isPoint(p.listener.up),'Invalid passive listener pose');
+  fail(p.listener.velocity==null||isPoint(p.listener.velocity),'Invalid passive velocity');
+  fail(p.geometry==null&&p.paths==null&&p.sources==null,'Passive listener must not carry acoustic evidence');
+  return immutable(p);
+}
+export class PassiveState {
+  constructor(){this.reset();}
+  reset(){this.frame=null;this.receivedAt=null;this.dropped=0;}
+  ingest(input,now,{wallNow=Date.now(),requestElapsedMs=0}={}){
+    if(!input){this.reset();return false;}
+    const p=checkPassive(input),changed=this.frame?.streamId!==p.streamId||this.frame?.sessionId!==p.sessionId;
+    if(changed)this.reset();
+    if(this.frame&&p.sequence<=this.frame.sequence)return false;
+    if(this.frame)this.dropped+=Math.max(0,p.sequence-this.frame.sequence-1);
+    const age=Math.max(Number.isFinite(p.ageMs)?Math.max(0,p.ageMs):0,Math.max(0,wallNow-p.observedAtUnixMs))+Math.max(0,requestElapsedMs);
+    this.frame=p;this.receivedAt=now-age;return true;
+  }
+  health(now){
+    if(!this.frame)return {state:'unavailable',message:'Waiting for passive camera tracking or an acoustic worker',expired:true,ageMs:null};
+    const ageMs=Math.max(0,now-this.receivedAt);
+    if(!this.frame.listener.valid)return {state:'invalid',message:'Passive camera unavailable · '+(this.frame.listener.reason||this.frame.reason||'invalid observation'),expired:true,ageMs};
+    if(ageMs>500)return {state:'stale',message:'Passive camera stale · acoustic processing inactive',expired:true,ageMs};
+    return {state:'passive',message:'Passive camera tracking · acoustic processing inactive',expired:false,ageMs};
+  }
+}
+export function presentation(acoustic,passive,now,connected=true){
+  const h=acoustic.health(now,connected),f=acoustic.frame;
+  const modelKey='model:'+acoustic.streamId+':'+acoustic.sessionId+':'+JSON.stringify(f?.calibration??null);
+  if(acoustic.mode==='replay')return {kind:'replay',frame:f,geometry:acoustic.geometry,listener:f?.listener,health:h,coordinateKey:modelKey};
+  if(f&&connected&&h.ageMs<=500&&f.listener?.valid)return {kind:'acoustic',frame:f,geometry:acoustic.geometry,listener:f.listener,health:h,coordinateKey:modelKey};
+  if(passive.frame)return {kind:'passive',frame:null,geometry:null,listener:passive.frame.listener,health:passive.health(now),coordinateKey:'native:'+passive.frame.streamId+':'+passive.frame.sessionId};
+  return {kind:f?'stale-acoustic':'waiting',frame:null,geometry:null,listener:f?.listener,health:h,coordinateKey:f?'model:'+acoustic.streamId:'none'};
+}
 
 export function checkGeometry(g) {
   fail(g?.schemaVersion===1&&typeof g.generation==='string'&&g.generation.length<=512&&ident(g.sessionId),'Unsupported geometry identity');
@@ -91,12 +153,12 @@ export function project(point,{target=[0,0,0],yaw=-.7,pitch=.7,scale=20,width=80
     depth:front*Math.cos(p)+z*Math.sin(p)};
 }
 export function pathStyle(path){
-  if(path.status==='rejected')return {color:'#b95457',dash:[3,5],label:'Rejected / obstructed candidate'};
-  if(path.status==='pruned')return {color:'#89929e',dash:[1,5],label:'Valid candidate, not selected'};
-  if(path.status==='unknown')return {color:'#9b750f',dash:[7,5],label:'Unknown / unavailable propagation'};
-  if(path.propagation==='obstructed')return {color:'#b95457',dash:[10,3],label:'Selected obstructed / transmission'};
-  return path.order===0?{color:'#008b8b',dash:[],label:'Selected direct'}:
-    path.order===1?{color:'#dc793c',dash:[],label:'Selected first reflection'}:{color:'#8e59b5',dash:[],label:'Selected second reflection'};
+  if(path.status==='rejected')return {color:'#ef8d93',dash:[3,6],label:'Rejected / obstructed candidate'};
+  if(path.status==='pruned')return {color:'#92a0b5',dash:[2,6],label:'Valid candidate, not selected'};
+  if(path.status==='unknown')return {color:'#e4cc80',dash:[8,6],label:'Unknown / unavailable propagation'};
+  if(path.propagation==='obstructed')return {color:'#ffabb0',dash:[12,4],label:'Selected obstructed / transmission'};
+  return path.order===0?{color:'#63e8d3',dash:[],label:'Selected direct'}:
+    path.order===1?{color:'#ffbc80',dash:[],label:'Selected first reflection'}:{color:'#c6adff',dash:[],label:'Selected second reflection'};
 }
 
 function calibrationKey(c){

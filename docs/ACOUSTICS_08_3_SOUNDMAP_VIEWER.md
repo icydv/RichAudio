@@ -16,7 +16,11 @@ endpoint. An authorised producer must separately use the same private descriptor
 
 The canvas uses an orthographic 3D projection with adjustable yaw, elevation,
 translation and zoom. Isometric and top-down controls, listener follow, and a
-15/20/30 FPS selector are provided. Drag orbits; Shift+drag pans; the wheel zooms.
+15/20/30/60 FPS selector are provided. Display animation is independent of the
+20 Hz telemetry poll and never raises collision or DSP work. The default dark
+Canvas and passive Story Mode camera feed are described in
+[ACOUSTICS-08.3.2](ACOUSTICS_08_3_2_LISTENER_SOUNDMAP.md).
+Drag orbits; Shift+drag pans; the wheel zooms.
 The reference grid is explicitly labelled as a camera aid, not measured ground.
 
 Every acoustic polygon comes from `soundMapGeometry.surfaces[].vertices`, with

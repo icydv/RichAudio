@@ -4,18 +4,21 @@ import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {SessionRecorder,privateDirectory,replayFrame,LIMITS} from './recorder.mjs';
+import {PassiveListener} from './passive.mjs';
 
 const ui=path.join(path.dirname(fileURLToPath(import.meta.url)),'ui');
 const equal=(a,b)=>typeof a==='string'&&a.length===b.length&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 async function body(req,limit){const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>limit)throw Error('Request byte bound');chunks.push(chunk);}return Buffer.concat(chunks);}
-export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.now}={}) {
+export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.now,ownerId=null}={}) {
   if(!Number.isInteger(port)||port<0||port>65535)throw Error('Port bound');
   const privateRoot=privateDirectory(root),token=randomBytes(32).toString('hex'),recorder=new SessionRecorder(privateRoot,{now});
+  if(ownerId!==null&&(typeof ownerId!=='string'||!/^[a-f0-9]{32}$/.test(ownerId)))throw Error('Owner identity bound');
+  const passive=new PassiveListener(now);let requestClose;
   let frame=null,receivedAt=0,sessionId=null,streamId=null,sequence=-1,replay=null,lastHost=null,stopping=null;
   const geometry=new Map(),stats={accepted:0,droppedUpdates:0,invalidUpdates:0,sessionChanges:0,geometryCacheEvictions:0};
   let boundPort;
   const status=()=>({connected:!!frame&&now()-receivedAt<=1500,sessionId,streamId,ageMs:frame?now()-receivedAt:null,...stats,
-    recording:recorder.status(),replay:replay?{id:replay.id,durationMs:replay.durationMs}:null,
+    passive:passive.status(),recording:recorder.status(),replay:replay?{id:replay.id,durationMs:replay.durationMs}:null,
     audio:{hostConnected:!!lastHost&&now()-lastHost.receivedAt<1500,host:lastHost?.info??null}});
   const server=http.createServer(async(req,res)=>{
     const origin='http://127.0.0.1:'+boundPort;
@@ -35,7 +38,12 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
       if(route==='/api/status'&&req.method==='GET')send(status());
       else if(route==='/api/frame'&&req.method==='GET'){
         const g=frame?geometry.get(frame.geometryGeneration):null;
-        send({mode:'live',frame,geometry:g&&url.searchParams.get('geometryGeneration')!==g.generation?g:null,status:status()});
+        send({mode:'live',frame,passive:passive.snapshot(),geometry:g&&url.searchParams.get('geometryGeneration')!==g.generation?g:null,status:status()});
+      }else if(route==='/api/passive'&&req.method==='POST'){
+        send(passive.accept(value));
+      }else if(route==='/api/service/stop'&&req.method==='POST'){
+        if(ownerId===null||!equal(value.ownerId,ownerId)){send({error:'Owned service required'},403);return;}
+        send({stopping:true});setImmediate(()=>requestClose());
       }else if(route==='/api/telemetry'&&req.method==='POST'){
         const f=value.frame,g=value.geometry;
         if(!f||f.schemaVersion!==1||typeof f.sessionId!=='string'||f.sessionId.length>256||f.streamId!==undefined&&(typeof f.streamId!=='string'||f.streamId.length>128)||!Number.isSafeInteger(f.audioFrame)||f.audioFrame<0||!Number.isSafeInteger(f.sequence)||!Array.isArray(f.paths)||f.paths.length>512)throw Error('Telemetry schema/bounds');
@@ -76,6 +84,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
         if(recorder.active&&value.recordingId===recorder.active.manifest.id){
           const a=recorder.active;if(value.type==='owned-capture-start'){a.hostStartDropped=value.metrics?.droppedFrames??0;a.hostCaptureStarted=true;a.hostCaptureStopped=false;}
           if(value.type==='host-capture-stop')a.hostCaptureStopped=true;
+          if(value.type==='host-capture-stop'&&typeof value.terminalFailure==='string'&&value.terminalFailure.length){recorder.event('host-terminal-failure',{reason:value.terminalFailure.slice(0,256)});recorder.gap({reason:'host-terminal-failure',tailConfirmed:false,explanation:'Captured prefix is retained; failed host does not establish a complete listening session'});}
           if(['recording-flushed','host-capture-stop'].includes(value.type)&&value.metrics?.droppedFrames>(a.hostStartDropped??0))recorder.gap({reason:'host-reported-dropped-frames',frames:value.metrics.droppedFrames-(a.hostStartDropped??0)});
           if(value.queuedTailChunks>0||value.callbackInFlight)recorder.gap({reason:'unflushed-tail',chunks:value.queuedTailChunks,callbackInFlight:value.callbackInFlight});
           if(value.captureSuspensions>0)recorder.gap({reason:'capture-suspended',count:value.captureSuspensions,explanation:'Capture disabled during active recording after a service/control failure; missing interval is not repaired'});
@@ -111,15 +120,18 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
   });
   server.requestTimeout=3000;server.headersTimeout=3000;server.maxConnections=16;
   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});boundPort=server.address().port;
-  const descriptor={schemaVersion:1,url:'http://127.0.0.1:'+boundPort,token};
+  const descriptor={schemaVersion:1,url:'http://127.0.0.1:'+boundPort,token,ownerId};
   const descriptorFile=path.join(privateRoot,'service.json');if(fs.existsSync(descriptorFile)&&fs.lstatSync(descriptorFile).isSymbolicLink()){server.close();throw Error('Linked service descriptor rejected');}
   const temporary=path.join(privateRoot,'service-'+randomBytes(8).toString('hex')+'.tmp');fs.writeFileSync(temporary,JSON.stringify(descriptor),{flag:'wx'});fs.renameSync(temporary,descriptorFile);
   const tick=setInterval(()=>{recorder.tick();if(stopping&&now()-stopping.at>1500){recorder.event('audio-tail-unconfirmed',{reason:'host-flush-timeout'});recorder.stop('host-flush-timeout');stopping=null;}},100);tick.unref();
-  return {server,descriptor,recorder,status,privateRoot,async close(){clearInterval(tick);recorder.stop('service-shutdown');await new Promise(resolve=>server.close(resolve));}};
+  let closing=null;
+  const close=()=>closing??=(async()=>{clearInterval(tick);recorder.stop('service-shutdown');await new Promise(resolve=>server.close(resolve));})();
+  requestClose=close;
+  return {server,descriptor,recorder,status,privateRoot,close};
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
-  let root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..'),port=17833;
-  for(let i=2;i<process.argv.length;i+=2){if(process.argv[i]==='--root')root=path.resolve(process.argv[i+1]);else if(process.argv[i]==='--port')port=Number(process.argv[i+1]);else throw Error('Unknown SoundMap option');}
-  const service=await startSoundMap({root,port});console.log('SoundMap '+service.descriptor.url+' (private configuration: .local/soundmap/service.json)');
+  let root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..'),port=17833,ownerId=null;
+  for(let i=2;i<process.argv.length;i+=2){if(process.argv[i]==='--root')root=path.resolve(process.argv[i+1]);else if(process.argv[i]==='--port')port=Number(process.argv[i+1]);else if(process.argv[i]==='--owner')ownerId=process.argv[i+1];else throw Error('Unknown SoundMap option');}
+  const service=await startSoundMap({root,port,ownerId});console.log('SoundMap '+service.descriptor.url+' (private configuration: .local/soundmap/service.json)');
   const close=()=>service.close().then(()=>process.exit(0));process.on('SIGINT',close);process.on('SIGTERM',close);
 }

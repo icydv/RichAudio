@@ -24,6 +24,7 @@ internal static class TestListenerTransport
     private static void Until(Func<bool> condition,int ms=2500){var w=Stopwatch.StartNew();while(!condition()&&w.ElapsedMilliseconds<ms)Thread.Sleep(10);Require(condition(),"bounded wait failed");}
     private static string Pipe(){return "RichAudio.Test."+Guid.NewGuid().ToString("N");}
     private static NamedPipeClientStream Client(string name){var c=new NamedPipeClientStream(".",name,PipeDirection.Out,PipeOptions.Asynchronous);c.Connect(1500);return c;}
+    private static NamedPipeClientStream DuplexClient(string name){var c=new NamedPipeClientStream(".",name,PipeDirection.InOut,PipeOptions.Asynchronous);c.Connect(1500);return c;}
     private static void Send(NamedPipeClientStream c,ListenerState state){var b=Protocol.Frame(state);c.Write(b,0,b.Length);c.Flush();}
     private static void Mutate(Action<ListenerState> change){var s=State();change(s);Reject(delegate{Protocol.Encode(s);});}
     private static void Pace(long start,int sample){double due=start+sample*Stopwatch.Frequency/20.0;while(Stopwatch.GetTimestamp()<due)Thread.Sleep(1);}
@@ -179,10 +180,79 @@ internal static class TestListenerTransport
             Test("strict invalid UTF8 attribution",delegate{StrictFailure("decoding",delegate(NamedPipeClientStream c){c.Write(BitConverter.GetBytes(1),0,4);c.WriteByte(255);});});
             Test("strict first schema rejection attribution",delegate{StrictFailure("schema",delegate(NamedPipeClientStream c){var b=Encoding.UTF8.GetBytes("{}");c.Write(BitConverter.GetBytes(b.Length),0,4);c.Write(b,0,b.Length);});});
             Test("strict signed future rejection diagnostics and peer termination",delegate{string p=Pipe();using(var server=Server(p,null,true))using(var writer=new StatePublisher(p)){server.Start();writer.Start();var x=State();x.ObservationTicks+=Stopwatch.Frequency;writer.Publish(x);Until(()=>writer.Finished&&server.Finished);Require(server.Accepted==0&&server.Diagnostic.Stage=="freshness"&&server.Diagnostic.FirstFrame.DecisionAgeMs < -2&&server.Diagnostic.FirstFrame.AgeClass=="future-dated","future signed evidence");Require(writer.Sent==0&&writer.Attempts==1&&!server.Diagnostic.AnotherAttempt,"strict peer terminal");}});
-            Test("strict stale rejection retains actual decision age",delegate{string p=Pipe();using(var server=Server(p,null,true)){server.Start();using(var c=Client(p)){var x=State();x.ObservationTicks-=Stopwatch.Frequency;Send(c,x);Until(()=>server.Finished);}Require(server.Diagnostic.FirstFrame.DecisionAgeMs>250&&server.Diagnostic.FirstFrame.AgeClass=="too-old"&&!server.Diagnostic.HadAcceptedFrame,"stale signed evidence");}});
+            Test("startup stale discard retains actual decision age before terminal idle deadline",delegate{string p=Pipe();using(var server=Server(p,null,true)){server.Start();using(var c=DuplexClient(p)){var x=State();x.ObservationTicks-=Stopwatch.Frequency;Send(c,x);TransportStop.Ack(c,TransportStop.StartupStaleDiscarded);Until(()=>server.Finished);}Require(server.Diagnostic.FirstFrame.DecisionAgeMs>250&&server.Diagnostic.FirstFrame.AgeClass=="too-old"&&!server.Diagnostic.HadAcceptedFrame&&server.StartupDiscarded==1&&server.FirstAcceptedFrame==null&&server.Diagnostic.Code=="deadline","stale signed evidence");}});
             Test("later rejection preserves first-frame timing",delegate{string p=Pipe();using(var server=Server(p,null,true))using(var writer=new StatePublisher(p)){server.Start();writer.Start();writer.Publish(State(0));Until(()=>writer.Sent==1);double? age=server.FirstFrame.DecisionAgeMs;var x=State(1);x.ObservationTicks+=Stopwatch.Frequency;writer.Publish(x);Until(()=>server.Finished&&writer.Finished);Require(server.FirstFrame.DecisionAgeMs==age&&server.FirstFrame.AgeClass=="within-bounds","first timing overwritten");Require(server.Diagnostic.OffendingFrame.FrameOrdinal==2&&server.Diagnostic.OffendingFrame.AgeClass=="future-dated"&&server.Diagnostic.OffendingFrame.DecisionAgeMs < -2,"offending timing missing");}});
             Test("first publication and first transmitted state remain distinct",delegate{string p=Pipe();using(var server=Server(p,null,true))using(var writer=new StatePublisher(p)){writer.Publish(State(0));writer.Publish(State(1));server.Start();writer.Start();Until(()=>writer.Sent==1);writer.RequestStop();Until(()=>writer.Finished&&server.Finished);Require(writer.FirstPublishedSequence==0&&writer.FirstTransmittedSequence==1&&writer.FirstFrame.CopyMs.HasValue,"publication attribution");}});
-            Test("strict stale first frame attribution",delegate{StrictFailure("freshness",delegate(NamedPipeClientStream c){var s=State();s.ObservationTicks-=Stopwatch.Frequency;Send(c,s);});});
+            Test("startup stale then fresh uses one connection and never forwards old",delegate{
+                string p=Pipe();long callbackSequence=-1;int callbacks=0;
+                using(var server=Server(p,delegate(ListenerState s,double age){Require(age<=250,"old callback");callbackSequence=s.Sequence;Interlocked.Increment(ref callbacks);},true)){
+                    server.Start();using(var c=DuplexClient(p)){
+                        var stale=State(0);stale.ObservationTicks-=Stopwatch.Frequency;Send(c,stale);TransportStop.Ack(c,TransportStop.StartupStaleDiscarded);
+                        Require(server.Accepted==0&&callbacks==0&&Double.IsPositiveInfinity(server.LastAgeMs),"discard forwarded");
+                        Send(c,State(1));TransportStop.Ack(c,TransportStop.Accepted);
+                        Require(server.Accepted==1&&callbacks==1&&callbackSequence==1&&server.StartupDiscarded==1,"fresh not accepted");
+                        Require(server.FirstFrame.FrameSequence==0&&server.FirstFrame.AgeClass=="too-old"&&server.FirstAcceptedFrame.FrameSequence==1&&server.FirstAcceptedFrame.AgeClass=="within-bounds","first wire evidence overwritten");
+                        TransportStop.Write(c,TransportStop.Frame());TransportStop.Ack(c,TransportStop.Stopped);
+                    }Until(()=>server.Finished);Require(server.Connections==1&&!server.Diagnostic.AnotherAttempt&&server.Rejected==0,"startup retry/rejection");
+                }
+            });
+            Test("startup discard budget is exactly four and fifth stale is terminal",delegate{string p=Pipe();using(var server=Server(p,null,true)){server.Start();using(var c=DuplexClient(p)){
+                for(int i=0;i<4;i++){var x=State(i);x.ObservationTicks-=Stopwatch.Frequency;Send(c,x);TransportStop.Ack(c,TransportStop.StartupStaleDiscarded);}
+                var fifth=State(4);fifth.ObservationTicks-=Stopwatch.Frequency;Send(c,fifth);Until(()=>server.Finished);
+            }Require(server.StartupDiscarded==4&&server.Accepted==0&&server.Connections==1&&server.Diagnostic.Stage=="freshness"&&server.Diagnostic.OffendingFrame.FrameOrdinal==5,"startup count not bounded");}});
+            Test("startup absolute deadline cannot be renewed by more stale frames",delegate{string p=Pipe();using(var server=Server(p,null,true)){server.Start();using(var c=DuplexClient(p)){
+                var x=State(0);x.ObservationTicks-=Stopwatch.Frequency;Send(c,x);TransportStop.Ack(c,TransportStop.StartupStaleDiscarded);Thread.Sleep(550);
+                x=State(1);x.ObservationTicks-=Stopwatch.Frequency;Send(c,x);TransportStop.Ack(c,TransportStop.StartupStaleDiscarded);var wait=Stopwatch.StartNew();Until(()=>server.Finished,800);
+                Require(wait.ElapsedMilliseconds<700,"startup budget renewed");
+            }Require(server.Accepted==0&&server.StartupDiscarded==2&&server.Diagnostic.Code=="deadline"&&server.Connections==1,"startup deadline not terminal");}});
+            Test("post-accept stale frame remains terminal",delegate{StrictFailure("freshness",delegate(NamedPipeClientStream c){var x=State();x.ObservationTicks-=Stopwatch.Frequency*200/1000;Send(c,x);TransportStop.Ack(c,TransportStop.Accepted);Thread.Sleep(100);x.Sequence++;x.ObservationTicks++;x.GameTimeMs++;Send(c,x);});});
+            Test("startup discard retains identity ordering clocks and generation",delegate{
+                Action<ListenerState>[] mutations={s=>s.Session=new string('b',32),s=>s.Sequence=0,s=>s.Generation=1,s=>s.GameTimeMs=0,s=>s.ObservationTicks=1,s=>s.ObservationTicks+=Stopwatch.Frequency,s=>s.ClockFrequency++};
+                foreach(var mutation in mutations){var validator=new StateValidator();var first=State();first.Generation=2;first.GameTimeMs=50;first.ObservationTicks-=Stopwatch.Frequency;
+                    Require(!validator.AcceptOrDiscardStartup(first,Stopwatch.GetTimestamp(),true)&&validator.LastAgeMs==0,"old validator accepted");
+                    var next=State(1);next.Generation=2;next.GameTimeMs=100;mutation(next);Reject(()=>validator.AcceptOrDiscardStartup(next,Stopwatch.GetTimestamp(),true));
+                }
+            });
+            Test("stale duplicate still faults before freshness discard",delegate{StrictFailure("sequence",delegate(NamedPipeClientStream c){var x=State();x.ObservationTicks-=Stopwatch.Frequency;Send(c,x);TransportStop.Ack(c,TransportStop.StartupStaleDiscarded);Send(c,x);});});
+            Test("validator cannot reopen startup after a fresh observation",delegate{var validator=new StateValidator();var first=State();validator.Accept(first,first.ObservationTicks);var next=State(1);next.ObservationTicks=first.ObservationTicks+1;Reject(()=>validator.AcceptOrDiscardStartup(next,next.ObservationTicks+Stopwatch.Frequency,true));});
+            Test("actual receiver preserves terminal faults following a discarded startup frame",delegate{
+                foreach(string fault in new[]{"session","generation","game-clock","future","schema"}){
+                    StrictFailure(fault=="future"?"freshness":fault=="schema"?"schema":"sequence",delegate(NamedPipeClientStream c){
+                        var first=State();first.Generation=2;first.GameTimeMs=100;first.ObservationTicks-=Stopwatch.Frequency;Send(c,first);TransportStop.Ack(c,TransportStop.StartupStaleDiscarded);
+                        var next=State(1);next.Generation=2;next.GameTimeMs=150;
+                        if(fault=="session")next.Session=new string('b',32);else if(fault=="generation")next.Generation=1;else if(fault=="game-clock")next.GameTimeMs=0;else if(fault=="future")next.ObservationTicks+=Stopwatch.Frequency;
+                        if(fault=="schema"){var bytes=Encoding.UTF8.GetBytes("{}");c.Write(BitConverter.GetBytes(bytes.Length),0,4);c.Write(bytes,0,bytes.Length);}else Send(c,next);
+                    });
+                }
+            });
+#if TRANSPORT_STARTUP_TEST
+            Test("actual publisher survives receive scheduling delay with explicit discard acknowledgement",delegate{
+                string p=Pipe();int held=0,callbacks=0;using(var server=Server(p,delegate{Interlocked.Increment(ref callbacks);},true))using(var writer=new StatePublisher(p)){
+                    server.BeforeDecodeTest=delegate{if(Interlocked.Increment(ref held)==1)Thread.Sleep(195);};
+                    server.Start();writer.Start();var first=State();first.ObservationTicks-=Stopwatch.Frequency*90/1000;writer.Publish(first);
+                    Until(()=>writer.StartupDiscarded==1);Require(writer.Sent==0&&callbacks==0&&server.Accepted==0,"discard counted accepted");
+                    var fresh=State(1);writer.Publish(fresh);Until(()=>writer.Sent==1);writer.RequestStop();Until(()=>writer.Finished&&server.Finished);
+                    Require(writer.Attempts==1&&server.Connections==1&&writer.Transmitted==2&&writer.FirstTransmittedSequence==0&&writer.FirstFrame.FrameSequence==0&&writer.FirstAcceptedFrame.FrameSequence==1,"same-connection sender bookkeeping");
+                    Require(writer.FirstFrame.ObservationTicks==first.ObservationTicks&&server.FirstFrame.ObservationTicks==first.ObservationTicks&&writer.FirstFrame.ClockFrequency==first.ClockFrequency&&server.FirstFrame.ClockFrequency==first.ClockFrequency,"first wire timestamp changed");
+                    Require(writer.FirstAcceptedFrame.ObservationTicks==fresh.ObservationTicks&&server.FirstAcceptedFrame.ObservationTicks==fresh.ObservationTicks&&writer.FirstAcceptedFrame.ClockFrequency==fresh.ClockFrequency&&server.FirstAcceptedFrame.ClockFrequency==fresh.ClockFrequency,"first accepted timestamp changed");
+                    Require(server.FirstFrame.PayloadReceivedAgeMs<=250&&server.FirstFrame.DecisionAgeMs>250&&server.FirstFrame.DecodeMs>=190&&server.FirstAcceptedFrame.DecisionAgeMs<=250,"stage timing omitted");
+                    Require(server.Diagnostic.Outcome=="deliberate-stop"&&writer.Diagnostic.Outcome=="deliberate-stop"&&server.Rejected==0,"startup recovery failed");
+                }
+            });
+#endif
+            Test("server shutdown completion exposes in-flight callback and prevents later callbacks",delegate{
+                string p=Pipe();int calls=0;using(var entered=new ManualResetEvent(false))using(var release=new ManualResetEvent(false))using(var server=Server(p,delegate{Interlocked.Increment(ref calls);entered.Set();release.WaitOne(1000);},true)){
+                    server.Start();using(var c=DuplexClient(p)){Send(c,State());Require(entered.WaitOne(1000),"callback not entered");Require(!server.StopAndWait(10)&&!server.ShutdownCompleted,"in-flight callback falsely joined");release.Set();Require(server.StopAndWait(1000)&&server.ShutdownCompleted&&calls==1,"callback outlived join");}
+                }
+            });
+            Test("concurrent publisher Stop and Dispose cannot signal a disposed event",delegate{
+                for(int i=0;i<40;i++)using(var go=new ManualResetEvent(false)){
+                    var writer=new StatePublisher(Pipe());Exception failure=null;
+                    var stopper=new Thread(delegate(){go.WaitOne();try{writer.RequestStop();}catch(Exception e){failure=e;}});
+                    var disposer=new Thread(delegate(){go.WaitOne();try{writer.Dispose();}catch(Exception e){failure=e;}});
+                    stopper.Start();disposer.Start();go.Set();Require(stopper.Join(1000)&&disposer.Join(1000),"shutdown deadlock");Require(failure==null,"shutdown event lifetime race");writer.Dispose();Reject(()=>writer.Start());
+                }
+            });
             Test("strict duplicate after accepted frame attribution",delegate{StrictFailure("sequence",delegate(NamedPipeClientStream c){var s=State();Send(c,s);TransportStop.Ack(c,1);Send(c,s);});});
             Test("strict clean EOF is terminal but not an invalid frame",delegate{string p=Pipe();using(var server=Server(p,null,true)){server.Start();using(var c=Client(p)){Until(()=>server.Connections==1);}Until(()=>server.Finished);Require(server.Rejected==0&&server.Diagnostic.Code=="clean-eof"&&server.Diagnostic.Outcome=="unexpected-eof","EOF classification");}});
             Test("strict midstream EOF is terminal without reconnect",delegate{StrictFailure("connection",delegate(NamedPipeClientStream c){Send(c,State());TransportStop.Ack(c,1);});});

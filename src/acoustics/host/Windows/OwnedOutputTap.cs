@@ -22,6 +22,7 @@ namespace RichAudio.Beacon.Windows
         private readonly long anchorTicks=Stopwatch.GetTimestamp(),anchorUnixMs=(long)(DateTime.UtcNow-new DateTime(1970,1,1)).TotalMilliseconds;
         public long CapturedFrames,DroppedFrames,DroppedChunks,UploadedFrames,UploadFailures,MaximumCopyTicks;
         public string LastError;
+        public string TerminalFailure;
         public OwnedOutputTap(string configuration) : this()
         {
             configurationPath=Path.GetFullPath(configuration);ReadConfiguration();
@@ -94,7 +95,7 @@ namespace RichAudio.Beacon.Windows
                 if(Peek()!=null)Upload();else Thread.Sleep(5);
             }
             recordingId=null;long deadline=watch.ElapsedMilliseconds+750;while((Peek()!=null||!Quiescent)&&watch.ElapsedMilliseconds<deadline){if(Peek()!=null)Upload();else Thread.Sleep(1);}
-            try{PostJson("/api/host/event",new Dictionary<string,object>{{"type","host-capture-stop"},{"recordingId",active},{"metrics",Status()},{"queuedTailChunks",write-read},{"callbackInFlight",!Quiescent},{"captureSuspensions",activeCaptureSuspensions}});}catch(Exception ex){LastError=ex.GetType().Name;}
+            try{PostJson("/api/host/event",new Dictionary<string,object>{{"type","host-capture-stop"},{"recordingId",active},{"metrics",Status()},{"queuedTailChunks",write-read},{"callbackInFlight",!Quiescent},{"captureSuspensions",activeCaptureSuspensions},{"terminalFailure",TerminalFailure}});}catch(Exception ex){LastError=ex.GetType().Name;}
         }
         public Dictionary<string,object> Metrics(){var value=Status();value["maximumCallbackCopyMs"]=MaximumCopyTicks*1000.0/Stopwatch.Frequency;value["queueCapacityChunks"]=Capacity;value["queueCapacityBytes"]=Capacity*MaximumFrames*8;value["queuedChunks"]=write-read;value["error"]=LastError;return value;}
         public void Dispose(){recordingId=null;stop=true;if(writer!=null&&writer.IsAlive&&!writer.Join(2000))LastError="Recorder writer shutdown timeout; background writer only";}

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {VisualState,ReplayClock,project,pathStyle,parseVisualContext,visibleContext,clampFps} from '../tools/soundmap/ui/model.mjs';
+import {VisualState,PassiveState,presentation,DisplayCadence,RateMeter,TELEMETRY_POLL_FPS,DISPLAY_RATES,ReplayClock,project,pathStyle,parseVisualContext,visibleContext,clampFps} from '../tools/soundmap/ui/model.mjs';
 import {observationCoordinates,modelPoint} from '../src/acoustics/engine/observed-geometry.mjs';
 const calibration={originNative:[100,200,3],axes:[[0,1,0],[-1,0,0],[0,0,1]],metresPerNativeUnit:2,basis:'declared-demonstration-scale',reference:'original-test-transform',physicalCalibration:'unverified'};
 const geometry=(generation='g1',sessionId='s1')=>({schemaVersion:1,generation,sessionId,coordinateSpace:'research-rh-z-up-metres-v1',calibration,createdAt:1000,validUntil:1500,coverage:'partial',surfaces:[{id:'finite-wall',vertices:[[0,0,0],[2,0,0],[2,0,2],[0,0,2]],openings:[]}],missingRegions:[]});
@@ -41,4 +41,35 @@ test('direct, first/second reflection, rejected, pruned and unknown states have 
 test('private visual context remains immutable historical-only and exact calibration controls visibility',()=>{const c=parseVisualContext(JSON.stringify(originalContext()));assert(Object.isFrozen(c));assert.equal(visibleContext(c,geometry(),[0,0,0]).tiles.length,1);const g=geometry();g.calibration={...calibration,metresPerNativeUnit:1};assert.equal(visibleContext(c,g,[0,0,0]).tiles.length,0);assert.equal(c.acousticUse,false);assert.equal(c.knowledge,'historical');});
 test('context culling bounds active tiles and retains distant regions as absent instead of filled',()=>{const c=originalContext();c.tiles=Array.from({length:12},(_,i)=>({...c.tiles[0],id:'tile'+i}));const data=parseVisualContext(JSON.stringify(c));assert.equal(visibleContext(data,geometry(),[0,0,0]).tiles.length,8);assert.equal(visibleContext(data,geometry(),[1000,1000,1000]).tiles.length,0);});
 test('malformed, oversize, promoted or out of tile private meshes are rejected before use',()=>{for(const alter of [c=>c.acousticUse=true,c=>c.knowledge='current',c=>c.provenance.kind='unknown',c=>c.tiles[0].faces=[[0,1,999]],c=>c.tiles[0].vertices[0]=[100,0,0],c=>c.tiles=Array(65).fill(c.tiles[0]),c=>c.tiles[0].faces=[[0,0,1]],c=>c.calibration=null]){const c=structuredClone(originalContext());alter(c);assert.throws(()=>parseVisualContext(JSON.stringify(c)));}assert.throws(()=>parseVisualContext(' '.repeat(4*1024*1024+1)),/4 MiB/);});
-test('pause, resume, scrub and replay end use monotonic elapsed time while keeping source timestamps separate',()=>{const r=new ReplayClock();r.open(1000);r.tick(0);r.playing=true;r.tick(200);assert.equal(r.timeMs,200);r.playing=false;r.tick(900);assert.equal(r.timeMs,200);r.seek(700);r.playing=true;r.tick(1000);r.tick(1100);assert.equal(r.timeMs,800);r.tick(1500);assert.equal(r.timeMs,1000);assert.equal(r.playing,false);r.seek(-40);assert.equal(r.timeMs,0);assert.equal(clampFps(1),15);assert.equal(clampFps(100),30);});
+test('pause, resume, scrub and replay end use monotonic elapsed time while keeping source timestamps separate',()=>{const r=new ReplayClock();r.open(1000);r.tick(0);r.playing=true;r.tick(200);assert.equal(r.timeMs,200);r.playing=false;r.tick(900);assert.equal(r.timeMs,200);r.seek(700);r.playing=true;r.tick(1000);r.tick(1100);assert.equal(r.timeMs,800);r.tick(1500);assert.equal(r.timeMs,1000);assert.equal(r.playing,false);r.seek(-40);assert.equal(r.timeMs,0);assert.equal(clampFps(1),15);assert.equal(clampFps(100),60);});
+const passiveFrame=(sequence=1,streamId='passive-a')=>({schemaVersion:1,kind:'passive-listener',streamId,sessionId:'native-session',sequence,observedAtUnixMs:1000,ageMs:0,coordinateSpace:'gta-native-unscaled',units:'native-unverified',listener:{valid:true,position:[100,200,3],forward:[0,1,0],up:[0,0,1],velocity:null,generation:1,reason:'ready'}});
+test('passive tracking is independent and returns after genuine acoustic freshness expires without mixed coordinates',()=>{
+  const s=new VisualState(),p=new PassiveState();p.ingest(passiveFrame(),0,{wallNow:1000});
+  let v=presentation(s,p,20,false);assert.equal(v.kind,'passive');assert.equal(v.geometry,null);assert.equal(v.frame,null);assert.deepEqual(v.listener.position,[100,200,3]);
+  s.ingest(envelope(),100);const originalCache=s.geometry;v=presentation(s,p,120,true);assert.equal(v.kind,'acoustic');assert.deepEqual(v.listener.position,[0,2,1]);assert.notEqual(v.coordinateKey,'native:passive-a');
+  const next=passiveFrame(2);next.observedAtUnixMs=1650;p.ingest(next,650,{wallNow:1650});
+  v=presentation(s,p,651,true);assert.equal(v.kind,'passive');assert.equal(v.geometry,null);assert.equal(v.frame,null);assert.equal(s.geometry,originalCache,'passive never changes acoustic cache');assert.equal(s.sessionId,'s1');
+  assert.equal(visibleContext(parseVisualContext(JSON.stringify(originalContext())),v.geometry,v.listener.position).tiles.length,0);
+});
+test('passive duplicate frames never renew age; invalid/paused and absent observations never become fresh solver evidence',()=>{
+  const p=new PassiveState(),s=new VisualState();p.ingest(passiveFrame(),0,{wallNow:1000});assert.equal(p.ingest(passiveFrame(),499,{wallNow:1499}),false);assert.equal(p.health(501).state,'stale');
+  const paused=passiveFrame(2);paused.listener.valid=false;paused.listener.reason='paused';p.ingest(paused,502,{wallNow:1502});assert.equal(p.health(502).state,'invalid');assert.match(p.health(502).message,/paused/);assert.equal(presentation(s,p,502,false).frame,null);
+  p.ingest(null,503);assert.equal(presentation(s,p,503,false).kind,'waiting');
+});
+test('passive stream or session changes reanchor coordinates without altering an acoustic worker identity',()=>{
+  const p=new PassiveState(),s=new VisualState();s.ingest(envelope(),0);p.ingest(passiveFrame(90),0,{wallNow:1000});const before=presentation(s,p,600,false).coordinateKey;
+  const next=passiveFrame(1,'passive-b');next.sessionId='new-native-session';next.listener.position=[-100,-200,20];p.ingest(next,601,{wallNow:1000});const after=presentation(s,p,601,false);assert.notEqual(after.coordinateKey,before);assert.deepEqual(after.listener.position,[-100,-200,20]);assert.equal(s.sessionId,'s1');assert.equal(s.frame.sequence,1);
+});
+test('passive contract rejects acoustic evidence and calibrated coordinate disguises',()=>{for(const edit of [p=>p.paths=[],p=>p.coordinateSpace='research-rh-z-up-metres-v1',p=>p.units='metres',p=>p.listener.forward=[NaN,0,1],p=>p.listener.velocity=[Infinity,0,0]]){const p=passiveFrame();edit(p);assert.throws(()=>new PassiveState().ingest(p,0,{wallNow:1000}));}});
+test('historical replay never switches to a simultaneous fresh passive stream',()=>{const s=new VisualState(),p=new PassiveState();s.ingest(envelope(frame(),geometry(),'replay'),0);p.ingest(passiveFrame(),0,{wallNow:1000});const view=presentation(s,p,200,false);assert.equal(view.kind,'replay');assert.equal(view.frame,s.frame);assert.equal(view.health.state,'historical');});
+test('display cadence renders 15/20/30/60 targets on animation ticks without changing the fixed telemetry cadence',()=>{
+  assert.deepEqual(DISPLAY_RATES,[15,20,30,60]);assert.equal(TELEMETRY_POLL_FPS,20);
+  for(const target of DISPLAY_RATES){const d=new DisplayCadence(target),m=new RateMeter();let count=0;for(let tick=0;tick<600;tick++){const now=tick*1000/60;if(d.due(now)){count++;m.mark(now);}}
+    assert(Math.abs(count-target*10)<=1,`${target} target yielded ${count} frames/10 seconds`);assert(Math.abs(m.rate(9999)-target)<1);assert.equal(TELEMETRY_POLL_FPS,20);}
+});
+test('slow displays and long pauses skip missed frame slots rather than burst or fabricate observations',()=>{
+  const d=new DisplayCadence(60);let count=0;for(let i=0;i<300;i++)if(d.due(i*1000/30))count++;assert.equal(count,300);
+  assert(d.due(20000));assert.equal(d.due(20000),false);assert.equal(d.due(20001),false);
+  d.setRate(15);assert(d.due(21000));assert.equal(d.due(21020),false);assert(d.due(21070));
+  const rate=new RateMeter();for(let i=0;i<1000;i++)rate.mark(i);assert(rate.times.length<=256);assert.equal(rate.rate(5000),0);
+});

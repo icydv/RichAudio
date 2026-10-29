@@ -17,6 +17,11 @@ namespace RichAudio.Beacon.Windows
     {
         private static volatile bool stop, producerEnded;
         private static volatile string producerError;
+        private static readonly object failureLock=new object();
+        private static readonly List<Dictionary<string,object>> secondaryFailures=new List<Dictionary<string,object>>();
+        private static Dictionary<string,object> primaryFailure;
+        private static TransportResult listenerTerminal;
+        private static long controlsRejectedDuringShutdown;
         private static volatile string latestRendererStatus;
         private static bool auditionOutputEnabled;
         private static readonly object inputLock = new object(), logLock = new object();
@@ -162,13 +167,14 @@ namespace RichAudio.Beacon.Windows
             return " --beacon-output-trim-db 12";
         }
 
-        private static int Run(string root, string scene, string beacon, int sources, int seconds, float gain, int device, bool autostart, bool exercise, bool loopbackEnabled, bool listenerPipe, string wav, string directory, double beaconFrequencyHz, double beaconLevel,string geometryModel,AcousticSettings acousticSettings,string settingsPath,string soundMapConfig,string auditionArguments)
+        private static int Run(string root, string scene, string beacon, int sources, int seconds, float gain, int device, bool autostart, bool exercise, bool loopbackEnabled, bool listenerPipe, string wav, string directory, double beaconFrequencyHz, double beaconLevel,string geometryModel,AcousticSettings acousticSettings,string settingsPath,string soundMapConfig,string auditionArguments, string fixturePipe=null)
         {
             AppDomain.MonitoringIsEnabled = true;
             long initialAllocated = AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
             int initialGen0 = GC.CollectionCount(0), initialGen1 = GC.CollectionCount(1), initialGen2 = GC.CollectionCount(2);
             PcmRing ring = new PcmRing(); Thread reader = null, controls = null, stderr = null; LoopbackCapture capture = null;
             OwnedOutputTap ownedRecorder=null;
+            bool childDisposed=false, listenerJoined=true, geometryRelayDisposalDeferred=false;
             var actions = new List<Dictionary<string, object>>(); Stopwatch wall = Stopwatch.StartNew(); Process self = Process.GetCurrentProcess(); TimeSpan initialCpu = self.TotalProcessorTime;
 #if STATE_TRANSPORT
             StatePipeServer pipe = null;
@@ -199,11 +205,12 @@ namespace RichAudio.Beacon.Windows
                 output = new WasapiOutput(ring, device); output.Volume = gain; output.Muted = !autostart;
                 output.OwnedRecorder=ownedRecorder;
                 if (loopbackEnabled) { capture = new LoopbackCapture(device, seconds + 2); capture.Start(); capture.Ready.WaitOne(3000); }
-                output.Start(); if (!output.Ready.WaitOne(5000)) throw new TimeoutException("Endpoint readiness timeout"); if (output.Error != null) throw new InvalidOperationException(output.Error);
+                if(fixturePipe==null){output.Start(); if (!output.Ready.WaitOne(5000)) throw new TimeoutException("Endpoint readiness timeout"); if (output.Error != null) throw new InvalidOperationException(output.Error);}
 #if STATE_TRANSPORT
                 if (listenerPipe)
                 {
-                    pipe = new StatePipeServer("RichAudio.Acoustics07.Listener.v1", ListenerReceived,true,ListenerEnded);
+                    pipe = new StatePipeServer(fixturePipe??"RichAudio.Acoustics07.Listener.v1", ListenerReceived,true,ListenerEnded);
+                    if(fixturePipe!=null)shutdownFixturePipe=pipe;
 #if GEOMETRY_LIVE
                     if(geometrySettings!=null){geometryRelay=new RichAudio.GeometryLive.GeometryHostRelay(Send,delegate{return pipe.PeerProcessId;},geometrySettings);geometryRelay.Start();}
 #else
@@ -215,11 +222,11 @@ namespace RichAudio.Beacon.Windows
                 if (listenerPipe) throw new NotSupportedException("Listener transport was not included in this build");
 #endif
                 Console.WriteLine("RichAudio shared output: " + output.EndpointName + ". Commands: start, mute, resume, emit-stop, status, stop. Maximum " + seconds + " seconds; gain " + gain.ToString(CultureInfo.InvariantCulture));
-                controls = new Thread(delegate() { string line; while (!stop && (line = Console.ReadLine()) != null) { if (line == "status") { Console.WriteLine("queued=" + ring.Count + " underflowFrames=" + Interlocked.Read(ref ring.UnderflowFrames)); Console.WriteLine(latestRendererStatus ?? "Renderer status pending (or known-WAV mode)."); if(acousticSettingsMonitor!=null)Console.WriteLine(latestAcousticSettingsStatus??"Acoustic settings active status pending."); } else Control(line.Trim()); } }); controls.IsBackground = true; controls.Start();
+                if(fixturePipe==null){controls = new Thread(delegate() { string line; while (!stop && (line = Console.ReadLine()) != null) { if(stop)break; if (line == "status") { Console.WriteLine("queued=" + ring.Count + " underflowFrames=" + Interlocked.Read(ref ring.UnderflowFrames)); Console.WriteLine(latestRendererStatus ?? "Renderer status pending (or known-WAV mode)."); if(acousticSettingsMonitor!=null)Console.WriteLine(latestAcousticSettingsStatus??"Acoustic settings active status pending."); } else Control(line.Trim()); } }); controls.IsBackground = true; controls.Start();}
                 bool didMute = false, didResume = false, didEmitStop = false; double drainStart = -1;
                 while (!stop && wall.Elapsed.TotalSeconds < seconds)
                 {
-                    if (output.Error != null || producerError != null) break;
+                    if(output.Error!=null){RecordFailure("audio-output",output.Error);break;}if(producerError!=null)break;
                     int credits = ring.TakeCredits(); if (credits != 0 && child != null && !producerEnded) Send("{\"type\":\"credit\",\"blocks\":" + credits + "}");
                     if (exercise)
                     {
@@ -231,28 +238,36 @@ namespace RichAudio.Beacon.Windows
                     Thread.Sleep(2);
                 }
             }
-            catch (Exception ex) { producerError = ex.GetType().Name + ": " + ex.Message; }
+            catch (Exception ex) { RecordFailure("host-run",ex.Message,ex); }
             finally
             {
-                stop = true; if (output != null) { output.Muted = true; try { output.Dispose(); } catch(Exception ex) { producerError="Output shutdown: "+ex.GetType().Name; } }
+                stop = true; if(output!=null)output.Muted=true;
+                if(shutdownFixtureHook!=null)ShutdownStep("fixture-secondary",shutdownFixtureHook);
 #if STATE_TRANSPORT
-                if (pipe != null) pipe.Dispose();
+                if(pipe!=null){listenerJoined=false;ShutdownStep("listener-shutdown",delegate{listenerJoined=pipe.StopAndWait(1000);if(!listenerJoined)throw new TimeoutException("Listener callback thread did not finish; callback resources retained until process exit");});}
 #endif
-#if GEOMETRY_LIVE
-                if(geometryRelay!=null)geometryRelay.Dispose();
-#endif
-                if (capture != null) { try { capture.Dispose(); } catch(Exception ex) { producerError="Capture shutdown: "+ex.GetType().Name; } }
-                if(ownedRecorder!=null)ownedRecorder.Dispose();
+                if(acousticSettingsMonitor!=null)ShutdownStep("settings-shutdown",acousticSettingsMonitor.Dispose);
+                if(output!=null)ShutdownStep("output-shutdown",output.Dispose);
+                if(capture!=null)ShutdownStep("capture-shutdown",capture.Dispose);
+                if(ownedRecorder!=null){ownedRecorder.TerminalFailure=producerError;ShutdownStep("recording-shutdown",ownedRecorder.Dispose);}
                 if (child != null)
                 {
-                    SendControl("stop");
-                    if (!child.WaitForExit(2500)) { child.Kill(); child.WaitForExit(2000); if(producerError==null)producerError="Renderer did not acknowledge bounded shutdown; owned child terminated"; }
-                    else if(child.ExitCode!=0 && producerError==null)producerError="Renderer exited with code "+child.ExitCode;
-                    inputStop=true;inputSignal.Set();if(inputWriter!=null&&inputWriter.IsAlive)inputWriter.Join(1000);
-                    try { child.StandardInput.Close(); } catch (IOException) { }
+                    ShutdownStep("producer-stop",delegate{SendControl("stop");if(!child.WaitForExit(2500)){child.Kill();if(!child.WaitForExit(2000))throw new TimeoutException("Owned producer did not terminate");RecordFailure("producer-stop","Renderer did not acknowledge bounded shutdown; owned child terminated");}else if(child.ExitCode!=0)RecordFailure("producer-exit","Renderer exited with code "+child.ExitCode);});
+                    inputStop=true;inputSignal.Set();
+                    ShutdownStep("control-writer-join",delegate{JoinOwnedThread(inputWriter,"control writer");});
+                    // The Process writer owns its BaseStream. Our UTF-8 wrapper
+                    // leaves it open and is joined before this sole-owner close.
+                    if(inputWriter==null||!inputWriter.IsAlive)ShutdownStep("producer-input-close",delegate{child.StandardInput.Close();});
                 }
-                if (reader != null && reader.IsAlive) reader.Join(1000); if (stderr != null && stderr.IsAlive) stderr.Join(1000);
-                if(acousticSettingsMonitor!=null)acousticSettingsMonitor.Dispose();
+                ShutdownStep("PCM-reader-join",delegate{JoinOwnedThread(reader,"PCM reader");});ShutdownStep("diagnostics-reader-join",delegate{JoinOwnedThread(stderr,"diagnostics reader");});
+#if GEOMETRY_LIVE
+                // Both ListenerReceived and the stderr reader call this relay.
+                // A timed-out join retains their target until process exit.
+                if(geometryRelay!=null){geometryRelayDisposalDeferred=!listenerJoined||(stderr!=null&&stderr.IsAlive);
+                    if(geometryRelayDisposalDeferred)RecordFailure("geometry-shutdown-deferred","Geometry relay retained until process exit because a callback thread is still active");
+                    else ShutdownStep("geometry-shutdown",geometryRelay.Dispose);}
+#endif
+                try{
                 self.Refresh();
                 var result = new Dictionary<string, object> {
                     {"schemaVersion",1},{"backend","WASAPI shared event-driven, exact Float32 stereo 48k"},{"mode",wav == null ? "incremental-streaming" : "known-WAV-device-test"},{"scene",scene},{"beacon",beacon},{"sources",sources},{"terminationReason",producerError!=null?"failure":wall.Elapsed.TotalSeconds>=seconds?"duration-limit":"controlled-stop"},{"durationWallSeconds",wall.Elapsed.TotalSeconds},{"gain",gain},
@@ -272,26 +287,33 @@ namespace RichAudio.Beacon.Windows
 #endif
                 result["listenerForwarding"]=new Dictionary<string,object>{{"written",listenerMessagesWritten},{"maxHostQueueAgeMs",maxListenerHostQueueAgeMs},{"first128Receipts",listenerReceipts},{"remainingClockUncertainty","Anonymous-pipe transit after write plus Windows device buffering are separate from acoustic delay"}};
 #if STATE_TRANSPORT
-                if (pipe != null) result["transport"] = new Dictionary<string,object>{{"accepted",pipe.Accepted},{"rejected",pipe.Rejected},{"connections",pipe.Connections},{"lastAgeMs",pipe.Accepted>0?(object)pipe.LastAgeMs:null},{"error",pipe.Error},{"diagnostic",pipe.Diagnostic},{"strict",true},{"outputMuted",output==null||output.Muted},{"hostStopped",stop}};
+                if (pipe != null) result["transport"] = new Dictionary<string,object>{{"accepted",pipe.Accepted},{"rejected",pipe.Rejected},{"startupDiscarded",pipe.StartupDiscarded},{"shutdownCompleted",pipe.ShutdownCompleted},{"connections",pipe.Connections},{"lastAgeMs",pipe.Accepted>0?(object)pipe.LastAgeMs:null},{"error",pipe.Error},{"diagnostic",pipe.Diagnostic},{"strict",true},{"outputMuted",output==null||output.Muted},{"hostStopped",stop}};
 #endif
-                WriteNew(Path.Combine(directory, "host-result.json"), json.Serialize(result));
-                lock (logLock) WriteNew(Path.Combine(directory, "renderer-diagnostics.txt"), string.Join(Environment.NewLine, rendererLog.ToArray()));
-                if (capture != null) capture.Save(Path.Combine(directory, "loopback.wav"));
+                result["deviceFreeFixture"]=fixturePipe!=null;
+                result["geometryRelayDisposalDeferred"]=geometryRelayDisposalDeferred;
+                result["ownedThreadsJoined"]=(inputWriter==null||!inputWriter.IsAlive)&&(reader==null||!reader.IsAlive)&&(stderr==null||!stderr.IsAlive);
+                if(capture!=null)ShutdownStep("loopback-evidence",delegate{capture.Save(Path.Combine(directory,"loopback.wav"));});
+                if(child!=null&&(inputWriter==null||!inputWriter.IsAlive)&&(reader==null||!reader.IsAlive)&&(stderr==null||!stderr.IsAlive)){ShutdownStep("producer-dispose",child.Dispose);childDisposed=true;}
+                PublishTerminal(directory,result);
                 Console.WriteLine("Host stopped. Underflow frames: " + ring.UnderflowFrames + "; peak submitted: " + ring.Peak.ToString("G6", CultureInfo.InvariantCulture) + "; output: " + directory);
-                if (child != null) child.Dispose();
+                }catch(Exception ex){RecordFailure("terminal-summary",ex.Message,ex);
+                    if(!childDisposed&&child!=null&&(inputWriter==null||!inputWriter.IsAlive)&&(reader==null||!reader.IsAlive)&&(stderr==null||!stderr.IsAlive)){ShutdownStep("producer-dispose",child.Dispose);childDisposed=true;}
+                    PublishTerminal(directory,new Dictionary<string,object>{{"schemaVersion",1},{"summaryFallback",true},{"deviceFreeFixture",fixturePipe!=null},{"geometryRelayDisposalDeferred",geometryRelayDisposalDeferred},{"durationWallSeconds",wall.Elapsed.TotalSeconds},{"outputMuted",output==null||output.Muted},{"hostStopped",stop}});}
             }
             return producerError != null || (output != null && output.Error != null) ? 1 : 0;
         }
         private static Dictionary<string, object> Action(string name, double ms, long frame) { return new Dictionary<string,object>{{"command",name},{"hostMs",ms},{"consumedFrame",frame},{"qpc100ns",Stopwatch.GetTimestamp()*(10000000.0/Stopwatch.Frequency)}}; }
         internal static double ObservationAgeAtWrite(long observed,long now,long frequency){return Math.Max(0,(now-observed)*1000.0/frequency);}
         internal static void ListenerReceived(ListenerState state,double age){
+            if(listenerFixtureHook!=null)listenerFixtureHook();
 #if GEOMETRY_LIVE
             if(geometryRelay!=null){geometryRelay.Listener(state);return;}
 #endif
             Enqueue(new ControlMessage{ListenerJson=Protocol.EncodeJson(state),ObservationTicks=state.ObservationTicks,QueuedTicks=Stopwatch.GetTimestamp(),Sequence=state.Sequence,ObservationQpc100ns=state.ObservationTicks*(10000000.0/state.ClockFrequency)});}
-        internal static void ListenerEnded(TransportResult ending){if(output!=null)output.Muted=true;stop=true;if(ending.Outcome!="deliberate-stop")producerError="Listener terminal: "+ending.Stage+"/"+ending.Code;Console.WriteLine("Listener terminal "+json.Serialize(ending)+"; owned output muted/stopping");stop=true;}
+        internal static void ListenerEnded(TransportResult ending){if(output!=null)output.Muted=true;listenerTerminal=ending;if(ending.Outcome!="deliberate-stop")RecordFailure("listener-terminal","Listener terminal: "+ending.Stage+"/"+ending.Code);stop=true;Console.WriteLine("Listener terminal "+json.Serialize(ending)+"; owned output muted/stopping");}
         private static void Control(string command)
         {
+            if(stop)return;
             if (command == "stop") { stop = true; if (output != null) output.Muted = true; }
             else if (command == "mute") { if (output != null) output.Muted = true; }
             else if (command == "start" || command == "resume") { if (output != null && output.Error == null) output.Muted = false; SendControl(command); }
@@ -301,8 +323,8 @@ namespace RichAudio.Beacon.Windows
         private static void ReadDiagnostics()
         {
             try { ReadDiagnosticsCore(); }
-            catch(IOException ex) { if(!stop)producerError="Diagnostic pipe closed: "+ex.GetType().Name; }
-            catch(ObjectDisposedException) { if(!stop)producerError="Diagnostic pipe disposed"; }
+            catch(IOException ex) { RecordFailure("diagnostic-pipe",ex.Message,ex); }
+            catch(ObjectDisposedException ex) { RecordFailure("diagnostic-pipe-disposed",ex.Message,ex); }
         }
         private static void ReadDiagnosticsCore()
         {
@@ -338,13 +360,13 @@ namespace RichAudio.Beacon.Windows
 #if GEOMETRY_LIVE
             if(geometryRelay!=null)maximum=65536;
 #endif
-            if(message.Length>maximum){producerError="Control message size limit";return;}
+            if(message.Length>maximum){RecordFailure("control-message","Control message size limit");return;}
             Enqueue(new ControlMessage{Text=message,QueuedTicks=Stopwatch.GetTimestamp()});
         }
         private static void Enqueue(ControlMessage message)
         {
             if(child==null)return;
-            lock(inputLock){if(inputQueue.Count>=64){producerError="Bounded control queue overflow";return;}inputQueue.Enqueue(message);controlQueueHigh=Math.Max(controlQueueHigh,inputQueue.Count);}inputSignal.Set();
+            lock(inputLock){if(inputStop){Interlocked.Increment(ref controlsRejectedDuringShutdown);return;}if(inputQueue.Count>=64){RecordFailure("control-queue","Bounded control queue overflow");return;}inputQueue.Enqueue(message);controlQueueHigh=Math.Max(controlQueueHigh,inputQueue.Count);}inputSignal.Set();
         }
         private static void WriteControls()
         {
@@ -353,7 +375,7 @@ namespace RichAudio.Beacon.Windows
                 // Framework Process.StandardInput inherits a console-dependent
                 // encoding, which can prepend a BOM to the first JSON frame.
                 // Own the byte encoding; no locale or console settings change.
-                using(var controlWriter=new StreamWriter(child.StandardInput.BaseStream,new UTF8Encoding(false,true)))
+                using(var controlWriter=new StreamWriter(child.StandardInput.BaseStream,new UTF8Encoding(false,true),1024,true))
                 {
                 while(!inputStop)
                 {
@@ -371,9 +393,9 @@ namespace RichAudio.Beacon.Windows
                 }
                 }
             }
-            catch (IOException ex) { if (!stop) producerError = "Control pipe closed: " + ex.GetType().Name; }
-            catch (ObjectDisposedException) { }
-            catch (InvalidOperationException) { if (!stop) producerError = "Control producer unavailable"; }
+            catch (IOException ex) { RecordFailure("control-pipe",ex.Message,ex); }
+            catch (ObjectDisposedException ex) { RecordFailure("control-writer-disposed",ex.Message,ex); }
+            catch (InvalidOperationException ex) { RecordFailure("control-producer",ex.Message,ex); }
         }
         private static void ReadBlocks(Stream stream, PcmRing ring)
         {
@@ -389,7 +411,7 @@ namespace RichAudio.Beacon.Windows
                     if (!ring.TryWrite(samples, frames)) throw new InvalidDataException("Producer exceeded granted PCM credits"); receivedBlocks++;
                 }
             }
-            catch (Exception ex) { if (!stop) { rejectedBlocks++; producerError = ex.GetType().Name + ": " + ex.Message; } }
+            catch (Exception ex) { rejectedBlocks++; RecordFailure("PCM-reader",ex.Message,ex); }
             finally { if(producerError==null)ring.EndOfStream=true; producerEnded = true; }
         }
         private static void ReadWav(string filename, PcmRing ring)
@@ -416,7 +438,7 @@ namespace RichAudio.Beacon.Windows
                     if (!found) throw new InvalidDataException("No WAV data");
                 }
             }
-            catch (Exception ex) { if (!stop) producerError = ex.GetType().Name + ": " + ex.Message; }
+            catch (Exception ex) { RecordFailure("WAV-reader",ex.Message,ex); }
             finally { if(producerError==null)ring.EndOfStream=true; producerEnded = true; }
         }
         private static string Quote(string text) { if (text.IndexOf('"') >= 0) throw new ArgumentException("Unsupported quote in path"); return "\"" + text + "\""; }

@@ -20,5 +20,13 @@ if($Tests){
   if($LASTEXITCODE-ne0){throw 'Host test compilation failed.'}
   & (Join-Path $out 'RichAudio.Acoustics.Host.Tests.exe')
   if($LASTEXITCODE-ne0){throw 'Host offline tests failed.'}
+  & $compiler @options '/main:RichAudio.Beacon.Tests.TestHostShutdown' ('/out:'+(Join-Path $out 'RichAudio.Host.Shutdown.Tests.exe')) @sources (Join-Path $repo 'tests\host\TestHostShutdown.cs')
+  if($LASTEXITCODE-ne0){throw 'Host shutdown test compilation failed.'}
+  & (Join-Path $out 'RichAudio.Host.Shutdown.Tests.exe')
+  if($LASTEXITCODE-ne0){throw 'Original disposal reproduction failed.'}
+  foreach($mode in @('future','disconnect','controlled','secondary','evidence-failure','blocked-callback')){
+    & (Join-Path $out 'RichAudio.Host.Shutdown.Tests.exe') $repo $mode
+    if($LASTEXITCODE-ne0){throw "Host device-free shutdown fixture failed: $mode"}
+  }
 }
 Write-Output 'Built original Windows host. No device was opened by the build; no game files were accessed.'

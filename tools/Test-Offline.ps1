@@ -20,6 +20,7 @@ try {
     & (Join-Path $repo 'tools\Test-AcousticSettingsHandoff.ps1')
     & (Join-Path $repo 'tools\Test-InGameMenu.ps1')
     & (Join-Path $repo 'tools\Test-SoundMapMenu.ps1')
+    & (Join-Path $repo 'tools\Test-PassiveSoundMap.ps1')
     & (Join-Path $repo 'tools\Test-MenuDeploymentLayout.ps1')
     & node --test tests/Test-SoundMapTelemetry.mjs tests/Test-SoundMapViewer.mjs tests/Test-SoundMapService.mjs tests/Test-SoundMapProducer.mjs
     if($LASTEXITCODE-ne0){throw 'SoundMap telemetry, viewer, recording, replay or actual producer checks failed.'}
@@ -60,6 +61,7 @@ try {
     & node --test tests/Test-SoundMapHost.mjs
     if($LASTEXITCODE-ne0){throw 'Native owned-output tap to private recording bundle failed.'}
     & (Join-Path $repo 'tools\Test-BeaconTransport.ps1')
+    & (Join-Path $repo 'tools\Test-ListenerEvidence.ps1')
     & (Join-Path $repo 'tools\Test-UnsentExpiry.ps1')
     & (Join-Path $repo 'tools\Test-HostHandoff.ps1')
     & (Join-Path $repo 'tools\Measure-FirstFrameTiming.ps1') -Output ('.local/timing-ci-'+[guid]::NewGuid().ToString('N'))

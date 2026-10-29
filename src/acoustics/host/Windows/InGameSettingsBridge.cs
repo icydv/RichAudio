@@ -14,8 +14,9 @@ namespace RichAudio.Beacon.Windows
     {
         public readonly string WorkspaceRoot,SettingsPath,ToggleKey;
         public readonly bool ControllerEnabled;
-        private InGameSettingsLink(string root,string path,string key,bool controller){WorkspaceRoot=root;SettingsPath=path;ToggleKey=key;ControllerEnabled=controller;}
-        private static void LocalFile(string path)
+        public readonly PassiveSoundMapOptions SoundMap;
+        private InGameSettingsLink(string root,string path,string key,bool controller,PassiveSoundMapOptions soundMap){WorkspaceRoot=root;SettingsPath=path;ToggleKey=key;ControllerEnabled=controller;SoundMap=soundMap;}
+        internal static void LocalFile(string path)
         {
             if(!System.Text.RegularExpressions.Regex.IsMatch(path,"\\A[A-Za-z]:[\\\\/]"))throw new InvalidDataException("Local drive path required");
             if(new DriveInfo(Path.GetPathRoot(path)).DriveType!=DriveType.Fixed)throw new InvalidDataException("Fixed local storage required");
@@ -41,9 +42,9 @@ namespace RichAudio.Beacon.Windows
             stage="sidecar-read";
             string text=AcousticSettingsStore.ReadBounded(pointerPath,4096);
             stage="sidecar-schema";
-            var d=new JavaScriptSerializer{MaxJsonLength=4096,RecursionLimit=4}.DeserializeObject(text) as Dictionary<string,object>;
+            var d=new JavaScriptSerializer{MaxJsonLength=4096,RecursionLimit=6}.DeserializeObject(text) as Dictionary<string,object>;
             var fields=new[]{"schemaVersion","workspaceRoot","settingsPath","toggleKey","controllerEnabled"};
-            if(d==null||d.Count!=fields.Length)throw new InvalidDataException("Menu connection schema");
+            if(d==null||(d.Count!=fields.Length&&d.Count!=fields.Length+1)||d.Count==fields.Length+1&&!d.ContainsKey("soundMap"))throw new InvalidDataException("Menu connection schema");
             foreach(string field in fields)if(!d.ContainsKey(field)||System.Text.RegularExpressions.Regex.Matches(text,"\""+field+"\"\\s*:").Count!=1)
                 throw new InvalidDataException("Unique menu connection fields required");
             if(!(d["schemaVersion"] is int)||(int)d["schemaVersion"]!=1||!(d["workspaceRoot"] is string)||!(d["settingsPath"] is string)||
@@ -54,8 +55,36 @@ namespace RichAudio.Beacon.Windows
             stage="workspace-path";
             string root=Path.GetFullPath(rawRoot),path=AcousticSettingsStore.PrivatePath(root,relative);
             LocalFile(path);if(!Directory.Exists(root))throw new InvalidDataException("Workspace unavailable");
-            return new InGameSettingsLink(root,path,key,(bool)d["controllerEnabled"]);
+            var options=PassiveSoundMapOptions.Disabled;
+            if(d.ContainsKey("soundMap")){
+                if(System.Text.RegularExpressions.Regex.Matches(text,"\"soundMap\"\\s*:").Count!=1)throw new InvalidDataException("Unique SoundMap configuration required");
+                foreach(string f in new[]{"enabled","autoStartService","openWindow","sampleHz","port","nodeExecutable"})if(System.Text.RegularExpressions.Regex.Matches(text,"\""+f+"\"\\s*:").Count!=1)throw new InvalidDataException("Unique SoundMap options required");
+                options=PassiveSoundMapOptions.Parse(d["soundMap"]);
+                if(options.AutoStartService){LocalFile(options.NodeExecutable);if(!File.Exists(options.NodeExecutable)||!String.Equals(Path.GetFileName(options.NodeExecutable),"node.exe",StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("Explicit local Node runtime required");}
+            }
+            return new InGameSettingsLink(root,path,key,(bool)d["controllerEnabled"],options);
             }catch(Exception e){diagnostic=MenuDiagnostic.Failure(stage,e);throw;}
+        }
+    }
+
+    public sealed class PassiveSoundMapOptions
+    {
+        public readonly bool Enabled,AutoStartService,OpenWindow;
+        public readonly int SampleHz,Port;
+        public readonly string NodeExecutable;
+        public static readonly PassiveSoundMapOptions Disabled=new PassiveSoundMapOptions(false,false,false,20,17833,"");
+        private PassiveSoundMapOptions(bool enabled,bool autoStart,bool window,int hz,int port,string node)
+        {Enabled=enabled;AutoStartService=autoStart;OpenWindow=window;SampleHz=hz;Port=port;NodeExecutable=node;}
+        internal static PassiveSoundMapOptions Parse(object value)
+        {
+            var d=value as Dictionary<string,object>;
+            var fields=new[]{"enabled","autoStartService","openWindow","sampleHz","port","nodeExecutable"};
+            if(d==null||d.Count!=fields.Length)throw new InvalidDataException("SoundMap options schema");
+            foreach(string f in fields)if(!d.ContainsKey(f))throw new InvalidDataException("SoundMap options fields");
+            if(!(d["enabled"] is bool)||!(d["autoStartService"] is bool)||!(d["openWindow"] is bool)||!(d["sampleHz"] is int)||!(d["port"] is int)||!(d["nodeExecutable"] is string))throw new InvalidDataException("SoundMap options types");
+            int hz=(int)d["sampleHz"],port=(int)d["port"];string node=(string)d["nodeExecutable"];
+            if(hz<1||hz>20||port<1024||port>65535||node.Length>1024||(bool)d["autoStartService"]&&!Path.IsPathRooted(node)||!(bool)d["enabled"]&&((bool)d["autoStartService"]||(bool)d["openWindow"]))throw new InvalidDataException("SoundMap options bounds");
+            return new PassiveSoundMapOptions((bool)d["enabled"],(bool)d["autoStartService"],(bool)d["openWindow"],hz,port,node);
         }
     }
 
