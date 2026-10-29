@@ -10,6 +10,28 @@ import {BeaconOutputTrim} from '../src/acoustics/streaming/beacon-output-trim.mj
 const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
 const lines=file=>fs.readFileSync(file,'utf8').split(/\r?\n/).filter(Boolean).map(JSON.parse);
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+export function listenerTerminalEvidence(host,mode){
+ const b=host?.listenerTerminalBoundary??{},s=host?.deviceFreeSink??{};
+ const num=x=>Number.isSafeInteger(x)&&x>=0?x:null;
+ const stop=num(b.qpcTicks),admitted=num(s.lastAdmissionQpcTicks),completed=num(s.lastCompletionQpcTicks),frequency=num(b.qpcFrequency);
+ const frames=num(s.frames),atStop=num(b.fixtureCompletedFrames),start=num(s.lastAdmissionFrameStart),end=num(s.lastCompletionFrameEnd);
+ const failures=[];
+ if(!stop||!admitted||!completed||!frequency||frequency!==s.qpcFrequency)failures.push('measured-clock-and-boundary-required');
+ if(s.lastSubmissionQpcTicks!==admitted)failures.push('existing-admission-alias-matches');
+ if(admitted!==null&&stop!==null&&admitted>stop)failures.push('no-new-admission-after-stop-request');
+ if(completed!==null&&admitted!==null&&completed<admitted)failures.push('completion-follows-admission');
+ if(s.submissionFrames!==512||b.fixtureSubmissionFrames!==512)failures.push('existing-512-frame-submission-bound');
+ if(frames===null||atStop===null||frames-atStop<0||frames-atStop>512)failures.push('at-most-one-already-admitted-completion');
+ if(start===null||end===null||end!==frames||end-start!==512)failures.push('same-buffer-completion-lineage');
+ const knownMode=['stale','future','wrong-session','reordered','interrupted'].includes(mode)?mode:'unrecognized';
+ return {schemaVersion:1,type:'listener-terminal-submission',mode:knownMode,passed:failures.length===0,failedPredicates:failures,
+  boundary:'output-stop-request; already-admitted work may complete',
+  admissionAfterRequestMs:frequency&&admitted!==null&&stop!==null?(admitted-stop)*1000/frequency:null,
+  completionAfterRequestMs:frequency&&completed!==null&&stop!==null?(completed-stop)*1000/frequency:null,
+  completedFramesAfterSnapshot:frames!==null&&atStop!==null?frames-atStop:null,
+  alreadyAdmittedCompletionAfterRequest:completed!==null&&stop!==null?completed>stop:null,
+  submissionFrames:num(s.submissionFrames),lastAdmissionFrameStart:start,lastCompletionFrameEnd:end};
+}
 function metrics(bytes,frames=null){
  let peak=0,energy=0,leftEnergy=0,rightEnergy=0,nonfinite=0,stereoDifference=0,samples=0;
  for(let at=0;at+8<=bytes.length;at+=8){const frame=at/8;if(frames&&!frames.has(Math.floor(frame/512)*512))continue;
@@ -51,8 +73,13 @@ export function checkListenerStartup(directory,{baseline=false,invalid=false,rep
   assert.ok(blocks.some(t=>t.emitting&&t.paths>0));assert.equal(host.transport.rejected,1);
   const expected=fixture.mode==='interrupted'?'payload/deadline':fixture.mode==='stale'||fixture.mode==='future'?'freshness/invalid-age':'sequence/invalid-sequence';
   assert.ok(host.producerError.includes(expected),host.producerError);assert.equal(host.transport.accepted,fixture.acceptedAcknowledgements);
-  if(host.listenerTerminalBoundary&&host.deviceFreeSink.lastSubmissionQpcTicks)assert.ok(host.deviceFreeSink.lastSubmissionQpcTicks<=host.listenerTerminalBoundary.qpcTicks,'no output submitted after strict listener terminal mute');
-  result.invalidRejectedBeforeRelay=true;result.submissionEnd='Actual consumer stops at the strict terminal mute; no fabricated zero samples appended';
+  const boundary=listenerTerminalEvidence(host,fixture.mode);
+  // Print only bounded scalar evidence BEFORE asserting, so a hosted failure
+  // retains its actual mode and measured admission/completion ordering.
+  console.log(JSON.stringify(boundary));
+  assert.equal(boundary.passed,true,'strict listener Stop: no new admission; at most one measured prior-admitted completion');
+  result.listenerTerminalSubmission=boundary;
+  result.invalidRejectedBeforeRelay=true;result.submissionEnd='No new callback admitted after Stop request; any one already-admitted completion is retained with measured lineage, without fabricated zero samples';
   assert.equal(recording.audioPlayable,false,'failed listener recording is retained as incomplete listening evidence');
  }else{
   assert.equal(host.producerError,null);assert.equal(host.secondaryFailures.length,0);assert.equal(fixture.nativeHostExit,0);assert.ok(blocks.length>500);

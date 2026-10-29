@@ -321,8 +321,10 @@ namespace RichAudio.Beacon.Windows
             Enqueue(new ControlMessage{ListenerJson=Protocol.EncodeJson(state),ObservationTicks=state.ObservationTicks,QueuedTicks=Stopwatch.GetTimestamp(),Sequence=state.Sequence,ObservationQpc100ns=state.ObservationTicks*(10000000.0/state.ClockFrequency)});}
         internal static void ListenerEnded(TransportResult ending){
             if(output!=null)output.Stop();
+            long fixtureCompletedAtRequest=listeningFixture?Interlocked.Read(ref fixtureSinkFrames):0;
             listenerTerminalBoundary=new Dictionary<string,object>{{"qpcTicks",Stopwatch.GetTimestamp()},{"qpcFrequency",Stopwatch.Frequency},
                 {"consumedFrame",output==null?0:output.ConsumerFrame},{"outputMuted",output==null||output.Muted},{"outputStopRequested",true}};
+            if(listeningFixture){listenerTerminalBoundary["fixtureCompletedFrames"]=fixtureCompletedAtRequest;listenerTerminalBoundary["fixtureSubmissionFrames"]=512;}
             listenerTerminal=ending;if(ending.Outcome!="deliberate-stop")RecordFailure("listener-terminal","Listener terminal: "+ending.Stage+"/"+ending.Code);stop=true;Console.WriteLine("Listener terminal "+json.Serialize(ending)+"; owned output muted/stopping");}
         private static void Control(string command)
         {

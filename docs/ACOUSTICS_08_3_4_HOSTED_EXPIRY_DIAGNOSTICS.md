@@ -45,7 +45,20 @@ The existing workflow always retains only `.local/expiry-ci-evidence/*.json` for
 
 Row B passed all nine assertions once. Its cold `domain-1` used one attempt and accepted 16 frames with zero rejections/discards. First unsent expiry was **324.8258 ms** after **299.5761 ms** encoding; the first wire and first accepted receiver decision ages were both **58.5135 ms**. Both child exits were zero, both transport terminals were `deliberate-stop`, and cleanup errors were zero. The `late` control still accepted zero frames and failed at the existing receiver header deadline. Row C was not needed or run.
 
-**Classification:** the historical hosted transport failure remains unclassified. No production transport defect has been demonstrated, and no production transport, engine, SoundMap, recorder or host implementation was changed. The correction is the demonstrated harness observability defect, with strict failure retention rather than relaxed acceptance. Successful local runs are not grounds to call the historical failure flaky.
+**Classification:** the historical hosted transport failure remains unclassified. No production transport defect has been demonstrated. The expiry correction fixes the demonstrated harness observability defect, with strict failure retention rather than relaxed acceptance. Successful local runs are not grounds to call the historical failure flaky.
+
+## Stop-boundary failure exposed by the first changed-source CI
+
+[Run 40968656231](https://github.com/icydv/RichAudio/actions/runs/40968656231), attempt 1 at `d1cfd4ac07fb46b90efd7c88fcebd05932c7bf89`, failed **before reaching the expiry test**. The actual A–E checker failed `no output submitted after strict listener terminal mute`. No mode or numeric boundary values were printed, and the expiry artifact directory was correctly empty because expiry had not run. The exact hosted mode/interleaving cannot be recovered. This failure is preserved; the run was not retried. The focused expiry checks now run once, before later audio checks, so another suite cannot prevent their requested evidence from being collected.
+
+Static inspection identified a concrete fixture admission gap and a misleading completion claim. `ListenerEnded` requests output Stop, records a boundary, then reports the primary error before setting the host stop flag. The device-free consumer checked only the host flag. Two controlled probes were declared before execution and each ran once against privately archived exact `d1cfd4a` sources, using real methods, an unstarted output and a prefilled ring, with no source hooks or audio endpoint:
+
+- **R1:** holding the existing failure lock naturally paused the terminal callback after output Stop but before the host flag. The fixture then admitted one extra **512-frame / 4096-byte muted-zero** fill, stamped **10.3703 ms after** the request boundary. The original strict comparison failed. This demonstrates the extra fixture admission, not nonzero audio leakage or the exact historical CI interleaving.
+- **R2:** blocking the real file write held an already-filled buffer in flight. Admission was **2.3391 ms before** the request; capture completion was **10.8640 ms after** it. The old comparison passed despite **1024 nonzero samples / 512 frames** completing afterward. Thus its pre-fill timestamp never proved completed output quiescence.
+
+The narrow correction makes the device-free fixture observe the existing authoritative output stop flag at callback admission. The native output gains only an internal read-only `StopRequested` getter; production `Stop`, `Fill`, renderer, gain, timing limits and transport behavior are unchanged. The fixture captures candidate admission time before reading that flag and publishes admission only for accepted work. It separately records actual completion time and frame lineage after the existing ring/tap/write work. No new lock, buffer discard, invented silence or atomic device guarantee was introduced.
+
+The checker retains strict refusal of **new admissions after the Stop-request boundary**, validates the same 512-frame buffer lineage and permits at most one previously admitted buffer to complete after the snapshot. It prints bounded scalar mode/order evidence before asserting. It explicitly distinguishes a Stop request from quiescence; already-admitted completion is disclosed rather than hidden. Permanent R1 now captures **zero** extra frames while the host flag is still false. Permanent R2 retains the exact original nonzero buffer and owned-tap lineage while reporting its post-request completion. Both permanent native tests and four Node contract/privacy cases passed.
 
 ## Affected regressions and complete audio proof
 
@@ -54,21 +67,22 @@ After the diagnostic correction, the following passed:
 - 54 PowerShell diagnostic checks, including each composite predicate, missing/malformed/oversized records, missing children, native/parent cleanup faults, sanitisation, output bounds and evidence surviving actual assertion/retention failure.
 - 10 native record/schema roundtrip checks without constructing transport or an endpoint.
 - 81 production listener-transport checks and seven listener-publisher evidence checks.
+- 1702 host/ring/framing assertions, eight existing actual shutdown fixtures and the two permanent admission/completion probes after the fixture correction.
 - The complete actual-component A–E chain, including the exact old startup negative control.
 
-The retained fresh chain is `.local/ci73-audio-proof/result.json` with full sample analysis in `corrected/analysis.json`. It accepted 116 native listener packets, delivered 115 to the producer and generated 670 blocks. No geometry was published during the direct-only phase. Actual captured post-host Float32 stereo amplitudes were:
+The final retained fresh chain is `.local/ci73-audio-proof-after-boundary/result.json` with full sample analysis in `corrected/analysis.json`. It accepted 116 native listener packets, delivered 115 to the producer and generated 669 blocks. No geometry was published during the direct-only phase. Actual captured post-host Float32 stereo amplitudes were:
 
 | Phase | Peak | RMS |
 |---|---:|---:|
-| No geometry, conditional direct | 0.02362404 | 0.01412081 |
-| Qualified fixture reflections | 0.05649731 | 0.02580227 |
-| Expired, including reflection release | 0.05454896 | 0.01452067 |
-| Expired, settled direct | 0.02399320 | 0.01442825 |
+| No geometry, conditional direct | 0.02362397 | 0.01412081 |
+| Qualified fixture reflections | 0.05649862 | 0.02580181 |
+| Expired, including reflection release | 0.05455000 | 0.01452076 |
+| Expired, settled direct | 0.02399302 | 0.01442832 |
 
-Matched replay of the actual path controls reproduced **685,056 pre-host samples exactly**; removing only reflected paths changed PCM with contribution RMS **0.02207128** before host gain. The original source generation **4294967297** survived geometry introduction and expiry, with one initial context reset and zero affected history frames. All stale, future, wrong-session, reordered and interrupted listener cases stopped submissions and preserved their primary failures with zero secondary failures.
+Matched replay of the actual path controls reproduced **684,032 pre-host samples exactly**; removing only reflected paths changed PCM with contribution RMS **0.02208754** before host gain. The original source generation **4294967297** survived geometry introduction and expiry, with one initial context reset and zero affected history frames. All stale, future, wrong-session, reordered and interrupted listener cases refused new admissions after Stop and preserved their primary failures with zero secondary failures. In this ordinary full-chain run, all five last completions preceded their request boundaries; the deterministic R2 regression separately retains and verifies already-admitted completion.
 
-The actual owned recording finalised with **340,992 stereo frames / 7.104 seconds**, complete integrity, zero gaps and exact post-gain lineage. Normal shutdown exited zero and joined owned threads, with no primary/secondary errors or ring underflows. The reviewed **600 Hz / 0.44 / guarded +12 dB / 0.20** profile was preserved. Maximum pre-host peak was **0.28248653**, below the unchanged **0.5** ceiling; no limiter activation, nonfinite sample or trim rejection occurred.
+The actual owned recording finalised with **340,480 stereo frames / 7.093 seconds**, complete integrity, zero gaps and exact post-gain lineage. Normal shutdown exited zero and joined owned threads, with no primary/secondary errors or ring underflows. The reviewed **600 Hz / 0.44 / guarded +12 dB / 0.20** profile was preserved. Maximum pre-host peak was **0.28249308**, below the unchanged **0.5** ceiling; no limiter activation, nonfinite sample or trim rejection occurred.
 
-Limitations remain explicit: two processing deadline misses and 206 late device-free consumer wakes, maximum **15.8917 ms**, were retained. Bounded catch-up maintained the same 48 kHz sample clock without underflow. This proves actual processing and capture through the real components with WASAPI unstarted; it does not prove physical audibility, GTA reflections or GTA-load timing. Exact final source, hosted result, retained artifact and any new candidate bindings are published in PR #73 and the final review; Candidate 09 is not resealed or reused for changed files.
+Limitations remain explicit: two processing deadline misses and 207 late device-free consumer wakes, maximum **16.0588 ms**, were retained. Bounded catch-up maintained the same 48 kHz sample clock without underflow. This proves actual processing and capture through the real components with WASAPI unstarted; it does not prove physical audibility, GTA reflections or GTA-load timing. Exact final source, hosted result, retained artifact and any new candidate bindings are published in PR #73 and the final review; Candidate 09 is not resealed or reused for changed files. Its package/seal remain unchanged, but the externally bound installed `chrome.exe` has drifted, and its validator correctly refuses the old binding.
 
 The standing combined milestone remains **60%**. After successful live acoustic playback, the next development priority remains one real vehicle driving an original RichAudio engine source. Video references remain future acceptance guidance; no reference recording is reproduced, distributed or introduced as a game asset here.

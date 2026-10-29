@@ -20,6 +20,12 @@ if($Tests){
   if($LASTEXITCODE-ne0){throw 'Host test compilation failed.'}
   & (Join-Path $out 'RichAudio.Acoustics.Host.Tests.exe')
   if($LASTEXITCODE-ne0){throw 'Host offline tests failed.'}
+  & $compiler @options '/main:RichAudio.Beacon.Tests.TestListeningSinkBoundary' ('/out:'+(Join-Path $out 'RichAudio.Listening.SinkBoundary.Tests.exe')) @sources (Join-Path $repo 'tests\host\TestListeningSinkBoundary.cs')
+  if($LASTEXITCODE-ne0){throw 'Device-free sink boundary test compilation failed.'}
+  foreach($mode in @('R1','R2')){
+    & (Join-Path $out 'RichAudio.Listening.SinkBoundary.Tests.exe') $repo $mode
+    if($LASTEXITCODE-ne0){throw "Device-free sink boundary fixture failed: $mode"}
+  }
   & $compiler @options '/main:RichAudio.Beacon.Tests.TestHostShutdown' ('/out:'+(Join-Path $out 'RichAudio.Host.Shutdown.Tests.exe')) @sources (Join-Path $repo 'tests\host\TestHostShutdown.cs')
   if($LASTEXITCODE-ne0){throw 'Host shutdown test compilation failed.'}
   & (Join-Path $out 'RichAudio.Host.Shutdown.Tests.exe')

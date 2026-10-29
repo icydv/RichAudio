@@ -15,7 +15,7 @@ namespace RichAudio.Beacon.Windows
         private static string listeningGeometryPipe=null;
         private static FileStream fixturePreHost,fixturePostHost;
         private static readonly object fixtureCaptureLock=new object();
-        private static long fixtureSinkBegin,fixtureSinkNext,fixtureSinkFrames,fixturePreHostFrames,fixtureMissedBudgets,fixtureLastSubmissionQpc;
+        private static long fixtureSinkBegin,fixtureSinkNext,fixtureSinkFrames,fixturePreHostFrames,fixtureMissedBudgets,fixtureLastSubmissionQpc,fixtureLastCompletionQpc,fixtureLastAdmissionFrameStart;
         private static double fixtureMaximumLatenessMs;
         private static readonly float[] fixtureSinkSamples=new float[PcmRing.MaximumFrames*2];
         private static readonly byte[] fixtureSinkBytes=new byte[PcmRing.MaximumFrames*8];
@@ -58,7 +58,7 @@ namespace RichAudio.Beacon.Windows
         }
         private static unsafe void ConsumeListeningFixture(PcmRing ring,OwnedOutputTap recorder)
         {
-            if(!listeningFixture||stop)return;
+            if(!listeningFixture||stop||output.StopRequested)return;
             long now=Stopwatch.GetTimestamp();
             if(fixtureSinkBegin==0){if(ring.Count<4)return;fixtureSinkBegin=now;fixtureSinkNext=now;}
             // Windows may round the host's 2 ms sleep to a scheduler quantum.
@@ -72,7 +72,13 @@ namespace RichAudio.Beacon.Windows
             fixtureMaximumLatenessMs=Math.Max(fixtureMaximumLatenessMs,late);if(late>512/48.0)fixtureMissedBudgets++;
             long underflow=ring.UnderflowFrames,endSilence=ring.EndSilenceFrames,producerStart=ring.ConsumedFrames-underflow-endSilence;
             int supplied,capture=-1;
-            fixtureLastSubmissionQpc=Stopwatch.GetTimestamp();
+            // Match the output callback's authoritative stop guard. Capture
+            // admission before reading that flag: Stop may follow a successful
+            // admission, but cannot authorize a new one after it is requested.
+            long admission=Stopwatch.GetTimestamp();
+            if(stop||output.StopRequested)return;
+            Interlocked.Exchange(ref fixtureLastAdmissionFrameStart,Interlocked.Read(ref fixtureSinkFrames));
+            Interlocked.Exchange(ref fixtureLastSubmissionQpc,admission);
             fixed(float* p=fixtureSinkSamples){
                 supplied=ring.Fill(p,512,output.Muted?0:output.Volume);
                 if(recorder!=null)capture=recorder.Prepare(p,512,fixtureSinkFrames,ring.ConsumedFrames,producerStart,supplied,
@@ -81,7 +87,9 @@ namespace RichAudio.Beacon.Windows
             if(recorder!=null)recorder.Commit(capture);
             Buffer.BlockCopy(fixtureSinkSamples,0,fixtureSinkBytes,0,fixtureSinkBytes.Length);
             fixturePostHost.Write(fixtureSinkBytes,0,fixtureSinkBytes.Length);
-            fixtureSinkFrames+=512;fixtureSinkNext=fixtureSinkBegin+(long)(fixtureSinkFrames*Stopwatch.Frequency/48000.0);
+            long completedFrames=Interlocked.Add(ref fixtureSinkFrames,512);
+            Interlocked.Exchange(ref fixtureLastCompletionQpc,Stopwatch.GetTimestamp());
+            fixtureSinkNext=fixtureSinkBegin+(long)(completedFrames*Stopwatch.Frequency/48000.0);
             if(ring.UnderflowFrames>0)RecordFailure("device-free-sink","Producer starvation in paced actual PCM ring; no automatic resume");
             if(producerError!=null)return;
             now=Stopwatch.GetTimestamp();
@@ -100,7 +108,16 @@ namespace RichAudio.Beacon.Windows
                 {"rms",ring.ConsumedFrames>0?Math.Sqrt(ring.SumSquares/(ring.ConsumedFrames*2)):0},
                 {"underflowFrames",ring.UnderflowFrames},{"firstUnderflowFrame",ring.FirstUnderflowFrame},
                 {"missedSinkBudgets",fixtureMissedBudgets},{"maximumLatenessMs",fixtureMaximumLatenessMs},
-                {"lastSubmissionQpcTicks",fixtureLastSubmissionQpc},{"qpcFrequency",Stopwatch.Frequency},
+                // lastSubmission is retained as the original pre-Fill admission
+                // anchor. Completion includes the same tap and file capture;
+                // Stop is a request, so one prior admission may still complete.
+                {"lastSubmissionQpcTicks",Interlocked.Read(ref fixtureLastSubmissionQpc)},
+                {"lastAdmissionQpcTicks",Interlocked.Read(ref fixtureLastSubmissionQpc)},
+                {"lastCompletionQpcTicks",Interlocked.Read(ref fixtureLastCompletionQpc)},
+                {"lastAdmissionFrameStart",Interlocked.Read(ref fixtureLastAdmissionFrameStart)},
+                {"lastCompletionFrameEnd",Interlocked.Read(ref fixtureSinkFrames)},
+                {"submissionFrames",512},{"qpcFrequency",Stopwatch.Frequency},
+                {"stopContract","No new admissions after output Stop; one already-admitted 512-frame buffer may complete after the request"},
                 {"sink","actual PcmRing.Fill and OwnedOutputTap, paced device-free consumer; not WASAPI timing proof"}};
         }
     }

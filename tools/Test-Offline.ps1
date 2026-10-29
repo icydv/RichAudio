@@ -9,6 +9,11 @@ Push-Location $repo
 try {
     & node --test tests/Test-ListeningOperator.mjs
     if($LASTEXITCODE-ne0){throw 'Focused listening operator orchestration failed.'}
+    & node --test tests/Test-ListenerBoundary.mjs
+    if($LASTEXITCODE-ne0){throw 'Measured listener stop admission/completion contract failed.'}
+    # Retain cold transport diagnostics before later audio-chain checks can fail.
+    & (Join-Path $repo 'tests\Test-UnsentExpiryDiagnostics.ps1')
+    & (Join-Path $repo 'tools\Test-UnsentExpiry.ps1')
     & (Join-Path $repo 'tools\Build-AcousticGpu.ps1') -Tests
     & node --test tests/Test-AcousticQuality.mjs tests/Test-AcousticGpuScenes.mjs tests/Test-AcousticAcceleration.mjs tests/Test-AcousticAccelerationBenchmark.mjs
     if($LASTEXITCODE-ne0){throw 'Acoustic quality, CPU fallback, adaptive selection or benchmark contracts failed.'}
@@ -67,8 +72,6 @@ try {
     if($LASTEXITCODE-ne0){throw 'Native owned-output tap to private recording bundle failed.'}
     & (Join-Path $repo 'tools\Test-BeaconTransport.ps1')
     & (Join-Path $repo 'tools\Test-ListenerEvidence.ps1')
-    & (Join-Path $repo 'tests\Test-UnsentExpiryDiagnostics.ps1')
-    & (Join-Path $repo 'tools\Test-UnsentExpiry.ps1')
     & (Join-Path $repo 'tools\Test-HostHandoff.ps1')
     & (Join-Path $repo 'tools\Measure-FirstFrameTiming.ps1') -Output ('.local/timing-ci-'+[guid]::NewGuid().ToString('N'))
     & (Join-Path $repo 'tests\Test-GeometryObservation.ps1')
