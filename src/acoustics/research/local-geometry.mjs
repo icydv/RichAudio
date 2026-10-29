@@ -75,10 +75,12 @@ export function cacheStatus(tile,c){
 }
 export function onPatch(s,p){const d=sub(p,s.center),u=dot(d,s.u),v=dot(d,s.v);return Math.abs(dot(d,s.normal))<=E&&Math.abs(u)<=s.half[0]+E&&Math.abs(v)<=s.half[1]+E&&(!s.footprint||s.footprint.every((a,i)=>{const b=s.footprint[(i+1)%s.footprint.length];return (b[0]-a[0])*(v-a[1])-(b[1]-a[1])*(u-a[0])>=-E;}))&&!s.openings.some(h=>u>=h.min[0]-E&&u<=h.max[0]+E&&v>=h.min[1]-E&&v<=h.max[1]+E);}
 function hitsBox(a,b,box){let lo=0,hi=1;const d=sub(b,a);for(let i=0;i<3;i++){if(Math.abs(d[i])<E){if(a[i]<box.min[i]||a[i]>box.max[i])return false;}else {let x=(box.min[i]-a[i])/d[i],y=(box.max[i]-a[i])/d[i];if(x>y)[x,y]=[y,x];lo=Math.max(lo,x);hi=Math.min(hi,y);if(lo>hi)return false;}}return true;}
-export function querySegment(tile,start,end,{reflectorId=null}={}){
+export function querySegment(tile,start,end,{reflectorId=null,surfaceIndices=null}={}){
   requireTile(tile);const a=vector(start),b=vector(end);if(!inBox(a,tile.bounds)||!inBox(b,tile.bounds)||length(sub(b,a))<=E)throw Error('segment extent');
+  let selected=tile.surfaces;
+  if(surfaceIndices!==null){if(!Array.isArray(surfaceIndices)||surfaceIndices.length>tile.surfaces.length||surfaceIndices.some((n,i)=>!Number.isSafeInteger(n)||n<0||n>=tile.surfaces.length||(i>0&&n<=surfaceIndices[i-1])))throw Error('invalid conservative surface indices');selected=surfaceIndices.map(i=>tile.surfaces[i]);}
   const hits=[],ambiguous=[];let surfaceTests=0;
-  for(const s of tile.surfaces){surfaceTests++;const d0=dot(sub(a,s.center),s.normal),d1=dot(sub(b,s.center),s.normal),den=d0-d1;
+  for(const s of selected){surfaceTests++;const d0=dot(sub(a,s.center),s.normal),d1=dot(sub(b,s.center),s.normal),den=d0-d1;
     if(Math.abs(den)<E){if(Math.abs(d0)<E&&hitsBox(a,b,{min:[0,1,2].map(i=>Math.min(...s.corners.map(p=>p[i]))-E),max:[0,1,2].map(i=>Math.max(...s.corners.map(p=>p[i]))+E)}))ambiguous.push(s.id);continue;}
     const t=d0/den;if(t< -E||t>1+E)continue;const p=add(a,scale(sub(b,a),t));if(!onPatch(s,p))continue;
     if(s.id===reflectorId&&(Math.abs(t)<=E||Math.abs(t-1)<=E))continue;

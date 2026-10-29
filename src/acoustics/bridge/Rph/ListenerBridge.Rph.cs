@@ -33,7 +33,8 @@ namespace RichAudio.Beacon.Rph
                 string exe=Process.GetCurrentProcess().MainModule.FileName;
                 if(!Path.GetFileName(exe).Equals("GTA5_Enhanced.exe",StringComparison.OrdinalIgnoreCase)||FileVersionInfo.GetVersionInfo(exe).FileVersion!="1.0.1158.16"||FileVersionInfo.GetVersionInfo(typeof(Game).Assembly.Location).FileVersion!="1.132.1428.17748")
                     throw new NotSupportedException("Reviewed exact-build guard");
-                ready=true;Game.Console.Print("RichAudio beacon listener READY, sending OFF. One Start and one connection attempt per plugin instance; 120 second cap. No sound or world mutation.");
+                try{InGameMenu.Start();}catch(Exception e){Game.Console.Print("RichAudio settings menu unavailable: "+e.GetType().Name);}
+                ready=true;Game.Console.Print("RichAudio beacon listener READY, sending OFF. One Start and one connection attempt per plugin instance; 120 second cap. No sound or world mutation. Settings: F10 or RichAudioSettings; no audio starts from the menu.");
                 while(!shutdown)
                 {
                     if(!requested){GameFiber.Sleep(25);continue;}
@@ -43,7 +44,7 @@ namespace RichAudio.Beacon.Rph
             }
             catch(ThreadAbortException){throw;}
             catch(Exception e){Game.Console.Print("RichAudio beacon bridge stopped: "+e.GetType().Name);}
-            finally{ready=false;requested=false;var p=publisher;if(p!=null){p.RequestStop();ThreadPool.QueueUserWorkItem(delegate{p.Dispose();});}publisher=null;}
+            finally{InGameMenu.Stop();ready=false;requested=false;var p=publisher;if(p!=null){p.RequestStop();ThreadPool.QueueUserWorkItem(delegate{p.Dispose();});}publisher=null;}
         }
         private static void RunSession()
         {
@@ -91,6 +92,6 @@ namespace RichAudio.Beacon.Rph
             finally{GeometryBridge.End();writer.RequestStop();ThreadPool.QueueUserWorkItem(delegate{writer.Dispose();});}
             publisher=null;Game.Console.Print("RichAudio beacon listener stopped. Terminal="+(lastTransport==null?"unknown":lastTransport.Stage+"/"+lastTransport.Code+"/"+lastTransport.Outcome)+"; another Start is disabled. No world state to restore.");
         }
-        public static void OnUnload(){ready=false;requested=false;shutdown=true;var p=publisher;if(p!=null)p.RequestStop();}
+        public static void OnUnload(){InGameMenu.Stop();ready=false;requested=false;shutdown=true;var p=publisher;if(p!=null)p.RequestStop();}
     }
 }

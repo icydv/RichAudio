@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {StreamingRenderer} from '../src/acoustics/streaming/causal.mjs';
+import {qualityNames,accelerationNames} from '../src/acoustics/streaming/acoustic-quality.mjs';
 import {wav,audioMetrics} from '../src/acoustics/engine/signals.mjs';
 import {privateStoragePath} from '../src/acoustics/research/research-private-storage.mjs';
 export function checkGeometryRelay(root,directory){
@@ -18,12 +19,19 @@ export function checkGeometryRelay(root,directory){
   assert.equal(final.historyDiagnostics.affectedFrames,0);assert.equal(final.simulation.resets,1,'geometry streams do not reset unrelated source history');
   assert.ok(final.geometry.stats.configured>=2);assert.ok(final.geometry.stats.expired>=1);
   assert.ok(relay.maximumAcceptedRoundTripMs<=10&&relay.maximumObservedRoundTripMs>10&&relay.rejected>0);
-  const renderers=[0,1].map(()=>new StreamingRenderer({sourceIds:['beacon-0'],generationReleaseGuard:true}));
+  const acoustic=final.acousticSettings??null;
+  const renderers=[0,1].map(()=>new StreamingRenderer({sourceIds:['beacon-0'],generationReleaseGuard:true,
+    ...(acoustic?{pathCapacityPerSource:64}:{})}));
   const output=[0,1].map(()=>[new Float32Array(blocks.length*512),new Float32Array(blocks.length*512)]),
     dry=new Float32Array(512),left=new Float32Array(512),right=new Float32Array(512);
   let phase=0,gain=0,stable=0,absent=0,differenceEnergy=0;const identities=new Set();
   for(const [b,t] of blocks.entries()){
     assert.equal(t.frame,b*512);for(const g of Object.values(t.sourceGenerations))identities.add(g);
+    if(acoustic){assert.ok(t.acoustic,'settings-enabled block retains actual worker diagnostics');
+      assert.ok(qualityNames.includes(t.acoustic.activeQuality)&&t.acoustic.activeQuality!=='auto');
+      assert.ok(Number.isInteger(t.acoustic.pathBudget)&&t.acoustic.pathBudget>=12&&t.acoustic.pathBudget<=64);
+      for(const renderer of renderers)renderer.setPathBudget(t.acoustic.pathBudget);
+    }else assert.equal(t.acoustic,undefined,'legacy fixture remains on its original renderer capacity');
     if(t.geometry.mode==='active')for(const e of t.geometry.originalObservationTimes){
       assert.equal(e.validUntilMs,e.finishedMs+1000);assert.ok(t.geometry.clock.upper<e.validUntilMs);
     }
@@ -64,6 +72,38 @@ export function checkGeometryRelay(root,directory){
     sourceHistoryResets:final.simulation.resets,unavailableHistoryFrames:final.historyDiagnostics.affectedFrames,
     geometryAccepted:final.geometry.stats.accepted,geometryExpired:final.geometry.stats.expired,subjectiveListening:'not performed',
     scale:'declared model scale 10; physical GTA metres/materials unverified',timing:'wall-paced fixture; no hardware or hard real-time scheduling claim'};
+  if(acoustic){
+    assert.ok(qualityNames.includes(acoustic.requestedQuality));assert.ok(accelerationNames.includes(acoustic.requestedAcceleration));
+    const gpuBlocks=[];let applied=0;
+    for(const t of blocks){const a=t.acoustic;if(a.gpuResultsApplied>applied){assert.equal(a.activeAcceleration,'gpu','applied GPU result is reported as actual GPU computation');gpuBlocks.push(a);}
+      applied=a.gpuResultsApplied;}
+    const hardware=acoustic.gpuCapability==='hardware-directcompute',verified=hardware&&acoustic.gpuResultsApplied>0;
+    const gpuProcessedSignalBlocks=blocks.filter(t=>t.acoustic.activeAcceleration==='gpu'&&t.geometry.mode==='active'&&t.paths>0&&t.emitting&&t.startup==='ready').length;
+    if(acoustic.requestedAcceleration==='gpu'&&hardware){
+      assert.ok(acoustic.gpuResultsApplied>0,'available hardware must produce real GPU results accepted by the acoustic engine');
+      assert.ok(acoustic.gpuCompletedBatches>0&&acoustic.gpuAcousticDispatches>0,'completed real GPU acoustic dispatches are required');
+      assert.ok(gpuBlocks.length>0&&typeof acoustic.gpuDevice==='string'&&acoustic.gpuDevice.length>0);
+      assert.ok(gpuProcessedSignalBlocks>0,'real GPU-assisted geometry reaches emitting stereo PCM blocks');
+    }
+    if(!verified)assert.ok(acoustic.requestedAcceleration!=='gpu'||acoustic.fallbackReason,'unverified GPU execution has an explicit fallback reason');
+    const picked={};
+    for(const key of ['requestedQuality','activeQuality','pathBudget','requestedAcceleration','activeAcceleration','gpuCapability','gpuDevice',
+      'fallbackReason','accelerationDeadlineMs','gpuAcousticDispatches','gpuCompletedBatches','gpuResultsApplied','cpuFallbacks','deadlineMisses',
+      'droppedResults','invalidResults','cpuSurfaceTests','gpuSurfaceTests','avoidedCpuSurfaceTests','qualityChanges','qualityDeadlineMisses',
+      'qualityMaximumMs','qualityProcessingEwmaMs','initializationMs','warmupMs','gpuTimingValid','helperCumulativeCpuMs',
+      'gpuOwnedBytes','gpuDeviceUsageBytes','helperWorkingSetBytes','cpuAccounting'])
+      if(acoustic[key]!==undefined)picked[key]=acoustic[key];
+    const timing={};
+    for(const key of ['gpuSubmitMs','gpuExecutionMs','gpuTransferMs','gpuReadbackMs','gpuRoundTripMs','helperCpuMs','queryWallMs','queryCpuMs','taskWallMs','taskCpuMs']){
+      const values=gpuBlocks.map(a=>a[key]).filter(Number.isFinite).sort((a,b)=>a-b);
+      timing[key]=values.length?{count:values.length,median:values[Math.floor(values.length*.5)],p95:values[Math.floor(values.length*.95)],max:values.at(-1)}:null;
+    }
+    report.acousticAcceleration={...picked,gpuProcessedSignalBlocks,hardwareExecutionVerified:verified,
+      hardwareVerification:verified?'real GPU results reached observed propagation and PCM':'unverified; actual CPU path or fallback retained',
+      cpuTimingCaveat:'Per-request counters can quantize to zero; cumulative helper CPU includes initialization and whole-run accounting is required for savings claims',
+      activeBackendsObserved:[...new Set(blocks.map(t=>t.acoustic.activeAcceleration))],
+      pathBudgetsObserved:[...new Set(blocks.map(t=>t.acoustic.pathBudget))],gpuAppliedTimingMs:timing};
+  }
   for(const [i,name] of ['observed','matched-direct'].entries())fs.writeFileSync(path.join(dir,name+'.wav'),wav(output[i]),{flag:'wx'});
   fs.writeFileSync(path.join(dir,'result.json'),JSON.stringify(report,null,2),{flag:'wx'});
   fs.writeFileSync(path.join(dir,'listen.html'),`<!doctype html><meta charset="utf-8"><title>RichAudio RPH relay fixture</title><h1>Actual C# publisher → host relay → Node PCM</h1><p>Original collision/audio fixtures; declared scale, not GTA calibration. Manual playback only.</p>${['observed','matched-direct'].map(n=>`<h2>${n}</h2><audio controls src="${n}.wav"></audio>`).join('')}`,{flag:'wx'});

@@ -1,0 +1,157 @@
+// Shared by the RPH adapter and device-free fixtures. All filesystem and mutex
+// work is confined to one bounded background worker, never a game/audio fiber.
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Threading;
+using System.Web.Script.Serialization;
+
+namespace RichAudio.Beacon.Windows
+{
+    public sealed class InGameSettingsLink
+    {
+        public readonly string WorkspaceRoot,SettingsPath,ToggleKey;
+        public readonly bool ControllerEnabled;
+        private InGameSettingsLink(string root,string path,string key,bool controller){WorkspaceRoot=root;SettingsPath=path;ToggleKey=key;ControllerEnabled=controller;}
+        private static void LocalFile(string path)
+        {
+            if(!System.Text.RegularExpressions.Regex.IsMatch(path,"\\A[A-Za-z]:[\\\\/]"))throw new InvalidDataException("Local drive path required");
+            if(new DriveInfo(Path.GetPathRoot(path)).DriveType!=DriveType.Fixed)throw new InvalidDataException("Fixed local storage required");
+            for(var d=new DirectoryInfo(Path.GetDirectoryName(path));d!=null;d=d.Parent)
+                if(d.Exists&&(d.Attributes&FileAttributes.ReparsePoint)!=0)throw new InvalidDataException("Linked menu connection rejected");
+            if(File.Exists(path)&&(File.GetAttributes(path)&FileAttributes.ReparsePoint)!=0)throw new InvalidDataException("Linked menu file rejected");
+        }
+        public static InGameSettingsLink Load(string pointerPath)
+        {
+            pointerPath=Path.GetFullPath(pointerPath);LocalFile(pointerPath);
+            string text=AcousticSettingsStore.ReadBounded(pointerPath,4096);
+            var d=new JavaScriptSerializer{MaxJsonLength=4096,RecursionLimit=4}.DeserializeObject(text) as Dictionary<string,object>;
+            var fields=new[]{"schemaVersion","workspaceRoot","settingsPath","toggleKey","controllerEnabled"};
+            if(d==null||d.Count!=fields.Length)throw new InvalidDataException("Menu connection schema");
+            foreach(string field in fields)if(!d.ContainsKey(field)||System.Text.RegularExpressions.Regex.Matches(text,"\""+field+"\"\\s*:").Count!=1)
+                throw new InvalidDataException("Unique menu connection fields required");
+            if(!(d["schemaVersion"] is int)||(int)d["schemaVersion"]!=1||!(d["workspaceRoot"] is string)||!(d["settingsPath"] is string)||
+                !(d["toggleKey"] is string)||!(d["controllerEnabled"] is bool))throw new InvalidDataException("Menu connection values");
+            string rawRoot=(string)d["workspaceRoot"],relative=(string)d["settingsPath"],key=(string)d["toggleKey"];
+            if(!Path.IsPathRooted(rawRoot)||Path.IsPathRooted(relative)||rawRoot.Length>1024||relative.Length>240||
+                !System.Text.RegularExpressions.Regex.IsMatch(key,"\\AF(?:[1-9]|1[0-2])\\z")||key=="F4")throw new InvalidDataException("Menu connection scope or shortcut");
+            string root=Path.GetFullPath(rawRoot),path=AcousticSettingsStore.PrivatePath(root,relative);
+            LocalFile(path);if(!Directory.Exists(root))throw new InvalidDataException("Workspace unavailable");
+            return new InGameSettingsLink(root,path,key,(bool)d["controllerEnabled"]);
+        }
+    }
+
+    public sealed class InGameSettingsSnapshot
+    {
+        public readonly AcousticSettings Settings;
+        public readonly string StatusJson,Error,ToggleKey;
+        public readonly bool Available,ControllerEnabled,Pending,ResetAvailable;
+        public readonly long SavedRevision;
+        internal readonly string RecoveryDigest;
+        internal InGameSettingsSnapshot(AcousticSettings settings,string status,string error,bool available,string key,bool controller,long revision,bool pending,bool resetAvailable=false,string recoveryDigest=null)
+        {Settings=settings;StatusJson=status;Error=error;Available=available;ToggleKey=key;ControllerEnabled=controller;SavedRevision=revision;Pending=pending;ResetAvailable=available||resetAvailable;RecoveryDigest=recoveryDigest;}
+        internal InGameSettingsSnapshot WithPending(bool value,string error)
+        {return new InGameSettingsSnapshot(Settings,StatusJson,error,Available,ToggleKey,ControllerEnabled,SavedRevision,value,ResetAvailable,RecoveryDigest);}
+    }
+
+    public sealed class InGameSettingsBridge:IDisposable
+    {
+        private sealed class Change {public AcousticSettings Desired;public long Expected;public string RecoveryDigest;}
+        private readonly string pointerPath;
+        private readonly AutoResetEvent wake=new AutoResetEvent(false);
+        private InGameSettingsSnapshot snapshot=new InGameSettingsSnapshot(AcousticSettings.Defaults(1),null,"Menu connection is loading.",false,"F10",true,0,false);
+        private InGameSettingsLink link;
+        private Change pending;
+        private Thread thread;
+        private int started,stopped,processing,operationInFlight;
+        public InGameSettingsBridge(string pointerPath)
+        {if(!Path.IsPathRooted(pointerPath))throw new ArgumentException("Explicit menu connection path required");this.pointerPath=Path.GetFullPath(pointerPath);}
+        public InGameSettingsSnapshot Snapshot{get{bool active=Volatile.Read(ref operationInFlight)!=0||Volatile.Read(ref processing)!=0||Volatile.Read(ref pending)!=null;var current=Volatile.Read(ref snapshot);
+            return current.Pending==active?current:current.WithPending(active,current.Error);}}
+        public void Start()
+        {if(Interlocked.CompareExchange(ref started,1,0)!=0||Volatile.Read(ref stopped)!=0)throw new InvalidOperationException("Menu settings worker cannot restart");
+            thread=new Thread(Run){IsBackground=true,Name="RichAudio in-game preferences"};thread.Start();}
+        public bool TryApply(AcousticSettings desired,long expectedRevision)
+        {
+            var current=Snapshot;
+            if(desired==null||!current.Available||current.Pending||expectedRevision!=current.SavedRevision||Volatile.Read(ref stopped)!=0||Volatile.Read(ref processing)!=0)return false;
+            return Queue(current,new Change{Desired=desired,Expected=expectedRevision});
+        }
+        private bool Queue(InGameSettingsSnapshot current,Change change)
+        {
+            if(Interlocked.CompareExchange(ref operationInFlight,1,0)!=0)return false;
+            if(Interlocked.CompareExchange(ref pending,change,null)!=null){Interlocked.Exchange(ref operationInFlight,0);return false;}
+            Interlocked.CompareExchange(ref snapshot,current.WithPending(true,null),current);Signal();return true;
+        }
+        public bool TryResetDefaults(long expectedRevision)
+        {
+            var current=Snapshot;
+            if(!current.ResetAvailable||current.Pending||expectedRevision!=current.SavedRevision||Volatile.Read(ref stopped)!=0||Volatile.Read(ref processing)!=0)return false;
+            return Queue(current,new Change{Desired=AcousticSettings.Defaults(1),Expected=expectedRevision,RecoveryDigest=current.RecoveryDigest});
+        }
+        public void RequestStop(){Interlocked.Exchange(ref stopped,1);Signal();}
+        private void Signal(){try{wake.Set();}catch(ObjectDisposedException){}}
+        private void Run()
+        {
+            try
+            {
+                while(Volatile.Read(ref stopped)==0)
+                {
+                    var cadence=Stopwatch.StartNew();
+                    string failure=null;
+                    bool validatedPointer=false;
+                    try
+                    {
+                        var read=InGameSettingsLink.Load(pointerPath);
+                        if(link!=null&&(!String.Equals(link.WorkspaceRoot,read.WorkspaceRoot,StringComparison.OrdinalIgnoreCase)||!String.Equals(link.SettingsPath,read.SettingsPath,StringComparison.OrdinalIgnoreCase)))
+                            throw new InvalidDataException("Menu connection changed during this plugin lifetime");
+                        link=read;
+                        validatedPointer=true;
+                        var command=Volatile.Read(ref pending);
+                        if(command!=null)
+                        {
+                            Interlocked.Exchange(ref processing,1);command=Interlocked.Exchange(ref pending,null);
+                            try
+                            {
+                                long clock=(long)(DateTime.UtcNow-new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc)).TotalMilliseconds;
+                                long revision=Math.Max(clock,command.Expected+1);
+                                if(command.RecoveryDigest!=null)AcousticSettingsStore.RecoverDefaults(link.WorkspaceRoot,link.SettingsPath,command.RecoveryDigest,command.Expected);
+                                else AcousticSettingsStore.SaveExpected(link.WorkspaceRoot,link.SettingsPath,command.Desired.WithRevision(revision),command.Expected);
+                            }
+                            catch(InvalidDataException){failure="Preferences changed or are invalid. Current saved values were retained; review and apply again.";}
+                            catch(IOException){failure="Preferences are unavailable or busy. Existing files were preserved.";}
+                            catch(UnauthorizedAccessException){failure="Preferences could not be saved. Existing files were preserved.";}
+                            finally{Interlocked.Exchange(ref processing,0);}
+                        }
+                        bool existed=File.Exists(link.SettingsPath);
+                        AcousticSettings settings=existed?AcousticSettingsStore.Load(link.WorkspaceRoot,link.SettingsPath):AcousticSettings.Defaults(1);
+                        long saved=existed?settings.Revision:0;
+                        string status=null,target=AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,AcousticSettingsStore.StatusPath(link.SettingsPath));
+                        if(File.Exists(target))try{status=AcousticSettingsStore.ReadBounded(target,16384);}catch(IOException){}catch(ArgumentException){}
+                        Interlocked.Exchange(ref snapshot,new InGameSettingsSnapshot(settings,status,failure,true,link.ToggleKey,link.ControllerEnabled,saved,Volatile.Read(ref pending)!=null));
+                        if(command!=null)Interlocked.Exchange(ref operationInFlight,0);
+                    }
+                    catch(Exception)
+                    {
+                        Interlocked.Exchange(ref pending,null);Interlocked.Exchange(ref processing,0);
+                        var old=Snapshot;
+                        string digest=null;bool recovery=false;
+                        if(validatedPointer)try{recovery=AcousticSettingsStore.TryMalformedRecovery(link.WorkspaceRoot,link.SettingsPath,out digest);}catch{}
+                        string message=recovery?"Saved preferences are invalid. Reset Defaults can preserve a backup and recover this file.":
+                            "RichAudio menu preferences are unavailable or use an unsupported format. Existing files were preserved.";
+                        Interlocked.Exchange(ref snapshot,new InGameSettingsSnapshot(old.Settings,null,message,false,
+                            link==null?"F10":link.ToggleKey,link==null||link.ControllerEnabled,old.SavedRevision,false,recovery,digest));
+                        Interlocked.Exchange(ref operationInFlight,0);
+                    }
+                    while(Volatile.Read(ref stopped)==0&&cadence.ElapsedMilliseconds<250)wake.WaitOne(Math.Max(1,250-(int)cadence.ElapsedMilliseconds));
+                }
+            }
+            finally{Interlocked.Exchange(ref pending,null);Interlocked.Exchange(ref processing,0);Interlocked.Exchange(ref operationInFlight,0);wake.Dispose();}
+        }
+        // The RPH unload callback uses RequestStop immediately and schedules this
+        // bounded join off the game fiber after detaching input/drawing handlers.
+        public void Dispose(){RequestStop();var worker=thread;if(worker!=null&&worker!=Thread.CurrentThread)worker.Join(1000);}
+    }
+}

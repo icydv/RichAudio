@@ -1,7 +1,7 @@
 // Causal adaptation around the unchanged A06 finite-path solver. No future trajectory input.
 import { requireValue, validated } from "../engine/contracts.mjs";
 import { vector, unit, length, dot } from "../research/local-geometry.mjs";
-import { candidatePaths, solvePath } from "../engine/paths.mjs";
+import { candidatePaths, preparePath, finishPath, pathSegments } from "../engine/paths.mjs";
 const FS = 48000;
 function state(s) {
   requireValue(s && typeof s === "object", "state required");
@@ -59,6 +59,8 @@ export class CausalSimulation {
     this.candidates = scene ? candidatePaths(scene) : [];
     this.geometryEpoch = 0;
     this.previous = new Map();
+    this.processingSettings=null;
+    this.prepareSequence=0;this.completedPrepareSequence=0;
     this.epoch = 0;
     this.session = null;
     this.stats = {
@@ -80,10 +82,19 @@ export class CausalSimulation {
     requireValue(!scene || this.historySeconds>=scene.config.maxDelay+.1,'replacement delay exceeds retained history');
     if (scene?.geometryKey === this.scene?.geometryKey) return;
     this.scene = scene;
-    this.candidates = scene ? candidatePaths(scene) : [];
+    this.candidates = scene ? candidatePaths(scene,this.processingSettings?{maxReflectors:this.processingSettings.maxReflectors}:{}) : [];
     this.geometryEpoch++;
     this.previous.clear(); // Never interpret a new reflector delay as source velocity.
     this.stats.sceneReplacements++;
+  }
+  setProcessingSettings({pathBudget,maxReflectors,earlyReflections=true}) {
+    requireValue(Number.isInteger(pathBudget)&&pathBudget>=1&&pathBudget<=64&&
+      Number.isInteger(maxReflectors)&&maxReflectors>=1&&maxReflectors<=16&&typeof earlyReflections==='boolean','bounded acoustic processing settings');
+    const rebuild=this.processingSettings?.maxReflectors!==maxReflectors;
+    if(rebuild||this.processingSettings?.pathBudget!==pathBudget||this.processingSettings?.earlyReflections!==earlyReflections)this.prepareSequence++;
+    this.processingSettings={pathBudget,maxReflectors,earlyReflections};
+    if(rebuild&&this.scene)this.candidates=candidatePaths(this.scene,{maxReflectors});
+    // Quality/backend changes do not change geometric identity or PCM history.
   }
   observe(snapshot) {
     requireValue(
@@ -196,20 +207,19 @@ export class CausalSimulation {
       });
     return { keys, discontinuityGuard: 0.05 };
   }
-  update(now, { geometryTimeMs } = {}) {
+  prepareUpdate(now, { geometryTimeMs } = {}) {
     requireValue(Number.isFinite(now) && now >= 0, "arrival time");
     this.stats.updates++;
-    const latest = this.records.at(-1),
-      paths = [],
-      sourceGenerations = {};
-    if (!latest)
-      return {
+    const prepareSequence=++this.prepareSequence,observations=this.stats.observations;
+    const latest = this.records.at(-1), paths=[],sourceGenerations={};
+    if (!latest){this.availablePaths=0;
+      return {prepareSequence,observations,terminal:{
         frame: Math.round(now * FS),
         paths,
         sourceGenerations,
         stats: { ...this.stats },
         ageSeconds: null,
-      };
+      }};}
     const age = now - latest.time;
     // Source history identity exists even while the listener presentation buffer
     // warms. Delaying this tag until a listener becomes valid discards real PCM.
@@ -219,31 +229,44 @@ export class CausalSimulation {
     this.stats.maximumAgeSeconds = Math.max(this.stats.maximumAgeSeconds, age);
     const listener = this.track("listener", null, now);
     if (!listener || !this.scene) {
+      this.availablePaths=0;
       this.stats.staleUpdates++;
-      return {
+      return {prepareSequence,observations,terminal:{
         frame: Math.round(now * FS),
         paths,
         sourceGenerations,
         stats: { ...this.stats },
         ageSeconds: age,
-      };
+      }};
     }
+    const sources=[],segments=[];
     for (const [id, current] of Object.entries(latest.sources)) {
       const track = this.track("source", id, now);
       sourceGenerations[id] = this.epoch * 4294967296 + current.generation;
       if (!track) continue;
-      const source = { track, directivity: current.directivity },
-        eligible = [];
+      const source = { track, directivity: current.directivity }, plans=[];
       for (const candidate of this.candidates) {
-        const p = solvePath(
-          this.scene,
-          source,
-          listener,
-          now,
-          candidate,
-          this.stats,
-          geometryTimeMs,
-        );
+        if(this.processingSettings?.earlyReflections===false&&candidate.surfaces.length)continue;
+        const plan=preparePath(this.scene,source,listener,now,candidate,geometryTimeMs),queries=pathSegments(plan),offset=segments.length;
+        segments.push(...queries);plans.push({plan,candidate,offset,count:queries.length});
+      }
+      sources.push({id,track,plans});
+    }
+    requireValue(segments.length<=16384,'bounded prepared visibility workload');
+    return {prepareSequence,observations,now,age,paths,sourceGenerations,sources,segments,scene:this.scene,geometryEpoch:this.geometryEpoch};
+  }
+  completeUpdate(frame,queries=null) {
+    requireValue(frame.prepareSequence===this.prepareSequence&&frame.prepareSequence>this.completedPrepareSequence&&
+      frame.observations===this.stats.observations,'superseded or out-of-generation prepared acoustic frame');
+    if(frame.terminal){this.completedPrepareSequence=frame.prepareSequence;return frame.terminal;}
+    const {now,age,paths,sourceGenerations,sources}=frame;
+    requireValue(frame.scene===this.scene&&frame.geometryEpoch===this.geometryEpoch,'out-of-generation prepared acoustic frame');
+    this.completedPrepareSequence=frame.prepareSequence;
+    let availablePaths=0;
+    for(const {id,track,plans} of sources){
+      const eligible=[];
+      for(const {plan,candidate,offset,count} of plans){
+        const p=finishPath(plan,queries?queries.slice(offset,offset+count):null,this.stats);
         if (
           p.status !== "renderable" ||
           p.generation !== sourceGenerations[id]
@@ -289,15 +312,21 @@ export class CausalSimulation {
           Math.max(...b.bands) - Math.max(...a.bands) ||
           a.id.localeCompare(b.id),
       );
+      availablePaths=Math.max(availablePaths,eligible.length);
+      const budget=this.processingSettings?.pathBudget??this.scene.config.maxPaths;
+      // Explicit quality selection reserves a valid direct contribution rather
+      // than allowing stronger reflections to evict its continuous identity.
+      if(this.processingSettings){const direct=eligible.findIndex(p=>p.order===0);if(direct>0)eligible.unshift(...eligible.splice(direct,1));}
       this.stats.prunedPaths += Math.max(
         0,
-        eligible.length - this.scene.config.maxPaths,
+        eligible.length - budget,
       );
-      paths.push(...eligible.slice(0, this.scene.config.maxPaths));
+      paths.push(...eligible.slice(0,budget));
     }
     // Old path-rate records are bounded independently from telemetry lifetime.
     for (const [id, p] of this.previous)
       if (now - p.time > this.historySeconds) this.previous.delete(id);
+    this.availablePaths=availablePaths;
     return {
       frame: Math.round(now * FS),
       paths,
@@ -306,12 +335,20 @@ export class CausalSimulation {
       ageSeconds: age,
     };
   }
+  update(now,options={}){return this.completeUpdate(this.prepareUpdate(now,options));}
+  async updateAccelerated(now,options,backend){
+    const frame=this.prepareUpdate(now,options);
+    if(frame.terminal)return this.completeUpdate(frame);
+    const queries=await backend.query(frame.scene.tile,frame.segments,{generation:frame.geometryEpoch});
+    return this.completeUpdate(frame,queries);
+  }
 }
 
 export class StreamingRenderer {
   constructor({
     sourceIds = ["beacon"],
     maxPathsPerSource = 12,
+    pathCapacityPerSource = maxPathsPerSource,
     historySeconds = 2.5,
     masterGain = 0.7,
     historyDiagnostics = false,
@@ -326,7 +363,10 @@ export class StreamingRenderer {
     requireValue(
       Number.isInteger(maxPathsPerSource) &&
         maxPathsPerSource >= 1 &&
-        maxPathsPerSource <= 12 &&
+        maxPathsPerSource <= 64 &&
+        Number.isInteger(pathCapacityPerSource) &&
+        pathCapacityPerSource >= maxPathsPerSource &&
+        pathCapacityPerSource <= 64 &&
         historySeconds >= 2.1 &&
         historySeconds <= 3 &&
         masterGain >= 0 &&
@@ -348,8 +388,14 @@ export class StreamingRenderer {
         }
       : null;
     this.masterGain = masterGain;
+    // User output is attenuation of the existing calibrated mix, never a gain
+    // boost or a source/emission command. Rings keep advancing while muted.
+    this.outputGain=1;this.outputTarget=1;this.outputSmooth=1-Math.exp(-1/(.02*FS));
     this.historyFrames = Math.ceil(historySeconds * FS);
+    this.maxPathsPerSource = maxPathsPerSource;
+    this.pathCapacityPerSource = pathCapacityPerSource;
     this.pathLimit = sourceIds.length * maxPathsPerSource;
+    this.pathCapacity = sourceIds.length * pathCapacityPerSource;
     this.sources = new Map(
       sourceIds.map((id) => [
         id,
@@ -370,7 +416,7 @@ export class StreamingRenderer {
     );
     this.sourceList = [...this.sources.values()];
     // A second bank permits bounded old-path releases while a new path is introduced.
-    this.slots = Array.from({ length: this.pathLimit * 2 }, () => ({
+    this.slots = Array.from({ length: this.pathCapacity * 2 }, () => ({
       active: false,
       present: false,
       releaseLeft: 0,
@@ -386,6 +432,13 @@ export class StreamingRenderer {
       pan: 0,
       panTarget: 0,
     }));
+    // Quality-capable instances reserve their maximum release banks once. The
+    // sample loop visits only occupied slots; changing quality never reallocates
+    // a source ring or walks a large mostly empty maximum-capacity pool.
+    this.activeSlotIndices = pathCapacityPerSource > 12
+      ? new Uint32Array(this.slots.length)
+      : null;
+    this.activeSlotCount = 0;
     this.smooth = 1 - Math.exp(-1 / (0.01 * FS));
     this.stats = {
       frames: 0,
@@ -409,7 +462,19 @@ export class StreamingRenderer {
           s.generations.byteLength,
         0,
       ) +
-      this.slots.length * 48;
+      this.slots.length * 48 + (this.activeSlotIndices?.byteLength ?? 0);
+  }
+  setPathBudget(maxPathsPerSource) {
+    requireValue(Number.isInteger(maxPathsPerSource) && maxPathsPerSource >= 1 &&
+      maxPathsPerSource <= this.pathCapacityPerSource, "DSP active path budget");
+    // Existing paths release through accept's ordinary absent-path mechanism.
+    // Source identity, ring contents, cursors and all filter histories survive.
+    this.maxPathsPerSource = maxPathsPerSource;
+    this.pathLimit = this.sources.size * maxPathsPerSource;
+  }
+  setOutputPreferences({richAudioEnabled=true,outputLevel=1}={}) {
+    requireValue(typeof richAudioEnabled==='boolean'&&Number.isFinite(outputLevel)&&outputLevel>=0&&outputLevel<=1,'bounded owned output preference');
+    this.outputTarget=richAudioEnabled?outputLevel:0;
   }
   historyReady(control) {
     return (
@@ -454,6 +519,14 @@ export class StreamingRenderer {
       "causal control snapshot",
     );
     requireValue(control.frame >= this.controlFrame, "out-of-order control");
+    const counts = new Map(), identities = new Set();
+    for (const p of control.paths) {
+      requireValue(p && this.sources.has(p.sourceId) && !identities.has(p.id), "path source/identity");
+      identities.add(p.id);
+      const count = (counts.get(p.sourceId) ?? 0) + 1;
+      requireValue(count <= this.maxPathsPerSource, "per-source path budget");
+      counts.set(p.sourceId, count);
+    }
     this.controlFrame = control.frame;
     this.stats.controlUpdates++;
     for (const [id, generation] of Object.entries(
@@ -527,6 +600,11 @@ export class StreamingRenderer {
             Math.floor((slot.source.generationFrame-slot.cursor-1)/rate)));
         }
       }
+    if (this.activeSlotIndices) {
+      this.activeSlotCount = 0;
+      for (let i = 0; i < this.slots.length; i++)
+        if (this.slots[i].active) this.activeSlotIndices[this.activeSlotCount++] = i;
+    }
   }
   process(inputs, left, right, frames = left.length) {
     requireValue(
@@ -577,8 +655,9 @@ export class StreamingRenderer {
       }
       let l = 0,
         r = 0;
-      for (let p = 0; p < this.slots.length; p++) {
-        const slot = this.slots[p];
+      const slotCount = this.activeSlotIndices ? this.activeSlotCount : this.slots.length;
+      for (let p = 0; p < slotCount; p++) {
+        const slot = this.slots[this.activeSlotIndices ? this.activeSlotIndices[p] : p];
         if (!slot.active) continue;
         const controlAge = frame - this.controlFrame;
         this.stats.maximumControlAgeFrames = Math.max(
@@ -646,6 +725,11 @@ export class StreamingRenderer {
           slot.rate + (slot.correctionLeft > 0 ? slot.correction : 0);
         if (slot.correctionLeft > 0) slot.correctionLeft--;
       }
+      if(this.outputGain!==this.outputTarget){
+        this.outputGain+=this.outputSmooth*(this.outputTarget-this.outputGain);
+        if(Math.abs(this.outputTarget-this.outputGain)<1e-9)this.outputGain=this.outputTarget;
+      }
+      if(this.outputGain!==1){l*=this.outputGain;r*=this.outputGain;}
       l *= this.masterGain;
       r *= this.masterGain;
       const peak = Math.max(Math.abs(l), Math.abs(r));
