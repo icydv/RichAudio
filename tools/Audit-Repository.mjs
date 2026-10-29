@@ -38,7 +38,7 @@ if (!current) {
 }
 // Check every filename, including two paths that reference the same blob.
 // Blob deduplication must not hide a restricted extension behind a benign name.
-const restrictedAssetPath = path => /\.(?:exe|dll|asi|rpf|awc|ybn|ymap|ytyp|ydr|ytd|yft|wav|flac|ogg|mp3|zip|7z|pdb|ratile|pending)$/i.test(path);
+const restrictedAssetPath = path => /\.(?:exe|dll|asi|rpf|awc|ybn|ymap|ytyp|ydr|ytd|yft|wav|f32le|pcm|rasoundmap-context|flac|ogg|mp3|zip|7z|pdb|ratile|pending)$/i.test(path);
 for (const [oid, path] of entries) if (restrictedAssetPath(path)) {
   findings.push({oid, path, category: 'binary-or-restricted-asset-review'});
 }

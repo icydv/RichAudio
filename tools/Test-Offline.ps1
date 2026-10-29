@@ -19,6 +19,9 @@ try {
     & (Join-Path $repo 'tools\Build-AcousticSettings.ps1') -Tests
     & (Join-Path $repo 'tools\Test-AcousticSettingsHandoff.ps1')
     & (Join-Path $repo 'tools\Test-InGameMenu.ps1')
+    & (Join-Path $repo 'tools\Test-SoundMapMenu.ps1')
+    & node --test tests/Test-SoundMapTelemetry.mjs tests/Test-SoundMapViewer.mjs tests/Test-SoundMapService.mjs tests/Test-SoundMapProducer.mjs
+    if($LASTEXITCODE-ne0){throw 'SoundMap telemetry, viewer, recording, replay or actual producer checks failed.'}
     & node --test tests/Test-InGameAcousticControls.mjs
     if($LASTEXITCODE-ne0){throw 'Actual in-game acoustic settings integration failed.'}
     & node --test tests/Test-GeometryRelay.mjs
@@ -51,6 +54,8 @@ try {
     & (Join-Path $repo 'tools\Prepare-Beacon600.ps1') -Output ('.local/beacon-ci-'+[guid]::NewGuid().ToString('N'))
     # Original PCM, bounded queues and local transport only: these tests never open an audio endpoint.
     & (Join-Path $repo 'tools\Build-AcousticsHost.ps1') -Tests
+    & node --test tests/Test-SoundMapHost.mjs
+    if($LASTEXITCODE-ne0){throw 'Native owned-output tap to private recording bundle failed.'}
     & (Join-Path $repo 'tools\Test-BeaconTransport.ps1')
     & (Join-Path $repo 'tools\Test-UnsentExpiry.ps1')
     & (Join-Path $repo 'tools\Test-HostHandoff.ps1')

@@ -14,6 +14,15 @@ namespace RichAudio.Beacon.Tests
         {
             try
             {
+                if(args.Length==2&&(args[0]=="--owned-recorder-fixture"||args[0]=="--owned-recorder-outage-fixture"))
+                {
+                    using(var tap=new OwnedOutputTap(args[1])){
+                        var deadline=System.Diagnostics.Stopwatch.StartNew();while(!tap.IsCapturing&&deadline.ElapsedMilliseconds<3000)Thread.Sleep(10);Check(tap.IsCapturing,"explicit recording active");
+                        var exact=new float[1024];for(int j=0;j<1024;j++)exact[j]=(j%2==0?.125f:-.25f);
+                        fixed(float* p=exact){for(int i=0;i<100;i++){tap.Commit(tap.Prepare(p,512,i*512,i*512+512));Thread.Sleep(args[0]=="--owned-recorder-outage-fixture"?10:2);}}
+                    }
+                    Console.WriteLine("PASS owned recorder HTTP fixture: 100 submitted post-gain blocks, no endpoint.");return 0;
+                }
                 if(args.Length==1&&args[0]=="--device-starvation")
                 {
                     var starved=new PcmRing();var silence=new float[1024];for(int i=0;i<4;i++)starved.TryWrite(silence,512);
@@ -59,6 +68,19 @@ namespace RichAudio.Beacon.Tests
                 string root=Path.Combine(Path.GetTempPath(),"RichAudioHostTest-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(root);
                 try{Check(HostProgram.PrivateOutput(root,".local/fresh").StartsWith(root),"private path");Throws(delegate{HostProgram.PrivateOutput(root,"public");},"public path rejects");Directory.CreateDirectory(Path.Combine(root,".local","existing"));Throws(delegate{HostProgram.PrivateOutput(root,".local/existing");},"overwrite rejects");}finally{if(Path.GetDirectoryName(root)!=Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar))throw new Exception("test cleanup boundary");Directory.Delete(root,true);}
                 var player=new WasapiOutput(new PcmRing(),-1);Throws(delegate{player.Volume=.9f;},"unsafe gain rejects");Throws(delegate{player.Volume=float.NaN;},"NaN gain rejects");player.Dispose();
+                // The capture tap sees the exact post-gain samples already filled
+                // for WASAPI; test uses managed memory and never opens a device.
+                using(var tap=new OwnedOutputTap()){
+                    tap.CaptureForTest("held-callback");int held;fixed(float* p=output){held=tap.Prepare(p,512,0,512);}tap.CaptureForTest(null);Check(!tap.Quiescent,"in-flight endpoint submission prevents false flush acknowledgement");tap.Commit(held);Check(tap.Quiescent&&tap.Peek()!=null,"commit publishes evidence before flush can complete");tap.Release();
+                    tap.CaptureForTest("fixture");fixed(float* p=output){int slot=tap.Prepare(p,512,1024,1536);tap.Commit(slot);}
+                    var recorded=tap.Peek();Check(recorded!=null&&recorded.SubmittedFrame==1024&&recorded.ConsumedFrame==1536,"owned PCM lineage");
+                    for(int i=0;i<1024;i++)Check(BitConverter.ToInt32(BitConverter.GetBytes(recorded.Samples[i]),0)==BitConverter.ToInt32(BitConverter.GetBytes(output[i]),0),"exact post-gain float bits");tap.Release();
+                    fixed(float* p=output){for(int i=0;i<OwnedOutputTap.Capacity;i++)tap.Commit(tap.Prepare(p,512,i*512,i*512+512));Check(tap.Prepare(p,512,99999,100511)==-1,"recorder overflow drops evidence without blocking audio");}
+                    Check(tap.DroppedChunks==1&&tap.DroppedFrames==512,"capture gap counters");while(tap.Peek()!=null)tap.Release();
+                    var watch=System.Diagnostics.Stopwatch.StartNew();fixed(float* p=output){for(int i=0;i<20000;i++){tap.Commit(tap.Prepare(p,512,i*512,i*512+512));tap.Release();}}
+                    double captureMs=watch.Elapsed.TotalMilliseconds;tap.CaptureForTest(null);watch.Restart();fixed(float* p=output){for(int i=0;i<20000;i++)tap.Commit(tap.Prepare(p,512,i*512,i*512+512));}
+                    Console.WriteLine("Owned recorder device-free callback: enabled "+(captureMs/20).ToString("F3",System.Globalization.CultureInfo.InvariantCulture)+" us/block; disabled "+(watch.Elapsed.TotalMilliseconds/20).ToString("F3",System.Globalization.CultureInfo.InvariantCulture)+" us/block; 20000 x 512 frames, exact float copy, no network/endpoint.");
+                }
                 player.Dispose(); bool lifecycleRejected=false;try{player.Start();}catch(InvalidOperationException){lifecycleRejected=true;}Check(lifecycleRejected,"disposed output cannot reopen endpoint");
                 var capture=new LoopbackCapture(-1,1);capture.Dispose();capture.Dispose();lifecycleRejected=false;try{capture.Start();}catch(InvalidOperationException){lifecycleRejected=true;}Check(lifecycleRejected,"disposed capture cannot reopen endpoint");
                 Throws(delegate{new WasapiOutput(null,-1);},"null ring rejects");

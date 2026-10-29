@@ -162,6 +162,9 @@ export class ObservedSimulationInput {
         velocity:modelVelocity(this.coordinates,s.velocityNative),forward:s.forward,up:s.up,valid:true,
         emitting:snapshot.emitting,directivity:0.2}));
       this.simulation.observe({time:now,session:snapshot.session,generation:snapshot.generation,listener,sources,paused:snapshot.paused});
+      this.listenerEvidence={session:snapshot.session,generation:s.generation,sequence:s.sequence,
+        observationTicks:s.observationTicks,clockFrequency:s.clockFrequency,gameTimeMs:s.gameTimeMs,
+        coordinates:s.coordinates,units:s.units,listenerKind:s.listenerKind,velocityKind:s.velocityKind};
     }catch(error){this.stats.poseRejected++;this.clear(error.message,'unavailable-pose');}
     return time;
   }
@@ -169,6 +172,9 @@ export class ObservedSimulationInput {
     control.geometry={...this.status,stats:{...this.stats},sourceRights:'original-generated',
       mappedListener:this.simulation.records.at(-1)?.time===now?this.simulation.records.at(-1).listener:null,
       mappedSources:this.simulation.records.at(-1)?.time===now?this.simulation.records.at(-1).sources:null,clock:time??null};
+    if(this.simulation.captureSoundMap&&this.simulation.soundMapState){
+      this.simulation.soundMapState.coordinateContract=this.coordinates??null;
+      this.simulation.soundMapState.listenerEvidence=this.simulation.records.at(-1)?.time===now?this.listenerEvidence:null;}
     return control;
   }
   update(snapshot,anchor,now){

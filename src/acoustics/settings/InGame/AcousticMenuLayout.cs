@@ -21,7 +21,8 @@ namespace RichAudio.Settings.InGame
             "Advanced diffraction is not implemented. This menu does not replace unobserved propagation paths with invented effects.",
             "Saves validated preferences through the background service and updates a configured host. The menu never blocks an audio callback or starts a live session.",
             "Restores Auto quality, Auto acceleration, enabled output at the reviewed level, early reflections on and diagnostics off. Apply to persist these defaults.",
-            "Closes the menu and releases its input focus. Unapplied edits are discarded; an already requested background save may still complete."
+            "Closes the menu and releases its input focus. Unapplied edits are discarded; an already requested background save may still complete.",
+            "Records a private acoustic timeline and RichAudio-owned PCM through SoundMap. This does not start the host, sound source or world publisher. Microphone and system audio are excluded."
         };
         private static string Title(string value)
         {return String.IsNullOrEmpty(value)?"Unavailable":Char.ToUpperInvariant(value[0])+value.Substring(1);}
@@ -128,16 +129,17 @@ namespace RichAudio.Settings.InGame
             Row(p,8,676,38,"Advanced Diffraction","Not available",true);
             p.Rect(16,728,728,86,unchecked((int)0x9E10171E));p.Rect(16,728,3,86,Gold);
             string description=Descriptions[SelectedIndex];
+            if(SelectedIndex==12)description=Descriptions[12]+" "+RecordingDetail;
             if(SelectedIndex==10&&!CanApply)description=ResetAvailable?
                 "Recovers this supported configuration by preserving its exact original bytes before saving validated defaults. The background service rechecks the file before replacement.":
                 "Settings recovery is unavailable for this configuration. No file or preference will be replaced.";
             p.Wrap(description,31,741,680,17,TextColor,3);
-            string[] buttons={"APPLY CHANGES","RESET DEFAULTS","BACK"};
-            for(int i=0;i<3;i++){
-                int row=9+i;float cx=16+i*246;bool selected=SelectedIndex==row;bool locked=i==0&&!CanApply||i==1&&!CanApply&&!ResetAvailable;
-                p.Rect(cx,830,236,45,selected&&!locked?Gold:RowBackground);
-                p.Text(locked?(i==0?"APPLY UNAVAILABLE":"RESET UNAVAILABLE"):buttons[i],cx+18,843,17,locked?Muted:selected?Ink:TextColor,selected);
-                p.Hit(HitRegionKind.Row,row,-1,cx,830,236,45);
+            string[] buttons={"APPLY CHANGES","RESET DEFAULTS","BACK",RecordingPending?"REC PENDING":RecordingActive?"STOP RECORDING":"START RECORDING"};
+            for(int i=0;i<4;i++){
+                int row=9+i;float cx=16+i*184;bool selected=SelectedIndex==row;bool locked=i==0&&!CanApply||i==1&&!CanApply&&!ResetAvailable||i==3&&(!RecordingAvailable||RecordingPending);
+                p.Rect(cx,830,176,45,selected&&!locked?Gold:RowBackground);
+                p.Text(locked?(i==0?"APPLY UNAVAILABLE":i==1?"RESET UNAVAILABLE":RecordingPending?"REC PENDING":"REC UNAVAILABLE"):buttons[i],cx+10,844,14,locked?Muted:selected?Ink:TextColor,selected);
+                p.Hit(HitRegionKind.Row,row,-1,cx,830,176,45);
             }
             p.Text("ARROWS  Navigate / adjust     ENTER  Select     ESC  Back",30,892,15,Muted);
             string notice=Notice;

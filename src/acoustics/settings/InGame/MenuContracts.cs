@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 namespace RichAudio.Settings.InGame
 {
     public enum MenuInput { Up, Down, Left, Right, Accept, Back }
-    public enum MenuAction { None, Apply, Close, Reset }
+    public enum MenuAction { None, Apply, Close, Reset, StartRecording, StopRecording }
     public enum DrawCommandKind { Rectangle, Text }
     public enum HitRegionKind { Row, QualityChoice, AccelerationChoice, Level }
 

@@ -21,10 +21,12 @@ namespace RichAudio.Beacon.Rph
         private static volatile bool stopping,renderFailed;
         private static volatile MenuFrame presentation;
         private static InGameSettingsBridge bridge;
+        private static InGameRecordingBridge recordingBridge;
         private static readonly AcousticMenuModel menu=new AcousticMenuModel();
         private static readonly MenuInputRouter input=new MenuInputRouter();
         private static long editingRevision,awaitingRevision=-1;
         private static MenuPreferences awaitingPreferences;
+        private static bool awaitingRecording;
         private static bool mouseDown,mouseVisible;
         private static float mouseX=-1,mouseY=-1;
         private static int layoutWidth,layoutHeight;
@@ -37,6 +39,7 @@ namespace RichAudio.Beacon.Rph
             {
                 string sidecar=Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),"RichAudio.Menu.json");
                 bridge=new InGameSettingsBridge(sidecar);bridge.Start();
+                recordingBridge=new InGameRecordingBridge(sidecar);recordingBridge.Start();
                 Game.RawFrameRender+=Render;
                 GameFiber.StartNew(Run,"RichAudio settings overlay");
             }
@@ -50,6 +53,7 @@ namespace RichAudio.Beacon.Rph
             stopping=true;presentation=null;Interlocked.Exchange(ref consoleRequested,0);
             Game.RawFrameRender-=Render;
             var service=bridge;bridge=null;if(service!=null){service.RequestStop();ThreadPool.QueueUserWorkItem(delegate{service.Dispose();});}
+            var recording=recordingBridge;recordingBridge=null;if(recording!=null){recording.RequestStop();ThreadPool.QueueUserWorkItem(delegate{recording.Dispose();});}
             // The owned fiber sees stopping at its next yield. No input hook or
             // persistent game-control mutation needs restoration.
         }
@@ -94,6 +98,11 @@ namespace RichAudio.Beacon.Rph
                     if(renderFailed){menu.Close();presentation=null;break;}
                     if(menu.Visible)
                     {
+                        var recorder=recordingBridge;var recordState=recorder==null?null:recorder.Snapshot;
+                        menu.SetRecording(recordState!=null&&recordState.Available,recordState!=null&&recordState.Active,
+                            recordState!=null&&recordState.Pending,recordState==null?"SoundMap recorder unavailable":recordState.Detail);
+                        if(awaitingRecording&&(recordState==null||!recordState.Pending)){
+                            awaitingRecording=false;menu.SetNotice(recordState==null?"Recording outcome unavailable; check SoundMap.":recordState.Detail,recordState==null||!recordState.Available);}
                         menu.SetWritable(state.Available&&!state.Pending);
                         menu.SetResetAvailable(state.ResetAvailable&&!state.Pending);
                         if(awaitingRevision>=0&&!state.Pending)
@@ -140,6 +149,11 @@ namespace RichAudio.Beacon.Rph
                             if(service.TryResetDefaults(state.SavedRevision))
                             {awaitingRevision=state.SavedRevision;awaitingPreferences=MenuPreferences.Defaults;menu.SetNotice("Preserving invalid preferences and restoring defaults...");}
                             else menu.SetNotice("Defaults were not restored. Current files were preserved.",true);
+                        }
+                        else if(action==MenuAction.StartRecording||action==MenuAction.StopRecording)
+                        {
+                            if(recorder==null||!recorder.TrySetRecording(action==MenuAction.StartRecording))menu.SetNotice("Recorder unavailable, changed or request pending. Check SoundMap.",true);
+                            else awaitingRecording=true;
                         }
                         if(menu.Visible)presentation=menu.BuildFrame(size.Width,size.Height,status);
                         else presentation=null;

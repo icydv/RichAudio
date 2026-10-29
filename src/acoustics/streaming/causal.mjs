@@ -61,6 +61,9 @@ export class CausalSimulation {
     this.previous = new Map();
     this.processingSettings=null;
     this.prepareSequence=0;this.completedPrepareSequence=0;
+    // The worker opts in only when a visual update is due. These references are
+    // never consumed by the renderer or used to make an acoustic decision.
+    this.captureSoundMap=false;this.soundMapState=null;
     this.epoch = 0;
     this.session = null;
     this.stats = {
@@ -212,7 +215,11 @@ export class CausalSimulation {
     this.stats.updates++;
     const prepareSequence=++this.prepareSequence,observations=this.stats.observations;
     const latest = this.records.at(-1), paths=[],sourceGenerations={};
+    const soundMap=this.captureSoundMap?{now,geometryTimeMs:geometryTimeMs??(this.scene?this.scene.tile.createdAt+now*1000:null),
+      latest,listener:null,sources:[],candidates:[],unavailableSources:[],reason:null}:null;
+    if(soundMap)this.soundMapState=soundMap;
     if (!latest){this.availablePaths=0;
+      if(soundMap)soundMap.reason='observation-unavailable';
       return {prepareSequence,observations,terminal:{
         frame: Math.round(now * FS),
         paths,
@@ -228,7 +235,16 @@ export class CausalSimulation {
     requireValue(age >= -1e-8, "future observation rejected");
     this.stats.maximumAgeSeconds = Math.max(this.stats.maximumAgeSeconds, age);
     const listener = this.track("listener", null, now);
+    if(soundMap)soundMap.listener=listener?.keys.at(-1)??null;
     if (!listener || !this.scene) {
+      if(soundMap){
+        soundMap.reason=!listener?'listener-unavailable':'geometry-unavailable';
+        for(const id of Object.keys(latest.sources)){
+          const track=this.track('source',id,now);
+          if(track)soundMap.sources.push({id,...track.keys.at(-1)});
+          else soundMap.unavailableSources.push({id,reason:'source-history-unavailable'});
+        }
+      }
       this.availablePaths=0;
       this.stats.staleUpdates++;
       return {prepareSequence,observations,terminal:{
@@ -243,7 +259,8 @@ export class CausalSimulation {
     for (const [id, current] of Object.entries(latest.sources)) {
       const track = this.track("source", id, now);
       sourceGenerations[id] = this.epoch * 4294967296 + current.generation;
-      if (!track) continue;
+      if (!track) {if(soundMap)soundMap.unavailableSources.push({id,reason:'source-history-unavailable'});continue;}
+      if(soundMap)soundMap.sources.push({id,...track.keys.at(-1)});
       const source = { track, directivity: current.directivity }, plans=[];
       for (const candidate of this.candidates) {
         if(this.processingSettings?.earlyReflections===false&&candidate.surfaces.length)continue;
@@ -253,7 +270,7 @@ export class CausalSimulation {
       sources.push({id,track,plans});
     }
     requireValue(segments.length<=16384,'bounded prepared visibility workload');
-    return {prepareSequence,observations,now,age,paths,sourceGenerations,sources,segments,scene:this.scene,geometryEpoch:this.geometryEpoch};
+    return {prepareSequence,observations,now,age,paths,sourceGenerations,sources,segments,scene:this.scene,geometryEpoch:this.geometryEpoch,soundMap};
   }
   completeUpdate(frame,queries=null) {
     requireValue(frame.prepareSequence===this.prepareSequence&&frame.prepareSequence>this.completedPrepareSequence&&
@@ -267,15 +284,19 @@ export class CausalSimulation {
       const eligible=[];
       for(const {plan,candidate,offset,count} of plans){
         const p=finishPath(plan,queries?queries.slice(offset,offset+count):null,this.stats);
+        const visual=frame.soundMap?{sourceId:id,plan,candidate,result:p,reason:p.status,identity:null}:null;
+        if(visual)frame.soundMap.candidates.push(visual);
         if (
           p.status !== "renderable" ||
           p.generation !== sourceGenerations[id]
         ) {
           this.stats.rejectedPaths++;
+          if(visual&&p.status==='renderable')visual.reason='source-generation-unavailable';
           continue;
         }
         if (p.emissionTime < track.keys[0].time - 1e-9) {
           this.stats.missingPast++;
+          if(visual)visual.reason='source-history-unavailable';
           continue;
         }
         const identity = id + ":" + candidate.id + ":g" + p.generation +
@@ -287,12 +308,14 @@ export class CausalSimulation {
             : 1;
         if (!Number.isFinite(rate) || rate < 0.25 || rate > 3) {
           this.stats.rejectedPaths++;
+          if(visual)visual.reason='emission-rate-outside-budget';
           continue;
         }
         this.previous.set(identity, {
           time: now,
           emissionTime: p.emissionTime,
         });
+        if(visual){visual.identity=identity;visual.reason='path-budget';}
         eligible.push({
           id: identity,
           sourceId: id,

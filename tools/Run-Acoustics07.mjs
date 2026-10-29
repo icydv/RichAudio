@@ -14,6 +14,7 @@ import { liveGeometryLimits } from '../src/acoustics/streaming/observed-live.mjs
 import { GeometryRelayGate } from '../src/acoustics/streaming/geometry-relay.mjs';
 import {validateAcousticSettings} from '../src/acoustics/streaming/acoustic-quality.mjs';
 import {scenario as acousticScenario} from './acoustics-08-2-scenes.mjs';
+import {SoundMapClient} from './soundmap/producer-client.mjs';
 
 const args = process.argv.slice(2),
   options = {
@@ -32,6 +33,7 @@ const args = process.argv.slice(2),
     geometry: false,
     acousticQuality:null,acousticAcceleration:null,acousticBenchmark:null,
     acousticPreferences:{},
+    soundMapConfig:null,soundMapFps:20,
   };
 const settingBoolean=v=>{if(v!=='true'&&v!=='false')throw Error('Boolean acoustic preference');return v==='true';};
 const settingNumber=v=>{if(typeof v!=='string'||!v.trim())throw Error('Numeric acoustic preference');return Number(v);};
@@ -63,6 +65,8 @@ for (let i = 0; i < args.length; i += 2) {
   else if(args[i]==='--early-reflections')options.acousticPreferences.earlyReflections=settingBoolean(args[i+1]);
   else if(args[i]==='--acoustic-diagnostics-overlay')options.acousticPreferences.diagnosticsOverlay=settingBoolean(args[i+1]);
   else if(args[i]==='--acoustic-benchmark')options.acousticBenchmark=args[i+1];
+  else if(args[i]==='--soundmap-config')options.soundMapConfig=args[i+1];
+  else if(args[i]==='--soundmap-fps')options.soundMapFps=Number(args[i+1]);
   else throw Error("Unknown producer option");
 }
 if (
@@ -106,6 +110,9 @@ if (
 const FS = 48000,
   BLOCK = 512,
   ids = Array.from({ length: options.sources }, (_, i) => "beacon-" + i);
+if(!Number.isInteger(options.soundMapFps)||options.soundMapFps<15||options.soundMapFps>30)throw Error('SoundMap FPS 15..30');
+const soundMap=options.soundMapConfig?new SoundMapClient(options.soundMapConfig):null;
+let lastSoundMapFrame=-512,soundMapDeadlineMisses=0,soundMapMissingHistory=0;
 const renderer = new StreamingRenderer({
     sourceIds: ids,
     historyDiagnostics: options.diagnostics,
@@ -118,7 +125,8 @@ const renderer = new StreamingRenderer({
       import.meta.url,
     ),
     { workerData: { scene: options.scene, geometry:options.geometry, sourceIds:ids, controlledClock:options.headless,
-      acousticSettings:options.acousticSettings,acousticBenchmark:options.acousticBenchmark } },
+      acousticSettings:options.acousticSettings,acousticBenchmark:options.acousticBenchmark,
+      soundMap:{enabled:!!soundMap,fps:options.soundMapFps} } },
   );
 const listenerPlayout = new ListenerPlayout({ delayMs: options.delayMs });
 const orientation = options.orientation ? new OrientationPresentation() : null;
@@ -214,6 +222,8 @@ async function finish(error) {
       const timer=setTimeout(()=>{worker.off('message',done);resolve();},100);worker.on('message',done);worker.postMessage({type:'acoustic-shutdown'});});
   }
   await worker.terminate();
+  if(soundMap){soundMap.event({type:'producer-stop',audioFrame:renderer.frame,error:error?.message??null,
+    remainingDeadlineFailures:soundMapDeadlineMisses,remainingMissingHistory:soundMapMissingHistory,transport:{...soundMap.stats}});await soundMap.close();}
   const memory = process.memoryUsage(),
     cpu = process.cpuUsage(cpuStart);
   log({
@@ -237,6 +247,7 @@ async function finish(error) {
     simulation: lastControl?.stats ?? null,
     geometry: lastControl?.geometry ?? null,
     geometryRelay: geometryRelay?.stats ?? null,
+    soundMap:soundMap?.stats??null,
     ...(options.acousticSettings?{acousticSettings:lastAcousticStatus}:{}),
     listenerPlayout: listenerPlayout.stats,
     orientation: orientation?.stats ?? null,
@@ -522,6 +533,20 @@ async function pump() {
         right.fill(0);
       }
       const dspMilliseconds = performance.now() - started;
+      if(soundMap){
+        const elapsed=performance.now()-blockProcessingStart;
+        soundMapMissingHistory+=renderer.stats.missingHistory-previousMissing;
+        if(result.soundMapFrame){
+          const frame={...result.soundMapFrame,diagnostics:{...result.soundMapFrame.diagnostics,audioDeadlineFailures:soundMapDeadlineMisses,missingHistorySinceLastSample:soundMapMissingHistory},producer:{audioFrame:renderer.frame-BLOCK,dspMilliseconds,workerSchedulingMilliseconds:result.schedulingMilliseconds,
+            processingMilliseconds:elapsed,deadlineMissesSinceLastSample:soundMapDeadlineMisses,missingHistorySinceLastSample:soundMapMissingHistory,
+            deadlineScope:'Completed producer blocks including PCM serialization and stdout write; distinct from endpoint underflows',
+            unsampledBlocksSinceLastFrame:Math.max(0,(renderer.frame-BLOCK-lastSoundMapFrame)/BLOCK-1),
+            scope:'Bounded sampled solver trace; unsampled blocks are counted, not reconstructed',
+            startup:startup.status,emitting:enabled,sourceGenerations:lastControl.sourceGenerations,sourcePcmFormat:'48000 Hz stereo float32 before Windows host gain'}};
+          if(soundMap.offer(frame,result.soundMapGeometry)){lastSoundMapFrame=renderer.frame-BLOCK;soundMapDeadlineMisses=0;soundMapMissingHistory=0;}
+        }else if(result.soundMapGeometry)soundMap.geometry=result.soundMapGeometry;
+        if(result.soundMapDiagnostic)soundMap.event({type:'solver-diagnostic',...result.soundMapDiagnostic,audioFrame:renderer.frame});
+      }
       if(lastControl.acoustic)lastAcousticFeedback={processingMs:performance.now()-blockProcessingStart,
         deadlineMiss:performance.now()-blockProcessingStart>BLOCK/FS*1000,
         availablePaths:lastControl.acoustic.availablePaths,activeBackend:lastControl.acoustic.activeAcceleration};
@@ -538,6 +563,7 @@ async function pump() {
         process.stdout.write(packet, (e) => (e ? reject(e) : resolve())),
       );
       stats.blocks++;
+      if(soundMap)soundMapDeadlineMisses+=Number(performance.now()-blockProcessingStart>BLOCK/FS*1000);
       inFlight = 0;
       if (options.trace)
         log({
@@ -659,6 +685,7 @@ function receive(m) {
     credits += m.blocks;
     void pump();
   } else if (m.type === "control") {
+    soundMap?.event({type:'control',command:m.command,audioFrame:renderer.frame,producedAtUnixMs:Date.now()});
     if (m.command === "start" || m.command === "resume") enabled = true;
     else if (m.command === "emit-stop") enabled = false;
     else if (m.command === "mute") enabled = false;

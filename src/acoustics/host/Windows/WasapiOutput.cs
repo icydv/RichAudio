@@ -11,6 +11,7 @@ namespace RichAudio.Beacon.Windows
         private readonly PcmRing ring;
         private readonly int deviceIndex;
         private readonly Thread thread;
+        public OwnedOutputTap OwnedRecorder;
         private int startState, disposed;
         private volatile bool stop;
         private volatile float volume = .08f;
@@ -111,8 +112,12 @@ namespace RichAudio.Beacon.Windows
         private unsafe void Fill(IAudioRenderClient renderer, uint frames)
         {
             if (frames == 0) return; IntPtr data; Native.Check(renderer.GetBuffer(frames, out data));
-            try { ring.Fill((float*)data, (int)frames, Muted ? 0 : volume); }
-            finally { Native.Check(renderer.ReleaseBuffer(frames, 0)); }
+            int captureSlot=-1;
+            try {long underflow=ring.UnderflowFrames,endSilence=ring.EndSilenceFrames,producerStart=ring.ConsumedFrames-underflow-endSilence;
+                int supplied=ring.Fill((float*)data, (int)frames, Muted ? 0 : volume);
+                if(OwnedRecorder!=null)captureSlot=OwnedRecorder.Prepare((float*)data,(int)frames,SubmittedFrames,ring.ConsumedFrames,producerStart,supplied,ring.UnderflowFrames-underflow,ring.EndSilenceFrames-endSilence); }
+            finally {try{Native.Check(renderer.ReleaseBuffer(frames, 0));}catch{if(OwnedRecorder!=null)OwnedRecorder.Cancel(captureSlot);throw;} }
+            if(OwnedRecorder!=null)OwnedRecorder.Commit(captureSlot);
             SubmittedFrames += frames;
             if(ring.UnderflowFrames!=0)throw new InvalidOperationException("Producer starvation: stopped to prevent renderer/device clock drift; no automatic resume");
         }
