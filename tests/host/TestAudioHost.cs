@@ -38,6 +38,12 @@ namespace RichAudio.Beacon.Tests
                 }
                 if(args.Length!=0)throw new ArgumentException("Unsupported test option");
                 Check(HostProgram.BeaconFrequencyArguments(95,"harmonic",false)=="","default producer invocation preserved");
+                Check(HostProgram.AuditionArguments(0,"open-road","harmonic",1,95,.22,.08f,false,false,false,false)=="","default audition disabled");
+                Check(HostProgram.AuditionArguments(12,"open-road","harmonic",1,600,.44,.20f,true,true,false,false)==" --beacon-output-trim-db 12","bounded geometry audition forwarding");
+                foreach(double db in new double[]{double.NaN,double.PositiveInfinity,24,25})Throws(delegate{HostProgram.AuditionArguments(db,"open-road","harmonic",1,600,.44,.20f,true,true,false,false);},"no arbitrary gain");
+                Throws(delegate{HostProgram.AuditionArguments(12,"open-road","harmonic",1,600,.44,.25f,true,true,false,false);},"fixed host master");
+                Throws(delegate{HostProgram.AuditionArguments(12,"open-road","harmonic",1,600,.44,.20f,true,false,false,false);},"requires geometry");
+                Throws(delegate{HostProgram.AuditionArguments(12,"open-road","harmonic",1,600,.44,.20f,true,true,false,true);},"manual startup and no loopback");
                 Check(HostProgram.BeaconFrequencyArguments(600,"harmonic",false)==" --beacon-frequency-hz 600","owned frequency forwarded invariantly");
                 foreach(double hz in new double[]{double.NaN,double.PositiveInfinity,0,19.9,2000.1})Throws(delegate{HostProgram.BeaconFrequencyArguments(hz,"harmonic",false);},"invalid frequency rejected before endpoint");
                 Throws(delegate{HostProgram.BeaconFrequencyArguments(600,"pulse",false);},"custom pulse frequency out of scope");

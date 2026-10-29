@@ -15,6 +15,7 @@ import { GeometryRelayGate } from '../src/acoustics/streaming/geometry-relay.mjs
 import {validateAcousticSettings} from '../src/acoustics/streaming/acoustic-quality.mjs';
 import {scenario as acousticScenario} from './acoustics-08-2-scenes.mjs';
 import {SoundMapClient} from './soundmap/producer-client.mjs';
+import {BeaconOutputTrim,validateAuditionProfile} from '../src/acoustics/streaming/beacon-output-trim.mjs';
 
 const args = process.argv.slice(2),
   options = {
@@ -23,6 +24,7 @@ const args = process.argv.slice(2),
     beacon: "harmonic",
     frequencyHz: DEFAULT_BEACON_FREQUENCY_HZ,
     level: DEFAULT_BEACON_LEVEL,
+    outputTrimDb:0,
     delayMs: 100,
     headless: false,
     trace: false,
@@ -43,6 +45,7 @@ for (let i = 0; i < args.length; i += 2) {
   else if (args[i] === "--beacon") options.beacon = args[i + 1];
   else if (args[i] === "--beacon-frequency-hz") options.frequencyHz = Number(args[i + 1]);
   else if (args[i] === "--beacon-level") options.level = Number(args[i + 1]);
+  else if (args[i] === '--beacon-output-trim-db') options.outputTrimDb=Number(args[i+1]);
   else if (args[i] === "--listener-delay-ms")
     options.delayMs = Number(args[i + 1]);
   else if (args[i] === "--headless-clock" && args[i + 1] === "audio")
@@ -110,6 +113,8 @@ if (
 const FS = 48000,
   BLOCK = 512,
   ids = Array.from({ length: options.sources }, (_, i) => "beacon-" + i);
+validateAuditionProfile(options);
+const outputTrim=new BeaconOutputTrim(options.outputTrimDb);
 if(!Number.isInteger(options.soundMapFps)||options.soundMapFps<15||options.soundMapFps>30)throw Error('SoundMap FPS 15..30');
 const soundMap=options.soundMapConfig?new SoundMapClient(options.soundMapConfig):null;
 let lastSoundMapFrame=-512,soundMapDeadlineMisses=0,soundMapMissingHistory=0;
@@ -223,13 +228,14 @@ async function finish(error) {
   }
   await worker.terminate();
   if(soundMap){soundMap.event({type:'producer-stop',audioFrame:renderer.frame,error:error?.message??null,
-    remainingDeadlineFailures:soundMapDeadlineMisses,remainingMissingHistory:soundMapMissingHistory,transport:{...soundMap.stats}});await soundMap.close();}
+    outputTrim:{...outputTrim.stats},remainingDeadlineFailures:soundMapDeadlineMisses,remainingMissingHistory:soundMapMissingHistory,transport:{...soundMap.stats}});await soundMap.close();}
   const memory = process.memoryUsage(),
     cpu = process.cpuUsage(cpuStart);
   log({
     type: "final",
     beaconFrequencyHz: options.frequencyHz,
     beaconLevel: options.level,
+    outputTrim:outputTrim.stats,
     error: error?.message ?? null,
     frames: renderer.frame,
     wallSeconds: (performance.now() - wallStart) / 1000,
@@ -532,6 +538,8 @@ async function pump() {
         left.fill(0);
         right.fill(0);
       }
+      if(outputTrim.enabled&&renderer.stats.limited)throw Error('Audition trim refuses limited acoustic output');
+      outputTrim.apply(left,right);
       const dspMilliseconds = performance.now() - started;
       if(soundMap){
         const elapsed=performance.now()-blockProcessingStart;
@@ -542,7 +550,7 @@ async function pump() {
             deadlineScope:'Completed producer blocks including PCM serialization and stdout write; distinct from endpoint underflows',
             unsampledBlocksSinceLastFrame:Math.max(0,(renderer.frame-BLOCK-lastSoundMapFrame)/BLOCK-1),
             scope:'Bounded sampled solver trace; unsampled blocks are counted, not reconstructed',
-            startup:startup.status,emitting:enabled,sourceGenerations:lastControl.sourceGenerations,sourcePcmFormat:'48000 Hz stereo float32 before Windows host gain'}};
+            startup:startup.status,emitting:enabled,sourceGenerations:lastControl.sourceGenerations,outputTrim:{...outputTrim.stats},sourcePcmFormat:'48000 Hz stereo float32 after explicit audition trim, before Windows host gain'}};
           if(soundMap.offer(frame,result.soundMapGeometry)){lastSoundMapFrame=renderer.frame-BLOCK;soundMapDeadlineMisses=0;soundMapMissingHistory=0;}
         }else if(result.soundMapGeometry)soundMap.geometry=result.soundMapGeometry;
         if(result.soundMapDiagnostic)soundMap.event({type:'solver-diagnostic',...result.soundMapDiagnostic,audioFrame:renderer.frame});

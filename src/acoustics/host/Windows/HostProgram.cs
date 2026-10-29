@@ -18,6 +18,7 @@ namespace RichAudio.Beacon.Windows
         private static volatile bool stop, producerEnded;
         private static volatile string producerError;
         private static volatile string latestRendererStatus;
+        private static bool auditionOutputEnabled;
         private static readonly object inputLock = new object(), logLock = new object();
         private sealed class ControlMessage { internal string Text, ListenerJson; internal long QueuedTicks, Sequence, ObservationTicks; internal double ObservationQpc100ns; }
         private static readonly Queue<ControlMessage> inputQueue = new Queue<ControlMessage>();
@@ -49,6 +50,7 @@ namespace RichAudio.Beacon.Windows
                     "  --acoustic-quality auto|performance|balanced|quality|max\n"+
                     "  --acoustic-acceleration auto|cpu|gpu\n"+
                     "  --acoustic-settings <private .local JSON file>\n"+
+                    "  --beacon-output-trim-db 12 enables the bounded geometry audition profile (default 0)\n"+
                     "  --soundmap-config <private .local/soundmap/service.json> enables bounded viewer telemetry and owned post-gain PCM recording\n"+
                     "  --rich-audio-enabled true|false; --rich-audio-output-level 0..1; --early-reflections true|false; --acoustic-diagnostics-overlay true|false\n"+
                     "Saved .local/acoustic-settings.json loads automatically on subsequent incremental launches.\n"+
@@ -64,6 +66,7 @@ namespace RichAudio.Beacon.Windows
             string scene = "open-road", beacon = "harmonic", outputPath = null, wav = null, geometryModel=null; int device = -1, seconds = 15, sources = 1; float gain = .08f;
             double beaconFrequencyHz = 95;
             double beaconLevel = .22;
+            double outputTrimDb=0;
             string acousticSettingsPath=null,acousticQuality=null,acousticAcceleration=null,soundMapConfig=null;
             bool? richAudioEnabled=null,earlyReflections=null,diagnosticsOverlay=null;double? acousticOutputLevel=null;
             bool autostart = false, exercise = false, loopback = false, listenerPipe = false, list = false, probe = false;
@@ -86,6 +89,7 @@ namespace RichAudio.Beacon.Windows
                         else if (key == "--beacon") beacon = value;
                         else if (key == "--beacon-frequency-hz") beaconFrequencyHz = double.Parse(value, CultureInfo.InvariantCulture);
                         else if (key == "--beacon-level") beaconLevel = double.Parse(value, CultureInfo.InvariantCulture);
+                        else if (key == "--beacon-output-trim-db") outputTrimDb=double.Parse(value,CultureInfo.InvariantCulture);
                         else if (key == "--geometry-model") geometryModel=Path.GetFullPath(value);
                         else if (key == "--acoustic-settings") acousticSettingsPath=value;
                         else if (key == "--soundmap-config") soundMapConfig=Path.GetFullPath(value);
@@ -104,6 +108,7 @@ namespace RichAudio.Beacon.Windows
                         else throw new ArgumentException("Unknown option " + key);
                     }
                 }
+                string auditionArguments=AuditionArguments(outputTrimDb,scene,beacon,sources,beaconFrequencyHz,beaconLevel,gain,listenerPipe,geometryModel!=null,wav!=null,autostart||exercise||loopback||list||probe);
                 if (list) { string[] devices = WasapiOutput.ListDevices(); for (int i = 0; i < devices.Length; i++) Console.WriteLine(i + ": " + devices[i]); return 0; }
                 if (probe) { if(device < -1)throw new ArgumentException("Invalid device index"); Console.WriteLine(json.Serialize(WasapiOutput.ProbeDevice(device))); return 0; }
                 if (seconds < 1 || seconds > 120 || sources < 1 || sources > 4 || device < -1 || !new List<string>{"open-road","urban-street","obstructed-corner","enclosure","flyby"}.Contains(scene)) throw new ArgumentException("Host bounds: 1..120 seconds, 1..4 measured sources, known scene, valid endpoint");
@@ -120,7 +125,8 @@ namespace RichAudio.Beacon.Windows
                     acousticSettings=(acousticSettings??AcousticSettings.Defaults(1)).WithAudio(richAudioEnabled,acousticOutputLevel,earlyReflections,diagnosticsOverlay);}
                 outputPath = PrivateOutput(root, outputPath ?? Path.Combine(".local", "acoustics07-host-" + Guid.NewGuid().ToString("N")));
                 Directory.CreateDirectory(outputPath);
-                return Run(root, scene, beacon, sources, seconds, gain, device, autostart, exercise, loopback, listenerPipe, wav, outputPath, beaconFrequencyHz, beaconLevel,geometryModel,acousticSettings,resolvedSettingsPath,soundMapConfig);
+                auditionOutputEnabled=outputTrimDb!=0;
+                return Run(root, scene, beacon, sources, seconds, gain, device, autostart, exercise, loopback, listenerPipe, wav, outputPath, beaconFrequencyHz, beaconLevel,geometryModel,acousticSettings,resolvedSettingsPath,soundMapConfig,auditionArguments);
             }
             catch (Exception ex) { Console.Error.WriteLine(ex.GetType().Name + ": " + ex.Message); return 1; }
         }
@@ -148,7 +154,15 @@ namespace RichAudio.Beacon.Windows
             return level == .22 ? "" : " --beacon-level " + level.ToString("R", CultureInfo.InvariantCulture);
         }
 
-        private static int Run(string root, string scene, string beacon, int sources, int seconds, float gain, int device, bool autostart, bool exercise, bool loopbackEnabled, bool listenerPipe, string wav, string directory, double beaconFrequencyHz, double beaconLevel,string geometryModel,AcousticSettings acousticSettings,string settingsPath,string soundMapConfig)
+        internal static string AuditionArguments(double db,string scene,string beacon,int sources,double hz,double level,float gain,bool listener,bool geometry,bool wav,bool incompatible)
+        {
+            if(db==0)return "";
+            if(db!=12||scene!="open-road"||beacon!="harmonic"||sources!=1||hz!=600||level!=.44||gain!=.20f||!listener||!geometry||wav||incompatible)
+                throw new ArgumentException("Audition trim requires explicit +12dB, one 600Hz/.44 geometry-enabled harmonic source, required listener, gain .20 and manual muted startup without loopback/device probes");
+            return " --beacon-output-trim-db 12";
+        }
+
+        private static int Run(string root, string scene, string beacon, int sources, int seconds, float gain, int device, bool autostart, bool exercise, bool loopbackEnabled, bool listenerPipe, string wav, string directory, double beaconFrequencyHz, double beaconLevel,string geometryModel,AcousticSettings acousticSettings,string settingsPath,string soundMapConfig,string auditionArguments)
         {
             AppDomain.MonitoringIsEnabled = true;
             long initialAllocated = AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
@@ -171,7 +185,7 @@ namespace RichAudio.Beacon.Windows
                     if(acousticSettings!=null)acousticSettingsMonitor=new AcousticSettingsMonitor(root,settingsPath,acousticSettings,
                         delegate(AcousticSettings changed){Send(changed.ControlMessage());});
                     string script = Path.Combine(root, "tools", "Run-Acoustics07.mjs"); if (!File.Exists(script)) throw new FileNotFoundException("Streaming worker is not built", "Run-Acoustics07.mjs");
-                    child = new Process { StartInfo = new ProcessStartInfo { FileName = "node.exe", Arguments = Quote(script) + " --scene " + scene + " --sources " + sources + " --beacon " + beacon + BeaconFrequencyArguments(beaconFrequencyHz, beacon, false) + BeaconLevelArguments(beaconLevel, beacon, false) + (listenerPipe ? " --listener-input required" : "")+(geometryModel!=null?" --geometry-input required":"")+(acousticSettings==null?"":acousticSettings.ProducerArguments())+(soundMapConfig==null?"":" --soundmap-config "+Quote(soundMapConfig)), WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true } };
+                    child = new Process { StartInfo = new ProcessStartInfo { FileName = "node.exe", Arguments = Quote(script) + " --scene " + scene + " --sources " + sources + " --beacon " + beacon + BeaconFrequencyArguments(beaconFrequencyHz, beacon, false) + BeaconLevelArguments(beaconLevel, beacon, false) + auditionArguments + (listenerPipe ? " --listener-input required" : "")+(geometryModel!=null?" --geometry-input required":"")+(acousticSettings==null?"":acousticSettings.ProducerArguments())+(soundMapConfig==null?"":" --soundmap-config "+Quote(soundMapConfig)), WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true } };
                     child.Start();
                     inputWriter = new Thread(WriteControls); inputWriter.IsBackground = true; inputWriter.Start();
                     stderr = new Thread(ReadDiagnostics); stderr.IsBackground = true; stderr.Start();
@@ -249,6 +263,7 @@ namespace RichAudio.Beacon.Windows
                 };
                 result["beaconFrequencyHz"] = beaconFrequencyHz;
                 result["beaconLevel"] = beaconLevel;
+                result["beaconOutputTrimDb"]=auditionOutputEnabled?12:0;
                 result["ownedRecorder"] = ownedRecorder==null?null:ownedRecorder.Metrics();
                 if(acousticSettingsMonitor!=null)result["acousticSettings"]=acousticSettingsMonitor.Metrics();
 #if GEOMETRY_LIVE
@@ -370,6 +385,7 @@ namespace RichAudio.Beacon.Windows
                     int frames = BlockProtocol.ValidateHeader(header, sequence++);
                     if (!BlockProtocol.ReadExact(stream, payload, frames * 8)) throw new EndOfStreamException("Missing PCM payload");
                     Buffer.BlockCopy(payload, 0, samples, 0, frames * 8);
+                    if(auditionOutputEnabled)for(int i=0;i<frames*2;i++)if(float.IsNaN(samples[i])||float.IsInfinity(samples[i])||Math.Abs(samples[i])>.5f)throw new InvalidDataException("Audition pre-master ceiling violated");
                     if (!ring.TryWrite(samples, frames)) throw new InvalidDataException("Producer exceeded granted PCM credits"); receivedBlocks++;
                 }
             }
