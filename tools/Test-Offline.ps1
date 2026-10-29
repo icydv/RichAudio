@@ -37,6 +37,7 @@ try {
     # Original PCM, bounded queues and local transport only: these tests never open an audio endpoint.
     & (Join-Path $repo 'tools\Build-AcousticsHost.ps1') -Tests
     & (Join-Path $repo 'tools\Test-BeaconTransport.ps1')
+    & (Join-Path $repo 'tests\Test-UnsentExpiryDiagnostics.ps1')
     & (Join-Path $repo 'tools\Test-UnsentExpiry.ps1')
     & (Join-Path $repo 'tools\Test-HostHandoff.ps1')
     & (Join-Path $repo 'tools\Measure-FirstFrameTiming.ps1') -Output ('.local/timing-ci-'+[guid]::NewGuid().ToString('N'))
