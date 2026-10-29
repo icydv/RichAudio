@@ -2,6 +2,8 @@
 
 `engine/` implements finite direct, first- and second-order image-source propagation and the owned-source PCM renderer. `streaming/` and `host/` provide the existing bounded producer and Windows playback route. The observation and research modules retain acquisition, reconstruction, uncertainty and cache contracts.
 
+The opt-in [ACOUSTICS-08.2 controls](../../docs/ACOUSTICS_08_2_GPU_ACCELERATION.md) add persistent Auto/Performance/Balanced/Quality/Max budgets and independent Auto/CPU/GPU acceleration. `gpu/` implements real owned Direct3D11 compute visibility screening; exact finite geometry and DSP remain shared with CPU. RTX 2080 SUPER execution and bit-identical CPU/GPU PCM are verified offline. Max's 64-path capacity works, but the demanding four-source case exceeds the block budget; higher-order tracing, late reverberation and GTA performance benefits remain unverified/future work.
+
 Future changes must preserve the [multiple-path and late-reverberation architectural requirement](../../ARCHITECTURE.md#governing-acoustic-requirement--29-october-2026): bounded concurrent contributions per source, selectively higher reflection orders and an environment-supported late field through the existing renderer. Late reverberation remains future implementation and acceptance work; ACOUSTICS-08.1 scope is unchanged.
 
 `engine/observed-geometry.mjs` now connects bounded GTA wall/ground observation groups to that same offline renderer. It preserves finite polygon support, original provenance and uncertainty, and requires an explicit coordinate/scale contract and partial-world assumptions. Physical GTA scale, acoustic materials and complete visibility remain unverified. See [the integration and runnable demonstration](../../docs/OBSERVED_GEOMETRY_AUDIO.md).

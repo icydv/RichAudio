@@ -1,5 +1,7 @@
 [CmdletBinding()]
-param([switch]$BuildOnly,[string]$Output='')
+param([switch]$BuildOnly,[string]$Output='',
+ [ValidateSet('auto','performance','balanced','quality','max')][string]$AcousticQuality='',
+ [ValidateSet('auto','cpu','gpu')][string]$AcousticAcceleration='')
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
 $out=Join-Path $repo 'build\geometry-live'
@@ -20,7 +22,15 @@ if(!$BuildOnly){
  if(!$Output.StartsWith($prefix,[StringComparison]::OrdinalIgnoreCase)){throw 'Fixture output must be private repository .local storage'}
  for($p=[IO.DirectoryInfo]::new($Output);$null-ne$p;$p=$p.Parent){if($p.Exists-and($p.Attributes-band[IO.FileAttributes]::ReparsePoint)){throw 'Linked fixture output rejected'}}
  if(Test-Path -LiteralPath $Output){throw 'Fresh fixture output required'}
- & $exe $repo $Output
+ $fixtureArguments=@($repo,$Output)
+ if($AcousticQuality -or $AcousticAcceleration){
+  if(!$AcousticQuality){$AcousticQuality='auto'}
+  if(!$AcousticAcceleration){$AcousticAcceleration='auto'}
+  $AcousticQuality=$AcousticQuality.ToLowerInvariant()
+  $AcousticAcceleration=$AcousticAcceleration.ToLowerInvariant()
+  $fixtureArguments+=@($AcousticQuality,$AcousticAcceleration)
+ }
+ & $exe @fixtureArguments
  if($LASTEXITCODE-ne0){throw 'Actual publisher/host/producer integration failed'}
  & node (Join-Path $repo 'tools\Check-GeometryRelay.mjs') $Output
  if($LASTEXITCODE-ne0){throw 'Actual geometry relay PCM verification failed'}

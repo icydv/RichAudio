@@ -7,6 +7,17 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & (Join-Path $repo 'tools\Build-AcousticGpu.ps1')
+    & node --test tests/Test-AcousticQuality.mjs tests/Test-AcousticGpuScenes.mjs tests/Test-AcousticAcceleration.mjs tests/Test-AcousticAccelerationBenchmark.mjs
+    if($LASTEXITCODE-ne0){throw 'Acoustic quality, CPU fallback, adaptive selection or benchmark contracts failed.'}
+    # Hardware checks are deliberately sequential: concurrent compute probes
+    # would contaminate deadlines. Unsupported hardware is explicitly unverified.
+    & node --test tests/Test-AcousticGpuDevice.mjs
+    if($LASTEXITCODE-ne0){throw 'Actual GPU compute or bounded protocol validation failed.'}
+    & node --test tests/Test-AcousticAccelerationProducer.mjs
+    if($LASTEXITCODE-ne0){throw 'Actual quality/acceleration worker and RA07 integration failed.'}
+    & (Join-Path $repo 'tools\Build-AcousticSettings.ps1') -Tests
+    & (Join-Path $repo 'tools\Test-AcousticSettingsHandoff.ps1')
     & node --test tests/Test-GeometryRelay.mjs
     if($LASTEXITCODE-ne0){throw 'Measured geometry relay admission failed.'}
     & (Join-Path $repo 'tools\Test-GeometryLive.ps1')

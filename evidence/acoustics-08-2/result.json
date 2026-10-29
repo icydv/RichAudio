@@ -1,0 +1,4076 @@
+{
+  "schemaVersion": 1,
+  "base": "9c7d48f3543afb9424758358f1851f662394c025",
+  "hardware": {
+    "device": "NVIDIA GeForce RTX 2080 SUPER",
+    "api": "Direct3D11-ComputeShader5",
+    "usesHardwareRayTracing": false,
+    "rayTracingCapability": "not-probed",
+    "ownedGpuBufferBytes": 270352,
+    "observedProcessLocalVideoBytes": 7610368
+  },
+  "gameLaunched": false,
+  "audioEndpointOpened": false,
+  "subjectiveListening": "not performed",
+  "qualityBudgetIncludesDirect": true,
+  "maximumReflectionOrder": 2,
+  "lateReverberation": "not-implemented",
+  "matrix": {
+    "cases": [
+      {
+        "name": "small",
+        "quality": "performance",
+        "requestedAcceleration": "cpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:21.314Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:21.328Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:21.378Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 1,
+        "surfaces": 1,
+        "measuredWallMs": 44.69370000000001,
+        "nodeProcessCpuMs": 79,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 79,
+        "cpuPercentOneCore": 176.7586930596482,
+        "cpuPercentMachine": 11.047418316228013,
+        "caseWallIncludingWarmupMs": 62.626400000000004,
+        "nodeCpuIncludingWarmupMs": 95,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 0.06059999999999377,
+          "p95": 0.11500000000000199,
+          "max": 0.29060000000000485
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 0.009000000000000341,
+          "p95": 0.01870000000000971,
+          "max": 0.0707000000000022
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.03359999999999275,
+          "p95": 0.21509999999999962,
+          "max": 1.2804000000000002
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 480,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 2,
+        "orders": [
+          0,
+          1
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "performance",
+            "pathBudget": 12
+          }
+        ],
+        "controlSha256": "97b22925452658b183886692b3b3f808f172b73d7c108e0181ef2090ae9e45ee",
+        "pcmFloat32Sha256": "4a10b5a32fa9d74df353773452cb059953c188d8ddeb9733bc67825d043aef5a",
+        "metrics": {
+          "peak": 0.01892612688243389,
+          "rms": 0.010240577853002305,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31770,
+          "maximumAdjacentStep": 0.00034681998658925295
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 2886656,
+        "nodePeakRssBytes": 58769408,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "small",
+        "quality": "performance",
+        "requestedAcceleration": "gpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:21.391Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:21.614Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:21.714Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 1,
+        "surfaces": 1,
+        "measuredWallMs": 95.73130000000003,
+        "nodeProcessCpuMs": 110,
+        "helperCpuMs": 15.625,
+        "combinedCpuMs": 125.625,
+        "cpuPercentOneCore": 131.2266729899207,
+        "cpuPercentMachine": 8.201667061870044,
+        "caseWallIncludingWarmupMs": 318.7328,
+        "nodeCpuIncludingWarmupMs": 141,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 0.3406999999999698,
+          "p95": 0.5744000000000256,
+          "max": 4.208000000000027
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 0.286200000000008,
+          "p95": 0.5253999999999905,
+          "max": 4.147099999999966
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.030599999999992633,
+          "p95": 0.03820000000001755,
+          "max": 0.04529999999999745
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.005344,
+          "p95": 0.006144,
+          "max": 0.006144
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.0626,
+          "p95": 0.07540000000000001,
+          "max": 0.1962
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.00928,
+          "p95": 0.010272,
+          "max": 0.010784
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.0010000000000000009,
+          "p95": 0.0012999999999999956,
+          "max": 0.0059000000000000025
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.23600000000004684,
+          "p95": 0.4759999999999991,
+          "max": 4.081600000000037
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 320,
+        "gpuSurfaceTests": 480,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 160,
+        "maximumPathCount": 2,
+        "orders": [
+          0,
+          1
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "performance",
+            "pathBudget": 12
+          }
+        ],
+        "controlSha256": "97b22925452658b183886692b3b3f808f172b73d7c108e0181ef2090ae9e45ee",
+        "pcmFloat32Sha256": "4a10b5a32fa9d74df353773452cb059953c188d8ddeb9733bc67825d043aef5a",
+        "metrics": {
+          "peak": 0.01892612688243389,
+          "rms": 0.010240577853002305,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31770,
+          "maximumAdjacentStep": 0.00034681998658925295
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 2886656,
+        "nodePeakRssBytes": 65544192,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": true
+      },
+      {
+        "name": "small",
+        "quality": "performance",
+        "requestedAcceleration": "auto",
+        "caseStartedAtUtc": "2026-10-29T14:58:21.720Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:21.942Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:21.970Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 1,
+        "surfaces": 1,
+        "measuredWallMs": 27.020899999999983,
+        "nodeProcessCpuMs": 47,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 47,
+        "cpuPercentOneCore": 173.9394320692502,
+        "cpuPercentMachine": 10.871214504328137,
+        "caseWallIncludingWarmupMs": 249.6252,
+        "nodeCpuIncludingWarmupMs": 47,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 0.04320000000006985,
+          "p95": 0.06880000000001019,
+          "max": 0.0867999999999256
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 0.00760000000002492,
+          "p95": 0.012799999999970169,
+          "max": 0.033299999999940155
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.030300000000011096,
+          "p95": 0.03679999999997108,
+          "max": 0.05259999999998399
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 480,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 2,
+        "orders": [
+          0,
+          1
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "performance",
+            "pathBudget": 12
+          }
+        ],
+        "controlSha256": "97b22925452658b183886692b3b3f808f172b73d7c108e0181ef2090ae9e45ee",
+        "pcmFloat32Sha256": "4a10b5a32fa9d74df353773452cb059953c188d8ddeb9733bc67825d043aef5a",
+        "metrics": {
+          "peak": 0.01892612688243389,
+          "rms": 0.010240577853002305,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31770,
+          "maximumAdjacentStep": 0.00034681998658925295
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 2886656,
+        "nodePeakRssBytes": 73293824,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "small",
+        "quality": "balanced",
+        "requestedAcceleration": "cpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:21.976Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:21.978Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:22.008Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 1,
+        "surfaces": 1,
+        "measuredWallMs": 25.85699999999997,
+        "nodeProcessCpuMs": 31,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 31,
+        "cpuPercentOneCore": 119.89016513903405,
+        "cpuPercentMachine": 7.493135321189628,
+        "caseWallIncludingWarmupMs": 31.3352000000001,
+        "nodeCpuIncludingWarmupMs": 31,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 0.03819999999996071,
+          "p95": 0.052800000000047476,
+          "max": 0.12459999999998672
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 0.005699999999933425,
+          "p95": 0.007799999999974716,
+          "max": 0.023199999999974352
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.03050000000007458,
+          "p95": 0.03390000000001692,
+          "max": 0.05379999999991014
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 480,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 2,
+        "orders": [
+          0,
+          1
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "balanced",
+            "pathBudget": 16
+          }
+        ],
+        "controlSha256": "97b22925452658b183886692b3b3f808f172b73d7c108e0181ef2090ae9e45ee",
+        "pcmFloat32Sha256": "4a10b5a32fa9d74df353773452cb059953c188d8ddeb9733bc67825d043aef5a",
+        "metrics": {
+          "peak": 0.01892612688243389,
+          "rms": 0.010240577853002305,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31770,
+          "maximumAdjacentStep": 0.00034681998658925295
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 2886656,
+        "nodePeakRssBytes": 77336576,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "small",
+        "quality": "balanced",
+        "requestedAcceleration": "gpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:22.011Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:22.221Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:22.315Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 1,
+        "surfaces": 1,
+        "measuredWallMs": 90.08070000000009,
+        "nodeProcessCpuMs": 108,
+        "helperCpuMs": 46.875,
+        "combinedCpuMs": 154.875,
+        "cpuPercentOneCore": 171.9291701774074,
+        "cpuPercentMachine": 10.745573136087962,
+        "caseWallIncludingWarmupMs": 301.48890000000006,
+        "nodeCpuIncludingWarmupMs": 108,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 0.3230999999998403,
+          "p95": 0.5964999999999918,
+          "max": 4.652400000000057
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 0.2820000000000391,
+          "p95": 0.5529999999999973,
+          "max": 4.598999999999933
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.030799999999999272,
+          "p95": 0.03920000000005075,
+          "max": 0.05270000000007258
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.00528,
+          "p95": 0.006144,
+          "max": 0.007456
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.061000000000000006,
+          "p95": 0.07980000000000001,
+          "max": 0.185
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.009216,
+          "p95": 0.010208,
+          "max": 0.01072
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.0009000000000000119,
+          "p95": 0.0012999999999999956,
+          "max": 0.008400000000000005
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.23900000000003274,
+          "p95": 0.49450000000001637,
+          "max": 4.541299999999978
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 320,
+        "gpuSurfaceTests": 480,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 160,
+        "maximumPathCount": 2,
+        "orders": [
+          0,
+          1
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "balanced",
+            "pathBudget": 16
+          }
+        ],
+        "controlSha256": "97b22925452658b183886692b3b3f808f172b73d7c108e0181ef2090ae9e45ee",
+        "pcmFloat32Sha256": "4a10b5a32fa9d74df353773452cb059953c188d8ddeb9733bc67825d043aef5a",
+        "metrics": {
+          "peak": 0.01892612688243389,
+          "rms": 0.010240577853002305,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31770,
+          "maximumAdjacentStep": 0.00034681998658925295
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 2886656,
+        "nodePeakRssBytes": 88457216,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": true
+      },
+      {
+        "name": "small",
+        "quality": "balanced",
+        "requestedAcceleration": "auto",
+        "caseStartedAtUtc": "2026-10-29T14:58:22.318Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:22.537Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:22.561Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 1,
+        "surfaces": 1,
+        "measuredWallMs": 23.96050000000014,
+        "nodeProcessCpuMs": 79,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 79,
+        "cpuPercentOneCore": 329.70931324471337,
+        "cpuPercentMachine": 20.606832077794586,
+        "caseWallIncludingWarmupMs": 242.68610000000012,
+        "nodeCpuIncludingWarmupMs": 79,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 0.03950000000008913,
+          "p95": 0.06839999999988322,
+          "max": 0.46100000000001273
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 0.005800000000135697,
+          "p95": 0.014900000000125146,
+          "max": 0.038499999999885404
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.029699999999820648,
+          "p95": 0.03760000000011132,
+          "max": 0.04750000000012733
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 480,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 2,
+        "orders": [
+          0,
+          1
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "balanced",
+            "pathBudget": 16
+          }
+        ],
+        "controlSha256": "97b22925452658b183886692b3b3f808f172b73d7c108e0181ef2090ae9e45ee",
+        "pcmFloat32Sha256": "4a10b5a32fa9d74df353773452cb059953c188d8ddeb9733bc67825d043aef5a",
+        "metrics": {
+          "peak": 0.01892612688243389,
+          "rms": 0.010240577853002305,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31770,
+          "maximumAdjacentStep": 0.00034681998658925295
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 2886656,
+        "nodePeakRssBytes": 87179264,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "small",
+        "quality": "quality",
+        "requestedAcceleration": "cpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:22.570Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:22.572Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:22.599Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 1,
+        "surfaces": 1,
+        "measuredWallMs": 26.30639999999994,
+        "nodeProcessCpuMs": 15,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 15,
+        "cpuPercentOneCore": 57.020344859045835,
+        "cpuPercentMachine": 3.5637715536903647,
+        "caseWallIncludingWarmupMs": 28.986400000000003,
+        "nodeCpuIncludingWarmupMs": 31,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 0.038899999999784995,
+          "p95": 0.061700000000200816,
+          "max": 0.09350000000017644
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 0.006099999999833017,
+          "p95": 0.009900000000016007,
+          "max": 0.023899999999912325
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.030499999999847205,
+          "p95": 0.034300000000030195,
+          "max": 0.03829999999993561
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 480,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 2,
+        "orders": [
+          0,
+          1
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "quality",
+            "pathBudget": 32
+          }
+        ],
+        "controlSha256": "97b22925452658b183886692b3b3f808f172b73d7c108e0181ef2090ae9e45ee",
+        "pcmFloat32Sha256": "4a10b5a32fa9d74df353773452cb059953c188d8ddeb9733bc67825d043aef5a",
+        "metrics": {
+          "peak": 0.01892612688243389,
+          "rms": 0.010240577853002305,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31770,
+          "maximumAdjacentStep": 0.00034681998658925295
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 2886656,
+        "nodePeakRssBytes": 75485184,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "small",
+        "quality": "quality",
+        "requestedAcceleration": "gpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:22.603Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:22.815Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:22.902Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 1,
+        "surfaces": 1,
+        "measuredWallMs": 86.09559999999988,
+        "nodeProcessCpuMs": 78,
+        "helperCpuMs": 31.25,
+        "combinedCpuMs": 109.25,
+        "cpuPercentOneCore": 126.89382500383313,
+        "cpuPercentMachine": 7.930864062739571,
+        "caseWallIncludingWarmupMs": 296.3218999999999,
+        "nodeCpuIncludingWarmupMs": 78,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 0.2944999999999709,
+          "p95": 0.536200000000008,
+          "max": 4.196899999999914
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 0.2556999999999334,
+          "p95": 0.46860000000015134,
+          "max": 4.15059999999994
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.02980000000002292,
+          "p95": 0.03770000000008622,
+          "max": 0.08290000000010878
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.005248,
+          "p95": 0.006144,
+          "max": 0.006144
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.055400000000000005,
+          "p95": 0.07400000000000001,
+          "max": 0.19160000000000002
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.009248000000000001,
+          "p95": 0.010144,
+          "max": 0.010656
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.000800000000000009,
+          "p95": 0.0011000000000000176,
+          "max": 0.0013000000000000234
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.2155999999999949,
+          "p95": 0.42630000000008295,
+          "max": 4.102799999999888
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 320,
+        "gpuSurfaceTests": 480,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 160,
+        "maximumPathCount": 2,
+        "orders": [
+          0,
+          1
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "quality",
+            "pathBudget": 32
+          }
+        ],
+        "controlSha256": "97b22925452658b183886692b3b3f808f172b73d7c108e0181ef2090ae9e45ee",
+        "pcmFloat32Sha256": "4a10b5a32fa9d74df353773452cb059953c188d8ddeb9733bc67825d043aef5a",
+        "metrics": {
+          "peak": 0.01892612688243389,
+          "rms": 0.010240577853002305,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31770,
+          "maximumAdjacentStep": 0.00034681998658925295
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 2886656,
+        "nodePeakRssBytes": 77344768,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": true
+      },
+      {
+        "name": "small",
+        "quality": "quality",
+        "requestedAcceleration": "auto",
+        "caseStartedAtUtc": "2026-10-29T14:58:22.910Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:23.129Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:23.150Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 1,
+        "surfaces": 1,
+        "measuredWallMs": 20.232999999999947,
+        "nodeProcessCpuMs": 31,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 31,
+        "cpuPercentOneCore": 153.21504472890862,
+        "cpuPercentMachine": 9.575940295556789,
+        "caseWallIncludingWarmupMs": 239.8512999999998,
+        "nodeCpuIncludingWarmupMs": 31,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 0.03330000000005384,
+          "p95": 0.04150000000004184,
+          "max": 0.05920000000014625
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 0.005400000000008731,
+          "p95": 0.006899999999859574,
+          "max": 0.028800000000046566
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.03110000000015134,
+          "p95": 0.03460000000018226,
+          "max": 0.05069999999977881
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 480,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 2,
+        "orders": [
+          0,
+          1
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "quality",
+            "pathBudget": 32
+          }
+        ],
+        "controlSha256": "97b22925452658b183886692b3b3f808f172b73d7c108e0181ef2090ae9e45ee",
+        "pcmFloat32Sha256": "4a10b5a32fa9d74df353773452cb059953c188d8ddeb9733bc67825d043aef5a",
+        "metrics": {
+          "peak": 0.01892612688243389,
+          "rms": 0.010240577853002305,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31770,
+          "maximumAdjacentStep": 0.00034681998658925295
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 2886656,
+        "nodePeakRssBytes": 80887808,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "small",
+        "quality": "max",
+        "requestedAcceleration": "cpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:23.155Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:23.157Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:23.179Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 1,
+        "surfaces": 1,
+        "measuredWallMs": 21.571299999999837,
+        "nodeProcessCpuMs": 31,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 31,
+        "cpuPercentOneCore": 143.70946581800928,
+        "cpuPercentMachine": 8.98184161362558,
+        "caseWallIncludingWarmupMs": 24.13709999999992,
+        "nodeCpuIncludingWarmupMs": 31,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 0.03469999999992979,
+          "p95": 0.05050000000005639,
+          "max": 0.06899999999995998
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 0.005400000000008731,
+          "p95": 0.007600000000138607,
+          "max": 0.01160000000004402
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.030499999999847205,
+          "p95": 0.03809999999998581,
+          "max": 0.04680000000007567
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 480,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 2,
+        "orders": [
+          0,
+          1
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "max",
+            "pathBudget": 64
+          }
+        ],
+        "controlSha256": "97b22925452658b183886692b3b3f808f172b73d7c108e0181ef2090ae9e45ee",
+        "pcmFloat32Sha256": "4a10b5a32fa9d74df353773452cb059953c188d8ddeb9733bc67825d043aef5a",
+        "metrics": {
+          "peak": 0.01892612688243389,
+          "rms": 0.010240577853002305,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31770,
+          "maximumAdjacentStep": 0.00034681998658925295
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 2886656,
+        "nodePeakRssBytes": 91262976,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "small",
+        "quality": "max",
+        "requestedAcceleration": "gpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:23.183Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:23.397Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:23.480Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 1,
+        "surfaces": 1,
+        "measuredWallMs": 82.46929999999975,
+        "nodeProcessCpuMs": 63,
+        "helperCpuMs": 46.875,
+        "combinedCpuMs": 109.875,
+        "cpuPercentOneCore": 133.23139641054348,
+        "cpuPercentMachine": 8.326962275658968,
+        "caseWallIncludingWarmupMs": 294.29830000000015,
+        "nodeCpuIncludingWarmupMs": 63,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 0.283900000000358,
+          "p95": 0.6044999999999163,
+          "max": 4.290599999999813
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 0.24620000000004438,
+          "p95": 0.5617999999999483,
+          "max": 4.248500000000149
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.030700000000251748,
+          "p95": 0.03870000000006257,
+          "max": 0.049799999999777356
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.005408,
+          "p95": 0.006144,
+          "max": 0.007232
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.055600000000000004,
+          "p95": 0.0714,
+          "max": 0.2156
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.00912,
+          "p95": 0.010176000000000001,
+          "max": 0.010432
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.000800000000000009,
+          "p95": 0.0010999999999999899,
+          "max": 0.0058
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.20890000000008513,
+          "p95": 0.5039999999999054,
+          "max": 4.200399999999718
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 320,
+        "gpuSurfaceTests": 480,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 160,
+        "maximumPathCount": 2,
+        "orders": [
+          0,
+          1
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "max",
+            "pathBudget": 64
+          }
+        ],
+        "controlSha256": "97b22925452658b183886692b3b3f808f172b73d7c108e0181ef2090ae9e45ee",
+        "pcmFloat32Sha256": "4a10b5a32fa9d74df353773452cb059953c188d8ddeb9733bc67825d043aef5a",
+        "metrics": {
+          "peak": 0.01892612688243389,
+          "rms": 0.010240577853002305,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31770,
+          "maximumAdjacentStep": 0.00034681998658925295
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 2886656,
+        "nodePeakRssBytes": 75431936,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": true
+      },
+      {
+        "name": "small",
+        "quality": "max",
+        "requestedAcceleration": "auto",
+        "caseStartedAtUtc": "2026-10-29T14:58:23.488Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:23.709Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:23.729Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 1,
+        "surfaces": 1,
+        "measuredWallMs": 19.43730000000005,
+        "nodeProcessCpuMs": 15,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 15,
+        "cpuPercentOneCore": 77.17121205105627,
+        "cpuPercentMachine": 4.823200753191017,
+        "caseWallIncludingWarmupMs": 241.4362000000001,
+        "nodeCpuIncludingWarmupMs": 31,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 0.030899999999746797,
+          "p95": 0.040799999999762804,
+          "max": 0.056199999999989814
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 0.0052999999998064595,
+          "p95": 0.007500000000163709,
+          "max": 0.010499999999865395
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.030200000000149885,
+          "p95": 0.037699999999858846,
+          "max": 0.04739999999992506
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 480,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 2,
+        "orders": [
+          0,
+          1
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "max",
+            "pathBudget": 64
+          }
+        ],
+        "controlSha256": "97b22925452658b183886692b3b3f808f172b73d7c108e0181ef2090ae9e45ee",
+        "pcmFloat32Sha256": "4a10b5a32fa9d74df353773452cb059953c188d8ddeb9733bc67825d043aef5a",
+        "metrics": {
+          "peak": 0.01892612688243389,
+          "rms": 0.010240577853002305,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31770,
+          "maximumAdjacentStep": 0.00034681998658925295
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 2886656,
+        "nodePeakRssBytes": 80056320,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "demanding",
+        "quality": "performance",
+        "requestedAcceleration": "cpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:23.746Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:23.815Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:25.634Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 1818.8602999999994,
+        "nodeProcessCpuMs": 2063,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 2063,
+        "cpuPercentOneCore": 113.42267462762263,
+        "cpuPercentMachine": 7.088917164226414,
+        "caseWallIncludingWarmupMs": 1888.5579999999995,
+        "nodeCpuIncludingWarmupMs": 2141,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 9.981200000000172,
+          "p95": 10.99429999999984,
+          "max": 23.45560000000023
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 8.124000000000251,
+          "p95": 8.817799999999806,
+          "max": 19.47290000000021
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 16,
+          "max": 16
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.7047999999999774,
+          "p95": 0.8006000000000313,
+          "max": 5.392899999999827
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 4833280,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 48,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "performance",
+            "pathBudget": 12
+          }
+        ],
+        "controlSha256": "e3c07e06a752403168aad39e5dbd75cc09df61ff148e165ec23989f58b068b3f",
+        "pcmFloat32Sha256": "915bcb0751ed92e0fdf659010ab3b3a24ad2b44b1c97b3c0196cee9ae1e8bd28",
+        "metrics": {
+          "peak": 0.09064394235610962,
+          "rms": 0.03127535546063247,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.001556292176246643
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 214171648,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 14,
+        "totalBlockDeadlineMisses": 145,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "demanding",
+        "quality": "performance",
+        "requestedAcceleration": "gpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:25.640Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:25.881Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:26.521Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 639.3793000000005,
+        "nodeProcessCpuMs": 719,
+        "helperCpuMs": 62.5,
+        "combinedCpuMs": 781.5,
+        "cpuPercentOneCore": 122.2279169813598,
+        "cpuPercentMachine": 7.639244811334987,
+        "caseWallIncludingWarmupMs": 878.5586000000003,
+        "nodeCpuIncludingWarmupMs": 734,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 2.883199999999306,
+          "p95": 3.431800000000294,
+          "max": 6.942700000000514
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 1.0304000000005544,
+          "p95": 1.5237999999999374,
+          "max": 4.997499999999491
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 16
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.7071999999998297,
+          "p95": 0.7646000000004278,
+          "max": 0.9350000000004002
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.01024,
+          "p95": 0.011328,
+          "max": 0.011904
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.0738,
+          "p95": 0.1174,
+          "max": 0.2685
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.009663999999999999,
+          "p95": 0.010432,
+          "max": 0.010624
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.0019000000000000128,
+          "p95": 0.010000000000000009,
+          "max": 0.011699999999999988
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.41309999999975844,
+          "p95": 0.7642000000005282,
+          "max": 4.3072000000001935
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 46080,
+        "gpuSurfaceTests": 4833280,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 4787200,
+        "maximumPathCount": 48,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "performance",
+            "pathBudget": 12
+          }
+        ],
+        "controlSha256": "e3c07e06a752403168aad39e5dbd75cc09df61ff148e165ec23989f58b068b3f",
+        "pcmFloat32Sha256": "915bcb0751ed92e0fdf659010ab3b3a24ad2b44b1c97b3c0196cee9ae1e8bd28",
+        "metrics": {
+          "peak": 0.09064394235610962,
+          "rms": 0.03127535546063247,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.001556292176246643
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 224595968,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": true
+      },
+      {
+        "name": "demanding",
+        "quality": "performance",
+        "requestedAcceleration": "auto",
+        "caseStartedAtUtc": "2026-10-29T14:58:26.529Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:26.792Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:27.436Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 643.3747999999996,
+        "nodeProcessCpuMs": 578,
+        "helperCpuMs": 78.125,
+        "combinedCpuMs": 656.125,
+        "cpuPercentOneCore": 101.98176863625999,
+        "cpuPercentMachine": 6.373860539766249,
+        "caseWallIncludingWarmupMs": 906.8459999999995,
+        "nodeCpuIncludingWarmupMs": 641,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 2.9000999999998385,
+          "p95": 3.520900000000438,
+          "max": 6.828099999999722
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 1.0109000000002197,
+          "p95": 1.4017000000003463,
+          "max": 4.961299999999937
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 16
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.7359999999998763,
+          "p95": 0.7743000000000393,
+          "max": 0.8618999999998778
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.01024,
+          "p95": 0.010656,
+          "max": 0.012096
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.0727,
+          "p95": 0.09290000000000001,
+          "max": 0.2088
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.0096,
+          "p95": 0.010336,
+          "max": 0.011488
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.001799999999999996,
+          "p95": 0.00990000000000002,
+          "max": 0.011699999999999988
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.39100000000053114,
+          "p95": 0.6957999999995081,
+          "max": 4.361900000000787
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 46080,
+        "gpuSurfaceTests": 4833280,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 4787200,
+        "maximumPathCount": 48,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "performance",
+            "pathBudget": 12
+          }
+        ],
+        "controlSha256": "e3c07e06a752403168aad39e5dbd75cc09df61ff148e165ec23989f58b068b3f",
+        "pcmFloat32Sha256": "915bcb0751ed92e0fdf659010ab3b3a24ad2b44b1c97b3c0196cee9ae1e8bd28",
+        "metrics": {
+          "peak": 0.09064394235610962,
+          "rms": 0.03127535546063247,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.001556292176246643
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 225554432,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "demanding",
+        "quality": "balanced",
+        "requestedAcceleration": "cpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:27.444Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:27.482Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:29.439Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 1955.7694000000001,
+        "nodeProcessCpuMs": 1953,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 1953,
+        "cpuPercentOneCore": 99.85839843899797,
+        "cpuPercentMachine": 6.241149902437373,
+        "caseWallIncludingWarmupMs": 1994.3572999999997,
+        "nodeCpuIncludingWarmupMs": 2000,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 10.98449999999957,
+          "p95": 11.654999999999745,
+          "max": 22.593300000000454
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 8.828300000000127,
+          "p95": 9.558200000000397,
+          "max": 19.087100000000646
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 15,
+          "p95": 16,
+          "max": 31
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 1.2903000000005704,
+          "p95": 1.3425999999999476,
+          "max": 1.4294999999992797
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 4833280,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 64,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "balanced",
+            "pathBudget": 16
+          }
+        ],
+        "controlSha256": "764dbc8bd900d6195fc62339648dd504d0ade462b3c68a75d1e14879aefd8f52",
+        "pcmFloat32Sha256": "bb591ce1e54d0e37b1e6704c2682a522ddff72dc0e734cc8582ebdaf15328069",
+        "metrics": {
+          "peak": 0.09023179858922958,
+          "rms": 0.0327763912094512,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.001523192971944809
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 239251456,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 95,
+        "totalBlockDeadlineMisses": 151,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "demanding",
+        "quality": "balanced",
+        "requestedAcceleration": "gpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:29.445Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:29.684Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:30.460Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 775.4508000000005,
+        "nodeProcessCpuMs": 782,
+        "helperCpuMs": 15.625,
+        "combinedCpuMs": 797.625,
+        "cpuPercentOneCore": 102.85952377636332,
+        "cpuPercentMachine": 6.428720236022707,
+        "caseWallIncludingWarmupMs": 1012.8095000000012,
+        "nodeCpuIncludingWarmupMs": 813,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 3.1617000000005646,
+          "p95": 3.778199999998833,
+          "max": 7.164999999999054
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 1.1053999999985535,
+          "p95": 1.7067999999999302,
+          "max": 4.988699999999881
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 16
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 1.2758999999987282,
+          "p95": 1.404899999999543,
+          "max": 1.623199999999997
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.01024,
+          "p95": 0.011296,
+          "max": 0.011456
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.0731,
+          "p95": 0.0983,
+          "max": 0.2209
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.009536,
+          "p95": 0.010336,
+          "max": 0.011488
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.0019000000000000128,
+          "p95": 0.010399999999999993,
+          "max": 0.01469999999999999
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.4431000000004133,
+          "p95": 0.7726000000002387,
+          "max": 4.313700000000608
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 46080,
+        "gpuSurfaceTests": 4833280,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 4787200,
+        "maximumPathCount": 64,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "balanced",
+            "pathBudget": 16
+          }
+        ],
+        "controlSha256": "764dbc8bd900d6195fc62339648dd504d0ade462b3c68a75d1e14879aefd8f52",
+        "pcmFloat32Sha256": "bb591ce1e54d0e37b1e6704c2682a522ddff72dc0e734cc8582ebdaf15328069",
+        "metrics": {
+          "peak": 0.09023179858922958,
+          "rms": 0.0327763912094512,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.001523192971944809
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 251072512,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": true
+      },
+      {
+        "name": "demanding",
+        "quality": "balanced",
+        "requestedAcceleration": "auto",
+        "caseStartedAtUtc": "2026-10-29T14:58:30.469Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:32.828Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:33.630Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 801.6112999999987,
+        "nodeProcessCpuMs": 874,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 874,
+        "cpuPercentOneCore": 109.03039914731758,
+        "cpuPercentMachine": 6.814399946707349,
+        "caseWallIncludingWarmupMs": 3161.3982000000015,
+        "nodeCpuIncludingWarmupMs": 999,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 3.242899999999281,
+          "p95": 4.288399999999456,
+          "max": 7.507499999999709
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 1.1772000000000844,
+          "p95": 2.026900000000751,
+          "max": 5.35910000000149
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 15
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 1.3029000000005908,
+          "p95": 1.4928999999992811,
+          "max": 1.6199000000015076
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.0104,
+          "p95": 0.031296,
+          "max": 0.032832
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.07440000000000001,
+          "p95": 0.09680000000000001,
+          "max": 0.2277
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.010112,
+          "p95": 0.020032,
+          "max": 0.021248
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.001799999999999996,
+          "p95": 0.009399999999999992,
+          "max": 0.01150000000000001
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.533900000000358,
+          "p95": 1.4165000000011787,
+          "max": 4.65979999999945
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 46080,
+        "gpuSurfaceTests": 4833280,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 4787200,
+        "maximumPathCount": 64,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "balanced",
+            "pathBudget": 16
+          }
+        ],
+        "controlSha256": "764dbc8bd900d6195fc62339648dd504d0ade462b3c68a75d1e14879aefd8f52",
+        "pcmFloat32Sha256": "bb591ce1e54d0e37b1e6704c2682a522ddff72dc0e734cc8582ebdaf15328069",
+        "metrics": {
+          "peak": 0.09023179858922958,
+          "rms": 0.0327763912094512,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.001523192971944809
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 251670528,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 0,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "demanding",
+        "quality": "quality",
+        "requestedAcceleration": "cpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:33.639Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:33.733Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:37.749Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 4015.4455,
+        "nodeProcessCpuMs": 4218,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 4218,
+        "cpuPercentOneCore": 105.04438424080217,
+        "cpuPercentMachine": 6.565274015050136,
+        "caseWallIncludingWarmupMs": 4109.593799999999,
+        "nodeCpuIncludingWarmupMs": 4312,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 21.789499999998952,
+          "p95": 24.6966999999986,
+          "max": 27.572299999999814
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 17.602499999999054,
+          "p95": 20.06580000000031,
+          "max": 21.321600000001126
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 16,
+          "p95": 31,
+          "max": 32
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 1.8042999999997846,
+          "p95": 2.4912999999996828,
+          "max": 2.7766999999985273
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 10096640,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 128,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "quality",
+            "pathBudget": 32
+          }
+        ],
+        "controlSha256": "68017820bd2093b1cdf5dd66d143973057283ee59f1400faf045fdb4c6e6e27a",
+        "pcmFloat32Sha256": "71290a4918a31e2d3891b6810e58e82f867e53bf9e730a6dac81501256abe590",
+        "metrics": {
+          "peak": 0.11375270038843155,
+          "rms": 0.0365669232644964,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.0019337665289640427
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 265920512,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 160,
+        "totalBlockDeadlineMisses": 160,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "demanding",
+        "quality": "quality",
+        "requestedAcceleration": "gpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:37.754Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:38.018Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:39.330Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 1311.727600000002,
+        "nodeProcessCpuMs": 1421,
+        "helperCpuMs": 15.625,
+        "combinedCpuMs": 1436.625,
+        "cpuPercentOneCore": 109.52159579473648,
+        "cpuPercentMachine": 6.84509973717103,
+        "caseWallIncludingWarmupMs": 1573.1951999999983,
+        "nodeCpuIncludingWarmupMs": 1469,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 5.7995000000009895,
+          "p95": 6.416699999997945,
+          "max": 9.795399999999063
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 1.6168999999972584,
+          "p95": 2.2083000000020547,
+          "max": 5.60740000000078
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 16
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 1.8847999999998137,
+          "p95": 2.049800000000687,
+          "max": 2.106599999999162
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.016384,
+          "p95": 0.0176,
+          "max": 0.01856
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.08990000000000001,
+          "p95": 0.11860000000000001,
+          "max": 0.2639
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.010016,
+          "p95": 0.011519999999999999,
+          "max": 0.050112
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.007800000000000001,
+          "p95": 0.011900000000000022,
+          "max": 0.015600000000000003
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.5714000000007218,
+          "p95": 0.930899999999383,
+          "max": 4.341099999997823
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 99220,
+        "gpuSurfaceTests": 10096640,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 9997420,
+        "maximumPathCount": 128,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "quality",
+            "pathBudget": 32
+          }
+        ],
+        "controlSha256": "68017820bd2093b1cdf5dd66d143973057283ee59f1400faf045fdb4c6e6e27a",
+        "pcmFloat32Sha256": "71290a4918a31e2d3891b6810e58e82f867e53bf9e730a6dac81501256abe590",
+        "metrics": {
+          "peak": 0.11375270038843155,
+          "rms": 0.0365669232644964,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.0019337665289640427
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 253132800,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 5,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": true
+      },
+      {
+        "name": "demanding",
+        "quality": "quality",
+        "requestedAcceleration": "auto",
+        "caseStartedAtUtc": "2026-10-29T14:58:39.338Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:39.630Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:41.018Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 1386.985099999998,
+        "nodeProcessCpuMs": 1422,
+        "helperCpuMs": 109.375,
+        "combinedCpuMs": 1531.375,
+        "cpuPercentOneCore": 110.41034254802031,
+        "cpuPercentMachine": 6.900646409251269,
+        "caseWallIncludingWarmupMs": 1679.1493999999984,
+        "nodeCpuIncludingWarmupMs": 1547,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 5.90650000000096,
+          "p95": 6.987600000000384,
+          "max": 10.286000000000058
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 1.6855999999970663,
+          "p95": 2.2111000000004424,
+          "max": 5.449899999999616
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 16
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 1.9134999999987485,
+          "p95": 2.629399999997986,
+          "max": 2.7797000000027765
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.016384,
+          "p95": 0.01776,
+          "max": 0.018592
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.0872,
+          "p95": 0.1373,
+          "max": 0.2401
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.010015999999999999,
+          "p95": 0.01072,
+          "max": 0.020128
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.007300000000000029,
+          "p95": 0.011199999999999988,
+          "max": 0.015100000000000002
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.6103000000002794,
+          "p95": 1.0165000000015425,
+          "max": 4.256900000000314
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 99220,
+        "gpuSurfaceTests": 10096640,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 9997420,
+        "maximumPathCount": 128,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "quality",
+            "pathBudget": 32
+          }
+        ],
+        "controlSha256": "68017820bd2093b1cdf5dd66d143973057283ee59f1400faf045fdb4c6e6e27a",
+        "pcmFloat32Sha256": "71290a4918a31e2d3891b6810e58e82f867e53bf9e730a6dac81501256abe590",
+        "metrics": {
+          "peak": 0.11375270038843155,
+          "rms": 0.0365669232644964,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.0019337665289640427
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 265039872,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 0,
+        "totalBlockDeadlineMisses": 5,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "demanding",
+        "quality": "max",
+        "requestedAcceleration": "cpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:41.027Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:41.165Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:47.673Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 6507.751600000003,
+        "nodeProcessCpuMs": 6860,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 6860,
+        "cpuPercentOneCore": 105.41275115663598,
+        "cpuPercentMachine": 6.588296947289749,
+        "caseWallIncludingWarmupMs": 6646.850000000002,
+        "nodeCpuIncludingWarmupMs": 6985,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 36.66700000000128,
+          "p95": 38.44499999999971,
+          "max": 46.75470000000132
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 29.008599999997386,
+          "p95": 30.30409999999756,
+          "max": 38.536700000000565
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 31,
+          "p95": 32,
+          "max": 32
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 4.28269999999975,
+          "p95": 5.158400000000256,
+          "max": 5.958800000000338
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 15175680,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 256,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "max",
+            "pathBudget": 64
+          }
+        ],
+        "controlSha256": "78f36189f49ee66dcb6006f23375f0df4ed5eb1833f589d6a3b1e9f4f53a111c",
+        "pcmFloat32Sha256": "21c14006bb23cbe287812bd8fab6c7ad5b89f5953609ee65c7a35999c2c8127f",
+        "metrics": {
+          "peak": 0.2088099718093872,
+          "rms": 0.05584608472236314,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.003839239478111267
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 265756672,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 160,
+        "totalBlockDeadlineMisses": 160,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "demanding",
+        "quality": "max",
+        "requestedAcceleration": "gpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:47.679Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:47.957Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:50.238Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 2281.106499999998,
+        "nodeProcessCpuMs": 2437,
+        "helperCpuMs": 62.5,
+        "combinedCpuMs": 2499.5,
+        "cpuPercentOneCore": 109.57401594357836,
+        "cpuPercentMachine": 6.8483759964736475,
+        "caseWallIncludingWarmupMs": 2557.6103000000003,
+        "nodeCpuIncludingWarmupMs": 2531,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 9.37329999999929,
+          "p95": 10.598599999997532,
+          "max": 14.098300000001473
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 2.379800000002433,
+          "p95": 2.775000000001455,
+          "max": 6.162700000000768
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 15,
+          "max": 16
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 3.9517999999989115,
+          "p95": 5.080799999999726,
+          "max": 5.153500000000349
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.021632,
+          "p95": 0.022528,
+          "max": 0.02288
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.1223,
+          "p95": 0.16690000000000002,
+          "max": 0.35150000000000003
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.011424,
+          "p95": 0.012511999999999999,
+          "max": 0.021504
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.01050000000000001,
+          "p95": 0.017699999999999994,
+          "max": 0.020100000000000007
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.8967000000011467,
+          "p95": 1.2273999999997613,
+          "max": 4.56159999999727
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 150420,
+        "gpuSurfaceTests": 15175680,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 15025260,
+        "maximumPathCount": 256,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "max",
+            "pathBudget": 64
+          }
+        ],
+        "controlSha256": "78f36189f49ee66dcb6006f23375f0df4ed5eb1833f589d6a3b1e9f4f53a111c",
+        "pcmFloat32Sha256": "21c14006bb23cbe287812bd8fab6c7ad5b89f5953609ee65c7a35999c2c8127f",
+        "metrics": {
+          "peak": 0.2088099718093872,
+          "rms": 0.05584608472236314,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.003839239478111267
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 265609216,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 7,
+        "totalBlockDeadlineMisses": 155,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": true
+      },
+      {
+        "name": "demanding",
+        "quality": "max",
+        "requestedAcceleration": "auto",
+        "caseStartedAtUtc": "2026-10-29T14:58:50.248Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:50.638Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:53.291Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 2652.5298000000003,
+        "nodeProcessCpuMs": 2782,
+        "helperCpuMs": 93.75,
+        "combinedCpuMs": 2875.75,
+        "cpuPercentOneCore": 108.41537011195877,
+        "cpuPercentMachine": 6.775960631997423,
+        "caseWallIncludingWarmupMs": 3043.1741,
+        "nodeCpuIncludingWarmupMs": 3031,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 10.421000000002095,
+          "p95": 11.22019999999975,
+          "max": 14.299800000000687
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 2.5742000000027474,
+          "p95": 3.0169999999998254,
+          "max": 6.259500000000116
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 16
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 5.3267999999989115,
+          "p95": 5.586799999997311,
+          "max": 5.810700000001816
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.021568,
+          "p95": 0.022528,
+          "max": 0.022848
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.12350000000000001,
+          "p95": 0.1777,
+          "max": 0.40750000000000003
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.011359999999999999,
+          "p95": 0.012512,
+          "max": 0.020032
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.01100000000000001,
+          "p95": 0.016500000000000015,
+          "max": 0.028000000000000025
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.9843999999975495,
+          "p95": 1.2824999999975262,
+          "max": 4.6216999999996915
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 150420,
+        "gpuSurfaceTests": 15175680,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 15025260,
+        "maximumPathCount": 256,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "max",
+            "pathBudget": 64
+          }
+        ],
+        "controlSha256": "78f36189f49ee66dcb6006f23375f0df4ed5eb1833f589d6a3b1e9f4f53a111c",
+        "pcmFloat32Sha256": "21c14006bb23cbe287812bd8fab6c7ad5b89f5953609ee65c7a35999c2c8127f",
+        "metrics": {
+          "peak": 0.2088099718093872,
+          "rms": 0.05584608472236314,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.003839239478111267
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 254459904,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 38,
+        "totalBlockDeadlineMisses": 158,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "demanding",
+        "quality": "runtime-switch",
+        "requestedAcceleration": "cpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:53.300Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:53.347Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:56.579Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 3231.9695999999967,
+        "nodeProcessCpuMs": 3359,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 3359,
+        "cpuPercentOneCore": 103.93043300902345,
+        "cpuPercentMachine": 6.495652063063965,
+        "caseWallIncludingWarmupMs": 3279.25,
+        "nodeCpuIncludingWarmupMs": 3406,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 11.09429999999702,
+          "p95": 37.33499999999913,
+          "max": 39.280800000000454
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 9.025499999999738,
+          "p95": 29.4403999999995,
+          "max": 32.17630000000645
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 16,
+          "p95": 32,
+          "max": 32
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 1.0218000000022585,
+          "p95": 5.286599999999453,
+          "max": 5.645499999998719
+        },
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuSubmissionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuTransferMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuReadbackMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "gpuRoundTripMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        },
+        "gpuResultsApplied": 0,
+        "gpuAcousticDispatches": 0,
+        "gpuCompletedBatches": 0,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 7871360,
+        "gpuSurfaceTests": 0,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 0,
+        "maximumPathCount": 256,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "performance",
+            "pathBudget": 12
+          },
+          {
+            "frame": 26624,
+            "quality": "max",
+            "pathBudget": 64
+          },
+          {
+            "frame": 50688,
+            "quality": "performance",
+            "pathBudget": 12
+          }
+        ],
+        "controlSha256": "79ba15ef88d39d107133f243c57d7ee696efafd855329abded03fc30e5d96efb",
+        "pcmFloat32Sha256": "7a2dd686bc02b5c79c61418fb36e694195f7708b0050112935a1206043c90109",
+        "metrics": {
+          "peak": 0.20713205635547638,
+          "rms": 0.04289570486112727,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.003834446892142296
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 267546624,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 100,
+        "totalBlockDeadlineMisses": 148,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      },
+      {
+        "name": "demanding",
+        "quality": "runtime-switch",
+        "requestedAcceleration": "gpu",
+        "caseStartedAtUtc": "2026-10-29T14:58:56.583Z",
+        "measuredStartedAtUtc": "2026-10-29T14:58:56.829Z",
+        "measuredEndedAtUtc": "2026-10-29T14:58:57.956Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 1126.0460999999996,
+        "nodeProcessCpuMs": 1140,
+        "helperCpuMs": 62.5,
+        "combinedCpuMs": 1202.5,
+        "cpuPercentOneCore": 106.78958880990757,
+        "cpuPercentMachine": 6.674349300619223,
+        "caseWallIncludingWarmupMs": 1370.5011999999988,
+        "nodeCpuIncludingWarmupMs": 1156,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 2.938799999996263,
+          "p95": 9.656399999999849,
+          "max": 13.96820000000298
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 1.0558000000019092,
+          "p95": 2.73689999999624,
+          "max": 6.4121999999988475
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 0,
+          "p95": 0,
+          "max": 16
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 0.7335999999995693,
+          "p95": 4.0847000000067055,
+          "max": 4.3562999999994645
+        },
+        "gpuExecutionMs": {
+          "count": 160,
+          "median": 0.010304,
+          "p95": 0.022336,
+          "max": 0.022816
+        },
+        "gpuSubmissionMs": {
+          "count": 160,
+          "median": 0.077,
+          "p95": 0.1514,
+          "max": 0.2992
+        },
+        "gpuTransferMs": {
+          "count": 160,
+          "median": 0.009824,
+          "p95": 0.011935999999999999,
+          "max": 0.012288
+        },
+        "gpuReadbackMs": {
+          "count": 160,
+          "median": 0.006099999999999994,
+          "p95": 0.013400000000000023,
+          "max": 0.017800000000000038
+        },
+        "gpuRoundTripMs": {
+          "count": 160,
+          "median": 0.4900000000052387,
+          "p95": 1.2854000000006636,
+          "max": 4.760800000003655
+        },
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        },
+        "gpuResultsApplied": 160,
+        "gpuAcousticDispatches": 160,
+        "gpuCompletedBatches": 160,
+        "cpuFallbacks": 0,
+        "gpuDeadlineMisses": 0,
+        "droppedGpuResults": 0,
+        "cpuSurfaceTests": 76724,
+        "gpuSurfaceTests": 7871360,
+        "calibrationCpuSurfaceTests": 0,
+        "avoidedCpuSurfaceTests": 7794636,
+        "maximumPathCount": 256,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "performance",
+            "pathBudget": 12
+          },
+          {
+            "frame": 26624,
+            "quality": "max",
+            "pathBudget": 64
+          },
+          {
+            "frame": 50688,
+            "quality": "performance",
+            "pathBudget": 12
+          }
+        ],
+        "controlSha256": "79ba15ef88d39d107133f243c57d7ee696efafd855329abded03fc30e5d96efb",
+        "pcmFloat32Sha256": "7a2dd686bc02b5c79c61418fb36e694195f7708b0050112935a1206043c90109",
+        "metrics": {
+          "peak": 0.20713205635547638,
+          "rms": 0.04289570486112727,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.003834446892142296
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 278360064,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 2,
+        "totalBlockDeadlineMisses": 47,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": true
+      },
+      {
+        "name": "demanding",
+        "quality": "runtime-switch",
+        "requestedAcceleration": "auto",
+        "caseStartedAtUtc": "2026-10-29T14:58:57.964Z",
+        "measuredStartedAtUtc": "2026-10-29T14:59:00.378Z",
+        "measuredEndedAtUtc": "2026-10-29T14:59:03.241Z",
+        "frames": 81920,
+        "blocks": 160,
+        "sourceCount": 4,
+        "surfaces": 128,
+        "measuredWallMs": 2862.8960000000006,
+        "nodeProcessCpuMs": 3094,
+        "helperCpuMs": 0,
+        "combinedCpuMs": 3094,
+        "cpuPercentOneCore": 108.0723854446686,
+        "cpuPercentMachine": 6.754524090291787,
+        "caseWallIncludingWarmupMs": 5277.3677000000025,
+        "nodeCpuIncludingWarmupMs": 3141,
+        "simulationWorkMs": {
+          "count": 160,
+          "median": 11.302999999999884,
+          "p95": 34.67749999999796,
+          "max": 37.833599999998114
+        },
+        "workerSchedulingLatencyMs": null,
+        "visibilityTaskWallMs": {
+          "count": 160,
+          "median": 9.124299999995856,
+          "p95": 27.384799999999814,
+          "max": 29.813300000001618
+        },
+        "visibilityTaskCpuMs": {
+          "count": 160,
+          "median": 15,
+          "p95": 32,
+          "max": 32
+        },
+        "dspMs": {
+          "count": 160,
+          "median": 1.0720999999975902,
+          "p95": 5.1547000000064145,
+          "max": 5.683099999994738
+        },
+        "gpuExecutionMs": {
+          "count": 52,
+          "median": 0.033056,
+          "p95": 0.035936,
+          "max": 0.037248
+        },
+        "gpuSubmissionMs": {
+          "count": 52,
+          "median": 0.0766,
+          "p95": 0.14450000000000002,
+          "max": 0.2828
+        },
+        "gpuTransferMs": {
+          "count": 52,
+          "median": 0.019264,
+          "p95": 0.020384,
+          "max": 0.024191999999999998
+        },
+        "gpuReadbackMs": {
+          "count": 52,
+          "median": 0.0020000000000000018,
+          "p95": 0.008300000000000002,
+          "max": 0.010399999999999993
+        },
+        "gpuRoundTripMs": {
+          "count": 52,
+          "median": 0.5175000000017462,
+          "p95": 1.4817000000039116,
+          "max": 4.101999999998952
+        },
+        "activeBackendBlocks": {
+          "cpu": 108,
+          "gpu": 52
+        },
+        "gpuResultsApplied": 52,
+        "gpuAcousticDispatches": 54,
+        "gpuCompletedBatches": 54,
+        "cpuFallbacks": 1,
+        "gpuDeadlineMisses": 1,
+        "droppedGpuResults": 1,
+        "cpuSurfaceTests": 6160832,
+        "gpuSurfaceTests": 1631232,
+        "calibrationCpuSurfaceTests": 155264,
+        "avoidedCpuSurfaceTests": 1615680,
+        "maximumPathCount": 256,
+        "orders": [
+          0,
+          1,
+          2
+        ],
+        "qualityTimeline": [
+          {
+            "frame": 0,
+            "quality": "performance",
+            "pathBudget": 12
+          },
+          {
+            "frame": 26624,
+            "quality": "max",
+            "pathBudget": 64
+          },
+          {
+            "frame": 50688,
+            "quality": "performance",
+            "pathBudget": 12
+          }
+        ],
+        "controlSha256": "79ba15ef88d39d107133f243c57d7ee696efafd855329abded03fc30e5d96efb",
+        "pcmFloat32Sha256": "7a2dd686bc02b5c79c61418fb36e694195f7708b0050112935a1206043c90109",
+        "metrics": {
+          "peak": 0.20713205635547638,
+          "rms": 0.04289570486112727,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 31114,
+          "maximumAdjacentStep": 0.003834446892142296
+        },
+        "sourceHistoryResets": 1,
+        "unavailableHistoryFrames": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "limiterFrames": 0,
+        "rendererOwnedBytes": 11546624,
+        "nodePeakRssBytes": 252981248,
+        "nodeRssScope": "Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.",
+        "workerDeadlineMisses": 108,
+        "totalBlockDeadlineMisses": 108,
+        "deadlineMs": 10.666666666666666,
+        "underruns": {
+          "measured": false,
+          "count": null,
+          "reason": "No audio endpoint or hardware callback is opened by this driver."
+        },
+        "hardwareVerified": false
+      }
+    ],
+    "comparisons": [
+      {
+        "name": "small",
+        "quality": "performance",
+        "mode": "gpu",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": -46.625,
+        "combinedCpuSavingPercent": -59.01898734177215,
+        "wallSpeedup": 0.4668661137997707,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "small",
+        "quality": "performance",
+        "mode": "auto",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": 32,
+        "combinedCpuSavingPercent": 40.50632911392405,
+        "wallSpeedup": 1.6540418712922231,
+        "gpuResultsApplied": 0,
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        }
+      },
+      {
+        "name": "small",
+        "quality": "balanced",
+        "mode": "gpu",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": -123.875,
+        "combinedCpuSavingPercent": -399.5967741935484,
+        "wallSpeedup": 0.28704261845212065,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "small",
+        "quality": "balanced",
+        "mode": "auto",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": -48,
+        "combinedCpuSavingPercent": -154.83870967741936,
+        "wallSpeedup": 1.0791511028567777,
+        "gpuResultsApplied": 0,
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        }
+      },
+      {
+        "name": "small",
+        "quality": "quality",
+        "mode": "gpu",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": -94.25,
+        "combinedCpuSavingPercent": -628.3333333333334,
+        "wallSpeedup": 0.3055487156138058,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "small",
+        "quality": "quality",
+        "mode": "auto",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": -16,
+        "combinedCpuSavingPercent": -106.66666666666667,
+        "wallSpeedup": 1.3001729847279202,
+        "gpuResultsApplied": 0,
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        }
+      },
+      {
+        "name": "small",
+        "quality": "max",
+        "mode": "gpu",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": -78.875,
+        "combinedCpuSavingPercent": -254.43548387096774,
+        "wallSpeedup": 0.2615676378967677,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "small",
+        "quality": "max",
+        "mode": "auto",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": 16,
+        "combinedCpuSavingPercent": 51.61290322580645,
+        "wallSpeedup": 1.1097889110112917,
+        "gpuResultsApplied": 0,
+        "activeBackendBlocks": {
+          "cpu": 160,
+          "gpu": 0
+        }
+      },
+      {
+        "name": "demanding",
+        "quality": "performance",
+        "mode": "gpu",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": 1281.5,
+        "combinedCpuSavingPercent": 62.118274357731465,
+        "wallSpeedup": 2.8447281605769814,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "demanding",
+        "quality": "performance",
+        "mode": "auto",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": 1406.875,
+        "combinedCpuSavingPercent": 68.19558894813379,
+        "wallSpeedup": 2.8270617686611295,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "demanding",
+        "quality": "balanced",
+        "mode": "gpu",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": 1155.375,
+        "combinedCpuSavingPercent": 59.1589861751152,
+        "wallSpeedup": 2.5221063670319235,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "demanding",
+        "quality": "balanced",
+        "mode": "auto",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": 1079,
+        "combinedCpuSavingPercent": 55.24833589349718,
+        "wallSpeedup": 2.4397976924726525,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "demanding",
+        "quality": "quality",
+        "mode": "gpu",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": 2781.375,
+        "combinedCpuSavingPercent": 65.94061166429587,
+        "wallSpeedup": 3.0611885424992153,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "demanding",
+        "quality": "quality",
+        "mode": "auto",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": 2686.625,
+        "combinedCpuSavingPercent": 63.694286391654806,
+        "wallSpeedup": 2.89508913974635,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "demanding",
+        "quality": "max",
+        "mode": "gpu",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": 4360.5,
+        "combinedCpuSavingPercent": 63.56413994169097,
+        "wallSpeedup": 2.8528924887987515,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "demanding",
+        "quality": "max",
+        "mode": "auto",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": 3984.25,
+        "combinedCpuSavingPercent": 58.07944606413994,
+        "wallSpeedup": 2.453413190683099,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "demanding",
+        "quality": "runtime-switch",
+        "mode": "gpu",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": 2156.5,
+        "combinedCpuSavingPercent": 64.2006549568324,
+        "wallSpeedup": 2.8701929698970567,
+        "gpuResultsApplied": 160,
+        "activeBackendBlocks": {
+          "cpu": 0,
+          "gpu": 160
+        }
+      },
+      {
+        "name": "demanding",
+        "quality": "runtime-switch",
+        "mode": "auto",
+        "pcm": {
+          "exact": true,
+          "mismatchedSamples": 0,
+          "maximumAbsolute": 0,
+          "rms": 0
+        },
+        "combinedCpuSavingMs": 265,
+        "combinedCpuSavingPercent": 7.889252753795772,
+        "wallSpeedup": 1.1289161743912444,
+        "gpuResultsApplied": 52,
+        "activeBackendBlocks": {
+          "cpu": 108,
+          "gpu": 52
+        }
+      }
+    ],
+    "hardwareExecutionVerified": true,
+    "cpuAccounting": "Node process CPU plus owned helper cumulative CPU through completed requests; startup/calibration reported separately",
+    "timingScope": "Accelerated offline core benchmark; measured simulation work is not audio scheduling or GTA FPS evidence"
+  },
+  "observedTransportGpu": {
+    "schemaVersion": 1,
+    "source": "original generated beacon; deterministic collision fixtures",
+    "gameLaunched": false,
+    "audioEndpointOpened": false,
+    "blocks": 345,
+    "frames": 176640,
+    "pcmFloat32SHA256": "0ba545b7c090fd66c2ec9b52487f76a24271cc8f55f9979b173d3816b8469fe0",
+    "exactControlReplay": true,
+    "matchedReflectionDifferenceRms": 0.0030103103729328153,
+    "metrics": {
+      "peak": 0.02589607983827591,
+      "rms": 0.0055182402913119604,
+      "clippedSamples": 0,
+      "nonfiniteSamples": 0,
+      "zeroSamples": 256390,
+      "maximumAdjacentStep": 0.0005406842974480242
+    },
+    "rendererOwnedBytes": 2886656,
+    "processRssBytes": 75087872,
+    "workerMs": {
+      "count": 345,
+      "median": 0.10509999999999309,
+      "p95": 1.2611000000001695,
+      "max": 9.192999999999984
+    },
+    "dspMs": {
+      "count": 345,
+      "median": 0.012199999999893407,
+      "p95": 0.17869999999993524,
+      "max": 1.830600000000004
+    },
+    "relay": {
+      "forwarded": 4,
+      "transactions": 81,
+      "rejected": 6,
+      "disconnects": 3,
+      "maximumAcceptedRoundTripMs": 1.2061,
+      "maximumObservedRoundTripMs": 33.006
+    },
+    "sourceHistoryResets": 1,
+    "unavailableHistoryFrames": 0,
+    "geometryAccepted": 4,
+    "geometryExpired": 1,
+    "subjectiveListening": "not performed",
+    "scale": "declared model scale 10; physical GTA metres/materials unverified",
+    "timing": "wall-paced fixture; no hardware or hard real-time scheduling claim",
+    "acousticAcceleration": {
+      "requestedQuality": "quality",
+      "activeQuality": "quality",
+      "pathBudget": 32,
+      "requestedAcceleration": "gpu",
+      "activeAcceleration": "gpu",
+      "gpuCapability": "hardware-directcompute",
+      "gpuDevice": "NVIDIA GeForce RTX 2080 SUPER",
+      "fallbackReason": null,
+      "accelerationDeadlineMs": 8,
+      "gpuAcousticDispatches": 91,
+      "gpuCompletedBatches": 91,
+      "gpuResultsApplied": 91,
+      "cpuFallbacks": 0,
+      "deadlineMisses": 0,
+      "droppedResults": 0,
+      "invalidResults": 0,
+      "cpuSurfaceTests": 410,
+      "gpuSurfaceTests": 767,
+      "avoidedCpuSurfaceTests": 357,
+      "qualityChanges": 1,
+      "qualityDeadlineMisses": 1,
+      "qualityMaximumMs": 50.5706,
+      "qualityProcessingEwmaMs": 0.3707052574108792,
+      "initializationMs": 219.56260000000003,
+      "warmupMs": 8.88760000000002,
+      "gpuTimingValid": true,
+      "helperCumulativeCpuMs": 234.375,
+      "gpuOwnedBytes": 270352,
+      "gpuDeviceUsageBytes": 7610368,
+      "helperWorkingSetBytes": 53481472,
+      "cpuAccounting": "Node thread CPU plus helper request CPU",
+      "hardwareExecutionVerified": true,
+      "hardwareVerification": "real GPU results reached observed propagation and PCM",
+      "cpuTimingCaveat": "Per-request counters can quantize to zero; cumulative helper CPU includes initialization and whole-run accounting is required for savings claims",
+      "activeBackendsObserved": [
+        "cpu",
+        "gpu"
+      ],
+      "pathBudgetsObserved": [
+        32
+      ],
+      "gpuAppliedTimingMs": {
+        "gpuSubmitMs": {
+          "count": 91,
+          "median": 0.09970000000000001,
+          "p95": 0.1505,
+          "max": 0.2934
+        },
+        "gpuExecutionMs": {
+          "count": 91,
+          "median": 0.014688,
+          "p95": 0.019424,
+          "max": 0.0304
+        },
+        "gpuTransferMs": {
+          "count": 91,
+          "median": 0.017952000000000003,
+          "p95": 0.029664,
+          "max": 0.041568
+        },
+        "gpuReadbackMs": {
+          "count": 91,
+          "median": 0.0015000000000000013,
+          "p95": 0.0024000000000000132,
+          "max": 0.012299999999999978
+        },
+        "gpuRoundTripMs": {
+          "count": 91,
+          "median": 0.6151999999999589,
+          "p95": 1.3414000000002488,
+          "max": 4.453400000000329
+        },
+        "helperCpuMs": {
+          "count": 91,
+          "median": 0,
+          "p95": 0,
+          "max": 15.625
+        },
+        "queryWallMs": {
+          "count": 91,
+          "median": 0.7526000000000295,
+          "p95": 1.4187000000001717,
+          "max": 4.541600000000017
+        },
+        "queryCpuMs": {
+          "count": 91,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "taskWallMs": {
+          "count": 91,
+          "median": 0.7526000000000295,
+          "p95": 1.4187000000001717,
+          "max": 4.541600000000017
+        },
+        "taskCpuMs": {
+          "count": 91,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        }
+      }
+    }
+  },
+  "autoQualityRealProducer": {
+    "activeStates": [
+      "performance",
+      "balanced"
+    ],
+    "changes": [
+      {
+        "active": "performance",
+        "reason": "awaiting-measurements",
+        "budget": 12,
+        "samples": 0
+      },
+      {
+        "active": "balanced",
+        "reason": "sustained-measured-headroom",
+        "budget": 16,
+        "samples": 321
+      }
+    ],
+    "frames": 262144,
+    "sourceHistoryResets": 1,
+    "metrics": {
+      "peak": 0.03435244783759117,
+      "rms": 0.014009397443601107,
+      "clippedSamples": 0,
+      "nonfiniteSamples": 0,
+      "zeroSamples": 26650,
+      "maximumAdjacentStep": 0.0006735841743648052
+    },
+    "processingDeadlineMisses": 1,
+    "maximumProcessingMs": 43.2346,
+    "gpuInitializations": 0
+  },
+  "producerComparison": {
+    "modes": [
+      "cpu",
+      "gpu",
+      "auto"
+    ],
+    "quality": "quality",
+    "frames": 81920,
+    "bitExactPcm": true,
+    "realGpuResultsApplied": 153,
+    "autoGpuResultsApplied": 150,
+    "maximumObservedWorkerSchedulingMs": 52.8966,
+    "maximumGpuQueryMs": 4.7444
+  },
+  "ownerExit": {
+    "helperExited": true,
+    "elapsedMs": 4.44
+  },
+  "combinedHistoricalMilestonePercent": 60,
+  "originalCiFailureCause": "unknown"
+}

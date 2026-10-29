@@ -1,5 +1,7 @@
 # Proposed architecture
 
+**ACOUSTICS-08.2 implementation — 29 October 2026:** [Optional Direct3D11 visibility compute and functional quality controls](docs/ACOUSTICS_08_2_GPU_ACCELERATION.md) now extend the existing finite solver/streaming renderer. The CPU remains complete; the GPU supplies conservative potential-contact masks for exact CPU refinement. Explicit 12/16/32/64-path capacities and separately adaptive hardware selection preserve source history. Real RTX 2080 SUPER comparisons are bit-identical, but full simulation/DSP costs still exceed the block budget at demanding Quality/Max settings. No hardware ray-tracing backend, extra reflection order, late field or GTA rendering-performance claim is implied.
+
 ## Governing acoustic requirement — 29 October 2026
 
 RichAudio must ultimately render a direct contribution, multiple simultaneous distinct early reflections and valid multi-bounce paths per source, together with an environment-dependent dense late-reverberation field where the available evidence supports one. A single reflected voice per source is not the target. The perceptual goal is physical presence: substantial nearby vehicles, convincing distance, and audible influence from roads, buildings, ceilings, tunnels and interiors. Arbitrary repeated echoes or a uniform reverb preset do not satisfy this requirement.

@@ -12,6 +12,8 @@ import { createHash } from "node:crypto";
 import { DEFAULT_BEACON_FREQUENCY_HZ, DEFAULT_BEACON_LEVEL, validateBeaconFrequencyHz, validateBeaconLevel } from "../src/acoustics/streaming/beacon-frequency.mjs";
 import { liveGeometryLimits } from '../src/acoustics/streaming/observed-live.mjs';
 import { GeometryRelayGate } from '../src/acoustics/streaming/geometry-relay.mjs';
+import {validateAcousticSettings} from '../src/acoustics/streaming/acoustic-quality.mjs';
+import {scenario as acousticScenario} from './acoustics-08-2-scenes.mjs';
 
 const args = process.argv.slice(2),
   options = {
@@ -28,6 +30,7 @@ const args = process.argv.slice(2),
     orientation: false,
     barrierFrame: null,
     geometry: false,
+    acousticQuality:null,acousticAcceleration:null,acousticBenchmark:null,
   };
 for (let i = 0; i < args.length; i += 2) {
   if (args[i] === "--scene") options.scene = args[i + 1];
@@ -50,6 +53,9 @@ for (let i = 0; i < args.length; i += 2) {
     options.orientation = true;
   else if (args[i] === "--headless-barrier-frame")
     options.barrierFrame = Number(args[i + 1]);
+  else if(args[i]==='--acoustic-quality')options.acousticQuality=args[i+1];
+  else if(args[i]==='--acoustic-acceleration')options.acousticAcceleration=args[i+1];
+  else if(args[i]==='--acoustic-benchmark')options.acousticBenchmark=args[i+1];
   else throw Error("Unknown producer option");
 }
 if (
@@ -66,6 +72,10 @@ if (
   !["harmonic", "pulse", "impulse"].includes(options.beacon)
 )
   throw Error("Scene/source/beacon budget");
+options.acousticSettings=options.acousticQuality!==null||options.acousticAcceleration!==null?
+  validateAcousticSettings({acousticQuality:options.acousticQuality??'auto',acousticAcceleration:options.acousticAcceleration??'auto'}):null;
+if(options.acousticBenchmark&&(!options.headless||!options.trace||!options.acousticSettings||options.geometry||
+  !['small','enclosure','demanding'].includes(options.acousticBenchmark)))throw Error('Explicit device-free acoustic benchmark scope');
 validateBeaconFrequencyHz(options.frequencyHz);
 validateBeaconLevel(options.level);
 if ((options.frequencyHz !== DEFAULT_BEACON_FREQUENCY_HZ || options.level !== DEFAULT_BEACON_LEVEL) && options.beacon !== "harmonic")
@@ -93,19 +103,23 @@ const renderer = new StreamingRenderer({
     sourceIds: ids,
     historyDiagnostics: options.diagnostics,
     generationReleaseGuard:options.geometry,
+    ...(options.acousticSettings?{pathCapacityPerSource:64}:{}),
   }),
   worker = new Worker(
     new URL(
       "../src/acoustics/streaming/simulation-worker.mjs",
       import.meta.url,
     ),
-    { workerData: { scene: options.scene, geometry:options.geometry, sourceIds:ids, controlledClock:options.headless } },
+    { workerData: { scene: options.scene, geometry:options.geometry, sourceIds:ids, controlledClock:options.headless,
+      acousticSettings:options.acousticSettings,acousticBenchmark:options.acousticBenchmark } },
   );
 const listenerPlayout = new ListenerPlayout({ delayMs: options.delayMs });
 const orientation = options.orientation ? new OrientationPresentation() : null;
 let barrier = null,
   orientationDiagnostic = null;
 const startup = new StartupGate();
+const benchmarkScene=options.acousticBenchmark?acousticScenario(options.acousticBenchmark,{sources:options.sources}):null;
+let pendingAcousticSettings=null,acousticRevision=0,lastAcousticFeedback=null,lastAcousticStatus=null,lastAcousticStatusKey=null;
 let startupIdentity = null,
   lifecycle = "initial-priming",
   priorPaths = "";
@@ -188,6 +202,10 @@ async function finish(error) {
     barrier.reject(Error("Producer stopping"));
     barrier = null;
   }
+  if(options.acousticSettings){
+    await new Promise(resolve=>{const done=m=>{if(m.type==='acoustic-shutdown'){clearTimeout(timer);worker.off('message',done);resolve();}};
+      const timer=setTimeout(()=>{worker.off('message',done);resolve();},100);worker.on('message',done);worker.postMessage({type:'acoustic-shutdown'});});
+  }
   await worker.terminate();
   const memory = process.memoryUsage(),
     cpu = process.cpuUsage(cpuStart);
@@ -212,6 +230,7 @@ async function finish(error) {
     simulation: lastControl?.stats ?? null,
     geometry: lastControl?.geometry ?? null,
     geometryRelay: geometryRelay?.stats ?? null,
+    ...(options.acousticSettings?{acousticSettings:lastAcousticStatus}:{}),
     listenerPlayout: listenerPlayout.stats,
     orientation: orientation?.stats ?? null,
     ownedArrayBytes: renderer.ownedArrayBytes,
@@ -242,7 +261,7 @@ function simulate(snapshot, now) {
       pending = null;
       reject(Error("Simulation worker deadline exceeded"));
     }, 1000);
-    pending = { id, resolve, reject, timer };
+    const scheduled=performance.now();pending = { id, resolve:m=>resolve({...m,schedulingMilliseconds:performance.now()-scheduled}), reject, timer };
     const events=geometryEvents;geometryEvents=[];
     let anchor=null;
     if(options.geometry&&external){
@@ -250,8 +269,9 @@ function simulate(snapshot, now) {
       anchor={state:external.state,receiptAgeMs:external.receiptAgeMs,queueAgeMs:age,delivery:external.delivery,
         dispatchNs:((before+after)/2n).toString(),dispatchUncertaintyMs:options.headless?0:Number(after-before)/2e6+.001};
     }
-    worker.postMessage({ id, snapshot, now, geometryEvents:events,
-      anchor });
+    worker.postMessage({ id, snapshot, now, geometryEvents:events,anchor,
+      acousticSettings:pendingAcousticSettings,acousticFeedback:lastAcousticFeedback });
+    pendingAcousticSettings=null;
   });
 }
 function baseListener() {
@@ -287,6 +307,8 @@ function sourceStates(time, externalMode) {
   });
 }
 function snapshot(now) {
+  if(benchmarkScene&&!external){const s=benchmarkScene.snapshot(now);return {...s,emitting:enabled,
+    sources:s.sources.map(source=>({...source,emitting:enabled}))};}
   if(options.geometry){
     if(!external)return null;
     lastPlayout=listenerPlayout.sample(now,receiptClock());
@@ -340,6 +362,7 @@ async function pump() {
   running = true;
   try {
     while (credits > 0 && !stopping) {
+      const blockProcessingStart=performance.now();
       credits--;
       inFlight = 1;
       const now = renderer.frame / FS;
@@ -414,6 +437,12 @@ async function pump() {
         stats.orientationMs.push(orientationMilliseconds);
       }
       lastControl = result.control;
+      if(lastControl.acoustic){
+        renderer.setPathBudget(lastControl.acoustic.pathBudget);
+        lastAcousticStatus={type:'acoustic-settings-status',...lastControl.acoustic};
+        const key=JSON.stringify([lastAcousticStatus.settingsRevision,lastAcousticStatus.activeQuality,lastAcousticStatus.activeAcceleration,lastAcousticStatus.fallbackReason]);
+        if(key!==lastAcousticStatusKey||stats.blocks%94===0){log(lastAcousticStatus);lastAcousticStatusKey=key;}
+      }
       const identity = Object.values(lastControl.sourceGenerations).join(":");
       if (identity && startupIdentity !== identity) {
         // Once primed, geometry-mode generation transitions use the renderer's
@@ -485,6 +514,9 @@ async function pump() {
         right.fill(0);
       }
       const dspMilliseconds = performance.now() - started;
+      if(lastControl.acoustic)lastAcousticFeedback={processingMs:performance.now()-blockProcessingStart,
+        deadlineMiss:performance.now()-blockProcessingStart>BLOCK/FS*1000,
+        availablePaths:lastControl.acoustic.availablePaths,activeBackend:lastControl.acoustic.activeAcceleration};
       stats.dspMs.push(dspMilliseconds);
       packet.write("RA07", 0, "ascii");
       packet.writeUInt32LE(sequence++, 4);
@@ -507,13 +539,14 @@ async function pump() {
           orientationMilliseconds,
           simulationMilliseconds: result.milliseconds,
           paths: lastControl.paths.length,
-          sourceGenerations: options.geometry?lastControl.sourceGenerations:undefined,
+          sourceGenerations: options.geometry||options.acousticSettings?lastControl.sourceGenerations:undefined,
+          ...(options.acousticSettings?{acoustic:lastControl.acoustic,workerSchedulingMilliseconds:result.schedulingMilliseconds}:{}),
           geometry: lastControl.geometry,
           activePaths: renderer.activePaths,
           orientation: orientationDiagnostic,
           spatialFingerprint,
           pathPresentation: lastControl.paths.map((p) => ({
-            ...(options.geometry?{sourceId:p.sourceId,generation:p.generation}:{}),
+            ...(options.geometry||options.acousticSettings?{sourceId:p.sourceId,generation:p.generation}:{}),
             id: p.id,
             pan: p.pan,
             arrivalDirection: p.arrivalDirection,
@@ -602,7 +635,11 @@ async function pump() {
 function receive(m) {
   if (!m || typeof m !== "object") throw Error("Control object");
   if(geometryRelay?.receive(m))return;
-  if (m.type === "credit") {
+  if(m.type==='acoustic-settings'){
+    if(!options.acousticSettings||!Number.isSafeInteger(m.revision)||m.revision<=acousticRevision)throw Error('Acoustic settings startup/revision');
+    const validated=validateAcousticSettings({acousticQuality:m.quality,acousticAcceleration:m.acceleration});
+    acousticRevision=m.revision;pendingAcousticSettings={revision:m.revision,quality:validated.acousticQuality,acceleration:validated.acousticAcceleration};
+  }else if (m.type === "credit") {
     if (
       !Number.isInteger(m.blocks) ||
       m.blocks < 1 ||

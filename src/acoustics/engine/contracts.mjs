@@ -11,8 +11,9 @@ import {
 } from "../research/local-geometry.mjs";
 export const bounds = Object.freeze({
   sources: 16,
-  paths: 12,
-  reflectors: 8,
+  // Absolute opt-in ceilings. Scene defaults below retain the original budget.
+  paths: 64,
+  reflectors: 16,
   keys: 4096,
   duration: 60,
   delay: 2,

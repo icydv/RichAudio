@@ -63,13 +63,15 @@ namespace RichAudio.Beacon.Windows
         }
         public static int Main(string[] args){try{
             KernelTests();TransportTests();if(args.Length<2){Console.WriteLine("PASS capture/clock/transport kernel "+checks);return 0;}
+            if(args.Length!=2 && args.Length!=4)throw new ArgumentException("Fixture accepts optional validated quality and acceleration together");
+            string acousticArguments=args.Length==4?new AcousticSettings(args[2],args[3],1).ProducerArguments():"";
             string root=Path.GetFullPath(args[0]),dest=Path.GetFullPath(args[1]);
             Check(dest.StartsWith(Path.Combine(root,".local")+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase),"private fixture destination");
             for(var d=new DirectoryInfo(dest);d!=null;d=d.Parent)Check(!d.Exists||(d.Attributes&FileAttributes.ReparsePoint)==0,"unlinked fixture output");
             Check(!Directory.Exists(dest)&&!File.Exists(dest),"fresh fixture destination");Directory.CreateDirectory(dest);
             LegacyPrefixTest(root);
             string token=Guid.NewGuid().ToString("N"),listenerPipe="RichAudio.GeometryFixture.Listener."+token,geometryPipe="RichAudio.GeometryFixture.Geometry."+token;
-            var child=new Process{StartInfo=new ProcessStartInfo{FileName="node.exe",WorkingDirectory=root,Arguments="\""+Path.Combine(root,"tools","Run-Acoustics07.mjs")+"\" --geometry-input required --trace-blocks yes --history-diagnostics yes",
+            var child=new Process{StartInfo=new ProcessStartInfo{FileName="node.exe",WorkingDirectory=root,Arguments="\""+Path.Combine(root,"tools","Run-Acoustics07.mjs")+"\" --geometry-input required --trace-blocks yes --history-diagnostics yes"+acousticArguments,
                 UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true}};child.Start();
             Console.WriteLine("Default process input encoding="+child.StandardInput.Encoding.WebName+" preamble="+BitConverter.ToString(child.StandardInput.Encoding.GetPreamble()));
             var model=GeometryModel.Parse("{\"basis\":\"declared-demonstration-scale\",\"metresPerNativeUnit\":10,\"sourceOffsetNative\":[-0.6,0,0.1],\"reference\":\"original-analytic-native-source\"}");

@@ -29,6 +29,8 @@ namespace RichAudio.Beacon.Windows
         private static int controlQueueHigh; private static double maximumControlWriteMs;
         private static readonly List<Dictionary<string,object>> listenerReceipts=new List<Dictionary<string,object>>();
         private static Process child;
+        private static AcousticSettingsMonitor acousticSettingsMonitor;
+        private static volatile string latestAcousticSettingsStatus;
 #if GEOMETRY_LIVE
         private static RichAudio.GeometryLive.GeometryHostRelay geometryRelay;
 #endif
@@ -40,10 +42,27 @@ namespace RichAudio.Beacon.Windows
         [STAThread]
         public static int Main(string[] args)
         {
+            if(args.Length==1 && (args[0]=="--help" || args[0]=="-h"))
+            {
+                Console.WriteLine("RichAudio Windows host\n"+
+                    "Acoustic controls (incremental rendering):\n"+
+                    "  --acoustic-quality auto|performance|balanced|quality|max\n"+
+                    "  --acoustic-acceleration auto|cpu|gpu\n"+
+                    "  --acoustic-settings <private .local JSON file>\n"+
+                    "Saved .local/acoustic-settings.json loads automatically on subsequent incremental launches.\n"+
+                    "Build/run build/acoustic-settings/RichAudio.Settings.exe for the five-position slider and independent backend selector.\n"+
+                    "Save once before host startup; later changes apply live to a configured host. Active/fallback diagnostics come from the producer.\n"+
+                    "Without saved controls or these options, the existing 12-path/default-profile route remains unchanged.\n"+
+                    "Known-WAV playback ignores saved incremental preferences and rejects explicit processing controls.\n"+
+                    "Other existing options: --root, --scene, --sources, --seconds, --gain, --beacon, --beacon-frequency-hz, --beacon-level,\n"+
+                    "  --listener-pipe, --geometry-model, --output, --wav, --device, --list-devices, --probe-device, --autostart, --exercise-controls, --loopback.\n"+
+                    "This help command opens no audio endpoint.");return 0;
+            }
             string root = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "..", ".."));
             string scene = "open-road", beacon = "harmonic", outputPath = null, wav = null, geometryModel=null; int device = -1, seconds = 15, sources = 1; float gain = .08f;
             double beaconFrequencyHz = 95;
             double beaconLevel = .22;
+            string acousticSettingsPath=null,acousticQuality=null,acousticAcceleration=null;
             bool autostart = false, exercise = false, loopback = false, listenerPipe = false, list = false, probe = false;
             try
             {
@@ -65,6 +84,9 @@ namespace RichAudio.Beacon.Windows
                         else if (key == "--beacon-frequency-hz") beaconFrequencyHz = double.Parse(value, CultureInfo.InvariantCulture);
                         else if (key == "--beacon-level") beaconLevel = double.Parse(value, CultureInfo.InvariantCulture);
                         else if (key == "--geometry-model") geometryModel=Path.GetFullPath(value);
+                        else if (key == "--acoustic-settings") acousticSettingsPath=value;
+                        else if (key == "--acoustic-quality") acousticQuality=value;
+                        else if (key == "--acoustic-acceleration") acousticAcceleration=value;
                         else if (key == "--output") outputPath = value;
                         else if (key == "--wav") wav = Path.GetFullPath(value);
                         else if (key == "--device") device = value == "default" ? -1 : int.Parse(value, CultureInfo.InvariantCulture);
@@ -83,9 +105,11 @@ namespace RichAudio.Beacon.Windows
                 if (float.IsNaN(gain) || float.IsInfinity(gain) || gain < 0 || gain > .25f) throw new ArgumentException("Gain must be 0..0.25; initial default is 0.08");
                 BeaconFrequencyArguments(beaconFrequencyHz, beacon, wav != null);
                 BeaconLevelArguments(beaconLevel, beacon, wav != null);
+                string resolvedSettingsPath;
+                var acousticSettings=AcousticSettingsStore.ResolveForLaunch(root,acousticSettingsPath,acousticQuality,acousticAcceleration,wav!=null,out resolvedSettingsPath);
                 outputPath = PrivateOutput(root, outputPath ?? Path.Combine(".local", "acoustics07-host-" + Guid.NewGuid().ToString("N")));
                 Directory.CreateDirectory(outputPath);
-                return Run(root, scene, beacon, sources, seconds, gain, device, autostart, exercise, loopback, listenerPipe, wav, outputPath, beaconFrequencyHz, beaconLevel,geometryModel);
+                return Run(root, scene, beacon, sources, seconds, gain, device, autostart, exercise, loopback, listenerPipe, wav, outputPath, beaconFrequencyHz, beaconLevel,geometryModel,acousticSettings,resolvedSettingsPath);
             }
             catch (Exception ex) { Console.Error.WriteLine(ex.GetType().Name + ": " + ex.Message); return 1; }
         }
@@ -113,7 +137,7 @@ namespace RichAudio.Beacon.Windows
             return level == .22 ? "" : " --beacon-level " + level.ToString("R", CultureInfo.InvariantCulture);
         }
 
-        private static int Run(string root, string scene, string beacon, int sources, int seconds, float gain, int device, bool autostart, bool exercise, bool loopbackEnabled, bool listenerPipe, string wav, string directory, double beaconFrequencyHz, double beaconLevel,string geometryModel)
+        private static int Run(string root, string scene, string beacon, int sources, int seconds, float gain, int device, bool autostart, bool exercise, bool loopbackEnabled, bool listenerPipe, string wav, string directory, double beaconFrequencyHz, double beaconLevel,string geometryModel,AcousticSettings acousticSettings,string settingsPath)
         {
             AppDomain.MonitoringIsEnabled = true;
             long initialAllocated = AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
@@ -131,11 +155,14 @@ namespace RichAudio.Beacon.Windows
                 Console.CancelKeyPress += delegate(object sender, ConsoleCancelEventArgs e) { e.Cancel = true; stop = true; if (output != null) output.Muted = true; };
                 if (wav == null)
                 {
+                    if(acousticSettings!=null)acousticSettingsMonitor=new AcousticSettingsMonitor(root,settingsPath,acousticSettings,
+                        delegate(AcousticSettings changed){Send(changed.ControlMessage());});
                     string script = Path.Combine(root, "tools", "Run-Acoustics07.mjs"); if (!File.Exists(script)) throw new FileNotFoundException("Streaming worker is not built", "Run-Acoustics07.mjs");
-                    child = new Process { StartInfo = new ProcessStartInfo { FileName = "node.exe", Arguments = Quote(script) + " --scene " + scene + " --sources " + sources + " --beacon " + beacon + BeaconFrequencyArguments(beaconFrequencyHz, beacon, false) + BeaconLevelArguments(beaconLevel, beacon, false) + (listenerPipe ? " --listener-input required" : "")+(geometryModel!=null?" --geometry-input required":""), WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true } };
+                    child = new Process { StartInfo = new ProcessStartInfo { FileName = "node.exe", Arguments = Quote(script) + " --scene " + scene + " --sources " + sources + " --beacon " + beacon + BeaconFrequencyArguments(beaconFrequencyHz, beacon, false) + BeaconLevelArguments(beaconLevel, beacon, false) + (listenerPipe ? " --listener-input required" : "")+(geometryModel!=null?" --geometry-input required":"")+(acousticSettings==null?"":acousticSettings.ProducerArguments()), WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true } };
                     child.Start();
                     inputWriter = new Thread(WriteControls); inputWriter.IsBackground = true; inputWriter.Start();
                     stderr = new Thread(ReadDiagnostics); stderr.IsBackground = true; stderr.Start();
+                    if(acousticSettingsMonitor!=null)acousticSettingsMonitor.Start();
                     reader = new Thread(delegate() { ReadBlocks(child.StandardOutput.BaseStream, ring); });
                     Send("{\"type\":\"credit\",\"blocks\":4}");
                     if (autostart) SendControl("start");
@@ -160,7 +187,7 @@ namespace RichAudio.Beacon.Windows
                 if (listenerPipe) throw new NotSupportedException("Listener transport was not included in this build");
 #endif
                 Console.WriteLine("RichAudio shared output: " + output.EndpointName + ". Commands: start, mute, resume, emit-stop, status, stop. Maximum " + seconds + " seconds; gain " + gain.ToString(CultureInfo.InvariantCulture));
-                controls = new Thread(delegate() { string line; while (!stop && (line = Console.ReadLine()) != null) { if (line == "status") { Console.WriteLine("queued=" + ring.Count + " underflowFrames=" + Interlocked.Read(ref ring.UnderflowFrames)); Console.WriteLine(latestRendererStatus ?? "Renderer status pending (or known-WAV mode)."); } else Control(line.Trim()); } }); controls.IsBackground = true; controls.Start();
+                controls = new Thread(delegate() { string line; while (!stop && (line = Console.ReadLine()) != null) { if (line == "status") { Console.WriteLine("queued=" + ring.Count + " underflowFrames=" + Interlocked.Read(ref ring.UnderflowFrames)); Console.WriteLine(latestRendererStatus ?? "Renderer status pending (or known-WAV mode)."); if(acousticSettingsMonitor!=null)Console.WriteLine(latestAcousticSettingsStatus??"Acoustic settings active status pending."); } else Control(line.Trim()); } }); controls.IsBackground = true; controls.Start();
                 bool didMute = false, didResume = false, didEmitStop = false; double drainStart = -1;
                 while (!stop && wall.Elapsed.TotalSeconds < seconds)
                 {
@@ -196,6 +223,7 @@ namespace RichAudio.Beacon.Windows
                     try { child.StandardInput.Close(); } catch (IOException) { }
                 }
                 if (reader != null && reader.IsAlive) reader.Join(1000); if (stderr != null && stderr.IsAlive) stderr.Join(1000);
+                if(acousticSettingsMonitor!=null)acousticSettingsMonitor.Dispose();
                 self.Refresh();
                 var result = new Dictionary<string, object> {
                     {"schemaVersion",1},{"backend","WASAPI shared event-driven, exact Float32 stereo 48k"},{"mode",wav == null ? "incremental-streaming" : "known-WAV-device-test"},{"scene",scene},{"beacon",beacon},{"sources",sources},{"terminationReason",producerError!=null?"failure":wall.Elapsed.TotalSeconds>=seconds?"duration-limit":"controlled-stop"},{"durationWallSeconds",wall.Elapsed.TotalSeconds},{"gain",gain},
@@ -206,6 +234,7 @@ namespace RichAudio.Beacon.Windows
                 };
                 result["beaconFrequencyHz"] = beaconFrequencyHz;
                 result["beaconLevel"] = beaconLevel;
+                if(acousticSettingsMonitor!=null)result["acousticSettings"]=acousticSettingsMonitor.Metrics();
 #if GEOMETRY_LIVE
                 if(geometryRelay!=null){result["geometryRelay"]=geometryRelay.Metrics();var rejected=geometryRelay.RejectedEvidence();if(rejected!=null)
                     using(var file=new FileStream(Path.Combine(directory,"geometry-rejected.bin"),FileMode.CreateNew,FileAccess.Write))file.Write(rejected,0,rejected.Length);}
@@ -263,6 +292,8 @@ namespace RichAudio.Beacon.Windows
         }
         private static void RememberDiagnostic(string line,bool overlong)
         {
+            if(!overlong && line.StartsWith("{\"type\":\"acoustic-settings-status\",",StringComparison.Ordinal))
+            {latestAcousticSettingsStatus=line;if(acousticSettingsMonitor!=null)acousticSettingsMonitor.PublishStatus(line);}
 #if GEOMETRY_LIVE
             if(!overlong&&geometryRelay!=null)geometryRelay.Diagnostic(line);
 #endif
