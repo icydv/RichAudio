@@ -67,6 +67,7 @@ try {
     if($LASTEXITCODE-ne0){throw 'Native owned-output tap to private recording bundle failed.'}
     & (Join-Path $repo 'tools\Test-BeaconTransport.ps1')
     & (Join-Path $repo 'tools\Test-ListenerEvidence.ps1')
+    & (Join-Path $repo 'tests\Test-UnsentExpiryDiagnostics.ps1')
     & (Join-Path $repo 'tools\Test-UnsentExpiry.ps1')
     & (Join-Path $repo 'tools\Test-HostHandoff.ps1')
     & (Join-Path $repo 'tools\Measure-FirstFrameTiming.ps1') -Output ('.local/timing-ci-'+[guid]::NewGuid().ToString('N'))
