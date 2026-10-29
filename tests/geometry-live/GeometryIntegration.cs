@@ -67,9 +67,11 @@ namespace RichAudio.Beacon.Windows
             Check(dest.StartsWith(Path.Combine(root,".local")+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase),"private fixture destination");
             for(var d=new DirectoryInfo(dest);d!=null;d=d.Parent)Check(!d.Exists||(d.Attributes&FileAttributes.ReparsePoint)==0,"unlinked fixture output");
             Check(!Directory.Exists(dest)&&!File.Exists(dest),"fresh fixture destination");Directory.CreateDirectory(dest);
+            LegacyPrefixTest(root);
             string token=Guid.NewGuid().ToString("N"),listenerPipe="RichAudio.GeometryFixture.Listener."+token,geometryPipe="RichAudio.GeometryFixture.Geometry."+token;
             var child=new Process{StartInfo=new ProcessStartInfo{FileName="node.exe",WorkingDirectory=root,Arguments="\""+Path.Combine(root,"tools","Run-Acoustics07.mjs")+"\" --geometry-input required --trace-blocks yes --history-diagnostics yes",
                 UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true}};child.Start();
+            Console.WriteLine("Default process input encoding="+child.StandardInput.Encoding.WebName+" preamble="+BitConverter.ToString(child.StandardInput.Encoding.GetPreamble()));
             var model=GeometryModel.Parse("{\"basis\":\"declared-demonstration-scale\",\"metresPerNativeUnit\":10,\"sourceOffsetNative\":[-0.6,0,0.1],\"reference\":\"original-analytic-native-source\"}");
             StatePipeServer listenerServer=null;listenerServer=new StatePipeServer(listenerPipe,HostProgram.ListenerReceived,true,delegate{});
             HostProgram.BeginGeometryFixture(child,model,delegate{return listenerServer.PeerProcessId;},geometryPipe);listenerServer.Start();
@@ -103,6 +105,7 @@ namespace RichAudio.Beacon.Windows
                         string error=final["error"] as string;
                         terminal=error==null?"no terminal error":System.Text.RegularExpressions.Regex.Replace(error,
                             "(?:[A-Za-z]:[\\\\/]|file:)[^'\"\\r\\n]*","[private-path]");
+                        foreach(char code in terminal)if(code>127)Console.Error.WriteLine("terminal non-ASCII code point U+"+((int)code).ToString("X4"));
                         terminal=System.Text.RegularExpressions.Regex.Replace(terminal,"[^\\x20-\\x7e]","?");
                         if(terminal.Length>400)terminal=terminal.Substring(0,400);
                     }
@@ -119,6 +122,19 @@ namespace RichAudio.Beacon.Windows
             Console.WriteLine(json.Serialize(new Dictionary<string,object>{{"checks",checks},{"blocks",blocks},{"geometryForwarded",metrics["forwarded"]},
                 {"maximumAcceptedRoundTripMs",metrics["maximumAcceptedRoundTripMs"]}}));return 0;
         }catch(Exception e){Console.Error.WriteLine(e);return 1;}}
+        private static void LegacyPrefixTest(string root){
+            byte[] bytes;using(var memory=new MemoryStream()){
+                using(var writer=new StreamWriter(memory,new System.Text.UTF8Encoding(true),1024,true)){writer.WriteLine("{\"type\":\"credit\",\"blocks\":1}");writer.Flush();}
+                bytes=memory.ToArray();}
+            Check(bytes[0]==239&&bytes[1]==187&&bytes[2]==191,"legacy UTF-8 writer supplies a BOM before JSON");
+            using(var p=new Process{StartInfo=new ProcessStartInfo{FileName="node.exe",WorkingDirectory=root,
+                Arguments="\""+Path.Combine(root,"tools","Run-Acoustics07.mjs")+"\" --geometry-input required",
+                UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true}}){
+                p.Start();var diagnostic=p.StandardError.ReadToEndAsync();p.StandardInput.BaseStream.Write(bytes,0,bytes.Length);p.StandardInput.BaseStream.Flush();
+                if(!p.WaitForExit(3000)){p.Kill();throw new TimeoutException("legacy prefix reproduction");}
+                Check(diagnostic.Wait(1000)&&p.ExitCode==1&&diagnostic.Result.Contains("\ufeff"),"actual producer rejects the legacy BOM-prefixed frame");
+            }
+        }
         private static GeometryPacket ClockPacket(){var clock=new GeometryClock();var a=clock.Pair();Thread.Sleep(110);var b=clock.Pair();
             return new GeometryPacket{Schema=1,SourcePid=Process.GetCurrentProcess().Id,ListenerSession=new string('a',32),ListenerGeneration=1,
                 GeometrySession=new string('d',32),ClockId="geometry-"+new string('d',32),Build="1.0.1158.16",Framework="1.132.1428.17748",

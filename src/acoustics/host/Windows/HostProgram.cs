@@ -288,6 +288,11 @@ namespace RichAudio.Beacon.Windows
         {
             try
             {
+                // Framework Process.StandardInput inherits a console-dependent
+                // encoding, which can prepend a BOM to the first JSON frame.
+                // Own the byte encoding; no locale or console settings change.
+                using(var controlWriter=new StreamWriter(child.StandardInput.BaseStream,new UTF8Encoding(false,true)))
+                {
                 while(!inputStop)
                 {
                     ControlMessage message=null;lock(inputLock){if(inputQueue.Count>0)message=inputQueue.Dequeue();}
@@ -300,7 +305,8 @@ namespace RichAudio.Beacon.Windows
                         text="{\"type\":\"listener\",\"receiptAgeMs\":"+totalAge.ToString("R",CultureInfo.InvariantCulture)+",\"state\":"+message.ListenerJson+"}";
                         if(listenerReceipts.Count<128)listenerReceipts.Add(new Dictionary<string,object>{{"sequence",message.Sequence},{"observationQpc100ns",message.ObservationQpc100ns},{"writeQpc100ns",now*(10000000.0/Stopwatch.Frequency)},{"receiptAgeMs",totalAge},{"hostQueueAgeMs",queueMs}});
                     }
-                    long writeStart=Stopwatch.GetTimestamp();child.StandardInput.WriteLine(text);child.StandardInput.Flush();maximumControlWriteMs=Math.Max(maximumControlWriteMs,(Stopwatch.GetTimestamp()-writeStart)*1000.0/Stopwatch.Frequency);if(message.ListenerJson!=null)listenerMessagesWritten++;
+                    long writeStart=Stopwatch.GetTimestamp();controlWriter.WriteLine(text);controlWriter.Flush();maximumControlWriteMs=Math.Max(maximumControlWriteMs,(Stopwatch.GetTimestamp()-writeStart)*1000.0/Stopwatch.Frequency);if(message.ListenerJson!=null)listenerMessagesWritten++;
+                }
                 }
             }
             catch (IOException ex) { if (!stop) producerError = "Control pipe closed: " + ex.GetType().Name; }
