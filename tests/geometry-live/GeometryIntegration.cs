@@ -101,7 +101,10 @@ namespace RichAudio.Beacon.Windows
                     foreach(string line in diagnostic)if(line.StartsWith("{\"type\":\"final\",",StringComparison.Ordinal)){
                         var final=new JavaScriptSerializer().DeserializeObject(line) as Dictionary<string,object>;
                         string error=final["error"] as string;
-                        terminal=error==null?"no terminal error":System.Text.RegularExpressions.Regex.IsMatch(error,"\\A[A-Za-z0-9 .:'\"()_=><,\\[\\]-]{1,180}\\z")?error:"private terminal error retained";
+                        terminal=error==null?"no terminal error":System.Text.RegularExpressions.Regex.Replace(error,
+                            "(?:[A-Za-z]:[\\\\/]|file:)[^'\"\\r\\n]*","[private-path]");
+                        terminal=System.Text.RegularExpressions.Regex.Replace(terminal,"[^\\x20-\\x7e]","?");
+                        if(terminal.Length>400)terminal=terminal.Substring(0,400);
                     }
                     throw new Exception("producer exited during geometry scenario; exit="+child.ExitCode+"; "+terminal);
                 }Thread.Sleep(1);
