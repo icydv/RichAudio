@@ -7,6 +7,8 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & node --test tests/Test-ListeningOperator.mjs
+    if($LASTEXITCODE-ne0){throw 'Focused listening operator orchestration failed.'}
     & (Join-Path $repo 'tools\Build-AcousticGpu.ps1') -Tests
     & node --test tests/Test-AcousticQuality.mjs tests/Test-AcousticGpuScenes.mjs tests/Test-AcousticAcceleration.mjs tests/Test-AcousticAccelerationBenchmark.mjs
     if($LASTEXITCODE-ne0){throw 'Acoustic quality, CPU fallback, adaptive selection or benchmark contracts failed.'}
