@@ -34,7 +34,7 @@ Before transport execution, the matrix was one standalone nine-case run, one req
 
 The initial diagnostic-only regression caught duplicate console emission introduced while relocating the print before retention. That failed outcome is retained privately. After removing the duplicate, all three cases passed their checks: unsuccessful exit preserved, failed predicates and signed ages retained, missing receiver/both JSON explicit, private fields excluded. No transport attempt had run before that correction.
 
-The standalone nine cases all passed once. The required full local suite also passed once, including its nine cases and diagnostic regressions. The final hosted outcome is recorded in publication evidence; no later pass establishes the original failure's cause. Unexpected outcomes are retained without retrying until green. No transport-harness defect or production defect has been demonstrated by the standalone run.
+The standalone nine cases all passed once. The required full local suite also passed once, including its nine cases and diagnostic regressions. The final hosted outcome is recorded in publication evidence; no later pass establishes the original failure's cause. Unexpected outcomes are retained without retrying until green. Before final publication verification, the pinned upload action was found to exclude hidden .local files by default. A follow-up changes only include-hidden-files for the same narrowly selected JSON path. The initial hosted run is retained and one additional final-head run is declared for that concrete retention correction, not to obtain a passing transport result. No transport-harness defect or production defect has been demonstrated by the standalone run.
 
 ## Preserved scope and remaining blocker
 

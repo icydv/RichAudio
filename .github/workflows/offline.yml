@@ -32,3 +32,4 @@ jobs:
           path: .local/expiry-*/diagnostics/*.json
           if-no-files-found: ignore
           retention-days: 7
+          include-hidden-files: true # The explicit path still selects only sanitized diagnostic JSON.
