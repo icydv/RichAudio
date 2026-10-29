@@ -128,11 +128,13 @@ export function solvePath(
   arrivalTime,
   candidate,
   stats = { queries: 0, surfaceTests: 0 },
+  geometryTimeMs = scene.tile.createdAt + arrivalTime * 1000,
 ) {
   if (
     !Number.isFinite(arrivalTime) ||
     arrivalTime < 0 ||
-    scene.tile.createdAt + arrivalTime * 1000 >=
+    !Number.isFinite(geometryTimeMs) || geometryTimeMs < scene.tile.createdAt ||
+    geometryTimeMs >=
       Math.min(
         scene.tile.validUntil,
         ...scene.tile.surfaces.map((s) => s.validUntil),
