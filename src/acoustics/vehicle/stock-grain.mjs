@@ -3,6 +3,7 @@
 const FS=48000;
 const check=(ok,message)=>{if(!ok)throw Error(message);};
 const smooth=x=>x*x*(3-2*x);
+const sourceTimelines=new WeakMap();
 function validated(asset){
   const samples=asset.samplesFloat32??asset.samples;
   check(samples instanceof Float32Array&&samples.length===asset.frames&&asset.frames>=16,'bounded decoded PCM required');
@@ -76,6 +77,7 @@ export class StockGrainVoice {
     this.stats.texture={enabled:this.textureEnabled,basis:features?'rate-level-spectrum-gated-original-PCM':'rate-level-detail-gated-original-PCM',
       uniqueIntervals:0,cyclesAdvanced:0,phrasesStarted:0,minimumPoolCycles:null,maximumPoolCycles:0,transientRiskReads:0,
       maximumMaterialRateDifference:0,insufficientMaterialFrames:0,stateLocalFallbackFrames:0,texturePlanRefreshes:0};
+    if(this.textureEnabled)this.timeline();
   }
   pair(u){
     const target=u*(this.asset.frames-1),r=this.intervals;let low=0,high=r.length-1;
@@ -109,8 +111,13 @@ export class StockGrainVoice {
     const r=this.intervals,f=this.features,period=(1-p.w)*r[p.a].length+p.w*r[p.b].length;
     const baseRms=Math.sqrt((1-p.w)*f[p.a].rms**2+p.w*f[p.b].rms**2),valid=[];
     const mixFeature=key=>(1-p.w)*(f[p.a][key]??0)+p.w*(f[p.b][key]??0);
+    const idle=this.asset.sustain?.state==='idle';
     for(let i=0;i<r.length;i++){
-      if(f[i].transientRisk||Math.abs(r[i].centre-p.target)>.12*this.asset.frames||Math.abs(Math.log(r[i].length/period))>Math.log(1.05))continue;
+      if(f[i].transientRisk)continue;
+      // The whole verified idle recording is one operating state. Applying a
+      // narrow moving-state address gate there needlessly freezes 1–3 cycles.
+      if(idle){valid.push(i);continue;}
+      if(Math.abs(r[i].centre-p.target)>.12*this.asset.frames||Math.abs(Math.log(r[i].length/period))>Math.log(1.05))continue;
       if(Math.abs(20*Math.log10(Math.max(f[i].rms,1e-12)/Math.max(baseRms,1e-12)))>3)continue;
       let compatible=true;
       if(f[i].bandFractions&&f[p.a].bandFractions&&f[p.b].bandFractions){
@@ -133,65 +140,136 @@ export class StockGrainVoice {
     t.minimumPoolCycles=Math.min(t.minimumPoolCycles??count,count);t.maximumPoolCycles=Math.max(t.maximumPoolCycles,count);
     return {lo:Math.min(...allowed),hi:Math.max(...allowed),runs,allowed,count,start:Math.max(run[0],Math.min(run[1],p.a)),runEnd:run[1],period,anchor:p.a};
   }
-  refill(plan){
-    const chunks=[];
-    for(const [lo,hi] of plan.runs){
-      const count=hi-lo+1,size=count<=2?1:Math.min(8,Math.max(2,Math.floor(count/2))),stride=Math.max(1,Math.floor(size/2));
-      for(let first=lo;first+size-1<=hi;first+=stride)chunks.push([first,first+size-1]);
-      if(chunks.at(-1)?.[0]!==hi-size+1)chunks.push([hi-size+1,hi]);
-    }
-    for(let i=chunks.length-1;i>0;i--){const j=Math.floor(this.random()*(i+1));[chunks[i],chunks[j]]=[chunks[j],chunks[i]];}
-    // No immediate repeated phrase, including the boundary between bags.
-    if(chunks.length>1&&chunks.at(-1)[0]===this.textureLastPhrase){[chunks[0],chunks[chunks.length-1]]=[chunks.at(-1),chunks[0]];}
-    this.textureBag=chunks;
+  // Metadata intervals define a source-time coordinate, not independent loops.
+  // Within a contiguous run this reads original chronology without any blend.
+  rateAt(u){const p=this.pair(u);return this.asset.sampleRate/((1-p.w)*this.intervals[p.a].length+p.w*this.intervals[p.b].length);}
+  advanceHead(head,rate){
+    const i=Math.floor(head.q),r=this.intervals[i],position=r.start+(head.q-i)*r.length,timeline=this.timeline();
+    const target=this.coordinate(head.q)+rate/FS;
+    let k=Math.floor(position);while(k+1<timeline.length&&timeline[k+1]<=target)k++;
+    check(k+1<timeline.length,'source-time advance escaped finite continuation');
+    const next=k+(target-timeline[k])/(timeline[k+1]-timeline[k]),step=next-position;
+    if(head.lastStep!==undefined)this.stats.texture.maximumReaderStepChange=Math.max(this.stats.texture.maximumReaderStepChange??0,Math.abs(step-head.lastStep));
+    head.lastStep=step;
+    let index=i;while(index+1<this.intervals.length&&next>=this.intervals[index].end)index++;
+    head.q=index+(next-this.intervals[index].start)/this.intervals[index].length;
   }
-  transitionCost(from,to){
-    const a=this.intervals[from],b=this.intervals[to];let difference=0,ea=0,eb=0;
-    for(let k=0;k<128;k++){const phase=(k+.5)/128,x=linear(this.samples,a.start+phase*a.length),y=linear(this.samples,b.start+phase*b.length);
-      difference+=(x-y)**2;ea+=x*x;eb+=y*y;}
-    return Math.sqrt(difference/Math.max(Math.sqrt(ea*eb),1e-30));
+  timeline(){
+    if(this.sourceTimeline)return this.sourceTimeline;
+    let entries=sourceTimelines.get(this.samples);if(!entries){entries=new Map();sourceTimelines.set(this.samples,entries);}
+    const key=this.intervals.map(r=>r.start+':'+r.end).join(',');
+    if(entries.has(key))return this.sourceTimeline=entries.get(key);
+    const t=new Float64Array(this.asset.frames+1);
+    for(let i=0;i<this.asset.frames;i++)t[i+1]=t[i]+this.rateAt((i+.5)/(this.asset.frames-1))/this.asset.sampleRate;
+    entries.set(key,t);return this.sourceTimeline=t;
   }
-  textureNext(current,p){
-    let plan=this.texturePlan;
-    // Re-evaluate at phrase/state boundaries, outside the per-sample waveform
-    // loop. Period/phase still follow the requested state, never the bag order.
-    if(!plan||plan.anchor!==p.a){plan=this.pool(p);this.texturePlan=plan;this.textureBag=[];this.textureEnd=null;}
-    if(plan.allowed.has(current)&&plan.allowed.has(current+1)&&this.textureEnd!==null&&current<this.textureEnd)return current+1;
-    if(!this.textureBag?.length)this.refill(plan);
-    if(this.textureBag.length>1&&this.textureBag.at(-1)[0]===current){const j=this.textureBag.findIndex(c=>c[0]!==current);[this.textureBag[j],this.textureBag[this.textureBag.length-1]]=[this.textureBag.at(-1),this.textureBag[j]];}
-    // Prefer a compatible waveform continuation, with bounded seeded choice
-    // among close candidates; never randomize phase, pitch or sample values.
-    const ranked=this.textureBag.map((chunk,index)=>({chunk,index,cost:this.transitionCost(current,chunk[0])})).sort((a,b)=>a.cost-b.cost);
-    const choices=ranked.filter(c=>c.cost<=ranked[0].cost+.15).slice(0,3),pick=choices[Math.floor(this.random()**3*choices.length)];
-    const [chunk]=this.textureBag.splice(pick.index,1);this.textureEnd=chunk[1];this.textureLastPhrase=chunk[0];this.stats.texture.phrasesStarted++;
-    return chunk[0];
+  coordinate(q){
+    if(q===this.intervals.length)return this.timeline()[this.intervals.at(-1).end];
+    const i=Math.floor(q),r=this.intervals[i],p=r.start+(q-i)*r.length,k=Math.floor(p),w=p-k,t=this.timeline();
+    return (1-w)*t[k]+w*t[k+1];
   }
-  safeStatePair(p){
-    if(!this.features[p.a].transientRisk&&!this.features[p.b].transientRisk)return p;
-    let a=p.a,b=p.b;while(a>=0&&this.features[a].transientRisk)a--;while(b<this.intervals.length&&this.features[b].transientRisk)b++;
-    if(a<0)a=b;if(b>=this.intervals.length)b=a;
-    check(a>=0&&b<this.intervals.length&&!this.features[a].transientRisk&&!this.features[b].transientRisk,'no safe state-local source material');
-    const left=this.intervals[a].centre,right=this.intervals[b].centre,w=a===b?0:Math.max(0,Math.min(1,(p.target-left)/(right-left)));
-    return {a,b,w,target:p.target};
+  clockRoom(q,plan){
+    const amount=this.available(q,plan);return amount>0?this.coordinate(q+amount)-this.coordinate(q):0;
   }
-  textureCycle(p){
-    if(!this.texturePlan){this.texturePlan=this.pool(p);const plan=this.texturePlan;
-      this.textureCurrent=plan.start;this.textureEnd=Math.min(plan.runEnd,this.textureCurrent+7);
-      this.textureUpcoming=this.textureNext(this.textureCurrent,p);}
-    if(this.pendingBoundary){this.textureCurrent=this.textureUpcoming;this.textureUpcoming=this.textureNext(this.textureCurrent,p);this.stats.texture.cyclesAdvanced++;}
-    const ia=this.textureCurrent,ib=this.textureUpcoming;
-    for(const i of [ia,ib]){if(!this.textureOccupancy[i]++)this.stats.texture.uniqueIntervals++;
-      if(this.features[i].transientRisk)this.stats.texture.transientRiskReads++;
+  sourceHead(p){
+    let i=p.a;while(i+1<this.intervals.length&&p.target>=this.intervals[i].end)i++;
+    const r=this.intervals[i];return {q:i+Math.max(0,Math.min(.999999999,(p.target-r.start)/r.length))};
+  }
+  sampleHead(q,track=false){
+    const i=Math.floor(q),r=this.intervals[i];check(r&&q>=0&&q<this.intervals.length,'continuous source cursor escaped PCM');
+    let position=r.start+(q-i)*r.length;
+    if(track&&(!this.texturePlan?.allowed.has(i+1)||this.features[i+1]?.transientRisk))position=Math.min(position,r.end-1);
+    if(track){if(!this.textureOccupancy[i]++)this.stats.texture.uniqueIntervals++;
       this.stats.minimumSelectedInterval=Math.min(this.stats.minimumSelectedInterval??i,i);this.stats.maximumSelectedInterval=Math.max(this.stats.maximumSelectedInterval??i,i);
-      const target=(1-p.w)*this.intervals[p.a].length+p.w*this.intervals[p.b].length;
-      this.stats.texture.maximumMaterialRateDifference=Math.max(this.stats.texture.maximumMaterialRateDifference,Math.abs(this.intervals[i].length/target-1));}
-    if(this.texturePlan.count<4)this.stats.texture.insufficientMaterialFrames++;
-    const a=this.cycle(this.intervals[ia]),b=ia===ib?a:this.cycle(this.intervals[ib]),w=smooth(this.phase);
-    // Adjacent source cycles evolve at the same continuously advancing phase.
-    // The full synthesis period is retained; no incoming clock runs early.
-    return {value:(1-w)*a.value+w*b.value,energy:(1-w)*a.energy+w*b.energy};
+      if(this.features[i].transientRisk)this.stats.texture.transientRiskReads++;}
+    if(track)this.stats.texture.maximumMaterialRateDifference=Math.max(this.stats.texture.maximumMaterialRateDifference,Math.abs(r.length*(this.lastRate??this.rateAt(this.state??.5))/this.asset.sampleRate-1));
+    return this.read(position);
   }
-  next(u){
+  available(q,plan){
+    const i=Math.floor(q);let last=i;
+    if(!plan.allowed.has(i))return 0;
+    while(last+1<this.intervals.length&&plan.allowed.has(last+1)&&this.intervals[last].end===this.intervals[last+1].start)last++;
+    return last+1-q;
+  }
+  matchHead(reference,plan){
+    const possible=[...plan.allowed].filter(i=>this.available(i,plan)>=2);
+    const list=possible.length?possible:[...plan.allowed];check(list.length,'safe source continuation required');
+    const longestRun=Math.max(...plan.runs.map(([a,b])=>b-a+1));
+    const horizon=Math.min(1,longestRun/2,(reference.voice.intervals.length-reference.q)*.99),n=64;
+    check(horizon>0,'outgoing source continuation must remain bounded');
+    const target=Float64Array.from({length:n},(_,k)=>reference.voice.sampleHead(reference.q+horizon*k/n));
+    const minimumRoom=Math.min(.5,Math.max(.000001,4*this.rateAt(this.state??.5)/FS));
+    const score=q=>{let diff=0,energy=0,xy=0,xx=0,yy=0;
+      if(q<0||q+horizon>this.intervals.length||this.available(q,plan)<Math.max(horizon,minimumRoom))return {error:Infinity,correlation:0};
+      if(reference.voice===this&&longestRun>=3&&this.available(q,plan)<Math.min(this.available(reference.q,plan)+.5,longestRun*.75))return {error:Infinity,correlation:0};
+      if(reference.voice===this&&longestRun>=8&&this.available(q,plan)<longestRun*.5)return {error:Infinity,correlation:0};
+      for(let k=0;k<n;k++){const x=target[k],y=this.sampleHead(q+horizon*k/n);diff+=(x-y)**2;energy+=x*x+y*y;xy+=x*y;xx+=x*x;yy+=y*y;}
+      return {error:diff/Math.max(energy,1e-20),correlation:xy/Math.sqrt(Math.max(xx*yy,1e-30))};};
+    // First test the existing phase: identical periodic inputs need no shift.
+    let best=null;const phase=((reference.q%1)+1)%1;
+    const candidates=[];for(let k=0;k<Math.min(12,list.length);k++){
+      const i=list[Math.min(list.length-1,Math.floor((k+this.random()*.5)*list.length/Math.min(12,list.length)))];
+      if(!candidates.includes(i))candidates.push(i);
+    }
+    for(const i of candidates){
+      const q=i+phase,c=score(q);if(!best||c.error<best.error)best={q,...c};
+      if(c.error<1e-12)break;
+      for(let j=0;j<32;j++){const q=i+j/32,c=score(q);if(c.error<best.error)best={q,...c};}
+    }
+    for(const step of [1/256,1/2048]){const centre=best.q;for(let k=-8;k<=8;k++){const q=centre+k*step,c=score(q);if(c.error<best.error)best={q,...c};}}
+    check(Number.isFinite(best.error),'no bounded waveform continuation');
+    this.stats.texture.minimumSpliceCorrelation=Math.min(this.stats.texture.minimumSpliceCorrelation??1,best.correlation);
+    if(best.correlation<.8)this.stats.texture.lowCoherenceSplices=(this.stats.texture.lowCoherenceSplices??0)+1;
+    return {q:best.q,correlation:best.correlation};
+  }
+  alignTo(reference,u,rateHz){
+    if(!this.textureEnabled||!reference.textureEnabled)return false;
+    if(reference.state===null)reference.state=.5;
+    if(!reference.head)reference.head=reference.sourceHead(reference.pair(reference.state));
+    this.state=u;const plan=this.pool(this.pair(u));
+    this.head=this.matchHead({voice:reference,q:reference.head.q},plan);this.join=null;
+    // Only the previously inaudible reader is registered. No reference reset,
+    // no engine/exhaust phase lock, and no added oscillator or pitch jitter.
+    this.phase=reference.phase;this.texturePlan=plan;this.lastPlanAnchor=plan.anchor;
+    this.stats.texture.modeRegistrations=(this.stats.texture.modeRegistrations??0)+1;
+    return true;
+  }
+  continuous(p,rate){
+    if(!this.texturePlan||p.a!==this.lastPlanAnchor){this.texturePlan=this.pool(p);this.lastPlanAnchor=p.a;}
+    const plan=this.texturePlan,delta=rate/FS;
+    if(plan.count<2){
+      // Sparse support cannot supply a multi-cycle chronological continuation.
+      // Keep the bounded phase-pair approximation explicit for that case only.
+      this.stats.texture.insufficientMaterialFrames++;this.head=null;this.join=null;
+      const ia=this.features[p.a].transientRisk?plan.start:p.a,ib=this.features[p.b].transientRisk?plan.start:p.b;
+      const a=this.cycle(this.intervals[ia]),b=this.cycle(this.intervals[ib]);
+      return {value:(1-p.w)*a.value+p.w*b.value,energy:(1-p.w)*a.energy+p.w*b.energy};
+    }
+    if(!this.head){this.head=this.sourceHead(p);if(!plan.allowed.has(Math.floor(this.head.q)))this.head={q:plan.start+this.phase};}
+    const reserve=Math.min(1,Math.max(.25,rate*.025));
+    if(!this.join&&this.clockRoom(this.head.q,plan)<reserve+delta){
+      const incoming=this.matchHead({voice:this,q:this.head.q},plan);
+      let safeEnd=Math.floor(this.head.q)+1;
+      while(safeEnd<this.intervals.length&&!this.features[safeEnd].transientRisk&&this.intervals[safeEnd-1].end===this.intervals[safeEnd].start)safeEnd++;
+      const compatibleRoom=this.clockRoom(this.head.q,plan);
+      const room=Math.min(this.coordinate(safeEnd)-this.coordinate(this.head.q),this.clockRoom(incoming.q,plan),compatibleRoom>0?compatibleRoom:Infinity);
+      const cycles=Math.max(delta,Math.min(reserve,room-2*delta));
+      this.join={incoming,age:0,cycles};this.stats.texture.phrasesStarted++;
+      this.stats.texture.splices=(this.stats.texture.splices??0)+1;
+    }
+    const outgoing=this.head,a=this.sampleHead(outgoing.q,true);let value=a,energy=a*a;
+    if(this.join){const j=this.join,b=this.sampleHead(j.incoming.q,true),w=smooth(Math.min(1,j.age/j.cycles));
+      value=(1-w)*a+w*b;energy=(1-w)*a*a+w*b*b;this.advanceHead(j.incoming,rate);j.age+=delta;
+      if(j.age>=j.cycles){this.head=j.incoming;this.join=null;}}
+    else this.stats.texture.chronologicalFrames=(this.stats.texture.chronologicalFrames??0)+1;
+    // Both heads advance by exactly the same requested interval phase. Native
+    // interval boundaries are traversed in order, without shortening a period.
+    if(this.head===outgoing)this.advanceHead(outgoing,rate);
+    this.stats.texture.cyclesAdvanced=this.clockCycles;
+    if(plan.count<4)this.stats.texture.insufficientMaterialFrames++;
+    return {value,energy};
+  }
+  next(u,externalRateHz=null){
     check(Number.isFinite(u)&&u>=0&&u<=1,'normalized authored source position required');
     if(this.state===null){this.state=u;const p=this.pair(u),r=this.intervals[p.a];
       // Keep each recording's own source-time phase. No imposed common
@@ -202,26 +280,13 @@ export class StockGrainVoice {
     if(this.lastPair!==undefined&&this.lastPair!==p.a)this.stats.stateSwitches++;
     this.lastPair=p.a;this.current=a;
     let value,energy;
-    if(this.textureEnabled){
-      const texture=this.textureCycle(p),target=(1-p.w)*a.length+p.w*b.length,w=smooth(this.phase);
-      const currentMismatch=Math.abs(this.intervals[this.textureCurrent].length/target-1),nextMismatch=Math.abs(this.intervals[this.textureUpcoming].length/target-1);
-      const compatible=(1-w<.001||currentMismatch<=.05+1e-12)&&(w<.001||nextMismatch<=.05+1e-12);
-      // A rapid state change must not drag an obsolete recorded-RPM region
-      // through the new clock. Fade to the contemporaneous state-local pair;
-      // refresh the texture plan only while it is inaudible. Phase never resets.
-      this.textureMix+=(1-Math.exp(-1/(FS*.005)))*((compatible?1:0)-this.textureMix);
-      this.fallbackPair=null;
-      if(this.textureMix<.999999){
-        this.stats.texture.stateLocalFallbackFrames++;
-        const q=this.safeStatePair(p);this.fallbackPair=q;this.stats.maximumConcurrentHeads=4;
-        const x=this.cycle(this.intervals[q.a]),y=q.a===q.b?x:this.cycle(this.intervals[q.b]),baseValue=(1-q.w)*x.value+q.w*y.value,baseEnergy=(1-q.w)*x.energy+q.w*y.energy;
-        value=this.textureMix*texture.value+(1-this.textureMix)*baseValue;energy=this.textureMix*texture.energy+(1-this.textureMix)*baseEnergy;
-      }else{value=texture.value;energy=texture.energy;}
-      if(!compatible&&this.textureMix<.001){this.texturePlan=null;this.textureBag=[];this.stats.texture.texturePlanRefreshes++;}
-    }
+    const period=(1-p.w)*a.length+p.w*b.length;
+    const rate=externalRateHz??this.asset.sampleRate/period;
+    check(Number.isFinite(rate)&&rate>0&&rate<=FS/8,'bounded source interval clock');
+    this.lastRate=rate;
+    if(this.textureEnabled){const x=this.continuous(p,rate);value=x.value;energy=x.energy;}
     else{const x=this.cycle(a),y=p.a===p.b?x:this.cycle(b);value=(1-p.w)*x.value+p.w*y.value;energy=(1-p.w)*x.energy+p.w*y.energy;}
     if(this.pendingBoundary)this.maximumBoundaryStep=Math.max(this.maximumBoundaryStep,Math.abs(value-this.previous));
-    const period=(1-p.w)*a.length+p.w*b.length,rate=this.asset.sampleRate/period;
     this.stats.minimumIntervalRateHz=Math.min(this.stats.minimumIntervalRateHz,rate);this.stats.maximumIntervalRateHz=Math.max(this.stats.maximumIntervalRateHz,rate);
     this.stats.minimumSelectedInterval=Math.min(this.stats.minimumSelectedInterval??p.a,p.a);
     this.stats.maximumSelectedInterval=Math.max(this.stats.maximumSelectedInterval??p.b,p.b);

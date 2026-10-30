@@ -34,7 +34,17 @@ export function loadStockAssets(manifestFile,{sustainAtlasFile=null}={}){
       if(mode!=='idle')check(intervals?.file===record.file&&intervals.frames===record.frames&&intervals.sampleRate===record.sampleRate&&intervals.candidateIntervals?.length>1,'verified offset-bounded playback intervals required');
       const texture=sustain?.streams.find(s=>s.model===v.model&&s.role===role&&s.state===mode);
       if(sustain)check(texture?.file===record.file&&texture.sha256.toUpperCase()===record.sha256.toUpperCase()&&texture.frames===record.frames&&texture.sampleRate===record.sampleRate,'sustain atlas source binding differs');
-      layers[role][mode]={...record,samples,nativePeak,intervals:intervals?.candidateIntervals??null,sustain:mode==='idle'?null:texture};
+      let spans=intervals?.candidateIntervals??null;
+      if(mode==='idle'){
+        // Retained ordered PCM offsets provide cycle-span evidence for idle as
+        // well as moving recordings. Their meaning is not recovered crank RPM
+        // or a claim about the native idle playback algorithm.
+        const offsets=record.granular?.grains?.map(g=>g.UnkUint1);
+        check(offsets?.length>2&&offsets.every((n,i)=>Number.isInteger(n)&&n>=0&&n<=record.frames&&(!i||n>offsets[i-1])),'ordered retained idle granular offsets required');
+        spans=offsets.slice(0,-1).map((startFrame,i)=>({startFrame,endFrame:offsets[i+1]}));
+        if(texture)check(texture.intervals?.length===spans.length&&texture.intervals.every((r,i)=>r.index===i&&r.startFrame===spans[i].startFrame&&r.endFrame===spans[i].endFrame),'idle sustain atlas must bind retained source offsets exactly');
+      }
+      layers[role][mode]={...record,samples,nativePeak,intervals:spans,sustain:texture};
     }}
     vehicles.set(v.model,{...v,layers});
   }
@@ -56,7 +66,11 @@ export class StockVehicleSource {
       check(bound<=.98,'calibrated native PCM exceeds declared individual input budget');return [role,bound];}));
     this.vehicle=vehicle;this.gain=sourceGain;this.frame=0;this.envelope=0;this.position=.1;
     this.weights=[1,0,0];this.voices={};this.stats={frames:0,peak:0,maximumStep:0,modeledRpm:false,oscillatorSamples:0,
-      energy:{engine:{actual:0,reference:0},exhaust:{actual:0,reference:0}}};this.previous={engine:0,exhaust:0};
+      energy:{engine:{actual:0,reference:0},exhaust:{actual:0,reference:0}},
+      transitions:{basis:'role-local weighted native-interval rate; entering PCM waveform alignment; not crank RPM or native state semantics',
+        phaseAlignments:0,alignmentRequests:0,roles:Object.fromEntries(stockRoles.map(role=>[role,{alignments:0,alignmentRequests:0,skippedVoiceFrames:0,
+          minimumCommonRateHz:Infinity,maximumCommonRateHz:0,maximumRateStepHz:0}]))}};
+    this.previous={engine:0,exhaust:0};this.commonRates={engine:null,exhaust:null};
     if(exhaustEvents){check(vehicle.model==='prototipo','verified native pops must not be substituted across vehicles');
       this.events=new StockExhaustEvents({...exhaustEvents,bedPeakBound:this.inputBounds.exhaust,roleGainBound:sourceGain*Math.max(...this.shareStates.map(s=>s.exhaust))});this.stats.events=this.events.stats;}
     for(const role of stockRoles)this.voices[role]=Object.fromEntries(stockModes.map(mode=>[mode,new StockGrainVoice(vehicle.layers[role][mode],{regions:atlas?.[role]?.[mode]})]));
@@ -75,21 +89,46 @@ export class StockVehicleSource {
     const a=1-Math.exp(-1/(FS*.04)),e=1-Math.exp(-1/(FS*.025));
     for(let i=0;i<frames;i++){
       this.position+=a*(control.operatingPoint-this.position);this.envelope+=e*((control.running?1:0)-this.envelope);
-      for(let m=0;m<3;m++)this.weights[m]+=a*(target[m]-this.weights[m]);
+      const entering=[],previousWeights=[...this.weights];
+      for(let m=0;m<3;m++){
+        this.weights[m]+=a*(target[m]-this.weights[m]);
+        // Complete only numerically negligible IIR tails. This is floating-
+        // point completion, not an audible gate or another smoothing preset.
+        if(target[m]===0&&this.weights[m]<Number.EPSILON)this.weights[m]=0;
+        if(previousWeights[m]===0&&this.weights[m]>0)entering.push(m);
+      }
+      const addresses=[.5,this.position,1-this.position],weightTotal=this.weights.reduce((s,w)=>s+w,0);
       for(let roleIndex=0;roleIndex<2;roleIndex++){
         const role=stockRoles[roleIndex],output=roleIndex?exhaust:engine;
+        const voices=this.voices[role],rates=stockModes.map((mode,m)=>voices[mode].rateAt(addresses[m]));
+        const rate=this.weights.reduce((s,w,m)=>s+w*rates[m],0)/weightTotal,transition=this.stats.transitions.roles[role];
+        transition.minimumCommonRateHz=Math.min(transition.minimumCommonRateHz,rate);
+        transition.maximumCommonRateHz=Math.max(transition.maximumCommonRateHz,rate);
+        if(this.commonRates[role]!==null)transition.maximumRateStepHz=Math.max(transition.maximumRateStepHz,Math.abs(rate-this.commonRates[role]));
+        this.commonRates[role]=rate;
+        if(entering.length){
+          const dominant=previousWeights.reduce((best,w,m)=>w>previousWeights[best]?m:best,0),reference=voices[stockModes[dominant]];
+          // Register before rendering this sample. Every active head then
+          // consumes the same interval-rate increment, independently per role.
+          for(const m of entering){transition.alignmentRequests++;this.stats.transitions.alignmentRequests++;
+            if(voices[stockModes[m]].alignTo(reference,addresses[m],rate)){transition.alignments++;this.stats.transitions.phaseAlignments++;}}
+        }
         let sum=0,expected=0;for(let m=0;m<3;m++){
-          const voice=this.voices[role][stockModes[m]],address=m===2?1-this.position:m===0?.5:this.position;
-          sum+=this.weights[m]*voice.next(address);expected+=this.weights[m]*voice.lastExpectedEnergy;
+          if(this.weights[m]===0){transition.skippedVoiceFrames++;continue;}
+          const voice=voices[stockModes[m]],share=this.shareStates[m][role];
+          sum+=this.weights[m]*share*voice.next(addresses[m],rate);expected+=this.weights[m]*share*share*voice.lastExpectedEnergy;
         }
         // Declared pressure shares retain an explicit two-emitter budget.
         // Native REL numeric fields are not interpreted as amplitude gains.
         // Load selects real accel/decel material;
         // only graph-bound finite PCM events may be explicitly scheduled.
-        if(role==='exhaust'&&this.events){const event=this.events.next(this.frame);expected+=2*sum*event+event*event;sum+=event;}
-        const share=this.weights.reduce((s,w,m)=>s+w*this.shareStates[m][role],0),value=sum*share*this.gain*this.envelope;check(Number.isFinite(value)&&Math.abs(value)<=.98+1e-12,'source PCM bound');
+        if(role==='exhaust'&&this.events){
+          const eventShare=this.weights.reduce((s,w,m)=>s+w*this.shareStates[m][role],0),event=this.events.next(this.frame)*eventShare;
+          expected+=2*sum*event+event*event;sum+=event;
+        }
+        const value=sum*this.gain*this.envelope;check(Number.isFinite(value)&&Math.abs(value)<=.98+1e-12,'source PCM bound');
         output[i]=value;this.stats.peak=Math.max(this.stats.peak,Math.abs(value));
-        this.stats.energy[role].actual+=value*value;this.stats.energy[role].reference+=expected*(share*this.gain*this.envelope)**2;
+        this.stats.energy[role].actual+=value*value;this.stats.energy[role].reference+=expected*(this.gain*this.envelope)**2;
         this.stats.maximumStep=Math.max(this.stats.maximumStep,Math.abs(value-this.previous[role]));this.previous[role]=value;
       }
       this.frame++;

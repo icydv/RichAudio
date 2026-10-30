@@ -30,7 +30,7 @@ test('complementary transitions are convex, smooth at boundaries and never norma
   for(let i=0;i<48000;i++){const value=v.next(i<24000?1:0);assert.ok(Math.abs(value)<=.75+1e-12);maxStep=Math.max(maxStep,Math.abs(value-previous));previous=value;}
   assert.ok(maxStep<.02);assert.ok(v.maximumBoundaryStep<.02);assert.ok(v.expectedEnergy>0&&v.outputEnergy>0);
   assert.ok(v.outputEnergy<=v.expectedEnergy+1e-7,'convex blend cannot hide cancellation by adding gain');
-  assert.equal(v.stats.maximumConcurrentHeads,4);assert.equal(v.stats.sourceBoundViolations,0);
+  assert.equal(v.stats.maximumConcurrentHeads,2);assert.equal(v.stats.sourceBoundViolations,0);
 });
 test('held state keeps deterministic interval phase without neighbour hopping or start jitter',()=>{
   const samples=Float32Array.from({length:12000},(_,i)=>.2*Math.sin(i*.07));

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "milestone": "STOCK-SOURCE-04",
+  "baseCommit": "ba62846dd6155b515e165a57088bea660c68be84",
+  "tests": {
+    "passed": 67,
+    "failed": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "scope": "13 focused source/clock/chronology/transition/history/causal/distance/late integration files; no full CI or benchmark matrix"
+  },
+  "preservation": {
+    "previous01and02FilesUnchanged": 294,
+    "previous03AuditionWavsUnchanged": 59,
+    "previous03DistanceSourcePcmUnchanged": 4,
+    "previous03CheckoutCleanAndAtOriginalCommit": true,
+    "earlierProtectedInputs": 78
+  },
+  "delivery": {
+    "newWavs": 28,
+    "players": 36,
+    "allLocalLinksResolve": true,
+    "inlineScriptParses": true,
+    "browserInteractionPerformed": false
+  },
+  "coreBindingsMatchRenderedAudio": true,
+  "moduleBindings": {
+    "src/acoustics/vehicle/stock-source.mjs": "6d9275e651e8b3ea6a5fbfa4388d2ff5b4a85ad08feca5e957de088fad3cb491",
+    "src/acoustics/vehicle/stock-grain.mjs": "203d1cefc68d1655bd681e058124b26ec2344551cab35d874d253af03f7e64e8",
+    "src/acoustics/vehicle/stock-events.mjs": "adbb889ae78ab1d1244cf0bd6a761059469a5e2022b82c8579e0d0a0bc9c151a",
+    "src/acoustics/vehicle/pipeline.mjs": "a91fe572a424651f54db97703e2025bd21373e8093400b3a92f8797540584620",
+    "src/acoustics/vehicle/distance-presentation.mjs": "947ac8254c0a508358746ad2607ea9a5a946fe8577286f92d2f7f7bfe5b9cec5",
+    "src/acoustics/streaming/causal.mjs": "491d84288c083d6d8a9ca2040a5ee2350aa68ea7dff14a95a3322197348af226",
+    "src/acoustics/engine/paths.mjs": "b4c12a08a2b240e54be1032bc7877e1dc8ecdcc9115e062b10439515c0024794",
+    "tools/stock-source-01-scenario.mjs": "8f23ce3cc3493f094d85123f86e33240e3bf808423f76b11a1cf6498e74ff9e4",
+    "tools/Render-StockSource03.mjs": "6d9f50cf67b46140cae6461ae94cfaf0c0b68d38b6edc1670c22a00d7d2f267d"
+  },
+  "sourceVerdict03": "REJECTED by user",
+  "subjectiveListeningPerformed": false,
+  "perceptualAcceptance": "PENDING user listening",
+  "allThreeRequirements": [
+    "Organic sustained texture and idle/load/lift handoffs for every vehicle",
+    "Native exhaust resonance and convincing passing power with justified returns",
+    "Continuous rising pitch across every vehicle including X80 and Lectro"
+  ]
+}
