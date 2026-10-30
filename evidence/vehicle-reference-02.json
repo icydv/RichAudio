@@ -1,0 +1,313 @@
+{
+  "baseCommit": "eef0cbc2e96e09754d87b375975eb1053422121e",
+  "method": "44.1kHz mono downmix; fourth-order Butterworth zero-phase bandpass; window RMS; Welch peaks. No level matching. Comparison windows are descriptive, not matched RPM/distance.",
+  "subjectiveListening": "not performed",
+  "physicalSpl": "uncalibrated and not inferred",
+  "originalMediaAvailable": [
+    "6966.mp4"
+  ],
+  "otherReferences": "6967/6968 supplied notes and spectrograms only",
+  "existingAuditionBindingsVerified": [
+    {
+      "file": "02-acceleration-dry.wav",
+      "sha256": "ae4f97e8a8a983352ef6ea79bba1090a7664d250eb5e90c416004e58bdf98df9"
+    },
+    {
+      "file": "05-pass-direct-dry.wav",
+      "sha256": "0d96c3db913afaf2dbda82de346f3032b80a8e4c00b85d95f1d48a9c43407414"
+    },
+    {
+      "file": "05-pass-direct.wav",
+      "sha256": "d93787dd6595ce813626fcd4281ae3d27c9454359bb8fbf7a3cb18e8dedfed7d"
+    },
+    {
+      "file": "06-distant-departure.wav",
+      "sha256": "84b6d65081c8794037de135b4bbac03f13c6137a9417be13dce5c93e1aa86a52"
+    },
+    {
+      "file": "07-pass-reflections.wav",
+      "sha256": "ce05521c5d3d43c18e749bbbfe8660ab8e58fe2e609cdb672f5050631b7982fa"
+    },
+    {
+      "file": "08-tunnel-early.wav",
+      "sha256": "1be4f34c8df0af341062913b0f0343feaa0cb886df7b063681cc859cbe7153ff"
+    },
+    {
+      "file": "09-tunnel-late.wav",
+      "sha256": "fac4904afe621b9640f715ba31b2aa7e5a0f3bee6c4a1fc05d479c28bdce2349"
+    }
+  ],
+  "windows": {
+    "6966.mp4": [
+      {
+        "label": "approach",
+        "start": 1.5,
+        "end": 2.3,
+        "rmsDbfs": -28.669558812218476,
+        "bandsDbfs": {
+          "160-500": -40.77309454507245,
+          "500-2000": -32.79768900606854,
+          "2000-6000": -42.05074327032057
+        },
+        "upperToMidDb": -9.253054264252029,
+        "prominentHz": [
+          10.77,
+          21.53,
+          767.12,
+          788.65,
+          581.4,
+          775.2,
+          619.08,
+          331.07
+        ]
+      },
+      {
+        "label": "near",
+        "start": 4.8,
+        "end": 5.6,
+        "rmsDbfs": -15.297881192766656,
+        "bandsDbfs": {
+          "160-500": -29.03341574380946,
+          "500-2000": -16.726095937697067,
+          "2000-6000": -23.10742161381764
+        },
+        "upperToMidDb": -6.381325676120571,
+        "prominentHz": [
+          802.11,
+          950.15,
+          977.07,
+          794.04,
+          750.97,
+          769.81,
+          1593.46,
+          740.2
+        ]
+      },
+      {
+        "label": "after-knee",
+        "start": 6.3,
+        "end": 7.3,
+        "rmsDbfs": -15.659360555673633,
+        "bandsDbfs": {
+          "160-500": -32.48221882190461,
+          "500-2000": -17.488065680768493,
+          "2000-6000": -22.619707735687324
+        },
+        "upperToMidDb": -5.1316420549188315,
+        "prominentHz": [
+          567.94,
+          584.09,
+          600.24,
+          594.85,
+          1165.48,
+          1138.57,
+          1706.51,
+          635.23
+        ]
+      },
+      {
+        "label": "later",
+        "start": 14,
+        "end": 18,
+        "rmsDbfs": -27.4028701127083,
+        "bandsDbfs": {
+          "160-500": -32.53358271388717,
+          "500-2000": -35.026117295550925,
+          "2000-6000": -48.88320781035123
+        },
+        "upperToMidDb": -13.857090514800305,
+        "prominentHz": [
+          10.77,
+          266.47,
+          532.95,
+          177.65,
+          250.32,
+          220.72,
+          1065.89,
+          53.83
+        ]
+      }
+    ],
+    "05-pass-direct-dry.wav": [
+      {
+        "label": "established-source",
+        "start": 1,
+        "end": 1.8,
+        "rmsDbfs": -21.9377304302022,
+        "bandsDbfs": {
+          "160-500": -31.173116008948185,
+          "500-2000": -24.996437797674393,
+          "2000-6000": -35.02928003406091
+        },
+        "upperToMidDb": -10.032842236386518,
+        "prominentHz": [
+          764.43,
+          126.51,
+          1528.86,
+          255.71,
+          382.21,
+          2293.29,
+          1071.28,
+          64.6
+        ]
+      }
+    ],
+    "05-pass-direct.wav": [
+      {
+        "label": "approach",
+        "start": 0.3,
+        "end": 0.7,
+        "rmsDbfs": -74.88097899169983,
+        "bandsDbfs": {
+          "160-500": -81.96070781587933,
+          "500-2000": -80.80934914020656,
+          "2000-6000": -93.99924628671295
+        },
+        "upperToMidDb": -13.189897146506382,
+        "prominentHz": [
+          137.27,
+          131.89,
+          123.82,
+          113.05,
+          99.59,
+          277.24,
+          69.98,
+          269.17
+        ]
+      },
+      {
+        "label": "near",
+        "start": 1.9,
+        "end": 2.1,
+        "rmsDbfs": -45.30458373541755,
+        "bandsDbfs": {
+          "160-500": -53.13229042052579,
+          "500-2000": -51.04110600604743,
+          "2000-6000": -60.52457993892879
+        },
+        "upperToMidDb": -9.48347393288136,
+        "prominentHz": [
+          130.0,
+          260.0,
+          765.0,
+          840.0,
+          65.0,
+          815.0,
+          735.0,
+          390.0
+        ]
+      },
+      {
+        "label": "recession",
+        "start": 3.2,
+        "end": 3.8,
+        "rmsDbfs": -70.2463998140255,
+        "bandsDbfs": {
+          "160-500": -79.84588226986745,
+          "500-2000": -73.85084004946694,
+          "2000-6000": -83.51918501885396
+        },
+        "upperToMidDb": -9.668344969387022,
+        "prominentHz": [
+          107.67,
+          651.38,
+          1302.76,
+          218.02,
+          1951.45,
+          325.69,
+          909.78,
+          2602.83
+        ]
+      }
+    ],
+    "06-distant-departure.wav": [
+      {
+        "label": "near",
+        "start": 0.5,
+        "end": 1,
+        "rmsDbfs": -56.57476159652909,
+        "bandsDbfs": {
+          "160-500": -66.4078109905184,
+          "500-2000": -59.97464763240889,
+          "2000-6000": -69.63791639198392
+        },
+        "upperToMidDb": -9.663268759575033,
+        "prominentHz": [
+          110.36,
+          656.76,
+          1316.22,
+          218.02,
+          1975.67,
+          882.86,
+          328.38,
+          53.83
+        ]
+      },
+      {
+        "label": "far",
+        "start": 7.5,
+        "end": 8.5,
+        "rmsDbfs": -73.7338680840095,
+        "bandsDbfs": {
+          "160-500": -82.90395091110071,
+          "500-2000": -77.67093046308959,
+          "2000-6000": -87.11588366867522
+        },
+        "upperToMidDb": -9.444953205585634,
+        "prominentHz": [
+          110.36,
+          659.45,
+          1318.91,
+          220.72,
+          1978.36,
+          885.55,
+          331.07,
+          2637.82
+        ]
+      }
+    ]
+  },
+  "tunnelDifferenceMono": [
+    {
+      "start": 0,
+      "end": 4,
+      "earlyDbfs": -41.827328615454135,
+      "lateMinusEarlyDbfs": -80.80695496007827
+    },
+    {
+      "start": 4,
+      "end": 5,
+      "earlyDbfs": -55.7100315129069,
+      "lateMinusEarlyDbfs": -88.19152051610807
+    },
+    {
+      "start": 5,
+      "end": 6,
+      "earlyDbfs": -300.0,
+      "lateMinusEarlyDbfs": -127.21399394123637
+    }
+  ],
+  "tunnelDifferenceStereo48k": [
+    {
+      "start": 0,
+      "end": 4,
+      "earlyDbfs": -41.4902593155336,
+      "lateMinusEarlyDbfs": -76.58795365432952,
+      "wetToEarlyDb": -35.097694338795925
+    },
+    {
+      "start": 4,
+      "end": 5,
+      "earlyDbfs": -55.433144952057695,
+      "lateMinusEarlyDbfs": -84.82748786138528,
+      "wetToEarlyDb": -29.394342909327584
+    },
+    {
+      "start": 5,
+      "end": 6,
+      "earlyDbfs": -300.0,
+      "lateMinusEarlyDbfs": -122.29165281350865,
+      "wetToEarlyDb": 177.70834718649135
+    }
+  ]
+}
