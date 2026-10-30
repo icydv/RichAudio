@@ -1,0 +1,1758 @@
+{
+  "schemaVersion": 1,
+  "milestone": "STOCK-SOURCE-02",
+  "scope": "Original harmonic/transient diagnostic and genuine fixed-state Schafter confirmation",
+  "profiles": {
+    "physical-default": {
+      "basis": "existing-propagation-model-default",
+      "physicalCalibration": "unverified",
+      "airDbPerMetre": [
+        0.0001,
+        0.001,
+        0.01
+      ]
+    },
+    "authored-detail-loss-v1": {
+      "basis": "authored-distance-presentation-assumption",
+      "physicalCalibration": "unverified",
+      "airDbPerMetre": [
+        0.0001,
+        0.01,
+        0.1
+      ]
+    }
+  },
+  "setup": {
+    "sampleRate": 48000,
+    "blockFrames": 512,
+    "sourcePcmSha256": "e97e229bab3ccfd39ab58c490ceb097e457f245af0083752f9c9c4202bad12dc",
+    "sourceState": "Identical deterministic diagnostic PCM at every distance",
+    "durationSeconds": 2.1,
+    "sourceVelocity": [
+      0,
+      0,
+      0
+    ],
+    "listenerVelocity": [
+      0,
+      0,
+      0
+    ],
+    "sourceForward": [
+      -1,
+      0,
+      0
+    ],
+    "listenerForward": [
+      1,
+      0,
+      0
+    ],
+    "sourceDirectivity": 0.5,
+    "sourceAndListenerHeightMetres": 1,
+    "listenerPosition": [
+      0,
+      0,
+      1
+    ],
+    "sourcePositions": "[distanceMetres,0,1]",
+    "tileBounds": {
+      "min": [
+        -2,
+        -2,
+        0
+      ],
+      "max": [
+        254,
+        2,
+        3
+      ]
+    },
+    "tileBasis": "empty complete synthetic visibility fixture",
+    "surfaces": 0,
+    "sourceGain": 1,
+    "rendererMasterGain": 0.7,
+    "normalisation": false,
+    "lateField": false,
+    "diagnosticCompensation": "Only distance/masterGain applied to sum(L,R)/sqrt(2); compensation never applied to audible output",
+    "heldHarmonicEmissionWindowSeconds": [
+      0.35,
+      0.85
+    ],
+    "pulseEmissionWindowSeconds": [
+      1.1,
+      1.3
+    ]
+  },
+  "rows": [
+    {
+      "profile": "physical-default",
+      "distanceMetres": 2,
+      "harmonicFrequenciesHz": [
+        100,
+        300,
+        1000,
+        3000,
+        6000,
+        9000
+      ],
+      "gainCompensatedHarmonicAmplitudes": [
+        0.05999731556096713,
+        0.0399926354337396,
+        0.029964804530839023,
+        0.02478331596310863,
+        0.01936120119578928,
+        0.013991684952621253
+      ],
+      "highLowDb": -9.595776857985811,
+      "high9000Low100Db": -12.645236033083652,
+      "rawPeak": 0.05163729190826416,
+      "rawSteadyStereoRms": 0.014933370868670387,
+      "pulse": {
+        "energyCentroidMs": 15.705118102537702,
+        "energy10to90Ms": 38.666666666666664,
+        "first5msEnergyFraction": 0.3583697547920858,
+        "normalisedMaximumAdjacentStep": 5.45341862498992,
+        "compensatedPeak": 0.20864616725967333,
+        "onsetErrorFrames": 0.11661807580094319
+      },
+      "propagation": {
+        "lastPathCount": 1,
+        "maximumRetardedFrameError": 0,
+        "maximumRateError": 2.0761170560490427e-14,
+        "bands": [
+          0.49998848720708144,
+          0.49988488399907827,
+          0.49885003191127664
+        ]
+      },
+      "diagnostics": {
+        "renderer": {
+          "frames": 100800,
+          "peak": 0.051637291644798335,
+          "sumSquares": 18.472181056629616,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 197,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "simulationMissingPast": 1
+      }
+    },
+    {
+      "profile": "physical-default",
+      "distanceMetres": 10,
+      "harmonicFrequenciesHz": [
+        100,
+        300,
+        1000,
+        3000,
+        6000,
+        9000
+      ],
+      "gainCompensatedHarmonicAmplitudes": [
+        0.05998798720326513,
+        0.0399716034549019,
+        0.029894020540928733,
+        0.024435304391675804,
+        0.018398018533522527,
+        0.012450831083458276
+      ],
+      "highLowDb": -10.223969835296336,
+      "high9000Low100Db": -13.657318978636175,
+      "rawPeak": 0.009663527831435204,
+      "rawSteadyStereoRms": 0.0029658312169948795,
+      "pulse": {
+        "energyCentroidMs": 16.3803174449901,
+        "energy10to90Ms": 39.270833333333336,
+        "first5msEnergyFraction": 0.3394640398629194,
+        "normalisedMaximumAdjacentStep": 4.929640512787997,
+        "compensatedPeak": 0.19523274456550757,
+        "onsetErrorFrames": 0.58309037899744
+      },
+      "propagation": {
+        "lastPathCount": 1,
+        "maximumRetardedFrameError": 0,
+        "maximumRateError": 1.0436096431476471e-14,
+        "bands": [
+          0.09998848773724686,
+          0.09988493699365053,
+          0.09885530946569389
+        ]
+      },
+      "diagnostics": {
+        "renderer": {
+          "frames": 100800,
+          "peak": 0.009663527389191453,
+          "sumSquares": 0.7271717173727229,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 197,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "simulationMissingPast": 3
+      }
+    },
+    {
+      "profile": "physical-default",
+      "distanceMetres": 25,
+      "harmonicFrequenciesHz": [
+        100,
+        300,
+        1000,
+        3000,
+        6000,
+        9000
+      ],
+      "gainCompensatedHarmonicAmplitudes": [
+        0.05997185499409781,
+        0.0399402597978565,
+        0.02982808318077637,
+        0.02428129354695879,
+        0.0181840991472879,
+        0.012250530066068395
+      ],
+      "highLowDb": -10.334144452691765,
+      "high9000Low100Db": -13.795852034436905,
+      "rawPeak": 0.003839704208076,
+      "rawSteadyStereoRms": 0.0011839630776588022,
+      "pulse": {
+        "energyCentroidMs": 16.470251942707524,
+        "energy10to90Ms": 39.333333333333336,
+        "first5msEnergyFraction": 0.33698158413247026,
+        "normalisedMaximumAdjacentStep": 4.892811541008218,
+        "compensatedPeak": 0.1939343488057902,
+        "onsetErrorFrames": 0.4577259475190658
+      },
+      "propagation": {
+        "lastPathCount": 1,
+        "maximumRetardedFrameError": 0,
+        "maximumRateError": 2.0872192862952943e-14,
+        "bands": [
+          0.03998848873121924,
+          0.0398850362708213,
+          0.03886511806308424
+        ]
+      },
+      "diagnostics": {
+        "renderer": {
+          "frames": 100800,
+          "peak": 0.003839704101535983,
+          "sumSquares": 0.11586295118817122,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 197,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "simulationMissingPast": 7
+      }
+    },
+    {
+      "profile": "physical-default",
+      "distanceMetres": 50,
+      "harmonicFrequenciesHz": [
+        100,
+        300,
+        1000,
+        3000,
+        6000,
+        9000
+      ],
+      "gainCompensatedHarmonicAmplitudes": [
+        0.05994598764883408,
+        0.03989395937376339,
+        0.029765670037320974,
+        0.024370092121847813,
+        0.01890698371628896,
+        0.013722042158947338
+      ],
+      "highLowDb": -9.777444554312549,
+      "high9000Low100Db": -12.806827411514409,
+      "rawPeak": 0.0020440607331693172,
+      "rawSteadyStereoRms": 0.0005944114786338115,
+      "pulse": {
+        "energyCentroidMs": 15.800136323811202,
+        "energy10to90Ms": 38.791666666666664,
+        "first5msEnergyFraction": 0.35556978830435637,
+        "normalisedMaximumAdjacentStep": 5.4355580274496855,
+        "compensatedPeak": 0.20648131508302436,
+        "onsetErrorFrames": 0.9154518950381316
+      },
+      "propagation": {
+        "lastPathCount": 1,
+        "maximumRetardedFrameError": 0,
+        "maximumRateError": 5.218048215738236e-15,
+        "bands": [
+          0.019988490387585604,
+          0.019885201479059134,
+          0.018881217525718468
+        ]
+      },
+      "diagnostics": {
+        "renderer": {
+          "frames": 100800,
+          "peak": 0.002044060693259933,
+          "sumSquares": 0.029263215188000815,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 197,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "simulationMissingPast": 14
+      }
+    },
+    {
+      "profile": "physical-default",
+      "distanceMetres": 100,
+      "harmonicFrequenciesHz": [
+        100,
+        300,
+        1000,
+        3000,
+        6000,
+        9000
+      ],
+      "gainCompensatedHarmonicAmplitudes": [
+        0.05989253050236105,
+        0.03979041618121892,
+        0.02954345732923711,
+        0.023801888562982744,
+        0.017953325238165053,
+        0.01262838680596978
+      ],
+      "highLowDb": -10.306584777484534,
+      "high9000Low100Db": -13.520495738269062,
+      "rawPeak": 0.0009695016779005527,
+      "rawSteadyStereoRms": 0.0002947394085374526,
+      "pulse": {
+        "energyCentroidMs": 16.282837780340603,
+        "energy10to90Ms": 39.208333333333336,
+        "first5msEnergyFraction": 0.3421358605053024,
+        "normalisedMaximumAdjacentStep": 5.146062104383639,
+        "compensatedPeak": 0.19586891737577627,
+        "onsetErrorFrames": 0.8309037900762632
+      },
+      "propagation": {
+        "lastPathCount": 1,
+        "maximumRetardedFrameError": 0,
+        "maximumRateError": 1.0436096431476471e-14,
+        "bands": [
+          0.009988493699365051,
+          0.009885530946569389,
+          0.008912509381337455
+        ]
+      },
+      "diagnostics": {
+        "renderer": {
+          "frames": 100800,
+          "peak": 0.000969501674931532,
+          "sumSquares": 0.007186227556807617,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 197,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "simulationMissingPast": 28
+      }
+    },
+    {
+      "profile": "physical-default",
+      "distanceMetres": 200,
+      "harmonicFrequenciesHz": [
+        100,
+        300,
+        1000,
+        3000,
+        6000,
+        9000
+      ],
+      "gainCompensatedHarmonicAmplitudes": [
+        0.059787166549321306,
+        0.03959027388027404,
+        0.02913240775803419,
+        0.02283581228414047,
+        0.016434874530611605,
+        0.010978637336706535
+      ],
+      "highLowDb": -11.193514140370972,
+      "high9000Low100Db": -14.721190653312204,
+      "rawPeak": 0.00045208403025753796,
+      "rawSteadyStereoRms": 0.0001453943786516212,
+      "pulse": {
+        "energyCentroidMs": 17.00695303993773,
+        "energy10to90Ms": 40.79166666666667,
+        "first5msEnergyFraction": 0.32197588562558704,
+        "normalisedMaximumAdjacentStep": 4.505771054253638,
+        "compensatedPeak": 0.18266953340642827,
+        "onsetErrorFrames": 0.6618075801670784
+      },
+      "propagation": {
+        "lastPathCount": 1,
+        "maximumRetardedFrameError": 0,
+        "maximumRateError": 2.0872192862952943e-14,
+        "bands": [
+          0.0049885003191127665,
+          0.004886186104779053,
+          0.003971641173621408
+        ]
+      },
+      "diagnostics": {
+        "renderer": {
+          "frames": 100800,
+          "peak": 0.0004520840231528873,
+          "sumSquares": 0.0017459423364645332,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 197,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "simulationMissingPast": 55
+      }
+    },
+    {
+      "profile": "authored-detail-loss-v1",
+      "distanceMetres": 2,
+      "harmonicFrequenciesHz": [
+        100,
+        300,
+        1000,
+        3000,
+        6000,
+        9000
+      ],
+      "gainCompensatedHarmonicAmplitudes": [
+        0.05998968703520677,
+        0.03996049652914381,
+        0.029887754072994568,
+        0.02460710866661212,
+        0.01913076120957384,
+        0.013796439974137103
+      ],
+      "highLowDb": -9.703052814356752,
+      "high9000Low100Db": -12.76619120987249,
+      "rawPeak": 0.051249563694000244,
+      "rawSteadyStereoRms": 0.014901452183037846,
+      "pulse": {
+        "energyCentroidMs": 15.790090422714307,
+        "energy10to90Ms": 38.75000000000001,
+        "first5msEnergyFraction": 0.35599591704726474,
+        "normalisedMaximumAdjacentStep": 5.398431099950261,
+        "compensatedPeak": 0.2070795086907398,
+        "onsetErrorFrames": 0.11661807580094319
+      },
+      "propagation": {
+        "lastPathCount": 1,
+        "maximumRetardedFrameError": 0,
+        "maximumRateError": 2.0761170560490427e-14,
+        "bands": [
+          0.49998848720708144,
+          0.49885003191127664,
+          0.48861861047790534
+        ]
+      },
+      "diagnostics": {
+        "renderer": {
+          "frames": 100800,
+          "peak": 0.05124956261092954,
+          "sumSquares": 18.390104455904865,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 197,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "simulationMissingPast": 1
+      }
+    },
+    {
+      "profile": "authored-detail-loss-v1",
+      "distanceMetres": 10,
+      "harmonicFrequenciesHz": [
+        100,
+        300,
+        1000,
+        3000,
+        6000,
+        9000
+      ],
+      "gainCompensatedHarmonicAmplitudes": [
+        0.059950633620603155,
+        0.03981435993761213,
+        0.02952263703849614,
+        0.02361238840474312,
+        0.017356128331078968,
+        0.011620896305441839
+      ],
+      "highLowDb": -10.74502134073505,
+      "high9000Low100Db": -14.251083031781633,
+      "rawPeak": 0.009299508295953274,
+      "rawSteadyStereoRms": 0.002937639288514519,
+      "pulse": {
+        "energyCentroidMs": 16.74167702336003,
+        "energy10to90Ms": 39.5625,
+        "first5msEnergyFraction": 0.3293894861227624,
+        "normalisedMaximumAdjacentStep": 4.6941503539616765,
+        "compensatedPeak": 0.1878784393648319,
+        "onsetErrorFrames": 0.58309037899744
+      },
+      "propagation": {
+        "lastPathCount": 1,
+        "maximumRetardedFrameError": 0,
+        "maximumRateError": 1.0436096431476471e-14,
+        "bands": [
+          0.09998848773724686,
+          0.09885530946569389,
+          0.08912509381337456
+        ]
+      },
+      "diagnostics": {
+        "renderer": {
+          "frames": 100800,
+          "peak": 0.009299508077761143,
+          "sumSquares": 0.7129903948095492,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 197,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "simulationMissingPast": 3
+      }
+    },
+    {
+      "profile": "authored-detail-loss-v1",
+      "distanceMetres": 25,
+      "harmonicFrequenciesHz": [
+        100,
+        300,
+        1000,
+        3000,
+        6000,
+        9000
+      ],
+      "gainCompensatedHarmonicAmplitudes": [
+        0.05988183177951009,
+        0.03956166492606309,
+        0.028954890031728134,
+        0.02242719195630346,
+        0.015834351143775686,
+        0.01037387890647788
+      ],
+      "highLowDb": -11.575879169348841,
+      "high9000Low100Db": -15.227078054023018,
+      "rawPeak": 0.003546140855178237,
+      "rawSteadyStereoRms": 0.0011587626495194688,
+      "pulse": {
+        "energyCentroidMs": 17.28059034166457,
+        "energy10to90Ms": 41.22916666666667,
+        "first5msEnergyFraction": 0.31436202889383347,
+        "normalisedMaximumAdjacentStep": 4.28657368506221,
+        "compensatedPeak": 0.17910716040994246,
+        "onsetErrorFrames": 0.4577259475190658
+      },
+      "propagation": {
+        "lastPathCount": 1,
+        "maximumRetardedFrameError": 0,
+        "maximumRateError": 2.0872192862952943e-14,
+        "bands": [
+          0.03998848873121924,
+          0.03886511806308424,
+          0.029995768373298235
+        ]
+      },
+      "diagnostics": {
+        "renderer": {
+          "frames": 100800,
+          "peak": 0.00354614074639622,
+          "sumSquares": 0.1108434231160469,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 197,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "simulationMissingPast": 7
+      }
+    },
+    {
+      "profile": "authored-detail-loss-v1",
+      "distanceMetres": 50,
+      "harmonicFrequenciesHz": [
+        100,
+        300,
+        1000,
+        3000,
+        6000,
+        9000
+      ],
+      "gainCompensatedHarmonicAmplitudes": [
+        0.0597755478496516,
+        0.03917762839963513,
+        0.0281654466306971,
+        0.02117061902382455,
+        0.014687350382854332,
+        0.010051889464717832
+      ],
+      "highLowDb": -12.075225061232612,
+      "high9000Low100Db": -15.48551721845391,
+      "rawPeak": 0.0017227305797860026,
+      "rawSteadyStereoRms": 0.0005715296994073394,
+      "pulse": {
+        "energyCentroidMs": 17.395334362427306,
+        "energy10to90Ms": 41.35416666666667,
+        "first5msEnergyFraction": 0.3111328957333334,
+        "normalisedMaximumAdjacentStep": 4.310506658744328,
+        "compensatedPeak": 0.1740220678748736,
+        "onsetErrorFrames": 0.9154518950381316
+      },
+      "propagation": {
+        "lastPathCount": 1,
+        "maximumRetardedFrameError": 0,
+        "maximumRateError": 5.218048215738236e-15,
+        "bands": [
+          0.019988490387585604,
+          0.018881217525718468,
+          0.011246826503806982
+        ]
+      },
+      "diagnostics": {
+        "renderer": {
+          "frames": 100800,
+          "peak": 0.0017227305281257708,
+          "sumSquares": 0.026974852925753218,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 197,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "simulationMissingPast": 14
+      }
+    },
+    {
+      "profile": "authored-detail-loss-v1",
+      "distanceMetres": 100,
+      "harmonicFrequenciesHz": [
+        100,
+        300,
+        1000,
+        3000,
+        6000,
+        9000
+      ],
+      "gainCompensatedHarmonicAmplitudes": [
+        0.05958176685924068,
+        0.038483344184365206,
+        0.026758451811358205,
+        0.01897485829693407,
+        0.011830265240126836,
+        0.007384376508662828
+      ],
+      "highLowDb": -14.127661016372969,
+      "high9000Low100Db": -18.1359909150916,
+      "rawPeak": 0.0007581404643133283,
+      "rawSteadyStereoRms": 0.0002778369334338615,
+      "pulse": {
+        "energyCentroidMs": 18.466814953636664,
+        "energy10to90Ms": 42,
+        "first5msEnergyFraction": 0.28121680582499786,
+        "normalisedMaximumAdjacentStep": 3.2405542257613402,
+        "compensatedPeak": 0.15316750383082062,
+        "onsetErrorFrames": 0.8309037900762632
+      },
+      "propagation": {
+        "lastPathCount": 1,
+        "maximumRetardedFrameError": 0,
+        "maximumRateError": 1.0436096431476471e-14,
+        "bands": [
+          0.009988493699365051,
+          0.008912509381337455,
+          0.0031622776601683794
+        ]
+      },
+      "diagnostics": {
+        "renderer": {
+          "frames": 100800,
+          "peak": 0.0007581404838494252,
+          "sumSquares": 0.006364708657337933,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 197,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "simulationMissingPast": 28
+      }
+    },
+    {
+      "profile": "authored-detail-loss-v1",
+      "distanceMetres": 200,
+      "harmonicFrequenciesHz": [
+        100,
+        300,
+        1000,
+        3000,
+        6000,
+        9000
+      ],
+      "gainCompensatedHarmonicAmplitudes": [
+        0.059250073698857944,
+        0.03731707693134819,
+        0.024494164277758277,
+        0.016416822764740015,
+        0.009157449100252723,
+        0.005018033513044683
+      ],
+      "highLowDb": -16.52889903880935,
+      "high9000Low100Db": -21.44310674902302,
+      "rawPeak": 0.00033008045284077525,
+      "rawSteadyStereoRms": 0.00013421086637151934,
+      "pulse": {
+        "energyCentroidMs": 19.260392313814734,
+        "energy10to90Ms": 43.75,
+        "first5msEnergyFraction": 0.25889395262508796,
+        "normalisedMaximumAdjacentStep": 2.3490753410377234,
+        "compensatedPeak": 0.1333726437376221,
+        "onsetErrorFrames": 0.6618075801670784
+      },
+      "propagation": {
+        "lastPathCount": 1,
+        "maximumRetardedFrameError": 0,
+        "maximumRateError": 2.0872192862952943e-14,
+        "bands": [
+          0.0049885003191127665,
+          0.003971641173621408,
+          0.0005
+        ]
+      },
+      "diagnostics": {
+        "renderer": {
+          "frames": 100800,
+          "peak": 0.00033008044305407857,
+          "sumSquares": 0.0014844167163827876,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 197,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "simulationMissingPast": 55
+      }
+    }
+  ],
+  "comparison": [
+    {
+      "distanceMetres": 2,
+      "relativeHighLowChangeDb": -0.10727595637094112,
+      "relative9000To100ChangeDb": -0.12095517678883816,
+      "pulseEnergyCentroidChangeMs": 0.08497232017660572,
+      "pulseNormalisedStepRatio": 0.9899168707152459,
+      "rawSteadyRmsRatio": 0.9978625933881073
+    },
+    {
+      "distanceMetres": 10,
+      "relativeHighLowChangeDb": -0.5210515054387148,
+      "relative9000To100ChangeDb": -0.593764053145458,
+      "pulseEnergyCentroidChangeMs": 0.36135957836992816,
+      "pulseNormalisedStepRatio": 0.9522297501784491,
+      "rawSteadyRmsRatio": 0.9904944258733219
+    },
+    {
+      "distanceMetres": 25,
+      "relativeHighLowChangeDb": -1.241734716657076,
+      "relative9000To100ChangeDb": -1.4312260195861128,
+      "pulseEnergyCentroidChangeMs": 0.8103383989570467,
+      "pulseNormalisedStepRatio": 0.8760962177134897,
+      "rawSteadyRmsRatio": 0.9787151908578388
+    },
+    {
+      "distanceMetres": 50,
+      "relativeHighLowChangeDb": -2.2977805069200627,
+      "relative9000To100ChangeDb": -2.678689806939502,
+      "pulseEnergyCentroidChangeMs": 1.595198038616104,
+      "pulseNormalisedStepRatio": 0.7930200794428421,
+      "rawSteadyRmsRatio": 0.9615051524929107
+    },
+    {
+      "distanceMetres": 100,
+      "relativeHighLowChangeDb": -3.821076238888434,
+      "relative9000To100ChangeDb": -4.615495176822538,
+      "pulseEnergyCentroidChangeMs": 2.1839771732960607,
+      "pulseNormalisedStepRatio": 0.6297153357323254,
+      "rawSteadyRmsRatio": 0.9426528159655878
+    },
+    {
+      "distanceMetres": 200,
+      "relativeHighLowChangeDb": -5.335384898438377,
+      "relative9000To100ChangeDb": -6.7219160957108155,
+      "pulseEnergyCentroidChangeMs": 2.253439273877003,
+      "pulseNormalisedStepRatio": 0.521348136146442,
+      "rawSteadyRmsRatio": 0.9230815360001048
+    }
+  ],
+  "validation": {
+    "focusedTests": 2,
+    "passed": 2,
+    "failed": 0,
+    "noRendererOrPcmHistoryFaults": true,
+    "maximumRetardedFrameError": 0,
+    "maximumStationaryRateError": 2.0872192862952943e-14,
+    "maximumPulseOnsetErrorFrames": 0.9154518950381316
+  },
+  "limitations": [
+    "Authored coefficients are presentation assumptions, not calibrated atmosphere or a reference-derived physical SPL",
+    "Existing complementary first-order 400 Hz and 4 kHz bands overlap; coefficient loss is not a steep physical cutoff or full fogging filter",
+    "Linear fractional-delay interpolation introduces baseline high-frequency ripples; compare profiles at the same distance",
+    "Source, bearing and orientation are fixed; engine-state changes, physical Doppler, obstruction and room acoustics are deliberately absent",
+    "Transient energy/detail metrics do not establish perceptual realism or human listening approval"
+  ],
+  "subjectiveListeningPerformed": false,
+  "audioEndpointOpened": false,
+  "gameLaunched": false,
+  "genuineHeldSource": {
+    "schemaVersion": 1,
+    "milestone": "STOCK-SOURCE-02",
+    "scope": "Genuine held-source distance confirmation; no subjective acceptance claim",
+    "source": {
+      "model": "schafter3",
+      "durationSeconds": 3,
+      "frames": 144000,
+      "sha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+      "peak": 0.7959645986557007,
+      "sourceGain": 1.5956559506856056,
+      "pressureShares": {
+        "engine": 0.4,
+        "exhaust": 0.6
+      },
+      "heldControl": {
+        "operatingPoint": 0.7,
+        "load": 0.9,
+        "running": true,
+        "lift": false
+      },
+      "construction": "(calibrated engine + exhaust)/sqrt(2), one co-located diagnostic emitter",
+      "limitation": "Co-location deliberately isolates propagation from separate car emitter positions; not the full spatial vehicle mix"
+    },
+    "setup": {
+      "sourceForward": [
+        -1,
+        0,
+        0
+      ],
+      "listenerForward": [
+        1,
+        0,
+        0
+      ],
+      "sourceDirectivity": 0.5,
+      "sourceAndListenerHeightMetres": 1,
+      "listenerPosition": [
+        0,
+        0,
+        1
+      ],
+      "sourcePositions": "[distanceMetres,0,1]",
+      "sourceVelocity": [
+        0,
+        0,
+        0
+      ],
+      "listenerVelocity": [
+        0,
+        0,
+        0
+      ],
+      "tileBounds": {
+        "min": [
+          -2,
+          -2,
+          0
+        ],
+        "max": [
+          254,
+          2,
+          3
+        ]
+      },
+      "tileBasis": "empty complete synthetic visibility fixture",
+      "surfaces": 0,
+      "sourceStateProgression": "One constant control from startup; internal running/state smoothing only",
+      "rendererMasterGain": 0.7,
+      "lateField": false,
+      "independentNormalisation": false,
+      "deliveredGainCompensation": false
+    },
+    "sequence": {
+      "distancesMetres": [
+        2,
+        10,
+        25,
+        50,
+        100,
+        200
+      ],
+      "segmentSeconds": 3,
+      "gapSeconds": 0.25,
+      "segmentStartSeconds": [
+        0,
+        3.25,
+        6.5,
+        9.75,
+        13,
+        16.25
+      ],
+      "totalSeconds": 19.25,
+      "defaultFile": "fixed-state-distance-default.wav",
+      "authoredFile": "fixed-state-distance-authored.wav"
+    },
+    "analysis": {
+      "emissionWindowSeconds": [
+        0.65,
+        2.1
+      ],
+      "waveformZoomEmissionSeconds": [
+        0.9,
+        0.918
+      ],
+      "frequencyLimitsHz": [
+        40,
+        10000
+      ],
+      "compensation": "Only analytical distance/master factor on sum(L,R)/sqrt(2); never applied to delivered listening WAVs",
+      "truncation": "Each delivered segment is 3 s; far clips end before the last emitted samples arrive. The common emission window ends at 2.1 s, safely before every truncation."
+    },
+    "sourceWindowBandPower": {
+      "low": 0.03354926757009896,
+      "mid": 0.020007910044602808,
+      "high": 0.0001894124652744338
+    },
+    "rows": [
+      {
+        "profile": "physical-default",
+        "distanceMetres": 2,
+        "sourceSha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+        "expectedArrivalSeconds": 0.0058309037900874635,
+        "analysisReceiverWindowSeconds": [
+          0.6558333333333334,
+          2.1058333333333334
+        ],
+        "gainCompensatedBandPower": {
+          "low": 0.033544255176385734,
+          "mid": 0.019966340133345063,
+          "high": 0.0001783678105726958
+        },
+        "relativeHighLowDb": -22.743016716789818,
+        "relativeMidLowDb": -2.253196879607779,
+        "bandTransferFromSourceDb": {
+          "low": -0.0006489016661284949,
+          "mid": -0.009032609492344062,
+          "high": -0.26092075144522936
+        },
+        "compensatedRms": 0.23477463612509947,
+        "rmsRelativeStep": 0.08834828292203238,
+        "maximumStepOverRms": 0.35983289130868557,
+        "p99StepOverRms": 0.2324809774098839,
+        "envelope10msCoefficientOfVariation": 0.12587670901200076,
+        "crestFactorDb": 10.597511440345098,
+        "rawFullClipPeak": 0.1968247890472412,
+        "rawFullClipRms": 0.055132524407163874,
+        "propagation": {
+          "maximumRetardedFrameError": 0,
+          "maximumRateError": 2.0761170560490427e-14,
+          "bands": [
+            0.49998848720708144,
+            0.49988488399907827,
+            0.49885003191127664
+          ]
+        },
+        "diagnostics": {
+          "renderer": {
+            "limited": 0,
+            "missingHistory": 0,
+            "cursorResets": 0,
+            "rejectedControls": 0,
+            "pathOverflow": 0
+          },
+          "historyAffectedFrames": 0,
+          "simulationMissingPast": 1
+        }
+      },
+      {
+        "profile": "physical-default",
+        "distanceMetres": 10,
+        "sourceSha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+        "expectedArrivalSeconds": 0.029154518950437316,
+        "analysisReceiverWindowSeconds": [
+          0.6791666666666667,
+          2.129166666666667
+        ],
+        "gainCompensatedBandPower": {
+          "low": 0.03352854803580865,
+          "mid": 0.01988393793472452,
+          "high": 0.0001623593378239388
+        },
+        "relativeHighLowDb": -23.14937475182347,
+        "relativeMidLowDb": -2.26912347706469,
+        "bandTransferFromSourceDb": {
+          "low": -0.0026829674206857355,
+          "mid": -0.026993272703811723,
+          "high": -0.669312852233438
+        },
+        "compensatedRms": 0.23452580620458408,
+        "rmsRelativeStep": 0.08632462939874319,
+        "maximumStepOverRms": 0.3493293027557047,
+        "p99StepOverRms": 0.22916447719218397,
+        "envelope10msCoefficientOfVariation": 0.126020356876912,
+        "crestFactorDb": 10.59737991646075,
+        "rawFullClipPeak": 0.039322640746831894,
+        "rawFullClipRms": 0.010966959008165616,
+        "propagation": {
+          "maximumRetardedFrameError": 0,
+          "maximumRateError": 1.0436096431476471e-14,
+          "bands": [
+            0.09998848773724686,
+            0.09988493699365053,
+            0.09885530946569389
+          ]
+        },
+        "diagnostics": {
+          "renderer": {
+            "limited": 0,
+            "missingHistory": 0,
+            "cursorResets": 0,
+            "rejectedControls": 0,
+            "pathOverflow": 0
+          },
+          "historyAffectedFrames": 0,
+          "simulationMissingPast": 3
+        }
+      },
+      {
+        "profile": "physical-default",
+        "distanceMetres": 25,
+        "sourceSha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+        "expectedArrivalSeconds": 0.0728862973760933,
+        "analysisReceiverWindowSeconds": [
+          0.7228958333333333,
+          2.1728958333333335
+        ],
+        "gainCompensatedBandPower": {
+          "low": 0.03350289287666975,
+          "mid": 0.01980915806920773,
+          "high": 0.00015883133352880094
+        },
+        "relativeHighLowDb": -23.24146126513598,
+        "relativeMidLowDb": -2.282162912085664,
+        "bandTransferFromSourceDb": {
+          "low": -0.006007346082025062,
+          "mid": -0.04335708638612511,
+          "high": -0.764723744207291
+        },
+        "compensatedRms": 0.23430206801622058,
+        "rmsRelativeStep": 0.08594313112379588,
+        "maximumStepOverRms": 0.35070513160487304,
+        "p99StepOverRms": 0.2287946944424199,
+        "envelope10msCoefficientOfVariation": 0.12617025573970084,
+        "crestFactorDb": 10.590275286066,
+        "rawFullClipPeak": 0.015701202675700188,
+        "rawFullClipRms": 0.004349355230734644,
+        "propagation": {
+          "maximumRetardedFrameError": 0,
+          "maximumRateError": 2.0872192862952943e-14,
+          "bands": [
+            0.03998848873121924,
+            0.0398850362708213,
+            0.03886511806308424
+          ]
+        },
+        "diagnostics": {
+          "renderer": {
+            "limited": 0,
+            "missingHistory": 0,
+            "cursorResets": 0,
+            "rejectedControls": 0,
+            "pathOverflow": 0
+          },
+          "historyAffectedFrames": 0,
+          "simulationMissingPast": 7
+        }
+      },
+      {
+        "profile": "physical-default",
+        "distanceMetres": 50,
+        "sourceSha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+        "expectedArrivalSeconds": 0.1457725947521866,
+        "analysisReceiverWindowSeconds": [
+          0.7957916666666667,
+          2.245791666666667
+        ],
+        "gainCompensatedBandPower": {
+          "low": 0.03346349714193208,
+          "mid": 0.01974070055299343,
+          "high": 0.0001704494765127986
+        },
+        "relativeHighLowDb": -22.929756536965314,
+        "relativeMidLowDb": -2.292087647112835,
+        "bandTransferFromSourceDb": {
+          "low": -0.011117178693911097,
+          "mid": -0.05839165402518242,
+          "high": -0.45812884864851156
+        },
+        "compensatedRms": 0.23410093169646537,
+        "rmsRelativeStep": 0.08757931534531321,
+        "maximumStepOverRms": 0.3512648226990572,
+        "p99StepOverRms": 0.23041426051964933,
+        "envelope10msCoefficientOfVariation": 0.1261620230821196,
+        "crestFactorDb": 10.589940427356284,
+        "rawFullClipPeak": 0.007843559607863426,
+        "rawFullClipRms": 0.0021442003383643797,
+        "propagation": {
+          "maximumRetardedFrameError": 0,
+          "maximumRateError": 5.218048215738236e-15,
+          "bands": [
+            0.019988490387585604,
+            0.019885201479059134,
+            0.018881217525718468
+          ]
+        },
+        "diagnostics": {
+          "renderer": {
+            "limited": 0,
+            "missingHistory": 0,
+            "cursorResets": 0,
+            "rejectedControls": 0,
+            "pathOverflow": 0
+          },
+          "historyAffectedFrames": 0,
+          "simulationMissingPast": 14
+        }
+      },
+      {
+        "profile": "physical-default",
+        "distanceMetres": 100,
+        "sourceSha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+        "expectedArrivalSeconds": 0.2915451895043732,
+        "analysisReceiverWindowSeconds": [
+          0.9415625,
+          2.3915625
+        ],
+        "gainCompensatedBandPower": {
+          "low": 0.033378885566285925,
+          "mid": 0.01948920470589494,
+          "high": 0.00015473557185600106
+        },
+        "relativeHighLowDb": -23.33881668347544,
+        "relativeMidLowDb": -2.336777153620848,
+        "bandTransferFromSourceDb": {
+          "low": -0.022112106925433698,
+          "mid": -0.11407608876471777,
+          "high": -0.8781839233901549
+        },
+        "compensatedRms": 0.23334034486619376,
+        "rmsRelativeStep": 0.08575759538328664,
+        "maximumStepOverRms": 0.34035544236196835,
+        "p99StepOverRms": 0.22705284206296703,
+        "envelope10msCoefficientOfVariation": 0.12664396915761192,
+        "crestFactorDb": 10.577700291031638,
+        "rawFullClipPeak": 0.0039035333320498466,
+        "rawFullClipRms": 0.0010430191094668298,
+        "propagation": {
+          "maximumRetardedFrameError": 0,
+          "maximumRateError": 1.0436096431476471e-14,
+          "bands": [
+            0.009988493699365051,
+            0.009885530946569389,
+            0.008912509381337455
+          ]
+        },
+        "diagnostics": {
+          "renderer": {
+            "limited": 0,
+            "missingHistory": 0,
+            "cursorResets": 0,
+            "rejectedControls": 0,
+            "pathOverflow": 0
+          },
+          "historyAffectedFrames": 0,
+          "simulationMissingPast": 28
+        }
+      },
+      {
+        "profile": "physical-default",
+        "distanceMetres": 200,
+        "sourceSha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+        "expectedArrivalSeconds": 0.5830903790087464,
+        "analysisReceiverWindowSeconds": [
+          1.2331041666666667,
+          2.683104166666667
+        ],
+        "gainCompensatedBandPower": {
+          "low": 0.03321396903826446,
+          "mid": 0.01902870829131168,
+          "high": 0.00013128750992138347
+        },
+        "relativeHighLowDb": -24.030973651719357,
+        "relativeMidLowDb": -2.419114680183522,
+        "bandTransferFromSourceDb": {
+          "low": -0.043622668363354565,
+          "mid": -0.21792417676531214,
+          "high": -1.591851453071994
+        },
+        "compensatedRms": 0.23193253291151517,
+        "rmsRelativeStep": 0.08297693095502749,
+        "maximumStepOverRms": 0.3344460576354637,
+        "p99StepOverRms": 0.22076000277895136,
+        "envelope10msCoefficientOfVariation": 0.12751539278224525,
+        "crestFactorDb": 10.550407614647998,
+        "rawFullClipPeak": 0.001933904830366373,
+        "rawFullClipRms": 0.0004952896796017417,
+        "propagation": {
+          "maximumRetardedFrameError": 0,
+          "maximumRateError": 2.0872192862952943e-14,
+          "bands": [
+            0.0049885003191127665,
+            0.004886186104779053,
+            0.003971641173621408
+          ]
+        },
+        "diagnostics": {
+          "renderer": {
+            "limited": 0,
+            "missingHistory": 0,
+            "cursorResets": 0,
+            "rejectedControls": 0,
+            "pathOverflow": 0
+          },
+          "historyAffectedFrames": 0,
+          "simulationMissingPast": 55
+        }
+      },
+      {
+        "profile": "authored-detail-loss-v1",
+        "distanceMetres": 2,
+        "sourceSha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+        "expectedArrivalSeconds": 0.0058309037900874635,
+        "analysisReceiverWindowSeconds": [
+          0.6558333333333334,
+          2.1058333333333334
+        ],
+        "gainCompensatedBandPower": {
+          "low": 0.033525769328117384,
+          "mid": 0.01987994493712375,
+          "high": 0.0001743642661411467
+        },
+        "relativeHighLowDb": -22.839212662670306,
+        "relativeMidLowDb": -2.2696357538553964,
+        "bandTransferFromSourceDb": {
+          "low": -0.0030429076796493885,
+          "mid": -0.027865489753482298,
+          "high": -0.35951070333924107
+        },
+        "compensatedRms": 0.23454179552754356,
+        "rmsRelativeStep": 0.0879234531730734,
+        "maximumStepOverRms": 0.3579095295402418,
+        "p99StepOverRms": 0.2313305212047905,
+        "envelope10msCoefficientOfVariation": 0.12604290463054346,
+        "crestFactorDb": 10.5938850056625,
+        "rawFullClipPeak": 0.1965475082397461,
+        "rawFullClipRms": 0.05507456559134518,
+        "propagation": {
+          "maximumRetardedFrameError": 0,
+          "maximumRateError": 2.0761170560490427e-14,
+          "bands": [
+            0.49998848720708144,
+            0.49885003191127664,
+            0.48861861047790534
+          ]
+        },
+        "diagnostics": {
+          "renderer": {
+            "limited": 0,
+            "missingHistory": 0,
+            "cursorResets": 0,
+            "rejectedControls": 0,
+            "pathOverflow": 0
+          },
+          "historyAffectedFrames": 0,
+          "simulationMissingPast": 1
+        }
+      },
+      {
+        "profile": "authored-detail-loss-v1",
+        "distanceMetres": 10,
+        "sourceSha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+        "expectedArrivalSeconds": 0.029154518950437316,
+        "analysisReceiverWindowSeconds": [
+          0.6791666666666667,
+          2.129166666666667
+        ],
+        "gainCompensatedBandPower": {
+          "low": 0.03343821422566174,
+          "mid": 0.019470709204025504,
+          "high": 0.00014547687865595427
+        },
+        "relativeHighLowDb": -23.614491015212526,
+        "relativeMidLowDb": -2.3486130518963435,
+        "bandTransferFromSourceDb": {
+          "low": -0.01439967515652637,
+          "mid": -0.11819955527130588,
+          "high": -1.146145823358337
+        },
+        "compensatedRms": 0.23341035370911403,
+        "rmsRelativeStep": 0.08448248688105732,
+        "maximumStepOverRms": 0.3422846468383159,
+        "p99StepOverRms": 0.2249923214650159,
+        "envelope10msCoefficientOfVariation": 0.12681800247995417,
+        "crestFactorDb": 10.570899692710018,
+        "rawFullClipPeak": 0.0390164852142334,
+        "rawFullClipRms": 0.01091163749819115,
+        "propagation": {
+          "maximumRetardedFrameError": 0,
+          "maximumRateError": 1.0436096431476471e-14,
+          "bands": [
+            0.09998848773724686,
+            0.09885530946569389,
+            0.08912509381337456
+          ]
+        },
+        "diagnostics": {
+          "renderer": {
+            "limited": 0,
+            "missingHistory": 0,
+            "cursorResets": 0,
+            "rejectedControls": 0,
+            "pathOverflow": 0
+          },
+          "historyAffectedFrames": 0,
+          "simulationMissingPast": 3
+        }
+      },
+      {
+        "profile": "authored-detail-loss-v1",
+        "distanceMetres": 25,
+        "sourceSha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+        "expectedArrivalSeconds": 0.0728862973760933,
+        "analysisReceiverWindowSeconds": [
+          0.7228958333333333,
+          2.1728958333333335
+        ],
+        "gainCompensatedBandPower": {
+          "low": 0.03328588205165621,
+          "mid": 0.018846254982869702,
+          "high": 0.00012254202019242562
+        },
+        "relativeHighLowDb": -24.339750342193543,
+        "relativeMidLowDb": -2.470350072621156,
+        "bandTransferFromSourceDb": {
+          "low": -0.03422973392650709,
+          "mid": -0.2597666347660988,
+          "high": -1.891235209109336
+        },
+        "compensatedRms": 0.23168499929709999,
+        "rmsRelativeStep": 0.08180797232446352,
+        "maximumStepOverRms": 0.33278745728459774,
+        "p99StepOverRms": 0.21794630235150889,
+        "envelope10msCoefficientOfVariation": 0.1280466536410571,
+        "crestFactorDb": 10.545101380996659,
+        "rawFullClipPeak": 0.015445288270711899,
+        "rawFullClipRms": 0.004297726338845152,
+        "propagation": {
+          "maximumRetardedFrameError": 0,
+          "maximumRateError": 2.0872192862952943e-14,
+          "bands": [
+            0.03998848873121924,
+            0.03886511806308424,
+            0.029995768373298235
+          ]
+        },
+        "diagnostics": {
+          "renderer": {
+            "limited": 0,
+            "missingHistory": 0,
+            "cursorResets": 0,
+            "rejectedControls": 0,
+            "pathOverflow": 0
+          },
+          "historyAffectedFrames": 0,
+          "simulationMissingPast": 7
+        }
+      },
+      {
+        "profile": "authored-detail-loss-v1",
+        "distanceMetres": 50,
+        "sourceSha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+        "expectedArrivalSeconds": 0.1457725947521866,
+        "analysisReceiverWindowSeconds": [
+          0.7957916666666667,
+          2.245791666666667
+        ],
+        "gainCompensatedBandPower": {
+          "low": 0.03305440968437229,
+          "mid": 0.01799481311343984,
+          "high": 0.00010619187466857791
+        },
+        "relativeHighLowDb": -24.931381178129893,
+        "relativeMidLowDb": -2.6408206492895507,
+        "bandTransferFromSourceDb": {
+          "low": -0.06453637779125543,
+          "mid": -0.46054385529924224,
+          "high": -2.513172688910432
+        },
+        "compensatedRms": 0.22929665606388486,
+        "rmsRelativeStep": 0.07981922646650735,
+        "maximumStepOverRms": 0.3161753509051704,
+        "p99StepOverRms": 0.2120601075320346,
+        "envelope10msCoefficientOfVariation": 0.12963063836201982,
+        "crestFactorDb": 10.50132234804762,
+        "rawFullClipPeak": 0.007604608777910471,
+        "rawFullClipRms": 0.0020975025321005258,
+        "propagation": {
+          "maximumRetardedFrameError": 0,
+          "maximumRateError": 5.218048215738236e-15,
+          "bands": [
+            0.019988490387585604,
+            0.018881217525718468,
+            0.011246826503806982
+          ]
+        },
+        "diagnostics": {
+          "renderer": {
+            "limited": 0,
+            "missingHistory": 0,
+            "cursorResets": 0,
+            "rejectedControls": 0,
+            "pathOverflow": 0
+          },
+          "historyAffectedFrames": 0,
+          "simulationMissingPast": 14
+        }
+      },
+      {
+        "profile": "authored-detail-loss-v1",
+        "distanceMetres": 100,
+        "sourceSha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+        "expectedArrivalSeconds": 0.2915451895043732,
+        "analysisReceiverWindowSeconds": [
+          0.9415625,
+          2.3915625
+        ],
+        "gainCompensatedBandPower": {
+          "low": 0.03263807932679572,
+          "mid": 0.01652597916690907,
+          "high": 7.143874810023655e-05
+        },
+        "relativeHighLowDb": -26.597907583110256,
+        "relativeMidLowDb": -2.955573927007405,
+        "bandTransferFromSourceDb": {
+          "low": -0.11958449682330205,
+          "mid": -0.8303452520491426,
+          "high": -4.234747212922844
+        },
+        "compensatedRms": 0.22505739438370428,
+        "rmsRelativeStep": 0.07447290999586881,
+        "maximumStepOverRms": 0.2970386053927555,
+        "p99StepOverRms": 0.19897077622380724,
+        "envelope10msCoefficientOfVariation": 0.13269139196832272,
+        "crestFactorDb": 10.425463335740657,
+        "rawFullClipPeak": 0.0036995550617575645,
+        "rawFullClipRms": 0.0010040237930061086,
+        "propagation": {
+          "maximumRetardedFrameError": 0,
+          "maximumRateError": 1.0436096431476471e-14,
+          "bands": [
+            0.009988493699365051,
+            0.008912509381337455,
+            0.0031622776601683794
+          ]
+        },
+        "diagnostics": {
+          "renderer": {
+            "limited": 0,
+            "missingHistory": 0,
+            "cursorResets": 0,
+            "rejectedControls": 0,
+            "pathOverflow": 0
+          },
+          "historyAffectedFrames": 0,
+          "simulationMissingPast": 28
+        }
+      },
+      {
+        "profile": "authored-detail-loss-v1",
+        "distanceMetres": 200,
+        "sourceSha256": "b2901d207a72f2162993c861f5aa0e2872d64a94997bfe9f4f7df5f8ceedeeb5",
+        "expectedArrivalSeconds": 0.5830903790087464,
+        "analysisReceiverWindowSeconds": [
+          1.2331041666666667,
+          2.683104166666667
+        ],
+        "gainCompensatedBandPower": {
+          "low": 0.031944697009648845,
+          "mid": 0.014307168546645578,
+          "high": 4.4786373766536596e-05
+        },
+        "relativeHighLowDb": -28.53252873073819,
+        "relativeMidLowDb": -3.488450798522912,
+        "bandTransferFromSourceDb": {
+          "low": -0.21284270046744413,
+          "mid": -1.4564803272087914,
+          "high": -6.2626265641949175
+        },
+        "compensatedRms": 0.21841274542670494,
+        "rmsRelativeStep": 0.06855455796089181,
+        "maximumStepOverRms": 0.27601636785520545,
+        "p99StepOverRms": 0.18406121256669283,
+        "envelope10msCoefficientOfVariation": 0.1377452299486401,
+        "crestFactorDb": 10.301379243986666,
+        "rawFullClipPeak": 0.001769701368175447,
+        "rawFullClipRms": 0.0004655518001790185,
+        "propagation": {
+          "maximumRetardedFrameError": 0,
+          "maximumRateError": 2.0872192862952943e-14,
+          "bands": [
+            0.0049885003191127665,
+            0.003971641173621408,
+            0.0005
+          ]
+        },
+        "diagnostics": {
+          "renderer": {
+            "limited": 0,
+            "missingHistory": 0,
+            "cursorResets": 0,
+            "rejectedControls": 0,
+            "pathOverflow": 0
+          },
+          "historyAffectedFrames": 0,
+          "simulationMissingPast": 55
+        }
+      }
+    ],
+    "comparison": [
+      {
+        "distanceMetres": 2,
+        "additionalHighLowLossDb": -0.09619594588048841,
+        "additionalMidLowLossDb": -0.016438874247617363,
+        "rmsRelativeStepRatio": 0.9951914204225804,
+        "envelopeVariationRatio": 1.0013203047636625
+      },
+      {
+        "distanceMetres": 10,
+        "additionalHighLowLossDb": -0.46511626338905643,
+        "additionalMidLowLossDb": -0.07948957483165353,
+        "rmsRelativeStepRatio": 0.9786602904580475,
+        "envelopeVariationRatio": 1.0063294980494404
+      },
+      {
+        "distanceMetres": 25,
+        "additionalHighLowLossDb": -1.0982890770575615,
+        "additionalMidLowLossDb": -0.18818716053549212,
+        "rmsRelativeStepRatio": 0.9518849412947741,
+        "envelopeVariationRatio": 1.0148719513197106
+      },
+      {
+        "distanceMetres": 50,
+        "additionalHighLowLossDb": -2.001624641164579,
+        "additionalMidLowLossDb": -0.3487330021767159,
+        "rmsRelativeStepRatio": 0.911393588221044,
+        "envelopeVariationRatio": 1.0274933390822567
+      },
+      {
+        "distanceMetres": 100,
+        "additionalHighLowLossDb": -3.259090899634817,
+        "additionalMidLowLossDb": -0.6187967733865567,
+        "rmsRelativeStepRatio": 0.868411825949855,
+        "envelopeVariationRatio": 1.047751368272299
+      },
+      {
+        "distanceMetres": 200,
+        "additionalHighLowLossDb": -4.501555079018832,
+        "additionalMidLowLossDb": -1.0693361183393901,
+        "rmsRelativeStepRatio": 0.8261881606352441,
+        "envelopeVariationRatio": 1.0802243316919715
+      }
+    ],
+    "listeningWavSha256": {
+      "fixed-state-distance-default.wav": "2844bfe6a4832776ed3371a6636f89a7695bbc44ddfd81d2f5c7cdec893ca28f",
+      "fixed-state-distance-authored.wav": "b4e75e6ccc5d28cecd43367af60b1134d68cc3a0d1f909d524a0aed8ce9db648"
+    },
+    "moduleSha256": {
+      "src/acoustics/vehicle/stock-source.mjs": "4c9e844e9999988c5044be576a9811244c7674f4e21479d611a70fdc429e9ff0",
+      "src/acoustics/vehicle/stock-grain.mjs": "336b8e7f08c02a6704ff43cd0e325e02376937fc5880e985755910c7ed1a5599",
+      "src/acoustics/vehicle/distance-presentation.mjs": "80dfd287d14b8e5ff064bae158271bcf51087953250cb6d096eda18b2a0ce21d",
+      "src/acoustics/vehicle/pipeline.mjs": "489afc49c9170f657b325186c587af6f200be8389ac71971c69e32f8a564b69c",
+      "src/acoustics/streaming/causal.mjs": "cecc48b68b2365eeab3983722a52adf1454631e1bbf34ef034722500e1e5153b",
+      "src/acoustics/engine/contracts.mjs": "0ed72d435550a25ff91c5ef3ebd34254e2b5aeb0ec1bbe5e0048b90997fe8a0c",
+      "src/acoustics/engine/paths.mjs": "b4c12a08a2b240e54be1032bc7877e1dc8ecdcc9115e062b10439515c0024794",
+      "tests/fixtures/vehicle-distance-probe.mjs": "39292570fc8fec13196ed7e0454c401c05ca8b769624de808470006fedad0da1"
+    },
+    "validation": {
+      "sameSourceHashAllTwelveCases": true,
+      "noClippingNonfiniteOrRendererHistoryFaults": true,
+      "maximumRetardedFrameError": 0,
+      "maximumStationaryRateError": 2.0872192862952943e-14
+    },
+    "limitations": [
+      "Authored distance coefficients and geometry are not measured atmospheric or GTA acoustic calibration",
+      "Existing first-order 400 Hz/4 kHz complementary bands limit the achievable steepness",
+      "Common source/control/geometry isolate distance; absolute native Schafter recognition and mix remain unverified",
+      "Simulation startup pose-history exclusions are retained separately from zero renderer PCM-history faults",
+      "No new headroom calibration, per-file normalization, gain compensation in delivered WAVs or timing campaign",
+      "Temporal modulation and RMS-relative steps characterize signal changes; they do not establish native recognition or perceptual realism",
+      "Each spectrum uses the same emitted-time window; no independent level matching or changing operating state is used"
+    ],
+    "subjectiveListeningPerformed": false,
+    "gameLaunched": false,
+    "audioEndpointOpened": false
+  }
+}

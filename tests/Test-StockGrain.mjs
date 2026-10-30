@@ -1,16 +1,16 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {StockGrainVoice} from '../src/acoustics/vehicle/stock-grain.mjs';
+import {StockGrainVoice,NativePcmVoice} from '../src/acoustics/vehicle/stock-grain.mjs';
 
 const asset=(samples,rate=48000)=>({samples,frames:samples.length,sampleRate:rate});
-test('adaptive source reads at native rate with exact linear interpolation',()=>{
+test('unmodified finite native reference has exact rate/interpolation and no source scheduling',()=>{
   for(const rate of [24000,32000,48000]){
-    const a=asset(Float32Array.from({length:1000},(_,i)=>i/2000),rate),v=new StockGrainVoice(a);
-    const first=v.next(.5),start=v.current.start;
+    const a=asset(Float32Array.from({length:1000},(_,i)=>i/2000),rate),v=new NativePcmVoice(a);
+    const first=v.next(),start=0;
     assert.equal(first,a.samples[start]);
     for(let i=1;i<80;i++){
       const p=start+i*rate/48000,k=Math.floor(p),f=p-k;
-      assert.ok(Math.abs(v.next(.5)-(a.samples[k]*(1-f)+a.samples[k+1]*f))<1e-12);
+      assert.ok(Math.abs(v.next()-(a.samples[k]*(1-f)+a.samples[k+1]*f))<1e-12);
     }
   }
 });
@@ -32,12 +32,13 @@ test('complementary transitions are convex, smooth at boundaries and never norma
   assert.ok(v.outputEnergy<=v.expectedEnergy+1e-7,'convex blend cannot hide cancellation by adding gain');
   assert.equal(v.stats.maximumConcurrentHeads,2);assert.equal(v.stats.sourceBoundViolations,0);
 });
-test('local interval variation is deterministic without exact repeated starts',()=>{
+test('held state keeps deterministic interval phase without neighbour hopping or start jitter',()=>{
   const samples=Float32Array.from({length:12000},(_,i)=>.2*Math.sin(i*.07));
   const regions=Array.from({length:12},(_,i)=>({startFrame:i*1000,endFrame:(i+1)*1000}));
   const a=new StockGrainVoice(asset(samples),{regions}),b=new StockGrainVoice(asset(samples),{regions});const starts=new Set();
   for(let i=0;i<48000;i++){assert.equal(a.next(.55),b.next(.55));starts.add(a.current.start);}
-  assert.ok(starts.size>5);assert.ok(a.stats.maximumSelectedInterval-a.stats.minimumSelectedInterval<=2);
+  assert.equal(starts.size,1);assert.equal(a.stats.stateSwitches,0);
+  assert.ok(a.stats.maximumSelectedInterval-a.stats.minimumSelectedInterval<=1);
 });
 test('source validation rejects malformed intervals, nonfinite input and invalid operating controls',()=>{
   const a=asset(new Float32Array(1000));

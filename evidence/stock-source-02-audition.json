@@ -1,0 +1,1441 @@
+{
+  "schemaVersion": 1,
+  "milestone": "STOCK-SOURCE-02",
+  "files": {
+    "schafter3/rejected-source.wav": {
+      "label": "Rejected reconstruction",
+      "sampleRate": 48000,
+      "channels": 2,
+      "durationSeconds": 9.0,
+      "sha256": "a4efae09bf631a5a6d2d6dfc10784a6f60ff2316f89366676d70eb12aa5fc7a8",
+      "rmsDbfs": -15.53490055769364,
+      "peakDbfs": -1.2597046883595018,
+      "rms": 0.1672071991293882,
+      "peak": 0.8649973273277283,
+      "crestDb": 14.275195869334137,
+      "bandPower": {
+        "20-150Hz": 0.013404048234965672,
+        "150-500Hz": 0.007236006350161456,
+        "500-2000Hz": 0.006343502992329173,
+        "2000-6000Hz": 0.00043548024784112357,
+        "6000-20000Hz": 7.662413200907314e-05
+      },
+      "bandFractions": {
+        "20-150Hz": 0.48749683698390744,
+        "150-500Hz": 0.26316901776713225,
+        "500-2000Hz": 0.2307092297751899,
+        "2000-6000Hz": 0.01583814379582166,
+        "6000-20000Hz": 0.0027867716779486954
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0,
+      "loudness": {
+        "method": "FFmpeg EBU R128; measurement only",
+        "integratedLufs": -12.7,
+        "truePeakDbfs": -1.2,
+        "maxMomentary400msLufs": -9.9,
+        "maxShortTerm3sLufs": -11.4,
+        "nearMomentary400msLufs": null,
+        "nearMomentaryEndSeconds": null
+      },
+      "loudest50msRms": {
+        "startSeconds": 3.07,
+        "endSeconds": 3.12,
+        "rmsDbfs": -11.184141453572881,
+        "peakDbfs": -3.451584671260916,
+        "rms": 0.2759261919644994,
+        "peak": 0.6720796823501587,
+        "crestDb": 7.732556782311963,
+        "bandPower": {
+          "20-150Hz": 0.04776145720122346,
+          "150-500Hz": 0.020421520204775237,
+          "500-2000Hz": 0.006165093761253613,
+          "2000-6000Hz": 0.0005428734022788322,
+          "6000-20000Hz": 7.861199826379289e-05
+        },
+        "bandFractions": {
+          "20-150Hz": 0.6370780272394008,
+          "150-500Hz": 0.2723975055969294,
+          "500-2000Hz": 0.082234630208577,
+          "2000-6000Hz": 0.0072412513443095,
+          "6000-20000Hz": 0.0010485856107832795
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "nearLoudest50msRms": null,
+      "loudest400msRms": {
+        "startSeconds": 4.37,
+        "endSeconds": 4.77,
+        "rmsDbfs": -12.038400710449475,
+        "peakDbfs": -1.2597046883595018,
+        "rms": 0.2500805780206943,
+        "peak": 0.8649973273277283,
+        "crestDb": 10.778696022089973,
+        "bandPower": {
+          "20-150Hz": 0.013813274248503428,
+          "150-500Hz": 0.026809572833514247,
+          "500-2000Hz": 0.017358457108804327,
+          "2000-6000Hz": 0.0012380470578574356,
+          "6000-20000Hz": 0.0002488205681388881
+        },
+        "bandFractions": {
+          "20-150Hz": 0.23228012273612328,
+          "150-500Hz": 0.4508222132016537,
+          "500-2000Hz": 0.29189491754133834,
+          "2000-6000Hz": 0.020818650044784136,
+          "6000-20000Hz": 0.0041840964761004915
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "near500ms": null,
+      "farFinal1s": null,
+      "transientSampleData": {
+        "maximumAdjacentStep": 0.13643325865268707,
+        "adjacentStepP99": 0.05856856724247339,
+        "adjacentStepP999": 0.08510371652245609,
+        "adjacentStepRms": 0.01678009874636577,
+        "interpretation": "Sample differences include genuine harmonics/transients and do not by themselves prove clicks or fidelity"
+      }
+    },
+    "schafter3/corrected-source.wav": {
+      "label": "Corrected source clock",
+      "sampleRate": 48000,
+      "channels": 2,
+      "durationSeconds": 9.0,
+      "sha256": "44ecd6e28113f6d5867c43fc8a56451eebd80c02053cd5ac101fdf3f2a7b19c1",
+      "rmsDbfs": -15.267271866470917,
+      "peakDbfs": -1.8203925210474379,
+      "rms": 0.1724393617286678,
+      "peak": 0.8109244108200073,
+      "crestDb": 13.44687934542348,
+      "bandPower": {
+        "20-150Hz": 0.015119348967068324,
+        "150-500Hz": 0.007253882883686627,
+        "500-2000Hz": 0.00728219935620988,
+        "2000-6000Hz": 0.00039710440317395794,
+        "6000-20000Hz": 5.36002318648054e-05
+      },
+      "bandFractions": {
+        "20-150Hz": 0.502201579319723,
+        "150-500Hz": 0.24094367081032456,
+        "500-2000Hz": 0.24188422567501583,
+        "2000-6000Hz": 0.013190148521814755,
+        "6000-20000Hz": 0.0017803756731218632
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0,
+      "loudness": {
+        "method": "FFmpeg EBU R128; measurement only",
+        "integratedLufs": -12.3,
+        "truePeakDbfs": -1.8,
+        "maxMomentary400msLufs": -10.3,
+        "maxShortTerm3sLufs": -10.9,
+        "nearMomentary400msLufs": null,
+        "nearMomentaryEndSeconds": null
+      },
+      "loudest50msRms": {
+        "startSeconds": 3.04,
+        "endSeconds": 3.09,
+        "rmsDbfs": -10.978548848523904,
+        "peakDbfs": -3.563146979928986,
+        "rms": 0.2825351967005487,
+        "peak": 0.6635026335716248,
+        "crestDb": 7.415401868594916,
+        "bandPower": {
+          "20-150Hz": 0.03574920814769283,
+          "150-500Hz": 0.010102824038342971,
+          "500-2000Hz": 0.00882952597273692,
+          "2000-6000Hz": 0.000622025727220647,
+          "6000-20000Hz": 4.909461206833117e-05
+        },
+        "bandFractions": {
+          "20-150Hz": 0.6458442322523682,
+          "150-500Hz": 0.1825173471722194,
+          "500-2000Hz": 0.1595139785881564,
+          "2000-6000Hz": 0.011237500046947659,
+          "6000-20000Hz": 0.0008869419403082785
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "nearLoudest50msRms": null,
+      "loudest400msRms": {
+        "startSeconds": 2.92,
+        "endSeconds": 3.32,
+        "rmsDbfs": -11.832017115372109,
+        "peakDbfs": -2.2388523643571947,
+        "rms": 0.2560938470873671,
+        "peak": 0.7727826833724976,
+        "crestDb": 9.593164751014914,
+        "bandPower": {
+          "20-150Hz": 0.03835244852252657,
+          "150-500Hz": 0.017944552317409435,
+          "500-2000Hz": 0.010295112404243651,
+          "2000-6000Hz": 0.0006682160944354956,
+          "6000-20000Hz": 6.075907656015501e-05
+        },
+        "bandFractions": {
+          "20-150Hz": 0.5696944215459429,
+          "150-500Hz": 0.2665517260615833,
+          "500-2000Hz": 0.15292551927789333,
+          "2000-6000Hz": 0.009925806462226901,
+          "6000-20000Hz": 0.000902526652353691
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "near500ms": null,
+      "farFinal1s": null,
+      "transientSampleData": {
+        "maximumAdjacentStep": 0.11303850449621677,
+        "adjacentStepP99": 0.05425039306283,
+        "adjacentStepP999": 0.0785051580378791,
+        "adjacentStepRms": 0.01565833766984585,
+        "interpretation": "Sample differences include genuine harmonics/transients and do not by themselves prove clicks or fidelity"
+      }
+    },
+    "schafter3/corrected-close-engine.wav": {
+      "label": "Engine alone",
+      "sampleRate": 48000,
+      "channels": 2,
+      "durationSeconds": 9.0,
+      "sha256": "dbe0bfc6cb7756095cea6e7bc20a9e89bb298c43d2497751aee027c5fb642a9f",
+      "rmsDbfs": -29.78323081447091,
+      "peakDbfs": -16.50117870573243,
+      "rms": 0.03242189980102319,
+      "peak": 0.14960326254367828,
+      "crestDb": 13.282052108738483,
+      "bandPower": {
+        "20-150Hz": 0.00024173567626986736,
+        "150-500Hz": 0.0003723275460934577,
+        "500-2000Hz": 0.00042136154754137745,
+        "2000-6000Hz": 2.480725042551688e-05,
+        "6000-20000Hz": 4.039841165819223e-06
+      },
+      "bandFractions": {
+        "20-150Hz": 0.22713714889545367,
+        "150-500Hz": 0.34984251633795876,
+        "500-2000Hz": 0.39591533214931834,
+        "2000-6000Hz": 0.023309129295822517,
+        "6000-20000Hz": 0.003795873321446693
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0,
+      "loudness": {
+        "method": "FFmpeg EBU R128; measurement only",
+        "integratedLufs": -26.1,
+        "truePeakDbfs": -16.5,
+        "maxMomentary400msLufs": -23.9,
+        "maxShortTerm3sLufs": -24.5,
+        "nearMomentary400msLufs": null,
+        "nearMomentaryEndSeconds": null
+      },
+      "loudest50msRms": {
+        "startSeconds": 3.04,
+        "endSeconds": 3.09,
+        "rmsDbfs": -26.297268098438163,
+        "peakDbfs": -16.572289634393393,
+        "rms": 0.04843246742947406,
+        "peak": 0.1483834683895111,
+        "crestDb": 9.724978464044769,
+        "bandPower": {
+          "20-150Hz": 0.0006881600049707818,
+          "150-500Hz": 0.0005691511337585772,
+          "500-2000Hz": 0.0006507482120073691,
+          "2000-6000Hz": 3.42006822868234e-05,
+          "6000-20000Hz": 3.2832664509424224e-06
+        },
+        "bandFractions": {
+          "20-150Hz": 0.3537109686310549,
+          "150-500Hz": 0.292540975013154,
+          "500-2000Hz": 0.3344814850346128,
+          "2000-6000Hz": 0.0175789879855469,
+          "6000-20000Hz": 0.0016875833356313672
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "nearLoudest50msRms": null,
+      "loudest400msRms": {
+        "startSeconds": 3.91,
+        "endSeconds": 4.31,
+        "rmsDbfs": -26.586867856326883,
+        "peakDbfs": -16.50117870573243,
+        "rms": 0.046844284204965565,
+        "peak": 0.14960326254367828,
+        "crestDb": 10.085689150594453,
+        "bandPower": {
+          "20-150Hz": 0.0002389786872605253,
+          "150-500Hz": 0.0005169249315436588,
+          "500-2000Hz": 0.0013591902307881635,
+          "2000-6000Hz": 5.981044149909769e-05,
+          "6000-20000Hz": 1.1306827367721773e-05
+        },
+        "bandFractions": {
+          "20-150Hz": 0.10931180673390617,
+          "150-500Hz": 0.23644785591795248,
+          "500-2000Hz": 0.6217104191410917,
+          "2000-6000Hz": 0.027358035550222547,
+          "6000-20000Hz": 0.0051718826568272055
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "near500ms": null,
+      "farFinal1s": null,
+      "transientSampleData": {
+        "maximumAdjacentStep": 0.03556523472070694,
+        "adjacentStepP99": 0.014455592371523385,
+        "adjacentStepP999": 0.021687035098671918,
+        "adjacentStepRms": 0.004043721175255324,
+        "interpretation": "Sample differences include genuine harmonics/transients and do not by themselves prove clicks or fidelity"
+      }
+    },
+    "schafter3/corrected-close-exhaust.wav": {
+      "label": "Exhaust alone",
+      "sampleRate": 48000,
+      "channels": 2,
+      "durationSeconds": 9.0,
+      "sha256": "9c6dc629510f45b14efcd266ddaad7876e87e5a919904aa23e3335257467c538",
+      "rmsDbfs": -30.77648597740837,
+      "peakDbfs": -17.54292707244593,
+      "rms": 0.02891849592077405,
+      "peak": 0.13269472122192383,
+      "crestDb": 13.233558904962443,
+      "bandPower": {
+        "20-150Hz": 0.0006064789418375105,
+        "150-500Hz": 0.00015919084252490732,
+        "500-2000Hz": 8.013248151448868e-05,
+        "2000-6000Hz": 3.5830745331724655e-06,
+        "6000-20000Hz": 3.426672697260636e-08
+      },
+      "bandFractions": {
+        "20-150Hz": 0.7139921621089408,
+        "150-500Hz": 0.18741131142646478,
+        "500-2000Hz": 0.0943379230255507,
+        "2000-6000Hz": 0.0042182620969265505,
+        "6000-20000Hz": 4.034134211723879e-05
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0,
+      "loudness": {
+        "method": "FFmpeg EBU R128; measurement only",
+        "integratedLufs": -28.8,
+        "truePeakDbfs": -17.5,
+        "maxMomentary400msLufs": -27.1,
+        "maxShortTerm3sLufs": -27.7,
+        "nearMomentary400msLufs": null,
+        "nearMomentaryEndSeconds": null
+      },
+      "loudest50msRms": {
+        "startSeconds": 0.85,
+        "endSeconds": 0.9,
+        "rmsDbfs": -27.769157630010383,
+        "peakDbfs": -18.698460847059412,
+        "rms": 0.04088293990479353,
+        "peak": 0.11616544425487518,
+        "crestDb": 9.070696782950968,
+        "bandPower": {
+          "20-150Hz": 0.0011310208158737583,
+          "150-500Hz": 8.488363662298469e-06,
+          "500-2000Hz": 8.13203027257597e-06,
+          "2000-6000Hz": 8.627521839829395e-07,
+          "6000-20000Hz": 7.596278303607843e-09
+        },
+        "bandFractions": {
+          "20-150Hz": 0.9847709478662163,
+          "150-500Hz": 0.007390751622106159,
+          "500-2000Hz": 0.007080494936262303,
+          "2000-6000Hz": 0.0007511915555136515,
+          "6000-20000Hz": 6.614019901588119e-06
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "nearLoudest50msRms": null,
+      "loudest400msRms": {
+        "startSeconds": 4.47,
+        "endSeconds": 4.87,
+        "rmsDbfs": -28.255664050471644,
+        "peakDbfs": -17.54292707244593,
+        "rms": 0.03865598975255086,
+        "peak": 0.13269472122192383,
+        "crestDb": 10.712736978025712,
+        "bandPower": {
+          "20-150Hz": 0.0006716809140769623,
+          "150-500Hz": 0.00048574850948725044,
+          "500-2000Hz": 0.0003229310240495295,
+          "2000-6000Hz": 1.0921385713606589e-05,
+          "6000-20000Hz": 1.8558392000500213e-07
+        },
+        "bandFractions": {
+          "20-150Hz": 0.450349036331356,
+          "150-500Hz": 0.3256849622526424,
+          "500-2000Hz": 0.21651899351950288,
+          "2000-6000Hz": 0.007322577474580741,
+          "6000-20000Hz": 0.00012443042191797595
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "near500ms": null,
+      "farFinal1s": null,
+      "transientSampleData": {
+        "maximumAdjacentStep": 0.02433859556913376,
+        "adjacentStepP99": 0.0052648268686607625,
+        "adjacentStepP999": 0.009836678903549922,
+        "adjacentStepRms": 0.0012753515404414562,
+        "interpretation": "Sample differences include genuine harmonics/transients and do not by themselves prove clicks or fidelity"
+      }
+    },
+    "schafter3/corrected-close-combined.wav": {
+      "label": "Combined close view",
+      "sampleRate": 48000,
+      "channels": 2,
+      "durationSeconds": 9.0,
+      "sha256": "05c3d1693276c8468863de5af3a05d00971fe79caa446a4207484fc422f57438",
+      "rmsDbfs": -27.395878891338043,
+      "peakDbfs": -13.044663496456646,
+      "rms": 0.04267819618137719,
+      "peak": 0.22272390127182007,
+      "crestDb": 14.351215394881393,
+      "bandPower": {
+        "20-150Hz": 0.0007221081584401533,
+        "150-500Hz": 0.0005792493690648094,
+        "500-2000Hz": 0.0005145063144028307,
+        "2000-6000Hz": 2.798660346992002e-05,
+        "6000-20000Hz": 4.064721385782379e-06
+      },
+      "bandFractions": {
+        "20-150Hz": 0.3907691064113507,
+        "150-500Hz": 0.3134610178449519,
+        "500-2000Hz": 0.27842528902663605,
+        "2000-6000Hz": 0.015144961182897132,
+        "6000-20000Hz": 0.002199625534164253
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0,
+      "loudness": {
+        "method": "FFmpeg EBU R128; measurement only",
+        "integratedLufs": -24.3,
+        "truePeakDbfs": -13.0,
+        "maxMomentary400msLufs": -21.7,
+        "maxShortTerm3sLufs": -22.8,
+        "nearMomentary400msLufs": null,
+        "nearMomentaryEndSeconds": null
+      },
+      "loudest50msRms": {
+        "startSeconds": 4.47,
+        "endSeconds": 4.52,
+        "rmsDbfs": -23.343299677494652,
+        "peakDbfs": -13.044663496456646,
+        "rms": 0.06805107907400745,
+        "peak": 0.22272390127182007,
+        "crestDb": 10.298636181038006,
+        "bandPower": {
+          "20-150Hz": 0.001059380654253921,
+          "150-500Hz": 0.001628519105435917,
+          "500-2000Hz": 0.0016041953426208255,
+          "2000-6000Hz": 7.977021451377491e-05,
+          "6000-20000Hz": 1.3392488712161793e-05
+        },
+        "bandFractions": {
+          "20-150Hz": 0.24157773641412864,
+          "150-500Hz": 0.3713622271830479,
+          "500-2000Hz": 0.365815515018399,
+          "2000-6000Hz": 0.01819054159439866,
+          "6000-20000Hz": 0.0030539797900258287
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "nearLoudest50msRms": null,
+      "loudest400msRms": {
+        "startSeconds": 4.39,
+        "endSeconds": 4.79,
+        "rmsDbfs": -23.849806939687205,
+        "peakDbfs": -13.044663496456646,
+        "rms": 0.06419624901790598,
+        "peak": 0.22272390127182007,
+        "crestDb": 10.805143443230556,
+        "bandPower": {
+          "20-150Hz": 0.0008003880997401154,
+          "150-500Hz": 0.0018302658953119604,
+          "500-2000Hz": 0.001425541841777803,
+          "2000-6000Hz": 8.414406126931838e-05,
+          "6000-20000Hz": 1.4376314860789274e-05
+        },
+        "bandFractions": {
+          "20-150Hz": 0.1926456727040538,
+          "150-500Hz": 0.44052729512613464,
+          "500-2000Hz": 0.34311413071512525,
+          "2000-6000Hz": 0.020252661543246724,
+          "6000-20000Hz": 0.0034602399114395856
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "near500ms": null,
+      "farFinal1s": null,
+      "transientSampleData": {
+        "maximumAdjacentStep": 0.03467453271150589,
+        "adjacentStepP99": 0.015043385801836857,
+        "adjacentStepP999": 0.022244871729984936,
+        "adjacentStepRms": 0.004254488933868966,
+        "interpretation": "Sample differences include genuine harmonics/transients and do not by themselves prove clicks or fidelity"
+      }
+    },
+    "schafter3/rejected-flyby.wav": {
+      "label": "Rejected flyby",
+      "sampleRate": 48000,
+      "channels": 2,
+      "durationSeconds": 10.3,
+      "sha256": "e2b293fa8db714db87c88776f935515a41ce17c26b0f4eee7075b98dc31fc6eb",
+      "rmsDbfs": -42.87619217542266,
+      "peakDbfs": -16.43079455472799,
+      "rms": 0.007181090355358388,
+      "peak": 0.15082046389579773,
+      "crestDb": 26.445397620694678,
+      "bandPower": {
+        "20-150Hz": 7.502844718187186e-06,
+        "150-500Hz": 2.3511938523987512e-05,
+        "500-2000Hz": 1.985868530764557e-05,
+        "2000-6000Hz": 1.1803064178849153e-06,
+        "6000-20000Hz": 2.3211367013014953e-07
+      },
+      "bandFractions": {
+        "20-150Hz": 0.14349655162517302,
+        "150-500Hz": 0.4496803848328152,
+        "500-2000Hz": 0.3798096546699093,
+        "2000-6000Hz": 0.022574091186638397,
+        "6000-20000Hz": 0.004439317685464113
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0,
+      "loudness": {
+        "method": "FFmpeg EBU R128; measurement only",
+        "integratedLufs": -33.4,
+        "truePeakDbfs": -16.4,
+        "maxMomentary400msLufs": -27.0,
+        "maxShortTerm3sLufs": -35.1,
+        "nearMomentary400msLufs": -27.0,
+        "nearMomentaryEndSeconds": 5.499979
+      },
+      "loudest50msRms": {
+        "startSeconds": 5.28,
+        "endSeconds": 5.33,
+        "rmsDbfs": -25.649943250465846,
+        "peakDbfs": -16.69834655465592,
+        "rms": 0.05217985134149253,
+        "peak": 0.1462455540895462,
+        "crestDb": 8.951596695809926,
+        "bandPower": {
+          "20-150Hz": 7.137109597596907e-05,
+          "150-500Hz": 0.0010285418574249895,
+          "500-2000Hz": 0.0013097783843525126,
+          "2000-6000Hz": 7.582565189884571e-05,
+          "6000-20000Hz": 1.4170771438866227e-05
+        },
+        "bandFractions": {
+          "20-150Hz": 0.028552004409068115,
+          "150-500Hz": 0.41146813351440437,
+          "500-2000Hz": 0.5239767961182312,
+          "2000-6000Hz": 0.030334049347725617,
+          "6000-20000Hz": 0.005669016610570711
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "nearLoudest50msRms": {
+        "startSeconds": 5.28,
+        "endSeconds": 5.33,
+        "rmsDbfs": -25.649943250465846,
+        "peakDbfs": -16.69834655465592,
+        "rms": 0.05217985134149253,
+        "peak": 0.1462455540895462,
+        "crestDb": 8.951596695809926,
+        "bandPower": {
+          "20-150Hz": 7.137109597596907e-05,
+          "150-500Hz": 0.0010285418574249895,
+          "500-2000Hz": 0.0013097783843525126,
+          "2000-6000Hz": 7.582565189884571e-05,
+          "6000-20000Hz": 1.4170771438866227e-05
+        },
+        "bandFractions": {
+          "20-150Hz": 0.028552004409068115,
+          "150-500Hz": 0.41146813351440437,
+          "500-2000Hz": 0.5239767961182312,
+          "2000-6000Hz": 0.030334049347725617,
+          "6000-20000Hz": 0.005669016610570711
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "loudest400msRms": {
+        "startSeconds": 5.18,
+        "endSeconds": 5.58,
+        "rmsDbfs": -29.377221242810165,
+        "peakDbfs": -16.43079455472799,
+        "rms": 0.033973394161358916,
+        "peak": 0.15082046389579773,
+        "crestDb": 12.946426688082177,
+        "bandPower": {
+          "20-150Hz": 0.00022917893063325003,
+          "150-500Hz": 0.0006930670458320996,
+          "500-2000Hz": 0.0006002440064443104,
+          "2000-6000Hz": 3.64831023901976e-05,
+          "6000-20000Hz": 6.673703833254314e-06
+        },
+        "bandFractions": {
+          "20-150Hz": 0.14637971490373308,
+          "150-500Hz": 0.4426713934730107,
+          "500-2000Hz": 0.38338404971702555,
+          "2000-6000Hz": 0.02330225606657939,
+          "6000-20000Hz": 0.004262585839651291
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "near500ms": {
+        "startSeconds": 5.05,
+        "endSeconds": 5.55,
+        "rmsDbfs": -30.274555726955278,
+        "peakDbfs": -16.43079455472799,
+        "rms": 0.030638832589660818,
+        "peak": 0.15082046389579773,
+        "crestDb": 13.843761172227287,
+        "bandPower": {
+          "20-150Hz": 0.0001479974920307894,
+          "150-500Hz": 0.0005365949149033559,
+          "500-2000Hz": 0.0004918335186630051,
+          "2000-6000Hz": 2.895278066115344e-05,
+          "6000-20000Hz": 5.8259390931196856e-06
+        },
+        "bandFractions": {
+          "20-150Hz": 0.12219032729010781,
+          "150-500Hz": 0.44302580654953333,
+          "500-2000Hz": 0.4060697096486966,
+          "2000-6000Hz": 0.02390411956581703,
+          "6000-20000Hz": 0.004810036945845204
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "farFinal1s": {
+        "startSeconds": 9.3,
+        "endSeconds": 10.3,
+        "rmsDbfs": -64.05353628806266,
+        "peakDbfs": -48.57814181726464,
+        "rms": 0.0006270803406560545,
+        "peak": 0.003724713809788227,
+        "crestDb": 15.475394470798033,
+        "bandPower": {
+          "20-150Hz": 2.396277080595171e-07,
+          "150-500Hz": 9.97174568542392e-08,
+          "500-2000Hz": 4.2875354022752435e-08,
+          "2000-6000Hz": 5.300330567475862e-09,
+          "6000-20000Hz": 2.5816503186399246e-10
+        },
+        "bandFractions": {
+          "20-150Hz": 0.6179491387545535,
+          "150-500Hz": 0.25715021472628125,
+          "500-2000Hz": 0.1105664628965856,
+          "2000-6000Hz": 0.013668430649399847,
+          "6000-20000Hz": 0.0006657529731798473
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "transientSampleData": {
+        "maximumAdjacentStep": 0.03097446635365486,
+        "adjacentStepP99": 0.003891796730458751,
+        "adjacentStepP999": 0.011727378369774447,
+        "adjacentStepRms": 0.0008984618625999278,
+        "interpretation": "Sample differences include genuine harmonics/transients and do not by themselves prove clicks or fidelity"
+      }
+    },
+    "schafter3/flyby-clock-only.wav": {
+      "label": "Source-clock correction only",
+      "sampleRate": 48000,
+      "channels": 2,
+      "durationSeconds": 10.3,
+      "sha256": "c07162c4905b039357d5dc9ab03b359f3d474c162e92b17e41b7150ce292e58e",
+      "rmsDbfs": -43.49854764134864,
+      "peakDbfs": -15.019550672733704,
+      "rms": 0.006684556800095998,
+      "peak": 0.17742812633514404,
+      "crestDb": 28.478996968614933,
+      "bandPower": {
+        "20-150Hz": 8.841663732223951e-06,
+        "150-500Hz": 1.552115384516842e-05,
+        "500-2000Hz": 1.9867064023813033e-05,
+        "2000-6000Hz": 1.2017156795052461e-06,
+        "6000-20000Hz": 2.1047574063004293e-07
+      },
+      "bandFractions": {
+        "20-150Hz": 0.19371740034879414,
+        "150-500Hz": 0.3400624208701312,
+        "500-2000Hz": 0.43527961612356797,
+        "2000-6000Hz": 0.026329121355714157,
+        "6000-20000Hz": 0.004611441301792572
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0,
+      "loudness": {
+        "method": "FFmpeg EBU R128; measurement only",
+        "integratedLufs": -34.5,
+        "truePeakDbfs": -15.0,
+        "maxMomentary400msLufs": -27.6,
+        "maxShortTerm3sLufs": -35.9,
+        "nearMomentary400msLufs": -27.6,
+        "nearMomentaryEndSeconds": 5.499979
+      },
+      "loudest50msRms": {
+        "startSeconds": 5.29,
+        "endSeconds": 5.34,
+        "rmsDbfs": -25.533551303896456,
+        "peakDbfs": -16.253178471658053,
+        "rms": 0.05288377329506769,
+        "peak": 0.15393631160259247,
+        "crestDb": 9.280372832238404,
+        "bandPower": {
+          "20-150Hz": 0.0008725734220456924,
+          "150-500Hz": 0.0008852708149488684,
+          "500-2000Hz": 0.001125765008119748,
+          "2000-6000Hz": 7.500674037609929e-05,
+          "6000-20000Hz": 1.208658179392655e-05
+        },
+        "bandFractions": {
+          "20-150Hz": 0.2937262826831414,
+          "150-500Hz": 0.2980004880657366,
+          "500-2000Hz": 0.3789558135228816,
+          "2000-6000Hz": 0.025248822013395514,
+          "6000-20000Hz": 0.004068593714844865
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "nearLoudest50msRms": {
+        "startSeconds": 5.29,
+        "endSeconds": 5.34,
+        "rmsDbfs": -25.533551303896456,
+        "peakDbfs": -16.253178471658053,
+        "rms": 0.05288377329506769,
+        "peak": 0.15393631160259247,
+        "crestDb": 9.280372832238404,
+        "bandPower": {
+          "20-150Hz": 0.0008725734220456924,
+          "150-500Hz": 0.0008852708149488684,
+          "500-2000Hz": 0.001125765008119748,
+          "2000-6000Hz": 7.500674037609929e-05,
+          "6000-20000Hz": 1.208658179392655e-05
+        },
+        "bandFractions": {
+          "20-150Hz": 0.2937262826831414,
+          "150-500Hz": 0.2980004880657366,
+          "500-2000Hz": 0.3789558135228816,
+          "2000-6000Hz": 0.025248822013395514,
+          "6000-20000Hz": 0.004068593714844865
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "loudest400msRms": {
+        "startSeconds": 5.13,
+        "endSeconds": 5.53,
+        "rmsDbfs": -29.898212184625127,
+        "peakDbfs": -15.019550672733704,
+        "rms": 0.031995536055637125,
+        "peak": 0.17742812633514404,
+        "crestDb": 14.87866151189142,
+        "bandPower": {
+          "20-150Hz": 0.0002887612837561161,
+          "150-500Hz": 0.0005088702450757566,
+          "500-2000Hz": 0.0006279527866990438,
+          "2000-6000Hz": 3.807313487885776e-05,
+          "6000-20000Hz": 6.875230125809515e-06
+        },
+        "bandFractions": {
+          "20-150Hz": 0.19636509108450834,
+          "150-500Hz": 0.346044839269006,
+          "500-2000Hz": 0.4270240267427016,
+          "2000-6000Hz": 0.02589070979707239,
+          "6000-20000Hz": 0.0046753331067117005
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "near500ms": {
+        "startSeconds": 5.05,
+        "endSeconds": 5.55,
+        "rmsDbfs": -30.775547982034492,
+        "peakDbfs": -15.019550672733704,
+        "rms": 0.028921619018260056,
+        "peak": 0.17742812633514404,
+        "crestDb": 15.755997309300792,
+        "bandPower": {
+          "20-150Hz": 0.000221776269483936,
+          "150-500Hz": 0.00039756400254753493,
+          "500-2000Hz": 0.0004877091205352403,
+          "2000-6000Hz": 2.9709169160326175e-05,
+          "6000-20000Hz": 5.428829504139251e-06
+        },
+        "bandFractions": {
+          "20-150Hz": 0.19416802460486005,
+          "150-500Hz": 0.3480724840772373,
+          "500-2000Hz": 0.42699571390779684,
+          "2000-6000Hz": 0.026010766174105922,
+          "6000-20000Hz": 0.0047530112359999484
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "farFinal1s": {
+        "startSeconds": 9.3,
+        "endSeconds": 10.3,
+        "rmsDbfs": -64.4040079637887,
+        "peakDbfs": -50.70542705231798,
+        "rms": 0.0006022816088034193,
+        "peak": 0.0029156047385185957,
+        "crestDb": 13.698580911470717,
+        "bandPower": {
+          "20-150Hz": 2.0992018744146468e-07,
+          "150-500Hz": 9.815960579647467e-08,
+          "500-2000Hz": 5.136988670977843e-08,
+          "2000-6000Hz": 4.738251487496154e-09,
+          "6000-20000Hz": 1.6252579247071207e-10
+        },
+        "bandFractions": {
+          "20-150Hz": 0.5761490984222489,
+          "150-500Hz": 0.26940986033986003,
+          "500-2000Hz": 0.14099031767559195,
+          "2000-6000Hz": 0.013004653606171254,
+          "6000-20000Hz": 0.0004460699561278409
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "transientSampleData": {
+        "maximumAdjacentStep": 0.03071444481611252,
+        "adjacentStepP99": 0.003808591961860657,
+        "adjacentStepP999": 0.011611185696907252,
+        "adjacentStepRms": 0.000880887510740752,
+        "interpretation": "Sample differences include genuine harmonics/transients and do not by themselves prove clicks or fidelity"
+      }
+    },
+    "schafter3/flyby-final.wav": {
+      "label": "Corrected clock + authored balance/distance",
+      "sampleRate": 48000,
+      "channels": 2,
+      "durationSeconds": 10.3,
+      "sha256": "c1c6afc422129e1defb17b264e4c53af86388ec64cc7f12688690898e8c9e74d",
+      "rmsDbfs": -43.050615628104424,
+      "peakDbfs": -14.212836406989698,
+      "rms": 0.007038323407811245,
+      "peak": 0.19469651579856873,
+      "crestDb": 28.83777922111473,
+      "bandPower": {
+        "20-150Hz": 1.5545553609789556e-05,
+        "150-500Hz": 1.6644931457820216e-05,
+        "500-2000Hz": 1.7235868427537754e-05,
+        "2000-6000Hz": 8.532834374288505e-07,
+        "6000-20000Hz": 1.2889427790734314e-07
+      },
+      "bandFractions": {
+        "20-150Hz": 0.3083913225893888,
+        "150-500Hz": 0.3302006834580906,
+        "500-2000Hz": 0.3419236389881783,
+        "2000-6000Hz": 0.016927361637773503,
+        "6000-20000Hz": 0.0025569933265688237
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0,
+      "loudness": {
+        "method": "FFmpeg EBU R128; measurement only",
+        "integratedLufs": -34.3,
+        "truePeakDbfs": -14.2,
+        "maxMomentary400msLufs": -27.6,
+        "maxShortTerm3sLufs": -35.9,
+        "nearMomentary400msLufs": -27.6,
+        "nearMomentaryEndSeconds": 5.499979
+      },
+      "loudest50msRms": {
+        "startSeconds": 5.31,
+        "endSeconds": 5.36,
+        "rmsDbfs": -25.302040675821118,
+        "peakDbfs": -15.170879092425762,
+        "rms": 0.05431227144439938,
+        "peak": 0.17436368763446808,
+        "crestDb": 10.131161583395356,
+        "bandPower": {
+          "20-150Hz": 0.0010804672071597105,
+          "150-500Hz": 0.0008474712311628664,
+          "500-2000Hz": 0.0009794250853341826,
+          "2000-6000Hz": 4.7591069869362316e-05,
+          "6000-20000Hz": 4.696805577675016e-06
+        },
+        "bandFractions": {
+          "20-150Hz": 0.3650656991181068,
+          "150-500Hz": 0.28634157097673285,
+          "500-2000Hz": 0.3309258264776586,
+          "2000-6000Hz": 0.016079957890910136,
+          "6000-20000Hz": 0.0015869455365916546
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "nearLoudest50msRms": {
+        "startSeconds": 5.31,
+        "endSeconds": 5.359999999999999,
+        "rmsDbfs": -25.302040675821118,
+        "peakDbfs": -15.170879092425762,
+        "rms": 0.05431227144439938,
+        "peak": 0.17436368763446808,
+        "crestDb": 10.131161583395356,
+        "bandPower": {
+          "20-150Hz": 0.0010804672071597105,
+          "150-500Hz": 0.0008474712311628664,
+          "500-2000Hz": 0.0009794250853341826,
+          "2000-6000Hz": 4.7591069869362316e-05,
+          "6000-20000Hz": 4.696805577675016e-06
+        },
+        "bandFractions": {
+          "20-150Hz": 0.3650656991181068,
+          "150-500Hz": 0.28634157097673285,
+          "500-2000Hz": 0.3309258264776586,
+          "2000-6000Hz": 0.016079957890910136,
+          "6000-20000Hz": 0.0015869455365916546
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "loudest400msRms": {
+        "startSeconds": 5.15,
+        "endSeconds": 5.55,
+        "rmsDbfs": -29.43684180570452,
+        "peakDbfs": -14.212836406989698,
+        "rms": 0.03374099688098834,
+        "peak": 0.19469651579856873,
+        "crestDb": 15.224005398714826,
+        "bandPower": {
+          "20-150Hz": 0.0005029502740398257,
+          "150-500Hz": 0.0005455732521332757,
+          "500-2000Hz": 0.0005409252397484061,
+          "2000-6000Hz": 2.7210969028736443e-05,
+          "6000-20000Hz": 4.011355132159878e-06
+        },
+        "bandFractions": {
+          "20-150Hz": 0.3103345750520255,
+          "150-500Hz": 0.33663416067077234,
+          "500-2000Hz": 0.333766205282839,
+          "2000-6000Hz": 0.016789939177203988,
+          "6000-20000Hz": 0.002475119817159149
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "near500ms": {
+        "startSeconds": 5.05,
+        "endSeconds": 5.55,
+        "rmsDbfs": -30.331346607818617,
+        "peakDbfs": -14.212836406989698,
+        "rms": 0.030439160430983735,
+        "peak": 0.19469651579856873,
+        "crestDb": 16.118510200828922,
+        "bandPower": {
+          "20-150Hz": 0.0003746219547817275,
+          "150-500Hz": 0.0004167997026702527,
+          "500-2000Hz": 0.0004162152210763904,
+          "2000-6000Hz": 2.1408939705409964e-05,
+          "6000-20000Hz": 3.3939000168485706e-06
+        },
+        "bandFractions": {
+          "20-150Hz": 0.3039677715949303,
+          "150-500Hz": 0.3381907419065281,
+          "500-2000Hz": 0.33771649429408346,
+          "2000-6000Hz": 0.017371186102147548,
+          "6000-20000Hz": 0.002753806102310626
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "farFinal1s": {
+        "startSeconds": 9.3,
+        "endSeconds": 10.3,
+        "rmsDbfs": -63.56057452457342,
+        "peakDbfs": -50.70658964845934,
+        "rms": 0.0006636991688433042,
+        "peak": 0.002915214514359832,
+        "crestDb": 12.85398487611407,
+        "bandPower": {
+          "20-150Hz": 3.1364883873793047e-07,
+          "150-500Hz": 9.233787383765348e-08,
+          "500-2000Hz": 3.373926505255954e-08,
+          "2000-6000Hz": 1.6847383870814948e-09,
+          "6000-20000Hz": 2.7781693365136077e-11
+        },
+        "bandFractions": {
+          "20-150Hz": 0.7105153727325831,
+          "150-500Hz": 0.20917494581229099,
+          "500-2000Hz": 0.0764302733624109,
+          "2000-6000Hz": 0.00381647363296722,
+          "6000-20000Hz": 6.293445974772187e-05
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "transientSampleData": {
+        "maximumAdjacentStep": 0.02408982813358307,
+        "adjacentStepP99": 0.003291390128433707,
+        "adjacentStepP999": 0.009770914368564226,
+        "adjacentStepRms": 0.0007429750802169194,
+        "interpretation": "Sample differences include genuine harmonics/transients and do not by themselves prove clicks or fidelity"
+      }
+    },
+    "bati/rejected-source.wav": {
+      "label": "Rejected Bati reconstruction",
+      "sampleRate": 48000,
+      "channels": 2,
+      "durationSeconds": 9.0,
+      "sha256": "23129e34f04ad4902340d33db4e9e59d00e72cada664d0201fc8fe3f9322c89d",
+      "rmsDbfs": -15.19317446368391,
+      "peakDbfs": -1.7170489071088249,
+      "rms": 0.17391669621965317,
+      "peak": 0.8206303119659424,
+      "crestDb": 13.476125556575084,
+      "bandPower": {
+        "20-150Hz": 0.018196845029239253,
+        "150-500Hz": 0.005969442956755408,
+        "500-2000Hz": 0.0028286504297384964,
+        "2000-6000Hz": 0.002551689017172384,
+        "6000-20000Hz": 0.0007902222772288635
+      },
+      "bandFractions": {
+        "20-150Hz": 0.5998264553870394,
+        "150-500Hz": 0.1967720120511142,
+        "500-2000Hz": 0.0932414030054528,
+        "2000-6000Hz": 0.08411186532397133,
+        "6000-20000Hz": 0.026048264232422257
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0,
+      "loudness": {
+        "method": "FFmpeg EBU R128; measurement only",
+        "integratedLufs": -11.9,
+        "truePeakDbfs": -1.6,
+        "maxMomentary400msLufs": -9.8,
+        "maxShortTerm3sLufs": -10.7,
+        "nearMomentary400msLufs": null,
+        "nearMomentaryEndSeconds": null
+      },
+      "loudest50msRms": {
+        "startSeconds": 5.75,
+        "endSeconds": 5.8,
+        "rmsDbfs": -11.105164300304804,
+        "peakDbfs": -4.321298597710218,
+        "rms": 0.2784465139085409,
+        "peak": 0.6080440878868103,
+        "crestDb": 6.783865702594586,
+        "bandPower": {
+          "20-150Hz": 0.043985272822650676,
+          "150-500Hz": 0.010503668510840065,
+          "500-2000Hz": 0.0013233228012642217,
+          "2000-6000Hz": 0.0020231764426562725,
+          "6000-20000Hz": 0.00027890698379647906
+        },
+        "bandFractions": {
+          "20-150Hz": 0.7568745872320791,
+          "150-500Hz": 0.18074139952749702,
+          "500-2000Hz": 0.022771017086107,
+          "2000-6000Hz": 0.03481371687990482,
+          "6000-20000Hz": 0.004799279274411988
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "nearLoudest50msRms": null,
+      "loudest400msRms": {
+        "startSeconds": 5.62,
+        "endSeconds": 6.02,
+        "rmsDbfs": -12.178590948541528,
+        "peakDbfs": -1.998245200899633,
+        "rms": 0.2460766764845823,
+        "peak": 0.7944887280464172,
+        "crestDb": 10.180345747641894,
+        "bandPower": {
+          "20-150Hz": 0.046345948110335794,
+          "150-500Hz": 0.011287043286540939,
+          "500-2000Hz": 0.0014686352536896125,
+          "2000-6000Hz": 0.0017377013832941847,
+          "6000-20000Hz": 0.0003155354359246275
+        },
+        "bandFractions": {
+          "20-150Hz": 0.7578456639549851,
+          "150-500Hz": 0.18456493312453454,
+          "500-2000Hz": 0.024015019744344987,
+          "2000-6000Hz": 0.02841477005590459,
+          "6000-20000Hz": 0.005159613120230812
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "near500ms": null,
+      "farFinal1s": null,
+      "transientSampleData": {
+        "maximumAdjacentStep": 0.3268454521894455,
+        "adjacentStepP99": 0.1421049133688212,
+        "adjacentStepP999": 0.2055334525033842,
+        "adjacentStepRms": 0.0394853427069933,
+        "interpretation": "Sample differences include genuine harmonics/transients and do not by themselves prove clicks or fidelity"
+      }
+    },
+    "bati/corrected-source.wav": {
+      "label": "Corrected Bati source clock",
+      "sampleRate": 48000,
+      "channels": 2,
+      "durationSeconds": 9.0,
+      "sha256": "c4229e61bd9eb4ff690ed4efec7109375347b3cedbe3de8327bc2f805d13ea28",
+      "rmsDbfs": -15.368822561169255,
+      "peakDbfs": -1.0820921851363097,
+      "rms": 0.17043503413923203,
+      "peak": 0.8828672170639038,
+      "crestDb": 14.286730376032946,
+      "bandPower": {
+        "20-150Hz": 0.01763954505735483,
+        "150-500Hz": 0.005499962079717974,
+        "500-2000Hz": 0.003203950250028506,
+        "2000-6000Hz": 0.002429021371643214,
+        "6000-20000Hz": 0.0004914513342480593
+      },
+      "bandFractions": {
+        "20-150Hz": 0.6027743027440706,
+        "150-500Hz": 0.1879433849876156,
+        "500-2000Hz": 0.10948461945634945,
+        "2000-6000Hz": 0.08300393569573408,
+        "6000-20000Hz": 0.016793757116230268
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0,
+      "loudness": {
+        "method": "FFmpeg EBU R128; measurement only",
+        "integratedLufs": -12.0,
+        "truePeakDbfs": -1.1,
+        "maxMomentary400msLufs": -8.9,
+        "maxShortTerm3sLufs": -10.6,
+        "nearMomentary400msLufs": null,
+        "nearMomentaryEndSeconds": null
+      },
+      "loudest50msRms": {
+        "startSeconds": 5.75,
+        "endSeconds": 5.8,
+        "rmsDbfs": -9.439541172621986,
+        "peakDbfs": -3.9887534336732147,
+        "rms": 0.3373051261474,
+        "peak": 0.6317748427391052,
+        "crestDb": 5.450787738948772,
+        "bandPower": {
+          "20-150Hz": 0.09223016059954971,
+          "150-500Hz": 0.006238716074278891,
+          "500-2000Hz": 0.0011674300185210394,
+          "2000-6000Hz": 0.001780746277851599,
+          "6000-20000Hz": 0.00013123964479448878
+        },
+        "bandFractions": {
+          "20-150Hz": 0.9082394024016314,
+          "150-500Hz": 0.0614359524283879,
+          "500-2000Hz": 0.011496303763049621,
+          "2000-6000Hz": 0.01753595488407685,
+          "6000-20000Hz": 0.0012923865228543342
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "nearLoudest50msRms": null,
+      "loudest400msRms": {
+        "startSeconds": 5.58,
+        "endSeconds": 5.98,
+        "rmsDbfs": -10.810866210144116,
+        "peakDbfs": -2.4645333964208422,
+        "rms": 0.2880425781740257,
+        "peak": 0.7529624700546265,
+        "crestDb": 8.346332813723272,
+        "bandPower": {
+          "20-150Hz": 0.07507054142842563,
+          "150-500Hz": 0.011727614309987543,
+          "500-2000Hz": 0.0016837197107460844,
+          "2000-6000Hz": 0.0016160045073307864,
+          "6000-20000Hz": 0.00021081310124671423
+        },
+        "bandFractions": {
+          "20-150Hz": 0.83126594889853,
+          "150-500Hz": 0.1298614110436718,
+          "500-2000Hz": 0.018644049135664465,
+          "2000-6000Hz": 0.017894229809057603,
+          "6000-20000Hz": 0.0023343611130761887
+        },
+        "fullScaleSamples": 0,
+        "nonfiniteSamples": 0
+      },
+      "near500ms": null,
+      "farFinal1s": null,
+      "transientSampleData": {
+        "maximumAdjacentStep": 0.27064675092697144,
+        "adjacentStepP99": 0.11571061730384828,
+        "adjacentStepP999": 0.1675227351952346,
+        "adjacentStepRms": 0.03273771775904995,
+        "interpretation": "Sample differences include genuine harmonics/transients and do not by themselves prove clicks or fidelity"
+      }
+    }
+  },
+  "checks": {
+    "allTenMainFilesFiniteUnclipped": true,
+    "rejectedCopiesUntouched": true,
+    "nativeReferencesUntouched": true,
+    "sourceBeforeAfterSameLength": true,
+    "newFlybysSameMotion": true,
+    "closeIsolatedSumMatchesCombined": true,
+    "noLimiterHistoryCursorFaults": true,
+    "noSourceBoundsViolations": true,
+    "commonGainUnchanged": true,
+    "flybysSameDurationAndSampleRate": true
+  },
+  "allNumericalChecksPass": true,
+  "closeIsolatedSumMaximumError": 1.4901161193847656e-08,
+  "sourceGain": 1.5956559506856056,
+  "rendererMasterGain": 0.7,
+  "profiles": {
+    "baseline": {
+      "pressureShares": {
+        "engine": 0.5,
+        "exhaust": 0.5
+      },
+      "directivity": {
+        "engine": 0.1,
+        "exhaust": 0.65
+      },
+      "distance": "physical-default"
+    },
+    "authored": {
+      "pressureShares": {
+        "engine": 0.4,
+        "exhaust": 0.6
+      },
+      "directivity": {
+        "engine": 0.1,
+        "exhaust": 0.35
+      },
+      "distance": "physical-default"
+    },
+    "final": {
+      "pressureShares": {
+        "engine": 0.4,
+        "exhaust": 0.6
+      },
+      "directivity": {
+        "engine": 0.1,
+        "exhaust": 0.35
+      },
+      "distance": "authored-detail-loss-v1"
+    }
+  },
+  "viewpoints": [
+    {
+      "view": "front",
+      "profile": "baseline",
+      "listenerPosition": [
+        5,
+        0,
+        1.4
+      ],
+      "windowSeconds": [
+        1,
+        3
+      ],
+      "exhaustMinusEngineDb": -13.818974653371601
+    },
+    {
+      "view": "front",
+      "profile": "authored",
+      "listenerPosition": [
+        5,
+        0,
+        1.4
+      ],
+      "windowSeconds": [
+        1,
+        3
+      ],
+      "exhaustMinusEngineDb": -4.993174935738692
+    },
+    {
+      "view": "side",
+      "profile": "baseline",
+      "listenerPosition": [
+        0,
+        5,
+        1.4
+      ],
+      "windowSeconds": [
+        1,
+        3
+      ],
+      "exhaustMinusEngineDb": -5.556044138426465
+    },
+    {
+      "view": "side",
+      "profile": "authored",
+      "listenerPosition": [
+        0,
+        5,
+        1.4
+      ],
+      "windowSeconds": [
+        1,
+        3
+      ],
+      "exhaustMinusEngineDb": 0.586428517946245
+    },
+    {
+      "view": "rear",
+      "profile": "baseline",
+      "listenerPosition": [
+        -5,
+        0,
+        1.4
+      ],
+      "windowSeconds": [
+        1,
+        3
+      ],
+      "exhaustMinusEngineDb": 4.878766872202071
+    },
+    {
+      "view": "rear",
+      "profile": "authored",
+      "listenerPosition": [
+        -5,
+        0,
+        1.4
+      ],
+      "windowSeconds": [
+        1,
+        3
+      ],
+      "exhaustMinusEngineDb": 8.472330580092045
+    }
+  ],
+  "timing": {
+    "blockFrames": 512,
+    "sampleRate": 48000,
+    "deadlineMs": 10.666666666666666,
+    "completeBlocks": 10652,
+    "maximumCompleteBlockMs": 5.403999999999996,
+    "completeDeadlineMisses": 0
+  },
+  "distanceFilesPresent": true,
+  "gameLaunched": false,
+  "audioEndpointOpened": false,
+  "subjectiveListening": "not performed",
+  "normalised": false,
+  "perceptualAcceptance": "Pending human listening; numerical safety/energy checks do not establish source fidelity or recognition.",
+  "measurementLimits": [
+    "50 ms values are RMS, not invented 50 ms LUFS; EBU momentary LUFS uses400 ms.",
+    "Band powers average channel energy without stereo cancellation. No SPL inferred.",
+    "Source clock A/B preserves baseline shares/directionality/air; final flyby adds authored balance and optional distance assumptions.",
+    "Sample-step data and spectrograms are diagnostic; controlled tone/harmonic/real-source evidence remains separate."
+  ],
+  "rejectedInventory": {
+    "filesChecked": 72,
+    "allSha256Unchanged": true,
+    "inventorySha256": "3c8919a3e1e2d6924dc6061802310d25b53d1d3f7c9b8fe79d603d8159a22a72"
+  },
+  "closeOperatingWindow4to5_1": {
+    "engine": {
+      "windowSeconds": [
+        4,
+        5.1
+      ],
+      "selection": "int(seconds*sampleRate), matching supplied review",
+      "rmsDbfs": -26.97959792705675,
+      "peakDbfs": -16.50761956829742,
+      "rms": 0.04477340294653023,
+      "peak": 0.14949236810207367,
+      "crestDb": 10.47197835875933,
+      "bandPower": {
+        "20-150Hz": 0.00015561708902271784,
+        "150-500Hz": 0.0007501667873272325,
+        "500-2000Hz": 0.001043434864376212,
+        "2000-6000Hz": 6.617517551063829e-05,
+        "6000-20000Hz": 1.350345056923183e-05
+      },
+      "bandFractions": {
+        "20-150Hz": 0.07670032578715215,
+        "150-500Hz": 0.36974112126143355,
+        "500-2000Hz": 0.5142866669588255,
+        "2000-6000Hz": 0.0326163248044497,
+        "6000-20000Hz": 0.00665556118813909
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0
+    },
+    "exhaust": {
+      "windowSeconds": [
+        4,
+        5.1
+      ],
+      "selection": "int(seconds*sampleRate), matching supplied review",
+      "rmsDbfs": -28.48886076294743,
+      "peakDbfs": -17.54292707244593,
+      "rms": 0.037631970694042075,
+      "peak": 0.13269472122192383,
+      "crestDb": 10.9459336905015,
+      "bandPower": {
+        "20-150Hz": 0.000637963960200341,
+        "150-500Hz": 0.00045930560665645746,
+        "500-2000Hz": 0.00030805989981930854,
+        "2000-6000Hz": 1.2685432704815026e-05,
+        "6000-20000Hz": 1.5850863274920082e-07
+      },
+      "bandFractions": {
+        "20-150Hz": 0.44984904990842345,
+        "150-500Hz": 0.3238712586634749,
+        "500-2000Hz": 0.21722301241763153,
+        "2000-6000Hz": 0.008944909439941168,
+        "6000-20000Hz": 0.00011176957052890445
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0
+    },
+    "combined": {
+      "windowSeconds": [
+        4,
+        5.1
+      ],
+      "selection": "int(seconds*sampleRate), matching supplied review",
+      "rmsDbfs": -24.371100270278276,
+      "peakDbfs": -13.044663496456646,
+      "rms": 0.06045677639021255,
+      "peak": 0.22272390127182007,
+      "crestDb": 11.32643677382163,
+      "bandPower": {
+        "20-150Hz": 0.0006821658250121242,
+        "150-500Hz": 0.0015126301310495768,
+        "500-2000Hz": 0.0014115085970511023,
+        "2000-6000Hz": 7.73837328678961e-05,
+        "6000-20000Hz": 1.362071044907728e-05
+      },
+      "bandFractions": {
+        "20-150Hz": 0.18450333084706805,
+        "150-500Hz": 0.40911650406017297,
+        "500-2000Hz": 0.3817664681026373,
+        "2000-6000Hz": 0.020929744563578528,
+        "6000-20000Hz": 0.003683952426543146
+      },
+      "fullScaleSamples": 0,
+      "nonfiniteSamples": 0
+    },
+    "exhaustMinusEngineRmsDb": -1.5092628358906772
+  }
+}

@@ -1,0 +1,3628 @@
+{
+  "schema": 1,
+  "milestone": "STOCK-SOURCE-02",
+  "scope": "Read-only existing decoded authentic PCM and parser-unknown grain metadata; no playback or rendering",
+  "method": {
+    "phaseGrid": 1024,
+    "nativeRatesPreserved": true,
+    "clockEvidence": "Compare unknown UnkFloat1 to native sampleRate divided by adjacent UnkUint1 offset differences; left/right/mean endpoints reported independently.",
+    "phaseEvidence": "Each complete ordered interval is Fourier-resampled to a1024-point phase grid for analysis only, preserving low integer orders without decimation alias. Same-phase and best circular normalized waveform correlations use mean-removed intervals. Low-order variant retains orders1\u201324.",
+    "periodEvidence": "Dominant integer spectral order is selected among1\u201364. Fractional circular autocorrelation tests2/3/4/6/8/12 repeated structures per interval. This is not crankshaft RPM or cylinder-count inference.",
+    "pairEvidence": "Clock trajectories compared at equal normalized source-file time; same-index comparison is reported only when grain counts differ by at most2. Acoustic role phase lock is not presumed."
+  },
+  "limitations": [
+    "Unknown field names and units remain unknown; numerical correspondence does not recover GTA playback semantics.",
+    "A high integer harmonic order does not alone prove the lowest physical fundamental or identify crank/firing cycles.",
+    "Circular phase alignment is an analysis descriptor; it is not a validated phase correction or a listening assessment.",
+    "Role recordings have different timbres and sometimes durations/counts; equal normalized time and shared state do not establish a common recorded sample clock."
+  ],
+  "narrowReconstructionRecommendation": [
+    "Use one continuous interval-phase accumulator per source voice. Derive its period from complete observed offset spans, with smooth authored-state interpolation; do not reset phase when the selected span changes.",
+    "Blend neighboring observed spans at the same normalized interval phase. Remove the short repeating neighbor-selection pattern and arbitrary start jitter. Do not consume part of the next period by starting it early.",
+    "Keep the complete interval as the cycle unit: many assets contain several similar pulses or strong higher integer orders. Do not infer crank RPM or divide by a dominant spectral order.",
+    "A short join overlap can use genuine preceding-source context ending at the selected start while the outgoing read reaches its full end, preserving complete interval duration. Every context read requires explicit original-file bounds; the first marker may not have a whole preceding interval.",
+    "Share authored operating state between engine and exhaust, but preserve their distinct interval tables and continuous phase histories. Do not force equal record time or claim native role phase lock.",
+    "Require held periodic and harmonic fixtures to retain their original frequencies at24/32/48kHz, including intervals containing1/2/4cycles, before creating a small real-source comparison. These recommendations do not constitute perceptual acceptance."
+  ],
+  "streams": [
+    {
+      "model": "schafter3",
+      "role": "engine",
+      "state": "accel",
+      "sampleRate": 24000,
+      "frames": 229572,
+      "sourceSha256": "CA72A03E9B090CA5A56E397DA1EF42C69C7B6C12FE2473CF825D268BD2E5876F",
+      "intervals": 287,
+      "intervalSeconds": {
+        "count": 287,
+        "minimum": 0.017166666666666667,
+        "median": 0.023541666666666666,
+        "p95": 0.08983333333333333,
+        "maximum": 0.11629166666666667
+      },
+      "candidateClockValue": {
+        "count": 288,
+        "minimum": 8.664259910583496,
+        "median": 42.42163848876953,
+        "p95": 57.051185035705565,
+        "maximum": 57.623050689697266
+      },
+      "intervalRateHz": {
+        "count": 287,
+        "minimum": 8.599068434252956,
+        "median": 42.47787610619469,
+        "p95": 56.96659949792302,
+        "maximum": 58.25242718446602
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9999272400038569,
+          "medianRelativeError": 0.0026478226979574056,
+          "p95RelativeError": 0.016105893182754523
+        },
+        "right": {
+          "pearson": 0.9999193782350638,
+          "medianRelativeError": 0.00326799945036569,
+          "p95RelativeError": 0.01936377001603434
+        },
+        "meanEndpoints": {
+          "pearson": 0.9999277677736489,
+          "medianRelativeError": 0.002208707650502547,
+          "p95RelativeError": 0.011213088226318366
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 287,
+        "minimum": 0.0022427417588263975,
+        "median": 0.19006418910336625,
+        "p95": 0.6646348042498176,
+        "maximum": 1.1974397082876067
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 287,
+        "minimum": 0.0003910722888683435,
+        "median": 0.29816942192212975,
+        "p95": 0.9464579263166933,
+        "maximum": 1.4803511485889198
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 287,
+        "minimum": 0.0,
+        "median": 0.2172364836940085,
+        "p95": 0.6160620235496147,
+        "maximum": 0.802481383006736
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 287,
+        "minimum": 0.00138418706087396,
+        "median": 0.2231679949965489,
+        "p95": 0.7355453602606524,
+        "maximum": 1.2814266308550493
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 286,
+          "minimum": 0.12760046519390475,
+          "median": 0.8186605805852067,
+          "p95": 0.8965289793329811,
+          "maximum": 0.9315450318023955
+        },
+        "bestCircularCorrelation": {
+          "count": 286,
+          "minimum": 0.22963148504470188,
+          "median": 0.8412468813418188,
+          "p95": 0.9001598855550542,
+          "maximum": 0.9315450318023955
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 286,
+          "minimum": 0.0,
+          "median": 0.0009765625,
+          "p95": 0.0087890625,
+          "maximum": 0.3984375
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 286,
+          "minimum": 0.13312240678484122,
+          "median": 0.8586332352426853,
+          "p95": 0.9322575209299175,
+          "maximum": 0.9613579939951669
+        },
+        "bestCircularCorrelation": {
+          "count": 286,
+          "minimum": 0.3441547770261865,
+          "median": 0.8700447317824481,
+          "p95": 0.9373722460604517,
+          "maximum": 0.9686097710359116
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 286,
+          "minimum": 0.0,
+          "median": 0.001953125,
+          "p95": 0.009765625,
+          "maximum": 0.4970703125
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "1": 21,
+        "2": 10,
+        "3": 89,
+        "4": 7,
+        "5": 1,
+        "6": 32,
+        "7": 19,
+        "8": 59,
+        "11": 2,
+        "12": 7,
+        "13": 3,
+        "15": 1,
+        "16": 20,
+        "17": 3,
+        "21": 1,
+        "22": 11,
+        "25": 1
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 287,
+            "minimum": -0.38659304763727614,
+            "median": 0.028221929366436416,
+            "p95": 0.6706883953621527,
+            "maximum": 0.8903525475028713
+          },
+          "fractionAbove0_8": 0.0313588850174216
+        },
+        "3": {
+          "correlation": {
+            "count": 287,
+            "minimum": -0.4405515034068124,
+            "median": -0.030868965100213957,
+            "p95": 0.32433552955924344,
+            "maximum": 0.5155056996461429
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "4": {
+          "correlation": {
+            "count": 287,
+            "minimum": -0.27984426956498754,
+            "median": 0.06461793894603493,
+            "p95": 0.6997797770953779,
+            "maximum": 0.887672986058488
+          },
+          "fractionAbove0_8": 0.0313588850174216
+        },
+        "6": {
+          "correlation": {
+            "count": 287,
+            "minimum": -0.4498156830553986,
+            "median": -0.06757739739047461,
+            "p95": 0.16581180114084834,
+            "maximum": 0.321172201461006
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 287,
+            "minimum": -0.3890358339025916,
+            "median": -0.0394112795939538,
+            "p95": 0.6831044224122962,
+            "maximum": 0.895703369615233
+          },
+          "fractionAbove0_8": 0.0313588850174216
+        },
+        "12": {
+          "correlation": {
+            "count": 287,
+            "minimum": -0.48783146841122227,
+            "median": -0.05488976239511625,
+            "p95": 0.13228316243518848,
+            "maximum": 0.2779248098696292
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": 0.9999848037056344,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "schafter3",
+      "role": "exhaust",
+      "state": "accel",
+      "sampleRate": 24000,
+      "frames": 229572,
+      "sourceSha256": "4BA2F03EDD678A41BC8E61F6E1CD15608D6AE31499BE9A7E1216BD4EF9396FDC",
+      "intervals": 287,
+      "intervalSeconds": {
+        "count": 287,
+        "minimum": 0.017083333333333332,
+        "median": 0.023666666666666666,
+        "p95": 0.09040833333333331,
+        "maximum": 0.117125
+      },
+      "candidateClockValue": {
+        "count": 288,
+        "minimum": 8.647090911865234,
+        "median": 42.38418006896973,
+        "p95": 57.051185035705565,
+        "maximum": 57.553955078125
+      },
+      "intervalRateHz": {
+        "count": 287,
+        "minimum": 8.537886872998932,
+        "median": 42.25352112676056,
+        "p95": 56.872037914691944,
+        "maximum": 58.53658536585366
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9999028388803982,
+          "medianRelativeError": 0.003425889333089217,
+          "p95RelativeError": 0.014021647659937474
+        },
+        "right": {
+          "pearson": 0.9998996140096825,
+          "medianRelativeError": 0.004398202896118075,
+          "p95RelativeError": 0.015099524752299021
+        },
+        "meanEndpoints": {
+          "pearson": 0.9999047516977908,
+          "medianRelativeError": 0.002741819620132375,
+          "p95RelativeError": 0.00969803695678703
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 287,
+        "minimum": 0.0012604264150828147,
+        "median": 0.0938147623505335,
+        "p95": 0.3490341948853095,
+        "maximum": 0.8979298923379601
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 287,
+        "minimum": 0.0015984882431766163,
+        "median": 0.15203446027233666,
+        "p95": 0.523294007938673,
+        "maximum": 0.9854222408025449
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 287,
+        "minimum": 0.0035916955525336683,
+        "median": 0.1159900361500678,
+        "p95": 0.27402503206868845,
+        "maximum": 0.5185240494369293
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 287,
+        "minimum": 0.00021260589290162096,
+        "median": 0.07099565185935937,
+        "p95": 0.28317605979710053,
+        "maximum": 0.510827612780076
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 286,
+          "minimum": 0.7196356648256252,
+          "median": 0.9613960508846505,
+          "p95": 0.9804130186586157,
+          "maximum": 0.9875730319737335
+        },
+        "bestCircularCorrelation": {
+          "count": 286,
+          "minimum": 0.8900617007991911,
+          "median": 0.9663949724396381,
+          "p95": 0.9819464281462132,
+          "maximum": 0.9891845946942156
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 286,
+          "minimum": 0.0,
+          "median": 0.0009765625,
+          "p95": 0.0048828125,
+          "maximum": 0.0224609375
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 286,
+          "minimum": 0.7857342076380375,
+          "median": 0.977083552439664,
+          "p95": 0.9891699833053995,
+          "maximum": 0.9933106955420479
+        },
+        "bestCircularCorrelation": {
+          "count": 286,
+          "minimum": 0.9125128558057891,
+          "median": 0.9811933200508958,
+          "p95": 0.9901764281902194,
+          "maximum": 0.9933106955420481
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 286,
+          "minimum": 0.0,
+          "median": 0.00146484375,
+          "p95": 0.0048828125,
+          "maximum": 0.01953125
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "1": 152,
+        "2": 58,
+        "3": 32,
+        "5": 28,
+        "8": 17
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 287,
+            "minimum": -0.6800774437870845,
+            "median": -0.33057975705270826,
+            "p95": 0.24551655843403136,
+            "maximum": 0.9396688180113
+          },
+          "fractionAbove0_8": 0.013937282229965157
+        },
+        "3": {
+          "correlation": {
+            "count": 287,
+            "minimum": -0.47994935879253453,
+            "median": -0.10889456642398992,
+            "p95": 0.25453614659704116,
+            "maximum": 0.6015651131608488
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "4": {
+          "correlation": {
+            "count": 287,
+            "minimum": -0.5986963983800174,
+            "median": 0.012328731501891302,
+            "p95": 0.34853413918401915,
+            "maximum": 0.9399136477376692
+          },
+          "fractionAbove0_8": 0.017421602787456445
+        },
+        "6": {
+          "correlation": {
+            "count": 287,
+            "minimum": -0.7002424640293228,
+            "median": -0.049935112293107986,
+            "p95": 0.13894504787211368,
+            "maximum": 0.26042833980089686
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 287,
+            "minimum": -0.4060972549427446,
+            "median": -0.021738948015716658,
+            "p95": 0.26476242911022296,
+            "maximum": 0.9398274159468418
+          },
+          "fractionAbove0_8": 0.017421602787456445
+        },
+        "12": {
+          "correlation": {
+            "count": 287,
+            "minimum": -0.6536476234286183,
+            "median": 0.28401868735938696,
+            "p95": 0.44415662052329663,
+            "maximum": 0.46955929646479794
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": 0.9999791521322889,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "schafter3",
+      "role": "engine",
+      "state": "decel",
+      "sampleRate": 24000,
+      "frames": 242188,
+      "sourceSha256": "7FC6E5467427EBFF5663CE5867A7CE9B076A64F2444742E3FFD17A0E64809F75",
+      "intervals": 313,
+      "intervalSeconds": {
+        "count": 313,
+        "minimum": 0.01775,
+        "median": 0.026583333333333334,
+        "p95": 0.06320833333333332,
+        "maximum": 0.08058333333333334
+      },
+      "candidateClockValue": {
+        "count": 314,
+        "minimum": 12.985137939453125,
+        "median": 37.681570053100586,
+        "p95": 54.28945693969726,
+        "maximum": 55.427249908447266
+      },
+      "intervalRateHz": {
+        "count": 313,
+        "minimum": 12.409513960703206,
+        "median": 37.61755485893417,
+        "p95": 54.22510035443244,
+        "maximum": 56.33802816901409
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9997846211185434,
+          "medianRelativeError": 0.00272971296310425,
+          "p95RelativeError": 0.01950678501129147
+        },
+        "right": {
+          "pearson": 0.9997796266122155,
+          "medianRelativeError": 0.0022710026105245557,
+          "p95RelativeError": 0.021544526100158664
+        },
+        "meanEndpoints": {
+          "pearson": 0.9997852194469502,
+          "medianRelativeError": 0.001799681901931752,
+          "p95RelativeError": 0.019895073807239573
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 313,
+        "minimum": 0.0034601139158731407,
+        "median": 0.20204142213643106,
+        "p95": 0.6360804423112328,
+        "maximum": 0.9084864143254716
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 313,
+        "minimum": 0.005186534465000243,
+        "median": 0.3300388063114144,
+        "p95": 1.0156296291827411,
+        "maximum": 1.3136104259845067
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 313,
+        "minimum": 0.0006201995609796655,
+        "median": 0.24322974824624424,
+        "p95": 0.7253777451724474,
+        "maximum": 0.8606322498979345
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 313,
+        "minimum": 0.00044972314444690557,
+        "median": 0.24320267916662308,
+        "p95": 0.7920685080474315,
+        "maximum": 1.314278761615152
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 312,
+          "minimum": -0.07681435445403081,
+          "median": 0.7728073718992304,
+          "p95": 0.8788075771587953,
+          "maximum": 0.9165371159380842
+        },
+        "bestCircularCorrelation": {
+          "count": 312,
+          "minimum": 0.24827689319783974,
+          "median": 0.7992804793207904,
+          "p95": 0.8966539482911277,
+          "maximum": 0.9165371159380842
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 312,
+          "minimum": 0.0,
+          "median": 0.0009765625,
+          "p95": 0.09921874999999925,
+          "maximum": 0.48046875
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 312,
+          "minimum": -0.10142064363028336,
+          "median": 0.7972836912890706,
+          "p95": 0.9063923966341304,
+          "maximum": 0.9351108231620668
+        },
+        "bestCircularCorrelation": {
+          "count": 312,
+          "minimum": 0.2974814146277015,
+          "median": 0.8050589896018159,
+          "p95": 0.9088223938098068,
+          "maximum": 0.9364885941172305
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 312,
+          "minimum": 0.0,
+          "median": 0.001953125,
+          "p95": 0.17011718749999982,
+          "maximum": 0.484375
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "1": 7,
+        "2": 23,
+        "3": 66,
+        "4": 17,
+        "5": 15,
+        "6": 40,
+        "7": 20,
+        "8": 63,
+        "10": 6,
+        "11": 1,
+        "12": 5,
+        "13": 1,
+        "14": 4,
+        "16": 7,
+        "17": 1,
+        "19": 4,
+        "20": 24,
+        "22": 1,
+        "24": 2,
+        "28": 4,
+        "30": 1,
+        "36": 1
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 313,
+            "minimum": -0.4087542083623302,
+            "median": 0.18072667147803131,
+            "p95": 0.490729496538582,
+            "maximum": 0.8545314726307829
+          },
+          "fractionAbove0_8": 0.003194888178913738
+        },
+        "3": {
+          "correlation": {
+            "count": 313,
+            "minimum": -0.336356583741634,
+            "median": -0.028229981240664052,
+            "p95": 0.23499538222193786,
+            "maximum": 0.40116664413131164
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "4": {
+          "correlation": {
+            "count": 313,
+            "minimum": -0.3744265854091904,
+            "median": 0.07217160698908653,
+            "p95": 0.5432944489376088,
+            "maximum": 0.7291925549920407
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "6": {
+          "correlation": {
+            "count": 313,
+            "minimum": -0.4494030759554489,
+            "median": -0.07815085020701651,
+            "p95": 0.2475697127922121,
+            "maximum": 0.4152510353766652
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 313,
+            "minimum": -0.5493725156895249,
+            "median": -0.043234356437593074,
+            "p95": 0.4748281444920986,
+            "maximum": 0.7307822116093418
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "12": {
+          "correlation": {
+            "count": 313,
+            "minimum": -0.559888552976939,
+            "median": -0.13380655875919664,
+            "p95": 0.006864301299130384,
+            "maximum": 0.2232355550093806
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": -0.9999943796167691,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "schafter3",
+      "role": "exhaust",
+      "state": "decel",
+      "sampleRate": 24000,
+      "frames": 322608,
+      "sourceSha256": "D2AD2047D839142EA7AC1CF2F244A013226240AB5D0BC454F3D22A77707606C6",
+      "intervals": 419,
+      "intervalSeconds": {
+        "count": 419,
+        "minimum": 0.017291666666666667,
+        "median": 0.0265,
+        "p95": 0.0638833333333333,
+        "maximum": 0.07625
+      },
+      "candidateClockValue": {
+        "count": 420,
+        "minimum": 13.057848930358887,
+        "median": 37.7745246887207,
+        "p95": 49.25309810638428,
+        "maximum": 49.55555725097656
+      },
+      "intervalRateHz": {
+        "count": 419,
+        "minimum": 13.114754098360656,
+        "median": 37.735849056603776,
+        "p95": 53.835898678948,
+        "maximum": 57.83132530120482
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9933435667755645,
+          "medianRelativeError": 0.005474441687266034,
+          "p95RelativeError": 0.08673522872924794
+        },
+        "right": {
+          "pearson": 0.9933923788229365,
+          "medianRelativeError": 0.0037868156433105375,
+          "p95RelativeError": 0.09789660976727797
+        },
+        "meanEndpoints": {
+          "pearson": 0.9933946127601629,
+          "medianRelativeError": 0.004102077325185142,
+          "p95RelativeError": 0.0876344323158264
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 419,
+        "minimum": 0.0002411592899268565,
+        "median": 0.07676378976894321,
+        "p95": 0.35389323824575847,
+        "maximum": 1.0277001285822345
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 419,
+        "minimum": 0.002764441110341135,
+        "median": 0.1978787725577678,
+        "p95": 0.5913055015654936,
+        "maximum": 2.036241320564597
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 419,
+        "minimum": 0.0016778776990546164,
+        "median": 0.18006353867394487,
+        "p95": 0.4149324704933793,
+        "maximum": 1.2271858089374204
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 419,
+        "minimum": 0.00020607821003045226,
+        "median": 0.05113389384582078,
+        "p95": 0.19556480325167933,
+        "maximum": 1.249304724240678
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 418,
+          "minimum": -0.4900893038973472,
+          "median": 0.9577791995021442,
+          "p95": 0.9942531475809655,
+          "maximum": 0.9957772844812047
+        },
+        "bestCircularCorrelation": {
+          "count": 418,
+          "minimum": 0.32285587772744245,
+          "median": 0.9597125466049858,
+          "p95": 0.9943991075724327,
+          "maximum": 0.9966494521156439
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 418,
+          "minimum": 0.0,
+          "median": 0.0009765625,
+          "p95": 0.030468749999999822,
+          "maximum": 0.4580078125
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 418,
+          "minimum": -0.4938307011920481,
+          "median": 0.966217179662426,
+          "p95": 0.9966015821815313,
+          "maximum": 0.9983052042437712
+        },
+        "bestCircularCorrelation": {
+          "count": 418,
+          "minimum": 0.33310541551208717,
+          "median": 0.9686872109497215,
+          "p95": 0.9970013460300113,
+          "maximum": 0.9987546211484133
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 418,
+          "minimum": 0.0,
+          "median": 0.0009765625,
+          "p95": 0.03769531249999991,
+          "maximum": 0.39453125
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "1": 30,
+        "3": 282,
+        "4": 3,
+        "5": 104
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 419,
+            "minimum": -0.9157348003172874,
+            "median": -0.6708161352676281,
+            "p95": -0.43355045167795303,
+            "maximum": 0.4762933710324285
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "3": {
+          "correlation": {
+            "count": 419,
+            "minimum": -0.3876947130917752,
+            "median": 0.37300980852695603,
+            "p95": 0.8190401525498309,
+            "maximum": 0.9265146458375968
+          },
+          "fractionAbove0_8": 0.06682577565632458
+        },
+        "4": {
+          "correlation": {
+            "count": 419,
+            "minimum": -0.2599143177819849,
+            "median": -0.0040152962474090115,
+            "p95": 0.10844659606901527,
+            "maximum": 0.725959628931282
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "6": {
+          "correlation": {
+            "count": 419,
+            "minimum": -0.924245271846827,
+            "median": -0.45486759407777405,
+            "p95": 0.06444287744257385,
+            "maximum": 0.35181011546739294
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 419,
+            "minimum": -0.8302199069358627,
+            "median": -0.5194967887208504,
+            "p95": 0.11132990581921866,
+            "maximum": 0.537420640167646
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "12": {
+          "correlation": {
+            "count": 419,
+            "minimum": -0.5630391639445265,
+            "median": -0.07682106954890879,
+            "p95": 0.4057017781671931,
+            "maximum": 0.7039272456455923
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": -0.9999393820499562,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "bati",
+      "role": "engine",
+      "state": "accel",
+      "sampleRate": 48000,
+      "frames": 328251,
+      "sourceSha256": "8E2B4BE819DA5A5D990A3A01F7BE41BA79DBE2AB86B7BC6EEB7700AC20021A9E",
+      "intervals": 154,
+      "intervalSeconds": {
+        "count": 154,
+        "minimum": 0.02525,
+        "median": 0.035729166666666666,
+        "p95": 0.09702395833333331,
+        "maximum": 0.13177083333333334
+      },
+      "candidateClockValue": {
+        "count": 155,
+        "minimum": 8.244589805603027,
+        "median": 28.04757308959961,
+        "p95": 39.16909713745117,
+        "maximum": 39.53871536254883
+      },
+      "intervalRateHz": {
+        "count": 154,
+        "minimum": 7.58893280632411,
+        "median": 27.98894722186239,
+        "p95": 39.17582703412179,
+        "maximum": 39.603960396039604
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9998833519802527,
+          "medianRelativeError": 0.005311912854512534,
+          "p95RelativeError": 0.014879559770226442
+        },
+        "right": {
+          "pearson": 0.9998691158868862,
+          "medianRelativeError": 0.004172177076339786,
+          "p95RelativeError": 0.03022120824058843
+        },
+        "meanEndpoints": {
+          "pearson": 0.999878943250297,
+          "medianRelativeError": 0.004160844643910724,
+          "p95RelativeError": 0.015263826389114027
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 154,
+        "minimum": 0.0,
+        "median": 0.28964620295715265,
+        "p95": 0.8505295172484941,
+        "maximum": 1.5862618384876086
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 154,
+        "minimum": 0.0002632066017684449,
+        "median": 0.3936501086192231,
+        "p95": 1.0775622166246015,
+        "maximum": 1.8290638522230545
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 154,
+        "minimum": 0.017611331750988737,
+        "median": 0.3246282449955993,
+        "p95": 0.8549613746490529,
+        "maximum": 1.5474676575319546
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 154,
+        "minimum": 0.003241616443265936,
+        "median": 0.3442118708407379,
+        "p95": 1.2828050858436828,
+        "maximum": 1.5884133026331912
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 153,
+          "minimum": 0.12027130694227087,
+          "median": 0.6824474445375094,
+          "p95": 0.769212625664263,
+          "maximum": 0.8366912801441506
+        },
+        "bestCircularCorrelation": {
+          "count": 153,
+          "minimum": 0.3363524929069294,
+          "median": 0.7048828125645865,
+          "p95": 0.7744295792276633,
+          "maximum": 0.84314891594415
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 153,
+          "minimum": 0.0,
+          "median": 0.0009765625,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 153,
+          "minimum": 0.1531794076737032,
+          "median": 0.9597762340291313,
+          "p95": 0.9808043445698694,
+          "maximum": 0.9910511374253519
+        },
+        "bestCircularCorrelation": {
+          "count": 153,
+          "minimum": 0.38431133727792205,
+          "median": 0.9685006608785915,
+          "p95": 0.9855051622995592,
+          "maximum": 0.9910511374253518
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 153,
+          "minimum": 0.0,
+          "median": 0.001953125,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "2": 9,
+        "6": 6,
+        "7": 1,
+        "8": 22,
+        "9": 1,
+        "10": 17,
+        "12": 5,
+        "16": 30,
+        "18": 17,
+        "20": 11,
+        "22": 4,
+        "58": 5,
+        "60": 9,
+        "62": 8,
+        "64": 9
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.3920416294461335,
+            "median": 0.6895079422346508,
+            "p95": 0.774734623086323,
+            "maximum": 0.8215682991721418
+          },
+          "fractionAbove0_8": 0.01948051948051948
+        },
+        "3": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.22955247767990444,
+            "median": -0.06746322190764983,
+            "p95": 0.12717500311550872,
+            "maximum": 0.3595341382914168
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "4": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.5871979294327943,
+            "median": 0.04549718659014714,
+            "p95": 0.21316513282434546,
+            "maximum": 0.323450849325023
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "6": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.2204312609331792,
+            "median": -0.06928150621939924,
+            "p95": 0.14234791406188643,
+            "maximum": 0.35933527109662056
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.2747714060955277,
+            "median": 0.010040981858833339,
+            "p95": 0.2174228687255733,
+            "maximum": 0.3717995402078589
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "12": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.35321595616432633,
+            "median": -0.050299202379399124,
+            "p95": 0.20917102264264442,
+            "maximum": 0.27985150039167594
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": 0.9999838869508461,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "bati",
+      "role": "exhaust",
+      "state": "accel",
+      "sampleRate": 48000,
+      "frames": 328251,
+      "sourceSha256": "A102D3AB2C122C74DC2085EF3673651D0018B90437B7F86627197882B9B744B4",
+      "intervals": 154,
+      "intervalSeconds": {
+        "count": 154,
+        "minimum": 0.025291666666666667,
+        "median": 0.03571875,
+        "p95": 0.09633854166666664,
+        "maximum": 0.12341666666666666
+      },
+      "candidateClockValue": {
+        "count": 155,
+        "minimum": 8.20011043548584,
+        "median": 28.010879516601562,
+        "p95": 39.29143180847168,
+        "maximum": 39.50617218017578
+      },
+      "intervalRateHz": {
+        "count": 154,
+        "minimum": 8.102633355840648,
+        "median": 27.997360023405978,
+        "p95": 39.17582703412179,
+        "maximum": 39.53871499176277
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.99996718635862,
+          "medianRelativeError": 0.0034777490695317697,
+          "p95RelativeError": 0.015978795759876523
+        },
+        "right": {
+          "pearson": 0.9999509734324589,
+          "medianRelativeError": 0.00440426921844482,
+          "p95RelativeError": 0.018057168379426006
+        },
+        "meanEndpoints": {
+          "pearson": 0.9999667850373704,
+          "medianRelativeError": 0.0010436487297216775,
+          "p95RelativeError": 0.004174181168278033
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 154,
+        "minimum": 0.00018811638064296623,
+        "median": 0.033072659488288976,
+        "p95": 0.14949262482900483,
+        "maximum": 0.3994769274144106
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 154,
+        "minimum": 0.0010989900697207502,
+        "median": 0.0968644899729453,
+        "p95": 0.25660832180553267,
+        "maximum": 0.4819899679772162
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 154,
+        "minimum": 0.00010377939009578541,
+        "median": 0.08151033863219243,
+        "p95": 0.21605437792784596,
+        "maximum": 0.270218868957873
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 154,
+        "minimum": 0.00010519075311611381,
+        "median": 0.011521284787035142,
+        "p95": 0.056505061512531304,
+        "maximum": 0.10116620318601195
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 153,
+          "minimum": 0.03058821766678449,
+          "median": 0.99134037358984,
+          "p95": 0.9962982510041155,
+          "maximum": 0.9976214576916543
+        },
+        "bestCircularCorrelation": {
+          "count": 153,
+          "minimum": 0.451340110274712,
+          "median": 0.9934104151574195,
+          "p95": 0.9963783092869211,
+          "maximum": 0.9976214576916546
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 153,
+          "minimum": 0.0,
+          "median": 0.0009765625,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 153,
+          "minimum": 0.02069833124301515,
+          "median": 0.9947176074434149,
+          "p95": 0.9979087895188562,
+          "maximum": 0.9988754846050318
+        },
+        "bestCircularCorrelation": {
+          "count": 153,
+          "minimum": 0.47819363592767666,
+          "median": 0.9959534962978276,
+          "p95": 0.9981288719003435,
+          "maximum": 0.9989989306344209
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 153,
+          "minimum": 0.0,
+          "median": 0.0009765625,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "2": 72,
+        "4": 37,
+        "6": 20,
+        "9": 1,
+        "10": 24
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.19539994358818913,
+            "median": 0.9920326138515171,
+            "p95": 0.996909280567391,
+            "maximum": 0.9978034033496129
+          },
+          "fractionAbove0_8": 0.987012987012987
+        },
+        "3": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.23466472931586133,
+            "median": -0.13863978197036875,
+            "p95": 0.16533297389235185,
+            "maximum": 0.4047574197842253
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "4": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.7421575530500151,
+            "median": -0.41067996471769597,
+            "p95": 0.17526745054261655,
+            "maximum": 0.2287730270540015
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "6": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.23471636672254154,
+            "median": -0.13973276471385465,
+            "p95": 0.14987528278921292,
+            "maximum": 0.22275804034290528
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.43575772808514035,
+            "median": -0.1344341880683911,
+            "p95": 0.01852906517832173,
+            "maximum": 0.17939195299533367
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "12": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.39611440201451986,
+            "median": 0.07833690699245839,
+            "p95": 0.4402557544172166,
+            "maximum": 0.47810367388066466
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": 0.9999685793188529,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "bati",
+      "role": "engine",
+      "state": "decel",
+      "sampleRate": 48000,
+      "frames": 424508,
+      "sourceSha256": "65E526D15E5AD0965152D4F4A2686797587C6AE348B6B08C24F764501046E988",
+      "intervals": 173,
+      "intervalSeconds": {
+        "count": 173,
+        "minimum": 0.026270833333333334,
+        "median": 0.040375,
+        "p95": 0.11285416666666667,
+        "maximum": 0.15279166666666666
+      },
+      "candidateClockValue": {
+        "count": 174,
+        "minimum": 6.586169242858887,
+        "median": 24.767966270446777,
+        "p95": 37.29414672851562,
+        "maximum": 38.03486633300781
+      },
+      "intervalRateHz": {
+        "count": 173,
+        "minimum": 6.5448595582219795,
+        "median": 24.76780185758514,
+        "p95": 37.01452726839724,
+        "maximum": 38.065027755749405
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9998209886773634,
+          "medianRelativeError": 0.003898612260818468,
+          "p95RelativeError": 0.016137249994277944
+        },
+        "right": {
+          "pearson": 0.9997594826250015,
+          "medianRelativeError": 0.00368909039100006,
+          "p95RelativeError": 0.02388771915435787
+        },
+        "meanEndpoints": {
+          "pearson": 0.9998152128740142,
+          "medianRelativeError": 0.0021708667278289816,
+          "p95RelativeError": 0.015726099765300795
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 173,
+        "minimum": 0.0,
+        "median": 0.11901195171614505,
+        "p95": 0.4375944877587293,
+        "maximum": 0.6083843786599604
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 173,
+        "minimum": 0.00030178011342436325,
+        "median": 0.32604738178431314,
+        "p95": 0.9994120940714226,
+        "maximum": 1.4574194994447844
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 173,
+        "minimum": 0.0005177357945457826,
+        "median": 0.26861965637999685,
+        "p95": 0.9428133355086125,
+        "maximum": 1.529051685666963
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 173,
+        "minimum": 0.002625548739859605,
+        "median": 0.3467350836178129,
+        "p95": 1.2160145612609479,
+        "maximum": 2.5511046701231894
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 172,
+          "minimum": 0.39548024787068753,
+          "median": 0.747360424094954,
+          "p95": 0.8567710318713798,
+          "maximum": 0.8877763600610384
+        },
+        "bestCircularCorrelation": {
+          "count": 172,
+          "minimum": 0.4191624991308901,
+          "median": 0.7816458780914095,
+          "p95": 0.8719076711352223,
+          "maximum": 0.8882910169301783
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 172,
+          "minimum": 0.0,
+          "median": 0.001953125,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 172,
+          "minimum": 0.4863462624552339,
+          "median": 0.958102258874859,
+          "p95": 0.9823084248808729,
+          "maximum": 0.9912928997258874
+        },
+        "bestCircularCorrelation": {
+          "count": 172,
+          "minimum": 0.4863462624552339,
+          "median": 0.9662672703386719,
+          "p95": 0.9874230406119456,
+          "maximum": 0.9935092663997477
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 172,
+          "minimum": 0.0,
+          "median": 0.00390625,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "4": 38,
+        "6": 69,
+        "8": 4,
+        "10": 14,
+        "11": 1,
+        "12": 6,
+        "16": 18,
+        "60": 10,
+        "64": 13
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 173,
+            "minimum": -0.16332106683946135,
+            "median": 0.7663788755614829,
+            "p95": 0.8589112765588789,
+            "maximum": 0.9099798911593499
+          },
+          "fractionAbove0_8": 0.35260115606936415
+        },
+        "3": {
+          "correlation": {
+            "count": 173,
+            "minimum": -0.27820005244227075,
+            "median": 0.03665859327561333,
+            "p95": 0.4750305882469004,
+            "maximum": 0.6874358871239608
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "4": {
+          "correlation": {
+            "count": 173,
+            "minimum": -0.7029160020610057,
+            "median": 0.09867881993152311,
+            "p95": 0.3880065419883983,
+            "maximum": 0.499883901603568
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "6": {
+          "correlation": {
+            "count": 173,
+            "minimum": -0.2760025033188557,
+            "median": 0.055305644163217024,
+            "p95": 0.49227140169732386,
+            "maximum": 0.7061292821471689
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 173,
+            "minimum": -0.4124774602807598,
+            "median": -0.0391900000027571,
+            "p95": 0.2589755592702734,
+            "maximum": 0.42182804589535017
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "12": {
+          "correlation": {
+            "count": 173,
+            "minimum": -0.7586165480048854,
+            "median": -0.14459678008760307,
+            "p95": 0.18451187007047315,
+            "maximum": 0.47356022108403817
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": -0.9999829150909623,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "bati",
+      "role": "exhaust",
+      "state": "decel",
+      "sampleRate": 48000,
+      "frames": 374180,
+      "sourceSha256": "908C634369953F8C1E0276F1A14D5E241DFB42AB7B67D44571AF7459B32253D0",
+      "intervals": 154,
+      "intervalSeconds": {
+        "count": 154,
+        "minimum": 0.02625,
+        "median": 0.04073958333333333,
+        "p95": 0.10798645833333333,
+        "maximum": 0.12535416666666666
+      },
+      "candidateClockValue": {
+        "count": 155,
+        "minimum": 8.17717170715332,
+        "median": 24.55242919921875,
+        "p95": 37.264798355102535,
+        "maximum": 37.97468185424805
+      },
+      "intervalRateHz": {
+        "count": 154,
+        "minimum": 7.9773973741066975,
+        "median": 24.546731208272206,
+        "p95": 37.30933411114567,
+        "maximum": 38.095238095238095
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9999202635846849,
+          "medianRelativeError": 0.0037284287810325995,
+          "p95RelativeError": 0.01475247649550438
+        },
+        "right": {
+          "pearson": 0.9993362777046432,
+          "medianRelativeError": 0.005271600286165872,
+          "p95RelativeError": 0.026173151562611217
+        },
+        "meanEndpoints": {
+          "pearson": 0.9997835323474873,
+          "medianRelativeError": 0.0017231374581654414,
+          "p95RelativeError": 0.011557773527999714
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 154,
+        "minimum": 0.00027933020142424886,
+        "median": 0.02991595033925762,
+        "p95": 0.11751027287535769,
+        "maximum": 0.17576873487071223
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 154,
+        "minimum": 0.0,
+        "median": 0.04283056565413258,
+        "p95": 0.1306360081167891,
+        "maximum": 0.2007654381283007
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 154,
+        "minimum": 0.001773363171628236,
+        "median": 0.027183764527694734,
+        "p95": 0.0536040830091757,
+        "maximum": 0.08777548776373946
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 154,
+        "minimum": 0.0001934628652401741,
+        "median": 0.007584867386291863,
+        "p95": 0.024810188987647388,
+        "maximum": 0.0961039587300202
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 153,
+          "minimum": 0.0318666449400731,
+          "median": 0.994387853384559,
+          "p95": 0.9981889033805005,
+          "maximum": 0.9988441682756388
+        },
+        "bestCircularCorrelation": {
+          "count": 153,
+          "minimum": 0.29238551162144416,
+          "median": 0.9958471959943511,
+          "p95": 0.9984633858776908,
+          "maximum": 0.998855707695488
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 153,
+          "minimum": 0.0,
+          "median": 0.0009765625,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 153,
+          "minimum": 0.03176753942303309,
+          "median": 0.9960695521258222,
+          "p95": 0.9989004489499783,
+          "maximum": 0.9993037440305026
+        },
+        "bestCircularCorrelation": {
+          "count": 153,
+          "minimum": 0.29508268390977604,
+          "median": 0.9973094001476648,
+          "p95": 0.9990672732772236,
+          "maximum": 0.9993365716100905
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 153,
+          "minimum": 0.0,
+          "median": 0.0009765625,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "4": 55,
+        "5": 2,
+        "6": 59,
+        "9": 1,
+        "10": 36,
+        "12": 1
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.4026243976327909,
+            "median": 0.9960348936894422,
+            "p95": 0.998806449230903,
+            "maximum": 0.999262699508038
+          },
+          "fractionAbove0_8": 0.9545454545454546
+        },
+        "3": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.34530140383327684,
+            "median": 0.019047435543677632,
+            "p95": 0.5408428051569152,
+            "maximum": 0.7608463137313883
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "4": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.825231461107752,
+            "median": -0.2479561311212345,
+            "p95": 0.37697627349966434,
+            "maximum": 0.4732861903628338
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "6": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.28666524865392357,
+            "median": 0.01745828094297555,
+            "p95": 0.5391383040276259,
+            "maximum": 0.7612258033734315
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.6652058756075954,
+            "median": -0.23521211493992034,
+            "p95": 0.0415435087291032,
+            "maximum": 0.13748111361189946
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "12": {
+          "correlation": {
+            "count": 154,
+            "minimum": -0.7849072024884587,
+            "median": -0.1713214807856305,
+            "p95": -0.05632212342309844,
+            "maximum": -0.035444313158877194
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": -0.9967322999581064,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "lectro",
+      "role": "engine",
+      "state": "accel",
+      "sampleRate": 24000,
+      "frames": 216000,
+      "sourceSha256": "C485EA531CCB5BE1EF2EF02F75EE0F7ED05B5431CF132AE81F2EDA34CE7BF096",
+      "intervals": 243,
+      "intervalSeconds": {
+        "count": 243,
+        "minimum": 0.021458333333333333,
+        "median": 0.0315,
+        "p95": 0.07329999999999998,
+        "maximum": 0.09141666666666666
+      },
+      "candidateClockValue": {
+        "count": 244,
+        "minimum": 11.710389137268066,
+        "median": 31.86749839782715,
+        "p95": 45.57027931213379,
+        "maximum": 45.977012634277344
+      },
+      "intervalRateHz": {
+        "count": 243,
+        "minimum": 10.938924339106654,
+        "median": 31.746031746031747,
+        "p95": 45.714285714285715,
+        "maximum": 46.601941747572816
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9992595504716716,
+          "medianRelativeError": 0.005874752362569123,
+          "p95RelativeError": 0.03935836138725273
+        },
+        "right": {
+          "pearson": 0.9992193101268775,
+          "medianRelativeError": 0.005659148693084692,
+          "p95RelativeError": 0.04703453462918591
+        },
+        "meanEndpoints": {
+          "pearson": 0.9992420304552432,
+          "medianRelativeError": 0.005804900844891857,
+          "p95RelativeError": 0.045174637929598464
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 243,
+        "minimum": 0.00020810291318118255,
+        "median": 0.2935247852598695,
+        "p95": 1.0567667782950956,
+        "maximum": 1.842650247266068
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 243,
+        "minimum": 0.0074451718949893105,
+        "median": 0.515540541054828,
+        "p95": 1.5021204274094453,
+        "maximum": 2.5428027521963594
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 243,
+        "minimum": 0.0007721589638736664,
+        "median": 0.3738817802166282,
+        "p95": 1.1114171873804426,
+        "maximum": 1.5536611861389684
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 243,
+        "minimum": 0.002694886093011276,
+        "median": 0.43371443154107525,
+        "p95": 1.5850498548228051,
+        "maximum": 2.6508321864748488
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 242,
+          "minimum": -0.28636967673256825,
+          "median": 0.7112325464509957,
+          "p95": 0.882811480247002,
+          "maximum": 0.9130168350557035
+        },
+        "bestCircularCorrelation": {
+          "count": 242,
+          "minimum": 0.19113293872477644,
+          "median": 0.7351803574400265,
+          "p95": 0.8907564274965326,
+          "maximum": 0.9175683372623442
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 242,
+          "minimum": 0.0,
+          "median": 0.49462890625,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 242,
+          "minimum": -0.36788269067651913,
+          "median": 0.9166073191396675,
+          "p95": 0.978685726085869,
+          "maximum": 0.9872591828216499
+        },
+        "bestCircularCorrelation": {
+          "count": 242,
+          "minimum": 0.3745337038617469,
+          "median": 0.9385902384770175,
+          "p95": 0.9866737088162716,
+          "maximum": 0.9904725724425146
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 242,
+          "minimum": 0.0,
+          "median": 0.43310546875,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "7": 1,
+        "8": 200,
+        "16": 37,
+        "24": 2,
+        "33": 1,
+        "37": 2
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 243,
+            "minimum": -0.3691598657372316,
+            "median": 0.7183067715864399,
+            "p95": 0.8830263586391447,
+            "maximum": 0.9362220729723498
+          },
+          "fractionAbove0_8": 0.25102880658436216
+        },
+        "3": {
+          "correlation": {
+            "count": 243,
+            "minimum": -0.43907506314083156,
+            "median": -0.25166834294868223,
+            "p95": -0.04605314255600835,
+            "maximum": 0.12423271773741791
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "4": {
+          "correlation": {
+            "count": 243,
+            "minimum": 0.03726563023910335,
+            "median": 0.5745669044216359,
+            "p95": 0.8310560153993298,
+            "maximum": 0.8580001090196079
+          },
+          "fractionAbove0_8": 0.16049382716049382
+        },
+        "6": {
+          "correlation": {
+            "count": 243,
+            "minimum": -0.42497580148853786,
+            "median": -0.25676811202813077,
+            "p95": -0.03857277664570202,
+            "maximum": 0.20444246256725945
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 243,
+            "minimum": -0.05811865282186874,
+            "median": 0.5866663156062605,
+            "p95": 0.8444568188398075,
+            "maximum": 0.8677726387910476
+          },
+          "fractionAbove0_8": 0.16049382716049382
+        },
+        "12": {
+          "correlation": {
+            "count": 243,
+            "minimum": -0.5250418625406486,
+            "median": -0.29641023395177923,
+            "p95": -0.08610467976704493,
+            "maximum": 0.16971127615760612
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": 0.9999824457690418,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "lectro",
+      "role": "exhaust",
+      "state": "accel",
+      "sampleRate": 24000,
+      "frames": 216000,
+      "sourceSha256": "24746DA996BB203D1983255D09BA415E70F332213E8BEBB1C0D5EB04FBAAADC3",
+      "intervals": 241,
+      "intervalSeconds": {
+        "count": 241,
+        "minimum": 0.021541666666666667,
+        "median": 0.03141666666666667,
+        "p95": 0.07195833333333333,
+        "maximum": 0.095875
+      },
+      "candidateClockValue": {
+        "count": 242,
+        "minimum": 10.286215782165527,
+        "median": 31.77256965637207,
+        "p95": 45.469229507446286,
+        "maximum": 46.153846740722656
+      },
+      "intervalRateHz": {
+        "count": 241,
+        "minimum": 10.430247718383312,
+        "median": 31.83023872679045,
+        "p95": 45.627376425855516,
+        "maximum": 46.42166344294004
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9995812646983705,
+          "medianRelativeError": 0.005383597373962406,
+          "p95RelativeError": 0.024523869991302516
+        },
+        "right": {
+          "pearson": 0.9995566021512267,
+          "medianRelativeError": 0.005617318868637088,
+          "p95RelativeError": 0.030179422060648525
+        },
+        "meanEndpoints": {
+          "pearson": 0.9995700998494209,
+          "medianRelativeError": 0.005253066102663744,
+          "p95RelativeError": 0.023472307483355187
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 241,
+        "minimum": 0.00017219991331734354,
+        "median": 0.13938577353772771,
+        "p95": 0.8200309695775021,
+        "maximum": 2.0200581675673313
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 241,
+        "minimum": 0.002201006467116149,
+        "median": 0.19352204796880262,
+        "p95": 1.1243920439700708,
+        "maximum": 2.0700461020443908
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 241,
+        "minimum": 0.002905307040089845,
+        "median": 0.11666823639892138,
+        "p95": 0.6246138050949779,
+        "maximum": 1.1327811449936374
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 241,
+        "minimum": 0.0005986346099456706,
+        "median": 0.12840216780324645,
+        "p95": 0.8727764425556629,
+        "maximum": 2.0680722398460416
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 240,
+          "minimum": 0.12867726990353678,
+          "median": 0.9310402657683854,
+          "p95": 0.9785338041609584,
+          "maximum": 0.9853217225631752
+        },
+        "bestCircularCorrelation": {
+          "count": 240,
+          "minimum": 0.4809274818463589,
+          "median": 0.9547539469218966,
+          "p95": 0.9835503305153505,
+          "maximum": 0.9892362865219533
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 240,
+          "minimum": 0.0,
+          "median": 0.4951171875,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 240,
+          "minimum": 0.13263574660913657,
+          "median": 0.9608489466204645,
+          "p95": 0.9905181683982571,
+          "maximum": 0.9959457474856102
+        },
+        "bestCircularCorrelation": {
+          "count": 240,
+          "minimum": 0.49096490907545653,
+          "median": 0.9802374463282205,
+          "p95": 0.9937000288608695,
+          "maximum": 0.9969208508635986
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 240,
+          "minimum": 0.0,
+          "median": 0.49169921875,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "8": 232,
+        "16": 1,
+        "17": 8
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 241,
+            "minimum": -0.8364765109891876,
+            "median": 0.9372015756035225,
+            "p95": 0.9817031592176394,
+            "maximum": 0.9870000846904396
+          },
+          "fractionAbove0_8": 0.7759336099585062
+        },
+        "3": {
+          "correlation": {
+            "count": 241,
+            "minimum": -0.4905446942030717,
+            "median": -0.42406700482448034,
+            "p95": -0.20703514628983927,
+            "maximum": -0.07917008711029963
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "4": {
+          "correlation": {
+            "count": 241,
+            "minimum": -0.020473400501882767,
+            "median": 0.8937065682670029,
+            "p95": 0.9716269970772013,
+            "maximum": 0.9829163227091006
+          },
+          "fractionAbove0_8": 0.6680497925311203
+        },
+        "6": {
+          "correlation": {
+            "count": 241,
+            "minimum": -0.49043038264411903,
+            "median": -0.42615340592103923,
+            "p95": -0.11373644380970854,
+            "maximum": 0.37647136313682794
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 241,
+            "minimum": 0.33614996440494915,
+            "median": 0.9102414889961132,
+            "p95": 0.9719429415509745,
+            "maximum": 0.9815657280020118
+          },
+          "fractionAbove0_8": 0.6265560165975104
+        },
+        "12": {
+          "correlation": {
+            "count": 241,
+            "minimum": -0.7142587860721256,
+            "median": -0.45964948506250447,
+            "p95": -0.23116256143277772,
+            "maximum": -0.1163816972827302
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": 0.9999991532742882,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "lectro",
+      "role": "engine",
+      "state": "decel",
+      "sampleRate": 24000,
+      "frames": 224704,
+      "sourceSha256": "8212CDC92B06D634C36DD4863C747A8A837DC62FE61A1EE1B23E1B4EFA6F2B45",
+      "intervals": 274,
+      "intervalSeconds": {
+        "count": 274,
+        "minimum": 0.021375,
+        "median": 0.0299375,
+        "p95": 0.060779166666666634,
+        "maximum": 0.07275
+      },
+      "candidateClockValue": {
+        "count": 275,
+        "minimum": 13.278751373291016,
+        "median": 33.67805862426758,
+        "p95": 45.62387809753418,
+        "maximum": 46.46660232543945
+      },
+      "intervalRateHz": {
+        "count": 274,
+        "minimum": 13.745704467353951,
+        "median": 33.403327160446,
+        "p95": 46.096264579949796,
+        "maximum": 46.78362573099415
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9985134633793606,
+          "medianRelativeError": 0.006762636979420997,
+          "p95RelativeError": 0.021069876909256033
+        },
+        "right": {
+          "pearson": 0.99853442701886,
+          "medianRelativeError": 0.005826092362403868,
+          "p95RelativeError": 0.01960447740554808
+        },
+        "meanEndpoints": {
+          "pearson": 0.9985246573097495,
+          "medianRelativeError": 0.006129391302665033,
+          "p95RelativeError": 0.019701916575431872
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 274,
+        "minimum": 0.0,
+        "median": 0.28787245841791065,
+        "p95": 0.9656515034923099,
+        "maximum": 1.5998788298240245
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 274,
+        "minimum": 0.000533396320040454,
+        "median": 0.4378291657301311,
+        "p95": 1.3925434872543585,
+        "maximum": 2.842291538301895
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 274,
+        "minimum": 0.000502961397269644,
+        "median": 0.3564581960563595,
+        "p95": 1.072589472001905,
+        "maximum": 2.21563184793814
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 274,
+        "minimum": 0.0013942289585552534,
+        "median": 0.3738043320601543,
+        "p95": 1.402088132934323,
+        "maximum": 2.670663781080433
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 273,
+          "minimum": -0.06993903994740563,
+          "median": 0.8033281595900632,
+          "p95": 0.9518285680383184,
+          "maximum": 0.9689869151888175
+        },
+        "bestCircularCorrelation": {
+          "count": 273,
+          "minimum": 0.23667963335705497,
+          "median": 0.8381689618683861,
+          "p95": 0.9580583299984157,
+          "maximum": 0.9716558690522449
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 273,
+          "minimum": 0.0,
+          "median": 0.498046875,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 273,
+          "minimum": -0.20689007128159012,
+          "median": 0.9538363846504058,
+          "p95": 0.9887616770942322,
+          "maximum": 0.9931403960093558
+        },
+        "bestCircularCorrelation": {
+          "count": 273,
+          "minimum": 0.29232391677736796,
+          "median": 0.9680009710869669,
+          "p95": 0.9931882333001432,
+          "maximum": 0.9949806307364143
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 273,
+          "minimum": 0.0,
+          "median": 0.494140625,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "8": 251,
+        "13": 1,
+        "16": 19,
+        "17": 1,
+        "18": 1,
+        "19": 1
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 274,
+            "minimum": -0.5365822102752171,
+            "median": 0.8492068486430373,
+            "p95": 0.9553888704232482,
+            "maximum": 0.9694989478318394
+          },
+          "fractionAbove0_8": 0.5656934306569343
+        },
+        "3": {
+          "correlation": {
+            "count": 274,
+            "minimum": -0.4720495563126185,
+            "median": -0.3435416852646569,
+            "p95": -0.09857695396909133,
+            "maximum": 0.13851343996444324
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "4": {
+          "correlation": {
+            "count": 274,
+            "minimum": -0.047160216329117315,
+            "median": 0.766673977715419,
+            "p95": 0.9376991889307198,
+            "maximum": 0.950655938504325
+          },
+          "fractionAbove0_8": 0.42700729927007297
+        },
+        "6": {
+          "correlation": {
+            "count": 274,
+            "minimum": -0.4721076907702313,
+            "median": -0.34042156901317033,
+            "p95": -0.08651156297903434,
+            "maximum": 0.29527784017517156
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 274,
+            "minimum": -0.35478567038627673,
+            "median": 0.7482226015730192,
+            "p95": 0.9331221415608653,
+            "maximum": 0.9484580806768741
+          },
+          "fractionAbove0_8": 0.3795620437956204
+        },
+        "12": {
+          "correlation": {
+            "count": 274,
+            "minimum": -0.46869708248002634,
+            "median": -0.38243727328812566,
+            "p95": -0.21592281873592287,
+            "maximum": 0.12044201205604428
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": -0.999998413200899,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "lectro",
+      "role": "exhaust",
+      "state": "decel",
+      "sampleRate": 24000,
+      "frames": 224704,
+      "sourceSha256": "D3B66056319C907EB4A074B826AD126ED6ED29299EEA5A68074688A3071D35DA",
+      "intervals": 273,
+      "intervalSeconds": {
+        "count": 273,
+        "minimum": 0.020958333333333332,
+        "median": 0.029791666666666668,
+        "p95": 0.06108333333333331,
+        "maximum": 0.07658333333333334
+      },
+      "candidateClockValue": {
+        "count": 274,
+        "minimum": 12.753582000732422,
+        "median": 33.483829498291016,
+        "p95": 45.68384418487548,
+        "maximum": 46.511627197265625
+      },
+      "intervalRateHz": {
+        "count": 273,
+        "minimum": 13.057671381936888,
+        "median": 33.56643356643357,
+        "p95": 46.06525911708253,
+        "maximum": 47.713717693836976
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9991127908347095,
+          "medianRelativeError": 0.004686336676279643,
+          "p95RelativeError": 0.018606413714090917
+        },
+        "right": {
+          "pearson": 0.9991193122299619,
+          "medianRelativeError": 0.004081128597259498,
+          "p95RelativeError": 0.01851458460489904
+        },
+        "meanEndpoints": {
+          "pearson": 0.9991176042292568,
+          "medianRelativeError": 0.003418680191040023,
+          "p95RelativeError": 0.018101755825678505
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 273,
+        "minimum": 5.5309300463200315e-05,
+        "median": 0.09665043062310429,
+        "p95": 0.5687277924625115,
+        "maximum": 1.13130036232091
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 273,
+        "minimum": 0.0009453001497402888,
+        "median": 0.18101896078066904,
+        "p95": 0.9046800290659573,
+        "maximum": 1.6912582929458024
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 273,
+        "minimum": 0.0019027725505870107,
+        "median": 0.14362185389829715,
+        "p95": 0.6626698758110091,
+        "maximum": 1.0197745680437698
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 273,
+        "minimum": 0.0017527742620167632,
+        "median": 0.12739698657990725,
+        "p95": 0.6953613442953468,
+        "maximum": 1.5844333959468149
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 272,
+          "minimum": -0.013326511458828953,
+          "median": 0.9080249759995498,
+          "p95": 0.9871668303340986,
+          "maximum": 0.9915038574068946
+        },
+        "bestCircularCorrelation": {
+          "count": 272,
+          "minimum": 0.17403884289827778,
+          "median": 0.9214683290654314,
+          "p95": 0.9888564237473272,
+          "maximum": 0.9921549794204872
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 272,
+          "minimum": 0.0,
+          "median": 0.498046875,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 272,
+          "minimum": -0.012982821920486526,
+          "median": 0.9527128859017038,
+          "p95": 0.9951698959316054,
+          "maximum": 0.9972036355429372
+        },
+        "bestCircularCorrelation": {
+          "count": 272,
+          "minimum": 0.17672730828816818,
+          "median": 0.9643191210681812,
+          "p95": 0.9962192185363719,
+          "maximum": 0.9972417644528216
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 272,
+          "minimum": 0.0,
+          "median": 0.4970703125,
+          "p95": 0.5,
+          "maximum": 0.5
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "4": 23,
+        "8": 247,
+        "10": 2,
+        "13": 1
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 273,
+            "minimum": -0.20778020530966332,
+            "median": 0.9316323865051437,
+            "p95": 0.9886552335108314,
+            "maximum": 0.9919876473952274
+          },
+          "fractionAbove0_8": 0.663003663003663
+        },
+        "3": {
+          "correlation": {
+            "count": 273,
+            "minimum": -0.49382061221858753,
+            "median": -0.3967751486367618,
+            "p95": -0.14052523957732949,
+            "maximum": 0.11532517528049302
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "4": {
+          "correlation": {
+            "count": 273,
+            "minimum": -0.7745923253329277,
+            "median": 0.843244182289788,
+            "p95": 0.980990080223864,
+            "maximum": 0.9889166544107071
+          },
+          "fractionAbove0_8": 0.5421245421245421
+        },
+        "6": {
+          "correlation": {
+            "count": 273,
+            "minimum": -0.5273565319333089,
+            "median": -0.4046551874979101,
+            "p95": -0.14957183482434383,
+            "maximum": 0.4878481440745044
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 273,
+            "minimum": -0.4741501286050608,
+            "median": 0.7591398923480952,
+            "p95": 0.9809168597907016,
+            "maximum": 0.985393430512072
+          },
+          "fractionAbove0_8": 0.4835164835164835
+        },
+        "12": {
+          "correlation": {
+            "count": 273,
+            "minimum": -0.49336474769367983,
+            "median": -0.44888835341373357,
+            "p95": -0.16824069904307476,
+            "maximum": 0.4671394975191102
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": -0.9999985416033176,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "prototipo",
+      "role": "engine",
+      "state": "accel",
+      "sampleRate": 32000,
+      "frames": 310495,
+      "sourceSha256": "218FC13CC6B72E0241B0C8A1629EBD2F29C481053F5A77A2CD56D6C8FA790BBB",
+      "intervals": 296,
+      "intervalSeconds": {
+        "count": 296,
+        "minimum": 0.01828125,
+        "median": 0.026140625,
+        "p95": 0.0677265625,
+        "maximum": 0.09678125
+      },
+      "candidateClockValue": {
+        "count": 297,
+        "minimum": 10.142208099365234,
+        "median": 38.14533996582031,
+        "p95": 50.84745788574219,
+        "maximum": 50.96918487548828
+      },
+      "intervalRateHz": {
+        "count": 296,
+        "minimum": 10.332579916047788,
+        "median": 38.254646064493265,
+        "p95": 53.06799336650083,
+        "maximum": 54.7008547008547
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9978688451014921,
+          "medianRelativeError": 0.010831230103969556,
+          "p95RelativeError": 0.06743604955077168
+        },
+        "right": {
+          "pearson": 0.9978601230858961,
+          "medianRelativeError": 0.010765209138393388,
+          "p95RelativeError": 0.0742525042891502
+        },
+        "meanEndpoints": {
+          "pearson": 0.997869039324573,
+          "medianRelativeError": 0.010051055610179885,
+          "p95RelativeError": 0.06983229424059387
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 296,
+        "minimum": 0.00010813086666263812,
+        "median": 0.38424871564478863,
+        "p95": 0.9994859108420634,
+        "maximum": 2.0990523169346242
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 296,
+        "minimum": 0.00395768181601229,
+        "median": 0.514866052424946,
+        "p95": 1.2775834806840547,
+        "maximum": 1.8315359053136073
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 296,
+        "minimum": 0.0007733465977202717,
+        "median": 0.29136609909745026,
+        "p95": 0.8056315167851295,
+        "maximum": 1.5493453904062446
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 296,
+        "minimum": 0.001212229328673457,
+        "median": 0.38174443246829615,
+        "p95": 1.2408813011446724,
+        "maximum": 1.828459966419138
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 295,
+          "minimum": -0.035021914756326114,
+          "median": 0.7224973152819301,
+          "p95": 0.8733979125887491,
+          "maximum": 0.9080703156647723
+        },
+        "bestCircularCorrelation": {
+          "count": 295,
+          "minimum": 0.11974788581261953,
+          "median": 0.7782041665376758,
+          "p95": 0.8814405285030363,
+          "maximum": 0.9134757129961559
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 295,
+          "minimum": 0.0,
+          "median": 0.0771484375,
+          "p95": 0.3369140625,
+          "maximum": 0.4990234375
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 295,
+          "minimum": -0.6060421502374103,
+          "median": 0.8521545963687824,
+          "p95": 0.9660724842578824,
+          "maximum": 0.9874812389953906
+        },
+        "bestCircularCorrelation": {
+          "count": 295,
+          "minimum": 0.19060700790876325,
+          "median": 0.9008601342137731,
+          "p95": 0.9710024757066728,
+          "maximum": 0.9874812389953905
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 295,
+          "minimum": 0.0,
+          "median": 0.1650390625,
+          "p95": 0.3359375,
+          "maximum": 0.4990234375
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "6": 7,
+        "11": 1,
+        "12": 146,
+        "13": 11,
+        "14": 4,
+        "15": 2,
+        "18": 79,
+        "24": 6,
+        "26": 11,
+        "28": 5,
+        "29": 1,
+        "30": 13,
+        "35": 2,
+        "36": 2,
+        "37": 1,
+        "42": 2,
+        "54": 3
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 296,
+            "minimum": -0.46741844489841333,
+            "median": 0.6981443705669298,
+            "p95": 0.8524436452869781,
+            "maximum": 0.8934532560246431
+          },
+          "fractionAbove0_8": 0.1891891891891892
+        },
+        "3": {
+          "correlation": {
+            "count": 296,
+            "minimum": -0.3223404649919376,
+            "median": 0.7132770462090477,
+            "p95": 0.876237350693284,
+            "maximum": 0.9088405095654015
+          },
+          "fractionAbove0_8": 0.21621621621621623
+        },
+        "4": {
+          "correlation": {
+            "count": 296,
+            "minimum": -0.7393145031996007,
+            "median": 0.042295191413209365,
+            "p95": 0.7180430273390281,
+            "maximum": 0.8579977277988768
+          },
+          "fractionAbove0_8": 0.013513513513513514
+        },
+        "6": {
+          "correlation": {
+            "count": 296,
+            "minimum": -0.3674252828233061,
+            "median": 0.6817140217852111,
+            "p95": 0.8688423443597567,
+            "maximum": 0.9169657842147484
+          },
+          "fractionAbove0_8": 0.21283783783783783
+        },
+        "8": {
+          "correlation": {
+            "count": 296,
+            "minimum": -0.7076020965339415,
+            "median": -0.2136147811868789,
+            "p95": 0.11032775112484243,
+            "maximum": 0.2494702084177718
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "12": {
+          "correlation": {
+            "count": 296,
+            "minimum": -0.6681852250964377,
+            "median": 0.17655908474045146,
+            "p95": 0.7314332825066009,
+            "maximum": 0.8439445139230741
+          },
+          "fractionAbove0_8": 0.006756756756756757
+        }
+      },
+      "clockTimeSpearman": 0.9992993946048623,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "prototipo",
+      "role": "exhaust",
+      "state": "accel",
+      "sampleRate": 32000,
+      "frames": 313967,
+      "sourceSha256": "3BD302350BB8C2C5D8D570B787DC99F7126A53599078A97752D4F48A0763C4F4",
+      "intervals": 300,
+      "intervalSeconds": {
+        "count": 300,
+        "minimum": 0.01796875,
+        "median": 0.0263125,
+        "p95": 0.06458125000000005,
+        "maximum": 0.1039375
+      },
+      "candidateClockValue": {
+        "count": 301,
+        "minimum": 9.805337905883789,
+        "median": 38.600547790527344,
+        "p95": 51.679534912109375,
+        "maximum": 51.81166076660156
+      },
+      "intervalRateHz": {
+        "count": 300,
+        "minimum": 9.621166566446181,
+        "median": 38.00475059382423,
+        "p95": 53.516187403012836,
+        "maximum": 55.65217391304348
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9982931677824587,
+          "medianRelativeError": 0.010733293890953044,
+          "p95RelativeError": 0.06321774202585215
+        },
+        "right": {
+          "pearson": 0.9982638518244007,
+          "medianRelativeError": 0.01218006974458695,
+          "p95RelativeError": 0.07655902584046119
+        },
+        "meanEndpoints": {
+          "pearson": 0.9982823638173481,
+          "medianRelativeError": 0.01116489106416697,
+          "p95RelativeError": 0.06942458739280703
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 300,
+        "minimum": 0.0023257529289527484,
+        "median": 0.1759846534290401,
+        "p95": 0.569295127956948,
+        "maximum": 0.8621390798214108
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 300,
+        "minimum": 0.0,
+        "median": 0.23103712896264955,
+        "p95": 0.6912717669911714,
+        "maximum": 1.09568193878272
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 300,
+        "minimum": 0.001923489349161373,
+        "median": 0.15550154167956148,
+        "p95": 0.4231684685867497,
+        "maximum": 0.7131647804150113
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 300,
+        "minimum": 0.0012843364959728126,
+        "median": 0.15249634390236783,
+        "p95": 0.6173709906843662,
+        "maximum": 0.9680504672965683
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 299,
+          "minimum": -0.03333232941833447,
+          "median": 0.9201745667593797,
+          "p95": 0.967083726448087,
+          "maximum": 0.9846052681081034
+        },
+        "bestCircularCorrelation": {
+          "count": 299,
+          "minimum": 0.18566564443410252,
+          "median": 0.9366729490747575,
+          "p95": 0.9695534729108054,
+          "maximum": 0.9846052681081034
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 299,
+          "minimum": 0.0,
+          "median": 0.001953125,
+          "p95": 0.3359375,
+          "maximum": 0.4990234375
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 299,
+          "minimum": -0.557962363916418,
+          "median": 0.9693014644557627,
+          "p95": 0.9933002748277429,
+          "maximum": 0.9969167270008249
+        },
+        "bestCircularCorrelation": {
+          "count": 299,
+          "minimum": 0.22178691490923572,
+          "median": 0.9764987146719143,
+          "p95": 0.9940754885593556,
+          "maximum": 0.9972977947874954
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 299,
+          "minimum": 0.0,
+          "median": 0.001953125,
+          "p95": 0.3859374999999996,
+          "maximum": 0.4990234375
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "6": 24,
+        "12": 103,
+        "14": 1,
+        "15": 1,
+        "17": 8,
+        "18": 137,
+        "19": 6,
+        "20": 3,
+        "21": 9,
+        "22": 1,
+        "26": 3,
+        "35": 1,
+        "36": 3
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 300,
+            "minimum": -0.5166604224461905,
+            "median": 0.8953041508650905,
+            "p95": 0.9606476462876087,
+            "maximum": 0.9734350420839244
+          },
+          "fractionAbove0_8": 0.7833333333333333
+        },
+        "3": {
+          "correlation": {
+            "count": 300,
+            "minimum": -0.3465688184966854,
+            "median": 0.9240216272058311,
+            "p95": 0.9703452237549217,
+            "maximum": 0.9805091565076842
+          },
+          "fractionAbove0_8": 0.8466666666666667
+        },
+        "4": {
+          "correlation": {
+            "count": 300,
+            "minimum": -0.8301970630293645,
+            "median": -0.156567645287767,
+            "p95": 0.6589366005561123,
+            "maximum": 0.7494065376893322
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "6": {
+          "correlation": {
+            "count": 300,
+            "minimum": -0.5371710228112607,
+            "median": 0.9060324357473399,
+            "p95": 0.9658818113806442,
+            "maximum": 0.9744638634837026
+          },
+          "fractionAbove0_8": 0.8366666666666667
+        },
+        "8": {
+          "correlation": {
+            "count": 300,
+            "minimum": -0.8301752354074392,
+            "median": -0.23348224488048203,
+            "p95": -0.010632522596800259,
+            "maximum": 0.27418114333675886
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "12": {
+          "correlation": {
+            "count": 300,
+            "minimum": -0.8347188749881542,
+            "median": -0.16947826709071898,
+            "p95": 0.6639108619448044,
+            "maximum": 0.7503398472239976
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": 0.9999707373794566,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "prototipo",
+      "role": "engine",
+      "state": "decel",
+      "sampleRate": 32000,
+      "frames": 289949,
+      "sourceSha256": "4BA75D60B0B2B5E3A70458F00F406E1CD4DFE9350BE356B6FF260CA9EF71544A",
+      "intervals": 301,
+      "intervalSeconds": {
+        "count": 301,
+        "minimum": 0.018375,
+        "median": 0.026125,
+        "p95": 0.06509375,
+        "maximum": 0.07903125
+      },
+      "candidateClockValue": {
+        "count": 302,
+        "minimum": 12.78976821899414,
+        "median": 38.36126899719238,
+        "p95": 51.54575366973877,
+        "maximum": 51.90386199951172
+      },
+      "intervalRateHz": {
+        "count": 301,
+        "minimum": 12.653222617635429,
+        "median": 38.27751196172249,
+        "p95": 51.2,
+        "maximum": 54.42176870748299
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.9974797936580772,
+          "medianRelativeError": 0.0056198334693909205,
+          "p95RelativeError": 0.0615994082689285
+        },
+        "right": {
+          "pearson": 0.9975175818044376,
+          "medianRelativeError": 0.0045841646194458505,
+          "p95RelativeError": 0.06552105903625496
+        },
+        "meanEndpoints": {
+          "pearson": 0.9975067926156295,
+          "medianRelativeError": 0.004971166670322475,
+          "p95RelativeError": 0.06263227963447568
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 301,
+        "minimum": 0.00011006919227948081,
+        "median": 0.45435596823291347,
+        "p95": 1.4556104677478388,
+        "maximum": 2.416924482306802
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 301,
+        "minimum": 0.00036033552420394554,
+        "median": 0.6119661485580336,
+        "p95": 1.9784609378292561,
+        "maximum": 3.497953969576327
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 301,
+        "minimum": 0.00023619466471324767,
+        "median": 0.38318593878396245,
+        "p95": 1.2072369634981412,
+        "maximum": 1.8961695543819153
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 301,
+        "minimum": 0.0045730073298599055,
+        "median": 0.6045793873411198,
+        "p95": 1.6478410549508453,
+        "maximum": 3.887102213209415
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 300,
+          "minimum": 0.01723692218401135,
+          "median": 0.45195580978879213,
+          "p95": 0.6747959471046789,
+          "maximum": 0.7985078515872878
+        },
+        "bestCircularCorrelation": {
+          "count": 300,
+          "minimum": 0.19501121287468165,
+          "median": 0.5077985278417383,
+          "p95": 0.7263344022452326,
+          "maximum": 0.8632727422875235
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 300,
+          "minimum": 0.0,
+          "median": 0.0009765625,
+          "p95": 0.362353515625,
+          "maximum": 0.4990234375
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 300,
+          "minimum": -0.37520059359190994,
+          "median": 0.6003960236640705,
+          "p95": 0.868038912922382,
+          "maximum": 0.9211904120372417
+        },
+        "bestCircularCorrelation": {
+          "count": 300,
+          "minimum": 0.25498421492816825,
+          "median": 0.7205890142010987,
+          "p95": 0.8899045341226365,
+          "maximum": 0.9235610960121512
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 300,
+          "minimum": 0.0,
+          "median": 0.14208984375,
+          "p95": 0.43955078125,
+          "maximum": 0.4990234375
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "1": 10,
+        "2": 9,
+        "3": 44,
+        "4": 4,
+        "6": 32,
+        "8": 3,
+        "9": 5,
+        "10": 14,
+        "11": 6,
+        "12": 49,
+        "14": 1,
+        "15": 1,
+        "18": 5,
+        "24": 49,
+        "25": 8,
+        "26": 17,
+        "30": 12,
+        "32": 1,
+        "33": 4,
+        "34": 16,
+        "36": 7,
+        "52": 1,
+        "54": 1,
+        "56": 1,
+        "58": 1
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 301,
+            "minimum": -0.7481711794457679,
+            "median": 0.1162107183198006,
+            "p95": 0.4235647417508224,
+            "maximum": 0.7416530719501595
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "3": {
+          "correlation": {
+            "count": 301,
+            "minimum": -0.41211855601225694,
+            "median": 0.16812618047138875,
+            "p95": 0.4904205674191044,
+            "maximum": 0.8179456331084436
+          },
+          "fractionAbove0_8": 0.0033222591362126247
+        },
+        "4": {
+          "correlation": {
+            "count": 301,
+            "minimum": -0.7236639616030724,
+            "median": -0.022282774662817712,
+            "p95": 0.269392155854451,
+            "maximum": 0.6140466201923431
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "6": {
+          "correlation": {
+            "count": 301,
+            "minimum": -0.7690120643092192,
+            "median": 0.10180361901614299,
+            "p95": 0.324147094053398,
+            "maximum": 0.39906916661908554
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "8": {
+          "correlation": {
+            "count": 301,
+            "minimum": -0.550319945297903,
+            "median": -0.08802655286208236,
+            "p95": 0.14616021929255257,
+            "maximum": 0.34176482243945444
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "12": {
+          "correlation": {
+            "count": 301,
+            "minimum": -0.5362294272127439,
+            "median": 0.040212516744994986,
+            "p95": 0.31254861917409704,
+            "maximum": 0.49409130237866705
+          },
+          "fractionAbove0_8": 0.0
+        }
+      },
+      "clockTimeSpearman": -0.9999136258747606,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    },
+    {
+      "model": "prototipo",
+      "role": "exhaust",
+      "state": "decel",
+      "sampleRate": 32000,
+      "frames": 289949,
+      "sourceSha256": "BC7E94E21696BDB535484342AB13D0F92EF207FB0B04A64D1FA4B8F62094D0F2",
+      "intervals": 299,
+      "intervalSeconds": {
+        "count": 299,
+        "minimum": 0.01840625,
+        "median": 0.026,
+        "p95": 0.06466874999999998,
+        "maximum": 0.0838125
+      },
+      "candidateClockValue": {
+        "count": 300,
+        "minimum": 12.76518440246582,
+        "median": 38.430843353271484,
+        "p95": 51.83865547180176,
+        "maximum": 52.344600677490234
+      },
+      "intervalRateHz": {
+        "count": 299,
+        "minimum": 11.931394481730052,
+        "median": 38.46153846153846,
+        "p95": 51.290282750956905,
+        "maximum": 54.32937181663837
+      },
+      "clockVsSampleRateOverOffsetDelta": {
+        "left": {
+          "pearson": 0.998824053834688,
+          "medianRelativeError": 0.004122040748596151,
+          "p95RelativeError": 0.042148073458671505
+        },
+        "right": {
+          "pearson": 0.9987439979849994,
+          "medianRelativeError": 0.003690071105956996,
+          "p95RelativeError": 0.04994957982897761
+        },
+        "meanEndpoints": {
+          "pearson": 0.9987928436137469,
+          "medianRelativeError": 0.0035626745223998548,
+          "p95RelativeError": 0.045945163795352024
+        }
+      },
+      "endpointPhaseAmplitudeErrorOverIntervalRms": {
+        "count": 299,
+        "minimum": 0.0010863715481614846,
+        "median": 0.13131041415579853,
+        "p95": 0.503493974464264,
+        "maximum": 0.9005905043421165
+      },
+      "directLoopJoinStepOverIntervalRms": {
+        "count": 299,
+        "minimum": 0.000781568665213967,
+        "median": 0.22450463454581665,
+        "p95": 0.7436915417591291,
+        "maximum": 1.585160448550718
+      },
+      "actualBoundaryAdjacentStepOverIntervalRms": {
+        "count": 299,
+        "minimum": 0.00024913436253550523,
+        "median": 0.15414716867666844,
+        "p95": 0.5033374895341366,
+        "maximum": 0.8763730417687609
+      },
+      "endpointDerivativeMismatchOverIntervalRms": {
+        "count": 299,
+        "minimum": 0.0006933941494040878,
+        "median": 0.10987633741058982,
+        "p95": 0.4303487289877339,
+        "maximum": 0.945763261164978
+      },
+      "adjacentIntervals": {
+        "samePhaseCorrelation": {
+          "count": 298,
+          "minimum": -0.05603705669115387,
+          "median": 0.8780986438613778,
+          "p95": 0.9721668785344038,
+          "maximum": 0.9829035359133005
+        },
+        "bestCircularCorrelation": {
+          "count": 298,
+          "minimum": 0.17270062620648707,
+          "median": 0.8940019905372609,
+          "p95": 0.9754352612241275,
+          "maximum": 0.9846235059433885
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 298,
+          "minimum": 0.0,
+          "median": 0.001953125,
+          "p95": 0.34404296874999996,
+          "maximum": 0.498046875
+        }
+      },
+      "adjacentLowOrders1to24": {
+        "samePhaseCorrelation": {
+          "count": 298,
+          "minimum": -0.5313926957831627,
+          "median": 0.9169869851068203,
+          "p95": 0.9825217434361627,
+          "maximum": 0.9898911256429341
+        },
+        "bestCircularCorrelation": {
+          "count": 298,
+          "minimum": 0.19283179373727571,
+          "median": 0.9238927757633869,
+          "p95": 0.9853201323735297,
+          "maximum": 0.9909595140921728
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 298,
+          "minimum": 0.0,
+          "median": 0.001953125,
+          "p95": 0.3570312499999999,
+          "maximum": 0.5
+        }
+      },
+      "dominantIntegerOrderHistogram": {
+        "3": 12,
+        "4": 2,
+        "6": 37,
+        "8": 3,
+        "9": 5,
+        "10": 2,
+        "11": 2,
+        "12": 182,
+        "13": 11,
+        "15": 3,
+        "16": 1,
+        "17": 2,
+        "18": 23,
+        "21": 2,
+        "24": 5,
+        "26": 1,
+        "28": 1,
+        "29": 4,
+        "31": 1
+      },
+      "withinIntervalRepeatedStructure": {
+        "2": {
+          "correlation": {
+            "count": 299,
+            "minimum": -0.6170110731320078,
+            "median": 0.6911213514502184,
+            "p95": 0.9305011063339456,
+            "maximum": 0.9694972443831705
+          },
+          "fractionAbove0_8": 0.2909698996655518
+        },
+        "3": {
+          "correlation": {
+            "count": 299,
+            "minimum": -0.3808047724597366,
+            "median": 0.8431079889396662,
+            "p95": 0.9673180077898929,
+            "maximum": 0.9802512889400251
+          },
+          "fractionAbove0_8": 0.5852842809364549
+        },
+        "4": {
+          "correlation": {
+            "count": 299,
+            "minimum": -0.8845927018498949,
+            "median": 0.20488223062042077,
+            "p95": 0.7708145184745249,
+            "maximum": 0.8867384765069457
+          },
+          "fractionAbove0_8": 0.04013377926421405
+        },
+        "6": {
+          "correlation": {
+            "count": 299,
+            "minimum": -0.6356284704672653,
+            "median": 0.7099531141345572,
+            "p95": 0.9267072692652167,
+            "maximum": 0.9621777147502377
+          },
+          "fractionAbove0_8": 0.3210702341137124
+        },
+        "8": {
+          "correlation": {
+            "count": 299,
+            "minimum": -0.8455151062589785,
+            "median": -0.2941385556621028,
+            "p95": 0.037589909188693635,
+            "maximum": 0.5231643750448063
+          },
+          "fractionAbove0_8": 0.0
+        },
+        "12": {
+          "correlation": {
+            "count": 299,
+            "minimum": -0.8950010617005371,
+            "median": 0.2468795903007608,
+            "p95": 0.7818726158422621,
+            "maximum": 0.894773642079325
+          },
+          "fractionAbove0_8": 0.043478260869565216
+        }
+      },
+      "clockTimeSpearman": -0.9999642212795484,
+      "absoluteRpmKnown": false,
+      "nativeGrainSemanticsRecovered": false
+    }
+  ],
+  "rolePairs": [
+    {
+      "model": "schafter3",
+      "state": "accel",
+      "engineIntervals": 287,
+      "exhaustIntervals": 287,
+      "engineDurationSeconds": 9.5655,
+      "exhaustDurationSeconds": 9.5655,
+      "normalizedTimeClockPearson": 0.9999965236157079,
+      "normalizedTimeClockRelativeDifference": {
+        "count": 201,
+        "minimum": 1.1977231947715854e-06,
+        "median": 0.0009772279657268984,
+        "p95": 0.0044551656993833035,
+        "maximum": 0.011251017028256385
+      },
+      "engineExhaustNormalizedPhaseWaveform": {
+        "samePhaseCorrelation": {
+          "count": 201,
+          "minimum": -0.5314900770949822,
+          "median": 0.10437063886818604,
+          "p95": 0.7153554292876214,
+          "maximum": 0.8771669717781495
+        },
+        "bestCircularCorrelation": {
+          "count": 201,
+          "minimum": 0.19493843292452487,
+          "median": 0.3859205555080256,
+          "p95": 0.8283538040923899,
+          "maximum": 0.9082884323059065
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 201,
+          "minimum": 0.0009765625,
+          "median": 0.1875,
+          "p95": 0.4091796875,
+          "maximum": 0.49609375
+        }
+      },
+      "sameIndexRelationship": {
+        "count": 288,
+        "clockPearson": 0.9999954264749429,
+        "relativeClockDifference": {
+          "count": 288,
+          "minimum": 0.0,
+          "median": 0.0008810869012210148,
+          "p95": 0.004450452089015384,
+          "maximum": 0.009855352725050993
+        },
+        "exhaustMinusEngineOffsetSeconds": {
+          "count": 288,
+          "minimum": -0.009833333333333333,
+          "median": 0.0010208333333334707,
+          "p95": 0.002777083333333773,
+          "maximum": 0.004750000000000032
+        }
+      },
+      "physicalEngineExhaustPhaseLockEstablished": false
+    },
+    {
+      "model": "schafter3",
+      "state": "decel",
+      "engineIntervals": 313,
+      "exhaustIntervals": 419,
+      "engineDurationSeconds": 10.091166666666666,
+      "exhaustDurationSeconds": 13.442,
+      "normalizedTimeClockPearson": 0.9969794422045948,
+      "normalizedTimeClockRelativeDifference": {
+        "count": 201,
+        "minimum": 0.0004934868197930848,
+        "median": 0.004162285558454759,
+        "p95": 0.06889859599315695,
+        "maximum": 0.10734435576855482
+      },
+      "engineExhaustNormalizedPhaseWaveform": {
+        "samePhaseCorrelation": {
+          "count": 201,
+          "minimum": -0.5087106858022188,
+          "median": -0.13816248919745455,
+          "p95": 0.13648169890679018,
+          "maximum": 0.31555508385743114
+        },
+        "bestCircularCorrelation": {
+          "count": 201,
+          "minimum": 0.11635842404165238,
+          "median": 0.3376133667229227,
+          "p95": 0.5159804375232364,
+          "maximum": 0.5676224820489364
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 201,
+          "minimum": 0.0146484375,
+          "median": 0.1953125,
+          "p95": 0.4814453125,
+          "maximum": 0.4990234375
+        }
+      },
+      "sameIndexRelationship": null,
+      "physicalEngineExhaustPhaseLockEstablished": false
+    },
+    {
+      "model": "bati",
+      "state": "accel",
+      "engineIntervals": 154,
+      "exhaustIntervals": 154,
+      "engineDurationSeconds": 6.8385625,
+      "exhaustDurationSeconds": 6.8385625,
+      "normalizedTimeClockPearson": 0.9999646275707089,
+      "normalizedTimeClockRelativeDifference": {
+        "count": 201,
+        "minimum": 9.273168729969536e-05,
+        "median": 0.004107068538023155,
+        "p95": 0.014911504733283691,
+        "maximum": 0.02062191029330005
+      },
+      "engineExhaustNormalizedPhaseWaveform": {
+        "samePhaseCorrelation": {
+          "count": 201,
+          "minimum": -0.18739470466724095,
+          "median": 0.33878081260553483,
+          "p95": 0.5004081781222849,
+          "maximum": 0.5770595894873833
+        },
+        "bestCircularCorrelation": {
+          "count": 201,
+          "minimum": 0.2937309049197676,
+          "median": 0.4196762211712456,
+          "p95": 0.7284713054981532,
+          "maximum": 0.741160102632531
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 201,
+          "minimum": 0.0,
+          "median": 0.0263671875,
+          "p95": 0.4931640625,
+          "maximum": 0.498046875
+        }
+      },
+      "sameIndexRelationship": {
+        "count": 155,
+        "clockPearson": 0.9999530207829187,
+        "relativeClockDifference": {
+          "count": 155,
+          "minimum": 0.00029941711098149034,
+          "median": 0.0036155706352269186,
+          "p95": 0.010816632645068788,
+          "maximum": 0.021253796004390414
+        },
+        "exhaustMinusEngineOffsetSeconds": {
+          "count": 155,
+          "minimum": -0.002874999999999961,
+          "median": -0.0019583333333335062,
+          "p95": -0.0012645833333332138,
+          "maximum": 0.006520833333333323
+        }
+      },
+      "physicalEngineExhaustPhaseLockEstablished": false
+    },
+    {
+      "model": "bati",
+      "state": "decel",
+      "engineIntervals": 173,
+      "exhaustIntervals": 154,
+      "engineDurationSeconds": 8.843916666666667,
+      "exhaustDurationSeconds": 7.795416666666667,
+      "normalizedTimeClockPearson": 0.9963074929412788,
+      "normalizedTimeClockRelativeDifference": {
+        "count": 201,
+        "minimum": 0.0003278885085832552,
+        "median": 0.014035492794245302,
+        "p95": 0.18534793075419476,
+        "maximum": 0.48323455839982615
+      },
+      "engineExhaustNormalizedPhaseWaveform": {
+        "samePhaseCorrelation": {
+          "count": 201,
+          "minimum": -0.7280698858738065,
+          "median": -0.18466456773825973,
+          "p95": -0.03881905684636164,
+          "maximum": 0.06190363919662434
+        },
+        "bestCircularCorrelation": {
+          "count": 201,
+          "minimum": 0.23571790802532705,
+          "median": 0.46735499935428115,
+          "p95": 0.770062678049272,
+          "maximum": 0.7931737337254562
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 201,
+          "minimum": 0.068359375,
+          "median": 0.25,
+          "p95": 0.353515625,
+          "maximum": 0.44921875
+        }
+      },
+      "sameIndexRelationship": null,
+      "physicalEngineExhaustPhaseLockEstablished": false
+    },
+    {
+      "model": "lectro",
+      "state": "accel",
+      "engineIntervals": 243,
+      "exhaustIntervals": 241,
+      "engineDurationSeconds": 9.0,
+      "exhaustDurationSeconds": 9.0,
+      "normalizedTimeClockPearson": 0.999854811163402,
+      "normalizedTimeClockRelativeDifference": {
+        "count": 201,
+        "minimum": 2.298804605882678e-05,
+        "median": 0.006155636035574881,
+        "p95": 0.052823428945696846,
+        "maximum": 0.0996186241759132
+      },
+      "engineExhaustNormalizedPhaseWaveform": {
+        "samePhaseCorrelation": {
+          "count": 201,
+          "minimum": -0.9028236259245329,
+          "median": 0.1535646887116351,
+          "p95": 0.7224968159740617,
+          "maximum": 0.7909875404865385
+        },
+        "bestCircularCorrelation": {
+          "count": 201,
+          "minimum": 0.09921594148743557,
+          "median": 0.5789800959158089,
+          "p95": 0.8937752256695032,
+          "maximum": 0.9160991703330439
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 201,
+          "minimum": 0.0,
+          "median": 0.2333984375,
+          "p95": 0.4873046875,
+          "maximum": 0.49609375
+        }
+      },
+      "sameIndexRelationship": {
+        "count": 242,
+        "clockPearson": 0.9998459912797222,
+        "relativeClockDifference": {
+          "count": 242,
+          "minimum": 9.053218579377298e-06,
+          "median": 0.004395859898039962,
+          "p95": 0.013865014289600016,
+          "maximum": 0.12949028818936584
+        },
+        "exhaustMinusEngineOffsetSeconds": {
+          "count": 242,
+          "minimum": 0.03412499999999952,
+          "median": 0.04947916666666652,
+          "p95": 0.09022499999999997,
+          "maximum": 0.1050000000000001
+        }
+      },
+      "physicalEngineExhaustPhaseLockEstablished": false
+    },
+    {
+      "model": "lectro",
+      "state": "decel",
+      "engineIntervals": 274,
+      "exhaustIntervals": 273,
+      "engineDurationSeconds": 9.362666666666666,
+      "exhaustDurationSeconds": 9.362666666666666,
+      "normalizedTimeClockPearson": 0.9999132395498551,
+      "normalizedTimeClockRelativeDifference": {
+        "count": 201,
+        "minimum": 1.7001144894886385e-06,
+        "median": 0.0029816541126419386,
+        "p95": 0.007869226772178503,
+        "maximum": 0.03200045436471961
+      },
+      "engineExhaustNormalizedPhaseWaveform": {
+        "samePhaseCorrelation": {
+          "count": 201,
+          "minimum": -0.20165570587739692,
+          "median": 0.571420318533506,
+          "p95": 0.9422632103203703,
+          "maximum": 0.9490888735149834
+        },
+        "bestCircularCorrelation": {
+          "count": 201,
+          "minimum": 0.11941947082627925,
+          "median": 0.6486586543068882,
+          "p95": 0.9517838890144386,
+          "maximum": 0.9613922169583743
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 201,
+          "minimum": 0.0,
+          "median": 0.25,
+          "p95": 0.4970703125,
+          "maximum": 0.5
+        }
+      },
+      "sameIndexRelationship": {
+        "count": 274,
+        "clockPearson": 0.999896838311273,
+        "relativeClockDifference": {
+          "count": 274,
+          "minimum": 7.987730845421433e-06,
+          "median": 0.003125164562633417,
+          "p95": 0.010426635926510762,
+          "maximum": 0.04952082842121295
+        },
+        "exhaustMinusEngineOffsetSeconds": {
+          "count": 274,
+          "minimum": 0.01483333333333331,
+          "median": 0.020270833333333238,
+          "p95": 0.035614583333332464,
+          "maximum": 0.04899999999999949
+        }
+      },
+      "physicalEngineExhaustPhaseLockEstablished": false
+    },
+    {
+      "model": "prototipo",
+      "state": "accel",
+      "engineIntervals": 296,
+      "exhaustIntervals": 300,
+      "engineDurationSeconds": 9.70296875,
+      "exhaustDurationSeconds": 9.81146875,
+      "normalizedTimeClockPearson": 0.9998968818572634,
+      "normalizedTimeClockRelativeDifference": {
+        "count": 201,
+        "minimum": 0.0,
+        "median": 0.005446028468603405,
+        "p95": 0.01381753890936725,
+        "maximum": 0.020970688136842337
+      },
+      "engineExhaustNormalizedPhaseWaveform": {
+        "samePhaseCorrelation": {
+          "count": 201,
+          "minimum": -0.6574629041488196,
+          "median": 0.006978486544938579,
+          "p95": 0.49081284151375515,
+          "maximum": 0.6047781521520674
+        },
+        "bestCircularCorrelation": {
+          "count": 201,
+          "minimum": 0.12245330414421576,
+          "median": 0.4713728257653919,
+          "p95": 0.652328994929953,
+          "maximum": 0.7270571075331466
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 201,
+          "minimum": 0.005859375,
+          "median": 0.2236328125,
+          "p95": 0.47265625,
+          "maximum": 0.4990234375
+        }
+      },
+      "sameIndexRelationship": null,
+      "physicalEngineExhaustPhaseLockEstablished": false
+    },
+    {
+      "model": "prototipo",
+      "state": "decel",
+      "engineIntervals": 301,
+      "exhaustIntervals": 299,
+      "engineDurationSeconds": 9.06090625,
+      "exhaustDurationSeconds": 9.06090625,
+      "normalizedTimeClockPearson": 0.9989586553312226,
+      "normalizedTimeClockRelativeDifference": {
+        "count": 201,
+        "minimum": 2.100873983998778e-05,
+        "median": 0.003980745460682733,
+        "p95": 0.06316835659361131,
+        "maximum": 0.0911115265858611
+      },
+      "engineExhaustNormalizedPhaseWaveform": {
+        "samePhaseCorrelation": {
+          "count": 201,
+          "minimum": -0.5096005137500624,
+          "median": 0.008552244255689456,
+          "p95": 0.4033147424235114,
+          "maximum": 0.6713571071676249
+        },
+        "bestCircularCorrelation": {
+          "count": 201,
+          "minimum": 0.11200484855154733,
+          "median": 0.3062474959158002,
+          "p95": 0.5618751916780169,
+          "maximum": 0.7779782764443911
+        },
+        "absoluteBestPhaseShiftTurns": {
+          "count": 201,
+          "minimum": 0.0,
+          "median": 0.224609375,
+          "p95": 0.4619140625,
+          "maximum": 0.4970703125
+        }
+      },
+      "sameIndexRelationship": {
+        "count": 300,
+        "clockPearson": 0.9987754329432508,
+        "relativeClockDifference": {
+          "count": 300,
+          "minimum": 1.4029212072685958e-05,
+          "median": 0.0032623221765738135,
+          "p95": 0.04263387638587623,
+          "maximum": 0.10993235758692968
+        },
+        "exhaustMinusEngineOffsetSeconds": {
+          "count": 300,
+          "minimum": -9.375000000000355e-05,
+          "median": 0.0033906249999999805,
+          "p95": 0.06047812500000008,
+          "maximum": 0.1499062500000008
+        }
+      },
+      "physicalEngineExhaustPhaseLockEstablished": false
+    }
+  ]
+}

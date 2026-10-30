@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {StockGrainVoice} from './stock-grain.mjs';
-export {StockGrainVoice} from './stock-grain.mjs';
+export {StockGrainVoice,NativePcmVoice} from './stock-grain.mjs';
 const FS=48000,clamp=x=>Math.max(0,Math.min(1,x));
 const check=(ok,message)=>{if(!ok)throw Error(message);};
 export const stockModels=Object.freeze(['bati','lectro','prototipo','schafter3']);
@@ -37,10 +37,14 @@ export function loadStockAssets(manifestFile){
 }
 
 export class StockVehicleSource {
-  constructor(vehicle,{sourceGain=1,atlas=null}={}){
-    // Each role has a fixed .5 pressure share. A common calibration <=2 keeps
-    // each stem at or below its decoded amplitude, before propagation.
+  constructor(vehicle,{sourceGain=1,atlas=null,pressureShares={engine:.5,exhaust:.5}}={}){
+    // Baseline shares are .5/.5. Authored role balances must also keep each
+    // calibrated stem at or below its decoded amplitude, before propagation.
     check(stockModels.includes(vehicle.model)&&Number.isFinite(sourceGain)&&sourceGain>0&&sourceGain<=2,'verified model and bounded shared source calibration');
+    check(stockRoles.every(role=>Number.isFinite(pressureShares[role])&&pressureShares[role]>0&&pressureShares[role]<1)&&
+      Math.abs(pressureShares.engine+pressureShares.exhaust-1)<1e-12&&sourceGain*Math.max(pressureShares.engine,pressureShares.exhaust)<=1,
+      'explicit pressure shares must sum to one and preserve decoded per-stem amplitude bounds');
+    this.pressureShares=Object.freeze({...pressureShares});
     this.vehicle=vehicle;this.gain=sourceGain;this.frame=0;this.envelope=0;this.position=.1;
     this.weights=[1,0,0];this.voices={};this.stats={frames:0,peak:0,maximumStep:0,modeledRpm:false,oscillatorSamples:0,
       energy:{engine:{actual:0,reference:0},exhaust:{actual:0,reference:0}}};this.previous={engine:0,exhaust:0};
@@ -65,12 +69,13 @@ export class StockVehicleSource {
           const voice=this.voices[role][stockModes[m]],address=m===2?1-this.position:m===0?.5:this.position;
           sum+=this.weights[m]*voice.next(address);expected+=this.weights[m]*voice.lastExpectedEnergy;
         }
-        // Fixed equal pressure shares prevent a coherent engine+exhaust sum
-        // from doubling raw peak. Load selects real accel/decel material;
+        // Declared pressure shares retain an explicit two-emitter budget.
+        // Native REL numeric fields are not interpreted as amplitude gains.
+        // Load selects real accel/decel material;
         // there is no extra decorative roar, boost layer or event waveform.
-        const value=sum*.5*this.gain*this.envelope;check(Number.isFinite(value)&&Math.abs(value)<=1,'source PCM bound');
+        const share=this.pressureShares[role],value=sum*share*this.gain*this.envelope;check(Number.isFinite(value)&&Math.abs(value)<=1,'source PCM bound');
         output[i]=value;this.stats.peak=Math.max(this.stats.peak,Math.abs(value));
-        this.stats.energy[role].actual+=value*value;this.stats.energy[role].reference+=expected*(.5*this.gain*this.envelope)**2;
+        this.stats.energy[role].actual+=value*value;this.stats.energy[role].reference+=expected*(share*this.gain*this.envelope)**2;
         this.stats.maximumStep=Math.max(this.stats.maximumStep,Math.abs(value-this.previous[role]));this.previous[role]=value;
       }
       this.frame++;

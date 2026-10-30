@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "milestone": "STOCK-SOURCE-02",
+  "reviewedCommit": "9ba87f2e5bac7e3d46e057a2fd0ad6dcfc775abf",
+  "userAcceptanceOfAudition02": "REJECTED; numerical checks do not override this verdict",
+  "perceptualAcceptanceOfCorrection": "PENDING",
+  "reproducerSha256": "dd8a9634aa0e6728f8d4eda9851e3753db9cb5b086e8cb45cd2d819afa193228",
+  "before": {
+    "scope": "Constant source, fixed operating point, no Doppler or acoustic renderer",
+    "originalMeasuredHz": 100,
+    "spectralResolutionHz": 1,
+    "rows": [
+      {
+        "cyclesPerInterval": 1,
+        "inputHz": 100,
+        "measuredDominantHz": 169,
+        "absoluteFrequencyErrorHz": 69,
+        "crossfades": 339,
+        "sourceBoundViolations": 0
+      },
+      {
+        "cyclesPerInterval": 2,
+        "inputHz": 100,
+        "measuredDominantHz": 85,
+        "absoluteFrequencyErrorHz": 15,
+        "crossfades": 169,
+        "sourceBoundViolations": 0
+      },
+      {
+        "cyclesPerInterval": 4,
+        "inputHz": 100,
+        "measuredDominantHz": 85,
+        "absoluteFrequencyErrorHz": 15,
+        "crossfades": 85,
+        "sourceBoundViolations": 0
+      }
+    ],
+    "passed": false
+  },
+  "after": {
+    "scope": "Constant source, fixed operating point, no Doppler or acoustic renderer",
+    "originalMeasuredHz": 100,
+    "spectralResolutionHz": 1,
+    "rows": [
+      {
+        "cyclesPerInterval": 1,
+        "inputHz": 100,
+        "measuredDominantHz": 100,
+        "absoluteFrequencyErrorHz": 0,
+        "crossfades": 200,
+        "sourceBoundViolations": 0
+      },
+      {
+        "cyclesPerInterval": 2,
+        "inputHz": 100,
+        "measuredDominantHz": 100,
+        "absoluteFrequencyErrorHz": 0,
+        "crossfades": 100,
+        "sourceBoundViolations": 0
+      },
+      {
+        "cyclesPerInterval": 4,
+        "inputHz": 100,
+        "measuredDominantHz": 100,
+        "absoluteFrequencyErrorHz": 0,
+        "crossfades": 50,
+        "sourceBoundViolations": 0
+      }
+    ],
+    "passed": true
+  },
+  "scope": "Actual supplied reproducer; unchanged original checkout versus corrected isolated checkout; no Doppler/renderer/state change",
+  "subjectiveListening": "not performed"
+}

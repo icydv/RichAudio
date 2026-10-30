@@ -1,0 +1,691 @@
+{
+  "schemaVersion": 1,
+  "milestone": "STOCK-SOURCE-02",
+  "baselineCommit": "9ba87f2e5bac7e3d46e057a2fd0ad6dcfc775abf",
+  "moduleBindings": {
+    "src/acoustics/vehicle/stock-source.mjs": "4a4dae891212baf63970fbb1659fa1692cbaf38c022f68b2c942a56605ffdeb7",
+    "src/acoustics/vehicle/stock-grain.mjs": "256c75d1e12a7d5bba97dfc1a92f4322e9b075c6d252cd519913ce0c63da09f5",
+    "src/acoustics/vehicle/pipeline.mjs": "489afc49c9170f657b325186c587af6f200be8389ac71971c69e32f8a564b69c",
+    "src/acoustics/vehicle/environment.mjs": "8ec78f17704f36432596a0da070257c023cb5a353cad316c741a58f1df1558da",
+    "src/acoustics/engine/paths.mjs": "b4c12a08a2b240e54be1032bc7877e1dc8ecdcc9115e062b10439515c0024794",
+    "tools/stock-source-01-scenario.mjs": "ec7b1729eef02d8128981575dd91fd81161b20e4a854da7f0b6505850d9ce105"
+  },
+  "sourceGain": 1.5956559506856056,
+  "rendererMasterGain": 0.7,
+  "nativeReferenceCount": 24,
+  "nativeReferences": [
+    {
+      "model": "bati",
+      "role": "engine",
+      "state": "idle",
+      "sampleRate": 48000,
+      "frames": 40350,
+      "wavSha256": "3b8a97fea007e838f524c1694918e0a56fd82c4ddc96ebbeb67e3cfdcc206430",
+      "pcmSha256": "7b0e711658549ac86ae3c25ccfe36c16d04e3192b62acea2acba7f0adadc0bee",
+      "float32Sha256": "7779658ccb3fec09d8904d0f301e0af45ec8c47fde71ceb3d63538f5b1ca5f24",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "bati",
+      "role": "engine",
+      "state": "accel",
+      "sampleRate": 48000,
+      "frames": 328251,
+      "wavSha256": "6256183775002e5273f6fc20cc2d2b2d5d1c9614f812edc8a2901185d01b681a",
+      "pcmSha256": "f9e477d6baf708f46c636cb0f9160e4dddd878f96926e70a67fe48957d9da5e2",
+      "float32Sha256": "8e2b4be819da5a5d990a3a01f7be41ba79dbe2ab86b7bc6eeb7700ac20021a9e",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "bati",
+      "role": "engine",
+      "state": "decel",
+      "sampleRate": 48000,
+      "frames": 424508,
+      "wavSha256": "c78e85b1860f125b694bc92eac593b6eac7dd9b4855af17882c4583735f44c95",
+      "pcmSha256": "54494b27be41d838980af0ef2388bd1333d80615ff7e8b24a50ebe44e5654d29",
+      "float32Sha256": "65e526d15e5ad0965152d4f4a2686797587c6ae348b6b08c24f764501046e988",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "bati",
+      "role": "exhaust",
+      "state": "idle",
+      "sampleRate": 48000,
+      "frames": 40350,
+      "wavSha256": "30d373508b0b675d9d7261d7ab26f79a310a497477c095cb574630ba321758ad",
+      "pcmSha256": "759a6ae4f0bc41e8ac5a4e9b50024d16f6d14fec396b6957ef1d0726c520c87b",
+      "float32Sha256": "1abdc7b08af8dbd0f5d7cdbe21c86e78c34209ed51e19cc00efb8c86974b1529",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "bati",
+      "role": "exhaust",
+      "state": "accel",
+      "sampleRate": 48000,
+      "frames": 328251,
+      "wavSha256": "d2964ef675622a5d448de8f11081af3369cf02a9aca19f98d3e59a4a3bb7caae",
+      "pcmSha256": "de9058deebca3cf4fd834f9c9784e3b9a3327e1a22f29341971469fcd998c404",
+      "float32Sha256": "a102d3ab2c122c74dc2085ef3673651d0018b90437b7f86627197882b9b744b4",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "bati",
+      "role": "exhaust",
+      "state": "decel",
+      "sampleRate": 48000,
+      "frames": 374180,
+      "wavSha256": "574dbb61c486f18848839300c9d72219957258ceea6b1f93710eb72ef6270f2f",
+      "pcmSha256": "e21a779780b24755250bba1674e673c6436c3b58e3cc6aea0e9cde00d6e5d70f",
+      "float32Sha256": "908c634369953f8c1e0276f1a14d5e241dfb42ab7b67d44571af7459b32253d0",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "lectro",
+      "role": "engine",
+      "state": "idle",
+      "sampleRate": 24000,
+      "frames": 24069,
+      "wavSha256": "82c974f51f3957a215dba7044a9fe8ad0d1921753884cc671a4b2dbaa2451778",
+      "pcmSha256": "357a9e717a61cc1feda979c41d9399a89eae07c414e5d8c0e0bdf5499b630881",
+      "float32Sha256": "0f56c8a9d427ee572141677ece68595afb9c6576e2e986661c99bf130056e64b",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "lectro",
+      "role": "engine",
+      "state": "accel",
+      "sampleRate": 24000,
+      "frames": 216000,
+      "wavSha256": "38c5e54c877bf0196d999d50922ece453a1f6ecc09a452231926a745df2ed084",
+      "pcmSha256": "4bfa772878934d7895ca3a7e4090a3285c7e6d3fc05c978e9e758cc3041b25a8",
+      "float32Sha256": "c485ea531ccb5be1ef2ef02f75ee0f7ed05b5431cf132ae81f2eda34ce7bf096",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "lectro",
+      "role": "engine",
+      "state": "decel",
+      "sampleRate": 24000,
+      "frames": 224704,
+      "wavSha256": "f3f382e0d04247d8ccc8971b4f3c7d5e218b5fa1112242b153e0b0b4dad7d573",
+      "pcmSha256": "4b97ec6fc890ca3b68e555842cb88c9cd5945dd55e956682998a7977a2ab9b40",
+      "float32Sha256": "8212cdc92b06d634c36dd4863c747a8a837dc62fe61a1ee1b23e1b4efa6f2b45",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "lectro",
+      "role": "exhaust",
+      "state": "idle",
+      "sampleRate": 24000,
+      "frames": 24069,
+      "wavSha256": "fda84f19ca1896b9101d89a03224d8bb27d5cca0aeba9bc6a4c99df995717023",
+      "pcmSha256": "317acfcab563bb3f79863b2b27a6afec0b7c0dae23f8f4dea07549a14ced8acb",
+      "float32Sha256": "97a0cadadb454a41d70e01189c94e094b04200de42dc9c7d06d29e0fcf229c57",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "lectro",
+      "role": "exhaust",
+      "state": "accel",
+      "sampleRate": 24000,
+      "frames": 216000,
+      "wavSha256": "ea3f2f4d97cf5183d15b0aa5b20fb3bf5c066d0164d73f1bba3d18cf994e91d1",
+      "pcmSha256": "72b0ad23628b80ae02aa63f35bcab18db9578a0a74ff4f7a891fe582fcf0b2b3",
+      "float32Sha256": "24746da996bb203d1983255d09ba415e70f332213e8bebb1c0d5eb04fbaaadc3",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "lectro",
+      "role": "exhaust",
+      "state": "decel",
+      "sampleRate": 24000,
+      "frames": 224704,
+      "wavSha256": "24427b467334548a2fbd229efd2bf2c6edd0f1b62973a12028ba77c84bc57894",
+      "pcmSha256": "97e703ac05f06fcc9751b52f633421f2314c88a85fd235bfed35f169897d5311",
+      "float32Sha256": "d3b66056319c907eb4a074b826ad126ed6ed29299eea5a68074688a3071d35da",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "prototipo",
+      "role": "engine",
+      "state": "idle",
+      "sampleRate": 32000,
+      "frames": 30140,
+      "wavSha256": "5371c0c3a5e6c5f94293d5dbb2fa0df99accb2eb57e031e6f2c4af31ffe3ec64",
+      "pcmSha256": "4c79954143e60c4debc2135cd8d49d33da489ade59135a6c08414e82217706a9",
+      "float32Sha256": "e8b5cd7ae4e9f3333b4588b7997c74e08b0e15f9b471c16c4842fc131e6fdba3",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "prototipo",
+      "role": "engine",
+      "state": "accel",
+      "sampleRate": 32000,
+      "frames": 310495,
+      "wavSha256": "fe258e9130c96959a1c5508664da5a319e50e13f02cb92c0ecf230a9b327a613",
+      "pcmSha256": "c211d4186b3b11187ff05b4d9fff1327a600f560a2980763593c4bfaf894bd97",
+      "float32Sha256": "218fc13cc6b72e0241b0c8a1629ebd2f29c481053f5a77a2cd56d6c8fa790bbb",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "prototipo",
+      "role": "engine",
+      "state": "decel",
+      "sampleRate": 32000,
+      "frames": 289949,
+      "wavSha256": "d7bae86dab06304c2fde582e94e0f21c2f14b57e95905469deab7d20dcc6bc44",
+      "pcmSha256": "c29a76fa518c41338d0da86206f09fddc2ca5da3c98e3336c0f08e63edcbdcab",
+      "float32Sha256": "4ba75d60b0b2b5e3a70458f00f406e1cd4dfe9350be356b6ff260ca9ef71544a",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "prototipo",
+      "role": "exhaust",
+      "state": "idle",
+      "sampleRate": 32000,
+      "frames": 29783,
+      "wavSha256": "44d728858fda51b37e9d6b6174aba7b76600ab199bcd2c58e9e11c1f8f78f938",
+      "pcmSha256": "7f5204667ae236e751c41c5ca2e92d401aecb32f22cf67aae14a04cb54bdd2f8",
+      "float32Sha256": "92a08c364eb4154365e581d8f0065341d12c9bcd386ce1faf9959fb0b0f10682",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "prototipo",
+      "role": "exhaust",
+      "state": "accel",
+      "sampleRate": 32000,
+      "frames": 313967,
+      "wavSha256": "c5040d6b334c9400de5b485c741289c1f906453fff04a2e2ca321743e1d8f157",
+      "pcmSha256": "2698ba30794f9f630c051dfc92218b493eebe88d3318d2a7c46f9e361c9409b2",
+      "float32Sha256": "3bd302350bb8c2c5d8d570b787dc99f7126a53599078a97752d4f48a0763c4f4",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "prototipo",
+      "role": "exhaust",
+      "state": "decel",
+      "sampleRate": 32000,
+      "frames": 289949,
+      "wavSha256": "ba866740e2407b9aded4ee0f1d0ce2b4802b3098e3943802dfc8b99553ca2e78",
+      "pcmSha256": "f8d176dbb71cb5f9f7c3065faf877b47a91dc7606a41230928d28dc63eb8ee4b",
+      "float32Sha256": "bc7e94e21696bdb535484342ab13d0f92ef207fb0b04a64d1fa4b8f62094d0f2",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "schafter3",
+      "role": "engine",
+      "state": "idle",
+      "sampleRate": 24000,
+      "frames": 30290,
+      "wavSha256": "e77ccb358c928dd2215d071fbdf8b01a2fad39c4bfb2e2fb48515b5270923238",
+      "pcmSha256": "2f17a635a758974ecccb1a2cf83a1b33488f60baa6b5cec3797b292e92df1cc5",
+      "float32Sha256": "d642d186405814ac688ada406c812a525bed0d39c246a6b22da91e4e8be9b79e",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "schafter3",
+      "role": "engine",
+      "state": "accel",
+      "sampleRate": 24000,
+      "frames": 229572,
+      "wavSha256": "db00fe6d171948f79f641b1095b83f8c00a7cb8ac2d22238356baaaa1eedfa4e",
+      "pcmSha256": "29b5bfa292f1974ee22705cb0af6ce19b10dc0b343b9ad17521c066319e74a0a",
+      "float32Sha256": "ca72a03e9b090ca5a56e397da1ef42c69c7b6c12fe2473cf825d268bd2e5876f",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "schafter3",
+      "role": "engine",
+      "state": "decel",
+      "sampleRate": 24000,
+      "frames": 242188,
+      "wavSha256": "6bfddf9920b55492b1611fb18ca723fdb9d9b684a9bcb819474d2642ff2a238b",
+      "pcmSha256": "d4a13edb036127b279c66e358c1932d9c6c6093639a09fdd029a3eb1f05d29b3",
+      "float32Sha256": "7fc6e5467427ebff5663ce5867a7ce9b076a64f2444742e3ffd17a0e64809f75",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "schafter3",
+      "role": "exhaust",
+      "state": "idle",
+      "sampleRate": 24000,
+      "frames": 32316,
+      "wavSha256": "8a0206344fa0cccf2886c201d5566fec4b3a1e732b034384fe55921828bad75d",
+      "pcmSha256": "4cdb66442e2a7fb3a4f16af0a18d2780b71b8f768d8ed29b87ae4af81ae3672e",
+      "float32Sha256": "a3f768500eb571bfab4cb3adab01fcb97812c0c846172b289bb869510b78d785",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "schafter3",
+      "role": "exhaust",
+      "state": "accel",
+      "sampleRate": 24000,
+      "frames": 229572,
+      "wavSha256": "c4eb7edb6c9688cb7f4d97ef226bc2620c018965dc612087e5fc8862a033f44b",
+      "pcmSha256": "1f8efa119d3952594d6159767e2d6203332978ac6b59d70a13f8f034ad2fb064",
+      "float32Sha256": "4ba2f03edd678a41bc8e61f6e1cd15608d6ae31499be9a7e1216bd4ef9396fdc",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    },
+    {
+      "model": "schafter3",
+      "role": "exhaust",
+      "state": "decel",
+      "sampleRate": 24000,
+      "frames": 322608,
+      "wavSha256": "6ebd0f9707a3c3a128767ee5ae0fd52b8184b3ee2024eefa3e0d042d34f3bb49",
+      "pcmSha256": "14f688d74d6a7df5272e128753887abf7fccfa7dae20f4d0db7604f3d56c0376",
+      "float32Sha256": "d2ad2047d839142ea7ac1cf2f244a013226240ab5d0bc454f3d22a77707606c6",
+      "pcmEquality": true,
+      "manifestHashesMatch": true,
+      "auditionReferenceIdentical": true
+    }
+  ],
+  "oldDryFiles": [
+    {
+      "model": "bati",
+      "durationSeconds": 9,
+      "sha256": "23129e34f04ad4902340d33db4e9e59d00e72cada664d0201fc8fe3f9322c89d",
+      "bitwiseEqual": true
+    },
+    {
+      "model": "lectro",
+      "durationSeconds": 9,
+      "sha256": "afc693a5130ca21912690294d27cbd2dcd5c7a737b71e95e653e1186d22e377d",
+      "bitwiseEqual": true
+    },
+    {
+      "model": "prototipo",
+      "durationSeconds": 9,
+      "sha256": "5874d04c3712e75ce6cf09a371d2ad8fcabd8cf817aa1b7fb66829c5be24ff2e",
+      "bitwiseEqual": true
+    },
+    {
+      "model": "schafter3",
+      "durationSeconds": 9,
+      "sha256": "a4efae09bf631a5a6d2d6dfc10784a6f60ff2316f89366676d70eb12aa5fc7a8",
+      "bitwiseEqual": true
+    }
+  ],
+  "allFourDryBitwiseEqual": true,
+  "schafter": {
+    "isolatedSumMaximumAbsoluteError": 1.4901161193847656e-08,
+    "originalWindows": [
+      {
+        "windowSeconds": [
+          0.2,
+          0.9
+        ],
+        "engineRmsDbfs": -26.168503468904134,
+        "exhaustRmsDbfs": -34.51243209450158,
+        "exhaustMinusEngineDb": -8.343928625597439
+      },
+      {
+        "windowSeconds": [
+          2,
+          3
+        ],
+        "engineRmsDbfs": -26.8310437240385,
+        "exhaustRmsDbfs": -35.79574497423241,
+        "exhaustMinusEngineDb": -8.964701250193912
+      },
+      {
+        "windowSeconds": [
+          4,
+          5.1
+        ],
+        "engineRmsDbfs": -25.42585999806016,
+        "exhaustRmsDbfs": -34.52147748301512,
+        "exhaustMinusEngineDb": -9.095617484954957
+      },
+      {
+        "windowSeconds": [
+          5.7,
+          6.3
+        ],
+        "engineRmsDbfs": -30.722257564858335,
+        "exhaustRmsDbfs": -34.56845157432572,
+        "exhaustMinusEngineDb": -3.846194009467384
+      }
+    ],
+    "closePath": {
+      "paths": [
+        {
+          "role": "engine",
+          "distance": 1.8580904176062047,
+          "radiation": 0.928472522315931,
+          "pressureGain": 0.4996917876106863,
+          "directivity": 0.1
+        },
+        {
+          "role": "exhaust",
+          "distance": 2.588435821108957,
+          "radiation": 0.44899478278377014,
+          "pressureGain": 0.17346181779829042,
+          "directivity": 0.65
+        }
+      ],
+      "exhaustMinusEngineDb": -9.189966372612178,
+      "distanceContributionDb": -2.879411154501575,
+      "radiationContributionDb": -6.310555218110602,
+      "basis": "Independently evaluated old formula before frequency-dependent air loss and common master; authored positions/directivity, not measured vehicle radiation"
+    },
+    "sourceExhaustMinusEngineDb4to5_1": 0.1136899681127785,
+    "fixedStateSourceExhaustMinusEngineDb": -0.5258564797963532,
+    "viewpoints": [
+      {
+        "name": "front",
+        "listener": [
+          5,
+          0,
+          1.4
+        ],
+        "commonSourceState": {
+          "operatingPoint": 0.7,
+          "load": 0.9,
+          "running": true,
+          "lift": false
+        },
+        "original": {
+          "windowSeconds": [
+            1,
+            3
+          ],
+          "engineRmsDbfs": -31.811710613690533,
+          "exhaustRmsDbfs": -45.51132742065511,
+          "exhaustMinusEngineDb": -13.69961680696457,
+          "path": {
+            "paths": [
+              {
+                "role": "engine",
+                "distance": 4.2664387959983685,
+                "radiation": 0.9992213787754242,
+                "pressureGain": 0.23420501888193646,
+                "directivity": 0.1
+              },
+              {
+                "role": "exhaust",
+                "distance": 6.888396039717809,
+                "radiation": 0.35417059541040335,
+                "pressureGain": 0.05141553902654418,
+                "directivity": 0.65
+              }
+            ],
+            "exhaustMinusEngineDb": -13.17003608665952,
+            "distanceContributionDb": -4.161051770396764,
+            "radiationContributionDb": -9.008984316262756,
+            "basis": "Independently evaluated old formula before frequency-dependent air loss and common master; authored positions/directivity, not measured vehicle radiation"
+          }
+        },
+        "candidate": {
+          "windowSeconds": [
+            1,
+            3
+          ],
+          "engineRmsDbfs": -33.74991088147441,
+          "exhaustRmsDbfs": -38.62372796380387,
+          "exhaustMinusEngineDb": -4.873817082329461,
+          "path": {
+            "paths": [
+              {
+                "role": "engine",
+                "distance": 4.2664387959983685,
+                "radiation": 0.9992213787754242,
+                "pressureGain": 0.23420501888193646,
+                "directivity": 0.1
+              },
+              {
+                "role": "exhaust",
+                "distance": 6.888396039717809,
+                "radiation": 0.6522457052209865,
+                "pressureGain": 0.0946876023765478,
+                "directivity": 0.35
+              }
+            ],
+            "exhaustMinusEngineDb": -7.866061555589381,
+            "distanceContributionDb": -4.161051770396764,
+            "radiationContributionDb": -3.7050097851926167,
+            "basis": "Independently evaluated old formula before frequency-dependent air loss and common master; authored positions/directivity, not measured vehicle radiation"
+          }
+        }
+      },
+      {
+        "name": "side",
+        "listener": [
+          0,
+          5,
+          1.4
+        ],
+        "commonSourceState": {
+          "operatingPoint": 0.7,
+          "load": 0.9,
+          "running": true,
+          "lift": false
+        },
+        "original": {
+          "windowSeconds": [
+            1,
+            3
+          ],
+          "engineRmsDbfs": -33.93947667933027,
+          "exhaustRmsDbfs": -39.35445554367057,
+          "exhaustMinusEngineDb": -5.4149788643402985,
+          "path": {
+            "paths": [
+              {
+                "role": "engine",
+                "distance": 5.118837758710467,
+                "radiation": 0.9421857261578698,
+                "pressureGain": 0.18406243185859916,
+                "directivity": 0.1
+              },
+              {
+                "role": "exhaust",
+                "distance": 5.426785420486055,
+                "radiation": 0.5672013761974757,
+                "pressureGain": 0.10451885089399275,
+                "directivity": 0.65
+              }
+            ],
+            "exhaustMinusEngineDb": -4.915410586938689,
+            "distanceContributionDb": -0.5074256946720478,
+            "radiationContributionDb": -4.40798489226664,
+            "basis": "Independently evaluated old formula before frequency-dependent air loss and common master; authored positions/directivity, not measured vehicle radiation"
+          }
+        },
+        "candidate": {
+          "windowSeconds": [
+            1,
+            3
+          ],
+          "engineRmsDbfs": -35.87767694749412,
+          "exhaustRmsDbfs": -35.15018315008921,
+          "exhaustMinusEngineDb": 0.7274937974049067,
+          "path": {
+            "paths": [
+              {
+                "role": "engine",
+                "distance": 5.118837758710467,
+                "radiation": 0.9421857261578698,
+                "pressureGain": 0.18406243185859916,
+                "directivity": 0.1
+              },
+              {
+                "role": "exhaust",
+                "distance": 5.426785420486055,
+                "radiation": 0.7669545871832562,
+                "pressureGain": 0.1413276051579285,
+                "directivity": 0.35
+              }
+            ],
+            "exhaustMinusEngineDb": -2.2947631185678405,
+            "distanceContributionDb": -0.5074256946720478,
+            "radiationContributionDb": -1.7873374238957915,
+            "basis": "Independently evaluated old formula before frequency-dependent air loss and common master; authored positions/directivity, not measured vehicle radiation"
+          }
+        }
+      },
+      {
+        "name": "rear",
+        "listener": [
+          -5,
+          0,
+          1.4
+        ],
+        "commonSourceState": {
+          "operatingPoint": 0.7,
+          "load": 0.9,
+          "running": true,
+          "lift": false
+        },
+        "original": {
+          "windowSeconds": [
+            1,
+            3
+          ],
+          "engineRmsDbfs": -35.49586189301265,
+          "exhaustRmsDbfs": -30.478645034912752,
+          "exhaustMinusEngineDb": 5.017216858099899,
+          "path": {
+            "paths": [
+              {
+                "role": "engine",
+                "distance": 5.848290348469372,
+                "radiation": 0.9004128586782804,
+                "pressureGain": 0.15396172300404656,
+                "directivity": 0.1
+              },
+              {
+                "role": "exhaust",
+                "distance": 3.3837848631377265,
+                "radiation": 0.9823481447740816,
+                "pressureGain": 0.2903104613640144,
+                "directivity": 0.65
+              }
+            ],
+            "exhaustMinusEngineDb": 5.508998465275957,
+            "distanceContributionDb": 4.7525236489260685,
+            "radiationContributionDb": 0.7564748163498876,
+            "basis": "Independently evaluated old formula before frequency-dependent air loss and common master; authored positions/directivity, not measured vehicle radiation"
+          }
+        },
+        "candidate": {
+          "windowSeconds": [
+            1,
+            3
+          ],
+          "engineRmsDbfs": -37.43406215545713,
+          "exhaustRmsDbfs": -28.823281583739195,
+          "exhaustMinusEngineDb": 8.610780571717932,
+          "path": {
+            "paths": [
+              {
+                "role": "engine",
+                "distance": 5.848290348469372,
+                "radiation": 0.9004128586782804,
+                "pressureGain": 0.15396172300404656,
+                "directivity": 0.1
+              },
+              {
+                "role": "exhaust",
+                "distance": 3.3837848631377265,
+                "radiation": 0.9904951548783516,
+                "pressureGain": 0.2927181233265173,
+                "directivity": 0.35
+              }
+            ],
+            "exhaustMinusEngineDb": 5.580736988977833,
+            "distanceContributionDb": 4.7525236489260685,
+            "radiationContributionDb": 0.8282133400517648,
+            "basis": "Independently evaluated old formula before frequency-dependent air loss and common master; authored positions/directivity, not measured vehicle radiation"
+          }
+        }
+      }
+    ],
+    "candidate": {
+      "enginePressureShare": 0.4,
+      "exhaustPressureShare": 0.6,
+      "engineDirectivity": 0.1,
+      "exhaustDirectivity": 0.35,
+      "basis": "Authored Schafter-only comparison hypothesis, not recovered native mix. Evaluated with unchanged rejected player to separate geometry; must be rechecked after source fidelity repair, with new common headroom calibration and human listening.",
+      "cautions": [
+        "Native EngineVolume400/ExhaustVolume800 are not interpreted as linear, decibel or2:1 gains",
+        "No universal exhaust-dominance target; front, side and rear remain different",
+        "Do not compensate full near-side9.19dB path difference with a universal exhaust gain",
+        "Do not use mix changes to conceal known source-clock corruption"
+      ]
+    }
+  },
+  "originalCheckoutUnchanged": true,
+  "archivesExtracted": false,
+  "gameLaunched": false,
+  "audioEndpointOpened": false,
+  "subjectiveListening": "not performed",
+  "nativeInGameMix": "unverified",
+  "limitations": [
+    "This tool verifies provided local decoded PCM, not a fresh archive decode or runtime mount",
+    "Source playback is the unchanged rejected01implementation; output ratios are diagnostic, not source fidelity approval",
+    "Authored listener/emitter positions and directivity are not measured vehicle bones/radiation or physical SPL"
+  ],
+  "localReferenceAvailability": {
+    "verifiedNativeSchafterRecordingFound": false,
+    "targetedSearchOnly": true,
+    "exhaustiveMachineSearch": false,
+    "inspectedLocations": [
+      "Supplied sound-reference pack entry inventory and companion analysis notes",
+      "Existing RichAudio private reference/capture directories",
+      "Windows Captures directory",
+      "GTA Enhanced user-data video/audio filenames",
+      "Downloads Schafter/GTA/RichAudio/reference filenames"
+    ],
+    "availableReferenceBasis": "Existing supplied notes describe real track-car/Pagani and motorcycle footage, not a verified native Schafter engine/exhaust mix.",
+    "limitation": "Filename/inventory checks establish no native Schafter recording in the targeted evidence; they do not prove none exists elsewhere or identify unrelated personal videos.",
+    "verificationScope": "Targeted manual inventory during STOCK-SOURCE-02 review; not automatically repeated by this reproduction tool"
+  }
+}
