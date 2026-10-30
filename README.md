@@ -1,5 +1,7 @@
 # RichAudio
 
+**Original vehicle integration, implemented and device-free tested:** One player car can drive the original V12 or supercharged V8 through eight separate acoustic components, the existing causal engine and native recording path. RPM/load remain labelled estimates and GTA stock audio remains additive. [Controls, evidence and the independent review candidate](docs/VEHICLE_LIVE_01.md). Gameplay listening awaits upstream stability reconciliation and fresh explicit authorization.
+
 **SoundMap and session recording, implemented offline:** An independent 3D window displays the engine's real paths and observed geometry. Private synchronized bundles preserve acoustic state and owned output PCM, with offline replay and Start/Stop controls in the window and gold overlay. [Implementation, measurements and one proposed supervised test](docs/ACOUSTICS_08_3_SOUNDMAP_RECORDING.md). No new GTA deployment or listening result is claimed.
 
 **In-game settings, implemented offline:** A gold-branded RPH overlay adds F10, console and controller access to real quality/acceleration, smooth owned-output, reflection and diagnostic controls. This is a separate overlay; stock pause-menu insertion was not supported by the reviewed API evidence. Actual Enhanced rendering/input compatibility remains unverified. [Implementation, preview and limits](docs/ACOUSTICS_08_2_IN_GAME_SETTINGS.md).

@@ -1,13 +1,17 @@
 // Runs in explicit Node, never in the UI REPL. No game API or pipe probe.
 import {spawn} from 'node:child_process';
 import {performance} from 'node:perf_hooks';
+import {vehicleLiveSourceIds} from '../../src/acoustics/vehicle/live-source.mjs';
 export function emissionReadiness(frame,status,{now=Date.now()}={}){
   const r=frame?.readiness,age=now-frame?.producedAtUnixMs;
   const fresh=status?.connected===true&&Number.isFinite(status.ageMs)&&status.ageMs>=0&&status.ageMs<=250&&
     Number.isFinite(age)&&age>=-2&&age<=250&&frame?.listener?.valid===true&&!!frame.listenerSessionId&&frame.sessionId===frame.listenerSessionId;
   const transportAccepted=fresh&&r?.transportAccepted===true;
   const contextInitialized=transportAccepted&&r.contextInitialized===true;
-  const conditional=r?.mode==='listener-only-conditional-direct'&&r.visibilityAssumption==='unobserved-space-assumed-clear';
+  const vehicleConditional=r?.mode==='vehicle-conditional-direct'&&frame.directPath?.rights==='original-generated'&&
+    JSON.stringify(frame.directPath.sourceIds)===JSON.stringify(vehicleLiveSourceIds)&&frame.sources?.length===8&&
+    vehicleLiveSourceIds.every(id=>frame.sources.some(s=>s.id===id&&s.valid===true));
+  const conditional=(r?.mode==='listener-only-conditional-direct'||vehicleConditional)&&r.visibilityAssumption==='unobserved-space-assumed-clear';
   const geometry=contextInitialized&&r.genuineGeometryPresent===true;
   return {transportAccepted,contextInitialized,rendererReadyForOwnedEmission:contextInitialized&&r.rendererReadyForOwnedEmission===true&&(geometry||conditional),
     genuineGeometryPresent:geometry,reflectionsActive:geometry&&r.reflectionsActive===true,mode:r?.mode??'unavailable',visibilityAssumption:r?.visibilityAssumption??null,

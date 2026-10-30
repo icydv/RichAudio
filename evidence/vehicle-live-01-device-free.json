@@ -1,0 +1,308 @@
+{
+  "schemaVersion": 1,
+  "milestone": "VEHICLE-LIVE-01",
+  "status": "passed",
+  "stage": "complete",
+  "gameLaunched": false,
+  "audioEndpointOpened": false,
+  "sourceDigest": "0e8cc4b4e1221102e9b29d7169f370a0fcb3f001e8388d0de6bcbf0a3a3c74c7",
+  "nativeFixtureSha256": "add5aba7c4673f8ec7ddcc44725692568357e8be74faff2b74eb2c5e7dac13ff",
+  "v12": {
+    "profile": "v12",
+    "actualHostExit": 0,
+    "listenerPackets": 158,
+    "vehiclePackets": 123,
+    "blocks": 911,
+    "preHost": {
+      "frames": 465920,
+      "peak": 0.014681129716336727,
+      "rms": 0.000823773698888514,
+      "stereoDifferenceRms": 0.0007207514521837548,
+      "nonfiniteSamples": 0,
+      "zeroCrossingsPerSecond": 413.11813186813185
+    },
+    "postHost": {
+      "frames": 464384,
+      "peak": 0.0029362260829657316,
+      "rms": 0.00016502698970015928,
+      "stereoDifferenceRms": 0.00014438849245979006,
+      "nonfiniteSamples": 0,
+      "zeroCrossingsPerSecond": 414.4845644983462
+    },
+    "preHostSHA256": "d79d6d068c41d1f096a73bfceca8863a9cc2f248fcdcd46791c62b6265acee16",
+    "postHostSHA256": "e5b19543d4de661e347f8e053bb15deb5de63c29b36ba71bf44684e9a21811af",
+    "componentEnergy": {
+      "mechanical": 418.7646596057928,
+      "exhaust": 214.63500722588665,
+      "intake": 29.448339118345338,
+      "drivetrain": 22.20694098565775,
+      "tyres": 0.2731387213005247,
+      "aero": 0.008901124729359316,
+      "induction": 0,
+      "transients": 0
+    },
+    "componentCount": 8,
+    "componentTravelMetres": 83,
+    "bodyExhaustSeparationMetres": 1.5935494971917257,
+    "stableSourceGeneration": true,
+    "removedAtEnd": true,
+    "estimatedRpm": {
+      "minimum": 1050,
+      "maximum": 5710.138730908279
+    },
+    "firingHz": {
+      "minimum": 31.26986847764855,
+      "maximum": 559.7947201920343
+    },
+    "dopplerOracle": {
+      "observed": {
+        "minimum": 0.9228466614691869,
+        "maximum": 1.0443334766175596
+      },
+      "maximumSpeed": 27.8122944,
+      "soundSpeed": 343,
+      "tolerance": 0.015,
+      "allowed": {
+        "minimum": 0.9099962991518331,
+        "maximum": 1.1032404164434515
+      }
+    },
+    "ratioEvidence": {
+      "count": 122,
+      "minimum": 0.5,
+      "maximum": 0.5,
+      "changedSamples": 0,
+      "usedForControl": false
+    },
+    "sourceHistory": {
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 0,
+      "affectedFrames": 0
+    },
+    "dsp": {
+      "frames": 466432,
+      "limited": 0,
+      "missingHistory": 0,
+      "rejectedControls": 0,
+      "cursorResets": 0,
+      "pathOverflow": 0,
+      "releasedSources": 16
+    },
+    "performance": {
+      "nodeCpuSeconds": 3.469,
+      "hostCpuSeconds": 1.0625,
+      "wallSeconds": 9.9917109,
+      "synthesisMs": {
+        "count": 911,
+        "median": 0.927599999999984,
+        "p95": 1.4086999999999534,
+        "max": 7.3745000000001255
+      },
+      "workerMs": {
+        "count": 911,
+        "median": 0.5497000000000298,
+        "p95": 0.9223999999994703,
+        "max": 3.2881
+      },
+      "dspMs": {
+        "count": 911,
+        "median": 0.21669999999994616,
+        "p95": 0.3699000000005981,
+        "max": 4.337299999999914
+      },
+      "processingDeadlineMisses": 2,
+      "backend": "cpu",
+      "gpuDispatches": 0,
+      "gpuApplied": 0,
+      "underflowFrames": 0,
+      "lateSinkWakes": 283,
+      "maximumSinkLatenessMs": 16.3908
+    },
+    "recording": {
+      "frames": 464384,
+      "gaps": 0,
+      "soundMapFrames": 124,
+      "receivedVehicleTelemetryRecords": 123,
+      "integrityComplete": true,
+      "exactPostGainSubmissionLineage": true,
+      "vehicleConditionalDirectRecorded": true
+    },
+    "calibration": {
+      "masterGain": 0.35,
+      "hostGain": 0.2,
+      "preHostPeakCap": 0.5,
+      "postHostPeakCap": 0.1,
+      "outputTrimDb": 0,
+      "rejectedBlocks": 0,
+      "clippedSamples": 0,
+      "limitedFrames": 0
+    }
+  },
+  "v8": {
+    "profile": "v8",
+    "actualHostExit": 0,
+    "listenerPackets": 158,
+    "vehiclePackets": 124,
+    "blocks": 912,
+    "preHost": {
+      "frames": 466432,
+      "peak": 0.013104350306093693,
+      "rms": 0.0011147993826836429,
+      "stereoDifferenceRms": 0.0009542079939262028,
+      "nonfiniteSamples": 0,
+      "zeroCrossingsPerSecond": 281.76454445664103
+    },
+    "postHost": {
+      "frames": 464896,
+      "peak": 0.00262087001465261,
+      "rms": 0.00022332790241060888,
+      "stereoDifferenceRms": 0.00019115660899226463,
+      "nonfiniteSamples": 0,
+      "zeroCrossingsPerSecond": 282.6954845814978
+    },
+    "preHostSHA256": "60b840ed0f0709f0002a2dfeb2753febb35b2f1c90e0b4aed08ddec7762b0ea7",
+    "postHostSHA256": "07e11e478d94b6dce1fad22c0d65b8dca68b90b51fb4b0669e210efc2a4fa11a",
+    "componentEnergy": {
+      "mechanical": 785.7991241078621,
+      "exhaust": 110.99207852498377,
+      "intake": 30.315106018317763,
+      "drivetrain": 22.36181981477034,
+      "tyres": 0.2774340023349563,
+      "aero": 0.009226321031067426,
+      "induction": 9.00896907554841,
+      "transients": 0
+    },
+    "componentCount": 8,
+    "componentTravelMetres": 82.58054461567252,
+    "bodyExhaustSeparationMetres": 2.725233934912744,
+    "stableSourceGeneration": true,
+    "removedAtEnd": true,
+    "estimatedRpm": {
+      "minimum": 750,
+      "maximum": 5704.740271951286
+    },
+    "firingHz": {
+      "minimum": 36.54505373405809,
+      "maximum": 363.5176163445122
+    },
+    "dopplerOracle": {
+      "observed": {
+        "minimum": 0.9227507830439109,
+        "maximum": 1.0437387079758056
+      },
+      "maximumSpeed": 27.786000200000004,
+      "soundSpeed": 343,
+      "tolerance": 0.015,
+      "allowed": {
+        "minimum": 0.9100618950418506,
+        "maximum": 1.1031496387141113
+      }
+    },
+    "ratioEvidence": {
+      "count": 123,
+      "minimum": 0.5,
+      "maximum": 0.5,
+      "changedSamples": 0,
+      "usedForControl": false
+    },
+    "sourceHistory": {
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 0,
+      "affectedFrames": 0
+    },
+    "dsp": {
+      "frames": 466944,
+      "limited": 0,
+      "missingHistory": 0,
+      "rejectedControls": 0,
+      "cursorResets": 0,
+      "pathOverflow": 0,
+      "releasedSources": 16
+    },
+    "performance": {
+      "nodeCpuSeconds": 3.844,
+      "hostCpuSeconds": 0.875,
+      "wallSeconds": 9.957582799999999,
+      "synthesisMs": {
+        "count": 912,
+        "median": 0.9627000000000407,
+        "p95": 1.5115000000000691,
+        "max": 7.702600000000075
+      },
+      "workerMs": {
+        "count": 912,
+        "median": 0.5806000000002314,
+        "p95": 0.9716999999991458,
+        "max": 3.0737000000000023
+      },
+      "dspMs": {
+        "count": 912,
+        "median": 0.21649999999999636,
+        "p95": 0.36570000000028813,
+        "max": 2.4287999999996828
+      },
+      "processingDeadlineMisses": 2,
+      "backend": "cpu",
+      "gpuDispatches": 0,
+      "gpuApplied": 0,
+      "underflowFrames": 0,
+      "lateSinkWakes": 282,
+      "maximumSinkLatenessMs": 15.8226
+    },
+    "recording": {
+      "frames": 464896,
+      "gaps": 0,
+      "soundMapFrames": 133,
+      "receivedVehicleTelemetryRecords": 124,
+      "integrityComplete": true,
+      "exactPostGainSubmissionLineage": true,
+      "vehicleConditionalDirectRecorded": true
+    },
+    "calibration": {
+      "masterGain": 0.35,
+      "hostGain": 0.2,
+      "preHostPeakCap": 0.5,
+      "postHostPeakCap": 0.1,
+      "outputTrimDb": 0,
+      "rejectedBlocks": 0,
+      "clippedSamples": 0,
+      "limitedFrames": 0
+    }
+  },
+  "failure": null,
+  "proofScope": "Device-free authored RPH evidence through actual production publisher, native named pipes, measured relay, vehicle adapter/synthesizer, worker, causal solver, StreamingRenderer, RA07, PcmRing and OwnedOutputTap",
+  "validationDate": "2026-10-30",
+  "acceptance": "final-source complete-chain run in full offline suite03",
+  "historicalCorrections": [
+    {
+      "attempt": 1,
+      "rawPipelineChecksPassed": true,
+      "physicalDopplerAccepted": false,
+      "v12MinimumRate": 0.8254062392148799,
+      "fault": "Wall-clock prediction tagged on audio-frame history; telemetry stepping was not caught by the original broad sign-only assertion"
+    },
+    {
+      "attempt": 2,
+      "rawPipelineChecksPassed": true,
+      "physicalDopplerAccepted": false,
+      "v12MinimumRate": 0.8428112682698723,
+      "fault": "Per-arrival audio-time reanchoring and short prediction horizon still introduced source pose jumps"
+    },
+    {
+      "attempt": 3,
+      "rawPipelineChecksPassed": true,
+      "physicalDopplerAccepted": true,
+      "correction": "One fixed observation-QPC/audio-frame mapping per source lifetime, bounded pose interpolation and100ms prediction; wall-clock freshness remains250ms"
+    }
+  ],
+  "followupValidation": {
+    "recordedVehiclePropagationMode": true,
+    "explicitVisibilityAssumption": true,
+    "unrecognizedPropagationModes": 0,
+    "configurableBoundedEstimatorApi": true
+  }
+}

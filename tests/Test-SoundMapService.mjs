@@ -10,6 +10,17 @@ import {SoundMapClient,readServiceConfiguration} from '../tools/soundmap/produce
 
 const fixture=()=>({frame:{schemaVersion:1,sessionId:'synthetic-test',sequence:1,audioFrame:512,producedAtUnixMs:1000,arrivalTimeSeconds:.0106667,observationTimeSeconds:.001,geometryTimeMs:100,geometryGeneration:'g1',paths:[{id:'actual-solver-path',status:'selected',vertices:[[0,0,0],[1,0,0]],delay:.003}],sources:[],listener:{position:[1,0,0]},settings:{quality:'balanced'}},geometry:{schemaVersion:1,generation:'g1',sessionId:'synthetic-test',surfaces:[],validUntil:123,clockDomain:'publisher-monotonic-ms'}});
 const temp=()=>fs.mkdtempSync(path.join(os.tmpdir(),'RichAudioSoundMap-'));
+test('recorded vehicle direct mode retains component identity and the explicit unverified visibility assumption',()=>{
+ const root=temp();try{const recorder=new SessionRecorder(root),{id}=recorder.start(),value=fixture();
+ value.frame.geometryGeneration=null;value.frame.geometryTimeMs=null;
+ value.frame.sources=[{id:'vehicle:1:exhaust',position:[0,0,1],valid:true}];
+ value.frame.readiness={mode:'vehicle-conditional-direct',visibilityAssumption:'unobserved-space-assumed-clear',genuineGeometryPresent:false};
+ recorder.frame(value.frame,null);recorder.stop();const replay=recorder.open(id);
+ assert.deepEqual(replay.manifest.propagationStates,[{mode:'vehicle-conditional-direct',visibilityAssumption:'unobserved-space-assumed-clear',genuineGeometryPresent:false}]);
+ assert.equal(replay.events.filter(e=>e.type==='propagation-state').length,1);
+ assert.match(fs.readFileSync(path.join(replay.dir,'timeline.jsonl'),'utf8'),/vehicle:1:exhaust/);
+ }finally{clean(root);}
+});
 test('recording manifest and timeline retain conditional-clear assumption and actual geometry transition',()=>{
  const root=temp();try{const recorder=new SessionRecorder(root),{id}=recorder.start();
  const value=fixture();value.frame.geometryGeneration=null;

@@ -16,6 +16,9 @@ import {validateAcousticSettings} from '../src/acoustics/streaming/acoustic-qual
 import {scenario as acousticScenario} from './acoustics-08-2-scenes.mjs';
 import {SoundMapClient} from './soundmap/producer-client.mjs';
 import {BeaconOutputTrim,validateAuditionProfile} from '../src/acoustics/streaming/beacon-output-trim.mjs';
+import {LiveVehicleSource,vehicleLiveSourceIds} from '../src/acoustics/vehicle/live-source.mjs';
+import {VehicleOutputGuard,vehicleOutputCalibration} from '../src/acoustics/vehicle/output-guard.mjs';
+import {VehicleRelayGate} from '../src/acoustics/vehicle/relay.mjs';
 
 const args = process.argv.slice(2),
   options = {
@@ -36,6 +39,7 @@ const args = process.argv.slice(2),
     acousticQuality:null,acousticAcceleration:null,acousticBenchmark:null,
     acousticPreferences:{},
     soundMapConfig:null,soundMapFps:20,
+    vehicleProfile:null,
   };
 const settingBoolean=v=>{if(v!=='true'&&v!=='false')throw Error('Boolean acoustic preference');return v==='true';};
 const settingNumber=v=>{if(typeof v!=='string'||!v.trim())throw Error('Numeric acoustic preference');return Number(v);};
@@ -70,7 +74,13 @@ for (let i = 0; i < args.length; i += 2) {
   else if(args[i]==='--acoustic-benchmark')options.acousticBenchmark=args[i+1];
   else if(args[i]==='--soundmap-config')options.soundMapConfig=args[i+1];
   else if(args[i]==='--soundmap-fps')options.soundMapFps=Number(args[i+1]);
+  else if(args[i]==='--vehicle-profile')options.vehicleProfile=args[i+1];
   else throw Error("Unknown producer option");
+}
+if(options.vehicleProfile!==null){
+  if(!['v12','v8'].includes(options.vehicleProfile)||!options.geometry||options.outputTrimDb!==0||options.acousticBenchmark||
+    options.orientation||(args.includes('--sources')&&options.sources!==8))throw Error('Vehicle requires explicit v12/v8, eight components, observed geometry input and zero beacon trim');
+  options.sources=8;
 }
 if (
   ![
@@ -112,9 +122,12 @@ if (
   throw Error("Headless barrier budget");
 const FS = 48000,
   BLOCK = 512,
-  ids = Array.from({ length: options.sources }, (_, i) => "beacon-" + i);
+  ids = options.vehicleProfile?[...vehicleLiveSourceIds]:Array.from({ length: options.sources }, (_, i) => "beacon-" + i);
 validateAuditionProfile(options);
 const outputTrim=new BeaconOutputTrim(options.outputTrimDb);
+const vehicle=options.vehicleProfile?new LiveVehicleSource({profile:options.vehicleProfile,maxTransitMs:0}):null;
+const vehicleOutput=vehicle?new VehicleOutputGuard():null;
+let vehicleBlock=null;
 if(!Number.isInteger(options.soundMapFps)||options.soundMapFps<15||options.soundMapFps>30)throw Error('SoundMap FPS 15..30');
 const soundMap=options.soundMapConfig?new SoundMapClient(options.soundMapConfig):null;
 let lastSoundMapFrame=-512,soundMapDeadlineMisses=0,soundMapMissingHistory=0;
@@ -122,6 +135,7 @@ const renderer = new StreamingRenderer({
     sourceIds: ids,
     historyDiagnostics: options.diagnostics,
     generationReleaseGuard:options.geometry,
+    ...(vehicle?{masterGain:vehicleOutputCalibration.masterGain}:{}),
     ...(options.acousticSettings?{pathCapacityPerSource:64}:{}),
   }),
   worker = new Worker(
@@ -131,6 +145,7 @@ const renderer = new StreamingRenderer({
     ),
     { workerData: { scene: options.scene, geometry:options.geometry, sourceIds:ids, controlledClock:options.headless,
       acousticSettings:options.acousticSettings,acousticBenchmark:options.acousticBenchmark,
+      vehicleProfile:options.vehicleProfile,
       soundMap:{enabled:!!soundMap,fps:options.soundMapFps} } },
   );
 const listenerPlayout = new ListenerPlayout({ delayMs: options.delayMs });
@@ -146,6 +161,11 @@ let startupIdentity = null,
 // Explicit silent replay clock. The normal host continues to use the monotonic wall clock.
 const receiptClock = () =>
   options.headless ? (renderer.frame / FS) * 1000 : performance.now();
+const acceptVehicle=m=>{
+  vehicle.accept(m,{now:renderer.frame/FS,receiptNowMs:receiptClock()});
+  soundMap?.event({type:'vehicle-evidence',audioFrame:renderer.frame,state:m.state,receiptAgeMs:m.receiptAgeMs});
+};
+const vehicleRelay=vehicle&&!options.headless?new VehicleRelayGate({now:receiptClock,log,apply:acceptVehicle}):null;
 const inputs = Object.fromEntries(
   ids.map((id) => [id, new Float32Array(BLOCK)]),
 );
@@ -162,6 +182,8 @@ const stats = {
   simulationMs: [],
   dspMs: [],
   orientationMs: [],
+  synthesisMs: [],
+  processingDeadlineMisses:0,
   pathMinimum: Infinity,
   pathMaximum: 0,
   listenerMode: "synthetic-metric",
@@ -236,6 +258,11 @@ async function finish(error) {
     beaconFrequencyHz: options.frequencyHz,
     beaconLevel: options.level,
     outputTrim:outputTrim.stats,
+    vehicle:vehicleBlock?.diagnostics??null,
+    vehicleOutput:vehicleOutput?.stats??null,
+    vehicleRelay:vehicleRelay?.stats??null,
+    activeSourceIds:lastControl?.activeSourceIds??null,
+    runtime:{node:process.version,platform:process.platform,arch:process.arch},
     error: error?.message ?? null,
     frames: renderer.frame,
     wallSeconds: (performance.now() - wallStart) / 1000,
@@ -246,6 +273,7 @@ async function finish(error) {
       simulationMs: summary(stats.simulationMs),
       dspMs: summary(stats.dspMs),
       orientationMs: summary(stats.orientationMs),
+      synthesisMs:summary(stats.synthesisMs),
     },
     dsp: renderer.stats,
     historyDiagnostics: renderer.historyDiagnostics,
@@ -295,6 +323,7 @@ function simulate(snapshot, now) {
         dispatchNs:((before+after)/2n).toString(),dispatchUncertaintyMs:options.headless?0:Number(after-before)/2e6+.001};
     }
     worker.postMessage({ id, snapshot, now, geometryEvents:events,anchor,
+      vehicleSources:vehicleBlock?.vehicleSources??null,
       acousticSettings:pendingAcousticSettings,acousticFeedback:lastAcousticFeedback });
     pendingAcousticSettings=null;
   });
@@ -395,6 +424,10 @@ async function pump() {
         await finish();
         break;
       }
+      const synthesisStarted=performance.now();
+      if(vehicle)vehicleBlock=vehicle.render({now,receiptNowMs:receiptClock(),frames:BLOCK});
+      const synthesisMilliseconds=vehicle?performance.now()-synthesisStarted:0;
+      if(vehicle)stats.synthesisMs.push(synthesisMilliseconds);
       const spatialSnapshot = snapshot(now);
       const controlContext = lastPlayout?.state ?? null;
       const orientationStarted = orientation ? performance.now() : 0;
@@ -509,7 +542,19 @@ async function pump() {
         result.control.paths.length,
       );
       const renderingEnabled=enabled;
-      for (let j = 0; j < BLOCK; j++) {
+      if(vehicle){
+        for(const id of ids){
+          const component=vehicleBlock.inputs[id];
+          if(!(component instanceof Float32Array)||component.length!==BLOCK)throw Error('Vehicle independent PCM component contract');
+          if(lastControl.activeSourceIds?.includes(id)&&renderer.sources.get(id)?.registered!==false)inputs[id].set(component);
+          else inputs[id].fill(0);
+        }
+        // Start/mute is an independent host control, never synthesized telemetry.
+        for(let j=0;j<BLOCK;j++){
+          gain+=(Number(renderingEnabled)-gain)*(1-Math.exp(-1/(.01*FS)));
+          for(const id of ids)inputs[id][j]*=gain;
+        }
+      }else for (let j = 0; j < BLOCK; j++) {
         gain +=
           (Number(renderingEnabled) * options.level - gain) * (1 - Math.exp(-1 / (0.01 * FS)));
         for (let i = 0; i < ids.length; i++) {
@@ -541,6 +586,7 @@ async function pump() {
       }
       if(outputTrim.enabled&&renderer.stats.limited)throw Error('Audition trim refuses limited acoustic output');
       outputTrim.apply(left,right);
+      vehicleOutput?.apply(left,right,renderer.stats.limited);
       const dspMilliseconds = performance.now() - started;
       if(soundMap){
         const elapsed=performance.now()-blockProcessingStart;
@@ -551,7 +597,9 @@ async function pump() {
             deadlineScope:'Completed producer blocks including PCM serialization and stdout write; distinct from endpoint underflows',
             unsampledBlocksSinceLastFrame:Math.max(0,(renderer.frame-BLOCK-lastSoundMapFrame)/BLOCK-1),
             scope:'Bounded sampled solver trace; unsampled blocks are counted, not reconstructed',
-            startup:startup.status,emitting:enabled,sourceGenerations:lastControl.sourceGenerations,outputTrim:{...outputTrim.stats},sourcePcmFormat:'48000 Hz stereo float32 after explicit audition trim, before Windows host gain'}};
+            startup:startup.status,emitting:enabled,sourceGenerations:lastControl.sourceGenerations,outputTrim:{...outputTrim.stats},
+            vehicle:vehicleBlock?.diagnostics??null,vehicleOutput:vehicleOutput?{...vehicleOutput.stats}:null,
+            sourcePcmFormat:'48000 Hz stereo float32 after guarded source calibration, before Windows host gain'}};
           if(soundMap.offer(frame,result.soundMapGeometry)){lastSoundMapFrame=renderer.frame-BLOCK;soundMapDeadlineMisses=0;soundMapMissingHistory=0;}
         }else if(result.soundMapGeometry)soundMap.geometry=result.soundMapGeometry;
         if(result.soundMapDiagnostic)soundMap.event({type:'solver-diagnostic',...result.soundMapDiagnostic,audioFrame:renderer.frame});
@@ -572,6 +620,7 @@ async function pump() {
         process.stdout.write(packet, (e) => (e ? reject(e) : resolve())),
       );
       stats.blocks++;
+      stats.processingDeadlineMisses+=Number(performance.now()-blockProcessingStart>BLOCK/FS*1000);
       if(soundMap)soundMapDeadlineMisses+=Number(performance.now()-blockProcessingStart>BLOCK/FS*1000);
       inFlight = 0;
       if (options.trace)
@@ -581,8 +630,13 @@ async function pump() {
           dspMilliseconds,
           orientationMilliseconds,
           simulationMilliseconds: result.milliseconds,
+          synthesisMilliseconds,
+          vehicle:vehicleBlock?.diagnostics??null,
+          vehicleOutput:vehicleOutput?{...vehicleOutput.stats}:null,
           paths: lastControl.paths.length,
           sourceGenerations: options.geometry||options.acousticSettings?lastControl.sourceGenerations:undefined,
+          activeSourceIds:lastControl.activeSourceIds,
+          releasedSourceIds:lastControl.releasedSourceIds,
           ...(options.acousticSettings?{acoustic:lastControl.acoustic,workerSchedulingMilliseconds:result.schedulingMilliseconds}:{}),
           geometry: lastControl.geometry,
           readiness: lastControl.readiness,
@@ -596,6 +650,7 @@ async function pump() {
             arrivalDirection: p.arrivalDirection,
             order: p.order,
             delay: p.delay,
+            distance:p.distance,
             rate: p.rate,
             bands: p.bands,
             emissionFrame: p.emissionFrame,
@@ -679,7 +734,11 @@ async function pump() {
 function receive(m) {
   if (!m || typeof m !== "object") throw Error("Control object");
   if(geometryRelay?.receive(m))return;
-  if(m.type==='acoustic-settings'){
+  if(vehicleRelay?.receive(m))return;
+  if(m.type==='vehicle'){
+    if(!vehicle||!options.headless)throw Error('Live vehicle input requires measured forwarding admission');
+    acceptVehicle(m);
+  }else if(m.type==='acoustic-settings'){
     if(!options.acousticSettings||!Number.isSafeInteger(m.revision)||m.revision<=acousticRevision)throw Error('Acoustic settings startup/revision');
     const {type,revision,quality,acceleration,...preferences}=m;
     const {acousticQuality,acousticAcceleration,...validated}=validateAcousticSettings({...preferences,acousticQuality:quality,acousticAcceleration:acceleration});

@@ -35,3 +35,12 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7
+      - name: Retain bounded sanitized vehicle integration evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: vehicle-integration-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .local/vehicle-ci-evidence/*.json
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7

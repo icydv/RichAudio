@@ -76,13 +76,14 @@ function metadata(now){
   const view=presentation(state,passive,now,connected),f=view.frame,g=view.geometry,h=view.health,d=f?.diagnostics,isPassive=view.kind==='passive';
   safeText($('connection'),viewPaused?'View paused · recording is independent':h.message);
   $('status-dot').style.background=h.state==='live'?'#63e8d3':h.state==='passive'?'#73bcff':h.state==='historical'?'#c6adff':'#e4cc80';
-  const conditional=f?.readiness?.mode==='listener-only-conditional-direct';
+  const vehicleConditional=f?.readiness?.mode==='vehicle-conditional-direct';
+  const conditional=vehicleConditional||f?.readiness?.mode==='listener-only-conditional-direct';
   const mode=isReplay?'HISTORICAL':isPassive?'PASSIVE CAMERA':conditional?'CONDITIONAL DIRECT':view.kind==='acoustic'?'ACOUSTIC SOLVER':h.state.toUpperCase();
   safeText($('mode-chip'),mode);safeText($('mode-label'),viewPaused?'VISUAL UPDATES PAUSED':mode);
   safeText($('scene-title'),isPassive?'Your listener, live.':f?isReplay?'A recorded acoustic moment.':'Sound, mapped.':'Ready when Story Mode is.');
   if(isPassive&&h.expired)safeText($('scene-title'),'Camera tracking unavailable.');
   const coverage=g?`${g.surfaces.length} finite surfaces · ${g.coverage}. `:'No accepted geometry. ';
-  safeText($('knowledge'),isPassive?'Passive camera telemetry only. Acoustic processing is inactive. The reference grid is not world geometry.':conditional?'Listener-only conditional direct path. Unobserved space is assumed clear for the owned beacon; this is not verified unobstructed geometry.':coverage+(h.expired?'Geometry unavailable or expired at this moment. ':'')+'Unobserved space remains unknown.');
+  safeText($('knowledge'),isPassive?'Passive camera telemetry only. Acoustic processing is inactive. The reference grid is not world geometry.':vehicleConditional?'Vehicle conditional direct paths. Unobserved space is assumed clear for the original vehicle components; this is not verified unobstructed geometry.':conditional?'Listener-only conditional direct path. Unobserved space is assumed clear for the owned beacon; this is not verified unobstructed geometry.':coverage+(h.expired?'Geometry unavailable or expired at this moment. ':'')+'Unobserved space remains unknown.');
   const actualFps=displayRate.rate(now),incoming=(isPassive?passiveRate:solverRate).rate(now);
   safeText($('display-fps'),actualFps.toFixed(1));safeText($('telemetry-rate'),incoming.toFixed(1));safeText($('telemetry-age'),Number.isFinite(h.ageMs)?`${Math.round(h.ageMs)} ms`:'—');
   $('display-fps').dataset.target=String(fps);$('telemetry-rate').dataset.pollTarget=String(TELEMETRY_POLL_FPS);

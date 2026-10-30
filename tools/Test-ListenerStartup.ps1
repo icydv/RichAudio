@@ -33,7 +33,10 @@ if(!$SkipBaseline){
  $legacyRelay=Join-Path $legacyRoot 'src\acoustics\geometry\GeometryHostRelay.cs'
  $baselineSources=@($sources|Where-Object{$_-ne(Join-Path $repo 'src\acoustics\geometry\GeometryHostRelay.cs')})+$legacyRelay
  $legacyExe=Join-Path $build 'RichAudio.Listening.Baseline.Tests.exe'
- & $compiler @options ('/out:'+$legacyExe) @baselineSources
+ # The archived implementation remains byte-for-byte unchanged. Only this
+ # negative-control build uses its pre-vehicle four-argument constructor.
+ $baselineOptions=@($options|Where-Object{$_-notlike '/define:*'})+'/define:STATE_TRANSPORT,GEOMETRY_LIVE,GEOMETRY_FIXTURE,LEGACY_RELAY_BASELINE'
+ & $compiler @baselineOptions ('/out:'+$legacyExe) @baselineSources
  if($LASTEXITCODE-ne0){throw 'Candidate08 actual relay integration compilation failed'}
 }
 & node (Join-Path $repo 'tools\Run-ListenerStartupProof.mjs') $repo $Output $exe $legacyRoot $legacyExe

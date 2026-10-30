@@ -1,5 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
 import {ListeningOperator,emissionReadiness} from '../tools/listening/operator.mjs';
+import {vehicleLiveSourceIds} from '../src/acoustics/vehicle/live-source.mjs';
 const root=fs.mkdtempSync(path.join(os.tmpdir(),'RichAudio operator ')),mock=path.join(root,'mock host.mjs');
 fs.writeFileSync(mock,`console.log(JSON.stringify({cwd:process.cwd(),args:process.argv.slice(2)}));if(process.argv[2]==='early')process.exit(7);if(process.argv[2]!=='quiet')setTimeout(()=>{console.log('RichAudio shared output: device-free fixture. Commands: start, mute, resume, emit-stop, status, stop. Maximum 60 seconds; gain 0.2');console.log('RichAudio shared output: duplicate. Commands: start, mute, resume, emit-stop, status, stop. Maximum 60 seconds; gain 0.2');},30);process.stdin.on('data',b=>{if(process.argv[2]!=='hung'&&b.toString().includes('stop'))process.exit(0);});`);
 const pre={storyReady:true,bridgeReady:true,passiveMovementVerified:true};
@@ -27,6 +28,16 @@ test('readiness separates accepted transport, owned context, conditional renderi
 });
 test('spawn failure is terminal, no listener permitted, primary survives secondary fault',async()=>{
  const {op,events}=setup('normal',{executable:path.join(root,'does not exist.exe')});op.begin(pre);await until(()=>op.finished);assert.match(op.primary,/spawn:/);assert.throws(()=>op.permitListener());const first=op.primary;op.fail('later cleanup error');assert.equal(op.primary,first);assert.ok(op.secondary.includes('later cleanup error'));assert.equal(op.launches,1);assert.equal(op.listenerStarts,0);assert.equal(events.filter(e=>e.type==='launch-request').length,1);
+});
+
+test('vehicle readiness requires the exact original eight-component registration',()=>{
+ const f=readyFrame(),status={connected:true,ageMs:0};f.readiness.mode='vehicle-conditional-direct';
+ assert.equal(emissionReadiness(f,status).rendererReadyForOwnedEmission,false);
+ f.directPath={rights:'original-generated',sourceIds:[...vehicleLiveSourceIds]};
+ f.sources=vehicleLiveSourceIds.map(id=>({id,valid:true}));
+ assert.equal(emissionReadiness(f,status).rendererReadyForOwnedEmission,true);
+ f.sources[0].valid=false;assert.equal(emissionReadiness(f,status).rendererReadyForOwnedEmission,false);
+ f.sources[0].valid=true;f.directPath.sourceIds[0]='beacon-0';assert.equal(emissionReadiness(f,status).rendererReadyForOwnedEmission,false);
 });
 test('early host exit and absent readiness cannot grant listener Start',async()=>{for(const mode of ['early','quiet']){const {op}=setup(mode,{readinessMs:100});op.begin(pre);await until(()=>op.finished);assert.ok(op.primary);assert.throws(()=>op.permitListener());assert.equal(op.listenerStarts,0);assert.equal(op.launches,1);}});
 test('host death after startup invalidates permission; no duplicate launch or emission',async()=>{const {op}=setup('normal',{stopMs:1000,limitMs:1200});op.begin(pre);await until(()=>op.state==='host-ready');op.child.kill();await until(()=>op.finished);assert.throws(()=>op.permitListener());assert.throws(()=>op.emitBeacon());assert.throws(()=>op.begin(pre));assert.match(op.primary,/unexpected-host-exit/);});

@@ -23,7 +23,7 @@ namespace RichAudio.GeometryLive
     }
     public sealed class GeometryHostRelay:IDisposable
     {
-        private readonly Action<string> send;private readonly Func<uint> listenerPid;private readonly GeometryModel model;
+        private readonly Action<string> send;private readonly Func<uint> listenerPid;private readonly GeometryModel model;private readonly bool vehicleMode;
         private readonly object sync=new object();private readonly AutoResetEvent changed=new AutoResetEvent(false),ack=new AutoResetEvent(false);
         private readonly JavaScriptSerializer json=new JavaScriptSerializer{MaxJsonLength=131072,RecursionLimit=32};
         private readonly GeometryPipeServer pipe;private Thread thread;private volatile bool stopped;
@@ -34,8 +34,8 @@ namespace RichAudio.GeometryLive
         private long ackSequence=-1;private string ackKind;private bool ackAccepted;
         public long Forwarded,ContextsForwarded,Rejected,Delivered,Disconnects;public double MaximumAcceptedRoundTripMs,MaximumObservedRoundTripMs;
         public string Reason;public GeometryPacket LastRejected;
-        public GeometryHostRelay(Action<string> send,Func<uint> listenerPid,GeometryModel model,string pipeName=GeometryWire.PipeName)
-        {this.send=send;this.listenerPid=listenerPid;this.model=model;pipe=new GeometryPipeServer(pipeName,Received,Unavailable);}
+        public GeometryHostRelay(Action<string> send,Func<uint> listenerPid,GeometryModel model,string pipeName=GeometryWire.PipeName,bool vehicleMode=false)
+        {Protocol.Check(!vehicleMode||model.Scale==1,"vehicle demonstration declares one metre per native unit");this.send=send;this.listenerPid=listenerPid;this.model=model;this.vehicleMode=vehicleMode;pipe=new GeometryPipeServer(pipeName,Received,Unavailable);}
         public void Start(){pipe.Start();thread=new Thread(Run){IsBackground=true,Name="RichAudio measured geometry relay"};thread.Start();}
         public void Listener(ListenerState state){lock(sync)listener=Protocol.Copy(state);changed.Set();}
         private void Received(GeometryPacket p,uint peer)
@@ -74,7 +74,7 @@ namespace RichAudio.GeometryLive
         {
             if(origin==null){origin=(double[])s.Position.Clone();source=new double[3];for(int i=0;i<3;i++)source[i]=origin[i]+model.Offset[i];}
             var lo=new double[3];var hi=new double[3];for(int i=0;i<3;i++){lo[i]=origin[i]-12;hi[i]=origin[i]+12;}
-            return new Dictionary<string,object>{{"contextEpoch",contextEpoch},{"listenerSession",s.Session},
+            var result=new Dictionary<string,object>{{"contextEpoch",contextEpoch},{"listenerSession",s.Session},
                 {"minimumListenerGeneration",s.Generation},{"build","1.0.1158.16"},
                 {"coordinates",new Dictionary<string,object>{{"originNative",Vec(origin)},{"axes",new[]{new[]{1,0,0},new[]{0,1,0},new[]{0,0,1}}},
                     {"metresPerNativeUnit",model.Scale},{"basis","declared-demonstration-scale"},{"reference",model.Reference}}},
@@ -84,6 +84,17 @@ namespace RichAudio.GeometryLive
                 {"engine",new Dictionary<string,object>{{"order",2}}},
                 {"directPath",new Dictionary<string,object>{{"mode","listener-only-conditional-direct"},{"sourceId","beacon-0"},{"rights","original-generated"},
                     {"visibilityAssumption","unobserved-space-assumed-clear"}}}};
+            if(vehicleMode){
+                var ids=new List<string>();var slots=new List<object>();
+                foreach(string component in new[]{"mechanical","exhaust","intake","drivetrain","tyres","aero","induction","transients"}){
+                    string id="vehicle:1:"+component;ids.Add(id);slots.Add(new Dictionary<string,object>{{"id",id},{"rights","original-generated"},{"reference","vehicle-live-01"},
+                        {"generation",1},{"positionNative",Vec(origin)},{"velocityNative",new[]{0,0,0}},{"forwardNative",new[]{0,1,0}},{"upNative",new[]{0,0,1}},
+                        {"valid",false},{"emitting",false},{"vehicle",true}});
+                }
+                result["sources"]=slots;
+                result["directPath"]=new Dictionary<string,object>{{"mode","vehicle-conditional-direct"},{"sourceIds",ids},{"rights","original-generated"},{"visibilityAssumption","unobserved-space-assumed-clear"},{"regionPolicy","bounded-follow-player"}};
+            }
+            return result;
         }
         private Dictionary<string,object> Configuration(GeometryPacket p,ListenerState s)
         {

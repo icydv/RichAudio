@@ -47,7 +47,7 @@ export class SessionRecorder {
     if(!this.active)return;const a=this.active;
     // Retain the explicit conditional-clear assumption alongside original frame
     // evidence; no inference of unobstructed world geometry is made by capture.
-    if(frame.readiness){const state={mode:['listener-only-conditional-direct','conditional-observed-geometry','observed-geometry','unavailable'].includes(frame.readiness.mode)?frame.readiness.mode:'unrecognised',
+    if(frame.readiness){const state={mode:['listener-only-conditional-direct','vehicle-conditional-direct','conditional-observed-geometry','observed-geometry','unavailable'].includes(frame.readiness.mode)?frame.readiness.mode:'unrecognised',
       visibilityAssumption:frame.readiness.visibilityAssumption==='unobserved-space-assumed-clear'?'unobserved-space-assumed-clear':null,
       genuineGeometryPresent:frame.readiness.genuineGeometryPresent===true};
       if(!a.manifest.propagationStates.some(s=>JSON.stringify(s)===JSON.stringify(state))&&a.manifest.propagationStates.length<16){
