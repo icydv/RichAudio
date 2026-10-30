@@ -388,6 +388,7 @@ export class StreamingRenderer {
     masterGain = 0.7,
     historyDiagnostics = false,
     generationReleaseGuard = false,
+    sourcePressureGains = {},
   } = {}) {
     requireValue(
       sourceIds.length >= 1 &&
@@ -395,6 +396,10 @@ export class StreamingRenderer {
         new Set(sourceIds).size === sourceIds.length,
       "sources",
     );
+    requireValue(sourcePressureGains && typeof sourcePressureGains === 'object' && !Array.isArray(sourcePressureGains) &&
+      Object.entries(sourcePressureGains).every(([id,gain]) => sourceIds.includes(id) && Number.isFinite(gain) && gain >= .25 && gain <= 4),
+      'explicit bounded source pressure calibration');
+    this.sourcePressureGains = Object.freeze(Object.fromEntries(sourceIds.map(id => [id,sourcePressureGains[id] ?? 1])));
     requireValue(
       Number.isInteger(maxPathsPerSource) &&
         maxPathsPerSource >= 1 &&
@@ -436,6 +441,7 @@ export class StreamingRenderer {
         id,
         {
           id,
+          pressureGain: this.sourcePressureGains[id],
           generation: 100001,
           bands: [
             new Float32Array(this.historyFrames),
@@ -754,6 +760,10 @@ export class StreamingRenderer {
               s.bands[1][at] * slot.gain[1] +
               s.bands[2][at] * slot.gain[2]);
         }
+        // Constant emitter calibration applies equally to every direct and
+        // reflected arrival. Original PCM histories and passive path losses
+        // remain unchanged; this is not normalization or a limiter.
+        x *= s.pressureGain;
         l += x * Math.sqrt((1 - slot.pan) / 2);
         r += x * Math.sqrt((1 + slot.pan) / 2);
         slot.cursor +=

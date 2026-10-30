@@ -8,14 +8,14 @@ export const vehicleBlockFrames = 512;
 
 export class VehicleAcousticPipeline {
   constructor({ scene, sourceIds, quality = 'quality', acceleration = 'cpu', masterGain = 0.7,
-    directStem = false } = {}) {
+    directStem = false, sourcePressureGains = {} } = {}) {
     if (!(quality in qualityPresets)) throw Error('explicit acoustic quality required');
     this.simulation = new CausalSimulation(scene);
     this.backend = new AcousticAcceleration({ mode: acceleration });
     this.renderer = new StreamingRenderer({ sourceIds, maxPathsPerSource: qualityPresets[quality],
-      pathCapacityPerSource: 64, masterGain, historyDiagnostics: true, generationReleaseGuard: true });
+      pathCapacityPerSource: 64, masterGain, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains });
     this.directRenderer = directStem ? new StreamingRenderer({ sourceIds, maxPathsPerSource: 1,
-      masterGain, historyDiagnostics: true, generationReleaseGuard: true }) : null;
+      masterGain, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains }) : null;
     this.setQuality(quality);
     this.lastControl = null;
   }
@@ -50,7 +50,8 @@ export class VehicleAcousticPipeline {
   diagnostics() {
     return { quality: this.quality, simulation: { ...this.simulation.stats }, renderer: { ...this.renderer.stats },
       history: this.renderer.historyDiagnostics, sourceHistoryBytes: this.renderer.ownedArrayBytes,
-      backend: this.backend.diagnostics(), directStemHistoryBytes: this.directRenderer?.ownedArrayBytes ?? 0 };
+      backend: this.backend.diagnostics(), directStemHistoryBytes: this.directRenderer?.ownedArrayBytes ?? 0,
+      sourcePressureGains: this.renderer.sourcePressureGains };
   }
   close() { this.backend.close(); }
 }

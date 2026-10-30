@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "milestone": "STOCK-SOURCE-05",
+  "baseCommit": "15516da787fc924dd3fa4ca91f1062f8b616c7bd",
+  "focusedTests": {"passed": 86, "failed": 0, "skipped": 0, "exitCode": 0, "fullCiRun": false},
+  "scope": "Existing source/chronology/transition/fidelity/history/propagation/distance/late tests plus finite urban train and per-emitter pressure calibration",
+  "audition": {"newWavs": 32, "players": 40, "figures": 8, "allLinksResolve": true, "maximumPeak": 0.7005810737609863, "limiting": 0, "pcmHistoryFaults": 0, "protectedInputsUnchanged": 76},
+  "timing": {"finalMainCompleteBlockMisses": 17, "maximumFinalMainCompleteBlockMs": 15.5691, "blockDeadlineMs": 10.666666666666666, "preflightCompleteBlockMisses": 12, "realTimeCertification": false},
+  "source04SynthesisUnchanged": true,
+  "remainingPitchSteppingVerdict": "OPEN, particularly Lectro and X80; reverberation is not a pitch fix",
+  "subjectiveListeningPerformed": false,
+  "perceptualAcceptance": "PENDING user listening",
+  "launcherReadyAllVehicleReplacement": false,
+  "startupWorldMapReady": false,
+  "runtimeScope": "Newly requested installed-world preparation and all-vehicle replacement are active development, not established by these authored auditions"
+}

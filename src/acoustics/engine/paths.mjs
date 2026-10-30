@@ -139,6 +139,19 @@ export function candidatePaths(scene, {maxReflectors=scene.config.maxReflectors}
       for (const b of s)
         if (a.id !== b.id)
           result.push({ id: "r:" + a.id + ">" + b.id, surfaces: [a, b] });
+  if (scene.config.higherOrderPaths?.length) {
+    const selected = new Map(s.map(surface => [surface.id, surface]));
+    const identities = new Set(result.map(path => path.id));
+    for (const sequence of scene.config.higherOrderPaths) {
+      // Explicit finite routes only: never enumerate an exponential path tree.
+      // Every bounce must survive the same quality reflector cap as lower orders.
+      if (!sequence.every(surfaceId => selected.has(surfaceId))) continue;
+      const id = 'r:' + sequence.join('>');
+      if (identities.has(id)) continue;
+      identities.add(id);
+      result.push({ id, surfaces: sequence.map(surfaceId => selected.get(surfaceId)) });
+    }
+  }
   return result;
 }
 export function solvePath(

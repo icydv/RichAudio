@@ -81,9 +81,10 @@ export function material({
   });
 }
 function engineConfiguration(engineOptions) {
+  const { higherOrderPaths, ...baseOptions } = engineOptions;
   const config = {
     soundSpeed: 343, referenceDistance: 1, airDbPerMetre: [0.0001, 0.001, 0.01],
-    order: 1, maxPaths: 12, maxReflectors: 8, maxDelay: 2, updateHz: 40, ...engineOptions,
+    order: 1, maxPaths: 12, maxReflectors: 8, maxDelay: 2, updateHz: 40, ...baseOptions,
   };
   requireValue(Number.isFinite(config.soundSpeed)&&config.soundSpeed>=250&&config.soundSpeed<=450,'sound speed');
   requireValue(Number.isFinite(config.referenceDistance)&&config.referenceDistance>0&&config.referenceDistance<=10,'reference distance');
@@ -92,6 +93,23 @@ function engineConfiguration(engineOptions) {
   requireValue(Number.isFinite(config.maxDelay)&&config.maxDelay>0&&config.maxDelay<=bounds.delay&&[20,40,80,100].includes(config.updateHz),'delay/update budget');
   requireValue(Array.isArray(config.airDbPerMetre)&&config.airDbPerMetre.length===3&&config.airDbPerMetre.every(x=>Number.isFinite(x)&&x>=0&&x<=1)&&
     config.airDbPerMetre[0]<=config.airDbPerMetre[1]&&config.airDbPerMetre[1]<=config.airDbPerMetre[2],'air band loss');
+  if (higherOrderPaths !== undefined) {
+    requireValue(Array.isArray(higherOrderPaths) && higherOrderPaths.length <= 16,
+      'bounded explicit higher-order paths required');
+    if (higherOrderPaths.length) {
+      requireValue(config.order === 2, 'explicit higher-order paths require order 2');
+      const sequences = new Set();
+      config.higherOrderPaths = Array.from(higherOrderPaths, sequence => {
+        requireValue(Array.isArray(sequence) && sequence.length >= 3 && sequence.length <= 10 &&
+          Array.from(sequence).every((surfaceId, i) => typeof surfaceId === 'string' &&
+            (i === 0 || surfaceId !== sequence[i - 1])), 'bounded higher-order surface sequence required');
+        const key = JSON.stringify(sequence);
+        requireValue(!sequences.has(key), 'duplicate higher-order surface sequence');
+        sequences.add(key);
+        return [...sequence];
+      });
+    }
+  }
   return config;
 }
 
@@ -135,6 +153,9 @@ export function acousticScene(tile, materials = {}, options = {}) {
     "validated metre geometry required; no implicit GTA scale",
   );
   const config=engineConfiguration(engineOptions);
+  const surfaceIds = new Set(tile.surfaces.map(s => s.id));
+  requireValue((config.higherOrderPaths ?? []).every(sequence => sequence.every(surfaceId => surfaceIds.has(surfaceId))),
+    'higher-order paths require existing finite surface identities');
   const checked = {};
   for (const s of tile.surfaces)
     checked[s.id] = materials[s.id] ? material(materials[s.id]) : null;
