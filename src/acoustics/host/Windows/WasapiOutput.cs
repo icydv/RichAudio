@@ -11,6 +11,7 @@ namespace RichAudio.Beacon.Windows
         private readonly PcmRing ring;
         private readonly int deviceIndex;
         private readonly Thread thread;
+        public OwnedOutputTap OwnedRecorder;
         private int startState, disposed;
         private volatile bool stop;
         private volatile float volume = .08f;
@@ -34,6 +35,8 @@ namespace RichAudio.Beacon.Windows
         }
         public void Start() { if(Thread.VolatileRead(ref disposed)!=0 || Interlocked.CompareExchange(ref startState,1,0)!=0)throw new InvalidOperationException("Output requires a fresh host instance"); thread.Start(); }
         public void Stop() { Muted = true; stop = true; }
+        internal bool StopRequested { get { return stop; } }
+        public long ConsumerFrame { get { return Interlocked.Read(ref ring.ConsumedFrames); } }
         public void Dispose() { if(Interlocked.Exchange(ref disposed,1)!=0)return; Stop(); if (thread.IsAlive && !thread.Join(3000)) throw new TimeoutException("Audio thread did not stop"); Ready.Dispose(); }
         public static string[] ListDevices()
         {
@@ -89,7 +92,9 @@ namespace RichAudio.Beacon.Windows
                 Native.Check(client.Start()); Started = true; long lastWake = Stopwatch.GetTimestamp(); int consecutiveTimeouts = 0;
                 while (!stop)
                 {
-                    if (!signal.WaitOne(100)) { WakeTimeouts++; if (++consecutiveTimeouts >= 5) throw new TimeoutException("Audio endpoint stopped signalling"); continue; }
+                    bool signalled=signal.WaitOne(100);
+                    if(stop)break;
+                    if (!signalled) { WakeTimeouts++; if (++consecutiveTimeouts >= 5) throw new TimeoutException("Audio endpoint stopped signalling"); continue; }
                     consecutiveTimeouts = 0;
                     long begin = Stopwatch.GetTimestamp(), interval = begin - lastWake; lastWake = begin;
                     Native.Check(client.GetCurrentPadding(out padding)); if (padding > BufferFrames) throw new InvalidOperationException("Invalid device padding"); if (padding == 0) EmptyPaddingEvents++;
@@ -110,9 +115,13 @@ namespace RichAudio.Beacon.Windows
         }
         private unsafe void Fill(IAudioRenderClient renderer, uint frames)
         {
-            if (frames == 0) return; IntPtr data; Native.Check(renderer.GetBuffer(frames, out data));
-            try { ring.Fill((float*)data, (int)frames, Muted ? 0 : volume); }
-            finally { Native.Check(renderer.ReleaseBuffer(frames, 0)); }
+            if (frames == 0 || stop) return; IntPtr data; Native.Check(renderer.GetBuffer(frames, out data));
+            int captureSlot=-1;
+            try {long underflow=ring.UnderflowFrames,endSilence=ring.EndSilenceFrames,producerStart=ring.ConsumedFrames-underflow-endSilence;
+                int supplied=ring.Fill((float*)data, (int)frames, Muted ? 0 : volume);
+                if(OwnedRecorder!=null)captureSlot=OwnedRecorder.Prepare((float*)data,(int)frames,SubmittedFrames,ring.ConsumedFrames,producerStart,supplied,ring.UnderflowFrames-underflow,ring.EndSilenceFrames-endSilence); }
+            finally {try{Native.Check(renderer.ReleaseBuffer(frames, 0));}catch{if(OwnedRecorder!=null)OwnedRecorder.Cancel(captureSlot);throw;} }
+            if(OwnedRecorder!=null)OwnedRecorder.Commit(captureSlot);
             SubmittedFrames += frames;
             if(ring.UnderflowFrames!=0)throw new InvalidOperationException("Producer starvation: stopped to prevent renderer/device clock drift; no automatic resume");
         }

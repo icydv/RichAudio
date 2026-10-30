@@ -24,8 +24,14 @@ namespace RichAudio.Beacon.Windows {
     }
    }catch(Exception e){producerError=e.GetType().Name;}
    finally{
-    stop=true;if(pipe!=null)pipe.Dispose();SendControl("stop");if(child!=null&&!child.WaitForExit(2500)){child.Kill();child.WaitForExit(2000);producerError="Bounded child shutdown required termination";}
-    inputStop=true;inputSignal.Set();if(child!=null)try{child.StandardInput.Close();}catch{}if(inputWriter!=null)inputWriter.Join(1000);if(reader!=null)reader.Join(1000);if(stderr!=null)stderr.Join(1000);
+    stop=true;if(pipe!=null&&!pipe.StopAndWait(1000))RecordFailure("listener-shutdown","Listener worker did not stop");SendControl("stop");if(child!=null&&!child.WaitForExit(2500)){child.Kill();child.WaitForExit(2000);RecordFailure("producer-shutdown","Bounded child shutdown required termination");}
+    lock(inputLock)inputStop=true;inputSignal.Set();
+    bool writerStopped=inputWriter==null||inputWriter.Join(1000);
+    if(!writerStopped)RecordFailure("control-writer-shutdown","Control writer did not stop");
+    // The custom UTF-8 writer leaves Process.StandardInput open. Its final
+    // flush must finish before the process-owned stream is closed.
+    if(child!=null&&writerStopped)try{child.StandardInput.Close();}catch(Exception e){RecordFailure("producer-stdin-close",e.Message,e);}
+    if(reader!=null)reader.Join(1000);if(stderr!=null)stderr.Join(1000);
    }
    double a=(rightA-leftA)/Math.Max(1e-30,rightA+leftA),b=(rightB-leftB)/Math.Max(1e-30,rightB+leftB);
    var result=new {mode=mode,deviceConstructed=false,started=started,error=producerError,accepted=pipe.Accepted,connections=pipe.Connections,terminal=pipe.Diagnostic,forwarded=listenerMessagesWritten,receipts=listenerReceipts,receivedBlocks=receivedBlocks,rejectedBlocks=rejectedBlocks,underflowFrames=ring.UnderflowFrames,peak=ring.Peak,energy=ring.SumSquares,ringHigh=high,controlQueueHigh=controlQueueHigh,maxWriteMs=maximumControlWriteMs,cpuSeconds=(Process.GetCurrentProcess().TotalProcessorTime-cpuStart).TotalSeconds,missedSinkBudgets=missed,initialCredits=4,ringSlots=PcmRing.Slots,finalOwnedFrame=ring.ConsumedFrames,balanceBefore=a,balanceAfter=b,energyBefore=leftA+rightA,energyAfter=leftB+rightB,wallMs=wall.Elapsed.TotalMilliseconds,producerExited=child.HasExited,writerExited=!inputWriter.IsAlive,readerExited=!reader.IsAlive,diagnosticExited=!stderr.IsAlive};

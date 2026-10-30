@@ -13,10 +13,10 @@ export class GeometryRelayGate {
     try{
       if(m.type==='geometry-relay-stage'){
         if(!Number.isSafeInteger(m.sequence)||m.sequence<=this.sequence||m.sequence<=this.cancelThrough||
-          !Array.isArray(m.messages)||m.messages.length>2||Buffer.byteLength(JSON.stringify(m))>liveGeometryLimits.bytes)
+          !Array.isArray(m.messages)||m.messages.length>3||Buffer.byteLength(JSON.stringify(m))>liveGeometryLimits.bytes)
           throw Error('relay stage bounds/order');
         const listener=validateNeutralEnvelope(m.listener);
-        if(m.messages.some(e=>!['geometry-config','geometry','owned-sources'].includes(e?.type)))throw Error('relay message family');
+        if(m.messages.some(e=>!['listener-context-config','geometry-config','geometry','owned-sources'].includes(e?.type)))throw Error('relay message family');
         this.sequence=m.sequence;this.stage={sequence:m.sequence,messages:structuredClone(m.messages),listener,at:this.now()};
         this.stats.staged++;this.log({type:'geometry-relay-ack',sequence:m.sequence});
       }else if(m.type==='geometry-relay-commit'){

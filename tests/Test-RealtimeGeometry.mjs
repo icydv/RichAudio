@@ -49,7 +49,9 @@ test('actual credit-paced producer renders changing geometry with bounded PCM tr
   assert.ok(difference>1e-3,'geometry changes actual samples, not only metadata');
   assert.ok(fixed.metrics.peak>0);assert.notEqual(fixed.metrics.sha256,metrics.sha256);
   assert.equal(final.ownedArrayBytes,reference.final.ownedArrayBytes);
-  assert.equal(final.ownedArrayBytes,fixed.final.ownedArrayBytes);
+  // The corrected route reserves one three-band Float64 attack target for
+  // each of the 24 fixed path/release slots; geometry updates do not grow it.
+  assert.equal(final.ownedArrayBytes,fixed.final.ownedArrayBytes+24*3*Float64Array.BYTES_PER_ELEMENT);
   console.log(JSON.stringify({integration:metrics,simulationMs:final.statistics.simulationMs,dspMs:final.statistics.dspMs,
     ownedArrayBytes:final.ownedArrayBytes,memory:final.memory,history:final.historyDiagnostics}));
 });

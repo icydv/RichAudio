@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "scope": "Offline actual observed-geometry producer; original analytic fixture; no endpoint or playback",
+  "trimDb": 12,
+  "hostGain": 0.2,
+  "preMasterCeiling": 0.5,
+  "outputCeiling": 0.100001,
+  "prior24dBRejected": true,
+  "nearSourceExcessRejected": true,
+  "focusedNodeTests": 23,
+  "hostAssertions": 1701,
+  "conditions": [
+    {
+      "condition": "direct",
+      "frames": 286720,
+      "postHostPeak": 0.02685975469648838,
+      "postHostRms": 0.011151604727227286,
+      "preMasterPeak": 0.13429877161979675,
+      "headroomDb": 31.417959159070538,
+      "clipped": 0,
+      "nonfinite": 0,
+      "limited": 0,
+      "rejected": 0,
+      "exact12dB": true,
+      "scope": "Actual observed-geometry worker/RA07 producer; synthetic private fixture; post-host Float32 multiplication, no device"
+    },
+    {
+      "condition": "reflected",
+      "frames": 286720,
+      "postHostPeak": 0.056448426097631454,
+      "postHostRms": 0.015264582320463686,
+      "preMasterPeak": 0.2822421193122864,
+      "headroomDb": 24.966963252510244,
+      "clipped": 0,
+      "nonfinite": 0,
+      "limited": 0,
+      "rejected": 0,
+      "exact12dB": true,
+      "scope": "Actual observed-geometry worker/RA07 producer; synthetic private fixture; post-host Float32 multiplication, no device"
+    },
+    {
+      "condition": "obstructed",
+      "frames": 286720,
+      "postHostPeak": 0.01905999705195427,
+      "postHostRms": 0.0029019784099872047,
+      "preMasterPeak": 0.09529998153448105,
+      "headroomDb": 34.39754341741669,
+      "clipped": 0,
+      "nonfinite": 0,
+      "limited": 0,
+      "rejected": 0,
+      "exact12dB": true,
+      "scope": "Actual observed-geometry worker/RA07 producer; synthetic private fixture; post-host Float32 multiplication, no device"
+    }
+  ]
+}
