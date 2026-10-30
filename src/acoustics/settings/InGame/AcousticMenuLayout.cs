@@ -12,15 +12,15 @@ namespace RichAudio.Settings.InGame
         private static readonly string[] Descriptions={
             "Sets the maximum direct and early-path detail per source. Auto adapts to measured workload. 32/64-path tiers are experimental and can exceed audio deadlines.",
             "Chooses acoustic computation independently of quality. GPU uses owned DirectCompute resources; unavailable or late work falls back to CPU. Active status is measured below.",
-            "Smoothly mutes or restores RichAudio's owned output. It does not start a beacon, publisher, host or new audio session and does not change GTA's stock sounds.",
+            "Enables or stops the installed automatic Story Mode audio. GTA's original sounds remain active in experimental additive mode. No manual host command is needed.",
             "Scales RichAudio's owned output from 0 to 100% of the reviewed profile. It cannot boost above that profile; loudness is not a substitute for acoustic realism.",
             "Includes or removes valid first- and second-order reflection paths. Old contributions fade through the existing renderer; source history and direct sound remain intact.",
             "Doppler follows the causal propagation cursor. Independent Doppler bypass is not implemented; this read-only control cannot pretend to turn it off.",
             "Shows a compact, noninteractive overlay with fresh host/backend information. Unavailable or stale state is labelled unavailable rather than inferred from your selection.",
-            "Environment-dependent late reverberation remains a planned acoustic feature. No artificial tail or uniform reverb preset is enabled by this menu.",
-            "Advanced diffraction is not implemented. This menu does not replace unobserved propagation paths with invented effects.",
-            "Saves validated preferences through the background service and updates a configured host. The menu never blocks an audio callback or starts a live session.",
-            "Restores Auto quality, Auto acceleration, enabled output at the reviewed level, early reflections on and diagnostics off. Apply to persist these defaults.",
+            "Shows or hides the optional SoundMap viewer. Gameplay audio works independently of the viewer. Its local service remains owned by RichAudio.",
+            "Stock fallback uses only GTA audio. Experimental additive plays verified RichAudio sources alongside GTA engine audio. Selective native replacement is unavailable; no horns, tyres or other GTA sounds are muted.",
+            "Saves your preferences for this and future launches. Enabled additive mode starts automatically when offline Story Mode is ready.",
+            "Restores safe defaults, including GTA stock fallback and hidden SoundMap. Apply to save the defaults.",
             "Closes the menu and releases its input focus. Unapplied edits are discarded; an already requested background save may still complete.",
             "Records a private acoustic timeline and RichAudio-owned PCM through SoundMap. This does not start the host, sound source or world publisher. Microphone and system audio are excluded."
         };
@@ -83,7 +83,7 @@ namespace RichAudio.Settings.InGame
                 unchecked((int)0xFFF3E2AB),GoldLight,Gold,unchecked((int)0xFFAF8B29)};
             for(int i=0;i<metal.Length;i++)p.Rect(30+i*87.5f,98,87.5f,2,metal[i]);
             p.Rect(16,112,728,96,unchecked((int)0xB5222B33));
-            p.Text("ACTIVE ENGINE",30,122,13,Gold,true);
+            p.Text("RICHAUDIO STATUS",30,122,13,Gold,true);
             if(status.Available){
                 p.Text(Title(status.ActiveQuality)+"  /  cap "+status.PathBudget+" paths/source",30,145,20,TextColor,true);
                 p.Text(status.ActiveAcceleration.ToUpperInvariant(),542,145,20,Gold,true);
@@ -125,8 +125,8 @@ namespace RichAudio.Settings.InGame
             Row(p,4,506,44,"Early Reflections",Pending.EarlyReflections?"On":"Off");
             Row(p,5,550,44,"Doppler", "On (fixed)",true);
             Row(p,6,594,44,"Diagnostics Overlay",Pending.DiagnosticsOverlay?"On":"Off");
-            Row(p,7,638,38,"Environmental Reverb","Not available",true);
-            Row(p,8,676,38,"Advanced Diffraction","Not available",true);
+            Row(p,7,638,38,"SoundMap viewer",Pending.SoundMapVisible?"Visible":"Hidden");
+            Row(p,8,676,38,"Audio integration",Pending.IntegrationMode=="experimental-additive"?"Additive (experimental)":"GTA stock fallback");
             p.Rect(16,728,728,86,unchecked((int)0x9E10171E));p.Rect(16,728,3,86,Gold);
             string description=Descriptions[SelectedIndex];
             if(SelectedIndex==12)description=Descriptions[12]+" "+RecordingDetail;

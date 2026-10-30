@@ -10,6 +10,7 @@ namespace RichAudio.Beacon.Windows
     {
         private readonly PcmRing ring;
         private readonly int deviceIndex;
+        private readonly bool calibratedGameplay;
         private readonly Thread thread;
         public OwnedOutputTap OwnedRecorder;
         private int startState, disposed;
@@ -27,14 +28,15 @@ namespace RichAudio.Beacon.Windows
         public volatile bool Started;
         public bool MmcssRegistered, MmcssReverted;
         public int MmcssError;
-        public float Volume { get { return volume; } set { if (float.IsNaN(value) || float.IsInfinity(value) || value < 0 || value > .25f) throw new ArgumentOutOfRangeException("volume"); volume = value; } }
-        public WasapiOutput(PcmRing ring, int index)
+        public float Volume { get { return volume; } set { if (float.IsNaN(value) || float.IsInfinity(value) || value < 0 || value > (calibratedGameplay?1:.25f)) throw new ArgumentOutOfRangeException("volume"); volume = value; } }
+        public WasapiOutput(PcmRing ring, int index,bool calibratedGameplay=false)
         {
             if(ring==null || index < -1)throw new ArgumentException("Invalid output ring or endpoint index");
-            this.ring = ring; deviceIndex = index; thread = new Thread(Run); thread.IsBackground = true; thread.Name = "RichAudio WASAPI output"; thread.SetApartmentState(ApartmentState.STA);
+            this.ring = ring; deviceIndex = index;this.calibratedGameplay=calibratedGameplay; thread = new Thread(Run); thread.IsBackground = true; thread.Name = "RichAudio WASAPI output"; thread.SetApartmentState(ApartmentState.STA);
         }
         public void Start() { if(Thread.VolatileRead(ref disposed)!=0 || Interlocked.CompareExchange(ref startState,1,0)!=0)throw new InvalidOperationException("Output requires a fresh host instance"); thread.Start(); }
         public void Stop() { Muted = true; stop = true; }
+        internal bool StopRequested { get { return stop; } }
         public long ConsumerFrame { get { return Interlocked.Read(ref ring.ConsumedFrames); } }
         public void Dispose() { if(Interlocked.Exchange(ref disposed,1)!=0)return; Stop(); if (thread.IsAlive && !thread.Join(3000)) throw new TimeoutException("Audio thread did not stop"); Ready.Dispose(); }
         public static string[] ListDevices()
@@ -117,7 +119,7 @@ namespace RichAudio.Beacon.Windows
             if (frames == 0 || stop) return; IntPtr data; Native.Check(renderer.GetBuffer(frames, out data));
             int captureSlot=-1;
             try {long underflow=ring.UnderflowFrames,endSilence=ring.EndSilenceFrames,producerStart=ring.ConsumedFrames-underflow-endSilence;
-                int supplied=ring.Fill((float*)data, (int)frames, Muted ? 0 : volume);
+                int supplied=calibratedGameplay?ring.FillCalibrated((float*)data,(int)frames,Muted?0:volume):ring.Fill((float*)data, (int)frames, Muted ? 0 : volume);
                 if(OwnedRecorder!=null)captureSlot=OwnedRecorder.Prepare((float*)data,(int)frames,SubmittedFrames,ring.ConsumedFrames,producerStart,supplied,ring.UnderflowFrames-underflow,ring.EndSilenceFrames-endSilence); }
             finally {try{Native.Check(renderer.ReleaseBuffer(frames, 0));}catch{if(OwnedRecorder!=null)OwnedRecorder.Cancel(captureSlot);throw;} }
             if(OwnedRecorder!=null)OwnedRecorder.Commit(captureSlot);

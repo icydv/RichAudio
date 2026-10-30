@@ -16,16 +16,17 @@ export function createStockVehiclePipeline(options = {}) {
 
 export class VehicleAcousticPipeline {
   constructor({ scene, sourceIds, quality = 'quality', acceleration = 'cpu', masterGain = 0.7,
-    directStem = false, sourcePressureGains = {} } = {}) {
+    directStem = false, sourcePressureGains = {}, continuousRates = false, controlFilter = null } = {}) {
     if (!(quality in qualityPresets)) throw Error('explicit acoustic quality required');
     this.simulation = new CausalSimulation(scene);
     this.backend = new AcousticAcceleration({ mode: acceleration });
     this.renderer = new StreamingRenderer({ sourceIds, maxPathsPerSource: qualityPresets[quality],
-      pathCapacityPerSource: 64, masterGain, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains });
+      pathCapacityPerSource: 64, masterGain, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains, continuousRates });
     this.directRenderer = directStem ? new StreamingRenderer({ sourceIds, maxPathsPerSource: 1,
       masterGain, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains }) : null;
     this.setQuality(quality);
     this.lastControl = null;
+    if(controlFilter!==null&&typeof controlFilter!=='function')throw Error('control filter required');this.controlFilter=controlFilter;
   }
   setQuality(quality) {
     if (!(quality in qualityPresets)) throw Error('explicit acoustic quality required');
@@ -38,7 +39,8 @@ export class VehicleAcousticPipeline {
   // Called on the source/control worker. GPU preparation is never in process().
   async prepare(snapshot, options = {}) {
     this.simulation.observe(snapshot);
-    const control = await this.simulation.updateAccelerated(snapshot.time, options, this.backend);
+    let control = await this.simulation.updateAccelerated(snapshot.time, options, this.backend);
+    if(this.controlFilter)control=this.controlFilter(control,this.renderer);
     this.renderer.accept(control);
     if (this.directRenderer) this.directRenderer.accept({ ...control, paths: control.paths.filter(p => p.order === 0) });
     this.lastControl = control;

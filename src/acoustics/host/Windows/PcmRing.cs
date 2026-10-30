@@ -28,8 +28,14 @@ namespace RichAudio.Beacon.Windows
             Thread.VolatileWrite(ref write, cursor + 1); return true;
         }
         public unsafe int Fill(float* output, int frames, float gain)
+        {return FillCore(output,frames,gain,.25f);}
+        // Gameplay PCM already has the explicit source/fleet headroom budget.
+        // Legacy audition API above retains its original .25 safety ceiling.
+        public unsafe int FillCalibrated(float* output,int frames,float gain)
+        {return FillCore(output,frames,gain,1);}
+        private unsafe int FillCore(float* output,int frames,float gain,float ceiling)
         {
-            if (output == null || frames < 0 || frames > 8192 || float.IsNaN(gain) || gain < 0 || gain > .25f) throw new ArgumentException("Output bounds");
+            if (output == null || frames < 0 || frames > 8192 || float.IsNaN(gain) || gain < 0 || gain > ceiling) throw new ArgumentException("Output bounds");
             int supplied = 0, missing = 0, afterEnd = 0;
             for (int f = 0; f < frames; f++)
             {

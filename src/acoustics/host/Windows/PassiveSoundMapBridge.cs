@@ -7,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Web.Script.Serialization;
+using RichAudio.Beacon.Transport;
 
 namespace RichAudio.Beacon.Windows
 {
@@ -22,10 +23,10 @@ namespace RichAudio.Beacon.Windows
         private readonly string pointer,session=Guid.NewGuid().ToString("N"),stream=Guid.NewGuid().ToString("N"),owner=Guid.NewGuid().ToString("N");
         private readonly AutoResetEvent wake=new AutoResetEvent(false);
         private Thread thread;private PassiveCameraSample latest;private int stopped,started,storyReady;
-        private InGameSettingsLink link;private Process service,window;private string url,token;private bool attempted;
+        private InGameSettingsLink link;private Process service,window;private string url,token;private bool attempted;private readonly bool useVisibility;private OwnedProcessJob job;
         private volatile string diagnostic="loading";private int sampleHz=20,enabled;private long accepted,expired;
         public string Diagnostic{get{return diagnostic;}}public int SampleHz{get{return Volatile.Read(ref sampleHz);}}public bool Enabled{get{return Volatile.Read(ref enabled)!=0;}}
-        public PassiveSoundMapBridge(string sidecar){pointer=sidecar;}
+        public PassiveSoundMapBridge(string sidecar,bool useSavedVisibility=false){pointer=sidecar;useVisibility=useSavedVisibility;}
         public void Start(){if(Interlocked.Exchange(ref started,1)!=0)throw new InvalidOperationException("Passive feed cannot restart");thread=new Thread(Run){IsBackground=true,Name="RichAudio passive camera transport"};thread.Start();}
         public void SetStoryReady(bool value){Volatile.Write(ref storyReady,value?1:0);Signal();}
         public void Publish(PassiveCameraSample sample){if(sample!=null&&Volatile.Read(ref stopped)==0){Interlocked.Exchange(ref latest,sample);Signal();}}
@@ -63,8 +64,8 @@ namespace RichAudio.Beacon.Windows
                 // PrivatePath verifies reparse containment; service code remains in the reviewed workspace.
                 AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,".local/soundmap/service.json");
                 InGameSettingsLink.LocalFile(script);if(!File.Exists(script))throw new InvalidDataException("Service script unavailable");
-                var start=new ProcessStartInfo(link.SoundMap.NodeExecutable,Quote(script)+" --root "+Quote(link.WorkspaceRoot)+" --port "+link.SoundMap.Port+" --owner "+owner){UseShellExecute=false,CreateNoWindow=true,WorkingDirectory=link.WorkspaceRoot};
-                service=Process.Start(start);long at=Stopwatch.GetTimestamp();
+                if(job==null)job=new OwnedProcessJob(1536);
+                service=job.Start(link.SoundMap.NodeExecutable,Quote(script)+" --root "+Quote(link.WorkspaceRoot)+" --port "+link.SoundMap.Port+" --owner "+owner,link.WorkspaceRoot);long at=Stopwatch.GetTimestamp();
                 while(Volatile.Read(ref stopped)==0&&!service.HasExited&&(Stopwatch.GetTimestamp()-at)/(double)Stopwatch.Frequency<3){if(Connect(true))break;wake.WaitOne(50);}
                 if(!Connect(true)){diagnostic="owned-service-start-failed";return;}
             }
@@ -77,7 +78,8 @@ namespace RichAudio.Beacon.Windows
                 // A fresh per-owner profile prevents Chromium singleton handoff
                 // to an earlier window whose lifetime we do not own.
                 string profile=AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,".local/soundmap/browser/"+owner+"/profile-marker");InGameSettingsLink.LocalFile(profile);Directory.CreateDirectory(Path.GetDirectoryName(profile));
-                window=Process.Start(new ProcessStartInfo(browser,"--app="+url+" --user-data-dir="+Quote(Path.GetDirectoryName(profile))+" --no-first-run --no-default-browser-check --window-size=1280,820"){UseShellExecute=false,CreateNoWindow=true});
+                if(job==null)job=new OwnedProcessJob(1536);
+                window=job.Start(browser,"--app="+url+" --user-data-dir="+Quote(Path.GetDirectoryName(profile))+" --no-first-run --no-default-browser-check --window-size=1280,820",link.WorkspaceRoot,true);
             }
         }
         private void Run()
@@ -89,6 +91,7 @@ namespace RichAudio.Beacon.Windows
                 diagnostic="waiting-story-mode";
                 long reconnectAt=0;
                 while(Volatile.Read(ref stopped)==0){
+                    if(useVisibility&&!AcousticSettingsStore.Load(link.WorkspaceRoot,link.SettingsPath).SoundMapVisible){if(attempted)CloseOwned();diagnostic="hidden";attempted=false;url=null;token=null;wake.WaitOne(200);continue;}
                     if(Volatile.Read(ref storyReady)!=0)EnsureService();
                     if(attempted&&url==null&&Stopwatch.GetTimestamp()>=reconnectAt){Connect(false);reconnectAt=Stopwatch.GetTimestamp()+Stopwatch.Frequency;}
                     var sample=Interlocked.Exchange(ref latest,null);
@@ -106,10 +109,14 @@ namespace RichAudio.Beacon.Windows
             }catch(Exception e){diagnostic="passive-failed-"+e.GetType().Name;}
             finally{
                 // Only the dedicated process/window and capability-owned service are stopped.
-                if(window!=null){try{if(!window.HasExited){window.CloseMainWindow();if(!window.WaitForExit(1000))window.Kill();}}catch{diagnostic="window-shutdown-failed";}finally{window.Dispose();}}
-                if(service!=null){try{if(!service.HasExited){if(Connect(true))Request("/api/service/stop",new{ownerId=owner});if(!service.WaitForExit(2000)){diagnostic="service-shutdown-timeout";service.Kill();service.WaitForExit(500);}}}catch{diagnostic="service-shutdown-failed";}finally{service.Dispose();}}
-                if(link!=null&&link.SoundMap.Enabled)try{string result=AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,".local/soundmap/passive-result.json");InGameSettingsLink.LocalFile(result);Directory.CreateDirectory(Path.GetDirectoryName(result));File.WriteAllText(result,new JavaScriptSerializer().Serialize(new{schemaVersion=1,kind="passive-listener",diagnostic=diagnostic,accepted=accepted,expired=expired,serviceOwned=service!=null,windowOwned=window!=null,audioOpened=false,sensingStarted=false,stopped=true}));}catch{diagnostic="passive-result-write-failed";}
+                bool serviceOwned=service!=null,windowOwned=window!=null;CloseOwned();
+                if(link!=null&&link.SoundMap.Enabled)try{string result=AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,".local/soundmap/passive-result.json");InGameSettingsLink.LocalFile(result);Directory.CreateDirectory(Path.GetDirectoryName(result));File.WriteAllText(result,new JavaScriptSerializer().Serialize(new{schemaVersion=1,kind="passive-listener",diagnostic=diagnostic,accepted=accepted,expired=expired,serviceOwned=serviceOwned,windowOwned=windowOwned,audioOpened=false,sensingStarted=false,stopped=true}));}catch{diagnostic="passive-result-write-failed";}
             }
+        }
+        private void CloseOwned(){
+            if(window!=null){try{if(!window.HasExited){window.CloseMainWindow();window.WaitForExit(500);}}catch{}finally{window.Dispose();window=null;}}
+            if(service!=null){try{if(!service.HasExited){if(Connect(true))Request("/api/service/stop",new{ownerId=owner});service.WaitForExit(500);}}catch{}finally{service.Dispose();service=null;}}
+            if(job!=null){job.Dispose();job=null;}
         }
         public void Dispose(){RequestStop();var worker=thread;if(worker!=null&&worker!=Thread.CurrentThread&&!worker.Join(6500))throw new TimeoutException("Passive worker still owns resources");wake.Dispose();}
     }

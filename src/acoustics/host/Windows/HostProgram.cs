@@ -43,12 +43,17 @@ namespace RichAudio.Beacon.Windows
 #endif
         private static WasapiOutput output;
         private static readonly List<string> rendererLog = new List<string>();
+        private static string overflowRendererBlock,overflowRendererFinal;
         private static long droppedLogLines, receivedBlocks, rejectedBlocks,drainedShutdownBlocks;
+        private static readonly long[] pcmQueueBlocks=new long[PcmRing.Slots+1];
+        private static long pcmQueueSamples;
+        private static double maximumCommandQueueAgeMs;
         private static readonly JavaScriptSerializer json = new JavaScriptSerializer { MaxJsonLength = 65536, RecursionLimit = 16 };
 
         [STAThread]
         public static int Main(string[] args)
         {
+            if(args.Length>0&&(args[0]=="--gameplay"||args[0]=="--gameplay-fixture"))return GameplayHost.Run(args);
             if(args.Length==1 && (args[0]=="--help" || args[0]=="-h"))
             {
                 Console.WriteLine("RichAudio Windows host\n"+
@@ -227,6 +232,8 @@ namespace RichAudio.Beacon.Windows
                 bool didMute = false, didResume = false, didEmitStop = false; double drainStart = -1;
                 while (!stop && wall.Elapsed.TotalSeconds < seconds)
                 {
+                    // Main-loop telemetry only: no work or allocation added to Fill.
+                    int queuedBlocks=ring.Count;if(queuedBlocks>=0&&queuedBlocks<pcmQueueBlocks.Length){pcmQueueBlocks[queuedBlocks]++;pcmQueueSamples++;}
                     if(output.Error!=null){RecordFailure("audio-output",output.Error);audioErrorReported=true;break;}if(producerError!=null)break;
                     ConsumeListeningFixture(ring,ownedRecorder);
                     int credits = ring.TakeCredits(); if (credits != 0 && child != null && !producerEnded) Send("{\"type\":\"credit\",\"blocks\":" + credits + "}");
@@ -287,13 +294,15 @@ namespace RichAudio.Beacon.Windows
                 result["beaconFrequencyHz"] = beaconFrequencyHz;
                 result["beaconLevel"] = beaconLevel;
                 result["beaconOutputTrimDb"]=auditionOutputEnabled?12:0;
+                result["pcmQueue"]=new Dictionary<string,object>{{"samples",pcmQueueSamples},{"blockHistogram",pcmQueueBlocks},{"blockFrames",512},{"sampleRate",48000},{"initialCredits",4},{"ringCapacityBlocks",PcmRing.Slots},
+                    {"measurementScope","Main-loop concurrent SPSC snapshots; each occupied block contains 1..512 remaining frames; startup and terminal empty samples retained. No endpoint presentation latency claim."}};
                 result["ownedRecorder"] = ownedRecorder==null?null:ownedRecorder.Metrics();
                 if(acousticSettingsMonitor!=null)result["acousticSettings"]=acousticSettingsMonitor.Metrics();
 #if GEOMETRY_LIVE
                 if(geometryRelay!=null){result["geometryRelay"]=geometryRelay.Metrics();var rejected=geometryRelay.RejectedEvidence();if(rejected!=null)
                     using(var file=new FileStream(Path.Combine(directory,"geometry-rejected.bin"),FileMode.CreateNew,FileAccess.Write))file.Write(rejected,0,rejected.Length);}
 #endif
-                result["listenerForwarding"]=new Dictionary<string,object>{{"written",listenerMessagesWritten},{"maxHostQueueAgeMs",maxListenerHostQueueAgeMs},{"first128Receipts",listenerReceipts},{"remainingClockUncertainty","Anonymous-pipe transit after write plus Windows device buffering are separate from acoustic delay"}};
+                result["listenerForwarding"]=new Dictionary<string,object>{{"written",listenerMessagesWritten},{"maxHostQueueAgeMs",maxListenerHostQueueAgeMs},{"first128Receipts",listenerReceipts},{"maximumCommandQueueAgeMs",maximumCommandQueueAgeMs},{"maximumControlWriteMs",maximumControlWriteMs},{"controlQueueHigh",controlQueueHigh},{"remainingClockUncertainty","Anonymous-pipe transit after write plus Windows device buffering are separate from acoustic delay"}};
 #if STATE_TRANSPORT
                 if (pipe != null) result["transport"] = new Dictionary<string,object>{{"accepted",pipe.Accepted},{"rejected",pipe.Rejected},{"startupDiscarded",pipe.StartupDiscarded},{"shutdownCompleted",pipe.ShutdownCompleted},{"connections",pipe.Connections},{"lastAgeMs",pipe.Accepted>0?(object)pipe.LastAgeMs:null},{"error",pipe.Error},{"diagnostic",pipe.Diagnostic},{"strict",true},{"outputMuted",output==null||output.Muted},{"hostStopped",stop}};
 #endif
@@ -321,8 +330,10 @@ namespace RichAudio.Beacon.Windows
             Enqueue(new ControlMessage{ListenerJson=Protocol.EncodeJson(state),ObservationTicks=state.ObservationTicks,QueuedTicks=Stopwatch.GetTimestamp(),Sequence=state.Sequence,ObservationQpc100ns=state.ObservationTicks*(10000000.0/state.ClockFrequency)});}
         internal static void ListenerEnded(TransportResult ending){
             if(output!=null)output.Stop();
+            long fixtureCompletedAtRequest=listeningFixture?Interlocked.Read(ref fixtureSinkFrames):0;
             listenerTerminalBoundary=new Dictionary<string,object>{{"qpcTicks",Stopwatch.GetTimestamp()},{"qpcFrequency",Stopwatch.Frequency},
                 {"consumedFrame",output==null?0:output.ConsumerFrame},{"outputMuted",output==null||output.Muted},{"outputStopRequested",true}};
+            if(listeningFixture){listenerTerminalBoundary["fixtureCompletedFrames"]=fixtureCompletedAtRequest;listenerTerminalBoundary["fixtureSubmissionFrames"]=512;}
             listenerTerminal=ending;if(ending.Outcome!="deliberate-stop")RecordFailure("listener-terminal","Listener terminal: "+ending.Stage+"/"+ending.Code);stop=true;Console.WriteLine("Listener terminal "+json.Serialize(ending)+"; owned output muted/stopping");}
         private static void Control(string command)
         {
@@ -364,8 +375,21 @@ namespace RichAudio.Beacon.Windows
             if(!overlong&&geometryRelay!=null)geometryRelay.Diagnostic(line);
 #endif
             if(!overlong && line.StartsWith("{\"type\":\"status\",",StringComparison.Ordinal))latestRendererStatus=line;
-            lock(logLock){if(!overlong&&rendererLog.Count<4096)rendererLog.Add(line);else droppedLogLines++;}
+            lock(logLock){
+                if(overlong){droppedLogLines++;return;}
+                if(rendererLog.Count<4094){rendererLog.Add(line);return;}
+                // Reserve the existing bound's final two slots for actual last
+                // progress and the first terminal record. Long trace fixtures
+                // must not lose the precise guard result after the prefix fills.
+                if(line.StartsWith("{\"type\":\"final\",",StringComparison.Ordinal)){
+                    if(overflowRendererFinal==null)overflowRendererFinal=line;else droppedLogLines++;
+                }else if(line.StartsWith("{\"type\":\"block\",",StringComparison.Ordinal)){
+                    if(overflowRendererBlock!=null)droppedLogLines++;overflowRendererBlock=line;
+                }else droppedLogLines++;
+            }
         }
+        internal static string[] RendererDiagnosticsSnapshot(){lock(logLock){
+            var retained=new List<string>(rendererLog);if(overflowRendererBlock!=null)retained.Add(overflowRendererBlock);if(overflowRendererFinal!=null)retained.Add(overflowRendererFinal);return retained.ToArray();}}
         private static void Send(string message)
         {
             if (child == null) return;
@@ -394,6 +418,7 @@ namespace RichAudio.Beacon.Windows
                 {
                     ControlMessage message=null;lock(inputLock){if(inputQueue.Count>0)message=inputQueue.Dequeue();}
                     if(message==null){inputSignal.WaitOne(50);continue;}
+                    maximumCommandQueueAgeMs=Math.Max(maximumCommandQueueAgeMs,(Stopwatch.GetTimestamp()-message.QueuedTicks)*1000.0/Stopwatch.Frequency);
                     string text=message.Text;
                     if(message.ListenerJson!=null)
                     {
