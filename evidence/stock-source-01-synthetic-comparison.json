@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "milestone": "STOCK-SOURCE-01",
+  "comparison": "Different complete demonstrations, not a controlled A/B",
+  "subjectiveListening": "not performed",
+  "method": "Stereo RMS averages both channel energies without mono downmix. Peak is largest absolute channel sample. Maximum50ms RMS uses a one-sample sliding hop. Mean-removed Welch PSD per channel, averaged channel powers;8192-frame Hann segments,50%overlap;discrete bin power integration. No output normalization or audio modifications.",
+  "caveats": [
+    "The earlier synthetic V12 dynamic demonstration and new genuine-stock X80 demonstration use different source material and reconstruction; eight original synthesis layers versus two spatial engine/exhaust emitters.",
+    "Duration, vehicle motion, operating state, emitter placement and gain staging differ. This is not the VEHICLE-REFERENCE-03 controlled constant-versus-dynamic pair.",
+    "Differences cannot be attributed to one scalar calibration or source substitution alone.",
+    "Authored near centres are5.55s(previous event report) and5.3s(new scenario);400ms EBU frames are approximate100ms-log-aligned receiver windows.",
+    "Digital file levels are not physical SPL and do not establish perceived realism, physical size, impact or success."
+  ],
+  "results": [
+    {
+      "label": "previousSyntheticDynamic",
+      "wavSha256": "C57D91E0F2A574B4486868DE3D83629432700CA76F55FF2B706525453B7002D8",
+      "sampleRate": 48000,
+      "channels": 2,
+      "frames": 489600,
+      "durationSeconds": 10.2,
+      "authoredNearCentreSeconds": 5.55,
+      "rms": 0.0011064487902926311,
+      "rmsDbfs": -59.12137363397514,
+      "peak": 0.027865173295140266,
+      "peakDbfs": -31.098765033932665,
+      "crestDb": 28.02260860004248,
+      "welchBandPower": {
+        "20-500Hz": 7.976459728743889e-07,
+        "500-2000Hz": 3.5838388664791554e-07,
+        "2000-6000Hz": 7.891522639565916e-08,
+        "6000-20000Hz": 4.299686461263413e-09
+      },
+      "welchBandRmsDbfs": {
+        "20-500Hz": -60.98189823113799,
+        "500-2000Hz": -64.4565152495079,
+        "2000-6000Hz": -71.02839193221233,
+        "6000-20000Hz": -83.66563212585022
+      },
+      "bandPowerFractions": {
+        "20-500Hz": 0.6436549022861622,
+        "500-2000Hz": 0.28919539919450615,
+        "2000-6000Hz": 0.06368009626068442,
+        "6000-20000Hz": 0.0034696022586469663
+      },
+      "finite": true,
+      "samplesAtOrAboveFullScale": 0,
+      "maximum50msRms": {
+        "rms": 0.00740247292095462,
+        "rmsDbfs": -42.612463452637485,
+        "startSeconds": 5.510770833333333,
+        "endSeconds": 5.560770833333334,
+        "hopFrames": 1
+      },
+      "near400ms": {
+        "startSeconds": 5.35,
+        "endSeconds": 5.75,
+        "rms": 0.005052167728712825,
+        "rmsDbfs": -45.93044479160872,
+        "peak": 0.027865173295140266,
+        "peakDbfs": -31.098765033932665,
+        "crestDb": 14.83167975767605,
+        "welchBandPower": {
+          "20-500Hz": 2.2275129367101923e-05,
+          "500-2000Hz": 1.0220177129307502e-05,
+          "2000-6000Hz": 1.872961486663236e-06,
+          "6000-20000Hz": 1.0601089919997741e-07
+        },
+        "welchBandRmsDbfs": {
+          "20-500Hz": -46.52179765034955,
+          "500-2000Hz": -49.905415772331835,
+          "2000-6000Hz": -57.27471152844519,
+          "6000-20000Hz": -69.74649481725132
+        },
+        "bandPowerFractions": {
+          "20-500Hz": 0.6461376449140532,
+          "500-2000Hz": 0.2964580394620791,
+          "2000-6000Hz": 0.05432924334862158,
+          "6000-20000Hz": 0.003075072275246063
+        },
+        "finite": true,
+        "samplesAtOrAboveFullScale": 0
+      },
+      "loudness": {
+        "integratedLufs": -48.4,
+        "maximumMomentary400msLufs": -43.2,
+        "nearMomentary400msLufs": -43.2,
+        "nearMomentaryWindowStartSeconds": 5.399979,
+        "nearMomentaryWindowEndSeconds": 5.799979,
+        "method": "FFmpeg EBU R128; near momentary selects nearest 100ms logged frame to authored near centre plus200ms. No playback."
+      }
+    },
+    {
+      "label": "stockX80Flyby",
+      "wavSha256": "CC071B5702423F256FD9C653914A0838106891DC8FB27BF8EC85E788B11825A1",
+      "sampleRate": 48000,
+      "channels": 2,
+      "frames": 494400,
+      "durationSeconds": 10.3,
+      "authoredNearCentreSeconds": 5.3,
+      "rms": 0.006122887658075145,
+      "rmsDbfs": -44.26087417736615,
+      "peak": 0.16327086091041565,
+      "peakDbfs": -15.741826345072695,
+      "crestDb": 28.519047832293456,
+      "welchBandPower": {
+        "20-500Hz": 5.074831370669372e-06,
+        "500-2000Hz": 2.8695077495224236e-05,
+        "2000-6000Hz": 3.262746208741033e-06,
+        "6000-20000Hz": 9.947496297333411e-07
+      },
+      "welchBandRmsDbfs": {
+        "20-500Hz": -52.94578384154554,
+        "500-2000Hz": -45.42192598040117,
+        "2000-6000Hz": -54.86416706300978,
+        "6000-20000Hz": -60.02286213835052
+      },
+      "bandPowerFractions": {
+        "20-500Hz": 0.13345195156288056,
+        "500-2000Hz": 0.7545894261863262,
+        "2000-6000Hz": 0.08579986549453535,
+        "6000-20000Hz": 0.026158756756257947
+      },
+      "finite": true,
+      "samplesAtOrAboveFullScale": 0,
+      "maximum50msRms": {
+        "rms": 0.05068655227305006,
+        "rmsDbfs": -25.902144974392836,
+        "startSeconds": 5.321354166666667,
+        "endSeconds": 5.371354166666666,
+        "hopFrames": 1
+      },
+      "near400ms": {
+        "startSeconds": 5.1,
+        "endSeconds": 5.5,
+        "rms": 0.028890536120848034,
+        "rmsDbfs": -30.784887977816254,
+        "peak": 0.16327086091041565,
+        "peakDbfs": -15.741826345072695,
+        "crestDb": 15.043061632743557,
+        "welchBandPower": {
+          "20-500Hz": 0.00010501313823200383,
+          "500-2000Hz": 0.00083913550114935,
+          "2000-6000Hz": 9.717116404241327e-05,
+          "6000-20000Hz": 3.0094932612299565e-05
+        },
+        "welchBandRmsDbfs": {
+          "20-500Hz": -39.787563627899175,
+          "500-2000Hz": -30.761679049043806,
+          "2000-6000Hz": -40.12462594695613,
+          "6000-20000Hz": -45.21506624797713
+        },
+        "bandPowerFractions": {
+          "20-500Hz": 0.09801352800179221,
+          "500-2000Hz": 0.7832032479354497,
+          "2000-6000Hz": 0.09069425757752714,
+          "6000-20000Hz": 0.02808896648523088
+        },
+        "finite": true,
+        "samplesAtOrAboveFullScale": 0
+      },
+      "loudness": {
+        "integratedLufs": -34.1,
+        "maximumMomentary400msLufs": -27.2,
+        "nearMomentary400msLufs": -27.2,
+        "nearMomentaryWindowStartSeconds": 5.099978999999999,
+        "nearMomentaryWindowEndSeconds": 5.499979,
+        "method": "FFmpeg EBU R128; near momentary selects nearest 100ms logged frame to authored near centre plus200ms. No playback."
+      }
+    }
+  ],
+  "newMinusPrevious": {
+    "wholeRmsDb": 14.860499456608991,
+    "peakDb": 15.35693868885997,
+    "maximum50msRmsDb": 16.71031847824465,
+    "near400msRmsDb": 15.145556813792467,
+    "nearMomentary400msLu": 16.000000000000004,
+    "wholeWelchBandRmsDb": {
+      "20-500Hz": 8.036114389592449,
+      "500-2000Hz": 19.034589269106732,
+      "2000-6000Hz": 16.16422486920255,
+      "6000-20000Hz": 23.642769987499705
+    }
+  }
+}

@@ -1,0 +1,761 @@
+{
+  "schemaVersion": 1,
+  "milestone": "STOCK-SOURCE-01",
+  "models": [
+    {
+      "model": "bati",
+      "identifierVerified": true,
+      "vehicleMetadata": [
+        {
+          "path": "common.rpf\\data\\levels\\gta5\\vehicles.meta",
+          "modelName": "bati",
+          "audioNameHash": "",
+          "gameName": "BATI",
+          "vehicleClass": "VC_MOTORCYCLE",
+          "xmlSHA256": "21B5B06EEE0E607BB6D716EB212236A5FD39FD1A7F861F5F3827C50626342F80"
+        },
+        {
+          "path": "update\\update.rpf\\common\\data\\levels\\gta5\\vehicles.meta",
+          "modelName": "bati",
+          "audioNameHash": "",
+          "gameName": "BATI",
+          "vehicleClass": "VC_MOTORCYCLE",
+          "xmlSHA256": "B424F1AE49B351407D5DEF137D4083C7371094640DCC66DE73DB5121A99DEF67"
+        }
+      ],
+      "selectionBasis": "audioNameHash is empty in all inspected model declarations; model-hash fallback inferred, exact matching Vehicle record verified",
+      "gameMetadata": {
+        "path": "update\\update.rpf\\x64\\audio\\config\\game.dat151.rel",
+        "sha256": "ED3B7926736330346E1D71AFD8CECF1FAB9AD7654238EAD45F2C3E9B82070F39",
+        "vehicleRecord": "hash_F9300CC5",
+        "engineRecord": "hash_A46D1B50",
+        "granularRecord": "hash_61F3BD06"
+      },
+      "soundMetadata": {
+        "path": "update\\update.rpf\\x64\\audio\\config\\sounds.dat54.rel",
+        "sha256": "F0E21545CBB6C16C635721AC321797C8564EC9968B01902E5BC9CE0B0242383F",
+        "playerGranularSound": "hash_0346A636",
+        "exhaustSound": "hash_411A8C83",
+        "exhaustType": "EnvironmentSound",
+        "exhaustChannelID": "1",
+        "channelBinding": "EnvironmentSound channel1 binding is parser-supported inference, not observed native voice routing"
+      },
+      "channels": [
+        {
+          "channel": "Channel0",
+          "containerHash": "hash_8B2BACBC",
+          "stream": "engine_accel",
+          "awc": "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+          "hashInput": "streamed_vehicles_granular/v_twin_2"
+        },
+        {
+          "channel": "Channel1",
+          "containerHash": "hash_8B2BACBC",
+          "stream": "exhaust_accel",
+          "awc": "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+          "hashInput": "streamed_vehicles_granular/v_twin_2"
+        },
+        {
+          "channel": "Channel2",
+          "containerHash": "hash_8B2BACBC",
+          "stream": "engine_decel",
+          "awc": "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+          "hashInput": "streamed_vehicles_granular/v_twin_2"
+        },
+        {
+          "channel": "Channel3",
+          "containerHash": "hash_8B2BACBC",
+          "stream": "exhaust_decel",
+          "awc": "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+          "hashInput": "streamed_vehicles_granular/v_twin_2"
+        },
+        {
+          "channel": "Channel4",
+          "containerHash": "hash_8B2BACBC",
+          "stream": "engine_idle",
+          "awc": "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+          "hashInput": "streamed_vehicles_granular/v_twin_2"
+        },
+        {
+          "channel": "Channel5",
+          "containerHash": "hash_8B2BACBC",
+          "stream": "exhaust_idle",
+          "awc": "x64\\audio\\sfx\\streamed_vehicles_granular.rpf\\v_twin_2.awc",
+          "hashInput": "streamed_vehicles_granular/v_twin_2"
+        }
+      ],
+      "conventionalEngineFields": {
+        "EngineLow": "hash_FC59AC21",
+        "EngineHigh": "hash_1C4C2592",
+        "ExhaustLow": "hash_66BCA37F",
+        "ExhaustHigh": "hash_FCE37F79",
+        "EngineIdleLoop": "hash_7C64E0F2",
+        "ExhaustIdleLoop": "hash_380E72B5",
+        "RevsOff": "hash_816FBBFE",
+        "Transmission": "hash_699D9F91",
+        "Ignition": "hash_9194DD86",
+        "ShutDown": "hash_0CCA5B4E",
+        "ExhaustPops": "null_sound"
+      },
+      "rawGranularLevels": {
+        "MasterVolume": "0",
+        "EngineVolume": "600",
+        "ExhaustVolume": "800",
+        "EngineIdleVolume": "0",
+        "ExhaustIdleVolume": "0",
+        "EngineAccelVolume": "0",
+        "ExhaustAccelVolume": "500"
+      },
+      "rawChannelLevels": {
+        "ChannelVolume0": "0",
+        "ChannelVolume1": "0",
+        "ChannelVolume2": "0",
+        "ChannelVolume3": "0",
+        "ChannelVolume4": "-800",
+        "ChannelVolume5": "0"
+      },
+      "granularClockRaw": "12, 50\n    11, 11",
+      "metadataSemantics": "Raw numeric fields are CodeWalker parser labels; gain units, GranularClock mapping and native granular playback schedule are not established and are not applied as invented dB/RPM values",
+      "mount": null,
+      "electricEngineReference": "",
+      "kers": null,
+      "runtimeSelectionObserved": false
+    },
+    {
+      "model": "lectro",
+      "identifierVerified": true,
+      "vehicleMetadata": [
+        {
+          "path": "update\\update.rpf\\dlc_patch\\mpheist\\common\\data\\levels\\gta5\\vehicles.meta",
+          "modelName": "lectro",
+          "audioNameHash": "",
+          "gameName": "LECTRO",
+          "vehicleClass": "VC_MOTORCYCLE",
+          "xmlSHA256": "1F6FD5C3A3AD45ACDD9957067743EF5CBD24FA96D56E364B82CAB0490E053CEB"
+        },
+        {
+          "path": "update\\x64\\dlcpacks\\mpheist\\dlc.rpf\\common\\data\\levels\\gta5\\vehicles.meta",
+          "modelName": "lectro",
+          "audioNameHash": "",
+          "gameName": "LECTRO",
+          "vehicleClass": "VC_MOTORCYCLE",
+          "xmlSHA256": "AA96E3F45E01C6F1E1BF81488E353761B415973C0F9E343626191D00BDA1BF25"
+        }
+      ],
+      "selectionBasis": "audioNameHash is empty in all inspected model declarations; model-hash fallback inferred, exact matching Vehicle record verified",
+      "gameMetadata": {
+        "path": "update\\x64\\dlcpacks\\mpheist\\dlc.rpf\\x64\\audio\\dlcmpheist_game.dat151.rel",
+        "sha256": "181A8C474DE162C97DAC84DA0264B94CD42D5B35E9D30AA152235FC0A8898B9C",
+        "vehicleRecord": "hash_26321E67",
+        "engineRecord": "hash_33891FA1",
+        "granularRecord": "hash_4E160836"
+      },
+      "soundMetadata": {
+        "path": "update\\x64\\dlcpacks\\mpheist\\dlc.rpf\\x64\\audio\\dlcmpheist_sounds.dat54.rel",
+        "sha256": "E3DFC836365544DBB9D9D04B93BB79BAE927862476D3A96E478D71EF29662E2B",
+        "playerGranularSound": "hash_AB64AE1F",
+        "exhaustSound": "hash_7E240436",
+        "exhaustType": "EnvironmentSound",
+        "exhaustChannelID": "1",
+        "channelBinding": "EnvironmentSound channel1 binding is parser-supported inference, not observed native voice routing"
+      },
+      "channels": [
+        {
+          "channel": "Channel0",
+          "containerHash": "hash_1E827720",
+          "stream": "engine_accel",
+          "awc": "update\\x64\\dlcpacks\\mpheist\\dlc.rpf\\x64\\audio\\sfx\\dlc_mpheist\\lectro.awc",
+          "hashInput": "dlc_mpheist/lectro"
+        },
+        {
+          "channel": "Channel1",
+          "containerHash": "hash_1E827720",
+          "stream": "exhaust_accel",
+          "awc": "update\\x64\\dlcpacks\\mpheist\\dlc.rpf\\x64\\audio\\sfx\\dlc_mpheist\\lectro.awc",
+          "hashInput": "dlc_mpheist/lectro"
+        },
+        {
+          "channel": "Channel2",
+          "containerHash": "hash_1E827720",
+          "stream": "engine_decel",
+          "awc": "update\\x64\\dlcpacks\\mpheist\\dlc.rpf\\x64\\audio\\sfx\\dlc_mpheist\\lectro.awc",
+          "hashInput": "dlc_mpheist/lectro"
+        },
+        {
+          "channel": "Channel3",
+          "containerHash": "hash_1E827720",
+          "stream": "exhaust_decel",
+          "awc": "update\\x64\\dlcpacks\\mpheist\\dlc.rpf\\x64\\audio\\sfx\\dlc_mpheist\\lectro.awc",
+          "hashInput": "dlc_mpheist/lectro"
+        },
+        {
+          "channel": "Channel4",
+          "containerHash": "hash_1E827720",
+          "stream": "engine_idle",
+          "awc": "update\\x64\\dlcpacks\\mpheist\\dlc.rpf\\x64\\audio\\sfx\\dlc_mpheist\\lectro.awc",
+          "hashInput": "dlc_mpheist/lectro"
+        },
+        {
+          "channel": "Channel5",
+          "containerHash": "hash_1E827720",
+          "stream": "exhaust_idle",
+          "awc": "update\\x64\\dlcpacks\\mpheist\\dlc.rpf\\x64\\audio\\sfx\\dlc_mpheist\\lectro.awc",
+          "hashInput": "dlc_mpheist/lectro"
+        }
+      ],
+      "conventionalEngineFields": {
+        "EngineLow": "hash_FC59AC21",
+        "EngineHigh": "hash_1C4C2592",
+        "ExhaustLow": "hash_66BCA37F",
+        "ExhaustHigh": "hash_FCE37F79",
+        "EngineIdleLoop": "hash_7C64E0F2",
+        "ExhaustIdleLoop": "hash_380E72B5",
+        "RevsOff": "hash_816FBBFE",
+        "Transmission": "hash_699D9F91",
+        "Ignition": "hash_9194DD86",
+        "ShutDown": "hash_67D0A570",
+        "ExhaustPops": "null_sound"
+      },
+      "rawGranularLevels": {
+        "MasterVolume": "0",
+        "EngineVolume": "400",
+        "ExhaustVolume": "500",
+        "EngineIdleVolume": "0",
+        "ExhaustIdleVolume": "0",
+        "EngineAccelVolume": "0",
+        "ExhaustAccelVolume": "200"
+      },
+      "rawChannelLevels": {
+        "ChannelVolume0": "0",
+        "ChannelVolume1": "0",
+        "ChannelVolume2": "200",
+        "ChannelVolume3": "200",
+        "ChannelVolume4": "-1000",
+        "ChannelVolume5": "200"
+      },
+      "granularClockRaw": "12, 46\n    16, 16",
+      "metadataSemantics": "Raw numeric fields are CodeWalker parser labels; gain units, GranularClock mapping and native granular playback schedule are not established and are not applied as invented dB/RPM values",
+      "mount": {
+        "pack": "mpheist",
+        "dlclistZeroBasedIndex": 10,
+        "device": "dlcMPHeist",
+        "declaredOrder": "10",
+        "updatePatchDeclarations": [
+          {
+            "filename": "dlcMPHeistCRC:/common/data/levels/gta5/vehicles.meta",
+            "fileType": "VEHICLE_METADATA_FILE",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlcMPHeist:/%PLATFORM%/audio/dlcmpheist_game.dat",
+            "fileType": "AUDIO_GAMEDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlcMPHeist:/%PLATFORM%/audio/sfx/dlc_mpheist",
+            "fileType": "AUDIO_WAVEPACK",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlcMPHeist:/%PLATFORM%/audio/dlcmpheist_mix.dat",
+            "fileType": "AUDIO_DYNAMIXDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlcMPHeist:/%PLATFORM%/audio/dlcmpheist_sounds.dat",
+            "fileType": "AUDIO_SOUNDDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlcMPHeist:/%PLATFORM%/audio/dlcmpheist_speech.dat",
+            "fileType": "AUDIO_SPEECHDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlcMPHeist:/%PLATFORM%/audio/dlcmpheist_amp.dat",
+            "fileType": "AUDIO_SYNTHDATA",
+            "initialDisabled": "true"
+          }
+        ],
+        "interpretation": "Declared metadata and audio wavepack routes verified; changeset activation and runtime registration not emulated. initialDisabled is not a claim that runtime audio is disabled."
+      },
+      "electricEngineReference": "",
+      "kers": {
+        "verifiedSeparateAudio": false,
+        "status": "unsupported-unverified",
+        "basis": "Conventional engine/exhaust references verified; ElectricEngine empty. No KERS/boost label or explicit reference to extra AWC hashes08894BE2/1B393DEA/1D64B840 found in this vehicle sound graph. Unknown fields are not assigned KERS semantics."
+      },
+      "runtimeSelectionObserved": false
+    },
+    {
+      "model": "prototipo",
+      "identifierVerified": true,
+      "vehicleMetadata": [
+        {
+          "path": "update\\update.rpf\\dlc_patch\\mpexecutive\\common\\data\\levels\\gta5\\vehicles.meta",
+          "modelName": "prototipo",
+          "audioNameHash": "",
+          "gameName": "PROTOTIPO",
+          "vehicleClass": "VC_SUPER",
+          "xmlSHA256": "B57D97E4866289E1285D94AE3E3813DC66D515815FE5B618F022ED37154AE0DC"
+        },
+        {
+          "path": "update\\x64\\dlcpacks\\mpexecutive\\dlc.rpf\\common\\data\\levels\\gta5\\vehicles.meta",
+          "modelName": "prototipo",
+          "audioNameHash": "",
+          "gameName": "PROTOTIPO",
+          "vehicleClass": "VC_SUPER",
+          "xmlSHA256": "7D18F0C91B686484134807FE68C9727445493D1F5B81358E8DC2EFADB1F14380"
+        }
+      ],
+      "selectionBasis": "audioNameHash is empty in all inspected model declarations; model-hash fallback inferred, exact matching Vehicle record verified",
+      "gameMetadata": {
+        "path": "update\\x64\\dlcpacks\\mpexecutive\\dlc.rpf\\x64\\audio\\dlcexec1_game.dat151.rel",
+        "sha256": "B67F6C3A6D5EED49BBFAF6BF5E2A58275D8B9224C30020E2308C88571D70D897",
+        "vehicleRecord": "hash_7E8F677F",
+        "engineRecord": "hash_C0FC8028",
+        "granularRecord": "hash_C1CDF10D"
+      },
+      "soundMetadata": {
+        "path": "update\\x64\\dlcpacks\\mpexecutive\\dlc.rpf\\x64\\audio\\dlcexec1_sounds.dat54.rel",
+        "sha256": "DA5A1B0B0CE653CB6F577F42B822D76D96C44BC6FFFCEDB2778F43057390CEC6",
+        "playerGranularSound": "hash_4BB86B31",
+        "exhaustSound": "hash_60C52598",
+        "exhaustType": "EnvironmentSound",
+        "exhaustChannelID": "1",
+        "channelBinding": "EnvironmentSound channel1 binding is parser-supported inference, not observed native voice routing"
+      },
+      "channels": [
+        {
+          "channel": "Channel0",
+          "containerHash": "hash_41CA753A",
+          "stream": "engine_accel",
+          "awc": "update\\x64\\dlcpacks\\mpexecutive\\dlc.rpf\\x64\\audio\\sfx\\dlc_exec1\\prototipo.awc",
+          "hashInput": "dlc_exec1/prototipo"
+        },
+        {
+          "channel": "Channel1",
+          "containerHash": "hash_41CA753A",
+          "stream": "exhaust_accel",
+          "awc": "update\\x64\\dlcpacks\\mpexecutive\\dlc.rpf\\x64\\audio\\sfx\\dlc_exec1\\prototipo.awc",
+          "hashInput": "dlc_exec1/prototipo"
+        },
+        {
+          "channel": "Channel2",
+          "containerHash": "hash_41CA753A",
+          "stream": "engine_decel",
+          "awc": "update\\x64\\dlcpacks\\mpexecutive\\dlc.rpf\\x64\\audio\\sfx\\dlc_exec1\\prototipo.awc",
+          "hashInput": "dlc_exec1/prototipo"
+        },
+        {
+          "channel": "Channel3",
+          "containerHash": "hash_41CA753A",
+          "stream": "exhaust_decel",
+          "awc": "update\\x64\\dlcpacks\\mpexecutive\\dlc.rpf\\x64\\audio\\sfx\\dlc_exec1\\prototipo.awc",
+          "hashInput": "dlc_exec1/prototipo"
+        },
+        {
+          "channel": "Channel4",
+          "containerHash": "hash_41CA753A",
+          "stream": "engine_idle",
+          "awc": "update\\x64\\dlcpacks\\mpexecutive\\dlc.rpf\\x64\\audio\\sfx\\dlc_exec1\\prototipo.awc",
+          "hashInput": "dlc_exec1/prototipo"
+        },
+        {
+          "channel": "Channel5",
+          "containerHash": "hash_41CA753A",
+          "stream": "exhaust_idle",
+          "awc": "update\\x64\\dlcpacks\\mpexecutive\\dlc.rpf\\x64\\audio\\sfx\\dlc_exec1\\prototipo.awc",
+          "hashInput": "dlc_exec1/prototipo"
+        }
+      ],
+      "conventionalEngineFields": {
+        "EngineLow": "hash_01F352B6",
+        "EngineHigh": "hash_AAEBF718",
+        "ExhaustLow": "hash_5A07A6D5",
+        "ExhaustHigh": "hash_5DBBF68D",
+        "EngineIdleLoop": "hash_538C2706",
+        "ExhaustIdleLoop": "hash_40107EA9",
+        "RevsOff": "hash_86E7AD94",
+        "Transmission": "hash_45E9C10E",
+        "Ignition": "hash_BA3992C8",
+        "ShutDown": "hash_C87BA1D4",
+        "ExhaustPops": "hash_4DFBD9EB"
+      },
+      "rawGranularLevels": {
+        "MasterVolume": "-300",
+        "EngineVolume": "600",
+        "ExhaustVolume": "500",
+        "EngineIdleVolume": "0",
+        "ExhaustIdleVolume": "-100",
+        "EngineAccelVolume": "300",
+        "ExhaustAccelVolume": "200"
+      },
+      "rawChannelLevels": {
+        "ChannelVolume0": "-500",
+        "ChannelVolume1": "-500",
+        "ChannelVolume2": "-700",
+        "ChannelVolume3": "0",
+        "ChannelVolume4": "-500",
+        "ChannelVolume5": "-500"
+      },
+      "granularClockRaw": "10, 53\n    11.05, 11.05",
+      "metadataSemantics": "Raw numeric fields are CodeWalker parser labels; gain units, GranularClock mapping and native granular playback schedule are not established and are not applied as invented dB/RPM values",
+      "mount": {
+        "pack": "mpexecutive",
+        "dlclistZeroBasedIndex": 32,
+        "device": "dlc_mpExecutive",
+        "declaredOrder": "21",
+        "updatePatchDeclarations": [
+          {
+            "filename": "dlc_mpExecutiveCRC:/common/data/levels/gta5/vehicles.meta",
+            "fileType": "VEHICLE_METADATA_FILE",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlc_mpExecutive:/%PLATFORM%/audio/sfx/dlc_exec1",
+            "fileType": "AUDIO_WAVEPACK",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlc_mpExecutive:/%PLATFORM%/audio/dlcexec1_game.dat",
+            "fileType": "AUDIO_GAMEDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlc_mpExecutive:/%PLATFORM%/audio/dlcexec1_sounds.dat",
+            "fileType": "AUDIO_SOUNDDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlc_mpExecutive:/%PLATFORM%/audio/dlcexec1_speech.dat",
+            "fileType": "AUDIO_SPEECHDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlc_mpExecutive:/%PLATFORM%/audio/dlcexec1_mix.dat",
+            "fileType": "AUDIO_DYNAMIXDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlc_mpExecutive:/%PLATFORM%/audio/dlcexec1_amp.dat",
+            "fileType": "AUDIO_SYNTHDATA",
+            "initialDisabled": "true"
+          }
+        ],
+        "interpretation": "Declared metadata and audio wavepack routes verified; changeset activation and runtime registration not emulated. initialDisabled is not a claim that runtime audio is disabled."
+      },
+      "electricEngineReference": "",
+      "kers": null,
+      "runtimeSelectionObserved": false
+    },
+    {
+      "model": "schafter3",
+      "identifierVerified": true,
+      "vehicleMetadata": [
+        {
+          "path": "update\\update.rpf\\dlc_patch\\mpapartment\\common\\data\\levels\\gta5\\vehicles.meta",
+          "modelName": "schafter3",
+          "audioNameHash": "",
+          "gameName": "SCHAFTER3",
+          "vehicleClass": "VC_SPORT",
+          "xmlSHA256": "6E489E78610BC1EE47CAF97A40D118A60619AFC342055445542647D7CD2CFCB7"
+        },
+        {
+          "path": "update\\x64\\dlcpacks\\mpapartment\\dlc.rpf\\common\\data\\levels\\gta5\\vehicles.meta",
+          "modelName": "schafter3",
+          "audioNameHash": "",
+          "gameName": "SCHAFTER3",
+          "vehicleClass": "VC_SPORT",
+          "xmlSHA256": "20B6F4E5C6C3E6C14C28B42FC562170ADAA0E21138BF0610735BAF79DC781CED"
+        }
+      ],
+      "selectionBasis": "audioNameHash is empty in all inspected model declarations; model-hash fallback inferred, exact matching Vehicle record verified",
+      "gameMetadata": {
+        "path": "update\\x64\\dlcpacks\\mpapartment\\dlc.rpf\\x64\\audio\\config\\dlcapartment_game.dat151.rel",
+        "sha256": "AAE4256A6E5F2996DF397ECC1CF3D39656B8C31A484BD6A7C4CC1F532DB7D4A4",
+        "vehicleRecord": "hash_A774B5A6",
+        "engineRecord": "hash_401BDF2D",
+        "granularRecord": "hash_9C114509"
+      },
+      "soundMetadata": {
+        "path": "update\\x64\\dlcpacks\\mpapartment\\dlc.rpf\\x64\\audio\\config\\dlcapartment_sounds.dat54.rel",
+        "sha256": "CDE38A812E5BB4908FBFB55D7DDCDABC437841438E8C753845F2B375677F07B5",
+        "playerGranularSound": "hash_9CDE985D",
+        "exhaustSound": "hash_BDDD21DA",
+        "exhaustType": "EnvironmentSound",
+        "exhaustChannelID": "1",
+        "channelBinding": "EnvironmentSound channel1 binding is parser-supported inference, not observed native voice routing"
+      },
+      "channels": [
+        {
+          "channel": "Channel0",
+          "containerHash": "hash_8C17A303",
+          "stream": "engine_accel",
+          "awc": "update\\x64\\dlcpacks\\mpapartment\\dlc.rpf\\x64\\audio\\sfx\\dlc_apartment\\schafter3.awc",
+          "hashInput": "dlc_apartment/schafter3"
+        },
+        {
+          "channel": "Channel1",
+          "containerHash": "hash_8C17A303",
+          "stream": "exhaust_accel",
+          "awc": "update\\x64\\dlcpacks\\mpapartment\\dlc.rpf\\x64\\audio\\sfx\\dlc_apartment\\schafter3.awc",
+          "hashInput": "dlc_apartment/schafter3"
+        },
+        {
+          "channel": "Channel2",
+          "containerHash": "hash_8C17A303",
+          "stream": "engine_decel",
+          "awc": "update\\x64\\dlcpacks\\mpapartment\\dlc.rpf\\x64\\audio\\sfx\\dlc_apartment\\schafter3.awc",
+          "hashInput": "dlc_apartment/schafter3"
+        },
+        {
+          "channel": "Channel3",
+          "containerHash": "hash_8C17A303",
+          "stream": "exhaust_decel",
+          "awc": "update\\x64\\dlcpacks\\mpapartment\\dlc.rpf\\x64\\audio\\sfx\\dlc_apartment\\schafter3.awc",
+          "hashInput": "dlc_apartment/schafter3"
+        },
+        {
+          "channel": "Channel4",
+          "containerHash": "hash_8C17A303",
+          "stream": "engine_idle",
+          "awc": "update\\x64\\dlcpacks\\mpapartment\\dlc.rpf\\x64\\audio\\sfx\\dlc_apartment\\schafter3.awc",
+          "hashInput": "dlc_apartment/schafter3"
+        },
+        {
+          "channel": "Channel5",
+          "containerHash": "hash_8C17A303",
+          "stream": "exhaust_idle",
+          "awc": "update\\x64\\dlcpacks\\mpapartment\\dlc.rpf\\x64\\audio\\sfx\\dlc_apartment\\schafter3.awc",
+          "hashInput": "dlc_apartment/schafter3"
+        }
+      ],
+      "conventionalEngineFields": {
+        "EngineLow": "hash_A7B73C2F",
+        "EngineHigh": "hash_51E04858",
+        "ExhaustLow": "hash_B0A28DDA",
+        "ExhaustHigh": "hash_1AA1DC12",
+        "EngineIdleLoop": "hash_DDC5CE45",
+        "ExhaustIdleLoop": "hash_3EDDB0A4",
+        "RevsOff": "hash_22385FE7",
+        "Transmission": "hash_699D9F91",
+        "Ignition": "hash_26DE38C2",
+        "ShutDown": "hash_F711ABEB",
+        "ExhaustPops": "null_sound"
+      },
+      "rawGranularLevels": {
+        "MasterVolume": "500",
+        "EngineVolume": "400",
+        "ExhaustVolume": "800",
+        "EngineIdleVolume": "-100",
+        "ExhaustIdleVolume": "-100",
+        "EngineAccelVolume": "0",
+        "ExhaustAccelVolume": "0"
+      },
+      "rawChannelLevels": {
+        "ChannelVolume0": "-1000",
+        "ChannelVolume1": "-1000",
+        "ChannelVolume2": "-1400",
+        "ChannelVolume3": "0",
+        "ChannelVolume4": "-2800",
+        "ChannelVolume5": "-1000"
+      },
+      "granularClockRaw": "13, 57\n    10.8, 10.8",
+      "metadataSemantics": "Raw numeric fields are CodeWalker parser labels; gain units, GranularClock mapping and native granular playback schedule are not established and are not applied as invented dB/RPM values",
+      "mount": {
+        "pack": "mpapartment",
+        "dlclistZeroBasedIndex": 27,
+        "device": "dlc_mpApartment",
+        "declaredOrder": "16",
+        "updatePatchDeclarations": [
+          {
+            "filename": "dlc_mpApartment:/%PLATFORM%/audio/config/dlcApartment_game.dat",
+            "fileType": "AUDIO_GAMEDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlc_mpApartment:/%PLATFORM%/audio/config/dlcApartment_mix.dat",
+            "fileType": "AUDIO_DYNAMIXDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlc_mpApartment:/%PLATFORM%/audio/config/dlcApartment_sounds.dat",
+            "fileType": "AUDIO_SOUNDDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlc_mpApartment:/%PLATFORM%/audio/config/dlcApartment_amp.dat",
+            "fileType": "AUDIO_SYNTHDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlc_mpApartment:/%PLATFORM%/audio/config/dlcApartment_speech.dat",
+            "fileType": "AUDIO_SPEECHDATA",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlc_mpApartment:/%PLATFORM%/audio/sfx/dlc_apartment",
+            "fileType": "AUDIO_WAVEPACK",
+            "initialDisabled": "true"
+          },
+          {
+            "filename": "dlc_mpApartmentCRC:/common/data/levels/gta5/vehicles.meta",
+            "fileType": "VEHICLE_METADATA_FILE",
+            "initialDisabled": "true"
+          }
+        ],
+        "interpretation": "Declared metadata and audio wavepack routes verified; changeset activation and runtime registration not emulated. initialDisabled is not a claim that runtime audio is disabled."
+      },
+      "electricEngineReference": "",
+      "kers": null,
+      "runtimeSelectionObserved": false
+    }
+  ],
+  "schafterVariants": [
+    {
+      "model": "schafter3",
+      "gameName": "SCHAFTER3",
+      "vehicleClass": "VC_SPORT"
+    },
+    {
+      "model": "schafter4",
+      "gameName": "SCHAFTER4",
+      "vehicleClass": "VC_SPORT"
+    },
+    {
+      "model": "schafter5",
+      "gameName": "SCHAFTER5",
+      "vehicleClass": "VC_SEDAN"
+    },
+    {
+      "model": "schafter6",
+      "gameName": "SCHAFTER6",
+      "vehicleClass": "VC_SEDAN"
+    }
+  ],
+  "mountConfigurationBindings": [
+    {
+      "path": "update\\update.rpf\\content.xml",
+      "bytes": 6925,
+      "sha256": "4CE371A492EB1938A864FB25303459C3E2020E4A7541D6FADFBCD95606A56EF4"
+    },
+    {
+      "path": "update\\update.rpf\\setup2.xml",
+      "bytes": 744,
+      "sha256": "6D7E547582986B8DED761431F93D86E69FA07193AE58735C7E31F500270DB428"
+    },
+    {
+      "path": "update\\update.rpf\\common\\data\\dlclist.xml",
+      "bytes": 4310,
+      "sha256": "86A6BB9C5C8858404FD7D73B9116FB6F31A683023F058082892A9E710E1BCCBC"
+    },
+    {
+      "path": "update\\update.rpf\\dlc_patch\\mpapartment\\content.xml",
+      "bytes": 68080,
+      "sha256": "3855387587B22E984E10D00635CA2AFD9471242E3227D34198FBF2D3A1CCFB7E"
+    },
+    {
+      "path": "update\\update.rpf\\dlc_patch\\mpexecutive\\content.xml",
+      "bytes": 46532,
+      "sha256": "932895F6955795C757CA0153AF59F3E1A69F4FA66EA7033912CE7FA68444AAA8"
+    },
+    {
+      "path": "update\\update.rpf\\dlc_patch\\mpheist\\content.xml",
+      "bytes": 170492,
+      "sha256": "4253917C830490CA24B6632D2833B181BF7758274A72F6EF2FB42F67FF9AD3FA"
+    },
+    {
+      "path": "update\\x64\\dlcpacks\\mpheist\\dlc.rpf\\content.xml",
+      "bytes": 116991,
+      "sha256": "2BCD6F5E44D7CF73B02549C1970AA3315463EA1DA90A59E130165E08EDEEA538"
+    },
+    {
+      "path": "update\\x64\\dlcpacks\\mpheist\\dlc.rpf\\setup2.xml",
+      "bytes": 2273,
+      "sha256": "E26AEA36A2ADAE9CB86721056D6C33CAC1BB1A24CE20390B43EB75617C9B87C7"
+    },
+    {
+      "path": "update\\x64\\dlcpacks\\mpapartment\\dlc.rpf\\content.xml",
+      "bytes": 50449,
+      "sha256": "A4C904BE05443CE0E9ED9D143AC1A393A5D1BC69A6BDB6412C9F8048500CFDDF"
+    },
+    {
+      "path": "update\\x64\\dlcpacks\\mpapartment\\dlc.rpf\\setup2.xml",
+      "bytes": 1216,
+      "sha256": "1CC3509B820425BA5F7556BF40FB724E46EC01D1CC26614CB549E8165D82F496"
+    },
+    {
+      "path": "update\\x64\\dlcpacks\\mpexecutive\\dlc.rpf\\content.xml",
+      "bytes": 32872,
+      "sha256": "2947963EBE50E4ED05099EEA1168415B6E126E99D9772D06DC7360E205B26EFD"
+    },
+    {
+      "path": "update\\x64\\dlcpacks\\mpexecutive\\dlc.rpf\\setup2.xml",
+      "bytes": 960,
+      "sha256": "3739BDF2C59D86D3B43BF4AF4EE0605661C2592AC3D568159E456F50F9389E59"
+    }
+  ],
+  "inspection": {
+    "relFiles": 54,
+    "vehicleMetaFiles": 43,
+    "parseErrors": 0,
+    "declaredDlcPackCount": 103,
+    "archives": [
+      {
+        "path": "x64\\audio\\audio_rel.rpf",
+        "length": 3196928,
+        "beforeSHA256": "FBFC8457F494C54EB1A8CFA070C3BAEE9F6631CCA39F2C7DBE211C1AD46AE347",
+        "afterSHA256": "FBFC8457F494C54EB1A8CFA070C3BAEE9F6631CCA39F2C7DBE211C1AD46AE347",
+        "unchanged": true
+      },
+      {
+        "path": "common.rpf",
+        "length": 19351552,
+        "beforeSHA256": "FC4D22F8A715AC492E67975254CB92FC8D6DC615B28417744F7822735D2A355C",
+        "afterSHA256": "FC4D22F8A715AC492E67975254CB92FC8D6DC615B28417744F7822735D2A355C",
+        "unchanged": true
+      },
+      {
+        "path": "update\\update.rpf",
+        "length": 3122239488,
+        "beforeSHA256": "C3A68386A7D067772D6D6038AC505040E7280640205B230FDC1F829567CEC913",
+        "afterSHA256": "C3A68386A7D067772D6D6038AC505040E7280640205B230FDC1F829567CEC913",
+        "unchanged": true
+      },
+      {
+        "path": "update\\x64\\dlcpacks\\mpheist\\dlc.rpf",
+        "length": 2438424576,
+        "beforeSHA256": "15305FE726C938FFA0AB64355267635FA002453A7A895F310D78F8B3214883AC",
+        "afterSHA256": "15305FE726C938FFA0AB64355267635FA002453A7A895F310D78F8B3214883AC",
+        "unchanged": true
+      },
+      {
+        "path": "update\\x64\\dlcpacks\\mpapartment\\dlc.rpf",
+        "length": 520589312,
+        "beforeSHA256": "29B506A169CC839AEFB520F4163DFD2C97E6C93A0BF9AC32530BBF68C8F951E7",
+        "afterSHA256": "29B506A169CC839AEFB520F4163DFD2C97E6C93A0BF9AC32530BBF68C8F951E7",
+        "unchanged": true
+      },
+      {
+        "path": "update\\x64\\dlcpacks\\mpexecutive\\dlc.rpf",
+        "length": 611624960,
+        "beforeSHA256": "FFB98F1ED76A420E098599B2CAE6A06F9BFFDC3C261D4BF8F4C9CF73911F8D8A",
+        "afterSHA256": "FFB98F1ED76A420E098599B2CAE6A06F9BFFDC3C261D4BF8F4C9CF73911F8D8A",
+        "unchanged": true
+      },
+      {
+        "path": "x64\\audio\\sfx\\STREAMED_VEHICLES_GRANULAR.rpf",
+        "length": 207796224,
+        "beforeSHA256": "F31CC031E06D1CFE5E863E8307857AB3C59B0736739E824277368EBEE5DF7EEF",
+        "afterSHA256": "F31CC031E06D1CFE5E863E8307857AB3C59B0736739E824277368EBEE5DF7EEF",
+        "unchanged": true
+      }
+    ]
+  },
+  "scope": "Installed base/update plus the three owning DLC archives and update-patched vehicle metadata; all four unique player bank identities verified. Other DLC sound registries, arbitrary mod overrides and runtime mount selection are not claimed exhaustively resolved.",
+  "gameWrites": false,
+  "gameLaunched": false,
+  "audioEndpointOpened": false,
+  "parser": "Supplied CodeWalker30_dev46, no replacement runtime or undocumented game hooks"
+}

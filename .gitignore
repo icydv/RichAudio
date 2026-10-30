@@ -20,6 +20,9 @@ obj/
 *.cache
 *.wav
 *.f32le
+*.f32
+__pycache__/
+*.pyc
 *.pcm
 *.rasoundmap-context
 *.flac

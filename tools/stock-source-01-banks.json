@@ -1,0 +1,28 @@
+{
+  "banks": [
+    {
+      "model": "bati",
+      "entry": "v_twin_2.awc",
+      "provenance": "Verified player GranularSound0346A636 sixchannel mapping",
+      "archive": "x64/audio/sfx/STREAMED_VEHICLES_GRANULAR.rpf"
+    },
+    {
+      "model": "lectro",
+      "entry": "lectro.awc",
+      "provenance": "Verified GranularSoundAB64AE1F container1E827720",
+      "archive": "update/x64/dlcpacks/mpheist/dlc.rpf"
+    },
+    {
+      "model": "prototipo",
+      "entry": "prototipo.awc",
+      "provenance": "Verified GranularSound4BB86B31 container41CA753A",
+      "archive": "update/x64/dlcpacks/mpexecutive/dlc.rpf"
+    },
+    {
+      "model": "schafter3",
+      "entry": "schafter3.awc",
+      "provenance": "Verified GranularSound9CDE985D container8C17A303",
+      "archive": "update/x64/dlcpacks/mpapartment/dlc.rpf"
+    }
+  ]
+}

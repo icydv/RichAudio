@@ -166,6 +166,7 @@ export class BoundedLateReverb {
 
   /** Caller-owned buffers avoid allocation in production DSP. Never blocks or uses devices. */
   processInto(left, right, outLeft, outRight, { enabled = this.enabled } = {}) {
+    requireValue(!this.sourceStemMode, 'separate late-field instances required for received and source-stem input bases');
     requireValue(left instanceof Float32Array && right instanceof Float32Array && left.length === right.length &&
       left.length > 0 && left.length <= 16384 && outLeft instanceof Float32Array && outRight instanceof Float32Array &&
       outLeft.length === left.length && outRight.length === left.length, 'bounded stereo late buffers');
@@ -208,13 +209,71 @@ export class BoundedLateReverb {
     this.outputFrames += left.length;
   }
 
+  /** Two original source stems excite one existing diffuse field. Callers apply
+   * source calibration and renderer master once, before propagation. Orthogonal
+   * injection preserves joint stem energy even when the sources are antiphase;
+   * it does not rectify, decorrelate or replace their waveforms. Geometry gating
+   * remains explicit. The feedback, damping, predelay and wet level are unchanged.
+   */
+  processSourceStemsInto(engine, exhaust, outLeft, outRight, { enabled = this.enabled } = {}) {
+    requireValue(engine instanceof Float32Array && exhaust instanceof Float32Array && engine.length === exhaust.length &&
+      engine.length > 0 && engine.length <= 16384 && outLeft instanceof Float32Array && outRight instanceof Float32Array &&
+      outLeft.length === engine.length && outRight.length === engine.length, 'bounded original source-stem late buffers');
+    const overlaps = (a, b) => a.buffer === b.buffer && a.byteOffset < b.byteOffset + b.byteLength &&
+      b.byteOffset < a.byteOffset + a.byteLength;
+    requireValue(!overlaps(outLeft, outRight) && ![engine, exhaust].some(input =>
+      overlaps(input, outLeft) || overlaps(input, outRight)), 'late source outputs must not overlap inputs or each other');
+    for (let n = 0; n < engine.length; n++) requireValue(Number.isFinite(engine[n]) && Number.isFinite(exhaust[n]) &&
+      Math.abs(engine[n]) <= 1 && Math.abs(exhaust[n]) <= 1, 'finite bounded original source-stem send');
+    requireValue(this.outputFrames === 0 || this.sourceStemMode === true, 'separate late-field instances required for received and source-stem input bases');
+    this.setEnabled(enabled);
+    if (!this.sourceStemMode) {
+      this.sourceStemMode = true;
+      this.send = this.enabled ? 1 : 0;
+      // Allocate once before the sample loop. Engine uses the existing predelay.
+      if (this.evidence) this.exhaustPredelay = new Float64Array(this.predelay.length);
+    }
+    if (!this.evidence) { outLeft.fill(0); outRight.fill(0); this.outputFrames += engine.length; return; }
+    const target = this.enabled ? 1 : 0;
+    for (let n = 0; n < engine.length; n++) {
+      this.send += this.smooth * (target - this.send);
+      const delayedEngine = this.predelay[this.preIndex], delayedExhaust = this.exhaustPredelay[this.preIndex];
+      this.predelay[this.preIndex] = engine[n] * this.send;
+      this.exhaustPredelay[this.preIndex] = exhaust[n] * this.send;
+      if (++this.preIndex === this.predelay.length) this.preIndex = 0;
+      let total = 0, outputL = 0, outputR = 0;
+      for (let i = 0; i < 8; i++) {
+        const line = this.lines[i], value = line.data[line.index];
+        line.low += this.lowA * (value - line.low);
+        line.upper += this.upperA * (value - line.upper);
+        const [lo, mid, hi] = line.gains;
+        const filtered = hi * value + (mid - hi) * line.upper + (lo - mid) * line.low;
+        this.values[i] = filtered; total += filtered;
+        outputL += (i % 2 ? -1 : 1) * value;
+        outputR += (i % 4 < 2 ? 1 : -1) * value;
+      }
+      for (let i = 0; i < 8; i++) {
+        const line = this.lines[i];
+        const injection = (i % 2 ? -1 : 1) * delayedEngine + (i % 4 < 2 ? 1 : -1) * delayedExhaust;
+        line.data[line.index] = this.values[i] - total / 4 + injection * this.inputGain;
+        if (++line.index === line.data.length) line.index = 0;
+      }
+      outLeft[n] = outputL * this.wet / SQRT8;
+      outRight[n] = outputR * this.wet / SQRT8;
+      this.peak = Math.max(this.peak, Math.abs(outLeft[n]), Math.abs(outRight[n]));
+    }
+    this.outputFrames += engine.length;
+  }
+
   diagnostics() {
     return { supported: Boolean(this.evidence), enabled: this.enabled,
       model: this.evidence?.model ?? 'unsupported-no-late-field', rt60Seconds: this.evidence?.rt60Seconds ?? null,
       delayFrames: this.lines.map(l => l.data.length), predelayFrames: this.predelay?.length ?? 0,
-      memoryBytes: this.lines.reduce((n, l) => n + l.data.byteLength, this.values.byteLength + (this.predelay?.byteLength ?? 0)),
+      memoryBytes: this.lines.reduce((n, l) => n + l.data.byteLength, this.values.byteLength + (this.predelay?.byteLength ?? 0) + (this.exhaustPredelay?.byteLength ?? 0)),
       maximumFeedbackGain: this.lines.length ? Math.max(...this.lines.map(l => l.gains[0])) : 0,
       inputNormalization: 'feedback-energy', maximumL2GainBound: this.maximumL2GainBound ?? 0,
-      frames: this.outputFrames, peak: this.peak, processingDevice: 'CPU', physicalCalibration: 'unverified' };
+      frames: this.outputFrames, peak: this.peak, processingDevice: 'CPU', physicalCalibration: 'unverified',
+      ...(this.sourceStemMode ? { inputBasis: 'orthogonal-original-engine-exhaust-source-stems',
+        inputEnergyNorm: 'engine-squared-plus-exhaust-squared', sourceStemPredelayFrames: this.exhaustPredelay?.length ?? 0 } : {}) };
   }
 }
