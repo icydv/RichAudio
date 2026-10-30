@@ -20,7 +20,9 @@ test('aliased outputs, fractional frames and invalid state reject before mutatin
   const source=p.voices.engine.idle.samples;
   assert.throws(()=>p.renderInto(c,source.subarray(0,512),new Float32Array(512)));assert.equal(p.frame,0);
   assert.throws(()=>new StockVehicleSource(fixture(),{sourceGain:2.001}));
-  assert.throws(()=>new StockVehicleSource(fixture(),{sourceGain:2,pressureShares:{engine:.4,exhaust:.6}}));
+  assert.doesNotThrow(()=>new StockVehicleSource(fixture(),{sourceGain:2,pressureShares:{engine:.4,exhaust:.6}}));
+  const full=fixture();for(const role of ['engine','exhaust'])for(const mode of ['idle','accel','decel'])full.layers[role][mode].samples.fill(1);
+  assert.throws(()=>new StockVehicleSource(full,{sourceGain:2,pressureShares:{engine:.4,exhaust:.6}}));
   assert.throws(()=>new StockVehicleSource(fixture(),{pressureShares:{engine:.4,exhaust:.7}}));
 });
 test('four authored flybys stay bounded, continuous and model-specific without pitch or pass effects',()=>{

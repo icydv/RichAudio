@@ -1,0 +1,3590 @@
+{
+  "schema": 1,
+  "milestone": "STOCK-SOURCE-03",
+  "criteria": {
+    "periodRateTolerance": [
+      0.03,
+      0.05
+    ],
+    "rawCycleRmsDbFromPoolMedianMaximum": 3,
+    "crestDbAbovePoolMedianMaximum": 6,
+    "sumAbsoluteLowMidHighFractionDifferenceMaximum": 0.35,
+    "sqrtOrderPowerCosineMinimum": 0.85,
+    "isolatedTransientRisksExcluded": true,
+    "semantics": "Explicit conservative analysis heuristics, not calibrated native state boundaries or proof of transient absence. Source audio is never normalized or edited."
+  },
+  "scope": "All24 existing verified source layers; read-only numeric feature audit, no audio generation/playback/extraction",
+  "limitations": [
+    "Available compatible material is finite and often less than1s at high state. Reordering it does not create new recorded sustain.",
+    "Compatible source spans can be phase-retimed to a fixed requested clock; do not vary the clock to follow source-rate differences.",
+    "Sustain screening flags isolated numeric outliers, not proven pops or guaranteed transient-free audio.",
+    "Idle remains a separate recorded operating state; its low/middle/high rev mapping is not established.",
+    "No separate intake/KERS or discrete event identity is inferred from sustained layers."
+  ],
+  "streams": [
+    {
+      "model": "schafter3",
+      "role": "engine",
+      "state": "idle",
+      "sha256": "D642D186405814AC688ADA406C812A525BED0D39C246A6B22DA91E4E8BE9B79E",
+      "sampleRate": 24000,
+      "frames": 30290,
+      "intervalCount": 13,
+      "sourceDurationSeconds": 1.2620833333333332,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 10.950691911874909,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 1.1910416666666668,
+          "closestCompatibleRange": {
+            "firstIndex": 0,
+            "lastIndex": 12,
+            "cycles": 13,
+            "durationSeconds": 1.1910416666666668
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.1762194041945505,
+            "median": 0.3938230234658653,
+            "p95": 0.47277860168815716,
+            "maximum": 0.4913878652302853
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.786015022430245,
+            "median": -11.207658812820707,
+            "p95": -10.818736138346258,
+            "maximum": -10.644302397952197
+          },
+          "rateOnlyCycleCount": 13,
+          "compatibleCycleCount": 13,
+          "longestCompatiblePhraseCycles": 13
+        },
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 10.950691911874909,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 1.1910416666666668,
+          "closestCompatibleRange": {
+            "firstIndex": 0,
+            "lastIndex": 12,
+            "cycles": 13,
+            "durationSeconds": 1.1910416666666668
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.1762194041945505,
+            "median": 0.3938230234658653,
+            "p95": 0.47277860168815716,
+            "maximum": 0.4913878652302853
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.786015022430245,
+            "median": -11.207658812820707,
+            "p95": -10.818736138346258,
+            "maximum": -10.644302397952197
+          },
+          "rateOnlyCycleCount": 13,
+          "compatibleCycleCount": 13,
+          "longestCompatiblePhraseCycles": 13
+        }
+      ]
+    },
+    {
+      "model": "schafter3",
+      "role": "engine",
+      "state": "accel",
+      "sha256": "CA72A03E9B090CA5A56E397DA1EF42C69C7B6C12FE2473CF825D268BD2E5876F",
+      "sampleRate": 24000,
+      "frames": 229572,
+      "intervalCount": 287,
+      "sourceDurationSeconds": 9.5655,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 10.684938150399743,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.37966666666666665,
+          "closestCompatibleRange": {
+            "firstIndex": 10,
+            "lastIndex": 13,
+            "cycles": 4,
+            "durationSeconds": 0.37966666666666665
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.7710353925353343,
+            "median": 0.8585277893875272,
+            "p95": 0.9017754685074398,
+            "maximum": 0.9065807661874301
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -14.478649632667546,
+            "median": -13.942268544523005,
+            "p95": -13.213614333999764,
+            "maximum": -13.148800984338173
+          },
+          "rateOnlyCycleCount": 4,
+          "compatibleCycleCount": 4,
+          "longestCompatiblePhraseCycles": 4
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 10.684938150399743,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.5591666666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 10,
+            "lastIndex": 15,
+            "cycles": 6,
+            "durationSeconds": 0.5591666666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.7099641451843723,
+            "median": 0.7710353925353343,
+            "p95": 0.8969701708274496,
+            "maximum": 0.9065807661874301
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -15.516087087169803,
+            "median": -14.39114836981572,
+            "p95": -13.25682323377416,
+            "maximum": -13.148800984338173
+          },
+          "rateOnlyCycleCount": 6,
+          "compatibleCycleCount": 6,
+          "longestCompatiblePhraseCycles": 6
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 32.86100788939718,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.21370833333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 85,
+            "lastIndex": 91,
+            "cycles": 7,
+            "durationSeconds": 0.21370833333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.8335395588814799,
+            "median": 0.8632019804000182,
+            "p95": 0.8765186658090126,
+            "maximum": 0.8770716790884496
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.825297135035472,
+            "median": -10.617297927574196,
+            "p95": -10.258952462186688,
+            "maximum": -10.21301306758697
+          },
+          "rateOnlyCycleCount": 7,
+          "compatibleCycleCount": 7,
+          "longestCompatiblePhraseCycles": 7
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 32.86100788939718,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.48704166666666665,
+          "closestCompatibleRange": {
+            "firstIndex": 81,
+            "lastIndex": 96,
+            "cycles": 16,
+            "durationSeconds": 0.48704166666666665
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.7806750459553188,
+            "median": 0.8534031055741914,
+            "p95": 0.8805395574603215,
+            "maximum": 0.888631273661356
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.135515843241159,
+            "median": -10.561118688666795,
+            "p95": -10.156276401544918,
+            "maximum": -10.146148406679405
+          },
+          "rateOnlyCycleCount": 16,
+          "compatibleCycleCount": 16,
+          "longestCompatiblePhraseCycles": 16
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 55.89641268991725,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.660875,
+          "closestCompatibleRange": {
+            "firstIndex": 244,
+            "lastIndex": 280,
+            "cycles": 37,
+            "durationSeconds": 0.660875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.7429202981494574,
+            "median": 0.824680129154629,
+            "p95": 0.9040298016057102,
+            "maximum": 0.9189762781065521
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.161162725492769,
+            "median": -10.387648370598082,
+            "p95": -9.841435547575344,
+            "maximum": -9.6110692224563
+          },
+          "rateOnlyCycleCount": 37,
+          "compatibleCycleCount": 37,
+          "longestCompatiblePhraseCycles": 37
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 55.89641268991725,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.9330833333333334,
+          "closestCompatibleRange": {
+            "firstIndex": 235,
+            "lastIndex": 283,
+            "cycles": 49,
+            "durationSeconds": 0.8799166666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.7178312180048976,
+            "median": 0.8241923987502923,
+            "p95": 0.8959702868186294,
+            "maximum": 0.9189762781065521
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.358344326505556,
+            "median": -10.345738333231704,
+            "p95": -9.726175517286217,
+            "maximum": -9.572786845779472
+          },
+          "rateOnlyCycleCount": 54,
+          "compatibleCycleCount": 52,
+          "longestCompatiblePhraseCycles": 49
+        }
+      ]
+    },
+    {
+      "model": "schafter3",
+      "role": "engine",
+      "state": "decel",
+      "sha256": "7FC6E5467427EBFF5663CE5867A7CE9B076A64F2444742E3FFD17A0E64809F75",
+      "sampleRate": 24000,
+      "frames": 242188,
+      "intervalCount": 313,
+      "sourceDurationSeconds": 10.091166666666666,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 16.43616319651312,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.30154166666666665,
+          "closestCompatibleRange": {
+            "firstIndex": 290,
+            "lastIndex": 294,
+            "cycles": 5,
+            "durationSeconds": 0.30154166666666665
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.24969130645963036,
+            "median": 0.45139732901382656,
+            "p95": 0.5107784179686574,
+            "maximum": 0.5205451093502926
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -21.91384472754502,
+            "median": -20.310861696786997,
+            "p95": -19.815083024605137,
+            "maximum": -19.73552710641107
+          },
+          "rateOnlyCycleCount": 6,
+          "compatibleCycleCount": 5,
+          "longestCompatiblePhraseCycles": 5
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 16.43616319651312,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.672375,
+          "closestCompatibleRange": {
+            "firstIndex": 290,
+            "lastIndex": 297,
+            "cycles": 8,
+            "durationSeconds": 0.4917916666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.21890210143281125,
+            "median": 0.4059842403582838,
+            "p95": 0.5117687734217298,
+            "maximum": 0.5205451093502926
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -21.91384472754502,
+            "median": -20.438866257685117,
+            "p95": -19.93441690189624,
+            "maximum": -19.73552710641107
+          },
+          "rateOnlyCycleCount": 14,
+          "compatibleCycleCount": 11,
+          "longestCompatiblePhraseCycles": 8
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 32.062387439205494,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.37416666666666665,
+          "closestCompatibleRange": {
+            "firstIndex": 190,
+            "lastIndex": 201,
+            "cycles": 12,
+            "durationSeconds": 0.37416666666666665
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.5646222578665712,
+            "median": 0.7147363708130793,
+            "p95": 0.8024087205838658,
+            "maximum": 0.8183004441939694
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -15.157140930620121,
+            "median": -14.056468755072839,
+            "p95": -13.276886047014008,
+            "maximum": -13.245934260229546
+          },
+          "rateOnlyCycleCount": 12,
+          "compatibleCycleCount": 12,
+          "longestCompatiblePhraseCycles": 12
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 32.062387439205494,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.6850833333333334,
+          "closestCompatibleRange": {
+            "firstIndex": 196,
+            "lastIndex": 206,
+            "cycles": 11,
+            "durationSeconds": 0.35170833333333335
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.6382960845442286,
+            "median": 0.7458202784624852,
+            "p95": 0.8111974876541519,
+            "maximum": 0.8183004441939694
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -14.975884454133428,
+            "median": -14.078612965786721,
+            "p95": -13.315341404314742,
+            "maximum": -13.245934260229546
+          },
+          "rateOnlyCycleCount": 23,
+          "compatibleCycleCount": 22,
+          "longestCompatiblePhraseCycles": 11
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 52.80341860112963,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.5110416666666666,
+          "closestCompatibleRange": {
+            "firstIndex": 16,
+            "lastIndex": 40,
+            "cycles": 25,
+            "durationSeconds": 0.47420833333333334
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.617585125826557,
+            "median": 0.8120518483048369,
+            "p95": 0.8611636239594807,
+            "maximum": 0.8629989505634024
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.523435116740995,
+            "median": -11.831155861051768,
+            "p95": -11.282860235509824,
+            "maximum": -11.161364677849475
+          },
+          "rateOnlyCycleCount": 28,
+          "compatibleCycleCount": 27,
+          "longestCompatiblePhraseCycles": 25
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 52.80341860112963,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.8504583333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 5,
+            "lastIndex": 45,
+            "cycles": 41,
+            "durationSeconds": 0.7727083333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.41496593023681067,
+            "median": 0.778257788691262,
+            "p95": 0.8510626575583983,
+            "maximum": 0.8629989505634024
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.523435116740995,
+            "median": -11.823189894920889,
+            "p95": -11.01764838760525,
+            "maximum": -10.869911978141594
+          },
+          "rateOnlyCycleCount": 47,
+          "compatibleCycleCount": 45,
+          "longestCompatiblePhraseCycles": 41
+        }
+      ]
+    },
+    {
+      "model": "schafter3",
+      "role": "exhaust",
+      "state": "idle",
+      "sha256": "A3F768500EB571BFAB4CB3ADAB01FCB97812C0C846172B289BB869510B78D785",
+      "sampleRate": 24000,
+      "frames": 32316,
+      "intervalCount": 14,
+      "sourceDurationSeconds": 1.3465,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 10.872465301155353,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 1.2914166666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 0,
+            "lastIndex": 13,
+            "cycles": 14,
+            "durationSeconds": 1.2914166666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.4575368667086536,
+            "median": 0.5587979315956743,
+            "p95": 0.6041675196139462,
+            "maximum": 0.6101015300898808
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.157544262497847,
+            "median": -10.186386793907822,
+            "p95": -9.583101975353445,
+            "maximum": -9.518575493096062
+          },
+          "rateOnlyCycleCount": 14,
+          "compatibleCycleCount": 14,
+          "longestCompatiblePhraseCycles": 14
+        },
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 10.872465301155353,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 1.2914166666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 0,
+            "lastIndex": 13,
+            "cycles": 14,
+            "durationSeconds": 1.2914166666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.4575368667086536,
+            "median": 0.5587979315956743,
+            "p95": 0.6041675196139462,
+            "maximum": 0.6101015300898808
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.157544262497847,
+            "median": -10.186386793907822,
+            "p95": -9.583101975353445,
+            "maximum": -9.518575493096062
+          },
+          "rateOnlyCycleCount": 14,
+          "compatibleCycleCount": 14,
+          "longestCompatiblePhraseCycles": 14
+        }
+      ]
+    },
+    {
+      "model": "schafter3",
+      "role": "exhaust",
+      "state": "accel",
+      "sha256": "4BA2F03EDD678A41BC8E61F6E1CD15608D6AE31499BE9A7E1216BD4EF9396FDC",
+      "sampleRate": 24000,
+      "frames": 229572,
+      "intervalCount": 287,
+      "sourceDurationSeconds": 9.5655,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 10.745303001259346,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.46941666666666665,
+          "closestCompatibleRange": {
+            "firstIndex": 10,
+            "lastIndex": 14,
+            "cycles": 5,
+            "durationSeconds": 0.46941666666666665
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9236404205427935,
+            "median": 0.928046960070573,
+            "p95": 0.9451182825048494,
+            "maximum": 0.9480036288930674
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -16.880151869478766,
+            "median": -16.089069095491336,
+            "p95": -15.635871391680487,
+            "maximum": -15.589335059779213
+          },
+          "rateOnlyCycleCount": 5,
+          "compatibleCycleCount": 5,
+          "longestCompatiblePhraseCycles": 5
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 10.745303001259346,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.647375,
+          "closestCompatibleRange": {
+            "firstIndex": 10,
+            "lastIndex": 16,
+            "cycles": 7,
+            "durationSeconds": 0.647375
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9236404205427935,
+            "median": 0.9383858075990072,
+            "p95": 0.9654832932803231,
+            "maximum": 0.9691019972108618
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -16.880151869478766,
+            "median": -15.90120395694177,
+            "p95": -15.58033723160894,
+            "maximum": -15.576481019535965
+          },
+          "rateOnlyCycleCount": 7,
+          "compatibleCycleCount": 7,
+          "longestCompatiblePhraseCycles": 7
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 32.80797251660008,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.27566666666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 84,
+            "lastIndex": 92,
+            "cycles": 9,
+            "durationSeconds": 0.27566666666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9228467968258309,
+            "median": 0.9449125543602794,
+            "p95": 0.9701919223929824,
+            "maximum": 0.972404549754821
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.569479271674265,
+            "median": -11.278114981805478,
+            "p95": -11.03930297732806,
+            "maximum": -10.955305884752738
+          },
+          "rateOnlyCycleCount": 9,
+          "compatibleCycleCount": 9,
+          "longestCompatiblePhraseCycles": 9
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 32.80797251660008,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.45866666666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 81,
+            "lastIndex": 95,
+            "cycles": 15,
+            "durationSeconds": 0.45866666666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9113777191788294,
+            "median": 0.9437845540668812,
+            "p95": 0.9682953846542635,
+            "maximum": 0.972404549754821
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.569479271674265,
+            "median": -11.278114981805478,
+            "p95": -10.956807685571489,
+            "maximum": -10.955305884752738
+          },
+          "rateOnlyCycleCount": 15,
+          "compatibleCycleCount": 15,
+          "longestCompatiblePhraseCycles": 15
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 55.88098888966894,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.6439166666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 245,
+            "lastIndex": 279,
+            "cycles": 35,
+            "durationSeconds": 0.6255
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.924110352203312,
+            "median": 0.9751725773514132,
+            "p95": 0.9817809541847605,
+            "maximum": 0.9871964016313461
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.902444655468779,
+            "median": -10.441721143111547,
+            "p95": -10.113917709692434,
+            "maximum": -9.876874422428358
+          },
+          "rateOnlyCycleCount": 36,
+          "compatibleCycleCount": 36,
+          "longestCompatiblePhraseCycles": 35
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 55.88098888966894,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.9695416666666666,
+          "closestCompatibleRange": {
+            "firstIndex": 233,
+            "lastIndex": 286,
+            "cycles": 54,
+            "durationSeconds": 0.9695416666666666
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.924110352203312,
+            "median": 0.9758039326547803,
+            "p95": 0.984527273611906,
+            "maximum": 0.9871964016313461
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.949693992718288,
+            "median": -10.493658405693893,
+            "p95": -10.158331820113897,
+            "maximum": -9.876874422428358
+          },
+          "rateOnlyCycleCount": 54,
+          "compatibleCycleCount": 54,
+          "longestCompatiblePhraseCycles": 54
+        }
+      ]
+    },
+    {
+      "model": "schafter3",
+      "role": "exhaust",
+      "state": "decel",
+      "sha256": "D2AD2047D839142EA7AC1CF2F244A013226240AB5D0BC454F3D22A77707606C6",
+      "sampleRate": 24000,
+      "frames": 322608,
+      "intervalCount": 419,
+      "sourceDurationSeconds": 13.442,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 16.683211875207682,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.47683333333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 384,
+            "lastIndex": 388,
+            "cycles": 5,
+            "durationSeconds": 0.2957916666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9504830437839544,
+            "median": 0.9650255039850246,
+            "p95": 0.974114990331427,
+            "maximum": 0.9744673227233945
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -14.254523981870776,
+            "median": -12.555909333477675,
+            "p95": -12.336154525373308,
+            "maximum": -12.258474091858933
+          },
+          "rateOnlyCycleCount": 8,
+          "compatibleCycleCount": 8,
+          "longestCompatiblePhraseCycles": 5
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 16.683211875207682,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.9584583333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 383,
+            "lastIndex": 395,
+            "cycles": 13,
+            "durationSeconds": 0.7806666666666666
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.7441227265259569,
+            "median": 0.9225206706950821,
+            "p95": 0.9731754372861802,
+            "maximum": 0.9744673227233945
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -14.254523981870776,
+            "median": -12.535765358409009,
+            "p95": -11.820768963379255,
+            "maximum": -10.507653577940223
+          },
+          "rateOnlyCycleCount": 16,
+          "compatibleCycleCount": 16,
+          "longestCompatiblePhraseCycles": 13
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 31.989882666442025,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.5315416666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 256,
+            "lastIndex": 271,
+            "cycles": 16,
+            "durationSeconds": 0.5010416666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9587913911129897,
+            "median": 0.9683990712766616,
+            "p95": 0.9797013525572625,
+            "maximum": 0.980083794500692
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.979948461151611,
+            "median": -11.772729817608099,
+            "p95": -11.473849305046416,
+            "maximum": -11.371023347931999
+          },
+          "rateOnlyCycleCount": 17,
+          "compatibleCycleCount": 17,
+          "longestCompatiblePhraseCycles": 16
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 31.989882666442025,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.9045,
+          "closestCompatibleRange": {
+            "firstIndex": 248,
+            "lastIndex": 276,
+            "cycles": 29,
+            "durationSeconds": 0.9045
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9505561405000293,
+            "median": 0.9692905365742672,
+            "p95": 0.9785449242590982,
+            "maximum": 0.980083794500692
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.194011521322452,
+            "median": -11.772729817608099,
+            "p95": -11.51792325585411,
+            "maximum": -11.371023347931999
+          },
+          "rateOnlyCycleCount": 29,
+          "compatibleCycleCount": 29,
+          "longestCompatiblePhraseCycles": 29
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 53.0584061247009,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.6087083333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 33,
+            "lastIndex": 36,
+            "cycles": 4,
+            "durationSeconds": 0.0755
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.42337568101946804,
+            "median": 0.9319591493962569,
+            "p95": 0.9664068923936147,
+            "maximum": 0.9723724093192052
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -13.02967101541785,
+            "median": -11.684903364283965,
+            "p95": -10.249877365740323,
+            "maximum": -9.4289809103805
+          },
+          "rateOnlyCycleCount": 37,
+          "compatibleCycleCount": 32,
+          "longestCompatiblePhraseCycles": 17
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 53.0584061247009,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.9515416666666666,
+          "closestCompatibleRange": {
+            "firstIndex": 33,
+            "lastIndex": 36,
+            "cycles": 4,
+            "durationSeconds": 0.0755
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.42337568101946804,
+            "median": 0.9190985157247472,
+            "p95": 0.9618622064745005,
+            "maximum": 0.9723724093192052
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -13.02967101541785,
+            "median": -11.542949514903505,
+            "p95": -10.23131649212879,
+            "maximum": -9.4289809103805
+          },
+          "rateOnlyCycleCount": 57,
+          "compatibleCycleCount": 50,
+          "longestCompatiblePhraseCycles": 28
+        }
+      ]
+    },
+    {
+      "model": "bati",
+      "role": "engine",
+      "state": "idle",
+      "sha256": "7779658CCB3FEC09D8904D0F301E0AF45EC8C47FDE71CEB3D63538F5B1CA5F24",
+      "sampleRate": 48000,
+      "frames": 40350,
+      "intervalCount": 8,
+      "sourceDurationSeconds": 0.840625,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 10.812716671624623,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.5528958333333334,
+          "closestCompatibleRange": {
+            "firstIndex": 4,
+            "lastIndex": 5,
+            "cycles": 2,
+            "durationSeconds": 0.1831875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.7358289073901613,
+            "median": 0.7370635001384217,
+            "p95": 0.7846487296511893,
+            "maximum": 0.7899359773748301
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -14.05272688196998,
+            "median": -13.445366739724387,
+            "p95": -12.87847901313753,
+            "maximum": -12.75191435599287
+          },
+          "rateOnlyCycleCount": 6,
+          "compatibleCycleCount": 6,
+          "longestCompatiblePhraseCycles": 3
+        },
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 10.812716671624623,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.7450416666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 0,
+            "lastIndex": 7,
+            "cycles": 8,
+            "durationSeconds": 0.7450416666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.4650265930032807,
+            "median": 0.642920624348541,
+            "p95": 0.7740742342039075,
+            "maximum": 0.7899359773748301
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -14.454478674238779,
+            "median": -13.51329473856902,
+            "p95": -12.929104875995394,
+            "maximum": -12.75191435599287
+          },
+          "rateOnlyCycleCount": 8,
+          "compatibleCycleCount": 8,
+          "longestCompatiblePhraseCycles": 8
+        }
+      ]
+    },
+    {
+      "model": "bati",
+      "role": "engine",
+      "state": "accel",
+      "sha256": "8E2B4BE819DA5A5D990A3A01F7BE41BA79DBE2AB86B7BC6EEB7700AC20021A9E",
+      "sampleRate": 48000,
+      "frames": 328251,
+      "intervalCount": 154,
+      "sourceDurationSeconds": 6.8385625,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 10.99754596077003,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.09,
+          "closestCompatibleRange": {
+            "firstIndex": 9,
+            "lastIndex": 9,
+            "cycles": 1,
+            "durationSeconds": 0.09
+          },
+          "adjacentCompatibleWaveformCorrelation": null,
+          "compatibleRmsDbRange": {
+            "minimum": -18.996716455742156,
+            "median": -18.996716455742156,
+            "p95": -18.996716455742156,
+            "maximum": -18.996716455742156
+          },
+          "rateOnlyCycleCount": 1,
+          "compatibleCycleCount": 1,
+          "longestCompatiblePhraseCycles": 1
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 10.99754596077003,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.26585416666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 9,
+            "lastIndex": 11,
+            "cycles": 3,
+            "durationSeconds": 0.26585416666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.6824537775390397,
+            "median": 0.6898699005532396,
+            "p95": 0.6965444112660194,
+            "maximum": 0.6972860235674394
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -19.018150168037458,
+            "median": -18.996716455742156,
+            "p95": -18.887392812772603,
+            "maximum": -18.87524574133154
+          },
+          "rateOnlyCycleCount": 3,
+          "compatibleCycleCount": 3,
+          "longestCompatiblePhraseCycles": 3
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 23.23812158517187,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.25714583333333335,
+          "closestCompatibleRange": {
+            "firstIndex": 53,
+            "lastIndex": 58,
+            "cycles": 6,
+            "durationSeconds": 0.25714583333333335
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.6258886369088905,
+            "median": 0.7390865796031723,
+            "p95": 0.7614776473618117,
+            "maximum": 0.7659175066328088
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.891639047359662,
+            "median": -12.593912234244428,
+            "p95": -12.046317115466028,
+            "maximum": -12.00582979859339
+          },
+          "rateOnlyCycleCount": 6,
+          "compatibleCycleCount": 6,
+          "longestCompatiblePhraseCycles": 6
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 23.23812158517187,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.4327916666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 50,
+            "lastIndex": 59,
+            "cycles": 10,
+            "durationSeconds": 0.4327916666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.6258886369088905,
+            "median": 0.6487413816553421,
+            "p95": 0.7570377880908146,
+            "maximum": 0.7659175066328088
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -13.340719911829034,
+            "median": -12.64413022295341,
+            "p95": -11.976524633324393,
+            "maximum": -11.952547679922485
+          },
+          "rateOnlyCycleCount": 10,
+          "compatibleCycleCount": 10,
+          "longestCompatiblePhraseCycles": 10
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 38.64734299516908,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.5941458333333334,
+          "closestCompatibleRange": {
+            "firstIndex": 131,
+            "lastIndex": 153,
+            "cycles": 23,
+            "durationSeconds": 0.5941458333333334
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.6065167684620058,
+            "median": 0.6824332744188454,
+            "p95": 0.7597956661055898,
+            "maximum": 0.7768452388217734
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.72173766722663,
+            "median": -11.200779922014455,
+            "p95": -10.872683064901695,
+            "maximum": -10.544478408104283
+          },
+          "rateOnlyCycleCount": 23,
+          "compatibleCycleCount": 23,
+          "longestCompatiblePhraseCycles": 23
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 38.64734299516908,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.7286458333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 126,
+            "lastIndex": 153,
+            "cycles": 28,
+            "durationSeconds": 0.7286458333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.6065167684620058,
+            "median": 0.6866634309052374,
+            "p95": 0.7565513260020622,
+            "maximum": 0.7768452388217734
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.761117293266786,
+            "median": -11.251010097222885,
+            "p95": -10.886091034402883,
+            "maximum": -10.544478408104283
+          },
+          "rateOnlyCycleCount": 28,
+          "compatibleCycleCount": 28,
+          "longestCompatiblePhraseCycles": 28
+        }
+      ]
+    },
+    {
+      "model": "bati",
+      "role": "engine",
+      "state": "decel",
+      "sha256": "65E526D15E5AD0965152D4F4A2686797587C6AE348B6B08C24F764501046E988",
+      "sampleRate": 48000,
+      "frames": 424508,
+      "intervalCount": 173,
+      "sourceDurationSeconds": 8.843916666666667,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 9.063085125721816,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.3350208333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 162,
+            "lastIndex": 164,
+            "cycles": 3,
+            "durationSeconds": 0.3350208333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.7980759372702909,
+            "median": 0.8083431917328655,
+            "p95": 0.8175837207491826,
+            "maximum": 0.8186104461954401
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -21.19293719262137,
+            "median": -20.69055246708062,
+            "p95": -20.652979400239282,
+            "maximum": -20.64880461503469
+          },
+          "rateOnlyCycleCount": 3,
+          "compatibleCycleCount": 3,
+          "longestCompatiblePhraseCycles": 3
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 9.063085125721816,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.546625,
+          "closestCompatibleRange": {
+            "firstIndex": 160,
+            "lastIndex": 164,
+            "cycles": 5,
+            "durationSeconds": 0.546625
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.6861029536037364,
+            "median": 0.7901116873203575,
+            "p95": 0.8155302698566678,
+            "maximum": 0.8186104461954401
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -21.19293719262137,
+            "median": -20.648912827000665,
+            "p95": -20.508359818563186,
+            "maximum": -20.47324861944531
+          },
+          "rateOnlyCycleCount": 5,
+          "compatibleCycleCount": 5,
+          "longestCompatiblePhraseCycles": 5
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 19.550335845816264,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.3064375,
+          "closestCompatibleRange": {
+            "firstIndex": 112,
+            "lastIndex": 115,
+            "cycles": 4,
+            "durationSeconds": 0.20402083333333335
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.6072736618867092,
+            "median": 0.6117555931408748,
+            "p95": 0.7331543026542255,
+            "maximum": 0.746643048155709
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -15.160214813423172,
+            "median": -14.785762682827265,
+            "p95": -14.602285165802689,
+            "maximum": -14.602077832998129
+          },
+          "rateOnlyCycleCount": 6,
+          "compatibleCycleCount": 6,
+          "longestCompatiblePhraseCycles": 4
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 19.550335845816264,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.4618333333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 110,
+            "lastIndex": 118,
+            "cycles": 9,
+            "durationSeconds": 0.4618333333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.43403583314303024,
+            "median": 0.6095146275137919,
+            "p95": 0.7879086650717199,
+            "maximum": 0.809952478873237
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -15.336365522478015,
+            "median": -14.844379897599765,
+            "p95": -14.520878034074691,
+            "maximum": -14.4667448347924
+          },
+          "rateOnlyCycleCount": 9,
+          "compatibleCycleCount": 9,
+          "longestCompatiblePhraseCycles": 9
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 36.496155981797635,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.49470833333333336,
+          "closestCompatibleRange": {
+            "firstIndex": 8,
+            "lastIndex": 23,
+            "cycles": 16,
+            "durationSeconds": 0.4401875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.47861307118690544,
+            "median": 0.7369299589443139,
+            "p95": 0.8219354806124969,
+            "maximum": 0.8450243576766393
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.115484305025525,
+            "median": -9.423781362509011,
+            "p95": -9.033086223259987,
+            "maximum": -8.81449072882588
+          },
+          "rateOnlyCycleCount": 20,
+          "compatibleCycleCount": 18,
+          "longestCompatiblePhraseCycles": 16
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 36.496155981797635,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.6600416666666666,
+          "closestCompatibleRange": {
+            "firstIndex": 8,
+            "lastIndex": 27,
+            "cycles": 20,
+            "durationSeconds": 0.5540416666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.4285304634177245,
+            "median": 0.7369299589443139,
+            "p95": 0.8253610079205261,
+            "maximum": 0.8450243576766393
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.115484305025525,
+            "median": -9.399845858841338,
+            "p95": -8.809974717539614,
+            "maximum": -8.561583768787976
+          },
+          "rateOnlyCycleCount": 28,
+          "compatibleCycleCount": 24,
+          "longestCompatiblePhraseCycles": 20
+        }
+      ]
+    },
+    {
+      "model": "bati",
+      "role": "exhaust",
+      "state": "idle",
+      "sha256": "1ABDC7B08AF8DBD0F5D7CDBE21C86E78C34209ED51E19CC00EFB8C86974B1529",
+      "sampleRate": 48000,
+      "frames": 40350,
+      "intervalCount": 8,
+      "sourceDurationSeconds": 0.840625,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 10.857680176545792,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.6499583333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 0,
+            "lastIndex": 6,
+            "cycles": 7,
+            "durationSeconds": 0.6499583333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.5945343487065775,
+            "median": 0.8521878293134659,
+            "p95": 0.9311882972871582,
+            "maximum": 0.947233657899215
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -9.44614201655205,
+            "median": -8.405231442564835,
+            "p95": -7.734138349489774,
+            "maximum": -7.707448501607108
+          },
+          "rateOnlyCycleCount": 7,
+          "compatibleCycleCount": 7,
+          "longestCompatiblePhraseCycles": 7
+        },
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 10.857680176545792,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.6499583333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 0,
+            "lastIndex": 6,
+            "cycles": 7,
+            "durationSeconds": 0.6499583333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.5945343487065775,
+            "median": 0.8521878293134659,
+            "p95": 0.9311882972871582,
+            "maximum": 0.947233657899215
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -9.44614201655205,
+            "median": -8.405231442564835,
+            "p95": -7.734138349489774,
+            "maximum": -7.707448501607108
+          },
+          "rateOnlyCycleCount": 7,
+          "compatibleCycleCount": 7,
+          "longestCompatiblePhraseCycles": 7
+        }
+      ]
+    },
+    {
+      "model": "bati",
+      "role": "exhaust",
+      "state": "accel",
+      "sha256": "A102D3AB2C122C74DC2085EF3673651D0018B90437B7F86627197882B9B744B4",
+      "sampleRate": 48000,
+      "frames": 328251,
+      "intervalCount": 154,
+      "sourceDurationSeconds": 6.8385625,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 10.945669021150193,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.0908125,
+          "closestCompatibleRange": {
+            "firstIndex": 9,
+            "lastIndex": 9,
+            "cycles": 1,
+            "durationSeconds": 0.0908125
+          },
+          "adjacentCompatibleWaveformCorrelation": null,
+          "compatibleRmsDbRange": {
+            "minimum": -8.84509994496774,
+            "median": -8.84509994496774,
+            "p95": -8.84509994496774,
+            "maximum": -8.84509994496774
+          },
+          "rateOnlyCycleCount": 1,
+          "compatibleCycleCount": 1,
+          "longestCompatiblePhraseCycles": 1
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 10.945669021150193,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.2737291666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 8,
+            "lastIndex": 10,
+            "cycles": 3,
+            "durationSeconds": 0.2737291666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9526335604846283,
+            "median": 0.9555901000794302,
+            "p95": 0.9582509857147519,
+            "maximum": 0.958546639674232
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -8.984329576874078,
+            "median": -8.918402319344711,
+            "p95": -8.852430182405438,
+            "maximum": -8.84509994496774
+          },
+          "rateOnlyCycleCount": 3,
+          "compatibleCycleCount": 3,
+          "longestCompatiblePhraseCycles": 3
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 23.27788399103487,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.25697916666666665,
+          "closestCompatibleRange": {
+            "firstIndex": 53,
+            "lastIndex": 58,
+            "cycles": 6,
+            "durationSeconds": 0.25697916666666665
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9898014032422043,
+            "median": 0.9928811597176583,
+            "p95": 0.9953153915780938,
+            "maximum": 0.9955072977779611
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.875840825696661,
+            "median": -10.76956707385181,
+            "p95": -10.53968529629467,
+            "maximum": -10.4988531013656
+          },
+          "rateOnlyCycleCount": 6,
+          "compatibleCycleCount": 6,
+          "longestCompatiblePhraseCycles": 6
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 23.27788399103487,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.38758333333333334,
+          "closestCompatibleRange": {
+            "firstIndex": 51,
+            "lastIndex": 59,
+            "cycles": 9,
+            "durationSeconds": 0.38758333333333334
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9898014032422043,
+            "median": 0.9937144632481415,
+            "p95": 0.9960095429009432,
+            "maximum": 0.996279982582549
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.193536047344683,
+            "median": -10.776887253656984,
+            "p95": -10.564184613252111,
+            "maximum": -10.4988531013656
+          },
+          "rateOnlyCycleCount": 9,
+          "compatibleCycleCount": 9,
+          "longestCompatiblePhraseCycles": 9
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 38.71447199159704,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.5676875,
+          "closestCompatibleRange": {
+            "firstIndex": 132,
+            "lastIndex": 153,
+            "cycles": 22,
+            "durationSeconds": 0.5676875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9773422401039155,
+            "median": 0.9892722253661902,
+            "p95": 0.9943052053496204,
+            "maximum": 0.9963256536364651
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.836301979970163,
+            "median": -11.396309554786402,
+            "p95": -11.143627698368416,
+            "maximum": -11.04072378725937
+          },
+          "rateOnlyCycleCount": 22,
+          "compatibleCycleCount": 22,
+          "longestCompatiblePhraseCycles": 22
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 38.71447199159704,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.7288541666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 126,
+            "lastIndex": 153,
+            "cycles": 28,
+            "durationSeconds": 0.7288541666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9773422401039155,
+            "median": 0.9900821781561384,
+            "p95": 0.9940331896499427,
+            "maximum": 0.9963256536364651
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.836301979970163,
+            "median": -11.470007188560047,
+            "p95": -11.148466794290808,
+            "maximum": -11.04072378725937
+          },
+          "rateOnlyCycleCount": 28,
+          "compatibleCycleCount": 28,
+          "longestCompatiblePhraseCycles": 28
+        }
+      ]
+    },
+    {
+      "model": "bati",
+      "role": "exhaust",
+      "state": "decel",
+      "sha256": "908C634369953F8C1E0276F1A14D5E241DFB42AB7B67D44571AF7459B32253D0",
+      "sampleRate": 48000,
+      "frames": 374180,
+      "intervalCount": 154,
+      "sourceDurationSeconds": 7.795416666666667,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 9.037805115655699,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.3329166666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 142,
+            "lastIndex": 144,
+            "cycles": 3,
+            "durationSeconds": 0.3329166666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9197128024978005,
+            "median": 0.9274135560344758,
+            "p95": 0.9343442342174835,
+            "maximum": 0.935114309571151
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.3030651737701,
+            "median": -10.199149726906839,
+            "p95": -9.557549809772846,
+            "maximum": -9.48626093009129
+          },
+          "rateOnlyCycleCount": 5,
+          "compatibleCycleCount": 3,
+          "longestCompatiblePhraseCycles": 3
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 9.037805115655699,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.448875,
+          "closestCompatibleRange": {
+            "firstIndex": 142,
+            "lastIndex": 145,
+            "cycles": 4,
+            "durationSeconds": 0.448875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.8836859072809538,
+            "median": 0.9197128024978005,
+            "p95": 0.933574158863816,
+            "maximum": 0.935114309571151
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.730403133057202,
+            "median": -10.25110745033847,
+            "p95": -9.593194249613623,
+            "maximum": -9.48626093009129
+          },
+          "rateOnlyCycleCount": 6,
+          "compatibleCycleCount": 4,
+          "longestCompatiblePhraseCycles": 4
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 19.936774388046285,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.20172916666666665,
+          "closestCompatibleRange": {
+            "firstIndex": 99,
+            "lastIndex": 102,
+            "cycles": 4,
+            "durationSeconds": 0.20172916666666665
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.987350985817755,
+            "median": 0.9957081525600883,
+            "p95": 0.9963173033085035,
+            "maximum": 0.9963849867249941
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -7.500540283378385,
+            "median": -7.424584728364463,
+            "p95": -7.387072700774523,
+            "maximum": -7.382662650781623
+          },
+          "rateOnlyCycleCount": 4,
+          "compatibleCycleCount": 4,
+          "longestCompatiblePhraseCycles": 4
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 19.936774388046285,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.3988333333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 96,
+            "lastIndex": 103,
+            "cycles": 8,
+            "durationSeconds": 0.3988333333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.987350985817755,
+            "median": 0.9946133844070704,
+            "p95": 0.9977754644326896,
+            "maximum": 0.9983713834502734
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -7.500540283378385,
+            "median": -7.360758344162912,
+            "p95": -7.150133967776707,
+            "maximum": -7.1424104461006035
+          },
+          "rateOnlyCycleCount": 8,
+          "compatibleCycleCount": 8,
+          "longestCompatiblePhraseCycles": 8
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 36.74090121560753,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.5722291666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 6,
+            "lastIndex": 23,
+            "cycles": 18,
+            "durationSeconds": 0.49183333333333334
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9260357155550671,
+            "median": 0.9934583181320166,
+            "p95": 0.9966853967132139,
+            "maximum": 0.9976128453063745
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.32407190506107,
+            "median": -10.130540761350499,
+            "p95": -9.396979061531376,
+            "maximum": -8.863907019941378
+          },
+          "rateOnlyCycleCount": 21,
+          "compatibleCycleCount": 21,
+          "longestCompatiblePhraseCycles": 18
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 36.74090121560753,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.7641666666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 0,
+            "lastIndex": 27,
+            "cycles": 28,
+            "durationSeconds": 0.7641666666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9260357155550671,
+            "median": 0.9925155368053791,
+            "p95": 0.9971089694275184,
+            "maximum": 0.9976128453063745
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.32407190506107,
+            "median": -10.127857319548838,
+            "p95": -9.560689856792786,
+            "maximum": -8.863907019941378
+          },
+          "rateOnlyCycleCount": 28,
+          "compatibleCycleCount": 28,
+          "longestCompatiblePhraseCycles": 28
+        }
+      ]
+    },
+    {
+      "model": "lectro",
+      "role": "engine",
+      "state": "idle",
+      "sha256": "0F56C8A9D427EE572141677ECE68595AFB9C6576E2E986661C99BF130056E64B",
+      "sampleRate": 24000,
+      "frames": 24069,
+      "intervalCount": 15,
+      "sourceDurationSeconds": 1.002875,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 15.341998721500108,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.257625,
+          "closestCompatibleRange": {
+            "firstIndex": 1,
+            "lastIndex": 3,
+            "cycles": 3,
+            "durationSeconds": 0.193375
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": -0.07437004361462138,
+            "median": 0.03665050901653798,
+            "p95": 0.1365690063845814,
+            "maximum": 0.14767106164769733
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -16.31744491340648,
+            "median": -15.479649076428974,
+            "p95": -15.207059553243168,
+            "maximum": -15.20700566559132
+          },
+          "rateOnlyCycleCount": 4,
+          "compatibleCycleCount": 4,
+          "longestCompatiblePhraseCycles": 3
+        },
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 15.341998721500108,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.3814166666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 5,
+            "lastIndex": 6,
+            "cycles": 2,
+            "durationSeconds": 0.125125
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.20914042601324792,
+            "median": 0.21782402128586814,
+            "p95": 0.22563925703122634,
+            "maximum": 0.22650761655848836
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -15.751933236254308,
+            "median": -15.207185291097481,
+            "p95": -14.972204719721773,
+            "maximum": -14.939568416831758
+          },
+          "rateOnlyCycleCount": 7,
+          "compatibleCycleCount": 6,
+          "longestCompatiblePhraseCycles": 2
+        }
+      ]
+    },
+    {
+      "model": "lectro",
+      "role": "engine",
+      "state": "accel",
+      "sha256": "C485EA531CCB5BE1EF2EF02F75EE0F7ED05B5431CF132AE81F2EDA34CE7BF096",
+      "sampleRate": 24000,
+      "frames": 216000,
+      "intervalCount": 243,
+      "sourceDurationSeconds": 9.0,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 14.78936695540063,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.20354166666666668,
+          "closestCompatibleRange": {
+            "firstIndex": 15,
+            "lastIndex": 17,
+            "cycles": 3,
+            "durationSeconds": 0.20354166666666668
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.721905789509961,
+            "median": 0.755632645986979,
+            "p95": 0.7859868168162952,
+            "maximum": 0.789359502463997
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -13.030723520550119,
+            "median": -12.296337443356178,
+            "p95": -12.147016538418605,
+            "maximum": -12.130425326758875
+          },
+          "rateOnlyCycleCount": 3,
+          "compatibleCycleCount": 3,
+          "longestCompatiblePhraseCycles": 3
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 14.78936695540063,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.27470833333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 14,
+            "lastIndex": 17,
+            "cycles": 4,
+            "durationSeconds": 0.27470833333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.721905789509961,
+            "median": 0.789359502463997,
+            "p95": 0.8389864996357498,
+            "maximum": 0.8445006104326113
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -13.030723520550119,
+            "median": -12.213381385057527,
+            "p95": -10.875431484239046,
+            "maximum": -10.653961982617899
+          },
+          "rateOnlyCycleCount": 6,
+          "compatibleCycleCount": 4,
+          "longestCompatiblePhraseCycles": 4
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 27.570833928133077,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.32475,
+          "closestCompatibleRange": {
+            "firstIndex": 89,
+            "lastIndex": 95,
+            "cycles": 7,
+            "durationSeconds": 0.2527083333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.5033510105334116,
+            "median": 0.6571511134136601,
+            "p95": 0.7444685659067032,
+            "maximum": 0.7558513882615403
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.341273623184021,
+            "median": -10.458996220282144,
+            "p95": -9.014804516465691,
+            "maximum": -8.960200159114503
+          },
+          "rateOnlyCycleCount": 10,
+          "compatibleCycleCount": 9,
+          "longestCompatiblePhraseCycles": 7
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 27.570833928133077,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.5158333333333334,
+          "closestCompatibleRange": {
+            "firstIndex": 83,
+            "lastIndex": 94,
+            "cycles": 12,
+            "durationSeconds": 0.4425
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.5725652904644069,
+            "median": 0.7558513882615403,
+            "p95": 0.825931623438703,
+            "maximum": 0.828302213715083
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.341273623184021,
+            "median": -9.188927959497674,
+            "p95": -8.158408243187436,
+            "maximum": -8.011830493020454
+          },
+          "rateOnlyCycleCount": 19,
+          "compatibleCycleCount": 14,
+          "longestCompatiblePhraseCycles": 12
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 44.99041529168136,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.689875,
+          "closestCompatibleRange": {
+            "firstIndex": 208,
+            "lastIndex": 235,
+            "cycles": 28,
+            "durationSeconds": 0.62475
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.39295573459651467,
+            "median": 0.7011435165928996,
+            "p95": 0.74993611981619,
+            "maximum": 0.7670589480817128
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -14.613078500564187,
+            "median": -14.0467782891133,
+            "p95": -13.196525003253058,
+            "maximum": -12.982437066259848
+          },
+          "rateOnlyCycleCount": 31,
+          "compatibleCycleCount": 31,
+          "longestCompatiblePhraseCycles": 28
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 44.99041529168136,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.9380833333333334,
+          "closestCompatibleRange": {
+            "firstIndex": 203,
+            "lastIndex": 242,
+            "cycles": 40,
+            "durationSeconds": 0.8916666666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.3473502991577894,
+            "median": 0.6811528637233126,
+            "p95": 0.732918929760851,
+            "maximum": 0.7670589480817128
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -15.059494993992944,
+            "median": -14.053600536516782,
+            "p95": -13.156517171519937,
+            "maximum": -12.982437066259848
+          },
+          "rateOnlyCycleCount": 42,
+          "compatibleCycleCount": 42,
+          "longestCompatiblePhraseCycles": 40
+        }
+      ]
+    },
+    {
+      "model": "lectro",
+      "role": "engine",
+      "state": "decel",
+      "sha256": "8212CDC92B06D634C36DD4863C747A8A837DC62FE61A1EE1B23E1B4EFA6F2B45",
+      "sampleRate": 24000,
+      "frames": 224704,
+      "intervalCount": 274,
+      "sourceDurationSeconds": 9.362666666666666,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 17.77960649248986,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.28179166666666666,
+          "closestCompatibleRange": {
+            "firstIndex": 250,
+            "lastIndex": 253,
+            "cycles": 4,
+            "durationSeconds": 0.22408333333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.5056230045554589,
+            "median": 0.5106073585534251,
+            "p95": 0.5668702963077495,
+            "maximum": 0.5731217338360078
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -17.18278243062255,
+            "median": -16.18376532421593,
+            "p95": -14.79023590523217,
+            "maximum": -14.513736042700941
+          },
+          "rateOnlyCycleCount": 7,
+          "compatibleCycleCount": 5,
+          "longestCompatiblePhraseCycles": 4
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 17.77960649248986,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.39379166666666665,
+          "closestCompatibleRange": {
+            "firstIndex": 250,
+            "lastIndex": 255,
+            "cycles": 6,
+            "durationSeconds": 0.34
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.5056230045554589,
+            "median": 0.5731217338360078,
+            "p95": 0.6089780382473629,
+            "maximum": 0.6157346387171867
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -17.18278243062255,
+            "median": -16.18376532421593,
+            "p95": -14.915446395029797,
+            "maximum": -14.513736042700941
+          },
+          "rateOnlyCycleCount": 10,
+          "compatibleCycleCount": 7,
+          "longestCompatiblePhraseCycles": 6
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 30.667816192655938,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.42725,
+          "closestCompatibleRange": {
+            "firstIndex": 158,
+            "lastIndex": 170,
+            "cycles": 13,
+            "durationSeconds": 0.42725
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.8440733946765216,
+            "median": 0.9016169246078196,
+            "p95": 0.9349635903691664,
+            "maximum": 0.9360610174210552
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -9.853740295545368,
+            "median": -7.878510323288355,
+            "p95": -7.430430960119301,
+            "maximum": -7.23626321463701
+          },
+          "rateOnlyCycleCount": 13,
+          "compatibleCycleCount": 13,
+          "longestCompatiblePhraseCycles": 13
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 30.667816192655938,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.910375,
+          "closestCompatibleRange": {
+            "firstIndex": 149,
+            "lastIndex": 175,
+            "cycles": 27,
+            "durationSeconds": 0.8792916666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.8440733946765216,
+            "median": 0.902262634316159,
+            "p95": 0.9316873401965573,
+            "maximum": 0.9360610174210552
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -9.853740295545368,
+            "median": -7.6896551311723,
+            "p95": -7.164239920926377,
+            "maximum": -6.510709169249407
+          },
+          "rateOnlyCycleCount": 28,
+          "compatibleCycleCount": 28,
+          "longestCompatiblePhraseCycles": 27
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 44.325886504963435,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.5901666666666666,
+          "closestCompatibleRange": {
+            "firstIndex": 20,
+            "lastIndex": 41,
+            "cycles": 22,
+            "durationSeconds": 0.49995833333333334
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.2818718092445005,
+            "median": 0.4493605206011965,
+            "p95": 0.6988363464549718,
+            "maximum": 0.7130632234524104
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -15.719038274394919,
+            "median": -15.196677243492918,
+            "p95": -14.547525880108896,
+            "maximum": -14.14478583673642
+          },
+          "rateOnlyCycleCount": 28,
+          "compatibleCycleCount": 26,
+          "longestCompatiblePhraseCycles": 22
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 44.325886504963435,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.9466666666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 13,
+            "lastIndex": 47,
+            "cycles": 35,
+            "durationSeconds": 0.7936666666666666
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.2818718092445005,
+            "median": 0.4513429036601526,
+            "p95": 0.7041179268716835,
+            "maximum": 0.7632484075159321
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -15.719038274394919,
+            "median": -14.888425392444148,
+            "p95": -13.741888006703343,
+            "maximum": -13.340785328459411
+          },
+          "rateOnlyCycleCount": 43,
+          "compatibleCycleCount": 42,
+          "longestCompatiblePhraseCycles": 35
+        }
+      ]
+    },
+    {
+      "model": "lectro",
+      "role": "exhaust",
+      "state": "idle",
+      "sha256": "97A0CADADB454A41D70E01189C94E094B04200DE42DC9C7D06D29E0FCF229C57",
+      "sampleRate": 24000,
+      "frames": 24069,
+      "intervalCount": 16,
+      "sourceDurationSeconds": 1.002875,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 17.309742443903474,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.1755,
+          "closestCompatibleRange": {
+            "firstIndex": 9,
+            "lastIndex": 9,
+            "cycles": 1,
+            "durationSeconds": 0.058125
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.6278429913457633,
+            "median": 0.6278429913457633,
+            "p95": 0.6278429913457633,
+            "maximum": 0.6278429913457633
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -9.770610274802557,
+            "median": -8.125663065426277,
+            "p95": -8.02341695448527,
+            "maximum": -8.012056275491826
+          },
+          "rateOnlyCycleCount": 4,
+          "compatibleCycleCount": 3,
+          "longestCompatiblePhraseCycles": 2
+        },
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 17.309742443903474,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.23575,
+          "closestCompatibleRange": {
+            "firstIndex": 9,
+            "lastIndex": 9,
+            "cycles": 1,
+            "durationSeconds": 0.058125
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.6278429913457633,
+            "median": 0.6278429913457633,
+            "p95": 0.6278429913457633,
+            "maximum": 0.6278429913457633
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -9.770610274802557,
+            "median": -8.068859670459052,
+            "p95": -7.399169278159167,
+            "maximum": -7.29101274921811
+          },
+          "rateOnlyCycleCount": 5,
+          "compatibleCycleCount": 4,
+          "longestCompatiblePhraseCycles": 2
+        }
+      ]
+    },
+    {
+      "model": "lectro",
+      "role": "exhaust",
+      "state": "accel",
+      "sha256": "24746DA996BB203D1983255D09BA415E70F332213E8BEBB1C0D5EB04FBAAADC3",
+      "sampleRate": 24000,
+      "frames": 216000,
+      "intervalCount": 241,
+      "sourceDurationSeconds": 9.0,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 14.740737158009505,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.20291666666666666,
+          "closestCompatibleRange": {
+            "firstIndex": 14,
+            "lastIndex": 16,
+            "cycles": 3,
+            "durationSeconds": 0.20291666666666666
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9659142970424337,
+            "median": 0.9689412134179277,
+            "p95": 0.9716654381558724,
+            "maximum": 0.9719681297934217
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -7.838629068556214,
+            "median": -7.162413778490321,
+            "p95": -6.929364663244531,
+            "maximum": -6.90347031710611
+          },
+          "rateOnlyCycleCount": 3,
+          "compatibleCycleCount": 3,
+          "longestCompatiblePhraseCycles": 3
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 14.740737158009505,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.26816666666666666,
+          "closestCompatibleRange": {
+            "firstIndex": 14,
+            "lastIndex": 17,
+            "cycles": 4,
+            "durationSeconds": 0.26816666666666666
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9659142970424337,
+            "median": 0.9719681297934217,
+            "p95": 0.9727679306609539,
+            "maximum": 0.9728567974240131
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -7.838629068556214,
+            "median": -7.032942047798215,
+            "p95": -6.496110107136884,
+            "maximum": -6.424223011259961
+          },
+          "rateOnlyCycleCount": 4,
+          "compatibleCycleCount": 4,
+          "longestCompatiblePhraseCycles": 4
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 27.696501271614157,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.36083333333333334,
+          "closestCompatibleRange": {
+            "firstIndex": 88,
+            "lastIndex": 94,
+            "cycles": 7,
+            "durationSeconds": 0.25183333333333335
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9385439400705494,
+            "median": 0.9551804924063988,
+            "p95": 0.9721908081281426,
+            "maximum": 0.9739231405503648
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -6.876907714526775,
+            "median": -5.8760398341211,
+            "p95": -5.544246418510019,
+            "maximum": -5.436959601252639
+          },
+          "rateOnlyCycleCount": 10,
+          "compatibleCycleCount": 10,
+          "longestCompatiblePhraseCycles": 7
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 27.696501271614157,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.651375,
+          "closestCompatibleRange": {
+            "firstIndex": 82,
+            "lastIndex": 98,
+            "cycles": 17,
+            "durationSeconds": 0.6163333333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9358847759197841,
+            "median": 0.961981582321017,
+            "p95": 0.9741877785909195,
+            "maximum": 0.974981692712584
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -7.398913271707715,
+            "median": -5.8760398341211,
+            "p95": -5.3428843015728384,
+            "maximum": -5.341053011735947
+          },
+          "rateOnlyCycleCount": 18,
+          "compatibleCycleCount": 18,
+          "longestCompatiblePhraseCycles": 17
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 44.94037525213335,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.7337083333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 206,
+            "lastIndex": 238,
+            "cycles": 33,
+            "durationSeconds": 0.7337083333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.7383354174590715,
+            "median": 0.840119414138472,
+            "p95": 0.8936763136088584,
+            "maximum": 0.9065554905552119
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -8.967872359660413,
+            "median": -8.41161660762251,
+            "p95": -7.897983468131293,
+            "maximum": -7.656421165680217
+          },
+          "rateOnlyCycleCount": 33,
+          "compatibleCycleCount": 33,
+          "longestCompatiblePhraseCycles": 33
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 44.94037525213335,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.9161666666666667,
+          "closestCompatibleRange": {
+            "firstIndex": 201,
+            "lastIndex": 240,
+            "cycles": 40,
+            "durationSeconds": 0.892875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.7326884324049496,
+            "median": 0.8352476178582885,
+            "p95": 0.8915636077658794,
+            "maximum": 0.9065554905552119
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -9.142247706679804,
+            "median": -8.560616841551381,
+            "p95": -7.963282082968448,
+            "maximum": -7.656421165680217
+          },
+          "rateOnlyCycleCount": 42,
+          "compatibleCycleCount": 41,
+          "longestCompatiblePhraseCycles": 40
+        }
+      ]
+    },
+    {
+      "model": "lectro",
+      "role": "exhaust",
+      "state": "decel",
+      "sha256": "D3B66056319C907EB4A074B826AD126ED6ED29299EEA5A68074688A3071D35DA",
+      "sampleRate": 24000,
+      "frames": 224704,
+      "intervalCount": 273,
+      "sourceDurationSeconds": 9.362666666666666,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 17.84143974050698,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.334375,
+          "closestCompatibleRange": {
+            "firstIndex": 248,
+            "lastIndex": 253,
+            "cycles": 6,
+            "durationSeconds": 0.334375
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9839399875959234,
+            "median": 0.985279686157116,
+            "p95": 0.988653596290796,
+            "maximum": 0.988858755725883
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -5.443199602742074,
+            "median": -5.3889857391103515,
+            "p95": -5.2076825541463965,
+            "maximum": -5.1795526939264835
+          },
+          "rateOnlyCycleCount": 6,
+          "compatibleCycleCount": 6,
+          "longestCompatiblePhraseCycles": 6
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 17.84143974050698,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.558375,
+          "closestCompatibleRange": {
+            "firstIndex": 246,
+            "lastIndex": 255,
+            "cycles": 10,
+            "durationSeconds": 0.558375
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9833895145653326,
+            "median": 0.9871088527635195,
+            "p95": 0.9896911648261317,
+            "maximum": 0.9902461042262976
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -5.644483943592782,
+            "median": -5.3889857391103515,
+            "p95": -5.196290602674287,
+            "maximum": -5.1795526939264835
+          },
+          "rateOnlyCycleCount": 10,
+          "compatibleCycleCount": 10,
+          "longestCompatiblePhraseCycles": 10
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 30.707670889847403,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.45770833333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 156,
+            "lastIndex": 169,
+            "cycles": 14,
+            "durationSeconds": 0.45770833333333333
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9159751348413553,
+            "median": 0.9647782908363361,
+            "p95": 0.9759376887830173,
+            "maximum": 0.9786899923685769
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -6.271388276357648,
+            "median": -5.58696062064956,
+            "p95": -5.329358123468131,
+            "maximum": -5.230676639319012
+          },
+          "rateOnlyCycleCount": 14,
+          "compatibleCycleCount": 14,
+          "longestCompatiblePhraseCycles": 14
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 30.707670889847403,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.9115,
+          "closestCompatibleRange": {
+            "firstIndex": 150,
+            "lastIndex": 175,
+            "cycles": 26,
+            "durationSeconds": 0.84925
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9159751348413553,
+            "median": 0.9625907057183942,
+            "p95": 0.9795191400994465,
+            "maximum": 0.9838417552636255
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -6.347736858487753,
+            "median": -5.525179362772699,
+            "p95": -5.240183049516886,
+            "maximum": -5.1644391077775715
+          },
+          "rateOnlyCycleCount": 28,
+          "compatibleCycleCount": 28,
+          "longestCompatiblePhraseCycles": 26
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 45.364869710261864,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.39579166666666665,
+          "closestCompatibleRange": {
+            "firstIndex": 17,
+            "lastIndex": 18,
+            "cycles": 2,
+            "durationSeconds": 0.04516666666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.4160015312114772,
+            "median": 0.7702315692471601,
+            "p95": 0.8538787941362882,
+            "maximum": 0.8620270335301539
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.398574326691538,
+            "median": -8.898142343618382,
+            "p95": -8.475066666342174,
+            "maximum": -8.40130065834152
+          },
+          "rateOnlyCycleCount": 22,
+          "compatibleCycleCount": 18,
+          "longestCompatiblePhraseCycles": 5
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 45.364869710261864,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.6419583333333333,
+          "closestCompatibleRange": {
+            "firstIndex": 17,
+            "lastIndex": 21,
+            "cycles": 5,
+            "durationSeconds": 0.11304166666666667
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.3678589323074043,
+            "median": 0.7481505435047001,
+            "p95": 0.8407583460604986,
+            "maximum": 0.8620270335301539
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.420618751196235,
+            "median": -8.998544473184744,
+            "p95": -8.387585879297777,
+            "maximum": -7.725873203489266
+          },
+          "rateOnlyCycleCount": 40,
+          "compatibleCycleCount": 29,
+          "longestCompatiblePhraseCycles": 12
+        }
+      ]
+    },
+    {
+      "model": "prototipo",
+      "role": "engine",
+      "state": "idle",
+      "sha256": "E8B5CD7AE4E9F3333B4588B7997C74E08B0E15F9B471C16C4842FC131E6FDBA3",
+      "sampleRate": 32000,
+      "frames": 30140,
+      "intervalCount": 11,
+      "sourceDurationSeconds": 0.941875,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 11.967367359119466,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.92121875,
+          "closestCompatibleRange": {
+            "firstIndex": 0,
+            "lastIndex": 10,
+            "cycles": 11,
+            "durationSeconds": 0.92121875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.27778233812715997,
+            "median": 0.4566037980190686,
+            "p95": 0.595639991575237,
+            "maximum": 0.5986907164693576
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.597276105313197,
+            "median": -11.21476044069588,
+            "p95": -10.615470165360632,
+            "maximum": -10.591285808078187
+          },
+          "rateOnlyCycleCount": 11,
+          "compatibleCycleCount": 11,
+          "longestCompatiblePhraseCycles": 11
+        },
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 11.967367359119466,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.92121875,
+          "closestCompatibleRange": {
+            "firstIndex": 0,
+            "lastIndex": 10,
+            "cycles": 11,
+            "durationSeconds": 0.92121875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.27778233812715997,
+            "median": 0.4566037980190686,
+            "p95": 0.595639991575237,
+            "maximum": 0.5986907164693576
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.597276105313197,
+            "median": -11.21476044069588,
+            "p95": -10.615470165360632,
+            "maximum": -10.591285808078187
+          },
+          "rateOnlyCycleCount": 11,
+          "compatibleCycleCount": 11,
+          "longestCompatiblePhraseCycles": 11
+        }
+      ]
+    },
+    {
+      "model": "prototipo",
+      "role": "engine",
+      "state": "accel",
+      "sha256": "218FC13CC6B72E0241B0C8A1629EBD2F29C481053F5A77A2CD56D6C8FA790BBB",
+      "sampleRate": 32000,
+      "frames": 310495,
+      "intervalCount": 296,
+      "sourceDurationSeconds": 9.70296875,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 16.71729058686715,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.35615625,
+          "closestCompatibleRange": {
+            "firstIndex": 18,
+            "lastIndex": 23,
+            "cycles": 6,
+            "durationSeconds": 0.35615625
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.22947420312611513,
+            "median": 0.3396410090373879,
+            "p95": 0.41794970785812036,
+            "maximum": 0.42649787434165254
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -20.353497768634842,
+            "median": -19.534539383759665,
+            "p95": -19.069100359010722,
+            "maximum": -19.016986848730852
+          },
+          "rateOnlyCycleCount": 6,
+          "compatibleCycleCount": 6,
+          "longestCompatiblePhraseCycles": 6
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 16.71729058686715,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.47059375,
+          "closestCompatibleRange": {
+            "firstIndex": 18,
+            "lastIndex": 25,
+            "cycles": 8,
+            "durationSeconds": 0.47059375
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.22947420312611513,
+            "median": 0.3271325949434372,
+            "p95": 0.41367562461635426,
+            "maximum": 0.42649787434165254
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -20.353497768634842,
+            "median": -19.3737854167741,
+            "p95": -18.839428780395107,
+            "maximum": -18.74382058975278
+          },
+          "rateOnlyCycleCount": 8,
+          "compatibleCycleCount": 8,
+          "longestCompatiblePhraseCycles": 8
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 31.401480111452226,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.2233125,
+          "closestCompatibleRange": {
+            "firstIndex": 103,
+            "lastIndex": 109,
+            "cycles": 7,
+            "durationSeconds": 0.2233125
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.4046136420100539,
+            "median": 0.5799220896087499,
+            "p95": 0.672984964517577,
+            "maximum": 0.6803488721164056
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.18236876607195,
+            "median": -11.52752572890279,
+            "p95": -11.120314441975014,
+            "maximum": -11.097082852799197
+          },
+          "rateOnlyCycleCount": 7,
+          "compatibleCycleCount": 7,
+          "longestCompatiblePhraseCycles": 7
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 31.401480111452226,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.291875,
+          "closestCompatibleRange": {
+            "firstIndex": 100,
+            "lastIndex": 108,
+            "cycles": 9,
+            "durationSeconds": 0.291875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.4046136420100539,
+            "median": 0.6566728958182007,
+            "p95": 0.7779610923605315,
+            "maximum": 0.8233624469714044
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.254782245857186,
+            "median": -11.709247111237639,
+            "p95": -11.283323424900347,
+            "maximum": -11.174521483385252
+          },
+          "rateOnlyCycleCount": 12,
+          "compatibleCycleCount": 9,
+          "longestCompatiblePhraseCycles": 9
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 51.044569896709724,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.77165625,
+          "closestCompatibleRange": {
+            "firstIndex": 242,
+            "lastIndex": 275,
+            "cycles": 34,
+            "durationSeconds": 0.67434375
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.396187828191968,
+            "median": 0.689920093873281,
+            "p95": 0.7847437603569803,
+            "maximum": 0.8215320287383902
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.12968642082429,
+            "median": -10.977247675349451,
+            "p95": -10.228744818311062,
+            "maximum": -9.862974035866284
+          },
+          "rateOnlyCycleCount": 39,
+          "compatibleCycleCount": 39,
+          "longestCompatiblePhraseCycles": 34
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 51.044569896709724,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 1.1106875,
+          "closestCompatibleRange": {
+            "firstIndex": 232,
+            "lastIndex": 277,
+            "cycles": 46,
+            "durationSeconds": 0.9156875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.24090931712837807,
+            "median": 0.7047807641141652,
+            "p95": 0.786810382617336,
+            "maximum": 0.8215320287383902
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.12968642082429,
+            "median": -10.890539291076097,
+            "p95": -10.129614767481785,
+            "maximum": -9.862974035866284
+          },
+          "rateOnlyCycleCount": 56,
+          "compatibleCycleCount": 56,
+          "longestCompatiblePhraseCycles": 46
+        }
+      ]
+    },
+    {
+      "model": "prototipo",
+      "role": "engine",
+      "state": "decel",
+      "sha256": "4BA75D60B0B2B5E3A70458F00F406E1CD4DFE9350BE356B6FF260CA9EF71544A",
+      "sampleRate": 32000,
+      "frames": 289949,
+      "intervalCount": 301,
+      "sourceDurationSeconds": 9.06090625,
+      "transientRiskCount": 1,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 17.00201966630831,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.120625,
+          "closestCompatibleRange": {
+            "firstIndex": 282,
+            "lastIndex": 282,
+            "cycles": 1,
+            "durationSeconds": 0.06009375
+          },
+          "adjacentCompatibleWaveformCorrelation": null,
+          "compatibleRmsDbRange": {
+            "minimum": -19.1182925732434,
+            "median": -18.255143469759783,
+            "p95": -17.47830927662453,
+            "maximum": -17.391994366276165
+          },
+          "rateOnlyCycleCount": 3,
+          "compatibleCycleCount": 2,
+          "longestCompatiblePhraseCycles": 1
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 17.00201966630831,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.120625,
+          "closestCompatibleRange": {
+            "firstIndex": 282,
+            "lastIndex": 282,
+            "cycles": 1,
+            "durationSeconds": 0.06009375
+          },
+          "adjacentCompatibleWaveformCorrelation": null,
+          "compatibleRmsDbRange": {
+            "minimum": -19.1182925732434,
+            "median": -18.255143469759783,
+            "p95": -17.47830927662453,
+            "maximum": -17.391994366276165
+          },
+          "rateOnlyCycleCount": 3,
+          "compatibleCycleCount": 2,
+          "longestCompatiblePhraseCycles": 1
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 33.63105325943892,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.29953125,
+          "closestCompatibleRange": {
+            "firstIndex": 193,
+            "lastIndex": 193,
+            "cycles": 1,
+            "durationSeconds": 0.029
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.457763159146327,
+            "median": 0.5063419540832332,
+            "p95": 0.5694820835520054,
+            "maximum": 0.5816997474192035
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -14.02046080865594,
+            "median": -13.407276007442418,
+            "p95": -12.888958154723637,
+            "maximum": -12.865158136743712
+          },
+          "rateOnlyCycleCount": 19,
+          "compatibleCycleCount": 10,
+          "longestCompatiblePhraseCycles": 7
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 33.63105325943892,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.48284375,
+          "closestCompatibleRange": {
+            "firstIndex": 191,
+            "lastIndex": 191,
+            "cycles": 1,
+            "durationSeconds": 0.0284375
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.42309252760078286,
+            "median": 0.5193840402636698,
+            "p95": 0.592369485215452,
+            "maximum": 0.6030392230117003
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -14.427464386495197,
+            "median": -13.492204414148315,
+            "p95": -12.90482483337692,
+            "maximum": -12.865158136743712
+          },
+          "rateOnlyCycleCount": 30,
+          "compatibleCycleCount": 16,
+          "longestCompatiblePhraseCycles": 12
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 50.46771622150316,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.497375,
+          "closestCompatibleRange": {
+            "firstIndex": 16,
+            "lastIndex": 33,
+            "cycles": 18,
+            "durationSeconds": 0.357375
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.24012374817680676,
+            "median": 0.47164949192167827,
+            "p95": 0.6332155068151295,
+            "maximum": 0.6380173223660431
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.024971968058459,
+            "median": -11.486470529073538,
+            "p95": -11.193962749655654,
+            "maximum": -10.713695854164468
+          },
+          "rateOnlyCycleCount": 30,
+          "compatibleCycleCount": 25,
+          "longestCompatiblePhraseCycles": 18
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 50.46771622150316,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.67371875,
+          "closestCompatibleRange": {
+            "firstIndex": 9,
+            "lastIndex": 36,
+            "cycles": 28,
+            "durationSeconds": 0.55321875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.06928573470623335,
+            "median": 0.38905055034135705,
+            "p95": 0.6125696444298879,
+            "maximum": 0.6380173223660431
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -12.024971968058459,
+            "median": -11.419122501310772,
+            "p95": -10.95937033558284,
+            "maximum": -10.713695854164468
+          },
+          "rateOnlyCycleCount": 48,
+          "compatibleCycleCount": 34,
+          "longestCompatiblePhraseCycles": 28
+        }
+      ]
+    },
+    {
+      "model": "prototipo",
+      "role": "exhaust",
+      "state": "idle",
+      "sha256": "92A08C364EB4154365E581D8F0065341D12C9BCD386CE1FAF9959FB0B0F10682",
+      "sampleRate": 32000,
+      "frames": 29783,
+      "intervalCount": 10,
+      "sourceDurationSeconds": 0.93071875,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 11.189929063842543,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.5388125,
+          "closestCompatibleRange": {
+            "firstIndex": 4,
+            "lastIndex": 5,
+            "cycles": 2,
+            "durationSeconds": 0.17915625
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.5412849911249696,
+            "median": 0.7791702909031095,
+            "p95": 0.822172250137315,
+            "maximum": 0.8269502456077823
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.80136027300871,
+            "median": -11.542746208003752,
+            "p95": -11.122887007539015,
+            "maximum": -11.049467710853262
+          },
+          "rateOnlyCycleCount": 7,
+          "compatibleCycleCount": 6,
+          "longestCompatiblePhraseCycles": 2
+        },
+        {
+          "label": "idle",
+          "operatingPoint": 0.5,
+          "sourcePosition": 0.5,
+          "targetRateHz": 11.189929063842543,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.7239375,
+          "closestCompatibleRange": {
+            "firstIndex": 1,
+            "lastIndex": 5,
+            "cycles": 5,
+            "durationSeconds": 0.4518125
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.5412849911249696,
+            "median": 0.8156299609795878,
+            "p95": 0.8332142876273053,
+            "maximum": 0.8348933395112186
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -11.80136027300871,
+            "median": -11.584944500539844,
+            "p95": -11.152254726213316,
+            "maximum": -11.049467710853262
+          },
+          "rateOnlyCycleCount": 10,
+          "compatibleCycleCount": 8,
+          "longestCompatiblePhraseCycles": 5
+        }
+      ]
+    },
+    {
+      "model": "prototipo",
+      "role": "exhaust",
+      "state": "accel",
+      "sha256": "3BD302350BB8C2C5D8D570B787DC99F7126A53599078A97752D4F48A0763C4F4",
+      "sampleRate": 32000,
+      "frames": 313967,
+      "intervalCount": 300,
+      "sourceDurationSeconds": 9.81146875,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 15.796179398978857,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.25346875,
+          "closestCompatibleRange": {
+            "firstIndex": 19,
+            "lastIndex": 20,
+            "cycles": 2,
+            "durationSeconds": 0.125125
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.10158157607525156,
+            "median": 0.13935470153564367,
+            "p95": 0.17335051444999652,
+            "maximum": 0.17712782699603574
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -18.368185667989728,
+            "median": -17.18294667488449,
+            "p95": -16.297989788223415,
+            "maximum": -16.177162605235914
+          },
+          "rateOnlyCycleCount": 6,
+          "compatibleCycleCount": 4,
+          "longestCompatiblePhraseCycles": 2
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.15,
+          "targetRateHz": 15.796179398978857,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.25346875,
+          "closestCompatibleRange": {
+            "firstIndex": 19,
+            "lastIndex": 20,
+            "cycles": 2,
+            "durationSeconds": 0.125125
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.10158157607525156,
+            "median": 0.13935470153564367,
+            "p95": 0.17335051444999652,
+            "maximum": 0.17712782699603574
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -18.368185667989728,
+            "median": -17.18294667488449,
+            "p95": -16.297989788223415,
+            "maximum": -16.177162605235914
+          },
+          "rateOnlyCycleCount": 6,
+          "compatibleCycleCount": 4,
+          "longestCompatiblePhraseCycles": 2
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 31.074592598514762,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.22471875,
+          "closestCompatibleRange": {
+            "firstIndex": 105,
+            "lastIndex": 111,
+            "cycles": 7,
+            "durationSeconds": 0.22471875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9218845009921303,
+            "median": 0.9400267696285078,
+            "p95": 0.9636419592847477,
+            "maximum": 0.9654918316904957
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.624267628730212,
+            "median": -10.466180688911713,
+            "p95": -10.183643123675356,
+            "maximum": -10.122740882864443
+          },
+          "rateOnlyCycleCount": 7,
+          "compatibleCycleCount": 7,
+          "longestCompatiblePhraseCycles": 7
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.55,
+          "targetRateHz": 31.074592598514762,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.3225,
+          "closestCompatibleRange": {
+            "firstIndex": 103,
+            "lastIndex": 112,
+            "cycles": 10,
+            "durationSeconds": 0.3225
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.9218845009921303,
+            "median": 0.9486028887435948,
+            "p95": 0.963854158825371,
+            "maximum": 0.9654918316904957
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.624267628730212,
+            "median": -10.456702754782455,
+            "p95": -9.841230852297615,
+            "maximum": -9.610904463652028
+          },
+          "rateOnlyCycleCount": 11,
+          "compatibleCycleCount": 10,
+          "longestCompatiblePhraseCycles": 10
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 51.210470060556176,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.6905,
+          "closestCompatibleRange": {
+            "firstIndex": 250,
+            "lastIndex": 278,
+            "cycles": 29,
+            "durationSeconds": 0.5731875
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.8381998532927268,
+            "median": 0.9501638950328885,
+            "p95": 0.9634152844831232,
+            "maximum": 0.965058276480394
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -9.839518148230058,
+            "median": -9.53037628019411,
+            "p95": -9.208364752377001,
+            "maximum": -8.827364339063505
+          },
+          "rateOnlyCycleCount": 35,
+          "compatibleCycleCount": 35,
+          "longestCompatiblePhraseCycles": 29
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.95,
+          "targetRateHz": 51.210470060556176,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.993875,
+          "closestCompatibleRange": {
+            "firstIndex": 235,
+            "lastIndex": 279,
+            "cycles": 45,
+            "durationSeconds": 0.89628125
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.8053755300042539,
+            "median": 0.9445332501158215,
+            "p95": 0.9639816688551528,
+            "maximum": 0.965058276480394
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.212241128263189,
+            "median": -9.596773568089471,
+            "p95": -9.274635423435855,
+            "maximum": -8.827364339063505
+          },
+          "rateOnlyCycleCount": 55,
+          "compatibleCycleCount": 50,
+          "longestCompatiblePhraseCycles": 45
+        }
+      ]
+    },
+    {
+      "model": "prototipo",
+      "role": "exhaust",
+      "state": "decel",
+      "sha256": "BC7E94E21696BDB535484342AB13D0F92EF207FB0B04A64D1FA4B8F62094D0F2",
+      "sampleRate": 32000,
+      "frames": 289949,
+      "intervalCount": 299,
+      "sourceDurationSeconds": 9.06090625,
+      "transientRiskCount": 0,
+      "embeddedEventIdentity": "unverified; no detected outlier is labeled a pop/shift/limiter",
+      "operatingRegions": [
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 17.205244732873375,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.17403125,
+          "closestCompatibleRange": {
+            "firstIndex": 280,
+            "lastIndex": 282,
+            "cycles": 3,
+            "durationSeconds": 0.17403125
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.04880523410569463,
+            "median": 0.12866229563661347,
+            "p95": 0.2005336510144404,
+            "maximum": 0.20851935716753228
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -16.22980808665988,
+            "median": -15.792681877434894,
+            "p95": -13.223314433219898,
+            "maximum": -12.937829161640453
+          },
+          "rateOnlyCycleCount": 3,
+          "compatibleCycleCount": 3,
+          "longestCompatiblePhraseCycles": 3
+        },
+        {
+          "label": "low",
+          "operatingPoint": 0.15,
+          "sourcePosition": 0.85,
+          "targetRateHz": 17.205244732873375,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.17403125,
+          "closestCompatibleRange": {
+            "firstIndex": 280,
+            "lastIndex": 282,
+            "cycles": 3,
+            "durationSeconds": 0.17403125
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.04880523410569463,
+            "median": 0.12866229563661347,
+            "p95": 0.2005336510144404,
+            "maximum": 0.20851935716753228
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -16.22980808665988,
+            "median": -15.792681877434894,
+            "p95": -13.223314433219898,
+            "maximum": -12.937829161640453
+          },
+          "rateOnlyCycleCount": 3,
+          "compatibleCycleCount": 3,
+          "longestCompatiblePhraseCycles": 3
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 35.90474144207537,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.4450625,
+          "closestCompatibleRange": {
+            "firstIndex": 164,
+            "lastIndex": 172,
+            "cycles": 9,
+            "durationSeconds": 0.2470625
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.709511455144977,
+            "median": 0.9332084611813922,
+            "p95": 0.9734333335235944,
+            "maximum": 0.9785596521861049
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.552914813958736,
+            "median": -9.238359598763148,
+            "p95": -8.339859911680504,
+            "maximum": -8.286973582292811
+          },
+          "rateOnlyCycleCount": 24,
+          "compatibleCycleCount": 16,
+          "longestCompatiblePhraseCycles": 9
+        },
+        {
+          "label": "middle",
+          "operatingPoint": 0.55,
+          "sourcePosition": 0.44999999999999996,
+          "targetRateHz": 35.90474144207537,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.7769375,
+          "closestCompatibleRange": {
+            "firstIndex": 157,
+            "lastIndex": 172,
+            "cycles": 16,
+            "durationSeconds": 0.43440625
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.709511455144977,
+            "median": 0.9354447446011158,
+            "p95": 0.9782164365319838,
+            "maximum": 0.9829035359133005
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -10.552914813958736,
+            "median": -9.244284606372556,
+            "p95": -8.380607531480747,
+            "maximum": -8.286973582292811
+          },
+          "rateOnlyCycleCount": 42,
+          "compatibleCycleCount": 28,
+          "longestCompatiblePhraseCycles": 16
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 50.621944612989736,
+          "tolerance": 0.03,
+          "totalCompatibleSeconds": 0.43915625,
+          "closestCompatibleRange": {
+            "firstIndex": 20,
+            "lastIndex": 33,
+            "cycles": 14,
+            "durationSeconds": 0.279125
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.6063890943038887,
+            "median": 0.7917584606016214,
+            "p95": 0.9064692614150635,
+            "maximum": 0.9190515990243703
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -9.130471188204488,
+            "median": -8.32994638996275,
+            "p95": -7.38409838749602,
+            "maximum": -7.251042585246935
+          },
+          "rateOnlyCycleCount": 31,
+          "compatibleCycleCount": 22,
+          "longestCompatiblePhraseCycles": 14
+        },
+        {
+          "label": "high",
+          "operatingPoint": 0.95,
+          "sourcePosition": 0.050000000000000044,
+          "targetRateHz": 50.621944612989736,
+          "tolerance": 0.05,
+          "totalCompatibleSeconds": 0.501125,
+          "closestCompatibleRange": {
+            "firstIndex": 20,
+            "lastIndex": 42,
+            "cycles": 23,
+            "durationSeconds": 0.462125
+          },
+          "adjacentCompatibleWaveformCorrelation": {
+            "minimum": 0.6063890943038887,
+            "median": 0.8262169633833562,
+            "p95": 0.9179277675057571,
+            "maximum": 0.9221430584622922
+          },
+          "compatibleRmsDbRange": {
+            "minimum": -9.130471188204488,
+            "median": -8.304343722463091,
+            "p95": -7.275413408541308,
+            "maximum": -7.108806707779759
+          },
+          "rateOnlyCycleCount": 43,
+          "compatibleCycleCount": 25,
+          "longestCompatiblePhraseCycles": 23
+        }
+      ]
+    }
+  ]
+}

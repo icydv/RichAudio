@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "milestone": "STOCK-SOURCE-03",
+  "baselineCommit": "3fa6649fd687bf524bd3cc9df8847cdf6a0026b4",
+  "previousInventories": {
+    "audition01": {
+      "files": 72,
+      "allSha256Unchanged": true
+    },
+    "evidence01": {
+      "files": 92,
+      "allSha256Unchanged": true
+    },
+    "audition02": {
+      "files": 24,
+      "allSha256Unchanged": true
+    },
+    "distance02": {
+      "files": 8,
+      "allSha256Unchanged": true
+    },
+    "evidence02": {
+      "files": 98,
+      "allSha256Unchanged": true
+    }
+  },
+  "privateInventorySha256": "c3b8b0f488d2c1f11a0ea593ad7e808db2eea49a0e3240e6d59c65b1327abb03",
+  "reproducedSources": [
+    {
+      "model": "schafter3",
+      "monoFloat32Sha256": "782ed95a54ff728594ade2b15495625c1108c8cb6d93f72dde28ae25b7d810fe",
+      "bitwiseEqual": true,
+      "sampleRate": 48000,
+      "frames": 432000,
+      "exact_source_reproduction": true,
+      "maximum_error": 0,
+      "uploaded_peak_windows": [
+        {
+          "startSeconds": 4,
+          "endSeconds": 4.4,
+          "repeatLagMs": 19.270833333333336,
+          "maxNormalizedAutocorrelation": 0.5234563721762349
+        },
+        {
+          "startSeconds": 4.85,
+          "endSeconds": 5.15,
+          "repeatLagMs": 17.895833333333332,
+          "maxNormalizedAutocorrelation": 0.9995545282731907
+        },
+        {
+          "startSeconds": 4.95,
+          "endSeconds": 5.19,
+          "repeatLagMs": 17.895833333333332,
+          "maxNormalizedAutocorrelation": 0.9994972515877367
+        }
+      ]
+    },
+    {
+      "model": "bati",
+      "monoFloat32Sha256": "2c71f6a09a68ee9413f4c2a2765f583719c0624b7b91e4b61e343edc964fc1ab",
+      "bitwiseEqual": true,
+      "sampleRate": 48000,
+      "frames": 432000,
+      "exact_source_reproduction": true,
+      "maximum_error": 0,
+      "uploaded_peak_windows": [
+        {
+          "startSeconds": 4,
+          "endSeconds": 4.4,
+          "repeatLagMs": 13.708333333333332,
+          "maxNormalizedAutocorrelation": 0.4657572126721631
+        },
+        {
+          "startSeconds": 4.85,
+          "endSeconds": 5.15,
+          "repeatLagMs": 25.875,
+          "maxNormalizedAutocorrelation": 0.9955365561982233
+        },
+        {
+          "startSeconds": 4.95,
+          "endSeconds": 5.19,
+          "repeatLagMs": 25.875,
+          "maxNormalizedAutocorrelation": 0.9955337109364577
+        }
+      ]
+    }
+  ],
+  "reproductionReportSha256": "c8895245ffeea012ccdc6698b5b8247ca7ff88be4f001451a9282800d323a59f",
+  "interpretation": "Reported peak autocorrelation is reproduced evidence of the reviewed held excerpt; not a universal engine periodicity rejection threshold.",
+  "gameLaunched": false,
+  "audioEndpointOpened": false,
+  "subjectiveListening": "not performed"
+}

@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "milestone": "STOCK-SOURCE-03",
+  "scope": "Targeted existing-export graph audit and exactly four narrowly decoded X80 pop streams; no full trace or other extraction",
+  "models": [
+    {
+      "model": "bati",
+      "exhaustPopsField": "null_sound",
+      "availableValidatedDiscretePopVariants": 0,
+      "revsOffField": "hash_816FBBFE",
+      "revsOffExternalTerminal": {
+        "containerHash": "D76F54D8",
+        "fileHash": "3B0AD5F2",
+        "validatedPcmAvailable": false
+      },
+      "transmissionField": "hash_699D9F91",
+      "transmissionGraph": "VariableBlock\u2192Multitrack\u2192ParameterTransform/ModularSynth plus externalSimpleSound",
+      "discreteGearshiftSampleEstablished": false,
+      "separateIntakeAssetEstablished": false,
+      "kersAssetEstablished": false
+    },
+    {
+      "model": "lectro",
+      "exhaustPopsField": "null_sound",
+      "availableValidatedDiscretePopVariants": 0,
+      "revsOffField": "hash_816FBBFE",
+      "revsOffExternalTerminal": {
+        "containerHash": "D76F54D8",
+        "fileHash": "3B0AD5F2",
+        "validatedPcmAvailable": false
+      },
+      "transmissionField": "hash_699D9F91",
+      "transmissionGraph": "VariableBlock\u2192Multitrack\u2192ParameterTransform/ModularSynth plus externalSimpleSound",
+      "discreteGearshiftSampleEstablished": false,
+      "separateIntakeAssetEstablished": false,
+      "kersAssetEstablished": false
+    },
+    {
+      "model": "prototipo",
+      "exhaustPopsField": "hash_4DFBD9EB",
+      "availableValidatedDiscretePopVariants": 4,
+      "revsOffField": "hash_86E7AD94",
+      "revsOffExternalTerminal": {
+        "containerHash": "15F17382",
+        "fileHash": "9845D6BB",
+        "validatedPcmAvailable": false
+      },
+      "transmissionField": "hash_45E9C10E",
+      "transmissionGraph": "VariableBlock\u2192ParameterTransform\u2192ModularSynth",
+      "discreteGearshiftSampleEstablished": false,
+      "separateIntakeAssetEstablished": false,
+      "kersAssetEstablished": false
+    },
+    {
+      "model": "schafter3",
+      "exhaustPopsField": "null_sound",
+      "availableValidatedDiscretePopVariants": 0,
+      "revsOffField": "hash_22385FE7",
+      "revsOffExternalTerminal": {
+        "containerHash": "D2F8F7E1",
+        "fileHash": "85D4E251",
+        "validatedPcmAvailable": false
+      },
+      "transmissionField": "hash_699D9F91",
+      "transmissionGraph": "VariableBlock\u2192Multitrack\u2192ParameterTransform/ModularSynth plus externalSimpleSound",
+      "discreteGearshiftSampleEstablished": false,
+      "separateIntakeAssetEstablished": false,
+      "kersAssetEstablished": false
+    }
+  ],
+  "x80PopAssetEvidence": "stock-source-03-x80-pops.json",
+  "x80PopValidation": {
+    "decodedStreams": 4,
+    "sourceCodec": 0,
+    "exactRawPcmAndWavBinding": true,
+    "exactPcm16ToFloatRoundtrip": true,
+    "numericDecoderBoundaryChecksPassed": 9,
+    "independentStandardWavChecksPassed": 4,
+    "archiveUnchanged": true,
+    "nativeRates": [
+      32005,
+      32001,
+      32002,
+      32001
+    ],
+    "frames": [
+      4709,
+      4405,
+      6066,
+      4609
+    ],
+    "edgeMeasurements": [
+      {
+        "name": "exhaust_pop_01",
+        "rate": 32005,
+        "frames": 4709,
+        "seconds": 0.1471332604280581,
+        "first": -0.000244140625,
+        "last": 0.024566650390625,
+        "peakSeconds": 0.00821746602093423,
+        "tail10msRms": 0.12398581303718843,
+        "exactPcmToFloat": true
+      },
+      {
+        "name": "exhaust_pop_02",
+        "rate": 32001,
+        "frames": 4405,
+        "seconds": 0.13765194837661324,
+        "first": 9.1552734375e-05,
+        "last": 3.0517578125e-05,
+        "peakSeconds": 0.0065622949282834915,
+        "tail10msRms": 0.09143121315570961,
+        "exactPcmToFloat": true
+      },
+      {
+        "name": "exhaust_pop_03",
+        "rate": 32002,
+        "frames": 6066,
+        "seconds": 0.18955065308418223,
+        "first": 0.0013427734375,
+        "last": -0.00067138671875,
+        "peakSeconds": 0.11174301606149616,
+        "tail10msRms": 0.2566934092816635,
+        "exactPcmToFloat": true
+      },
+      {
+        "name": "exhaust_pop_04",
+        "rate": 32001,
+        "frames": 4609,
+        "seconds": 0.1440267491640886,
+        "first": -0.000396728515625,
+        "last": -0.0001220703125,
+        "peakSeconds": 0.00721852442111184,
+        "tail10msRms": 0.07195034661935258,
+        "exactPcmToFloat": true
+      }
+    ]
+  },
+  "embeddedSustainRisks": [
+    {
+      "model": "prototipo",
+      "role": "engine",
+      "state": "decel",
+      "intervalIndex": 252,
+      "sourceCentreSeconds": 6.42271875,
+      "identity": "unverified isolated envelope/spectral outlier; not labeled pop/limiter/shift",
+      "scores": {
+        "rmsBoostDb": 4.015383993565871,
+        "peak1msBoostDb": 6.292370909758982,
+        "crestBoostDb": -0.6258001413452359,
+        "orderInnovation": 0.2969796716170259
+      }
+    }
+  ],
+  "limitations": [
+    "No subjective listening was performed.",
+    "Native X80 ExhaustPops graph establishes event identity. Any offline trigger timing or one-shot edge fade is an authored control, not recovered ECU/fuel/gear behavior.",
+    "Isolated numeric outlier detection is conservative and cannot establish that unflagged sustained PCM contains no transient.",
+    "No Bati/Lectro/Schafter pop, separately identified intake, KERS or discrete gearshift event is invented.",
+    "External RevsOff/transmission terminals are not available validated PCM in this library and were not extracted."
+  ]
+}

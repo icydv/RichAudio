@@ -26,7 +26,7 @@ export class VehicleAcousticPipeline {
     this.renderer.setPathBudget(qualityPresets[quality]);
   }
   setAcceleration(mode) { this.backend.setMode(mode); }
-  replaceScene(scene) { this.simulation.replaceScene(scene); }
+  replaceScene(scene, options) { this.simulation.replaceScene(scene, options); }
   // Called on the source/control worker. GPU preparation is never in process().
   async prepare(snapshot, options = {}) {
     this.simulation.observe(snapshot);

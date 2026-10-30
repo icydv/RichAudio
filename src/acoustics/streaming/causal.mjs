@@ -80,16 +80,26 @@ export class CausalSimulation {
       sceneReplacements: 0,
     };
   }
-  replaceScene(scene) {
+  replaceScene(scene, { preserveIdenticalReflectors = false } = {}) {
     requireValue(scene === null || validated.scene(scene), 'validated replacement scene');
     requireValue(!scene || this.historySeconds>=scene.config.maxDelay+.1,'replacement delay exceeds retained history');
+    requireValue(typeof preserveIdenticalReflectors === 'boolean', 'explicit coverage-only preservation option');
+    if(preserveIdenticalReflectors){
+      requireValue(this.scene&&scene&&!this.scene.observationModel&&!scene.observationModel&&
+        this.scene.tile?.coverage==='complete-synthetic'&&scene.tile?.coverage==='complete-synthetic'&&
+        this.scene.tile.missingRegions.length===0&&scene.tile.missingRegions.length===0&&
+        JSON.stringify(this.scene.tile.surfaces)===JSON.stringify(scene.tile.surfaces)&&
+        JSON.stringify(this.scene.materials)===JSON.stringify(scene.materials)&&
+        JSON.stringify(this.scene.config)===JSON.stringify(scene.config)&&this.scene.coordinateSpace===scene.coordinateSpace,
+        'coverage-only preservation requires exactly identical complete finite reflectors, materials and propagation settings');
+    }
     if (scene?.geometryKey === this.scene?.geometryKey) return;
     this.scene = scene;
     this.candidates = scene ? candidatePaths(scene,this.processingSettings?{maxReflectors:this.processingSettings.maxReflectors}:{}) : [];
     this.geometryEpoch++;
     // A geometry replacement changes reflector identity, not the existing
     // direct arrival history. Preserve its retarded-time rate/smoothing.
-    for(const id of this.previous.keys())if(!id.includes(':direct:g'))this.previous.delete(id);
+    if(!preserveIdenticalReflectors)for(const id of this.previous.keys())if(!id.includes(':direct:g'))this.previous.delete(id);
     this.stats.sceneReplacements++;
   }
   setProcessingSettings({pathBudget,maxReflectors,earlyReflections=true}) {

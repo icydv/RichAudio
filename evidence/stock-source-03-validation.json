@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "milestone": "STOCK-SOURCE-03",
+  "baseCommit": "3fa6649fd687bf524bd3cc9df8847cdf6a0026b4",
+  "previousFiles": {
+    "audition01": {
+      "files": 72,
+      "allSha256Unchanged": true
+    },
+    "evidence01": {
+      "files": 92,
+      "allSha256Unchanged": true
+    },
+    "audition02": {
+      "files": 24,
+      "allSha256Unchanged": true
+    },
+    "distance02": {
+      "files": 8,
+      "allSha256Unchanged": true
+    },
+    "evidence02": {
+      "files": 98,
+      "allSha256Unchanged": true
+    }
+  },
+  "totalPreviousFilesChecked": 294,
+  "delivery": {
+    "audioPlayers": 64,
+    "allLocalTargetsExist": true,
+    "inlineScriptParses": true,
+    "explicitCommonVolume": true,
+    "noAutoplay": true,
+    "browserInteractionPerformed": false,
+    "subjectiveListeningPerformed": false,
+    "nativeReferences": 28,
+    "generatedWavs": 36
+  },
+  "tests": {
+    "command": "node --test tests/Test-StockSustain.mjs tests/Test-StockFidelity.mjs tests/Test-StockSource.mjs tests/Test-StockGrain.mjs tests/Test-StockSource03Scenario.mjs tests/Test-StockFidelityPropagation.mjs tests/Test-StockLateSend.mjs tests/Test-VehiclePropagation.mjs tests/Test-VehiclePipeline.mjs tests/Test-VehicleEnvironment.mjs tests/Test-VehicleDistancePresentation.mjs",
+    "passed": 57,
+    "failed": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "scope": "Focused source/causal propagation/distance/late integration only; no full CI or full benchmark matrix"
+  },
+  "finalSustainBindingMatchesRenderedCore": true,
+  "moduleBindings": {
+    "src/acoustics/vehicle/stock-source.mjs": "80b527d4ea62fee5972442bdf94b2be6f8e7db0f51b2df7dfb8e32e22038078a",
+    "src/acoustics/vehicle/stock-grain.mjs": "3d5cfa2c99eb59ea249945bc5d16dd4f90fe81b90d6fbad132d08266fa9bb8ab",
+    "src/acoustics/vehicle/pipeline.mjs": "a91fe572a424651f54db97703e2025bd21373e8093400b3a92f8797540584620",
+    "src/acoustics/vehicle/environment.mjs": "8ec78f17704f36432596a0da070257c023cb5a353cad316c741a58f1df1558da",
+    "src/acoustics/vehicle/stock-events.mjs": "579483c74bd143249804bac60195110a6f114fbcbcd26d00db63fe38d4802fe0",
+    "src/acoustics/vehicle/distance-presentation.mjs": "947ac8254c0a508358746ad2607ea9a5a946fe8577286f92d2f7f7bfe5b9cec5",
+    "src/acoustics/streaming/causal.mjs": "491d84288c083d6d8a9ca2040a5ee2350aa68ea7dff14a95a3322197348af226",
+    "src/acoustics/engine/paths.mjs": "b4c12a08a2b240e54be1032bc7877e1dc8ecdcc9115e062b10439515c0024794",
+    "tools/stock-source-01-scenario.mjs": "8f23ce3cc3493f094d85123f86e33240e3bf808423f76b11a1cf6498e74ff9e4"
+  },
+  "packageChecksPassed": 36,
+  "perceptualAcceptance": "PENDING user listening"
+}
