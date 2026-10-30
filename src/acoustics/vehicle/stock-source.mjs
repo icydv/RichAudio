@@ -10,6 +10,7 @@ export {StockGrainVoice,NativePcmVoice} from './stock-grain.mjs';
 const FS=48000,clamp=x=>Math.max(0,Math.min(1,x));
 const check=(ok,message)=>{if(!ok)throw Error(message);};
 const verifiedVehicleBanks=new WeakSet();
+export const isVerifiedStockBank=bank=>verifiedVehicleBanks.has(bank);
 const validModel=model=>typeof model==='string'&&/^[a-zA-Z0-9_:-]{1,64}$/.test(model);
 export const stockModels=Object.freeze(['bati','lectro','prototipo','schafter3']);
 export const stockRoles=Object.freeze(['engine','exhaust']);

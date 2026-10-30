@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "catalogSha256": "c4250395be8638b9d44df2a43da966caec99841a83f26e3131be51edca57c018",
+  "modelCount": 935,
+  "contexts": {
+    "player": {
+      "counts": {
+        "bank-not-decoded": 695,
+        "incomplete-or-unverified-six-state-graph": 231,
+        "available": 9
+      },
+      "available": [
+        {
+          "model": "bati",
+          "decodedBank": "bati"
+        },
+        {
+          "model": "bati2",
+          "decodedBank": "bati"
+        },
+        {
+          "model": "lectro",
+          "decodedBank": "lectro"
+        },
+        {
+          "model": "prototipo",
+          "decodedBank": "prototipo"
+        },
+        {
+          "model": "schafter3",
+          "decodedBank": "schafter3"
+        },
+        {
+          "model": "schafter4",
+          "decodedBank": "schafter3"
+        },
+        {
+          "model": "schafter5",
+          "decodedBank": "schafter3"
+        },
+        {
+          "model": "schafter6",
+          "decodedBank": "schafter3"
+        },
+        {
+          "model": "thrust",
+          "decodedBank": "bati"
+        }
+      ]
+    },
+    "npc": {
+      "counts": {
+        "incomplete-or-unverified-six-state-graph": 935
+      },
+      "available": []
+    }
+  },
+  "focusedTestsPassed": 5,
+  "genuineFourSourceWaveformsUnchanged": true,
+  "pressureProfileChanged": false,
+  "gameLaunched": false,
+  "endpointOpened": false,
+  "runtimeReplacementImplemented": false
+}
