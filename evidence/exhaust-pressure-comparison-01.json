@@ -1,0 +1,1739 @@
+{
+  "schemaVersion": 1,
+  "status": "complete",
+  "basis": "Published Source05 frozen source performance and acoustic configuration",
+  "sampleRate": 48000,
+  "durationSeconds": 10.3,
+  "multipliers": [
+    2.5,
+    5,
+    7,
+    7.5,
+    10
+  ],
+  "commonGain": 0.25,
+  "commonGainDb": -12.041199826559248,
+  "rendererMasterGain": 0.7,
+  "sourceGain": 1.5956559506856056,
+  "files": [
+    {
+      "model": "bati",
+      "sceneName": "road-exhaust",
+      "multiplier": 2.5,
+      "exhaustDbAboveCurrent2p5": 0,
+      "file": "bati/road-exhaust-2p5x.wav",
+      "sha256": "9326c4052bf11c9e5687143334ae516d2f523ea28fd96608a439674fdfb49e42",
+      "metrics": {
+        "peak": 0.13248424232006073,
+        "rms": 0.00913868167494422,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.019787027616985142
+      },
+      "nearPass": {
+        "peak": 0.13248424232006073,
+        "rms": 0.026903425538821985,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.019787027616985142
+      },
+      "liftAndRecession": {
+        "peak": 0.0270551610738039,
+        "rms": 0.003205287726934827,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.0037586595863103867
+      },
+      "sourceHash": "a5cb77ccd7dc003d408b27c7c8cdc7ebb5bbd239b8bfd44fc9171bfd94c50db2",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "bati",
+      "sceneName": "road-exhaust",
+      "multiplier": 5,
+      "exhaustDbAboveCurrent2p5": 6.020599913279624,
+      "file": "bati/road-exhaust-5x.wav",
+      "sha256": "9fe61984554a7e6df51f59d6e693e295ce217f332c6919addd2e4af0c886201f",
+      "metrics": {
+        "peak": 0.24589717388153076,
+        "rms": 0.01775006790975889,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.03012973116710782
+      },
+      "nearPass": {
+        "peak": 0.24589717388153076,
+        "rms": 0.05208114799257747,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.03012973116710782
+      },
+      "liftAndRecession": {
+        "peak": 0.0554787702858448,
+        "rms": 0.006287994772671223,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.006121156737208366
+      },
+      "sourceHash": "a5cb77ccd7dc003d408b27c7c8cdc7ebb5bbd239b8bfd44fc9171bfd94c50db2",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "bati",
+      "sceneName": "road-exhaust",
+      "multiplier": 7,
+      "exhaustDbAboveCurrent2p5": 8.943160626844385,
+      "file": "bati/road-exhaust-7x.wav",
+      "sha256": "b11b1396685b78e405b602bb9d6680c3e7fbf133e130c4ba30868256c03b1f4e",
+      "metrics": {
+        "peak": 0.3366275131702423,
+        "rms": 0.024679834769320105,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.03840389475226402
+      },
+      "nearPass": {
+        "peak": 0.3366275131702423,
+        "rms": 0.0723374605614309,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.03840389475226402
+      },
+      "liftAndRecession": {
+        "peak": 0.07825779914855957,
+        "rms": 0.008781172056982067,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.008329920470714569
+      },
+      "sourceHash": "a5cb77ccd7dc003d408b27c7c8cdc7ebb5bbd239b8bfd44fc9171bfd94c50db2",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "bati",
+      "sceneName": "road-exhaust",
+      "multiplier": 7.5,
+      "exhaustDbAboveCurrent2p5": 9.542425094393248,
+      "file": "bati/road-exhaust-7p5x.wav",
+      "sha256": "6a89f9696ad6fc41a34c0273f65f33257e1b50dd6681abafbe1f55ceab667cbf",
+      "metrics": {
+        "peak": 0.359310120344162,
+        "rms": 0.026414224826780883,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.04047243855893612
+      },
+      "nearPass": {
+        "peak": 0.359310120344162,
+        "rms": 0.0774070337954951,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.04047243855893612
+      },
+      "liftAndRecession": {
+        "peak": 0.08395256102085114,
+        "rms": 0.009405738209979832,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.008882112801074982
+      },
+      "sourceHash": "a5cb77ccd7dc003d408b27c7c8cdc7ebb5bbd239b8bfd44fc9171bfd94c50db2",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "bati",
+      "sceneName": "road-exhaust",
+      "multiplier": 10,
+      "exhaustDbAboveCurrent2p5": 12.041199826559248,
+      "file": "bati/road-exhaust-10x.wav",
+      "sha256": "d89b6b533ebcf310c9ce98b058bddcedf2788035b1e77eeacfb5fbce2339588c",
+      "metrics": {
+        "peak": 0.4727230370044708,
+        "rms": 0.03509208731634277,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.05081513803452253
+      },
+      "nearPass": {
+        "peak": 0.4727230370044708,
+        "rms": 0.10277160621773175,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.05081513803452253
+      },
+      "liftAndRecession": {
+        "peak": 0.11242634803056717,
+        "rms": 0.012532396756143909,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.01170160248875618
+      },
+      "sourceHash": "a5cb77ccd7dc003d408b27c7c8cdc7ebb5bbd239b8bfd44fc9171bfd94c50db2",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "bati",
+      "sceneName": "urban24",
+      "multiplier": 2.5,
+      "exhaustDbAboveCurrent2p5": 0,
+      "file": "bati/urban24-2p5x.wav",
+      "sha256": "1bbc645af585ee62b45c97d050fb2f1de16f8d46f046ee5552f77f4a15ad1c8b",
+      "metrics": {
+        "peak": 0.12129996716976166,
+        "rms": 0.010081978140895485,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.019191525410860777
+      },
+      "nearPass": {
+        "peak": 0.12129996716976166,
+        "rms": 0.02741787079140988,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.019191525410860777
+      },
+      "liftAndRecession": {
+        "peak": 0.04235661029815674,
+        "rms": 0.005336579591643557,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.004652901436202228
+      },
+      "sourceHash": "a5cb77ccd7dc003d408b27c7c8cdc7ebb5bbd239b8bfd44fc9171bfd94c50db2",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "bati",
+      "sceneName": "urban24",
+      "multiplier": 5,
+      "exhaustDbAboveCurrent2p5": 6.020599913279624,
+      "file": "bati/urban24-5x.wav",
+      "sha256": "c6bd59de791a45b43a49b8fe2abed08c2ab88a75e478aea81353050e67a1c7ef",
+      "metrics": {
+        "peak": 0.22601287066936493,
+        "rms": 0.019616265183301982,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.029442918836139143
+      },
+      "nearPass": {
+        "peak": 0.22601287066936493,
+        "rms": 0.05311635070389544,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.029442918836139143
+      },
+      "liftAndRecession": {
+        "peak": 0.08549061417579651,
+        "rms": 0.010409144070909775,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.006874804152175784
+      },
+      "sourceHash": "a5cb77ccd7dc003d408b27c7c8cdc7ebb5bbd239b8bfd44fc9171bfd94c50db2",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "bati",
+      "sceneName": "urban24",
+      "multiplier": 7,
+      "exhaustDbAboveCurrent2p5": 8.943160626844385,
+      "file": "bati/urban24-7x.wav",
+      "sha256": "f08b71a5105c3668fc964ae6e4f7e86b2af39ec7d05bf0913dbc3b53adf963b5",
+      "metrics": {
+        "peak": 0.3097831904888153,
+        "rms": 0.027291705777571437,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.03764402982778847
+      },
+      "nearPass": {
+        "peak": 0.3097831904888153,
+        "rms": 0.07379274955145829,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.03764402982778847
+      },
+      "liftAndRecession": {
+        "peak": 0.11999781429767609,
+        "rms": 0.01451424462947599,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.009628204628825188
+      },
+      "sourceHash": "a5cb77ccd7dc003d408b27c7c8cdc7ebb5bbd239b8bfd44fc9171bfd94c50db2",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "bati",
+      "sceneName": "urban24",
+      "multiplier": 7.5,
+      "exhaustDbAboveCurrent2p5": 9.542425094393248,
+      "file": "bati/urban24-7p5x.wav",
+      "sha256": "04d8484fb2aee8afb2b6472a36db5f67f5741d6cf18823afdfcf0169e8a72bc3",
+      "metrics": {
+        "peak": 0.330725759267807,
+        "rms": 0.02921286048858555,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.03969431028235704
+      },
+      "nearPass": {
+        "peak": 0.330725759267807,
+        "rms": 0.07896750594370867,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.03969431028235704
+      },
+      "liftAndRecession": {
+        "peak": 0.12862461805343628,
+        "rms": 0.015542751200394505,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.010316554456949234
+      },
+      "sourceHash": "a5cb77ccd7dc003d408b27c7c8cdc7ebb5bbd239b8bfd44fc9171bfd94c50db2",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "bati",
+      "sceneName": "urban24",
+      "multiplier": 10,
+      "exhaustDbAboveCurrent2p5": 12.041199826559248,
+      "file": "bati/urban24-10x.wav",
+      "sha256": "33889111d2bd9c82cfa4e501ac669ec22b5c8bfe130b8cc8561239cc7ccf8d5a",
+      "metrics": {
+        "peak": 0.43593183159828186,
+        "rms": 0.03882558895311865,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.04994570184499025
+      },
+      "nearPass": {
+        "peak": 0.43593183159828186,
+        "rms": 0.1048584783629084,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.04994570184499025
+      },
+      "liftAndRecession": {
+        "peak": 0.17175860702991486,
+        "rms": 0.020692017437674827,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.013758304994553328
+      },
+      "sourceHash": "a5cb77ccd7dc003d408b27c7c8cdc7ebb5bbd239b8bfd44fc9171bfd94c50db2",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "lectro",
+      "sceneName": "road-exhaust",
+      "multiplier": 2.5,
+      "exhaustDbAboveCurrent2p5": 0,
+      "file": "lectro/road-exhaust-2p5x.wav",
+      "sha256": "9adcbf4e8d73ff2ae598fff3c6d6fe544da3dadcdf54baa4320935e06a5dd1ce",
+      "metrics": {
+        "peak": 0.1054888591170311,
+        "rms": 0.008000112394187719,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.030342172365635633
+      },
+      "nearPass": {
+        "peak": 0.1054888591170311,
+        "rms": 0.021589101249491326,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.030342172365635633
+      },
+      "liftAndRecession": {
+        "peak": 0.022811848670244217,
+        "rms": 0.004283115787188874,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.004293005302315578
+      },
+      "sourceHash": "c88a45c9585a5693218ca059e079f0f866707e7ee55526730496d798a4672d53",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "lectro",
+      "sceneName": "road-exhaust",
+      "multiplier": 5,
+      "exhaustDbAboveCurrent2p5": 6.020599913279624,
+      "file": "lectro/road-exhaust-5x.wav",
+      "sha256": "d914fea325c15c6762b5525931799c0de9b637549ee2d2bd5fcb1280cedeb973",
+      "metrics": {
+        "peak": 0.20961569249629974,
+        "rms": 0.015387080432672803,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.05309421010315418
+      },
+      "nearPass": {
+        "peak": 0.20961569249629974,
+        "rms": 0.041806414199458845,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.05309421010315418
+      },
+      "liftAndRecession": {
+        "peak": 0.04386705905199051,
+        "rms": 0.008275749072085635,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.008412855211645365
+      },
+      "sourceHash": "c88a45c9585a5693218ca059e079f0f866707e7ee55526730496d798a4672d53",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "lectro",
+      "sceneName": "road-exhaust",
+      "multiplier": 7,
+      "exhaustDbAboveCurrent2p5": 8.943160626844385,
+      "file": "lectro/road-exhaust-7x.wav",
+      "sha256": "2eb88bf8649ed052f0b5f2cf2887fe42e62b1f426f4ebd943d2c066e22f2be81",
+      "metrics": {
+        "peak": 0.29626497626304626,
+        "rms": 0.021354174783980277,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.07129583694040775
+      },
+      "nearPass": {
+        "peak": 0.29626497626304626,
+        "rms": 0.05813405158152182,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.07129583694040775
+      },
+      "liftAndRecession": {
+        "peak": 0.06148523464798927,
+        "rms": 0.011481656303409528,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.011780887376517057
+      },
+      "sourceHash": "c88a45c9585a5693218ca059e079f0f866707e7ee55526730496d798a4672d53",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "lectro",
+      "sceneName": "road-exhaust",
+      "multiplier": 7.5,
+      "exhaustDbAboveCurrent2p5": 9.542425094393248,
+      "file": "lectro/road-exhaust-7p5x.wav",
+      "sha256": "6c7634a33ef4ec5720a1dc6a959c4e80f3399cc3024d60d16dd2344da8d219c3",
+      "metrics": {
+        "peak": 0.3179273009300232,
+        "rms": 0.02284873314799345,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.07584624364972115
+      },
+      "nearPass": {
+        "peak": 0.3179273009300232,
+        "rms": 0.06222333922834802,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.07584624364972115
+      },
+      "liftAndRecession": {
+        "peak": 0.06588978320360184,
+        "rms": 0.012283703621960889,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.012622895650565624
+      },
+      "sourceHash": "c88a45c9585a5693218ca059e079f0f866707e7ee55526730496d798a4672d53",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "lectro",
+      "sceneName": "road-exhaust",
+      "multiplier": 10,
+      "exhaustDbAboveCurrent2p5": 12.041199826559248,
+      "file": "lectro/road-exhaust-10x.wav",
+      "sha256": "1523b71aa416516dc0cd43acf3080064a26c8bf8436b5fd70b0d2de28a33a5b1",
+      "metrics": {
+        "peak": 0.42623892426490784,
+        "rms": 0.03032999976294158,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.09859828092157841
+      },
+      "nearPass": {
+        "peak": 0.42623892426490784,
+        "rms": 0.08269215398524825,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.09859828092157841
+      },
+      "liftAndRecession": {
+        "peak": 0.08797676116228104,
+        "rms": 0.01629567846484546,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.016832935623824596
+      },
+      "sourceHash": "c88a45c9585a5693218ca059e079f0f866707e7ee55526730496d798a4672d53",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "lectro",
+      "sceneName": "urban24",
+      "multiplier": 2.5,
+      "exhaustDbAboveCurrent2p5": 0,
+      "file": "lectro/urban24-2p5x.wav",
+      "sha256": "26b3039ff87d7371d519ac28cbadade7341afe8e6c728e961dbc7065f0a91887",
+      "metrics": {
+        "peak": 0.10585907101631165,
+        "rms": 0.009618124244544418,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.03055245615541935
+      },
+      "nearPass": {
+        "peak": 0.10585907101631165,
+        "rms": 0.0231546867671598,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.03055245615541935
+      },
+      "liftAndRecession": {
+        "peak": 0.038764405995607376,
+        "rms": 0.0069965384346907114,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.0053827790543437
+      },
+      "sourceHash": "c88a45c9585a5693218ca059e079f0f866707e7ee55526730496d798a4672d53",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "lectro",
+      "sceneName": "urban24",
+      "multiplier": 5,
+      "exhaustDbAboveCurrent2p5": 6.020599913279624,
+      "file": "lectro/urban24-5x.wav",
+      "sha256": "a1533895c7730618322b9a1c89434547fd5209426151cd7c6f430a987b1ac823",
+      "metrics": {
+        "peak": 0.21294938027858734,
+        "rms": 0.018505347637171616,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.05323455296456814
+      },
+      "nearPass": {
+        "peak": 0.21294938027858734,
+        "rms": 0.0451814304947788,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.05323455296456814
+      },
+      "liftAndRecession": {
+        "peak": 0.07624254375696182,
+        "rms": 0.013461934919168228,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.010803564917296171
+      },
+      "sourceHash": "c88a45c9585a5693218ca059e079f0f866707e7ee55526730496d798a4672d53",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "lectro",
+      "sceneName": "urban24",
+      "multiplier": 7,
+      "exhaustDbAboveCurrent2p5": 8.943160626844385,
+      "file": "lectro/urban24-7x.wav",
+      "sha256": "ea85b9fec7cb51492c28b43eebd26ac487d1ac4d4b010e189e6f138a41a3869a",
+      "metrics": {
+        "peak": 0.29912298917770386,
+        "rms": 0.025686797423971758,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.07138023152947426
+      },
+      "nearPass": {
+        "peak": 0.29912298917770386,
+        "rms": 0.0629589134698219,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.07138023152947426
+      },
+      "liftAndRecession": {
+        "peak": 0.10622505098581314,
+        "rms": 0.018658739502977747,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.015140191651880741
+      },
+      "sourceHash": "c88a45c9585a5693218ca059e079f0f866707e7ee55526730496d798a4672d53",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "lectro",
+      "sceneName": "urban24",
+      "multiplier": 7.5,
+      "exhaustDbAboveCurrent2p5": 9.542425094393248,
+      "file": "lectro/urban24-7p5x.wav",
+      "sha256": "dd74a190b80b7f98f430d193e11cd27cd92751ac090d2909f4762b9170728d2f",
+      "metrics": {
+        "peak": 0.3206663727760315,
+        "rms": 0.02748562721415315,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.07591664791107178
+      },
+      "nearPass": {
+        "peak": 0.3206663727760315,
+        "rms": 0.06741069967954105,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.07591664791107178
+      },
+      "liftAndRecession": {
+        "peak": 0.11372067779302597,
+        "rms": 0.019959130284116916,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.016224348917603493
+      },
+      "sourceHash": "c88a45c9585a5693218ca059e079f0f866707e7ee55526730496d798a4672d53",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "lectro",
+      "sceneName": "urban24",
+      "multiplier": 10,
+      "exhaustDbAboveCurrent2p5": 12.041199826559248,
+      "file": "lectro/urban24-10x.wav",
+      "sha256": "50bdd23b4c1fd7cc8148ff804a70b89fe454b63b939c82f8845fd5f96d55badb",
+      "metrics": {
+        "peak": 0.42838338017463684,
+        "rms": 0.036490324057362536,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.09859874472022057
+      },
+      "nearPass": {
+        "peak": 0.42838338017463684,
+        "rms": 0.08969203880735546,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.09859874472022057
+      },
+      "liftAndRecession": {
+        "peak": 0.15119881927967072,
+        "rms": 0.026464714612809574,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.021645134314894676
+      },
+      "sourceHash": "c88a45c9585a5693218ca059e079f0f866707e7ee55526730496d798a4672d53",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "prototipo",
+      "sceneName": "road-exhaust",
+      "multiplier": 2.5,
+      "exhaustDbAboveCurrent2p5": 0,
+      "file": "prototipo/road-exhaust-2p5x.wav",
+      "sha256": "f6b52277d8689fe1bf9dcbf8ee526e0ab03885a69f3e18d1fe4e6cfdf8e298ad",
+      "metrics": {
+        "peak": 0.10941873490810394,
+        "rms": 0.007683948826877161,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.038171328604221344
+      },
+      "nearPass": {
+        "peak": 0.10941873490810394,
+        "rms": 0.021297309749701884,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.038171328604221344
+      },
+      "liftAndRecession": {
+        "peak": 0.02733677253127098,
+        "rms": 0.004112227421404761,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.006520002847537398
+      },
+      "sourceHash": "60e93ba9f929b01f22d4b03f47e8dad92c7720b86271970217dd3156870fbf5a",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "prototipo",
+      "sceneName": "road-exhaust",
+      "multiplier": 5,
+      "exhaustDbAboveCurrent2p5": 6.020599913279624,
+      "file": "prototipo/road-exhaust-5x.wav",
+      "sha256": "159ec8f9ef9714a564af22bd7f35b8e54ca54a7e3181a26a7aec71271df0aa6c",
+      "metrics": {
+        "peak": 0.20648787915706635,
+        "rms": 0.014828182317003138,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.07521688565611839
+      },
+      "nearPass": {
+        "peak": 0.20648787915706635,
+        "rms": 0.04075633828532054,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.07521688565611839
+      },
+      "liftAndRecession": {
+        "peak": 0.05583806335926056,
+        "rms": 0.008212077417934525,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.012527406681329012
+      },
+      "sourceHash": "60e93ba9f929b01f22d4b03f47e8dad92c7720b86271970217dd3156870fbf5a",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "prototipo",
+      "sceneName": "road-exhaust",
+      "multiplier": 7,
+      "exhaustDbAboveCurrent2p5": 8.943160626844385,
+      "file": "prototipo/road-exhaust-7x.wav",
+      "sha256": "f58e7ebe034c5f24b9ce05776e3e309f56df305ede86eb298a7bacd8a277210d",
+      "metrics": {
+        "peak": 0.28414320945739746,
+        "rms": 0.020618248636705864,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.1048533245921135
+      },
+      "nearPass": {
+        "peak": 0.28414320945739746,
+        "rms": 0.05656668412984887,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.1048533245921135
+      },
+      "liftAndRecession": {
+        "peak": 0.07863909751176834,
+        "rms": 0.011502732817572605,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.01733333058655262
+      },
+      "sourceHash": "60e93ba9f929b01f22d4b03f47e8dad92c7720b86271970217dd3156870fbf5a",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "prototipo",
+      "sceneName": "road-exhaust",
+      "multiplier": 7.5,
+      "exhaustDbAboveCurrent2p5": 9.542425094393248,
+      "file": "prototipo/road-exhaust-7p5x.wav",
+      "sha256": "8a778e8855084376bb9508a2c472522307f936b09596b92b035ecea14df18220",
+      "metrics": {
+        "peak": 0.30355703830718994,
+        "rms": 0.022069354871300878,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.11226243525743484
+      },
+      "nearPass": {
+        "peak": 0.30355703830718994,
+        "rms": 0.06053106760235811,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.11226243525743484
+      },
+      "liftAndRecession": {
+        "peak": 0.08433935791254044,
+        "rms": 0.012325895160498715,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.018534811213612556
+      },
+      "sourceHash": "60e93ba9f929b01f22d4b03f47e8dad92c7720b86271970217dd3156870fbf5a",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "prototipo",
+      "sceneName": "road-exhaust",
+      "multiplier": 10,
+      "exhaustDbAboveCurrent2p5": 12.041199826559248,
+      "file": "prototipo/road-exhaust-10x.wav",
+      "sha256": "af1b9470b6e7f0ad2daaacc7b2ef2942d4b43f96baf8214bfdd8ea076507aece",
+      "metrics": {
+        "peak": 0.40062618255615234,
+        "rms": 0.02933576946000665,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.1493079885840416
+      },
+      "nearPass": {
+        "peak": 0.40062618255615234,
+        "rms": 0.08038885807013123,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.1493079885840416
+      },
+      "liftAndRecession": {
+        "peak": 0.11284065246582031,
+        "rms": 0.016443200486160565,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.02454221621155739
+      },
+      "sourceHash": "60e93ba9f929b01f22d4b03f47e8dad92c7720b86271970217dd3156870fbf5a",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "prototipo",
+      "sceneName": "urban24",
+      "multiplier": 2.5,
+      "exhaustDbAboveCurrent2p5": 0,
+      "file": "prototipo/urban24-2p5x.wav",
+      "sha256": "f69d60ca76fc1138b713999257f16b1bd55eb2f92f123841ac50fcb88a1a689f",
+      "metrics": {
+        "peak": 0.10720950365066528,
+        "rms": 0.00882652671364298,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.03920734114944935
+      },
+      "nearPass": {
+        "peak": 0.10720950365066528,
+        "rms": 0.022277112769796683,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.03920734114944935
+      },
+      "liftAndRecession": {
+        "peak": 0.03893422707915306,
+        "rms": 0.00609713726944339,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.007386287557892501
+      },
+      "sourceHash": "60e93ba9f929b01f22d4b03f47e8dad92c7720b86271970217dd3156870fbf5a",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "prototipo",
+      "sceneName": "urban24",
+      "multiplier": 5,
+      "exhaustDbAboveCurrent2p5": 6.020599913279624,
+      "file": "prototipo/urban24-5x.wav",
+      "sha256": "4743aec54f338d2f42fb7e1edbf951ff983855c0ac8acb6b16ef659cd14faaae",
+      "metrics": {
+        "peak": 0.20141853392124176,
+        "rms": 0.017116956979064846,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.07674921303987503
+      },
+      "nearPass": {
+        "peak": 0.20141853392124176,
+        "rms": 0.042755618890553036,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.07674921303987503
+      },
+      "liftAndRecession": {
+        "peak": 0.07603452354669571,
+        "rms": 0.012093273283123387,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.01484067877754569
+      },
+      "sourceHash": "60e93ba9f929b01f22d4b03f47e8dad92c7720b86271970217dd3156870fbf5a",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "prototipo",
+      "sceneName": "urban24",
+      "multiplier": 7,
+      "exhaustDbAboveCurrent2p5": 8.943160626844385,
+      "file": "prototipo/urban24-7x.wav",
+      "sha256": "0b90234cc7ba8b033fc225a2b5ef2df39ee1829c2e10496ad248289a87d8c31e",
+      "metrics": {
+        "peak": 0.2767857611179352,
+        "rms": 0.023829396579120813,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.1067827045917511
+      },
+      "nearPass": {
+        "peak": 0.2767857611179352,
+        "rms": 0.0593839474224834,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.1067827045917511
+      },
+      "liftAndRecession": {
+        "peak": 0.10652708262205124,
+        "rms": 0.016911090973209936,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.02080419287085533
+      },
+      "sourceHash": "60e93ba9f929b01f22d4b03f47e8dad92c7720b86271970217dd3156870fbf5a",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "prototipo",
+      "sceneName": "urban24",
+      "multiplier": 7.5,
+      "exhaustDbAboveCurrent2p5": 9.542425094393248,
+      "file": "prototipo/urban24-7p5x.wav",
+      "sha256": "ff39240a4b549b3034ae9d569faa225193fce60e5cda89f15fa1d1252021e95a",
+      "metrics": {
+        "peak": 0.29565396904945374,
+        "rms": 0.025511333791560432,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.11429108679294586
+      },
+      "nearPass": {
+        "peak": 0.29565396904945374,
+        "rms": 0.0635529015254232,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.11429108679294586
+      },
+      "liftAndRecession": {
+        "peak": 0.11415021866559982,
+        "rms": 0.018116520679576923,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.022295071743428707
+      },
+      "sourceHash": "60e93ba9f929b01f22d4b03f47e8dad92c7720b86271970217dd3156870fbf5a",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "prototipo",
+      "sceneName": "urban24",
+      "multiplier": 10,
+      "exhaustDbAboveCurrent2p5": 12.041199826559248,
+      "file": "prototipo/urban24-10x.wav",
+      "sha256": "3e7f220a1986668bafb7ec0718578932216c71b6543cc9e6e7884ebe03f84eee",
+      "metrics": {
+        "peak": 0.39013099670410156,
+        "rms": 0.033932600576686484,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.1518329605460167
+      },
+      "nearPass": {
+        "peak": 0.39013099670410156,
+        "rms": 0.0844337302333293,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.1518329605460167
+      },
+      "liftAndRecession": {
+        "peak": 0.15226592123508453,
+        "rms": 0.024146599576582637,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.029749460518360138
+      },
+      "sourceHash": "60e93ba9f929b01f22d4b03f47e8dad92c7720b86271970217dd3156870fbf5a",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "schafter3",
+      "sceneName": "road-exhaust",
+      "multiplier": 2.5,
+      "exhaustDbAboveCurrent2p5": 0,
+      "file": "schafter3/road-exhaust-2p5x.wav",
+      "sha256": "c06b2b3754c14e09171d1970fd897fb9f62018c0a66c3303634ec35562d345c2",
+      "metrics": {
+        "peak": 0.1512536108493805,
+        "rms": 0.01030002537823141,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.013967663049697876
+      },
+      "nearPass": {
+        "peak": 0.1512536108493805,
+        "rms": 0.030134533983106206,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.013967663049697876
+      },
+      "liftAndRecession": {
+        "peak": 0.033727459609508514,
+        "rms": 0.0036113615668953206,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.002633431926369667
+      },
+      "sourceHash": "fad1426f59e2156cf12fc4c2175015093f7577670912e6e651a44dc9c4e6a296",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "schafter3",
+      "sceneName": "road-exhaust",
+      "multiplier": 5,
+      "exhaustDbAboveCurrent2p5": 6.020599913279624,
+      "file": "schafter3/road-exhaust-5x.wav",
+      "sha256": "b87efa6c18138a217a5ea54c44ca0ee6b9c5241d52dd53af7e899b5b4a918894",
+      "metrics": {
+        "peak": 0.29900261759757996,
+        "rms": 0.02022389151077419,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.027023591101169586
+      },
+      "nearPass": {
+        "peak": 0.29900261759757996,
+        "rms": 0.05923580379614243,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.027023591101169586
+      },
+      "liftAndRecession": {
+        "peak": 0.06711626052856445,
+        "rms": 0.00707886199043134,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.004953701049089432
+      },
+      "sourceHash": "fad1426f59e2156cf12fc4c2175015093f7577670912e6e651a44dc9c4e6a296",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "schafter3",
+      "sceneName": "road-exhaust",
+      "multiplier": 7,
+      "exhaustDbAboveCurrent2p5": 8.943160626844385,
+      "file": "schafter3/road-exhaust-7x.wav",
+      "sha256": "bbc0fc5d88b9faca345eba92d909ecdb7fcdc1ffbdde1f5dd5880a50baae2296",
+      "metrics": {
+        "peak": 0.41720181703567505,
+        "rms": 0.028206873245750785,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.03746834397315979
+      },
+      "nearPass": {
+        "peak": 0.41720181703567505,
+        "rms": 0.08264513356870637,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.03746834397315979
+      },
+      "liftAndRecession": {
+        "peak": 0.09382729977369308,
+        "rms": 0.009865310196182914,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.0068099163472652435
+      },
+      "sourceHash": "fad1426f59e2156cf12fc4c2175015093f7577670912e6e651a44dc9c4e6a296",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "schafter3",
+      "sceneName": "road-exhaust",
+      "multiplier": 7.5,
+      "exhaustDbAboveCurrent2p5": 9.542425094393248,
+      "file": "schafter3/road-exhaust-7p5x.wav",
+      "sha256": "770a84ef4f4f6e439168327c2d7af9d03c09b9eb34391a48cd2f1701ae97c4c9",
+      "metrics": {
+        "peak": 0.4467516243457794,
+        "rms": 0.030204691886619717,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.04007953405380249
+      },
+      "nearPass": {
+        "peak": 0.4467516243457794,
+        "rms": 0.08850351806935697,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.04007953405380249
+      },
+      "liftAndRecession": {
+        "peak": 0.10051212459802628,
+        "rms": 0.010562512097467617,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.007273969240486622
+      },
+      "sourceHash": "fad1426f59e2156cf12fc4c2175015093f7577670912e6e651a44dc9c4e6a296",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "schafter3",
+      "sceneName": "road-exhaust",
+      "multiplier": 10,
+      "exhaustDbAboveCurrent2p5": 12.041199826559248,
+      "file": "schafter3/road-exhaust-10x.wav",
+      "sha256": "ee83cf420eaeaf8dd80c91f8cf0aa1a69ddaaa6872a7d6878710924da851ac95",
+      "metrics": {
+        "peak": 0.5945006012916565,
+        "rms": 0.04020004221278543,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.053135454654693604
+      },
+      "nearPass": {
+        "peak": 0.5945006012916565,
+        "rms": 0.11781369574205562,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.053135454654693604
+      },
+      "liftAndRecession": {
+        "peak": 0.13393738865852356,
+        "rms": 0.01405030449581922,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.009594238363206387
+      },
+      "sourceHash": "fad1426f59e2156cf12fc4c2175015093f7577670912e6e651a44dc9c4e6a296",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "schafter3",
+      "sceneName": "urban24",
+      "multiplier": 2.5,
+      "exhaustDbAboveCurrent2p5": 0,
+      "file": "schafter3/urban24-2p5x.wav",
+      "sha256": "d070d538e18c27e40c2ffddc42f1def6aed9f9884a692032ac26c82c7b8d063a",
+      "metrics": {
+        "peak": 0.16268934309482574,
+        "rms": 0.011659709274484054,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.014800481498241425
+      },
+      "nearPass": {
+        "peak": 0.16268934309482574,
+        "rms": 0.033091071394893326,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.014800481498241425
+      },
+      "liftAndRecession": {
+        "peak": 0.044088076800107956,
+        "rms": 0.005033574535530833,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.0034786753822118044
+      },
+      "sourceHash": "fad1426f59e2156cf12fc4c2175015093f7577670912e6e651a44dc9c4e6a296",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "schafter3",
+      "sceneName": "urban24",
+      "multiplier": 5,
+      "exhaustDbAboveCurrent2p5": 6.020599913279624,
+      "file": "schafter3/urban24-5x.wav",
+      "sha256": "23b1667aaaebae0304b0587715a647a9030d1f7c482d97a0b34acd74a6db93af",
+      "metrics": {
+        "peak": 0.31562915444374084,
+        "rms": 0.02291540628041711,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.028581492602825165
+      },
+      "nearPass": {
+        "peak": 0.31562915444374084,
+        "rms": 0.0651615931841008,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.028581492602825165
+      },
+      "liftAndRecession": {
+        "peak": 0.08630102127790451,
+        "rms": 0.009855238034136782,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.006402069702744484
+      },
+      "sourceHash": "fad1426f59e2156cf12fc4c2175015093f7577670912e6e651a44dc9c4e6a296",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "schafter3",
+      "sceneName": "urban24",
+      "multiplier": 7,
+      "exhaustDbAboveCurrent2p5": 8.943160626844385,
+      "file": "schafter3/urban24-7x.wav",
+      "sha256": "d9c1d74a535456e35a3816f1f717d57294fab61767a61ec529bdeedbf44141ce",
+      "metrics": {
+        "peak": 0.43805843591690063,
+        "rms": 0.03197357576599232,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.03960631787776947
+      },
+      "nearPass": {
+        "peak": 0.43805843591690063,
+        "rms": 0.09095769255786838,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.03960631787776947
+      },
+      "liftAndRecession": {
+        "peak": 0.12007138133049011,
+        "rms": 0.013738327896370018,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.008741497993469238
+      },
+      "sourceHash": "fad1426f59e2156cf12fc4c2175015093f7577670912e6e651a44dc9c4e6a296",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "schafter3",
+      "sceneName": "urban24",
+      "multiplier": 7.5,
+      "exhaustDbAboveCurrent2p5": 9.542425094393248,
+      "file": "schafter3/urban24-7p5x.wav",
+      "sha256": "0db58699e134df75cb4805bba3d77dec7e1b3e347cd213e5879fec5949cfd5c2",
+      "metrics": {
+        "peak": 0.46866574883461,
+        "rms": 0.03424064650398153,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.0423625111579895
+      },
+      "nearPass": {
+        "peak": 0.46866574883461,
+        "rms": 0.09741329045507503,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.0423625111579895
+      },
+      "liftAndRecession": {
+        "peak": 0.12851396203041077,
+        "rms": 0.014710320691452986,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.009336896240711212
+      },
+      "sourceHash": "fad1426f59e2156cf12fc4c2175015093f7577670912e6e651a44dc9c4e6a296",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    },
+    {
+      "model": "schafter3",
+      "sceneName": "urban24",
+      "multiplier": 10,
+      "exhaustDbAboveCurrent2p5": 12.041199826559248,
+      "file": "schafter3/urban24-10x.wav",
+      "sha256": "94dd7d845e5ef07f3d04708c511596a62edfd5714c965cd540cc6ebd06fc1162",
+      "metrics": {
+        "peak": 0.6217023730278015,
+        "rms": 0.04558362541876441,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 32768,
+        "maximumAdjacentStep": 0.05614352226257324
+      },
+      "nearPass": {
+        "peak": 0.6217023730278015,
+        "rms": 0.12971108980578203,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.05614352226257324
+      },
+      "liftAndRecession": {
+        "peak": 0.17072691023349762,
+        "rms": 0.019573970662937677,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 0,
+        "maximumAdjacentStep": 0.012313883751630783
+      },
+      "sourceHash": "fad1426f59e2156cf12fc4c2175015093f7577670912e6e651a44dc9c4e6a296",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04"
+    }
+  ],
+  "cases": [
+    {
+      "model": "bati",
+      "sceneName": "road-exhaust",
+      "sourceHash": "a5cb77ccd7dc003d408b27c7c8cdc7ebb5bbd239b8bfd44fc9171bfd94c50db2",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04",
+      "publishedReferenceSha256": "d049ff0bf7525af68f33ec67c3a756728fc132fa11d73f8468dccc77bab42762",
+      "maximumReferenceError": 0,
+      "maximumSumError": 8.381903171539307e-9,
+      "deadlineMisses": 1,
+      "maximumBlockMs": 19.33910000000003,
+      "timingScope": "Full renderer only; diagnostic stem passes excluded",
+      "renderer": {
+        "frames": 494400,
+        "peak": 0.1324842467645771,
+        "sumSquares": 82.58012915961262,
+        "limited": 0,
+        "missingHistory": 0,
+        "controlUpdates": 966,
+        "rejectedControls": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "maximumControlAgeFrames": 511
+      },
+      "history": {
+        "beforeStart": 0,
+        "future": 0,
+        "frameTag": 0,
+        "generationTag": 0,
+        "zeroWeightUnavailable": 0,
+        "affectedFrames": 0,
+        "firstFrame": -1,
+        "lastFrame": -1
+      }
+    },
+    {
+      "model": "bati",
+      "sceneName": "urban24",
+      "sourceHash": "a5cb77ccd7dc003d408b27c7c8cdc7ebb5bbd239b8bfd44fc9171bfd94c50db2",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04",
+      "publishedReferenceSha256": "5a6e8dc06a8e658de8b4bb45a9852d339d3aaf178e8c0c8d04bf8fff3a324b01",
+      "maximumReferenceError": 0,
+      "maximumSumError": 8.381903171539307e-9,
+      "deadlineMisses": 1,
+      "maximumBlockMs": 11.370300000000043,
+      "timingScope": "Full renderer only; diagnostic stem passes excluded",
+      "renderer": {
+        "frames": 494400,
+        "peak": 0.12129996859816608,
+        "sumSquares": 100.50784494500788,
+        "limited": 0,
+        "missingHistory": 0,
+        "controlUpdates": 966,
+        "rejectedControls": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "maximumControlAgeFrames": 511
+      },
+      "history": {
+        "beforeStart": 0,
+        "future": 0,
+        "frameTag": 0,
+        "generationTag": 0,
+        "zeroWeightUnavailable": 0,
+        "affectedFrames": 0,
+        "firstFrame": -1,
+        "lastFrame": -1
+      }
+    },
+    {
+      "model": "lectro",
+      "sceneName": "road-exhaust",
+      "sourceHash": "c88a45c9585a5693218ca059e079f0f866707e7ee55526730496d798a4672d53",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04",
+      "publishedReferenceSha256": "56c705d442871079f177ffb7bd7d2bba17c536af4e9f4cfd321ad28a02b4a43d",
+      "maximumReferenceError": 0,
+      "maximumSumError": 7.712515071034431e-9,
+      "deadlineMisses": 0,
+      "maximumBlockMs": 9.729600000000573,
+      "timingScope": "Full renderer only; diagnostic stem passes excluded",
+      "renderer": {
+        "frames": 494400,
+        "peak": 0.10548886115102604,
+        "sumSquares": 63.28497819175429,
+        "limited": 0,
+        "missingHistory": 0,
+        "controlUpdates": 966,
+        "rejectedControls": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "maximumControlAgeFrames": 511
+      },
+      "history": {
+        "beforeStart": 0,
+        "future": 0,
+        "frameTag": 0,
+        "generationTag": 0,
+        "zeroWeightUnavailable": 0,
+        "affectedFrames": 0,
+        "firstFrame": -1,
+        "lastFrame": -1
+      }
+    },
+    {
+      "model": "lectro",
+      "sceneName": "urban24",
+      "sourceHash": "c88a45c9585a5693218ca059e079f0f866707e7ee55526730496d798a4672d53",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04",
+      "publishedReferenceSha256": "e0a2389b778913cb9e092a38358db63167f770de5b6c9d7a58b5dd37734bd9eb",
+      "maximumReferenceError": 0,
+      "maximumSumError": 8.032657206058502e-9,
+      "deadlineMisses": 1,
+      "maximumBlockMs": 10.839900000000853,
+      "timingScope": "Full renderer only; diagnostic stem passes excluded",
+      "renderer": {
+        "frames": 494400,
+        "peak": 0.105859071074174,
+        "sumSquares": 91.47222089743758,
+        "limited": 0,
+        "missingHistory": 0,
+        "controlUpdates": 966,
+        "rejectedControls": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "maximumControlAgeFrames": 511
+      },
+      "history": {
+        "beforeStart": 0,
+        "future": 0,
+        "frameTag": 0,
+        "generationTag": 0,
+        "zeroWeightUnavailable": 0,
+        "affectedFrames": 0,
+        "firstFrame": -1,
+        "lastFrame": -1
+      }
+    },
+    {
+      "model": "prototipo",
+      "sceneName": "road-exhaust",
+      "sourceHash": "60e93ba9f929b01f22d4b03f47e8dad92c7720b86271970217dd3156870fbf5a",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04",
+      "publishedReferenceSha256": "ff6e1720853688436d19f65a63098a8b6ffdbc92ddeb278a5d3db8d0adebdf41",
+      "maximumReferenceError": 0,
+      "maximumSumError": 7.450580596923828e-9,
+      "deadlineMisses": 0,
+      "maximumBlockMs": 7.82640000000174,
+      "timingScope": "Full renderer only; diagnostic stem passes excluded",
+      "renderer": {
+        "frames": 494400,
+        "peak": 0.10941873481186203,
+        "sumSquares": 58.38178719360547,
+        "limited": 0,
+        "missingHistory": 0,
+        "controlUpdates": 966,
+        "rejectedControls": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "maximumControlAgeFrames": 511
+      },
+      "history": {
+        "beforeStart": 0,
+        "future": 0,
+        "frameTag": 0,
+        "generationTag": 0,
+        "zeroWeightUnavailable": 0,
+        "affectedFrames": 0,
+        "firstFrame": -1,
+        "lastFrame": -1
+      }
+    },
+    {
+      "model": "prototipo",
+      "sceneName": "urban24",
+      "sourceHash": "60e93ba9f929b01f22d4b03f47e8dad92c7720b86271970217dd3156870fbf5a",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04",
+      "publishedReferenceSha256": "99c1bdea3a7bdf510ac55e8d95cd4e1494649f9d068229ad368eae8cb52f0734",
+      "maximumReferenceError": 0,
+      "maximumSumError": 7.450580596923828e-9,
+      "deadlineMisses": 2,
+      "maximumBlockMs": 13.175899999998364,
+      "timingScope": "Full renderer only; diagnostic stem passes excluded",
+      "renderer": {
+        "frames": 494400,
+        "peak": 0.10720950231777537,
+        "sumSquares": 77.03500903765189,
+        "limited": 0,
+        "missingHistory": 0,
+        "controlUpdates": 966,
+        "rejectedControls": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "maximumControlAgeFrames": 511
+      },
+      "history": {
+        "beforeStart": 0,
+        "future": 0,
+        "frameTag": 0,
+        "generationTag": 0,
+        "zeroWeightUnavailable": 0,
+        "affectedFrames": 0,
+        "firstFrame": -1,
+        "lastFrame": -1
+      }
+    },
+    {
+      "model": "schafter3",
+      "sceneName": "road-exhaust",
+      "sourceHash": "fad1426f59e2156cf12fc4c2175015093f7577670912e6e651a44dc9c4e6a296",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04",
+      "publishedReferenceSha256": "80a6002f89acf0be5bf6d6e110ac7b2dfd015ffe3230308edd9d8d3722f2e0e7",
+      "maximumReferenceError": 0,
+      "maximumSumError": 1.1641532182693481e-8,
+      "deadlineMisses": 0,
+      "maximumBlockMs": 8.178299999999581,
+      "timingScope": "Full renderer only; diagnostic stem passes excluded",
+      "renderer": {
+        "frames": 494400,
+        "peak": 0.15125361513856972,
+        "sumSquares": 104.90230890868061,
+        "limited": 0,
+        "missingHistory": 0,
+        "controlUpdates": 966,
+        "rejectedControls": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "maximumControlAgeFrames": 511
+      },
+      "history": {
+        "beforeStart": 0,
+        "future": 0,
+        "frameTag": 0,
+        "generationTag": 0,
+        "zeroWeightUnavailable": 0,
+        "affectedFrames": 0,
+        "firstFrame": -1,
+        "lastFrame": -1
+      }
+    },
+    {
+      "model": "schafter3",
+      "sceneName": "urban24",
+      "sourceHash": "fad1426f59e2156cf12fc4c2175015093f7577670912e6e651a44dc9c4e6a296",
+      "controlHash": "da8fb06f97801b791b738e260da5ee5ac17c4304cd8a94dc9e5fc538933e03f0",
+      "motionHash": "d4748df89bf1e3df21d7b4a8011e47b0ecb00928627b433c60844756b0493f04",
+      "publishedReferenceSha256": "e155d4acd20f8858b9e68417b45f30de693a67810b53f36d4bafd43087b23ffd",
+      "maximumReferenceError": 0,
+      "maximumSumError": 1.1292286217212677e-8,
+      "deadlineMisses": 0,
+      "maximumBlockMs": 10.500199999994948,
+      "timingScope": "Full renderer only; diagnostic stem passes excluded",
+      "renderer": {
+        "frames": 494400,
+        "peak": 0.16268934335013627,
+        "sumSquares": 134.42619358280226,
+        "limited": 0,
+        "missingHistory": 0,
+        "controlUpdates": 966,
+        "rejectedControls": 0,
+        "cursorResets": 0,
+        "pathOverflow": 0,
+        "maximumControlAgeFrames": 511
+      },
+      "history": {
+        "beforeStart": 0,
+        "future": 0,
+        "frameTag": 0,
+        "generationTag": 0,
+        "zeroWeightUnavailable": 0,
+        "affectedFrames": 0,
+        "firstFrame": -1,
+        "lastFrame": -1
+      }
+    }
+  ],
+  "processing": "Actual engine/exhaust acoustic stems; linear pressure sum commonGain*(engine + multiplier*exhaust). Same scalar on every delivered file; no independent normalization, EQ or limiter.",
+  "referenceMeaning": "Multipliers relative to original Source05 engine1/exhaust1 emitter calibration;2.5 is current published balance. Digital calibration, not measured SPL.",
+  "acousticEngineChanged": false,
+  "sourcePlayerChanged": false,
+  "gameLaunched": false,
+  "endpointOpened": false,
+  "subjectiveListeningPerformed": false,
+  "perceptualAcceptance": "User accepted10x exterior pressure; remaining source quality and runtime acceptance OPEN",
+  "limitations": [
+    "This isolates exhaust balance, not exhaust resonance or source texture. Existing Lectro/X80 stepping remains open.",
+    "Street geometry is the authored24m Source05 canyon, not imported Legion Square.",
+    "Offline render timings do not establish live fleet performance."
+  ],
+  "protectedFilesUnchanged": true,
+  "validation": {
+    "all40WavHashesMatch": true,
+    "pageAudioPlayers": 40,
+    "localLinksResolved": 42,
+    "maximumPeak": 0.6217023730278015,
+    "deadlineMisses": 5,
+    "allEightReferenceErrorsZero": true,
+    "focusedTestsPassed": 16
+  },
+  "selection": {
+    "scope": "Exterior exhaust pressure only",
+    "multiplier": 10,
+    "commonHeadroom": 0.25,
+    "userVerdict": "10x is perfect, just listened to it",
+    "profile": {
+      "id": "user-selected-exhaust-10x-v1",
+      "engine": 1,
+      "exhaust": 10,
+      "commonHeadroom": 0.25,
+      "acceptance": "User selected10x after listening to exhaust-pressure comparison"
+    },
+    "sourcePitchAndRuntimeAcceptance": "OPEN"
+  }
+}

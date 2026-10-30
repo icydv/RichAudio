@@ -2,9 +2,17 @@
 import { CausalSimulation, StreamingRenderer } from '../streaming/causal.mjs';
 import { AcousticAcceleration } from '../streaming/acoustic-backend.mjs';
 import { qualityPresets, qualityReflectors } from '../streaming/acoustic-quality.mjs';
+import { stockExteriorPressureGains } from './stock-pressure.mjs';
 
 export const vehicleSampleRate = 48000;
 export const vehicleBlockFrames = 512;
+
+// Stock integration entry point: the exact balance/headroom selected by the
+// user, independent of unchanged generic and historical audition defaults.
+export function createStockVehiclePipeline(options = {}) {
+  if (Object.hasOwn(options, 'sourcePressureGains')) throw Error('stock pressure calibration is supplied by the selected shared profile');
+  return new VehicleAcousticPipeline({ ...options, sourcePressureGains: stockExteriorPressureGains(options.sourceIds) });
+}
 
 export class VehicleAcousticPipeline {
   constructor({ scene, sourceIds, quality = 'quality', acceleration = 'cpu', masterGain = 0.7,
