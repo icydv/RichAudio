@@ -25,6 +25,52 @@ test("Gain is explicit and over-ceiling/nonfinite blocks are rejected atomically
   }
   assert.equal(t.stats.rejectedBlocks,4);
 });
+test('Trim failure identifies the original sample and scans finite peaks without retaining audio or arbitrary context',()=>{
+  const trim=new BeaconOutputTrim(12),left=new Float32Array([.01,.13,.3]),right=new Float32Array([.02,.4,.03]),a=left.slice(),b=right.slice();
+  let error;try{trim.apply(left,right,{audioFrame:8192,sourceGenerations:[4294967297],pathCount:2,minimumDistance:1.8,
+    maximumDistance:6,maximumRelativeSpeed:8,geometryMode:'listener-only-conditional-direct',pathTransition:'reacquiring',
+    outputLevel:1,richAudioEnabled:true,recentPoseDiscontinuities:3,recentControlChanges:1,
+    path:'C:\\private\\do-not-retain',secret:'do-not-retain',pcm:left});}catch(e){error=e;}
+  assert.equal(error.code,'AUDITION_TRIM_OVER_CEILING');
+  assert.equal(error.diagnostic,trim.stats.lastFailure);
+  assert.deepEqual(left,a);assert.deepEqual(right,b);
+  const d=error.diagnostic;assert.equal(d.classification,'over-ceiling');assert.equal(d.offendingAudioFrame,8193);
+  assert.equal(d.firstOffendingSample.channel,'left');assert.equal(d.firstOffendingSample.originalSample,a[1]);
+  assert.equal(d.preTrimPeak,b[1]);assert.equal(d.maximumFiniteAbsoluteValue,b[1]);
+  assert.equal(d.predictedPostTrimPeak,Math.fround(b[1]*trim.gain));
+  assert.equal(d.context.minimumDistance,1.8);assert.equal(d.context.recentPoseDiscontinuities,3);
+  const json=JSON.stringify(d);assert.ok(json.length<2000);assert.doesNotMatch(json,/private|do-not-retain|pcm|secret/);
+  assert.equal(trim.stats.blocks,0);assert.equal(trim.stats.rejectedBlocks,1);
+});
+test('Nonfinite trim diagnostics distinguish NaN and infinities, and remain bounded across repeated failures',()=>{
+  const trim=new BeaconOutputTrim(12);
+  for(const [value,label] of [[NaN,'NaN'],[Infinity,'+Infinity'],[-Infinity,'-Infinity']]){
+    assert.throws(()=>trim.apply(new Float32Array([.01,.02]),new Float32Array([value,.1]),
+      {audioFrame:2048,pathCount:1,geometryMode:'C:\\untrusted',sourceGenerations:new Array(1000).fill(1)}),error=>{
+      const d=error.diagnostic;assert.equal(error.code,'AUDITION_TRIM_NONFINITE');
+      assert.equal(d.firstOffendingSample.originalSample,label);assert.equal(d.offendingAudioFrame,2048);
+      assert.equal(d.firstOffendingSample.channel,'right');assert.equal(d.nonfiniteSamples,1);assert.equal(d.overCeilingSamples,0);
+      assert.equal(d.context.geometryMode,null);assert.equal(d.context.sourceGenerations.length,16);
+      assert.equal(d.maximumFiniteAbsoluteValue,Math.fround(.1));assert.equal(d.preTrimPeak,null);
+      assert.equal(d.predictedPostTrimPeak,null);assert.equal(d.nonfiniteInputSamples,1);assert.ok(JSON.stringify(d).length<2000);return true;
+    });
+  }
+  assert.equal(trim.stats.rejectedBlocks,3);assert.equal(trim.stats.lastFailure.firstOffendingSample.originalSample,'-Infinity');
+});
+test('Bounded failure context is lazy and collector failure cannot mask the acoustic guard',()=>{
+  const trim=new BeaconOutputTrim(12);let calls=0;
+  const collect=()=>{calls++;return {audioFrame:4096,recentWindowMs:1000,recentControlChanges:2};};
+  trim.apply(new Float32Array([.01]),new Float32Array([.01]),collect);assert.equal(calls,0);
+  assert.throws(()=>trim.apply(new Float32Array([.2]),new Float32Array([.01]),collect),error=>{
+    assert.equal(error.diagnostic.offendingAudioFrame,4096);assert.equal(error.diagnostic.context.recentWindowMs,1000);
+    assert.equal(error.diagnostic.contextCollectionFailed,false);return true;
+  });
+  assert.equal(calls,1);
+  assert.throws(()=>trim.apply(new Float32Array([.2]),new Float32Array([.01]),()=>{throw Error('unrelated private detail');}),error=>{
+    assert.equal(error.code,'AUDITION_TRIM_OVER_CEILING');assert.equal(error.diagnostic.contextCollectionFailed,true);
+    assert.doesNotMatch(JSON.stringify(error.diagnostic),/private detail/);return true;
+  });
+});
 test("Production CLI rejects incompatible audition profiles before PCM",()=>{
   for(const extra of [["--sources","2"],["--scene","enclosure"],["--listener-delay-ms","75"],["--experimental-orientation","50ms"]]){
     const p=spawnSync(process.execPath,["tools/Run-Acoustics07.mjs",...auditionSettings,"--listener-input","required",...extra],{encoding:"utf8",windowsHide:true,timeout:3000});

@@ -35,7 +35,16 @@ namespace RichAudio.Beacon.Tests
             var sender=new Thread(delegate(){try{
                 using(var client=new NamedPipeClientStream(".",pipe,PipeDirection.InOut,PipeOptions.Asynchronous)){
                     client.Connect(3000);
-                    if(mode=="disconnect")return;
+                    if(mode=="disconnect"){
+                        // Test EOF after admission, rather than racing client
+                        // disposal against EndWaitForConnection (which correctly
+                        // reports a different connection-failed terminal).
+                        var field=typeof(HostProgram).GetField("shutdownFixturePipe",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Static);
+                        var admitted=Stopwatch.StartNew();bool connected=false;
+                        while(admitted.ElapsedMilliseconds<3000){var server=field.GetValue(null) as StatePipeServer;
+                            if(server!=null&&server.Connections>0){connected=true;break;}Thread.Sleep(1);}
+                        Require(connected,"disconnect fixture requires actual server admission");return;
+                    }
                     if(mode=="controlled"||mode=="audio-stop-fault"){TransportStop.Write(client,TransportStop.Frame());TransportStop.Ack(client,TransportStop.Stopped);return;}
                     var state=Protocol.Synthetic(new string('a',32),0,0);state.ObservationTicks=Stopwatch.GetTimestamp()+Stopwatch.Frequency;
                     TransportStop.Write(client,Protocol.Frame(state));

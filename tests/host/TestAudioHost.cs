@@ -104,7 +104,19 @@ namespace RichAudio.Beacon.Tests
                     Check(((string)typeof(HostProgram).GetField("producerError",flags).GetValue(null)).Contains("schema/invalid-schema"),"terminal status visible");
                     typeof(HostProgram).GetField("output",flags).SetValue(null,null);
                 }
-                Console.WriteLine("PASS: "+checks+" original host/ring/framing assertions; no audio endpoint opened.");return 0;
+                var remember=typeof(HostProgram).GetMethod("RememberDiagnostic",flags);
+                for(int i=0;i<4094;i++)remember.Invoke(null,new object[]{"{\"type\":\"block\",\"frame\":"+i+"}",false});
+                string progress="{\"type\":\"block\",\"frame\":2399744}",terminal="{\"type\":\"final\",\"error\":\"precise-guard-condition\"}";
+                remember.Invoke(null,new object[]{"{\"type\":\"block\",\"frame\":2399232}",false});
+                remember.Invoke(null,new object[]{progress,false});remember.Invoke(null,new object[]{terminal,false});
+                remember.Invoke(null,new object[]{"{\"type\":\"final\",\"error\":\"replacement-denied\"}",false});
+                remember.Invoke(null,new object[]{"oversize-must-not-be-retained",true});
+                var diagnostics=HostProgram.RendererDiagnosticsSnapshot();
+                Check(diagnostics.Length==4096,"diagnostic trace remains within original line bound");
+                Check(diagnostics[4094]==progress,"last actual progress retained after bounded trace prefix");
+                Check(diagnostics[4095]==terminal,"first precise terminal retained after long trace");
+                Check(((string)typeof(HostProgram).GetField("producerError",flags).GetValue(null)).Contains("schema/invalid-schema"),"diagnostic retention cannot replace original host failure");
+                Console.WriteLine("PASS: "+checks+" original host/ring/framing and bounded diagnostic assertions; no audio endpoint opened.");return 0;
             }catch(Exception ex){Console.Error.WriteLine(ex);return 1;}
         }
     }

@@ -21,10 +21,12 @@ function state(s) {
     "generation",
   );
   const directivity = s.directivity ?? 0;
+  const nearFieldRadius = s.nearFieldRadius ?? 0;
   requireValue(
     Number.isFinite(directivity) && directivity >= 0 && directivity <= 1,
     "directivity",
   );
+  requireValue(Number.isFinite(nearFieldRadius) && nearFieldRadius >= 0 && nearFieldRadius <= 10, 'finite source radius');
   return {
     position,
     velocity,
@@ -33,6 +35,7 @@ function state(s) {
     valid: s.valid !== false,
     generation,
     directivity,
+    nearFieldRadius,
     emitting: s.emitting !== false,
   };
 }
@@ -263,7 +266,7 @@ export class CausalSimulation {
       sourceGenerations[id] = this.epoch * 4294967296 + current.generation;
       if (!track) {if(soundMap)soundMap.unavailableSources.push({id,reason:'source-history-unavailable'});continue;}
       if(soundMap)soundMap.sources.push({id,...track.keys.at(-1)});
-      const source = { track, directivity: current.directivity }, plans=[];
+      const source = { track, directivity: current.directivity, nearFieldRadius: current.nearFieldRadius }, plans=[];
       for (const candidate of this.candidates) {
         if(this.processingSettings?.earlyReflections===false&&candidate.surfaces.length)continue;
         const plan=preparePath(this.scene,source,listener,now,candidate,geometryTimeMs),queries=pathSegments(plan),offset=segments.length;
@@ -327,6 +330,7 @@ export class CausalSimulation {
           bands: p.bands,
           pan: p.pan,
           arrivalDirection: p.arrivalDirection,
+          ...(this.scene.directPath||this.scene.observationModel?{arrivalOrigin:p.points.at(-1)??plan.state.position}:{}),
           distance: p.distance,
           delay: p.delay,
           order: p.order,
@@ -378,6 +382,8 @@ export class StreamingRenderer {
     masterGain = 0.7,
     historyDiagnostics = false,
     generationReleaseGuard = false,
+    continuousRates = false,
+    continuousTransitions = continuousRates,
   } = {}) {
     requireValue(
       sourceIds.length >= 1 &&
@@ -400,6 +406,10 @@ export class StreamingRenderer {
     );
     this.frame = 0;
     this.generationReleaseGuard = generationReleaseGuard;
+    requireValue(typeof continuousRates==='boolean','continuous rate policy');
+    this.continuousRates=continuousRates;
+    requireValue(typeof continuousTransitions==='boolean','continuous transition policy');
+    this.continuousTransitions=continuousTransitions;
     this.historyDiagnostics = historyDiagnostics
       ? {
           beforeStart: 0,
@@ -446,16 +456,27 @@ export class StreamingRenderer {
       present: false,
       releaseLeft: 0,
       id: null,
+      pathKey: null,
       source: null,
       generation: 0,
       cursor: 0,
       rate: 1,
+      rateTarget: 1,
+      previousReadRate: null,
       correction: 0,
+      correctionTarget: 0,
       correctionLeft: 0,
       gain: new Float64Array(3),
       target: new Float64Array(3),
       pan: 0,
       panTarget: 0,
+      panStep: 0,
+      panKnown: 0,
+      panTrajectoryLeft: 0,
+      panTrajectoryFresh: false,
+      attackLeft: 0,
+      attackTotal: 0,
+      attackTarget: this.continuousTransitions?new Float64Array(3):null,
     }));
     // Quality-capable instances reserve their maximum release banks once. The
     // sample loop visits only occupied slots; changing quality never reallocates
@@ -465,6 +486,9 @@ export class StreamingRenderer {
       : null;
     this.activeSlotCount = 0;
     this.smooth = 1 - Math.exp(-1 / (0.01 * FS));
+    // This time constant recovers only a missed observation boundary's residual.
+    // Known bracketed motion is feedforward, with no100 ms input-motion filter.
+    this.panResidualSmooth=1-Math.exp(-1/(.1*FS));
     this.stats = {
       frames: 0,
       peak: 0,
@@ -476,6 +500,23 @@ export class StreamingRenderer {
       cursorResets: 0,
       pathOverflow: 0,
       maximumControlAgeFrames: 0,
+      maximumPanStep: 0,
+      panReconstructedBlocks:0,
+      panReconstructedFrames:0,
+      panPartialBlocks:0,
+      maximumPanResidual:0,
+      maximumPanResidualFrame:-1,
+      panResidualBoundFrames:0,
+      panResidualFrames:0,
+      firstPanResidualFrame:-1,
+      lastPanResidualFrame:-1,
+      panResidualTimeConstantSeconds:.1,
+      maximumGainStep: 0,
+      maximumRateStep: 0,
+      causalRateBoundFrames: 0,
+      firstCausalRateBoundFrame: -1,
+      lastCausalRateBoundFrame: -1,
+      maximumCausalRateReduction: 0,
     };
     this.controlFrame = -Infinity;
     this.ownedArrayBytes =
@@ -487,7 +528,7 @@ export class StreamingRenderer {
           s.generations.byteLength,
         0,
       ) +
-      this.slots.length * 48 + (this.activeSlotIndices?.byteLength ?? 0);
+      this.slots.length * (this.continuousTransitions?72:48) + (this.activeSlotIndices?.byteLength ?? 0);
   }
   setPathBudget(maxPathsPerSource) {
     requireValue(Number.isInteger(maxPathsPerSource) && maxPathsPerSource >= 1 &&
@@ -513,9 +554,14 @@ export class StreamingRenderer {
           [k, ...(f > 0 ? [k + 1] : [])].every(
             (index) =>
               index >= 0 &&
-              index < this.frame &&
-              s.frames[index % this.historyFrames] === index &&
-              s.generations[index % this.historyFrames] === p.generation,
+              // process() writes every current dry source sample before any
+              // path reads it. The fractional tap at exactly the next current
+              // frame is causal even though its tag is not written until that
+              // call; samples beyond that frame remain forbidden.
+              (index === this.frame
+                ? s.generation === p.generation
+                : index < this.frame && s.frames[index % this.historyFrames] === index &&
+                  s.generations[index % this.historyFrames] === p.generation),
           )
         );
       })
@@ -581,46 +627,87 @@ export class StreamingRenderer {
           Math.abs(p.pan) <= 1,
         "invalid path control",
       );
+      if(p.panTrajectory)requireValue(p.panTrajectory.frame===control.frame&&Number.isInteger(p.panTrajectory.frames)&&
+        p.panTrajectory.frames>=2&&p.panTrajectory.frames<=512&&
+        p.panTrajectory.basis==='arrived-observation-brackets'&&p.panTrajectory.start===p.pan&&
+        Number.isFinite(p.panTrajectory.end)&&Math.abs(p.panTrajectory.end)<=1,'invalid bracketed pan trajectory');
       let slot = this.slots.find((s) => s.active && s.id === p.id),
         fresh = !slot;
+      const pathKey=p.id.replace(/:g\d+(?::geometry\d+)?$/,'');
+      const replacement=this.continuousTransitions&&fresh&&this.slots.some(s=>s.active&&s.id!==p.id&&
+        s.source?.id===p.sourceId&&s.pathKey===pathKey);
       if (!slot) slot = this.slots.find((s) => !s.active);
       if (!slot) {
         this.stats.pathOverflow++;
         continue;
       }
-      const desired = p.emissionFrame + (this.frame - control.frame) * p.rate;
+      const requested = p.emissionFrame + (this.frame - control.frame) * p.rate;
+      // A delayed handoff may extrapolate an approaching path through zero
+      // delay. The source has emitted only through the current dry frame.
+      const desired = this.continuousRates?Math.min(this.frame,requested):requested;
       if (fresh) {
         slot.active = true;
         slot.id = p.id;
+        slot.pathKey=pathKey;
         slot.source = this.sources.get(p.sourceId);
         slot.generation = p.generation;
         slot.cursor = desired;
         slot.gain.fill(0);
         slot.pan = p.pan;
+        slot.rate = p.rate;
+        slot.previousReadRate=p.rate;
+        slot.correction = 0;
+        slot.correctionTarget = 0;
+        // A revised reflection/source identity replaces one acoustic arrival.
+        // Its linear attack is complementary to the old arrival's 20 ms linear
+        // release. Independent exponential attacks coherently overshoot unity.
+        slot.attackLeft=replacement?960:0;slot.attackTotal=slot.attackLeft;
+        if(replacement)slot.attackTarget.set(p.bands);
       }
       const error = desired - slot.cursor;
       if (Math.abs(error) > FS * 0.05) {
         slot.gain.fill(0);
         slot.cursor = desired;
         slot.correction = 0;
+        slot.correctionTarget = 0;
         this.stats.cursorResets++;
       } else {
-        slot.correction = error / 960;
+        slot.correctionTarget = error / 960;
+        if(!this.continuousRates)slot.correction=slot.correctionTarget;
         slot.correctionLeft = 960;
       }
-      slot.rate = p.rate;
+      // Keep the retarded-time cursor and its rate continuous when a new
+      // genuine observation changes the next 512-frame control target.
+      slot.rateTarget = p.rate;
+      if(!this.continuousRates)slot.rate=p.rate;
       slot.target.set(p.bands);
       slot.panTarget = p.pan;
+      slot.panTrajectoryLeft=0;
+      if(this.continuousRates&&p.panTrajectory&&control.frame===this.frame){
+        // Feed forward genuinely known motion; do not force a preceding gap's
+        // residual to close in one512-sample block. Keep actual pan persistent
+        // and recover that residual separately over the bounded100 ms time.
+        slot.panTarget=p.panTrajectory.end;
+        slot.panStep=(slot.panTarget-p.pan)/(p.panTrajectory.frames-1);
+        slot.panKnown=p.pan;
+        slot.panTrajectoryLeft=p.panTrajectory.frames;
+        slot.panTrajectoryFresh=fresh;
+        this.stats.panReconstructedBlocks++;
+        if(p.panTrajectory.frames<512)this.stats.panPartialBlocks++;
+      }
       slot.present = true;
       slot.releaseLeft = 0;
     }
     for (const slot of this.slots)
       if (slot.active && !slot.present) {
+        slot.panTrajectoryLeft=0;
         if (!slot.releaseLeft) slot.releaseLeft = 960;
         // An old-generation release may only read PCM before its generation
         // boundary. Do not let the 20 ms tail cross into another source's tag.
         if(this.generationReleaseGuard && slot.generation!==slot.source.generation){
-          const rate=Math.max(.25,slot.rate+(slot.correctionLeft>0?slot.correction:0));
+          const rate=this.continuousRates?
+            Math.max(.25,slot.rate,slot.rateTarget)+Math.max(0,slot.correction,slot.correctionTarget):
+            Math.max(.25,slot.rate+(slot.correctionLeft>0?slot.correction:0));
           slot.releaseLeft=Math.max(1,Math.min(slot.releaseLeft,
             Math.floor((slot.source.generationFrame-slot.cursor-1)/rate)));
         }
@@ -662,6 +749,7 @@ export class StreamingRenderer {
     }
     const lowK = 1 - Math.exp((-2 * Math.PI * 400) / FS),
       highK = 1 - Math.exp((-2 * Math.PI * 4000) / FS);
+    const measureSpatialSteps=this.continuousRates||this.continuousTransitions;
     for (let j = 0; j < frames; j++) {
       let affected = false;
       const frame = this.frame + j,
@@ -695,13 +783,40 @@ export class StreamingRenderer {
         }
         let gainMax = 0;
         for (let b = 0; b < 3; b++) {
+          const before = slot.gain[b];
           if (slot.releaseLeft)
             slot.gain[b] *= (slot.releaseLeft - 1) / slot.releaseLeft;
+          else if(slot.attackLeft)
+            slot.gain[b]=slot.attackTarget[b]*(1-(slot.attackLeft-1)/slot.attackTotal);
           else slot.gain[b] += this.smooth * (slot.target[b] - slot.gain[b]);
           gainMax = Math.max(gainMax, slot.gain[b]);
+          if(measureSpatialSteps)this.stats.maximumGainStep = Math.max(this.stats.maximumGainStep, Math.abs(slot.gain[b] - before));
         }
         if (slot.releaseLeft) slot.releaseLeft--;
-        slot.pan += this.smooth * (slot.panTarget - slot.pan);
+        if(slot.attackLeft)slot.attackLeft--;
+        const previousPan = slot.pan;
+        if(slot.panTrajectoryLeft){
+          const proposed=slot.pan+(slot.panTrajectoryFresh?0:slot.panStep),
+            residual=slot.panKnown-proposed,
+            followed=proposed+this.panResidualSmooth*residual,
+            low=Math.min(slot.pan,slot.panKnown),high=Math.max(slot.pan,slot.panKnown);
+          // A stale residual must not carry a descending trajectory past its
+          // known endpoint, or move away from the current genuinely known pan.
+          // This bounds the spatial parameter, never clips source/output PCM.
+          slot.pan=Math.max(low,Math.min(high,followed));
+          if(slot.pan!==followed)this.stats.panResidualBoundFrames++;
+          slot.panKnown+=slot.panStep;slot.panTrajectoryLeft--;slot.panTrajectoryFresh=false;
+          if(Math.abs(residual)>this.stats.maximumPanResidual){
+            this.stats.maximumPanResidual=Math.abs(residual);this.stats.maximumPanResidualFrame=frame;
+          }
+          if(Math.abs(residual)>1e-6){
+            this.stats.panResidualFrames++;
+            if(this.stats.firstPanResidualFrame<0)this.stats.firstPanResidualFrame=frame;
+            this.stats.lastPanResidualFrame=frame;
+          }
+          this.stats.panReconstructedFrames++;
+        }else slot.pan += this.smooth * (slot.panTarget - slot.pan);
+        if(measureSpatialSteps)this.stats.maximumPanStep = Math.max(this.stats.maximumPanStep, Math.abs(slot.pan - previousPan));
         if (
           gainMax < 1e-9 &&
           slot.target[0] === 0 &&
@@ -711,6 +826,7 @@ export class StreamingRenderer {
           slot.active = false;
           continue;
         }
+        if(this.continuousRates)requireValue(slot.cursor<=frame,'non-causal source-history cursor');
         const k = Math.floor(slot.cursor),
           f = slot.cursor - k,
           s = slot.source;
@@ -746,8 +862,25 @@ export class StreamingRenderer {
         }
         l += x * Math.sqrt((1 - slot.pan) / 2);
         r += x * Math.sqrt((1 + slot.pan) / 2);
-        slot.cursor +=
-          slot.rate + (slot.correctionLeft > 0 ? slot.correction : 0);
+        const previousRate = slot.previousReadRate;
+        if(this.continuousRates){
+          slot.rate += this.smooth * (slot.rateTarget - slot.rate);
+          slot.correction += this.smooth * ((slot.correctionLeft > 0 ? slot.correctionTarget : 0) - slot.correction);
+        }
+        const requestedRate = slot.rate + (this.continuousRates||slot.correctionLeft>0?slot.correction:0);
+        // Smoothed approach Doppler cannot advance past the next emitted dry
+        // sample when distance reaches zero. Bound the cursor slope, not PCM:
+        // no future samples, silent fallback, ring reset or added delay buffer.
+        const readRate=this.continuousRates?Math.min(requestedRate,Math.max(0,frame+1-slot.cursor)):requestedRate;
+        if(readRate<requestedRate-1e-12){
+          this.stats.causalRateBoundFrames++;
+          if(this.stats.firstCausalRateBoundFrame<0)this.stats.firstCausalRateBoundFrame=frame;
+          this.stats.lastCausalRateBoundFrame=frame;
+          this.stats.maximumCausalRateReduction=Math.max(this.stats.maximumCausalRateReduction,requestedRate-readRate);
+        }
+        if(measureSpatialSteps&&previousRate!==null)this.stats.maximumRateStep = Math.max(this.stats.maximumRateStep, Math.abs(readRate - previousRate));
+        slot.previousReadRate=readRate;
+        slot.cursor = this.continuousRates?Math.min(frame+1,slot.cursor+readRate):slot.cursor+readRate;
         if (slot.correctionLeft > 0) slot.correctionLeft--;
       }
       if(this.outputGain!==this.outputTarget){

@@ -116,7 +116,9 @@ export class ObservedSimulationInput {
       const positionNative=vector(s.positionNative),velocityNative=vector(s.velocityNative),
         forwardNative=modelDirection(this.coordinates,s.forwardNative),upNative=modelDirection(this.coordinates,s.upNative);
       requireValue(Math.hypot(...modelVelocity(this.coordinates,velocityNative))<=100,'mapped source speed');
-      return {...s,positionNative,velocityNative,forward:forwardNative,up:upNative,at:now};
+      const nearFieldRadius=s.nearFieldRadius??0;
+      requireValue(Number.isFinite(nearFieldRadius)&&nearFieldRadius>=0&&nearFieldRadius<=10,'finite source radius');
+      return {...s,nearFieldRadius,positionNative,velocityNative,forward:forwardNative,up:upNative,at:now};
     });
     this.owned=freeze(checked);
   }
@@ -211,7 +213,7 @@ export class ObservedSimulationInput {
       const sources=this.owned.map(s=>({id:s.id,generation:s.generation,
         position:modelPoint(this.coordinates,s.positionNative.map((x,i)=>x+s.velocityNative[i]*(now-s.at))),
         velocity:modelVelocity(this.coordinates,s.velocityNative),forward:s.forward,up:s.up,valid:true,
-        emitting:snapshot.emitting,directivity:0.2}));
+        emitting:snapshot.emitting,directivity:0.2,nearFieldRadius:s.nearFieldRadius}));
       this.simulation.observe({time:now,session:snapshot.session,generation:snapshot.generation,listener,sources,paused:snapshot.paused});
       this.poseAccepted=listener.valid&&!snapshot.paused;
       if(this.poseAccepted&&this.directScene&&!this.feed.scene&&this.simulation.scene!==this.directScene)this.clear(this.status.reason,this.status.geometryMode??this.status.mode);
@@ -223,6 +225,10 @@ export class ObservedSimulationInput {
   }
   decorate(control,time,now){
     control.geometry={...this.status,stats:{...this.stats},sourceRights:'original-generated',
+      // Direction-only basis accompanies the actual worker result. Presentation
+      // must project native camera rotation in this same model coordinate frame.
+      presentationAxes:this.coordinates?.axes??null,
+      presentationScale:this.coordinates?.metresPerNativeUnit??null,
       mappedListener:this.simulation.records.at(-1)?.time===now?this.simulation.records.at(-1).listener:null,
       mappedSources:this.simulation.records.at(-1)?.time===now?this.simulation.records.at(-1).sources:null,clock:time??null};
     const context=this.context??this.config,current=this.simulation.records.at(-1)?.time===now?this.simulation.records.at(-1):null,

@@ -35,7 +35,7 @@ namespace RichAudio.Beacon.Windows
             string settingsPath=Path.Combine(full,"acoustic-settings.json");
             File.WriteAllText(settingsPath,settings.Serialize());
             listeningGeometryPipe=geometryPipe;listeningFixture=true;auditionOutputEnabled=true;
-            return Run(root,"open-road","harmonic",1,12,.20f,-1,false,false,false,true,null,full,600,.44,modelPath,
+            return Run(root,"open-road","harmonic",1,60,.20f,-1,false,false,false,true,null,full,600,.44,modelPath,
                 settings,settingsPath,soundMapConfig,
                 AuditionArguments(12,"open-road","harmonic",1,600,.44,.20f,true,true,false,false),listenerPipe);
 #else
@@ -48,7 +48,7 @@ namespace RichAudio.Beacon.Windows
             if(command!="start"&&command!="emit-stop"&&command!="stop"&&command!="mute"&&command!="resume")throw new ArgumentException("Existing owned control only");
             Control(command);
         }
-        internal static string[] ListeningFixtureDiagnostics(){lock(logLock)return rendererLog.ToArray();}
+        internal static string[] ListeningFixtureDiagnostics(){return RendererDiagnosticsSnapshot();}
         private static string ListeningFixtureArguments(){return listeningFixture?" --trace-blocks yes --history-diagnostics yes":"";}
         private static string ListeningFixtureGeometryPipe(){return listeningGeometryPipe??"RichAudio.Acoustics081.Geometry.v1";}
         private static void CaptureListeningFixturePreHost(byte[] payload,int frames)

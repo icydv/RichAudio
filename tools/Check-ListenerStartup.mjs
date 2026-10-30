@@ -105,7 +105,8 @@ export function checkListenerStartup(directory,{baseline=false,invalid=false,rep
   assert.equal(final.historyDiagnostics.affectedFrames,0,'retarded source history remains available');result.sourceGenerations=[...generations];
   // Replay the actual path controls through the identical DSP to isolate only
   // observed reflections. Match every captured pre-host sample exactly.
-  const renderers=[0,1].map(()=>new StreamingRenderer({sourceIds:['beacon-0'],generationReleaseGuard:true,pathCapacityPerSource:64}));
+  assert.ok(blocks.some(t=>t.pathPresentation.some(p=>p.panTrajectory)),'retain genuine within-block pan controls for exact renderer replay');
+  const renderers=[0,1].map(()=>new StreamingRenderer({sourceIds:['beacon-0'],generationReleaseGuard:true,continuousRates:true,pathCapacityPerSource:64}));
   const trims=[new BeaconOutputTrim(12),new BeaconOutputTrim(12)],dry=new Float32Array(512),left=new Float32Array(512),right=new Float32Array(512);
   let phase=0,gain=0,differenceEnergy=0,matchedSamples=0;
   for(const t of blocks){if(t.frame*8+4096>pre.length)break;

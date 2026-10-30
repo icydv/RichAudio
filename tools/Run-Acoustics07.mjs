@@ -9,7 +9,7 @@ import {
   orientationTiming,
 } from "../src/acoustics/streaming/orientation-presentation.mjs";
 import { createHash } from "node:crypto";
-import { DEFAULT_BEACON_FREQUENCY_HZ, DEFAULT_BEACON_LEVEL, validateBeaconFrequencyHz, validateBeaconLevel } from "../src/acoustics/streaming/beacon-frequency.mjs";
+import { DEFAULT_BEACON_FREQUENCY_HZ, DEFAULT_BEACON_LEVEL, ORIGINAL_BEACON_NEAR_FIELD_RADIUS, validateBeaconFrequencyHz, validateBeaconLevel } from "../src/acoustics/streaming/beacon-frequency.mjs";
 import { liveGeometryLimits } from '../src/acoustics/streaming/observed-live.mjs';
 import { GeometryRelayGate } from '../src/acoustics/streaming/geometry-relay.mjs';
 import {validateAcousticSettings} from '../src/acoustics/streaming/acoustic-quality.mjs';
@@ -115,6 +115,20 @@ const FS = 48000,
   ids = Array.from({ length: options.sources }, (_, i) => "beacon-" + i);
 validateAuditionProfile(options);
 const outputTrim=new BeaconOutputTrim(options.outputTrimDb);
+// Source calibration, independent of the audition trim. Other beacons, source
+// counts and vehicle sources retain their existing propagation model.
+const beaconNearFieldRadius=options.scene==='open-road'&&options.sources===1&&options.beacon==='harmonic'&&options.frequencyHz===600&&options.level===0.44?ORIGINAL_BEACON_NEAR_FIELD_RADIUS:0;
+const calibrateOwnedSource=source=>{
+  if(!beaconNearFieldRadius||source.id!=='beacon-0')return source;
+  if(source.nearFieldRadius!==undefined&&source.nearFieldRadius!==beaconNearFieldRadius)throw Error('Fixed original beacon source calibration differs');
+  return {...source,nearFieldRadius:beaconNearFieldRadius};
+};
+const calibrateGeometryMessage=message=>{
+  if(!beaconNearFieldRadius)return message;
+  const calibrate=sources=>sources.map(source=>source.rights==='original-generated'?calibrateOwnedSource(source):source);
+  if(Array.isArray(message.configuration?.sources))return {...message,configuration:{...message.configuration,sources:calibrate(message.configuration.sources)}};
+  return Array.isArray(message.sources)?{...message,sources:calibrate(message.sources)}:message;
+};
 if(!Number.isInteger(options.soundMapFps)||options.soundMapFps<15||options.soundMapFps>30)throw Error('SoundMap FPS 15..30');
 const soundMap=options.soundMapConfig?new SoundMapClient(options.soundMapConfig):null;
 let lastSoundMapFrame=-512,soundMapDeadlineMisses=0,soundMapMissingHistory=0;
@@ -122,6 +136,7 @@ const renderer = new StreamingRenderer({
     sourceIds: ids,
     historyDiagnostics: options.diagnostics,
     generationReleaseGuard:options.geometry,
+    continuousRates:options.geometry,
     ...(options.acousticSettings?{pathCapacityPerSource:64}:{}),
   }),
   worker = new Worker(
@@ -133,7 +148,7 @@ const renderer = new StreamingRenderer({
       acousticSettings:options.acousticSettings,acousticBenchmark:options.acousticBenchmark,
       soundMap:{enabled:!!soundMap,fps:options.soundMapFps} } },
   );
-const listenerPlayout = new ListenerPlayout({ delayMs: options.delayMs });
+const listenerPlayout = new ListenerPlayout({ delayMs: options.delayMs, interactive:options.geometry });
 const orientation = options.orientation ? new OrientationPresentation() : null;
 let barrier = null,
   orientationDiagnostic = null;
@@ -162,6 +177,11 @@ const stats = {
   simulationMs: [],
   dspMs: [],
   orientationMs: [],
+  processingMs: [],
+  workerSchedulingMs: [],
+  stdoutWriteMs: [],
+  listenerObservationIntervalMs: [],
+  listenerReceiptIntervalMs: [],
   pathMinimum: Infinity,
   pathMaximum: 0,
   listenerMode: "synthetic-metric",
@@ -181,6 +201,16 @@ let credits = 0,
   inputText = "",
   external = null;
 let geometryEvents=[];
+let previousReceipt=null,previousPoseRejected=0,previousSettingsRevision=0;
+function recordListenerReceipt(message,at){
+  const current={session:message.state.session,clockFrequency:message.state.clockFrequency,ticks:message.state.observationTicks,at};
+  if(previousReceipt&&current.session===previousReceipt.session&&current.clockFrequency===previousReceipt.clockFrequency){
+    const observationMs=(current.ticks-previousReceipt.ticks)*1000/current.clockFrequency;
+    if(observationMs>0)stats.listenerObservationIntervalMs.push(observationMs);
+    if(at>=previousReceipt.at)stats.listenerReceiptIntervalMs.push(at-previousReceipt.at);
+  }
+  previousReceipt=current;
+}
 const geometryRelay=options.geometry&&!options.headless?new GeometryRelayGate({now:receiptClock,log,
   apply:({listener,messages,at,elapsed,delivery})=>{
     if(geometryEvents.length+messages.length>liveGeometryLimits.events)throw Error('relay geometry queue bound');
@@ -188,10 +218,11 @@ const geometryRelay=options.geometry&&!options.headless?new GeometryRelayGate({n
     // receipt age and its separately measured interval, avoiding double counting.
     const upperAge=listener.receiptAgeMs+elapsed+delivery.maximumMs;
     const accepted=listenerPlayout.add({...listener,receiptAgeMs:upperAge},renderer.frame/FS,receiptClock());
+    recordListenerReceipt(accepted,receiptClock());
     external={state:accepted.state,receiptAgeMs:listener.receiptAgeMs,receivedAt:at,pendingReceipt:true,
       audioTime:renderer.frame/FS,delivery};
     stats.listenerMessages++;stats.maxReceiptAgeMs=Math.max(stats.maxReceiptAgeMs,upperAge);
-    geometryEvents.push(...messages);
+    geometryEvents.push(...messages.map(calibrateGeometryMessage));
   },unavailable:event=>{if(event){geometryEvents=[];geometryEvents.push(event);}}}):null;
 let lastControl = null,
   lastPlayout = null;
@@ -236,6 +267,8 @@ async function finish(error) {
     beaconFrequencyHz: options.frequencyHz,
     beaconLevel: options.level,
     outputTrim:outputTrim.stats,
+    sourceCalibration:{mode:beaconNearFieldRadius?'original-beacon-finite-emitter-c1':'existing-point-source',nearFieldRadius:beaconNearFieldRadius,
+      units:'declared model metres; native GTA physical scale remains unverified',farFieldUnchanged:true,sourceLevel:options.level,frequencyHz:options.frequencyHz},
     error: error?.message ?? null,
     frames: renderer.frame,
     wallSeconds: (performance.now() - wallStart) / 1000,
@@ -246,6 +279,11 @@ async function finish(error) {
       simulationMs: summary(stats.simulationMs),
       dspMs: summary(stats.dspMs),
       orientationMs: summary(stats.orientationMs),
+      processingMs:summary(stats.processingMs),
+      workerSchedulingMs:summary(stats.workerSchedulingMs),
+      stdoutWriteMs:summary(stats.stdoutWriteMs),
+      listenerObservationIntervalMs:summary(stats.listenerObservationIntervalMs),
+      listenerReceiptIntervalMs:summary(stats.listenerReceiptIntervalMs),
     },
     dsp: renderer.stats,
     historyDiagnostics: renderer.historyDiagnostics,
@@ -318,7 +356,7 @@ function sourceStates(time, externalMode) {
       position = [35 * Math.sin(angle), i * 0.4, 1];
       velocity = [12.25 * Math.cos(angle), 0, 0];
     }
-    return {
+    return calibrateOwnedSource({
       id,
       generation: 1,
       position,
@@ -328,10 +366,11 @@ function sourceStates(time, externalMode) {
       directivity: 0.2,
       valid: true,
       emitting: enabled,
-    };
+    });
   });
 }
 function snapshot(now) {
+  if(external?.pendingReceipt){stats.maxNodeQueueAgeMs=Math.max(stats.maxNodeQueueAgeMs,receiptClock()-external.receivedAt);external.pendingReceipt=false;}
   if(benchmarkScene&&!external){const s=benchmarkScene.snapshot(now);return {...s,emitting:enabled,
     sources:s.sources.map(source=>({...source,emitting:enabled}))};}
   if(options.geometry){
@@ -352,13 +391,6 @@ function snapshot(now) {
       sources: sourceStates(now, false),
       paused: false,
     };
-  if (external.pendingReceipt) {
-    stats.maxNodeQueueAgeMs = Math.max(
-      stats.maxNodeQueueAgeMs,
-      receiptClock() - external.receivedAt,
-    );
-    external.pendingReceipt = false;
-  }
   lastPlayout = listenerPlayout.sample(now, receiptClock());
   const s = lastPlayout.state ?? external.state;
   const native = s.coordinates === "gta-native-unscaled";
@@ -422,7 +454,12 @@ async function pump() {
               ),
             };
       const result = await simulate(spatialSnapshot, now);
+      stats.workerSchedulingMs.push(result.schedulingMilliseconds);
       if (stopping) break;
+      // Camera-relative presentation uses fresh, same-generation observations
+      // after the worker handoff; retarded source physics and path delays remain.
+      const responsive=listenerPlayout.presentation(result.control,lastPlayout,now,receiptClock());
+      result.control=responsive.control;
       // Test-only bounded hold of an actual worker result, before DSP handoff.
       if (options.barrierFrame === renderer.frame) {
         await new Promise((resolve, reject) => {
@@ -435,14 +472,14 @@ async function pump() {
         });
       }
       if (stopping) break;
-      let mutePresentation = false;
+      let mutePresentation = responsive.muteBlock;
       const spatialFingerprint = options.trace
         ? createHash("sha256")
             .update(
               JSON.stringify({
                 frame: result.control.frame,
                 sourceGenerations: result.control.sourceGenerations,
-                paths: result.control.paths.map(({ pan, ...p }) => p),
+                paths: result.control.paths.map(({ pan, panTrajectory, ...p }) => p),
               }),
             )
             .digest("hex")
@@ -540,13 +577,34 @@ async function pump() {
         right.fill(0);
       }
       if(outputTrim.enabled&&renderer.stats.limited)throw Error('Audition trim refuses limited acoustic output');
-      outputTrim.apply(left,right);
+      outputTrim.apply(left,right,()=>{
+        let minimumDistance=Infinity,maximumDistance=0,maximumRelativeSpeed=null;
+        for(const path of lastControl.paths){minimumDistance=Math.min(minimumDistance,path.distance);maximumDistance=Math.max(maximumDistance,path.distance);}
+        const mappedListener=lastControl.geometry?.mappedListener;
+        for(const source of Object.values(lastControl.geometry?.mappedSources??{})){
+          if(mappedListener?.velocity&&source.velocity)maximumRelativeSpeed=Math.max(maximumRelativeSpeed??0,Math.hypot(...source.velocity.map((v,i)=>v-mappedListener.velocity[i])));
+        }
+        let activePathCount=0,releasingPathCount=0,replacingPathCount=0;
+        for(const slot of renderer.slots)if(slot.active){activePathCount++;if(slot.releaseLeft>0)releasingPathCount++;if(slot.attackLeft>0)replacingPathCount++;}
+        return {audioFrame:renderer.frame-BLOCK,sourceGenerations:Object.values(lastControl.sourceGenerations),pathCount:lastControl.paths.length,
+        activePathCount,releasingPathCount,replacingPathCount,
+        minimumDistance:Number.isFinite(minimumDistance)?minimumDistance:null,maximumDistance:lastControl.paths.length?maximumDistance:null,maximumRelativeSpeed,
+        geometryMode:lastControl.readiness?.mode??lastControl.geometry?.mode??'synthetic-model',
+        pathTransition:replacingPathCount?'reacquiring':releasingPathCount?'releasing':priorPaths===lastControl.paths.map(p=>p.id).join('|')?'steady':lastControl.paths.length?'acquiring':'releasing',
+        outputLevel:lastControl.acoustic?.outputLevel??1,richAudioEnabled:lastControl.acoustic?.richAudioEnabled??true,
+        recentPoseDiscontinuities:Math.max(0,(lastControl.geometry?.stats?.poseRejected??0)-previousPoseRejected),recentControlChanges:Math.max(0,acousticRevision-previousSettingsRevision),
+        recentWindowMs:BLOCK/FS*1000,
+        nearFieldRadius:beaconNearFieldRadius,sourceLevel:options.level,sourceFrequencyHz:options.frequencyHz};
+      });
+      previousPoseRejected=lastControl.geometry?.stats?.poseRejected??0;previousSettingsRevision=acousticRevision;
       const dspMilliseconds = performance.now() - started;
       if(soundMap){
         const elapsed=performance.now()-blockProcessingStart;
         soundMapMissingHistory+=renderer.stats.missingHistory-previousMissing;
         if(result.soundMapFrame){
           const frame={...result.soundMapFrame,diagnostics:{...result.soundMapFrame.diagnostics,audioDeadlineFailures:soundMapDeadlineMisses,missingHistorySinceLastSample:soundMapMissingHistory},producer:{audioFrame:renderer.frame-BLOCK,dspMilliseconds,workerSchedulingMilliseconds:result.schedulingMilliseconds,
+            listenerTiming:{...responsive.diagnostic,observationTicks:listenerPlayout.records.at(-1)?.state.observationTicks??null,
+              clockFrequency:listenerPlayout.records.at(-1)?.state.clockFrequency??null},beaconNearFieldRadius,
             processingMilliseconds:elapsed,deadlineMissesSinceLastSample:soundMapDeadlineMisses,missingHistorySinceLastSample:soundMapMissingHistory,
             deadlineScope:'Completed producer blocks including PCM serialization and stdout write; distinct from endpoint underflows',
             unsampledBlocksSinceLastFrame:Math.max(0,(renderer.frame-BLOCK-lastSoundMapFrame)/BLOCK-1),
@@ -568,9 +626,12 @@ async function pump() {
         packet.writeFloatLE(left[j], 16 + j * 8);
         packet.writeFloatLE(right[j], 20 + j * 8);
       }
+      const stdoutWriteStarted=performance.now();
       await new Promise((resolve, reject) =>
         process.stdout.write(packet, (e) => (e ? reject(e) : resolve())),
       );
+      stats.stdoutWriteMs.push(performance.now()-stdoutWriteStarted);
+      stats.processingMs.push(performance.now()-blockProcessingStart);
       stats.blocks++;
       if(soundMap)soundMapDeadlineMisses+=Number(performance.now()-blockProcessingStart>BLOCK/FS*1000);
       inFlight = 0;
@@ -593,13 +654,21 @@ async function pump() {
             ...(options.geometry||options.acousticSettings?{sourceId:p.sourceId,generation:p.generation}:{}),
             id: p.id,
             pan: p.pan,
+            ...(p.panTrajectory?{panTrajectory:p.panTrajectory}:{}),
             arrivalDirection: p.arrivalDirection,
             order: p.order,
             delay: p.delay,
             rate: p.rate,
             bands: p.bands,
+            distance:p.distance,
             emissionFrame: p.emissionFrame,
           })),
+          listenerTiming:{...responsive.diagnostic,playoutMode:lastPlayout?.mode??null,spatialDelayMs:(lastPlayout?.playoutSeconds??0)*1000,
+            targetTime:lastPlayout?.targetTime??null,predictionSeconds:lastPlayout?.extrapolationSeconds??0,
+            observationTicks:external?.state.observationTicks??null,clockFrequency:external?.state.clockFrequency??null,
+            receiptAgeMs:external?.receiptAgeMs??null,nodeQueueAgeMs:external?Math.max(0,receiptClock()-external.receivedAt):null,
+            listenerPosition:lastPlayout?.state?.position??null,listenerForward:lastPlayout?.state?.forward??null},
+          processingMilliseconds:performance.now()-blockProcessingStart,
           smoothedPan: renderer.slots
             .filter((s) => s.active)
             .map((s) => ({ id: s.id, pan: s.pan })),
@@ -703,6 +772,7 @@ function receive(m) {
     else throw Error("Unknown control");
   } else if (m.type === "listener") {
     m = listenerPlayout.add(m, renderer.frame / FS, receiptClock());
+    recordListenerReceipt(m,receiptClock());
     orientation?.add(m, renderer.frame / FS, receiptClock());
     const s = m.state;
     external = {
@@ -711,13 +781,14 @@ function receive(m) {
       receivedAt: receiptClock(),
       pendingReceipt: true,
       audioTime: renderer.frame / FS,
+      ...(options.headless?{delivery:{maximumMs:0,basis:'controlled-fixture',reference:'deterministic-audio-frame-delivery'}}:{}),
     };
     stats.listenerMessages++;
     stats.maxReceiptAgeMs = Math.max(stats.maxReceiptAgeMs, m.receiptAgeMs);
-  } else if(options.geometry && ['geometry-config','geometry','owned-sources'].includes(m.type)){
+  } else if(options.geometry && (['geometry-config','geometry','owned-sources'].includes(m.type)||options.headless&&m.type==='listener-context-config')){
     if(geometryEvents.length>=liveGeometryLimits.events || Buffer.byteLength(JSON.stringify(m))>liveGeometryLimits.bytes)
       throw Error('Bounded geometry input queue');
-    geometryEvents.push(m);
+    geometryEvents.push(calibrateGeometryMessage(m));
   } else if (m.type === "headless-release" && options.headless && barrier) {
     const b = barrier;
     barrier = null;

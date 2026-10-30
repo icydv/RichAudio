@@ -2,8 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {replayGeometry} from '../tools/audio/geometry-replay.mjs';
 const profile=['--beacon-frequency-hz','600','--beacon-level','0.44','--acoustic-quality','balanced','--acoustic-acceleration','auto'];
-test('stronger near-source geometry terminates rather than clipping or publishing an excessive block',async()=>{
- await assert.rejects(()=>replayGeometry({geometryScale:1,extraArgs:[...profile,'--beacon-output-trim-db','12']}),/Audition trim (rejected|refuses)/);
+test('qualified close geometry, replacements and source reacquisition retain guard headroom with the explicit finite-emitter beacon',async()=>{
+ for(const geometryScale of [.01,.05,.1,.2,1,2]){
+  const r=await replayGeometry({geometryScale,extraArgs:[...profile,'--beacon-output-trim-db','12']});
+  assert.equal(r.final.error,null);assert.equal(r.final.sourceCalibration.nearFieldRadius,10);
+  assert.equal(r.final.outputTrim.rejectedBlocks,0);assert.equal(r.final.dsp.limited,0);
+  assert.equal(r.metrics.nonfinite,0);assert.equal(r.metrics.clipped,0);assert.ok(r.metrics.peak<.5);
+  assert.ok(r.traces.some(t=>t.pathPresentation.some(p=>p.order===2)));
+  console.log(JSON.stringify({geometryScale,preHostPeak:r.metrics.peak,guardHeadroomDb:20*Math.log10(.5/r.metrics.peak),
+   radius:r.final.sourceCalibration.nearFieldRadius,clipped:0,nonfinite:0,guardRejected:0,
+   scope:'Actual producer/worker/trim/framing; qualified finite geometry; source/path replacement and expiry; no device'}));
+ }
 });
 test('bounded +12dB preserves actual observed direct, reflected, obstructed and expiry PCM',async()=>{
  for(const condition of ['direct','reflected','obstructed']){
