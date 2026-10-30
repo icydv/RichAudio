@@ -1,0 +1,115 @@
+{
+  "Schema": 1,
+  "Milestone": "INSTALLED-AUDIO-WORLD-PREPARATION-01",
+  "Method": "Actual installed archive metadata, CodeWalker selected dictionaries and AWC stream tables, all-selected-YBN plan; bounded offline coordinator",
+  "State": "prepared-with-explicit-gaps",
+  "PreparationCompleted": true,
+  "InputsStable": true,
+  "ElapsedSeconds": 102.532,
+  "GameVersion": "1.0.1158.16",
+  "GameExecutableSHA256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea",
+  "CodeWalkerCoreSHA256": "3d2bb91b35cf0d1888c12772a9af25441adea3ccc8510a149fcf0d47c8e71ca8",
+  "InputFingerprint": "6ea33042cf0612d22941b5c59b985bf06b47db6069a3ac76445bb4b249c4ce75",
+  "Stages": [
+    {
+      "Stage": "catalog",
+      "State": "complete",
+      "Completed": true,
+      "ElapsedSeconds": 39.252,
+      "MaximumSeconds": 240.0,
+      "MaximumOwnedProcesses": 8,
+      "JobMemoryMiB": 3072
+    },
+    {
+      "Stage": "resolved",
+      "State": "complete",
+      "Completed": true,
+      "ElapsedSeconds": 53.004,
+      "MaximumSeconds": 240.0,
+      "MaximumOwnedProcesses": 8,
+      "JobMemoryMiB": 3072
+    },
+    {
+      "Stage": "geometry",
+      "State": "complete",
+      "Completed": true,
+      "ElapsedSeconds": 6.065,
+      "MaximumSeconds": 240.0,
+      "MaximumOwnedProcesses": 8,
+      "JobMemoryMiB": 3072
+    }
+  ],
+  "ReferenceCatalog": {
+    "Archives": 173,
+    "CacheHits": 173,
+    "DeclaredDlcCount": 103,
+    "VehicleDeclarations": 1808,
+    "DeclaredUniqueModels": 934,
+    "UnresolvedIssues": 63,
+    "ArchiveContentHashesRequired": false
+  },
+  "ResolvedMetadata": {
+    "VehicleModels": 935,
+    "ModelsWithVehicleAudioRecord": 931,
+    "ModelsWithGranularRecord": 711,
+    "UniqueSoundChannelSlots": 5118,
+    "ModelChannelOccurrences": 8532,
+    "VerifiedStreamLinks": 4258,
+    "AmbiguousStreamLinks": 10,
+    "UnusedStreamSlots": 850,
+    "AwcTablesParsed": 774,
+    "Gen9SelectorAvailable": false,
+    "RuntimeMountStateObserved": false
+  },
+  "Geometry": {
+    "PlanOnly": true,
+    "SelectedYbnCount": 10663,
+    "ProcessedResources": 0,
+    "PendingResources": 4337,
+    "BlockedResources": 6326,
+    "AllSelectedExteriorImported": false,
+    "AcousticWorldComplete": false
+  },
+  "Readiness": {
+    "DecodedSourcesReady": false,
+    "StartupPluginHookVerifiedInGame": false,
+    "NativeAudioSuppressionVerified": false,
+    "LiveGainChainVerified": false,
+    "RuntimeReplacementImplemented": false,
+    "ReadyForGameLaunch": false,
+    "FullArchiveContentFreshnessVerified": false,
+    "CustomRuntimeMountsObserved": false
+  },
+  "FocusedValidation": {
+    "Status": "pass",
+    "Cases": [
+      "artifact receipt digest and changed-install identity",
+      "shared sound-graph count deduplication",
+      "real owned process completion",
+      "monotonic deadline",
+      "cooperative cancellation",
+      "orphan-child cleanup by kill-on-close Windows job"
+    ]
+  },
+  "PriorAttempt": {
+    "State": "incomplete",
+    "ElapsedSeconds": 221.205,
+    "InputsStable": false,
+    "RefusalReason": "world driver and documentation changed during execution",
+    "PublishedAsSuccessful": false
+  },
+  "GameWrites": false,
+  "PcmDecoded": false,
+  "EndpointOpened": false,
+  "GameLaunched": false,
+  "ResumeValidation": {
+    "State": "prepared-with-explicit-gaps",
+    "PreparationCompleted": true,
+    "InputsStable": true,
+    "ElapsedSeconds": 3.897,
+    "AllThreeStagesReused": true,
+    "ArtifactDigestsVerified": true,
+    "StageWorkersSpawned": 0,
+    "RuntimeReady": false
+  }
+}

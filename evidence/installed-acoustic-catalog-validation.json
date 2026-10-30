@@ -1,0 +1,38 @@
+{
+  "Schema": 1,
+  "Summary": {
+    "Schema": 1,
+    "State": "reference-catalog-complete-with-explicit-gaps",
+    "GameVersion": "1.0.1158.16",
+    "GameExecutableSHA256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea",
+    "CodeWalkerCoreSHA256": "3d2bb91b35cf0d1888c12772a9af25441adea3ccc8510a149fcf0d47c8e71ca8",
+    "ArchiveCount": 173,
+    "DeclaredDlcCount": 103,
+    "VehicleDeclarations": 1808,
+    "UniqueModels": 934,
+    "ConflictingModelAudioDeclarations": 0,
+    "YbnReferences": 13232,
+    "YmapReferences": 19495,
+    "YtypReferences": 2739,
+    "ResourceNameConflicts": 7536,
+    "UnresolvedIssueCount": 63,
+    "ArchiveContentHashesRequired": false,
+    "CacheHits": 0,
+    "ElapsedSeconds": 146.027,
+    "EffectiveMountSelectionComplete": false,
+    "AcousticWorldImported": false,
+    "RuntimeReplacementImplemented": false,
+    "GameWrites": false,
+    "AudioDecoded": false,
+    "EndpointOpened": false
+  },
+  "Validation": {
+    "Passed": true,
+    "ArchiveRowsChecked": 173,
+    "ModelRowsChecked": 934,
+    "MetadataProvenanceHashesRequired": true
+  },
+  "FullArchiveHashAttemptCompleted": false,
+  "FullArchiveHashAttemptOutcome": "Independent 600-second deadline enforced; completed archive caches retained privately.",
+  "RuntimeReady": false
+}

@@ -35,6 +35,7 @@ namespace RichAudio.Beacon.Rph
                 string exe=Process.GetCurrentProcess().MainModule.FileName;
                 if(!Path.GetFileName(exe).Equals("GTA5_Enhanced.exe",StringComparison.OrdinalIgnoreCase)||FileVersionInfo.GetVersionInfo(exe).FileVersion!="1.0.1158.16"||FileVersionInfo.GetVersionInfo(typeof(Game).Assembly.Location).FileVersion!="1.132.1428.17748")
                     throw new NotSupportedException("Reviewed exact-build guard");
+                InstalledWorldWarmup.Start();
                 try{InGameMenu.Start();}catch(Exception e){Game.Console.Print("RichAudio settings menu unavailable: "+e.GetType().Name);}
                 try{PassiveListener.Start();}catch(Exception e){Game.Console.Print("RichAudio passive SoundMap unavailable: "+e.GetType().Name);}
                 ready=true;Game.Console.Print("RichAudio beacon listener READY, sending OFF. One Start and one connection attempt per plugin instance; 120 second cap. No sound or world mutation. Settings: F10 or RichAudioSettings; no audio starts from the menu.");
@@ -48,7 +49,7 @@ namespace RichAudio.Beacon.Rph
             }
             catch(ThreadAbortException){throw;}
             catch(Exception e){Game.Console.Print("RichAudio beacon bridge stopped: "+e.GetType().Name);}
-            finally{PassiveListener.Stop();InGameMenu.Stop();ready=false;requested=false;var p=publisher;if(p!=null){p.RequestStop();ThreadPool.QueueUserWorkItem(delegate{p.Dispose();});}publisher=null;}
+            finally{InstalledWorldWarmup.Stop();PassiveListener.Stop();InGameMenu.Stop();ready=false;requested=false;var p=publisher;if(p!=null){p.RequestStop();ThreadPool.QueueUserWorkItem(delegate{p.Dispose();});}publisher=null;}
         }
         private static void RunSession()
         {
@@ -100,6 +101,6 @@ namespace RichAudio.Beacon.Rph
         // Only the game fiber calls the RPH console. Background file evidence is
         // independent if unload occurs before these two bounded lines are drained.
         private static void DrainPublisherEvidence(){while(true){string message;lock(publisherEvidence){if(publisherEvidence.Count==0)return;message=publisherEvidence.Dequeue();}Game.Console.Print(message);}}
-        public static void OnUnload(){PassiveListener.Stop();InGameMenu.Stop();ready=false;requested=false;shutdown=true;var p=publisher;if(p!=null)p.RequestStop();}
+        public static void OnUnload(){InstalledWorldWarmup.Stop();PassiveListener.Stop();InGameMenu.Stop();ready=false;requested=false;shutdown=true;var p=publisher;if(p!=null)p.RequestStop();}
     }
 }

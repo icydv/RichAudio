@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "stage": "compiled-bound-plugin-startup-preparation",
+  "hookImplemented": true,
+  "compiledAgainstPinnedSdk": true,
+  "pluginSha256": "1C731F48ECEF223FD6EA098F083FDA0ACC1F346E34F9F675F3E9C2EC6ADF0EA8",
+  "sdkSha256": "5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0",
+  "targetGta": "1.0.1158.16",
+  "targetRph": "1.132.1428.17748",
+  "sidecarSha256": "78e4af1201be1e9f2aed9881ba8fc5b00257d615b9a95dcad880a88b2bebec6d",
+  "sidecarEnabled": true,
+  "geometryImportEnabled": true,
+  "geometryResourceBudget": 16,
+  "sourceBindingsValidated": 17,
+  "sourceHashes": {
+    "src/acoustics/integration/WorldWarmupSupervisor.cs": "d8c1da81d36e6ecab808e76388df05449838559d2de4e558e03e566e733627c8",
+    "src/acoustics/bridge/Rph/InstalledWorldWarmup.Rph.cs": "8b241f253ed6f9319d14330fb63ce841e837cda1ae0dc286deb88d94a000342e",
+    "tests/Test-WorldWarmupStartup.ps1": "4e7e0fb9394d9fb50a1bf1ec163f848cab237437012fd514ffeb2f58bb86ab79",
+    "tools/Prepare-WorldWarmupSidecar.ps1": "99f055892d63828d60a43bdbe79fd4222e9dba65dd1eeb4a9f8a70e62041ae50"
+  },
+  "focusedFixtureValidation": {
+    "passed": true,
+    "cases": [
+      "source digest mismatch rejected",
+      "private output enforced",
+      "cached DLL layout uses game Plugins sidecar",
+      "normal owned worker completion",
+      "own unload marker archived and resumed",
+      "manual cancellation retained",
+      "orphan child terminated",
+      "cooperative cancellation cleanup",
+      "monotonic deadline cleanup"
+    ]
+  },
+  "rphStartupExecuted": false,
+  "fullWorldWarmed": false,
+  "allVehicleReplacementImplemented": false,
+  "nativeAudioSuppressionPerformed": false,
+  "gameWrites": false,
+  "gameLaunched": false,
+  "audioEndpointOpened": false,
+  "readyForGameLaunch": false
+}

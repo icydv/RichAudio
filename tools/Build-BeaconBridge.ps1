@@ -16,6 +16,7 @@ if(!$CoreOnly)
     $hash=(Get-FileHash -LiteralPath $SdkPath -Algorithm SHA256).Hash
     if($hash -ne '5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0'){throw 'Unreviewed RPH SDK fingerprint.'}
     $adapter=@(Get-ChildItem -LiteralPath (Join-Path $repo 'src\acoustics\bridge\Rph') -Filter '*.cs' | ForEach-Object FullName)
+    $adapter+=Join-Path $repo 'src\acoustics\integration\WorldWarmupSupervisor.cs'
     $binary=Join-Path $output 'RichAudio.Beacon.Rph.dll'
     $geometry=@(Get-ChildItem (Join-Path $repo 'src\acoustics\geometry') -Filter '*.cs'|ForEach-Object FullName)
     $geometry+=@('GeometryObservation.cs','SurfaceAcquisition.cs','DiagnosticTile.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\observation\'+$_)}
