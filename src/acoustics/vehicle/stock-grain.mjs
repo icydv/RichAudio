@@ -111,7 +111,7 @@ export class StockGrainVoice {
     const r=this.intervals,f=this.features,period=(1-p.w)*r[p.a].length+p.w*r[p.b].length;
     const baseRms=Math.sqrt((1-p.w)*f[p.a].rms**2+p.w*f[p.b].rms**2),valid=[];
     const mixFeature=key=>(1-p.w)*(f[p.a][key]??0)+p.w*(f[p.b][key]??0);
-    const idle=this.asset.sustain?.state==='idle';
+    const idle=this.asset.sustain?.state==='idle'||this.asset.playbackState==='idle';
     for(let i=0;i<r.length;i++){
       if(f[i].transientRisk)continue;
       // The whole verified idle recording is one operating state. Applying a

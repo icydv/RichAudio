@@ -1,0 +1,410 @@
+{
+  "schemaVersion": 1,
+  "milestone": "WORLD-VEHICLE-02",
+  "base": "03a248b2a06b4307e998f107aee08c624bdb9841",
+  "verifiedNpcModels": [
+    "bati"
+  ],
+  "otherNpcModelsAssessed": false,
+  "graph": {
+    "vehicle": "F9300CC5",
+    "granular": "61F3BD06",
+    "npcSound": "D7852424",
+    "playerSound": "0346A636",
+    "activeSlots": [
+      0,
+      1,
+      4,
+      5
+    ],
+    "explicitUnusedSlots": [
+      2,
+      3
+    ],
+    "awcSha256": "06091F1B58D3E28DBF768B66A1F5C5A7CBFC5D0FB9021A582DE100AAA16110DC",
+    "sourceArchive": "x64/audio/sfx/streamed_vehicles_granular_npc.rpf",
+    "sourceEntry": "x64/audio/sfx/streamed_vehicles_granular_npc.rpf/v_twin_2_npc.awc",
+    "gameExecutableSha256": "B48E80F5FC899EB89E5DCC9F3B68E9551CC8DCFAC78B2A940B207E569E9987EA",
+    "parserSha256": "3D2BB91B35CF0D1888C12772A9AF25441ADEA3CCC8510A149FCF0D47C8E71CA8",
+    "catalogSha256": "c4250395be8638b9d44df2a43da966caec99841a83f26e3131be51edca57c018"
+  },
+  "decode": {
+    "complete": true,
+    "streams": [
+      {
+        "name": "exhaust_accel",
+        "streamHash": "03AB9171",
+        "frames": 122455,
+        "sampleRate": 48000,
+        "channels": 1,
+        "codec": 0,
+        "sourcePcmSha256": "34565E3EF4B8C3229E0465E7D02AD8294749C31C654E1515B1405ADFFF63E093",
+        "floatSha256": "8F92E4FA143E2F746B2246C6B07BC802F8EC4E3951BB1641053229651C3868B5",
+        "peak": 0.794281005859375,
+        "rms": 0.3042521103474346,
+        "dc": -0.011536899825366334,
+        "fullScaleSamples": 0,
+        "directWrapJump": 0.60467529296875,
+        "maximumAdjacentStep": 0.111724853515625,
+        "floatRoundTripMaximumInt16Error": 0,
+        "rawPcmEqualsDecoded": true,
+        "wavPcmEqualsDecoded": true,
+        "rawPeakValEqualsObservedInt16": false,
+        "grainCount": 56,
+        "loopCount": 5,
+        "loopPointRaw": -1
+      },
+      {
+        "name": "exhaust_idle",
+        "streamHash": "179DDCAA",
+        "frames": 40350,
+        "sampleRate": 48000,
+        "channels": 1,
+        "codec": 0,
+        "sourcePcmSha256": "759A6AE4F0BC41E8AC5A4E9B50024D16F6D14FEC396B6957EF1D0726C520C87B",
+        "floatSha256": "1ABDC7B08AF8DBD0F5D7CDBE21C86E78C34209ED51E19CC00EFB8C86974B1529",
+        "peak": 0.794281005859375,
+        "rms": 0.38094668825583783,
+        "dc": 0.02779937781956707,
+        "fullScaleSamples": 0,
+        "directWrapJump": 0.016510009765625,
+        "maximumAdjacentStep": 0.038726806640625,
+        "floatRoundTripMaximumInt16Error": 0,
+        "rawPcmEqualsDecoded": true,
+        "wavPcmEqualsDecoded": true,
+        "rawPeakValEqualsObservedInt16": false,
+        "grainCount": 9,
+        "loopCount": 0,
+        "loopPointRaw": -1
+      },
+      {
+        "name": "engine_idle",
+        "streamHash": "1D18B9A1",
+        "frames": 40350,
+        "sampleRate": 48000,
+        "channels": 1,
+        "codec": 0,
+        "sourcePcmSha256": "7B0E711658549AC86AE3C25CCFE36C16D04E3192B62ACEA2ACBA7F0ADADC0BEE",
+        "floatSha256": "7779658CCB3FEC09D8904D0F301E0AF45EC8C47FDE71CEB3D63538F5B1CA5F24",
+        "peak": 0.794281005859375,
+        "rms": 0.210141616666853,
+        "dc": 0.005798030508199737,
+        "fullScaleSamples": 0,
+        "directWrapJump": 0.237335205078125,
+        "maximumAdjacentStep": 0.599578857421875,
+        "floatRoundTripMaximumInt16Error": 0,
+        "rawPcmEqualsDecoded": true,
+        "wavPcmEqualsDecoded": true,
+        "rawPeakValEqualsObservedInt16": false,
+        "grainCount": 9,
+        "loopCount": 0,
+        "loopPointRaw": -1
+      },
+      {
+        "name": "engine_accel",
+        "streamHash": "1F7402AA",
+        "frames": 123810,
+        "sampleRate": 48000,
+        "channels": 1,
+        "codec": 0,
+        "sourcePcmSha256": "E5B8216B73D3B5822B832D0D0A71B93305BF03B86EAE64E9380E92102DF408A9",
+        "floatSha256": "EC8D5408771A8D27810E3D5F554D38BB711B3ED7B23ADF453C23D43E83F2CFDA",
+        "peak": 0.794281005859375,
+        "rms": 0.2169339613719293,
+        "dc": -0.002308987419609684,
+        "fullScaleSamples": 0,
+        "directWrapJump": 0.542266845703125,
+        "maximumAdjacentStep": 0.563201904296875,
+        "floatRoundTripMaximumInt16Error": 0,
+        "rawPcmEqualsDecoded": true,
+        "wavPcmEqualsDecoded": true,
+        "rawPeakValEqualsObservedInt16": false,
+        "grainCount": 61,
+        "loopCount": 5,
+        "loopPointRaw": -1
+      }
+    ],
+    "archiveBindings": [
+      {
+        "archive": "x64/audio/sfx/streamed_vehicles_granular_npc.rpf",
+        "beforeSha256": "9EE025DAA5839720AB24914BCB79BBD2DB17E6FD26DF963B82FC90E43E7EF3E7",
+        "afterSha256": "9EE025DAA5839720AB24914BCB79BBD2DB17E6FD26DF963B82FC90E43E7EF3E7",
+        "unchanged": true
+      }
+    ]
+  },
+  "transitionPolicy": "authored: follow operating point through accel PCM on lift; blend to recorded idle below .28; no decel voice or native scheduling claim",
+  "comparison": {
+    "files": [
+      {
+        "file": "native-acceleration.wav",
+        "seconds": 2.5,
+        "sha256": "1d16371fa219d8620523632412530c6f6efd4865ed2d2ee4a9eb349795e72924",
+        "metrics": {
+          "peak": 0.7383133172988892,
+          "rms": 0.2657627090622961,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 2,
+          "maximumAdjacentStep": 0.11596794426441193
+        }
+      },
+      {
+        "file": "reconstructed-states.wav",
+        "seconds": 4.1,
+        "sha256": "39dedb1ac569ae8595a5129a64b22db7a20ce221ec1de418782560e6e4e9372c",
+        "metrics": {
+          "peak": 0.7412819266319275,
+          "rms": 0.2831073398104055,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 0,
+          "maximumAdjacentStep": 0.09731921553611755
+        }
+      }
+    ],
+    "reference": "First2.5seconds of original engine/exhaust accel PCM at native48k, linearly mixed. No loop, state control, resampling or propagation.",
+    "reconstruction": "4.1seconds authored idle/rise/hold/falling-operating-point/idle; same per-role gain as reference. Different operating performances, not an identical-state fidelity null test.",
+    "sourceGain": 1,
+    "roleShares": {
+      "engine": 0.5,
+      "exhaust": 0.5
+    },
+    "exteriorPressure": {
+      "id": "user-selected-exhaust-10x-v1",
+      "engine": 1,
+      "exhaust": 10,
+      "commonHeadroom": 0.25,
+      "acceptance": "User selected10x after listening to exhaust-pressure comparison"
+    },
+    "master": 0.7,
+    "independentNormalization": false,
+    "sourceFilesUnchanged": true,
+    "sourceStats": {
+      "frames": 196800,
+      "peak": 0.397140502929661,
+      "maximumStep": 0.24218402067178804,
+      "modeledRpm": false,
+      "oscillatorSamples": 0,
+      "energy": {
+        "engine": {
+          "actual": 2476.013052171748,
+          "reference": 2576.253861160248
+        },
+        "exhaust": {
+          "actual": 5192.292613868297,
+          "reference": 5489.648668499336
+        }
+      },
+      "transitions": {
+        "basis": "role-local weighted native-interval rate; entering PCM waveform alignment; not crank RPM or native state semantics",
+        "phaseAlignments": 4,
+        "alignmentRequests": 4,
+        "roles": {
+          "engine": {
+            "alignments": 2,
+            "alignmentRequests": 2,
+            "skippedVoiceFrames": 73159,
+            "minimumCommonRateHz": 9.955009068328291,
+            "maximumCommonRateHz": 38.03486529318542,
+            "maximumRateStepHz": 0.017929444395669236
+          },
+          "exhaust": {
+            "alignments": 2,
+            "alignmentRequests": 2,
+            "skippedVoiceFrames": 73159,
+            "minimumCommonRateHz": 9.973992512989394,
+            "maximumCommonRateHz": 38.09523785752432,
+            "maximumRateStepHz": 0.019448255787708035
+          }
+        }
+      },
+      "transitionPolicy": "authored: follow operating point through accel PCM on lift; blend to recorded idle below .28; no decel voice or native scheduling claim"
+    },
+    "voices": {
+      "engine": {
+        "idle": {
+          "crossfades": 67,
+          "reads": 328095,
+          "minimumReadFrame": 762,
+          "maximumReadFrame": 36522,
+          "minimumSelectedInterval": 0,
+          "maximumSelectedInterval": 7,
+          "maximumConcurrentHeads": 2,
+          "sourceBoundViolations": 0,
+          "stateSwitches": 0,
+          "minimumIntervalRateHz": 9.955009068328291,
+          "maximumIntervalRateHz": 38.03486529318541,
+          "clock": "full interval phase; no overlap-hop rate or neighbour pattern",
+          "texture": {
+            "enabled": true,
+            "basis": "rate-level-detail-gated-original-PCM",
+            "uniqueIntervals": 8,
+            "cyclesAdvanced": 67,
+            "phrasesStarted": 12,
+            "minimumPoolCycles": 8,
+            "maximumPoolCycles": 8,
+            "transientRiskReads": 0,
+            "maximumMaterialRateDifference": 2.667987321711566,
+            "insufficientMaterialFrames": 0,
+            "stateLocalFallbackFrames": 0,
+            "texturePlanRefreshes": 0,
+            "chronologicalFrames": 153299,
+            "maximumReaderStepChange": 0.0007315992115763947,
+            "minimumSpliceCorrelation": 0.23497763386679257,
+            "lowCoherenceSplices": 8,
+            "splices": 12,
+            "modeRegistrations": 1
+          }
+        },
+        "accel": {
+          "crossfades": 77,
+          "reads": 451259,
+          "minimumReadFrame": 6796,
+          "maximumReadFrame": 119532,
+          "minimumSelectedInterval": 0,
+          "maximumSelectedInterval": 56,
+          "maximumConcurrentHeads": 2,
+          "sourceBoundViolations": 0,
+          "stateSwitches": 88,
+          "minimumIntervalRateHz": 9.955009068328291,
+          "maximumIntervalRateHz": 38.03486529318542,
+          "clock": "full interval phase; no overlap-hop rate or neighbour pattern",
+          "texture": {
+            "enabled": true,
+            "basis": "rate-level-detail-gated-original-PCM",
+            "uniqueIntervals": 47,
+            "cyclesAdvanced": 77,
+            "phrasesStarted": 29,
+            "minimumPoolCycles": 2,
+            "maximumPoolCycles": 17,
+            "transientRiskReads": 0,
+            "maximumMaterialRateDifference": 0.5793702933325937,
+            "insufficientMaterialFrames": 59587,
+            "stateLocalFallbackFrames": 0,
+            "texturePlanRefreshes": 0,
+            "minimumSpliceCorrelation": 0.35223325779912235,
+            "lowCoherenceSplices": 26,
+            "modeRegistrations": 1,
+            "chronologicalFrames": 118469,
+            "maximumReaderStepChange": 0.0007375677741947584,
+            "splices": 29
+          }
+        }
+      },
+      "exhaust": {
+        "idle": {
+          "crossfades": 65,
+          "reads": 328098,
+          "minimumReadFrame": 1,
+          "maximumReadFrame": 36237,
+          "minimumSelectedInterval": 0,
+          "maximumSelectedInterval": 7,
+          "maximumConcurrentHeads": 2,
+          "sourceBoundViolations": 0,
+          "stateSwitches": 0,
+          "minimumIntervalRateHz": 9.973992512989394,
+          "maximumIntervalRateHz": 38.09523785752432,
+          "clock": "full interval phase; no overlap-hop rate or neighbour pattern",
+          "texture": {
+            "enabled": true,
+            "basis": "rate-level-detail-gated-original-PCM",
+            "uniqueIntervals": 8,
+            "cyclesAdvanced": 65,
+            "phrasesStarted": 12,
+            "minimumPoolCycles": 8,
+            "maximumPoolCycles": 8,
+            "transientRiskReads": 0,
+            "maximumMaterialRateDifference": 2.9997401201996787,
+            "insufficientMaterialFrames": 0,
+            "stateLocalFallbackFrames": 0,
+            "texturePlanRefreshes": 0,
+            "chronologicalFrames": 153296,
+            "maximumReaderStepChange": 0.0009513941076875199,
+            "minimumSpliceCorrelation": 0.38408177368953245,
+            "splices": 12,
+            "lowCoherenceSplices": 7,
+            "modeRegistrations": 1
+          }
+        },
+        "accel": {
+          "crossfades": 74,
+          "reads": 502074,
+          "minimumReadFrame": 724,
+          "maximumReadFrame": 118069,
+          "minimumSelectedInterval": 0,
+          "maximumSelectedInterval": 51,
+          "maximumConcurrentHeads": 2,
+          "sourceBoundViolations": 0,
+          "stateSwitches": 80,
+          "minimumIntervalRateHz": 9.973992512989394,
+          "maximumIntervalRateHz": 38.09523785752432,
+          "clock": "full interval phase; no overlap-hop rate or neighbour pattern",
+          "texture": {
+            "enabled": true,
+            "basis": "rate-level-detail-gated-original-PCM",
+            "uniqueIntervals": 49,
+            "cyclesAdvanced": 74,
+            "phrasesStarted": 31,
+            "minimumPoolCycles": 2,
+            "maximumPoolCycles": 17,
+            "transientRiskReads": 0,
+            "maximumMaterialRateDifference": 0.39427394770717306,
+            "insufficientMaterialFrames": 65399,
+            "stateLocalFallbackFrames": 0,
+            "texturePlanRefreshes": 0,
+            "minimumSpliceCorrelation": 0.3628654353972417,
+            "lowCoherenceSplices": 9,
+            "modeRegistrations": 1,
+            "chronologicalFrames": 116678,
+            "maximumReaderStepChange": 0.0005942795760347508,
+            "splices": 31
+          }
+        }
+      }
+    }
+  },
+  "validation": {
+    "focusedPassed": 20,
+    "failed": 0,
+    "skipped": 0,
+    "playerFullEventPcmHashesUnchanged": true,
+    "analyticalFundamentalAndHarmonicResidualRmsTolerance": 0.0001,
+    "analyticalNativeRates": [
+      24000,
+      32000,
+      48000
+    ],
+    "actualStreetRenderer": {
+      "limited": 0,
+      "missingHistory": 0,
+      "cursorResets": 0,
+      "rejectedControls": 0,
+      "pathOverflow": 0,
+      "affectedHistoryFrames": 0
+    }
+  },
+  "sourceOwnershipChanged": false,
+  "gameLaunched": false,
+  "gameWrites": false,
+  "endpointOpened": false,
+  "nativeSuppressionPerformed": false,
+  "subjectiveListeningPerformed": false,
+  "perceptualAcceptance": "PENDING user listening",
+  "liveNpcAttachmentImplemented": false,
+  "remainingIssues": [
+    "NPC state policy is authored, not native scheduling reconstruction",
+    "Only Bati NPC bank decoded and verified",
+    "Remaining vehicle banks/source families and live state attachment not implemented",
+    "Lectro/X80 pitch stepping remains open and unchanged"
+  ],
+  "sourceBindings": {
+    "src/acoustics/vehicle/stock-source.mjs": "78d29a58e5ffb898a11e0397417fde721477a418fccfb97cb8a18b5bfa3a575a",
+    "src/acoustics/vehicle/stock-grain.mjs": "b231876fdc0e5a828009cab1956be602f71ec3d656a7ec72c416e25c9fa39545",
+    "src/acoustics/vehicle/installed-stock-registry.mjs": "d72bcbc15d1a44cdc2dfc1f3672515b8fcc047c78d9abb333e3614be1fdc13fa",
+    "tools/Decode-StockVehicleAudio.ps1": "6178d38b8f75ebe43c2d4b67d5695b46017e3626823f758fc5ac03254557b086",
+    "tools/Render-StockNpc02.mjs": "e8bc3595670799cb4e1cad85e0c96ee8741d5d214ac94b85c38641d08d9b7fd1",
+    "tools/world-vehicle-02-scenario.mjs": "64dd708579a27542dbd077fd7323c7cdb7fcd3e6c31aacb6bbf34abaa2d0f46b",
+    "tests/Test-StockNpc.mjs": "816cfe05f2ddc4b0df09ad84e3b5274d761757d80f8df0777988707eb4e5e720"
+  }
+}
