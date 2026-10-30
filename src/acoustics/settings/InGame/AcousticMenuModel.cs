@@ -81,6 +81,8 @@ namespace RichAudio.Settings.InGame
                 case 3:Pending=Pending.With(outputLevel:Math.Max(0,Math.Min(1,Math.Round((Pending.OutputLevel+direction*.05)*20)/20)));break;
                 case 4:Pending=Pending.With(earlyReflections:cycle?!Pending.EarlyReflections:direction>0);break;
                 case 6:Pending=Pending.With(diagnosticsOverlay:cycle?!Pending.DiagnosticsOverlay:direction>0);break;
+                case 7:Pending=Pending.With(soundMapVisible:cycle?!Pending.SoundMapVisible:direction>0);break;
+                case 8:Pending=Pending.With(integrationMode:cycle?(Pending.IntegrationMode=="stock-fallback"?"experimental-additive":"stock-fallback"):(direction>0?"experimental-additive":"stock-fallback"));break;
                 default:SetNotice("This control is read-only; no unsupported effect has been enabled.");return;
             }
             SetNotice("Pending changes. Apply to save and update a configured host.");

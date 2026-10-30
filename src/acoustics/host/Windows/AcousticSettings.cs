@@ -15,21 +15,23 @@ namespace RichAudio.Beacon.Windows
         public readonly long Revision;
         public readonly bool RichAudioEnabled,EarlyReflections,DiagnosticsOverlay;
         public readonly double OutputLevel;
+        public readonly string IntegrationMode;public readonly bool SoundMapVisible;
         public static readonly string[] Qualities = {"auto", "performance", "balanced", "quality", "max"};
         public static readonly string[] Accelerations = {"auto", "cpu", "gpu"};
 
-        public AcousticSettings(string quality, string acceleration, long revision,bool richAudioEnabled=true,double outputLevel=1,bool earlyReflections=true,bool diagnosticsOverlay=false)
+        public AcousticSettings(string quality, string acceleration, long revision,bool richAudioEnabled=true,double outputLevel=1,bool earlyReflections=true,bool diagnosticsOverlay=false,string integrationMode="stock-fallback",bool soundMapVisible=false)
         {
             if(Array.IndexOf(Qualities, quality)<0 || Array.IndexOf(Accelerations, acceleration)<0 || revision<1 || revision>9007199254740991L)
                 throw new ArgumentException("Validated acoustic quality, acceleration and revision required");
             if(Double.IsNaN(outputLevel)||Double.IsInfinity(outputLevel)||outputLevel<0||outputLevel>1)throw new ArgumentException("Owned output level must be finite and within 0..1");
             Quality=quality; Acceleration=acceleration; Revision=revision;RichAudioEnabled=richAudioEnabled;OutputLevel=outputLevel;EarlyReflections=earlyReflections;DiagnosticsOverlay=diagnosticsOverlay;
+            if(integrationMode!="stock-fallback"&&integrationMode!="experimental-additive")throw new ArgumentException("Native replacement is not verified");IntegrationMode=integrationMode;SoundMapVisible=soundMapVisible;
         }
         public static AcousticSettings Defaults(long revision){return new AcousticSettings("auto","auto",revision);}
-        public AcousticSettings WithRevision(long revision){return new AcousticSettings(Quality,Acceleration,revision,RichAudioEnabled,OutputLevel,EarlyReflections,DiagnosticsOverlay);}
-        public AcousticSettings WithSelections(string quality,string acceleration,long revision){return new AcousticSettings(quality,acceleration,revision,RichAudioEnabled,OutputLevel,EarlyReflections,DiagnosticsOverlay);}
-        public AcousticSettings WithAudio(bool? enabled,double? outputLevel,bool? earlyReflections,bool? diagnosticsOverlay){return new AcousticSettings(Quality,Acceleration,Revision,enabled??RichAudioEnabled,outputLevel??OutputLevel,earlyReflections??EarlyReflections,diagnosticsOverlay??DiagnosticsOverlay);}
-        public bool SamePreferences(AcousticSettings other){return other!=null&&Quality==other.Quality&&Acceleration==other.Acceleration&&RichAudioEnabled==other.RichAudioEnabled&&OutputLevel==other.OutputLevel&&EarlyReflections==other.EarlyReflections&&DiagnosticsOverlay==other.DiagnosticsOverlay;}
+        public AcousticSettings WithRevision(long revision){return new AcousticSettings(Quality,Acceleration,revision,RichAudioEnabled,OutputLevel,EarlyReflections,DiagnosticsOverlay,IntegrationMode,SoundMapVisible);}
+        public AcousticSettings WithSelections(string quality,string acceleration,long revision){return new AcousticSettings(quality,acceleration,revision,RichAudioEnabled,OutputLevel,EarlyReflections,DiagnosticsOverlay,IntegrationMode,SoundMapVisible);}
+        public AcousticSettings WithAudio(bool? enabled,double? outputLevel,bool? earlyReflections,bool? diagnosticsOverlay){return new AcousticSettings(Quality,Acceleration,Revision,enabled??RichAudioEnabled,outputLevel??OutputLevel,earlyReflections??EarlyReflections,diagnosticsOverlay??DiagnosticsOverlay,IntegrationMode,SoundMapVisible);}
+        public bool SamePreferences(AcousticSettings other){return other!=null&&Quality==other.Quality&&Acceleration==other.Acceleration&&RichAudioEnabled==other.RichAudioEnabled&&OutputLevel==other.OutputLevel&&EarlyReflections==other.EarlyReflections&&DiagnosticsOverlay==other.DiagnosticsOverlay&&IntegrationMode==other.IntegrationMode&&SoundMapVisible==other.SoundMapVisible;}
         public static AcousticSettings Parse(string text)
         {
             if(text==null || text.Length>4096)throw new InvalidDataException("Bounded acoustic settings required");
@@ -37,14 +39,14 @@ namespace RichAudio.Beacon.Windows
                 if(System.Text.RegularExpressions.Regex.Matches(text,"\""+key+"\"\\s*:").Count!=1)
                     throw new InvalidDataException("Canonical unique acoustic settings fields required");
             var d=new JavaScriptSerializer{MaxJsonLength=4096,RecursionLimit=4}.DeserializeObject(text) as Dictionary<string,object>;
-            if(d==null || d.Count<4 || d.Count>8 || !d.ContainsKey("schemaVersion") || !(d["schemaVersion"] is int) || (int)d["schemaVersion"]!=1 ||
+            if(d==null || d.Count<4 || d.Count>10 || !d.ContainsKey("schemaVersion") || !(d["schemaVersion"] is int) || (int)d["schemaVersion"]!=1 ||
                !d.ContainsKey("revision") || !(d["revision"] is int || d["revision"] is long) ||
                !d.ContainsKey("acousticQuality") || !d.ContainsKey("acousticAcceleration"))
                 throw new InvalidDataException("Acoustic settings schema/version");
             foreach(string key in d.Keys){
-                if(Array.IndexOf(new[]{"schemaVersion","revision","acousticQuality","acousticAcceleration","richAudioEnabled","outputLevel","earlyReflections","diagnosticsOverlay"},key)<0 ||
+                if(Array.IndexOf(new[]{"schemaVersion","revision","acousticQuality","acousticAcceleration","richAudioEnabled","outputLevel","earlyReflections","diagnosticsOverlay","integrationMode","soundMapVisible"},key)<0 ||
                     System.Text.RegularExpressions.Regex.Matches(text,"\""+key+"\"\\s*:").Count!=1)throw new InvalidDataException("Unknown or duplicate acoustic preference");}
-            foreach(string key in new[]{"richAudioEnabled","earlyReflections","diagnosticsOverlay"})
+            foreach(string key in new[]{"richAudioEnabled","earlyReflections","diagnosticsOverlay","soundMapVisible"})
                 if(d.ContainsKey(key)&&!(d[key] is bool))throw new InvalidDataException("Boolean acoustic preference required");
             object level;double output=1;
             if(d.TryGetValue("outputLevel",out level)){
@@ -52,13 +54,13 @@ namespace RichAudio.Beacon.Windows
                 output=Convert.ToDouble(level,CultureInfo.InvariantCulture);}
             return new AcousticSettings(d["acousticQuality"] as string,d["acousticAcceleration"] as string,
                 Convert.ToInt64(d["revision"],CultureInfo.InvariantCulture),!d.ContainsKey("richAudioEnabled")||(bool)d["richAudioEnabled"],output,
-                !d.ContainsKey("earlyReflections")||(bool)d["earlyReflections"],d.ContainsKey("diagnosticsOverlay")&&(bool)d["diagnosticsOverlay"]);
+                !d.ContainsKey("earlyReflections")||(bool)d["earlyReflections"],d.ContainsKey("diagnosticsOverlay")&&(bool)d["diagnosticsOverlay"],d.ContainsKey("integrationMode")?d["integrationMode"] as string:"stock-fallback",d.ContainsKey("soundMapVisible")&&(bool)d["soundMapVisible"]);
         }
         public string Serialize()
         {
             return new JavaScriptSerializer().Serialize(new Dictionary<string,object>{{"schemaVersion",1},{"revision",Revision},
                 {"acousticQuality",Quality},{"acousticAcceleration",Acceleration},{"richAudioEnabled",RichAudioEnabled},{"outputLevel",OutputLevel},
-                {"earlyReflections",EarlyReflections},{"diagnosticsOverlay",DiagnosticsOverlay}});
+                {"earlyReflections",EarlyReflections},{"diagnosticsOverlay",DiagnosticsOverlay},{"integrationMode",IntegrationMode},{"soundMapVisible",SoundMapVisible}});
         }
         public string ProducerArguments(){return " --acoustic-quality "+Quality+" --acoustic-acceleration "+Acceleration+
             (RichAudioEnabled?"":" --rich-audio-enabled false")+(OutputLevel==1?"":" --rich-audio-output-level "+OutputLevel.ToString("R",CultureInfo.InvariantCulture))+

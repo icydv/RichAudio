@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$SdkPath='',[switch]$CoreOnly)
+param([string]$SdkPath='',[switch]$CoreOnly,[switch]$Playable)
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
 $output=Join-Path $repo 'build\acoustics07\transport'
@@ -21,7 +21,8 @@ if(!$CoreOnly)
     $geometry=@(Get-ChildItem (Join-Path $repo 'src\acoustics\geometry') -Filter '*.cs'|ForEach-Object FullName)
     $geometry+=@('GeometryObservation.cs','SurfaceAcquisition.cs','DiagnosticTile.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\observation\'+$_)}
     $menu=@(Get-ChildItem (Join-Path $repo 'src\acoustics\settings\InGame') -Filter '*.cs'|ForEach-Object FullName)
-    $menu+=@('AcousticSettings.cs','InGameSettingsBridge.cs','InGameRecordingBridge.cs','MenuDiagnostic.cs','PassiveSoundMapBridge.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\host\Windows\'+$_)}
+    $menu+=@('AcousticSettings.cs','InGameSettingsBridge.cs','InGameRecordingBridge.cs','MenuDiagnostic.cs','PassiveSoundMapBridge.cs','GameplayRuntime.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\host\Windows\'+$_)}
+    if($Playable){$base+='/define:PLAYABLE_PRODUCT'}
     & $compiler @base '/r:System.Web.Extensions.dll' '/r:System.Drawing.dll' '/r:System.Windows.Forms.dll' '/r:Microsoft.CSharp.dll' ('/r:'+$SdkPath) ('/out:'+$binary) @transport @geometry @menu @adapter
     if($LASTEXITCODE -ne 0){throw 'Listener RPH adapter build failed.'}
     # Prepared application configuration only, outside the game. A future live

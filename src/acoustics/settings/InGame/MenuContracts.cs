@@ -14,25 +14,27 @@ namespace RichAudio.Settings.InGame
         public readonly string Quality, Acceleration;
         public readonly bool Enabled, EarlyReflections, DiagnosticsOverlay;
         public readonly double OutputLevel;
+        public readonly string IntegrationMode;public readonly bool SoundMapVisible;
         public static readonly string[] Qualities={"auto","performance","balanced","quality","max"};
         public static readonly string[] Accelerations={"auto","cpu","gpu"};
         public static MenuPreferences Defaults {get{return new MenuPreferences("auto","auto");}}
         public MenuPreferences(string quality,string acceleration,bool enabled=true,double outputLevel=1,
-            bool earlyReflections=true,bool diagnosticsOverlay=false)
+            bool earlyReflections=true,bool diagnosticsOverlay=false,string integrationMode="stock-fallback",bool soundMapVisible=false)
         {
             if(Array.IndexOf(Qualities,quality)<0||Array.IndexOf(Accelerations,acceleration)<0||
                 Double.IsNaN(outputLevel)||Double.IsInfinity(outputLevel)||outputLevel<0||outputLevel>1)
                 throw new ArgumentException("Validated menu preferences required");
             Quality=quality;Acceleration=acceleration;Enabled=enabled;OutputLevel=outputLevel;
             EarlyReflections=earlyReflections;DiagnosticsOverlay=diagnosticsOverlay;
+            if(integrationMode!="stock-fallback"&&integrationMode!="experimental-additive")throw new ArgumentException("Unverified integration mode");IntegrationMode=integrationMode;SoundMapVisible=soundMapVisible;
         }
         public MenuPreferences With(string quality=null,string acceleration=null,bool? enabled=null,double? outputLevel=null,
-            bool? earlyReflections=null,bool? diagnosticsOverlay=null)
+            bool? earlyReflections=null,bool? diagnosticsOverlay=null,string integrationMode=null,bool? soundMapVisible=null)
         {return new MenuPreferences(quality??Quality,acceleration??Acceleration,enabled??Enabled,outputLevel??OutputLevel,
-            earlyReflections??EarlyReflections,diagnosticsOverlay??DiagnosticsOverlay);}
+            earlyReflections??EarlyReflections,diagnosticsOverlay??DiagnosticsOverlay,integrationMode??IntegrationMode,soundMapVisible??SoundMapVisible);}
         public bool Same(MenuPreferences other)
         {return other!=null&&Quality==other.Quality&&Acceleration==other.Acceleration&&Enabled==other.Enabled&&
-            OutputLevel==other.OutputLevel&&EarlyReflections==other.EarlyReflections&&DiagnosticsOverlay==other.DiagnosticsOverlay;}
+                OutputLevel==other.OutputLevel&&EarlyReflections==other.EarlyReflections&&DiagnosticsOverlay==other.DiagnosticsOverlay&&IntegrationMode==other.IntegrationMode&&SoundMapVisible==other.SoundMapVisible;}
     }
 
     public sealed class MenuStatus

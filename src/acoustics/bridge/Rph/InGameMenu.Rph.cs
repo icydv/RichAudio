@@ -71,7 +71,7 @@ namespace RichAudio.Beacon.Rph
             // persistent game-control mutation needs restoration.
         }
         private static MenuPreferences Preferences(AcousticSettings s)
-        {return new MenuPreferences(s.Quality,s.Acceleration,s.RichAudioEnabled,s.OutputLevel,s.EarlyReflections,s.DiagnosticsOverlay);}
+        {return new MenuPreferences(s.Quality,s.Acceleration,s.RichAudioEnabled,s.OutputLevel,s.EarlyReflections,s.DiagnosticsOverlay,s.IntegrationMode,s.SoundMapVisible);}
         private static bool Key(Keys key){return Game.IsKeyDownRightNow(key);}
         private static bool Button(bool connected,ControllerButtons button){return connected&&Game.IsControllerButtonDownRightNow(button);}
         private static void Run()
@@ -117,6 +117,9 @@ namespace RichAudio.Beacon.Rph
                         var recorder=recordingBridge;var recordState=recorder==null?null:recorder.Snapshot;
                         menu.SetRecording(recordState!=null&&recordState.Available,recordState!=null&&recordState.Active,
                             recordState!=null&&recordState.Pending,recordState==null?"SoundMap recorder unavailable":recordState.Detail);
+#if PLAYABLE_PRODUCT
+                        menu.SetRecording(false,false,false,"Gameplay PCM recording is not connected in this candidate.");
+#endif
                         if(awaitingRecording&&(recordState==null||!recordState.Pending)){
                             awaitingRecording=false;menu.SetNotice(recordState==null?"Recording outcome unavailable; check SoundMap.":recordState.Detail,recordState==null||!recordState.Available);}
                         menu.SetWritable(state.Available&&!state.Pending);
@@ -156,7 +159,7 @@ namespace RichAudio.Beacon.Rph
                         if(action==MenuAction.Apply)
                         {
                             var p=menu.Pending;
-                            var desired=new AcousticSettings(p.Quality,p.Acceleration,Math.Max(1,editingRevision),p.Enabled,p.OutputLevel,p.EarlyReflections,p.DiagnosticsOverlay);
+                            var desired=new AcousticSettings(p.Quality,p.Acceleration,Math.Max(1,editingRevision),p.Enabled,p.OutputLevel,p.EarlyReflections,p.DiagnosticsOverlay,p.IntegrationMode,p.SoundMapVisible);
                             if(service.TryApply(desired,editingRevision)){awaitingRevision=editingRevision;awaitingPreferences=p.With();menu.SetNotice("Saving preferences in the background...");}
                             else menu.SetNotice("Save unavailable or already pending. Preferences have not been applied.",true);
                         }

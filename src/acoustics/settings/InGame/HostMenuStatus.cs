@@ -27,7 +27,7 @@ namespace RichAudio.Settings.InGame
                 if(json.Length>16384)throw new FormatException();
                 var wrapper=new JavaScriptSerializer{MaxJsonLength=16384,RecursionLimit=20}.DeserializeObject(json) as Dictionary<string,object>;
                 object raw;if(wrapper==null||!wrapper.TryGetValue("schemaVersion",out raw)||!Equals(raw,1))throw new FormatException();
-                if(Text(wrapper,"hostState")!="running")return MenuStatus.Unavailable("Host stopped. Active processing is unavailable.");
+                if(Text(wrapper,"hostState")!="running")return MenuStatus.Unavailable("GTA stock fallback. RichAudio output is stopped; native audio remains active.");
                 DateTime recorded;if(!DateTime.TryParse(Text(wrapper,"recordedAtUtc"),CultureInfo.InvariantCulture,DateTimeStyles.RoundtripKind,out recorded))throw new FormatException();
                 double age=(utcNow.ToUniversalTime()-recorded.ToUniversalTime()).TotalSeconds;
                 if(age>3||age< -1)return MenuStatus.Unavailable("Host status is stale. Active quality and backend are unverified.");
@@ -43,7 +43,9 @@ namespace RichAudio.Settings.InGame
                     return MenuStatus.Unavailable("GPU selected but completed hardware processing has not been established.");
                 long revision=Count(state,"settingsRevision");
                 string detail=revision<savedRevision?"Preferences saved; waiting for engine acknowledgement. ":"Engine report. ";
+                detail+=(Text(state,"integrationMode")=="experimental-additive"?"ADDITIVE: GTA engine audio remains. ":Text(state,"integrationMode")=="stock-fallback"?"GTA stock fallback. ":"");
                 detail+="Deadline misses: "+Count(state,"qualityDeadlineMisses")+"; dropped GPU results: "+Count(state,"droppedResults")+". ";
+                if(state.ContainsKey("activeVehicles"))detail+="Vehicles: "+Count(state,"activeVehicles")+"; emitters: "+Count(state,"activeEmitters")+"; underrun frames: "+Count(state,"nativeUnderflowFrames")+". ";
                 if(state.TryGetValue("richAudioEnabled",out raw)&&raw is bool)detail+=(bool)raw?"Output enabled. ":"Owned output muted. ";
                 if(state.TryGetValue("earlyReflections",out raw)&&raw is bool)detail+=(bool)raw?"Early reflections on.":"Direct propagation only.";
                 bool? enabled=state.TryGetValue("richAudioEnabled",out raw)&&raw is bool?(bool?)raw:null;

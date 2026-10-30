@@ -76,7 +76,8 @@ public static class TestInGameMenu
         Click(menu,Region(frame,HitRegionKind.QualityChoice,0,4));Check(menu.Pending.Quality=="max","mouse selects Max target");
         Click(menu,Region(frame,HitRegionKind.AccelerationChoice,1,1));Check(menu.Pending.Acceleration=="cpu"&&menu.Pending.Quality=="max","mouse acceleration independent");
         Click(menu,Region(frame,HitRegionKind.Level,3,-1),.25f);Check(menu.Pending.OutputLevel==.25,"mouse output slider reaches actual preference");
-        var before=menu.Pending;Click(menu,Region(frame,HitRegionKind.Row,7,-1));Check(menu.Pending.Same(before),"clicking unavailable reverb does not enable it");
+        var before=menu.Pending;Click(menu,Region(frame,HitRegionKind.Row,7,-1));Check(menu.Pending.SoundMapVisible!=before.SoundMapVisible,"SoundMap visibility is a real preference");
+        before=menu.Pending;Click(menu,Region(frame,HitRegionKind.Row,8,-1));Check(menu.Pending.IntegrationMode!=before.IntegrationMode,"integration selector distinguishes additive from GTA fallback");
         Check(Click(menu,Region(frame,HitRegionKind.Row,9,-1))==MenuAction.Apply,"mouse Apply dispatches action");
         int selected=menu.SelectedIndex;menu.Pointer(1,1,false,1);Check(menu.SelectedIndex!=selected,"wheel navigates bounded selection");
         menu.BuildFrame(800,600,null);frame=menu.BuildFrame(3440,1440,null);
