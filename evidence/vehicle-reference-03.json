@@ -1,0 +1,611 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "94bfed6",
+  "scenario": {
+    "duration": 10.2,
+    "passTime": 5.5,
+    "shiftTime": 3,
+    "shiftEnd": 3.25,
+    "liftTime": 6.2,
+    "wheelRadius": 0.34,
+    "finalDrive": 3.4,
+    "thirdRatio": 1.95,
+    "fourthRatio": 1.6,
+    "masterGain": 0.7,
+    "seed": 731,
+    "listener": {
+      "position": [
+        0,
+        4,
+        1.5
+      ],
+      "velocity": [
+        0,
+        0,
+        0
+      ],
+      "forward": [
+        0,
+        1,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ]
+    }
+  },
+  "scope": "Authored direct-only accelerating/shift/lift-plus-braking comparison; no measured car calibration or subjective listening",
+  "constantBaseline": "Original 7644 RPM/.82 load/.9 throttle/gear4 operating controls on the NEW common trajectory; counterfactual diagnostic, not rigid drivetrain coupling",
+  "identicalMotionAndPropagation": true,
+  "engineFilesChanged": false,
+  "reports": [
+    {
+      "kind": "constant",
+      "duration": 10.2,
+      "sampleRate": 48000,
+      "masterGain": 0.7,
+      "seed": 731,
+      "normalised": false,
+      "metrics": {
+        "peak": 0.023954132571816444,
+        "rms": 0.001070088008274517,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 65536,
+        "maximumAdjacentStep": 0.003749716270249337
+      },
+      "layerEnergy": {
+        "mechanical": 1504.5605779438904,
+        "exhaust": 636.7611341473315,
+        "intake": 108.45532234222117,
+        "drivetrain": 64.67717267372409,
+        "tyres": 3.2500868696213936,
+        "aero": 0.8190060727101391,
+        "induction": 0,
+        "transients": 0
+      },
+      "maximumSampleStep": 0.049936309456825256,
+      "phaseAdvanceError": 2.0816681711721685e-14,
+      "componentHashes": {
+        "mechanical": "992bd5fdc1763cc584a5baef4521789f02641122581bc136b62ad74eae92461e",
+        "exhaust": "f173ab50f494e4e6a41229ae03c6e7663446ee47b7b99c5f080ac33096a300c9",
+        "intake": "82cc0212e0b124f5a6b8994ece068b1c89c37e96724e8aaa14b3764c58f61ad0",
+        "drivetrain": "e0ccac91208caea317bfc13e5fed947d49759c7456000fe50bda6f2132cc5c2a",
+        "tyres": "071a096dc954eafcbc867ab850263a5e0b7727cc458f441a1e4be7a463ba8776",
+        "aero": "f1c400e93e7233f57777d958ff3f9e21dbaef60a4862b6f75f26af0bf1065926",
+        "induction": "1fff06a08c222badaa84ce775c273e4cc17f5ed5ffaa7e55c84af5b423b97c22",
+        "transients": "1fff06a08c222badaa84ce775c273e4cc17f5ed5ffaa7e55c84af5b423b97c22"
+      },
+      "synth": {
+        "blocks": 957,
+        "frames": 489600,
+        "shifts": 0,
+        "pops": 0,
+        "rejectedPops": 0,
+        "limitedFrames": 0,
+        "peak": 0.2628793651238084,
+        "maximumRpmStep": 1.1944570205541822,
+        "maximumLoadStep": 0.0004165426833312169
+      },
+      "diagnostics": {
+        "quality": "quality",
+        "simulation": {
+          "observations": 957,
+          "updates": 957,
+          "resets": 1,
+          "staleUpdates": 0,
+          "missingPast": 517,
+          "queries": 7656,
+          "surfaceTests": 0,
+          "rejectedPaths": 0,
+          "prunedPaths": 0,
+          "maximumAgeSeconds": 0,
+          "sceneReplacements": 1
+        },
+        "renderer": {
+          "frames": 489600,
+          "peak": 0.023954132428442142,
+          "sumSquares": 1.1212705071025506,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 957,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "sourceHistoryBytes": 23093248,
+        "backend": {
+          "requestedAcceleration": "cpu",
+          "activeAcceleration": "cpu",
+          "gpuDevice": null,
+          "gpuCapability": "unverified",
+          "gpuApi": null,
+          "usesHardwareRayTracing": false,
+          "rayTracingCapability": "not-probed",
+          "rayTracingBackend": "not-implemented",
+          "helperCumulativeCpuMs": null,
+          "fallbackReason": null,
+          "initializationMs": null,
+          "warmupMs": null,
+          "initializationAttempts": 0,
+          "accelerationDeadlineMs": 8,
+          "autoMinimumPairs": 2048,
+          "autoGpuQualified": false,
+          "lastCalibration": null,
+          "lastRejectedGpuAttempt": null,
+          "requests": 957,
+          "gpuAcousticDispatches": 0,
+          "gpuCompletedBatches": 0,
+          "gpuResultsApplied": 0,
+          "calibrationCpuSurfaceTests": 0,
+          "cpuFallbacks": 0,
+          "deadlineMisses": 0,
+          "droppedResults": 0,
+          "invalidResults": 0,
+          "cpuSurfaceTests": 0,
+          "gpuSurfaceTests": 0,
+          "avoidedCpuSurfaceTests": 0,
+          "backendChanges": 0,
+          "queryWallMs": 0.006699999999909778,
+          "queryCpuMs": 0,
+          "cpuTaskWallMs": 0.006699999999909778,
+          "cpuTaskCpuMs": 0,
+          "taskWallMs": 0.006699999999909778,
+          "taskCpuMs": 0,
+          "segments": 8,
+          "surfaces": 0,
+          "cpuAccounting": "Node thread CPU plus helper request CPU",
+          "cpuAccountingNote": "Per-task counters may be quantized; use aggregate Node plus helper CPU deltas for savings"
+        },
+        "directStemHistoryBytes": 0
+      },
+      "motionHash": "fef06ee54a9f061ccfb74d1b616743980a1786e5862187a7bdd19b3a71d2b920",
+      "pathHash": "42da915d749d8db3c6026ef1352751d58b4872332c24012ec9e0672c93ba7999",
+      "wavSha256": "1956e8271da2e80259a437a1b371049bd0004580b1f7cd4566f5314410e0ab34"
+    },
+    {
+      "kind": "dynamic",
+      "duration": 10.2,
+      "sampleRate": 48000,
+      "masterGain": 0.7,
+      "seed": 731,
+      "normalised": false,
+      "metrics": {
+        "peak": 0.027865173295140266,
+        "rms": 0.0011064487902926758,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 65536,
+        "maximumAdjacentStep": 0.005086524412035942
+      },
+      "layerEnergy": {
+        "mechanical": 1037.2581553980333,
+        "exhaust": 323.58498902271936,
+        "intake": 47.88099832633895,
+        "drivetrain": 33.70633842220187,
+        "tyres": 3.2500868696213936,
+        "aero": 0.8190060727101391,
+        "induction": 0,
+        "transients": 0
+      },
+      "maximumSampleStep": 0.06056254357099533,
+      "phaseAdvanceError": 0,
+      "componentHashes": {
+        "mechanical": "cf88ffe9e3dd7be245eeb18f1243ab1340f22c8273afc3b8779ece8983ee4b70",
+        "exhaust": "e571a0230d78b998c58e6cfb4f7a863b8c20d791cb5a2e85a75c9f66d9f4cca5",
+        "intake": "2414502b23ce16795f1769233bb3ead599be117f240a0f6f1178e2ff23825567",
+        "drivetrain": "71b53d48d91f5b23a6ff21c9d0f564c186f75716c6f6e7acc93d548f6b555667",
+        "tyres": "071a096dc954eafcbc867ab850263a5e0b7727cc458f441a1e4be7a463ba8776",
+        "aero": "f1c400e93e7233f57777d958ff3f9e21dbaef60a4862b6f75f26af0bf1065926",
+        "induction": "1fff06a08c222badaa84ce775c273e4cc17f5ed5ffaa7e55c84af5b423b97c22",
+        "transients": "1fff06a08c222badaa84ce775c273e4cc17f5ed5ffaa7e55c84af5b423b97c22"
+      },
+      "synth": {
+        "blocks": 957,
+        "frames": 489600,
+        "shifts": 1,
+        "pops": 0,
+        "rejectedPops": 0,
+        "limitedFrames": 0,
+        "peak": 0.28900389140471816,
+        "maximumRpmStep": 0.6530716557520009,
+        "maximumLoadStep": 0.0001368640245231062
+      },
+      "diagnostics": {
+        "quality": "quality",
+        "simulation": {
+          "observations": 957,
+          "updates": 957,
+          "resets": 1,
+          "staleUpdates": 0,
+          "missingPast": 517,
+          "queries": 7656,
+          "surfaceTests": 0,
+          "rejectedPaths": 0,
+          "prunedPaths": 0,
+          "maximumAgeSeconds": 0,
+          "sceneReplacements": 1
+        },
+        "renderer": {
+          "frames": 489600,
+          "peak": 0.027865172984682295,
+          "sumSquares": 1.1987649632449908,
+          "limited": 0,
+          "missingHistory": 0,
+          "controlUpdates": 957,
+          "rejectedControls": 0,
+          "cursorResets": 0,
+          "pathOverflow": 0,
+          "maximumControlAgeFrames": 511
+        },
+        "history": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "sourceHistoryBytes": 23093248,
+        "backend": {
+          "requestedAcceleration": "cpu",
+          "activeAcceleration": "cpu",
+          "gpuDevice": null,
+          "gpuCapability": "unverified",
+          "gpuApi": null,
+          "usesHardwareRayTracing": false,
+          "rayTracingCapability": "not-probed",
+          "rayTracingBackend": "not-implemented",
+          "helperCumulativeCpuMs": null,
+          "fallbackReason": null,
+          "initializationMs": null,
+          "warmupMs": null,
+          "initializationAttempts": 0,
+          "accelerationDeadlineMs": 8,
+          "autoMinimumPairs": 2048,
+          "autoGpuQualified": false,
+          "lastCalibration": null,
+          "lastRejectedGpuAttempt": null,
+          "requests": 957,
+          "gpuAcousticDispatches": 0,
+          "gpuCompletedBatches": 0,
+          "gpuResultsApplied": 0,
+          "calibrationCpuSurfaceTests": 0,
+          "cpuFallbacks": 0,
+          "deadlineMisses": 0,
+          "droppedResults": 0,
+          "invalidResults": 0,
+          "cpuSurfaceTests": 0,
+          "gpuSurfaceTests": 0,
+          "avoidedCpuSurfaceTests": 0,
+          "backendChanges": 0,
+          "queryWallMs": 0.005999999999858119,
+          "queryCpuMs": 0,
+          "cpuTaskWallMs": 0.005999999999858119,
+          "cpuTaskCpuMs": 0,
+          "taskWallMs": 0.005999999999858119,
+          "taskCpuMs": 0,
+          "segments": 8,
+          "surfaces": 0,
+          "cpuAccounting": "Node thread CPU plus helper request CPU",
+          "cpuAccountingNote": "Per-task counters may be quantized; use aggregate Node plus helper CPU deltas for savings"
+        },
+        "directStemHistoryBytes": 0
+      },
+      "motionHash": "fef06ee54a9f061ccfb74d1b616743980a1786e5862187a7bdd19b3a71d2b920",
+      "pathHash": "42da915d749d8db3c6026ef1352751d58b4872332c24012ec9e0672c93ba7999",
+      "wavSha256": "c57d91e0f2a574b4486868de3d83629432700ca76f55ff2b706525453b7002d8"
+    }
+  ],
+  "eventMeasurements": {
+    "method": "Stereo RMS/peak; arithmetic mono downmix for fourth-order zero-phase bandpass and Welch analysis. Nearest peak to predicted firing family is a descriptor, not a pitch/listening score. Windows are on receiver time; source controls arrive after propagation.",
+    "subjectiveListening": "not performed",
+    "normalised": false,
+    "reports": [
+      {
+        "kind": "constant",
+        "events": [
+          {
+            "event": "distant-approach",
+            "start": 0.9,
+            "end": 1.5,
+            "sourceRpmMedian": 7643.823166344777,
+            "speedMedianMps": 32.04003792592593,
+            "receivedFiringHzPredictedMedian": 823.1842609326616,
+            "nearestMeasuredSpectralPeakHz": 826.171875,
+            "spectralResolutionHz": 2.9296875,
+            "stereoRms": 0.00013153472301461616,
+            "stereoRmsDbfs": -77.61919170804275,
+            "peak": 0.00047719202120788395,
+            "upperToMidDb": -11.427361676926964,
+            "bandRmsDbfs": {
+              "160-500": -87.39619410594455,
+              "500-2000": -88.0178721808911,
+              "2000-6000": -99.44523385781807
+            }
+          },
+          {
+            "event": "acceleration",
+            "start": 2,
+            "end": 2.7,
+            "sourceRpmMedian": 7643.9999921101735,
+            "speedMedianMps": 42.603640130370366,
+            "receivedFiringHzPredictedMedian": 859.973904627338,
+            "nearestMeasuredSpectralPeakHz": 864.2578125,
+            "spectralResolutionHz": 2.9296875,
+            "stereoRms": 0.00016924685798063585,
+            "stereoRmsDbfs": -75.42958770240888,
+            "peak": 0.0006261837552301586,
+            "upperToMidDb": -12.68285369203835,
+            "bandRmsDbfs": {
+              "160-500": -85.28075605535233,
+              "500-2000": -84.59475871885091,
+              "2000-6000": -97.27761241088926
+            }
+          },
+          {
+            "event": "shift-arrival",
+            "start": 3.35,
+            "end": 3.65,
+            "sourceRpmMedian": 7643.99999999749,
+            "speedMedianMps": 45.530511964005484,
+            "receivedFiringHzPredictedMedian": 879.7591586475952,
+            "nearestMeasuredSpectralPeakHz": 880,
+            "spectralResolutionHz": 3.3333333333333335,
+            "stereoRms": 0.0002611087338544528,
+            "stereoRmsDbfs": -71.66357202341422,
+            "peak": 0.0008865503477863967,
+            "upperToMidDb": -14.174427406470656,
+            "bandRmsDbfs": {
+              "160-500": -81.82275912708648,
+              "500-2000": -79.52368760884471,
+              "2000-6000": -93.69811501531537
+            }
+          },
+          {
+            "event": "near-pass",
+            "start": 5.45,
+            "end": 5.65,
+            "sourceRpmMedian": 7643.99999999749,
+            "speedMedianMps": 60,
+            "receivedFiringHzPredictedMedian": 765.6489134825359,
+            "nearestMeasuredSpectralPeakHz": 765,
+            "spectralResolutionHz": 5,
+            "stereoRms": 0.005794322645062614,
+            "stereoRmsDbfs": -44.73994651309387,
+            "peak": 0.023954132571816444,
+            "upperToMidDb": -8.816497262356222,
+            "bandRmsDbfs": {
+              "160-500": -53.260098790963,
+              "500-2000": -50.564241960074696,
+              "2000-6000": -59.38073922243092
+            }
+          },
+          {
+            "event": "lift-and-braking",
+            "start": 6.55,
+            "end": 7.05,
+            "sourceRpmMedian": 7643.99999999749,
+            "speedMedianMps": 58.795378451669336,
+            "receivedFiringHzPredictedMedian": 651.7124301718097,
+            "nearestMeasuredSpectralPeakHz": 650.390625,
+            "spectralResolutionHz": 2.9296875,
+            "stereoRms": 0.00048773193102326264,
+            "stereoRmsDbfs": -66.23637621836124,
+            "peak": 0.002826823852956295,
+            "upperToMidDb": -9.596416056334434,
+            "bandRmsDbfs": {
+              "160-500": -78.57132868744262,
+              "500-2000": -72.56520946231315,
+              "2000-6000": -82.16162551864758
+            }
+          },
+          {
+            "event": "recession",
+            "start": 8,
+            "end": 8.6,
+            "sourceRpmMedian": 7643.99999999749,
+            "speedMedianMps": 49.59356535782669,
+            "receivedFiringHzPredictedMedian": 663.0343003608698,
+            "nearestMeasuredSpectralPeakHz": 662.109375,
+            "spectralResolutionHz": 2.9296875,
+            "stereoRms": 0.00022077910224517657,
+            "stereoRmsDbfs": -73.12084073924831,
+            "peak": 0.0012226160615682602,
+            "upperToMidDb": -9.070079224361777,
+            "bandRmsDbfs": {
+              "160-500": -85.24992735860206,
+              "500-2000": -79.97404718279114,
+              "2000-6000": -89.04412640715292
+            }
+          },
+          {
+            "event": "far",
+            "start": 9.7,
+            "end": 10.2,
+            "sourceRpmMedian": 7643.99999999749,
+            "speedMedianMps": 42.00854351013267,
+            "receivedFiringHzPredictedMedian": 678.5274321169992,
+            "nearestMeasuredSpectralPeakHz": 676.7578125,
+            "spectralResolutionHz": 2.9296875,
+            "stereoRms": 0.00013789475070877423,
+            "stereoRmsDbfs": -77.20904531921028,
+            "peak": 0.0007218826794996858,
+            "upperToMidDb": -7.637793480073967,
+            "bandRmsDbfs": {
+              "160-500": -88.77258375615163,
+              "500-2000": -84.9794942519366,
+              "2000-6000": -92.61728773201057
+            }
+          }
+        ]
+      },
+      {
+        "kind": "dynamic",
+        "events": [
+          {
+            "event": "distant-approach",
+            "start": 0.9,
+            "end": 1.5,
+            "sourceRpmMedian": 5778.606727234119,
+            "speedMedianMps": 32.04003792592593,
+            "receivedFiringHzPredictedMedian": 525.7577069480358,
+            "nearestMeasuredSpectralPeakHz": 530.2734375,
+            "spectralResolutionHz": 2.9296875,
+            "stereoRms": 0.00009563852339583189,
+            "stereoRmsDbfs": -80.38734275526424,
+            "peak": 0.00032903667306527495,
+            "upperToMidDb": -16.152076282286956,
+            "bandRmsDbfs": {
+              "160-500": -91.13831063439683,
+              "500-2000": -93.19299026141756,
+              "2000-6000": -109.34506654370452
+            }
+          },
+          {
+            "event": "acceleration",
+            "start": 2,
+            "end": 2.7,
+            "sourceRpmMedian": 7779.441539457255,
+            "speedMedianMps": 42.603640130370366,
+            "receivedFiringHzPredictedMedian": 775.3700231028829,
+            "nearestMeasuredSpectralPeakHz": 773.4375,
+            "spectralResolutionHz": 2.9296875,
+            "stereoRms": 0.0001336911707787649,
+            "stereoRmsDbfs": -77.4779454686238,
+            "peak": 0.0004603802226483822,
+            "upperToMidDb": -13.38754602631056,
+            "bandRmsDbfs": {
+              "160-500": -87.31856038440048,
+              "500-2000": -88.02081459526896,
+              "2000-6000": -101.40836062157952
+            }
+          },
+          {
+            "event": "shift-arrival",
+            "start": 3.35,
+            "end": 3.65,
+            "sourceRpmMedian": 7263.37180720934,
+            "speedMedianMps": 45.530511964005484,
+            "receivedFiringHzPredictedMedian": 946.3729294014545,
+            "nearestMeasuredSpectralPeakHz": 953.3333333333334,
+            "spectralResolutionHz": 3.3333333333333335,
+            "stereoRms": 0.00021679646592439214,
+            "stereoRmsDbfs": -73.27895603326756,
+            "peak": 0.0008713160059414804,
+            "upperToMidDb": -15.09417435975918,
+            "bandRmsDbfs": {
+              "160-500": -82.2435969474677,
+              "500-2000": -81.80988807803362,
+              "2000-6000": -96.9040624377928
+            }
+          },
+          {
+            "event": "near-pass",
+            "start": 5.45,
+            "end": 5.65,
+            "sourceRpmMedian": 9146.79825944061,
+            "speedMedianMps": 60,
+            "receivedFiringHzPredictedMedian": 915.7259712626962,
+            "nearestMeasuredSpectralPeakHz": 915,
+            "spectralResolutionHz": 5,
+            "stereoRms": 0.006279201638871386,
+            "stereoRmsDbfs": -44.041911411477955,
+            "peak": 0.027865173295140266,
+            "upperToMidDb": -7.300093439796221,
+            "bandRmsDbfs": {
+              "160-500": -51.32304668825799,
+              "500-2000": -49.85213422942101,
+              "2000-6000": -57.15222766921723
+            }
+          },
+          {
+            "event": "lift-and-braking",
+            "start": 6.55,
+            "end": 7.05,
+            "sourceRpmMedian": 9078.713820607667,
+            "speedMedianMps": 58.795378451669336,
+            "receivedFiringHzPredictedMedian": 778.8859638647294,
+            "nearestMeasuredSpectralPeakHz": 779.296875,
+            "spectralResolutionHz": 2.9296875,
+            "stereoRms": 0.0002741771466706325,
+            "stereoRmsDbfs": -71.23937495070149,
+            "peak": 0.001830384717322886,
+            "upperToMidDb": -7.674763365120299,
+            "bandRmsDbfs": {
+              "160-500": -81.42044931390878,
+              "500-2000": -80.83453278310225,
+              "2000-6000": -88.50929614822255
+            }
+          },
+          {
+            "event": "recession",
+            "start": 8,
+            "end": 8.6,
+            "sourceRpmMedian": 7858.530859323075,
+            "speedMedianMps": 49.59356535782669,
+            "receivedFiringHzPredictedMedian": 718.6560672459347,
+            "nearestMeasuredSpectralPeakHz": 714.84375,
+            "spectralResolutionHz": 2.9296875,
+            "stereoRms": 0.00010344395383003044,
+            "stereoRmsDbfs": -79.70589776453542,
+            "peak": 0.00038427693652920425,
+            "upperToMidDb": -4.717929410794596,
+            "bandRmsDbfs": {
+              "160-500": -89.30529822199496,
+              "500-2000": -95.73894247393325,
+              "2000-6000": -100.45687188472785
+            }
+          },
+          {
+            "event": "far",
+            "start": 9.7,
+            "end": 10.2,
+            "sourceRpmMedian": 6500.779458300382,
+            "speedMedianMps": 42.00854351013267,
+            "receivedFiringHzPredictedMedian": 607.5389533055683,
+            "nearestMeasuredSpectralPeakHz": 612.3046875,
+            "spectralResolutionHz": 2.9296875,
+            "stereoRms": 0.00007660306450341285,
+            "stereoRmsDbfs": -82.31507712162981,
+            "peak": 0.0002931210910901427,
+            "upperToMidDb": -14.991000656907033,
+            "bandRmsDbfs": {
+              "160-500": -93.20323961694746,
+              "500-2000": -91.42098467738015,
+              "2000-6000": -106.41198533428718
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "legacyRegression": {
+    "legacyCase": "05-pass-direct",
+    "legacyDuration": 4,
+    "expected": "d93787dd6595ce813626fcd4281ae3d27c9454359bb8fbf7a3cb18e8dedfed7d",
+    "actual": "d93787dd6595ce813626fcd4281ae3d27c9454359bb8fbf7a3cb18e8dedfed7d",
+    "exact": true
+  },
+  "focusedTests": {
+    "new": 4,
+    "existingSelected": 4,
+    "fullSuiteRun": false
+  },
+  "subjectiveListening": "not performed"
+}
