@@ -7,6 +7,14 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & node --test tests/Test-VehicleState.mjs tests/Test-VehicleSynthesis.mjs tests/Test-VehicleSynthesisOriginal.mjs tests/Test-VehicleEnvironment.mjs tests/Test-VehiclePipeline.mjs tests/Test-VehiclePropagation.mjs tests/Test-VehicleDemo.mjs tests/Test-VehicleOutputGuard.mjs tests/Test-VehicleLiveSource.mjs tests/Test-VehicleRelay.mjs
+    if($LASTEXITCODE-ne0){throw 'Original vehicle modules, live source ownership or output headroom failed.'}
+    & (Join-Path $repo 'tools\Test-VehicleEvidence.ps1')
+    & node --test tests/Test-VehicleCandidate.mjs tests/Test-VehicleCandidatePreparer.mjs tests/Test-VehicleLiveProof.mjs tests/Test-VehicleCalibration.mjs
+    if($LASTEXITCODE-ne0){throw 'Independent vehicle candidate binding or readiness boundary failed.'}
+    & (Join-Path $repo 'tools\Test-VehicleLive.ps1')
+    & node --test tests/Test-VehicleNativeDiagnostics.mjs
+    if($LASTEXITCODE-ne0){throw 'Actual native vehicle startup and bounded diagnostic evidence failed.'}
     & node --test tests/Test-ListeningOperator.mjs
     if($LASTEXITCODE-ne0){throw 'Focused listening operator orchestration failed.'}
     & node --test tests/Test-ListenerBoundary.mjs

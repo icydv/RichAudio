@@ -42,6 +42,21 @@ namespace RichAudio.Beacon.Windows
             throw new NotSupportedException("Actual listening fixture requires geometry-enabled build");
 #endif
         }
+        internal static int RunVehicleFixture(string root,string directory,string listenerPipe,string geometryPipe,string vehiclePipeName,string modelPath,string soundMapConfig,string profile)
+        {
+            if(!System.Reflection.Assembly.GetExecutingAssembly().GetName().Name.EndsWith(".Tests",StringComparison.Ordinal)||listeningFixture)
+                throw new InvalidOperationException("One actual vehicle fixture per test process");
+            string full=Path.GetFullPath(directory),local=Path.GetFullPath(Path.Combine(root,".local"))+Path.DirectorySeparatorChar;
+            if(!full.StartsWith(local,StringComparison.OrdinalIgnoreCase)||string.IsNullOrEmpty(listenerPipe)||string.IsNullOrEmpty(geometryPipe)||string.IsNullOrEmpty(vehiclePipeName))
+                throw new ArgumentException("Private fixture directory and dedicated pipes required");
+            VehicleArguments(profile,true,true,false,false,0,.20f);
+            Directory.CreateDirectory(full);
+            fixturePreHost=new FileStream(Path.Combine(full,"pre-host.f32le"),FileMode.CreateNew,FileAccess.Write,FileShare.Read);
+            fixturePostHost=new FileStream(Path.Combine(full,"post-host.f32le"),FileMode.CreateNew,FileAccess.Write,FileShare.Read);
+            var settings=new AcousticSettings("balanced","auto",1);string settingsPath=Path.Combine(full,"acoustic-settings.json");File.WriteAllText(settingsPath,settings.Serialize());
+            listeningGeometryPipe=geometryPipe;vehicleFixturePipe=vehiclePipeName;vehicleProfile=profile;listeningFixture=true;auditionOutputEnabled=false;
+            return Run(root,"open-road","harmonic",8,15,.20f,-1,false,false,false,true,null,full,95,.22,modelPath,settings,settingsPath,soundMapConfig,"",listenerPipe);
+        }
         internal static void ListeningFixtureControl(string command)
         {
             if(!listeningFixture)throw new InvalidOperationException("Listening fixture not running");

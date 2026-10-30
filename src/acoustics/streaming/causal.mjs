@@ -426,6 +426,7 @@ export class StreamingRenderer {
         id,
         {
           id,
+          registered: true,
           generation: 100001,
           bands: [
             new Float32Array(this.historyFrames),
@@ -528,11 +529,26 @@ export class StreamingRenderer {
       "source generation",
     );
     if (s.generation !== generation) {
+      s.registered = true;
       s.generation = generation;
       s.generationFrame = this.frame;
       s.low = 0;
       s.upper = 0;
     }
+  }
+  releaseSources(ids) {
+    requireValue(Array.isArray(ids)&&ids.length<=this.sources.size&&new Set(ids).size===ids.length&&
+      ids.every(id=>this.sources.has(id)), 'bounded owned source removal');
+    for(const id of ids) {
+      const source=this.sources.get(id);
+      if(!source.registered)continue;
+      source.registered=false;source.low=0;source.upper=0;
+      for(const band of source.bands)band.fill(0);
+      source.frames.fill(-1);source.generations.fill(0);
+      for(const slot of this.slots)if(slot.source===source){slot.active=false;slot.present=false;slot.gain.fill(0);slot.target.fill(0);slot.releaseLeft=0;}
+      this.stats.releasedSources=(this.stats.releasedSources??0)+1;
+    }
+    if(this.activeSlotIndices){this.activeSlotCount=0;for(let i=0;i<this.slots.length;i++)if(this.slots[i].active)this.activeSlotIndices[this.activeSlotCount++]=i;}
   }
   accept(control) {
     requireValue(
@@ -558,6 +574,13 @@ export class StreamingRenderer {
       control.sourceGenerations ?? {},
     ))
       if (this.sources.has(id)) this.setSourceGeneration(id, generation);
+    if(control.releasedSourceIds)this.releaseSources(control.releasedSourceIds);
+    if(control.activeSourceIds){
+      requireValue(Array.isArray(control.activeSourceIds)&&control.activeSourceIds.length<=this.sources.size&&
+        new Set(control.activeSourceIds).size===control.activeSourceIds.length&&control.activeSourceIds.every(id=>this.sources.has(id)&&
+          !(control.releasedSourceIds??[]).includes(id)), 'bounded active source registration');
+      for(const id of control.activeSourceIds)this.sources.get(id).registered=true;
+    }
     for (const slot of this.slots) {
       slot.target.fill(0);
       slot.present = false;
@@ -670,6 +693,7 @@ export class StreamingRenderer {
         const s = this.sourceList[i],
           x = s.input[j];
         requireValue(Number.isFinite(x) && Math.abs(x) <= 1, "invalid dry PCM");
+        if(!s.registered){requireValue(x===0,'released source cannot submit PCM');continue;}
         s.low += lowK * (x - s.low);
         s.upper += highK * (x - s.upper);
         s.bands[0][write] = s.low;

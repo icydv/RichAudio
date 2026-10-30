@@ -14,6 +14,19 @@ test('conditional listener-only renderer stays distinct from observed geometry a
  assert.match(s.health(10).message,/unobserved space assumed clear/);assert.equal(s.health(501).state,'stale');
  assert.equal(s.health(10,false).state,'disconnected');assert.equal(s.frame.paths[0].visibilityAssumption,'unobserved-space-assumed-clear');
 });
+test('vehicle components remain live conditional direct evidence without inventing geometry or renewing stale telemetry',()=>{
+ const s=new VisualState(),f=frame();f.geometryGeneration=null;f.geometryTimeMs=null;
+ f.sources=['mechanical','exhaust','intake','drivetrain','tyres','aero','induction','transients'].map((name,i)=>
+   ({id:`vehicle:1:${name}`,position:[i*.1,2,1],valid:true}));
+ f.readiness={rendererReadyForOwnedEmission:true,genuineGeometryPresent:false,reflectionsActive:false,
+   mode:'vehicle-conditional-direct',visibilityAssumption:'unobserved-space-assumed-clear'};
+ f.paths=[{id:'vehicle-exhaust-direct',sourceId:'vehicle:1:exhaust',status:'selected',order:0,
+   vertices:[[.1,2,1],[0,2,1]],visibilityAssumption:'unobserved-space-assumed-clear'}];
+ s.ingest(envelope(f,null),0);assert.equal(s.frame.sources.length,8);assert.equal(s.geometry,null);
+ assert.equal(s.health(10).state,'conditional');assert.equal(s.health(10).expired,true,'geometry remains unavailable');
+ assert.match(s.health(10).message,/unobserved space assumed clear/);assert.equal(s.health(501).state,'stale');
+ assert.equal(s.health(10,false).state,'disconnected');assert.equal(s.frame.paths[0].sourceId,'vehicle:1:exhaust');
+});
 const originalContext=()=>({schemaVersion:1,kind:'richaudio-visual-context',coordinateSpace:'research-rh-z-up-metres-v1',calibration,acousticUse:false,knowledge:'historical',provenance:{kind:'original-synthetic',reference:'analytic-box-fixture'},tiles:[{id:'context',bounds:{min:[0,0,0],max:[4,4,4]},vertices:[[0,0,0],[4,0,0],[4,4,0],[0,4,0]],faces:[[0,1,2,3]]}]});
 test('viewer preserves solver emission/contact/arrival vertices and never manufactures unavailable rays',()=>{const s=new VisualState(),f=frame();s.ingest(envelope(f),10);assert.equal(s.frame.paths[0].vertices,f.paths[0].vertices);assert.deepEqual(s.frame.paths[0].points,[[1,0,1]]);assert.equal(s.frame.paths[1].vertices,null);assert(Object.isFrozen(s.frame.paths[0].vertices));assert.throws(()=>s.frame.paths[0].vertices.push([0,0,0]));});
 test('immutable generation cache is reused, bounded, and cleared across session changes',()=>{const s=new VisualState();s.ingest(envelope(),10);const g=s.geometry;s.ingest(envelope(frame(2),null),20);assert.equal(s.geometry,g);assert.equal(s.geometryRequestKey(),'g1');for(let i=3;i<10;i++)s.ingest(envelope(frame(i,'s1','g'+i),geometry('g'+i)),i*10);assert.equal(s.geometries.size,4);s.ingest(envelope(frame(1,'s2','g1'),null),100);assert.equal(s.geometry,null);assert.equal(s.geometries.size,0);});

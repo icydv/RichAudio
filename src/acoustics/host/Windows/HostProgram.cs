@@ -7,6 +7,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Web.Script.Serialization;
+#if LEGACY_RELAY_BASELINE && !GEOMETRY_FIXTURE
+#error LEGACY_RELAY_BASELINE is restricted to the device-free geometry fixture build.
+#endif
 #if STATE_TRANSPORT
 using RichAudio.Beacon.Transport;
 #endif
@@ -26,7 +29,7 @@ namespace RichAudio.Beacon.Windows
         private static volatile string latestRendererStatus;
         private static bool auditionOutputEnabled;
         private static readonly object inputLock = new object(), logLock = new object();
-        private sealed class ControlMessage { internal string Text, ListenerJson; internal long QueuedTicks, Sequence, ObservationTicks; internal double ObservationQpc100ns; }
+        private sealed class ControlMessage { internal string Text, ListenerJson, VehicleJson; internal long QueuedTicks, Sequence, ObservationTicks; internal double ObservationQpc100ns; }
         private static readonly Queue<ControlMessage> inputQueue = new Queue<ControlMessage>();
         private static readonly AutoResetEvent inputSignal = new AutoResetEvent(false);
         private static volatile bool inputStop;
@@ -65,7 +68,7 @@ namespace RichAudio.Beacon.Windows
                     "Without saved controls or these options, the existing 12-path/default-profile route remains unchanged.\n"+
                     "Known-WAV playback ignores saved incremental preferences and rejects explicit processing controls.\n"+
                     "Other existing options: --root, --scene, --sources, --seconds, --gain, --beacon, --beacon-frequency-hz, --beacon-level,\n"+
-                    "  --listener-pipe, --geometry-model, --output, --wav, --device, --list-devices, --probe-device, --autostart, --exercise-controls, --loopback.\n"+
+                    "  --listener-pipe, --geometry-model, --vehicle-profile v12|v8, --output, --wav, --device, --list-devices, --probe-device, --autostart, --exercise-controls, --loopback.\n"+
                     "This help command opens no audio endpoint.");return 0;
             }
             string root = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "..", ".."));
@@ -96,6 +99,7 @@ namespace RichAudio.Beacon.Windows
                         else if (key == "--beacon-frequency-hz") beaconFrequencyHz = double.Parse(value, CultureInfo.InvariantCulture);
                         else if (key == "--beacon-level") beaconLevel = double.Parse(value, CultureInfo.InvariantCulture);
                         else if (key == "--beacon-output-trim-db") outputTrimDb=double.Parse(value,CultureInfo.InvariantCulture);
+                        else if (key == "--vehicle-profile") vehicleProfile=value;
                         else if (key == "--geometry-model") geometryModel=Path.GetFullPath(value);
                         else if (key == "--acoustic-settings") acousticSettingsPath=value;
                         else if (key == "--soundmap-config") soundMapConfig=Path.GetFullPath(value);
@@ -114,13 +118,15 @@ namespace RichAudio.Beacon.Windows
                         else throw new ArgumentException("Unknown option " + key);
                     }
                 }
+                VehicleArguments(vehicleProfile,listenerPipe,geometryModel!=null,wav!=null,autostart||exercise||loopback||list||probe,outputTrimDb,gain);
+                if(vehicleProfile!=null)sources=8;
                 string auditionArguments=AuditionArguments(outputTrimDb,scene,beacon,sources,beaconFrequencyHz,beaconLevel,gain,listenerPipe,geometryModel!=null,wav!=null,autostart||exercise||loopback||list||probe);
                 if (list) { string[] devices = WasapiOutput.ListDevices(); for (int i = 0; i < devices.Length; i++) Console.WriteLine(i + ": " + devices[i]); return 0; }
                 if (probe) { if(device < -1)throw new ArgumentException("Invalid device index"); Console.WriteLine(json.Serialize(WasapiOutput.ProbeDevice(device))); return 0; }
-                if (seconds < 1 || seconds > 120 || sources < 1 || sources > 4 || device < -1 || !new List<string>{"open-road","urban-street","obstructed-corner","enclosure","flyby"}.Contains(scene)) throw new ArgumentException("Host bounds: 1..120 seconds, 1..4 measured sources, known scene, valid endpoint");
+                if (seconds < 1 || seconds > 120 || sources < 1 || (vehicleProfile==null?sources>4:sources!=8) || device < -1 || !new List<string>{"open-road","urban-street","obstructed-corner","enclosure","flyby"}.Contains(scene)) throw new ArgumentException("Host bounds: 1..120 seconds, 1..4 beacon sources or eight components of one vehicle, known scene, valid endpoint");
                 if(!new List<string>{"harmonic","pulse","impulse"}.Contains(beacon))throw new ArgumentException("Unknown owned beacon");
                 if(wav!=null&&listenerPipe)throw new ArgumentException("The listener bridge requires incremental rendering; known-WAV playback cannot respond to telemetry");
-                if(geometryModel!=null&&(!listenerPipe||wav!=null||sources!=1))throw new ArgumentException("Geometry requires listener pipe, incremental owned source and one source");
+                if(geometryModel!=null&&(!listenerPipe||wav!=null||(vehicleProfile==null?sources!=1:sources!=8)))throw new ArgumentException("Geometry requires listener pipe and reviewed original source slots");
                 if (float.IsNaN(gain) || float.IsInfinity(gain) || gain < 0 || gain > .25f) throw new ArgumentException("Gain must be 0..0.25; initial default is 0.08");
                 BeaconFrequencyArguments(beaconFrequencyHz, beacon, wav != null);
                 BeaconLevelArguments(beaconLevel, beacon, wav != null);
@@ -184,6 +190,7 @@ namespace RichAudio.Beacon.Windows
             {
 #if GEOMETRY_LIVE
                 var geometrySettings=geometryModel==null?null:LoadGeometryModel(root,geometryModel);
+                if(vehicleProfile!=null)Protocol.Check(geometrySettings!=null&&geometrySettings.Scale==1,"vehicle demonstration requires explicit one metre scale before output startup");
 #endif
                 Console.CancelKeyPress += delegate(object sender, ConsoleCancelEventArgs e) { e.Cancel = true; if (output != null) output.Stop(); stop = true; };
                 if(soundMapConfig!=null)ownedRecorder=new OwnedOutputTap(soundMapConfig);
@@ -192,7 +199,7 @@ namespace RichAudio.Beacon.Windows
                     if(acousticSettings!=null)acousticSettingsMonitor=new AcousticSettingsMonitor(root,settingsPath,acousticSettings,
                         delegate(AcousticSettings changed){Send(changed.ControlMessage());});
                     string script = Path.Combine(root, "tools", "Run-Acoustics07.mjs"); if (!File.Exists(script)) throw new FileNotFoundException("Streaming worker is not built", "Run-Acoustics07.mjs");
-                    child = new Process { StartInfo = new ProcessStartInfo { FileName = "node.exe", Arguments = Quote(script) + " --scene " + scene + " --sources " + sources + " --beacon " + beacon + BeaconFrequencyArguments(beaconFrequencyHz, beacon, false) + BeaconLevelArguments(beaconLevel, beacon, false) + auditionArguments + (listenerPipe ? " --listener-input required" : "")+(geometryModel!=null?" --geometry-input required":"")+(acousticSettings==null?"":acousticSettings.ProducerArguments())+(soundMapConfig==null?"":" --soundmap-config "+Quote(soundMapConfig))+ListeningFixtureArguments(), WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true } };
+                    child = new Process { StartInfo = new ProcessStartInfo { FileName = "node.exe", Arguments = Quote(script) + " --scene " + scene + " --sources " + sources + " --beacon " + beacon + BeaconFrequencyArguments(beaconFrequencyHz, beacon, false) + BeaconLevelArguments(beaconLevel, beacon, false) + auditionArguments + VehicleProducerArguments() + (listenerPipe ? " --listener-input required" : "")+(geometryModel!=null?" --geometry-input required":"")+(acousticSettings==null?"":acousticSettings.ProducerArguments())+(soundMapConfig==null?"":" --soundmap-config "+Quote(soundMapConfig))+ListeningFixtureArguments(), WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true } };
                     child.Start();
                     inputWriter = new Thread(WriteControls); inputWriter.IsBackground = true; inputWriter.Start();
                     stderr = new Thread(ReadDiagnostics); stderr.IsBackground = true; stderr.Start();
@@ -213,10 +220,20 @@ namespace RichAudio.Beacon.Windows
                     pipe = new StatePipeServer(fixturePipe??"RichAudio.Acoustics07.Listener.v1", ListenerReceived,true,ListenerEnded);
                     if(fixturePipe!=null)shutdownFixturePipe=pipe;
 #if GEOMETRY_LIVE
-                    if(geometrySettings!=null){geometryRelay=new RichAudio.GeometryLive.GeometryHostRelay(Send,delegate{return pipe.PeerProcessId;},geometrySettings,ListeningFixtureGeometryPipe());geometryRelay.Start();}
+                    if(geometrySettings!=null){
+#if LEGACY_RELAY_BASELINE && GEOMETRY_FIXTURE
+                        // The negative control compiles the exact archived relay,
+                        // whose four-argument API predates vehicle registration.
+                        if(vehicleProfile!=null)throw new NotSupportedException("Archived relay baseline cannot authorize vehicle sources");
+                        geometryRelay=new RichAudio.GeometryLive.GeometryHostRelay(Send,delegate{return pipe.PeerProcessId;},geometrySettings,ListeningFixtureGeometryPipe());
+#else
+                        geometryRelay=new RichAudio.GeometryLive.GeometryHostRelay(Send,delegate{return pipe.PeerProcessId;},geometrySettings,ListeningFixtureGeometryPipe(),vehicleProfile!=null);
+#endif
+                        geometryRelay.Start();}
 #else
                     if(geometryModel!=null)throw new NotSupportedException("Geometry relay not included");
 #endif
+                    StartVehicleReceiver(delegate{return pipe.PeerProcessId;});
                     pipe.Start();
                 }
 #else
@@ -251,6 +268,7 @@ namespace RichAudio.Beacon.Windows
 #if STATE_TRANSPORT
                 if(pipe!=null){listenerJoined=false;ShutdownStep("listener-shutdown",delegate{listenerJoined=pipe.StopAndWait(1000);if(!listenerJoined)throw new TimeoutException("Listener callback thread did not finish; callback resources retained until process exit");});}
 #endif
+                ShutdownStep("vehicle-shutdown",CloseVehicleReceiver);
                 if(acousticSettingsMonitor!=null)ShutdownStep("settings-shutdown",acousticSettingsMonitor.Dispose);
                 if(output!=null)ShutdownStep("output-shutdown",output.Dispose);
                 if(output!=null&&output.Error!=null&&!audioErrorReported){RecordFailure("audio-output",output.Error);audioErrorReported=true;}
@@ -284,6 +302,7 @@ namespace RichAudio.Beacon.Windows
                     {"drainedShutdownBlocks",drainedShutdownBlocks},
                     {"audio",output != null ? output.Metrics() : null},{"actions",actions},{"rendererDiagnosticsDropped",droppedLogLines},{"listening","not confirmed"},{"loopback",capture != null ? capture.Metrics() : null}
                 };
+                result["vehicle"] = VehicleMetrics();
                 result["beaconFrequencyHz"] = beaconFrequencyHz;
                 result["beaconLevel"] = beaconLevel;
                 result["beaconOutputTrimDb"]=auditionOutputEnabled?12:0;
@@ -315,6 +334,7 @@ namespace RichAudio.Beacon.Windows
         internal static double ObservationAgeAtWrite(long observed,long now,long frequency){return Math.Max(0,(now-observed)*1000.0/frequency);}
         internal static void ListenerReceived(ListenerState state,double age){
             if(listenerFixtureHook!=null)listenerFixtureHook();
+            VehicleListenerReceived(state);
 #if GEOMETRY_LIVE
             if(geometryRelay!=null){geometryRelay.Listener(state);return;}
 #endif
@@ -360,6 +380,7 @@ namespace RichAudio.Beacon.Windows
         }
         private static void RememberDiagnostic(string line,bool overlong)
         {
+            if(!overlong)VehicleDiagnostic(line);
             if(!overlong && line.StartsWith("{\"type\":\"acoustic-settings-status\",",StringComparison.Ordinal))
             {latestAcousticSettingsStatus=line;if(acousticSettingsMonitor!=null)acousticSettingsMonitor.PublishStatus(line);}
 #if GEOMETRY_LIVE
@@ -404,7 +425,17 @@ namespace RichAudio.Beacon.Windows
                         text="{\"type\":\"listener\",\"receiptAgeMs\":"+totalAge.ToString("R",CultureInfo.InvariantCulture)+",\"state\":"+message.ListenerJson+"}";
                         if(listenerReceipts.Count<128)listenerReceipts.Add(new Dictionary<string,object>{{"sequence",message.Sequence},{"observationQpc100ns",message.ObservationQpc100ns},{"writeQpc100ns",now*(10000000.0/Stopwatch.Frequency)},{"receiptAgeMs",totalAge},{"hostQueueAgeMs",queueMs}});
                     }
+                    if(message.VehicleJson!=null)
+                    {
+                        long now=Stopwatch.GetTimestamp();double queueMs=(now-message.QueuedTicks)*1000.0/Stopwatch.Frequency;
+                        double age=ObservationAgeAtWrite(message.ObservationTicks,now,Stopwatch.Frequency);
+                        maxVehicleHostQueueAgeMs=Math.Max(maxVehicleHostQueueAgeMs,queueMs);maxVehicleWriteAgeMs=Math.Max(maxVehicleWriteAgeMs,age);
+                        if(age>250){vehicleMessagesExpired++;RecordFailure("vehicle-control-freshness","Vehicle expired before producer write");continue;}
+                        text="{\"type\":\"vehicle-relay-stage\",\"sequence\":"+message.Sequence+",\"vehicle\":{\"type\":\"vehicle\",\"receiptAgeMs\":"+age.ToString("R",CultureInfo.InvariantCulture)+",\"state\":"+message.VehicleJson+"}}";
+                        if(vehicleReceipts.Count<128)vehicleReceipts.Add(new Dictionary<string,object>{{"sequence",message.Sequence},{"observationQpc100ns",message.ObservationQpc100ns},{"writeQpc100ns",now*(10000000.0/Stopwatch.Frequency)},{"receiptAgeMs",age},{"hostQueueAgeMs",queueMs}});
+                    }
                     long writeStart=Stopwatch.GetTimestamp();controlWriter.WriteLine(text);controlWriter.Flush();maximumControlWriteMs=Math.Max(maximumControlWriteMs,(Stopwatch.GetTimestamp()-writeStart)*1000.0/Stopwatch.Frequency);if(message.ListenerJson!=null)listenerMessagesWritten++;
+                    if(message.VehicleJson!=null)vehicleMessagesWritten++;
                 }
                 }
             }
@@ -425,7 +456,7 @@ namespace RichAudio.Beacon.Windows
                     int frames = BlockProtocol.ValidateHeader(header, sequence++);
                     if (!BlockProtocol.ReadExact(stream, payload, frames * 8)) throw new EndOfStreamException("Missing PCM payload");
                     Buffer.BlockCopy(payload, 0, samples, 0, frames * 8);
-                    if(auditionOutputEnabled)for(int i=0;i<frames*2;i++)if(float.IsNaN(samples[i])||float.IsInfinity(samples[i])||Math.Abs(samples[i])>.5f)throw new InvalidDataException("Audition pre-master ceiling violated");
+                    if(auditionOutputEnabled||vehicleProfile!=null)for(int i=0;i<frames*2;i++)if(float.IsNaN(samples[i])||float.IsInfinity(samples[i])||Math.Abs(samples[i])>.5f)throw new InvalidDataException("Owned output pre-master ceiling violated");
                     if(stop){drainedShutdownBlocks++;continue;}
                     CaptureListeningFixturePreHost(payload,frames);
                     if (!ring.TryWrite(samples, frames)) throw new InvalidDataException("Producer exceeded granted PCM credits"); receivedBlocks++;

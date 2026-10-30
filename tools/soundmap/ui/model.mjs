@@ -141,7 +141,8 @@ export class VisualState {
     if(historical)return {state:'historical',message:'Historical recording · original observation timestamps'+(this.replaySampleAgeMs>0?` · held sample ${Math.round(this.replaySampleAgeMs)} ms before cursor`:''),expired,ageMs:this.replaySampleAgeMs,replaySampleAgeMs:this.replaySampleAgeMs};
     if(!connected)return {state:'disconnected',message:'Disconnected · last received evidence',expired:true,ageMs:age};
     if(age>500)return {state:'stale',message:'Stale telemetry · last received evidence',expired:true,ageMs:age};
-    const conditional=this.frame.readiness?.rendererReadyForOwnedEmission===true&&this.frame.readiness?.mode==='listener-only-conditional-direct';
+    const conditional=this.frame.readiness?.rendererReadyForOwnedEmission===true&&
+      ['listener-only-conditional-direct','vehicle-conditional-direct'].includes(this.frame.readiness?.mode);
     return {state:conditional?'conditional':expired?'expired':'live',message:conditional?'Live conditional direct path · unobserved space assumed clear':expired?'Geometry unavailable or expired · coverage unknown':this.geometry.coverage==='complete-synthetic'?'Live solver evidence · original synthetic scene':'Live solver evidence · partial world coverage',expired,ageMs:age};
   }
 }

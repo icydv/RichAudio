@@ -53,6 +53,7 @@ parentPort.on("message", async (message) => {
           queueUncertaintyMs:message.anchor.dispatchUncertaintyMs??0};
       };
       observed.consume(message.geometryEvents??[],anchor(),message.now);
+      if(workerData.vehicleProfile)observed.vehicleSources(message.vehicleSources,anchor(),message.now);
       control=acceleration?await observed.updateAccelerated(message.snapshot,anchor(),message.now,acceleration,anchor):observed.update(message.snapshot,anchor(),message.now);
     }else{
       if (message.snapshot) simulation.observe(message.snapshot);

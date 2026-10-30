@@ -5,25 +5,78 @@ import {performance} from 'node:perf_hooks';
 import {ListeningOperator} from './operator.mjs';
 import {readServiceConfiguration} from '../soundmap/producer-client.mjs';
 export const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex').toUpperCase();
+const hex40=value=>typeof value==='string'&&/^[a-f0-9]{40}$/.test(value);
+const hex64=value=>typeof value==='string'&&/^[A-F0-9]{64}$/.test(value);
+function unlinked(file){
+  if(!path.isAbsolute(file))throw Error('Absolute vehicle input required');
+  let current=path.resolve(file);while(true){if(fs.existsSync(current)&&fs.lstatSync(current).isSymbolicLink())throw Error('Linked vehicle input rejected');const parent=path.dirname(current);if(parent===current)break;current=parent;}
+}
+function validateVehicleInputs(c,candidateFile){
+  // The native option parser uses the last occurrence. Refuse aliases/duplicates
+  // before interpreting any path or allowing a manually approved invocation.
+  const values=new Set(['--root','--scene','--vehicle-profile','--beacon-output-trim-db','--gain','--seconds','--sources','--device','--geometry-model','--acoustic-settings','--soundmap-config','--output']);
+  const parsed=new Map();for(let i=0;i<c.args.length;i++){
+    const key=c.args[i];if(parsed.has(key)||(!values.has(key)&&key!=='--listener-pipe'))throw Error('Vehicle option scope/duplicate');
+    if(key==='--listener-pipe'){parsed.set(key,true);continue;}
+    if(i+1>=c.args.length||c.args[i+1].startsWith('--'))throw Error('Vehicle option value absent');parsed.set(key,c.args[++i]);
+  }
+  if(parsed.size!==values.size+1||[...values].some(key=>!parsed.has(key))||parsed.get('--device')!=='default')throw Error('Complete fixed vehicle options required');
+  const root=path.resolve(c.cwd),pack=path.dirname(candidateFile),same=(a,b)=>path.resolve(a).toLowerCase()===path.resolve(b).toLowerCase();
+  if(!same(root,path.join(pack,'app'))||!same(c.executable,path.join(root,'build','acoustics-host','RichAudio.Acoustics.Host.exe')))throw Error('Vehicle package executable/cwd routing');
+  const routed={'--geometry-model':'.local/geometry-model.json','--acoustic-settings':'.local/acoustic-settings.json','--soundmap-config':'.local/soundmap/service.json','--output':'.local/host-live-01'};
+  for(const [flag,relative] of Object.entries(routed))if(!same(parsed.get(flag),path.join(root,relative)))throw Error('Vehicle input/output routing differs');
+  const bindings=new Map();for(const b of c.bindings){unlinked(b.Path);const key=path.resolve(b.Path).toLowerCase();if(!hex64(b.SHA256)||bindings.has(key))throw Error('Vehicle binding identity/hash');bindings.set(key,b.SHA256);}
+  const bound=file=>{const hash=bindings.get(path.resolve(file).toLowerCase());if(!hash||hash!==sha(file))throw Error('Required vehicle input not bound');return hash;};
+  if(bound(c.executable)!==c.hostSha256||bound(path.join(pack,'runtime','Plugins','RichAudio.Beacon.Rph.dll'))!==c.pluginSha256)throw Error('Vehicle executable fingerprint differs');
+  bound(parsed.get('--geometry-model'));bound(path.join(root,'tools','Run-Acoustics07.mjs'));
+  const op=c.listeningOperator;if(!op||!same(op.script,path.join(root,'tools','listening','run.mjs')))throw Error('Vehicle operator routing differs');
+  bound(op.executable);bound(op.script);
+  if(!hex40(c.sourceHead)||c.baseCommit!=='247e7ff2af8f1670ba454ae303ba56cb4f16fb19'||c.vehiclePhysicsCommit!=='eef0cbc2e96e09754d87b375975eb1053422121e'||c.targetGta!=='1.0.1158.16'||c.targetRph!=='1.132.1428.17748')throw Error('Vehicle exact source/build provenance');
+  if(typeof c.liveReady!=='boolean'||c.liveReady&&(!hex40(c.upstreamCorrectionCommit)||c.upstreamCorrectionCommit===c.baseCommit))throw Error('Vehicle upstream readiness evidence required');
+  const model=JSON.parse(fs.readFileSync(parsed.get('--geometry-model')));
+  if(model.basis!=='declared-demonstration-scale'||model.metresPerNativeUnit!==1||!Array.isArray(model.sourceOffsetNative)||model.sourceOffsetNative.length!==3||model.sourceOffsetNative.some(x=>x!==0))throw Error('Vehicle declared coordinate model changed');
+  const settings=parsed.get('--acoustic-settings');unlinked(settings);
+  if(!c.initialSettings||!same(c.initialSettings.Path,settings)||!hex64(c.initialSettings.SHA256)||sha(settings)!==c.initialSettings.SHA256)throw Error('Initial vehicle settings changed');
+  for(const file of [candidateFile,root,c.executable,...Object.values(routed).map(relative=>path.join(root,relative))])unlinked(file);
+  // Everything copied into the executable app is an exact input. Only the
+  // explicitly mutable settings and owned SoundMap/output directories differ.
+  const walk=directory=>{for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
+    const file=path.join(directory,entry.name);unlinked(file);const relative=path.relative(root,file).replaceAll('\\','/');
+    if(relative==='.local/soundmap'||relative==='.local/host-live-01')continue;
+    if(entry.isDirectory())walk(file);else if(!same(file,settings))bound(file);
+  }};walk(root);
+}
 export function validateCandidate(candidateFile,expectedHash){
   if(!path.isAbsolute(candidateFile)||sha(candidateFile)!==expectedHash)throw Error('Exact candidate hash required');
   const c=JSON.parse(fs.readFileSync(candidateFile));
-  if(c.scope!=='RICHAUDIO_083_COMBINED'||c.maximumAttempts!==1||!path.isAbsolute(c.cwd)||!fs.statSync(c.cwd).isDirectory()||!path.isAbsolute(c.executable)||!fs.statSync(c.executable).isFile()||!Array.isArray(c.args)||c.args.some(a=>typeof a!=='string'||a.includes('\0')))throw Error('Candidate executable/cwd/argument scope');
+  const vehicle=c.scope==='RICHAUDIO_VEHICLE_LIVE01';
+  if((!vehicle&&c.scope!=='RICHAUDIO_083_COMBINED')||c.maximumAttempts!==1||!path.isAbsolute(c.cwd)||!fs.statSync(c.cwd).isDirectory()||!path.isAbsolute(c.executable)||!fs.statSync(c.executable).isFile()||!Array.isArray(c.args)||c.args.some(a=>typeof a!=='string'||a.includes('\0')))throw Error('Candidate executable/cwd/argument scope');
+  if(!Array.isArray(c.bindings)||!c.bindings.length||new Set(c.bindings.map(b=>b.Path)).size!==c.bindings.length)throw Error('Exact nonempty unique input bindings required');
   for(const b of c.bindings)if(sha(b.Path)!==b.SHA256)throw Error('Bound input changed');
   const option=k=>c.args[c.args.indexOf(k)+1];
-  for(const [k,v] of Object.entries({'--root':c.cwd,'--scene':'open-road','--beacon':'harmonic','--beacon-frequency-hz':'600','--beacon-level':'0.44','--beacon-output-trim-db':'12','--gain':'0.20','--seconds':'60','--sources':'1'}))if(c.args.filter(a=>a===k).length!==1||option(k)!==v)throw Error('Approved profile changed: '+k);
+  const profile=vehicle?{'--root':c.cwd,'--scene':'open-road','--vehicle-profile':'v12','--beacon-output-trim-db':'0','--gain':'0.20','--seconds':'60','--sources':'8'}:
+    {'--root':c.cwd,'--scene':'open-road','--beacon':'harmonic','--beacon-frequency-hz':'600','--beacon-level':'0.44','--beacon-output-trim-db':'12','--gain':'0.20','--seconds':'60','--sources':'1'};
+  for(const [k,v] of Object.entries(profile))if(c.args.filter(a=>a===k).length!==1||option(k)!==v)throw Error('Approved profile changed: '+k);
+  if(vehicle&&(c.liveAuthorised!==false||c.state!=='REVIEW_ONLY'||c.audio?.stockAudio!=='additive-experimental-playback'||
+    c.audio?.rendererMasterGain!==.35||c.audio?.preHostPeakLimit!==.5||c.audio?.outputTrimDb!==0))throw Error('Vehicle review/ownership/calibration scope');
   if(!c.args.includes('--listener-pipe')||['--autostart','--loopback','--exercise-controls','--probe-device','--list-devices','--wav'].some(k=>c.args.includes(k)))throw Error('Manual required-listener profile only');
   for(const k of ['--geometry-model','--acoustic-settings'])if(!fs.statSync(option(k)).isFile())throw Error('Required input absent');
   const settings=JSON.parse(fs.readFileSync(option('--acoustic-settings')));
   if(settings.acousticQuality!=='balanced'||settings.acousticAcceleration!=='auto'||settings.outputLevel!==1||!settings.richAudioEnabled||!settings.earlyReflections)throw Error('Approved settings changed');
+  if(vehicle)validateVehicleInputs(c,candidateFile);
   return c;
 }
 async function main(){
   const [candidateFile,hash,mode]=process.argv.slice(2),c=validateCandidate(candidateFile,hash);
   if(mode==='--validate-only'){console.log(JSON.stringify({type:'validated',clock:'node:perf_hooks.performance.now',spawned:false}));return;}
   if(mode!=='--execute-approved')throw Error('Explicit execute-approved or validate-only required');
+  if(c.scope==='RICHAUDIO_VEHICLE_LIVE01'&&c.liveReady!==true)throw Error('Vehicle candidate awaits reconciled upstream correction and new exact-build readiness review');
+  if(c.scope==='RICHAUDIO_VEHICLE_LIVE01'&&(sha(process.execPath)!==sha(c.listeningOperator.executable)||sha(fileURLToPath(import.meta.url))!==sha(c.listeningOperator.script)))throw Error('Exact vehicle operator/runtime required');
   const packageRoot=path.dirname(candidateFile),planFile=path.join(packageRoot,'attempt.json'),plan=JSON.parse(fs.readFileSync(planFile));
   const approval=JSON.parse(fs.readFileSync(plan.Paths.FreshApproval)),journal=JSON.parse(fs.readFileSync(plan.Paths.Journal));
+  if(c.scope==='RICHAUDIO_VEHICLE_LIVE01'&&(approval.Approved!==true||!Number.isFinite(Date.parse(approval.ExpiresUtc))||
+    plan.Schema!==1||plan.Scope!==c.scope||plan.FixtureOnly!==false||plan.OriginalCandidateSHA256!==hash||
+    path.resolve(plan.OriginalCandidatePath)!==path.resolve(candidateFile)||sha(plan.ManifestPath)!==plan.ManifestSHA256))throw Error('Fresh exact vehicle attempt/approval binding required');
   if(!approval.Approved||approval.MaximumAttempts!==1||approval.Scope!==c.scope||approval.CandidateSHA256!==hash||approval.AttemptSHA256!==sha(planFile)||approval.ManifestSHA256!==plan.ManifestSHA256||Date.parse(approval.ExpiresUtc)<=Date.now()||journal.AttemptSHA256!==sha(planFile)||journal.State!=='DEPLOYED_NOT_LAUNCHED'||fs.existsSync(path.join(packageRoot,'closed.json')))throw Error('Fresh exact deployed attempt approval required');
   const out=path.join(packageRoot,'observations','listening-operator');fs.mkdirSync(out,{recursive:false});
   const emit=e=>{fs.appendFileSync(path.join(out,'events.jsonl'),JSON.stringify(e)+'\n');if(e.type==='terminal')fs.writeFileSync(path.join(out,'terminal.json'),JSON.stringify(e,null,2));if(!['stdout','stderr'].includes(e.type))console.log(JSON.stringify(e));};

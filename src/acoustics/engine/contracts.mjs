@@ -96,18 +96,22 @@ function engineConfiguration(engineOptions) {
 }
 
 // This is an explicit propagation assumption, not a tile or an observation.
-// It can render only the separately authorised original owned beacon. No
+// It can render only separately authorised original sources. No
 // visibility queries, fabricated surfaces or observation clock are attached.
-export function conditionalDirectScene({calibration,modelBounds,listenerSession,contextEpoch,sourceId,visibilityAssumption,engine={}}) {
+export function conditionalDirectScene({calibration,modelBounds,listenerSession,contextEpoch,sourceId,sourceIds,regionRevision=0,visibilityAssumption,engine={}}) {
+  const components=['mechanical','exhaust','intake','drivetrain','tyres','aero','induction','transients'];
+  const vehicle=Array.isArray(sourceIds)&&sourceIds.length===8&&components.every((x,i)=>sourceIds[i]===`vehicle:1:${x}`);
   requireValue(calibration?.basis==='declared-demonstration-scale'&&calibration.physicalCalibration==='unverified'&&
-    visibilityAssumption==='unobserved-space-assumed-clear'&&sourceId==='beacon-0'&&
-    /^[a-f0-9]{32}$/.test(listenerSession)&&Number.isSafeInteger(contextEpoch)&&contextEpoch>0,'explicit original-beacon direct context required');
+    visibilityAssumption==='unobserved-space-assumed-clear'&&(sourceId==='beacon-0'&&!sourceIds||vehicle&&!sourceId)&&
+    /^[a-f0-9]{32}$/.test(listenerSession)&&Number.isSafeInteger(contextEpoch)&&contextEpoch>0,'explicit original source direct context required');
   const min=vector(modelBounds?.min),max=vector(modelBounds?.max);
+  requireValue(Number.isSafeInteger(regionRevision)&&regionRevision>=0&&regionRevision<=1000000&&(!regionRevision||vehicle),'bounded direct region revision');
   requireValue(min.every((x,i)=>max[i]>x&&max[i]-x<=256),'bounded conditional propagation region');
-  const directPath=freeze({mode:'listener-only-conditional-direct',sourceId,rights:'original-generated',visibilityAssumption,
+  const directPath=freeze({mode:vehicle?'vehicle-conditional-direct':'listener-only-conditional-direct',
+    ...(vehicle?{sourceIds:[...sourceIds]}:{sourceId}),rights:'original-generated',visibilityAssumption,
     calibration,listenerSession,contextEpoch,geometryPresent:false,observationEvidence:[]});
   const result=freeze({version:1,tile:null,materials:{},config:engineConfiguration({...engine,order:0}),coordinateSpace,
-    geometryKey:'listener-direct:'+listenerSession+':'+contextEpoch,generation:contextEpoch,observationModel:null,directPath,modelBounds:{min,max}});
+    geometryKey:'listener-direct:'+listenerSession+':'+contextEpoch+(regionRevision?':region-'+regionRevision:''),generation:contextEpoch,observationModel:null,directPath,modelBounds:{min,max}});
   scenes.add(result);return result;
 }
 

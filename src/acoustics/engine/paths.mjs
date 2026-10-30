@@ -31,7 +31,7 @@ export function pathGeometry(
 // The CPU and GPU-screened routes share the exact same path and material math.
 export function preparePathGeometry(scene,source,listener,surfaces) {
   if(scene.directPath){
-    requireValue(!surfaces.length&&scene.directPath.mode==='listener-only-conditional-direct','conditional model permits direct path only');
+    requireValue(!surfaces.length&&['listener-only-conditional-direct','vehicle-conditional-direct'].includes(scene.directPath.mode),'conditional model permits direct path only');
     if(!inBox(source,scene.modelBounds)||!inBox(listener,scene.modelBounds))return {status:'outside-tile'};
     const delta=sub(source,listener),distance=length(delta);
     return {status:'clear',distance,points:[],hits:[],arrivalDirection:distance>E?unit(delta):[0,0,0],

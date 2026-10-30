@@ -22,7 +22,8 @@ namespace RichAudio.Beacon.Rph
         private static int starts;
         private const int MaximumStarts=1,MaximumSeconds=120;
         [ConsoleCommand(Name="RichAudioBeaconStart",Description="Read camera listener at 20 Hz for at most 120 seconds; no game mutations")]
-        public static void Start(){if(ready&&permit.TryConsume())requested=true;}
+        public static void Start(){TryStartVehicle();}
+        internal static bool TryStartVehicle(){if(!ready||requested||!permit.TryConsume())return false;requested=true;return true;}
         [ConsoleCommand(Name="RichAudioBeaconStop",Description="Stop listener telemetry; host freshness gate fades its owned beacon")]
         public static void Stop(){requested=false;}
         [ConsoleCommand(Name="RichAudioBeaconStatus",Description="Print listener counters only; no world coordinates")]
@@ -79,19 +80,20 @@ namespace RichAudio.Beacon.Rph
                         }
                         if((after-before)/(double)Stopwatch.Frequency>0.05){generation++;valid=false;reason="slow-observation";}
                         var state=new ListenerState{Version=1,Session=session,Generation=generation,Sequence=sequence++,ObservationTicks=observed,ClockFrequency=Stopwatch.Frequency,GameTimeMs=game,Position=p,Velocity=v,Forward=forward,Up=up,ListenerKind="camera",VelocityKind=velocityKind,Paused=paused,Valid=valid,Reason=reason,Coordinates="gta-native-unscaled",Units="native-unverified",SourceId=null};
-                        writer.Publish(state);GeometryBridge.Observe(state);Interlocked.Increment(ref observations);lastPosition=p;lastTick=observed;lastGame=game;lastPause=paused;
+                        writer.Publish(state);GeometryBridge.Observe(state);VehicleDemo.Observe(state,writer.Sent>0);Interlocked.Increment(ref observations);lastPosition=p;lastTick=observed;lastGame=game;lastPause=paused;
                     }
                     catch(ThreadAbortException){throw;}
                     catch{break;} // Missing native/invalid state stops emission; host rejects stale state and fades.
                     if(writer.Finished)break; // Exhausted bounded reconnect budget; no endless retry on the game thread.
                     GameFiber.Yield();
                 }
+                VehicleDemo.End();
                 writer.RequestStop();
                 // Do not wait for pipe I/O on the game fiber. Poll its bounded exit before Dispose.
                 long stoppingAt=Stopwatch.GetTimestamp();while(!writer.Finished&&!shutdown&&(Stopwatch.GetTimestamp()-stoppingAt)/(double)Stopwatch.Frequency<1)GameFiber.Sleep(5);
                 lastTransport=writer.Diagnostic;lastSent=writer.Sent;
             }
-            finally{GeometryBridge.End();writer.RequestStop();ThreadPool.QueueUserWorkItem(delegate{
+            finally{VehicleDemo.End();GeometryBridge.End();writer.RequestStop();ThreadPool.QueueUserWorkItem(delegate{
                 ListenerEvidence.Complete(writer,delegate{return RichAudio.Beacon.Windows.InGameSettingsLink.SidecarForGameExecutable(Process.GetCurrentProcess().MainModule.FileName);},QueuePublisherEvidence);
             });}
             publisher=null;Game.Console.Print("RichAudio beacon listener stopped. Terminal="+(lastTransport==null?"unknown":lastTransport.Stage+"/"+lastTransport.Code+"/"+lastTransport.Outcome)+"; another Start is disabled. No world state to restore.");
@@ -100,6 +102,6 @@ namespace RichAudio.Beacon.Rph
         // Only the game fiber calls the RPH console. Background file evidence is
         // independent if unload occurs before these two bounded lines are drained.
         private static void DrainPublisherEvidence(){while(true){string message;lock(publisherEvidence){if(publisherEvidence.Count==0)return;message=publisherEvidence.Dequeue();}Game.Console.Print(message);}}
-        public static void OnUnload(){PassiveListener.Stop();InGameMenu.Stop();ready=false;requested=false;shutdown=true;var p=publisher;if(p!=null)p.RequestStop();}
+        public static void OnUnload(){VehicleDemo.Unload();PassiveListener.Stop();InGameMenu.Stop();ready=false;requested=false;shutdown=true;var p=publisher;if(p!=null)p.RequestStop();}
     }
 }

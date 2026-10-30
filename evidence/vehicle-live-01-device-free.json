@@ -1,0 +1,1097 @@
+{
+  "schemaVersion": 1,
+  "milestone": "VEHICLE-LIVE-01",
+  "status": "passed",
+  "stage": "complete",
+  "gameLaunched": false,
+  "audioEndpointOpened": false,
+  "sourceDigest": "3000c06d90a674652f89a9691388bec168764a17332747207104303fdd6a2a17",
+  "nativeFixtureSha256": "a8d7ed04c18e250f555dc850acfacce23adead7921022fcbf274b2999e4e58cc",
+  "v12": {
+    "profile": "v12",
+    "actualHostExit": 0,
+    "listenerPackets": 158,
+    "vehiclePackets": 124,
+    "blocks": 923,
+    "preHost": {
+      "frames": 472576,
+      "peak": 0.014745761640369892,
+      "rms": 0.0008194260241460074,
+      "stereoDifferenceRms": 0.0007167730756983962,
+      "nonfiniteSamples": 0,
+      "zeroCrossingsPerSecond": 433.5048754062839
+    },
+    "postHost": {
+      "frames": 470528,
+      "peak": 0.002949152374640107,
+      "rms": 0.00016424148028366337,
+      "stereoDifferenceRms": 0.00014366625852015047,
+      "nonfiniteSamples": 0,
+      "zeroCrossingsPerSecond": 435.3917301414581
+    },
+    "preHostSHA256": "c9405eca33d6d99c0affb052a85d61679216b7c42953038345fab6f59ef3aa2b",
+    "postHostSHA256": "42f10ec4ea5a23b47cb2822d314fba5dc84089741de11b7fce168554ddede60b",
+    "componentEnergy": {
+      "mechanical": 418.90331556943397,
+      "exhaust": 215.16759917956043,
+      "intake": 29.45914247829784,
+      "drivetrain": 22.215567491956477,
+      "tyres": 0.27313922588376477,
+      "aero": 0.008893539291707164,
+      "induction": 0,
+      "transients": 0
+    },
+    "componentCount": 8,
+    "componentTravelMetres": 83,
+    "bodyExhaustSeparationMetres": 1.5935494971917257,
+    "stableSourceGeneration": true,
+    "removedAtEnd": true,
+    "estimatedRpm": {
+      "minimum": 1050,
+      "maximum": 5714.167074934847
+    },
+    "firingHz": {
+      "minimum": 24.93612610480819,
+      "maximum": 559.4980254775891
+    },
+    "dopplerOracle": {
+      "observed": {
+        "minimum": 0.9231082440249697,
+        "maximum": 1.0437645106364803
+      },
+      "maximumSpeed": 27.831915199999997,
+      "soundSpeed": 343,
+      "tolerance": 0.015,
+      "allowed": {
+        "minimum": 0.9099473573896963,
+        "maximum": 1.103308164888147
+      }
+    },
+    "ratioEvidence": {
+      "count": 123,
+      "minimum": 0.5,
+      "maximum": 0.5,
+      "changedSamples": 0,
+      "usedForControl": false
+    },
+    "sourceHistory": {
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 0,
+      "affectedFrames": 0
+    },
+    "dsp": {
+      "frames": 472576,
+      "limited": 0,
+      "missingHistory": 0,
+      "rejectedControls": 0,
+      "cursorResets": 0,
+      "pathOverflow": 0,
+      "releasedSources": 16
+    },
+    "performance": {
+      "nodeCpuSeconds": 3.296,
+      "hostCpuSeconds": 0.703125,
+      "wallSeconds": 9.9340943,
+      "synthesisMs": {
+        "count": 923,
+        "median": 0.809400000000096,
+        "p95": 1.1451999999999316,
+        "max": 4.049199999999928
+      },
+      "workerMs": {
+        "count": 923,
+        "median": 0.5160999999998239,
+        "p95": 0.7845000000002074,
+        "max": 3.2343999999999937
+      },
+      "dspMs": {
+        "count": 923,
+        "median": 0.20749999999952706,
+        "p95": 0.2538999999999305,
+        "max": 3.985300000000052
+      },
+      "processingDeadlineMisses": 1,
+      "backend": "cpu",
+      "gpuDispatches": 0,
+      "gpuApplied": 0,
+      "underflowFrames": 0,
+      "lateSinkWakes": 284,
+      "maximumSinkLatenessMs": 16.3671
+    },
+    "recording": {
+      "frames": 470528,
+      "gaps": 0,
+      "soundMapFrames": 158,
+      "receivedVehicleTelemetryRecords": 124,
+      "integrityComplete": true,
+      "exactPostGainSubmissionLineage": true,
+      "vehicleConditionalDirectRecorded": true
+    },
+    "calibration": {
+      "masterGain": 0.35,
+      "hostGain": 0.2,
+      "preHostPeakCap": 0.5,
+      "postHostPeakCap": 0.1,
+      "outputTrimDb": 0,
+      "rejectedBlocks": 0,
+      "clippedSamples": 0,
+      "limitedFrames": 0
+    }
+  },
+  "v8": {
+    "profile": "v8",
+    "actualHostExit": 0,
+    "listenerPackets": 158,
+    "vehiclePackets": 125,
+    "blocks": 925,
+    "preHost": {
+      "frames": 473600,
+      "peak": 0.013320953585207462,
+      "rms": 0.0011065184627910172,
+      "stereoDifferenceRms": 0.0009472790263254232,
+      "nonfiniteSamples": 0,
+      "zeroCrossingsPerSecond": 278.9189189189189
+    },
+    "postHost": {
+      "frames": 471552,
+      "peak": 0.0026641907170414925,
+      "rms": 0.00022178374832434048,
+      "stereoDifferenceRms": 0.00018986677602499683,
+      "nonfiniteSamples": 0,
+      "zeroCrossingsPerSecond": 280.1302931596091
+    },
+    "preHostSHA256": "a0404e9e8b3411f16b6c55fd19ef7c15a6497f001354dc5dcfe68034393e5e18",
+    "postHostSHA256": "69eec85efbd54a4b437d22a17e2bc91a8e1ff4821bf8ddeae3d36452e0108353",
+    "componentEnergy": {
+      "mechanical": 787.0160130969064,
+      "exhaust": 111.13069709884665,
+      "intake": 30.389670254480805,
+      "drivetrain": 22.4269810824718,
+      "tyres": 0.2774600567133871,
+      "aero": 0.009217789342368056,
+      "induction": 8.977766917263127,
+      "transients": 0
+    },
+    "componentCount": 8,
+    "componentTravelMetres": 83,
+    "bodyExhaustSeparationMetres": 2.725233934912744,
+    "stableSourceGeneration": true,
+    "removedAtEnd": true,
+    "estimatedRpm": {
+      "minimum": 750,
+      "maximum": 5695.496194757887
+    },
+    "firingHz": {
+      "minimum": 35.5885305853066,
+      "maximum": 363.33247620311033
+    },
+    "dopplerOracle": {
+      "observed": {
+        "minimum": 0.923123049387156,
+        "maximum": 1.0439575677859139
+      },
+      "maximumSpeed": 27.7409752,
+      "soundSpeed": 343,
+      "tolerance": 0.015,
+      "allowed": {
+        "minimum": 0.9101742400876115,
+        "maximum": 1.1029942301972127
+      }
+    },
+    "ratioEvidence": {
+      "count": 124,
+      "minimum": 0.5,
+      "maximum": 0.5,
+      "changedSamples": 0,
+      "usedForControl": false
+    },
+    "sourceHistory": {
+      "beforeStart": 0,
+      "future": 0,
+      "frameTag": 0,
+      "generationTag": 0,
+      "affectedFrames": 0
+    },
+    "dsp": {
+      "frames": 473600,
+      "limited": 0,
+      "missingHistory": 0,
+      "rejectedControls": 0,
+      "cursorResets": 0,
+      "pathOverflow": 0,
+      "releasedSources": 16
+    },
+    "performance": {
+      "nodeCpuSeconds": 3.265,
+      "hostCpuSeconds": 0.8125,
+      "wallSeconds": 10.168494800000001,
+      "synthesisMs": {
+        "count": 925,
+        "median": 0.836699999999837,
+        "p95": 1.098700000000008,
+        "max": 4.07770000000005
+      },
+      "workerMs": {
+        "count": 925,
+        "median": 0.5106999999998152,
+        "p95": 0.8028999999996813,
+        "max": 2.9595999999999947
+      },
+      "dspMs": {
+        "count": 925,
+        "median": 0.21000000000094587,
+        "p95": 0.2593000000001666,
+        "max": 2.4967000000001462
+      },
+      "processingDeadlineMisses": 1,
+      "backend": "cpu",
+      "gpuDispatches": 0,
+      "gpuApplied": 0,
+      "underflowFrames": 0,
+      "lateSinkWakes": 287,
+      "maximumSinkLatenessMs": 16.035
+    },
+    "recording": {
+      "frames": 471552,
+      "gaps": 0,
+      "soundMapFrames": 110,
+      "receivedVehicleTelemetryRecords": 125,
+      "integrityComplete": true,
+      "exactPostGainSubmissionLineage": true,
+      "vehicleConditionalDirectRecorded": true
+    },
+    "calibration": {
+      "masterGain": 0.35,
+      "hostGain": 0.2,
+      "preHostPeakCap": 0.5,
+      "postHostPeakCap": 0.1,
+      "outputTrimDb": 0,
+      "rejectedBlocks": 0,
+      "clippedSamples": 0,
+      "limitedFrames": 0
+    }
+  },
+  "nativeCases": {
+    "v12": {
+      "profile": "v12",
+      "childExit": 0,
+      "timedOut": false,
+      "producer": {
+        "fileStatus": "read",
+        "bytes": 11320103,
+        "lines": 1507,
+        "malformedLines": 0,
+        "oversizedLines": 0,
+        "blockCount": 923,
+        "lastBlock": {
+          "blockIndex": 922,
+          "frame": 472064,
+          "synthesisMilliseconds": 0.033400000000256114,
+          "simulationMilliseconds": 0.3566000000009808,
+          "dspMilliseconds": 0.022100000000136788,
+          "workerSchedulingMilliseconds": 0.500900000000911,
+          "completedBlockProcessingMilliseconds": 0.7091999999993277,
+          "pcmCompletionIntervalMilliseconds": 0.8082999999987805,
+          "beforeBlockProcessingGapMilliseconds": 0.09909999999945285,
+          "processingDeadlineMisses": 1,
+          "activeSourceCount": 0,
+          "activePathCount": 0,
+          "previousBlockProcessingMilliseconds": 0.9688999999998487,
+          "qualityDeadlineMisses": 1,
+          "vehicleActive": false,
+          "emitting": true
+        },
+        "firstActiveBlocks": [
+          {
+            "blockIndex": 104,
+            "frame": 53248,
+            "synthesisMilliseconds": 4.049199999999928,
+            "simulationMilliseconds": 2.2001000000000204,
+            "dspMilliseconds": 0.8829999999998108,
+            "workerSchedulingMilliseconds": 2.5733999999999924,
+            "completedBlockProcessingMilliseconds": 8.238900000000058,
+            "pcmCompletionIntervalMilliseconds": 22.060000000000173,
+            "beforeBlockProcessingGapMilliseconds": 13.821100000000115,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 0.7496000000001004,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 105,
+            "frame": 53760,
+            "synthesisMilliseconds": 2.5582999999999174,
+            "simulationMilliseconds": 0.699100000000044,
+            "dspMilliseconds": 0.1630999999999858,
+            "workerSchedulingMilliseconds": 1,
+            "completedBlockProcessingMilliseconds": 4.214099999999917,
+            "pcmCompletionIntervalMilliseconds": 11.155699999999797,
+            "beforeBlockProcessingGapMilliseconds": 6.94159999999988,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 8.171199999999999,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 106,
+            "frame": 54272,
+            "synthesisMilliseconds": 1.5731000000000677,
+            "simulationMilliseconds": 0.530699999999797,
+            "dspMilliseconds": 0.09420000000000073,
+            "workerSchedulingMilliseconds": 0.7236000000000331,
+            "completedBlockProcessingMilliseconds": 2.770300000000134,
+            "pcmCompletionIntervalMilliseconds": 2.9468000000001666,
+            "beforeBlockProcessingGapMilliseconds": 0.17650000000003274,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 4.141200000000026,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 107,
+            "frame": 54784,
+            "synthesisMilliseconds": 1.0627999999999247,
+            "simulationMilliseconds": 0.5003000000001521,
+            "dspMilliseconds": 0.12049999999999272,
+            "workerSchedulingMilliseconds": 0.6820000000000164,
+            "completedBlockProcessingMilliseconds": 2.2496000000001004,
+            "pcmCompletionIntervalMilliseconds": 10.43119999999999,
+            "beforeBlockProcessingGapMilliseconds": 8.18159999999989,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 2.7164999999999964,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 108,
+            "frame": 55296,
+            "synthesisMilliseconds": 1.163000000000011,
+            "simulationMilliseconds": 0.41849999999999454,
+            "dspMilliseconds": 0.09550000000012915,
+            "workerSchedulingMilliseconds": 0.589200000000119,
+            "completedBlockProcessingMilliseconds": 2.2215000000001055,
+            "pcmCompletionIntervalMilliseconds": 14.982099999999946,
+            "beforeBlockProcessingGapMilliseconds": 12.76059999999984,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 2.199600000000146,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 109,
+            "frame": 55808,
+            "synthesisMilliseconds": 0.9577999999999065,
+            "simulationMilliseconds": 0.3912000000000262,
+            "dspMilliseconds": 0.09359999999992397,
+            "workerSchedulingMilliseconds": 0.5408999999999651,
+            "completedBlockProcessingMilliseconds": 1.9531999999999243,
+            "pcmCompletionIntervalMilliseconds": 2.08420000000001,
+            "beforeBlockProcessingGapMilliseconds": 0.1310000000000855,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 2.1737000000000535,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 110,
+            "frame": 56320,
+            "synthesisMilliseconds": 1.2468999999998687,
+            "simulationMilliseconds": 0.6808999999998377,
+            "dspMilliseconds": 0.09259999999994761,
+            "workerSchedulingMilliseconds": 0.957700000000159,
+            "completedBlockProcessingMilliseconds": 2.752999999999929,
+            "pcmCompletionIntervalMilliseconds": 13.977499999999964,
+            "beforeBlockProcessingGapMilliseconds": 11.224500000000035,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 1.9054999999998472,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 111,
+            "frame": 56832,
+            "synthesisMilliseconds": 1.2082000000000335,
+            "simulationMilliseconds": 0.5098000000000411,
+            "dspMilliseconds": 0.09570000000007894,
+            "workerSchedulingMilliseconds": 0.7291000000000167,
+            "completedBlockProcessingMilliseconds": 2.4469000000001415,
+            "pcmCompletionIntervalMilliseconds": 15.712600000000066,
+            "beforeBlockProcessingGapMilliseconds": 13.265699999999924,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 2.702099999999973,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          }
+        ],
+        "final": {
+          "frames": 472576,
+          "blocks": 923,
+          "cpuSeconds": 3.296,
+          "wallSeconds": 9.9340943,
+          "processingDeadlineMisses": 1,
+          "hasError": false,
+          "synthesisMs": {
+            "count": 923,
+            "median": 0.809400000000096,
+            "p95": 1.1451999999999316,
+            "max": 4.049199999999928
+          },
+          "simulationMs": {
+            "count": 923,
+            "median": 0.5160999999998239,
+            "p95": 0.7845000000002074,
+            "max": 3.2343999999999937
+          },
+          "dspMs": {
+            "count": 923,
+            "median": 0.20749999999952706,
+            "p95": 0.2538999999999305,
+            "max": 3.985300000000052
+          }
+        }
+      },
+      "files": {
+        "fixture": "read",
+        "host": "read"
+      },
+      "fixture": {
+        "nativeHostExit": 0,
+        "senderStage": "complete",
+        "senderErrorKind": null,
+        "senderJoined": true,
+        "acceptedListenerAcknowledgements": 158,
+        "acceptedVehicleAcknowledgements": 124,
+        "listenerWire": {
+          "transmitted": 158,
+          "startupDiscarded": 0,
+          "firstAck": null,
+          "lastAck": null,
+          "stopAck": null,
+          "firstEncodeMs": null,
+          "firstAgeAtWriteMs": null,
+          "firstAckMs": null,
+          "firstAgeAfterAckMs": null
+        },
+        "listenerPublisher": {
+          "sent": 158,
+          "transmitted": 158,
+          "attempts": 1,
+          "expiredBeforeEncoding": 0,
+          "expiredAfterEncoding": 0,
+          "startupDiscarded": 0,
+          "errorKind": null,
+          "outcome": "deliberate-stop",
+          "stage": "connection",
+          "code": "sender-stop",
+          "firstFrame": {
+            "CopyMs": 1.9773,
+            "MailboxAgeMs": 13.7593,
+            "AgeBeforeEncodeMs": 13.7597,
+            "EncodeMs": 7.5117,
+            "AgeBeforeWriteMs": 21.2715,
+            "WriteMs": 0.133,
+            "AckMs": 9.8071,
+            "ConnectionMs": 0.1436,
+            "HeaderMs": null,
+            "PayloadMs": null,
+            "PayloadReceivedAgeMs": null,
+            "DecodeMs": null,
+            "DecisionAgeMs": null,
+            "CallbackMs": null
+          },
+          "firstAcceptedFrame": {
+            "CopyMs": 1.9773,
+            "MailboxAgeMs": 13.7593,
+            "AgeBeforeEncodeMs": 13.7597,
+            "EncodeMs": 7.5117,
+            "AgeBeforeWriteMs": 21.2715,
+            "WriteMs": 0.133,
+            "AckMs": 9.8071,
+            "ConnectionMs": 0.1436,
+            "HeaderMs": null,
+            "PayloadMs": null,
+            "PayloadReceivedAgeMs": null,
+            "DecodeMs": null,
+            "DecisionAgeMs": null,
+            "CallbackMs": null
+          },
+          "firstExpiredUnsent": {
+            "AgeMs": null,
+            "EncodeMs": null,
+            "BeforeEncodeAgeMs": null
+          }
+        },
+        "vehiclePublisher": {
+          "sent": 124,
+          "expired": 0,
+          "replaced": 0,
+          "terminalReason": "deliberate-stop"
+        }
+      },
+      "host": {
+        "hasPrimaryFailure": false,
+        "stage": null,
+        "exceptionKind": null,
+        "duringShutdown": false,
+        "secondaryFailureCount": 0,
+        "durationWallSeconds": 10.0376204,
+        "receivedBlocks": 923,
+        "rejectedBlocks": 0,
+        "rendererExitCode": 0,
+        "ownedThreadsJoined": true,
+        "listener": {
+          "accepted": 158,
+          "rejected": 0,
+          "startupDiscarded": 0,
+          "connections": 1,
+          "lastAgeMs": 139.0064,
+          "stage": "connection",
+          "code": "sender-stop",
+          "exceptionKind": null,
+          "outcome": "deliberate-stop",
+          "firstFrame": {
+            "CopyMs": null,
+            "MailboxAgeMs": null,
+            "AgeBeforeEncodeMs": null,
+            "EncodeMs": null,
+            "AgeBeforeWriteMs": null,
+            "WriteMs": null,
+            "AckMs": 0.2142,
+            "ConnectionMs": 127.6649,
+            "HeaderMs": 17.4668,
+            "PayloadMs": 0.0772,
+            "PayloadReceivedAgeMs": 21.4454,
+            "DecodeMs": 8.243,
+            "DecisionAgeMs": 29.9434,
+            "CallbackMs": 0.4894
+          },
+          "firstAcceptedFrame": {
+            "CopyMs": null,
+            "MailboxAgeMs": null,
+            "AgeBeforeEncodeMs": null,
+            "EncodeMs": null,
+            "AgeBeforeWriteMs": null,
+            "WriteMs": null,
+            "AckMs": 0.2142,
+            "ConnectionMs": 127.6649,
+            "HeaderMs": 17.4668,
+            "PayloadMs": 0.0772,
+            "PayloadReceivedAgeMs": 21.4454,
+            "DecodeMs": 8.243,
+            "DecisionAgeMs": 29.9434,
+            "CallbackMs": 0.4894
+          }
+        },
+        "vehicle": {
+          "accepted": 124,
+          "rejected": 0,
+          "connections": 1,
+          "written": 124,
+          "expiredBeforeWrite": 0,
+          "maxHostQueueAgeMs": 0.0106,
+          "maxObservationAgeAtWriteMs": 15.9121,
+          "relayDelivered": 124,
+          "relayRejected": 0,
+          "maximumObservedRoundTripMs": 1.5247,
+          "maximumAcceptedRoundTripMs": 1.5247,
+          "terminal": "deliberate-stop",
+          "removed": true
+        },
+        "sink": {
+          "frames": 470528,
+          "underflowFrames": 0,
+          "firstUnderflowFrame": -1,
+          "missedSinkBudgets": 284,
+          "maximumLatenessMs": 16.3671
+        }
+      }
+    },
+    "v8": {
+      "profile": "v8",
+      "childExit": 0,
+      "timedOut": false,
+      "producer": {
+        "fileStatus": "read",
+        "bytes": 11409182,
+        "lines": 1511,
+        "malformedLines": 0,
+        "oversizedLines": 0,
+        "blockCount": 925,
+        "lastBlock": {
+          "blockIndex": 924,
+          "frame": 473088,
+          "synthesisMilliseconds": 0.029099999999743886,
+          "simulationMilliseconds": 0.3171999999995023,
+          "dspMilliseconds": 0.022500000000945874,
+          "workerSchedulingMilliseconds": 0.47039999999833526,
+          "completedBlockProcessingMilliseconds": 0.6831999999994878,
+          "pcmCompletionIntervalMilliseconds": 0.7441999999991822,
+          "beforeBlockProcessingGapMilliseconds": 0.06099999999969441,
+          "processingDeadlineMisses": 1,
+          "activeSourceCount": 0,
+          "activePathCount": 0,
+          "previousBlockProcessingMilliseconds": 0.7480999999988853,
+          "qualityDeadlineMisses": 1,
+          "vehicleActive": false,
+          "emitting": true
+        },
+        "firstActiveBlocks": [
+          {
+            "blockIndex": 100,
+            "frame": 51200,
+            "synthesisMilliseconds": 4.07770000000005,
+            "simulationMilliseconds": 2.110800000000154,
+            "dspMilliseconds": 0.8519000000001142,
+            "workerSchedulingMilliseconds": 2.5037999999999556,
+            "completedBlockProcessingMilliseconds": 8.25870000000009,
+            "pcmCompletionIntervalMilliseconds": 22.86500000000001,
+            "beforeBlockProcessingGapMilliseconds": 14.60629999999992,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 0.974100000000135,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 101,
+            "frame": 51712,
+            "synthesisMilliseconds": 2.5674000000001342,
+            "simulationMilliseconds": 0.6985999999999422,
+            "dspMilliseconds": 0.2142999999998665,
+            "workerSchedulingMilliseconds": 0.8983999999998105,
+            "completedBlockProcessingMilliseconds": 4.337099999999964,
+            "pcmCompletionIntervalMilliseconds": 4.495400000000018,
+            "beforeBlockProcessingGapMilliseconds": 0.15830000000005384,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 8.184400000000096,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 102,
+            "frame": 52224,
+            "synthesisMilliseconds": 1.2705000000000837,
+            "simulationMilliseconds": 0.6209000000001197,
+            "dspMilliseconds": 0.10389999999983957,
+            "workerSchedulingMilliseconds": 0.8352999999999611,
+            "completedBlockProcessingMilliseconds": 2.636399999999867,
+            "pcmCompletionIntervalMilliseconds": 5.636199999999917,
+            "beforeBlockProcessingGapMilliseconds": 2.99980000000005,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 4.250299999999925,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 103,
+            "frame": 52736,
+            "synthesisMilliseconds": 1.2302000000001954,
+            "simulationMilliseconds": 0.52800000000002,
+            "dspMilliseconds": 0.10349999999993997,
+            "workerSchedulingMilliseconds": 0.7652000000000498,
+            "completedBlockProcessingMilliseconds": 2.5002999999999247,
+            "pcmCompletionIntervalMilliseconds": 15.790500000000065,
+            "beforeBlockProcessingGapMilliseconds": 13.29020000000014,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 2.570799999999963,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 104,
+            "frame": 53248,
+            "synthesisMilliseconds": 1.1090999999998985,
+            "simulationMilliseconds": 0.4830000000001746,
+            "dspMilliseconds": 0.10530000000017026,
+            "workerSchedulingMilliseconds": 0.6434999999999036,
+            "completedBlockProcessingMilliseconds": 2.2380000000000564,
+            "pcmCompletionIntervalMilliseconds": 2.3549000000000433,
+            "beforeBlockProcessingGapMilliseconds": 0.1168999999999869,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 2.4484999999999673,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 105,
+            "frame": 53760,
+            "synthesisMilliseconds": 1.047399999999925,
+            "simulationMilliseconds": 0.4730000000001837,
+            "dspMilliseconds": 0.12139999999999418,
+            "workerSchedulingMilliseconds": 0.6574000000000524,
+            "completedBlockProcessingMilliseconds": 2.2764000000001943,
+            "pcmCompletionIntervalMilliseconds": 13.456300000000056,
+            "beforeBlockProcessingGapMilliseconds": 11.179899999999861,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 2.1889000000001033,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 106,
+            "frame": 54272,
+            "synthesisMilliseconds": 1.2902999999998883,
+            "simulationMilliseconds": 0.71550000000002,
+            "dspMilliseconds": 0.12000000000011823,
+            "workerSchedulingMilliseconds": 1.0221999999998843,
+            "completedBlockProcessingMilliseconds": 3.025000000000091,
+            "pcmCompletionIntervalMilliseconds": 16.470299999999952,
+            "beforeBlockProcessingGapMilliseconds": 13.445299999999861,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 2.215800000000172,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          },
+          {
+            "blockIndex": 107,
+            "frame": 54784,
+            "synthesisMilliseconds": 1.0908999999999196,
+            "simulationMilliseconds": 0.5049999999998818,
+            "dspMilliseconds": 0.10140000000001237,
+            "workerSchedulingMilliseconds": 0.6760999999999058,
+            "completedBlockProcessingMilliseconds": 2.312900000000127,
+            "pcmCompletionIntervalMilliseconds": 2.453700000000026,
+            "beforeBlockProcessingGapMilliseconds": 0.14079999999989923,
+            "processingDeadlineMisses": 1,
+            "activeSourceCount": 8,
+            "activePathCount": 0,
+            "previousBlockProcessingMilliseconds": 2.9481000000000677,
+            "qualityDeadlineMisses": 1,
+            "vehicleActive": true,
+            "emitting": true
+          }
+        ],
+        "final": {
+          "frames": 473600,
+          "blocks": 925,
+          "cpuSeconds": 3.265,
+          "wallSeconds": 10.168494800000001,
+          "processingDeadlineMisses": 1,
+          "hasError": false,
+          "synthesisMs": {
+            "count": 925,
+            "median": 0.836699999999837,
+            "p95": 1.098700000000008,
+            "max": 4.07770000000005
+          },
+          "simulationMs": {
+            "count": 925,
+            "median": 0.5106999999998152,
+            "p95": 0.8028999999996813,
+            "max": 2.9595999999999947
+          },
+          "dspMs": {
+            "count": 925,
+            "median": 0.21000000000094587,
+            "p95": 0.2593000000001666,
+            "max": 2.4967000000001462
+          }
+        }
+      },
+      "files": {
+        "fixture": "read",
+        "host": "read"
+      },
+      "fixture": {
+        "nativeHostExit": 0,
+        "senderStage": "complete",
+        "senderErrorKind": null,
+        "senderJoined": true,
+        "acceptedListenerAcknowledgements": 158,
+        "acceptedVehicleAcknowledgements": 125,
+        "listenerWire": {
+          "transmitted": 158,
+          "startupDiscarded": 0,
+          "firstAck": null,
+          "lastAck": null,
+          "stopAck": null,
+          "firstEncodeMs": null,
+          "firstAgeAtWriteMs": null,
+          "firstAckMs": null,
+          "firstAgeAfterAckMs": null
+        },
+        "listenerPublisher": {
+          "sent": 158,
+          "transmitted": 158,
+          "attempts": 1,
+          "expiredBeforeEncoding": 0,
+          "expiredAfterEncoding": 0,
+          "startupDiscarded": 0,
+          "errorKind": null,
+          "outcome": "deliberate-stop",
+          "stage": "connection",
+          "code": "sender-stop",
+          "firstFrame": {
+            "CopyMs": 2.1709,
+            "MailboxAgeMs": 28.8616,
+            "AgeBeforeEncodeMs": 28.8621,
+            "EncodeMs": 6.5822,
+            "AgeBeforeWriteMs": 35.4444,
+            "WriteMs": 0.0517,
+            "AckMs": 9.8081,
+            "ConnectionMs": 0.1832,
+            "HeaderMs": null,
+            "PayloadMs": null,
+            "PayloadReceivedAgeMs": null,
+            "DecodeMs": null,
+            "DecisionAgeMs": null,
+            "CallbackMs": null
+          },
+          "firstAcceptedFrame": {
+            "CopyMs": 2.1709,
+            "MailboxAgeMs": 28.8616,
+            "AgeBeforeEncodeMs": 28.8621,
+            "EncodeMs": 6.5822,
+            "AgeBeforeWriteMs": 35.4444,
+            "WriteMs": 0.0517,
+            "AckMs": 9.8081,
+            "ConnectionMs": 0.1832,
+            "HeaderMs": null,
+            "PayloadMs": null,
+            "PayloadReceivedAgeMs": null,
+            "DecodeMs": null,
+            "DecisionAgeMs": null,
+            "CallbackMs": null
+          },
+          "firstExpiredUnsent": {
+            "AgeMs": null,
+            "EncodeMs": null,
+            "BeforeEncodeAgeMs": null
+          }
+        },
+        "vehiclePublisher": {
+          "sent": 125,
+          "expired": 0,
+          "replaced": 0,
+          "terminalReason": "deliberate-stop"
+        }
+      },
+      "host": {
+        "hasPrimaryFailure": false,
+        "stage": null,
+        "exceptionKind": null,
+        "duringShutdown": false,
+        "secondaryFailureCount": 0,
+        "durationWallSeconds": 10.2682031,
+        "receivedBlocks": 925,
+        "rejectedBlocks": 0,
+        "rendererExitCode": 0,
+        "ownedThreadsJoined": true,
+        "listener": {
+          "accepted": 158,
+          "rejected": 0,
+          "startupDiscarded": 0,
+          "connections": 1,
+          "lastAgeMs": 354.0101,
+          "stage": "connection",
+          "code": "sender-stop",
+          "exceptionKind": null,
+          "outcome": "deliberate-stop",
+          "firstFrame": {
+            "CopyMs": null,
+            "MailboxAgeMs": null,
+            "AgeBeforeEncodeMs": null,
+            "EncodeMs": null,
+            "AgeBeforeWriteMs": null,
+            "WriteMs": null,
+            "AckMs": 0.2194,
+            "ConnectionMs": 140.6305,
+            "HeaderMs": 31.5025,
+            "PayloadMs": 0.0272,
+            "PayloadReceivedAgeMs": 35.5697,
+            "DecodeMs": 8.2363,
+            "DecisionAgeMs": 44.0957,
+            "CallbackMs": 0.4537
+          },
+          "firstAcceptedFrame": {
+            "CopyMs": null,
+            "MailboxAgeMs": null,
+            "AgeBeforeEncodeMs": null,
+            "EncodeMs": null,
+            "AgeBeforeWriteMs": null,
+            "WriteMs": null,
+            "AckMs": 0.2194,
+            "ConnectionMs": 140.6305,
+            "HeaderMs": 31.5025,
+            "PayloadMs": 0.0272,
+            "PayloadReceivedAgeMs": 35.5697,
+            "DecodeMs": 8.2363,
+            "DecisionAgeMs": 44.0957,
+            "CallbackMs": 0.4537
+          }
+        },
+        "vehicle": {
+          "accepted": 125,
+          "rejected": 0,
+          "connections": 1,
+          "written": 125,
+          "expiredBeforeWrite": 0,
+          "maxHostQueueAgeMs": 0.0132,
+          "maxObservationAgeAtWriteMs": 16.3597,
+          "relayDelivered": 125,
+          "relayRejected": 0,
+          "maximumObservedRoundTripMs": 1.6636,
+          "maximumAcceptedRoundTripMs": 1.6636,
+          "terminal": "deliberate-stop",
+          "removed": true
+        },
+        "sink": {
+          "frames": 471552,
+          "underflowFrames": 0,
+          "firstUnderflowFrame": -1,
+          "missedSinkBudgets": 287,
+          "maximumLatenessMs": 16.035
+        }
+      }
+    }
+  },
+  "failure": null,
+  "proofScope": "Device-free authored RPH evidence through actual production publisher, native named pipes, measured relay, vehicle adapter/synthesizer, worker, causal solver, StreamingRenderer, RA07, PcmRing and OwnedOutputTap",
+  "validationDate": "2026-10-30",
+  "acceptance": "complete-chain local validation after bit-exact cold-synthesis optimization",
+  "historicalCorrections": [
+    {
+      "attempt": 1,
+      "rawPipelineChecksPassed": true,
+      "physicalDopplerAccepted": false,
+      "v12MinimumRate": 0.8254062392148799,
+      "fault": "Wall-clock prediction tagged on audio-frame history; telemetry stepping was not caught by the original broad sign-only assertion"
+    },
+    {
+      "attempt": 2,
+      "rawPipelineChecksPassed": true,
+      "physicalDopplerAccepted": false,
+      "v12MinimumRate": 0.8428112682698723,
+      "fault": "Per-arrival audio-time reanchoring and short prediction horizon still introduced source pose jumps"
+    },
+    {
+      "attempt": 3,
+      "rawPipelineChecksPassed": true,
+      "physicalDopplerAccepted": true,
+      "correction": "One fixed observation-QPC/audio-frame mapping per source lifetime, bounded pose interpolation and100ms prediction; wall-clock freshness remains250ms"
+    }
+  ],
+  "followupValidation": {
+    "recordedVehiclePropagationMode": true,
+    "explicitVisibilityAssumption": true,
+    "unrecognizedPropagationModes": 0,
+    "configurableBoundedEstimatorApi": true
+  },
+  "historicalHostedFailure": {
+    "runId": 40978952924,
+    "head": "bf2b1a643753a75fffbfb0aa64ebf13cb2bdb94d",
+    "stage": "v12",
+    "nativeExit": 1,
+    "cause": "unclassified; original artifact did not retain native diagnostics",
+    "correctionHostedValidation": "Listener startup accepted in run40980370795; that run stopped on native device-free underflow"
+  },
+  "listenerFixtureRegression": {
+    "productionPolicyChanged": false,
+    "codecWarmed": false,
+    "injectedDelayMs": 350,
+    "legacy": {
+      "exit": 1,
+      "ack": 2,
+      "ageAtWriteMs": 372.0426,
+      "receiverDecisionAgeMs": 381.1515,
+      "accepted": 0,
+      "startupDiscarded": 1,
+      "rejected": 0,
+      "connections": 1
+    },
+    "sequence": {
+      "exit": 0,
+      "firstAck": 2,
+      "lastAck": 1,
+      "stopAck": 3,
+      "accepted": 1,
+      "startupDiscarded": 1,
+      "rejected": 0,
+      "connections": 1,
+      "outcome": "deliberate-stop"
+    },
+    "productionPublisher": {
+      "exit": 0,
+      "expiredAfterEncoding": 1,
+      "firstExpiredAgeMs": 376.0792,
+      "sent": 1,
+      "attempts": 1,
+      "rejected": 0,
+      "connections": 1,
+      "outcome": "deliberate-stop"
+    }
+  },
+  "confirmedHostedFailure": {
+    "runId": 40980370795,
+    "head": "3d694953525d0426a3bc1d4b681a03f74391c983",
+    "mergeCommit": "d81c6d3414a6bc9bdafd7dc95a84ac118cdb62ca",
+    "tree": "9667844e96e4956076b0e425dd4272b35f8cecb1",
+    "artifactSha256": "a7ef3f65b11232f9afcd49e3a6792817df81aa5d37cc97b97c1c0c1c4c02d617",
+    "sourceDigest": "900f49145882d1f69246354c989053cd539d35fd5b0023124e8cd5206bb38e83",
+    "nativeFixtureSha256": "69e2df49029139f09369d1142980308bde7d9afb7fc0f427f66be1580ab72691",
+    "sourceDigestVerified": "Exact reproduction from the tested Git blobs using Windows CRLF checkout",
+    "status": "failed",
+    "stage": "v12",
+    "primaryFailureStage": "device-free-sink",
+    "underflowFrames": 512,
+    "firstUnderflowFrame": 55296,
+    "receivedBlocks": 108,
+    "durationWallSeconds": 1.6460424999999999,
+    "listenerAccepted": 19,
+    "listenerStartupDiscarded": 0,
+    "listenerFirstAcceptedAgeMs": 51.3535,
+    "vehicleAccepted": 3,
+    "relayDelivered": 2,
+    "relayRejected": 1,
+    "maximumObservedRelayRoundTripMs": 13.4131,
+    "inference": "Native device-free underflow is confirmed. The underlying scheduling cause is not isolated by this artifact; the listener startup-discard defect did not occur in this run."
+  },
+  "coldSynthesisEvidence": "docs/research/VEHICLE_LIVE_01_COLD_SYNTHESIS.json",
+  "currentHostedValidation": "See PR75 latest checks; this local proof does not establish hosted success"
+}
