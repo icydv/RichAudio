@@ -22,6 +22,8 @@ The calibration has independent identity/range validation, is fixed for a render
 
 ## Controlled listening package
 
+Subsequent pressure comparison: the user listened to2.5×/5×/7×/7.5×/10× options and selected **10×**. The preserved files described below retain their original2.5× calibration. See `EXHAUST_PRESSURE_COMPARISON_01.md` for the accepted shared profile, common headroom trim and additional listening files.
+
 Private page: `.local/stock-source-05/audition/index.html`, in the same parent folder as the audition files. All four original banks have five 10.3-second examples:
 
 1. Open road with the previous emitter level.
