@@ -9,19 +9,30 @@ export {loadStockExhaustPops} from './stock-events.mjs';
 export {StockGrainVoice,NativePcmVoice} from './stock-grain.mjs';
 const FS=48000,clamp=x=>Math.max(0,Math.min(1,x));
 const check=(ok,message)=>{if(!ok)throw Error(message);};
+const verifiedVehicleBanks=new WeakSet();
+const validModel=model=>typeof model==='string'&&/^[a-zA-Z0-9_:-]{1,64}$/.test(model);
 export const stockModels=Object.freeze(['bati','lectro','prototipo','schafter3']);
 export const stockRoles=Object.freeze(['engine','exhaust']);
 export const stockModes=Object.freeze(['idle','accel','decel']);
 
 export function loadStockAssets(manifestFile,{sustainAtlasFile=null}={}){
+  return readStockAssetLibrary(manifestFile,{sustainAtlasFile},stockModels);
+}
+
+/** Generic verified-bank loader. Coverage is declared by its manifest, never
+ * supplied by substituting one of the four demonstration banks. */
+export function loadStockCatalogAssets(manifestFile,{sustainAtlasFile=null}={}){
+  return readStockAssetLibrary(manifestFile,{sustainAtlasFile},null);
+}
+function readStockAssetLibrary(manifestFile,{sustainAtlasFile},allowedModels){
   const base=path.dirname(path.resolve(manifestFile)),manifest=JSON.parse(fs.readFileSync(manifestFile,'utf8'));
-  check(manifest.schema===1&&Array.isArray(manifest.vehicles),'verified private decoder manifest required');
+  check(manifest.schema===1&&Array.isArray(manifest.vehicles)&&manifest.vehicles.length>=1&&manifest.vehicles.length<=2048,'verified private decoder manifest required');
   const atlas=JSON.parse(fs.readFileSync(path.join(base,'analysis-intervals.json'),'utf8'));
   const sustain=sustainAtlasFile?JSON.parse(fs.readFileSync(sustainAtlasFile,'utf8')):null;
   check(sustain===null||sustain.schema===1&&Array.isArray(sustain.streams),'bound private sustain atlas required');
   const vehicles=new Map();
   for(const v of manifest.vehicles){
-    check(stockModels.includes(v.model)&&!vehicles.has(v.model),'exact distinct requested vehicle identity');
+    check(validModel(v.model)&&(!allowedModels||allowedModels.includes(v.model))&&!vehicles.has(v.model),'exact distinct requested vehicle identity');
     const layers={};
     for(const role of stockRoles){layers[role]={};for(const mode of stockModes){
       const record=v.layers?.[role]?.[mode];check(record&&record.channels===1&&record.sourceFormat?.codec===0,'verified mono PCM0 layer required');
@@ -46,15 +57,15 @@ export function loadStockAssets(manifestFile,{sustainAtlasFile=null}={}){
       }
       layers[role][mode]={...record,samples,nativePeak,intervals:spans,sustain:texture};
     }}
-    vehicles.set(v.model,{...v,layers});
+    const bank=Object.freeze({...v,layers});verifiedVehicleBanks.add(bank);vehicles.set(v.model,bank);
   }
-  check(vehicles.size===4,'four verified stock vehicles required');
+  if(allowedModels)check(vehicles.size===allowedModels.length,'four verified stock vehicles required');
   return {manifest,base,vehicles};
 }
 
 export class StockVehicleSource {
   constructor(vehicle,{sourceGain=1,atlas=null,pressureShares={engine:.5,exhaust:.5},pressureSharesByState=null,exhaustEvents=null}={}){
-    check(stockModels.includes(vehicle.model)&&Number.isFinite(sourceGain)&&sourceGain>0&&sourceGain<=2,'verified model and bounded shared source calibration');
+    check((stockModels.includes(vehicle.model)||verifiedVehicleBanks.has(vehicle))&&Number.isFinite(sourceGain)&&sourceGain>0&&sourceGain<=2,'verified model and bounded shared source calibration');
     const shareStates=pressureSharesByState?[pressureSharesByState.idle,pressureSharesByState.load,pressureSharesByState.lift]:[pressureShares,pressureShares,pressureShares];
     check(shareStates.every(s=>s&&stockRoles.every(role=>Number.isFinite(s[role])&&s[role]>0&&s[role]<1)&&Math.abs(s.engine+s.exhaust-1)<1e-12),'explicit pressure shares must sum to one');
     this.shareStates=shareStates.map(s=>Object.freeze({...s}));

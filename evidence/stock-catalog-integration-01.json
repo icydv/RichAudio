@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "stage": "verified-stock-bank-catalogue-seam",
+  "focusedTests": { "passed": 4, "failed": 0, "skipped": 0 },
+  "genuineAssetValidation": {
+    "banks": ["bati", "lectro", "prototipo", "schafter3"],
+    "nativeSampleRates": [24000, 32000, 48000],
+    "eventDurationSeconds": 10.3,
+    "allEmittedPcmHashesMatchPublishedSource05": true,
+    "bankSubstitution": false
+  },
+  "genericManifestBankLimit": 2048,
+  "allInstalledBanksDecoded": false,
+  "runtimeReplacementImplemented": false,
+  "gameLaunched": false,
+  "endpointOpened": false,
+  "subjectiveListeningPerformed": false
+}
