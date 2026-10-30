@@ -1716,7 +1716,7 @@
   "validation": {
     "all40WavHashesMatch": true,
     "pageAudioPlayers": 40,
-    "localLinksResolved": 42,
+    "localLinksResolved": 43,
     "maximumPeak": 0.6217023730278015,
     "deadlineMisses": 5,
     "allEightReferenceErrorsZero": true,

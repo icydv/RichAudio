@@ -20,6 +20,7 @@ test('arbitrary verified catalogue identity uses its own bound PCM without four-
    const bank=loaded.vehicles.get('custom_bank_02'),source=new StockVehicleSource(bank),e=new Float32Array(512),x=new Float32Array(512);
    source.renderInto({operatingPoint:.6,load:.9,running:true},e,x);assert.ok(e.some(v=>v!==0));assert.equal(source.vehicle.model,'custom_bank_02');assert.ok(Object.isFrozen(bank));
    assert.throws(()=>new StockVehicleSource({...bank}),'copying metadata cannot forge a verified model identity');assert.throws(()=>{bank.model='bati';});
+   assert.throws(()=>new StockVehicleSource({...bank,model:'bati'}),'a known demo name cannot bypass decoded-bank registration');
  }finally{f.close();}
 });
 test('generic catalogue rejects missing states, corrupt hashes, duplicated names and unsupported source formats',()=>{
@@ -32,6 +33,7 @@ test('generic and strict loaders retain identical existing four-bank waveform be
    const a=loadStockAssets(f.file),b=loadStockCatalogAssets(f.file),control={operatingPoint:.65,load:.9,running:true};
    for(const model of a.vehicles.keys()){
      const old=new StockVehicleSource(a.vehicles.get(model)),general=new StockVehicleSource(b.vehicles.get(model)),oe=new Float32Array(512),ox=new Float32Array(512),ne=new Float32Array(512),nx=new Float32Array(512);
+     assert.throws(()=>new StockVehicleSource({...a.vehicles.get(model),model:'bati'}),'copied decoded demo banks also require registration');
      for(let k=0;k<20;k++){old.renderInto(control,oe,ox);general.renderInto(control,ne,nx);assert.deepEqual(ne,oe);assert.deepEqual(nx,ox);}
    }
  }finally{f.close();}

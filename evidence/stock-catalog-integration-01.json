@@ -10,6 +10,8 @@
     "bankSubstitution": false
   },
   "genericManifestBankLimit": 2048,
+  "renamedDecodedBankCopiesRejectedForKnownAndUnknownModels": true,
+  "legacyAnalyticalFixtureRegressionTestsPassed": 14,
   "allInstalledBanksDecoded": false,
   "runtimeReplacementImplemented": false,
   "gameLaunched": false,

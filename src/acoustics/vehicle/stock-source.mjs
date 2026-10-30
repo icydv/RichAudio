@@ -14,6 +14,11 @@ const validModel=model=>typeof model==='string'&&/^[a-zA-Z0-9_:-]{1,64}$/.test(m
 export const stockModels=Object.freeze(['bati','lectro','prototipo','schafter3']);
 export const stockRoles=Object.freeze(['engine','exhaust']);
 export const stockModes=Object.freeze(['idle','accel','decel']);
+// Preserve the original in-memory analytical fixture seam, without letting a
+// copied decoded bank regain verification by changing its model to a demo ID.
+const analyticFixture=vehicle=>stockModels.includes(vehicle?.model)&&vehicle.provenance===undefined&&
+  stockRoles.every(role=>stockModes.every(mode=>{const a=vehicle.layers?.[role]?.[mode];return a?.samples instanceof Float32Array&&
+    a.file===undefined&&a.sha256===undefined&&a.sourceFormat===undefined;}));
 
 export function loadStockAssets(manifestFile,{sustainAtlasFile=null}={}){
   return readStockAssetLibrary(manifestFile,{sustainAtlasFile},stockModels);
@@ -65,7 +70,7 @@ function readStockAssetLibrary(manifestFile,{sustainAtlasFile},allowedModels){
 
 export class StockVehicleSource {
   constructor(vehicle,{sourceGain=1,atlas=null,pressureShares={engine:.5,exhaust:.5},pressureSharesByState=null,exhaustEvents=null}={}){
-    check((stockModels.includes(vehicle.model)||verifiedVehicleBanks.has(vehicle))&&Number.isFinite(sourceGain)&&sourceGain>0&&sourceGain<=2,'verified model and bounded shared source calibration');
+    check((verifiedVehicleBanks.has(vehicle)||analyticFixture(vehicle))&&Number.isFinite(sourceGain)&&sourceGain>0&&sourceGain<=2,'verified model or explicit analytical fixture and bounded shared source calibration');
     const shareStates=pressureSharesByState?[pressureSharesByState.idle,pressureSharesByState.load,pressureSharesByState.lift]:[pressureShares,pressureShares,pressureShares];
     check(shareStates.every(s=>s&&stockRoles.every(role=>Number.isFinite(s[role])&&s[role]>0&&s[role]<1)&&Math.abs(s.engine+s.exhaust-1)<1e-12),'explicit pressure shares must sum to one');
     this.shareStates=shareStates.map(s=>Object.freeze({...s}));
