@@ -7,7 +7,7 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
-    & node --test tests/Test-VehicleState.mjs tests/Test-VehicleSynthesis.mjs tests/Test-VehicleEnvironment.mjs tests/Test-VehiclePipeline.mjs tests/Test-VehiclePropagation.mjs tests/Test-VehicleDemo.mjs tests/Test-VehicleOutputGuard.mjs tests/Test-VehicleLiveSource.mjs tests/Test-VehicleRelay.mjs
+    & node --test tests/Test-VehicleState.mjs tests/Test-VehicleSynthesis.mjs tests/Test-VehicleSynthesisOriginal.mjs tests/Test-VehicleEnvironment.mjs tests/Test-VehiclePipeline.mjs tests/Test-VehiclePropagation.mjs tests/Test-VehicleDemo.mjs tests/Test-VehicleOutputGuard.mjs tests/Test-VehicleLiveSource.mjs tests/Test-VehicleRelay.mjs
     if($LASTEXITCODE-ne0){throw 'Original vehicle modules, live source ownership or output headroom failed.'}
     & (Join-Path $repo 'tools\Test-VehicleEvidence.ps1')
     & node --test tests/Test-VehicleCandidate.mjs tests/Test-VehicleCandidatePreparer.mjs tests/Test-VehicleLiveProof.mjs tests/Test-VehicleCalibration.mjs

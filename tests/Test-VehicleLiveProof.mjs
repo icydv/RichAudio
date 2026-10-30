@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {checkVehicleDoppler,pcmMetrics} from '../tools/Check-VehicleLiveProof.mjs';
-import {createVehicleCiEvidence,createVehicleNativeEvidence,readVehicleNativeEvidence} from '../tools/vehicle-live-evidence.mjs';
+import {createVehicleCiEvidence,createVehicleNativeEvidence,readVehicleNativeEvidence,readVehicleProducerEvidence} from '../tools/vehicle-live-evidence.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -59,10 +59,49 @@ test('partial native evidence preserves available diagnostics and read failures 
     let e=readVehicleNativeEvidence(root,{profile:'v12',childExit:1});
     assert.equal(e.files.fixture,'read');assert.equal(e.files.host,'missing');assert.equal(e.fixture.senderErrorKind,'TimeoutException');
     assert.equal(e.host.stage,null);assert.equal(e.host.receivedBlocks,null);
+    const read=t.mock.method(fs,'readFileSync',()=>{throw Object.assign(new Error('private-path-session-token'),{code:'EACCES'});});
+    try{assert.equal(readVehicleNativeEvidence(root,{profile:'v12',childExit:1}).files.fixture,'read-failed');}finally{read.mock.restore();}
     const stat=t.mock.method(fs,'statSync',()=>{throw Object.assign(new Error('private-path-session-token'),{code:'EACCES'});});
     try{e=readVehicleNativeEvidence(root,{profile:'v12',childExit:1});}finally{stat.mock.restore();}
     assert.equal(e.files.fixture,'read-failed');assert.equal(e.files.host,'read-failed');
     const text=JSON.stringify(createVehicleCiEvidence({nativeCases:{v12:e}},{stage:'v12',error:new Error('private-path-session-token')}));
     assert.equal(text.includes('private-path-session-token'),false);assert.ok(text.length<65536);
+  }finally{fs.rmSync(root,{recursive:true});}
+});
+
+test('producer failure evidence retains last block and first eight active timings without control payloads',()=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'richaudio-producer-evidence-')),secret='private-source-path-session-position';
+  try{const rows=Array.from({length:13},(_,i)=>({type:'block',frame:i*512,synthesisMilliseconds:i+.1,simulationMilliseconds:i+.2,dspMilliseconds:i+.3,
+      workerSchedulingMilliseconds:i+.4,completedBlockProcessingMilliseconds:i+.8,pcmCompletionIntervalMilliseconds:i+12,beforeBlockProcessingGapMilliseconds:11.2,processingDeadlineMisses:4,
+      vehicle:{active:i>=2&&i<12,sourceCount:8,position:[1,2,3],provenance:secret},activePaths:8,emitting:true,
+      acoustic:{qualityTiming:{processingMs:i+.6},qualityDeadlineMisses:3,device:secret},sourceGenerations:{[secret]:1},geometry:{path:secret}}));
+    rows.push({type:'final',frames:13*512,cpuSeconds:2,wallSeconds:3,error:secret,statistics:{blocks:13,processingDeadlineMisses:4,
+      synthesisMs:{count:13,p95:7,max:15},simulationMs:{count:13,p95:2,max:4},dspMs:{count:13,p95:1,max:2}},private:secret});
+    fs.writeFileSync(path.join(root,'renderer-diagnostics.txt'),rows.map(JSON.stringify).join('\n')+'\n');
+    const e=readVehicleProducerEvidence(root);assert.equal(e.fileStatus,'read');assert.equal(e.blockCount,13);assert.equal(e.firstActiveBlocks.length,8);
+    assert.equal(e.firstActiveBlocks[0].frame,1024);assert.equal(e.firstActiveBlocks[7].frame,4608);assert.equal(e.lastBlock.frame,6144);
+    assert.equal(e.firstActiveBlocks[0].completedBlockProcessingMilliseconds,2.8);assert.equal(e.firstActiveBlocks[0].processingDeadlineMisses,4);
+    assert.equal(e.firstActiveBlocks[0].pcmCompletionIntervalMilliseconds,14);assert.equal(e.firstActiveBlocks[0].beforeBlockProcessingGapMilliseconds,11.2);
+    assert.equal(e.firstActiveBlocks[0].previousBlockProcessingMilliseconds,2.6);assert.equal(e.final.synthesisMs.max,15);assert.equal(e.final.processingDeadlineMisses,4);
+    e.firstActiveBlocks[0].injected=secret;e.injected=secret;e.firstActiveBlocks.push(...e.firstActiveBlocks);
+    const native=createVehicleNativeEvidence({profile:'v12',childExit:1,producer:e});
+    const result=createVehicleCiEvidence({nativeCases:{v12:native}},{stage:'v12',error:new Error(secret)}),text=JSON.stringify(result);
+    assert.equal(result.nativeCases.v12.producer.firstActiveBlocks.length,8);assert.equal(text.includes(secret),false);
+    assert.equal(result.nativeCases.v12.producer.firstActiveBlocks[0].pcmCompletionIntervalMilliseconds,14);
+    assert.equal(result.nativeCases.v12.producer.firstActiveBlocks[0].beforeBlockProcessingGapMilliseconds,11.2);
+    for(const key of ['sourceGenerations','geometry','position','provenance'])assert.equal(text.includes(key),false);assert.ok(text.length<65536);
+  }finally{fs.rmSync(root,{recursive:true});}
+});
+
+test('bounded producer trace scan preserves completed work across oversized and truncated lines',t=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'richaudio-partial-producer-'));
+  try{assert.equal(readVehicleProducerEvidence(root).fileStatus,'missing');
+    fs.writeFileSync(path.join(root,'renderer-diagnostics.txt'),'x'.repeat(262145)+'\n'+JSON.stringify({type:'block',frame:512,vehicle:{active:true},synthesisMilliseconds:3})+'\n{"type":');
+    const e=readVehicleProducerEvidence(root);assert.equal(e.fileStatus,'partial');assert.equal(e.oversizedLines,1);assert.equal(e.malformedLines,1);
+    assert.equal(e.lastBlock.frame,512);assert.equal(e.firstActiveBlocks[0].synthesisMilliseconds,3);assert.equal(e.final,null);
+    const stat=t.mock.method(fs,'statSync',()=>({isFile:()=>true,size:64*1024*1024+1}));
+    try{const over=readVehicleProducerEvidence(root);assert.equal(over.fileStatus,'over-limit');assert.equal(over.blockCount,0);assert.equal(over.lastBlock,null);}finally{stat.mock.restore();}
+    const denied=t.mock.method(fs,'statSync',()=>{throw Object.assign(new Error('private-path'),{code:'EACCES'});});
+    try{assert.equal(readVehicleProducerEvidence(root).fileStatus,'read-failed');}finally{denied.mock.restore();}
   }finally{fs.rmSync(root,{recursive:true});}
 });

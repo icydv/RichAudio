@@ -47,6 +47,20 @@ function compileCombustion(p) {
   for(const h of harmonics)h.amplitude/=normalization;
   return harmonics.sort((a,b)=>a.cycleOrder-b.cycleOrder);
 }
+// Keep the bounded partial sum small enough to optimize independently during the
+// first real block. Equations, partial order and phase are unchanged.
+function combustionSample(harmonics,cycleHz,brightnessDenominator,cyclePhase) {
+  let combustion=0;
+  for(let harmonicIndex=0;harmonicIndex<harmonics.length;harmonicIndex++) {
+    const h=harmonics[harmonicIndex];
+    const hz=cycleHz*h.cycleOrder,band=vehiclePartialWeight(hz);
+    if(band===0)continue;
+    const brightness=1/(1+h.relative*.1/brightnessDenominator);
+    const resonance=.70+.18/(1+((hz-210)/130)**2)+.12/(1+((hz-1500)/650)**2);
+    combustion+=h.amplitude*brightness*resonance*band*Math.cos(TAU*h.cycleOrder*cyclePhase+h.phase);
+  }
+  return combustion;
+}
 function controls(c,p) {
   if (!c || typeof c!=='object')throw Error('vehicle control required');
   const running=c.engineRunning??true;
@@ -115,19 +129,12 @@ export class VehicleSynthesizer {
       let shift=1;
       if(this.shiftRemaining>0) {const progress=1-this.shiftRemaining/p.shiftSeconds;shift=1-.8*Math.sin(Math.PI*progress)**2;this.shiftRemaining=Math.max(0,this.shiftRemaining-1/FS);}
       const firingPower=this.engineEnvelope*(.22+.78*this.load)*limiter*shift;
-      let combustion=0;
-      for(const h of this.harmonics) {
-        const hz=cycleHz*h.cycleOrder,band=vehiclePartialWeight(hz);
-        if(band===0)continue;
-        const brightness=1/(1+h.relative*.1/(.2+p.exhaustBrightness*(.2+.8*this.load)*(.5+.5*rev)));
-        // Fixed original resonances are broad and bounded; frequency tracks engine orders.
-        const resonance=.70+.18/(1+((hz-210)/130)**2)+.12/(1+((hz-1500)/650)**2);
-        combustion+=h.amplitude*brightness*resonance*band*Math.cos(TAU*h.cycleOrder*this.cyclePhase+h.phase);
-      }
+      const brightnessDenominator=.2+p.exhaustBrightness*(.2+.8*this.load)*(.5+.5*rev);
+      const combustion=combustionSample(this.harmonics,cycleHz,brightnessDenominator,this.cyclePhase);
       let mechanical=0;
-      for(const o of p.mechanicalOrders)mechanical+=o.amplitude/this.mechanicalNormalization*vehiclePartialWeight(crankHz*o.order)*
+      for(let orderIndex=0;orderIndex<p.mechanicalOrders.length;orderIndex++){const o=p.mechanicalOrders[orderIndex];mechanical+=o.amplitude/this.mechanicalNormalization*vehiclePartialWeight(crankHz*o.order)*
         mechanicalRadiationWeight(crankHz*o.order,p.mechanicalRadiationHz)*
-        Math.sin(TAU*o.order*4*this.rotationPhase+o.phase);
+        Math.sin(TAU*o.order*4*this.rotationPhase+o.phase);}
       const mechanicalNoise=this.filters.mechanical.next(this.noise()),exhaustNoise=this.filters.exhaust.next(this.noise()),
         intakeNoise=this.filters.intake.next(this.noise()),tyreNoise=this.filters.tyres.next(this.noise()),aeroNoise=this.filters.aero.next(this.noise());
       const pulseEnvelope=.65+.35*Math.sin(TAU*p.cylinders*this.cyclePhase);
@@ -157,7 +164,7 @@ export class VehicleSynthesizer {
       layer.aero[i]=g.aero.gain*(this.speed/100)**2*aeroNoise;
       layer.induction[i]=g.induction.gain*induction;
       layer.transients[i]=g.transients.gain*transient;
-      let mixed=0;for(const n of vehicleLayerNames)mixed+=layer[n][i];output.mixed[i]=mixed;
+      let mixed=0;for(let layerIndex=0;layerIndex<vehicleLayerNames.length;layerIndex++)mixed+=layer[vehicleLayerNames[layerIndex]][i];output.mixed[i]=mixed;
       this.stats.peak=Math.max(this.stats.peak,Math.abs(mixed));
       this.frame++;
     }

@@ -8,11 +8,11 @@ Run `pwsh -NoProfile -File tools/Test-VehicleLive.ps1` from the integration chec
 
 ## Source binding and complete sequence
 
-The final source-bound run after the strict-listener fixture correction used source digest `01c5561d34820c871f315d89e94f237a283acc3c8722d0e23a635de49fc56138` and native fixture SHA-256 `1382a93b99e047e8d5f72a419b520805bd72424d8976986d92062d66f377d756`. It includes the configurable bounded estimator API, corrected vehicle propagation labels in SoundMap and recording, and bounded native failure diagnostics. The runner hashes the native fixture and all acoustic sources plus the producer, SoundMap and proof code before and after both cases, and rejects source drift during measurement. Its private source manifest contains only repository-relative paths, sizes and hashes.
+The final source-bound run after the cold-synthesis optimization used source digest `3000c06d90a674652f89a9691388bec168764a17332747207104303fdd6a2a17` and native fixture SHA-256 `a8d7ed04c18e250f555dc850acfacce23adead7921022fcbf274b2999e4e58cc`. It includes the configurable bounded estimator API, corrected vehicle propagation labels in SoundMap and recording, the strict-listener fixture correction, bounded native/producer failure diagnostics and bit-exact synthesis changes. The runner hashes the native fixture and all acoustic sources plus the producer, SoundMap and proof code before and after both cases, and rejects source drift during measurement. Its private source manifest contains only repository-relative paths, sizes and hashes.
 
 Each approximately ten-second case includes idle, acceleration, increasing estimated RPM, a gear change, continued acceleration, a pass, deceleration, engine stop, explicit source removal, acknowledged vehicle transport Stop and normal host shutdown. The listener position is fixed while camera orientation changes. Source position follows a continuous authored trajectory over 83 metres with a maximum observed speed below 28 m/s. The normalized getter deliberately stays at 0.5 for both profiles, proving that the documented speed/gear estimate responds to movement even when the getter provides no variation.
 
-The V12 and V8 each accepted 124 vehicle packets and 158 listener packets; both kept eight separate causal component identities and preserved their generation while driving. Mechanical body, exhaust, intake, drivetrain, tyres and aero generated nonzero PCM. The V8 also generated its supercharger layer; the naturally aspirated V12 correctly left induction silent. Exhaust transients remain silent because the available observations do not establish throttle lift, fuel state or real exhaust pops. Gear transitions are synthesized without resetting phase. Source removal releases the independent histories and paths, and the captured tail settles to silence.
+The V12 accepted 124 vehicle packets and the V8 accepted 125; each accepted 158 listener packets. Both kept eight separate causal component identities and preserved their generation while driving. Mechanical body, exhaust, intake, drivetrain, tyres and aero generated nonzero PCM. The V8 also generated its supercharger layer; the naturally aspirated V12 correctly left induction silent. Exhaust transients remain silent because the available observations do not establish throttle lift, fuel state or real exhaust pops. Gear transitions are synthesized without resetting phase. Source removal releases the independent histories and paths, and the captured tail settles to silence.
 
 The exhaust was spatially separate from the body by 1.594 m for the V12 and 2.725 m for the V8. SoundMap captured the real moving component identities and positions. The actual RPH-format telemetry was retained alongside PCM, including the removal event. Both recording manifests retained `vehicle-conditional-direct`, the explicit `unobserved-space-assumed-clear` assumption and no genuine geometry, with no unrecognized propagation mode. These fixtures do not invent reflective geometry or claim a reflection comparison.
 
@@ -20,17 +20,17 @@ The exhaust was spatially separate from the body by 1.594 m for the V12 and 2.72
 
 | Measurement | V12 | Supercharged V8 |
 |---|---:|---:|
-| Pre-host peak | 0.01436380 | 0.01447253 |
-| Post-host peak | 0.00287276 | 0.00289451 |
-| Pre-host RMS, complete sequence | 0.00081904 | 0.00110758 |
-| Synthesis p95 | 1.365 ms | 1.454 ms |
-| Acoustic worker p95 | 0.830 ms | 0.867 ms |
-| Streaming DSP p95 | 0.256 ms | 0.268 ms |
-| Node CPU time | 3.312 s | 2.781 s |
-| Native host CPU time | 0.594 s | 0.438 s |
-| Producer processing deadline misses | 2 | 3 |
-| Paced device-free late wakes | 283 | 283 |
-| Maximum device-free wake lateness | 16.010 ms | 16.203 ms |
+| Pre-host peak | 0.01474576 | 0.01332095 |
+| Post-host peak | 0.00294915 | 0.00266419 |
+| Pre-host RMS, complete sequence | 0.00081943 | 0.00110652 |
+| Synthesis p95 | 1.145 ms | 1.099 ms |
+| Acoustic worker p95 | 0.785 ms | 0.803 ms |
+| Streaming DSP p95 | 0.254 ms | 0.259 ms |
+| Node CPU time | 3.296 s | 3.265 s |
+| Native host CPU time | 0.703 s | 0.813 s |
+| Producer processing deadline misses | 1 | 1 |
+| Paced device-free late wakes | 284 | 287 |
+| Maximum device-free wake lateness | 16.367 ms | 16.035 ms |
 | PCM underflow frames | 0 | 0 |
 | Limited / clipped / nonfinite samples | 0 | 0 |
 | Affected source-history frames | 0 | 0 |
@@ -49,7 +49,7 @@ The initial broad pipeline checks passed, but a closer physical audit found a re
 
 The corrected source keeps one fixed relationship between observation QPC time and the audio frame clock for its lifetime. It interpolates genuinely timestamped poses, predicts at most 100 ms without adding a fixed buffer, and uses independent wall-clock age for the unchanged 250 ms freshness limit. New packet arrivals no longer reset that timing relationship.
 
-The final direct-path rates were 0.92344–1.04396 for the V12 and 0.92346–1.04483 for the V8. The checker now enforces the stationary-listener retarded-time envelope `1 / (1 ± maximumObservedSpeed / 343)`, with a declared 0.015 allowance for finite-time observation correction. It requires both approach and recession behavior and permanently rejects both measured earlier stepping failures. This check exercises the actual worker path rates, not a separate Doppler oscillator.
+The final direct-path rates were 0.92311–1.04376 for the V12 and 0.92312–1.04396 for the V8. The checker now enforces the stationary-listener retarded-time envelope `1 / (1 ± maximumObservedSpeed / 343)`, with a declared 0.015 allowance for finite-time observation correction. It requires both approach and recession behavior and permanently rejects both measured earlier stepping failures. This check exercises the actual worker path rates, not a separate Doppler oscillator.
 
 ## Hosted failure and listener-fixture correction
 
@@ -58,6 +58,18 @@ Hosted CI run `40978952924` at head `bf2b1a643753a75fffbfb0aa64ebf13cb2bdb94d` e
 A separate deterministic probe demonstrated a fixture defect: the old manual listener sender required ACK 1 even when the unchanged strict receiver correctly returned startup-discard ACK 2 for an observation over 250 ms old. The permanent native regression injects a 350 ms first-observation delay. The old sender fails at ACK 2; the proper same-connection sequence receives ACK 2 and accepts a fresh observation with ACK 1, with one startup discard and zero rejected observations. This reproduction does not identify the earlier CI failure's cause.
 
 The normal fixture now uses the actual strict production `StatePublisher`, starts after actual host readiness, and waits for an acknowledged listener before publishing vehicle evidence. A second native regression delays the first encode by 350 ms: the unchanged publisher expires that unsent observation, sends a fresh one on its single connection, and stops deliberately. No codec warm-up, reconnect, widened freshness limit or production policy change is used. Eight focused checks passed, including partial, unreadable, malformed and oversized diagnostics and preservation of exact scalar failure counts. Both complete-chain profiles then passed with one listener connection, deliberate shutdown, zero transport rejections and zero underflow. Current hosted validation is reported on [PR #75](https://github.com/icydv/RichAudio/pull/75).
+
+## Confirmed hosted underflow and bounded cold-cost work
+
+[CI run 40980370795](https://github.com/icydv/RichAudio/actions/runs/40980370795) at head `3d694953525d0426a3bc1d4b681a03f74391c983` stopped on a confirmed device-free sink underflow: 512 frames beginning at frame 55,296, after 108 received blocks and 1.646 seconds. Listener startup had accepted 19 observations with zero startup discards; this was a different failure from the demonstrated ACK 2 fixture defect. The artifact ZIP hash was verified, the CI merge tree matched the requested head, and its source digest was reproduced exactly from that head with Windows CRLF line endings. The underlying scheduling cause is not isolated by the retained artifact.
+
+The resulting diagnostic record now retains the last completed producer block, the first eight active vehicle blocks and final aggregate timings. It distinguishes current-block processing, the interval between PCM write completions and the gap before processing starts. A bounded scan exports only numerical timing/counter fields, without source poses or control payloads.
+
+Three fresh-process V12 probes per candidate measured the original first activation at 13.305–14.385 ms. Indexed loops, a sample-invariant brightness expression and a small pure combustion-sum function reduced the final private-probe range to 10.525–11.891 ms; two of those three results still exceeded the 10.667 ms block budget. These sequential local comparisons are bounded observations, not statistical guarantees. Disposable synthesis preparation was rejected: it added 48.042–52.398 ms of preparation and produced 15.185–16.897 ms first activations. It was not added to production, and no additional queued PCM was introduced.
+
+The permanent same-runtime regression checks all eight component PCM streams, mixed PCM and complete per-block synthesis state against immutable original PR #74 sources for 180 blocks per profile. Those comparisons are exact; the arithmetic, partial ordering and phase behavior are preserved. [Cold-synthesis research evidence](research/VEHICLE_LIVE_01_COLD_SYNTHESIS.json) retains every candidate, the rejected preparation, the hosted failure and the final source binding.
+
+In the final complete-chain run, first active synthesis measured 4.049 ms for the V12 and 4.078 ms for the V8; completed block work measured 8.239 and 8.259 ms. The corresponding PCM completion intervals remained 22.060 and 22.865 ms, including pre-block gaps of 13.821 and 14.606 ms. Each case retained one earlier processing deadline miss and completed with zero underflow. These local results establish neither the earlier CI scheduling cause nor a deadline guarantee or behavior under GTA load; hosted results remain separate evidence.
 
 ## Remaining live evidence
 

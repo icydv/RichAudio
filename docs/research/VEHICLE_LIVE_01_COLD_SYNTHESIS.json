@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 1,
+  "scope": "Bounded device-free local cold-activation comparison; these measurements do not identify the historical CI underflow cause or prove a deadline guarantee.",
+  "environment": {
+    "node": "v24.19.0",
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "protocol": {
+    "freshProcessesPerCandidate": 3,
+    "sampleRate": 48000,
+    "blockFrames": 512,
+    "deadlineMilliseconds": 10.666666666666666,
+    "idleBlocksBeforeAdmission": 100,
+    "activeBlocks": 16,
+    "profile": "original-hypercar-v12",
+    "signal": "Actual LiveVehicleSource, simulation worker and causal renderer; controlled time; stationary native-shaped evidence; no native sink, endpoint or additional queued PCM",
+    "order": "Original, preparation, indexed loops, then extracted kernel; not interleaved; use timings as bounded local observations, not statistical guarantees"
+  },
+  "cases": {
+    "original": [
+      {
+        "run": 1,
+        "firstActivationMilliseconds": 14.384600000000006,
+        "maximumSourceMilliseconds": 7.872899999999987,
+        "meanActiveBlockMilliseconds": 4.636606249999996,
+        "deadlineMissBlocks": [
+          100
+        ]
+      },
+      {
+        "run": 2,
+        "firstActivationMilliseconds": 13.305299999999988,
+        "maximumSourceMilliseconds": 7.210300000000018,
+        "meanActiveBlockMilliseconds": 4.631862499999999,
+        "deadlineMissBlocks": [
+          100
+        ]
+      },
+      {
+        "run": 3,
+        "firstActivationMilliseconds": 14.244400000000013,
+        "maximumSourceMilliseconds": 8.419000000000011,
+        "meanActiveBlockMilliseconds": 4.584562499999995,
+        "deadlineMissBlocks": [
+          100
+        ]
+      }
+    ],
+    "rejectedPreparation": [
+      {
+        "run": 1,
+        "firstActivationMilliseconds": 16.896500000000003,
+        "maximumSourceMilliseconds": 10.078499999999991,
+        "meanActiveBlockMilliseconds": 6.128156249999995,
+        "deadlineMissBlocks": [
+          100
+        ],
+        "preparationMilliseconds": 48.04169999999999
+      },
+      {
+        "run": 2,
+        "firstActivationMilliseconds": 15.215499999999992,
+        "maximumSourceMilliseconds": 9.06559999999996,
+        "meanActiveBlockMilliseconds": 6.416262500000004,
+        "deadlineMissBlocks": [
+          100
+        ],
+        "preparationMilliseconds": 52.39829999999999
+      },
+      {
+        "run": 3,
+        "firstActivationMilliseconds": 15.185299999999984,
+        "maximumSourceMilliseconds": 7.871200000000016,
+        "meanActiveBlockMilliseconds": 5.868899999999993,
+        "deadlineMissBlocks": [
+          100
+        ],
+        "preparationMilliseconds": 51.88699999999999
+      }
+    ],
+    "indexedLoops": [
+      {
+        "run": 1,
+        "firstActivationMilliseconds": 12.685200000000009,
+        "maximumSourceMilliseconds": 6.663799999999981,
+        "meanActiveBlockMilliseconds": 4.229474999999994,
+        "deadlineMissBlocks": [
+          100
+        ]
+      },
+      {
+        "run": 2,
+        "firstActivationMilliseconds": 12.646600000000007,
+        "maximumSourceMilliseconds": 6.748199999999997,
+        "meanActiveBlockMilliseconds": 4.281287500000003,
+        "deadlineMissBlocks": [
+          100
+        ]
+      },
+      {
+        "run": 3,
+        "firstActivationMilliseconds": 12.752700000000004,
+        "maximumSourceMilliseconds": 6.7509000000000015,
+        "meanActiveBlockMilliseconds": 4.303799999999999,
+        "deadlineMissBlocks": [
+          100
+        ]
+      }
+    ],
+    "extractedCombustionKernel": [
+      {
+        "run": 1,
+        "firstActivationMilliseconds": 11.891400000000004,
+        "maximumSourceMilliseconds": 5.008600000000001,
+        "meanActiveBlockMilliseconds": 3.534368750000004,
+        "deadlineMissBlocks": [
+          100
+        ]
+      },
+      {
+        "run": 2,
+        "firstActivationMilliseconds": 11.687200000000018,
+        "maximumSourceMilliseconds": 4.904600000000016,
+        "meanActiveBlockMilliseconds": 3.3779375000000016,
+        "deadlineMissBlocks": [
+          100
+        ]
+      },
+      {
+        "run": 3,
+        "firstActivationMilliseconds": 10.525300000000016,
+        "maximumSourceMilliseconds": 4.579800000000006,
+        "meanActiveBlockMilliseconds": 3.343774999999999,
+        "deadlineMissBlocks": []
+      }
+    ]
+  },
+  "decision": {
+    "retained": "Indexed harmonic/order/mix loops, sample-invariant brightness expression, and a small pure combustion-sum function; unchanged equations, operation order, partial order and phase.",
+    "rejected": "Disposable synth preparation did not improve activation and was not added to production.",
+    "remaining": "Two of three kernel activation totals still exceed one block budget; scheduler, relay and native-consumer behaviour are outside this private probe."
+  },
+  "jitInspection": {
+    "scope": "One trace-opt/deopt baseline and one prepared run; timing intentionally not interpreted.",
+    "observations": [
+      "The large renderInto function optimized during preparation, then was invalidated after subsequent synth construction with dependent field type changed.",
+      "Baseline renderInto encountered insufficient generic named access during early optimization; causal renderer process also changed integer to fractional timing representations and first-path access.",
+      "Trace output did not establish one exact source field as the historical CI cause."
+    ]
+  },
+  "exactRegression": {
+    "referenceCommit": "eef0cbc2e96e09754d87b375975eb1053422121e",
+    "fixture": "tests/fixtures/VehicleSynthesisOriginal.json",
+    "test": "tests/Test-VehicleSynthesisOriginal.mjs",
+    "profiles": 2,
+    "blocksPerProfile": 180,
+    "framesPerProfile": 92160,
+    "checked": "Eight layer PCM streams, mixed PCM and complete per-block synthesis state/diagnostics",
+    "result": "exact match",
+    "runtimeContract": "Complete PCM and state equivalence to immutable PR74 fixtures is checked on every runtime. Stored golden digests additionally apply on the exact captured Node release, platform and architecture; tests use no Git or network.",
+    "immutableReferenceFiles": [
+      "tests/fixtures/VehicleSynthesisOriginalReference.mjs",
+      "tests/fixtures/VehicleSynthesisOriginalProfiles.mjs"
+    ]
+  },
+  "source": {
+    "path": "src/acoustics/vehicle/synthesizer.mjs",
+    "sha256Lf": "c85f88a4d8553b29b981f9f5bbcb76fe0132381a00e9f81054e0962d336c627c"
+  },
+  "confirmedHostedFailure": {
+    "runId": 40980370795,
+    "head": "3d694953525d0426a3bc1d4b681a03f74391c983",
+    "mergeCommit": "d81c6d3414a6bc9bdafd7dc95a84ac118cdb62ca",
+    "tree": "9667844e96e4956076b0e425dd4272b35f8cecb1",
+    "artifactSha256": "a7ef3f65b11232f9afcd49e3a6792817df81aa5d37cc97b97c1c0c1c4c02d617",
+    "sourceDigest": "900f49145882d1f69246354c989053cd539d35fd5b0023124e8cd5206bb38e83",
+    "nativeFixtureSha256": "69e2df49029139f09369d1142980308bde7d9afb7fc0f427f66be1580ab72691",
+    "sourceDigestVerified": "Exact reproduction from the tested Git blobs using Windows CRLF checkout",
+    "status": "failed",
+    "stage": "v12",
+    "primaryFailureStage": "device-free-sink",
+    "underflowFrames": 512,
+    "firstUnderflowFrame": 55296,
+    "receivedBlocks": 108,
+    "durationWallSeconds": 1.6460424999999999,
+    "listenerAccepted": 19,
+    "listenerStartupDiscarded": 0,
+    "listenerFirstAcceptedAgeMs": 51.3535,
+    "vehicleAccepted": 3,
+    "relayDelivered": 2,
+    "relayRejected": 1,
+    "maximumObservedRelayRoundTripMs": 13.4131,
+    "inference": "Native device-free underflow is confirmed. The underlying scheduling cause is not isolated by this artifact; the listener startup-discard defect did not occur in this run."
+  },
+  "completeChainValidation": {
+    "date": "2026-10-30",
+    "scope": "One complete local device-free native/recording case per profile after frozen optimization; no game or endpoint",
+    "sourceDigest": "3000c06d90a674652f89a9691388bec168764a17332747207104303fdd6a2a17",
+    "nativeFixtureSha256": "a8d7ed04c18e250f555dc850acfacce23adead7921022fcbf274b2999e4e58cc",
+    "profiles": {
+      "v12": {
+        "nativeExit": 0,
+        "underflowFrames": 0,
+        "processingDeadlineMisses": 1,
+        "firstActiveBlock": {
+          "blockIndex": 104,
+          "frame": 53248,
+          "synthesisMilliseconds": 4.049199999999928,
+          "simulationMilliseconds": 2.2001000000000204,
+          "dspMilliseconds": 0.8829999999998108,
+          "workerSchedulingMilliseconds": 2.5733999999999924,
+          "completedBlockProcessingMilliseconds": 8.238900000000058,
+          "pcmCompletionIntervalMilliseconds": 22.060000000000173,
+          "beforeBlockProcessingGapMilliseconds": 13.821100000000115,
+          "processingDeadlineMisses": 1,
+          "activeSourceCount": 8,
+          "activePathCount": 0,
+          "previousBlockProcessingMilliseconds": 0.7496000000001004,
+          "qualityDeadlineMisses": 1,
+          "vehicleActive": true,
+          "emitting": true
+        },
+        "synthesisP95Milliseconds": 1.1451999999999316,
+        "simulationP95Milliseconds": 0.7845000000002074,
+        "dspP95Milliseconds": 0.2538999999999305,
+        "preHostPeak": 0.014745761640369892
+      },
+      "v8": {
+        "nativeExit": 0,
+        "underflowFrames": 0,
+        "processingDeadlineMisses": 1,
+        "firstActiveBlock": {
+          "blockIndex": 100,
+          "frame": 51200,
+          "synthesisMilliseconds": 4.07770000000005,
+          "simulationMilliseconds": 2.110800000000154,
+          "dspMilliseconds": 0.8519000000001142,
+          "workerSchedulingMilliseconds": 2.5037999999999556,
+          "completedBlockProcessingMilliseconds": 8.25870000000009,
+          "pcmCompletionIntervalMilliseconds": 22.86500000000001,
+          "beforeBlockProcessingGapMilliseconds": 14.60629999999992,
+          "processingDeadlineMisses": 1,
+          "activeSourceCount": 8,
+          "activePathCount": 0,
+          "previousBlockProcessingMilliseconds": 0.974100000000135,
+          "qualityDeadlineMisses": 1,
+          "vehicleActive": true,
+          "emitting": true
+        },
+        "synthesisP95Milliseconds": 1.098700000000008,
+        "simulationP95Milliseconds": 0.8028999999996813,
+        "dspP95Milliseconds": 0.2593000000001666,
+        "preHostPeak": 0.013320953585207462
+      }
+    },
+    "limitations": "One earlier processing deadline miss remains in each complete-chain case. Local success and lower measured cold synthesis costs do not establish the historical CI scheduling cause, future hosted success, a deadline guarantee or behavior under GTA load."
+  }
+}

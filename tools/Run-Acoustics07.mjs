@@ -192,6 +192,7 @@ const stats = {
 const cpuStart = process.cpuUsage(),
   wallStart = performance.now();
 let credits = 0,
+  previousPcmCompletionMs = null,
   inFlight = 0,
   running = false,
   stopping = false,
@@ -620,8 +621,13 @@ async function pump() {
         process.stdout.write(packet, (e) => (e ? reject(e) : resolve())),
       );
       stats.blocks++;
-      stats.processingDeadlineMisses+=Number(performance.now()-blockProcessingStart>BLOCK/FS*1000);
-      if(soundMap)soundMapDeadlineMisses+=Number(performance.now()-blockProcessingStart>BLOCK/FS*1000);
+      const pcmCompletedAt=performance.now();
+      const completedBlockProcessingMilliseconds=pcmCompletedAt-blockProcessingStart;
+      const pcmCompletionIntervalMilliseconds=previousPcmCompletionMs===null?null:pcmCompletedAt-previousPcmCompletionMs;
+      const beforeBlockProcessingGapMilliseconds=previousPcmCompletionMs===null?null:blockProcessingStart-previousPcmCompletionMs;
+      previousPcmCompletionMs=pcmCompletedAt;
+      stats.processingDeadlineMisses+=Number(completedBlockProcessingMilliseconds>BLOCK/FS*1000);
+      if(soundMap)soundMapDeadlineMisses+=Number(completedBlockProcessingMilliseconds>BLOCK/FS*1000);
       inFlight = 0;
       if (options.trace)
         log({
@@ -631,6 +637,10 @@ async function pump() {
           orientationMilliseconds,
           simulationMilliseconds: result.milliseconds,
           synthesisMilliseconds,
+          completedBlockProcessingMilliseconds,
+          pcmCompletionIntervalMilliseconds,
+          beforeBlockProcessingGapMilliseconds,
+          processingDeadlineMisses:stats.processingDeadlineMisses,
           vehicle:vehicleBlock?.diagnostics??null,
           vehicleOutput:vehicleOutput?{...vehicleOutput.stats}:null,
           paths: lastControl.paths.length,

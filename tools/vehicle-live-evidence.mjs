@@ -2,6 +2,7 @@
 // raw errors/stacks, capabilities, PCM, recordings or environment identifiers.
 import fs from 'node:fs';
 import path from 'node:path';
+import {StringDecoder} from 'node:string_decoder';
 const number=v=>typeof v==='number'&&Number.isFinite(v)?v:null;
 const fields=(value,keys)=>Object.fromEntries(keys.map(key=>[key,number(value?.[key])]));
 const hash=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value)?value:null;
@@ -19,12 +20,43 @@ const transportStages=['connection','startup','header','length','payload','decod
 const transportCodes=['deadline','truncated-header','invalid-length','payload-failed','invalid-encoding-or-json','invalid-schema','invalid-sequence','invalid-age','consumer-failed','connection-failed','operation-failed','receiver-stop','sender-stop','peer-stop'];
 const terminalKinds=['deliberate-stop','unexpected-eof','failed','local-stop',...errorKinds];
 const firstTiming=t=>fields(t,['CopyMs','MailboxAgeMs','AgeBeforeEncodeMs','EncodeMs','AgeBeforeWriteMs','WriteMs','AckMs','ConnectionMs','HeaderMs','PayloadMs','PayloadReceivedAgeMs','DecodeMs','DecisionAgeMs','CallbackMs']);
+const producerBlockFields=['blockIndex','frame','synthesisMilliseconds','simulationMilliseconds','dspMilliseconds','workerSchedulingMilliseconds',
+  'completedBlockProcessingMilliseconds','pcmCompletionIntervalMilliseconds','beforeBlockProcessingGapMilliseconds','processingDeadlineMisses',
+  'activeSourceCount','activePathCount','previousBlockProcessingMilliseconds','qualityDeadlineMisses'];
+const safeProducerBlock=b=>b?{...fields(b,producerBlockFields),vehicleActive:b.vehicleActive===true,emitting:b.emitting===true}:null;
+function retainProducer(p){if(!p)return null;return {fileStatus:choice(p.fileStatus,['read','partial','missing','over-limit','read-failed']),
+  ...fields(p,['bytes','lines','malformedLines','oversizedLines','blockCount']),lastBlock:safeProducerBlock(p.lastBlock),
+  firstActiveBlocks:Array.isArray(p.firstActiveBlocks)?p.firstActiveBlocks.slice(0,8).map(safeProducerBlock):[],
+  final:p.final?{...fields(p.final,['frames','blocks','cpuSeconds','wallSeconds','processingDeadlineMisses']),hasError:p.final.hasError===true,
+    synthesisMs:timing(p.final.synthesisMs),simulationMs:timing(p.final.simulationMs),dspMs:timing(p.final.dspMs)}:null};}
+// The private renderer trace includes source poses and control payloads. Scan
+// bounded bytes/lines and retain only timing scalars, never those raw records.
+export function readVehicleProducerEvidence(directory){
+  const result={fileStatus:'read',bytes:0,lines:0,malformedLines:0,oversizedLines:0,blockCount:0,lastBlock:null,firstActiveBlocks:[],final:null};
+  let fd;try{const file=path.join(directory,'renderer-diagnostics.txt'),stat=fs.statSync(file);result.bytes=stat.size;
+    if(!stat.isFile()||stat.size>64*1024*1024){result.fileStatus='over-limit';return retainProducer(result);}
+    fd=fs.openSync(file,'r');const decoder=new StringDecoder('utf8'),chunk=Buffer.alloc(65536);let carry='',skipping=false,position=0;
+    const append=value=>{if(skipping)return;if(Buffer.byteLength(carry)+Buffer.byteLength(value)>262144){result.oversizedLines++;carry='';skipping=true;}else carry+=value;};
+    const line=()=>{result.lines++;if(skipping||!carry.trim())return;let row;try{row=JSON.parse(carry.replace(/^\uFEFF/,''));}catch{result.malformedLines++;return;}
+      if(row?.type==='block'){
+        const block=safeProducerBlock({...row,blockIndex:result.blockCount++,vehicleActive:row.vehicle?.active===true,activeSourceCount:row.vehicle?.sourceCount,
+          activePathCount:row.activePaths,previousBlockProcessingMilliseconds:row.acoustic?.qualityTiming?.processingMs,qualityDeadlineMisses:row.acoustic?.qualityDeadlineMisses});
+        result.lastBlock=block;if(block.vehicleActive&&result.firstActiveBlocks.length<8)result.firstActiveBlocks.push(block);
+      }else if(row?.type==='final'){result.final={frames:row.frames,blocks:row.statistics?.blocks,cpuSeconds:row.cpuSeconds,wallSeconds:row.wallSeconds,
+        processingDeadlineMisses:row.statistics?.processingDeadlineMisses,hasError:row.error!=null,synthesisMs:row.statistics?.synthesisMs,simulationMs:row.statistics?.simulationMs,dspMs:row.statistics?.dspMs};}
+    };
+    const consume=value=>{let start=0,end;while((end=value.indexOf('\n',start))!==-1){append(value.slice(start,end));line();carry='';skipping=false;start=end+1;}append(value.slice(start));};
+    while(position<stat.size){const read=fs.readSync(fd,chunk,0,Math.min(chunk.length,stat.size-position),position);if(!read)break;position+=read;consume(decoder.write(chunk.subarray(0,read)));}
+    consume(decoder.end());if(carry.length||skipping)line();if(result.malformedLines||result.oversizedLines)result.fileStatus='partial';
+  }catch(error){result.fileStatus=error.code==='ENOENT'?'missing':'read-failed';}finally{if(fd!==undefined)fs.closeSync(fd);}
+  return retainProducer(result);
+}
 function readRecord(directory,name,maxBytes){try{const file=path.join(directory,name),stat=fs.statSync(file);if(!stat.isFile()||stat.size>maxBytes)return {status:'over-limit',value:null};
-  try{return {status:'read',value:JSON.parse(fs.readFileSync(file,'utf8').replace(/^\uFEFF/,''))};}catch{return {status:'malformed',value:null};}
+  const text=fs.readFileSync(file,'utf8');try{return {status:'read',value:JSON.parse(text.replace(/^\uFEFF/,''))};}catch{return {status:'malformed',value:null};}
 }catch(error){return {status:error.code==='ENOENT'?'missing':'read-failed',value:null};}}
-export function createVehicleNativeEvidence({profile,childExit,timedOut=false,fixture=null,host=null,files={}}){
+export function createVehicleNativeEvidence({profile,childExit,timedOut=false,fixture=null,host=null,files={},producer=null}){
   const transport=host?.transport,terminal=host?.listenerTerminal??transport?.diagnostic;
-  return {profile:choice(profile,['v12','v8']),childExit:number(childExit),timedOut:timedOut===true,
+  return {profile:choice(profile,['v12','v8']),childExit:number(childExit),timedOut:timedOut===true,producer:retainProducer(producer),
     files:Object.fromEntries(['fixture','host'].map(name=>[name,choice(files[name],['read','missing','malformed','over-limit','read-failed'])])),
     fixture:{nativeHostExit:number(fixture?.nativeHostExit),senderStage:choice(fixture?.senderStage,senderStages),senderErrorKind:choice(fixture?.senderErrorKind,errorKinds),
       senderJoined:fixture?.senderJoined===true,acceptedListenerAcknowledgements:number(fixture?.acceptedListenerAcknowledgements),acceptedVehicleAcknowledgements:number(fixture?.acceptedVehicleAcknowledgements),
@@ -46,12 +78,12 @@ export function createVehicleNativeEvidence({profile,childExit,timedOut=false,fi
 }
 export function readVehicleNativeEvidence(directory,options){
   const fixture=readRecord(directory,'fixture.json',16384),host=readRecord(directory,'host-result.json',262144);
-  return createVehicleNativeEvidence({...options,fixture:fixture.value,host:host.value,files:{fixture:fixture.status,host:host.status}});
+  return createVehicleNativeEvidence({...options,fixture:fixture.value,host:host.value,files:{fixture:fixture.status,host:host.status},producer:readVehicleProducerEvidence(directory)});
 }
 function retainNative(n){if(!n)return null;
   // Rebuild even already-sanitized input: callers cannot smuggle extra fields
   // into the CI record by attaching arbitrary properties to nativeCases.
-  const result=createVehicleNativeEvidence({profile:n.profile,childExit:n.childExit,timedOut:n.timedOut,files:n.files,
+  const result=createVehicleNativeEvidence({profile:n.profile,childExit:n.childExit,timedOut:n.timedOut,files:n.files,producer:n.producer,
     fixture:{...n.fixture,vehiclePublisher:n.fixture?.vehiclePublisher,listenerPublisher:n.fixture?.listenerPublisher?{...n.fixture.listenerPublisher,
       diagnostic:{Outcome:n.fixture.listenerPublisher.outcome,Stage:n.fixture.listenerPublisher.stage,Code:n.fixture.listenerPublisher.code}}:null},
     host:{...n.host,primaryFailure:n.host?.hasPrimaryFailure?{stage:n.host.stage,exceptionType:n.host.exceptionKind,duringShutdown:n.host.duringShutdown}:null,
