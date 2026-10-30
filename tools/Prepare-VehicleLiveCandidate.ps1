@@ -18,7 +18,9 @@ for($parent=[IO.DirectoryInfo]::new($package);$null-ne$parent;$parent=$parent.Pa
 if(Test-Path -LiteralPath $package){throw 'Fresh package directory required'}
 $oldManifest=[IO.Path]::GetFullPath($BaselineManifest)
 $old=Get-Content -LiteralPath $oldManifest -Raw|ConvertFrom-Json
-if($old.Schema-ne1-or!([IO.Path]::IsPathRooted($old.GameRoot))-or@($old.Files).Count-ne26){throw 'Reviewed 26-file baseline manifest required before the new menu addition'}
+# The preserved deployment manifest has SchemaVersion; Schema belongs to the
+# separate attempt/journal format consumed by the filesystem-only helpers.
+if($old.SchemaVersion-ne1-or$old.GameVersion-ne'1.0.1158.16'-or$old.RphVersion-ne'1.132.1428.17748'-or!([IO.Path]::IsPathRooted($old.GameRoot))-or@($old.Files).Count-ne26){throw 'Reviewed exact-build 26-file SchemaVersion baseline manifest required before the new menu addition'}
 $gameRoot=[IO.Path]::GetFullPath($old.GameRoot)
 if($package-eq$gameRoot-or$package.StartsWith($gameRoot+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)-or$gameRoot.StartsWith($package+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Package/game overlap rejected'}
 $destinations=[Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
@@ -29,7 +31,10 @@ foreach($file in $old.Files){
  if(!$destination.StartsWith($gameRoot+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)-or$destination-ne([IO.Path]::GetFullPath($file.Destination))-or$file.SHA256-notmatch'^[A-Fa-f0-9]{64}$'){throw 'Baseline destination/hash scope differs'}
 }
 if(!$destinations.Contains('Plugins\RichAudio.Beacon.Rph.dll')-or$destinations.Contains('Plugins\RichAudio.Menu.json')){throw 'Baseline must contain one bridge and no prior menu sidecar'}
-if($old.RenameSource-ne(Join-Path $gameRoot 'GTA5.exe')-or$old.RenameDestination-ne(Join-Path $gameRoot '_GTA5.exe')){throw 'Original executable rename scope differs'}
+$renameSource=Join-Path $gameRoot 'GTA5.exe';$renameDestination=Join-Path $gameRoot '_GTA5.exe'
+# Node/Windows temporary paths may use a short-name spelling (for example the
+# runner's profile directory). Compare both sides under the same normalization.
+if(![IO.Path]::IsPathRooted($old.RenameSource)-or![IO.Path]::IsPathRooted($old.RenameDestination)-or[IO.Path]::GetFullPath($old.RenameSource)-ne$renameSource-or[IO.Path]::GetFullPath($old.RenameDestination)-ne$renameDestination){throw 'Original executable rename scope differs'}
 function Hash([string]$Path){(Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash}
 function Json([string]$Path,$Value){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 30),[Text.UTF8Encoding]::new($false))}
 $reviewedHelpers=@{
@@ -67,15 +72,15 @@ $files=@(foreach($f in $old.Files){
  $source=if($f.RelativeDestination-eq'Plugins\RichAudio.Beacon.Rph.dll'){Join-Path $repo 'build\acoustics07\transport\RichAudio.Beacon.Rph.dll'}else{$f.Source}
  if($f.RelativeDestination-ne'Plugins\RichAudio.Beacon.Rph.dll'-and(Hash $source)-ne$f.SHA256){throw 'Historical runtime drift'}
  $copy=Join-Path $package ('runtime\'+$f.RelativeDestination);Copy-New $source $copy
- [ordered]@{RelativeDestination=$f.RelativeDestination;Source=$copy;Destination=Join-Path $old.GameRoot $f.RelativeDestination;SHA256=Hash $copy}
+ [ordered]@{RelativeDestination=$f.RelativeDestination;Source=$copy;Destination=Join-Path $gameRoot $f.RelativeDestination;SHA256=Hash $copy}
 })
 $menu=Join-Path $package 'runtime\Plugins\RichAudio.Menu.json'
 Json $menu ([ordered]@{schemaVersion=1;workspaceRoot=$app;settingsPath='.local/acoustic-settings.json';toggleKey='F10';controllerEnabled=$true;soundMap=[ordered]@{enabled=$true;autoStartService=$true;openWindow=$true;sampleHz=20;port=17833;nodeExecutable=(Get-Command node.exe).Source}})
-$files+=[ordered]@{RelativeDestination='Plugins\RichAudio.Menu.json';Source=$menu;Destination=Join-Path $old.GameRoot 'Plugins\RichAudio.Menu.json';SHA256=Hash $menu}
+$files+=[ordered]@{RelativeDestination='Plugins\RichAudio.Menu.json';Source=$menu;Destination=Join-Path $gameRoot 'Plugins\RichAudio.Menu.json';SHA256=Hash $menu}
 $baseline=Join-Path $package 'baseline';$backups=Join-Path $package 'original-executables'
 foreach($f in Get-ChildItem -LiteralPath $old.BaselineDirectory -File){Copy-New $f.FullName (Join-Path $baseline $f.Name)}
 foreach($f in Get-ChildItem -LiteralPath $old.ExecutableBackupDirectory -File){Copy-New $f.FullName (Join-Path $backups $f.Name)}
-$manifest=[ordered]@{Schema=1;GameRoot=$old.GameRoot;Files=$files;BaselineDirectory=$baseline;ExecutableBackupDirectory=$backups;RenameSource=$old.RenameSource;RenameDestination=$old.RenameDestination;RenameSHA256=$old.RenameSHA256;GeneratedFiles=$old.GeneratedFiles}
+$manifest=[ordered]@{SchemaVersion=1;GameRoot=$gameRoot;GameVersion=$old.GameVersion;RphVersion=$old.RphVersion;Files=$files;BaselineDirectory=$baseline;ExecutableBackupDirectory=$backups;RenameSource=$renameSource;RenameDestination=$renameDestination;RenameSHA256=$old.RenameSHA256;GeneratedFiles=$old.GeneratedFiles}
 $manifestPath=Join-Path $package 'deployment-manifest.json';Json $manifestPath $manifest
 foreach($name in @('Invoke-Session.ps1','Verify-Original.ps1','LaunchOnly.Common.ps1')){Copy-New (Join-Path $HelperDirectory $name) (Join-Path $package $name)}
 # Narrow scope adaptation in this new copy only. Earlier sealed helpers are untouched.
