@@ -13,6 +13,8 @@ try {
     & node --test tests/Test-VehicleCandidate.mjs tests/Test-VehicleCandidatePreparer.mjs tests/Test-VehicleLiveProof.mjs tests/Test-VehicleCalibration.mjs
     if($LASTEXITCODE-ne0){throw 'Independent vehicle candidate binding or readiness boundary failed.'}
     & (Join-Path $repo 'tools\Test-VehicleLive.ps1')
+    & node --test tests/Test-VehicleNativeDiagnostics.mjs
+    if($LASTEXITCODE-ne0){throw 'Actual native vehicle startup and bounded diagnostic evidence failed.'}
     & node --test tests/Test-ListeningOperator.mjs
     if($LASTEXITCODE-ne0){throw 'Focused listening operator orchestration failed.'}
     & node --test tests/Test-ListenerBoundary.mjs

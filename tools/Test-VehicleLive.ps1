@@ -11,7 +11,7 @@ $sources+=@(Get-ChildItem (Join-Path $repo 'src\acoustics\geometry') -Filter '*.
 $sources+=@('GeometryObservation.cs','SurfaceAcquisition.cs','DiagnosticTile.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\observation\'+$_)}
 $sources+=Join-Path $repo 'tests\geometry-live\GeometryIntegration.cs'
 $sources+=Join-Path $repo 'tests\geometry-live\VehicleIntegration.cs'
-$options=@('/nologo','/optimize+','/warnaserror+','/unsafe+','/platform:x64','/langversion:5','/define:STATE_TRANSPORT,GEOMETRY_LIVE,GEOMETRY_FIXTURE','/r:System.Runtime.Serialization.dll','/r:System.Web.Extensions.dll','/main:RichAudio.Beacon.Windows.VehicleIntegration')
+$options=@('/nologo','/optimize+','/warnaserror+','/unsafe+','/platform:x64','/langversion:5','/define:STATE_TRANSPORT,GEOMETRY_LIVE,GEOMETRY_FIXTURE,TRANSPORT_EXPIRY_TEST','/r:System.Runtime.Serialization.dll','/r:System.Web.Extensions.dll','/main:RichAudio.Beacon.Windows.VehicleIntegration')
 $exe=Join-Path $build 'RichAudio.VehicleLive.Tests.exe'
 & $compiler @options ('/out:'+$exe) @sources
 if($LASTEXITCODE-ne0){

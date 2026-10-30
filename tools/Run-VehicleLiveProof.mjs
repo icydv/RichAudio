@@ -8,7 +8,7 @@ import {finished} from 'node:stream/promises';
 import {createHash} from 'node:crypto';
 import {startSoundMap} from './soundmap/server.mjs';
 import {checkVehicleLive,compareVehicleProfiles} from './Check-VehicleLiveProof.mjs';
-import {createVehicleCiEvidence} from './vehicle-live-evidence.mjs';
+import {createVehicleCiEvidence,readVehicleNativeEvidence} from './vehicle-live-evidence.mjs';
 
 const [root,output,exe]=process.argv.slice(2);
 const model={basis:'declared-demonstration-scale',metresPerNativeUnit:1,sourceOffsetNative:[0,0,0],reference:'authored-vehicle-fixture-native-unit-assumed-metre'};
@@ -36,13 +36,18 @@ async function run(profile){
     const deadline=setTimeout(()=>{timedOut=true;spawn('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});},25000);
     let code;try{code=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',resolve);});}finally{clearTimeout(deadline);}
     await Promise.all([finished(stdout),finished(stderr)]);
+    const native=readVehicleNativeEvidence(destination,{profile,childExit:code,timedOut});
+    report.nativeCases??={};report.nativeCases[profile]=native;
+    // Retain bounded diagnostic facts before any lifecycle assertion or
+    // recorder shutdown can obscure the actual native outcome.
+    console.log(JSON.stringify({type:'vehicle-native-case',...native}));
     assert.equal(timedOut,false,'owned device-free fixture exceeded25s; only its process tree was terminated');
     await request('/api/record/stop',{id:recording.id});
     const until=performance.now()+2000;while(service.recorder.active&&performance.now()<until)await new Promise(resolve=>setTimeout(resolve,10));
     assert.equal(service.recorder.active,null,'actual recorder flushed and sealed');
     const opened=service.recorder.open(recording.id);
     fs.writeFileSync(path.join(destination,'recording-result.json'),JSON.stringify({id:recording.id,directory:opened.dir,audioPlayable:opened.audioPlayable,manifest:opened.manifest,status:service.status()},null,2),{flag:'wx'});
-    assert.equal(code,0,'actual native vehicle fixture lifecycle failed; retained stderr explains failure');
+    assert.equal(code,0,'actual native vehicle fixture lifecycle failed; bounded native-case evidence retained above');
   }finally{await service.close();}
   return checkVehicleLive(destination);
 }

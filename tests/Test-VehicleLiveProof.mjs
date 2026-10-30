@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {checkVehicleDoppler,pcmMetrics} from '../tools/Check-VehicleLiveProof.mjs';
-import {createVehicleCiEvidence} from '../tools/vehicle-live-evidence.mjs';
+import {createVehicleCiEvidence,createVehicleNativeEvidence,readVehicleNativeEvidence} from '../tools/vehicle-live-evidence.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 test('direct vehicle Doppler oracle accepts physical approach/recession and rejects observed telemetry stepping',()=>{
   const velocity=28,c=343;
@@ -25,4 +28,41 @@ test('PCM measurements preserve actual stereo amplitude, signed crossings and no
   const result=pcmMetrics(bytes);assert.equal(result.frames,4);assert.equal(result.peak,.5);
   assert.equal(result.rms,Math.sqrt((.25**2+.5**2)/2));assert.equal(result.zeroCrossings,3);assert.equal(result.stereoDifferenceRms,.75);
   bytes.writeFloatLE(NaN,0);assert.equal(pcmMetrics(bytes).nonfiniteSamples,1);
+});
+test('native exit failure retains whitelisted listener ACK/age, host failure stage and transport counters',()=>{
+  const secret='private-path-pipe-session-token';
+  const native=createVehicleNativeEvidence({profile:'v12',childExit:1,files:{fixture:'read',host:'read'},fixture:{nativeHostExit:0,
+    senderStage:'listener-ack',senderErrorKind:'InvalidDataException',senderError:secret,senderJoined:true,
+    listenerWire:{firstAck:2,firstAgeAtWriteMs:350,firstEncodeMs:12},vehiclePublisher:{terminalReason:secret}},
+    host:{primaryFailure:{stage:'listener-terminal',exceptionType:'IOException',message:secret,stack:secret},secondaryFailures:[],
+      transport:{accepted:0,rejected:0,startupDiscarded:1,connections:1},listenerTerminal:{Stage:'connection',Code:'peer-stop',Outcome:'deliberate-stop',FirstFrame:{ObservationTicks:999,ClockFrequency:10000000,DecisionAgeMs:351}},
+      vehicle:{first128Receipts:[{session:secret}]},deviceFreeSink:{underflowFrames:0}}});
+  const result=createVehicleCiEvidence({nativeCases:{v12:native}},{stage:'v12',error:new Error(secret)}),text=JSON.stringify(result);
+  assert.equal(result.nativeCases.v12.childExit,1);assert.equal(result.nativeCases.v12.fixture.listenerWire.firstAck,2);
+  assert.equal(result.nativeCases.v12.fixture.listenerWire.firstAgeAtWriteMs,350);assert.equal(result.nativeCases.v12.host.listener.startupDiscarded,1);
+  assert.equal(result.nativeCases.v12.host.stage,'listener-terminal');assert.equal(text.includes(secret),false);assert.equal(text.includes('ObservationTicks'),false);
+  native.host.secondaryFailureCount=1000000000;
+  assert.equal(createVehicleCiEvidence({nativeCases:{v12:native}}).nativeCases.v12.host.secondaryFailureCount,1000000000);
+});
+test('missing, malformed and over-limit native diagnostics produce bounded failure records',()=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'richaudio-native-evidence-'));
+  try{let e=readVehicleNativeEvidence(root,{profile:'v12',childExit:1});assert.equal(e.files.fixture,'missing');assert.equal(e.files.host,'missing');
+    fs.writeFileSync(path.join(root,'fixture.json'),'{');fs.writeFileSync(path.join(root,'host-result.json'),'x'.repeat(262145));
+    e=readVehicleNativeEvidence(root,{profile:'v12',childExit:1});assert.equal(e.files.fixture,'malformed');assert.equal(e.files.host,'over-limit');
+    assert.ok(JSON.stringify(createVehicleCiEvidence({nativeCases:{v12:e}},{stage:'v12',error:new Error('failed')})).length<65536);
+  }finally{fs.rmSync(root,{recursive:true});}
+});
+
+test('partial native evidence preserves available diagnostics and read failures remain bounded',t=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'richaudio-partial-evidence-'));
+  try{fs.writeFileSync(path.join(root,'fixture.json'),JSON.stringify({nativeHostExit:1,senderStage:'listener-publish',senderErrorKind:'TimeoutException',senderError:'private-path-session-token'}));
+    let e=readVehicleNativeEvidence(root,{profile:'v12',childExit:1});
+    assert.equal(e.files.fixture,'read');assert.equal(e.files.host,'missing');assert.equal(e.fixture.senderErrorKind,'TimeoutException');
+    assert.equal(e.host.stage,null);assert.equal(e.host.receivedBlocks,null);
+    const stat=t.mock.method(fs,'statSync',()=>{throw Object.assign(new Error('private-path-session-token'),{code:'EACCES'});});
+    try{e=readVehicleNativeEvidence(root,{profile:'v12',childExit:1});}finally{stat.mock.restore();}
+    assert.equal(e.files.fixture,'read-failed');assert.equal(e.files.host,'read-failed');
+    const text=JSON.stringify(createVehicleCiEvidence({nativeCases:{v12:e}},{stage:'v12',error:new Error('private-path-session-token')}));
+    assert.equal(text.includes('private-path-session-token'),false);assert.ok(text.length<65536);
+  }finally{fs.rmSync(root,{recursive:true});}
 });

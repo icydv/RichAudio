@@ -5,70 +5,70 @@
   "stage": "complete",
   "gameLaunched": false,
   "audioEndpointOpened": false,
-  "sourceDigest": "0e8cc4b4e1221102e9b29d7169f370a0fcb3f001e8388d0de6bcbf0a3a3c74c7",
-  "nativeFixtureSha256": "add5aba7c4673f8ec7ddcc44725692568357e8be74faff2b74eb2c5e7dac13ff",
+  "sourceDigest": "01c5561d34820c871f315d89e94f237a283acc3c8722d0e23a635de49fc56138",
+  "nativeFixtureSha256": "1382a93b99e047e8d5f72a419b520805bd72424d8976986d92062d66f377d756",
   "v12": {
     "profile": "v12",
     "actualHostExit": 0,
     "listenerPackets": 158,
-    "vehiclePackets": 123,
-    "blocks": 911,
+    "vehiclePackets": 124,
+    "blocks": 923,
     "preHost": {
-      "frames": 465920,
-      "peak": 0.014681129716336727,
-      "rms": 0.000823773698888514,
-      "stereoDifferenceRms": 0.0007207514521837548,
+      "frames": 472576,
+      "peak": 0.014363802038133144,
+      "rms": 0.0008190397223310651,
+      "stereoDifferenceRms": 0.0007166461318289767,
       "nonfiniteSamples": 0,
-      "zeroCrossingsPerSecond": 413.11813186813185
+      "zeroCrossingsPerSecond": 432.08288190682555
     },
     "postHost": {
-      "frames": 464384,
-      "peak": 0.0029362260829657316,
-      "rms": 0.00016502698970015928,
-      "stereoDifferenceRms": 0.00014438849245979006,
+      "frames": 470528,
+      "peak": 0.002872760407626629,
+      "rms": 0.00016416405191862937,
+      "stereoDifferenceRms": 0.00014364081444848736,
       "nonfiniteSamples": 0,
-      "zeroCrossingsPerSecond": 414.4845644983462
+      "zeroCrossingsPerSecond": 433.9635473340588
     },
-    "preHostSHA256": "d79d6d068c41d1f096a73bfceca8863a9cc2f248fcdcd46791c62b6265acee16",
-    "postHostSHA256": "e5b19543d4de661e347f8e053bb15deb5de63c29b36ba71bf44684e9a21811af",
+    "preHostSHA256": "2319574246208937cc6d26373732bfb119d300ea61484cfe8a9925fd386b52fd",
+    "postHostSHA256": "4aeef4a342f5de2c5365a9b26a57cc98ef9dd1685d85a0d3abbdb38e117f533c",
     "componentEnergy": {
-      "mechanical": 418.7646596057928,
-      "exhaust": 214.63500722588665,
-      "intake": 29.448339118345338,
-      "drivetrain": 22.20694098565775,
-      "tyres": 0.2731387213005247,
-      "aero": 0.008901124729359316,
+      "mechanical": 418.25814099119145,
+      "exhaust": 214.67057103698855,
+      "intake": 29.37223232071262,
+      "drivetrain": 22.168068130816987,
+      "tyres": 0.2732142558405377,
+      "aero": 0.008899798960426173,
       "induction": 0,
       "transients": 0
     },
     "componentCount": 8,
-    "componentTravelMetres": 83,
+    "componentTravelMetres": 82.99690164652694,
     "bodyExhaustSeparationMetres": 1.5935494971917257,
     "stableSourceGeneration": true,
     "removedAtEnd": true,
     "estimatedRpm": {
       "minimum": 1050,
-      "maximum": 5710.138730908279
+      "maximum": 5704.452797062086
     },
     "firingHz": {
-      "minimum": 31.26986847764855,
-      "maximum": 559.7947201920343
+      "minimum": 25.931130653510774,
+      "maximum": 560.0230786963041
     },
     "dopplerOracle": {
       "observed": {
-        "minimum": 0.9228466614691869,
-        "maximum": 1.0443334766175596
+        "minimum": 0.9234394237946676,
+        "maximum": 1.0439639354140018
       },
-      "maximumSpeed": 27.8122944,
+      "maximumSpeed": 27.784599999999998,
       "soundSpeed": 343,
       "tolerance": 0.015,
       "allowed": {
-        "minimum": 0.9099962991518331,
-        "maximum": 1.1032404164434515
+        "minimum": 0.910065388368341,
+        "maximum": 1.103144805107872
       }
     },
     "ratioEvidence": {
-      "count": 122,
+      "count": 123,
       "minimum": 0.5,
       "maximum": 0.5,
       "changedSamples": 0,
@@ -82,7 +82,7 @@
       "affectedFrames": 0
     },
     "dsp": {
-      "frames": 466432,
+      "frames": 472576,
       "limited": 0,
       "missingHistory": 0,
       "rejectedControls": 0,
@@ -91,26 +91,26 @@
       "releasedSources": 16
     },
     "performance": {
-      "nodeCpuSeconds": 3.469,
-      "hostCpuSeconds": 1.0625,
-      "wallSeconds": 9.9917109,
+      "nodeCpuSeconds": 3.312,
+      "hostCpuSeconds": 0.59375,
+      "wallSeconds": 9.9691767,
       "synthesisMs": {
-        "count": 911,
-        "median": 0.927599999999984,
-        "p95": 1.4086999999999534,
-        "max": 7.3745000000001255
+        "count": 923,
+        "median": 0.8598000000001775,
+        "p95": 1.3645000000005894,
+        "max": 7.044399999999996
       },
       "workerMs": {
-        "count": 911,
-        "median": 0.5497000000000298,
-        "p95": 0.9223999999994703,
-        "max": 3.2881
+        "count": 923,
+        "median": 0.5468000000000757,
+        "p95": 0.8301000000001295,
+        "max": 3.2352000000000203
       },
       "dspMs": {
-        "count": 911,
-        "median": 0.21669999999994616,
-        "p95": 0.3699000000005981,
-        "max": 4.337299999999914
+        "count": 923,
+        "median": 0.2098999999998341,
+        "p95": 0.25569999999970605,
+        "max": 4.18100000000004
       },
       "processingDeadlineMisses": 2,
       "backend": "cpu",
@@ -118,13 +118,13 @@
       "gpuApplied": 0,
       "underflowFrames": 0,
       "lateSinkWakes": 283,
-      "maximumSinkLatenessMs": 16.3908
+      "maximumSinkLatenessMs": 16.0103
     },
     "recording": {
-      "frames": 464384,
+      "frames": 470528,
       "gaps": 0,
-      "soundMapFrames": 124,
-      "receivedVehicleTelemetryRecords": 123,
+      "soundMapFrames": 94,
+      "receivedVehicleTelemetryRecords": 124,
       "integrityComplete": true,
       "exactPostGainSubmissionLineage": true,
       "vehicleConditionalDirectRecorded": true
@@ -145,59 +145,59 @@
     "actualHostExit": 0,
     "listenerPackets": 158,
     "vehiclePackets": 124,
-    "blocks": 912,
+    "blocks": 922,
     "preHost": {
-      "frames": 466432,
-      "peak": 0.013104350306093693,
-      "rms": 0.0011147993826836429,
-      "stereoDifferenceRms": 0.0009542079939262028,
+      "frames": 472064,
+      "peak": 0.014472529292106628,
+      "rms": 0.001107579858327676,
+      "stereoDifferenceRms": 0.0009487433000855874,
       "nonfiniteSamples": 0,
-      "zeroCrossingsPerSecond": 281.76454445664103
+      "zeroCrossingsPerSecond": 254.60954446854663
     },
     "postHost": {
-      "frames": 464896,
-      "peak": 0.00262087001465261,
-      "rms": 0.00022332790241060888,
-      "stereoDifferenceRms": 0.00019115660899226463,
+      "frames": 470016,
+      "peak": 0.0028945058584213257,
+      "rms": 0.00022199805647303515,
+      "stereoDifferenceRms": 0.00019016160964920758,
       "nonfiniteSamples": 0,
-      "zeroCrossingsPerSecond": 282.6954845814978
+      "zeroCrossingsPerSecond": 255.718954248366
     },
-    "preHostSHA256": "60b840ed0f0709f0002a2dfeb2753febb35b2f1c90e0b4aed08ddec7762b0ea7",
-    "postHostSHA256": "07e11e478d94b6dce1fad22c0d65b8dca68b90b51fb4b0669e210efc2a4fa11a",
+    "preHostSHA256": "ca87aee7b5c5d0e3f232d1966930df3fa942742c85c9b995952ec24df50243e5",
+    "postHostSHA256": "49858e7a258202dbf747b016ca3dc2323368d299c6b7eafa2affa31978a10031",
     "componentEnergy": {
-      "mechanical": 785.7991241078621,
-      "exhaust": 110.99207852498377,
-      "intake": 30.315106018317763,
-      "drivetrain": 22.36181981477034,
-      "tyres": 0.2774340023349563,
-      "aero": 0.009226321031067426,
-      "induction": 9.00896907554841,
+      "mechanical": 786.8740639570279,
+      "exhaust": 110.86743825777674,
+      "intake": 30.370501956553657,
+      "drivetrain": 22.395605964263094,
+      "tyres": 0.27737084080247915,
+      "aero": 0.009227706385150993,
+      "induction": 9.012517213925799,
       "transients": 0
     },
     "componentCount": 8,
-    "componentTravelMetres": 82.58054461567252,
+    "componentTravelMetres": 83,
     "bodyExhaustSeparationMetres": 2.725233934912744,
     "stableSourceGeneration": true,
     "removedAtEnd": true,
     "estimatedRpm": {
       "minimum": 750,
-      "maximum": 5704.740271951286
+      "maximum": 5715.316399623989
     },
     "firingHz": {
-      "minimum": 36.54505373405809,
-      "maximum": 363.5176163445122
+      "minimum": 39.51480390255638,
+      "maximum": 363.56559125251147
     },
     "dopplerOracle": {
       "observed": {
-        "minimum": 0.9227507830439109,
-        "maximum": 1.0437387079758056
+        "minimum": 0.9234573904997015,
+        "maximum": 1.0448308798757246
       },
-      "maximumSpeed": 27.786000200000004,
+      "maximumSpeed": 27.837513199999997,
       "soundSpeed": 343,
       "tolerance": 0.015,
       "allowed": {
-        "minimum": 0.9100618950418506,
-        "maximum": 1.1031496387141113
+        "minimum": 0.9099333947911934,
+        "maximum": 1.1033274957075252
       }
     },
     "ratioEvidence": {
@@ -215,7 +215,7 @@
       "affectedFrames": 0
     },
     "dsp": {
-      "frames": 466944,
+      "frames": 472064,
       "limited": 0,
       "missingHistory": 0,
       "rejectedControls": 0,
@@ -224,39 +224,39 @@
       "releasedSources": 16
     },
     "performance": {
-      "nodeCpuSeconds": 3.844,
-      "hostCpuSeconds": 0.875,
-      "wallSeconds": 9.957582799999999,
+      "nodeCpuSeconds": 2.781,
+      "hostCpuSeconds": 0.4375,
+      "wallSeconds": 9.948594199999999,
       "synthesisMs": {
-        "count": 912,
-        "median": 0.9627000000000407,
-        "p95": 1.5115000000000691,
-        "max": 7.702600000000075
+        "count": 922,
+        "median": 0.8649999999997817,
+        "p95": 1.4541000000001532,
+        "max": 10.803599999999733
       },
       "workerMs": {
-        "count": 912,
-        "median": 0.5806000000002314,
-        "p95": 0.9716999999991458,
-        "max": 3.0737000000000023
+        "count": 922,
+        "median": 0.5623999999997977,
+        "p95": 0.8672999999998865,
+        "max": 2.8948000000000036
       },
       "dspMs": {
-        "count": 912,
-        "median": 0.21649999999999636,
-        "p95": 0.36570000000028813,
-        "max": 2.4287999999996828
+        "count": 922,
+        "median": 0.21050000000013824,
+        "p95": 0.26840000000015607,
+        "max": 2.6353000000003703
       },
-      "processingDeadlineMisses": 2,
+      "processingDeadlineMisses": 3,
       "backend": "cpu",
       "gpuDispatches": 0,
       "gpuApplied": 0,
       "underflowFrames": 0,
-      "lateSinkWakes": 282,
-      "maximumSinkLatenessMs": 15.8226
+      "lateSinkWakes": 283,
+      "maximumSinkLatenessMs": 16.2027
     },
     "recording": {
-      "frames": 464896,
+      "frames": 470016,
       "gaps": 0,
-      "soundMapFrames": 133,
+      "soundMapFrames": 151,
       "receivedVehicleTelemetryRecords": 124,
       "integrityComplete": true,
       "exactPostGainSubmissionLineage": true,
@@ -273,10 +273,332 @@
       "limitedFrames": 0
     }
   },
+  "nativeCases": {
+    "v12": {
+      "profile": "v12",
+      "childExit": 0,
+      "timedOut": false,
+      "files": {
+        "fixture": "read",
+        "host": "read"
+      },
+      "fixture": {
+        "nativeHostExit": 0,
+        "senderStage": "complete",
+        "senderErrorKind": null,
+        "senderJoined": true,
+        "acceptedListenerAcknowledgements": 158,
+        "acceptedVehicleAcknowledgements": 124,
+        "listenerWire": {
+          "transmitted": 158,
+          "startupDiscarded": 0,
+          "firstAck": null,
+          "lastAck": null,
+          "stopAck": null,
+          "firstEncodeMs": null,
+          "firstAgeAtWriteMs": null,
+          "firstAckMs": null,
+          "firstAgeAfterAckMs": null
+        },
+        "listenerPublisher": {
+          "sent": 158,
+          "transmitted": 158,
+          "attempts": 1,
+          "expiredBeforeEncoding": 0,
+          "expiredAfterEncoding": 0,
+          "startupDiscarded": 0,
+          "errorKind": null,
+          "outcome": "deliberate-stop",
+          "stage": "connection",
+          "code": "sender-stop",
+          "firstFrame": {
+            "CopyMs": 1.7899,
+            "MailboxAgeMs": 13.8196,
+            "AgeBeforeEncodeMs": 13.8197,
+            "EncodeMs": 6.2833,
+            "AgeBeforeWriteMs": 20.1032,
+            "WriteMs": 0.049,
+            "AckMs": 9.9934,
+            "ConnectionMs": 0.16740000000000002,
+            "HeaderMs": null,
+            "PayloadMs": null,
+            "PayloadReceivedAgeMs": null,
+            "DecodeMs": null,
+            "DecisionAgeMs": null,
+            "CallbackMs": null
+          },
+          "firstAcceptedFrame": {
+            "CopyMs": 1.7899,
+            "MailboxAgeMs": 13.8196,
+            "AgeBeforeEncodeMs": 13.8197,
+            "EncodeMs": 6.2833,
+            "AgeBeforeWriteMs": 20.1032,
+            "WriteMs": 0.049,
+            "AckMs": 9.9934,
+            "ConnectionMs": 0.16740000000000002,
+            "HeaderMs": null,
+            "PayloadMs": null,
+            "PayloadReceivedAgeMs": null,
+            "DecodeMs": null,
+            "DecisionAgeMs": null,
+            "CallbackMs": null
+          },
+          "firstExpiredUnsent": {
+            "AgeMs": null,
+            "EncodeMs": null,
+            "BeforeEncodeAgeMs": null
+          }
+        },
+        "vehiclePublisher": {
+          "sent": 124,
+          "expired": 0,
+          "replaced": 0,
+          "terminalReason": "deliberate-stop"
+        }
+      },
+      "host": {
+        "hasPrimaryFailure": false,
+        "stage": null,
+        "exceptionKind": null,
+        "duringShutdown": false,
+        "secondaryFailureCount": 0,
+        "durationWallSeconds": 10.0695318,
+        "receivedBlocks": 923,
+        "rejectedBlocks": 0,
+        "rendererExitCode": 0,
+        "ownedThreadsJoined": true,
+        "listener": {
+          "accepted": 158,
+          "rejected": 0,
+          "startupDiscarded": 0,
+          "connections": 1,
+          "lastAgeMs": 182.5049,
+          "stage": "connection",
+          "code": "sender-stop",
+          "exceptionKind": null,
+          "outcome": "deliberate-stop",
+          "firstFrame": {
+            "CopyMs": null,
+            "MailboxAgeMs": null,
+            "AgeBeforeEncodeMs": null,
+            "EncodeMs": null,
+            "AgeBeforeWriteMs": null,
+            "WriteMs": null,
+            "AckMs": 0.2699,
+            "ConnectionMs": 129.4926,
+            "HeaderMs": 16.137,
+            "PayloadMs": 0.0226,
+            "PayloadReceivedAgeMs": 20.2155,
+            "DecodeMs": 8.1832,
+            "DecisionAgeMs": 28.6485,
+            "CallbackMs": 0.5578
+          },
+          "firstAcceptedFrame": {
+            "CopyMs": null,
+            "MailboxAgeMs": null,
+            "AgeBeforeEncodeMs": null,
+            "EncodeMs": null,
+            "AgeBeforeWriteMs": null,
+            "WriteMs": null,
+            "AckMs": 0.2699,
+            "ConnectionMs": 129.4926,
+            "HeaderMs": 16.137,
+            "PayloadMs": 0.0226,
+            "PayloadReceivedAgeMs": 20.2155,
+            "DecodeMs": 8.1832,
+            "DecisionAgeMs": 28.6485,
+            "CallbackMs": 0.5578
+          }
+        },
+        "vehicle": {
+          "accepted": 124,
+          "rejected": 0,
+          "connections": 1,
+          "written": 124,
+          "expiredBeforeWrite": 0,
+          "maxHostQueueAgeMs": 0.0094,
+          "maxObservationAgeAtWriteMs": 16.5477,
+          "relayDelivered": 124,
+          "relayRejected": 0,
+          "maximumObservedRoundTripMs": 2.2882,
+          "maximumAcceptedRoundTripMs": 2.2882,
+          "terminal": "deliberate-stop",
+          "removed": true
+        },
+        "sink": {
+          "frames": 470528,
+          "underflowFrames": 0,
+          "firstUnderflowFrame": -1,
+          "missedSinkBudgets": 283,
+          "maximumLatenessMs": 16.0103
+        }
+      }
+    },
+    "v8": {
+      "profile": "v8",
+      "childExit": 0,
+      "timedOut": false,
+      "files": {
+        "fixture": "read",
+        "host": "read"
+      },
+      "fixture": {
+        "nativeHostExit": 0,
+        "senderStage": "complete",
+        "senderErrorKind": null,
+        "senderJoined": true,
+        "acceptedListenerAcknowledgements": 158,
+        "acceptedVehicleAcknowledgements": 124,
+        "listenerWire": {
+          "transmitted": 158,
+          "startupDiscarded": 0,
+          "firstAck": null,
+          "lastAck": null,
+          "stopAck": null,
+          "firstEncodeMs": null,
+          "firstAgeAtWriteMs": null,
+          "firstAckMs": null,
+          "firstAgeAfterAckMs": null
+        },
+        "listenerPublisher": {
+          "sent": 158,
+          "transmitted": 158,
+          "attempts": 1,
+          "expiredBeforeEncoding": 0,
+          "expiredAfterEncoding": 0,
+          "startupDiscarded": 0,
+          "errorKind": null,
+          "outcome": "deliberate-stop",
+          "stage": "connection",
+          "code": "sender-stop",
+          "firstFrame": {
+            "CopyMs": 2.6542,
+            "MailboxAgeMs": 28.9502,
+            "AgeBeforeEncodeMs": 28.9508,
+            "EncodeMs": 6.9482,
+            "AgeBeforeWriteMs": 35.8991,
+            "WriteMs": 0.0497,
+            "AckMs": 10.2965,
+            "ConnectionMs": 0.2025,
+            "HeaderMs": null,
+            "PayloadMs": null,
+            "PayloadReceivedAgeMs": null,
+            "DecodeMs": null,
+            "DecisionAgeMs": null,
+            "CallbackMs": null
+          },
+          "firstAcceptedFrame": {
+            "CopyMs": 2.6542,
+            "MailboxAgeMs": 28.9502,
+            "AgeBeforeEncodeMs": 28.9508,
+            "EncodeMs": 6.9482,
+            "AgeBeforeWriteMs": 35.8991,
+            "WriteMs": 0.0497,
+            "AckMs": 10.2965,
+            "ConnectionMs": 0.2025,
+            "HeaderMs": null,
+            "PayloadMs": null,
+            "PayloadReceivedAgeMs": null,
+            "DecodeMs": null,
+            "DecisionAgeMs": null,
+            "CallbackMs": null
+          },
+          "firstExpiredUnsent": {
+            "AgeMs": null,
+            "EncodeMs": null,
+            "BeforeEncodeAgeMs": null
+          }
+        },
+        "vehiclePublisher": {
+          "sent": 124,
+          "expired": 0,
+          "replaced": 0,
+          "terminalReason": "deliberate-stop"
+        }
+      },
+      "host": {
+        "hasPrimaryFailure": false,
+        "stage": null,
+        "exceptionKind": null,
+        "duringShutdown": false,
+        "secondaryFailureCount": 0,
+        "durationWallSeconds": 10.0660808,
+        "receivedBlocks": 922,
+        "rejectedBlocks": 0,
+        "rendererExitCode": 0,
+        "ownedThreadsJoined": true,
+        "listener": {
+          "accepted": 158,
+          "rejected": 0,
+          "startupDiscarded": 0,
+          "connections": 1,
+          "lastAgeMs": 167.9385,
+          "stage": "connection",
+          "code": "sender-stop",
+          "exceptionKind": null,
+          "outcome": "deliberate-stop",
+          "firstFrame": {
+            "CopyMs": null,
+            "MailboxAgeMs": null,
+            "AgeBeforeEncodeMs": null,
+            "EncodeMs": null,
+            "AgeBeforeWriteMs": null,
+            "WriteMs": null,
+            "AckMs": 0.2113,
+            "ConnectionMs": 144.1662,
+            "HeaderMs": 31.5353,
+            "PayloadMs": 0.0243,
+            "PayloadReceivedAgeMs": 36.0158,
+            "DecodeMs": 8.5159,
+            "DecisionAgeMs": 44.7813,
+            "CallbackMs": 0.5484
+          },
+          "firstAcceptedFrame": {
+            "CopyMs": null,
+            "MailboxAgeMs": null,
+            "AgeBeforeEncodeMs": null,
+            "EncodeMs": null,
+            "AgeBeforeWriteMs": null,
+            "WriteMs": null,
+            "AckMs": 0.2113,
+            "ConnectionMs": 144.1662,
+            "HeaderMs": 31.5353,
+            "PayloadMs": 0.0243,
+            "PayloadReceivedAgeMs": 36.0158,
+            "DecodeMs": 8.5159,
+            "DecisionAgeMs": 44.7813,
+            "CallbackMs": 0.5484
+          }
+        },
+        "vehicle": {
+          "accepted": 124,
+          "rejected": 0,
+          "connections": 1,
+          "written": 124,
+          "expiredBeforeWrite": 0,
+          "maxHostQueueAgeMs": 0.0095,
+          "maxObservationAgeAtWriteMs": 17.2778,
+          "relayDelivered": 124,
+          "relayRejected": 0,
+          "maximumObservedRoundTripMs": 2.1144,
+          "maximumAcceptedRoundTripMs": 2.1144,
+          "terminal": "deliberate-stop",
+          "removed": true
+        },
+        "sink": {
+          "frames": 470016,
+          "underflowFrames": 0,
+          "firstUnderflowFrame": -1,
+          "missedSinkBudgets": 283,
+          "maximumLatenessMs": 16.2027
+        }
+      }
+    }
+  },
   "failure": null,
   "proofScope": "Device-free authored RPH evidence through actual production publisher, native named pipes, measured relay, vehicle adapter/synthesizer, worker, causal solver, StreamingRenderer, RA07, PcmRing and OwnedOutputTap",
   "validationDate": "2026-10-30",
-  "acceptance": "final-source complete-chain run in full offline suite03",
+  "acceptance": "complete-chain run after strict-listener fixture correction",
   "historicalCorrections": [
     {
       "attempt": 1,
@@ -304,5 +626,49 @@
     "explicitVisibilityAssumption": true,
     "unrecognizedPropagationModes": 0,
     "configurableBoundedEstimatorApi": true
+  },
+  "historicalHostedFailure": {
+    "runId": 40978952924,
+    "head": "bf2b1a643753a75fffbfb0aa64ebf13cb2bdb94d",
+    "stage": "v12",
+    "nativeExit": 1,
+    "cause": "unclassified; original artifact did not retain native diagnostics",
+    "correctionHostedValidation": "pending"
+  },
+  "listenerFixtureRegression": {
+    "productionPolicyChanged": false,
+    "codecWarmed": false,
+    "injectedDelayMs": 350,
+    "legacy": {
+      "exit": 1,
+      "ack": 2,
+      "ageAtWriteMs": 372.0426,
+      "receiverDecisionAgeMs": 381.1515,
+      "accepted": 0,
+      "startupDiscarded": 1,
+      "rejected": 0,
+      "connections": 1
+    },
+    "sequence": {
+      "exit": 0,
+      "firstAck": 2,
+      "lastAck": 1,
+      "stopAck": 3,
+      "accepted": 1,
+      "startupDiscarded": 1,
+      "rejected": 0,
+      "connections": 1,
+      "outcome": "deliberate-stop"
+    },
+    "productionPublisher": {
+      "exit": 0,
+      "expiredAfterEncoding": 1,
+      "firstExpiredAgeMs": 376.0792,
+      "sent": 1,
+      "attempts": 1,
+      "rejected": 0,
+      "connections": 1,
+      "outcome": "deliberate-stop"
+    }
   }
 }

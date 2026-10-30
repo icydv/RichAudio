@@ -18,9 +18,14 @@ namespace RichAudio.Beacon.Windows
         private static readonly ManualResetEvent HostDone=new ManualResetEvent(false);
         private static Exception senderError;
         private static VehiclePublisher publisher;
+        private static StatePublisher listenerPublisher;
         private static long listenerSequence,vehicleSequence,listenerAccepted,vehicleAccepted;
         private static Stopwatch watch;
         private static string phase;
+        private static string senderStage="not-started",probeMode="normal";
+        private static int? firstAck,lastAck,listenerStopAck;
+        private static double? firstEncodeMs,firstAgeAtWriteMs,firstAckMs,firstAgeAfterAckMs;
+        private static long listenerTransmitted,listenerStartupDiscarded;
         private static readonly string Session=new string('a',32);
         private static readonly uint Pid=(uint)Process.GetCurrentProcess().Id;
         private static void Require(bool value,string message){if(!value)throw new Exception(message);}
@@ -52,39 +57,93 @@ namespace RichAudio.Beacon.Windows
                 EngineRunning=running,RpmRatio=.5,Gear=gear,Valid=!remove,Reason=remove?"stopped":"valid",Rights="original-generated",
                 Coordinates="gta-native-unscaled",Units="native-unverified"};
         }
-        private static void Scenario(string listenerPipe,string vehiclePipe,string profile){
+        // Explicit legacy/protocol probes retain the demonstrated ACK2 failure.
+        // Normal integration uses the unchanged production StatePublisher below.
+        private static void ScenarioRaw(string listenerPipe,string vehiclePipe,string profile){
             try{using(var listener=new NamedPipeClientStream(".",listenerPipe,PipeDirection.InOut,PipeOptions.Asynchronous)){
-                listener.Connect(5000);watch=Stopwatch.StartNew();double next=0;bool complete=false,started=false;
+                senderStage="listener-connect";listener.Connect(5000);watch=Stopwatch.StartNew();double next=0;bool complete=false,started=false;
                 using(var vehicle=publisher=new VehiclePublisher(vehiclePipe)){
                     while(watch.Elapsed.TotalSeconds<9.8){double time=watch.Elapsed.TotalSeconds;
                         if(time*1000<next){Thread.Sleep(1);continue;}next=time*1000+50;
-                        TransportStop.Write(listener,Protocol.Frame(Listener(time)));TransportStop.Ack(listener,TransportStop.Accepted);listenerAccepted++;
+                        senderStage="listener-encode";var state=Listener(time);long encodedAt=Stopwatch.GetTimestamp();var bytes=Protocol.Frame(state);
+                        double encodedMs=(Stopwatch.GetTimestamp()-encodedAt)*1000.0/Stopwatch.Frequency;
+                        if(probeMode!="normal"&&listenerTransmitted==0)Thread.Sleep(350);
+                        senderStage="listener-write";double writeAge=(Stopwatch.GetTimestamp()-state.ObservationTicks)*1000.0/Stopwatch.Frequency;
+                        TransportStop.Write(listener,bytes);listenerTransmitted++;senderStage="listener-ack";long ackAt=Stopwatch.GetTimestamp();byte ack=TransportStop.ReadAck(listener);lastAck=ack;
+                        if(firstAck==null){firstAck=ack;firstEncodeMs=encodedMs;firstAgeAtWriteMs=writeAge;firstAckMs=(Stopwatch.GetTimestamp()-ackAt)*1000.0/Stopwatch.Frequency;firstAgeAfterAckMs=(Stopwatch.GetTimestamp()-state.ObservationTicks)*1000.0/Stopwatch.Frequency;}
+                        if(probeMode=="cold-listener-sequence"&&listenerTransmitted==1){Require(ack==TransportStop.StartupStaleDiscarded,"aged first observation receives existing bounded startup-discard acknowledgement");listenerStartupDiscarded++;continue;}
+                        if(ack!=TransportStop.Accepted)throw new InvalidDataException("fixture listener expected accepted acknowledgement");listenerAccepted++;
                         if(listenerAccepted==1)Event("listener-first-accepted");
+                        if(probeMode=="cold-listener-sequence"){senderStage="probe-complete";TransportStop.Write(listener,TransportStop.Frame());listenerStopAck=TransportStop.ReadAck(listener);
+                            Require(listenerStopAck==TransportStop.Stopped,"native receiver acknowledged deliberate listener Stop");HostDone.WaitOne(4000);return;}
                         if(time<1)continue;
-                        if(!started){vehicle.Start();started=true;Event("vehicle-publisher-start");HostProgram.ListeningFixtureControl("start");}
-                        if(!complete){var sample=Vehicle(time,profile);vehicle.Publish(sample);
+                        if(!started){senderStage="vehicle-start";vehicle.Start();started=true;Event("vehicle-publisher-start");HostProgram.ListeningFixtureControl("start");}
+                        if(!complete){senderStage="vehicle-publish";var sample=Vehicle(time,profile);vehicle.Publish(sample);
                             if(sample.Action=="remove"){vehicle.Complete();complete=true;Event("vehicle-transport-stop-request");}}
                     }
-                    vehicleAccepted=vehicle.Sent;Require(vehicle.Finished&&vehicle.Reason=="deliberate-stop","vehicle publisher deliberate Stop acknowledged: "+vehicle.Reason);
+                    senderStage="vehicle-stop-ack";vehicleAccepted=vehicle.Sent;Require(vehicle.Finished&&vehicle.Reason=="deliberate-stop","vehicle publisher deliberate Stop acknowledged: "+vehicle.Reason);
                     Event("vehicle-transport-deliberate-stop");
-                    Event("normal-host-stop");HostProgram.ListeningFixtureControl("stop");HostDone.WaitOne(4000);
+                    Event("normal-host-stop");senderStage="host-stop";HostProgram.ListeningFixtureControl("stop");HostDone.WaitOne(4000);senderStage="complete";
                 }
             }}catch(Exception error){senderError=error;try{HostProgram.ListeningFixtureControl("stop");}catch{}}
         }
+        private static void ScenarioPublished(string listenerPipe,string vehiclePipe,string profile){
+            try{
+                senderStage="listener-ready";var ready=Stopwatch.StartNew();
+                while(LastBlock()==null&&ready.ElapsedMilliseconds<4000&&!HostDone.WaitOne(5)){}
+                Require(LastBlock()!=null,"actual host producer ready before the strict single-connection listener publisher starts");
+                using(var listener=listenerPublisher=new StatePublisher(listenerPipe,1,true))
+                using(var vehicle=publisher=new VehiclePublisher(vehiclePipe)){
+#if TRANSPORT_EXPIRY_TEST
+                    listener.AfterEncodeTest=null;
+                    if(probeMode=="publisher-cold-listener-probe")listener.BeforeEncodeTest=delegate{listener.BeforeEncodeTest=null;Thread.Sleep(350);};
+                    else listener.BeforeEncodeTest=null;
+#endif
+                    senderStage="listener-connect";listener.Start();watch=Stopwatch.StartNew();double next=0;bool complete=false,started=false,acceptedEvent=false;
+                    while(watch.Elapsed.TotalSeconds<9.8){double time=watch.Elapsed.TotalSeconds;
+                        if(time*1000<next){Thread.Sleep(1);continue;}next=time*1000+50;
+                        senderStage="listener-publish";listener.Publish(Listener(time));listenerAccepted=listener.Sent;
+                        if(listener.Error!=null)throw new InvalidDataException("production listener publisher ended before deliberate Stop");
+                        if(listenerAccepted>0&&!acceptedEvent){acceptedEvent=true;Event("listener-first-accepted");}
+                        if(probeMode=="publisher-cold-listener-probe"&&listenerAccepted>0)break;
+                        if(time<1||listenerAccepted==0)continue;
+                        if(!started){senderStage="vehicle-start";vehicle.Start();started=true;Event("vehicle-publisher-start");HostProgram.ListeningFixtureControl("start");}
+                        if(!complete){senderStage="vehicle-publish";var sample=Vehicle(time,profile);vehicle.Publish(sample);
+                            if(sample.Action=="remove"){vehicle.Complete();complete=true;Event("vehicle-transport-stop-request");}}
+                    }
+                    if(probeMode=="normal"){
+                        senderStage="vehicle-stop-ack";vehicleAccepted=vehicle.Sent;Require(vehicle.Finished&&vehicle.Reason=="deliberate-stop","vehicle publisher deliberate Stop acknowledged: "+vehicle.Reason);
+                        Event("vehicle-transport-deliberate-stop");
+                    }
+                    Event("normal-host-stop");senderStage="host-stop";listener.RequestStop();var until=Stopwatch.StartNew();
+                    while(!listener.Finished&&until.ElapsedMilliseconds<2000)Thread.Sleep(1);
+                    Require(listener.Finished&&listener.Diagnostic!=null&&listener.Diagnostic.Outcome=="deliberate-stop","production listener deliberate Stop acknowledged");
+                    listenerAccepted=listener.Sent;listenerTransmitted=listener.Transmitted;listenerStartupDiscarded=listener.StartupDiscarded;
+                    HostDone.WaitOne(4000);senderStage="complete";
+                }
+            }catch(Exception error){senderError=error;try{HostProgram.ListeningFixtureControl("stop");}catch{}}
+        }
         public static int Main(string[] args){
-            if(args.Length!=5||(args[4]!="v12"&&args[4]!="v8")){Console.Error.WriteLine("root output model service.json v12|v8");return 1;}
+            if((args.Length!=5&&args.Length!=6)||(args[4]!="v12"&&args[4]!="v8")){Console.Error.WriteLine("root output model service.json v12|v8 [legacy-cold-listener-probe|cold-listener-sequence|publisher-cold-listener-probe]");return 1;}
+            if(args.Length==6){probeMode=args[5];if(probeMode!="legacy-cold-listener-probe"&&probeMode!="cold-listener-sequence"&&probeMode!="publisher-cold-listener-probe")return 1;}
             string root=Path.GetFullPath(args[0]),directory=Path.GetFullPath(args[1]),profile=args[4],token=Guid.NewGuid().ToString("N");
             string listener="RichAudio.VehicleListenerFixture."+token,vehicle="RichAudio.VehicleFixture."+token,geometry="RichAudio.VehicleGeometryFixture."+token;
-            int exit=1;Directory.CreateDirectory(directory);var sender=new Thread(()=>Scenario(listener,vehicle,profile)){IsBackground=true};
+            int exit=1;Directory.CreateDirectory(directory);var sender=new Thread(()=>{if(probeMode=="legacy-cold-listener-probe"||probeMode=="cold-listener-sequence")ScenarioRaw(listener,vehicle,profile);else ScenarioPublished(listener,vehicle,profile);}){IsBackground=true};
             TimeSpan cpuBefore=Process.GetCurrentProcess().TotalProcessorTime;
             try{sender.Start();exit=HostProgram.RunVehicleFixture(root,directory,listener,geometry,vehicle,args[2],args[3],profile);}
-            finally{HostDone.Set();Require(sender.Join(5000),"fixture sender joined");vehicleAccepted=publisher==null?0:publisher.Sent;File.WriteAllText(Path.Combine(directory,"fixture.json"),Json.Serialize(new Dictionary<string,object>{
+            finally{HostDone.Set();bool senderJoined=sender.Join(5000);vehicleAccepted=publisher==null?0:publisher.Sent;File.WriteAllText(Path.Combine(directory,"fixture.json"),Json.Serialize(new Dictionary<string,object>{
                     {"schemaVersion",1},{"profile",profile},{"acceptedListenerAcknowledgements",listenerAccepted},{"acceptedVehicleAcknowledgements",vehicleAccepted},
                     {"nativeHostExit",exit},{"senderError",senderError==null?null:senderError.ToString()},{"events",Events},
+                    {"senderStage",senderStage},{"senderErrorKind",senderError==null?null:TransportStop.Kind(senderError)},{"senderJoined",senderJoined},{"probeMode",probeMode},
+                    {"listenerWire",new Dictionary<string,object>{{"transmitted",listenerTransmitted},{"startupDiscarded",listenerStartupDiscarded},{"firstAck",firstAck},{"lastAck",lastAck},{"stopAck",listenerStopAck},
+                        {"firstEncodeMs",firstEncodeMs},{"firstAgeAtWriteMs",firstAgeAtWriteMs},{"firstAckMs",firstAckMs},{"firstAgeAfterAckMs",firstAgeAfterAckMs}}},
                     {"hostCpuSeconds",(Process.GetCurrentProcess().TotalProcessorTime-cpuBefore).TotalSeconds},{"qpcFrequency",Stopwatch.Frequency},
                     {"vehiclePublisher",publisher==null?null:new Dictionary<string,object>{{"sent",publisher.Sent},{"expired",publisher.Expired},{"replaced",publisher.Replaced},{"terminalReason",publisher.Reason}}},
+                    {"listenerPublisher",listenerPublisher==null?null:new Dictionary<string,object>{{"sent",listenerPublisher.Sent},{"transmitted",listenerPublisher.Transmitted},{"attempts",listenerPublisher.Attempts},
+                        {"expiredBeforeEncoding",listenerPublisher.ExpiredBeforeEncoding},{"expiredAfterEncoding",listenerPublisher.ExpiredAfterEncoding},{"startupDiscarded",listenerPublisher.StartupDiscarded},
+                        {"errorKind",listenerPublisher.Error},{"diagnostic",listenerPublisher.Diagnostic},{"firstFrame",listenerPublisher.FirstFrame},{"firstAcceptedFrame",listenerPublisher.FirstAcceptedFrame},{"firstExpiredUnsent",listenerPublisher.FirstExpiredUnsent}}},
                     {"rpmGetterFixture",new Dictionary<string,object>{{"value",.5},{"range",0},{"meaningfulness","constant-getter fixture; never measured engine RPM"}}},
-                    {"fixtureProvenance","Authored RPH-format player vehicle and camera observations through actual named-pipe validation/relay; no GTA, geometry or audio endpoint"}}));}
+                    {"fixtureProvenance","Authored RPH-format player vehicle and camera observations through actual named-pipe validation/relay; no GTA, geometry or audio endpoint"}}));Require(senderJoined,"fixture sender joined");}
             if(senderError!=null){Console.Error.WriteLine(senderError);return 1;}Require(exit==0,"bounded actual host shutdown: exit="+exit);
             Console.WriteLine("PASS actual vehicle host "+profile+" accepted="+vehicleAccepted+" exit="+exit+" (no endpoint)");return 0;
         }
