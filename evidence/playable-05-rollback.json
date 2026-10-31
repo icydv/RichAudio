@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "verifiedUtc": "2026-10-31T23:15:00.4690018Z",
+  "scope": "Independent read-only post-session integrity, ownership-aware process and preserved-file verification",
+  "result": "PASS",
+  "issues": [],
+  "protectedFileCount": 11,
+  "protectedFiles": [
+    {
+      "name": "GTA5_Enhanced.exe",
+      "sha256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea",
+      "matchesBeforeAndRollbackReceipt": true
+    },
+    {
+      "name": "RAGEPluginHook.exe",
+      "sha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac",
+      "matchesBeforeAndRollbackReceipt": true
+    },
+    {
+      "name": "Plugins/RichAudio.dll",
+      "sha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657",
+      "matchesBeforeAndRollbackReceipt": true
+    },
+    {
+      "name": "Plugins/RichAudio.Playable.json",
+      "sha256": "96a91834affba1f0c2bafcd7a6e14cb9fe17ac8846e98c72a14d14fd1b366001",
+      "matchesBeforeAndRollbackReceipt": true
+    },
+    {
+      "name": "Plugins/RichAudio.Menu.json",
+      "sha256": "63a6f398e838fe5c4503f0e2bf8de401ee8a2ac54203d8ddf16a25f1b16bcea3",
+      "matchesBeforeAndRollbackReceipt": true
+    },
+    {
+      "name": "startup.rphs",
+      "sha256": "4c7d8fb2dc1d84e4c84e7409c296744268f7f33be87af1b9585f104010141d1c",
+      "matchesBeforeAndRollbackReceipt": true
+    },
+    {
+      "name": "DirectStorageFix.asi",
+      "sha256": "7f50b8a9a2e8a376e2adb7d46bc9483c2754bbbdd964f0918787d4f6f1b76e2c",
+      "matchesBeforeAndRollbackReceipt": true
+    },
+    {
+      "name": "dstorage.dll",
+      "sha256": "8a7f9809b4630d22796445ab9aa44181458d0f73f03705b1dfafd79410e07334",
+      "matchesBeforeAndRollbackReceipt": true
+    },
+    {
+      "name": "dstoragecore.dll",
+      "sha256": "77c7b3acf5b5a9acec6ad3ed7aa3c33e1ad43e73116b437adfcd26965a079b2b",
+      "matchesBeforeAndRollbackReceipt": true
+    },
+    {
+      "name": "dinput8.dll",
+      "sha256": "9fd9e02353b7d39fe07b9667f7ea2697229a7f2d0e7d389eb79eb212b1bb181d",
+      "matchesBeforeAndRollbackReceipt": true
+    },
+    {
+      "name": "ScriptHookV.dll",
+      "sha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f",
+      "matchesBeforeAndRollbackReceipt": true
+    }
+  ],
+  "settings": {
+    "sha256": "73647afcfa175c643a6938c63fc25845c2527dc8c864221bcf35142ce956f711",
+    "matchesBeforeAndRollbackReceipt": true,
+    "stockFallbackSelected": true
+  },
+  "preservedCandidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "bytes": 288256,
+    "sha256": "8f516dc5bdfd62f125c8f9624d3396c9c3f9debceb618c39f76784323fd7a083",
+    "matchesApprovedBuildAndOwnedRemovalReceipt": true,
+    "sourceInputsStillMatchBuildReceipt": true
+  },
+  "temporaryAsiDestinationAbsent": true,
+  "temporaryPendingPathAbsent": true,
+  "processVerification": {
+    "recordedGameRphIdentities": [
+      {
+        "role": "RAGEPluginHook",
+        "recordedIdentityPresent": false,
+        "recordedPidCurrentlyAbsent": true,
+        "pidReusedByDifferentIdentity": false,
+        "ownershipMethod": "PID plus recorded UTC start time and process name; absence is checked directly"
+      },
+      {
+        "role": "GTA5_Enhanced",
+        "recordedIdentityPresent": false,
+        "recordedPidCurrentlyAbsent": true,
+        "pidReusedByDifferentIdentity": false,
+        "ownershipMethod": "PID plus recorded UTC start time and process name; absence is checked directly"
+      }
+    ],
+    "recordedLauncherPidAbsent": true,
+    "launcherMethod": "The recorded PID is absent; no PID-only ownership assertion or action was made",
+    "namedGameRphHostGpuRemaining": 0,
+    "productCacheBoundNodeWorkersRemaining": 0,
+    "processesStoppedByVerifier": 0
+  },
+  "normalExit": {
+    "normalQuitConfirmationRecorded": false,
+    "forcedTerminationRecorded": false,
+    "qualification": "Exit history is receipt-based; current process absence was independently checked. The normal-exit receipt records the confirmation-helper limitation.",
+    "normalQuitDialogRecorded": true,
+    "confirmationInputCompletionVerifiedByHelper": false,
+    "shvScriptUnregistrationRecorded": true
+  },
+  "preservedCaptures": [
+    {
+      "name": "capture.json",
+      "bytes": 865,
+      "sha256": "a75ae7bd08b6e18ec4cd2a66e86e466c685dcb6eead2295287feec158a962a04",
+      "originalAndSnapshotMatch": true
+    },
+    {
+      "name": "journal.ndjson",
+      "bytes": 483,
+      "sha256": "45981f0d7fa42c3761b300aa714c7755832845d5fdd03dbd197fd91189948da1",
+      "originalAndSnapshotMatch": true
+    }
+  ],
+  "privateReceiptHashes": [
+    {
+      "name": "preflight.json",
+      "sha256": "cba8724f26334c00c94f1b2c8d7d324e5bf70bbb0720688364d1a7f4c5c05c71"
+    },
+    {
+      "name": "installation-receipt.json",
+      "sha256": "633238e7b4f38c0d39e2d584effe118a1cc427dd2782ab6355ff7da552d46fee"
+    },
+    {
+      "name": "pending-creation-receipt.json",
+      "sha256": "364ec464b3571b76497b9424fc44fd6972fc7a8464802299be21a5c72f34dfc6"
+    },
+    {
+      "name": "launch-receipt.json",
+      "sha256": "f29c0dc30218d4bbe013f150e32d1339d24b83ec548072013849c38e5d3f6649"
+    },
+    {
+      "name": "observed-processes.json",
+      "sha256": "b1e9e1d163e8e1924d2055d3efd9c8278f6940f52895c9754c5ddeba73c1adc8"
+    },
+    {
+      "name": "normal-exit.json",
+      "sha256": "85f3c74998524647d4d4d71d842cc212adb528cc19ddd55468aa85c6d04a17d2"
+    },
+    {
+      "name": "capture-observation.json",
+      "sha256": "00edcc8505220203447cf015fd5bcf6db5cba5d437accdcc0d10c284c9dc2aa1"
+    },
+    {
+      "name": "rollback-receipt.json",
+      "sha256": "7c29e9c7f2a54816d5d91d452513c261a51c7bd500ba11d4f34b250851870972"
+    }
+  ],
+  "sourceAudioMenuGain": {
+    "trackedSourceOrConfigChangesSinceCommittedCandidate": 0,
+    "menuProtectedHashMatches": true,
+    "settingsBytesMatch": true,
+    "changesPerformedByVerifier": false,
+    "audioAssetsOrEndpointOpenedByVerifier": false,
+    "qualification": "Menu/settings and committed source/config integrity checked; private audio asset trees were not rehashed by this rollback verifier"
+  },
+  "furtherLaunchOrNativeRetryRecorded": false,
+  "gameFilesWrittenByVerifier": false,
+  "dllLoadedByVerifier": false,
+  "sourceOrAudioChangedByVerifier": false,
+  "privacy": "No absolute local paths, process identifiers, raw captures, coordinates, stack traces, raw logs or signed download URLs are included"
+}

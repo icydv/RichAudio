@@ -1,5 +1,10 @@
 # PLAYABLE-04: independent Script Hook V one-call probe
 
+Follow-up: [PLAYABLE-05](PLAYABLE_05.md) ran this exact candidate once through
+the real SHV interface. It returned zero while the engine-running query reported
+false; idle/provider qualification remains inconclusive. The probe was removed
+after game exit. The build record below remains unchanged.
+
 31 October 2026. Continues PR #76 on `feature/playable-01` from
 `646fffd4bb036a1f48bd35051d7d042a0f0166e5`.
 
