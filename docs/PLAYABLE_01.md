@@ -1,8 +1,15 @@
 # PLAYABLE-01 validation candidate
 
-Implemented from `36de226` on `feature/playable-01`. This is a self-starting
-**experimental additive candidate**, with human/gameplay acceptance pending.
-It is not a completed native replacement or a production-readiness claim.
+Implemented from `36de226` on `feature/playable-01`. **Live acceptance is
+blocked.** The 2026-10-31 Story Mode test proved automatic plugin/host startup,
+F10 controls, persistence and endpoint operation, but produced no vehicle audio.
+The actual RPH getter returned `50` for the Bati's engine-revolution ratio;
+its documented contract is 0..1. Invalid evidence is rejected. The installed
+configuration has been returned to GTA stock fallback.
+
+This is an experimental additive integration candidate, not a completed
+replacement or a usable-vehicle-playback claim. Sanitised actual live results
+are in [playable-01-live.json](../evidence/playable-01-live.json).
 
 The product RPH entry waits for playable offline Story Mode, loads the pinned
 private installation, captures camera and eligible vehicles and automatically
@@ -10,7 +17,7 @@ starts its owned host. The real secured pipe, recorded source loader, causal
 worker, RA07 decoder and native PCM ring are connected. Product operation has
 no listening-session duration cap; historical supervised routes retain theirs.
 No terminal, browser, listening operator or host command is part of gameplay.
-The final WASAPI sink requires the separately approved first live launch.
+The final WASAPI sink was opened during the approved first live launch.
 
 ## Integration and ownership
 
@@ -32,7 +39,9 @@ The final WASAPI sink requires the separately approved first live launch.
   from a falling ratio; throttle, gear, crankshaft RPM and Rockstar's native
   scheduling semantics are not established. Emitter offsets are authored.
 - Fixed 100 ms common observation delay avoids relabelling time when a camera
-  is stationary but a source moves. Forecast remains bounded to 50 ms.
+  is stationary but a source moves. An explicit QPC observation anchor preserves
+  source/listener timing despite producer-credit jitter. Forecast remains
+  bounded to 50 ms; the legacy listener policy is unchanged.
 - Pause preserves recorded phase without advancing it. Unknown, stale,
   destroyed, streamed-out or reused identities retire. Scene changes preserve
   renderer-owned source arrays. Invalid listener evidence silences output.
@@ -41,6 +50,25 @@ The final WASAPI sink requires the separately approved first live launch.
   retries back off, with three faults in ten minutes exhausting recovery.
   The real-chain fixture exercises one forced host failure/recovery; the
   exhaustion threshold and RPH app-domain unload still need live validation.
+
+The product build now contains exactly one RPH `Main`/`OnUnload` convention
+pair; a compiled-metadata check guards against accidentally shipping the
+legacy bridge entry as well. Startup contains one supported `LoadPlugin`
+command. Reviewed upgrades preserve the existing ASI loader, user settings,
+unrelated startup commands and original uninstall backups.
+
+The shared native ring reserves eight blocks (85.33 ms) for gameplay. This
+adds 42.67 ms to the rejected four-block reserve, independently of the 100 ms
+observation delay and device buffering. Deterministic exact-PCM tests reproduce
+the old reserve starving and exercise 480/960-frame device callbacks crossing
+512-frame producer boundaries. Both device and fixture stop on any underrun.
+Healthy host operation survives observation gaps; stale evidence still silences
+and retires sources after the existing freshness bounds. A >6-second gap test
+checks actual output energy stops, the host stays alive and genuine feed resumes.
+The test first reproduced a process crash from disposing an asynchronous pipe
+event before pending I/O completed. Reads/writes/acknowledgements now use a
+completion-owned gate with the same deadlines. Real stalled/partial pipes are
+regression cases; deadlines and malformed-frame rejection remain enforced.
 
 ## Sound, geometry and native audio
 
@@ -94,24 +122,47 @@ pointers and a backed-up `startup.rphs` entry. If RPH is absent, setup requests
 the user's separately obtained authentic package and verifies its inventory.
 It refuses conflicting loader dependencies. It never launches GTA. Uninstall
 restores originals only if installed files still match the ownership receipt.
-The actual RPH package readme documents `startup.rphs`; its command execution
-and current RPH/game runtime compatibility remain live-unverified.
+The actual RPH package readme documents `startup.rphs`; its automatic command
+execution and Enhanced build detection were verified in the live test. This
+does not establish that all RPH vehicle getters work on this game build.
 
-Focused evidence: `evidence/playable-01.json`. The real-chain fixture injects
+Original evidence is preserved in `evidence/playable-01.json`. The updated
+66-check result and focused regressions are in
+[playable-01-reliability.json](../evidence/playable-01-reliability.json).
+The real-chain fixture injects
 game observations and substitutes only the final device sink. It exercises
 automatic Story-ready startup, real dual-context source playback, retirement,
 pause/resume, volume persistence, disable/re-enable, forced host failure and
 cleanup. It does not claim actual GTA getters, endpoint or human listening.
 The finite geometry test uses labelled independent analytical collision samples.
 
-Before installation, launch or endpoint access, obtain explicit approval for
-the concrete private candidate. First test: one RPH launch, load Story Mode,
-verify automatic playback without console commands, inspect F10, approach a
-Bati, rotate camera, drive a supported vehicle, pause/resume, disable/re-enable,
-exit and check owned processes are gone. Stop for loader/version warnings or
-unstable output; retain stock fallback. No acceptance is inferred from builds.
+The user authorised the first candidate installation/launch/endpoint test.
+RichAudio auto-loaded and the host started without host/listener commands.
+F10 was opened/closed/reopened; volume and SoundMap preferences were saved and
+acknowledged. A real Bati was spawned only to set up the vehicle test. An
+independent RPH expression confirmed its exact model and the invalid ratio.
+The sustained final host consumed 18,566,976 frames (386.8 seconds), with zero
+underruns, errors, clipped/limited samples or output energy. These are SILENT
+endpoint results, not proof of loaded-source performance or perceptual quality.
+Two earlier restarts occurred during observation gaps; their precise terminal
+causes were not retained by that build. The revised host retains failure detail
+and separately tests long gaps without relaxing PCM deadlines.
 
-Remaining normal-gameplay blockers: supervised RPH/startup/getter/device proof,
+Stock fallback was selected through F10 before normal game exit. No owned host,
+Node or GPU process remained. Exit with actively sounding sources, moving-source
+listening, real reflections and loaded CPU/GPU budgets remain unvalidated.
+
+The documented [RPH ratio getter](https://docs.ragepluginhook.net/html/P_Rage_Vehicle_EngineRevolutionsRatio.htm)
+is an older reference and does not establish current percent semantics for
+`50`; dividing by 100 is not a fix.
+An outdated getter offset is a possible explanation, not a proven diagnosis.
+FiveM's `GET_VEHICLE_CURRENT_RPM` is a CFX extension, not an available vanilla
+GTA native. A supported current-build operating-state provider is required.
+No raw memory reader, native suppression or fabricated RPM was introduced.
+
+Remaining normal-gameplay blockers: valid live operating-point telemetry,
 native double-playback elimination, actual city geometry integration, wider NPC
-coverage and sustained performance/listening approval. The candidate verifies
-only Bati NPC and nine exact player model mappings, not all GTA traffic.
+coverage and loaded performance/listening approval. Source assets are verified
+only for Bati NPC and nine exact player model mappings, not all GTA traffic.
+Do not call the product playable until a real eligible vehicle emits correctly
+without operator intervention and the remaining acceptance tests succeed.

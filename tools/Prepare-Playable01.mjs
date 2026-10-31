@@ -44,7 +44,7 @@ const manifest={schema:1,gameExecutable:game,gameSha256:gameHash,gameVersion:'1.
  eligible,bindings:walk(root).map(f=>({file:path.relative(root,f).replaceAll('\\','/'),sha256:hash(f)})).sort((a,b)=>a.file.localeCompare(b.file)),
  mode:'experimental-additive',nativeReplacement:false,geometryCoverage:'no qualified installed collision geometry; conditional direct sound',
  sourcePolicy:'Observed engine revolution ratio, inferred lift; no measured throttle/crank RPM/native NPC deceleration claim',
- limits:{trackedVehicles:4,activeVehicles:2,sourceEmitters:4,controlDelayMs:100,historySeconds:2.5,maximumPropagationSeconds:2},
+ limits:{trackedVehicles:4,activeVehicles:2,sourceEmitters:4,controlDelayMs:100,producerStartupBlocks:8,producerReserveMs:4096/48,historySeconds:2.5,maximumPropagationSeconds:2},
  calibration:{exhaustToEngine:10,commonSourceHeadroomTrim:.25,masterGain:.175,fleetHeadroomFactor:.25,dynamicNormalisation:false}};
 json('playable.json',manifest);
 json('.local/preparation-receipt.json',{schema:1,gameSha256:gameHash,manifestSha256:hash(path.join(root,'playable.json')),eligible,decodedThisRun:0,reusedVerifiedCache:true,installed:false,endpointOpened:false,rphRedistributed:false});

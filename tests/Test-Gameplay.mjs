@@ -26,3 +26,10 @@ test('qualified finite geometry adds real solver paths, expires and preserves or
 test('unsupported context never substitutes a player bank and malformed telemetry fails closed',{skip},async()=>{
  const f=fixture();try{const result=await f.step(60,()=>[f.vehicle('unsupported','npc',0xa774b5a6)]);assert.equal(result.peak,0);assert.equal(f.engine.diagnostics().active,0);assert.ok(f.engine.diagnostics().unsupported>0);assert.throws(()=>f.accept([{...f.vehicle(),operatingPoint:1.1}]));assert.throws(()=>f.engine.setSettings({quality:'max',acceleration:'cpu',enabled:true,volume:1.01,reflections:true,mode:'experimental-additive'}));}finally{f.engine.close();}
 });
+test('observed RPH out-of-contract ratio is rejected without rescaling',{skip},()=>{
+ const f=fixture();try{const before=f.engine.snapshots.length;
+  for(const operatingPoint of [50,NaN,Infinity,-.1])assert.throws(()=>f.accept([{...f.vehicle(),operatingPoint}]));
+  assert.equal(f.engine.snapshots.length,before,'invalid vehicle evidence cannot enter source history');
+  assert.equal(f.engine.diagnostics().active,0);
+ }finally{f.engine.close();}
+});

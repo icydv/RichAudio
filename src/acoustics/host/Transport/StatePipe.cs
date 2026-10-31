@@ -29,8 +29,8 @@ namespace RichAudio.Beacon.Transport
         public static readonly byte[] Payload=System.Text.Encoding.ASCII.GetBytes("{\"transportStop\":1}");
         public static bool IsStop(byte[] bytes,int count){if(count!=Payload.Length)return false;for(int i=0;i<count;i++)if(bytes[i]!=Payload[i])return false;return true;}
         public static byte[] Frame(){var b=new byte[Payload.Length+4];Buffer.BlockCopy(BitConverter.GetBytes(Payload.Length),0,b,0,4);Buffer.BlockCopy(Payload,0,b,4,Payload.Length);return b;}
-        public static void Write(PipeStream pipe,byte[] bytes){var operation=pipe.BeginWrite(bytes,0,bytes.Length,null,null);using(var ready=operation.AsyncWaitHandle){if(!ready.WaitOne(250))throw new TimeoutException("write deadline");pipe.EndWrite(operation);}}
-        public static byte ReadAck(PipeStream pipe){var b=new byte[1];var operation=pipe.BeginRead(b,0,1,null,null);using(var ready=operation.AsyncWaitHandle){if(!ready.WaitOne(250))throw new TimeoutException("ack deadline");if(pipe.EndRead(operation)!=1)throw new InvalidDataException("peer terminal or closed");return b[0];}}
+        public static void Write(PipeStream pipe,byte[] bytes){PipeDeadline.Write(pipe,bytes,250,"write deadline");}
+        public static byte ReadAck(PipeStream pipe){var b=new byte[1];if(PipeDeadline.Read(pipe,b,0,1,250,"ack deadline")!=1)throw new InvalidDataException("peer terminal or closed");return b[0];}
         public static void Ack(PipeStream pipe,byte expected){if(ReadAck(pipe)!=expected)throw new InvalidDataException("peer terminal or closed");}
     }
     public sealed class StatePipeServer:IDisposable
@@ -118,12 +118,7 @@ namespace RichAudio.Beacon.Transport
             int offset=0;var elapsed=Stopwatch.StartNew();
             while(offset<length)
             {
-                IAsyncResult read=pipe.BeginRead(buffer,offset,length-offset,null,null);
-                using(var done=read.AsyncWaitHandle)
-                {
-                    if(!done.WaitOne(Math.Max(1,deadlineMs-(int)elapsed.ElapsedMilliseconds))){pipe.Dispose();throw new TimeoutException("bounded pipe read timeout");}
-                    int n;try{n=pipe.EndRead(read);}catch(IOException e){int code=e.HResult&65535;if(code!=109&&code!=232&&code!=233)throw;if(offset!=0)throw new InvalidDataException("truncated frame");return false;}if(n==0){if(offset!=0)throw new InvalidDataException("truncated frame");return false;}offset+=n;
-                }
+                int n;try{n=PipeDeadline.Read(pipe,buffer,offset,length-offset,Math.Max(1,deadlineMs-(int)elapsed.ElapsedMilliseconds),"bounded pipe read timeout");}catch(IOException e){int code=e.HResult&65535;if(code!=109&&code!=232&&code!=233)throw;if(offset!=0)throw new InvalidDataException("truncated frame");return false;}if(n==0){if(offset!=0)throw new InvalidDataException("truncated frame");return false;}offset+=n;
             }
             return true;
         }
@@ -195,8 +190,7 @@ namespace RichAudio.Beacon.Transport
                                 if(FirstExpiredUnsent==null)FirstExpiredUnsent=new ExpiredUnsentTiming{Sequence=state.Sequence,AgeMs=(beforeWrite-state.ObservationTicks)*1000.0/Stopwatch.Frequency,EncodeMs=encodeMs,BeforeEncodeAgeMs=ageBeforeEncode,Stage="after-encoding-before-write"};
                                 continue; // No bytes sent, no acknowledgement expected, no session restart.
                             }
-                            mark=Stopwatch.GetTimestamp();stage="payload";IAsyncResult write=pipe.BeginWrite(bytes,0,bytes.Length,null,null);
-                            using(var done=write.AsyncWaitHandle){if(!done.WaitOne(250)){pipe.Dispose();throw new TimeoutException("writer deadline");}pipe.EndWrite(write);}
+                            mark=Stopwatch.GetTimestamp();stage="payload";PipeDeadline.Write(pipe,bytes,250,"writer deadline");
                             if(timing!=null)timing.WriteMs=FirstFrameTiming.Ms(mark);if(Transmitted==0)FirstTransmittedSequence=state.Sequence;Interlocked.Increment(ref transmitted);
                             mark=Stopwatch.GetTimestamp();byte ack=TransportStop.Accepted;if(strict){stage="callback";ack=TransportStop.ReadAck(pipe);}if(timing!=null)timing.AckMs=FirstFrameTiming.Ms(mark);
                             if(ack==TransportStop.StartupStaleDiscarded){

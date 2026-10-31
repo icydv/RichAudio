@@ -8,6 +8,12 @@ namespace RichAudio.Beacon.Windows
     public sealed class PcmRing
     {
         public const int Slots = 8, MaximumFrames = 512;
+        // Gameplay reserves the existing fixed ring capacity. The measured live
+        // 27.24 ms producer spike plus a 20 ms device chunk and control/IPC
+        // scheduling jitter exceed the legacy 42.67 ms four-block reserve.
+        // Eight blocks add a documented fixed 42.67 ms; no resampling or drift.
+        public const int GameplayStartupBlocks = 8;
+        public const double GameplayReserveMilliseconds = GameplayStartupBlocks * MaximumFrames / 48.0;
         private readonly float[][] data = new float[Slots][];
         private readonly int[] lengths = new int[Slots];
         private int write, read, offset, credits;
@@ -17,6 +23,10 @@ namespace RichAudio.Beacon.Windows
         public double SumSquares, Peak;
         public PcmRing() { for (int i = 0; i < Slots; i++) data[i] = new float[MaximumFrames * 2]; }
         public int Count { get { return Thread.VolatileRead(ref write) - Thread.VolatileRead(ref read); } }
+        public int BufferedFrames { get { int a=Thread.VolatileRead(ref read),b=Thread.VolatileRead(ref write),n=0;for(int i=a;i<b&&i<a+Slots;i++)n+=lengths[i%Slots];return Math.Max(0,n-Thread.VolatileRead(ref offset)); } }
+        // Both real and device-free sinks enforce this same fatal integrity
+        // boundary. Underflow is never silently resumed or accepted by a test.
+        public void RequireContinuousProducer(){if(Interlocked.Read(ref UnderflowFrames)!=0)throw new InvalidOperationException("Producer starvation: stopped to prevent renderer/device clock drift; no automatic resume");}
         public int TakeCredits() { return Interlocked.Exchange(ref credits, 0); }
         public bool TryWrite(float[] samples, int frames)
         {

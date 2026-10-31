@@ -1,7 +1,7 @@
 // Real owned supervisor -> secured pipe -> host -> Node -> source -> causal
 // renderer -> RA07 -> native ring. Only the device sink and GTA observations
 // are replaced; no audio device is enumerated or opened.
-using System;using System.Collections.Generic;using System.Diagnostics;using System.IO;using System.Threading;using System.Web.Script.Serialization;using RichAudio.Beacon.Transport;using RichAudio.Beacon.Windows;
+using System;using System.Collections.Generic;using System.Diagnostics;using System.IO;using System.IO.Pipes;using System.Threading;using System.Web.Script.Serialization;using RichAudio.Beacon.Transport;using RichAudio.Beacon.Windows;
 internal static class TestGameplay {
  static GameplayRuntime runtime;static long sequence,generation=1;static bool wasPaused;static readonly JavaScriptSerializer Json=new JavaScriptSerializer();static string root;static int checks;static readonly List<int> owned=new List<int>();
  static void Check(bool x,string why){checks++;if(!x)throw new Exception(why);}
@@ -15,20 +15,71 @@ internal static class TestGameplay {
  static void Until(Func<bool> condition,int milliseconds,int count=1,bool pause=false){var clock=Stopwatch.StartNew();while(!condition()){if(clock.ElapsedMilliseconds>milliseconds)throw new TimeoutException(runtime.State+"; "+(Evidence()==null?"no host status":Json.Serialize(Evidence())));Feed(count,pause);Thread.Sleep(50);}}
  static void For(int milliseconds,int count=1,bool pause=false,bool valid=true){var clock=Stopwatch.StartNew();while(clock.ElapsedMilliseconds<milliseconds){Feed(count,pause,valid);Thread.Sleep(50);}}
  static void Settings(long revision,bool enabled=true,double volume=1){AcousticSettingsStore.Save(root,AcousticSettingsStore.DefaultPath(root),new AcousticSettings("performance","cpu",Math.Max(revision,File.Exists(AcousticSettingsStore.DefaultPath(root))?AcousticSettingsStore.Load(root,AcousticSettingsStore.DefaultPath(root)).Revision+1:1),enabled,volume,true,false,"experimental-additive",false));}
+ static float Marker(int frame){return .1f*(frame%251)/251;}
+ static unsafe bool Reserve(int blocks,int callbackFrames){
+  var ring=new PcmRing();var input=new float[1024];var output=new float[callbackFrames*2];int sourceFrame=0,consumedFrame=0;
+  Action fill=delegate{for(int i=0;i<512;i++){input[2*i]=Marker(sourceFrame+i);input[2*i+1]=-input[2*i];}if(!ring.TryWrite(input,512))throw new Exception("test reserve overflow");sourceFrame+=512;};
+  for(int i=0;i<blocks;i++)fill();
+  // Reproduce the 27.24 ms measured spike plus worst-case 20 ms callback /
+  // IPC scheduling phase. A blocked producer must not alter original PCM.
+  for(int callback=0;callback<8;callback++){
+   double timeMs=callback*callbackFrames/48d;if(timeMs>=47)while(ring.Count<blocks)fill();
+   fixed(float* p=output)ring.FillCalibrated(p,callbackFrames,1);
+   try{ring.RequireContinuousProducer();}catch(InvalidOperationException){Check(blocks==4,"only the rejected four-block baseline starves");Check(ring.FirstUnderflowFrame==2048,"baseline fails at its exact exhausted original frame");return false;}
+   bool identical=true;for(int i=0;i<callbackFrames;i++){float expected=Marker(consumedFrame+i);if(output[2*i]!=expected||output[2*i+1]!=-expected)identical=false;}
+   Check(identical,"continuous PCM identity through fractional block callbacks and producer stall");consumedFrame+=callbackFrames;
+  }
+  Check(ring.UnderflowFrames==0,"full reserve retains zero hidden underflow");Check(ring.ConsumedFrames==consumedFrame,"original sample clock remains exact");return true;
+ }
+ static void RingTests(){Check(!Reserve(4,960),"old four-block reserve reproduces starvation");Check(Reserve(PcmRing.GameplayStartupBlocks,960),"eight-block reserve covers the measured stall with20ms callbacks");Check(Reserve(PcmRing.GameplayStartupBlocks,480),"native10ms partial-block callbacks remain continuous");Check(Math.Abs(PcmRing.GameplayReserveMilliseconds-85.3333333333333)<1e-9,"explicit fixed reserve latency");}
+ static void PipeTimeoutTests(){
+  for(int partial=0;partial<2;partial++){string name="RichAudio.Gameplay.TimeoutTest."+Guid.NewGuid().ToString("N");using(var server=GameplayWire.Server(name))using(var client=new NamedPipeClientStream(".",name,PipeDirection.InOut,PipeOptions.Asynchronous)){
+   var connection=server.BeginWaitForConnection(null,null);client.Connect(1000);server.EndWaitForConnection(connection);if(partial!=0){client.Write(new byte[]{3,0},0,2);client.Flush();}
+   var time=Stopwatch.StartNew();bool expired=false;try{GameplayWire.Read(server);}catch(TimeoutException){expired=true;}
+   Check(expired&&time.ElapsedMilliseconds>=900&&time.ElapsedMilliseconds<2500,"real stalled pipe retains bounded one-second read deadline");
+   // Cancelling the pending kernel read used to deliver an unhandled closed
+   // event exception here, even after the caller caught TimeoutException.
+   Thread.Sleep(100);Check(!server.IsConnected,"timed-out pipe is closed before accepting another peer");
+  }}
+  for(int write=0;write<2;write++){string name="RichAudio.Gameplay.AckWriteTimeoutTest."+Guid.NewGuid().ToString("N");using(var server=GameplayWire.Server(name))using(var client=new NamedPipeClientStream(".",name,PipeDirection.InOut,PipeOptions.Asynchronous)){
+   var connection=server.BeginWaitForConnection(null,null);client.Connect(1000);server.EndWaitForConnection(connection);var time=Stopwatch.StartNew();bool expired=false;
+   try{if(write==0)TransportStop.ReadAck(server);else TransportStop.Write(server,new byte[1048576]);}catch(TimeoutException){expired=true;}
+   Check(expired&&time.ElapsedMilliseconds>=200&&time.ElapsedMilliseconds<2500,"real stalled ack/write retains bounded250ms deadline");Thread.Sleep(100);Check(!server.IsConnected,"ack/write cancellation safely retires its pending kernel operation");
+  }}
+  string next="RichAudio.Gameplay.CompletionTest."+Guid.NewGuid().ToString("N");using(var server=GameplayWire.Server(next))using(var client=new NamedPipeClientStream(".",next,PipeDirection.InOut,PipeOptions.Asynchronous)){
+   var connection=server.BeginWaitForConnection(null,null);client.Connect(1000);server.EndWaitForConnection(connection);GameplayWire.Write(client,new byte[]{7,8,9});var b=GameplayWire.Read(server);Check(b.Length==3&&b[0]==7&&b[1]==8&&b[2]==9,"a new genuine pipe preserves exact framing after timeout cancellation");
+  }
+ }
  public static int Main(string[]args){
-  try{root=Path.GetFullPath(args[0]);var c=PlayableConfiguration.Load(Path.Combine(root,"playable.json"));Settings(1);string pointer=Path.Combine(root,".local","fixture-pointer.json");Directory.CreateDirectory(Path.GetDirectoryName(pointer));File.WriteAllText(pointer,Json.Serialize(new{schema=1,packageRoot=root,manifestSha256=PlayableConfiguration.Digest(c.Manifest)}));
+  try{RingTests();PipeTimeoutTests();if(args.Length==1&&args[0]=="--ring-only"){Console.WriteLine("PASS "+checks+" exact PCM reserve / native callback / retained starvation guard / real pipe timeout checks; no endpoint");return 0;}root=Path.GetFullPath(args[0]);var c=PlayableConfiguration.Load(Path.Combine(root,"playable.json"));Settings(1);string pointer=Path.Combine(root,".local","fixture-pointer.json");Directory.CreateDirectory(Path.GetDirectoryName(pointer));File.WriteAllText(pointer,Json.Serialize(new{schema=1,packageRoot=root,manifestSha256=PlayableConfiguration.Digest(c.Manifest)}));
    runtime=new GameplayRuntime(true);runtime.Start(pointer,c.GameExecutable,args[1]);Until(()=>runtime.Configuration!=null,5000,0);Thread.Sleep(250);Check(runtime.Attempts==0,"no host before Story readiness");runtime.SetStoryReady(true);
    Until(()=>runtime.HostPid>0,5000);owned.Add(runtime.HostPid);Until(()=>Number(Worker(),"activeSources")>=1&&Number(Evidence(),"peak")>0,15000);owned.Add((int)Number(Evidence(),"nodePid"));Check(!(bool)Evidence()["endpointOpened"],"device-free route");Check(Number(Evidence(),"receivedSnapshots")>0,"real secured pipe snapshots");
    Until(()=>Number(Worker(),"activeSources")==2,4000,2);Check(Number(Worker(),"activeSources")==2,"two independent stock sources");Until(()=>Number(Worker(),"retired")>=1,3000,1);Check(Number(Worker(),"retired")>=1,"missing identity retires");
    Settings(2,true,.4);Until(()=>Number(Worker(),"outputLevel")==.4,3000);Check(Number(Worker(),"outputLevel")==.4,"settings applied through real producer");
    // Pause/resume both change listener generation, matching the RPH adapter.
    For(700,1,true);For(700);Until(()=>Number(Worker(),"activeSources")==0,3000,0);Check(Number(Worker(),"activeSources")==0,"no indefinite unknown source");For(700,1);
+   Until(()=>Number(Worker(),"activeSources")>=1&&Number(Worker(),"selectedPaths")>0,5000);
+   int gapHost=runtime.HostPid,gapAttempts=runtime.Attempts;double preGapArrivals=Number(Worker(),"arrivals");
+   // Stop publishing entirely, as GTA can do while backgrounded or paused.
+   // This exceeds the rejected five-second watchdog and two-second acoustic
+   // tail bound; no mock listener or artificial valid observation fills it.
+   Thread.Sleep(6200);var quiet=Evidence();var quietWorker=Worker();
+   Check(runtime.HostPid==gapHost&&Alive(gapHost),"healthy owned host survives a greater-than-five-second observation gap");
+   Check(runtime.Attempts==gapAttempts,"observation loss does not spend the recovery budget");
+   Check(Number(quietWorker,"activeSources")==0&&Number(quietWorker,"selectedPaths")==0,"expired listener/source evidence retires every active emitter and path");
+   Check(quiet!=null&&quiet.ContainsKey("sumSquares"),"actual native consumer reports cumulative output energy");double quietEnergy=Number(quiet,"sumSquares"),quietFrames=Number(quiet,"consumedFrames");
+   Thread.Sleep(1000);var quietLater=Evidence();Check(Number(quietLater,"consumedFrames")>quietFrames+24000,"native PCM consumption continues during absent observations");
+   Check(Number(quietLater,"sumSquares")==quietEnergy,"expired-source output is sample-exact silence after genuine acoustic tails");
+   Check(Number(quietLater,"underflowFrames")==0,"observation loss does not cause PCM starvation");
+   Until(()=>Number(Worker(),"activeSources")>=1&&Number(Worker(),"selectedPaths")>0&&Number(Worker(),"arrivals")>preGapArrivals&&Number(Evidence(),"sumSquares")>quietEnergy+1e-8,5000);
+   Check(runtime.HostPid==gapHost&&runtime.Attempts==gapAttempts,"new genuine observations resume audible PCM without a replacement host");
    var before=Evidence();Check(Number(Worker(),"missingHistory")==0,"no source history violations");Check(Number(Worker(),"limitedSamples")==0,"no hidden limiter");Check(Number(before,"peak")<1,"digital headroom");
+   Check(Number(before,"underflowFrames")==0,"actual native-ring fixture applies fatal WASAPI underflow guard");Check(Number(before,"fixtureCallbackFrames")==960,"actual fixture uses native20ms callbacks across512-frame source boundaries");Check(Number(before,"producerStartupBlocks")==8,"real owned chain uses declared bounded reserve");
    int first=runtime.HostPid;Settings(3,false);Until(()=>runtime.HostPid==0,5000,0);Check(!Alive(first),"disabled host cleaned");Settings(4);Until(()=>runtime.HostPid>0,5000);owned.Add(runtime.HostPid);Until(()=>Number(Evidence(),"peak")>0,10000);
    // Kill actual host; job disposal must retire its real Node descendants.
    int crash=runtime.HostPid;using(var p=Process.GetProcessById(crash))p.Kill();Until(()=>runtime.HostPid!=0&&runtime.HostPid!=crash,10000);owned.Add(runtime.HostPid);Until(()=>Number(Evidence(),"peak")>0,10000);
    owned.Add((int)Number(Evidence(),"nodePid"));int last=runtime.HostPid;runtime.RequestStop();Check(runtime.Join(6000),"supervisor stopped");Check(!Alive(last),"no owned host after unload");foreach(int id in owned)if(id>0)Check(!Alive(id),"old hosts and Node children remain dead");
-   string report=Json.Serialize(new{schema=1,checks=checks,actualComponents=true,gameGetters="injected; live unverified",endpointOpened=false,automaticStart=true,independentSources=2,recoveryAttempts=runtime.Attempts,cleanup=true,measurement=before});File.WriteAllText(Path.Combine(root,".local","gameplay-fixture-result.json"),report);Console.WriteLine(report);return 0;
+   string report=Json.Serialize(new{schema=1,checks=checks,actualComponents=true,gameGetters="injected; live unverified",endpointOpened=false,automaticStart=true,independentSources=2,recoveryAttempts=runtime.Attempts,cleanup=true,snapshotGap=new{milliseconds=7200,hostRestarted=false,expiredSources=Number(quietWorker,"activeSources"),expiredPaths=Number(quietWorker,"selectedPaths"),silentNativeFrames=Number(quietLater,"consumedFrames")-quietFrames,outputEnergyDelta=Number(quietLater,"sumSquares")-quietEnergy,resumedActualPcm=true},measurement=before});File.WriteAllText(Path.Combine(root,".local","gameplay-fixture-result.json"),report);Console.WriteLine(report);return 0;
   }catch(Exception e){Console.Error.WriteLine(e.ToString());return 1;}finally{if(runtime!=null){runtime.RequestStop();runtime.Join(6000);}}
  }
  static bool Alive(int id){try{using(var p=Process.GetProcessById(id))return !p.HasExited;}catch(ArgumentException){return false;}}

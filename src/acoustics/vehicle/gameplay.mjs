@@ -12,7 +12,7 @@ export class StockGameplay {
   this.registry=registry;this.profiles=profiles;this.now=now;this.session=session;this.settings={quality:'auto',acceleration:'auto',enabled:true,volume:1,reflections:true,mode:'experimental-additive'};
   // Fixed common observation clock: camera-stationary calibration cannot
   // relabel time while an independently moving vehicle is producing Doppler.
-  this.playout=new ListenerPlayout();this.snapshots=[];this.sample=null;this.quality=new AcousticQualityController({now});
+  this.playout=new ListenerPlayout({anchoredClock:true});this.snapshots=[];this.sample=null;this.quality=new AcousticQualityController({now});
   this.slots=Array.from({length:MAX},(_,i)=>({index:i,identity:null,generation:1,source:null,vehicle:null,score:0}));
   this.ids=this.slots.flatMap(s=>['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`));
   this.direct=conditionalStockScene(this.ids,session,vehicleDistanceSceneOptions('authored-detail-loss-v1'));
@@ -122,6 +122,11 @@ export class StockGameplay {
   return [this.left,this.right];
  }
  diagnostics(){return {...this.stats,active:this.slots.filter(s=>s.identity).length,activeLimit:this.activeLimit,mode:this.settings.mode,nativeReplacement:false,
+   selectedPaths:this.pipeline.lastControl?.paths.length??0,outputPeak:this.pipeline.renderer.stats.peak,
+   listenerState:this.sample?.mode??'not-observed',
+   sourceStates:this.slots.filter(s=>s.source).map(s=>({bank:s.source.vehicle.model,context:s.source.npc?'npc':'player',running:s.vehicle?.running??false,
+    operatingPoint:s.vehicle?.operatingPoint??null,sourceFrame:s.source.frame,dryPeak:s.source.stats.peak,
+    listenerDistance:this.sample?.state&&s.vehicle?distance(s.vehicle.position,this.sample.state.position):null})),
    geometry:this.pipeline.simulation.scene===this.direct?'conditional-direct-unobserved-space-assumed-clear':'qualified-observed-partial',controlDelayMs:100,sourceHistoryLimitSeconds:2.5,propagationLimitSeconds:2,
    quality:this.quality.diagnostics(),pipeline:this.pipeline.diagnostics(),playout:this.playout.stats,memory:process.memoryUsage()};}
  close(){this.pipeline.close();}

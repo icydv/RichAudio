@@ -38,6 +38,13 @@ never controls audio availability. Safe defaults select GTA stock fallback.
 Normal play has no short listening-session timer. Three failed host starts in
 ten minutes exhaust recovery; reload the plugin after resolving the cause.
 Pausing silences owned output. Unknown/expired identities retire safely.
+The gameplay producer reserves eight blocks (85.33 ms) against measured game
+load stalls. This adds 42.67 ms over the old candidate, alongside its 100 ms
+observation delay. Underflow still stops the host; it is never hidden.
+
+Reviewed upgrades can preserve an existing ASI loader and original uninstall
+backups. Unrecognised changes stop setup for review. Upgrade uses a new private
+cache and retains the previous version for rollback; settings are carried over.
 
 Exit GTA before changing installation. Run Uninstall.cmd from this candidate
 to restore the exact backed-up files, including startup.rphs. Uninstall refuses
@@ -45,6 +52,10 @@ to overwrite files changed since installation. It retains private settings and
 source cache under LocalAppData\RichAudio for reuse; delete that versioned
 folder manually after uninstall if no longer needed.
 
-LIVE ACCEPTANCE PENDING: startup/getters/camera/audio-device performance and
-human listening still require the supervised first launch. This is not a
-production-ready replacement mod. No launch is performed by Setup.
+LIVE ACCEPTANCE BLOCKED (2026-10-31): automatic startup, F10, settings and the
+audio endpoint were exercised, but the real Bati's RPH engine-revolution getter
+returned 50 outside its documented 0..1 range. RichAudio rejects that evidence;
+no vehicle audio was emitted. Do not divide/clamp it to invent an engine state.
+Keep GTA stock fallback selected until supported telemetry is established.
+This is not a playable replacement mod or proof of sound quality. Setup never
+launches GTA. Loaded-source performance and human listening remain pending.

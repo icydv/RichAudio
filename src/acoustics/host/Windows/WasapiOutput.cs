@@ -21,11 +21,13 @@ namespace RichAudio.Beacon.Windows
         public volatile string Error;
         public string EndpointName, FormatResult;
         public uint BufferFrames, MixRate, MixChannels;
+        public uint MaximumCallbackFrames,MinimumCallbackFrames=UInt32.MaxValue;
         public long DevicePeriod100ns, StreamLatency100ns, SubmittedFrames, WakeTimeouts, EmptyPaddingEvents, MaximumSubmissionTicks, LastDeviceQpc100ns, ClockPositionWarnings;
         public ulong DeviceClockFrequency, LastDevicePosition;
         public readonly long[] SubmissionTicks = new long[30000], WakeIntervalsTicks = new long[30000];
         public int Measurements;
         public volatile bool Started;
+        public volatile bool DeviceOpened,EverStarted;
         public bool MmcssRegistered, MmcssReverted;
         public int MmcssError;
         public float Volume { get { return volume; } set { if (float.IsNaN(value) || float.IsInfinity(value) || value < 0 || value > (calibratedGameplay?1:.25f)) throw new ArgumentOutOfRangeException("volume"); volume = value; } }
@@ -71,7 +73,7 @@ namespace RichAudio.Beacon.Windows
             IntPtr requested = IntPtr.Zero, mix = IntPtr.Zero, closest = IntPtr.Zero, mmcss = IntPtr.Zero; AutoResetEvent signal = null;
             try
             {
-                enumerator = (IMMDeviceEnumerator)new MMDeviceEnumeratorClass(); device = Native.Device(enumerator, deviceIndex); EndpointName = Native.Name(device); client = Native.Client(device);
+                enumerator = (IMMDeviceEnumerator)new MMDeviceEnumeratorClass(); device = Native.Device(enumerator, deviceIndex); EndpointName = Native.Name(device); client = Native.Client(device);DeviceOpened=true;
                 Native.Check(client.GetMixFormat(out mix)); WaveFormat mf = (WaveFormat)Marshal.PtrToStructure(mix, typeof(WaveFormat)); MixRate = mf.SamplesPerSecond; MixChannels = mf.Channels;
                 WaveFormat format = WaveFormat.FloatStereo48k(); requested = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(WaveFormat))); Marshal.StructureToPtr(format, requested, false);
                 int supported = client.IsFormatSupported(0, requested, out closest);
@@ -85,12 +87,13 @@ namespace RichAudio.Beacon.Windows
                 signal = new AutoResetEvent(false); Native.Check(client.SetEventHandle(signal.SafeWaitHandle.DangerousGetHandle()));
                 Ready.Set();
                 long deadline = Stopwatch.GetTimestamp() + Stopwatch.Frequency * 5;
-                while (!stop && ring.Count < 4 && Stopwatch.GetTimestamp() < deadline) Thread.Sleep(2);
+                int startupBlocks=calibratedGameplay?PcmRing.GameplayStartupBlocks:4;
+                while (!stop && ring.Count < startupBlocks && Stopwatch.GetTimestamp() < deadline) Thread.Sleep(2);
                 if (stop) return;
-                if (ring.Count < 4) throw new TimeoutException("No four-block prefill; device was not started");
+                if (ring.Count < startupBlocks) throw new TimeoutException("No "+startupBlocks+"-block prefill; device was not started");
                 uint taskIndex=0;mmcss=Native.AvSetMmThreadCharacteristicsW("Audio",ref taskIndex);MmcssRegistered=mmcss!=IntPtr.Zero;if(!MmcssRegistered)MmcssError=Marshal.GetLastWin32Error();
                 uint padding; Native.Check(client.GetCurrentPadding(out padding)); Fill(renderer, BufferFrames - padding);
-                Native.Check(client.Start()); Started = true; long lastWake = Stopwatch.GetTimestamp(); int consecutiveTimeouts = 0;
+                Native.Check(client.Start()); Started = true;EverStarted=true; long lastWake = Stopwatch.GetTimestamp(); int consecutiveTimeouts = 0;
                 while (!stop)
                 {
                     bool signalled=signal.WaitOne(100);
@@ -117,6 +120,7 @@ namespace RichAudio.Beacon.Windows
         private unsafe void Fill(IAudioRenderClient renderer, uint frames)
         {
             if (frames == 0 || stop) return; IntPtr data; Native.Check(renderer.GetBuffer(frames, out data));
+            MaximumCallbackFrames=Math.Max(MaximumCallbackFrames,frames);MinimumCallbackFrames=Math.Min(MinimumCallbackFrames,frames);
             int captureSlot=-1;
             try {long underflow=ring.UnderflowFrames,endSilence=ring.EndSilenceFrames,producerStart=ring.ConsumedFrames-underflow-endSilence;
                 int supplied=calibratedGameplay?ring.FillCalibrated((float*)data,(int)frames,Muted?0:volume):ring.Fill((float*)data, (int)frames, Muted ? 0 : volume);
@@ -124,19 +128,25 @@ namespace RichAudio.Beacon.Windows
             finally {try{Native.Check(renderer.ReleaseBuffer(frames, 0));}catch{if(OwnedRecorder!=null)OwnedRecorder.Cancel(captureSlot);throw;} }
             if(OwnedRecorder!=null)OwnedRecorder.Commit(captureSlot);
             SubmittedFrames += frames;
-            if(ring.UnderflowFrames!=0)throw new InvalidOperationException("Producer starvation: stopped to prevent renderer/device clock drift; no automatic resume");
+            ring.RequireContinuousProducer();
         }
         public Dictionary<string, object> Metrics()
         {
-            var duration = new double[Measurements]; var intervals = new double[Measurements];
-            for (int i = 0; i < Measurements; i++) { duration[i] = SubmissionTicks[i] * 1000.0 / Stopwatch.Frequency; intervals[i] = WakeIntervalsTicks[i] * 1000.0 / Stopwatch.Frequency; }
+            // Status is now sampled during gameplay, not only after disposal.
+            // Snapshot the published count once so a callback cannot grow the
+            // iteration beyond the arrays allocated by this status call.
+            int count=Math.Min(Volatile.Read(ref Measurements),SubmissionTicks.Length);
+            var duration = new double[count]; var intervals = new double[count];
+            for (int i = 0; i < count; i++) { duration[i] = SubmissionTicks[i] * 1000.0 / Stopwatch.Frequency; intervals[i] = WakeIntervalsTicks[i] * 1000.0 / Stopwatch.Frequency; }
             Array.Sort(duration); Array.Sort(intervals);
             return new Dictionary<string, object> {
                 {"endpointName",EndpointName},{"format",FormatResult},{"mixSampleRate",MixRate},{"mixChannels",MixChannels},{"processingSampleRate",48000},{"processingChannels",2},
                 {"endpointBufferFrames",BufferFrames},{"endpointBufferMilliseconds",BufferFrames/48.0},{"streamLatencyMilliseconds",StreamLatency100ns/10000.0},{"devicePeriodMilliseconds",DevicePeriod100ns/10000.0},
+                {"producerStartupBlocks",calibratedGameplay?PcmRing.GameplayStartupBlocks:4},{"producerReserveMilliseconds",calibratedGameplay?PcmRing.GameplayReserveMilliseconds:4*512/48.0},{"bufferedFrames",ring.BufferedFrames},{"maximumCallbackFrames",MaximumCallbackFrames},{"minimumCallbackFrames",MinimumCallbackFrames==UInt32.MaxValue?0:MinimumCallbackFrames},
                 {"mmcssTask","Audio"},{"mmcssRegistered",MmcssRegistered},{"mmcssReverted",MmcssReverted},{"mmcssError",MmcssError},
                 {"submittedFrames",SubmittedFrames},{"consumedFrames",ring.ConsumedFrames},{"underflowFrames",ring.UnderflowFrames},{"firstUnderflowFrame",ring.FirstUnderflowFrame},{"endOfStreamSilenceFrames",ring.EndSilenceFrames},{"emptyPaddingEvents",EmptyPaddingEvents},{"wakeTimeouts",WakeTimeouts},
-                {"submissionMeasurements",Measurements},{"submissionMedianMs",Percentile(duration,.5)},{"submissionP99Ms",Percentile(duration,.99)},{"submissionMaxMs",MaximumSubmissionTicks*1000.0/Stopwatch.Frequency},
+                {"submissionMeasurements",count},{"submissionMedianMs",Percentile(duration,.5)},{"submissionP99Ms",Percentile(duration,.99)},{"submissionMaxMs",MaximumSubmissionTicks*1000.0/Stopwatch.Frequency},
+                {"deviceOpened",DeviceOpened},{"everStarted",EverStarted},{"currentlyStarted",Started},
                 {"wakeIntervalP99Ms",Percentile(intervals,.99)},{"deviceClockFrequency",DeviceClockFrequency},{"deviceClockPosition",LastDevicePosition},{"deviceQpc100ns",LastDeviceQpc100ns},{"deviceClockPositionWarnings",ClockPositionWarnings},
                 {"peakSubmitted",ring.Peak},{"rmsSubmitted",ring.ConsumedFrames>0?Math.Sqrt(ring.SumSquares/(ring.ConsumedFrames*2)):0},{"pcmRingBytes",PcmRing.Slots*PcmRing.MaximumFrames*2*4},{"error",Error},
                 {"limits","Shared endpoint acknowledgement is not physical speaker or subjective listening confirmation; empty padding events can include startup and are separate from producer underflows."}

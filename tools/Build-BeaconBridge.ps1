@@ -16,6 +16,10 @@ if(!$CoreOnly)
     $hash=(Get-FileHash -LiteralPath $SdkPath -Algorithm SHA256).Hash
     if($hash -ne '5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0'){throw 'Unreviewed RPH SDK fingerprint.'}
     $adapter=@(Get-ChildItem -LiteralPath (Join-Path $repo 'src\acoustics\bridge\Rph') -Filter '*.cs' | ForEach-Object FullName)
+    # RPH can discover public convention entry methods. Never ship two Main/
+    # OnUnload pairs and depend on attribute ordering to select the product.
+    $excluded=if($Playable){'ListenerBridge.Rph.cs'}else{'Playable.Rph.cs'}
+    $adapter=@($adapter|Where-Object{[IO.Path]::GetFileName($_)-ne $excluded})
     $adapter+=Join-Path $repo 'src\acoustics\integration\WorldWarmupSupervisor.cs'
     $binary=Join-Path $output 'RichAudio.Beacon.Rph.dll'
     $geometry=@(Get-ChildItem (Join-Path $repo 'src\acoustics\geometry') -Filter '*.cs'|ForEach-Object FullName)

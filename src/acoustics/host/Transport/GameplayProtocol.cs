@@ -41,7 +41,7 @@ namespace RichAudio.Beacon.Transport {
   public static GameplayFrame Decode(byte[] b,string session){Protocol.Check(b!=null&&b.Length>0&&b.Length<=MaximumBytes,"gameplay packet size");new UTF8Encoding(false,true).GetString(b);using(var m=new MemoryStream(b)){var f=(GameplayFrame)new DataContractJsonSerializer(typeof(GameplayFrame)).ReadObject(m);Validate(f,session);return f;}}
   public static NamedPipeServerStream Server(string name){return new NamedPipeServerStream(name,PipeDirection.InOut,1,PipeTransmissionMode.Byte,PipeOptions.Asynchronous,MaximumBytes,MaximumBytes,Security());}
   public static byte[] Read(PipeStream p){var h=ReadExact(p,4);int n=BitConverter.ToInt32(h,0);Protocol.Check(n>0&&n<=MaximumBytes,"gameplay frame length");return ReadExact(p,n);}
-  static byte[] ReadExact(PipeStream p,int n){var b=new byte[n];int at=0;while(at<n){var op=p.BeginRead(b,at,n-at,null,null);using(var wait=op.AsyncWaitHandle){if(!wait.WaitOne(1000))throw new TimeoutException("gameplay transport stalled");int got=p.EndRead(op);if(got==0)throw new EndOfStreamException();at+=got;}}return b;}
+  static byte[] ReadExact(PipeStream p,int n){var b=new byte[n];int at=0;while(at<n){int got=PipeDeadline.Read(p,b,at,n-at,1000,"gameplay transport stalled");if(got==0)throw new EndOfStreamException();at+=got;}return b;}
   public static void Write(PipeStream p,byte[] b){var frame=new byte[b.Length+4];Buffer.BlockCopy(BitConverter.GetBytes(b.Length),0,frame,0,4);Buffer.BlockCopy(b,0,frame,4,b.Length);TransportStop.Write(p,frame);}
  }
  public sealed class GameplayPublisher:IDisposable {

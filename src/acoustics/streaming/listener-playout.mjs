@@ -35,12 +35,13 @@ const same=(a,b)=>a&&b&&['session','generation','coordinates','units','listenerK
 // have ALREADY arrived. The interactive delay is measured and converges only
 // while the pose is stationary. This is control latency, not acoustic distance.
 export class ListenerPlayout {
-  constructor({ delayMs = 100, interactive = false } = {}) {
+  constructor({ delayMs = 100, interactive = false, anchoredClock = false } = {}) {
     if (![100, 75, 50].includes(delayMs))
       throw Error("Experimental listener delay");
     this.delay = delayMs / 1000;
     if(typeof interactive!=='boolean'||interactive&&delayMs!==100)throw Error('Interactive listener policy requires its reviewed 100 ms maximum');
     this.interactive=interactive;
+    if(typeof anchoredClock!=='boolean')throw Error('Explicit observation clock policy');this.anchoredClock=anchoredClock;
     this.delayMaximum=this.delay;
     this.delayTarget=this.delay;
     this.lastRenderTime=null;
@@ -83,7 +84,7 @@ export class ListenerPlayout {
       s.session !== this.lastState.session ||
       s.generation !== this.lastState.generation;
     const receiptMappedTime=audioTime-message.receiptAgeMs/1000;
-    const anchor=this.interactive&&!changed?this.observationAnchor:null;
+    const anchor=(this.interactive||this.anchoredClock)&&!changed?this.observationAnchor:null;
     const time=anchor?anchor.time+(s.observationTicks-anchor.ticks)/s.clockFrequency:receiptMappedTime,
       previous=this.records.at(-1);
     if (previous && hostMs < previous.hostMs)
