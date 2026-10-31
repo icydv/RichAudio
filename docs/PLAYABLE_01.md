@@ -101,6 +101,35 @@ SoundMap visibility and diagnostics. SoundMap is optional and job-owned;
 gameplay PCM recording is explicitly unavailable in this candidate.
 No unresolved Lectro/X80 source stepping is claimed fixed by integration.
 
+The opening key is now a saved preference: F6, F7, F9, F10 or F11, with F10
+as the default. Select **Open menu key**, then **Apply changes**. Unsupported
+bindings fall back to F10; console, Escape and screenshot keys are not offered.
+The overlay uses a 220 ms eased slide/fade and a stationary background dimmer.
+It remains native in-game drawing with GTA's own cursor. Controls are suppressed
+each frame during opening, interaction and closing, including release of the
+closing gesture. Hit regions follow the presentation transform; actions are
+accepted when fully open. Changing a binding while either key is held cannot
+retoggle the menu. A deliberate stock fallback has a clear non-error heading;
+stale status and actual failures retain their diagnostic messages.
+Fresh key edges can reverse an animation without an extra debounce delay;
+held keys still do not repeat. Hidden input polling follows the game frame.
+While focused, the menu resets the documented
+[idle camera timer](https://raw.githubusercontent.com/citizenfx/natives/master/CAM/InvalidateIdleCam.md)
+and [vehicle idle timer](https://raw.githubusercontent.com/citizenfx/natives/master/CAM/InvalidateVehicleIdleCam.md)
+once per second. It does not install a camera override or pause game time.
+
+The menu-only Story Mode check verified native pointer selection, saving F6,
+closing/reopening with F6 and restoring F10, with stock fallback throughout
+and no RichAudio host/endpoint. Final rapid-key and idle-timer corrections
+follow that check and are validated by focused tests/SDK compilation; their
+final in-game feel remains for human review.
+Focused menu and package evidence is recorded in
+[playable-01-menu.json](../evidence/playable-01-menu.json). The final private
+package is installed with F10 and GTA stock fallback selected. All 132 payload
+digests and the ZIP manifest were checked. The host, worker and recorded assets
+are identical to the 66-check component test; final changes affect the menu
+plugin and one-time setup only. No game or owned audio process remains running.
+
 ## Preparation, installation and validation
 
 Build with `Build-BeaconBridge.ps1 -Playable`, `Build-AcousticsHost.ps1` and

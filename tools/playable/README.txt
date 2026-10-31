@@ -12,6 +12,9 @@ remains independently audible: seamless native replacement is NOT established.
 
 Then launch GTA through RAGEPluginHook.exe as normal and load OFFLINE Story
 Mode. startup.rphs loads RichAudio automatically. F10 opens the gold menu.
+Change Open menu key to F6, F7, F9, F10 or F11, then Apply changes to save it.
+Opening/closing uses a short slide/fade and background dimming. GTA's native
+cursor remains active; gameplay input returns after closing and button release.
 No terminal, listening operator, AI, host command or browser is required.
 Online is rejected. Unsupported vehicles retain GTA audio.
 

@@ -7,19 +7,20 @@ namespace RichAudio.Settings.InGame
     public enum MenuInput { Up, Down, Left, Right, Accept, Back }
     public enum MenuAction { None, Apply, Close, Reset, StartRecording, StopRecording }
     public enum DrawCommandKind { Rectangle, Text }
-    public enum HitRegionKind { Row, QualityChoice, AccelerationChoice, Level }
+    public enum HitRegionKind { Row, QualityChoice, AccelerationChoice, Level, MenuKeyChoice }
 
     public sealed class MenuPreferences
     {
         public readonly string Quality, Acceleration;
         public readonly bool Enabled, EarlyReflections, DiagnosticsOverlay;
         public readonly double OutputLevel;
-        public readonly string IntegrationMode;public readonly bool SoundMapVisible;
+        public readonly string IntegrationMode,MenuToggleKey;public readonly bool SoundMapVisible;
+        public static readonly string[] MenuToggleKeys={"F6","F7","F9","F10","F11"};
         public static readonly string[] Qualities={"auto","performance","balanced","quality","max"};
         public static readonly string[] Accelerations={"auto","cpu","gpu"};
         public static MenuPreferences Defaults {get{return new MenuPreferences("auto","auto");}}
         public MenuPreferences(string quality,string acceleration,bool enabled=true,double outputLevel=1,
-            bool earlyReflections=true,bool diagnosticsOverlay=false,string integrationMode="stock-fallback",bool soundMapVisible=false)
+            bool earlyReflections=true,bool diagnosticsOverlay=false,string integrationMode="stock-fallback",bool soundMapVisible=false,string menuToggleKey="F10")
         {
             if(Array.IndexOf(Qualities,quality)<0||Array.IndexOf(Accelerations,acceleration)<0||
                 Double.IsNaN(outputLevel)||Double.IsInfinity(outputLevel)||outputLevel<0||outputLevel>1)
@@ -27,19 +28,20 @@ namespace RichAudio.Settings.InGame
             Quality=quality;Acceleration=acceleration;Enabled=enabled;OutputLevel=outputLevel;
             EarlyReflections=earlyReflections;DiagnosticsOverlay=diagnosticsOverlay;
             if(integrationMode!="stock-fallback"&&integrationMode!="experimental-additive")throw new ArgumentException("Unverified integration mode");IntegrationMode=integrationMode;SoundMapVisible=soundMapVisible;
+            MenuToggleKey=Array.IndexOf(MenuToggleKeys,menuToggleKey)>=0?menuToggleKey:"F10";
         }
         public MenuPreferences With(string quality=null,string acceleration=null,bool? enabled=null,double? outputLevel=null,
-            bool? earlyReflections=null,bool? diagnosticsOverlay=null,string integrationMode=null,bool? soundMapVisible=null)
+            bool? earlyReflections=null,bool? diagnosticsOverlay=null,string integrationMode=null,bool? soundMapVisible=null,string menuToggleKey=null)
         {return new MenuPreferences(quality??Quality,acceleration??Acceleration,enabled??Enabled,outputLevel??OutputLevel,
-            earlyReflections??EarlyReflections,diagnosticsOverlay??DiagnosticsOverlay,integrationMode??IntegrationMode,soundMapVisible??SoundMapVisible);}
+            earlyReflections??EarlyReflections,diagnosticsOverlay??DiagnosticsOverlay,integrationMode??IntegrationMode,soundMapVisible??SoundMapVisible,menuToggleKey??MenuToggleKey);}
         public bool Same(MenuPreferences other)
         {return other!=null&&Quality==other.Quality&&Acceleration==other.Acceleration&&Enabled==other.Enabled&&
-                OutputLevel==other.OutputLevel&&EarlyReflections==other.EarlyReflections&&DiagnosticsOverlay==other.DiagnosticsOverlay&&IntegrationMode==other.IntegrationMode&&SoundMapVisible==other.SoundMapVisible;}
+                OutputLevel==other.OutputLevel&&EarlyReflections==other.EarlyReflections&&DiagnosticsOverlay==other.DiagnosticsOverlay&&IntegrationMode==other.IntegrationMode&&SoundMapVisible==other.SoundMapVisible&&MenuToggleKey==other.MenuToggleKey;}
     }
 
     public sealed class MenuStatus
     {
-        public readonly bool Available;
+        public readonly bool Available,StockAudioActive;
         public readonly string RequestedQuality,ActiveQuality,RequestedAcceleration,ActiveAcceleration,Device,FallbackReason,Detail;
         public readonly int PathBudget;
         public readonly long GpuResultsApplied;
@@ -49,9 +51,9 @@ namespace RichAudio.Settings.InGame
         {if(String.IsNullOrEmpty(value))return "";value=value.Replace('\r',' ').Replace('\n',' ');return value.Length>length?value.Substring(0,length):value;}
         private MenuStatus(bool available,string requestedQuality,string activeQuality,string requestedAcceleration,
             string activeAcceleration,string device,string fallbackReason,int pathBudget,long gpuResultsApplied,string detail,
-            bool? outputEnabled=null,double? outputLevel=null,bool? earlyReflections=null)
+            bool? outputEnabled=null,double? outputLevel=null,bool? earlyReflections=null,bool stockAudioActive=false)
         {
-            Available=available;RequestedQuality=Bounded(requestedQuality,24);ActiveQuality=Bounded(activeQuality,24);
+            Available=available;StockAudioActive=stockAudioActive;RequestedQuality=Bounded(requestedQuality,24);ActiveQuality=Bounded(activeQuality,24);
             RequestedAcceleration=Bounded(requestedAcceleration,12);ActiveAcceleration=Bounded(activeAcceleration,12);
             Device=Bounded(device,128);FallbackReason=Bounded(fallbackReason,180);PathBudget=pathBudget;
             GpuResultsApplied=gpuResultsApplied;Detail=Bounded(detail,260);
@@ -59,6 +61,8 @@ namespace RichAudio.Settings.InGame
         }
         public static MenuStatus Unavailable(string reason)
         {return new MenuStatus(false,"","","","","","",0,0,String.IsNullOrEmpty(reason)?"Host status unavailable":reason);}
+        public static MenuStatus StockFallback()
+        {return new MenuStatus(false,"","","","","","",0,0,"RichAudio processing is stopped. GTA keeps its original vehicle sounds.",stockAudioActive:true);}
         public static MenuStatus Measured(string requestedQuality,string activeQuality,string requestedAcceleration,string activeAcceleration,
             string device,string fallbackReason,int pathBudget,long gpuResultsApplied,string detail,
             bool? outputEnabled=null,double? outputLevel=null,bool? earlyReflections=null)

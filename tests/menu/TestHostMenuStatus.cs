@@ -33,6 +33,12 @@ namespace RichAudio.Settings.InGame
             status["settingsRevision"]=5;Check(!read().Detail.Contains("waiting for engine acknowledgement"));
             Check(!HostMenuStatus.Read(null,now).Available);Check(!HostMenuStatus.Read("{}",now).Available);
             Check(!HostMenuStatus.Read("not JSON",now).Available);Check(!HostMenuStatus.Read(new String('x',16385),now).Available);
+            wrapper["hostState"]="stopped";wrapper["status"]=new Dictionary<string,object>{{"integrationMode","stock-fallback"},{"nativeReplacement",false},{"reason","GTA stock fallback"}};
+            var fallback=read();Check(fallback.StockAudioActive&&!fallback.Available&&fallback.Detail.Contains("GTA keeps its original"));
+            wrapper["recordedAtUtc"]=now.AddSeconds(-4).ToString("o");Check(!read().StockAudioActive);
+            wrapper["recordedAtUtc"]=now.ToString("o");var stopped=(Dictionary<string,object>)wrapper["status"];stopped["reason"]="GTA stock fallback: blocked-InvalidDataException";
+            Check(!read().StockAudioActive&&read().Detail.Contains("blocked-InvalidDataException"));
+            stopped["reason"]="GTA stock fallback";stopped["nativeReplacement"]=true;Check(!read().StockAudioActive);
             return checks;
         }
     }

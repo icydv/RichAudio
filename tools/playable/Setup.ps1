@@ -112,7 +112,7 @@ Copy-Item -LiteralPath $manifestFile -Destination (Join-Path $install 'playable.
 $settings=Safe-Path $install '.local/acoustic-settings.json'
 [IO.Directory]::CreateDirectory((Split-Path -Parent $settings))|Out-Null
 if($previous -and (Test-Path -LiteralPath (Safe-Path $previous.root '.local/acoustic-settings.json'))){Copy-Item -LiteralPath (Safe-Path $previous.root '.local/acoustic-settings.json') -Destination $settings -Force}
-if(!(Test-Path -LiteralPath $settings)){Write-Json $settings ([ordered]@{schemaVersion=1;revision=1;acousticQuality='auto';acousticAcceleration='auto';richAudioEnabled=$true;outputLevel=1;earlyReflections=$true;diagnosticsOverlay=$false;integrationMode='experimental-additive';soundMapVisible=$false})}
+if(!(Test-Path -LiteralPath $settings)){Write-Json $settings ([ordered]@{schemaVersion=1;revision=1;acousticQuality='auto';acousticAcceleration='auto';richAudioEnabled=$true;outputLevel=1;earlyReflections=$true;diagnosticsOverlay=$false;integrationMode='experimental-additive';soundMapVisible=$false;menuToggleKey='F10'})}
 $pointer=Safe-Path $install '.local/install-payload/RichAudio.Playable.json';Write-Json $pointer ([ordered]@{schema=1;packageRoot=$install;manifestSha256=$manifestSha})
 $menu=Safe-Path $install '.local/install-payload/RichAudio.Menu.json';Write-Json $menu ([ordered]@{schemaVersion=1;workspaceRoot=$install;settingsPath='.local/acoustic-settings.json';toggleKey='F10';controllerEnabled=$true;soundMap=[ordered]@{enabled=$true;autoStartService=$true;openWindow=$true;sampleHz=20;port=17833;nodeExecutable=(Join-Path $install 'runtime/node.exe')}})
 $startup=Safe-Path $game 'startup.rphs';$old=if(Test-Path -LiteralPath $startup){[IO.File]::ReadAllText($startup)}else{''}
@@ -140,4 +140,4 @@ if($previous){
 }
 $receipt=[ordered]@{schema=1;manifestSha256=$manifestSha;gameRoot=$game;files=$files;uninstalled=$false;complete=$false;upgradedFrom=if($previous){$previous.receipt.manifestSha256}else{$null};preservedDependencies=$preserved;transactionBackups=$rollback};Write-Json $receiptFile $receipt
 Invoke-InstallTransaction $game $install $plans $rollback $receiptFile $receipt
-Write-Output ('Installed. Launch through RAGEPluginHook.exe and load OFFLINE Story Mode. F10 controls. Private cache: '+$install)
+Write-Output ('Installed. Launch through RAGEPluginHook.exe and load OFFLINE Story Mode. Use your saved menu key (F10 default). Private cache: '+$install)

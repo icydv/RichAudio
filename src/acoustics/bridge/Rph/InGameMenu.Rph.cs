@@ -23,6 +23,9 @@ namespace RichAudio.Beacon.Rph
         private static InGameRecordingBridge recordingBridge;
         private static readonly AcousticMenuModel menu=new AcousticMenuModel();
         private static readonly MenuInputRouter input=new MenuInputRouter();
+        private static readonly MenuTransition transition=new MenuTransition(220);
+        private static MenuFrame openPresentation;
+        private static readonly MenuShortcutLatch shortcut=new MenuShortcutLatch();
         private static long editingRevision,awaitingRevision=-1;
         private static MenuPreferences awaitingPreferences;
         private static bool awaitingRecording;
@@ -31,6 +34,7 @@ namespace RichAudio.Beacon.Rph
         private static int layoutWidth,layoutHeight;
         private static string lastDiagnostic;
         private static int diagnosticReports;
+        private static double nextIdleRefreshMs;
 
         internal static void Start()
         {
@@ -63,7 +67,7 @@ namespace RichAudio.Beacon.Rph
         internal static void Stop()
         {
             if(Interlocked.Exchange(ref started,0)==0)return;
-            stopping=true;presentation=null;Interlocked.Exchange(ref consoleRequested,0);
+            stopping=true;presentation=openPresentation=null;Interlocked.Exchange(ref consoleRequested,0);
             Game.RawFrameRender-=Render;
             var service=bridge;bridge=null;if(service!=null){service.RequestStop();ThreadPool.QueueUserWorkItem(delegate{service.Dispose();});}
             var recording=recordingBridge;recordingBridge=null;if(recording!=null){recording.RequestStop();ThreadPool.QueueUserWorkItem(delegate{recording.Dispose();});}
@@ -71,7 +75,7 @@ namespace RichAudio.Beacon.Rph
             // persistent game-control mutation needs restoration.
         }
         private static MenuPreferences Preferences(AcousticSettings s)
-        {return new MenuPreferences(s.Quality,s.Acceleration,s.RichAudioEnabled,s.OutputLevel,s.EarlyReflections,s.DiagnosticsOverlay,s.IntegrationMode,s.SoundMapVisible);}
+        {return new MenuPreferences(s.Quality,s.Acceleration,s.RichAudioEnabled,s.OutputLevel,s.EarlyReflections,s.DiagnosticsOverlay,s.IntegrationMode,s.SoundMapVisible,s.MenuToggleKey);}
         private static bool Key(Keys key){return Game.IsKeyDownRightNow(key);}
         private static bool Button(bool connected,ControllerButtons button){return connected&&Game.IsControllerButtonDownRightNow(button);}
         private static void Run()
@@ -93,24 +97,47 @@ namespace RichAudio.Beacon.Rph
                         story=ped!=0&&NativeFunction.CallByName<bool>("IS_PLAYER_PLAYING",player)&&
                             NativeFunction.CallByName<bool>("DOES_ENTITY_EXIST",ped)&&!NativeFunction.CallByName<bool>("IS_PLAYER_SWITCH_IN_PROGRESS");
                     }
-                    Keys toggle; if(!Enum.TryParse<Keys>(state.ToggleKey,out toggle))toggle=Keys.F10;
+                    double now=Stopwatch.GetTimestamp()*1000d/Stopwatch.Frequency;
+                    shortcut.Configure(state.Settings.MenuToggleKey);
+                    Keys activeToggle,previousToggle;Enum.TryParse<Keys>(shortcut.Key,out activeToggle);Enum.TryParse<Keys>(shortcut.PreviousKey,out previousToggle);
                     bool connected=state.ControllerEnabled&&Game.IsControllerConnected;
-                    bool toggleHeld=Key(toggle)||(Button(connected,ControllerButtons.LeftShoulder)&&Button(connected,ControllerButtons.DPadRight));
+                    bool chord=Button(connected,ControllerButtons.LeftShoulder)&&Button(connected,ControllerButtons.DPadRight);
+                    bool toggleHeld=shortcut.Held(Key(activeToggle),Key(previousToggle),chord);
                     var held=new[]{Key(Keys.Up)||Button(connected,ControllerButtons.DPadUp),Key(Keys.Down)||Button(connected,ControllerButtons.DPadDown),
                         Key(Keys.Left)||Button(connected,ControllerButtons.DPadLeft),Key(Keys.Right)||Button(connected,ControllerButtons.DPadRight),
                         Key(Keys.Enter)||Button(connected,ControllerButtons.A),Key(Keys.Escape)||Button(connected,ControllerButtons.B)};
-                    var routed=input.Update(Stopwatch.GetTimestamp()*1000d/Stopwatch.Frequency,story,paused,loading,console,menu.Visible,
+                    var routed=input.Update(now,story,paused,loading,console,menu.Visible,
                         toggleHeld,Interlocked.Exchange(ref consoleRequested,0)!=0,held);
-                    if(routed.Close){menu.Close();presentation=null;mouseVisible=false;}
+                    if(routed.Close){menu.Close();mouseVisible=false;}
                     if(routed.Open)
                     {
                         menu.Open(Preferences(state.Settings),state.Available);editingRevision=state.SavedRevision;awaitingRevision=-1;
                         layoutWidth=layoutHeight=0;
                         mouseVisible=false;mouseX=mouseY=-1;mouseDown=Game.GetMouseState().IsLeftButtonDown;Game.GetMouseWheelDelta();
                     }
-                    // These are frame-scoped controls, only while visible or
-                    // consuming its closing key. No pause/global state is set.
-                    if(routed.SuppressGameplay)NativeFunction.Natives.DISABLE_ALL_CONTROL_ACTIONS(0);
+                    bool eligible=story&&!paused&&!loading&&!console;
+                    if(!eligible){menu.Close();transition.ResetClosed(now);openPresentation=null;}
+                    transition.SetOpen(menu.Visible,now);
+                    var mouse=Game.GetMouseState();
+                    bool closingInputHeld=Key(activeToggle)||(shortcut.WaitingForRelease&&Key(previousToggle))||chord||mouse.IsLeftButtonDown||mouse.IsRightButtonDown;
+                    foreach(bool down in held)closingInputHeld|=down;
+                    var motion=transition.Sample(now,closingInputHeld);
+                    // Frame-scoped suppression includes both animation phases
+                    // and the release of the closing gesture. No game pause,
+                    // persistent input hook or OS cursor ownership is applied.
+                    bool captured=eligible&&(routed.SuppressGameplay||motion.CapturesInput);
+                    if(captured){
+                        NativeFunction.Natives.DISABLE_ALL_CONTROL_ACTIONS(0);NativeFunction.Natives.DISABLE_ALL_CONTROL_ACTIONS(1);NativeFunction.Natives.DISABLE_ALL_CONTROL_ACTIONS(2);NativeFunction.Natives.SET_MOUSE_CURSOR_THIS_FRAME();
+                        if(now>=nextIdleRefreshMs){
+                            // Documented no-argument timer resets, not camera
+                            // ownership. RPH documents int for a void native.
+                            // At most two calls per second while modal focus is
+                            // captured; no call or restoration after closing.
+                            NativeFunction.CallByHash<int>(0xF4F2C0D4EE209E20UL);
+                            NativeFunction.CallByHash<int>(0x9E4CFFF989258472UL);
+                            nextIdleRefreshMs=now+1000;
+                        }
+                    }
                     if(renderFailed){menu.Close();presentation=null;break;}
                     if(menu.Visible)
                     {
@@ -141,25 +168,24 @@ namespace RichAudio.Beacon.Rph
                         if(layoutWidth!=size.Width||layoutHeight!=size.Height)
                         {menu.BuildFrame(size.Width,size.Height,status);layoutWidth=size.Width;layoutHeight=size.Height;}
                         MenuAction action=MenuAction.None;
-                        if(routed.Action.HasValue){mouseVisible=false;action=menu.Handle(routed.Action.Value);}
+                        if(motion.FullyOpen&&routed.Action.HasValue){mouseVisible=false;action=menu.Handle(routed.Action.Value);}
                         // Cursor axes are normalized game input, rather than
                         // assuming undocumented MouseState X/Y coordinates.
-                        NativeFunction.Natives.SET_MOUSE_CURSOR_THIS_FRAME();
                         float nx=NativeFunction.CallByName<float>("GET_DISABLED_CONTROL_NORMAL",0,(int)GameControl.CursorX),
                             ny=NativeFunction.CallByName<float>("GET_DISABLED_CONTROL_NORMAL",0,(int)GameControl.CursorY);
-                        var mouse=Game.GetMouseState();bool click=mouse.IsLeftButtonDown&&!mouseDown;mouseDown=mouse.IsLeftButtonDown;
+                        bool click=mouse.IsLeftButtonDown&&!mouseDown;mouseDown=mouse.IsLeftButtonDown;
                         int wheel=Game.GetMouseWheelDelta();
                         if(!Single.IsNaN(nx)&&!Single.IsInfinity(nx)&&!Single.IsNaN(ny)&&!Single.IsInfinity(ny)&&nx>=0&&nx<=1&&ny>=0&&ny<=1)
                         {
                             float x=nx*(size.Width-1),y=ny*(size.Height-1);
                             bool moved=mouseX>=0&&(Math.Abs(x-mouseX)>.75f||Math.Abs(y-mouseY)>.75f);
                             mouseX=x;mouseY=y;if(moved||click||wheel!=0)mouseVisible=true;
-                            if(mouseVisible){var pointerAction=menu.Pointer(x,y,click,wheel);if(pointerAction!=MenuAction.None)action=pointerAction;}
+                            if(motion.FullyOpen&&mouseVisible){var pointerAction=menu.Pointer(x,y,click,wheel);if(pointerAction!=MenuAction.None)action=pointerAction;}
                         }
                         if(action==MenuAction.Apply)
                         {
                             var p=menu.Pending;
-                            var desired=new AcousticSettings(p.Quality,p.Acceleration,Math.Max(1,editingRevision),p.Enabled,p.OutputLevel,p.EarlyReflections,p.DiagnosticsOverlay,p.IntegrationMode,p.SoundMapVisible);
+                            var desired=new AcousticSettings(p.Quality,p.Acceleration,Math.Max(1,editingRevision),p.Enabled,p.OutputLevel,p.EarlyReflections,p.DiagnosticsOverlay,p.IntegrationMode,p.SoundMapVisible,p.MenuToggleKey);
                             if(service.TryApply(desired,editingRevision)){awaitingRevision=editingRevision;awaitingPreferences=p.With();menu.SetNotice("Saving preferences in the background...");}
                             else menu.SetNotice("Save unavailable or already pending. Preferences have not been applied.",true);
                         }
@@ -174,21 +200,22 @@ namespace RichAudio.Beacon.Rph
                             if(recorder==null||!recorder.TrySetRecording(action==MenuAction.StartRecording))menu.SetNotice("Recorder unavailable, changed or request pending. Check SoundMap.",true);
                             else awaitingRecording=true;
                         }
-                        if(menu.Visible)presentation=menu.BuildFrame(size.Width,size.Height,status);
-                        else presentation=null;
+                        if(menu.Visible)openPresentation=menu.BuildFrame(size.Width,size.Height,status);
                     }
-                    else if(story&&!paused&&!console&&state.Settings.DiagnosticsOverlay)
+                    transition.SetOpen(menu.Visible,now);motion=transition.Sample(now,closingInputHeld);
+                    if(eligible&&motion.Visible&&openPresentation!=null){var size=Game.Resolution;presentation=MenuTransition.Present(openPresentation,motion,size.Width,size.Height);}
+                    else if(story&&!paused&&!console&&state.Settings.DiagnosticsOverlay&&!motion.CapturesInput)
                     {
                         var size=Game.Resolution;presentation=menu.BuildDiagnosticFrame(size.Width,size.Height,
                             HostMenuStatus.Read(state.StatusJson,DateTime.UtcNow,state.SavedRevision));
                     }
                     else presentation=null;
-                    if(menu.Visible||routed.SuppressGameplay)GameFiber.Yield();else GameFiber.Sleep(20);
+                    GameFiber.Yield();
                 }
             }
             catch(ThreadAbortException){throw;}
             catch(Exception e){Game.Console.Print("RichAudio settings overlay unavailable: "+e.GetType().Name+". Listener and geometry controls remain separate.");}
-            finally{presentation=null;menu.Close();Stop();}
+            finally{presentation=openPresentation=null;menu.Close();Stop();}
         }
         private static void Render(object sender,GraphicsEventArgs e)
         {

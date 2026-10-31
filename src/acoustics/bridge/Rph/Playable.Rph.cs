@@ -16,7 +16,7 @@ namespace RichAudio.Beacon.Rph {
     string executable=Process.GetCurrentProcess().MainModule.FileName;runtime=new GameplayRuntime();
     runtime.Start(Path.Combine(Path.GetDirectoryName(executable),"Plugins","RichAudio.Playable.json"),executable,typeof(Game).Assembly.Location);
     InGameMenu.Start();PassiveListener.Start();
-    Game.Console.Print("RichAudio automatic Story Mode lifecycle. F10 settings. Experimental additive only; GTA engine audio remains. Unsupported vehicles retain stock audio.");
+    Game.Console.Print("RichAudio automatic Story Mode lifecycle. Saved menu shortcut (F10 default). Experimental additive only; GTA engine audio remains. Unsupported vehicles retain stock audio.");
     while(!stopping){
      bool ready=false;try{ready=CameraSampler.StoryReady();}catch(ThreadAbortException){throw;}catch{}
      var r=runtime;if(r==null)break;r.SetStoryReady(ready);
