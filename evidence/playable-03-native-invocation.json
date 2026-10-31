@@ -1,0 +1,2412 @@
+{
+  "schema": 1,
+  "inspectedUtc": "2026-10-31T22:18:26.3525745Z",
+  "scope": "Offline metadata and authentic SDK XML contract comparison only; no runtime body analysis or native invocation",
+  "metadataReader": {
+    "bytes": 280576,
+    "sha256": "0f6465ce57a0cbabc37013c8e3c9f110672de1c127b6192177d59eb1c7809772",
+    "fileVersion": "0.9.6.0"
+  },
+  "pinnedSdk": {
+    "file": {
+      "bytes": 219648,
+      "sha256": "5d439745604a5fedbf8fa401520d4f296c1b6800d77e2923ba3bf9772182c7e0",
+      "fileVersion": "1.124.1393.17586"
+    },
+    "assemblyIdentity": "RagePluginHook, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "nativeTypeNames": [
+      "Rage.Native.NativeFunction",
+      "Rage.Native.NativeArgument",
+      "Rage.Native.NativeString",
+      "Rage.Native.DynamicNativeFunction",
+      "Rage.Native.NativePointer"
+    ],
+    "nativeCallOrFlagTypeNames": [],
+    "types": [
+      {
+        "type": "Rage.Native.NativeFunction",
+        "attributes": "Public, Abstract, Sealed, Serializable",
+        "baseType": "System.Object",
+        "publicMethods": [
+          {
+            "signature": "System.Object Rage.Native.NativeFunction::get_Natives()",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Object Rage.Native.NativeFunction::CallByName(System.String,System.Type,Rage.Native.NativeArgument[])",
+            "attributes": "Public, Static, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "nativeName",
+                "type": "System.String",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "returnType",
+                "type": "System.Type",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "arguments",
+                "type": "Rage.Native.NativeArgument[]",
+                "attributes": "None",
+                "isParamArray": true,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "ReturnType Rage.Native.NativeFunction::CallByName(System.String,Rage.Native.NativeArgument[])",
+            "attributes": "Public, Static, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [
+              {
+                "name": "ReturnType",
+                "attributes": "NotNullableValueTypeConstraint, DefaultConstructorConstraint",
+                "constraints": []
+              }
+            ],
+            "parameters": [
+              {
+                "name": "nativeName",
+                "type": "System.String",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "arguments",
+                "type": "Rage.Native.NativeArgument[]",
+                "attributes": "None",
+                "isParamArray": true,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Object Rage.Native.NativeFunction::CallByHash(System.UInt64,System.Type,Rage.Native.NativeArgument[])",
+            "attributes": "Public, Static, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "nativeHash",
+                "type": "System.UInt64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "returnType",
+                "type": "System.Type",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "arguments",
+                "type": "Rage.Native.NativeArgument[]",
+                "attributes": "None",
+                "isParamArray": true,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "ReturnType Rage.Native.NativeFunction::CallByHash(System.UInt64,Rage.Native.NativeArgument[])",
+            "attributes": "Public, Static, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [
+              {
+                "name": "ReturnType",
+                "attributes": "NotNullableValueTypeConstraint, DefaultConstructorConstraint",
+                "constraints": []
+              }
+            ],
+            "parameters": [
+              {
+                "name": "nativeHash",
+                "type": "System.UInt64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "arguments",
+                "type": "Rage.Native.NativeArgument[]",
+                "attributes": "None",
+                "isParamArray": true,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Object Rage.Native.NativeFunction::Call(System.UInt64,System.Type,Rage.Native.NativeArgument[])",
+            "attributes": "Public, Static, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "nativeHash",
+                "type": "System.UInt64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "returnType",
+                "type": "System.Type",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "arguments",
+                "type": "Rage.Native.NativeArgument[]",
+                "attributes": "None",
+                "isParamArray": true,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          }
+        ],
+        "publicProperties": [
+          {
+            "signature": "System.Object Rage.Native.NativeFunction::Natives()",
+            "customAttributes": [
+              "System.Runtime.CompilerServices.DynamicAttribute"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Rage.Native.NativeArgument",
+        "attributes": "Public, Sealed, Serializable, BeforeFieldInit",
+        "baseType": "System.Object",
+        "publicMethods": [
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(Rage.Vector3*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Vector3*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(Rage.Player)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Player",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(Rage.Model)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Model",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(Rage.IHandleable)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.IHandleable",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(Rage.Native.NativeString)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Native.NativeString",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(Rage.Native.NativePointer)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "pointer",
+                "type": "Rage.Native.NativePointer",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.IntPtr)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "address",
+                "type": "System.IntPtr",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.SByte modopt(System.Runtime.CompilerServices.IsSignUnspecifiedByte)*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.SByte modopt(System.Runtime.CompilerServices.IsSignUnspecifiedByte)*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Boolean*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Boolean*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Single*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Single*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.UInt64*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt64*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Int64*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int64*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.UInt32*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt32*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Int32*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int32*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Void*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Void*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Byte)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Byte",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Boolean)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Boolean",
+                "attributes": "HasFieldMarshal",
+                "isParamArray": false,
+                "hasMarshalInfo": true
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Single)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Single",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.UInt64)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Int64)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.UInt32)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt32",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Int32)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int32",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Type Rage.Native.NativeArgument::get_ParameterType()",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::set_ParameterType(System.Type)",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Type",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Int64 Rage.Native.NativeArgument::get_Value()",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::set_Value(System.Int64)",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Boolean Rage.Native.NativeArgument::get_IsPointer()",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::set_IsPointer(System.Boolean)",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Boolean",
+                "attributes": "HasFieldMarshal",
+                "isParamArray": false,
+                "hasMarshalInfo": true
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Boolean Rage.Native.NativeArgument::get_IsString()",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::CleanUp()",
+            "attributes": "Public, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(Rage.Vector3*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Vector3*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(Rage.Player)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Player",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(Rage.Model)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Model",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(Rage.IHandleable)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.IHandleable",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(Rage.Native.NativeString)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Native.NativeString",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.String)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.String",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(Rage.Native.NativePointer)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "pointer",
+                "type": "Rage.Native.NativePointer",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.IntPtr)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.IntPtr",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Boolean*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Boolean*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.SByte modopt(System.Runtime.CompilerServices.IsSignUnspecifiedByte)*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.SByte modopt(System.Runtime.CompilerServices.IsSignUnspecifiedByte)*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Single*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Single*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.UInt64*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt64*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Int64*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int64*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.UInt32*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt32*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Int32*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int32*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Void*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Void*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Byte)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Byte",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Boolean)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Boolean",
+                "attributes": "HasFieldMarshal",
+                "isParamArray": false,
+                "hasMarshalInfo": true
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Single)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Single",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.UInt64)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Int64)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.UInt32)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt32",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Int32)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int32",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::Dispose()",
+            "attributes": "Public, Final, Virtual, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          }
+        ],
+        "publicProperties": [
+          {
+            "signature": "System.Boolean Rage.Native.NativeArgument::IsString()",
+            "customAttributes": []
+          },
+          {
+            "signature": "System.Boolean Rage.Native.NativeArgument::IsPointer()",
+            "customAttributes": []
+          },
+          {
+            "signature": "System.Int64 Rage.Native.NativeArgument::Value()",
+            "customAttributes": []
+          },
+          {
+            "signature": "System.Type Rage.Native.NativeArgument::ParameterType()",
+            "customAttributes": []
+          }
+        ]
+      },
+      {
+        "type": "Rage.Native.DynamicNativeFunction",
+        "attributes": "Public, Sealed, BeforeFieldInit",
+        "baseType": "System.Dynamic.DynamicObject",
+        "publicMethods": [
+          {
+            "signature": "System.Boolean Rage.Native.DynamicNativeFunction::TryInvokeMember(System.Dynamic.InvokeMemberBinder,System.Object[],System.Object&)",
+            "attributes": "Public, Final, Virtual, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "binder",
+                "type": "System.Dynamic.InvokeMemberBinder",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "args",
+                "type": "System.Object[]",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "result",
+                "type": "System.Object&",
+                "attributes": "Out",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          }
+        ],
+        "publicProperties": []
+      }
+    ]
+  },
+  "comparisonSdk": {
+    "file": {
+      "bytes": 248832,
+      "sha256": "1f8a8a88a511d8c6d4aacd196e72b5192970b730f4070606d8bfac63ed722d45",
+      "fileVersion": "1.131.1424.17745"
+    },
+    "assemblyIdentity": "RagePluginHook, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "nativeTypeNames": [
+      "Rage.Native.NativeFunction",
+      "Rage.Native.NativeArgument",
+      "Rage.Native.NativeString",
+      "Rage.Native.DynamicNativeFunction",
+      "Rage.Native.NativePointer"
+    ],
+    "nativeCallOrFlagTypeNames": [],
+    "types": [
+      {
+        "type": "Rage.Native.NativeFunction",
+        "attributes": "Public, Abstract, Sealed, Serializable",
+        "baseType": "System.Object",
+        "publicMethods": [
+          {
+            "signature": "System.Object Rage.Native.NativeFunction::get_Natives()",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Object Rage.Native.NativeFunction::CallByName(System.String,System.Type,Rage.Native.NativeArgument[])",
+            "attributes": "Public, Static, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "nativeName",
+                "type": "System.String",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "returnType",
+                "type": "System.Type",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "arguments",
+                "type": "Rage.Native.NativeArgument[]",
+                "attributes": "None",
+                "isParamArray": true,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "ReturnType Rage.Native.NativeFunction::CallByName(System.String,Rage.Native.NativeArgument[])",
+            "attributes": "Public, Static, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [
+              {
+                "name": "ReturnType",
+                "attributes": "NotNullableValueTypeConstraint, DefaultConstructorConstraint",
+                "constraints": []
+              }
+            ],
+            "parameters": [
+              {
+                "name": "nativeName",
+                "type": "System.String",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "arguments",
+                "type": "Rage.Native.NativeArgument[]",
+                "attributes": "None",
+                "isParamArray": true,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Object Rage.Native.NativeFunction::CallByHash(System.UInt64,System.Type,Rage.Native.NativeArgument[])",
+            "attributes": "Public, Static, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "nativeHash",
+                "type": "System.UInt64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "returnType",
+                "type": "System.Type",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "arguments",
+                "type": "Rage.Native.NativeArgument[]",
+                "attributes": "None",
+                "isParamArray": true,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "ReturnType Rage.Native.NativeFunction::CallByHash(System.UInt64,Rage.Native.NativeArgument[])",
+            "attributes": "Public, Static, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [
+              {
+                "name": "ReturnType",
+                "attributes": "NotNullableValueTypeConstraint, DefaultConstructorConstraint",
+                "constraints": []
+              }
+            ],
+            "parameters": [
+              {
+                "name": "nativeHash",
+                "type": "System.UInt64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "arguments",
+                "type": "Rage.Native.NativeArgument[]",
+                "attributes": "None",
+                "isParamArray": true,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Object Rage.Native.NativeFunction::Call(System.UInt64,System.Type,Rage.Native.NativeArgument[])",
+            "attributes": "Public, Static, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "nativeHash",
+                "type": "System.UInt64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "returnType",
+                "type": "System.Type",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "arguments",
+                "type": "Rage.Native.NativeArgument[]",
+                "attributes": "None",
+                "isParamArray": true,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          }
+        ],
+        "publicProperties": [
+          {
+            "signature": "System.Object Rage.Native.NativeFunction::Natives()",
+            "customAttributes": [
+              "System.Runtime.CompilerServices.DynamicAttribute"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Rage.Native.NativeArgument",
+        "attributes": "Public, Sealed, Serializable, BeforeFieldInit",
+        "baseType": "System.Object",
+        "publicMethods": [
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(Rage.Vector3*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Vector3*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(Rage.Player)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Player",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(Rage.Model)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Model",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(Rage.IHandleable)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.IHandleable",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(Rage.Native.NativeString)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Native.NativeString",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(Rage.Native.NativePointer)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "pointer",
+                "type": "Rage.Native.NativePointer",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.IntPtr)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "address",
+                "type": "System.IntPtr",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.SByte modopt(System.Runtime.CompilerServices.IsSignUnspecifiedByte)*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.SByte modopt(System.Runtime.CompilerServices.IsSignUnspecifiedByte)*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Boolean*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Boolean*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Single*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Single*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.UInt64*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt64*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Int64*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int64*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.UInt32*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt32*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Int32*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int32*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Void*)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Void*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Byte)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Byte",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Boolean)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Boolean",
+                "attributes": "HasFieldMarshal",
+                "isParamArray": false,
+                "hasMarshalInfo": true
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Single)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Single",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.UInt64)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Int64)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.UInt32)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt32",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::.ctor(System.Int32)",
+            "attributes": "Public, HideBySig, SpecialName, RTSpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int32",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Type Rage.Native.NativeArgument::get_ParameterType()",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::set_ParameterType(System.Type)",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Type",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Int64 Rage.Native.NativeArgument::get_Value()",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::set_Value(System.Int64)",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Boolean Rage.Native.NativeArgument::get_IsPointer()",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::set_IsPointer(System.Boolean)",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Boolean",
+                "attributes": "HasFieldMarshal",
+                "isParamArray": false,
+                "hasMarshalInfo": true
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Boolean Rage.Native.NativeArgument::get_IsString()",
+            "attributes": "Public, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::CleanUp()",
+            "attributes": "Public, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(Rage.Vector3*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Vector3*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(Rage.Player)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Player",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(Rage.Model)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Model",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(Rage.IHandleable)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.IHandleable",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(Rage.Native.NativeString)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Rage.Native.NativeString",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.String)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.String",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(Rage.Native.NativePointer)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "pointer",
+                "type": "Rage.Native.NativePointer",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.IntPtr)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.IntPtr",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Boolean*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Boolean*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.SByte modopt(System.Runtime.CompilerServices.IsSignUnspecifiedByte)*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.SByte modopt(System.Runtime.CompilerServices.IsSignUnspecifiedByte)*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Single*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Single*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.UInt64*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt64*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Int64*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int64*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.UInt32*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt32*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Int32*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int32*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Void*)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Void*",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Byte)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Byte",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Boolean)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Boolean",
+                "attributes": "HasFieldMarshal",
+                "isParamArray": false,
+                "hasMarshalInfo": true
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Single)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Single",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.UInt64)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Int64)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int64",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.UInt32)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.UInt32",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "Rage.Native.NativeArgument Rage.Native.NativeArgument::op_Implicit(System.Int32)",
+            "attributes": "Public, Static, HideBySig, SpecialName",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "value",
+                "type": "System.Int32",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          },
+          {
+            "signature": "System.Void Rage.Native.NativeArgument::Dispose()",
+            "attributes": "Public, Final, Virtual, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [],
+            "customAttributes": [],
+            "implementationPresent": false
+          }
+        ],
+        "publicProperties": [
+          {
+            "signature": "System.Boolean Rage.Native.NativeArgument::IsString()",
+            "customAttributes": []
+          },
+          {
+            "signature": "System.Boolean Rage.Native.NativeArgument::IsPointer()",
+            "customAttributes": []
+          },
+          {
+            "signature": "System.Int64 Rage.Native.NativeArgument::Value()",
+            "customAttributes": []
+          },
+          {
+            "signature": "System.Type Rage.Native.NativeArgument::ParameterType()",
+            "customAttributes": []
+          }
+        ]
+      },
+      {
+        "type": "Rage.Native.DynamicNativeFunction",
+        "attributes": "Public, Sealed, BeforeFieldInit",
+        "baseType": "System.Dynamic.DynamicObject",
+        "publicMethods": [
+          {
+            "signature": "System.Boolean Rage.Native.DynamicNativeFunction::TryInvokeMember(System.Dynamic.InvokeMemberBinder,System.Object[],System.Object&)",
+            "attributes": "Public, Final, Virtual, HideBySig",
+            "implementationAttributes": "IL",
+            "genericParameters": [],
+            "parameters": [
+              {
+                "name": "binder",
+                "type": "System.Dynamic.InvokeMemberBinder",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "args",
+                "type": "System.Object[]",
+                "attributes": "None",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              },
+              {
+                "name": "result",
+                "type": "System.Object&",
+                "attributes": "Out",
+                "isParamArray": false,
+                "hasMarshalInfo": false
+              }
+            ],
+            "customAttributes": [],
+            "implementationPresent": false
+          }
+        ],
+        "publicProperties": []
+      }
+    ]
+  },
+  "publicInvocationContractIdentical": true,
+  "contractDifferences": [],
+  "comparisonDocumentation": {
+    "file": {
+      "bytes": 801766,
+      "sha256": "adcb826402c3f871a7d6f4ffcf320a446b798ac1890f16ad2f4c77e076aabf27",
+      "fileVersion": null
+    },
+    "publisherPost": "https://www.lcpdfr.com/forums/topic/156960-lspdfr-api-documentation-and-rph-sdk/",
+    "dynamicMemberId": "T:Rage.Native.DynamicNativeFunction",
+    "genericHashMemberId": "M:Rage.Native.NativeFunction.CallByHash``1(System.UInt64,Rage.Native.NativeArgument[])",
+    "documentsOriginal64BitHash": true,
+    "documentsXPrefix": true,
+    "documentsHandleableConversion": true,
+    "documentsCompileSuccessDoesNotEstablishMethodExistence": true,
+    "directHashDiscouraged": true,
+    "directHashRecommendationReferencesNatives": true,
+    "currentRatioContractStillZeroToOne": true,
+    "interpretation": "The shipped 1.131 XML recommends dynamic Natives, documents original 64-bit x-prefixed identifiers and handle conversion, and still documents a 0..1 RPH ratio. It does not promise a different hash resolver, exact-build support for the candidate hash or a direct-call workaround."
+  },
+  "priorDiagnosticProbe": {
+    "file": {
+      "bytes": 19968,
+      "sha256": "a34bdc8b05d870eef3f2a3f214a5a7b2774dd45346859bbfa8b5d67bc8c57f3e",
+      "fileVersion": "0.0.0.0"
+    },
+    "metadataOnly": true,
+    "callSites": [
+      {
+        "caller": "System.Double RichAudio.Telemetry.Probe.OperatingStateProbe/<>c__DisplayClass13::<Main>b__8()",
+        "publishedHashBits": "0xF9DDA40BC293A61E",
+        "genericReturnType": "System.Single",
+        "callSignature": "!!0 Rage.Native.NativeFunction::CallByHash<System.Single>(System.UInt64,Rage.Native.NativeArgument[])",
+        "usesHandleableNativeArgumentConversion": true,
+        "nativeArgumentArrayLengthOne": true
+      },
+      {
+        "caller": "System.Double RichAudio.Telemetry.Probe.OperatingStateProbe/<>c__DisplayClass13::<Main>b__9()",
+        "publishedHashBits": "0x92D96892FC06AF22",
+        "genericReturnType": "System.Single",
+        "callSignature": "!!0 Rage.Native.NativeFunction::CallByHash<System.Single>(System.UInt64,Rage.Native.NativeArgument[])",
+        "usesHandleableNativeArgumentConversion": true,
+        "nativeArgumentArrayLengthOne": true
+      },
+      {
+        "caller": "System.Double RichAudio.Telemetry.Probe.OperatingStateProbe/<>c__DisplayClass13::<Main>b__a()",
+        "publishedHashBits": "0x56185A25D45A0DCD",
+        "genericReturnType": "System.Int32",
+        "callSignature": "!!0 Rage.Native.NativeFunction::CallByHash<System.Int32>(System.UInt64,Rage.Native.NativeArgument[])",
+        "usesHandleableNativeArgumentConversion": true,
+        "nativeArgumentArrayLengthOne": true
+      }
+    ],
+    "interpretation": "The prior diagnostic artifact preserves the published 64-bit literals, expected float/int return types and one IHandleable-derived argument. This excludes source-level integer truncation or an omitted vehicle argument in this artifact; it does not validate runtime marshalling or the native handlers."
+  },
+  "compileOnlyContract": {
+    "sourceSha256": "d69f6e4415e4b21c7648ac17c7d68b2e6c4015bfee2a18375849218a759f894b",
+    "builds": [
+      {
+        "sdk": "pinned-sdk",
+        "file": {
+          "bytes": 4096,
+          "sha256": "2d6338879f25f6af26966167e223f3df6bc304e6bac87a1fd16422c6de8e3969",
+          "fileVersion": "0.0.0.0"
+        },
+        "methodSignatures": [
+          "System.Single RphNativeInvocationContract::ReadRphGetter(Rage.Vehicle)",
+          "System.Single RphNativeInvocationContract::DirectCallByHash(Rage.Vehicle)",
+          "System.Single RphNativeInvocationContract::DocumentedDynamic(Rage.Vehicle)"
+        ],
+        "directNativeHashBits": "0xF9DDA40BC293A61E",
+        "directGenericReturnType": "System.Single",
+        "dynamicIdentifier": "xF9DDA40BC293A61E",
+        "dynamicInvokeMemberBinderPresent": true,
+        "dynamicFloatTypeTokenPresent": true,
+        "pluginAttributeCount": 0,
+        "lifecycleMethodCount": 0,
+        "executed": false
+      },
+      {
+        "sdk": "comparison-sdk",
+        "file": {
+          "bytes": 4096,
+          "sha256": "a682b8db03237ad01d6594b1a42caf49ce09725b0eec9f120739d68d7b4acd4d",
+          "fileVersion": "0.0.0.0"
+        },
+        "methodSignatures": [
+          "System.Single RphNativeInvocationContract::ReadRphGetter(Rage.Vehicle)",
+          "System.Single RphNativeInvocationContract::DirectCallByHash(Rage.Vehicle)",
+          "System.Single RphNativeInvocationContract::DocumentedDynamic(Rage.Vehicle)"
+        ],
+        "directNativeHashBits": "0xF9DDA40BC293A61E",
+        "directGenericReturnType": "System.Single",
+        "dynamicIdentifier": "xF9DDA40BC293A61E",
+        "dynamicInvokeMemberBinderPresent": true,
+        "dynamicFloatTypeTokenPresent": true,
+        "pluginAttributeCount": 0,
+        "lifecycleMethodCount": 0,
+        "executed": false
+      }
+    ],
+    "fixtureStoredOnlyInIgnoredBuildDirectory": true,
+    "interpretation": "Both source spellings and the existing getter type-check against each inspected authentic SDK. The libraries contain no plugin or lifecycle entry point and were never executed. Compilation does not establish dispatch equivalence, successful resolution, a corrected provider or live safety."
+  },
+  "conclusion": {
+    "nativeCallFlagsAvailableInReviewedSdks": false,
+    "documentedDynamicHashEntry": "NativeFunction.Natives.x<original-64-bit-hash><ReturnType>(vehicle)",
+    "dynamicVersusDirectHashDomainDifferenceEstablished": false,
+    "dynamicResolverFixEstablished": false,
+    "noHashFoundEstablishes": "The installed RPH invocation path reported that the supplied 64-bit identifier could not be found. No candidate return value was obtained.",
+    "noHashFoundDoesNotEstablish": [
+      "Native absent from the game",
+      "Which internal table, mapping or resolver stage missed",
+      "Incorrect vehicle argument or float return type",
+      "A NativeDB error",
+      "A missing optional NativeCallFlags argument",
+      "An SDK upgrade or dynamic syntax would fix the miss",
+      "Cause of the independent RPH ratio value of 50"
+    ],
+    "knownHistoricalDefect": {
+      "version": "RPH 0.50.1044.10171",
+      "affectedLegacyBuild": "944",
+      "publishedSummary": "A legacy EngineRevolutionsRatio invalid-value defect was fixed.",
+      "source": "https://docs.ragepluginhook.net/html/567cc57d-324e-4309-8869-ba0751ce4356.htm",
+      "access": "Official indexed documentation was available; direct fetch returned 404",
+      "applicability": "Historical precedent only; does not identify the current Enhanced defect or justify a workaround."
+    },
+    "exactCurrentIssueMaintainerAcknowledgementFound": false,
+    "newMaintainerCompatibilityStatement": {
+      "source": "https://www.lcpdfr.com/forums/topic/157697-request-for-enhanced-rph-sdk-compatibility-gta-v-10115816/?comment=834046&do=findComment",
+      "finding": "The maintainer states that no Enhanced-specific SDK is needed because RPH provides cross-compatibility.",
+      "access": "Primary forum page and search index reviewed during PLAYABLE-03; this inspection tool does not fetch the forum",
+      "limitation": "General compatibility statement, not per-native or engine-ratio correctness assurance."
+    },
+    "providerReady": false,
+    "productChangeJustified": false,
+    "anotherLiveAttemptJustifiedBySyntaxAlone": false
+  },
+  "sdkOrProbeCodeExecuted": false,
+  "installedRuntimeInspected": false,
+  "gameStarted": false,
+  "gameFilesWritten": false,
+  "sdkRepinned": false,
+  "privacy": "Only signatures, hashes, bounded public contract interpretations and prior public outcome are recorded; no absolute paths, raw capture stacks, source assets, runtime dumps or signed download URLs."
+}

@@ -1,5 +1,9 @@
 # PLAYABLE-02: operating-state investigation and measured PCM stages
 
+Follow-up: [PLAYABLE-03](PLAYABLE_03.md) compares the newer authentic SDK,
+Enhanced-specific native provenance and maintained alternatives. The historical
+measurements below are unchanged; provider qualification remains blocked.
+
 31 October 2026. **Live vehicle-audio acceptance remains blocked.** Offline
 validation was followed by one freshly authorised Story Mode session with two
 separately authorised read-only captures. Both stopped on their first candidate
