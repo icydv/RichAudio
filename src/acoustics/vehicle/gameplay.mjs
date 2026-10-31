@@ -7,6 +7,12 @@ import {AcousticQualityController} from '../streaming/acoustic-quality.mjs';
 import {inBox} from '../research/local-geometry.mjs';
 const FS=48000,BLOCK=512,MAX=2,unit=v=>{const n=Math.hypot(...v);if(n<1e-8)throw Error('orientation discontinuity');return v.map(x=>x/n);};
 const mix=(a,b,u)=>a.map((x,i)=>x+(b[i]-x)*u),distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
+const pcmCounters=()=>({nonzeroBlocks:0,peak:0,sumSquares:0});
+// Fixed-size diagnostics only: observe the original PCM without changing it.
+function observePcmBlock(left,counters,right=null){let peak=0,energy=0;
+ for(let i=0;i<left.length;i++){const l=left[i],r=right?right[i]:0;peak=Math.max(peak,Math.abs(l),Math.abs(r));energy+=l*l+r*r;}
+ if(peak>0)counters.nonzeroBlocks++;counters.peak=Math.max(counters.peak,peak);counters.sumSquares+=energy;
+}
 export class StockGameplay {
  constructor({registry,profiles,session,now=()=>performance.now()}){
   this.registry=registry;this.profiles=profiles;this.now=now;this.session=session;this.settings={quality:'auto',acceleration:'auto',enabled:true,volume:1,reflections:true,mode:'experimental-additive'};
@@ -21,6 +27,8 @@ export class StockGameplay {
   this.inputs=Object.fromEntries(this.ids.map(id=>[id,new Float32Array(BLOCK)]));this.left=new Float32Array(BLOCK);this.right=new Float32Array(BLOCK);
   this.activeLimit=MAX;this.lastGood=now();this.consecutiveMisses=0;this.sceneExpiry=-Infinity;this.lastFrame=-1;this.lastGeneration=0;
   this.stats={blocks:0,acceptedFrames:0,rejectedFrames:0,unsupported:0,arrivals:0,retired:0,headroomPathsOmitted:0,deadlineMisses:0,maximumProcessingMs:0,maximumActive:0,sourceBudgetReductions:0,geometryUpdates:0,geometryFallbacks:0,clippingFaults:0};
+  this.stageCounters={validVehicleObservations:0,runningVehicleObservations:0,eligibleVehicleBlocks:0,sourceCreations:0,sourcePlaybackBlocks:0,acousticPathBlocks:0,
+   engine:pcmCounters(),exhaust:pcmCounters(),stereo:pcmCounters()};
  }
  accept(frame,ageMs){
   try{
@@ -36,6 +44,7 @@ export class StockGameplay {
    const time=this.playout.records.at(-1).time;
    this.snapshots.push({time,frame:structuredClone(frame)});while(this.snapshots.length>64)this.snapshots.shift();
    this.lastFrame=state.sequence;this.lastGeneration=state.generation;this.stats.acceptedFrames++;
+   for(const v of frame.vehicles)if(v.valid){this.stageCounters.validVehicleObservations++;if(v.running)this.stageCounters.runningVehicleObservations++;}
   }catch(e){this.stats.rejectedFrames++;throw e;}
  }
  setSettings(s){
@@ -93,14 +102,16 @@ export class StockGameplay {
    const score=(v.running?1:.01)*energy/Math.max(1,distance(v.position,listener.position))*(prior?1.5:1);
    eligible.push({v,resolved,score,identity:`${v.id}:${v.generation}:${v.model}:${v.context}`});
   }
+  this.stageCounters.eligibleVehicleBlocks+=eligible.length;
   eligible.sort((a,b)=>b.score-a.score);const selected=eligible.slice(0,this.activeLimit),preserve=!this.sample.state&&(this.playout.lastState?.paused||this.sample.mode==='warming')&&this.sample.mode!=='stale-wall-clock',keep=new Set(preserve?this.slots.map(s=>s.identity):selected.map(x=>x.identity));
   for(const s of this.slots)if(s.identity&&!keep.has(s.identity)){s.identity=null;s.source=null;s.vehicle=null;this.stats.retired++;}
   for(const item of selected){let slot=this.slots.find(s=>s.identity===item.identity);if(!slot){slot=this.slots.find(s=>!s.identity);slot.identity=item.identity;slot.generation++;const profile=this.profiles?.profiles?.[item.resolved.bank.model];
-    slot.source=this.registry.createSource(item.v.model,item.v.context,{sourceGain:profile?.sourceGain??1,...(profile?.pressureSharesByState?{pressureSharesByState:profile.pressureSharesByState}:{})});this.stats.arrivals++;}
+    slot.source=this.registry.createSource(item.v.model,item.v.context,{sourceGain:profile?.sourceGain??1,...(profile?.pressureSharesByState?{pressureSharesByState:profile.pressureSharesByState}:{})});this.stats.arrivals++;this.stageCounters.sourceCreations++;}
    slot.vehicle=item.v;slot.score=item.score;
   }
   const sources=[];for(const s of this.slots){const ids=['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`);for(const id of ids)this.inputs[id].fill(0);
    if(!s.source||!this.sample.state)continue;const v=s.vehicle;s.source.renderInto({operatingPoint:v.operatingPoint,load:v.lift ? .05 : .9,lift:v.lift,running:v.running},this.inputs[ids[0]],this.inputs[ids[1]]);
+   this.stageCounters.sourcePlaybackBlocks++;observePcmBlock(this.inputs[ids[0]],this.stageCounters.engine);observePcmBlock(this.inputs[ids[1]],this.stageCounters.exhaust);
    const profile=this.profiles?.profiles?.[s.source.vehicle.model];
    for(const [i,role]of ['engine','exhaust'].entries()){const placement=this.profiles?.emitters?.[s.source.vehicle.model],offset=role==='engine'?(placement?.engineOffset??.35):(placement?.exhaustOffset??-.75);
     sources.push({id:ids[i],generation:s.generation,position:v.position.map((x,k)=>x+v.forward[k]*offset+v.up[k]*(i ? .3 : .65)),velocity:v.velocity,
@@ -111,7 +122,9 @@ export class StockGameplay {
   this.pipeline.simulation.setProcessingSettings({pathBudget:this.pipeline.renderer.maxPathsPerSource,maxReflectors:16,earlyReflections:this.settings.reflections});
   this.telemetry?.begin(this.pipeline.simulation,this.now());
   await this.pipeline.prepare({time,session:this.session,generation:listener.generation,listener,sources},this.pipeline.simulation.scene===this.direct?{}:{geometryTimeMs:this.geometryAnchor.observationMs+this.now()-this.geometryAnchor.at});
+  if(this.pipeline.lastControl.paths.length>0)this.stageCounters.acousticPathBlocks++;
   const before=this.pipeline.renderer.stats.limited;this.pipeline.process(this.inputs,this.left,this.right);
+  observePcmBlock(this.left,this.stageCounters.stereo,this.right);
   if(this.pipeline.renderer.stats.limited!==before){this.stats.clippingFaults++;throw Error('headroom invariant failed; stock fallback required');}
   const elapsed=this.now()-start;this.stats.blocks++;this.stats.maximumProcessingMs=Math.max(this.stats.maximumProcessingMs,elapsed);
   if(this.telemetry)try{this.visual=this.telemetry.publish(this.pipeline.simulation,this.pipeline.lastControl,{workerMs:elapsed});}catch{this.visual=null;}
@@ -122,6 +135,7 @@ export class StockGameplay {
   return [this.left,this.right];
  }
  diagnostics(){return {...this.stats,active:this.slots.filter(s=>s.identity).length,activeLimit:this.activeLimit,mode:this.settings.mode,nativeReplacement:false,
+   stageCounters:{...this.stageCounters,engine:{...this.stageCounters.engine},exhaust:{...this.stageCounters.exhaust},stereo:{...this.stageCounters.stereo}},
    selectedPaths:this.pipeline.lastControl?.paths.length??0,outputPeak:this.pipeline.renderer.stats.peak,
    listenerState:this.sample?.mode??'not-observed',
    sourceStates:this.slots.filter(s=>s.source).map(s=>({bank:s.source.vehicle.model,context:s.source.npc?'npc':'player',running:s.vehicle?.running??false,

@@ -31,5 +31,31 @@ test('observed RPH out-of-contract ratio is rejected without rescaling',{skip},(
   for(const operatingPoint of [50,NaN,Infinity,-.1])assert.throws(()=>f.accept([{...f.vehicle(),operatingPoint}]));
   assert.equal(f.engine.snapshots.length,before,'invalid vehicle evidence cannot enter source history');
   assert.equal(f.engine.diagnostics().active,0);
+  const stages=f.engine.diagnostics().stageCounters;assert.equal(stages.validVehicleObservations,0);assert.equal(stages.sourceCreations,0);assert.equal(stages.engine.nonzeroBlocks,0);assert.equal(stages.exhaust.nonzeroBlocks,0);assert.equal(stages.stereo.nonzeroBlocks,0);
  }finally{f.engine.close();}
+});
+test('injected valid Bati observations produce independent genuine engine/exhaust and post-propagation PCM stage evidence',{skip},async()=>{
+ const f=fixture();try{
+  // Only observations are authored. The decoded private Bati NPC bank,
+  // registry, continuous source and causal renderer are genuine components.
+  await f.step(90,()=>[f.vehicle('unsupported','npc',0xa774b5a6)]);
+  const unsupported=f.engine.diagnostics().stageCounters;assert.ok(unsupported.validVehicleObservations>0);assert.ok(unsupported.runningVehicleObservations>0);
+  assert.equal(unsupported.eligibleVehicleBlocks,0);assert.equal(unsupported.sourceCreations,0);assert.equal(unsupported.sourcePlaybackBlocks,0);assert.equal(unsupported.engine.nonzeroBlocks,0);assert.equal(unsupported.exhaust.nonzeroBlocks,0);assert.equal(unsupported.acousticPathBlocks,0);assert.equal(unsupported.stereo.nonzeroBlocks,0);
+  assert.ok((await f.step(150)).peak>0);
+  const d=f.engine.diagnostics(),stages=d.stageCounters;assert.ok(stages.eligibleVehicleBlocks>0);assert.equal(stages.sourceCreations,1);assert.ok(stages.sourcePlaybackBlocks>0);assert.ok(stages.acousticPathBlocks>0);
+  assert.equal(d.sourceStates[0].bank,'bati');assert.equal(d.sourceStates[0].context,'npc');
+  for(const role of ['engine','exhaust','stereo']){assert.ok(stages[role].nonzeroBlocks>0,role+' has actual nonzero PCM blocks');assert.ok(stages[role].peak>0&&stages[role].peak<1,role+' bounded PCM peak');assert.ok(stages[role].sumSquares>0,role+' actual PCM energy');}
+  assert.equal(d.pipeline.renderer.limited,0);assert.equal(d.pipeline.renderer.missingHistory,0);assert.equal(d.pipeline.history.affectedFrames,0);
+  // Diagnostics are a snapshot; a consumer cannot rewrite accumulated proof.
+  stages.engine.nonzeroBlocks=0;assert.ok(f.engine.diagnostics().stageCounters.engine.nonzeroBlocks>0);
+ }finally{f.engine.close();}
+});
+test('all nine prepared player mappings and the exact Bati NPC mapping still resolve and emit genuine PCM',{skip},async()=>{
+ loaded();const manifest=JSON.parse(fs.readFileSync(path.join(root,'playable.json')));assert.equal(manifest.eligible.filter(v=>v.context==='player').length,9);
+ assert.deepEqual(manifest.eligible.filter(v=>v.context==='npc').map(v=>v.model),[0xf9300cc5]);
+ for(const mapping of manifest.eligible){const f=fixture();try{
+  assert.equal(registry.resolve(mapping.model,mapping.context).status,'available');assert.ok((await f.step(70,()=>[f.vehicle(mapping.name,mapping.context,mapping.model)])).peak>0,mapping.context+':'+mapping.name);
+  const d=f.engine.diagnostics();for(const role of ['engine','exhaust','stereo'])assert.ok(d.stageCounters[role].sumSquares>0,mapping.name+':'+role);
+  assert.equal(d.pipeline.renderer.limited,0);assert.equal(d.pipeline.renderer.missingHistory,0);
+ }finally{f.engine.close();}}
 });

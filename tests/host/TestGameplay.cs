@@ -74,6 +74,9 @@ internal static class TestGameplay {
    Until(()=>Number(Worker(),"activeSources")>=1&&Number(Worker(),"selectedPaths")>0&&Number(Worker(),"arrivals")>preGapArrivals&&Number(Evidence(),"sumSquares")>quietEnergy+1e-8,5000);
    Check(runtime.HostPid==gapHost&&runtime.Attempts==gapAttempts,"new genuine observations resume audible PCM without a replacement host");
    var before=Evidence();Check(Number(Worker(),"missingHistory")==0,"no source history violations");Check(Number(Worker(),"limitedSamples")==0,"no hidden limiter");Check(Number(before,"peak")<1,"digital headroom");
+   var stages=Worker()["stageCounters"] as Dictionary<string,object>;Check(Number(stages,"validVehicleObservations")>0&&Number(stages,"eligibleVehicleBlocks")>0&&Number(stages,"sourceCreations")>0,"valid injected observations resolve genuine supported source banks");
+   foreach(string role in new[]{"engine","exhaust","stereo"}){var pcm=stages[role] as Dictionary<string,object>;Check(Number(pcm,"nonzeroBlocks")>0&&Number(pcm,"sumSquares")>0&&Number(pcm,"peak")>0&&Number(pcm,"peak")<1,"actual "+role+" PCM is nonzero and bounded");}
+   Check(Number(stages,"acousticPathBlocks")>0&&Number(before,"sumSquares")>0,"post-propagation PCM reaches the actual host native ring");
    Check(Number(before,"underflowFrames")==0,"actual native-ring fixture applies fatal WASAPI underflow guard");Check(Number(before,"fixtureCallbackFrames")==960,"actual fixture uses native20ms callbacks across512-frame source boundaries");Check(Number(before,"producerStartupBlocks")==8,"real owned chain uses declared bounded reserve");
    int first=runtime.HostPid;Settings(3,false);Until(()=>runtime.HostPid==0,5000,0);Check(!Alive(first),"disabled host cleaned");Settings(4);Until(()=>runtime.HostPid>0,5000);owned.Add(runtime.HostPid);Until(()=>Number(Evidence(),"peak")>0,10000);
    // Kill actual host; job disposal must retire its real Node descendants.

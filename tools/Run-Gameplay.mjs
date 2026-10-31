@@ -27,7 +27,7 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality;
   integrationMode:d.mode,nativeReplacement:false,geometryMode:d.geometry,processingMaximumMs:d.maximumProcessingMs,sourceHistoryBytes:d.pipeline.sourceHistoryBytes,memoryBytes:d.memory.rss,
   clippedSamples:0,limitedSamples:d.pipeline.renderer.limited,missingHistory:d.pipeline.renderer.missingHistory,headroomPathsOmitted:d.headroomPathsOmitted,
   richAudioEnabled:engine.settings.enabled,outputLevel:engine.settings.volume,earlyReflections:engine.settings.reflections,
-  listenerState:d.listenerState,selectedPaths:d.selectedPaths,outputPeak:d.outputPeak,sourceStates:d.sourceStates,
+  listenerState:d.listenerState,selectedPaths:d.selectedPaths,outputPeak:d.outputPeak,sourceStates:d.sourceStates,stageCounters:d.stageCounters,
   fallbackReason:d.geometry==='conditional-direct-unobserved-space-assumed-clear'?'Additive; conditional direct sound without collision coverage':b.fallbackReason,
   controlDelayMs:100,propagationLimitSeconds:2,arrivals:d.arrivals,retired:d.retired}});
 }

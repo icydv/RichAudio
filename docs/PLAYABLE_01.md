@@ -1,5 +1,10 @@
 # PLAYABLE-01 validation candidate
 
+Follow-up: [PLAYABLE-02 provider investigation](PLAYABLE_02.md) identifies a
+sourced base-game revolution-ratio candidate and adds measured PCM stages.
+Authorised measurement found that installed RPH cannot resolve that candidate;
+live acceptance remains blocked on a trustworthy operating-state provider.
+
 Implemented from `36de226` on `feature/playable-01`. **Live acceptance is
 blocked.** The 2026-10-31 Story Mode test proved automatic plugin/host startup,
 F10 controls, persistence and endpoint operation, but produced no vehicle audio.
