@@ -1,5 +1,9 @@
 # PLAYABLE-03: engine telemetry compatibility decision
 
+Follow-up: [PLAYABLE-04](PLAYABLE_04.md) prepares and tests an independent SHV
+ASI offline. Its compiled candidate is not a validated live telemetry provider;
+the findings below remain the PLAYABLE-03 evidence record.
+
 31 October 2026. Continue PR #76 from `60ffda416bf9bbcc4882d953e6d4548b1c4bd8ca`.
 **BLOCKED for further playable integration.** No trustworthy operating-state
 provider has been validated on the actual Enhanced executable. The smallest

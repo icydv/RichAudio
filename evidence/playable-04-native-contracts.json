@@ -1,0 +1,287 @@
+{
+  "schema": 1,
+  "dateUtc": "2026-10-31",
+  "scope": "Independent static source-contract verification only; no native/runtime/game invocation",
+  "source": {
+    "url": "https://raw.githubusercontent.com/alloc8or/gta5-nativedb-data/424fb51b089049a9fbcebcc641500b1d44d255b4/natives_gen9.json",
+    "commit": "424fb51b089049a9fbcebcc641500b1d44d255b4",
+    "gitBlobSha1": "5dfba6ff6942a997e716347c57e1fd060909a008",
+    "sha256": "c58064f5f3b89a0acd58fe3a3497e817311e965b0595776402886949249c5a5e",
+    "bytes": 2667594,
+    "namespaceCorpus": "Enhanced/Gen9",
+    "cryptographicIdentityMatchesPinnedRepository": true
+  },
+  "nativeIdsHeader": {
+    "path": "src/telemetry/ShvProbe/NativeIds.h",
+    "sha256": "f31b3ca722efef97c0c9bfc45c31dab5ef413eff1d1a553cb90169cc86339f91",
+    "definitions": 16
+  },
+  "contracts": [
+    {
+      "alias": "IsLoading",
+      "namespace": "DLC",
+      "hash": "0x10D0A8F259E93EC9",
+      "name": "GET_IS_LOADING_SCREEN_ACTIVE",
+      "returnType": "BOOL",
+      "arity": 0,
+      "parameters": [],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "NetworkGame",
+      "namespace": "NETWORK",
+      "hash": "0x10FAB35428CCC9D7",
+      "name": "NETWORK_IS_GAME_IN_PROGRESS",
+      "returnType": "BOOL",
+      "arity": 0,
+      "parameters": [],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "NetworkSession",
+      "namespace": "NETWORK",
+      "hash": "0x9DE624D2FC4B603F",
+      "name": "NETWORK_IS_SESSION_STARTED",
+      "returnType": "BOOL",
+      "arity": 0,
+      "parameters": [],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "PlayerSwitch",
+      "namespace": "STREAMING",
+      "hash": "0xD9D2CFFF49FAB35F",
+      "name": "IS_PLAYER_SWITCH_IN_PROGRESS",
+      "returnType": "BOOL",
+      "arity": 0,
+      "parameters": [],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "PlayerId",
+      "namespace": "PLAYER",
+      "hash": "0x4F8644AF03D0E0D6",
+      "name": "PLAYER_ID",
+      "returnType": "Player",
+      "arity": 0,
+      "parameters": [],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "PlayerPlaying",
+      "namespace": "PLAYER",
+      "hash": "0x5E9564D8246B909A",
+      "name": "IS_PLAYER_PLAYING",
+      "returnType": "BOOL",
+      "arity": 1,
+      "parameters": [
+        {
+          "type": "Player",
+          "name": "player"
+        }
+      ],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "PlayerPed",
+      "namespace": "PLAYER",
+      "hash": "0xD80958FC74E988A6",
+      "name": "PLAYER_PED_ID",
+      "returnType": "Ped",
+      "arity": 0,
+      "parameters": [],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "EntityExists",
+      "namespace": "ENTITY",
+      "hash": "0x7239B21A38F536BA",
+      "name": "DOES_ENTITY_EXIST",
+      "returnType": "BOOL",
+      "arity": 1,
+      "parameters": [
+        {
+          "type": "Entity",
+          "name": "entity"
+        }
+      ],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "EntityIsPed",
+      "namespace": "ENTITY",
+      "hash": "0x524AC5ECEA15343E",
+      "name": "IS_ENTITY_A_PED",
+      "returnType": "BOOL",
+      "arity": 1,
+      "parameters": [
+        {
+          "type": "Entity",
+          "name": "entity"
+        }
+      ],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "EntityIsVehicle",
+      "namespace": "ENTITY",
+      "hash": "0x6AC7003FA6E5575E",
+      "name": "IS_ENTITY_A_VEHICLE",
+      "returnType": "BOOL",
+      "arity": 1,
+      "parameters": [
+        {
+          "type": "Entity",
+          "name": "entity"
+        }
+      ],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "EntityDead",
+      "namespace": "ENTITY",
+      "hash": "0x5F9532F3B5CC2551",
+      "name": "IS_ENTITY_DEAD",
+      "returnType": "BOOL",
+      "arity": 2,
+      "parameters": [
+        {
+          "type": "Entity",
+          "name": "entity"
+        },
+        {
+          "type": "BOOL",
+          "name": "p1"
+        }
+      ],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "PedVehicle",
+      "namespace": "PED",
+      "hash": "0x9A9112A0FE9A4713",
+      "name": "GET_VEHICLE_PED_IS_IN",
+      "returnType": "Vehicle",
+      "arity": 2,
+      "parameters": [
+        {
+          "type": "Ped",
+          "name": "ped"
+        },
+        {
+          "type": "BOOL",
+          "name": "includeEntering"
+        }
+      ],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "EntityModel",
+      "namespace": "ENTITY",
+      "hash": "0x9F47B058362C84B5",
+      "name": "GET_ENTITY_MODEL",
+      "returnType": "Hash",
+      "arity": 1,
+      "parameters": [
+        {
+          "type": "Entity",
+          "name": "entity"
+        }
+      ],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "VehicleSeatPed",
+      "namespace": "VEHICLE",
+      "hash": "0xBB40DD2270B65366",
+      "name": "GET_PED_IN_VEHICLE_SEAT",
+      "returnType": "Ped",
+      "arity": 3,
+      "parameters": [
+        {
+          "type": "Vehicle",
+          "name": "vehicle"
+        },
+        {
+          "type": "int",
+          "name": "seatIndex"
+        },
+        {
+          "type": "BOOL",
+          "name": "p2"
+        }
+      ],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "EngineRunning",
+      "namespace": "VEHICLE",
+      "hash": "0xAE31E7DF9B5B132E",
+      "name": "GET_IS_VEHICLE_ENGINE_RUNNING",
+      "returnType": "BOOL",
+      "arity": 1,
+      "parameters": [
+        {
+          "type": "Vehicle",
+          "name": "vehicle"
+        }
+      ],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    },
+    {
+      "alias": "CurrentRevRatio",
+      "namespace": "VEHICLE",
+      "hash": "0xF9DDA40BC293A61E",
+      "name": "_GET_VEHICLE_CURRENT_REV_RATIO",
+      "returnType": "float",
+      "arity": 1,
+      "parameters": [
+        {
+          "type": "Vehicle",
+          "name": "vehicle"
+        }
+      ],
+      "introductionMetadata": "811",
+      "matchesPublishedNameAndReturnAndArity": true
+    }
+  ],
+  "bati": {
+    "name": "bati",
+    "algorithm": "case-normalized ASCII Jenkins one-at-a-time hash with uint32 wrap",
+    "computedHex": "0xF9300CC5",
+    "declaredHex": "0xF9300CC5",
+    "deviceFreeMatch": true,
+    "nativeIdentityOrAssetSupportProvenByHashAlone": false
+  },
+  "review": {
+    "callArityAndParameterTypesManuallyCrossChecked": true,
+    "entityDeadSecondArgument": false,
+    "pedVehicleIncludeEntering": false,
+    "driverSeatIndex": -1,
+    "driverSeatThirdArgument": false,
+    "onlyNativeHandleArguments": true,
+    "targetDispatchAttemptsMaximum": 1,
+    "nativeCallsAfterTarget": 0,
+    "noLookupByHandlerAddress": true,
+    "preconditionNativeLiveReliabilityUnverified": true,
+    "targetRangeAndFailureSemanticsUnverified": true,
+    "measuredRpmClaim": false,
+    "providerValidClaim": false,
+    "productionSourceModifiedForThisReview": false
+  }
+}
