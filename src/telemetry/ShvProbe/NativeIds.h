@@ -22,5 +22,14 @@ inline constexpr std::uint64_t EntityModel = 0x9F47B058362C84B5ULL; // Hash(Enti
 inline constexpr std::uint64_t VehicleSeatPed = 0xBB40DD2270B65366ULL; // Ped(Vehicle,int,BOOL)
 inline constexpr std::uint64_t EngineRunning = 0xAE31E7DF9B5B132EULL; // BOOL(Vehicle)
 inline constexpr std::uint64_t CurrentRevRatio = 0xF9DDA40BC293A61EULL; // float(Vehicle)
+inline constexpr std::uint64_t EntitySpeed = 0xD5037BA82E12416FULL; // float(Entity), metres/second; gate only
+inline constexpr std::uint64_t PauseMenu = 0xB0034A223497FFCBULL; // BOOL()
+inline constexpr std::uint64_t TextFont = 0x66E0276CC5F6B9DAULL; // void(int)
+inline constexpr std::uint64_t TextScale = 0x07C837F9A01C34C9ULL; // void(float,float)
+inline constexpr std::uint64_t TextColour = 0xBE6B23FFA53FB442ULL; // void(int,int,int,int)
+inline constexpr std::uint64_t TextOutline = 0x2513DFB0FB8400FEULL; // void()
+inline constexpr std::uint64_t TextBegin = 0x25FBB336DF1804CBULL; // void(const char*)
+inline constexpr std::uint64_t TextAdd = 0x6C188BE134E074AAULL; // void(const char*)
+inline constexpr std::uint64_t TextEnd = 0xCD015E5BB0D96A57ULL; // void(float,float,int)
 inline constexpr std::uint32_t BatiModel = 0xF9300CC5U;
 }

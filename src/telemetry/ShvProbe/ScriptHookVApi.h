@@ -27,3 +27,8 @@ __declspec(dllimport) void scriptWait(DWORD milliseconds);
 __declspec(dllimport) void nativeInit(UINT64 hash);
 __declspec(dllimport) void nativePush64(UINT64 value);
 __declspec(dllimport) UINT64* nativeCall();
+
+// Published SDK keyboard callback. Notifications are observed, never consumed.
+using KeyboardHandler = void (*)(DWORD, WORD, BYTE, BOOL, BOOL, BOOL, BOOL);
+__declspec(dllimport) void keyboardHandlerRegister(KeyboardHandler handler);
+__declspec(dllimport) void keyboardHandlerUnregister(KeyboardHandler handler);

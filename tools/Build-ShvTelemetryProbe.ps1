@@ -3,13 +3,20 @@
 param(
  [string]$GameRoot='D:\Games\steamapps\common\Grand Theft Auto V Enhanced',
  [string]$BuildToolsRoot='',
- [string]$OutputRoot=''
+ [string]$OutputRoot='',
+ [string]$PublicEvidencePath=''
 )
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'Inspect-ShvProbe.ps1')
-if(!$OutputRoot){$OutputRoot=Join-Path $repo 'build/playable-04-shv-probe'}
+if(!$OutputRoot){$OutputRoot=Join-Path $repo 'build/playable-06-shv-probe'}
 $output=Assert-ShvBuildOutputPath $OutputRoot $repo $GameRoot
+$probeProfile='playable-06';$preservedRoot=[IO.Path]::GetFullPath((Join-Path $repo 'build/playable-04-shv-probe')).TrimEnd('\','/')
+if($output.Equals($preservedRoot,[StringComparison]::OrdinalIgnoreCase) -or $output.StartsWith($preservedRoot+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'PLAYABLE-04 build artifacts and receipts are preserved; choose the PLAYABLE-06 output directory.'}
+if(!$PublicEvidencePath){$PublicEvidencePath=Join-Path $repo 'evidence/playable-06-build.json'}
+$publicTarget=[IO.Path]::GetFullPath($PublicEvidencePath);$evidenceRoot=[IO.Path]::GetFullPath((Join-Path $repo 'evidence'))
+if(![IO.Path]::GetDirectoryName($publicTarget).Equals($evidenceRoot,[StringComparison]::OrdinalIgnoreCase) -or [IO.Path]::GetFileName($publicTarget) -notmatch '^playable-06-build(?:[-.][A-Za-z0-9_-]+)?\.json$'){throw 'Public build evidence must be a new playable-06-build JSON directly under this repository evidence directory.'}
+for($cursor=$publicTarget;$cursor;$cursor=[IO.Path]::GetDirectoryName($cursor)){if((Test-Path -LiteralPath $cursor) -and ((Get-Item -LiteralPath $cursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Public evidence output through a reparse point is not permitted.'}}
 $sourceRoot=Join-Path $repo 'src/telemetry/ShvProbe'
 $sources=@('Probe.cpp','ScriptHookVApi.h','NativeIds.h')
 foreach($name in $sources){if(!(Test-Path -LiteralPath (Join-Path $sourceRoot $name))){throw ('Probe source is not ready: '+$name)}}
@@ -32,7 +39,7 @@ if(!$sdkVersion){throw 'The authorised Windows 11 SDK 26100 headers are not read
 $includeDirs=@((Join-Path $vcRoot 'include'),(Join-Path $sdkRoot ('Include/'+$sdkVersion+'/ucrt')),(Join-Path $sdkRoot ('Include/'+$sdkVersion+'/shared')),(Join-Path $sdkRoot ('Include/'+$sdkVersion+'/um')))
 $libraryDirs=@((Join-Path $vcRoot 'lib/x64'),(Join-Path $sdkRoot ('Lib/'+$sdkVersion+'/ucrt/x64')),(Join-Path $sdkRoot ('Lib/'+$sdkVersion+'/um/x64')))
 foreach($directory in @($includeDirs)+@($libraryDirs)){if(!(Test-Path -LiteralPath $directory -PathType Container)){throw 'Microsoft compiler/SDK include or library directory is missing.'}}
-foreach($path in @($compiler,$linker,$librarian,(Join-Path $includeDirs[3] 'Windows.h'),(Join-Path $libraryDirs[2] 'kernel32.lib'))){if(!(Test-Path -LiteralPath $path -PathType Leaf)){throw 'Required Microsoft compiler, SDK header or import library is missing.'}}
+foreach($path in @($compiler,$linker,$librarian,(Join-Path $includeDirs[3] 'Windows.h'),(Join-Path $libraryDirs[2] 'kernel32.lib'),(Join-Path $libraryDirs[2] 'user32.lib'))){if(!(Test-Path -LiteralPath $path -PathType Leaf)){throw 'Required Microsoft compiler, SDK header or import library is missing.'}}
 
 function File-Record([string]$Path){$item=Get-Item -LiteralPath $Path;[ordered]@{Name=$item.Name;Bytes=$item.Length;Sha256=(Get-FileHash -LiteralPath $Path).Hash.ToLowerInvariant();FileVersion=$item.VersionInfo.FileVersion}}
 function Tool-Record([string]$Path){
@@ -55,21 +62,25 @@ function Invoke-BuildTool([string]$Executable,[string[]]$Arguments,[string]$Log)
  return [ordered]@{ExitCode=$code;Log=$Log}
 }
 $tools=[ordered]@{Compiler=(Tool-Record $compiler);Linker=(Tool-Record $linker);Librarian=(Tool-Record $librarian)}
+$preserved=@(foreach($name in @('build/playable-04-shv-probe/RichAudio.OperatingState.Shv.asi','build/playable-04-shv-probe/build-receipt.json','build/playable-04-shv-probe/pe-inspection.json','evidence/playable-04-build.json','evidence/playable-04-fixtures.json','evidence/playable-05-rollback.json')){
+ $path=Join-Path $repo $name;$record=File-Record $path;[ordered]@{Name=$name;Bytes=$record.Bytes;Sha256=$record.Sha256}
+})
+if($preserved[0].Sha256 -ne '8f516dc5bdfd62f125c8f9624d3396c9c3f9debceb618c39f76784323fd7a083' -or $preserved[0].Bytes -ne 288256){throw 'Preserved PLAYABLE-04 candidate no longer matches its approved fingerprint.'}
 $pins=[ordered]@{'ScriptHookV.dll'='126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f';'dinput8.dll'='9fd9e02353b7d39fe07b9667f7ea2697229a7f2d0e7d389eb79eb212b1bb181d';'GTA5_Enhanced.exe'='b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea'}
 $baseline=@(foreach($name in $pins.Keys){$record=File-Record (Join-Path $GameRoot $name);if($record.Sha256 -ne $pins[$name]){throw ('Installed baseline fingerprint differs: '+$name)};$record})
 $framework=Get-ShvPeImage -Path (Join-Path $GameRoot 'ScriptHookV.dll')
 if($framework.Machine -ne 'Amd64' -or $framework.PeKind -ne 'PE32Plus' -or !$framework.IsDll){throw 'Installed ScriptHookV baseline is not the verified x64 native DLL.'}
-$exports=@(Get-ShvExpectedExports)
+$exports=@(Get-ShvExpectedExports -Profile $probeProfile)
 foreach($name in $exports){$match=@($framework.Exports | Where-Object {$_.Name -ceq $name});if($match.Count -ne 1 -or $match[0].Forwarded -or !$match[0].HasFunction){throw 'Required exact public ScriptHookV export is missing, ambiguous or forwarded.'}}
-$provenanceFile=Join-Path $repo 'evidence/playable-04-header-provenance.json';$provenance=Get-Content -LiteralPath $provenanceFile -Raw|ConvertFrom-Json
-if($provenance.installedShv.expectedSha256 -ne $pins['ScriptHookV.dll'] -or @(Compare-Object ($exports|Sort-Object) (@($provenance.abi.PSObject.Properties.Value)|Sort-Object)).Count){throw 'Project header provenance and verified import boundary disagree.'}
+$provenanceFile=Join-Path $repo 'evidence/playable-06-header-provenance.json';$provenance=Get-Content -LiteralPath $provenanceFile -Raw|ConvertFrom-Json
+if($provenance.installedShv.expectedSha256 -ne $pins['ScriptHookV.dll'] -or @(Compare-Object ($exports|Sort-Object) (@($provenance.abi.PSObject.Properties.Value)|Sort-Object) -CaseSensitive).Count){throw 'Project header provenance and verified import boundary disagree.'}
 $projectInputs=@(foreach($name in $sources){$path=Join-Path $sourceRoot $name;[ordered]@{Name=(Portable-InputName $path);Bytes=(Get-Item -LiteralPath $path).Length;Sha256=(Get-FileHash -LiteralPath $path).Hash.ToLowerInvariant()}})
 [IO.Directory]::CreateDirectory($output)|Out-Null
 $definition=Join-Path $output 'ScriptHookV.def';$importLibrary=Join-Path $output 'ScriptHookV.lib';$object=Join-Path $output 'Probe.obj';$binary=Join-Path $output 'RichAudio.OperatingState.Shv.asi';$dependencies=Join-Path $output 'source-dependencies.json'
 (@('LIBRARY ScriptHookV.dll','EXPORTS')+@($exports|ForEach-Object {'  '+$_})) | Set-Content -LiteralPath $definition -Encoding ascii
 $compilerArguments=@('/nologo','/c','/std:c++17','/W4','/WX','/O2','/MT','/EHsc','/guard:cf','/Brepro','/utf-8',('/Fo'+$object),('/Fd'+(Join-Path $output 'Probe.compiler.pdb')),'/sourceDependencies',$dependencies)
 $compilerArguments+=@($includeDirs|ForEach-Object {'/I'+$_});$compilerArguments+=(Join-Path $sourceRoot 'Probe.cpp')
-$linkArguments=@('/NOLOGO','/DLL','/MACHINE:X64','/INCREMENTAL:NO','/OPT:REF','/OPT:ICF','/GUARD:CF','/DYNAMICBASE','/NXCOMPAT','/HIGHENTROPYVA','/Brepro','/VERBOSE:LIB',('/OUT:'+$binary),$object,$importLibrary,'kernel32.lib')+@($libraryDirs|ForEach-Object {'/LIBPATH:'+$_})
+$linkArguments=@('/NOLOGO','/DLL','/MACHINE:X64','/INCREMENTAL:NO','/OPT:REF','/OPT:ICF','/GUARD:CF','/DYNAMICBASE','/NXCOMPAT','/HIGHENTROPYVA','/Brepro','/VERBOSE:LIB',('/OUT:'+$binary),$object,$importLibrary,'kernel32.lib','user32.lib')+@($libraryDirs|ForEach-Object {'/LIBPATH:'+$_})
 $oldTemp=$env:TEMP;$oldTmp=$env:TMP;$oldLanguage=$env:VSLANG
 $temp=Join-Path $output 'tmp';[IO.Directory]::CreateDirectory($temp)|Out-Null
 try{
@@ -80,7 +91,7 @@ try{
   $linkStep=Invoke-BuildTool $linker $linkArguments (Join-Path $output 'link.log')
  }finally{Pop-Location}
 }finally{$env:TEMP=$oldTemp;$env:TMP=$oldTmp;$env:VSLANG=$oldLanguage}
-$image=Get-ShvPeImage -Path $binary;$null=Assert-ShvProductImage $image
+$image=Get-ShvPeImage -Path $binary;$null=Assert-ShvProductImage -Image $image -Profile $probeProfile
 $image|ConvertTo-Json -Depth 9|Set-Content -LiteralPath (Join-Path $output 'pe-inspection.json') -Encoding utf8
 $dependencyData=Get-Content -LiteralPath $dependencies -Raw|ConvertFrom-Json
 $includedHeaders=@(foreach($path in @($dependencyData.Data.Includes)|Sort-Object -Unique){[ordered]@{Name=(Portable-InputName $path);Sha256=(Get-FileHash -LiteralPath $path).Hash.ToLowerInvariant()}})
@@ -92,20 +103,22 @@ $linkedLibraries=@(foreach($path in @($libraryPaths)|Sort-Object){[ordered]@{Nam
 if(@($linkedLibraries|Where-Object {$_.Name -match '/kernel32\.lib$'}).Count -ne 1){throw 'Linker trace did not identify the consumed Windows kernel import library.'}
 foreach($name in $pins.Keys){if((Get-FileHash -LiteralPath (Join-Path $GameRoot $name)).Hash.ToLowerInvariant() -ne $pins[$name]){throw 'A pinned game baseline changed during offline build; no success receipt is published.'}}
 foreach($sourceInput in $projectInputs){$path=Join-Path $repo $sourceInput.Name.Substring(5);if((Get-FileHash -LiteralPath $path).Hash.ToLowerInvariant() -ne $sourceInput.Sha256){throw 'Probe source changed while compiling; rebuild the settled source.'}}
+foreach($record in $preserved){$path=Join-Path $repo $record.Name;if((Get-FileHash -LiteralPath $path).Hash.ToLowerInvariant() -ne $record.Sha256 -or (Get-Item -LiteralPath $path).Length -ne $record.Bytes){throw 'A preserved PLAYABLE-04 artifact or earlier receipt changed during compilation; no success receipt is published.'}}
 $toolchain=[ordered]@{Compiler=$compiler;Linker=$linker;Librarian=$librarian;SdkRoot=$sdkRoot;SdkVersion=$sdkVersion;VcRoot=$vcRoot;VcVersion=$vcVersion;IncludeDirs=$includeDirs;LibraryDirs=$libraryDirs}
-$private=[ordered]@{Schema=1;BuiltUtc=[DateTime]::UtcNow.ToString('o');Candidate=[ordered]@{Path=$binary;Sha256=$image.Sha256;Bytes=$image.Bytes};Toolchain=$toolchain;CompilerArguments=$compilerArguments;LinkerArguments=$linkArguments;Steps=@($libraryStep,$compileStep,$linkStep);PeInspection=$image;SourceInputs=$projectInputs;IncludedHeaders=$includedHeaders;LinkedLibraries=$linkedLibraries;GameFilesWritten=$false;GameOrProbeExecuted=$false;DeviceFreeFixturesExecutedByBuilder=$false}
+$private=[ordered]@{Schema=1;Profile=$probeProfile;BuiltUtc=[DateTime]::UtcNow.ToString('o');Candidate=[ordered]@{Path=$binary;Sha256=$image.Sha256;Bytes=$image.Bytes};Toolchain=$toolchain;CompilerArguments=$compilerArguments;LinkerArguments=$linkArguments;Steps=@($libraryStep,$compileStep,$linkStep);PeInspection=$image;SourceInputs=$projectInputs;IncludedHeaders=$includedHeaders;LinkedLibraries=$linkedLibraries;PreservedPlayable04Files=$preserved;EarlierArtifactAndReceiptsUnchanged=$true;GameFilesWritten=$false;GameOrProbeExecuted=$false;DeviceFreeFixturesExecutedByBuilder=$false}
 $private|ConvertTo-Json -Depth 12|Set-Content -LiteralPath (Join-Path $output 'build-receipt.json') -Encoding utf8
 $public=[ordered]@{
- schema=1;builtUtc=$private.BuiltUtc;scope='Offline Microsoft x64 C++ compilation, exact public import-boundary linking and static PE inspection only'
- candidate=[ordered]@{name=$image.Name;bytes=$image.Bytes;sha256=$image.Sha256;pathHint='build/playable-04-shv-probe/RichAudio.OperatingState.Shv.asi';installablePlayableUpdate=$false}
+ schema=1;profile=$probeProfile;builtUtc=$private.BuiltUtc;scope='Offline Microsoft x64 C++ compilation of the operator-armed diagnostic, exact public import-boundary linking and static PE inspection only'
+ candidate=[ordered]@{name=$image.Name;bytes=$image.Bytes;sha256=$image.Sha256;pathHint=(Portable-InputName $binary).Substring(5);installablePlayableUpdate=$false}
  toolchain=[ordered]@{msvcVersion=$vcVersion;windowsSdkVersion=$sdkVersion;compiler=$tools.Compiler;linker=$tools.Linker;librarian=$tools.Librarian;compilerFlags=@('/std:c++17','/W4','/WX','/O2','/MT','/EHsc','/guard:cf','/Brepro','/utf-8');linkerFlags=@('/DLL','/MACHINE:X64','/INCREMENTAL:NO','/OPT:REF','/OPT:ICF','/GUARD:CF','/DYNAMICBASE','/NXCOMPAT','/HIGHENTROPYVA','/Brepro')}
  sourceInputs=$projectInputs;headerProvenanceSha256=(Get-FileHash -LiteralPath $provenanceFile).Hash.ToLowerInvariant();includedHeaderCount=$includedHeaders.Count;includedHeaderManifestSha256=(Get-FileHash -LiteralPath $includedManifest).Hash.ToLowerInvariant();linkedLibraries=$linkedLibraries
- generatedImportLibrary=[ordered]@{method='Local MSVC librarian generated a COFF import library from six statically verified decorated exports; no proprietary import-library binary was copied';definitionSha256=(Get-FileHash -LiteralPath $definition).Hash.ToLowerInvariant();librarySha256=(Get-FileHash -LiteralPath $importLibrary).Hash.ToLowerInvariant();frameworkDll='ScriptHookV.dll';exactImportedNames=@($exports|Sort-Object)}
+ generatedImportLibrary=[ordered]@{method='Local MSVC librarian generated a COFF import library from eight statically verified decorated exports, including documented keyboard callbacks; no proprietary import-library binary was copied';definitionSha256=(Get-FileHash -LiteralPath $definition).Hash.ToLowerInvariant();librarySha256=(Get-FileHash -LiteralPath $importLibrary).Hash.ToLowerInvariant();frameworkDll='ScriptHookV.dll';exactImportedNames=@($exports|Sort-Object)}
+ preservedPlayable04Files=$preserved;earlierArtifactAndReceiptsUnchanged=$true
  pinnedInstalledBaselines=$baseline;baselineHashesStillMatchAfterBuild=$true;pe=$image
  runtimeSupportEstablished=$false;nativeResolutionEstablished=$false;operatingStateContractValidated=$false;sourceOrRenderedAudioEstablished=$false;gameFilesWritten=$false;deployed=$false;gameOrProbeExecuted=$false;deviceFreeFixturesExecutedByBuilder=$false;newSystemSoftwareInstalledByBuilder=$false
- qualification='A compiled isolated diagnostic candidate only. Static imports/entry point do not prove successful ASI loading, native availability, valid engine telemetry or audible vehicle sound. Device-free fixtures are reported separately.'
+ qualification='A compiled isolated operator-armed diagnostic candidate only. Static imports/entry point do not prove correct operator gating, successful ASI loading, native availability, valid engine telemetry or audible vehicle sound. Device-free fixtures are reported separately.'
  privacy='Absolute project/toolchain/game paths, raw build logs, compiler dependency paths and private captures remain in ignored build storage. No source audio, SDK/runtime binaries or game assets are published.'
 }
-$public|ConvertTo-Json -Depth 12|Set-Content -LiteralPath (Join-Path $repo 'evidence/playable-04-build.json') -Encoding utf8
+$public|ConvertTo-Json -Depth 12|Set-Content -LiteralPath $publicTarget -Encoding utf8
 Write-Output ('PASS native x64 read-only SHV probe compiled and PE/import boundary verified. '+$binary)
 Write-Output ('SHA256 '+$image.Sha256+'; not deployed, loaded or executed by this builder.')
