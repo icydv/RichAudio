@@ -1,6 +1,6 @@
 # PLAYABLE-12: functional RPH compatibility and passive SHV handoff
 
-**GO for approval of the exact passive candidate below. Not deployed, launched, live-qualified or audible.** The owner has explicitly removed third-party RPH distribution authentication from RichAudio's responsibilities. This is the operational policy, not a diagnostic exception. No maintainer authentication or API hash whitelist is required before integration can proceed.
+**GO for approval of the exact passive candidate below. Not deployed, launched, live-qualified or audible.** I have explicitly removed third-party RPH distribution authentication from RichAudio's responsibilities. This is the operational policy, not a diagnostic exception. No maintainer authentication or API hash whitelist is required before integration can proceed.
 
 Development started at `8c06c46ee0c1925d93692fbac6672116cd7f8537` on `feature/playable-01`, after inspecting the real working tree. The seven completed local PLAYABLE-11 reports/receipts are incorporated unchanged. Their identity and provenance findings remain historical facts; their requirement to wait for distribution authentication is superseded by this owner decision. Neither maintainer report was submitted, and neither is an action dependency now.
 
