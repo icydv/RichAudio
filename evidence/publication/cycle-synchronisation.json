@@ -1,0 +1,1789 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "parentPr": 15,
+  "parentCommit": "d011364127d5e2095e501802d015a708f1c45567",
+  "mainReviewed": "e5fbd8f3502d3e28169a224caa07471e090e368f",
+  "outcome": "PASS for bounded interior experiment; complete native scheduling/full-range phase reconstruction remains unverified",
+  "relationship": "Strongly supported but incomplete relative cycle/state coordinate",
+  "scope": "Bati player family; offline metadata and 26 local waveform windows; no live RPM",
+  "reviewedSource": {
+    "repository": "dexyfex/CodeWalker",
+    "commit": "485d56bec00262ed7fa472261cce7bbc6202b96e",
+    "files": [
+      "CodeWalker.Core/GameFiles/FileTypes/AwcFile.cs",
+      "CodeWalker.Core/GameFiles/FileTypes/RelFile.cs"
+    ],
+    "binarySourceIdentityProven": false
+  },
+  "nativeClockCrossCheck": {
+    "record": "hash_0346A636",
+    "observedClockPairs": [
+      [
+        12,
+        50
+      ],
+      [
+        11,
+        11
+      ]
+    ],
+    "oldField": "UnkFlags1",
+    "movingChannelValues": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "idleChannelValues": [
+      1,
+      1
+    ],
+    "currentSourceFieldAtCorrespondingByte": "GranularClockIndex",
+    "classification": "Source-layout correspondence; supplied-binary field renaming not independently established",
+    "nativeAlgorithmVerified": false,
+    "binaryLayoutCheck": "Incomplete; initial reflection-only dependency resolution failed, follow-up script was policy-blocked. Restriction left in place; no third-party method invoked or persistent policy changed."
+  },
+  "method": {
+    "windowSeconds": 0.5,
+    "acfSearchHz": [
+      6,
+      200
+    ],
+    "maximumLagFractionOfWindow": 0.3333333333333333,
+    "frequencyLabel": "relative acoustic repetition only; not physical RPM",
+    "controls": [
+      "half-rotated metadata values across uniform observation windows",
+      "1.37 times local metadata value"
+    ],
+    "heldOut": "Marker-spacing model selected on even records; evaluated on odd records. Temporally correlated points are not independent vehicle samples."
+  },
+  "streams": [
+    {
+      "name": "engine_decel",
+      "sourceSha256": "C78E85B1860F125B694BC92EAC593B6EAC7DD9B4855AF17882C4583735F44C95",
+      "sampleRate": 48000,
+      "summary": {
+        "count": 174,
+        "frames": 424508,
+        "values": {
+          "count": 174,
+          "median": 24.76796625,
+          "min": 6.58616924,
+          "max": 38.0348663
+        },
+        "spacing": {
+          "count": 173,
+          "median": 1938,
+          "min": 1261,
+          "max": 7334
+        },
+        "increases": 1,
+        "decreases": 165,
+        "plateaus": 7,
+        "spacingModel": {
+          "candidates": [
+            "current UnkFloat1",
+            "next UnkFloat1",
+            "adjacent mean UnkFloat1"
+          ],
+          "trainingMedianRelativeErrors": [
+            0.004581940416666486,
+            0.0025733635124999266,
+            0.0019780052447917473
+          ],
+          "chosenOnEvenRecords": 2,
+          "oddHeldOutRelativeError": {
+            "count": 86,
+            "median": 0.0022757884817708462,
+            "min": 0.0000011679687499377422,
+            "max": 0.038743255060000203
+          },
+          "reversedFloatControl": {
+            "count": 86,
+            "median": 0.60484184859375,
+            "min": 0.011576986334374983,
+            "max": 4.803486682941666
+          },
+          "halfRotationControl": {
+            "count": 86,
+            "median": 0.6388288300437499,
+            "min": 0.3381036317125,
+            "max": 2.8390004812500003
+          }
+        },
+        "markerValueRmsOverWholeRms": 0.23197830275010145,
+        "positiveSlopeFraction": 0.5344827586206896,
+        "groups": [
+          {
+            "index": 0,
+            "count": 18,
+            "firstRecord": 6,
+            "lastRecord": 23,
+            "firstFrame": 8865,
+            "values": {
+              "count": 18,
+              "median": 36.64122,
+              "min": 35.6612167,
+              "max": 37.6175537
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 1,
+            "count": 17,
+            "firstRecord": 42,
+            "lastRecord": 58,
+            "firstFrame": 58133,
+            "values": {
+              "count": 17,
+              "median": 31.209362,
+              "min": 30.2076778,
+              "max": 32.2249336
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 2,
+            "count": 12,
+            "firstRecord": 84,
+            "lastRecord": 95,
+            "firstFrame": 127879,
+            "values": {
+              "count": 12,
+              "median": 24.483552,
+              "min": 23.6336784,
+              "max": 25.18363
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 3,
+            "count": 8,
+            "firstRecord": 120,
+            "lastRecord": 127,
+            "firstFrame": 206874,
+            "values": {
+              "count": 8,
+              "median": 17.880429999999997,
+              "min": 17.3535786,
+              "max": 18.35564
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 4,
+            "count": 7,
+            "firstRecord": 141,
+            "lastRecord": 147,
+            "firstFrame": 268845,
+            "values": {
+              "count": 7,
+              "median": 13.2625933,
+              "min": 12.8,
+              "max": 13.7614679
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 5,
+            "count": 6,
+            "firstRecord": 160,
+            "lastRecord": 165,
+            "firstFrame": 346507,
+            "values": {
+              "count": 6,
+              "median": 9.128443,
+              "min": 8.654824,
+              "max": 9.550338
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          }
+        ],
+        "loopIndexInterpretation": "Candidate zero-based record indexing; native index base/walk semantics unverified"
+      },
+      "increasingMapValid": false,
+      "decreasingMapValid": false,
+      "observations": [
+        {
+          "centerFrame": 50941,
+          "bracketStartIndex": 37,
+          "bracketEndIndex": 38,
+          "groupIndices": [],
+          "metadataValue": 33.04567841650619,
+          "metadataPeriodCorrelation": 0.06732541555433351,
+          "strongestIndependentPeak": {
+            "periodSamples": 276,
+            "relativeFrequencyHz": 173.91304347826087,
+            "correlation": 0.24208428530210122
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 1452,
+            "relativeFrequencyHz": 33.05785123966942,
+            "correlation": 0.07035193411179608,
+            "relativePeriodError": 0.0006882312456985547
+          },
+          "controls": [
+            {
+              "value": 16.72255982273361,
+              "correlation": 0.02239145465685743
+            },
+            {
+              "value": 45.27257943061348,
+              "correlation": -0.011259830974848279
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 106127,
+          "bracketStartIndex": 72,
+          "bracketEndIndex": 73,
+          "groupIndices": [],
+          "metadataValue": 27.48011206191562,
+          "metadataPeriodCorrelation": 0.13024530126954845,
+          "strongestIndependentPeak": {
+            "periodSamples": 868,
+            "relativeFrequencyHz": 55.29953917050691,
+            "correlation": 0.3157025665688533
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 1739,
+            "relativeFrequencyHz": 27.602070155261643,
+            "correlation": 0.1414267683545952,
+            "relativePeriodError": 0.0045792787635947334
+          },
+          "controls": [
+            {
+              "value": 12.400204039334028,
+              "correlation": 0.0013825531701015595
+            },
+            {
+              "value": 37.6477535248244,
+              "correlation": 0.06942466341907175
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 169803,
+          "bracketStartIndex": 104,
+          "bracketEndIndex": 105,
+          "groupIndices": [],
+          "metadataValue": 21.69761085279531,
+          "metadataPeriodCorrelation": 0.1606605674935076,
+          "strongestIndependentPeak": {
+            "periodSamples": 1111,
+            "relativeFrequencyHz": 43.204320432043204,
+            "correlation": 0.3474571208855444
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 2221,
+            "relativeFrequencyHz": 21.611886537595677,
+            "correlation": 0.20552043887311178,
+            "relativePeriodError": 0.00406871609403255
+          },
+          "controls": [
+            {
+              "value": 9.073422064036592,
+              "correlation": -0.010764271817126084
+            },
+            {
+              "value": 29.725726868329577,
+              "correlation": 0.03270648988621897
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 233479,
+          "bracketStartIndex": 129,
+          "bracketEndIndex": 130,
+          "groupIndices": [],
+          "metadataValue": 16.72255982273361,
+          "metadataPeriodCorrelation": 0.28171607171471036,
+          "strongestIndependentPeak": {
+            "periodSamples": 1425,
+            "relativeFrequencyHz": 33.68421052631579,
+            "correlation": 0.5150254110231562
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 2871,
+            "relativeFrequencyHz": 16.718913270637408,
+            "correlation": 0.2836944849476299,
+            "relativePeriodError": 0.0003484320557491289
+          },
+          "controls": [
+            {
+              "value": 33.04567841650619,
+              "correlation": 0.46234136496557066
+            },
+            {
+              "value": 22.90990695714505,
+              "correlation": 0.0008494801365794754
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 297156,
+          "bracketStartIndex": 148,
+          "bracketEndIndex": 149,
+          "groupIndices": [],
+          "metadataValue": 12.400204039334028,
+          "metadataPeriodCorrelation": 0.44992709868345754,
+          "strongestIndependentPeak": {
+            "periodSamples": 1937,
+            "relativeFrequencyHz": 24.7805885389778,
+            "correlation": 0.683982920426994
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 3878,
+            "relativeFrequencyHz": 12.377514182568333,
+            "correlation": 0.4563386366785053,
+            "relativePeriodError": 0.0018083182640144665
+          },
+          "controls": [
+            {
+              "value": 27.48011206191562,
+              "correlation": -0.06296337650056616
+            },
+            {
+              "value": 16.98827953388762,
+              "correlation": 0.07522287188366436
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 360832,
+          "bracketStartIndex": 162,
+          "bracketEndIndex": 163,
+          "groupIndices": [
+            5
+          ],
+          "metadataValue": 9.073422064036592,
+          "metadataPeriodCorrelation": 0.4975824363619192,
+          "strongestIndependentPeak": {
+            "periodSamples": 2649,
+            "relativeFrequencyHz": 18.12004530011325,
+            "correlation": 0.6447748908793898
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 5293,
+            "relativeFrequencyHz": 9.06858114490837,
+            "correlation": 0.5028555509140462,
+            "relativePeriodError": 0.0005671077504725897
+          },
+          "controls": [
+            {
+              "value": 21.69761085279531,
+              "correlation": -0.5378722597132636
+            },
+            {
+              "value": 12.430588227730132,
+              "correlation": -0.3302198027651051
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        }
+      ]
+    },
+    {
+      "name": "exhaust_decel",
+      "sourceSha256": "574DBB61C486F18848839300C9D72219957258CEEA6B1F93710EB72EF6270F2F",
+      "sampleRate": 48000,
+      "summary": {
+        "count": 155,
+        "frames": 374180,
+        "values": {
+          "count": 155,
+          "median": 24.55243,
+          "min": 8.177172,
+          "max": 37.97468
+        },
+        "spacing": {
+          "count": 154,
+          "median": 1955.5,
+          "min": 1260,
+          "max": 6017
+        },
+        "increases": 8,
+        "decreases": 146,
+        "plateaus": 0,
+        "spacingModel": {
+          "candidates": [
+            "current UnkFloat1",
+            "next UnkFloat1",
+            "adjacent mean UnkFloat1"
+          ],
+          "trainingMedianRelativeErrors": [
+            0.0038591436687498426,
+            0.005346121708333262,
+            0.001725485693749862
+          ],
+          "chosenOnEvenRecords": 2,
+          "oddHeldOutRelativeError": {
+            "count": 77,
+            "median": 0.001720794402083392,
+            "min": 0.0000015631250001035824,
+            "max": 0.08112217643541664
+          },
+          "reversedFloatControl": {
+            "count": 77,
+            "median": 0.6232378896249999,
+            "min": 0.009560143953124989,
+            "max": 3.5709357562656256
+          },
+          "halfRotationControl": {
+            "count": 77,
+            "median": 0.6604239370000002,
+            "min": 0.006076710671874874,
+            "max": 2.213356419005208
+          }
+        },
+        "markerValueRmsOverWholeRms": 0.04683734940684254,
+        "positiveSlopeFraction": 0.5870967741935483,
+        "groups": [
+          {
+            "index": 0,
+            "count": 24,
+            "firstRecord": 2,
+            "lastRecord": 25,
+            "firstFrame": 3497,
+            "values": {
+              "count": 24,
+              "median": 36.7816963,
+              "min": 35.6083069,
+              "max": 37.97468
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 1,
+            "count": 17,
+            "firstRecord": 47,
+            "lastRecord": 63,
+            "firstFrame": 65661,
+            "values": {
+              "count": 17,
+              "median": 29.3398533,
+              "min": 28.2519131,
+              "max": 30.2648163
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 2,
+            "count": 15,
+            "firstRecord": 84,
+            "lastRecord": 98,
+            "firstFrame": 131537,
+            "values": {
+              "count": 15,
+              "median": 21.67043,
+              "min": 20.6985779,
+              "max": 22.6095142
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 3,
+            "count": 10,
+            "firstRecord": 111,
+            "lastRecord": 120,
+            "firstFrame": 195901,
+            "values": {
+              "count": 10,
+              "median": 15.9735728,
+              "min": 15.1629066,
+              "max": 16.72602
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 4,
+            "count": 8,
+            "firstRecord": 130,
+            "lastRecord": 137,
+            "firstFrame": 258181,
+            "values": {
+              "count": 8,
+              "median": 11.46476505,
+              "min": 10.9364319,
+              "max": 11.9572525
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 5,
+            "count": 6,
+            "firstRecord": 143,
+            "lastRecord": 148,
+            "firstFrame": 316362,
+            "values": {
+              "count": 6,
+              "median": 8.641580000000001,
+              "min": 8.177172,
+              "max": 9.146377
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          }
+        ],
+        "loopIndexInterpretation": "Candidate zero-based record indexing; native index base/walk semantics unverified"
+      },
+      "increasingMapValid": false,
+      "decreasingMapValid": false,
+      "observations": [
+        {
+          "centerFrame": 44902,
+          "bracketStartIndex": 33,
+          "bracketEndIndex": 34,
+          "groupIndices": [],
+          "metadataValue": 33.514205107520894,
+          "metadataPeriodCorrelation": 0.1720171108389695,
+          "strongestIndependentPeak": {
+            "periodSamples": 718,
+            "relativeFrequencyHz": 66.85236768802228,
+            "correlation": 0.5437009728802271
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 1457,
+            "relativeFrequencyHz": 32.94440631434454,
+            "correlation": 0.19172427102712597,
+            "relativePeriodError": 0.017458100558659217
+          },
+          "controls": [
+            {
+              "value": 16.153209541607804,
+              "correlation": 0.043320625220478484
+            },
+            {
+              "value": 45.91446099730363,
+              "correlation": 0.11824163257249823
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 93545,
+          "bracketStartIndex": 63,
+          "bracketEndIndex": 64,
+          "groupIndices": [],
+          "metadataValue": 28.102405247445684,
+          "metadataPeriodCorrelation": 0.4689189037400654,
+          "strongestIndependentPeak": {
+            "periodSamples": 854,
+            "relativeFrequencyHz": 56.20608899297424,
+            "correlation": 0.7231485676055308
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 1701,
+            "relativeFrequencyHz": 28.21869488536155,
+            "correlation": 0.47415991498218674,
+            "relativePeriodError": 0.004098360655737705
+          },
+          "controls": [
+            {
+              "value": 11.937032918825562,
+              "correlation": -0.14589662958982175
+            },
+            {
+              "value": 38.50029518900059,
+              "correlation": 0.2009646366286081
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 149672,
+          "bracketStartIndex": 92,
+          "bracketEndIndex": 93,
+          "groupIndices": [
+            2
+          ],
+          "metadataValue": 21.55310573369272,
+          "metadataPeriodCorrelation": 0.675405426215542,
+          "strongestIndependentPeak": {
+            "periodSamples": 1115,
+            "relativeFrequencyHz": 43.04932735426009,
+            "correlation": 0.8702326226039032
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 2228,
+            "relativeFrequencyHz": 21.54398563734291,
+            "correlation": 0.6755405114259462,
+            "relativePeriodError": 0.000449034575662326
+          },
+          "controls": [
+            {
+              "value": 9.083829183053993,
+              "correlation": -0.12517630144486375
+            },
+            {
+              "value": 29.52775485515903,
+              "correlation": -0.07588185136874091
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 205799,
+          "bracketStartIndex": 114,
+          "bracketEndIndex": 115,
+          "groupIndices": [
+            3
+          ],
+          "metadataValue": 16.153209541607804,
+          "metadataPeriodCorrelation": 0.6253499317786696,
+          "strongestIndependentPeak": {
+            "periodSamples": 1486,
+            "relativeFrequencyHz": 32.30148048452221,
+            "correlation": 0.8593767426122771
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 2971,
+            "relativeFrequencyHz": 16.156176371592057,
+            "correlation": 0.6253743943273735,
+            "relativePeriodError": 0.00033647375504710633
+          },
+          "controls": [
+            {
+              "value": 33.514205107520894,
+              "correlation": 0.6359057783745665
+            },
+            {
+              "value": 22.129897072002695,
+              "correlation": -0.25340317567387644
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 261926,
+          "bracketStartIndex": 130,
+          "bracketEndIndex": 131,
+          "groupIndices": [
+            4
+          ],
+          "metadataValue": 11.937032918825562,
+          "metadataPeriodCorrelation": 0.2470361259222915,
+          "strongestIndependentPeak": {
+            "periodSamples": 2013,
+            "relativeFrequencyHz": 23.84500745156483,
+            "correlation": 0.6567509198063065
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 4079,
+            "relativeFrequencyHz": 11.76759009561167,
+            "correlation": 0.2998784396078018,
+            "relativePeriodError": 0.014424272569012683
+          },
+          "controls": [
+            {
+              "value": 28.102405247445684,
+              "correlation": -0.27544739356046527
+            },
+            {
+              "value": 16.35373509879102,
+              "correlation": -0.011886761363034562
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 318053,
+          "bracketStartIndex": 143,
+          "bracketEndIndex": 144,
+          "groupIndices": [
+            5
+          ],
+          "metadataValue": 9.083829183053993,
+          "metadataPeriodCorrelation": 0.35841708294267904,
+          "strongestIndependentPeak": {
+            "periodSamples": 2655,
+            "relativeFrequencyHz": 18.07909604519774,
+            "correlation": 0.6475622807612154
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 5332,
+            "relativeFrequencyHz": 9.00225056264066,
+            "correlation": 0.3762991760394167,
+            "relativePeriodError": 0.009084027252081756
+          },
+          "controls": [
+            {
+              "value": 21.55310573369272,
+              "correlation": -0.3627844080509836
+            },
+            {
+              "value": 12.444845980783972,
+              "correlation": -0.27432824880337364
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        }
+      ]
+    },
+    {
+      "name": "engine_accel",
+      "sourceSha256": "6256183775002E5273F6FC20CC2D2B2D5D1C9614F812EDC8A2901185D01B681A",
+      "sampleRate": 48000,
+      "summary": {
+        "count": 155,
+        "frames": 328251,
+        "values": {
+          "count": 155,
+          "median": 28.0475731,
+          "min": 8.24459,
+          "max": 39.5387154
+        },
+        "spacing": {
+          "count": 154,
+          "median": 1715,
+          "min": 1212,
+          "max": 6325
+        },
+        "increases": 150,
+        "decreases": 0,
+        "plateaus": 4,
+        "spacingModel": {
+          "candidates": [
+            "current UnkFloat1",
+            "next UnkFloat1",
+            "adjacent mean UnkFloat1"
+          ],
+          "trainingMedianRelativeErrors": [
+            0.005313625770833386,
+            0.004290688962500067,
+            0.00363722815937495
+          ],
+          "chosenOnEvenRecords": 2,
+          "oddHeldOutRelativeError": {
+            "count": 77,
+            "median": 0.004291770374999837,
+            "min": 0.00014903667708332513,
+            "max": 0.10438894557291678
+          },
+          "reversedFloatControl": {
+            "count": 77,
+            "median": 0.53450898891875,
+            "min": 0.006222634093750012,
+            "max": 4.2100494771875
+          },
+          "halfRotationControl": {
+            "count": 77,
+            "median": 0.55993837628125,
+            "min": 0.15035310085624998,
+            "max": 2.7418165932812504
+          }
+        },
+        "markerValueRmsOverWholeRms": 0.3706438571918287,
+        "positiveSlopeFraction": 0.45161290322580644,
+        "groups": [
+          {
+            "index": 0,
+            "count": 5,
+            "firstRecord": 1,
+            "lastRecord": 5,
+            "firstFrame": 5837,
+            "values": {
+              "count": 5,
+              "median": 8.788082,
+              "min": 8.253802,
+              "max": 9.434977
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 1,
+            "count": 8,
+            "firstRecord": 21,
+            "lastRecord": 28,
+            "firstFrame": 93237,
+            "values": {
+              "count": 8,
+              "median": 16.00062845,
+              "min": 14.9296265,
+              "max": 16.945591
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 2,
+            "count": 11,
+            "firstRecord": 54,
+            "lastRecord": 64,
+            "firstFrame": 177123,
+            "values": {
+              "count": 11,
+              "median": 24.2218361,
+              "min": 23.0489521,
+              "max": 25.3279457
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 3,
+            "count": 16,
+            "firstRecord": 85,
+            "lastRecord": 100,
+            "firstFrame": 233772,
+            "values": {
+              "count": 16,
+              "median": 31.229194999999997,
+              "min": 29.7491837,
+              "max": 32.6748238
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 4,
+            "count": 20,
+            "firstRecord": 132,
+            "lastRecord": 151,
+            "firstFrame": 300338,
+            "values": {
+              "count": 20,
+              "median": 38.56853855,
+              "min": 37.3626175,
+              "max": 39.5387154
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          }
+        ],
+        "loopIndexInterpretation": "Candidate zero-based record indexing; native index base/walk semantics unverified"
+      },
+      "increasingMapValid": false,
+      "decreasingMapValid": false,
+      "observations": [
+        {
+          "centerFrame": 39390,
+          "bracketStartIndex": 7,
+          "bracketEndIndex": 8,
+          "groupIndices": [],
+          "metadataValue": 10.191566310391249,
+          "metadataPeriodCorrelation": -0.06070565965873796,
+          "strongestIndependentPeak": {
+            "periodSamples": 892,
+            "relativeFrequencyHz": 53.81165919282511,
+            "correlation": 0.40007529238065176
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 4823,
+            "relativeFrequencyHz": 9.952311839104292,
+            "correlation": 0.06346517423833704,
+            "relativePeriodError": 0.02399150743099788
+          },
+          "controls": [
+            {
+              "value": 23.442177615797103,
+              "correlation": -0.22042961100946143
+            },
+            {
+              "value": 13.962445845236012,
+              "correlation": 0.05334553189998288
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 82063,
+          "bracketStartIndex": 17,
+          "bracketEndIndex": 18,
+          "groupIndices": [],
+          "metadataValue": 13.824583444498568,
+          "metadataPeriodCorrelation": 0.07076993577855414,
+          "strongestIndependentPeak": {
+            "periodSamples": 1746,
+            "relativeFrequencyHz": 27.491408934707902,
+            "correlation": 0.22042378000941024
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 3465,
+            "relativeFrequencyHz": 13.852813852813853,
+            "correlation": 0.08165493605061083,
+            "relativePeriodError": 0.0020161290322580645
+          },
+          "controls": [
+            {
+              "value": 29.23055169725777,
+              "correlation": 0.08552331125098367
+            },
+            {
+              "value": 18.93967931896304,
+              "correlation": -0.012479671944784169
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 131300,
+          "bracketStartIndex": 34,
+          "bracketEndIndex": 35,
+          "groupIndices": [],
+          "metadataValue": 18.49389489,
+          "metadataPeriodCorrelation": 0.13539124466030222,
+          "strongestIndependentPeak": {
+            "periodSamples": 1301,
+            "relativeFrequencyHz": 36.89469638739431,
+            "correlation": 0.2684261687961855
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 2590,
+            "relativeFrequencyHz": 18.53281853281853,
+            "correlation": 0.14356966749487665,
+            "relativePeriodError": 0.0019267822736030828
+          },
+          "controls": [
+            {
+              "value": 35.17534522893961,
+              "correlation": 0.12670662368061247
+            },
+            {
+              "value": 25.3366359993,
+              "correlation": 0.0007567066134872242
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 180538,
+          "bracketStartIndex": 55,
+          "bracketEndIndex": 56,
+          "groupIndices": [
+            2
+          ],
+          "metadataValue": 23.442177615797103,
+          "metadataPeriodCorrelation": 0.14049459242593837,
+          "strongestIndependentPeak": {
+            "periodSamples": 998,
+            "relativeFrequencyHz": 48.09619238476954,
+            "correlation": 0.19267044987271723
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 2047,
+            "relativeFrequencyHz": 23.44894968246214,
+            "correlation": 0.14112125406471884,
+            "relativePeriodError": 0.00048828125
+          },
+          "controls": [
+            {
+              "value": 10.191566310391249,
+              "correlation": -0.018253206728326737
+            },
+            {
+              "value": 32.115783333642035,
+              "correlation": 0.008635372308955983
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 229776,
+          "bracketStartIndex": 82,
+          "bracketEndIndex": 83,
+          "groupIndices": [],
+          "metadataValue": 29.23055169725777,
+          "metadataPeriodCorrelation": 0.03787536573335333,
+          "strongestIndependentPeak": {
+            "periodSamples": 803,
+            "relativeFrequencyHz": 59.7758405977584,
+            "correlation": 0.22307104872003614
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 1631,
+            "relativeFrequencyHz": 29.429797670141017,
+            "correlation": 0.07946607369695295,
+            "relativePeriodError": 0.006699147381242387
+          },
+          "controls": [
+            {
+              "value": 13.824583444498568,
+              "correlation": -0.011444369686928189
+            },
+            {
+              "value": 40.045855825243144,
+              "correlation": -0.049914868696875975
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 279013,
+          "bracketStartIndex": 115,
+          "bracketEndIndex": 116,
+          "groupIndices": [],
+          "metadataValue": 35.17534522893961,
+          "metadataPeriodCorrelation": 0.14443199015976324,
+          "strongestIndependentPeak": {
+            "periodSamples": 683,
+            "relativeFrequencyHz": 70.27818448023426,
+            "correlation": 0.2601927825138997
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 1361,
+            "relativeFrequencyHz": 35.26818515797208,
+            "correlation": 0.18000210238914216,
+            "relativePeriodError": 0.0029304029304029304
+          },
+          "controls": [
+            {
+              "value": 18.49389489,
+              "correlation": 0.020430034346277333
+            },
+            {
+              "value": 48.19022296364727,
+              "correlation": -0.08724150982886485
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        }
+      ]
+    },
+    {
+      "name": "exhaust_accel",
+      "sourceSha256": "D2964EF675622A5D448DE8F11081AF3369CF02A9ACA19F98D3E59A4A3BB7CAAE",
+      "sampleRate": 48000,
+      "summary": {
+        "count": 155,
+        "frames": 328251,
+        "values": {
+          "count": 155,
+          "median": 28.01088,
+          "min": 8.20011,
+          "max": 39.5061722
+        },
+        "spacing": {
+          "count": 154,
+          "median": 1714.5,
+          "min": 1214,
+          "max": 5924
+        },
+        "increases": 148,
+        "decreases": 1,
+        "plateaus": 5,
+        "spacingModel": {
+          "candidates": [
+            "current UnkFloat1",
+            "next UnkFloat1",
+            "adjacent mean UnkFloat1"
+          ],
+          "trainingMedianRelativeErrors": [
+            0.0032486983937499714,
+            0.004559979499999978,
+            0.0009764747916667371
+          ],
+          "chosenOnEvenRecords": 2,
+          "oddHeldOutRelativeError": {
+            "count": 77,
+            "median": 0.0011328773656249513,
+            "min": 6.815312498797965e-7,
+            "max": 0.02309337420833324
+          },
+          "reversedFloatControl": {
+            "count": 77,
+            "median": 0.5413875333333331,
+            "min": 0.008272074567708398,
+            "max": 3.8757200856833336
+          },
+          "halfRotationControl": {
+            "count": 77,
+            "median": 0.5697334471635414,
+            "min": 0.1517503128020834,
+            "max": 2.5113465586458332
+          }
+        },
+        "markerValueRmsOverWholeRms": 0.12743600862128263,
+        "positiveSlopeFraction": 0.05806451612903226,
+        "groups": [
+          {
+            "index": 0,
+            "count": 5,
+            "firstRecord": 1,
+            "lastRecord": 5,
+            "firstFrame": 6150,
+            "values": {
+              "count": 5,
+              "median": 8.650925,
+              "min": 8.20011,
+              "max": 9.334036
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 1,
+            "count": 6,
+            "firstRecord": 14,
+            "lastRecord": 19,
+            "firstFrame": 68308,
+            "values": {
+              "count": 6,
+              "median": 13.2510853,
+              "min": 12.5195618,
+              "max": 14.1462736
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 2,
+            "count": 10,
+            "firstRecord": 38,
+            "lastRecord": 47,
+            "firstFrame": 140554,
+            "values": {
+              "count": 10,
+              "median": 20.336914999999998,
+              "min": 19.3662415,
+              "max": 21.277256
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 3,
+            "count": 14,
+            "firstRecord": 71,
+            "lastRecord": 84,
+            "firstFrame": 209930,
+            "values": {
+              "count": 14,
+              "median": 28.1683266,
+              "min": 26.8339329,
+              "max": 29.7004
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          },
+          {
+            "index": 4,
+            "count": 20,
+            "firstRecord": 131,
+            "lastRecord": 150,
+            "firstFrame": 298942,
+            "values": {
+              "count": 20,
+              "median": 38.665765,
+              "min": 37.5,
+              "max": 39.5061722
+            },
+            "style": 2,
+            "identifier": "4C633D07"
+          }
+        ],
+        "loopIndexInterpretation": "Candidate zero-based record indexing; native index base/walk semantics unverified"
+      },
+      "increasingMapValid": false,
+      "decreasingMapValid": false,
+      "observations": [
+        {
+          "centerFrame": 39390,
+          "bracketStartIndex": 7,
+          "bracketEndIndex": 8,
+          "groupIndices": [],
+          "metadataValue": 10.001758160176804,
+          "metadataPeriodCorrelation": 0.01722530920285855,
+          "strongestIndependentPeak": {
+            "periodSamples": 911,
+            "relativeFrequencyHz": 52.689352360043905,
+            "correlation": 0.49928214727760734
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 4944,
+            "relativeFrequencyHz": 9.70873786407767,
+            "correlation": 0.12303136056722308,
+            "relativePeriodError": 0.0302146280475099
+          },
+          "controls": [
+            {
+              "value": 23.293588663280115,
+              "correlation": -0.18869521941398912
+            },
+            {
+              "value": 13.702408679442222,
+              "correlation": 0.05019015958940889
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 82063,
+          "bracketStartIndex": 17,
+          "bracketEndIndex": 18,
+          "groupIndices": [
+            1
+          ],
+          "metadataValue": 13.741601615573304,
+          "metadataPeriodCorrelation": 0.011947482561516834,
+          "strongestIndependentPeak": {
+            "periodSamples": 692,
+            "relativeFrequencyHz": 69.36416184971098,
+            "correlation": 0.504368519840037
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 3380,
+            "relativeFrequencyHz": 14.201183431952662,
+            "correlation": 0.18705791393923285,
+            "relativePeriodError": 0.03235041511594618
+          },
+          "controls": [
+            {
+              "value": 29.32046131890244,
+              "correlation": 0.004840335472465734
+            },
+            {
+              "value": 18.825994213335427,
+              "correlation": -0.06151870116416461
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 131300,
+          "bracketStartIndex": 34,
+          "bracketEndIndex": 35,
+          "groupIndices": [],
+          "metadataValue": 18.54524303500773,
+          "metadataPeriodCorrelation": 0.2997622353544422,
+          "strongestIndependentPeak": {
+            "periodSamples": 1294,
+            "relativeFrequencyHz": 37.09428129829985,
+            "correlation": 0.665345826089598
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 2600,
+            "relativeFrequencyHz": 18.46153846153846,
+            "correlation": 0.3037728089549686,
+            "relativePeriodError": 0.00463678516228748
+          },
+          "controls": [
+            {
+              "value": 35.35645707742647,
+              "correlation": 0.3137339077615135
+            },
+            {
+              "value": 25.40698295796059,
+              "correlation": -0.1348051088284629
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 180538,
+          "bracketStartIndex": 55,
+          "bracketEndIndex": 56,
+          "groupIndices": [],
+          "metadataValue": 23.293588663280115,
+          "metadataPeriodCorrelation": 0.39858893979970217,
+          "strongestIndependentPeak": {
+            "periodSamples": 1030,
+            "relativeFrequencyHz": 46.601941747572816,
+            "correlation": 0.6701155556409122
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 2037,
+            "relativeFrequencyHz": 23.564064801178205,
+            "correlation": 0.40824224961257727,
+            "relativePeriodError": 0.011644832605531296
+          },
+          "controls": [
+            {
+              "value": 10.001758160176804,
+              "correlation": -0.08727532225178786
+            },
+            {
+              "value": 31.91221646869376,
+              "correlation": 0.10680826421758785
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 229776,
+          "bracketStartIndex": 82,
+          "bracketEndIndex": 83,
+          "groupIndices": [
+            3
+          ],
+          "metadataValue": 29.32046131890244,
+          "metadataPeriodCorrelation": 0.38809304772555475,
+          "strongestIndependentPeak": {
+            "periodSamples": 820,
+            "relativeFrequencyHz": 58.53658536585366,
+            "correlation": 0.6308407816006404
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 1662,
+            "relativeFrequencyHz": 28.880866425992778,
+            "correlation": 0.41876781006969677,
+            "relativePeriodError": 0.015271838729383017
+          },
+          "controls": [
+            {
+              "value": 13.741601615573304,
+              "correlation": -0.09888471363665134
+            },
+            {
+              "value": 40.169032006896344,
+              "correlation": -0.11661048264785065
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        },
+        {
+          "centerFrame": 279013,
+          "bracketStartIndex": 115,
+          "bracketEndIndex": 116,
+          "groupIndices": [],
+          "metadataValue": 35.35645707742647,
+          "metadataPeriodCorrelation": 0.6291953936247654,
+          "strongestIndependentPeak": {
+            "periodSamples": 679,
+            "relativeFrequencyHz": 70.69219440353461,
+            "correlation": 0.7910772599882434
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 1351,
+            "relativeFrequencyHz": 35.529237601776465,
+            "correlation": 0.6340864259583271,
+            "relativePeriodError": 0.005154639175257732
+          },
+          "controls": [
+            {
+              "value": 18.54524303500773,
+              "correlation": 0.11453759140772617
+            },
+            {
+              "value": 48.438346196074264,
+              "correlation": -0.4732796566498449
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        }
+      ]
+    },
+    {
+      "name": "engine_idle",
+      "sourceSha256": "3B8A97FEA007E838F524C1694918E0A56FD82C4DDC96EBBEB67E3CFDCC206430",
+      "sampleRate": 48000,
+      "summary": {
+        "count": 9,
+        "frames": 40350,
+        "values": {
+          "count": 9,
+          "median": 10.822999,
+          "min": 10.1673374,
+          "max": 11.0803328
+        },
+        "spacing": {
+          "count": 8,
+          "median": 4440,
+          "min": 4388,
+          "max": 4629
+        },
+        "increases": 4,
+        "decreases": 3,
+        "plateaus": 1,
+        "spacingModel": {
+          "candidates": [
+            "current UnkFloat1",
+            "next UnkFloat1",
+            "adjacent mean UnkFloat1"
+          ],
+          "trainingMedianRelativeErrors": [
+            0.010834997207291641,
+            0.021732394189583393,
+            0.008687268425520811
+          ],
+          "chosenOnEvenRecords": 2,
+          "oddHeldOutRelativeError": {
+            "count": 4,
+            "median": 0.017765561145312525,
+            "min": 0.003539351585416517,
+            "max": 0.036357594259375015
+          },
+          "reversedFloatControl": {
+            "count": 4,
+            "median": 0.020697046634374994,
+            "min": 0.007771119579166874,
+            "max": 0.057330657815625186
+          },
+          "halfRotationControl": {
+            "count": 4,
+            "median": 0.01880369685989569,
+            "min": 0.010597508083333373,
+            "max": 0.04137161133437517
+          }
+        },
+        "markerValueRmsOverWholeRms": 0.022171636340642006,
+        "positiveSlopeFraction": 0.3333333333333333,
+        "groups": [],
+        "loopIndexInterpretation": "Candidate zero-based record indexing; native index base/walk semantics unverified"
+      },
+      "increasingMapValid": false,
+      "decreasingMapValid": false,
+      "observations": [
+        {
+          "centerFrame": 20175,
+          "bracketStartIndex": 4,
+          "bracketEndIndex": 5,
+          "groupIndices": [],
+          "metadataValue": 10.927444216390466,
+          "metadataPeriodCorrelation": 0.46485137055119724,
+          "strongestIndependentPeak": {
+            "periodSamples": 4462,
+            "relativeFrequencyHz": 10.757507844016136,
+            "correlation": 0.562153588574511
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 4391,
+            "relativeFrequencyHz": 10.931450694602596,
+            "correlation": 0.46216096777237153,
+            "relativePeriodError": 0.00045526974732529026
+          },
+          "controls": [
+            {
+              "value": 10.927444216390466,
+              "correlation": 0.46485137055119724
+            },
+            {
+              "value": 14.97059857645494,
+              "correlation": -0.2803750813017404
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        }
+      ]
+    },
+    {
+      "name": "exhaust_idle",
+      "sourceSha256": "30D373508B0B675D9D7261D7AB26F79A310A497477C095CB574630BA321758AD",
+      "sampleRate": 48000,
+      "summary": {
+        "count": 9,
+        "frames": 40350,
+        "values": {
+          "count": 9,
+          "median": 10.7695761,
+          "min": 8.761683,
+          "max": 10.9750671
+        },
+        "spacing": {
+          "count": 8,
+          "median": 4476,
+          "min": 4370,
+          "max": 5040
+        },
+        "increases": 6,
+        "decreases": 2,
+        "plateaus": 0,
+        "spacingModel": {
+          "candidates": [
+            "current UnkFloat1",
+            "next UnkFloat1",
+            "adjacent mean UnkFloat1"
+          ],
+          "trainingMedianRelativeErrors": [
+            0.020301375875000027,
+            0.015012212280208326,
+            0.017350548561458345
+          ],
+          "chosenOnEvenRecords": 1,
+          "oddHeldOutRelativeError": {
+            "count": 4,
+            "median": 0.008458427572916594,
+            "min": 0.0010175784125001641,
+            "max": 0.12024896900000015
+          },
+          "reversedFloatControl": {
+            "count": 4,
+            "median": 0.0075474795312499565,
+            "min": 0.0008115994374999769,
+            "max": 0.1308054905
+          },
+          "halfRotationControl": {
+            "count": 4,
+            "median": 0.01047457902708343,
+            "min": 0.0008115994374999769,
+            "max": 0.1184986925
+          }
+        },
+        "markerValueRmsOverWholeRms": 0.1571050181326579,
+        "positiveSlopeFraction": 0.8888888888888888,
+        "groups": [],
+        "loopIndexInterpretation": "Candidate zero-based record indexing; native index base/walk semantics unverified"
+      },
+      "increasingMapValid": false,
+      "decreasingMapValid": false,
+      "observations": [
+        {
+          "centerFrame": 20175,
+          "bracketStartIndex": 4,
+          "bracketEndIndex": 5,
+          "groupIndices": [],
+          "metadataValue": 10.836492749875594,
+          "metadataPeriodCorrelation": 0.5548158507671531,
+          "strongestIndependentPeak": {
+            "periodSamples": 4463,
+            "relativeFrequencyHz": 10.755097468070804,
+            "correlation": 0.5999957356438015
+          },
+          "nearestIndependentPeak": {
+            "periodSamples": 4463,
+            "relativeFrequencyHz": 10.755097468070804,
+            "correlation": 0.5999957356438015,
+            "relativePeriodError": 0.007676676450666065
+          },
+          "controls": [
+            {
+              "value": 10.836492749875594,
+              "correlation": 0.5548158507671531
+            },
+            {
+              "value": 14.845995067329566,
+              "correlation": -0.0372650024836391
+            }
+          ],
+          "classification": "Measured relative acoustic periodicity / derived field interpolation; no calibrated RPM or unique physical cycle"
+        }
+      ]
+    }
+  ],
+  "progression": [
+    {
+      "engineFraction": 0.2,
+      "engineValue": 30.082450878105394,
+      "exhaustAtSameTime": 28.796688668086382,
+      "exhaustAtSameFraction": 29.5895913140037,
+      "sameTimeRelativeError": 0.042741271820868,
+      "sameFractionRelativeError": 0.01638362399721911
+    },
+    {
+      "engineFraction": 0.35,
+      "engineValue": 23.77469235501235,
+      "exhaustAtSameTime": 21.612913600360038,
+      "exhaustAtSameFraction": 22.68361061596958,
+      "sameTimeRelativeError": 0.09092772778599378,
+      "sameFractionRelativeError": 0.04589257024866351
+    },
+    {
+      "engineFraction": 0.5,
+      "engineValue": 18.04548582128138,
+      "exhaustAtSameTime": 15.783504873874465,
+      "exhaustAtSameFraction": 17.732970678816084,
+      "sameTimeRelativeError": 0.12534885288260386,
+      "sameFractionRelativeError": 0.01731818946635059
+    },
+    {
+      "engineFraction": 0.65,
+      "engineValue": 13.48637212752856,
+      "exhaustAtSameTime": 11.333691352834627,
+      "exhaustAtSameFraction": 13.316919662806052,
+      "sameTimeRelativeError": 0.159618966044979,
+      "sameFractionRelativeError": 0.012564718155494072
+    }
+  ],
+  "performance": {
+    "analysisWallMs": 733.7862,
+    "analysisCpuUserMs": 718,
+    "analysisCpuSystemMs": 94,
+    "analysisRssBytes": 96874496,
+    "renderWallMs": [
+      97.9824,
+      97.63239999999999
+    ]
+  },
+  "experiment": {
+    "range": {
+      "startFrame": 102511,
+      "endFrame": 265412,
+      "globalStartFrame": 515242,
+      "globalEndFrame": 678143
+    },
+    "controls": {
+      "lowState": 14,
+      "highState": 28,
+      "maxSpeedDeviation": 0.05,
+      "maxRelativeStateError": 0.02,
+      "joinSamples": 96,
+      "edgeFadeSamples": 1200,
+      "engineUnchanged": true,
+      "fixedGains": {
+        "engine": 0.2,
+        "exhaust": 0.15
+      },
+      "requestedBalanceEngineMultiplier": 0.35
+    },
+    "actual": {
+      "cycles": 70,
+      "speedMin": 0.9715886354541817,
+      "speedMax": 1.018688524590164,
+      "stateErrorMax": 0.009566146249645927,
+      "maxSeamStep": 0.003243937677301257
+    },
+    "outputs": {
+      "A_accepted_excerpt.wav": {
+        "sha256": "4B4411F6079E6AD6A02B5C83A87626ABEF01A4676D0D534D6598E87843B5595A",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 162901,
+        "durationSeconds": 3.3937708333333334,
+        "peak": 0.2738037109375,
+        "rms": 0.07658541106846098,
+        "dc": 0.0005181193525179787,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.118194580078125,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 170
+      },
+      "B_marker_state.wav": {
+        "sha256": "E1900206510C6943C5EE908BDB2E56097EC38FBD15160ECC4F1F52589688BCFC",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 162901,
+        "durationSeconds": 3.3937708333333334,
+        "peak": 0.237548828125,
+        "rms": 0.07124482826397163,
+        "dc": -0.0015029273555142387,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.118438720703125,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 170
+      },
+      "C_exhaust_led.wav": {
+        "sha256": "C2C0752171F8B0300FDC5F60E5DBD62A6ABFA732BE69328FB61261E69BA6D223",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 162901,
+        "durationSeconds": 3.3937708333333334,
+        "peak": 0.154296875,
+        "rms": 0.06471228650878116,
+        "dc": -0.0014897310662299304,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.04205322265625,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 170
+      },
+      "B_engine.wav": {
+        "sha256": "9E2795BE9A53C01D45518C51A3A9512FE2289E214569BF26EC9CBC951CF63E22",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 162901,
+        "durationSeconds": 3.3937708333333334,
+        "peak": 0.158843994140625,
+        "rms": 0.03941890615662797,
+        "dc": -0.00002021191707789547,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.1175537109375,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 170
+      },
+      "B_exhaust.wav": {
+        "sha256": "393B768626E9E452B4ED88177EC108BE28AEE77060C5E79E2271A2618B038AC8",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 162901,
+        "durationSeconds": 3.3937708333333334,
+        "peak": 0.119659423828125,
+        "rms": 0.06521715169327603,
+        "dc": -0.0014827137523926533,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.01055908203125,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 170
+      }
+    },
+    "repeatHashesMatch": true,
+    "limitation": [
+      "Marker boundaries are not known combustion phase",
+      "Only a contiguous interior state branch is used",
+      "Two-ms convex join smoothing is estimated",
+      "Small band-limited time resampling changes local pitch as well as time",
+      "C tests requested exhaust-led balance relative to B, not a phase correction",
+      "No integration or promotion to accepted reference"
+    ],
+    "clockSemantics": "Candidate marker intervals; relative phase chosen by source anchors, not measured native emission phase"
+  },
+  "listening": {
+    "method": "Labelled A/B/C local playback, each repeated twice; informal, not blinded or loudness normalised",
+    "stateMatching": "Clear improvement at unchanged gains",
+    "balance": "C is the requested balance",
+    "presence": "More exhaust presence remains desired; no effects added",
+    "completeGhostingEliminationConfirmed": false,
+    "stockMixIsQualityTarget": false,
+    "engineBalanceMultiplier": 0.35,
+    "engineRmsRelativeToExhaustDb": -13.491784285756388
+  },
+  "preservation": {
+    "originalSourcesMatched": 12,
+    "historicalWavsMatched": 25,
+    "sourceManifestSha256": "60C7226D1ACA1CB983F7C0CB40CADF9001B7803104959A25029BF416709A0AF5",
+    "metadataSha256": "A46E440BE76E42ABF55F37444836C3BF4B392E9CE3292A5755579DB383697288",
+    "acceptedReferenceHashUnchanged": true,
+    "productionTelemetryUnchanged": true,
+    "sourceManifestHashRechecked": true,
+    "metadataHashRechecked": true
+  },
+  "safety": {
+    "gameLaunches": 0,
+    "rphLaunches": 0,
+    "gameWrites": 0,
+    "archivesAccessed": 0,
+    "thirdPartyBinariesPublished": false,
+    "stockAudioPublished": false,
+    "audioUploaded": false,
+    "newDependencies": 0
+  },
+  "tests": {
+    "cycleTests": 12,
+    "stockAudioTests": 19,
+    "decelerationTests": 8,
+    "extractionPublicationGuards": 8,
+    "ownershipTests": 15,
+    "coreAssertions": 65,
+    "drivetrainAssertions": 35,
+    "metadataParserTests": 17,
+    "diagnosticAnalyzerTests": 3,
+    "phase1Checks": 122,
+    "configurationAssertions": 9,
+    "appendExpectations": 8,
+    "result": "PASS"
+  },
+  "nextStep": "Research-only synthetic relative-state holds/slow sweeps within validated interior domain; full RPM/load renderer not yet supported",
+  "phase3Ready": false,
+  "licenceSelected": false
+}
