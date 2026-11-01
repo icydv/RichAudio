@@ -6,7 +6,7 @@
 
 **A relative cycle/state relationship is strongly supported but incomplete. PASS for one bounded interior playback experiment.** Marker spacing, independently measured waveform repetition, acceleration cross-checks and listening support using shared marker-state/cycle coordinates instead of a shared elapsed file time. This does **not** establish physical RPM, crankshaft order, Rockstar's complete scheduler, native source phase or full-range acoustic reconstruction.
 
-An experimental 3.393771-second excerpt retains the accepted engine waveform and selects exhaust intervals by matching their metadata state. Exhaust local read-speed adjustments are −2.84% to +1.87%; no whole-file stretch, correlation-based delay or phase inversion is used. At unchanged gains, the owner heard **clear improvement** over the accepted timing. A separate balance comparison retains that timing and reduces engine amplitude to 0.35; this was the preferred exhaust-led balance. More physical exhaust presence remains desired. Complete elimination of ghosting was not explicitly confirmed.
+An experimental 3.393771-second excerpt retains the accepted engine waveform and selects exhaust intervals by matching their metadata state. Exhaust local read-speed adjustments are −2.84% to +1.87%; no whole-file stretch, correlation-based delay or phase inversion is used. At unchanged gains, I heard **clear improvement** over the accepted timing. A separate balance comparison retains that timing and reduces engine amplitude to 0.35; this was the preferred exhaust-led balance. More physical exhaust presence remains desired. Complete elimination of ghosting was not explicitly confirmed.
 
 The 19.322479-second accepted reference remains byte-identical. The rejected 27-second grain prototype and prior −2.5 dB balance candidate remain historical evidence, not new defaults. No GTA/RPH launch, game write, archive access/re-extraction, sound-bank edit, live memory access or new dependency occurred. No stock audio was uploaded.
 
@@ -100,7 +100,7 @@ All have **zero clipped/nonfinite samples and no silent 20 ms windows**. B engin
 
 A/B holds component gains fixed; B/C separately tests balance. No loudness normalisation was applied. Combined RMS differs (~−0.63 dB B versus A), so this is an informal labelled comparison, not a blinded loudness-matched proof. The mode also includes small resampling/join changes: listening does not isolate which sub-operation contributes how much. It supports the tested method as a whole, not a unique native causal reconstruction.
 
-The owner heard each excerpt twice and confirmed clear improvement for B, then preferred C's balance. Full removal of all ghosting and behaviour over the complete 19-second sequence remain untested. The desired “rolling thunder” exhaust presence is a separate quality target. These are dry source-component previews with no world acoustics/presence processing; stock timbre may limit the ultimate result. GTA's original engine/exhaust balance is not the quality target, and no effect is added here to disguise a defect.
+I heard each excerpt twice and confirmed clear improvement for B, then preferred C's balance. Full removal of all ghosting and behaviour over the complete 19-second sequence remain untested. The desired “rolling thunder” exhaust presence is a separate quality target. These are dry source-component previews with no world acoustics/presence processing; stock timbre may limit the ultimate result. GTA's original engine/exhaust balance is not the quality target, and no effect is added here to disguise a defect.
 
 ## Tools, repeatability and validation
 
@@ -119,7 +119,7 @@ node tools/Render-CycleExperiment.mjs .local/audio-reconstruction/decoded-final 
 .\build\audio\PlayPrivatePreview.exe .local\audio-reconstruction\NEW-cycle-preview\B_marker_state.wav
 ```
 
-Source/layout/fingerprint, size, reparse/symlink, output isolation and no-overwrite guards remain in force. Audio, full marker arrays, raw XML, parser binaries and workstation paths stay private. Public results contain original code/tests, scalar/reference findings and numeric measurements only. No project licence is selected. Existing PR listening observations are written in first person at the owner's request; technical results remain factual and separate.
+Source/layout/fingerprint, size, reparse/symlink, output isolation and no-overwrite guards remain in force. Audio, full marker arrays, raw XML, parser binaries and workstation paths stay private. Public results contain original code/tests, scalar/reference findings and numeric measurements only. No project licence is selected. Existing PR listening observations are written in first person at my request; technical results remain factual and separate.
 
 ## Next decision
 
