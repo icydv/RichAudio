@@ -1,6 +1,6 @@
 # PLAYABLE-15 Stage A attempt 1: startup failure, restored
 
-**Result: BLOCKED before operator Start. Restoration: PASS.** One exact passive deployment and one Enhanced/RPH route invocation ran under the owner's explicit approval of `4c07d448fdd4a280965c1ae2d1d6f80feee2c86f` and candidate receipt `94c582f5d961125fe91988698a300405bc0b6849aee5441b34c34359efcd295d`. No retry, second launch, audible DLL deployment, RichAudio playback, endpoint access or audio recording occurred.
+**Result: BLOCKED before operator Start. Restoration: PASS.** One exact passive deployment and one Enhanced/RPH route invocation ran under my explicit approval of `4c07d448fdd4a280965c1ae2d1d6f80feee2c86f` and candidate receipt `94c582f5d961125fe91988698a300405bc0b6849aee5441b34c34359efcd295d`. No retry, second launch, audible DLL deployment, RichAudio playback, endpoint access or audio recording occurred.
 
 The installed passive image was 381,952 bytes, SHA-256 `3a124f3b0bb15e4790645d8ef1b0fa2268639a64386c6ae95f83009465efefda`; native producer was the unchanged 129,024-byte `05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40`. Fresh independent preflight and coordinator reviews passed; the original plugin was retained in the exact owned backup. The Stage A selector was separately adapted to the actual PLAYABLE-15 entry text while preserving its 120/300/120-second policy.
 
@@ -18,7 +18,7 @@ The current process/session log records:
 | 21:32:06.782 | `passive-handoff-failed:ArgumentException` |
 | 21:32:06.783 | RETIRED, accepted=0, frames=0 |
 
-READY and ACTIVE were absent. The independent supervisor admitted the exact new log epoch and raised a terminal stop request. The owner subsequently confirmed being mounted on the Bati, but **no operator Start was dispatched**. Camera movement, camera-cut recovery, changing telemetry and deliberate driver-loss qualification were therefore not exercised in this attempt. The failed session's capture directory was absent.
+READY and ACTIVE were absent. The independent supervisor admitted the exact new log epoch and raised a terminal stop request. I subsequently confirmed being mounted on the Bati, but **no operator Start was dispatched**. Camera movement, camera-cut recovery, changing telemetry and deliberate driver-loss qualification were therefore not exercised in this attempt. The failed session's capture directory was absent.
 
 The caller reports `producerCompleted=False`, writer completion false, writer worker false and native FIFO drain false. Those fields must not be turned into successful worker/producer completion. No raw native audit or Begin counter exists for this attempt, so its actual native attempt/Begin count was not independently measured. Zero published frames is established; missing native audit is retained as missing evidence.
 
@@ -40,4 +40,4 @@ Root requested normal exit with Alt+F4 at **21:33:00.054**; game/RPH absence was
 
 Exact owned rollback removed only the installed producer, passive plugin and process lease, restored the original 222,208-byte plugin, and passed all **11 protected files, four settings, stock-fallback/F10, both false production flags and 32 absent owned paths**. Game/RPH/audio and all three owned supervisor/startup/launch processes were absent; the independent supervisor completed naturally. Private captures, packages and prior evidence were retained. Independent restoration review passed 98 checks.
 
-The failed attempt is consumed. The [narrowly corrected Stage A proposal](PLAYABLE_15_STAGE_A_RETEST_PROPOSAL.md) requires fresh explicit approval; Stage B remains blocked on genuine Stage A acceptance. The separate [audio review](PLAYABLE_15_AUDIO_REVIEW.md) confirms the owner's findings using offline stems and leaves calibration intact. [Sanitised live evidence](../evidence/playable-15-stage-a-live-01.json) binds the exact closed result and restoration without publishing private runtime identities or addresses.
+The failed attempt is consumed. The [narrowly corrected Stage A proposal](PLAYABLE_15_STAGE_A_RETEST_PROPOSAL.md) requires fresh explicit approval; Stage B remains blocked on genuine Stage A acceptance. The separate [audio review](PLAYABLE_15_AUDIO_REVIEW.md) confirms my findings using offline stems and leaves calibration intact. [Sanitised live evidence](../evidence/playable-15-stage-a-live-01.json) binds the exact closed result and restoration without publishing private runtime identities or addresses.
