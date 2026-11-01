@@ -1,6 +1,6 @@
 # P2-01 authorised deployment and first runtime attempt
 
-24 October 2026. **Stopped at RPH's compatibility gate; game-file additions rolled back.** The user explicitly approved the Microsoft prerequisite, the exact 26-file manifest, supported Story Mode launch and conditional A–E testing. This report supersedes earlier statements that no runtime had ever been installed/launched. The earlier readiness reports remain historical evidence.
+24 October 2026. **Stopped at RPH's compatibility gate; game-file additions rolled back.** I explicitly approved the Microsoft prerequisite, the exact 26-file manifest, supported Story Mode launch and conditional A–E testing. This report supersedes earlier statements that no runtime had ever been installed/launched. The earlier readiness reports remain historical evidence.
 
 ## Verified outcome
 
@@ -37,7 +37,7 @@ The UI-reported version matches the older GTA5.exe. **Inference:** executable se
 
 The actual deployed RPH file matches the reviewed official archive and expected version/hash. The telemetry adapter cannot explain the pre-game rejection because it had not been loaded. SDK member binding, DirectStorage behaviour, ASI/OpenRPF coexistence and game scheduling remain untested; none should be named as the observed cause.
 
-Screenshot and accessible UI text were preserved locally. The UI showed a compatibility warning, not a crash dialog. No RPH log file was found in the game root during this attempt. The Restart with logging button was deliberately not used because the user required stopping on a conflict. Microsoft generated two real installer logs from the requested log prefix; their actual paths/hashes are recorded in the installation receipt.
+Screenshot and accessible UI text were preserved locally. The UI showed a compatibility warning, not a crash dialog. No RPH log file was found in the game root during this attempt. The Restart with logging button was deliberately not used because I required stopping on a conflict. Microsoft generated two real installer logs from the requested log prefix; their actual paths/hashes are recorded in the installation receipt.
 
 ## Measurements and A–E results
 
