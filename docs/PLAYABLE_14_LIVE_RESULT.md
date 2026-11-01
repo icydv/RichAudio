@@ -1,5 +1,7 @@
 # PLAYABLE-14: binding succeeded; full passive qualification remains BLOCKED
 
+**Later authorised retest:** [Attempt 3](PLAYABLE_14_RETEST_RESULT.md) passed current-session supervision and initial binding, then retired with `source-silence-or-expiry` after 32 idle frames. Its installation was restored. The record below describes the earlier attempts and preparation state at `791a7e8`.
+
 **Overall decision: BLOCKED. Initial fresh-context binding: PASS in-game. Restoration: PASS.** The first authorised passive session produced 54 genuine idle gameplay frames before a terminal listener-continuity rejection. The owner then explicitly requested one fresh manual attempt; that attempt was cancelled at Steam confirmation after an observer attributed the first session's retained log to the new launch. No third attempt, audible playback, endpoint access or recording occurred.
 
 The approved [proposal](PLAYABLE_14_LIVE_PROPOSAL.md) at `bf59244e482897ee744c6a64b70243f20743d755`, binaries and manifests are unchanged. The two deployments used only:
