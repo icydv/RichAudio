@@ -37,7 +37,7 @@ hash-matched copy, logs, human statement and independent review remain local.
 | Requested markers | START OFF, then chord EARLY STOP OFF; zero ADVANCE events |
 | Output | 4,797,335 bytes across the three capture files, within 12 MiB |
 
-After capture, the operator reported: “idle, stationary revving, significant
+After capture, I reported: “idle, stationary revving, significant
 acceleration, acceleration redlining doing a wheelie, deceleration and idle
 again”. This is qualitative corroboration received later, not synchronised
 actuation timestamps or a measured redline/RPM calibration. No engine-off or
@@ -49,8 +49,7 @@ The frozen primary analyser reports **incomplete**, with zero data-quality
 failures. Its only mandatory missing criteria are the requested-phase initial
 idle, return idle, acceleration/deceleration and associated ratio-trend regions.
 Those phase labels never advanced. The OFF text is not evidence of engine off;
-all actual running queries were true. The operator subsequently clarified that
-they started and stopped recording without advancing the phase labels. This
+all actual running queries were true. I subsequently clarified that I started and stopped recording without advancing the phase labels. This
 explains the missing markers; no diagnostic keyboard-control defect is established.
 
 Independent exploratory review, explicitly separate from the unchanged primary
@@ -243,7 +242,7 @@ Predeclared review heuristics, rather than native physics claims:
 These are conservative gates for reviewing this experiment. Real engine ratio
 can change with load, clutch and shifts; an unmet trend gate calls for analysis
 of the captured context rather than inventing a conversion or silently relaxing
-criteria. Human review must account for the operator's actual actions and any
+criteria. Human review must account for my actual actions and any
 unobserved phases before recommending a restricted **normalised Bati engine
 operating-state** provider on this exact game/SHV stack. Physical crankshaft RPM,
 redline values, every vehicle/build, native handler authenticity and audio
