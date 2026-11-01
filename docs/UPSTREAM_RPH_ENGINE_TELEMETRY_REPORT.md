@@ -160,8 +160,7 @@ The subsequent separately approved [PLAYABLE-07 capture](PLAYABLE_07.md) made
 Raw results varied from `0x3E4CCCCD` (0.2) to `0x3F800000` (1.0), with 1,351
 distinct patterns, same-Bati/driver context, running true and independent speed
 0..48.4427528 m/s. No native exception, invalid bracket or unreadable outcome was
-recorded. Stationary baseline and return regions were observed. The operator
-reported idle, revving, acceleration and deceleration, but did not advance the
+recorded. Stationary baseline and return regions were observed. I reported idle, revving, acceleration and deceleration, but did not advance the
 requested phase labels, so controlled multi-state qualification remains incomplete.
 
 These real changing returns strengthen the independent call-path evidence.
