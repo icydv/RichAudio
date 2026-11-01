@@ -94,6 +94,17 @@ internal static class TestBatiPlaybackSession
    Check(delay>=0&&delay<250,"independent expiry watchdog retires without game-fiber publication");
    Check(!current.Enable()&&!current.PublishAccepted(Frame(),Stopwatch.GetTimestamp()+Stopwatch.Frequency/5),"expired provider cannot revive");
    Until(()=>current.HostPid==0,10000,false);Stop();
+   Start();Check(current.Enable(),"driver-loss fixture enabled");Until(()=>Nonzero(),15000,true);Record("before-driver-loss-retirement");
+   int driverLossAttempts=current.Attempts;current.Retire("rph-current-driver-changed");
+   Check(current.Retired&&current.RetirementReason=="rph-current-driver-changed","driver loss preserves concrete terminal reason");
+   Check(!current.Enable(),"driver-loss session cannot be re-enabled");
+   var remount=Frame();Check(!current.PublishAccepted(remount,remount.ValidThroughTicks),"remount cannot republish a retired source");
+   Until(()=>current.HostPid==0,10000,false);
+   var driverStop=Evidence();Check(driverStop!=null&&Convert.ToString(driverStop["hostState"])=="stopped","driver loss observes clean host shutdown");
+   Check(Number(driverStop,"fixtureTrailingSilentFrames")>=960&&Number(driverStop,"fixtureLastPeak")==0,"driver-loss retirement fades actual output ring to exact zero");
+   Check(driverStop.ContainsKey("fadeReserveConsumed")&&(bool)driverStop["fadeReserveConsumed"],"driver-loss retirement consumes queued PCM and fade");
+   For(300,false);Check(current.Attempts==driverLossAttempts,"retired driver-loss source cannot restart playback");
+   observations.Add(new{name="driver-loss-terminal-fade-and-no-replay",session=current.Session,evidence=driverStop});Stop();
    Start();Check(current.Enable(),"scope-denial fixture armed");var wrong=Frame(0xa774b5a6u);
    Check(!current.PublishAccepted(wrong,wrong.ValidThroughTicks)&&current.Retired&&current.Attempts==0,"non-Bati scope rejected before host start");Stop();
    Check(PlayableConfiguration.Digest(settingsPath)==settingsBefore,"all isolated saved preferences unchanged");

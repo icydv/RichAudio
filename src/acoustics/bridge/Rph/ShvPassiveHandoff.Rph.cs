@@ -21,8 +21,12 @@ namespace RichAudio.Beacon.Rph
         static volatile bool stopping,startRequested,stopRequested;
         static string stage="waiting-reviewed-session",reason="not-started";
         static long accepted,frames;
+#if SHV_HANDOFF_15
+        static readonly CameraListenerTracker listenerTracker=new CameraListenerTracker();
+#else
         static CameraObservation previous;
         static long listenerSequence,listenerGeneration=1;
+#endif
         static bool ran;
 #if SHV_PLAYABLE_13
         static RichAudio.Beacon.Windows.BatiPlaybackSession playback;
@@ -42,7 +46,9 @@ namespace RichAudio.Beacon.Rph
             try
             {
 #if SHV_PLAYABLE_13
-                Game.Console.Print("RichAudio PLAYABLE-13 Bati audio profile; separately approved lease and explicit AudioOn required. GTA stock audio retained.");
+                Game.Console.Print("RichAudio Bati audio profile; separately approved lease and explicit AudioOn required. GTA stock audio retained.");
+#elif SHV_HANDOFF_15
+                Game.Console.Print("RichAudio PLAYABLE-15 passive listener recovery profile; GTA stock audio retained. No audio host or recording.");
 #elif SHV_HANDOFF_14
                 Game.Console.Print("RichAudio PLAYABLE-14 passive fresh-context handoff only; GTA stock audio retained. No audio host or recording.");
 #elif SHV_HANDOFF_13
@@ -171,12 +177,28 @@ namespace RichAudio.Beacon.Rph
 #endif
                         composition.Poll(delegate{return sampler.Capture(out peerReason);});
                         Need(DrainAudit(composition,journal),"source-evidence-budget-or-queue");
+#if SHV_HANDOFF_15
+                        // Preserve the concrete driver/lifetime retirement cause
+                        // before a camera transition can obscure it.
+                        Need(!sampler.Retired,sampler.RetirementReason);
+#endif
                         if(composition.AcceptedCount!=accepted)
                         {
                             H.Candidate current;HandoffPeerObservation peer;
                             Need(composition.TryGetCurrent(out current,out peer),"accepted-observation-expired-before-use");
                             GameplayFrame frame;ShvGameplayFrameAdapter.Lineage lineage;string adaptationReason;
+#if SHV_HANDOFF_15
+                            bool publishListener;
+                            var listener=Listener(module.SessionId,sampler,current,peer,journal,out publishListener);
+                            Need(adapter.TryCreate(current,peer,listener,out frame,out lineage,out adaptationReason),adaptationReason);
+                            // The adapter consumes the original source sequence
+                            // under every original identity/clock/expiry gate.
+                            // No rejected camera frame reaches the wire or audio.
+                            accepted=composition.AcceptedCount;
+                            if(!publishListener)continue;
+#else
                             Need(adapter.TryCreate(current,peer,Listener(module.SessionId),out frame,out lineage,out adaptationReason),adaptationReason);
+#endif
                             Need(journal.WriteFrame(frame,lineage),"gameplay-evidence-budget-or-queue");
 #if SHV_PLAYABLE_13
                             Need(playback.PublishAccepted(frame,lineage.ValidThroughHostTicks),"audio-frame-gate:"+playback.State);
@@ -442,6 +464,57 @@ namespace RichAudio.Beacon.Rph
                 driftPpm=map.DriftPpm,minimumMeasuredRatePpm=map.MinimumMeasuredRatePpm,
                 maximumMeasuredRatePpm=map.MaximumMeasuredRatePpm,anchors=map.AnchorsUsed}),"clock-evidence-budget-or-queue");
         }
+#if SHV_HANDOFF_15
+        static object Number(double? value)
+        {return !value.HasValue?null:Protocol.Finite(value.Value)?(object)value.Value:value.Value.ToString("R",System.Globalization.CultureInfo.InvariantCulture);}
+        static object[] Numbers(double[] values)
+        {if(values==null)return null;var result=new object[values.Length];for(int i=0;i<values.Length;i++)result[i]=Number(values[i]);return result;}
+        static object CameraOperands(CameraObservation value)
+        {return value==null?null:new{before=value.Before,after=value.After,observed=value.Observed,unixMs=value.UnixMs,
+            gameTime=value.GameTime,paused=value.Paused,position=Numbers(value.Position),forward=Numbers(value.Forward),up=Numbers(value.Up)};}
+        static object PeerOperands(HandoffPeerObservation value)
+        {return value==null?null:new{start=value.Context.StartTicks,end=value.Context.EndTicks,player=value.Context.PlayerId,
+            ped=value.Context.PedId,vehicle=value.Context.VehicleId,currentVehicle=value.Context.CurrentVehicleId,driver=value.Context.DriverId,
+            generation=value.Context.Generation,model=value.Context.Model,eligible=value.Context.Eligible,running=value.Context.Running,
+            vehicleAddress=value.VehicleAddress,pedAddress=value.PedAddress,
+            vehiclePoolIndex=value.VehiclePoolIndex,vehiclePoolCounter=value.VehiclePoolCounter,vehiclePoolValue=value.VehiclePoolValue,
+            pedPoolIndex=value.PedPoolIndex,pedPoolCounter=value.PedPoolCounter,pedPoolValue=value.PedPoolValue};}
+        static ListenerState Listener(string session,RphHandoffSampler sampler,H.Candidate source,HandoffPeerObservation sourcePeer,
+            ShvHandoffJournal journal,out bool publish)
+        {
+            publish=false;string why;
+            var before=sampler.Capture(out why);
+            Need(before!=null,why??"listener-pre-camera-driver-qualification-failed");
+            var camera=CameraSampler.Read();
+            var after=sampler.Capture(out why);
+            if(after==null){
+                Need(journal.WriteEvent("listener-ownership-retired",new{classification=why,sourceSequence=source.SourceSequence,
+                    sourceGeneration=source.SourceGeneration,rawBits=source.RawBits,operatingPoint=source.OperatingPoint,
+                    sourcePeer=PeerOperands(sourcePeer),beforeCamera=PeerOperands(before),camera=CameraOperands(camera),afterCamera=PeerOperands(after)}),
+                    "listener-diagnostic-write-failed");
+                Need(false,why??"listener-post-camera-driver-qualification-failed");
+            }
+            var decision=listenerTracker.Observe(session,camera);
+            if(!decision.Publish&&decision.Classification!="listener-cached-observation"){
+                // Original measured operands are captured by Observe once. This
+                // journal write precedes throwing or discarding, and failure is
+                // terminal rather than an invisible loss of the diagnosis.
+                Need(journal.WriteEvent("listener-rejection",new{schema=1,classification=decision.Classification,terminal=decision.Terminal,
+                    previous=CameraOperands(decision.Previous),current=CameraOperands(decision.Current),
+                    dt=Number(decision.Dt),delta=Numbers(decision.Delta),velocity=Numbers(decision.Velocity),speedSquared=Number(decision.SpeedSquared),
+                    listenerSequence=decision.Sequence,listenerGeneration=decision.Generation,sourceSequence=source.SourceSequence,
+                    sourceGeneration=source.SourceGeneration,sourceBefore=source.SourceBeforeTicks,sourceAfter=source.SourceAfterTicks,
+                    mappedLow=source.MinimumHostTicks,mappedHigh=source.MaximumHostTicks,validThrough=source.ValidThroughHostTicks,
+                    rawBits=source.RawBits,operatingPoint=source.OperatingPoint,sourcePeer=PeerOperands(sourcePeer),
+                    beforeCamera=PeerOperands(before),afterCamera=PeerOperands(after),
+                    callOrder="source-peer-then-pre-camera-peer-then-camera-read-then-post-camera-peer-then-policy",
+                    originalCameraAcquisitionBeforePrePeer=camera!=null&&camera.Before<before.Context.StartTicks,
+                    unpublishedBaseline=!decision.Terminal,velocityAcrossCutPublished=false}),"listener-diagnostic-write-failed");
+                Need(!decision.Terminal,decision.Classification);
+            }
+            publish=decision.Publish;return decision.Listener;
+        }
+#else
         static ListenerState Listener(string session)
         {
             var camera=CameraSampler.Read();double[] velocity={0,0,0};
@@ -463,6 +536,7 @@ namespace RichAudio.Beacon.Rph
                 VelocityKind="estimated-camera-difference",Paused=camera.Paused,Valid=!camera.Paused,
                 Reason=camera.Paused?"paused":"valid",Coordinates="gta-native-unscaled",Units="native-unverified",SourceId=null};
         }
+#endif
         internal static void Stop(){stopping=true;stopRequested=true;
 #if SHV_PLAYABLE_13
             if(playback!=null)playback.Stop();

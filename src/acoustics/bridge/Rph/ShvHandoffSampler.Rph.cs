@@ -19,6 +19,7 @@ namespace RichAudio.Beacon.Handoff
         internal readonly string PlayerKey,PedKey,VehicleKey;
         bool retired;
         internal bool Retired{get{return retired;}}
+        internal string RetirementReason{get;private set;}
 
         private RphHandoffSampler(Ped ped,Vehicle vehicle)
         {
@@ -106,7 +107,7 @@ namespace RichAudio.Beacon.Handoff
             catch(System.Threading.ThreadAbortException){throw;}
             catch{return Reject("rph-observation-failed",out reason);}
         }
-        HandoffPeerObservation Reject(string value,out string reason){retired=true;reason=value;return null;}
+        HandoffPeerObservation Reject(string value,out string reason){retired=true;RetirementReason=value;reason=value;return null;}
         static double[] Vector(Vector3 v){return new[]{(double)v.X,(double)v.Y,(double)v.Z};}
         static bool Pose(double[] position,double[] velocity,double[] forward,double[] up)
         {

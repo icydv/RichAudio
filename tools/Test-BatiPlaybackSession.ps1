@@ -4,8 +4,8 @@ param([Parameter(Mandatory)][string]$Candidate)
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
 $candidateRoot=[IO.Path]::GetFullPath($(if([IO.Path]::IsPathRooted($Candidate)){$Candidate}else{Join-Path $repo $Candidate}))
-$private=[IO.Path]::GetFullPath((Join-Path $repo '.local/playable-13')).TrimEnd('\')+'\'
-if(!$candidateRoot.StartsWith($private,[StringComparison]::OrdinalIgnoreCase)){throw 'New private PLAYABLE-13 candidate required.'}
+$private=@('13','15')|ForEach-Object{[IO.Path]::GetFullPath((Join-Path $repo ('.local/playable-'+$_))).TrimEnd('\')+'\'}
+if(!@($private|Where-Object{$candidateRoot.StartsWith($_,[StringComparison]::OrdinalIgnoreCase)}).Count){throw 'Private PLAYABLE-13/15 candidate required.'}
 for($cursor=$candidateRoot;$cursor;$cursor=[IO.Path]::GetDirectoryName($cursor)){if((Test-Path -LiteralPath $cursor)-and((Get-Item -LiteralPath $cursor -Force).Attributes-band[IO.FileAttributes]::ReparsePoint)){throw 'Linked candidate refused.'}}
 $out=Join-Path $repo ('.local/playable-13/bati-session-fixture-'+[Guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory($out)|Out-Null

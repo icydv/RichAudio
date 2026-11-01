@@ -89,6 +89,18 @@ internal static class TestShvGameplayFrameAdapter
             c=f.Candidate(2,0x3F400000);Check(f.Emit(c,f.Peer(),f.Listener(),out frame)&&frame.Vehicles[0].OperatingPoint==.75,"second exact observation");
             Check(!f.Emit(c,f.Peer(),f.Listener(),out frame)&&frame.Vehicles.Length==0&&!f.Adapter.Retired,"duplicate produces no last-good vehicle");
         });
+        Test("private camera baseline consumes source under unchanged gates before fresh recovery",delegate{
+            var f=new Fixture();GameplayFrame frame;var c=f.Candidate();Check(f.Emit(c,f.Peer(),f.Listener(),out frame),"first published frame");
+            c=f.Candidate(2);var baseline=f.Listener();baseline.Generation=2;baseline.Position[0]=20;baseline.VelocityKind="unavailable";
+            Check(f.Emit(c,f.Peer(),baseline,out frame)&&frame.Listener.Generation==2&&!f.Adapter.Retired,"private cut baseline passes original full adapter gates");
+            // The entry discards this frame instead of serializing or publishing.
+            frame=null;c=f.Candidate(3);var fresh=f.Listener();fresh.Generation=2;fresh.Position[0]=21;fresh.Velocity[0]=1/.06;
+            Check(f.Emit(c,f.Peer(),fresh,out frame)&&frame.Listener.Generation==2&&frame.Vehicles[0].OperatingPoint==c.OperatingPoint,"next fresh source publishes without sequence fabrication");
+            f=new Fixture();c=f.Candidate();baseline=f.Listener();baseline.Generation=2;baseline.VelocityKind="unavailable";f.Clock.Value=c.ValidThroughHostTicks+1;
+            Check(!f.Emit(c,f.Peer(),baseline,out frame)&&f.Adapter.Retired,"private cut cannot conceal genuine source expiry");
+            f=new Fixture();c=f.Candidate();baseline=f.Listener();baseline.Generation=2;baseline.VelocityKind="unavailable";baseline.ObservationTicks+=f.Frequency*51/1000;f.Clock.Value=baseline.ObservationTicks;
+            Check(!f.Emit(c,f.Peer(),baseline,out frame)&&f.Adapter.Retired,"private cut cannot conceal original clock skew");
+        });
         Test("retirement clears a previously emitted vehicle",delegate{
             var f=new Fixture();GameplayFrame frame;Check(f.Emit(f.Candidate(),f.Peer(),f.Listener(),out frame),"active");f.Adapter.Retire("source-stopped");
             Check(!f.Emit(f.Candidate(2),f.Peer(),f.Listener(),out frame)&&frame.Vehicles.Length==0&&f.Adapter.Retired,"no resurrection");

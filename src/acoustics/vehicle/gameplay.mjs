@@ -42,6 +42,9 @@ export class StockGameplay {
    }
    this.playout.add({type:'listener',state,receiptAgeMs:ageMs},this.pipeline.renderer.frame/FS,this.now());this.playout.delayTarget=.1;
    const time=this.playout.records.at(-1).time;
+   // A new camera generation starts a new spatial clock. Source identity may
+   // remain valid, but its old pose brackets cannot straddle that boundary.
+   if(this.lastGeneration&&state.generation!==this.lastGeneration)this.snapshots=[];
    this.snapshots.push({time,frame:structuredClone(frame),wallExpires:validForMs===null?Infinity:this.now()+validForMs});while(this.snapshots.length>64)this.snapshots.shift();
    this.lastFrame=state.sequence;this.lastGeneration=state.generation;this.stats.acceptedFrames++;
    for(const v of frame.vehicles)if(v.valid){this.stageCounters.validVehicleObservations++;if(v.running)this.stageCounters.runningVehicleObservations++;}
