@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-12",
+  "kind": "actual-single-authorised-passive-launch-attempt",
+  "preparationCommit": "30146a702a97e4a3bc433b16adb100a2ca6f107b",
+  "decision": "BLOCKED-STARTUP",
+  "approvalConsumed": true,
+  "deployments": 1,
+  "launchRouteInvocations": 1,
+  "confirmedEnhancedProcessObserved": false,
+  "actualEnhancedProcessCreationCount": null,
+  "automaticRetry": false,
+  "additionalLaunchAuthorised": false,
+  "artifacts": [
+    {
+      "name": "Plugins/RichAudio.dll",
+      "bytes": 337408,
+      "sha256": "1b9ed8586906c0c56f9f8c695dcbe137857b4d08da02a6797eb6811002727866"
+    },
+    {
+      "name": "RichAudio.OperatingState.ShvHandoff.asi",
+      "bytes": 129024,
+      "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+      "nativeSourceChanged": false
+    }
+  ],
+  "observed": {
+    "formalPreflight": "PASS",
+    "exactPayloadInstallation": "PASS",
+    "reviewedRouteInvokedOnce": true,
+    "steamExistingCustomArgumentsPromptObserved": true,
+    "steamContinueInputReturned": true,
+    "rphLauncherWindowObserved": true,
+    "rphStayedAtLaunchingGame": true,
+    "steamReturnedToPlayState": true,
+    "coordinatorTerminal": "Exact new game process not observed; no lease or retry.",
+    "configuredProcessObservationDeadlineSeconds": 120,
+    "leaseCreated": false,
+    "operatorHandoffStartIssued": false,
+    "currentSessionJournalCreated": false,
+    "normalRphCancelInputReturned": true,
+    "launcherWindowDisappearanceObserved": true,
+    "launcherAndGameProcessAbsenceIndependentlyVerified": true,
+    "forceTerminationUsed": false,
+    "gameQuitPromptObserved": false
+  },
+  "evidenceBoundary": {
+    "rphLauncherExecutionObserved": true,
+    "rphApiExecution": "UNOBSERVED",
+    "shvExecution": "UNOBSERVED",
+    "managedPluginLoaded": "UNOBSERVED",
+    "nativeProducerLoaded": "UNOBSERVED",
+    "sourceOpenBeginAdmissionAvailable": false,
+    "admissionBasis": "The required process-bound lease was never issued; no journal exists. This is control-flow evidence, not measured producer counters.",
+    "nativeAttempts": null,
+    "acceptedObservations": null,
+    "gameplayFrameCount": null,
+    "clockMapping": null,
+    "vehicleCorrespondence": null,
+    "callbackCompletion": null,
+    "fifoDrain": null,
+    "writerJoin": null,
+    "activeCaptureObserved": false,
+    "runtimeCountersMeasured": false,
+    "startupRootCause": "UNESTABLISHED",
+    "functionalApiOrHandoffFailureEstablished": false,
+    "briefUnobservedGameProcessExcluded": false
+  },
+  "supervision": {
+    "independentMonotonicObserver": true,
+    "observerFinalState": "waiting",
+    "observerFailure": null,
+    "observerSawActiveInterval": false,
+    "observerSawPluginTerminal": false,
+    "startupDeadlineControlledBySeparateCoordinatorStopwatch": true,
+    "native120AndWaiting300LimitsExercised": "UNOBSERVED",
+    "noUiPacedDeadlineExtension": true,
+    "osOrNativePreemptionClaimed": false
+  },
+  "logs": [
+    {
+      "name": "RagePluginHook.log",
+      "bytes": 14861,
+      "sha256": "4421cef411981e9be9e54685352077106212f2840c863ae8d9f022cb8459b59d",
+      "beforeAfterByteIdentical": true,
+      "newPlayable12Marker": false,
+      "interpretation": "Historical unchanged file, not execution evidence for this attempt"
+    },
+    {
+      "name": "ScriptHookV.log",
+      "bytes": 799,
+      "sha256": "ca77b1f39c07dbbc774300f9b3ad15105b791fcc3c75db3d28ed3aa16f4177e7",
+      "beforeAfterByteIdentical": true,
+      "newPlayable12Marker": false,
+      "interpretation": "Historical unchanged file, not execution evidence for this attempt"
+    },
+    {
+      "name": "asiloader.log",
+      "bytes": 1483,
+      "sha256": "2bc69561dff25d16bbf49cb9e6cc21a0ad84f7dd2ce5fe075f7c1bbf909b7cb5",
+      "beforeAfterByteIdentical": true,
+      "newPlayable12Marker": false,
+      "interpretation": "Historical unchanged file, not execution evidence for this attempt"
+    },
+    {
+      "name": "DirectStorageFix.log",
+      "bytes": 17136,
+      "sha256": "2a3de45232f94f5bf99238214166080ee28952a9c511ab1957719dfbace24b49",
+      "beforeAfterByteIdentical": true,
+      "newPlayable12Marker": false,
+      "interpretation": "Historical unchanged file, not execution evidence for this attempt"
+    }
+  ],
+  "privateReceipts": {
+    "authorisationSha256": "65c81c9953278a32cac8e7733405a52a97def745e5b20d353312210d2326f30d",
+    "preflightSha256": "be9f118809a08b5711fad4577ccca4bfdb1d39b460841f3b3f223bc7c6851317",
+    "installationSha256": "73fc3f2f015ae6ba59952e9832129d1fd6c8be5ffac792586c6e08f874816dc7",
+    "singleLaunchMarkerSha256": "06bb62763ddb63d535f962c440e8d9fffc487dd03059f37fdcb70f350c192a7c",
+    "launchReceiptSha256": "96266338d55ce84f3bc8b7f8ebcec1d8f9a6874a73d362ed3f7f8c44bbcc27e2",
+    "terminalSha256": "6c00105a27abc3da58adcddfd8b475ee8af99e9be12e139f1f136d750b0fdb64",
+    "normalLauncherExitSha256": "202f9dc467db85d81e7e91b24c60ac5c4e5ab5d22af73c799d070f39f371546c",
+    "observerCompletionSha256": "79a10810b6aa53e37003cc560e928ca5e9c3040485e7d7b2616cd251ab0571a1",
+    "captureIndexSha256": "9c12285198ff0b893601b9bfb437acaad173dc3be105e9e650b4db18bc9da1b4",
+    "coordinatorSourceSha256": "49fc31440204973bf77ce8bd70a9b7f67c70878e4af95aa5e89b9d2e2059c6fb",
+    "observerSourceSha256": "5b5f9a3916fc923ee04fe74178f1404bfa1a1fd34005a4334729c9a358cc7fd9"
+  },
+  "boundaries": {
+    "richAudioPlaybackAttempted": false,
+    "recordingAttempted": false,
+    "wasapiEndpointOpened": false,
+    "modificationAwareLoudnessActivated": false,
+    "gameFrameworkOrAudioConfigurationEdited": false,
+    "rendererSourcesOrGainsChanged": false,
+    "stockFallbackSettingsPreserved": true,
+    "liveHandoffQualified": false,
+    "audibilityQualified": false,
+    "maintainerReportSent": false
+  },
+  "limits": [
+    "One route invocation is not proof that a GTA process successfully started. Bounded polling did not observe the exact process; a brief process between polls cannot be excluded.",
+    "Old RPH/SHV log entries and missing capture files cannot be converted into measured zero counters or a functional handoff failure.",
+    "Normal cancellation of the remaining RPH launcher was observed; no game world or GTA quit prompt was observed.",
+    "The original runtime/startup cause remains unknown; no retry, alternate route or framework change was attempted."
+  ],
+  "privacy": "Absolute paths, process/session/QPC identifiers, raw UI captures and local logs remain private. Only sanitised facts and receipt digests are public."
+}
