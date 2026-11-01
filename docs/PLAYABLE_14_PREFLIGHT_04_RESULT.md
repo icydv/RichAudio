@@ -1,6 +1,6 @@
 # PLAYABLE-14: the pinned coordinator refused reuse before deployment
 
-**Later result:** The owner separately approved the new coordinator and [attempt 5 ran once](PLAYABLE_14_RETEST_05_RESULT.md), with changing telemetry followed by listener rejection and verified restoration. The preflight/preparation account below describes the earlier state published at `4c395b4`.
+**Later result:** I separately approved the new coordinator and [attempt 5 ran once](PLAYABLE_14_RETEST_05_RESULT.md), with changing telemetry followed by listener rejection and verified restoration. The preflight/preparation account below describes the earlier state published at `4c395b4`.
 
 **Decision: BLOCKED — `Existing attempt; no preflight retry.`** The fresh approval requested another passive test using the exact coordinator receipt `8fb6a5e22f9808bc787126d2245d931a7595e649ed47d9ad91bdce50c7d24f66`. Its single preflight invocation exited with code 1 before deployment, launcher invocation, lease creation or operator Start. This is a coordinator reuse guard, not a new GTA/runtime failure or another observation of the earlier source expiry.
 
