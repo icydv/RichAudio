@@ -3,7 +3,7 @@
 param()
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
-$output=Join-Path $repo ('.local/playable-09/journal-validation-'+[Guid]::NewGuid().ToString('N'))
+$output=Join-Path $repo ('.local/playable-12/journal-validation-'+[Guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory($output)|Out-Null
 $workspace=Join-Path $output 'fixture-workspace';[IO.Directory]::CreateDirectory($workspace)|Out-Null
 $binary=Join-Path $output 'RichAudio.ShvHandoff.Journal.Tests.exe';$policy=Join-Path $output 'ShvHandoffBuildPolicy.fixture.cs'
@@ -18,6 +18,6 @@ if($LASTEXITCODE -ne 0){throw 'Journal fixture compilation failed.'}
 $raw=@(& $binary);if($LASTEXITCODE -ne 0 -or $raw.Count -ne 1){throw 'Journal fixture execution failed.'}
 $result=$raw[0]|ConvertFrom-Json;if(!$result.passed -or $result.gameExecuted -or $result.endpointOpened -or $result.audioPlayback){throw 'Unexpected journal fixture boundary.'}
 foreach($pin in $pins){if((Get-FileHash -LiteralPath (Join-Path $repo $pin.name)).Hash.ToLowerInvariant() -ne $pin.sha256){throw 'Source changed during journal validation.'}}
-$receipt=[ordered]@{schema=1;profile='PLAYABLE-09';kind='actual-bounded-journal-and-process-lease-private-fixtures';passed=$true;cases=$result.cases;assertions=$result.assertions;casesPassed=$result.casesPassed;sources=$pins;compilerSha256=(Get-FileHash -LiteralPath $compiler).Hash.ToLowerInvariant();fixturePolicySha256=(Get-FileHash -LiteralPath $policy).Hash.ToLowerInvariant();runnerSha256=(Get-FileHash -LiteralPath $PSCommandPath).Hash.ToLowerInvariant();binarySha256=(Get-FileHash -LiteralPath $binary).Hash.ToLowerInvariant();fixturePolicyIsNotProductionPolicy=$true;actualCurrentFixtureProcessIdentityObserved=$true;actualWriterAndCodecExecuted=$true;gameExecuted=$false;gameFilesWritten=$false;actualRphOrProducerExecuted=$false;endpointOpened=$false;audioPlayback=$false}
+$receipt=[ordered]@{schema=1;profile='PLAYABLE-12';runtimePolicy='functional-compatibility';kind='actual-bounded-journal-and-process-lease-private-fixtures';passed=$true;cases=$result.cases;assertions=$result.assertions;casesPassed=$result.casesPassed;sources=$pins;compilerSha256=(Get-FileHash -LiteralPath $compiler).Hash.ToLowerInvariant();fixturePolicySha256=(Get-FileHash -LiteralPath $policy).Hash.ToLowerInvariant();runnerSha256=(Get-FileHash -LiteralPath $PSCommandPath).Hash.ToLowerInvariant();binarySha256=(Get-FileHash -LiteralPath $binary).Hash.ToLowerInvariant();fixturePolicyIsNotProductionPolicy=$true;actualCurrentFixtureProcessIdentityObserved=$true;actualWriterAndCodecExecuted=$true;gameExecuted=$false;gameFilesWritten=$false;actualRphOrProducerExecuted=$false;endpointOpened=$false;audioPlayback=$false}
 $path=Join-Path $output 'validation.json';$receipt|ConvertTo-Json -Depth 8|Set-Content -LiteralPath $path -Encoding utf8
 Write-Output ('PASS '+$result.cases+' journal/bootstrap cases / '+$result.assertions+' assertions; '+$path)

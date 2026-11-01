@@ -38,7 +38,7 @@ namespace RichAudio.Beacon.Rph
             long lastClockLogged=-1;
             try
             {
-                Game.Console.Print("RichAudio PLAYABLE-09 passive handoff only; GTA stock audio retained. No audio host or recording.");
+                Game.Console.Print("RichAudio PLAYABLE-12 passive handoff only; GTA stock audio retained. No audio host or recording.");
                 // A later authorised coordinator writes the process-bound lease.
                 // Merely loading this candidate cannot start target readings.
                 long leaseDeadline=Stopwatch.GetTimestamp()+Stopwatch.Frequency*60;
@@ -49,22 +49,28 @@ namespace RichAudio.Beacon.Rph
                     GameFiber.Sleep(50);
                 }
                 if(stopping||config==null)throw new InvalidDataException("reviewed-session-not-acquired");
-                stage="attaching-reviewed-module";
+                stage="checking-rph-compatibility";
                 Assembly caller=typeof(ShvPassiveHandoffEntry).Assembly;
-                Assembly rphRuntime=typeof(Game).Assembly;
-                // Verify the actual assembly supplying these API calls. The
-                // launcher on disk or a matching version string alone cannot
-                // authenticate a different cached runtime assembly.
-                string rphRuntimeHash=Hash(rphRuntime.Location);
-                string rphRuntimeVersion=FileVersionInfo.GetVersionInfo(rphRuntime.Location).FileVersion;
-                Need(rphRuntimeHash==config.Scope.RphSha256&&rphRuntimeVersion==config.Scope.RphVersion,
-                    "actual-rph-runtime-bytes-or-version-unreviewed");
+                var compatibility=RphHandoffCompatibility.Inspect();
+                Need(compatibility.Compatible,compatibility.Reason);
                 stage="waiting-offline-story";
                 long storyDeadline=Stopwatch.GetTimestamp()+Stopwatch.Frequency*300;
                 while(!stopping&&!stopRequested&&Stopwatch.GetTimestamp()<storyDeadline&&!CameraSampler.StoryReady())
                     GameFiber.Sleep(50);
                 Need(!stopping&&!stopRequested&&CameraSampler.StoryReady(),"offline-story-not-acquired");
+                stage="attaching-reviewed-module";
                 module=ShvProducerModule.AttachLoaded(config.CreateReview(Hash(caller.Location)),caller);
+                // Retain the functional check and best-effort private diagnostics
+                // before source Open. Metadata availability never decides API
+                // compatibility; ordinary journal failure still stops the run.
+                journal=new ShvHandoffJournal(config.EvidenceRoot);
+                Need(journal.WriteEvent("rph-compatibility",new{runtimePolicy="functional-compatibility",
+                    compatible=compatibility.Compatible,reason=compatibility.Reason,
+                    diagnosticStatus=compatibility.DiagnosticStatus,apiAssemblyName=compatibility.ApiAssemblyName,
+                    apiModuleName=compatibility.ApiModuleName,apiMvid=compatibility.ApiMvid,
+                    apiLocation=compatibility.ApiLocation,apiSha256=compatibility.ApiSha256,
+                    apiFileVersion=compatibility.ApiFileVersion,distributionAuthenticationRequired=false,
+                    actualBehaviourRequiresSubsequentCalls=true}),"journal-compatibility-failed");
                 stage="waiting-source-metadata";
                 long metadataDeadline=Stopwatch.GetTimestamp()+Stopwatch.Frequency*2;
                 while(!stopping&&!stopRequested&&!module.MetadataReady&&Stopwatch.GetTimestamp()<metadataDeadline)
@@ -75,14 +81,14 @@ namespace RichAudio.Beacon.Rph
                 module.OpenSession(config.SessionId);
                 composition=new TrustedShvComposition(module,HandoffBindingProofMode.ReadOnlySdkOrdinaryReuse);
                 adapter=new ShvGameplayFrameAdapter(module.SessionId,module.Generation,config.Scope);
-                journal=new ShvHandoffJournal(config.EvidenceRoot);
                 Need(journal.WriteEvent("session",new{session=module.SessionId,generation=module.Generation,
                     producerSha256=config.Scope.ProducerSha256,bridgeSha256=Hash(caller.Location),
                     identityMode="read-only-sdk-ordinary-reuse",unobservedFullCounterWrapAddressReuseExcluded=true,
                     passiveOnly=true,audioHostStarted=false,recordingStarted=false,
                     sourceInstanceQpc=module.Description.SourceInstanceQpc,sourceFrequency=module.Description.Frequency,
-                    hostFrequency=module.HostFrequency,rphRuntimeHash=rphRuntimeHash,rphRuntimeVersion=rphRuntimeVersion,
-                    rphRuntimeAssemblyName=rphRuntime.FullName}),"journal-start-failed");
+                    hostFrequency=module.HostFrequency,rphRuntimeHash=compatibility.ApiSha256,
+                    rphRuntimeVersion=compatibility.ApiFileVersion,rphRuntimeAssemblyName=compatibility.ApiAssemblyName,
+                    runtimePolicy="functional-compatibility"}),"journal-start-failed");
                 // The original gold menu and services remain unchanged, but
                 // this temporary diagnostic profile starts none of them. Menu
                 // workers can contact an existing SoundMap recorder endpoint.

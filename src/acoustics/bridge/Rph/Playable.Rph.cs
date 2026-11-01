@@ -1,7 +1,7 @@
 using System;using System.Collections.Generic;using System.Diagnostics;using System.IO;using System.Threading;using Rage;using Rage.Attributes;using RichAudio.Beacon.Transport;using RichAudio.Beacon.Windows;
 #if PLAYABLE_PRODUCT
 #if SHV_HANDOFF_09
-[assembly:Plugin("RichAudio",Author="RichAudio",Description="PLAYABLE-09 passive SHV/RPH handoff qualification. GTA stock audio; no audio host.",EntryPoint="RichAudio.Beacon.Rph.PlayableEntry.Main",ExitPoint="RichAudio.Beacon.Rph.PlayableEntry.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]
+[assembly:Plugin("RichAudio",Author="RichAudio",Description="PLAYABLE-12 passive SHV/RPH handoff qualification. GTA stock audio; no audio host.",EntryPoint="RichAudio.Beacon.Rph.PlayableEntry.Main",ExitPoint="RichAudio.Beacon.Rph.PlayableEntry.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]
 #else
 [assembly:Plugin("RichAudio",Author="RichAudio",Description="Automatic offline Story Mode stock-source acoustics. Experimental additive; native GTA sounds retained.",EntryPoint="RichAudio.Beacon.Rph.PlayableEntry.Main",ExitPoint="RichAudio.Beacon.Rph.PlayableEntry.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]
 #endif
@@ -17,9 +17,16 @@ namespace RichAudio.Beacon.Rph {
   static void Diagnostic(string reason){lastReason=reason;if(reason==lastPrintedReason||diagnosticChanges>=8||Stopwatch.GetTimestamp()-lastDiagnosticAt<Stopwatch.Frequency*2)return;lastPrintedReason=reason;lastDiagnosticAt=Stopwatch.GetTimestamp();diagnosticChanges++;Game.Console.Print("RichAudio vehicle evidence "+VehicleDiagnostic());}
   static string VehicleDiagnostic(){return "reason="+lastReason+" stage="+stage+" playerModel="+lastPlayerModel.ToString("X8")+" context="+lastPlayerContext+" rawRatio="+lastRatio.ToString("R",System.Globalization.CultureInfo.InvariantCulture)+" running="+lastRunning+" tracked="+tracked.Count+" discovery="+discovered.Length+" captures="+captures+" offers="+offers+" eligible="+eligibleOffers+" unsupported="+unsupportedOffers+" dead="+deadOffers+" getterFailures="+sourceGetterFailures+" ratioRejects="+ratioRejections+" identityRetired="+identityRetirements+" publishedTotal="+publishedVehicles+" slowBatches="+slowBatches;}
 #endif
+#if SHV_HANDOFF_09
+  [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+  static void RunPassive(){ShvPassiveHandoffEntry.Run();}
+#endif
   public static void Main(){
 #if SHV_HANDOFF_09
-   ShvPassiveHandoffEntry.Run();
+   // Catch compatibility/JIT failures before Run's own try can be entered.
+   try{RunPassive();}catch(ThreadAbortException){throw;}catch(Exception e){
+    try{System.Console.Error.WriteLine("RichAudio passive compatibility/lifecycle failure: "+e.GetType().Name+". Stock fallback retained; no retry.");}catch(ThreadAbortException){throw;}catch{}
+   }
 #else
    try{
     string executable=Process.GetCurrentProcess().MainModule.FileName;runtime=new GameplayRuntime();

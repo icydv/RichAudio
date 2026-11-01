@@ -1,0 +1,251 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-11",
+  "kind": "new-offline-reruns-of-unchanged-controls",
+  "recordedUtc": "2026-11-01T15:06:57.9924938Z",
+  "passed": true,
+  "provenanceFixtures": {
+    "cases": 35,
+    "assertions": 337,
+    "privateReceiptSha256": "844f6f15c5d0ff3b9f6cf1b6ae6935f140359a71573d81a8adcf9e1a64da5b9b",
+    "canonicalRunner": "tools/Test-RphRuntimeProvenance.ps1",
+    "runnerSha256": "5b43f5fdadb38b856222dd45e41d777d9700bca8e01634dc9a88b27e101fd523",
+    "fixtureOnly": true,
+    "authenticatesObservedApi": false,
+    "casesPassed": [
+      {
+        "test": "different-reviewed-runtime-and-launcher",
+        "passed": true,
+        "terminalReason": "diagnostic-only-provenance-matched-no-activation"
+      },
+      {
+        "test": "unreviewed-does-not-adopt-observation",
+        "passed": true,
+        "terminalReason": "api-runtime-policy-unreviewed"
+      },
+      {
+        "test": "right-version-wrong-runtime-bytes",
+        "passed": true,
+        "terminalReason": "api-runtime-digest-mismatch"
+      },
+      {
+        "test": "right-bytes-wrong-runtime-version",
+        "passed": true,
+        "terminalReason": "api-runtime-version-mismatch"
+      },
+      {
+        "test": "unexpected-runtime-cache-path",
+        "passed": true,
+        "terminalReason": "api-runtime-path-mismatch"
+      },
+      {
+        "test": "runtime-size-mismatch",
+        "passed": true,
+        "terminalReason": "api-runtime-size-mismatch"
+      },
+      {
+        "test": "runtime-assembly-name-mismatch",
+        "passed": true,
+        "terminalReason": "api-runtime-assembly-name-mismatch"
+      },
+      {
+        "test": "runtime-mvid-mismatch",
+        "passed": true,
+        "terminalReason": "api-runtime-module-mvid-mismatch"
+      },
+      {
+        "test": "runtime-evidence-missing",
+        "passed": true,
+        "terminalReason": "api-runtime-policy-evidence-missing"
+      },
+      {
+        "test": "runtime-evidence-invalid",
+        "passed": true,
+        "terminalReason": "api-runtime-policy-evidence-missing"
+      },
+      {
+        "test": "runtime-evidence-count-bound",
+        "passed": true,
+        "terminalReason": "api-runtime-policy-evidence-missing"
+      },
+      {
+        "test": "launcher-wrong-hash",
+        "passed": true,
+        "terminalReason": "launcher-digest-mismatch"
+      },
+      {
+        "test": "launcher-wrong-version",
+        "passed": true,
+        "terminalReason": "launcher-version-mismatch"
+      },
+      {
+        "test": "launcher-wrong-size",
+        "passed": true,
+        "terminalReason": "launcher-size-mismatch"
+      },
+      {
+        "test": "launcher-missing",
+        "passed": true,
+        "terminalReason": "launcher-unavailable-or-inconsistent"
+      },
+      {
+        "test": "process-id-mismatch",
+        "passed": true,
+        "terminalReason": "process-id-mismatch"
+      },
+      {
+        "test": "process-creation-mismatch",
+        "passed": true,
+        "terminalReason": "process-creation-mismatch"
+      },
+      {
+        "test": "process-path-mismatch",
+        "passed": true,
+        "terminalReason": "game-process-path-mismatch"
+      },
+      {
+        "test": "session-context-mismatch",
+        "passed": true,
+        "terminalReason": "session-context-mismatch"
+      },
+      {
+        "test": "caller-hash-mismatch",
+        "passed": true,
+        "terminalReason": "caller-assembly-digest-mismatch"
+      },
+      {
+        "test": "caller-is-not-reviewed-entry",
+        "passed": true,
+        "terminalReason": "caller-assembly-digest-mismatch"
+      },
+      {
+        "test": "missing-actual-runtime",
+        "passed": true,
+        "terminalReason": "api-runtime-unavailable-or-inconsistent"
+      },
+      {
+        "test": "dynamic-runtime-no-location",
+        "passed": true,
+        "terminalReason": "api-runtime-unavailable-or-inconsistent"
+      },
+      {
+        "test": "artifact-write-open-denied",
+        "passed": true,
+        "terminalReason": "launcher-unavailable-or-inconsistent"
+      },
+      {
+        "test": "changed-file-before-capture",
+        "passed": true,
+        "terminalReason": "launcher-digest-mismatch"
+      },
+      {
+        "test": "hardlink-retains-safe-values-but-rejects",
+        "passed": true,
+        "terminalReason": "launcher-unavailable-or-inconsistent"
+      },
+      {
+        "test": "single-file-pin-spans-metadata-write-and-replace-attempts",
+        "passed": true,
+        "terminalReason": null
+      },
+      {
+        "test": "reparse-ancestor-refused",
+        "passed": true,
+        "terminalReason": "launcher-unavailable-or-inconsistent"
+      },
+      {
+        "test": "artifact-size-rejected-before-hash",
+        "passed": true,
+        "terminalReason": "launcher-unavailable-or-inconsistent"
+      },
+      {
+        "test": "output-first-create",
+        "passed": true,
+        "terminalReason": "diagnostic-only-provenance-matched-no-activation"
+      },
+      {
+        "test": "output-reuse-no-overwrite",
+        "passed": true,
+        "terminalReason": "provenance-session-output-already-exists"
+      },
+      {
+        "test": "invalid-output-session",
+        "passed": true,
+        "terminalReason": "report-session-invalid"
+      },
+      {
+        "test": "missing-workspace",
+        "passed": true,
+        "terminalReason": "owned-workspace-required"
+      },
+      {
+        "test": "reparse-output-workspace",
+        "passed": true,
+        "terminalReason": "reparse-or-nondirectory-ancestor"
+      },
+      {
+        "test": "output-write-failure-is-fail-closed",
+        "passed": true,
+        "terminalReason": "provenance-capture-or-output-failed:IOException"
+      }
+    ]
+  },
+  "profileValidation": {
+    "controls": 25,
+    "privateReceiptSha256": "1c69d68dd3955e2f1649d7642817f512f25f02d700b51565cf5ca277e878343e",
+    "canonicalRunner": "tools/Test-RphProvenanceProfile.ps1",
+    "runnerSha256": "d05100782e2e2455e49f3be23138b1a25ef53c91098c9862ed38ca6b1d443d0c",
+    "retainedProductionPluginSha256": "cb2555ba00169af86d2728ba545c808a825df0ab04ba08026f1268e02d3caf3a",
+    "productionDiagnosticPluginExecuted": false,
+    "independentRebuildMethods": 187,
+    "sourceIdenticalEntryFixtures": 16,
+    "entryAssertions": 260,
+    "serializedMutantsRejected": 6,
+    "defaultProductMethods": 655,
+    "defaultProductMethodDifferences": 0,
+    "casesPassed": [
+      "actual-authentic-SDK-diagnostic-profile-isolated",
+      "independent-rebuild-all-method-bodies-equal",
+      "source-type-injection",
+      "gameplay-field-reference",
+      "extra-lifecycle-entry",
+      "unexpected-audio-dependency",
+      "forbidden-native-import",
+      "plugin-entry-target-mutation",
+      "source-identical-fixture-policy-entry-valid-unreviewed",
+      "source-identical-fixture-policy-entry-wrong-process",
+      "source-identical-fixture-policy-entry-wrong-creation",
+      "source-identical-fixture-policy-entry-wrong-caller",
+      "source-identical-fixture-policy-entry-wrong-session",
+      "source-identical-fixture-policy-entry-wrong-profile",
+      "source-identical-fixture-policy-entry-source-opt-in",
+      "source-identical-fixture-policy-entry-audio-opt-in",
+      "source-identical-fixture-policy-entry-asi-opt-in",
+      "source-identical-fixture-policy-entry-runtime-self-review",
+      "source-identical-fixture-policy-entry-unknown-lease-field",
+      "source-identical-fixture-policy-entry-duplicate-lease-field",
+      "source-identical-fixture-policy-entry-changed-installed-scope",
+      "source-identical-fixture-policy-entry-changed-launcher",
+      "source-identical-fixture-policy-entry-occupied-report-output",
+      "source-identical-fixture-policy-entry-unload-before-entry",
+      "default-product-methods-unchanged"
+    ]
+  },
+  "historicalHandoffRegressions": {
+    "rerun": false,
+    "preservedReceipt": "evidence/playable-10-managed-regressions.json",
+    "preservedReceiptSha256": "45bc90b2285c14bb09d7bf1178f39c45ba43839d745c9ebcbd3b752138134553",
+    "reason": "No source, handoff policy, build configuration or candidate changed; prior managed and native results stay historical and do not authenticate the API."
+  },
+  "limitations": "Positive identities are explicitly authored fixture policies, not independently authenticated official API bytes. Diagnostic component omission verifies no Open/BEGIN/gameplay path in that image; it does not newly validate an accepted passive source. No corrected accepted candidate exists.",
+  "newPassiveCandidateBuilt": false,
+  "actualRphExecuted": false,
+  "actualShvExecuted": false,
+  "gameExecuted": false,
+  "gameFilesWritten": false,
+  "endpointOpened": false,
+  "audioPlayback": false,
+  "stockFallback": true,
+  "modificationAwareLoudness": false,
+  "synchronizedAudioRecording": false
+}

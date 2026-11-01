@@ -21,6 +21,8 @@ namespace RichAudio.Beacon.Handoff
 
         internal sealed class Scope
         {
+            // RPH metadata is retained for historical diagnostics only. Runtime
+            // compatibility, not third-party distribution identity, is policy.
             internal readonly string GameVersion, GameSha256, ShvSha256, LoaderSha256, ProducerSha256,RphVersion,RphSha256;
             internal readonly uint Model;
             internal Scope(string version,string game,string shv,string loader,string producer,uint model,string rphVersion,string rph)
@@ -39,7 +41,7 @@ namespace RichAudio.Beacon.Handoff
         {
             return a!=null&&b!=null&&a.GameVersion==b.GameVersion&&a.GameSha256==b.GameSha256
                 &&a.ShvSha256==b.ShvSha256&&a.LoaderSha256==b.LoaderSha256
-                &&a.ProducerSha256==b.ProducerSha256&&a.Model==b.Model&&a.RphVersion==b.RphVersion&&a.RphSha256==b.RphSha256;
+                &&a.ProducerSha256==b.ProducerSha256&&a.Model==b.Model;
         }
         static bool Token(string x,int length)
         {

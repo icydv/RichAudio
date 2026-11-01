@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-11",
+  "kind": "local-addition-artifact-manifest",
+  "createdUtc": "2026-11-01T15:11:21.5674152Z",
+  "baseCommit": "8c06c46ee0c1925d93692fbac6672116cd7f8537",
+  "artifacts": [
+    {
+      "name": "docs/PLAYABLE_11.md",
+      "bytes": 10841,
+      "sha256": "d7a4e5845fc0864fb08330aa2d7b5e8631c242da271ac887c556f92099132da5"
+    },
+    {
+      "name": "docs/UPSTREAM_RPH_API_PROVENANCE_QUESTION.md",
+      "bytes": 2465,
+      "sha256": "fed08dd0b51d7421357dcb0d72e181aaa554c8e89aec8e251968b2414417ac27"
+    },
+    {
+      "name": "evidence/playable-11-provenance.json",
+      "bytes": 5770,
+      "sha256": "d11d3987b7e49cf3af9fd3f70b121ab77fa46d7dfa1c0454275c68a860835fe3"
+    },
+    {
+      "name": "evidence/playable-11-offline-controls.json",
+      "bytes": 9075,
+      "sha256": "f36b31ce722831d062fc6af347aa67a12615dd582fa0f3771401771f1fa9f0b5"
+    },
+    {
+      "name": "evidence/playable-11-preservation.json",
+      "bytes": 961,
+      "sha256": "0986bbc7656a52d8fe47bd2ad70ea1e31a76095c215bcd7370550029364f4f15"
+    },
+    {
+      "name": "evidence/playable-11-independent-review.json",
+      "bytes": 3735,
+      "sha256": "8ac080a9e0eef22ec5fdc6580a0ee6bcf211a55e1ebc3582e4ccc5442243f8af"
+    }
+  ],
+  "manifestSelfDigestExcluded": true,
+  "newAcceptedBinaryCandidate": false,
+  "productOrPolicyEdits": false,
+  "externalPublication": false,
+  "newLiveAuthorisation": false
+}

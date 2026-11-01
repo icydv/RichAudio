@@ -125,7 +125,13 @@ internal static class ShvHandoffFixtureHost
             window=Window(caseName!="no_foreground");
             IntPtr sourceModule=LoadLibraryExW(producer,IntPtr.Zero,0x100|0x800);Check(sourceModule!=IntPtr.Zero,"unchanged production ASI loaded against fake import");
             string hostHash=Hash(binary);var scope=new H.Scope("0.0.0.0",hostHash,args[1],args[1],args[2],H.BatiModel,"explicit-fixture",hostHash);
-            var review=new ShvModuleReview(scope,binary,fake,fake,producer,binary,hostHash,true);
+            // Genuine component positive case has no RPH distribution evidence:
+            // unrelated metadata and a nonexistent launcher path cannot prevent
+            // our owned module from opening, binding and emitting valid frames.
+            if(caseName=="valid_changing")scope=new H.Scope(scope.GameVersion,scope.GameSha256,scope.ShvSha256,
+                scope.LoaderSha256,scope.ProducerSha256,scope.Model,"unknown-functional-host",new string('a',64));
+            var review=new ShvModuleReview(scope,binary,fake,fake,producer,
+                caseName=="valid_changing"?Path.Combine(root,"absent-rph-launcher.exe"):binary,hostHash,true);
             if(caseName=="wrong_provider_hash"){
                 var bad=new H.Scope(scope.GameVersion,scope.GameSha256,scope.ShvSha256,scope.LoaderSha256,new string('0',64),scope.Model,scope.RphVersion,scope.RphSha256);
                 bool denied=false;try{ShvProducerModule.AttachLoaded(new ShvModuleReview(bad,binary,fake,fake,producer,binary,hostHash,true),Assembly.GetExecutingAssembly());}catch(InvalidDataException){denied=true;}
@@ -160,7 +166,7 @@ internal static class ShvHandoffFixtureHost
                         }
                         if(caseName=="wrong_peer_address"||caseName=="wrong_binding_policy"||caseName=="no_foreground")Check(!bound&&composition.Retired,"independent initial binding denied");
                         else{
-                            Check(bound&&composition.ClockReady,"actual loaded-module clock and independent fixture binding");Check(composition.Begin(),"single begin after measured binding");
+                            Check(bound&&composition.ClockReady,"actual loaded-module clock and independent fixture binding: "+composition.Reason+" anchors="+composition.ClockAnchors);Check(composition.Begin(),"single begin after measured binding");
                             var adapter=new ShvGameplayFrameAdapter(module.SessionId,1,scope);
                             var active=Stopwatch.StartNew();int limit=caseName=="max_duration"?123000:6000;
                             while(!composition.Retired&&active.ElapsedMilliseconds<limit){

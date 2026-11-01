@@ -25,13 +25,13 @@ internal static class TestShvHandoffJournal
     static void Check(bool value,string why){assertions++;if(!value)throw new Exception(why);}
     static void Test(string name,Action body){body();cases++;names.Add(name);}
     static string Session(int value){return value.ToString("x32");}
-    static string Root(int value){return Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-09","live-session",Session(value));}
+    static string Root(int value){return Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-12","live-session",Session(value));}
     static IDictionary<string,object> Lease(){
         long creation,exit,kernel,user;using(var process=Process.GetCurrentProcess()){Check(GetProcessTimes(process.Handle,out creation,out exit,out kernel,out user),"actual fixture process creation");
-            return new Dictionary<string,object>{{"schema",1},{"profile","PLAYABLE-09"},{"sessionId",Session(90)},{"gameProcessId",process.Id},{"gameProcessCreationFileTime",creation.ToString(System.Globalization.CultureInfo.InvariantCulture)},
+            return new Dictionary<string,object>{{"schema",1},{"profile","PLAYABLE-12"},{"sessionId",Session(90)},{"gameProcessId",process.Id},{"gameProcessCreationFileTime",creation.ToString(System.Globalization.CultureInfo.InvariantCulture)},
                 {"gamePath",ShvHandoffBuildPolicy.GamePath},{"gameSha256",ShvHandoffBuildPolicy.GameSha256},{"gameVersion",ShvHandoffBuildPolicy.GameVersion},
                 {"shvPath",ShvHandoffBuildPolicy.ShvPath},{"shvSha256",ShvHandoffBuildPolicy.ShvSha256},{"loaderPath",ShvHandoffBuildPolicy.LoaderPath},{"loaderSha256",ShvHandoffBuildPolicy.LoaderSha256},
-                {"rphPath",ShvHandoffBuildPolicy.RphPath},{"rphSha256",ShvHandoffBuildPolicy.RphSha256},{"rphVersion",ShvHandoffBuildPolicy.RphVersion},
+                {"runtimePolicy","functional-compatibility"},
                 {"producerPath",ShvHandoffBuildPolicy.ProducerPath},{"producerSha256",ShvHandoffBuildPolicy.ProducerSha256},{"callerAssemblySha256",ShvHandoffBootstrap.HashAssembly(Assembly.GetExecutingAssembly())},
                 {"passiveOnly",true},{"audioPlaybackAllowed",false},{"fixtureOnly",false},{"identityMode","read-only-sdk-ordinary-reuse"},{"counterWrapAddressAbaExcluded",true}};
         }
@@ -46,8 +46,8 @@ internal static class TestShvHandoffJournal
             Check(config.EvidenceRoot==Root(90)&&!config.CreateReview((string)lease["callerAssemblySha256"]).FixtureOnly,"output derives from policy; no fixtureOnly lease bypass");
         });
         Test("wrong process creation artifact purpose fields and duplicate JSON fail closed",delegate{
-            string[] keys={"gameProcessId","gameProcessCreationFileTime","producerSha256","callerAssemblySha256","audioPlaybackAllowed","fixtureOnly","counterWrapAddressAbaExcluded","identityMode"};
-            foreach(string key in keys){var lease=Lease();if(key=="gameProcessId")lease[key]=Int32.MaxValue;else if(key=="gameProcessCreationFileTime")lease[key]="1";else if(key=="producerSha256"||key=="callerAssemblySha256")lease[key]=new String('0',64);else if(key=="identityMode")lease[key]="marker-mode";else lease[key]=!(bool)lease[key];Put(lease);
+            string[] keys={"gameProcessId","gameProcessCreationFileTime","producerSha256","callerAssemblySha256","audioPlaybackAllowed","fixtureOnly","counterWrapAddressAbaExcluded","identityMode","runtimePolicy"};
+            foreach(string key in keys){var lease=Lease();if(key=="gameProcessId")lease[key]=Int32.MaxValue;else if(key=="gameProcessCreationFileTime")lease[key]="1";else if(key=="producerSha256"||key=="callerAssemblySha256")lease[key]=new String('0',64);else if(key=="identityMode")lease[key]="marker-mode";else if(key=="runtimePolicy")lease[key]="distribution-whitelist";else lease[key]=!(bool)lease[key];Put(lease);
                 ShvHandoffBootstrap.Configuration config;string why;Check(!ShvHandoffBootstrap.TryLoad(out config,out why)&&config==null,"bad lease "+key);}
             var extra=Lease();extra["outputRoot"]="C:\\arbitrary";Put(extra);ShvHandoffBootstrap.Configuration value;string reason;Check(!ShvHandoffBootstrap.TryLoad(out value,out reason),"no arbitrary output field");
             string text=Json.Serialize(Lease());File.WriteAllText(ShvHandoffBuildPolicy.LeasePath,text.Substring(0,text.Length-1)+",\"schema\":1}");Check(!ShvHandoffBootstrap.TryLoad(out value,out reason),"duplicate field rejected");

@@ -1,0 +1,226 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-12",
+  "kind": "authentic-sdk-passive-functional-compatibility-build",
+  "baseCommit": "8c06c46ee0c1925d93692fbac6672116cd7f8537",
+  "runtimePolicy": "functional-compatibility",
+  "launcherApiEqualityRequired": false,
+  "thirdPartyRphDistributionAuthenticationRequired": false,
+  "expectedApiHashWhitelistUsed": false,
+  "privateBuildReceiptSha256": "55ad9a36f30443f72a6dd8315cf057707bbb59c9c86fff7a3c1dfb723054185a",
+  "plugin": {
+    "name": "RichAudio.dll",
+    "bytes": 337408,
+    "sha256": "1b9ed8586906c0c56f9f8c695dcbe137857b4d08da02a6797eb6811002727866"
+  },
+  "nativeProducer": {
+    "name": "RichAudio.OperatingState.ShvHandoff.asi",
+    "bytes": 129024,
+    "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+    "sourceChanged": false,
+    "rebuilt": false
+  },
+  "sdkSha256": "5d439745604a5fedbf8fa401520d4f296c1b6800d77e2923ba3bf9772182c7e0",
+  "sourceManifestSha256": "3453ce83635186b9421718ac99d5340f1f522a09b28ee6307d3631ac740cd871",
+  "compiledSourceCount": 47,
+  "sources": [
+    {
+      "name": ".local/playable-12/passive-bridge-final-03/ShvHandoffBuildPolicy.generated.cs",
+      "sha256": "476586e986ad677663b01e50656b7b40334e20ee29b21b69592ce6da3c68fe07"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/CameraSampler.Rph.cs",
+      "sha256": "c28eff41162e36ac7880242b3afcdbf3ebda64e8526df80a43c4cf02f2df913b"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/GeometryBridge.Rph.cs",
+      "sha256": "f488f656073d1b0fec4ec95008c97f1446d3550de9351b8afff680b76bb2bd01"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/InGameMenu.Rph.cs",
+      "sha256": "551a0075ddda61f747091ad6971eab40369e0e2cdbc100ae14ed51ea8c849d7b"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/InstalledWorldWarmup.Rph.cs",
+      "sha256": "3286941195cb2eec31662826f65d5b12313bde823b6c0cc596b05b31851a9952"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/ListenerEvidence.Rph.cs",
+      "sha256": "624374e67f4e3a594d51c64e514b6b0d11f47841df9723f39999a9b3e5661c46"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/PassiveListener.Rph.cs",
+      "sha256": "274b9dca8380155860e7a366e18e15c4c3e362aef220dd3356a92a23db0d6b3f"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/Playable.Rph.cs",
+      "sha256": "2759d4596f0141dcab35a1eb2132f13ee2e55ba33712313308feac75dd027755"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/RphHandoffCompatibility.Rph.cs",
+      "sha256": "50e8ac5d57c6c8c05badb250042811aefb6a800aa49e301fa3d2211fdbbc7ab9"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/RphProvenanceBootstrap.Rph.cs",
+      "sha256": "778dca93a2287507e77ed48f713972f29eb74183c220ee26d3b883e29950b61e"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/RphProvenanceEntry.Rph.cs",
+      "sha256": "6e6d9948fbead579ca9e879c378a0775276ed9b0f11f7e17355b063654052c8f"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/ShvHandoffBootstrap.Rph.cs",
+      "sha256": "076fbbe6155a2946b563257de4dd1cc1ba0a4c702688dbb2978b117c4fc8451b"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/ShvHandoffJournal.Rph.cs",
+      "sha256": "c598d6260d735cdb3697d736940d9d77ea83592470e6eb9d391d9e2f8e977aca"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/ShvHandoffSampler.Rph.cs",
+      "sha256": "1497282001c477295e72fa2c03d30f01cc04665def2a6c487f5177f92a0336a2"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/ShvPassiveHandoff.Rph.cs",
+      "sha256": "132d9be8420d678951d6697682164236e0807b9e572206764677b8ef765a14a6"
+    },
+    {
+      "name": "src/acoustics/geometry/GeometryCapture.cs",
+      "sha256": "16e5be0a38afb65a6c61145a162ddcfaece5c0ebd174e661970b05ce9c14aa4d"
+    },
+    {
+      "name": "src/acoustics/geometry/GeometryHostRelay.cs",
+      "sha256": "a23ea9ce6942e53536cffc0bcf404c6e197f22e053b864553dbae70ffcdbd97a"
+    },
+    {
+      "name": "src/acoustics/geometry/GeometryPipe.cs",
+      "sha256": "be13b59a8b75612f841e20a6cce73ed801799c71de68bea583cd9413ef188ded"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvClockCalibration.cs",
+      "sha256": "52891eb31cee846682ac1bc7e66dab6e36a7456c01f4d40ee4b31513bb983cc5"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvGameplayFrameAdapter.cs",
+      "sha256": "783f358ca9f6f1c64f4213cb55233adf10b3b61ffd91db927adb5fb4b5089dbe"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvHandoffConsumer.cs",
+      "sha256": "71b7e034c75ea16616692aacfc020bc793af8caf06fc06fae45f6264b6a9ae89"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvOperatingStateHandoff.cs",
+      "sha256": "5df84d09cfdce5176a3be3ff591b2874dbb83d489e7084c32bffe3c098b84d91"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvProducerModule.cs",
+      "sha256": "fe8351f1c2c73817a639c93c30d129c58ad88e79e6f8668808585356bcb9af39"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/TrustedShvComposition.cs",
+      "sha256": "9fe4517599265f180b43390f36fd1f7946c7642673b4ab9cffbe1c541877d464"
+    },
+    {
+      "name": "src/acoustics/host/Transport/CameraBasis.cs",
+      "sha256": "6da0749808bbdadcbc55f21c0529b31670e6e57d8f90c8643e0586c3b9f2fbaf"
+    },
+    {
+      "name": "src/acoustics/host/Transport/GameplayProtocol.cs",
+      "sha256": "493b07e5c23e2d30c394929f71b66235fa101621adaa3fc56ea943e1a2d83c68"
+    },
+    {
+      "name": "src/acoustics/host/Transport/ListenerProtocol.cs",
+      "sha256": "7d76e16d4e4ab184d4074ef3751795c070308a1e51ba443c8e4e84a80faf027b"
+    },
+    {
+      "name": "src/acoustics/host/Transport/OwnedProcessJob.cs",
+      "sha256": "eca00bdb390410c0109d6a7910c513d6c77f2c05e5e6c8df3e77c1a65c512fe8"
+    },
+    {
+      "name": "src/acoustics/host/Transport/PipeDeadline.cs",
+      "sha256": "f28a13fcecd969a1475458a3db44a2b9bb9ac84f9b5bb3aa35b869a5bc4eb940"
+    },
+    {
+      "name": "src/acoustics/host/Transport/PlayableConfiguration.cs",
+      "sha256": "4b295d0c10d43fed720497b0ce94fd04f0f25189f1189ed982f5748cb9a36e86"
+    },
+    {
+      "name": "src/acoustics/host/Transport/StatePipe.cs",
+      "sha256": "67da56ca63bca4bb3631b1f6ae790148937ffe40766a6c06a92ab9cdf4c4534d"
+    },
+    {
+      "name": "src/acoustics/host/Windows/AcousticSettings.cs",
+      "sha256": "26430407cf2decb3e756ef38ce2cea76dec841be46089361289e4e31a6507953"
+    },
+    {
+      "name": "src/acoustics/host/Windows/GameplayRuntime.cs",
+      "sha256": "56d0bbb2cd7baab04f86c1bc821390253b45febbe14cd3279343498c31761984"
+    },
+    {
+      "name": "src/acoustics/host/Windows/InGameRecordingBridge.cs",
+      "sha256": "908674c808ed97a9fc2804bf5b3c98e6d638e794ee49d559c78fc0dd594d4393"
+    },
+    {
+      "name": "src/acoustics/host/Windows/InGameSettingsBridge.cs",
+      "sha256": "02d5989950ae202df4c74cbafdd7b08530ec90df9ad3fa5290eabc0ecdd7485a"
+    },
+    {
+      "name": "src/acoustics/host/Windows/MenuDiagnostic.cs",
+      "sha256": "d1e1dc79fa02eb840085f474c90db30fb75c5f142941e3753396829c14c88d43"
+    },
+    {
+      "name": "src/acoustics/host/Windows/PassiveSoundMapBridge.cs",
+      "sha256": "4bcbe4577f8380736b8675961c6161d204851ea7088276070871e22c1faa2d3d"
+    },
+    {
+      "name": "src/acoustics/integration/WorldWarmupSupervisor.cs",
+      "sha256": "6dd20b514041d10dfa4d12f31c1ad38abcaf3da60c884b6a20b9ab439bfc44a4"
+    },
+    {
+      "name": "src/acoustics/observation/DiagnosticTile.cs",
+      "sha256": "905257bedb01671c2a5f9e9b7c63aae920061750502c27f1d741e37307d5e8fa"
+    },
+    {
+      "name": "src/acoustics/observation/GeometryObservation.cs",
+      "sha256": "93a7d4a22e43bb8c6739c26fa9eab9f9c836ab95556b6075fbe7e6d9d380a87e"
+    },
+    {
+      "name": "src/acoustics/observation/SurfaceAcquisition.cs",
+      "sha256": "496349333402f7fcce8caa74b24fcf8f266740b57e429f1304a31f58fec7cc26"
+    },
+    {
+      "name": "src/acoustics/settings/InGame/AcousticMenuLayout.cs",
+      "sha256": "0555bff7884bec30c2cd01febdaf7e206b76c1a7753044379b26cf398b89ee75"
+    },
+    {
+      "name": "src/acoustics/settings/InGame/AcousticMenuModel.cs",
+      "sha256": "328df4db2b4f2674871eef249d34b5bc93666034739954bf63c7e918fad4a124"
+    },
+    {
+      "name": "src/acoustics/settings/InGame/HostMenuStatus.cs",
+      "sha256": "1f1fc1145027da09225125108c16176a4ce55f2b2ab9202ac376ac495a5cd5c0"
+    },
+    {
+      "name": "src/acoustics/settings/InGame/MenuContracts.cs",
+      "sha256": "8a01326b9f872810b46fa4d706a79e4555386eaa387681af9004cb5b001dbc04"
+    },
+    {
+      "name": "src/acoustics/settings/InGame/MenuInputRouter.cs",
+      "sha256": "d5041d370254f5d34495c0e6abce68a22eeba2117f485f78c2ab4819c1b79bb0"
+    },
+    {
+      "name": "src/acoustics/settings/InGame/MenuTransition.cs",
+      "sha256": "7ffeaafdf86776ebc38864be58ca2fe8b174ddb8a4587572091e2d2fdd4dc33d"
+    }
+  ],
+  "builderSha256": "fa6a820b4054a6c2f9956f14cc367f03754dd6df87f97e7412c39cfaf698a91c",
+  "bridgeBuilderSha256": "172d7f20a5f4c87a9c5e57ed7f65baa467df6ed1b88a9075e9f96f8d7771ce83",
+  "sessionLeaseFields": 21,
+  "stockFallback": true,
+  "audioPlaybackAllowed": false,
+  "deployed": false,
+  "gameLaunched": false,
+  "liveHandoffQualified": false,
+  "runtimeCompatibilityEstablishedInGame": false,
+  "limits": "Actual SDK compilation and metadata inspection, not actual RPH execution. SDK/compiler fingerprints bind build inputs; they are not third-party runtime distribution authentication."
+}

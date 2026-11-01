@@ -265,11 +265,20 @@ internal static class TestShvOperatingStateHandoff
             });
             Test("scope changes cannot inherit diagnostic qualification",delegate{
                 var scopes=new[]{Scope(version:"1.0.1158.13"),Scope(game:new string('a',64)),Scope(shv:new string('a',64)),
-                    Scope(loader:new string('a',64)),Scope(producer:new string('a',64)),Scope(model:0),
-                    Scope(rphVersion:"1.124.0.0"),Scope(rph:new string('a',64))};
+                    Scope(loader:new string('a',64)),Scope(producer:new string('a',64)),Scope(model:0)};
                 foreach(var scope in scopes){
                     var f=new Fixture();Throws(()=>f.Composition.Source(scope,Session,1,Frequency,Frequency));
                     Check(f.Accept(Change(Fixture.Frame(),scope:scope)).Reason=="scope-session-generation","packet scope mutation rejected");
+                }
+            });
+            Test("RPH distribution metadata is diagnostic rather than telemetry scope",delegate{
+                foreach(var scope in new[]{Scope(rphVersion:"unknown"),Scope(rph:new string('a',64)),
+                    new H.Scope(H.QualifiedDiagnosticScope().GameVersion,H.QualifiedDiagnosticScope().GameSha256,
+                        H.QualifiedDiagnosticScope().ShvSha256,H.QualifiedDiagnosticScope().LoaderSha256,
+                        H.QualifiedDiagnosticScope().ProducerSha256,H.BatiModel,null,null)}){
+                    var f=new Fixture();Check(H.SameScope(scope,f.Source.Scope),"unknown RPH digest/version does not change source scope");
+                    Check(f.Composition.Source(scope,Session,1,Frequency,Frequency)!=null,"scope can be issued without RPH identity");
+                    Check(f.Accept(Change(Fixture.Frame(),scope:scope)).Accepted,"valid raw observation survives RPH diagnostic changes");
                 }
             });
             Test("invalid trust policy construction denied",delegate{

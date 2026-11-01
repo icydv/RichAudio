@@ -122,11 +122,14 @@ namespace RichAudio.Beacon.Handoff
             if(review==null||review.Scope==null||caller==null||caller.IsDynamic)throw new InvalidDataException("reviewed module policy");
             if(!review.FixtureOnly){var q=ShvOperatingStateHandoff.QualifiedDiagnosticScope();
                 if(review.Scope.GameVersion!=q.GameVersion||!Equal(review.Scope.GameSha256,q.GameSha256)||!Equal(review.Scope.ShvSha256,q.ShvSha256)
-                    ||!Equal(review.Scope.LoaderSha256,q.LoaderSha256)||review.Scope.RphVersion!=q.RphVersion||!Equal(review.Scope.RphSha256,q.RphSha256)
+                    ||!Equal(review.Scope.LoaderSha256,q.LoaderSha256)
                     ||review.Scope.Model!=q.Model)throw new InvalidDataException("unreviewed framework scope");}
             try{
                 Pin(review.GamePath,review.Scope.GameSha256);Pin(review.ShvPath,review.Scope.ShvSha256);Pin(review.LoaderPath,review.Scope.LoaderSha256);
-                Pin(review.ProducerPath,review.Scope.ProducerSha256);Pin(review.RphPath,review.Scope.RphSha256);Pin(caller.Location,review.CallerAssemblySha256);
+                // RPH is a host API, not an authenticated distribution owned by
+                // RichAudio. Keep our producer/caller and qualified SHV stack
+                // pinned; the typed RPH operations enforce functional validity.
+                Pin(review.ProducerPath,review.Scope.ProducerSha256);Pin(caller.Location,review.CallerAssemblySha256);
                 bool callerLoaded=false;foreach(var loaded in AppDomain.CurrentDomain.GetAssemblies())if(Object.ReferenceEquals(loaded,caller))callerLoaded=true;
                 if(!callerLoaded)throw new InvalidDataException("RPH caller assembly not loaded");
                 IntPtr baseAddress=IntPtr.Zero;long moduleBytes=0;

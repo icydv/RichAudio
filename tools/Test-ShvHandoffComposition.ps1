@@ -21,18 +21,18 @@ if($result.passed-ne$true-or$result.liveHandoffReady-ne$false-or$result.actualPr
 $legacyBinary=Join-Path $out 'RichAudio.ShvHandoff.Playable08.Regression.Tests.exe'
 $legacySources=@((Join-Path $repo 'src/acoustics/host/Handoff/ShvOperatingStateHandoff.cs'),(Join-Path $repo 'tests/host/TestShvOperatingStateHandoff.cs'))
 & $compiler /nologo /optimize+ /warnaserror+ /langversion:5 /platform:x64 /main:TestShvOperatingStateHandoff ('/out:'+$legacyBinary) @legacySources
-if($LASTEXITCODE-ne0){throw 'Unchanged08 validator regression compilation failed.'}
+if($LASTEXITCODE-ne0){throw 'Revised shared validator regression compilation failed.'}
 $legacyRaw=@(& $legacyBinary)
-if($LASTEXITCODE-ne0-or$legacyRaw.Count-ne1){throw 'Unchanged08 validator regression failed.'}
+if($LASTEXITCODE-ne0-or$legacyRaw.Count-ne1){throw 'Revised shared validator regression failed.'}
 $legacy=$legacyRaw[0]|ConvertFrom-Json
-if(!$legacy.passed-or$legacy.cases-ne68-or$legacy.assertions-ne250-or$legacy.liveHandoffReady-or$legacy.gameLaunched-or$legacy.endpointOpened){throw 'Unexpected08 regression boundary.'}
+if(!$legacy.passed-or$legacy.cases-ne69-or$legacy.assertions-ne255-or$legacy.liveHandoffReady-or$legacy.gameLaunched-or$legacy.endpointOpened){throw 'Unexpected revised validator regression boundary.'}
 foreach($pin in $pins){if((Get-FileHash -LiteralPath (Join-Path $repo $pin.name)).Hash.ToLowerInvariant()-ne$pin.sha256){throw 'Source changed during core validation.'}}
 $receipt=[ordered]@{schema=1;profile='PLAYABLE-09';kind='composition-core-offline-controls';provenance='explicit-device-free-fixtures';passed=$true
  cases=$result.cases;assertions=$result.assertions;casesPassed=$result.casesPassed;sources=$pins
  binary=[ordered]@{path=$binary;sha256=(Get-FileHash -LiteralPath $binary).Hash.ToLowerInvariant()}
- legacyValidatorRegression=[ordered]@{cases=$legacy.cases;assertions=$legacy.assertions;unchangedTestSourceSha256=(Get-FileHash -LiteralPath $legacySources[1]).Hash.ToLowerInvariant();extendedValidatorSourceSha256=(Get-FileHash -LiteralPath $legacySources[0]).Hash.ToLowerInvariant();binarySha256=(Get-FileHash -LiteralPath $legacyBinary).Hash.ToLowerInvariant();casesPassed=$legacy.casesPassed}
+ legacyValidatorRegression=[ordered]@{cases=$legacy.cases;assertions=$legacy.assertions;testSourceSha256=(Get-FileHash -LiteralPath $legacySources[1]).Hash.ToLowerInvariant();extendedValidatorSourceSha256=(Get-FileHash -LiteralPath $legacySources[0]).Hash.ToLowerInvariant();binarySha256=(Get-FileHash -LiteralPath $legacyBinary).Hash.ToLowerInvariant();casesPassed=$legacy.casesPassed;runtimePolicy='functional-compatibility'}
  compilerSha256=(Get-FileHash -LiteralPath $compiler).Hash.ToLowerInvariant();runnerSha256=(Get-FileHash -LiteralPath $PSCommandPath).Hash.ToLowerInvariant()
  liveHandoffReady=$false;actualProducerExecuted=$false;actualRphWitnessExecuted=$false;gameLaunched=$false;gameFilesWritten=$false;endpointOpened=$false;audioPlayback=$false
- limits='Core clock/silence and unchanged08 validator fixtures only. The actual new native producer/module/RPH correspondence pipeline requires separate compiled-component tests and a separately approved passive live test.'}
+ limits='Core clock/silence and revised shared validator fixtures only. RPH metadata scope expectations intentionally changed for PLAYABLE-12; prior68-case evidence remains historical. Native/module/RPH correspondence needs separate compiled-component tests and an approved passive live test.'}
 $path=Join-Path $out 'validation.json';$receipt|ConvertTo-Json -Depth 8|Set-Content -LiteralPath $path -Encoding utf8
 Write-Output ('PASS '+$result.cases+' core cases / '+$result.assertions+' assertions; '+$path)

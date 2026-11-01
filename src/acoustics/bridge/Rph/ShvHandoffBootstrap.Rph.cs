@@ -19,7 +19,7 @@ namespace RichAudio.Beacon.Handoff
     {
         const int MaximumLeaseBytes=16384;
         static readonly HashSet<string> Fields=new HashSet<string>(new[]{"schema","profile","sessionId","gameProcessId","gameProcessCreationFileTime",
-            "gamePath","gameSha256","gameVersion","shvPath","shvSha256","loaderPath","loaderSha256","rphPath","rphSha256","rphVersion",
+            "gamePath","gameSha256","gameVersion","shvPath","shvSha256","loaderPath","loaderSha256","runtimePolicy",
             "producerPath","producerSha256","callerAssemblySha256","passiveOnly","audioPlaybackAllowed","fixtureOnly","identityMode","counterWrapAddressAbaExcluded"},StringComparer.Ordinal);
         [DllImport("kernel32.dll",SetLastError=true)] static extern bool GetProcessTimes(IntPtr process,out long creation,out long exit,out long kernel,out long user);
         internal sealed class Configuration
@@ -29,16 +29,16 @@ namespace RichAudio.Beacon.Handoff
             internal Configuration(string session,string caller)
             {
                 SessionId=session;CallerAssemblySha256=caller;
-                EvidenceRoot=Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-09","live-session",session);
+                EvidenceRoot=Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-12","live-session",session);
                 Scope=new H.Scope(ShvHandoffBuildPolicy.GameVersion,ShvHandoffBuildPolicy.GameSha256,ShvHandoffBuildPolicy.ShvSha256,
                     ShvHandoffBuildPolicy.LoaderSha256,ShvHandoffBuildPolicy.ProducerSha256,H.BatiModel,
-                    ShvHandoffBuildPolicy.RphVersion,ShvHandoffBuildPolicy.RphSha256);
+                    "functional-compatibility",null);
             }
             internal ShvModuleReview CreateReview(string callerAssemblySha)
             {
                 Need(callerAssemblySha==CallerAssemblySha256,"caller-assembly-lease-mismatch");
                 return new ShvModuleReview(Scope,ShvHandoffBuildPolicy.GamePath,ShvHandoffBuildPolicy.ShvPath,
-                    ShvHandoffBuildPolicy.LoaderPath,ShvHandoffBuildPolicy.ProducerPath,ShvHandoffBuildPolicy.RphPath,callerAssemblySha,false);
+                    ShvHandoffBuildPolicy.LoaderPath,ShvHandoffBuildPolicy.ProducerPath,null,callerAssemblySha,false);
             }
         }
         static void Need(bool value,string reason){if(!value)throw new InvalidDataException(reason);}
@@ -87,7 +87,7 @@ namespace RichAudio.Beacon.Handoff
                     Need(file.Length>0&&file.Length<=MaximumLeaseBytes,"session-byte-budget");bytes=new byte[(int)file.Length];
                     int at=0;while(at<bytes.Length){int got=file.Read(bytes,at,bytes.Length-at);Need(got>0,"session-short-read");at+=got;}
                 }
-                var data=Parse(bytes);Need(data["schema"] is int&&(int)data["schema"]==1,"session-schema");Exact(data,"profile","PLAYABLE-09");
+                var data=Parse(bytes);Need(data["schema"] is int&&(int)data["schema"]==1,"session-schema");Exact(data,"profile","PLAYABLE-12");
                 string session=Text(data,"sessionId");Need(Regex.IsMatch(session,"\\A[a-f0-9]{32}\\z"),"session-id");
                 Need(data["gameProcessId"] is int&&(int)data["gameProcessId"]>0,"session-process-id");
                 string made=Text(data,"gameProcessCreationFileTime");ulong creation=0;
@@ -99,7 +99,7 @@ namespace RichAudio.Beacon.Handoff
                 Exact(data,"gamePath",ShvHandoffBuildPolicy.GamePath);Exact(data,"gameSha256",ShvHandoffBuildPolicy.GameSha256);Exact(data,"gameVersion",ShvHandoffBuildPolicy.GameVersion);
                 Exact(data,"shvPath",ShvHandoffBuildPolicy.ShvPath);Exact(data,"shvSha256",ShvHandoffBuildPolicy.ShvSha256);
                 Exact(data,"loaderPath",ShvHandoffBuildPolicy.LoaderPath);Exact(data,"loaderSha256",ShvHandoffBuildPolicy.LoaderSha256);
-                Exact(data,"rphPath",ShvHandoffBuildPolicy.RphPath);Exact(data,"rphSha256",ShvHandoffBuildPolicy.RphSha256);Exact(data,"rphVersion",ShvHandoffBuildPolicy.RphVersion);
+                Exact(data,"runtimePolicy","functional-compatibility");
                 Exact(data,"producerPath",ShvHandoffBuildPolicy.ProducerPath);Exact(data,"producerSha256",ShvHandoffBuildPolicy.ProducerSha256);
                 Exact(data,"identityMode","read-only-sdk-ordinary-reuse");Flag(data,"counterWrapAddressAbaExcluded",true);
                 Flag(data,"passiveOnly",true);Flag(data,"audioPlaybackAllowed",false);Flag(data,"fixtureOnly",false);
