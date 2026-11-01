@@ -1,5 +1,7 @@
 # Acoustic design
 
+**P2-03 evidence:** [private stock-source playback](docs/P2_03_STOCK_AUDIO_RECONSTRUCTION.md) establishes waveform access. The estimated grain demo failed human listening despite passing numerical checks; the revised continuous-recording reference sounded much more natural to the user, with deceleration phasing still unresolved. Source samples remain private; no bass/loudness enhancement or propagation is added. Native granular behaviour remains unproven.
+
 **P2-02 ownership gate:** [six-route review and synthetic policy checks](docs/P2_02_AUDIO_OWNERSHIP.md) preserve native audio wherever isolated material, native suppression and independent recovery are not established. A known synthetic common-clock selector is not available evidence about GTA's engine. In particular, helicopter LF loop metadata prevents assuming low-frequency supplementation is a distinct missing component. No propagation/rendering code is introduced by this study.
 
 ## Immersion-first design contract

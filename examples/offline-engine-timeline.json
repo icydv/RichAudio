@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "mode": "estimated-grains",
+  "listeningStatus": "FAILED: robotic acceleration/deceleration; retained for reproducible investigation, not recommended playback",
+  "classification": "synthetic offline control; never live telemetry or calibrated crankshaft RPM",
+  "duration": 27,
+  "rate": 48000,
+  "master": 0.2,
+  "gains": {"engine": 1, "exhaust": 0.75},
+  "points": [
+    {"t": 0, "ratio": 0.2, "throttle": 0.05},
+    {"t": 4, "ratio": 0.2, "throttle": 0.05},
+    {"t": 5, "ratio": 0.62, "throttle": 0.7},
+    {"t": 6, "ratio": 0.24, "throttle": 0.05},
+    {"t": 7, "ratio": 0.35, "throttle": 0.6},
+    {"t": 14, "ratio": 0.88, "throttle": 0.95},
+    {"t": 18, "ratio": 0.88, "throttle": 0.65},
+    {"t": 23, "ratio": 0.25, "throttle": 0},
+    {"t": 27, "ratio": 0.2, "throttle": 0.05}
+  ]
+}

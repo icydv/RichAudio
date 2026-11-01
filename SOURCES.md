@@ -1,5 +1,7 @@
 # Evidence and sources
 
+P2-03 adds [actual local waveform evidence](docs/P2_03_STOCK_AUDIO_RECONSTRUCTION.md): the pinned supplied CodeWalker parser decoded twelve streams from the two previously inspected archives, with exact PCM/WAV payload equality, repeat hashes and unchanged originals. Public evidence contains metadata/statistics only; recordings, grain exports, spectrogram and previews remain private. The file-render prototype and synthetic tests are original RichAudio code.
+
 25 October P2-02 follow-up: [audio ownership report](docs/P2_02_AUDIO_OWNERSHIP.md) reuses the pinned CodeWalker/Cfx source and prior Bati evidence, adding codec/granular limitations, category-specific siren controls, Windows mix boundaries and original synthetic ownership tests. No waveform or third-party implementation is redistributed; no native audio capability is promoted to live-verified.
 
 25 October RPM follow-up: [cross-framework investigation and permanent source links](docs/RPM_SOURCE_INVESTIGATION.md), [versioned reviewed-commit/capability inventory](evidence/publication/rpm-source-review.json), and [unsubmitted vendor reproduction](docs/RPH_RPM_VENDOR_REPRO.md). This refresh distinguishes memory-backed SHVDNE/IKT getters, HUD estimation, Cfx-only natives and exact-build support gaps; it includes no new live test or redistributed source/binary.
