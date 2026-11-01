@@ -90,8 +90,7 @@ lateness and dropped records. Do not rescale or feed observations into audio.
 
 With an independently enforced capture duration and explicit phase markers,
 compare engine off, stationary idle, stationary throttle where supported,
-acceleration, visible gear changes and deceleration. The operator drives and
-marks the phases; the observer does not spawn, drive or modify vehicles. A missing
+acceleration, visible gear changes and deceleration. I drive and mark the phases; the observer does not spawn, drive or modify vehicles. A missing
 phase or invalid reading makes that part inconclusive. An unavailable native or
 unexpected exception stops that candidate's acquisition. Compilation cannot
 prove native invocation safe or semantically correct on the target build.
