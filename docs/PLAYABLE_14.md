@@ -1,5 +1,7 @@
 # PLAYABLE-14: fresh-context admission before the single binding
 
+**Subsequent live update:** [The authorised live result](PLAYABLE_14_LIVE_RESULT.md) establishes successful fresh-context binding and 54 genuine idle frames, followed by a terminal listener-continuity rejection. A separately requested manual attempt was cancelled because of an observer attribution defect. Both installations were restored. The preparation record below describes the evidence available before those live attempts.
+
 **Offline correction implemented; the next passive live experiment requires fresh explicit approval.** No deployment, GTA launch, WASAPI access, playback or recording was performed for PLAYABLE-14. The exact candidate and focused validation receipts are bound in [offline evidence](../evidence/playable-14-offline.json) and [candidate evidence](../evidence/playable-14-candidate.json). PR #76 remains draft and unmerged.
 
 ## What is established

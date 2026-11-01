@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-14",
+  "kind": "sanitised-two-attempt-restoration",
+  "result": "PASS",
+  "originalPluginBytes": 222208,
+  "originalPluginSha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657",
+  "attempts": [
+    {
+      "attempt": 1,
+      "rollbackReceiptSha256": "8bdfb036937b433c27bfbd241aee8f297af46074d165f0e8af48a79ddbb926ae",
+      "verificationSha256": "8390ae1c9e8265d5134dac6c20013c9f0bf32718ff0deca334b9cbf7ba43ee8a",
+      "independentReviewSha256": "147dc89f204437d2efa249a03ad613204345a437bfc1da9c3972d09d9bc4f8fc",
+      "protectedFilesMatched": 11,
+      "settingsMatched": 4,
+      "ownedPathsAbsent": 27,
+      "ownedProcessesAbsent": true,
+      "stockFallback": true,
+      "productionFlagsFalse": true
+    },
+    {
+      "attempt": 2,
+      "rollbackReceiptSha256": "2d543cfda8aecd8892e30a9bc116029f4171297e8345fa8c1763cd23c220fa5e",
+      "verificationSha256": "006eaf39531eff5afdb2533d071bc1497ad51361c22799a2d04f4c69aa4af7d4",
+      "independentReviewSha256": "2d661f4595eedb0de9a8dc1dedbed7573e149144a39d2dba7a26ceaad360d009",
+      "protectedFilesMatched": 11,
+      "settingsMatched": 4,
+      "ownedPathsAbsent": 27,
+      "ownedProcessesAbsent": true,
+      "stockFallback": true,
+      "productionFlagsFalse": true
+    }
+  ],
+  "capturesRetained": true,
+  "oldEvidenceAndCoordinatorScriptsPreserved": true,
+  "nativeAndAudioInfrastructureChanged": false,
+  "recursiveDeletionPerformed": false,
+  "currentOwnedProcessesAbsent": true,
+  "remainingOwnedGameFiles": [],
+  "thirdAttemptAuthorised": false,
+  "report": "docs/PLAYABLE_14_LIVE_RESULT.md"
+}
