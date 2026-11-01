@@ -1,6 +1,6 @@
 # PLAYABLE-15 isolated offline audio review
 
-The owner's spectral measurements are independently confirmed: the genuine-trace WAV has **96.8242% of unweighted power below 600 Hz**, **99.8067% below 1.2 kHz**, stereo correlation **0.997036**, peak **−25.0519 dBFS** and RMS **−36.0728 dBFS**. A separate Hann/Welch calculation gives 96.8167% and 99.8047%, respectively. Gated file loudness is approximately **−34.61 LUFS**; no endpoint or physical sound-pressure measurement is implied.
+My spectral measurements are independently confirmed: the genuine-trace WAV has **96.8242% of unweighted power below 600 Hz**, **99.8067% below 1.2 kHz**, stereo correlation **0.997036**, peak **−25.0519 dBFS** and RMS **−36.0728 dBFS**. A separate Hann/Welch calculation gives 96.8167% and 99.8047%, respectively. Gated file loudness is approximately **−34.61 LUFS**; no endpoint or physical sound-pressure measurement is implied.
 
 The dominant cause is already visible before acoustic processing. The actual dry exhaust output is strongly bass weighted and the preserved pressure calibration makes its post-acoustic stem **27.915 dB RMS louder than the engine stem**. The original decoded exhaust recordings are themselves bass weighted. The brighter engine recording survives the source player, but contributes little to this particular final balance.
 
