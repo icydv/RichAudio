@@ -1,5 +1,7 @@
 # P2-01 drivetrain getter investigation
 
+**Offline follow-up:** the [cross-framework source review](RPM_SOURCE_INVESTIGATION.md) identifies SHVDNE's independent memory-backed ratio reader, but no verified exact-build alternative or supported RPH correction. The [prepared vendor reproduction](RPH_RPM_VENDOR_REPRO.md) preserves the constant-value evidence without publishing raw captures. RPH motion telemetry remains the primary integration; invalid RPM stays unavailable. No further game launch occurred.
+
 25 October 2026. Based on the verified recovery in [PR #10](https://github.com/icydv/RichAudio/pull/10), commit `695a1426234735cfcd6c95453dddcef9847b9b9e`. This focused branch stacks on that still-open PR and preserves accepted main through `e5fbd8f`. No acoustic code, new framework, setter, memory offset or game patch is introduced.
 
 ## Offline evidence
