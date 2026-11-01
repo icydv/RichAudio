@@ -79,6 +79,7 @@ internal static class TestShvGameplayFrameAdapter
             Check(v.ObservationTicks==peer.Context.StartTicks+(peer.Context.EndTicks-peer.Context.StartTicks)/2&&v.ObservationTicks!=f.Clock.Value,"pose was not retimestamped");
             Check(line.RawBits==c.RawBits&&line.SessionId==Fixture.Session&&line.SourceSequence==1&&line.SourceGeneration==1,"private source lineage");
             Check(line.MinimumHostTicks==c.MinimumHostTicks&&line.MaximumHostTicks==c.MaximumHostTicks&&line.ValidThroughHostTicks==c.ValidThroughHostTicks,"uncertainty and expiry retained");
+            Check(frame.ValidThroughTicks==c.ValidThroughHostTicks,"original source expiry reaches the gameplay wire");
             Check(line.SourceBeforeTicks==c.SourceBeforeTicks&&line.PeerStartTicks==peer.Context.StartTicks&&line.ListenerObservationTicks==listener.ObservationTicks,"original acquisition times retained");
             Check(f.Adapter.PassiveOnly&&!f.Adapter.AudioPlaybackAllowed&&!c.LiveHandoffReady,"no audio or live promotion");
             listener.Position[0]=99;Check(frame.Listener.Position[0]==0,"listener snapshot copied");var p=peer.Position;p[0]=999;Check(frame.Vehicles[0].Position[0]==10,"peer pose snapshot copied");

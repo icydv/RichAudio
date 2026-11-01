@@ -8,6 +8,7 @@ namespace RichAudio.Beacon.Transport {
   [DataMember(Name="gameSha256",IsRequired=true)]public string GameSha256;
   [DataMember(Name="gameVersion",IsRequired=true)]public string GameVersion;
   [DataMember(Name="rphVersion",IsRequired=true)]public string RphVersion;
+  [DataMember(Name="demoProfile",EmitDefaultValue=false)]public string DemoProfile;
   [DataMember(Name="bindings",IsRequired=true)]public PlayableBinding[] Bindings;
   [DataMember(Name="eligible",IsRequired=true)]public PlayableModel[] Eligible;
   [DataMember(Name="playerManifest",IsRequired=true)]public string PlayerManifest;
@@ -24,7 +25,8 @@ namespace RichAudio.Beacon.Transport {
    file=Path.GetFullPath(file);NoLinks(file);if(new FileInfo(file).Length>131072)throw new InvalidDataException("package manifest size");PlayableConfiguration c;
    using(var s=System.IO.File.OpenRead(file))c=(PlayableConfiguration)new DataContractJsonSerializer(typeof(PlayableConfiguration)).ReadObject(s);
    c.Root=Path.GetDirectoryName(file);c.Manifest=file;
-   if(c.Schema!=1||c.GameVersion!="1.0.1158.16"||c.RphVersion!="1.132.1428.17748"||c.Bindings==null||c.Bindings.Length<8||c.Bindings.Length>512||c.Eligible==null||c.Eligible.Length<1||c.Eligible.Length>64)throw new InvalidDataException("supported playable manifest required");
+   if(c.Schema!=1||c.GameVersion!="1.0.1158.16"||(c.DemoProfile!="PLAYABLE-13"&&c.RphVersion!="1.132.1428.17748")||c.DemoProfile!=null&&c.DemoProfile!="PLAYABLE-13"||c.Bindings==null||c.Bindings.Length<8||c.Bindings.Length>512||c.Eligible==null||c.Eligible.Length<1||c.Eligible.Length>64)throw new InvalidDataException("supported playable manifest required");
+   if(c.DemoProfile=="PLAYABLE-13"&&(c.Eligible.Length!=1||c.Eligible[0].Model!=0xF9300CC5||c.Eligible[0].Context!="player"))throw new InvalidDataException("Bati-player-only demonstration package required");
    var names=new HashSet<string>(StringComparer.OrdinalIgnoreCase);foreach(var b in c.Bindings){string p=Inside(c.Root,b.File);if(!names.Add(b.File)||b.Sha256==null||b.Sha256.Length!=64||verify&&!String.Equals(Digest(p),b.Sha256,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("immutable playable payload differs");}
    foreach(string p in new[]{"runtime/node.exe","runtime/RichAudio.Acoustics.Host.exe","tools/Run-Gameplay.mjs",c.PlayerManifest,c.NpcManifest,c.Atlas,c.Profiles,c.Catalog})if(!names.Contains(p))throw new InvalidDataException("required bound package file missing");
    var models=new HashSet<string>();foreach(var e in c.Eligible)if((e.Context!="npc"&&e.Context!="player")||!models.Add(e.Model+":"+e.Context))throw new InvalidDataException("eligible model context");

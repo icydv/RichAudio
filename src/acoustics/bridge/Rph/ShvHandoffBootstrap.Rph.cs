@@ -20,16 +20,27 @@ namespace RichAudio.Beacon.Handoff
         const int MaximumLeaseBytes=16384;
         static readonly HashSet<string> Fields=new HashSet<string>(new[]{"schema","profile","sessionId","gameProcessId","gameProcessCreationFileTime",
             "gamePath","gameSha256","gameVersion","shvPath","shvSha256","loaderPath","loaderSha256","runtimePolicy",
-            "producerPath","producerSha256","callerAssemblySha256","passiveOnly","audioPlaybackAllowed","fixtureOnly","identityMode","counterWrapAddressAbaExcluded"},StringComparer.Ordinal);
+            "producerPath","producerSha256","callerAssemblySha256","passiveOnly","audioPlaybackAllowed","fixtureOnly","identityMode","counterWrapAddressAbaExcluded"
+#if SHV_PLAYABLE_13
+            ,"recordingAllowed","loopbackAllowed","playablePointerSha256"
+#endif
+            },StringComparer.Ordinal);
         [DllImport("kernel32.dll",SetLastError=true)] static extern bool GetProcessTimes(IntPtr process,out long creation,out long exit,out long kernel,out long user);
         internal sealed class Configuration
         {
             internal readonly string SessionId,EvidenceRoot,CallerAssemblySha256;
             internal readonly H.Scope Scope;
+#if SHV_PLAYABLE_13
+            internal bool RecordingAllowed,LoopbackAllowed;
+#endif
             internal Configuration(string session,string caller)
             {
                 SessionId=session;CallerAssemblySha256=caller;
+#if SHV_HANDOFF_13
+                EvidenceRoot=Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-13","live-session",session);
+#else
                 EvidenceRoot=Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-12","live-session",session);
+#endif
                 Scope=new H.Scope(ShvHandoffBuildPolicy.GameVersion,ShvHandoffBuildPolicy.GameSha256,ShvHandoffBuildPolicy.ShvSha256,
                     ShvHandoffBuildPolicy.LoaderSha256,ShvHandoffBuildPolicy.ProducerSha256,H.BatiModel,
                     "functional-compatibility",null);
@@ -65,7 +76,7 @@ namespace RichAudio.Beacon.Handoff
                     Need(reader.Depth<=1,"nested-session-field");
                     if(reader.Depth==0){Need(reader.GetAttribute("type")=="object","session-object-required");continue;}
                     string name=reader.LocalName;Need(Fields.Contains(name)&&names.Add(name),"unknown-or-duplicate-session-field");
-                    string expected=name=="schema"||name=="gameProcessId"?"number":name=="passiveOnly"||name=="audioPlaybackAllowed"||name=="fixtureOnly"||name=="counterWrapAddressAbaExcluded"?"boolean":"string";
+                    string expected=name=="schema"||name=="gameProcessId"?"number":name=="passiveOnly"||name=="audioPlaybackAllowed"||name=="fixtureOnly"||name=="counterWrapAddressAbaExcluded"||name=="recordingAllowed"||name=="loopbackAllowed"?"boolean":"string";
                     Need(reader.GetAttribute("type")==expected,"session-field-type");
                 }
             }
@@ -87,7 +98,12 @@ namespace RichAudio.Beacon.Handoff
                     Need(file.Length>0&&file.Length<=MaximumLeaseBytes,"session-byte-budget");bytes=new byte[(int)file.Length];
                     int at=0;while(at<bytes.Length){int got=file.Read(bytes,at,bytes.Length-at);Need(got>0,"session-short-read");at+=got;}
                 }
-                var data=Parse(bytes);Need(data["schema"] is int&&(int)data["schema"]==1,"session-schema");Exact(data,"profile","PLAYABLE-12");
+                var data=Parse(bytes);Need(data["schema"] is int&&(int)data["schema"]==1,"session-schema");
+#if SHV_HANDOFF_13
+                Exact(data,"profile","PLAYABLE-13");
+#else
+                Exact(data,"profile","PLAYABLE-12");
+#endif
                 string session=Text(data,"sessionId");Need(Regex.IsMatch(session,"\\A[a-f0-9]{32}\\z"),"session-id");
                 Need(data["gameProcessId"] is int&&(int)data["gameProcessId"]>0,"session-process-id");
                 string made=Text(data,"gameProcessCreationFileTime");ulong creation=0;
@@ -102,9 +118,24 @@ namespace RichAudio.Beacon.Handoff
                 Exact(data,"runtimePolicy","functional-compatibility");
                 Exact(data,"producerPath",ShvHandoffBuildPolicy.ProducerPath);Exact(data,"producerSha256",ShvHandoffBuildPolicy.ProducerSha256);
                 Exact(data,"identityMode","read-only-sdk-ordinary-reuse");Flag(data,"counterWrapAddressAbaExcluded",true);
-                Flag(data,"passiveOnly",true);Flag(data,"audioPlaybackAllowed",false);Flag(data,"fixtureOnly",false);
+#if SHV_PLAYABLE_13
+                Flag(data,"passiveOnly",false);Flag(data,"audioPlaybackAllowed",true);
+                string pointerSha=Text(data,"playablePointerSha256");Need(Regex.IsMatch(pointerSha,"\\A[a-f0-9]{64}\\z"),"playable-pointer-digest");
+                CheckUnlinked(ShvHandoffBuildPolicy.GameplayPointerPath);
+                using(var pointer=File.OpenRead(ShvHandoffBuildPolicy.GameplayPointerPath))using(var sha=SHA256.Create()){
+                    Need(pointer.Length>0&&pointer.Length<=4096,"playable-pointer-bound");
+                    Need(BitConverter.ToString(sha.ComputeHash(pointer)).Replace("-","").ToLowerInvariant()==pointerSha,"playable-pointer-differs-from-approved-lease");
+                }
+#else
+                Flag(data,"passiveOnly",true);Flag(data,"audioPlaybackAllowed",false);
+#endif
+                Flag(data,"fixtureOnly",false);
                 string caller=Text(data,"callerAssemblySha256");Need(Regex.IsMatch(caller,"\\A[a-f0-9]{64}\\z")&&caller==HashAssembly(typeof(ShvHandoffBootstrap).Assembly),"session-actual-caller-hash");
                 var value=new Configuration(session,caller);CheckUnlinked(value.EvidenceRoot);
+#if SHV_PLAYABLE_13
+                value.RecordingAllowed=(bool)data["recordingAllowed"];value.LoopbackAllowed=(bool)data["loopbackAllowed"];
+                Need(!value.LoopbackAllowed||value.RecordingAllowed,"loopback-needs-recording-approval");
+#endif
                 Need(!Directory.Exists(value.EvidenceRoot)&&!File.Exists(value.EvidenceRoot),"session-evidence-already-exists");
                 config=value;reason="reviewed-process-bound-session";return true;
             }catch(System.Threading.ThreadAbortException){throw;}

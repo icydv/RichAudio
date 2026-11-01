@@ -20,6 +20,9 @@ namespace RichAudio.Beacon.Transport {
   [DataMember(Name="session",IsRequired=true)]public string Session;
   [DataMember(Name="listener",IsRequired=true)]public ListenerState Listener;
   [DataMember(Name="vehicles",IsRequired=true)]public GameplayVehicle[] Vehicles;
+  // Absolute expiry in the original publisher's host-clock domain. Zero is the
+  // unchanged legacy contract; accepted SHV frames carry their shorter lease.
+  [DataMember(Name="validThroughTicks",EmitDefaultValue=false)]public long ValidThroughTicks;
  }
  public static class GameplayWire {
   public const int MaximumBytes=32768;
@@ -29,6 +32,7 @@ namespace RichAudio.Beacon.Transport {
   public static PipeSecurity Security(){var sid=WindowsIdentity.GetCurrent().User;var s=new PipeSecurity();s.SetAccessRuleProtection(true,false);s.SetOwner(sid);s.AddAccessRule(new PipeAccessRule(sid,PipeAccessRights.FullControl,AccessControlType.Allow));return s;}
   public static void Validate(GameplayFrame f,string session){
    Protocol.Check(f!=null&&f.Version==1&&f.Session==session,"gameplay session");Protocol.Validate(f.Listener);Protocol.Check(f.Listener.Session==session&&f.Vehicles!=null&&f.Vehicles.Length<=8,"gameplay frame budget");
+   Protocol.Check(f.ValidThroughTicks==0||f.ValidThroughTicks>=f.Listener.ObservationTicks&&(decimal)f.ValidThroughTicks-f.Listener.ObservationTicks<=Stopwatch.Frequency/4m,"gameplay original source expiry");
    var seen=new HashSet<string>();foreach(var v in f.Vehicles){Protocol.Check(v!=null&&v.Id!=null&&System.Text.RegularExpressions.Regex.IsMatch(v.Id,"\\A[\\w:-]{1,64}\\z")&&seen.Add(v.Id)&&v.Generation>0&&(v.Context=="player"||v.Context=="npc"),"vehicle identity/context");
     Protocol.Check(Protocol.Finite(v.OperatingPoint)&&v.OperatingPoint>=0&&v.OperatingPoint<=1,"observed operating ratio");
     Protocol.Check(v.ObservationTicks>=0&&Math.Abs(v.ObservationTicks-f.Listener.ObservationTicks)<=Stopwatch.Frequency/20,"source sampling clock");
@@ -52,9 +56,9 @@ namespace RichAudio.Beacon.Transport {
   public void Publish(GameplayFrame frame){Interlocked.Exchange(ref latest,frame);wake.Set();}
   void Run(){while(!stop){wake.WaitOne(50);if(stop)break;var f=Interlocked.Exchange(ref latest,null);if(f==null)continue;
    try{string name;int pid;lock(gate){name=endpoint;pid=expectedPid;}if(name==null||pid<=0)continue;
-    if((Stopwatch.GetTimestamp()-f.Listener.ObservationTicks)*1000d/Stopwatch.Frequency>250){Expired++;continue;}
+    if((Stopwatch.GetTimestamp()-f.Listener.ObservationTicks)*1000d/Stopwatch.Frequency>250||f.ValidThroughTicks!=0&&Stopwatch.GetTimestamp()>f.ValidThroughTicks){Expired++;continue;}
     NamedPipeClientStream p;lock(gate)p=pipe;if(p==null){p=new NamedPipeClientStream(".",name,PipeDirection.InOut,PipeOptions.Asynchronous);p.Connect(150);GameplayWire.Peer(p,pid,false);lock(gate){if(name!=endpoint){p.Dispose();continue;}pipe=p;}}
-    var b=GameplayWire.Encode(f,session);if((Stopwatch.GetTimestamp()-f.Listener.ObservationTicks)*1000d/Stopwatch.Frequency>250){Expired++;continue;}
+    var b=GameplayWire.Encode(f,session);if((Stopwatch.GetTimestamp()-f.Listener.ObservationTicks)*1000d/Stopwatch.Frequency>250||f.ValidThroughTicks!=0&&Stopwatch.GetTimestamp()>f.ValidThroughTicks){Expired++;continue;}
     GameplayWire.Write(p,b);TransportStop.Ack(p,TransportStop.Accepted);Sent++;
    }catch(ThreadAbortException){throw;}catch{Failures++;lock(gate){var p=pipe;pipe=null;if(p!=null)p.Dispose();}wake.WaitOne(200);}
   }}

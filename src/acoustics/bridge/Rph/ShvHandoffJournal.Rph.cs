@@ -31,7 +31,11 @@ namespace RichAudio.Beacon.Handoff
         [DllImport("kernel32.dll",SetLastError=true)] static extern bool GetFileInformationByHandle(SafeFileHandle file,out FileInfo info);
         internal ShvHandoffJournal(string evidenceRoot)
         {
+#if SHV_HANDOFF_13
+            string parent=Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-13","live-session");
+#else
             string parent=Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-12","live-session");
+#endif
             root=Path.GetFullPath(evidenceRoot);string leaf=Path.GetFileName(root);
             if(Path.GetDirectoryName(root)!=parent||!System.Text.RegularExpressions.Regex.IsMatch(leaf,"\\A[a-f0-9]{32}\\z"))throw new ArgumentException("compiled private evidence root");
             worker=new Thread(Run){IsBackground=true,Name="RichAudio bounded passive evidence"};worker.Start();
@@ -146,7 +150,13 @@ namespace RichAudio.Beacon.Handoff
                     source.Flush(true);events.Flush(true);
                 }
                 byte[] summary;
-                lock(gate)summary=new UTF8Encoding(false).GetBytes(json.Serialize(new{schema=1,profile="PLAYABLE-12",session=Path.GetFileName(root),
+                lock(gate)summary=new UTF8Encoding(false).GetBytes(json.Serialize(new{schema=1,profile=
+#if SHV_HANDOFF_13
+                    "PLAYABLE-13",
+#else
+                    "PLAYABLE-12",
+#endif
+                    session=Path.GetFileName(root),
                     passiveOnly=true,audioPlaybackAllowed=false,producerCompleted=producerCompleted,sourceRetired=sourceRetired,
                     sourceCallbackOutcome=producerCompleted?"completed":"outcome-unobserved",nativeOutcomeMayRemainUnobserved=!producerCompleted,
                     summaryPreparedHostQpc=Stopwatch.GetTimestamp(),completionDeadlineHostQpc=completionDeadline,

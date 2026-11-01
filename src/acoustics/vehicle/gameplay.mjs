@@ -30,9 +30,9 @@ export class StockGameplay {
   this.stageCounters={validVehicleObservations:0,runningVehicleObservations:0,eligibleVehicleBlocks:0,sourceCreations:0,sourcePlaybackBlocks:0,acousticPathBlocks:0,
    engine:pcmCounters(),exhaust:pcmCounters(),stereo:pcmCounters()};
  }
- accept(frame,ageMs){
+ accept(frame,ageMs,validForMs=null){
   try{
-   const state=frame.listener;if(frame.version!==1||frame.session!==this.session||!Array.isArray(frame.vehicles)||frame.vehicles.length>8||!Number.isFinite(ageMs)||ageMs< -2||ageMs>250)throw Error('gameplay frame');
+   const state=frame.listener;if(frame.version!==1||frame.session!==this.session||!Array.isArray(frame.vehicles)||frame.vehicles.length>8||!Number.isFinite(ageMs)||ageMs< -2||ageMs>250||validForMs!==null&&(!Number.isFinite(validForMs)||validForMs<=0||validForMs>252))throw Error('gameplay frame');
    if(state.session!==this.session||state.sequence<=this.lastFrame||state.generation<this.lastGeneration)throw Error('gameplay identity');
    const ids=new Set();for(const v of frame.vehicles){
     if(typeof v.id!=='string'||!/^[\w:-]{1,64}$/.test(v.id)||ids.has(v.id)||!Number.isInteger(v.generation)||v.generation<1||!Number.isInteger(v.model)||v.model<0||v.model>0xffffffff||!['player','npc'].includes(v.context)||typeof v.running!=='boolean'||typeof v.valid!=='boolean'||!Number.isFinite(v.operatingPoint)||v.operatingPoint<0||v.operatingPoint>1)throw Error('vehicle identity/state');
@@ -42,7 +42,7 @@ export class StockGameplay {
    }
    this.playout.add({type:'listener',state,receiptAgeMs:ageMs},this.pipeline.renderer.frame/FS,this.now());this.playout.delayTarget=.1;
    const time=this.playout.records.at(-1).time;
-   this.snapshots.push({time,frame:structuredClone(frame)});while(this.snapshots.length>64)this.snapshots.shift();
+   this.snapshots.push({time,frame:structuredClone(frame),wallExpires:validForMs===null?Infinity:this.now()+validForMs});while(this.snapshots.length>64)this.snapshots.shift();
    this.lastFrame=state.sequence;this.lastGeneration=state.generation;this.stats.acceptedFrames++;
    for(const v of frame.vehicles)if(v.valid){this.stageCounters.validVehicleObservations++;if(v.running)this.stageCounters.runningVehicleObservations++;}
   }catch(e){this.stats.rejectedFrames++;throw e;}
@@ -73,6 +73,7 @@ export class StockGameplay {
   return result;
  }
  vehiclesAt(time){
+  if(!this.snapshots.length||this.now()>=this.snapshots.at(-1).wallExpires)return [];
   let a=null,b=null;for(const s of this.snapshots){if(s.time<=time)a=s;else{b=s;break;}}
   if(!a||time-a.time>.25||!a.frame.listener.valid||a.frame.listener.paused)return [];
   const result=[];for(const identity of this.snapshots.at(-1).frame.vehicles){if(!identity.valid)continue;

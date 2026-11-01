@@ -1,7 +1,8 @@
 [CmdletBinding()]
-param([string]$SdkPath='',[switch]$CoreOnly,[switch]$Playable,[string]$Output='',[switch]$ShvHandoff,[string]$ShvHandoffPolicySource='')
+param([string]$SdkPath='',[switch]$CoreOnly,[switch]$Playable,[string]$Output='',[switch]$ShvHandoff,[string]$ShvHandoffPolicySource='',[switch]$ShvHandoff13,[switch]$BatiPlayback)
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
+if(($ShvHandoff13-and!$ShvHandoff)-or($BatiPlayback-and!$ShvHandoff13)){throw 'PLAYABLE-13 audio requires the explicit handoff13 profile.'}
 if($ShvHandoff){
     if($CoreOnly -or !$ShvHandoffPolicySource -or !(Test-Path -LiteralPath $ShvHandoffPolicySource -PathType Leaf)){throw 'Passive handoff requires the generated reviewed policy source and actual SDK compilation.'}
     $Playable=$true
@@ -14,8 +15,8 @@ for($cursor=$output;$cursor;$cursor=[IO.Path]::GetDirectoryName($cursor)){
     if((Test-Path -LiteralPath $cursor) -and ((Get-Item -LiteralPath $cursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked bridge build output is not permitted.'}
 }
 if($ShvHandoff){
-    $handoffRoots=@('build/playable-12-passive-bridge','.local/playable-12')|ForEach-Object{[IO.Path]::GetFullPath((Join-Path $repo $_)).TrimEnd('\')+'\'}
-    if(!@($handoffRoots|Where-Object{($output+'\').StartsWith($_,[StringComparison]::OrdinalIgnoreCase)}).Count){throw 'Passive bridge output must use a new12-only build or private directory.'}
+    $handoffRoots=@('build/playable-12-passive-bridge','.local/playable-12','.local/playable-13')|ForEach-Object{[IO.Path]::GetFullPath((Join-Path $repo $_)).TrimEnd('\')+'\'}
+    if(!@($handoffRoots|Where-Object{($output+'\').StartsWith($_,[StringComparison]::OrdinalIgnoreCase)}).Count){throw 'Handoff output must use a new private reviewed-profile directory.'}
     $policy=[IO.Path]::GetFullPath($ShvHandoffPolicySource)
     if(![IO.Path]::GetDirectoryName($policy).Equals($output,[StringComparison]::OrdinalIgnoreCase) -or [IO.Path]::GetFileName($policy) -ne 'ShvHandoffBuildPolicy.generated.cs'){throw 'Passive bridge policy must be generated inside its new output directory.'}
     for($cursor=$policy;$cursor;$cursor=[IO.Path]::GetDirectoryName($cursor)){if((Test-Path -LiteralPath $cursor) -and ((Get-Item -LiteralPath $cursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked policy is not permitted.'}}
@@ -45,7 +46,8 @@ if(!$CoreOnly)
     $menu=@(Get-ChildItem (Join-Path $repo 'src\acoustics\settings\InGame') -Filter '*.cs'|ForEach-Object FullName)
     $menu+=@('AcousticSettings.cs','InGameSettingsBridge.cs','InGameRecordingBridge.cs','MenuDiagnostic.cs','PassiveSoundMapBridge.cs','GameplayRuntime.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\host\Windows\'+$_)}
     if($ShvHandoff){
-        $base+='/define:PLAYABLE_PRODUCT,SHV_HANDOFF_09'
+        $defines='PLAYABLE_PRODUCT,SHV_HANDOFF_09';if($ShvHandoff13){$defines+=',SHV_HANDOFF_13'};if($BatiPlayback){$defines+=',SHV_PLAYABLE_13';$menu+=Join-Path $repo 'src/acoustics/host/Windows/BatiPlaybackSession.cs'}
+        $base+='/define:'+$defines
         $adapter+=@(Get-ChildItem -LiteralPath (Join-Path $repo 'src/acoustics/host/Handoff') -Filter '*.cs'|Where-Object Name -ne 'RphRuntimeProvenance.cs'|ForEach-Object FullName)
         $adapter+=$policy
         $handoffPins=@(@($transport)+@($geometry)+@($menu)+@($adapter)|Sort-Object -Unique|ForEach-Object{[ordered]@{path=$_;sha256=(Get-FileHash -LiteralPath $_).Hash.ToLowerInvariant()}})
@@ -54,7 +56,7 @@ if(!$CoreOnly)
     if($LASTEXITCODE -ne 0){throw 'Listener RPH adapter build failed.'}
     if($ShvHandoff){
         foreach($pin in $handoffPins){if((Get-FileHash -LiteralPath $pin.path).Hash.ToLowerInvariant() -ne $pin.sha256){throw 'Passive bridge source changed while compiling.'}}
-        [ordered]@{schema=1;profile='PLAYABLE-12';runtimePolicy='functional-compatibility';sources=$handoffPins;passiveOnly=$true;audioPlaybackAllowed=$false;deployed=$false;gameExecuted=$false}|ConvertTo-Json -Depth 5|Set-Content -LiteralPath (Join-Path $output 'passive-build-source-manifest.json') -Encoding utf8
+        [ordered]@{schema=1;profile=$(if($ShvHandoff13){'PLAYABLE-13'}else{'PLAYABLE-12'});runtimePolicy='functional-compatibility';sources=$handoffPins;passiveOnly=(!$BatiPlayback);audioPlaybackAllowed=[bool]$BatiPlayback;recordingRequiresPerRunApproval=$true;deployed=$false;gameExecuted=$false}|ConvertTo-Json -Depth 5|Set-Content -LiteralPath (Join-Path $output 'passive-build-source-manifest.json') -Encoding utf8
     }
     # Prepared application configuration only, outside the game. A future live
     # package must separately bind this opt-in sidecar and the changed plugin.

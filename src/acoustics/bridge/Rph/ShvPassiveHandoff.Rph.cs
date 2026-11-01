@@ -24,6 +24,9 @@ namespace RichAudio.Beacon.Rph
         static CameraObservation previous;
         static long listenerSequence,listenerGeneration=1;
         static bool ran;
+#if SHV_PLAYABLE_13
+        static RichAudio.Beacon.Windows.BatiPlaybackSession playback;
+#endif
         internal static void Run()
         {
             if(ran)return;ran=true;
@@ -38,7 +41,13 @@ namespace RichAudio.Beacon.Rph
             long lastClockLogged=-1;
             try
             {
+#if SHV_PLAYABLE_13
+                Game.Console.Print("RichAudio PLAYABLE-13 Bati audio profile; separately approved lease and explicit AudioOn required. GTA stock audio retained.");
+#elif SHV_HANDOFF_13
+                Game.Console.Print("RichAudio PLAYABLE-13 passive handoff only; GTA stock audio retained. No audio host or recording.");
+#else
                 Game.Console.Print("RichAudio PLAYABLE-12 passive handoff only; GTA stock audio retained. No audio host or recording.");
+#endif
                 // A later authorised coordinator writes the process-bound lease.
                 // Merely loading this candidate cannot start target readings.
                 long leaseDeadline=Stopwatch.GetTimestamp()+Stopwatch.Frequency*60;
@@ -53,6 +62,10 @@ namespace RichAudio.Beacon.Rph
                 Assembly caller=typeof(ShvPassiveHandoffEntry).Assembly;
                 var compatibility=RphHandoffCompatibility.Inspect();
                 Need(compatibility.Compatible,compatibility.Reason);
+#if SHV_PLAYABLE_13
+                playback=new RichAudio.Beacon.Windows.BatiPlaybackSession(config.SessionId,false,config.RecordingAllowed,config.LoopbackAllowed);
+                playback.Start(ShvHandoffBuildPolicy.GameplayPointerPath,ShvHandoffBuildPolicy.GamePath);
+#endif
                 stage="waiting-offline-story";
                 long storyDeadline=Stopwatch.GetTimestamp()+Stopwatch.Frequency*300;
                 while(!stopping&&!stopRequested&&Stopwatch.GetTimestamp()<storyDeadline&&!CameraSampler.StoryReady())
@@ -84,7 +97,13 @@ namespace RichAudio.Beacon.Rph
                 Need(journal.WriteEvent("session",new{session=module.SessionId,generation=module.Generation,
                     producerSha256=config.Scope.ProducerSha256,bridgeSha256=Hash(caller.Location),
                     identityMode="read-only-sdk-ordinary-reuse",unobservedFullCounterWrapAddressReuseExcluded=true,
-                    passiveOnly=true,audioHostStarted=false,recordingStarted=false,
+                    passiveOnly=
+#if SHV_PLAYABLE_13
+                    false,
+#else
+                    true,
+#endif
+                    audioHostStarted=false,recordingStarted=false,
                     sourceInstanceQpc=module.Description.SourceInstanceQpc,sourceFrequency=module.Description.Frequency,
                     hostFrequency=module.HostFrequency,rphRuntimeHash=compatibility.ApiSha256,
                     rphRuntimeVersion=compatibility.ApiFileVersion,rphRuntimeAssemblyName=compatibility.ApiAssemblyName,
@@ -148,6 +167,9 @@ namespace RichAudio.Beacon.Rph
                             GameplayFrame frame;ShvGameplayFrameAdapter.Lineage lineage;string adaptationReason;
                             Need(adapter.TryCreate(current,peer,Listener(module.SessionId),out frame,out lineage,out adaptationReason),adaptationReason);
                             Need(journal.WriteFrame(frame,lineage),"gameplay-evidence-budget-or-queue");
+#if SHV_PLAYABLE_13
+                            Need(playback.PublishAccepted(frame,lineage.ValidThroughHostTicks),"audio-frame-gate:"+playback.State);
+#endif
                             accepted=composition.AcceptedCount;frames++;
                         }
                         if(!composition.LastPollHadRecord)break;
@@ -165,6 +187,9 @@ namespace RichAudio.Beacon.Rph
             finally
             {
                 stage="retiring";
+#if SHV_PLAYABLE_13
+                if(playback!=null)playback.Retire(reason??"provider-retired");
+#endif
                 try
                 {
                     // Retire the consumer before any source-control/drain operation.
@@ -223,7 +248,13 @@ namespace RichAudio.Beacon.Rph
                                     rawAuditAdmissionFailed=rawAuditAdmissionFailed,
                                     auditOutcomeUnobserved=!nativeFifoDrained||rawAuditAdmissionFailed||!journal.Healthy
                                         ||(composition!=null&&composition.PendingAuditCount!=0),
-                                    nativeOutcomeMayRemainUnobserved=!completed,audioHostStarted=false});
+                                    nativeOutcomeMayRemainUnobserved=!completed,audioHostStarted=
+#if SHV_PLAYABLE_13
+                                    playback!=null&&playback.Attempts>0
+#else
+                                    false
+#endif
+                                    });
                             }
                             finally
                             {
@@ -243,6 +274,13 @@ namespace RichAudio.Beacon.Rph
                             finally
                             {
                                 stage="retired";
+#if SHV_PLAYABLE_13
+                                if(playback!=null){
+                                    playback.Stop();bool audioJoined=false;long audioEnd=Stopwatch.GetTimestamp()+Stopwatch.Frequency*8;
+                                    while(!audioJoined&&Stopwatch.GetTimestamp()<audioEnd){audioJoined=playback.Join(0);if(!audioJoined)GameFiber.Sleep(10);}
+                                    Game.Console.Print("RichAudio Bati audio shutdown joined="+audioJoined+" state="+playback.State+"; native stock audio retained.");
+                                }
+#endif
                                 bool joined=journal!=null&&journal.CompletionObservedWithinBound;
                                 bool writerAlive=journal!=null&&journal.WorkerAlive;
                                 Game.Console.Print("RichAudio passive handoff RETIRED: accepted="+accepted+", frames="+frames+", reason="+reason
@@ -299,13 +337,31 @@ namespace RichAudio.Beacon.Rph
                 VelocityKind="estimated-camera-difference",Paused=camera.Paused,Valid=!camera.Paused,
                 Reason=camera.Paused?"paused":"valid",Coordinates="gta-native-unscaled",Units="native-unverified",SourceId=null};
         }
-        internal static void Stop(){stopping=true;stopRequested=true;}
+        internal static void Stop(){stopping=true;stopRequested=true;
+#if SHV_PLAYABLE_13
+            if(playback!=null)playback.Stop();
+#endif
+        }
         internal static void PrintStatus()
-        {Game.Console.Print("RichAudio passive handoff: "+stage+"; accepted="+accepted+"; frames="+frames+"; reason="+reason+"; audio host disabled.");}
-        [ConsoleCommand(Name="RichAudioHandoffStart",Description="Arm the single reviewed passive SHV/RPH handoff. No audio; no retry.")]
+        {Game.Console.Print("RichAudio handoff: "+stage+"; accepted="+accepted+"; frames="+frames+"; reason="+reason+
+#if SHV_PLAYABLE_13
+            "; playback="+(playback==null?"not-ready":playback.State)
+#else
+            "; audio host disabled."
+#endif
+            );}
+        [ConsoleCommand(Name="RichAudioHandoffStart",Description="Arm the single approved SHV/RPH handoff. Playback requires its own approved profile and AudioOn.")]
         public static void RequestStart(){if(!ran||stopping||stage!="ready-for-operator"||startRequested)return;startRequested=true;}
         [ConsoleCommand(Name="RichAudioHandoffStop",Description="Permanently retire this passive handoff session; no restart.")]
         public static void RequestStop(){stopRequested=true;}
+#if SHV_PLAYABLE_13
+        [ConsoleCommand(Name="RichAudioBatiAudioOn",Description="Explicitly enable this approved Bati additive audio session; fresh accepted telemetry required.")]
+        public static void AudioOn(){var value=playback;if(value!=null&&!stopping)Game.Console.Print("RichAudio Bati audio enable="+value.Enable()+" state="+value.State);}
+        [ConsoleCommand(Name="RichAudioBatiAudioOff",Description="Disable additive Bati audio; preserve stock audio and the still-valid provider.")]
+        public static void AudioOff(){var value=playback;if(value!=null)value.Disable();}
+        [ConsoleCommand(Name="RichAudioBatiAudioStatus",Description="Report this scoped Bati playback state without activating output or recording.")]
+        public static void AudioStatus(){var value=playback;Game.Console.Print("RichAudio Bati audio "+(value==null?"not-ready":value.State+" host="+value.HostPid+" starts="+value.Attempts));}
+#endif
     }
 }
 #endif

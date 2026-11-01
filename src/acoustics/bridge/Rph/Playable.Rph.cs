@@ -1,7 +1,13 @@
 using System;using System.Collections.Generic;using System.Diagnostics;using System.IO;using System.Threading;using Rage;using Rage.Attributes;using RichAudio.Beacon.Transport;using RichAudio.Beacon.Windows;
 #if PLAYABLE_PRODUCT
 #if SHV_HANDOFF_09
+#if SHV_PLAYABLE_13
+[assembly:Plugin("RichAudio",Author="RichAudio",Description="PLAYABLE-13 explicitly gated player-Bati additive audio demonstration; stock GTA sounds retained.",EntryPoint="RichAudio.Beacon.Rph.PlayableEntry.Main",ExitPoint="RichAudio.Beacon.Rph.PlayableEntry.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]
+#elif SHV_HANDOFF_13
+[assembly:Plugin("RichAudio",Author="RichAudio",Description="PLAYABLE-13 passive SHV/RPH handoff. No audio host or recording.",EntryPoint="RichAudio.Beacon.Rph.PlayableEntry.Main",ExitPoint="RichAudio.Beacon.Rph.PlayableEntry.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]
+#else
 [assembly:Plugin("RichAudio",Author="RichAudio",Description="PLAYABLE-12 passive SHV/RPH handoff qualification. GTA stock audio; no audio host.",EntryPoint="RichAudio.Beacon.Rph.PlayableEntry.Main",ExitPoint="RichAudio.Beacon.Rph.PlayableEntry.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]
+#endif
 #else
 [assembly:Plugin("RichAudio",Author="RichAudio",Description="Automatic offline Story Mode stock-source acoustics. Experimental additive; native GTA sounds retained.",EntryPoint="RichAudio.Beacon.Rph.PlayableEntry.Main",ExitPoint="RichAudio.Beacon.Rph.PlayableEntry.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]
 #endif

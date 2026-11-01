@@ -38,7 +38,8 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
    if(!clock)clock={ticks:s.observationTicks+m.ageMs*s.clockFrequency/1000,at:now,frequency:s.clockFrequency};
    if(s.clockFrequency!==clock.frequency)throw Error('producer observation clock changed');
    const age=Math.max(m.ageMs,(clock.ticks+(now-clock.at)*clock.frequency/1000-s.observationTicks)*1000/clock.frequency);
-   if(age<=250){engine.accept(m.frame,age);lastFrame={frame:m.frame,age,at:now};}
+   const remaining=m.validForMs===undefined?null:m.validForMs-(now-m.receivedAt);
+   if(age<=250&&(remaining===null||remaining>0)){engine.accept(m.frame,age,remaining);lastFrame={frame:m.frame,age,at:now};}
   }
   const channels=await engine.render();credits--;encodeVehicleRa07(...channels,sequence,packet);sequence=(sequence+1)>>>0;
   if(viewerClient&&engine.visual?.soundMapFrame)try{viewerClient.offer(engine.visual.soundMapFrame,engine.visual.soundMapGeometry);}catch{}
@@ -60,7 +61,7 @@ const input=readline.createInterface({input:process.stdin,terminal:false});
 input.on('line',line=>{try{if(line.length>131072)throw Error('producer command size');const m=JSON.parse(line);
  if(m.type==='credit'){if(!Number.isInteger(m.blocks)||m.blocks<1||m.blocks>8||credits+m.blocks>8)throw Error('bounded PCM credits');credits+=m.blocks;}
  else if(m.type==='settings'){engine.setSettings({quality:m.quality,acceleration:m.acceleration,enabled:m.enabled,volume:m.volume,reflections:m.reflections,mode:m.mode});viewer=m.soundMapVisible===true;engine.telemetry.enabled=viewer;}
- else if(m.type==='snapshot'){if(!Array.isArray(m.frame?.vehicles)||m.frame.vehicles.some(v=>v.valid&&!allowed.has(v.model+':'+v.context)))throw Error('unprepared source identity');pendingSnapshot=m;}
+ else if(m.type==='snapshot'){if(!Array.isArray(m.frame?.vehicles)||m.frame.vehicles.some(v=>v.valid&&!allowed.has(v.model+':'+v.context))||m.validForMs!==undefined&&(!Number.isFinite(m.validForMs)||m.validForMs<=0||m.validForMs>252))throw Error('unprepared source identity or expiry');pendingSnapshot={...m,receivedAt:performance.now()};}
  else if(m.type==='geometry'){try{geometry(m.value);}catch(e){log({type:'geometry-rejected',reason:e.message});}}
  else if(m.type==='stop'){finish();return;}else throw Error('producer command');pump();
  }catch(e){finish(e);}});

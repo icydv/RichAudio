@@ -5,9 +5,22 @@ const root=process.env.PLAYABLE01_CANDIDATE,session='b'.repeat(32),skip=!root;
 let registry,profiles;function loaded(){if(registry)return;const m=JSON.parse(fs.readFileSync(path.join(root,'playable.json'))),assets=loadStockCatalogAssets(path.join(root,m.playerManifest),{sustainAtlasFile:path.join(root,m.atlas)}),npcAssets=loadStockNpcAssets(path.join(root,m.npcManifest));registry=loadInstalledStockRegistry({catalogFile:path.join(root,m.catalog),catalogSha256:m.catalogSha256,assets,npcAssets});profiles=JSON.parse(fs.readFileSync(path.join(root,m.profiles)));}
 function fixture(){loaded();let wall=0,sequence=0,generation=1,paused=false;const engine=new StockGameplay({registry,profiles,session,now:()=>wall});
  const vehicle=(id='bati',context='npc',model=0xf9300cc5)=>({id,generation:1,observationTicks:Math.round((1000+wall)*10000),model,context,position:[-.3,.1,.8],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],operatingPoint:.5,running:true,valid:true});
- function accept(vehicles=[vehicle()],opts={}){if(opts.paused!==undefined&&opts.paused!==paused){generation++;paused=opts.paused;}engine.accept({version:1,session,listener:{version:1,session,generation,sequence:sequence++,observationTicks:Math.round((1000+wall)*10000),clockFrequency:10000000,gameTimeMs:Math.round(wall),position:[.3,.1,.7],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],listenerKind:'camera',velocityKind:'estimated-camera-difference',paused,valid:opts.valid??true,reason:'valid',coordinates:'gta-native-unscaled',units:'native-unverified',sourceId:null},vehicles},0);}
+ function accept(vehicles=[vehicle()],opts={}){if(opts.paused!==undefined&&opts.paused!==paused){generation++;paused=opts.paused;}engine.accept({version:1,session,listener:{version:1,session,generation,sequence:sequence++,observationTicks:Math.round((1000+wall)*10000),clockFrequency:10000000,gameTimeMs:Math.round(wall),position:[.3,.1,.7],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],listenerKind:'camera',velocityKind:'estimated-camera-difference',paused,valid:opts.valid??true,reason:'valid',coordinates:'gta-native-unscaled',units:'native-unverified',sourceId:null},vehicles},0,opts.validForMs??null);}
  async function step(blocks,make=()=>[vehicle()],opts={}){let peak=0,reflections=0;for(let i=0;i<blocks;i++){if(i%4===0)accept(make(),opts);const channels=await engine.render();for(const c of channels)for(const x of c){assert.ok(Number.isFinite(x)&&Math.abs(x)<1);peak=Math.max(peak,Math.abs(x));}reflections=Math.max(reflections,engine.pipeline.lastControl.paths.filter(p=>p.order>0).length);wall+=512000/48000;}return {peak,reflections};}
- return {engine,vehicle,accept,step,now:()=>wall};}
+ return {engine,vehicle,accept,step,now:()=>wall,advance:ms=>{wall+=ms;}};}
+test('an accepted Bati source lease expires independently of a newer listener or render clock',{skip},async()=>{
+ const f=fixture();try{
+  await f.step(24,()=>[f.vehicle('bati-player','player')],{validForMs:80});
+  f.accept([f.vehicle('bati-player','player')],{validForMs:15});
+  const time=f.engine.snapshots.at(-1).time;
+  assert.equal(f.engine.vehiclesAt(time).length,1);
+  f.advance(16);
+  assert.equal(f.engine.vehiclesAt(time).length,0,'original source lease cannot be renewed by delayed playout');
+  await f.engine.render();assert.equal(f.engine.diagnostics().active,0);
+  assert.throws(()=>f.accept([f.vehicle()],{validForMs:0}));
+  assert.throws(()=>f.accept([f.vehicle()],{validForMs:300}));
+ }finally{f.engine.close();}
+});
 test('genuine multi-source ownership, retirement, pause/resume and unchanged PCM through actual causal pipeline',{skip},async()=>{
  const f=fixture(),e=f.engine;try{assert.equal((await f.step(120)).peak>0,true);const first=e.slots.find(s=>s.identity),source=first.source,pcm=source.vehicle.layers.engine.accel.samples,hash=()=>createHash('sha256').update(Buffer.from(pcm.buffer,pcm.byteOffset,pcm.byteLength)).digest('hex'),before=hash();
  await f.step(80,()=>[f.vehicle(),{...f.vehicle('schafter','player',0xa774b5a6),position:[-1,.1,.8]}]);assert.equal(e.diagnostics().maximumActive,2);assert.notEqual(e.slots[0].source,e.slots[1].source);assert.notEqual(e.pipeline.renderer.sources.get('stock:slot0:engine').bands[0],e.pipeline.renderer.sources.get('stock:slot1:engine').bands[0]);

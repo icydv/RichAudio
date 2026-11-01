@@ -9,10 +9,17 @@ namespace RichAudio.Beacon.Windows.Recording
     public sealed class RecordingReadiness
     {
         public readonly bool FeatureEnabled,ExplicitUserStart,TelemetryQualified,HandoffQualified,LivePcmVerified,HumanListeningApproved,LoopbackExplicitlyApproved;
+        // A first demonstration may be measured before its listening result is
+        // known. This narrow internal capability does not approve that result or
+        // turn on the production recording feature.
+        public readonly bool FirstDemoMeasurement;
         internal readonly bool FixtureOnly;
         public RecordingReadiness(bool featureEnabled=false,bool explicitUserStart=false,bool telemetryQualified=false,bool handoffQualified=false,bool livePcmVerified=false,bool humanListeningApproved=false,bool loopbackExplicitlyApproved=false)
         {FeatureEnabled=featureEnabled;ExplicitUserStart=explicitUserStart;TelemetryQualified=telemetryQualified;HandoffQualified=handoffQualified;LivePcmVerified=livePcmVerified;HumanListeningApproved=humanListeningApproved;LoopbackExplicitlyApproved=loopbackExplicitlyApproved;}
-        public bool CoreAllowed {get{return FeatureEnabled&&ExplicitUserStart&&TelemetryQualified&&HandoffQualified&&LivePcmVerified&&HumanListeningApproved;}}
+        public bool CoreAllowed {get{return FirstDemoMeasurement&&ExplicitUserStart||FeatureEnabled&&ExplicitUserStart&&TelemetryQualified&&HandoffQualified&&LivePcmVerified&&HumanListeningApproved;}}
+        private RecordingReadiness(bool fixture,bool explicitStart,bool loopback):this(false,explicitStart,false,false,false,false,loopback){FixtureOnly=fixture;FirstDemoMeasurement=true;}
+        internal static RecordingReadiness FirstDemo(bool explicitPerRunStart,bool loopback,bool fixtureOnly)
+        {if(!explicitPerRunStart||loopback&&!explicitPerRunStart)throw new InvalidOperationException("Explicit first-demo recording permission required");return new RecordingReadiness(fixtureOnly,true,loopback);}
         private RecordingReadiness(bool fixture,RecordingReadiness basis):this(basis.FeatureEnabled,basis.ExplicitUserStart,basis.TelemetryQualified,basis.HandoffQualified,basis.LivePcmVerified,basis.HumanListeningApproved,basis.LoopbackExplicitlyApproved){FixtureOnly=fixture;}
         internal static RecordingReadiness Fixture(){return new RecordingReadiness(true,new RecordingReadiness(true,true,true,true,true,true,false));}
     }
