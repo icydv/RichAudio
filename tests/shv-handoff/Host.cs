@@ -23,7 +23,7 @@ namespace RichAudio.Beacon.Handoff
     }
 }
 
-internal static class ShvHandoffFixtureHost
+internal static partial class ShvHandoffFixtureHost
 {
     [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)]static extern IntPtr LoadLibraryExW(string path,IntPtr file,uint flags);
     [DllImport("kernel32.dll",CharSet=CharSet.Ansi,ExactSpelling=true)]static extern IntPtr GetProcAddress(IntPtr module,string name);
@@ -106,6 +106,9 @@ internal static class ShvHandoffFixtureHost
         }
     }
     static int Main(string[] args){
+#if SHV_BINDING_14
+        if(args.Length>0&&args[0].StartsWith("binding14_",StringComparison.Ordinal))return RunWaitingBinding14(args);
+#endif
         IntPtr window=IntPtr.Zero;ShvProducerModule module=null;ReleaseFn release=null;JoinFn join=null;MetricsFn metricsFn=null;
         bool callbackStarted=false;string output=null;var acceptedBits=new List<uint>();int emitted=0;bool completionBeforeRelease=false,completionAfterRelease=false;
         bool partialReturnRetained=false,autonomousSilenceObserved=false,emptyRetirementFrame=false,postPeerAuditRetained=false,queueLossAuditRetained=false;

@@ -29,7 +29,17 @@ namespace Rage
         public static bool IsPaused{get{return Fixture.Read(Fixture.Paused);}}
 #endif
     }
-    public sealed class GameConsole{public void Print(string value){Fixture.Read(value);}}
+    public sealed class GameConsole
+    {
+#if !MISSING_CONSOLE_OPEN
+#if WRONG_CONSOLE_OPEN
+        public int IsOpen{get{return 0;}}
+#else
+        public bool IsOpen{get{return Fixture.Read(false);}}
+#endif
+#endif
+        public void Print(string value){Fixture.Read(value);}
+    }
     public static class GameFiber{public static void Sleep(int milliseconds){Fixture.Read(milliseconds);}}
     public sealed class Player{public Ped Ped;public Ped Character{get{return Fixture.Read(Ped);}}}
     public class Entity

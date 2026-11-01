@@ -36,7 +36,9 @@ namespace RichAudio.Beacon.Handoff
             internal Configuration(string session,string caller)
             {
                 SessionId=session;CallerAssemblySha256=caller;
-#if SHV_HANDOFF_13
+#if SHV_HANDOFF_14
+                EvidenceRoot=Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-14","live-session",session);
+#elif SHV_HANDOFF_13
                 EvidenceRoot=Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-13","live-session",session);
 #else
                 EvidenceRoot=Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-12","live-session",session);
@@ -99,7 +101,9 @@ namespace RichAudio.Beacon.Handoff
                     int at=0;while(at<bytes.Length){int got=file.Read(bytes,at,bytes.Length-at);Need(got>0,"session-short-read");at+=got;}
                 }
                 var data=Parse(bytes);Need(data["schema"] is int&&(int)data["schema"]==1,"session-schema");
-#if SHV_HANDOFF_13
+#if SHV_HANDOFF_14
+                Exact(data,"profile","PLAYABLE-14");
+#elif SHV_HANDOFF_13
                 Exact(data,"profile","PLAYABLE-13");
 #else
                 Exact(data,"profile","PLAYABLE-12");

@@ -243,8 +243,10 @@ namespace RichAudio.Beacon.Handoff
             Require(reply.Frequency==description.Frequency&&reply.ProcessCreationFileTime==creation&&reply.Terminal==0&&reply.State!=ShvAbi.State.Retired,"producer clock identity/state");
             return new ShvClockWitness(witnessOwner,reply.Frequency,hostClock.Frequency,reply.SourceInstanceQpc,reply.CallQpc,before,after);
         }}
-        internal ShvAbi.Code TryPeek(out ShvAbi.ContextReply reply){lock(gate){
-            var request=Request();var code=(ShvAbi.Code)peek(ref request,56,out reply,160);
+        internal ShvAbi.Code TryPeek(out ShvAbi.ContextReply reply){ShvAbi.Code raw;bool returned;return TryPeek(out reply,out raw,out returned);}
+        internal ShvAbi.Code TryPeek(out ShvAbi.ContextReply reply,out ShvAbi.Code rawCode,out bool nativeReturned){lock(gate){
+            reply=new ShvAbi.ContextReply();rawCode=ShvAbi.Code.Unavailable;nativeReturned=false;
+            var request=Request();var code=(ShvAbi.Code)peek(ref request,56,out reply,160);rawCode=code;nativeReturned=true;
             Require(code==ShvAbi.Code.Ok||code==ShvAbi.Code.Empty||code==ShvAbi.Code.Busy,"owned producer waiting context");
             if(code==ShvAbi.Code.Busy)return code;
             CheckHead(reply.Header,160);CheckSession(reply.Session0,reply.Session1,reply.Generation,reply.SourceInstanceQpc);

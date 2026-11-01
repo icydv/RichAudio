@@ -52,12 +52,34 @@ namespace RichAudio.Beacon.Handoff
         internal readonly ShvAbi.ReadReply Reply;
         internal ShvConsumedAuditRow(long ordinal,ShvAbi.ReadReply reply){Ordinal=ordinal;Reply=reply;}
     }
+    // Private bounded admission evidence. Null means an operand/check was not
+    // observed, rather than a fabricated zero or a passing check.
+    internal sealed class ShvPrebindDiagnostic
+    {
+        public int Schema=1;
+        public string Outcome="waiting",Reason="not-evaluated",PeekStatus,PeekValidationError=null;
+        public bool CanBind,SafeToWait=true,SourceReady,MapAvailable,SourceContextObserved;
+        public long HostNowQpc,ArmedHostQpc,BaselineSourceEndQpc,SourceFrequency,HostFrequency;
+        public ulong BaselineSequence;
+        public bool? PeekApiReturned=null,WaitingWitnessOwned,SequenceAdvanced,AcquisitionAdvanced,SourceIntervalOrdered,SourceWithinMapWindow,
+            MapCurrent,SourceMapped,SourceAfterArm,SourceFresh,SourceScopeValid,PeerIntervalsOrdered,PeerFresh,PeerSkewWithinLimit,
+            SourceWithinPeerBracket,VehicleCorrespondence;
+        public ulong? SourceContextSequence,SourceVehicleAddress,SourcePedAddress,PeerVehicleAddress,PeerPedAddress;
+        public long? SourceStartQpc,SourceEndQpc,PeekCallQpc,MapSourceAnchor,MapHostBefore,MapHostAfter,MapExpires,
+            MappedSourceLow,MappedSourceHigh,PeerPreStart,PeerPreEnd,PeerPostStart,PeerPostEnd;
+        public uint? PeekState,PeekTerminal,SourceFlags,SourceModel,SourceEngineRunningRaw;
+        public int? MapDriftPpm,MapAnchors;
+        public decimal? MapMinimumMeasuredRatePpm,MapMaximumMeasuredRatePpm,SourceContextAgeAtPeekMs,MappedSourceAgeMs,MappedSourceFutureMs,PeerAgeMs,PeerFutureMs,PeerSkewMs;
+        public string CorrespondenceReason,PeerCaptureReason=null;
+    }
 
     // An owned passive-candidate composition, not a live handoff acceptance or
     // an audio activation gate. Source and clock witnesses come from actual
     // verified module calls. RPH peer witnesses come from the RPH-only factory.
     internal sealed class TrustedShvComposition:IDisposable
     {
+        internal const int PrebindMaximumWaitMilliseconds=10000,PrebindMaximumAttempts=200,PrebindPollMilliseconds=50;
+        internal const int PrebindBracketWaitMilliseconds=40,PrebindMaximumBracketReads=8;
         readonly object gate=new object(),issuer=new object();
         readonly ShvProducerModule module;
         readonly HandoffBindingProofMode mode;
@@ -115,6 +137,88 @@ namespace RichAudio.Beacon.Handoff
         internal ShvAbi.Record? PartialReturn{get{lock(gate)return pendingReturn;}}
         internal string SessionId{get{return source.SessionId;}}
         internal long SourceGeneration{get{return source.Generation;}}
+        static ShvPrebindDiagnostic PrebindResult(ShvPrebindDiagnostic d,string outcome,string why)
+        {d.Outcome=outcome;d.Reason=why;d.CanBind=outcome=="ready";d.SafeToWait=outcome=="waiting";return d;}
+        internal ShvPrebindDiagnostic InspectInitialBinding(ShvAbi.Code peekCode,ShvAbi.ContextReply value,
+            HandoffPeerObservation pre,HandoffPeerObservation post,ulong baselineSequence,long baselineSourceEndQpc,long armedHostTicks)
+        {lock(gate){
+            var d=new ShvPrebindDiagnostic{HostNowQpc=StopwatchHandoffClock.Instance.Now,ArmedHostQpc=armedHostTicks,
+                BaselineSequence=baselineSequence,BaselineSourceEndQpc=baselineSourceEndQpc,PeekStatus=peekCode.ToString(),
+                MapAvailable=clock!=null,SourceContextObserved=peekCode==ShvAbi.Code.Ok,SourceFrequency=source.SourceFrequency,HostFrequency=source.HostFrequency};
+            if(clock!=null){d.MapSourceAnchor=clock.SourceAnchor;d.MapHostBefore=clock.HostBefore;d.MapHostAfter=clock.HostAfter;
+                d.MapExpires=clock.ExpiresTicks;d.MapDriftPpm=clock.DriftPpm;d.MapCurrent=d.HostNowQpc>=clock.HostAfter&&d.HostNowQpc<=clock.ExpiresTicks;}
+            if(measuredMap!=null){d.MapAnchors=measuredMap.AnchorsUsed;d.MapMinimumMeasuredRatePpm=measuredMap.MinimumMeasuredRatePpm;d.MapMaximumMeasuredRatePpm=measuredMap.MaximumMeasuredRatePpm;}
+            if(peekCode==ShvAbi.Code.Ok||peekCode==ShvAbi.Code.Empty){d.PeekCallQpc=value.CallQpc;d.PeekState=(uint)value.State;d.PeekTerminal=value.Terminal;d.SourceContextSequence=value.ContextSequence;}
+            if(peekCode==ShvAbi.Code.Ok){d.SourceStartQpc=value.Context.StartQpc;d.SourceEndQpc=value.Context.EndQpc;
+                d.SourceVehicleAddress=value.Context.VehicleAddress;d.SourcePedAddress=value.Context.PedAddress;
+                d.SourceFlags=value.Context.Flags;d.SourceModel=value.Context.Model;d.SourceEngineRunningRaw=value.Context.EngineRunningRaw;
+                d.SourceContextAgeAtPeekMs=((decimal)value.CallQpc-value.Context.StartQpc)*1000/source.SourceFrequency;}
+            if(pre!=null){d.PeerPreStart=pre.Context.StartTicks;d.PeerPreEnd=pre.Context.EndTicks;d.PeerVehicleAddress=pre.VehicleAddress;d.PeerPedAddress=pre.PedAddress;}
+            if(post!=null){d.PeerPostStart=post.Context.StartTicks;d.PeerPostEnd=post.Context.EndTicks;}
+            if(disposed||retired||consumer.Retired)return PrebindResult(d,"terminal",Reason??"composition-retired");
+            if(begun||binding!=null)return PrebindResult(d,"terminal","initial-binding-already-used");
+            if(peekCode==ShvAbi.Code.Busy)return PrebindResult(d,"waiting","waiting-context-busy");
+            if(peekCode==ShvAbi.Code.Empty)return PrebindResult(d,"waiting","waiting-context-empty");
+            if(peekCode!=ShvAbi.Code.Ok)return PrebindResult(d,"terminal","waiting-context-peek-status");
+            d.WaitingWitnessOwned=module.OwnsWaiting(value);
+            if(d.WaitingWitnessOwned!=true)return PrebindResult(d,"terminal","waiting-context-witness-owner");
+            if(value.State!=ShvAbi.State.Waiting||value.Terminal!=0)return PrebindResult(d,"terminal","source-not-waiting-or-terminal");
+            d.SourceIntervalOrdered=value.Context.StartQpc>0&&value.Context.EndQpc>=value.Context.StartQpc&&value.CallQpc>=value.Context.EndQpc;
+            if(d.SourceIntervalOrdered!=true)return PrebindResult(d,"terminal","source-context-interval-invalid");
+            if((decimal)(value.Context.EndQpc-value.Context.StartQpc)*1000/source.SourceFrequency>250)return PrebindResult(d,"terminal","source-context-bracket-over-budget");
+            if(clock==null)return PrebindResult(d,"waiting","clock-map-unavailable");
+            if(d.HostNowQpc<clock.HostAfter)return PrebindResult(d,"terminal","clock-map-from-future");
+            if(d.MapCurrent!=true)return PrebindResult(d,"waiting","clock-map-expired");
+            decimal limit=(decimal)clock.SourceFrequency*(ShvOperatingStateHandoff.MaximumMapLifetimeMs+ShvOperatingStateHandoff.MaximumAgeMs+ShvOperatingStateHandoff.MaximumBracketMs+ShvOperatingStateHandoff.MaximumFutureMs)/1000;
+            d.SourceWithinMapWindow=Math.Abs((decimal)value.Context.StartQpc-clock.SourceAnchor)<=limit&&Math.Abs((decimal)value.Context.EndQpc-clock.SourceAnchor)<=limit;
+            if(d.SourceWithinMapWindow!=true)return PrebindResult(d,value.Context.StartQpc>clock.SourceAnchor?"terminal":"waiting","source-context-outside-map-window");
+            long low,high;d.SourceMapped=ShvOperatingStateHandoff.Map(clock,value.Context.StartQpc,value.Context.EndQpc,out low,out high);
+            if(d.SourceMapped!=true)return PrebindResult(d,"terminal","source-context-mapping-invalid");
+            d.MappedSourceLow=low;d.MappedSourceHigh=high;decimal frequency=source.HostFrequency;
+            d.MappedSourceAgeMs=((decimal)d.HostNowQpc-low)*1000/frequency;d.MappedSourceFutureMs=((decimal)high-d.HostNowQpc)*1000/frequency;
+            d.SourceFresh=d.MappedSourceAgeMs<=250&&d.MappedSourceFutureMs<=2;
+            if(d.SourceFresh!=true)return PrebindResult(d,d.MappedSourceFutureMs>2?"terminal":"waiting","source-context-stale-or-future");
+            d.SequenceAdvanced=value.ContextSequence>baselineSequence;
+            d.AcquisitionAdvanced=value.Context.StartQpc>baselineSourceEndQpc&&value.Context.EndQpc>baselineSourceEndQpc;
+            d.SourceAfterArm=low>=armedHostTicks;
+            if(d.SequenceAdvanced!=true||d.AcquisitionAdvanced!=true||d.SourceAfterArm!=true)return PrebindResult(d,"waiting","waiting-context-not-new-after-arm");
+            d.SourceScopeValid=value.Context.Flags==15&&value.Context.ReservedZero&&ShvOperatingStateHandoff.ValidShv(value.Context.ToContext());
+            if(d.SourceScopeValid!=true)return PrebindResult(d,"terminal","source-current-driver-scope");
+            d.SourceReady=true;
+            if(pre==null||post==null)return PrebindResult(d,"waiting","peer-observation-required");
+            try{CheckCorrespondence(value.Context,value.Context,pre,post,originalPeer==null);d.VehicleCorrespondence=true;}
+            catch(InvalidDataException error){d.VehicleCorrespondence=false;d.CorrespondenceReason=error.Message;return PrebindResult(d,"terminal","vehicle-correspondence-failure:"+error.Message);}
+            d.PeerIntervalsOrdered=pre.Context.StartTicks>=0&&pre.Context.EndTicks>=pre.Context.StartTicks&&post.Context.StartTicks>=pre.Context.EndTicks&&post.Context.EndTicks>=post.Context.StartTicks;
+            if(d.PeerIntervalsOrdered!=true)return PrebindResult(d,"terminal","peer-acquisition-order");
+            d.PeerAgeMs=((decimal)d.HostNowQpc-pre.Context.StartTicks)*1000/frequency;d.PeerFutureMs=((decimal)post.Context.EndTicks-d.HostNowQpc)*1000/frequency;
+            d.PeerFresh=d.PeerAgeMs<=250&&d.PeerFutureMs<=2;
+            if(d.PeerFresh!=true)return PrebindResult(d,d.PeerFutureMs>2?"terminal":"waiting","peer-observation-stale-or-future");
+            d.PeerSkewMs=Math.Max(Math.Abs((decimal)post.Context.EndTicks-low),Math.Abs((decimal)high-pre.Context.StartTicks))*1000/frequency;
+            d.PeerSkewWithinLimit=d.PeerSkewMs<=50;
+            if(d.PeerSkewWithinLimit!=true)return PrebindResult(d,"waiting","binding-peer-skew-exceeded");
+            d.SourceWithinPeerBracket=low>=pre.Context.StartTicks&&high<=post.Context.EndTicks;
+            if(d.SourceWithinPeerBracket!=true)return PrebindResult(d,"waiting","source-context-not-bracketed");
+            return PrebindResult(d,"ready","fresh-context-and-independent-peer-bracket");
+        }}
+        internal bool TryInitialBind(HandoffPeerObservation pre,ShvAbi.ContextReply value,HandoffPeerObservation post,
+            ulong baselineSequence,long baselineSourceEndQpc,long armedHostTicks,Func<ShvPrebindDiagnostic,bool> retain,out ShvPrebindDiagnostic diagnostic)
+        {lock(gate){
+            diagnostic=InspectInitialBinding(ShvAbi.Code.Ok,value,pre,post,baselineSequence,baselineSourceEndQpc,armedHostTicks);
+            try{
+                if(retain==null||!retain(diagnostic)){RetireOwned("prebind-diagnostic-write-failed");return false;}
+                if(!diagnostic.CanBind){if(!diagnostic.SafeToWait)RetireOwned(diagnostic.Reason);return false;}
+                // Queue admission may take time. Never turn a formerly fresh
+                // snapshot into a terminal bind without checking its age again.
+                var current=InspectInitialBinding(ShvAbi.Code.Ok,value,pre,post,baselineSequence,baselineSourceEndQpc,armedHostTicks);
+                if(!current.CanBind){diagnostic=current;if(!retain(diagnostic)){RetireOwned("prebind-diagnostic-write-failed");return false;}
+                    if(!diagnostic.SafeToWait)RetireOwned(diagnostic.Reason);return false;}
+                bool accepted=TryBind(pre,value,post);
+                if(!accepted){diagnostic=current;diagnostic.Outcome="terminal";diagnostic.SafeToWait=false;diagnostic.CanBind=false;diagnostic.Reason=Reason??"initial-binding-rejected";
+                    if(!retain(diagnostic))RetireOwned("prebind-diagnostic-write-failed");}
+                return accepted;
+            }catch(System.Threading.ThreadAbortException){throw;}
+            catch{RetireOwned("prebind-diagnostic-write-failed");return false;}
+        }}
         static void Need(bool condition,string why){if(!condition)throw new InvalidDataException(why);}
         void RetireOwned(string why){if(retired)return;retired=true;reason=why;binding=null;acceptedPeer=null;consumer.Invalidate(why);}
         internal void Retire(string why){lock(gate)RetireOwned(why);}

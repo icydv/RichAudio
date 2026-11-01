@@ -43,6 +43,9 @@ namespace RichAudio.Beacon.Rph
                 Property(typeof(Game),"LocalPlayer",typeof(Player),true);
                 Property(typeof(Game),"IsLoading",typeof(bool),true);
                 Property(typeof(Game),"IsPaused",typeof(bool),true);
+#if SHV_HANDOFF_14
+                Property(typeof(GameConsole),"IsOpen",typeof(bool),false);
+#endif
                 Method(typeof(GameConsole),"Print",typeof(void),false,typeof(string));
                 Method(typeof(GameFiber),"Sleep",typeof(void),true,typeof(int));
                 Property(typeof(Player),"Character",typeof(Ped),false);

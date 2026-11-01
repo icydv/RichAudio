@@ -43,6 +43,8 @@ namespace RichAudio.Beacon.Rph
             {
 #if SHV_PLAYABLE_13
                 Game.Console.Print("RichAudio PLAYABLE-13 Bati audio profile; separately approved lease and explicit AudioOn required. GTA stock audio retained.");
+#elif SHV_HANDOFF_14
+                Game.Console.Print("RichAudio PLAYABLE-14 passive fresh-context handoff only; GTA stock audio retained. No audio host or recording.");
 #elif SHV_HANDOFF_13
                 Game.Console.Print("RichAudio PLAYABLE-13 passive handoff only; GTA stock audio retained. No audio host or recording.");
 #else
@@ -132,6 +134,10 @@ namespace RichAudio.Beacon.Rph
                 }
                 Need(!stopping&&!stopRequested&&startRequested&&composition.ClockReady,"operator-start-not-acquired");
                 stage="independent-binding";
+#if SHV_HANDOFF_14
+                HandoffPeerObservation pre,post;ShvAbi.ContextReply waiting;
+                Need(AcquireFreshInitialBinding(module,composition,journal,waitingDeadline,ref lastClockLogged,ref sampler,out pre,out waiting,out post,out reason),reason);
+#else
                 Need(RphHandoffSampler.TryAcquire(out sampler,out reason),reason);
                 string peerReason;
                 var pre=sampler.Capture(out peerReason);
@@ -139,12 +145,14 @@ namespace RichAudio.Beacon.Rph
                 Need(module.TryPeek(out waiting)==ShvAbi.Code.Ok,"source-waiting-context-unavailable");
                 var post=sampler.Capture(out peerReason);
                 Need(composition.TryBind(pre,waiting,post),composition.Reason??"independent-binding-rejected");
+#endif
                 Need(journal.WriteEvent("binding",new{hostBefore=pre.Context.StartTicks,hostAfter=post.Context.EndTicks,
                     sourceBefore=waiting.Context.StartQpc,sourceAfter=waiting.Context.EndQpc,
                     vehicleAddress=pre.VehicleAddress,pedAddress=pre.PedAddress,
                     rphVehiclePoolIndex=pre.VehiclePoolIndex,rphVehiclePoolCounter=pre.VehiclePoolCounter,
                     rphPedPoolIndex=pre.PedPoolIndex,rphPedPoolCounter=pre.PedPoolCounter,
                     crossFrameworkHandleIntegersCompared=false}),"journal-binding-failed");
+                Need(journal.Healthy,"prebind-journal-worker-failed");
                 Need(composition.Begin(),composition.Reason??"begin-rejected");began=true;stage="active";
                 Game.Console.Print("RichAudio passive handoff ACTIVE (120 seconds maximum). Manually idle/rev/drive gently, then exit the Bati when requested. RichAudioHandoffStop retires permanently.");
                 long activeDeadline=Stopwatch.GetTimestamp()+Stopwatch.Frequency*120;
@@ -158,6 +166,9 @@ namespace RichAudio.Beacon.Rph
                     // introduce an artificial frame of latency between them.
                     for(int batch=0;batch<4&&!composition.Retired;batch++)
                     {
+#if SHV_HANDOFF_14
+                        string peerReason;
+#endif
                         composition.Poll(delegate{return sampler.Capture(out peerReason);});
                         Need(DrainAudit(composition,journal),"source-evidence-budget-or-queue");
                         if(composition.AcceptedCount!=accepted)
@@ -293,6 +304,121 @@ namespace RichAudio.Beacon.Rph
                 }
             }
         }
+#if SHV_HANDOFF_14
+        static bool RetainPrebind(ShvHandoffJournal journal,int attempt,string phase,ShvPrebindDiagnostic diagnostic)
+        {
+            return journal.Healthy&&journal.WriteEvent("prebind-readiness",new{attempt=attempt,phase=phase,diagnostic=diagnostic,
+                maximumWaitMilliseconds=TrustedShvComposition.PrebindMaximumWaitMilliseconds,
+                maximumAttempts=TrustedShvComposition.PrebindMaximumAttempts,
+                retention="bounded asynchronous queue admission; writer completion separately observed"})&&journal.Healthy;
+        }
+        static ShvAbi.Code ReadPrebindContext(ShvProducerModule module,TrustedShvComposition composition,ShvHandoffJournal journal,
+            int attempt,ulong baselineSequence,long baselineEnd,long armed,out ShvAbi.ContextReply value,
+            ref bool previousKnown,ref ShvAbi.ContextReply previous)
+        {
+            ShvAbi.Code code=ShvAbi.Code.Unavailable;bool returned=false;value=new ShvAbi.ContextReply();
+            try{
+                module.TryPeek(out value,out code,out returned);
+                if(previousKnown&&code==ShvAbi.Code.Empty)throw new InvalidDataException("waiting-context-sequence-regressed");
+                if(code==ShvAbi.Code.Ok&&previousKnown){
+                    Need(value.ContextSequence>=previous.ContextSequence,"waiting-context-sequence-regressed");
+                    if(value.ContextSequence==previous.ContextSequence)Need(value.Context.Equals(previous.Context),"waiting-context-sequence-content-changed");
+                    else Need(value.Context.StartQpc>previous.Context.EndQpc&&value.Context.EndQpc>previous.Context.EndQpc,"waiting-context-timestamp-regressed");
+                }
+                if(code==ShvAbi.Code.Ok){previous=value;previousKnown=true;}return code;
+            }catch(ThreadAbortException){throw;}
+            catch(Exception error){
+                var diagnostic=composition.InspectInitialBinding(code,value,null,null,baselineSequence,baselineEnd,armed);
+                diagnostic.PeekApiReturned=returned;diagnostic.PeekValidationError=error is InvalidDataException?error.Message:error.GetType().Name;
+                diagnostic.Outcome="terminal";diagnostic.CanBind=false;diagnostic.SafeToWait=false;diagnostic.Reason="waiting-context-validation-failed:"+diagnostic.PeekValidationError;
+                Need(RetainPrebind(journal,attempt,"peek-rejected",diagnostic),"prebind-diagnostic-write-failed");
+                composition.Retire(diagnostic.Reason);throw new InvalidDataException(diagnostic.Reason);
+            }
+        }
+        static bool AcquireFreshInitialBinding(ShvProducerModule module,TrustedShvComposition composition,ShvHandoffJournal journal,
+            long originalWaitingDeadline,ref long lastClockLogged,ref RphHandoffSampler sampler,
+            out HandoffPeerObservation pre,out ShvAbi.ContextReply waiting,out HandoffPeerObservation post,out string why)
+        {
+            pre=post=null;waiting=new ShvAbi.ContextReply();why="waiting-context-not-refreshing";
+            long armed=Stopwatch.GetTimestamp(),deadline=Math.Min(originalWaitingDeadline,armed+Stopwatch.Frequency*TrustedShvComposition.PrebindMaximumWaitMilliseconds/1000);
+            ulong baselineSequence=0;long baselineEnd=0;bool baselineKnown=false,previousKnown=false;ShvAbi.ContextReply previous=new ShvAbi.ContextReply();
+            Game.Console.Print("RichAudio Start armed. Close the RPH console now; waiting up to10 seconds for NEW SHV context and independent RPH brackets.");
+            for(int attempt=1;attempt<=TrustedShvComposition.PrebindMaximumAttempts&&Stopwatch.GetTimestamp()<deadline;attempt++){
+                if(stopping||stopRequested){why="operator-stopped-before-binding";return false;}
+                Need(journal.Healthy,"prebind-journal-worker-failed");composition.ObserveClock();
+                Need(!composition.Retired,composition.Reason??"prebind-clock-retired");LogClock(composition,journal,ref lastClockLogged);
+                if(!baselineKnown){
+                    var baseCode=ReadPrebindContext(module,composition,journal,attempt,0,0,armed,out waiting,ref previousKnown,ref previous);
+                    if(baseCode==ShvAbi.Code.Ok||baseCode==ShvAbi.Code.Empty){baselineSequence=waiting.ContextSequence;baselineEnd=baseCode==ShvAbi.Code.Ok?waiting.Context.EndQpc:0;baselineKnown=true;}
+                    var initial=composition.InspectInitialBinding(baseCode,waiting,null,null,baselineSequence,baselineEnd,armed);initial.PeekApiReturned=true;
+                    Need(RetainPrebind(journal,attempt,"arm-baseline",initial),"prebind-diagnostic-write-failed");
+                    if(!initial.SafeToWait&&!initial.CanBind){composition.Retire(initial.Reason);why=initial.Reason;return false;}
+                }
+                bool consoleOpen=Game.Console.IsOpen,paused=Game.IsPaused;
+                if(consoleOpen||paused||!baselineKnown){
+                    Need(journal.WriteEvent("prebind-ui-wait",new{attempt=attempt,consoleOpen=consoleOpen,paused=paused,baselineKnown=baselineKnown,
+                        armedHostQpc=armed,observedHostQpc=Stopwatch.GetTimestamp(),reason=consoleOpen?"close-rph-console":paused?"game-paused":"waiting-context-baseline-unavailable"}),"prebind-diagnostic-write-failed");
+                    GameFiber.Sleep(TrustedShvComposition.PrebindPollMilliseconds);continue;
+                }
+                if(stopping||stopRequested){why="operator-stopped-before-binding";return false;}
+                var previewCode=ReadPrebindContext(module,composition,journal,attempt,baselineSequence,baselineEnd,armed,out waiting,ref previousKnown,ref previous);
+                var preview=composition.InspectInitialBinding(previewCode,waiting,null,null,baselineSequence,baselineEnd,armed);preview.PeekApiReturned=true;
+                Need(RetainPrebind(journal,attempt,"source-readiness",preview),"prebind-diagnostic-write-failed");
+                if(!preview.SafeToWait&&!preview.CanBind){composition.Retire(preview.Reason);why=preview.Reason;return false;}
+                if(!preview.SourceReady){GameFiber.Sleep(TrustedShvComposition.PrebindPollMilliseconds);continue;}
+                if(sampler==null){
+                    string acquireReason;
+                    if(!RphHandoffSampler.TryAcquire(out sampler,out acquireReason)){
+                        if(Game.Console.IsOpen||Game.IsPaused){GameFiber.Sleep(TrustedShvComposition.PrebindPollMilliseconds);continue;}
+                        preview.Outcome="terminal";preview.SafeToWait=false;preview.CanBind=false;preview.Reason="vehicle-correspondence-failure:"+acquireReason;
+                        preview.PeerCaptureReason=acquireReason;Need(RetainPrebind(journal,attempt,"rph-acquisition-rejected",preview),"prebind-diagnostic-write-failed");
+                        composition.Retire(preview.Reason);why=preview.Reason;return false;
+                    }
+                }
+                string peerReason;pre=sampler.Capture(out peerReason);
+                if(pre==null){preview.Outcome="terminal";preview.SafeToWait=false;preview.CanBind=false;preview.PeerCaptureReason=peerReason;preview.Reason="vehicle-correspondence-failure:"+peerReason;
+                    Need(RetainPrebind(journal,attempt,"rph-pre-rejected",preview),"prebind-diagnostic-write-failed");composition.Retire(preview.Reason);why=preview.Reason;return false;}
+                ulong beforeSequence=waiting.ContextSequence;long beforeEnd=waiting.Context.EndQpc;
+                long bracketDeadline=Math.Min(deadline,pre.Context.StartTicks+Stopwatch.Frequency*TrustedShvComposition.PrebindBracketWaitMilliseconds/1000);
+                ShvAbi.Code code=previewCode;bool uiReopened=false;
+                for(int read=0;read<TrustedShvComposition.PrebindMaximumBracketReads&&Stopwatch.GetTimestamp()<bracketDeadline;read++){
+                    GameFiber.Sleep(1);
+                    if(stopping||stopRequested)break;
+                    if(Game.Console.IsOpen||Game.IsPaused){uiReopened=true;break;}
+                    code=ReadPrebindContext(module,composition,journal,attempt,baselineSequence,baselineEnd,armed,out waiting,ref previousKnown,ref previous);
+                    if(code==ShvAbi.Code.Ok&&waiting.ContextSequence>beforeSequence&&waiting.Context.StartQpc>beforeEnd)break;
+                }
+                if(stopping||stopRequested){why="operator-stopped-before-binding";return false;}
+                if(uiReopened){Need(journal.WriteEvent("prebind-ui-wait",new{attempt=attempt,reason="console-or-pause-reopened-before-post",preHostStart=pre.Context.StartTicks}),"prebind-diagnostic-write-failed");GameFiber.Sleep(TrustedShvComposition.PrebindPollMilliseconds);continue;}
+                post=sampler.Capture(out peerReason);
+                var diagnostic=composition.InspectInitialBinding(code,waiting,pre,post,baselineSequence,baselineEnd,armed);diagnostic.PeekApiReturned=true;
+                if(post==null){diagnostic.Outcome="terminal";diagnostic.SafeToWait=false;diagnostic.CanBind=false;diagnostic.PeerCaptureReason=peerReason;diagnostic.Reason="vehicle-correspondence-failure:"+peerReason;}
+                if(!diagnostic.CanBind){
+                    Need(RetainPrebind(journal,attempt,"bracket-readiness",diagnostic),"prebind-diagnostic-write-failed");
+                    if(!diagnostic.SafeToWait){composition.Retire(diagnostic.Reason);why=diagnostic.Reason;return false;}
+                    GameFiber.Sleep(TrustedShvComposition.PrebindPollMilliseconds);continue;
+                }
+                if(stopping||stopRequested){why="operator-stopped-before-binding";break;}
+                if(Stopwatch.GetTimestamp()>=deadline)break;
+                ShvPrebindDiagnostic commit;
+                if(composition.TryInitialBind(pre,waiting,post,baselineSequence,baselineEnd,armed,
+                    delegate(ShvPrebindDiagnostic value){
+                        value.PeekApiReturned=true;bool retained=RetainPrebind(journal,attempt,"before-terminal-binding",value);
+                        if(retained&&(stopping||stopRequested||Stopwatch.GetTimestamp()>=deadline))
+                            composition.Retire(stopping||stopRequested?"operator-stopped-before-binding":"waiting-context-not-refreshing");
+                        return retained;
+                    },out commit)){
+                    Need(journal.Healthy,"prebind-journal-worker-failed");why="fresh-context-bound";return true;
+                }
+                if(composition.Retired){why=composition.Reason??commit.Reason;return false;}
+                GameFiber.Sleep(TrustedShvComposition.PrebindPollMilliseconds);
+            }
+            if(stopping||stopRequested)why="operator-stopped-before-binding";
+            Need(journal.WriteEvent("prebind-window-ended",new{reason=why,armedHostQpc=armed,endedHostQpc=Stopwatch.GetTimestamp(),
+                maximumMilliseconds=TrustedShvComposition.PrebindMaximumWaitMilliseconds,maximumAttempts=TrustedShvComposition.PrebindMaximumAttempts}),"prebind-diagnostic-write-failed");
+            composition.Retire(why);return false;
+        }
+#endif
         static void Need(bool value,string why){if(!value)throw new InvalidDataException(why??"passive-gate-rejected");}
         static bool DrainAudit(TrustedShvComposition composition,ShvHandoffJournal journal)
         {

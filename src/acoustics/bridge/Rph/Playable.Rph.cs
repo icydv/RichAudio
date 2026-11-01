@@ -1,7 +1,9 @@
 using System;using System.Collections.Generic;using System.Diagnostics;using System.IO;using System.Threading;using Rage;using Rage.Attributes;using RichAudio.Beacon.Transport;using RichAudio.Beacon.Windows;
 #if PLAYABLE_PRODUCT
 #if SHV_HANDOFF_09
-#if SHV_PLAYABLE_13
+#if SHV_HANDOFF_14
+[assembly:Plugin("RichAudio",Author="RichAudio",Description="PLAYABLE-14 passive SHV/RPH handoff with bounded fresh-context readiness. No audio host or recording.",EntryPoint="RichAudio.Beacon.Rph.PlayableEntry.Main",ExitPoint="RichAudio.Beacon.Rph.PlayableEntry.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]
+#elif SHV_PLAYABLE_13
 [assembly:Plugin("RichAudio",Author="RichAudio",Description="PLAYABLE-13 explicitly gated player-Bati additive audio demonstration; stock GTA sounds retained.",EntryPoint="RichAudio.Beacon.Rph.PlayableEntry.Main",ExitPoint="RichAudio.Beacon.Rph.PlayableEntry.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]
 #elif SHV_HANDOFF_13
 [assembly:Plugin("RichAudio",Author="RichAudio",Description="PLAYABLE-13 passive SHV/RPH handoff. No audio host or recording.",EntryPoint="RichAudio.Beacon.Rph.PlayableEntry.Main",ExitPoint="RichAudio.Beacon.Rph.PlayableEntry.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]

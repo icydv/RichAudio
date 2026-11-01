@@ -38,6 +38,9 @@ struct Shared {
     std::atomic<DWORD> threadId{0};
     std::atomic<HANDLE> thread{nullptr}, release{nullptr};
     std::atomic<bool> configured{false}, started{false}, exited{false}, blocked{false};
+    // PLAYABLE-14: pause only the registered script's ordinary WAIT. The real
+    // producer Clock export continues sampling QPC on its caller independently.
+    std::atomic<bool> pauseWaiting{false}, waitingPaused{false};
     std::atomic<std::uint64_t> nativeCalls{0}, addressCalls{0}, targetCalls{0}, waits{0}, lastHash{0};
     std::atomic<std::uint32_t> nativeViolations{0}, addressViolations{0}, arguments{0}, unknown{0};
     std::atomic<std::uint32_t> registered{0}, unregistered{0}, published{0};
@@ -96,6 +99,11 @@ __declspec(dllexport) void scriptUnregister(HMODULE) {
 }
 __declspec(dllexport) void scriptWait(DWORD milliseconds) {
     CheckThread(); shared.waits.fetch_add(1); Poison();
+    while (shared.pauseWaiting.load(std::memory_order_acquire)) {
+        shared.waitingPaused.store(true, std::memory_order_release);
+        Sleep(1);
+    }
+    shared.waitingPaused.store(false, std::memory_order_release);
     if (shared.selected == Case::Shutdown && shared.targetCalls.load(std::memory_order_acquire) >= 3 && !current.postPending) {
         // Deliberately end only our owned fake callback thread; a consumer must
         // detect silence independently, not rely on producer completion flags.
@@ -222,8 +230,15 @@ FIXTURE_API BOOL __cdecl FixtureStartRegistered() {
     shared.thread.store(thread, std::memory_order_release); return TRUE;
 }
 FIXTURE_API void __cdecl FixtureRelease() {
+    shared.pauseWaiting.store(false, std::memory_order_release);
     const auto event = shared.release.load(std::memory_order_acquire);
     if (event) SetEvent(event);
+}
+FIXTURE_API void __cdecl FixturePauseWaiting(BOOL pause) {
+    shared.pauseWaiting.store(pause != FALSE, std::memory_order_release);
+}
+FIXTURE_API BOOL __cdecl FixtureWaitingPaused() {
+    return shared.waitingPaused.load(std::memory_order_acquire) ? TRUE : FALSE;
 }
 FIXTURE_API BOOL __cdecl FixtureJoin(DWORD milliseconds) {
     const auto thread = shared.thread.load(std::memory_order_acquire);
