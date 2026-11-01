@@ -2,7 +2,7 @@
 
 **BLOCKED before the handoff could start. Restoration PASS.** The exact two approved artifacts were deployed once and the existing Enhanced/RPH route was invoked once. The coordinator's bounded 120-second process observation did not see an exact new `GTA5_Enhanced.exe` process. It stopped with `Exact new game process not observed; no lease or retry.` No process-bound lease, operator handoff session or PLAYABLE-12 capture was created. The remaining RPH launcher was cancelled normally; exact ownership rollback restored the original installation and settings.
 
-This actual result supersedes the approval-readiness status in the frozen [preparation report](PLAYABLE_12.md), [proposal](PLAYABLE_12_LIVE_PROPOSAL.md) and [candidate receipt](../evidence/playable-12-candidate.json). The user's explicit one-attempt approval was consumed by this deployment and launch-route invocation. No retry, second launch, alternate route or audible experiment is authorised. The prepared reports and passing offline evidence remain unchanged.
+This actual result supersedes the approval-readiness status in the frozen [preparation report](PLAYABLE_12.md), [proposal](PLAYABLE_12_LIVE_PROPOSAL.md) and [candidate receipt](../evidence/playable-12-candidate.json). My explicit one-attempt approval was consumed by this deployment and launch-route invocation. No retry, second launch, alternate route or audible experiment is authorised. The prepared reports and passing offline evidence remain unchanged.
 
 | Approved payload | Installed bytes | SHA-256 |
 | --- | ---: | --- |
@@ -27,6 +27,6 @@ All 776 pre-attempt tracked files, seven preserved PLAYABLE-11 pins, 1,115 priva
 
 Independent read-only review confirmed the blocked-startup evidence, the absence of a lease/current capture, unchanged historical logs and exact restoration. UI cancellation facts are the coordinator's recorded observations; the reviewer did not operate or personally observe the UI. The review does not confer handoff or audio acceptance. [Actual evidence](../evidence/playable-12-live-01.json) · [rollback evidence](../evidence/playable-12-live-rollback.json) · [independent review](../evidence/playable-12-live-review.json) · [new report hashes](../evidence/playable-12-live-artifacts.json).
 
-The owner-directed functional compatibility policy and the prior accepted foundations are preserved. This attempt did not reach that policy's live execution, so it neither validates nor invalidates its actual framework compatibility. PLAYABLE-08's restricted Bati telemetry acceptance and all PLAYABLE-12 offline results remain as previously documented.
+The functional compatibility policy I requested and the prior accepted foundations are preserved. This attempt did not reach that policy's live execution, so it neither validates nor invalidates its actual framework compatibility. PLAYABLE-08's restricted Bati telemetry acceptance and all PLAYABLE-12 offline results remain as previously documented.
 
 **Current decision: passive handoff BLOCKED; audible RichAudio test BLOCKED; installation restored.** Any further startup attempt needs separate fresh authorisation and a reviewed exact procedure. The eventual Bati-only listening experiment still requires successful genuine passive evidence first and its own explicit approval. No further live work was performed for this result.
