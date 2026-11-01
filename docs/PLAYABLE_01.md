@@ -153,7 +153,7 @@ contains source, tests and sanitised evidence only. RPH is not bundled.
 Setup validates actual GTA `1.0.1158.16` and authentic RPH
 `1.132.1428.17748`, then installs a versioned LocalAppData cache, plugin/menu
 pointers and a backed-up `startup.rphs` entry. If RPH is absent, setup requests
-the user's separately obtained authentic package and verifies its inventory.
+my separately obtained authentic package and verifies its inventory.
 It refuses conflicting loader dependencies. It never launches GTA. Uninstall
 restores originals only if installed files still match the ownership receipt.
 The actual RPH package readme documents `startup.rphs`; its automatic command
@@ -170,7 +170,7 @@ pause/resume, volume persistence, disable/re-enable, forced host failure and
 cleanup. It does not claim actual GTA getters, endpoint or human listening.
 The finite geometry test uses labelled independent analytical collision samples.
 
-The user authorised the first candidate installation/launch/endpoint test.
+I authorised the first candidate installation/launch/endpoint test.
 RichAudio auto-loaded and the host started without host/listener commands.
 F10 was opened/closed/reopened; volume and SoundMap preferences were saved and
 acknowledged. A real Bati was spawned only to set up the vehicle test. An
