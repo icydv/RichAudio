@@ -1,13 +1,25 @@
 [CmdletBinding()]
-param([string]$SdkPath='',[switch]$CoreOnly,[switch]$Playable,[string]$Output='')
+param([string]$SdkPath='',[switch]$CoreOnly,[switch]$Playable,[string]$Output='',[switch]$ShvHandoff,[string]$ShvHandoffPolicySource='')
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
+if($ShvHandoff){
+    if($CoreOnly -or !$ShvHandoffPolicySource -or !(Test-Path -LiteralPath $ShvHandoffPolicySource -PathType Leaf)){throw 'Passive handoff requires the generated reviewed policy source and actual SDK compilation.'}
+    $Playable=$true
+}elseif($ShvHandoffPolicySource){throw 'A handoff policy source requires explicit -ShvHandoff.'}
 if(!$Output){$Output=Join-Path $repo 'build\acoustics07\transport'}
 $output=[IO.Path]::GetFullPath($Output)
 $allowed=@('build','.local')|ForEach-Object{[IO.Path]::GetFullPath((Join-Path $repo $_)).TrimEnd('\')+'\'}
 if(!@($allowed|Where-Object{$output.StartsWith($_,[StringComparison]::OrdinalIgnoreCase)}).Count){throw 'Bridge build output must be inside repository build or .local, never the game installation.'}
 for($cursor=$output;$cursor;$cursor=[IO.Path]::GetDirectoryName($cursor)){
     if((Test-Path -LiteralPath $cursor) -and ((Get-Item -LiteralPath $cursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked bridge build output is not permitted.'}
+}
+if($ShvHandoff){
+    $handoffRoots=@('build/playable-09-passive-bridge','.local/playable-09')|ForEach-Object{[IO.Path]::GetFullPath((Join-Path $repo $_)).TrimEnd('\')+'\'}
+    if(!@($handoffRoots|Where-Object{($output+'\').StartsWith($_,[StringComparison]::OrdinalIgnoreCase)}).Count){throw 'Passive bridge output must use a new09-only build or private directory.'}
+    $policy=[IO.Path]::GetFullPath($ShvHandoffPolicySource)
+    if(![IO.Path]::GetDirectoryName($policy).Equals($output,[StringComparison]::OrdinalIgnoreCase) -or [IO.Path]::GetFileName($policy) -ne 'ShvHandoffBuildPolicy.generated.cs'){throw 'Passive bridge policy must be generated inside its new output directory.'}
+    for($cursor=$policy;$cursor;$cursor=[IO.Path]::GetDirectoryName($cursor)){if((Test-Path -LiteralPath $cursor) -and ((Get-Item -LiteralPath $cursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked policy is not permitted.'}}
+    foreach($name in @('RichAudio.Listener.Transport.dll','RichAudio.Beacon.Rph.dll','bridge-build-receipt.json','RichAudio.Menu.json')){if(Test-Path -LiteralPath (Join-Path $output $name)){throw 'Passive bridge output files must be new; existing builds are never overwritten.'}}
 }
 [IO.Directory]::CreateDirectory($output) | Out-Null
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
@@ -32,9 +44,18 @@ if(!$CoreOnly)
     $geometry+=@('GeometryObservation.cs','SurfaceAcquisition.cs','DiagnosticTile.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\observation\'+$_)}
     $menu=@(Get-ChildItem (Join-Path $repo 'src\acoustics\settings\InGame') -Filter '*.cs'|ForEach-Object FullName)
     $menu+=@('AcousticSettings.cs','InGameSettingsBridge.cs','InGameRecordingBridge.cs','MenuDiagnostic.cs','PassiveSoundMapBridge.cs','GameplayRuntime.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\host\Windows\'+$_)}
-    if($Playable){$base+='/define:PLAYABLE_PRODUCT'}
+    if($ShvHandoff){
+        $base+='/define:PLAYABLE_PRODUCT,SHV_HANDOFF_09'
+        $adapter+=@(Get-ChildItem -LiteralPath (Join-Path $repo 'src/acoustics/host/Handoff') -Filter '*.cs'|ForEach-Object FullName)
+        $adapter+=$policy
+        $handoffPins=@(@($transport)+@($geometry)+@($menu)+@($adapter)|Sort-Object -Unique|ForEach-Object{[ordered]@{path=$_;sha256=(Get-FileHash -LiteralPath $_).Hash.ToLowerInvariant()}})
+    }elseif($Playable){$base+='/define:PLAYABLE_PRODUCT'}
     & $compiler @base '/r:System.Web.Extensions.dll' '/r:System.Drawing.dll' '/r:System.Windows.Forms.dll' '/r:Microsoft.CSharp.dll' ('/r:'+$SdkPath) ('/out:'+$binary) @transport @geometry @menu @adapter
     if($LASTEXITCODE -ne 0){throw 'Listener RPH adapter build failed.'}
+    if($ShvHandoff){
+        foreach($pin in $handoffPins){if((Get-FileHash -LiteralPath $pin.path).Hash.ToLowerInvariant() -ne $pin.sha256){throw 'Passive bridge source changed while compiling.'}}
+        [ordered]@{schema=1;profile='PLAYABLE-09';sources=$handoffPins;passiveOnly=$true;audioPlaybackAllowed=$false;deployed=$false;gameExecuted=$false}|ConvertTo-Json -Depth 5|Set-Content -LiteralPath (Join-Path $output 'passive-build-source-manifest.json') -Encoding utf8
+    }
     # Prepared application configuration only, outside the game. A future live
     # package must separately bind this opt-in sidecar and the changed plugin.
     $menuConfig=Join-Path $output 'RichAudio.Menu.json'

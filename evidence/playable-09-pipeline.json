@@ -1,0 +1,661 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-09",
+  "kind": "genuine-components-offline-pipeline",
+  "dateUtc": "2026-11-01",
+  "result": "PASS",
+  "scope": "Unchanged compiled native producer and actual C# owned-module reader, measured clock, trusted composition, reused PLAYABLE08 validator, autonomous consumer, passive adapter and GameplayWire executed together with an explicitly identified fake SHV and authored independent peer/camera fixtures. This is not a live handoff acceptance.",
+  "artifacts": {
+    "producer": {
+      "name": "RichAudio.OperatingState.ShvHandoff.asi",
+      "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+      "bytes": 129024
+    },
+    "fakeShv": {
+      "name": "ScriptHookV.dll",
+      "sha256": "0c477cdbcaa1db0725d70c11ad73ba859cf5a3d15218f2ca9ec447de91989224"
+    },
+    "fixtureHost": {
+      "name": "RichAudio.ShvHandoff.FixtureHost.exe",
+      "sha256": "d9950eeb5510bc819e44b0fa43aee75cc26c74cced363246f190befd294038c0"
+    },
+    "privatePipelineReceiptSha256": "48d362c7b89366bdec17f66323028b93089f395834d03fbf51311116d0211a6b",
+    "privateExecutionReceiptSha256": "b6878faa32e63fef71bdf3d97c0f24b61d1ca3fa9ae7518c2336f75eb162d9b6",
+    "privateBuildReceiptSha256": "f9d28cf4040bc4aa449a3620cfc942a6ed9006e7110e2fc3d9d8876788dc5dda",
+    "runnerSourceSha256": "f06b5367a29567a6c4d6cfb14f884cbefd794562ccf64d6161259e95487c023e"
+  },
+  "nativeSourcePins": [
+    {
+      "file": "src/telemetry/ShvHandoff/Producer.cpp",
+      "sha256": "4d210d5492562ce5610b1364768f7cdc51a3e1fe18b2c03f6b059c2294830d0d",
+      "bytes": 32956
+    },
+    {
+      "file": "src/telemetry/ShvHandoff/ProducerApi.h",
+      "sha256": "ba5e2d6eb7c728ebbaa452556f565a65846315018d94312e493a6c9362c7d4bf",
+      "bytes": 8300
+    },
+    {
+      "file": "src/telemetry/ShvHandoff/ScriptHookVApi.h",
+      "sha256": "cc8249d23101d8a7fb50f5170c1b7f77557d5dcccd3567f53f81902ada653a69",
+      "bytes": 970
+    },
+    {
+      "file": "src/telemetry/ShvHandoff/NativeIds.h",
+      "sha256": "257f764059089523cb744867f4c3756605a7b16fef5457b2064c554001448d52",
+      "bytes": 1637
+    }
+  ],
+  "testedSourcePins": [
+    {
+      "name": "src/acoustics/host/Handoff/ShvOperatingStateHandoff.cs",
+      "sha256": "b16bc4168e9d9ce2c4f5996f633f17156ee75cf217bea5d642ef33c6b3b0152a"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/TrustedShvComposition.cs",
+      "sha256": "9fe4517599265f180b43390f36fd1f7946c7642673b4ab9cffbe1c541877d464"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvProducerModule.cs",
+      "sha256": "1209b605130f47ccbdadadfb89efaeed53a72f18d93ee34455b099fece594298"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvClockCalibration.cs",
+      "sha256": "52891eb31cee846682ac1bc7e66dab6e36a7456c01f4d40ee4b31513bb983cc5"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvHandoffConsumer.cs",
+      "sha256": "71b7e034c75ea16616692aacfc020bc793af8caf06fc06fae45f6264b6a9ae89"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvGameplayFrameAdapter.cs",
+      "sha256": "783f358ca9f6f1c64f4213cb55233adf10b3b61ffd91db927adb5fb4b5089dbe"
+    },
+    {
+      "name": "src/acoustics/host/Transport/ListenerProtocol.cs",
+      "sha256": "7d76e16d4e4ab184d4074ef3751795c070308a1e51ba443c8e4e84a80faf027b"
+    },
+    {
+      "name": "src/acoustics/host/Transport/GameplayProtocol.cs",
+      "sha256": "493b07e5c23e2d30c394929f71b66235fa101621adaa3fc56ea943e1a2d83c68"
+    },
+    {
+      "name": "src/acoustics/host/Transport/StatePipe.cs",
+      "sha256": "67da56ca63bca4bb3631b1f6ae790148937ffe40766a6c06a92ab9cdf4c4534d"
+    },
+    {
+      "name": "src/acoustics/host/Transport/PipeDeadline.cs",
+      "sha256": "f28a13fcecd969a1475458a3db44a2b9bb9ac84f9b5bb3aa35b869a5bc4eb940"
+    },
+    {
+      "name": "tests/shv-handoff/Host.cs",
+      "sha256": "de7bc07cdc4b8d817c59df940d366b4667becdf096ce3a28c0aa86e3cc06d016"
+    },
+    {
+      "name": "tests/shv-handoff/Fixture.cpp",
+      "sha256": "12a5c65832ed3dd72f6394e3bfe32f73405713bb7bef10db01e788e04461f642"
+    }
+  ],
+  "validation": {
+    "cases": 32,
+    "assertions": 22464,
+    "failed": 0,
+    "fullMatrix": true,
+    "totalFakeNativeTargetCalls": 2086,
+    "totalAcceptedCandidates": 2012,
+    "perArtifactHashVerifiedBeforeExecution": true,
+    "productionAndFixtureSourcesUnchangedDuringFinalRun": true,
+    "changedProducerInheritedDiagnosticQualification": false,
+    "measuredClockCorrespondenceExercised": true,
+    "strictRawFloat32PreservationExercised": true,
+    "autonomousSilenceAfterPreviouslyActiveSourceExercised": true,
+    "postPeerFaultAndClrAbortAuditPreservationExercised": true,
+    "queueFullAndRetirementAuditExercised": true,
+    "metadataPendingBeforeSourceCallbackExercised": true,
+    "existingGameplayWireEncodingAndDecodingExercised": true,
+    "perUseExpiryAndEmptyRetirementFramesExercised": true
+  },
+  "cases": [
+    {
+      "case": "valid_changing",
+      "assertions": 148,
+      "nativeTargetCalls": 8,
+      "acceptedCandidates": 8,
+      "gameplayFrames": 8,
+      "consumerTerminalReason": "fixture-requested-stop",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "metadata_pending",
+      "assertions": 148,
+      "nativeTargetCalls": 8,
+      "acceptedCandidates": 8,
+      "gameplayFrames": 8,
+      "consumerTerminalReason": "fixture-requested-stop",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "metadataPendingObserved",
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "zero_running",
+      "assertions": 101,
+      "nativeTargetCalls": 4,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "clock-access-or-calibration-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "null_pointer",
+      "assertions": 101,
+      "nativeTargetCalls": 4,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "clock-access-or-calibration-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "target_seh",
+      "assertions": 101,
+      "nativeTargetCalls": 4,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "clock-access-or-calibration-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "nan",
+      "assertions": 101,
+      "nativeTargetCalls": 4,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "clock-access-or-calibration-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "infinity",
+      "assertions": 101,
+      "nativeTargetCalls": 4,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "clock-access-or-calibration-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "out_of_range",
+      "assertions": 101,
+      "nativeTargetCalls": 4,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "clock-access-or-calibration-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "source_identity_changed",
+      "assertions": 99,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "clock-access-or-calibration-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "source_address_changed",
+      "assertions": 99,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "clock-access-or-calibration-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "source_driver_changed",
+      "assertions": 99,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "clock-access-or-calibration-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "source_engine_off",
+      "assertions": 99,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "clock-access-or-calibration-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "source_model_changed",
+      "assertions": 100,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "producer-retired-or-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "source_offline_lost",
+      "assertions": 99,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "clock-access-or-calibration-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "freeze_after_3",
+      "assertions": 101,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "source-silence-or-expiry",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "autonomousSilenceObserved",
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "shutdown_after_3",
+      "assertions": 100,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "source-silence-or-expiry",
+      "sourceCallbackCompletionObserved": false,
+      "checksExercised": [
+        "autonomousSilenceObserved",
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "post_context_delay",
+      "assertions": 94,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 2,
+      "gameplayFrames": 2,
+      "consumerTerminalReason": "source-silence-or-expiry",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "host_identity_changed",
+      "assertions": 99,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "independent-peer-lifetime-changed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "host_pool_counter_changed",
+      "assertions": 99,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "independent-peer-lifetime-changed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "host_owner_changed",
+      "assertions": 99,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "independent-peer-lifetime-changed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "host_driver_changed",
+      "assertions": 99,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "independent-peer-lifetime-changed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "host_exit",
+      "assertions": 99,
+      "nativeTargetCalls": 3,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "independent-peer-scope-lost",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "post_peer_fault",
+      "assertions": 103,
+      "nativeTargetCalls": 4,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "producer-or-peer-observation-failed",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "postPeerFaultAuditRetained",
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "post_peer_abort",
+      "assertions": 104,
+      "nativeTargetCalls": 4,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "fixture-peer-aborted",
+      "sourceCallbackCompletionObserved": true,
+      "checksExercised": [
+        "postPeerAbortAuditRetained",
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "queue_full",
+      "assertions": 229,
+      "nativeTargetCalls": 67,
+      "acceptedCandidates": 3,
+      "gameplayFrames": 3,
+      "consumerTerminalReason": "source-silence-or-expiry",
+      "sourceCallbackCompletionObserved": true,
+      "observedNativeTerminalCode": 5,
+      "checksExercised": [
+        "queueFullAuditRetained",
+        "authoredLossMetadataMutationRejected",
+        "emptyRetirementFrame"
+      ]
+    },
+    {
+      "case": "wrong_peer_address",
+      "assertions": 65,
+      "nativeTargetCalls": 0,
+      "acceptedCandidates": 0,
+      "gameplayFrames": 0,
+      "consumerTerminalReason": "opaque-entity-correspondence",
+      "sourceCallbackCompletionObserved": true
+    },
+    {
+      "case": "wrong_binding_policy",
+      "assertions": 65,
+      "nativeTargetCalls": 0,
+      "acceptedCandidates": 0,
+      "gameplayFrames": 0,
+      "consumerTerminalReason": "binding-policy-pending",
+      "sourceCallbackCompletionObserved": true
+    },
+    {
+      "case": "wrong_provider_hash",
+      "assertions": 61,
+      "nativeTargetCalls": 0,
+      "acceptedCandidates": 0,
+      "gameplayFrames": 0,
+      "consumerTerminalReason": "wrong-provider-rejected",
+      "sourceCallbackCompletionObserved": false
+    },
+    {
+      "case": "wrong_session_key",
+      "assertions": 66,
+      "nativeTargetCalls": 0,
+      "acceptedCandidates": 0,
+      "gameplayFrames": 0,
+      "consumerTerminalReason": "wrong-session-rejected",
+      "sourceCallbackCompletionObserved": true
+    },
+    {
+      "case": "wrong_process_open",
+      "assertions": 66,
+      "nativeTargetCalls": 0,
+      "acceptedCandidates": 0,
+      "gameplayFrames": 0,
+      "consumerTerminalReason": "wrong-process-rejected",
+      "sourceCallbackCompletionObserved": true
+    },
+    {
+      "case": "no_foreground",
+      "assertions": 65,
+      "nativeTargetCalls": 0,
+      "acceptedCandidates": 0,
+      "gameplayFrames": 0,
+      "consumerTerminalReason": "source-context-proof-incomplete",
+      "sourceCallbackCompletionObserved": true
+    },
+    {
+      "case": "max_duration",
+      "assertions": 19353,
+      "nativeTargetCalls": 1929,
+      "acceptedCandidates": 1928,
+      "gameplayFrames": 1928,
+      "consumerTerminalReason": "consumer-active-deadline",
+      "sourceCallbackCompletionObserved": true,
+      "observedNativeTerminalCode": 3,
+      "checksExercised": [
+        "emptyRetirementFrame"
+      ]
+    }
+  ],
+  "realDurationCase": {
+    "targetCalls": 1929,
+    "acceptedCandidates": 1928,
+    "gameplayFrames": 1928,
+    "unpromotedNativeAttempts": 1,
+    "nativeTargetEntrySpanMs": 119984.9679,
+    "minimumActualNativeTargetEntryGapMs": 59.7796,
+    "maximumActualNativeTargetEntryGapMs": 64.6301,
+    "fixtureElapsedMilliseconds": 120448,
+    "consumerTerminal": "consumer-active-deadline",
+    "nativeTerminalCode": 3,
+    "nativeTerminal": "ActiveTimeout",
+    "sourceCallbackCompletionObserved": true,
+    "maximumActiveMs": 120000,
+    "maximumTargets": 2400,
+    "maximumHz": 20,
+    "notes": "The entire real active limit was exercised without a test clock override. Fixture elapsed time includes setup/cleanup. Entry span is relative to the first native entry, not an invented exact hard stop. One native attempt was retained as evidence and not promoted after expiry/termination. No native preemption or exact sampling rate is promised."
+  },
+  "queueTimingDiagnostic": {
+    "isolatedReceiptSha256": "a7fc5d90f32f9b77aba3d54d02a7bae6f272d50de5af9914a9a871cf4a4cce0d",
+    "formerFourSecondObservation": {
+      "state": 4,
+      "terminal": 0,
+      "queued": 128,
+      "attempts": 67,
+      "foreground": true,
+      "elapsedMilliseconds": 4003
+    },
+    "finalQueueCaseNativeTerminal": 5,
+    "explanation": "At the former fixed 4 second wait the actual FIFO held 128 rows and was still Active; retirement occurs at the next scheduled capture check. The final fixture waits for actual QueueFull retirement within an 8 second test budget, never loosens acceptance. An authored DroppedRecords=1 mutation is separately labelled and is not claimed as an actual dropped record."
+  },
+  "focusedRegression": {
+    "core": {
+      "privateReceiptSha256": "df13da1dacac684d6182c83aa28800fe4d17e7bc96e1ce508d6c7ebd5fe7aa08",
+      "cases": 13,
+      "assertions": 43,
+      "binarySha256": "e5ad200470d5f10dd8b9016dc02dfa7f7c05821e31fc13c4cf277a58d2cde096",
+      "compilerSha256": "46809206887326d2d24db1eff1f3064de972c3451abe766b49111450a5e08e00",
+      "runnerSha256": "38a665e649c127b2e2e679369dd5397ec9cf248076bb58e60c34e021c7b4cf04",
+      "sourcePins": [
+        {
+          "name": "src/acoustics/host/Handoff/ShvOperatingStateHandoff.cs",
+          "sha256": "b16bc4168e9d9ce2c4f5996f633f17156ee75cf217bea5d642ef33c6b3b0152a"
+        },
+        {
+          "name": "src/acoustics/host/Handoff/TrustedShvComposition.cs",
+          "sha256": "9fe4517599265f180b43390f36fd1f7946c7642673b4ab9cffbe1c541877d464"
+        },
+        {
+          "name": "src/acoustics/host/Handoff/ShvProducerModule.cs",
+          "sha256": "1209b605130f47ccbdadadfb89efaeed53a72f18d93ee34455b099fece594298"
+        },
+        {
+          "name": "src/acoustics/host/Handoff/ShvClockCalibration.cs",
+          "sha256": "52891eb31cee846682ac1bc7e66dab6e36a7456c01f4d40ee4b31513bb983cc5"
+        },
+        {
+          "name": "src/acoustics/host/Handoff/ShvHandoffConsumer.cs",
+          "sha256": "71b7e034c75ea16616692aacfc020bc793af8caf06fc06fae45f6264b6a9ae89"
+        },
+        {
+          "name": "tests/host/TestShvHandoffComposition.cs",
+          "sha256": "68d2549fe0638321af54cfcbd5710037a2788339a06c4f1ff9585f429516787c"
+        }
+      ]
+    },
+    "unchangedPlayable08Validator": {
+      "cases": 68,
+      "assertions": 250,
+      "originalTestSourceSha256": "ac7cbdc992fa230b8f0da1c313f215e59a32514818e6e528e1b1016a3045a728",
+      "extendedValidatorSourceSha256": "b16bc4168e9d9ce2c4f5996f633f17156ee75cf217bea5d642ef33c6b3b0152a",
+      "binarySha256": "52581d263c305d702d6544f523455ec50f8dd0d215084d4e2e77afe780877415"
+    },
+    "passiveGameplayAdapter": {
+      "privateReceiptSha256": "ec6085ed5dafac5585402de6fbc44c1c3c1d2f5ab980e43603432efa24c91657",
+      "cases": 14,
+      "assertions": 63,
+      "actualGameOrAudioProof": false
+    }
+  },
+  "foregroundControl": {
+    "realWindowsForegroundReaders": true,
+    "normalOwnedWindowActivationOnly": true,
+    "officialComputerUseAssistance": true,
+    "positivePendingAndPositiveActiveTitlesOnly": true,
+    "negativeForegroundCaseIgnored": true,
+    "noForegroundCaseTargetCalls": 0,
+    "globalKeyboardInputInjected": false,
+    "mouseInputInjected": false,
+    "foregroundReadersSubstituted": false,
+    "scope": "Ordinary creation/activation and separately approved official computer-use activation maintained the actual positive fixture window. No fake system DLL, IAT patch, reader substitution, input injection or foreground-lock bypass was used. This does not prove actual GTA rendering or input delivery."
+  },
+  "preservedAttempts": {
+    "initialChangingSmoke": {
+      "cases": 1,
+      "assertions": 131,
+      "acceptedFrames": 8,
+      "privateReceiptSha256": "70b65d23643fa54be1b23d89ebf840c61ce60487d04f76650fd8ae9c8f6c3664"
+    },
+    "partialFullAttempts": [
+      {
+        "completedCases": 9,
+        "fullMatrix": false,
+        "cause": "foreground setup refused in source_driver_changed before production ASI callback",
+        "receiptSha256": "915138bd8dcf8c89f829eec5b7c858b4f89d312552426beceff0264e8d40ec5c",
+        "fullDurationCaseExecuted": false,
+        "preserved": true
+      },
+      {
+        "completedCases": 23,
+        "fullMatrix": false,
+        "cause": "queue fixture assumed an actual drop was necessary before reserved-capacity retirement",
+        "receiptSha256": "281f3b6076eb7413a5d4333658b2508856003baf9750d9f9706429d1cfea0d74",
+        "fullDurationCaseExecuted": false,
+        "preserved": true
+      },
+      {
+        "completedCases": 24,
+        "fullMatrix": false,
+        "cause": "queue fixture assumed 4 seconds implied the next scheduled QueueFull check had run",
+        "receiptSha256": "f9a3d6c6fb93657b575ef8cd4be67eee5864ad91c8d7fe0b4c0f40876e3b1a1f",
+        "fullDurationCaseExecuted": false,
+        "preserved": true
+      }
+    ],
+    "isolatedQueue": {
+      "cases": 1,
+      "assertions": 230,
+      "acceptedCandidates": 3,
+      "targetCalls": 67,
+      "privateReceiptSha256": "a7fc5d90f32f9b77aba3d54d02a7bae6f272d50de5af9914a9a871cf4a4cce0d"
+    },
+    "earlierAttemptsCountedAsFinalPasses": false,
+    "onlyFinalRunExercisedFull120SecondCase": true
+  },
+  "baseline": {
+    "preservedPlayable08SnapshotManifestSha256": "f1303b011e58add704ea94497416ed31b0b1621621074d2f31f47f3533f2464c",
+    "originalValidatorSha256": "2df5c9eedf34bdbe845b7ca1e0a4c90a27f8439f649789132c282d67d94d08bd",
+    "historicalPlayable08EvidenceModified": false
+  },
+  "boundaries": {
+    "actualProducerExecuted": true,
+    "actualShvExecuted": false,
+    "actualRphWitnessExecuted": false,
+    "gameStarted": false,
+    "gameFilesWritten": false,
+    "audioHostStarted": false,
+    "endpointOpened": false,
+    "audioPlayback": false,
+    "providerQualified": false,
+    "liveHandoffAccepted": false,
+    "liveHandoffReady": false,
+    "physicalRpmQualified": false,
+    "productionFeatureActivation": false,
+    "newLiveAuthorization": false,
+    "samePrivilegeSecurityGuarantee": false,
+    "unsupportedEngineOffOrOtherVehicleQualification": false
+  },
+  "limitations": [
+    "The native data and independent peer/camera observations are explicit fixtures. SDK-backed real vehicle correspondence and clock/loss behavior need a separately approved passive live capture.",
+    "The selected bounded read-only proof rejects observed identity/pool/address changes; full unobserved 8-bit counter wrap plus address ABA between observations is explicitly excluded.",
+    "Module/file/process/caller/session checks do not secure a process against arbitrary code with equal privileges or a compromised framework.",
+    "Regular CLR ThreadAbort transfer is protected with a constrained finally and preallocated storage. Fatal process failure, OOM and every blocked native/OS call are not made recoverable.",
+    "Retired is not producer completion. Unexpected fake callback shutdown correctly retained completion=false; bounded audit collection must report unfinished/unknown outcomes rather than invent cancellation.",
+    "No recordings, gains, renderer behavior or original PCM are changed by this handoff. Audible playback, listening, loudness and recording remain later acceptance gates."
+  ]
+}

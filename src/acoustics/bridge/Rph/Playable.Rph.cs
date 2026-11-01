@@ -1,9 +1,14 @@
 using System;using System.Collections.Generic;using System.Diagnostics;using System.IO;using System.Threading;using Rage;using Rage.Attributes;using RichAudio.Beacon.Transport;using RichAudio.Beacon.Windows;
 #if PLAYABLE_PRODUCT
+#if SHV_HANDOFF_09
+[assembly:Plugin("RichAudio",Author="RichAudio",Description="PLAYABLE-09 passive SHV/RPH handoff qualification. GTA stock audio; no audio host.",EntryPoint="RichAudio.Beacon.Rph.PlayableEntry.Main",ExitPoint="RichAudio.Beacon.Rph.PlayableEntry.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]
+#else
 [assembly:Plugin("RichAudio",Author="RichAudio",Description="Automatic offline Story Mode stock-source acoustics. Experimental additive; native GTA sounds retained.",EntryPoint="RichAudio.Beacon.Rph.PlayableEntry.Main",ExitPoint="RichAudio.Beacon.Rph.PlayableEntry.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]
+#endif
 #endif
 namespace RichAudio.Beacon.Rph {
  public static class PlayableEntry {
+#if !SHV_HANDOFF_09
   static GameplayRuntime runtime;static volatile bool stopping;static long sequence,generation=1,lastGame=-1;static CameraObservation previous;static bool? paused;
   sealed class Tracked {public Vehicle Vehicle;public string Identity,Context;public uint Model;public int Generation=1;public double Distance;public double[] Position;public long Ticks;}
   static readonly List<Tracked> tracked=new List<Tracked>(4);static Entity[] discovered=new Entity[0];static int cursor;static long nextDiscovery;static int instance;
@@ -11,7 +16,11 @@ namespace RichAudio.Beacon.Rph {
   static string stage="startup",lastReason="not-sampled",lastPlayerContext="unknown",lastPrintedReason;static uint lastPlayerModel;static double lastRatio=Double.NaN;static bool lastRunning;static int diagnosticChanges;
   static void Diagnostic(string reason){lastReason=reason;if(reason==lastPrintedReason||diagnosticChanges>=8||Stopwatch.GetTimestamp()-lastDiagnosticAt<Stopwatch.Frequency*2)return;lastPrintedReason=reason;lastDiagnosticAt=Stopwatch.GetTimestamp();diagnosticChanges++;Game.Console.Print("RichAudio vehicle evidence "+VehicleDiagnostic());}
   static string VehicleDiagnostic(){return "reason="+lastReason+" stage="+stage+" playerModel="+lastPlayerModel.ToString("X8")+" context="+lastPlayerContext+" rawRatio="+lastRatio.ToString("R",System.Globalization.CultureInfo.InvariantCulture)+" running="+lastRunning+" tracked="+tracked.Count+" discovery="+discovered.Length+" captures="+captures+" offers="+offers+" eligible="+eligibleOffers+" unsupported="+unsupportedOffers+" dead="+deadOffers+" getterFailures="+sourceGetterFailures+" ratioRejects="+ratioRejections+" identityRetired="+identityRetirements+" publishedTotal="+publishedVehicles+" slowBatches="+slowBatches;}
+#endif
   public static void Main(){
+#if SHV_HANDOFF_09
+   ShvPassiveHandoffEntry.Run();
+#else
    try{
     string executable=Process.GetCurrentProcess().MainModule.FileName;runtime=new GameplayRuntime();
     runtime.Start(Path.Combine(Path.GetDirectoryName(executable),"Plugins","RichAudio.Playable.json"),executable,typeof(Game).Assembly.Location);
@@ -26,7 +35,9 @@ namespace RichAudio.Beacon.Rph {
     }
    }catch(ThreadAbortException){throw;}catch(Exception e){Game.Console.Print("RichAudio stock fallback: "+e.GetType().Name);}
    finally{OnUnload();}
+#endif
   }
+#if !SHV_HANDOFF_09
   static double[] V(Vector3 v){return new[]{(double)v.X,v.Y,v.Z};}
   static double Distance(double[] a,double[] b){double s=0;for(int i=0;i<3;i++)s+=(a[i]-b[i])*(a[i]-b[i]);return Math.Sqrt(s);}
   static string Context(Vehicle v,Ped player){stage="context.current-vehicle";var car=player.CurrentVehicle;stage="context.driver";var driver=v.Driver;stage="context.identity";return car!=null&&car.IsValid()&&car.Handle.Value==v.Handle.Value&&driver!=null&&driver.IsValid()&&driver.Handle.Value==player.Handle.Value?"player":"npc";}
@@ -70,8 +81,21 @@ namespace RichAudio.Beacon.Rph {
    r.Publish(new GameplayFrame{Session=r.Session,Listener=listener,Vehicles=valid?observations.ToArray():new GameplayVehicle[0]});
    Diagnostic(lastReason);
   }
+#endif
   [ConsoleCommand(Name="RichAudioStatus",Description="Automatic Story Mode integration status. Native GTA audio is not suppressed.")]
-  public static void Status(){var r=runtime;Game.Console.Print(r==null?"RichAudio stopped; GTA stock audio retained":"RichAudio "+r.State+"; host="+r.HostPid+"; launches="+r.Attempts+"; maximum getter batch="+r.MaximumObservationMs.ToString("F2")+"ms; no native sound ownership.");Game.Console.Print("RichAudio vehicle evidence "+VehicleDiagnostic());}
-  public static void OnUnload(){stopping=true;var r=runtime;runtime=null;if(r!=null){r.RequestStop();ThreadPool.QueueUserWorkItem(delegate{r.Join(5000);});}PassiveListener.Stop();InGameMenu.Stop();tracked.Clear();}
+  public static void Status(){
+#if SHV_HANDOFF_09
+   ShvPassiveHandoffEntry.PrintStatus();
+#else
+   var r=runtime;Game.Console.Print(r==null?"RichAudio stopped; GTA stock audio retained":"RichAudio "+r.State+"; host="+r.HostPid+"; launches="+r.Attempts+"; maximum getter batch="+r.MaximumObservationMs.ToString("F2")+"ms; no native sound ownership.");Game.Console.Print("RichAudio vehicle evidence "+VehicleDiagnostic());
+#endif
+  }
+  public static void OnUnload(){
+#if SHV_HANDOFF_09
+   ShvPassiveHandoffEntry.Stop();
+#else
+   stopping=true;var r=runtime;runtime=null;if(r!=null){r.RequestStop();ThreadPool.QueueUserWorkItem(delegate{r.Join(5000);});}PassiveListener.Stop();InGameMenu.Stop();tracked.Clear();
+#endif
+  }
  }
 }

@@ -1,0 +1,51 @@
+# PLAYABLE-09 owned passive handoff composition
+
+This extends the PLAYABLE-08 validator; it does not introduce a second value or timing validator. The original PLAYABLE-08 source, test, runner and document bytes are preserved privately under `.local/playable-09/preserved-playable-08-handoff`, with their original digests and Git history. The changed source is explicitly PLAYABLE-09 work. Historical PLAYABLE-08 receipts and captured evidence remain unchanged.
+
+The new producer is a separately reviewed passive candidate. It does not inherit the accepted diagnostic artifact's qualification. `LiveHandoffReady=false` and `MeasuredRpm=false` remain explicit. No component described here opens an audio endpoint, launches an audio child, enables a feature flag or grants live-test permission.
+
+## Owned source boundary
+
+`ShvProducerModule.AttachLoaded` attaches only an already loaded native module. It does not load an ASI or Script Hook V. It compares the actual current executable and process creation time, actual loaded producer/SHV/loader paths, reviewed file hashes, loaded caller assembly and the seven export addresses. Exports must resolve inside the owned module rather than forward elsewhere. Read-only file handles prevent ordinary file replacement while this lease is held; the native module remains pinned until process exit. Hot unload is unsupported.
+
+The RPH caller is independently hashed from the actual loaded assembly. The peer witness's owner type must belong to that assembly. The RPH executable digest is an installation pin; it must not be described as authenticating every managed SDK/cache assembly. The actual RPH API runtime assembly identity, location/version and observed digest are separate diagnostic facts for the RPH entry to retain. These checks do not promise security against arbitrary code with equal user privileges, hostile full-trust code in the same process, memory patching or an already compromised game/framework.
+
+The producer accepts one owned 128-bit session and a 256-bit secret through a fixed, bounded, same-process C ABI. The secret is never part of an audit record. Module/process/session/generation checks identify the reviewed owned route; same-machine or same-PID receipt alone is insufficient. No received `authenticated=true`, `bindingValid=true` or equal-clock flag issues a capability.
+
+`Describe` can legitimately report metadata unavailable before the registered SHV callback starts. `AttachLoaded` retains its verified module with `MetadataReady=false`; `TryInitializeMetadata` performs a read-only, non-native readiness check. The RPH owner waits within a two-second metadata deadline, yielding its game fiber, before `OpenSession`. There is no target invocation or repeated target attempt during this wait. The current passive entry performs startup file verification synchronously before beginning acquisition. Filesystem reads may block; the deadline cannot interrupt them. No active audio host or accepted source exists during that startup work.
+
+## Independent physical correspondence
+
+The RPH-only partial factory creates `HandoffPeerObservation` from actual retained SDK vehicle/ped wrappers. Its constructor is private; ordinary DTOs cannot manufacture a witness. The separately compiled pipeline fixture contains an explicitly authored fixture factory that is absent from the real RPH source set.
+
+The selected proof is the user's bounded read-only SDK option. SHV independently obtains its current player ped, current vehicle and driver, then calls the published `getScriptHandleBaseAddress` interface. RPH independently obtains its own current player, current vehicle and driver, retains the original wrappers and checks their validity, local pool index/counter/value, model, running state and opaque `MemoryAddress` values. Both ped and vehicle opaque addresses must correspond, with stable pre/post contexts and retained ownership. No pointer is dereferenced, no offset is read, and SHV/RPH numeric vehicle handles are never compared. Matching model or similar speed does not create identity.
+
+Any observed exit, driver/model/instance change, source discontinuity, loss of eligibility or reconnect retires the lease permanently. Clock/binding renewal can preserve the same observed lifetime; it cannot bind a replacement entity. A new session requires a new independently reviewed source lifetime. **A complete unobserved 8-bit pool-counter wrap together with address ABA between observations is outside this proof.** The bounded read-only option does not manufacture an immutable identifier or claim to exclude that event. No DECOR or other entity metadata is written.
+
+The context-only waiting snapshot is bound before `Begin`. The producer then starts attempt sequence 1. It preserves an ordered FIFO rather than silently starting a strict validator at a later latest-only sequence. The actual target's raw float32 and raw bits are copied before another native/address query/yield; the supplied float32 is promoted exactly and checked by the existing validator.
+
+## Measured clock correspondence
+
+`MeasureClock` records host `h0`, invokes the verified module's non-native QPC accessor, and records host `h1`. The returned source anchor is bracketed by those actual calls. A clock witness is owned by that module lease. Equal frequencies, UTC timestamps and close-looking values cannot issue a map.
+
+Calibration keeps at most 32 anchors, requires at least 3 with a measured span of 250 ms, and rejects any anchor wider than the existing 4 ms policy. Pairwise source/host elapsed intervals retain the uncertainty from both endpoints. Their measured rate interval must fit within 100 ppm; it is never clipped to 100 ppm to manufacture precision. Different frequencies and origins remain distinct. A map retains the actual anchor bracket, the measured rate interval, outward uncertainty and an expiry no later than 5 s. This is a conservative local correspondence over the measured interval, not proof of arbitrary future oscillator behavior. Repeated measured anchors renew the map without resetting the source sequence.
+
+The existing validator still checks complete source/peer intervals, 250 ms age and continuity, 2 ms future allowance, 50 ms worst-endpoint peer skew, ordered native acquisition and exact float preservation. RPH must poll quickly enough to drain two rows per 20 Hz target; polling only once every 50 ms would unnecessarily accumulate peer skew.
+
+## Autonomous loss and audit behavior
+
+`ShvHandoffConsumer` starts explicitly after the single begin request. Its sole background worker checks expiry at intervals no greater than 20 ms of requested wait time. It performs computation and internal retirement only: no RPH/native/device/UI calls or external callbacks. Every `TryGetCurrent` also checks the actual monotonic clock and candidate expiry, so delayed timer dispatch cannot authorize a stale value. A 250 ms missing-stream bound and an independent 120 s consumer deadline permanently retire the same validator and clear current output. Later packets do not revive it. Actual thread scheduling can be late; this is not a hard real-time dispatch or native-preemption guarantee.
+
+Each target has an immediate `TargetReturn` audit row followed by a complete `Observation`. Only a matching ordered pair with valid independently acquired contexts can reach the validator. A known raw return survives a blocked/faulting post-context getter, but cannot qualify without the missing context. A duplicate, replay, invalid raw value, dropped queue row or changed identity retires the consumer.
+
+`ReadNext` returns the fixed-size raw row before interpreting it. `LastPollHadRecord` resets on every poll, and `RecordsRead` increments once immediately after an actual pop, before a later RPH getter or validation can fail. The audit owner must record that new row exactly once, then call/use the rejecting validation path. The raw API is not permission to construct an operating point directly. Malformed/session-mismatched/loss-bearing rows are retained as diagnostic data and denied as candidates.
+
+Producer `Retired` means immediate denial, not callback completion. `ReadSourceCompletion` queries actual `Description` flag 64, set only after final audit publication is attempted. A bounded collector can drain available rows after stop, but must report incomplete/unobserved outcomes if completion is still false at its deadline. Empty plus retired is not completion, and stop cannot forcibly interrupt every native or OS call.
+
+`ShvGameplayFrameAdapter` retains the accepted raw scalar, host-local identity and peer timestamp while using the existing `GameplayVehicle`/`GameplayFrame`/`GameplayWire`. It checks expiry again at use and publication. Retirement clears consumer state. The adapter can emit an empty frame only with a separately supplied fresh actual listener; the passive entry records cleared state without inventing a new camera observation or calling another getter during cleanup. It never repeats a last valid operating point indefinitely. `PassiveOnly=true` and `AudioPlaybackAllowed=false`; no broken RPH revolutions getter is used as a fallback.
+
+## Device-free checks and remaining acceptance
+
+`tools/Test-ShvHandoffComposition.ps1` compiles the actual common C# code, runs measured-clock and autonomous-expiry fixtures, and runs the unchanged PLAYABLE-08 tests against the extended validator in new PLAYABLE-09 output. `tools/Test-ShvHandoffPipeline.ps1` loads the unchanged native candidate against a separately hashed fake SHV, uses actual Windows foreground readers with an ordinary owned window, and runs the real module/composition/validator/consumer/adapter/codec. Its peer and camera observations are explicitly authored fixtures; it does not execute RPH/GTA or prove real physical correspondence. No global keys, foreground-reader substitutions, microphone, endpoint or genuine SHV runtime are used.
+
+The exact final fixture receipts, source pins and independent review must precede preparation. A later passive Story Mode test still needs separate approval and actual independent RPH/SHV witness, measured clock and fail-closed exit/silence evidence. Audible playback, listening, loudness calibration and recording remain later gates.

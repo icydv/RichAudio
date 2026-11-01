@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-09",
+  "verifiedUtc": "2026-11-01T04:34:16.6504075Z",
+  "decision": "READY_FOR_FRESH_EXPLICIT_APPROVAL_ONLY",
+  "purpose": "Reviewed passive telemetry deployment/rollback proposal; no installation or launch performed",
+  "artifacts": [
+    {
+      "name": "RichAudio.OperatingState.ShvHandoff.asi",
+      "bytes": 129024,
+      "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40"
+    },
+    {
+      "name": "RichAudio.dll",
+      "bytes": 328192,
+      "sha256": "c97acbcb6af255a0497c28f8349d8be3447f53c6dc5e31a0d567a7ebbc76743d"
+    }
+  ],
+  "manifestDigests": {
+    "installationSha256": "47b9a925d100cef5d65fb9defdff5828b55934f3f4b3a3eabfdeb0f9aa34556b",
+    "rollbackSha256": "e8d5a2fa440bbe9db3c053420ba93f1e9a4dea349f7cdb577d3fe74a08c1c3e0",
+    "preparationPreflightSha256": "e5cd3a6210a205f4f97ebb53d46eff194898f9c073ab21402ad90f3ccde627ef",
+    "independentPreflightSha256": "b406ccecc18d9e975bb530970fe6596c0921628f4fe9e670acafcdbdfe4d7075"
+  },
+  "qualificationEvidence": {
+    "bridgeBuildReceiptSha256": "2dc03eb013e1067fb946bbfd13a899f3b6193bf1332eaf4ed33447407dcdfd74",
+    "nativeBuildReceiptSha256": "f9d28cf4040bc4aa449a3620cfc942a6ed9006e7110e2fc3d9d8876788dc5dda",
+    "fullPipelineReceiptSha256": "48d362c7b89366bdec17f66323028b93089f395834d03fbf51311116d0211a6b",
+    "actualComponentCases": 32,
+    "actualComponentAssertions": 22464,
+    "bridgePublicEvidenceSha256": "9c277fc5bac1d3f151aadfcf15d10827b839eecaa0d6a800a47e6aabcabca7d0",
+    "preparerSha256": "89df1d7c0e34aafe5634cdf8e477f0f7f1a50016ed2f0d39989a6ce0e95fcd85"
+  },
+  "preflight": {
+    "protectedFilesVerified": 11,
+    "settingsAndShortcutsVerified": 4,
+    "historicalAndPreservedSourcePinsVerified": 170,
+    "bridgeCompiledSourcesVerified": 44,
+    "nativeCompiledSourcesVerified": 4,
+    "pipelineSourcePinsVerified": 12,
+    "stockFallbackSelected": true,
+    "productionFlagsDisabled": true,
+    "ownedGameDestinationsPendingAndBackupPathsAbsent": true,
+    "gameRphAndRichAudioProcessesAbsent": true,
+    "timeoutOverridesAbsentInProcessUserMachineScopes": true
+  },
+  "preparationValidation": {
+    "pinnedCopyCases": 5,
+    "copyGuardReceiptSha256": "3d1645b6daa2db55390ed9785779d367c633e8cd2a246c1d8e13bb935c263c8c",
+    "proposalNegativeCases": 4,
+    "proposalNegativeReceiptSha256": "5bd4d4eca4a8920e5815634b8c89afb5af97d8279c3d42d4c239a944ab1a4136",
+    "existingCandidateRejectedWithoutOverwrite": true,
+    "unreviewedDllAndSelfAssertedReceiptRejected": true,
+    "priorProfileOutputRejected": true
+  },
+  "identityMode": "read-only-sdk-ordinary-reuse",
+  "unobservedFull8BitCounterWrapAndAddressAbaExcluded": true,
+  "liveHandoffReady": false,
+  "newProducerLiveQualified": false,
+  "passiveOnly": true,
+  "audioPlaybackAllowed": false,
+  "menuServiceOrAudioHostStarted": false,
+  "gameFilesWritten": false,
+  "deployed": false,
+  "launched": false,
+  "endpointOpened": false,
+  "recordingStarted": false,
+  "approvalGranted": false,
+  "requiresFreshExplicitApprovalForExactArtifactsAndOneLaunch": true,
+  "privacy": "Only artifact hashes, receipt/manifest digests and verification counts are public. Paths, process identities, runtime lease values and ownership manifests remain private."
+}

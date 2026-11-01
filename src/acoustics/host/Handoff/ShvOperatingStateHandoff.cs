@@ -1,11 +1,12 @@
-// Offline handoff preparation only. Not compiled into the current product host.
-// No transport, native calls, endpoint, renderer, file I/O or live capability issuer.
+// Shared value/identity/time validator, originally PLAYABLE-08 offline preparation.
+// PLAYABLE-09 adds owned composition separately; this file opens no endpoint,
+// launches no process and performs no native calls, transport or rendering.
 using System;
 using System.IO;
 
 namespace RichAudio.Beacon.Handoff
 {
-    internal sealed class ShvOperatingStateHandoff
+    internal sealed partial class ShvOperatingStateHandoff
     {
         // Authored conservative validation policy, not measured transport guarantees.
         internal const int MaximumAgeMs=250, MaximumFutureMs=2, MaximumPeerSkewMs=50;
@@ -34,7 +35,7 @@ namespace RichAudio.Beacon.Handoff
                 "41361aa281493e1cc54fe196161aafc4a93ce002bfe0bb9da2effbc742465484",BatiModel,
                 "1.132.1428.17748","73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac");
         }
-        static bool SameScope(Scope a,Scope b)
+        internal static bool SameScope(Scope a,Scope b)
         {
             return a!=null&&b!=null&&a.GameVersion==b.GameVersion&&a.GameSha256==b.GameSha256
                 &&a.ShvSha256==b.ShvSha256&&a.LoaderSha256==b.LoaderSha256
@@ -187,13 +188,13 @@ namespace RichAudio.Beacon.Handoff
             internal readonly long SourceSequence,SourceGeneration,SourceBeforeTicks,SourceAfterTicks;
             internal readonly long MinimumHostTicks,MaximumHostTicks,HostVehicleObservationTicks;
             internal readonly long ValidThroughHostTicks,HostClockFrequency;
-            internal readonly string HostVehicleId;
+            internal readonly string HostVehicleId,SessionId;
             internal readonly int HostVehicleGeneration;
             internal readonly Scope Scope;
             internal bool LiveHandoffReady{get{return false;}}
             internal bool MeasuredRpm{get{return false;}}
             internal Candidate(Observation o,long low,long high,long through,long frequency)
-            { OperatingPoint=o.RawValue;RawBits=o.RawBits;SourceSequence=o.Sequence;SourceGeneration=o.Generation;
+            { OperatingPoint=o.RawValue;RawBits=o.RawBits;SourceSequence=o.Sequence;SourceGeneration=o.Generation;SessionId=o.SessionId;
               SourceBeforeTicks=o.TargetBeforeTicks;SourceAfterTicks=o.TargetAfterTicks;MinimumHostTicks=low;MaximumHostTicks=high;
               HostVehicleId=o.HostPre.VehicleId;HostVehicleGeneration=o.HostPre.Generation;
               HostVehicleObservationTicks=o.HostPre.StartTicks+(o.HostPost.EndTicks-o.HostPre.StartTicks)/2;
@@ -215,28 +216,38 @@ namespace RichAudio.Beacon.Handoff
         readonly object admission=new object();
         readonly SourceCapability source;
         bool retired;
+        string retirementReason;
         long lastSequence,lastAfter=-1,lastReceive=-1;
-        ShvOperatingStateHandoff(object key,SourceCapability src){issuer=key;source=src;}
+        internal ShvOperatingStateHandoff(object key,SourceCapability src){issuer=key;source=src;}
         internal bool Retired{get{lock(admission)return retired;}}
+        internal long HostFrequency{get{return source.HostFrequency;}}
+        internal string RetirementReason{get{lock(admission)return retirementReason;}}
+        // Missing arrivals must be able to retire the same validator. This is
+        // permanent and does not create a replacement source/session.
+        internal void Retire(string reason)
+        {
+            if(!Token(reason,96))throw new ArgumentException("bounded retirement reason");
+            lock(admission){if(!retired){retired=true;retirementReason=reason;}}
+        }
         static bool Frequency(long x){return x>0&&x<=1000000000;}
-        static bool ValidShv(ShvContext x)
+        internal static bool ValidShv(ShvContext x)
         {
             return x!=null&&x.Eligible&&x.Player>=0&&x.Ped!=0&&x.Vehicle!=0&&x.Driver==x.Ped
                 &&x.Model==BatiModel&&x.EngineRunningRaw==1&&Finite(Decode(x.SpeedBits))
                 &&Decode(x.SpeedBits)>=0&&Decode(x.SpeedBits)<=100;
         }
-        static bool ValidHost(HostContext x)
+        internal static bool ValidHost(HostContext x)
         {
             return x!=null&&x.Eligible&&x.Running&&x.Model==BatiModel&&x.Generation>0
                 &&Token(x.PlayerId,64)&&Token(x.PedId,64)&&Token(x.VehicleId,64)
                 &&x.CurrentVehicleId==x.VehicleId&&x.DriverId==x.PedId;
         }
-        static bool SameShv(ShvContext a,ShvContext b)
+        internal static bool SameShv(ShvContext a,ShvContext b)
         { return a.Player==b.Player&&a.Ped==b.Ped&&a.Vehicle==b.Vehicle&&a.Driver==b.Driver&&a.Model==b.Model; }
-        static bool SameHost(HostContext a,HostContext b)
+        internal static bool SameHost(HostContext a,HostContext b)
         { return a.PlayerId==b.PlayerId&&a.PedId==b.PedId&&a.VehicleId==b.VehicleId&&a.CurrentVehicleId==b.CurrentVehicleId
             &&a.DriverId==b.DriverId&&a.Model==b.Model&&a.Generation==b.Generation; }
-        static bool Map(ClockCapability clock,long start,long end,out long low,out long high)
+        internal static bool Map(ClockCapability clock,long start,long end,out long low,out long high)
         {
             low=high=0;
             if(start<0||end<start)return false;
@@ -249,7 +260,7 @@ namespace RichAudio.Beacon.Handoff
             if(lower<0||upper>Int64.MaxValue||upper<lower)return false;
             low=(long)lower;high=(long)upper;return true;
         }
-        Decision Reject(string reason,Observation o){retired=true;return new Decision(false,reason,null,o);}
+        Decision Reject(string reason,Observation o){retired=true;retirementReason=reason;return new Decision(false,reason,null,o);}
 
         internal Decision Accept(Observation o,BindingCapability binding,ClockCapability clock,long nowHostTicks)
         { lock(admission)return AcceptOwned(o,binding,clock,nowHostTicks); }
