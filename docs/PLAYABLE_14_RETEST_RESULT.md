@@ -19,7 +19,7 @@ Steam Action 14 recorded argument-confirmation continuation at 19:40:30 UTC, int
 
 The corrected supervisor initially stayed waiting with no owner/active state and rejected the old retained same-profile log. It subsequently admitted only the current process/session entry at **19:41:32.359** and READY at **19:41:34.867**. Independent startup review confirms the new process, installed artifacts, lease and log baseline/epoch correspondence. The prior supervisor attribution defect did not recur.
 
-The owner confirmed the engine-running Bati was ready. The coordinator observed the mounted motorcycle, entered `RichAudioHandoffStart` once and dispatched console closure; it issued no further game input during capture. The recorded readiness path includes **144 console-open waits** and succeeds at attempt **146**, **8,208.463 ms** after arming. This measured delay is retained separately from the intended immediate closure.
+I confirmed the engine-running Bati was ready. The coordinator observed the mounted motorcycle, entered `RichAudioHandoffStart` once and dispatched console closure; it issued no further game input during capture. The recorded readiness path includes **144 console-open waits** and succeeds at attempt **146**, **8,208.463 ms** after arming. This measured delay is retained separately from the intended immediate closure.
 
 The waiting context was genuinely old: sequence 838 reached **40,408.8859 ms** age at Peek while measured maps remained current. The gate safely waited, then admitted new sequence **840** within independent RPH brackets. The retained commit diagnostic reports source age at Peek **5.0343 ms**, mapped age **8.4913 ms**, peer skew **5.1472 ms**, valid ownership/correspondence and a current measured map. No source timestamp or freshness/skew limit was relaxed.
 
@@ -49,7 +49,7 @@ The existing ABI already returns source state, target-attempt count, queue count
 
 ## Restoration and next milestone
 
-The owner reported normal game exit after the terminal result. Exact game/RPH lifetimes were observed ended before rollback. After rollback, verification and capture preservation, the supervisor was signalled to finish; final independent verification found all owned game, launcher and observer lifetimes absent. No forced termination or hot unload occurred. The final quit dialog and numeric game exit code were not observed by the coordinator.
+I reported normal game exit after the terminal result. Exact game/RPH lifetimes were observed ended before rollback. After rollback, verification and capture preservation, the supervisor was signalled to finish; final independent verification found all owned game, launcher and observer lifetimes absent. No forced termination or hot unload occurred. The final quit dialog and numeric game exit code were not observed by the coordinator.
 
 Ownership/hash/length rollback restored the original plugin and independently verified **all 11 protected files, four settings, 27 absent owned paths, saved stock fallback/F10 and both false production flags**, with zero mismatches. The audit also rehashed 3,138 prior private files, 132 audio-package bindings, all 47 approved compiled source pins, four native source inputs, previous captures/reviews and all 12 sealed attempt helpers. Prior evidence, the approved binaries and the original audible host/assets/renderer/gains/recorder remain unchanged.
 
