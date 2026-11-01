@@ -1,6 +1,6 @@
 # PLAYABLE-15 recording recovery: latency diagnostics
 
-This change prepares measurements for one separately approved Bati demonstration. No live latency is measured by this work. The owner's 250–500 ms impression remains subjective. The established first live result is unchanged: 27.832 seconds of submitted PCM, a failed startup recording, and independently verified restoration.
+This change prepares measurements for one separately approved Bati demonstration. No live latency is measured by this work. My 250–500 ms impression remains subjective. The established first live result is unchanged: 27.832 seconds of submitted PCM, a failed startup recording, and independently verified restoration.
 
 The existing sound, source mapping, source expiry, gains, DSP and buffering are retained. In particular, the 100 ms control delay, eight-block/85.3333 ms startup reserve, and previous 22 ms endpoint buffer describe different parts of the pipeline. Adding them does not measure end-to-end delay: startup reserve is an initial fill target, actual occupancy changes, endpoint buffering overlaps submitted audio, and software submission is earlier than physical output.
 
