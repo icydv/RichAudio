@@ -13,6 +13,7 @@ namespace RichAudio.Settings.InGame
         public bool RecordingAvailable {get;private set;}
         public bool RecordingActive {get;private set;}
         public bool RecordingPending {get;private set;}
+        public bool AudioTestRecordingMode {get;private set;}
         public string RecordingDetail {get;private set;}
         public bool Dirty {get{return !Pending.Same(baseline);}}
         public string Notice {get;private set;}
@@ -31,6 +32,10 @@ namespace RichAudio.Settings.InGame
         public void SetWritable(bool canApply){CanApply=canApply;}
         public void SetResetAvailable(bool resetAvailable){ResetAvailable=resetAvailable;}
         public void SetRecording(bool available,bool active,bool pending,string detail)
+        {AudioTestRecordingMode=false;ApplyRecording(available,active,pending,detail);}
+        public void SetAudioTestRecording(bool available,bool active,bool pending,string detail)
+        {AudioTestRecordingMode=true;ApplyRecording(available,active,pending,detail);}
+        private void ApplyRecording(bool available,bool active,bool pending,string detail)
         {RecordingAvailable=available;RecordingActive=active;RecordingPending=pending;RecordingDetail=detail??"Recorder unavailable";}
         public void SetNotice(string message,bool error=false)
         {Notice=(message??"").Replace('\r',' ').Replace('\n',' ');if(Notice.Length>160)Notice=Notice.Substring(0,160);NoticeIsError=error;}
@@ -64,6 +69,7 @@ namespace RichAudio.Settings.InGame
                 if(SelectedIndex==RecordingRow){
                     if(!RecordingAvailable||RecordingPending){SetNotice(RecordingDetail??"Recorder unavailable or request pending",true);return MenuAction.None;}
                     SetNotice("Recording request queued; completion is confirmed by the recorder service.");
+                    if(AudioTestRecordingMode)return RecordingActive?MenuAction.StopAudioTest:MenuAction.StartAudioTest;
                     return RecordingActive?MenuAction.StopRecording:MenuAction.StartRecording;
                 }
                 Adjust(1,true);

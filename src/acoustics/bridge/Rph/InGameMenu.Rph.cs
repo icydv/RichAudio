@@ -145,7 +145,7 @@ namespace RichAudio.Beacon.Rph
                         menu.SetRecording(recordState!=null&&recordState.Available,recordState!=null&&recordState.Active,
                             recordState!=null&&recordState.Pending,recordState==null?"SoundMap recorder unavailable":recordState.Detail);
 #if PLAYABLE_PRODUCT
-                        menu.SetRecording(false,false,false,"Gameplay PCM recording is not connected in this candidate.");
+                        menu.SetAudioTestRecording(false,false,false,"Locked until an approved vehicle playback test passes.");
 #endif
                         if(awaitingRecording&&(recordState==null||!recordState.Pending)){
                             awaitingRecording=false;menu.SetNotice(recordState==null?"Recording outcome unavailable; check SoundMap.":recordState.Detail,recordState==null||!recordState.Available);}
@@ -194,6 +194,13 @@ namespace RichAudio.Beacon.Rph
                             if(service.TryResetDefaults(state.SavedRevision))
                             {awaitingRevision=state.SavedRevision;awaitingPreferences=MenuPreferences.Defaults;menu.SetNotice("Preserving invalid preferences and restoring defaults...");}
                             else menu.SetNotice("Defaults were not restored. Current files were preserved.",true);
+                        }
+                        else if(action==MenuAction.StartAudioTest||action==MenuAction.StopAudioTest)
+                        {
+                            // Production session control must bind the reviewed
+                            // local recorder and its acceptance gates. Never
+                            // route this distinct intent to the SoundMap API.
+                            menu.SetNotice("Audio test is unavailable until vehicle playback is approved.",true);
                         }
                         else if(action==MenuAction.StartRecording||action==MenuAction.StopRecording)
                         {

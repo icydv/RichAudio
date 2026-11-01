@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-08",
+  "recordedUtc": "2026-11-01T01:43:12.9809312Z",
+  "scope": "Offline-tested production foundations and unchanged-SHV diagnostic proposal, before fresh live authorisation",
+  "decision": "GO to request one phase-marked telemetry session only; product integration, loudness and recording activation BLOCKED",
+  "telemetry": {
+    "qualification": "INCOMPLETE",
+    "existingActualObservationsPreserved": 1869,
+    "newLiveTestPerformed": false,
+    "unchangedAsiReused": true,
+    "candidateSha256": "21302b4c5c5fb99f63b7b25dce2fa973117bfb0246f16745d0782f062fe1a69e",
+    "candidateBytes": 378880,
+    "primaryAnalyzerChanged": false,
+    "preflightEvidenceSha256": "6001a0b4c15a8e9919775053854a55fac2b19b6f80a49874bd48d54354a9cd90",
+    "firstAdvanceReadinessChecks": 49,
+    "earlierBinaryCasesReused": 48,
+    "earlierBinaryAssertionsReused": 51703,
+    "newBinaryExecutionClaimed": false
+  },
+  "featureRequests": {
+    "schema": 1,
+    "modificationAwareLoudness": false,
+    "synchronizedAudioRecording": false
+  },
+  "validation": {
+    "productionActivationChecks": 18,
+    "menuChecks": 1305,
+    "existingHostRegressionChecks": 1702,
+    "newLoudnessPolicyChecks": 13,
+    "retainedSourceReferenceChecks": 5,
+    "loudnessTotalPassed": 18,
+    "recordingCsharpAssertions": 105,
+    "recordingAnalysisChecks": 17,
+    "failed": 0,
+    "validatedSourcePinsMatch": true
+  },
+  "menu": {
+    "recordAudioTestIntent": "Implemented; distinct from SoundMap and locked in product branch",
+    "existingLayoutAndPreferenceContractPreserved": true,
+    "controlledSoftwarePreview": true,
+    "previewReviewed": true,
+    "previewIsInGameEvidence": false,
+    "authenticSdkSha256": "5d439745604a5fedbf8fa401520d4f296c1b6800d77e2923ba3bf9772182c7e0",
+    "compiledBridgeSha256": "76cebf72504e5d3ae91b225655af4ecaaff04a5896825c1385b930189e5992e2",
+    "compiledOnly": true,
+    "installedMenuChanged": false
+  },
+  "loudness": {
+    "module": "src/acoustics/vehicle/loudness-policy.mjs",
+    "enabled": false,
+    "gameplayWired": false,
+    "acousticCalibration": "unverified",
+    "modificationReadsLiveValidated": false,
+    "modRoutes": [
+      "observed nonstock exhaust",
+      "observed nonstock engine/EMS index0 or higher"
+    ],
+    "unknownModificationFallback": "stock/model treatment",
+    "reference": {
+      "engine": 1,
+      "exhaust": 10,
+      "commonHeadroom": 0.25
+    },
+    "emissionHistoryUntouched": true,
+    "busProminenceIsWholeVehicleAttenuation": true,
+    "headroomUsesFullHistoryCeiling": true,
+    "publicDesign": "docs/PLAYABLE_08_LOUDNESS_POLICY.md"
+  },
+  "recording": {
+    "implemented": true,
+    "gameplayWired": false,
+    "enabled": false,
+    "actualProductionFillTested": true,
+    "exactSubmittedPcmBytesTested": true,
+    "realLoopbackBackendCompiled": true,
+    "realLoopbackBackendExecuted": false,
+    "maximumSeconds": 120,
+    "defaultMaximumBytes": 134217728,
+    "absoluteMaximumBytes": 268435456,
+    "allDefaultReadinessFields": false,
+    "microphoneCaptureImplemented": false,
+    "automaticUploadImplemented": false,
+    "noPhysicalLatencyClaim": true,
+    "publicEvidence": "evidence/playable-08-recording.json",
+    "publicDesign": "docs/PLAYABLE_08_RECORDING.md"
+  },
+  "receiptIntegrity": {
+    "controlsSha256": "d4438dd65474501cf629bacebf1ad4c4b9e3edceae2ef009560312ba4e027528",
+    "loudnessSha256": "75f9a470358d742d803ccfd418fc7be9379ec8f13483f2c71d54ec60f04dbf7d",
+    "recordingSha256": "10fcfdaea514940f4271fc1dec4cb345d89f403083133def2d008ceb2aa98b48",
+    "recordingPublicSha256": "8f3223cd3df57f370fb69651837ae35f8fd93c1cb8a4f9e5c8bfaa4368b48dc9",
+    "firstAdvancePreflightSha256": "6001a0b4c15a8e9919775053854a55fac2b19b6f80a49874bd48d54354a9cd90"
+  },
+  "controlsSourcePins": [
+    {
+      "file": "config/production-features.json",
+      "sha256": "c2714e26e9e044534d91c11a2ce7abef5e591534c702f2c85c195817faa55132"
+    },
+    {
+      "file": "src/acoustics/production/activation.mjs",
+      "sha256": "a07c8e444852fd43629eba076662db328bc0a3b32430c7326a311466b558a9dc"
+    },
+    {
+      "file": "tests/Test-ProductionActivation.mjs",
+      "sha256": "31d310a0f7ff0f6ce42ee74e96536cfc074fd9dfea38636990a6cc2e0dcd30de"
+    },
+    {
+      "file": "src/acoustics/settings/InGame/AcousticMenuModel.cs",
+      "sha256": "328df4db2b4f2674871eef249d34b5bc93666034739954bf63c7e918fad4a124"
+    },
+    {
+      "file": "src/acoustics/settings/InGame/AcousticMenuLayout.cs",
+      "sha256": "0555bff7884bec30c2cd01febdaf7e206b76c1a7753044379b26cf398b89ee75"
+    },
+    {
+      "file": "src/acoustics/settings/InGame/MenuContracts.cs",
+      "sha256": "8a01326b9f872810b46fa4d706a79e4555386eaa387681af9004cb5b001dbc04"
+    },
+    {
+      "file": "src/acoustics/bridge/Rph/InGameMenu.Rph.cs",
+      "sha256": "551a0075ddda61f747091ad6971eab40369e0e2cdbc100ae14ed51ea8c849d7b"
+    },
+    {
+      "file": "tests/menu/TestInGameMenu.cs",
+      "sha256": "e06dac41b3ca2db4d47c3cc39ee83dc8061908096cf6bd0c822a0c7a8af41f4c"
+    },
+    {
+      "file": "tools/Build-BeaconBridge.ps1",
+      "sha256": "f8a2a1dce3072d91346357db99a90b7110bdb7ded420304a5e114f8b1f42a94a"
+    }
+  ],
+  "activation": {
+    "configurationIsNotAcceptance": true,
+    "configurationIsNotPermission": true,
+    "scopeBoundTo": [
+      "gameVersion",
+      "gameSha256",
+      "modelHash",
+      "providerSha256",
+      "normalised quantity",
+      "SHV handle domain"
+    ],
+    "currentSessionPermissionRequired": true,
+    "orderedGates": [
+      "phase-marked telemetry acceptance",
+      "supported independently correlated handoff",
+      "real nonzero engine/exhaust/production output",
+      "human listening",
+      "separately approved loudness calibration or recording"
+    ],
+    "futureQualifiedHostAdapterRequired": true
+  },
+  "currentIncrement": {
+    "gameStarted": false,
+    "gameFilesWritten": false,
+    "productHostStarted": false,
+    "audioEndpointOpened": false,
+    "microphoneOpened": false,
+    "newSystemSoftwareInstalled": false,
+    "sourceRecordingsAltered": false,
+    "installedSettingsChanged": false,
+    "stockFallbackPreserved": true,
+    "liveAudioAcceptance": false,
+    "productionReady": false
+  },
+  "privacy": "Source/artifact/receipt hashes and sanitised metrics only; absolute paths, local tokens, raw recordings and game assets remain private."
+}

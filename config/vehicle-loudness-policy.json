@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "enabled": false,
+  "maximumVehicles": 8,
+  "transitionSeconds": 0.2,
+  "modificationStaleAfterSeconds": 0.5,
+  "reference": { "engine": 1, "exhaust": 10, "commonHeadroom": 0.25 },
+  "minimumEmissionMultipliers": { "engine": 0.25, "exhaust": 0.15 },
+  "stockTreatments": {
+    "civilian": { "engine": 0.85, "exhaust": 0.3 },
+    "performance": { "engine": 0.95, "exhaust": 0.65 }
+  },
+  "modifiedTreatments": {
+    "ems": { "engine": 0.98, "exhaust": 0.82 },
+    "exhaust": { "engine": 1, "exhaust": 1 }
+  },
+  "performanceClassIds": [4, 6, 7],
+  "modelOverrides": {},
+  "prominence": { "maximumUnits": 2, "minimumBusGain": 0.6 }
+}

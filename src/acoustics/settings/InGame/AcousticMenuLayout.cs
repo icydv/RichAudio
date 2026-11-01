@@ -140,16 +140,19 @@ namespace RichAudio.Settings.InGame
             }
             p.Rect(16,774,728,66,unchecked((int)0x9E10171E));p.Rect(16,774,3,66,Gold);
             string description=Descriptions[SelectedIndex];
-            if(SelectedIndex==RecordingRow)description=Descriptions[RecordingRow]+" "+RecordingDetail;
+            if(SelectedIndex==RecordingRow)description=(AudioTestRecordingMode?
+                "Local WAVs: RichAudio and the selected output mix, including other apps. No microphone or uploads.":Descriptions[RecordingRow])+" "+RecordingDetail;
             if(SelectedIndex==ResetRow&&!CanApply)description=ResetAvailable?
                 "Recovers this supported configuration by preserving its exact original bytes before saving validated defaults. The background service rechecks the file before replacement.":
                 "Settings recovery is unavailable for this configuration. No file or preference will be replaced.";
             p.Wrap(description,31,784,680,15,TextColor,3);
-            string[] buttons={"APPLY CHANGES","RESET DEFAULTS","BACK",RecordingPending?"REC PENDING":RecordingActive?"STOP RECORDING":"START RECORDING"};
+            string recordingButton=AudioTestRecordingMode?(RecordingPending?"TEST PENDING":RecordingActive?"STOP AUDIO TEST":"RECORD AUDIO TEST"):
+                (RecordingPending?"REC PENDING":RecordingActive?"STOP RECORDING":"START RECORDING");
+            string[] buttons={"APPLY CHANGES","RESET DEFAULTS","BACK",recordingButton};
             for(int i=0;i<4;i++){
                 int row=ApplyRow+i;float cx=16+i*184;bool selected=SelectedIndex==row;bool locked=i==0&&!CanApply||i==1&&!CanApply&&!ResetAvailable||i==3&&(!RecordingAvailable||RecordingPending);
                 p.Rect(cx,856,176,45,selected&&!locked?Gold:RowBackground);
-                p.Text(locked?(i==0?"APPLY UNAVAILABLE":i==1?"RESET UNAVAILABLE":RecordingPending?"REC PENDING":"REC UNAVAILABLE"):buttons[i],cx+10,870,14,locked?Muted:selected?Ink:TextColor,selected);
+                p.Text(locked?(i==0?"APPLY UNAVAILABLE":i==1?"RESET UNAVAILABLE":AudioTestRecordingMode?recordingButton:RecordingPending?"REC PENDING":"REC UNAVAILABLE"):buttons[i],cx+10,870,14,locked?Muted:selected?Ink:TextColor,selected);
                 p.Hit(HitRegionKind.Row,row,-1,cx,856,176,45);
             }
             p.Text("ARROWS  Navigate / adjust     ENTER  Select     ESC  Back",30,920,15,Muted);

@@ -1,8 +1,14 @@
 [CmdletBinding()]
-param([string]$SdkPath='',[switch]$CoreOnly,[switch]$Playable)
+param([string]$SdkPath='',[switch]$CoreOnly,[switch]$Playable,[string]$Output='')
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
-$output=Join-Path $repo 'build\acoustics07\transport'
+if(!$Output){$Output=Join-Path $repo 'build\acoustics07\transport'}
+$output=[IO.Path]::GetFullPath($Output)
+$allowed=@('build','.local')|ForEach-Object{[IO.Path]::GetFullPath((Join-Path $repo $_)).TrimEnd('\')+'\'}
+if(!@($allowed|Where-Object{$output.StartsWith($_,[StringComparison]::OrdinalIgnoreCase)}).Count){throw 'Bridge build output must be inside repository build or .local, never the game installation.'}
+for($cursor=$output;$cursor;$cursor=[IO.Path]::GetDirectoryName($cursor)){
+    if((Test-Path -LiteralPath $cursor) -and ((Get-Item -LiteralPath $cursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked bridge build output is not permitted.'}
+}
 [IO.Directory]::CreateDirectory($output) | Out-Null
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 if(!(Test-Path -LiteralPath $compiler)){throw '.NET Framework x64 compiler not found.'}

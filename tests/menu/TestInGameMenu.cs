@@ -71,6 +71,19 @@ public static class TestInGameMenu
         menu.SetRecording(true,true,false,"Recording");
         Check(menu.Handle(MenuInput.Accept)==MenuAction.StopRecording,"recording stop is a distinct explicit action");
         Check(HasText(menu.BuildFrame(1920,1080,null),"STOP RECORDING"),"record stop action is visible");
+        var saved=menu.Pending.With();
+        menu.SetAudioTestRecording(false,false,false,"Telemetry and playback acceptance required");
+        Check(menu.AudioTestRecordingMode&&HasText(menu.BuildFrame(1920,1080,null),"RECORD AUDIO TEST"),"locked production audio test keeps an identifiable action label");
+        Check(menu.Handle(MenuInput.Accept)==MenuAction.None&&menu.NoticeIsError,"locked production audio test cannot dispatch a recording");
+        menu.SetAudioTestRecording(true,false,false,"Ready after qualified host session and explicit approval");
+        Check(menu.Handle(MenuInput.Accept)==MenuAction.StartAudioTest,"explicit audio test intent is distinct from SoundMap recording");
+        menu.SetAudioTestRecording(true,true,true,"Pending");
+        Check(menu.Handle(MenuInput.Accept)==MenuAction.None,"pending audio test action cannot repeat");
+        menu.SetAudioTestRecording(true,true,false,"Recording");
+        Check(HasText(menu.BuildFrame(1920,1080,null),"STOP AUDIO TEST")&&menu.Handle(MenuInput.Accept)==MenuAction.StopAudioTest,"production stop is explicit and mode specific");
+        Check(menu.Pending.Same(saved),"recording intent never changes stored acoustic preferences");
+        menu.SetRecording(true,false,false,"Legacy SoundMap ready");
+        Check(!menu.AudioTestRecordingMode&&menu.Handle(MenuInput.Accept)==MenuAction.StartRecording,"SoundMap retains its separate existing action contract");
         menu.Handle(MenuInput.Right);Check(menu.SelectedIndex==AcousticMenuModel.ApplyRow,"four footer buttons wrap correctly");
         menu.Close();
     }
@@ -152,6 +165,9 @@ public static class TestInGameMenu
         foreach(int time in new[]{55,110,165,220})Draw(MenuTransition.Present(original,transition.Sample(time),1920,1080),1920,1080,Path.Combine(dest,"richaudio-opening-"+time+"ms.png"));
         transition.SetOpen(false,220);foreach(int time in new[]{275,330,385,440})Draw(MenuTransition.Present(original,transition.Sample(time),1920,1080),1920,1080,Path.Combine(dest,"richaudio-closing-"+(time-220)+"ms.png"));
         var stock=menu.BuildFrame(1920,1080,MenuStatus.StockFallback());Draw(stock,1920,1080,Path.Combine(dest,"richaudio-stock-fallback.png"));
+        Select(menu,AcousticMenuModel.RecordingRow);
+        menu.SetAudioTestRecording(false,false,false,"Locked until an approved vehicle playback test passes.");
+        Draw(menu.BuildFrame(1920,1080,MenuStatus.StockFallback()),1920,1080,Path.Combine(dest,"richaudio-audio-test-locked.png"));
         var json=new JavaScriptSerializer{MaxJsonLength=262144};File.WriteAllText(Path.Combine(dest,"draw-commands.json"),json.Serialize(original.Commands));
         File.WriteAllText(Path.Combine(dest,"result.json"),json.Serialize(new Dictionary<string,object>{{"schemaVersion",1},{"checks",assertions},
             {"provenance","Software preview of actual menu drawing commands and illustrative status. Not an in-game screenshot."},
