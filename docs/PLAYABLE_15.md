@@ -1,6 +1,8 @@
 # PLAYABLE-15: controlled listener recovery and prepared Bati audio
 
-**Offline correction and integrated candidate: PASS. Corrected live listener behaviour and in-game audibility: pending separate approval.** Continued from `25fdfadd77784f2d600508c9c650ccc1f33fe0af`; no deployment, game launch, audio endpoint access or recording occurred. PR #76 remains draft.
+**Latest live result: Stage A attempt 1 stopped before operator Start with a startup `ArgumentException`; restoration passed.** The journal selected the historical PLAYABLE-14 evidence root while the bootstrap supplied PLAYABLE-15. The original sealed DLL reproduces that defect offline. A narrowly corrected, separately reviewed replacement is prepared, with no second deployment or launch. See [the genuine result](PLAYABLE_15_STAGE_A_RESULT.md) and [fresh Stage A approval proposal](PLAYABLE_15_STAGE_A_RETEST_PROPOSAL.md). The earlier offline preparation below is historical and did not establish successful startup. Stage B remains unauthorised.
+
+**Original offline preparation, before Stage A: PASS. Corrected live listener behaviour and in-game audibility remained unverified.** That preparation continued from `25fdfadd77784f2d600508c9c650ccc1f33fe0af` and performed no deployment, game launch, endpoint access or recording. The later authorised attempt and corrected replacement are reported above. PR #76 remains draft.
 
 The [attempt 5 result](PLAYABLE_14_RETEST_05_RESULT.md) still establishes genuine changing SHV engine state and valid RPH spatial frames. Its exception identifies the old position-difference speed guard. The rejected camera operands were absent, so dismount, camera mode, focus and timing remain unproved causes. This work does not reopen that handoff architecture or reinterpret the missing observation.
 

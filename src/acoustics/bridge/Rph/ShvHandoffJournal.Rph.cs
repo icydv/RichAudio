@@ -31,7 +31,9 @@ namespace RichAudio.Beacon.Handoff
         [DllImport("kernel32.dll",SetLastError=true)] static extern bool GetFileInformationByHandle(SafeFileHandle file,out FileInfo info);
         internal ShvHandoffJournal(string evidenceRoot)
         {
-#if SHV_HANDOFF_14
+#if SHV_HANDOFF_15
+            string parent=Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-15","live-session");
+#elif SHV_HANDOFF_14
             string parent=Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-14","live-session");
 #elif SHV_HANDOFF_13
             string parent=Path.Combine(ShvHandoffBuildPolicy.WorkspaceRoot,".local","playable-13","live-session");
@@ -153,7 +155,9 @@ namespace RichAudio.Beacon.Handoff
                 }
                 byte[] summary;
                 lock(gate)summary=new UTF8Encoding(false).GetBytes(json.Serialize(new{schema=1,profile=
-#if SHV_HANDOFF_14
+#if SHV_HANDOFF_15
+                    "PLAYABLE-15",
+#elif SHV_HANDOFF_14
                     "PLAYABLE-14",
 #elif SHV_HANDOFF_13
                     "PLAYABLE-13",

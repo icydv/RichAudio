@@ -28,6 +28,11 @@ foreach($mode in @('passive','audible')){
   if($listener.Count-ne1-or@($types|Where-Object FullName -ceq 'RichAudio.Beacon.Rph.CameraListenerTracker').Count-ne1-or
    @($listenerCalls|Where-Object{$_.Operand.DeclaringType.FullName-ceq'RichAudio.Beacon.Rph.CameraListenerTracker'-and$_.Operand.Name-ceq'Observe'}).Count-ne1-or
    @($listenerCalls|Where-Object{$_.Operand.DeclaringType.FullName-ceq'RichAudio.Beacon.Handoff.RphHandoffSampler'-and$_.Operand.Name-ceq'Capture'}).Count-ne2){throw 'Tested camera policy and two ownership brackets must be integrated.'}
+  $journalCtor=@($methods|Where-Object{$_.DeclaringType.FullName-ceq'RichAudio.Beacon.Handoff.ShvHandoffJournal'-and$_.IsConstructor-and!$_.IsStatic})
+  $journalRoots=@($journalCtor[0].Body.Instructions|Where-Object{$_.OpCode.Name-ceq'ldstr'}|ForEach-Object{$_.Operand})
+  if($journalCtor.Count-ne1-or'playable-15'-notin$journalRoots-or'playable-14'-in$journalRoots){throw 'Journal private root must match actual PLAYABLE-15 bootstrap.'}
+  $journalRun=@($methods|Where-Object{$_.DeclaringType.FullName-ceq'RichAudio.Beacon.Handoff.ShvHandoffJournal'-and$_.Name-ceq'Run'})
+  if(!@($journalRun[0].Body.Instructions|Where-Object{$_.OpCode.Name-ceq'ldstr'-and$_.Operand-ceq'PLAYABLE-15'}).Count){throw 'Journal summary must retain PLAYABLE-15 profile.'}
   $bootstrap=@($methods|Where-Object{$_.DeclaringType.FullName-ceq'RichAudio.Beacon.Handoff.ShvHandoffBootstrap'-and$_.Name-ceq'TryLoad'})
   if(!@($bootstrap[0].Body.Instructions|Where-Object{$_.OpCode.Name-ceq'ldstr'-and$_.Operand-ceq'PLAYABLE-15'}).Count){throw 'Strict15 lease profile missing.'}
   $bati=@($types|Where-Object FullName -ceq 'RichAudio.Beacon.Windows.BatiPlaybackSession')
@@ -38,7 +43,7 @@ foreach($mode in @('passive','audible')){
    if($bati.Count-ne1){throw 'Integrated Bati playback type missing.'}
    foreach($name in @('.ctor','Start','Enable','Disable','PublishAccepted','Retire','Stop','Join')){if(!@($batiCalls|Where-Object{$_.Operand.Name-ceq$name}).Count){throw ('Audible lifecycle integration missing: '+$name)}}
   }
-  $inspection[$mode]=[ordered]@{oneProductLifecycle=$true;freshContextBindingIntegrated=$true;cameraTrackerIntegrated=$true;cameraOwnershipBracketCalls=2;strict15Lease=$true;legacyRatioReferences=0;legacyDistributionTypes=0;batiPlaybackTypeCount=$bati.Count;batiEntryCalls=$batiCalls.Count;actualPluginExecuted=$false}
+  $inspection[$mode]=[ordered]@{oneProductLifecycle=$true;freshContextBindingIntegrated=$true;cameraTrackerIntegrated=$true;cameraOwnershipBracketCalls=2;journalPrivateRootAndSummaryProfile15=$true;strict15Lease=$true;legacyRatioReferences=0;legacyDistributionTypes=0;batiPlaybackTypeCount=$bati.Count;batiEntryCalls=$batiCalls.Count;actualPluginExecuted=$false}
  }finally{if($assembly-is[IDisposable]){$assembly.Dispose()}}
 }
 Check $build.host.path $build.host.sha256 $build.host.bytes;foreach($pin in $build.host.sources){Check $pin.path $pin.sha256}
