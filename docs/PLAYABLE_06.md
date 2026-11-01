@@ -186,11 +186,9 @@ stock-fallback settings and reviewed shortcut fingerprints.
 
 ## Approved one-launch procedure and actual result
 
-After reviewing the exact candidate, manifests and offline checks, the user
-separately authorised **one operator-armed live qualification**. Only the pinned
+After reviewing the exact candidate, manifests and offline checks, I separately authorised **one operator-armed live qualification**. Only the pinned
 ASI was installed through the new pending path and ownership receipt, and the
-existing RPH launch route was invoked once. In offline Story Mode the operator
-reported arming once at stationary idle. Readiness text was visibly drawn in
+existing RPH launch route was invoked once. In offline Story Mode I reported arming once at stationary idle. Readiness text was visibly drawn in
 GTA; its final chord word was truncated, so the full shortcut instruction in the
 approved procedure remained necessary. No live code correction or retry was made.
 
@@ -262,7 +260,7 @@ human listening. No part of that subsystem is implemented here.
 
 ## Supplied NFSgauge comparison
 
-The user-supplied NFSgauge 2.7.0 archive was inspected statically, not installed
+The NFSgauge 2.7.0 archive I supplied was inspected statically, not installed
 or executed. It contains a native SHV ASI, not a ScriptHookVDotNet script. The
 author-linked reconstructed source uses executable signatures and vehicle memory
 to obtain a normalized fraction, then scales it for a needle. Exact source-to-ASI
