@@ -6,9 +6,9 @@
 
 **PARTIAL — engine/exhaust combination implicated by listening; a modest balance experiment helped slightly but did not resolve the artefact.** The accepted 19.322479-second reference is preserved, fingerprinted and reproduced exactly. No corrected reference replaces it. No game/RPH launch, archive access, installation write, runtime hook, new dependency or acoustic propagation work occurred.
 
-The user heard each isolated rendered stem over exactly the same global time interval and reported **no ghosting** in either. The unchanged combined clip brought the ghosting back **throughout deceleration**. This implicates their combination under the current estimated timing/gains. It does not establish a universal phase defect, a fixed correct delay, native engine/exhaust phase alignment or the native mixing law.
+I heard each isolated rendered stem over exactly the same global time interval and reported **no ghosting** in either. The unchanged combined clip brought the ghosting back **throughout deceleration**. This implicates their combination under the current estimated timing/gains. It does not establish a universal phase defect, a fixed correct delay, native engine/exhaust phase alignment or the native mixing law.
 
-The only candidate reduced engine deceleration amplitude to **0.75 of baseline (−2.499 dB)**. The user reported **slight improvement**, then heard the full candidate: idle/acceleration remained fine, but deceleration still sounded reverberant, as if the tracks were going out of phase. This is not a confirmed correction or acceptance of a new default. No additional gain sweep, delay, phase inversion, time stretch, EQ, reverb or granular reconstruction was attempted.
+The only candidate reduced engine deceleration amplitude to **0.75 of baseline (−2.499 dB)**. I reported **slight improvement**, then heard the full candidate: idle/acceleration remained fine, but deceleration still sounded reverberant, as if the tracks were going out of phase. This is not a confirmed correction or acceptance of a new default. No additional gain sweep, delay, phase inversion, time stretch, EQ, reverb or granular reconstruction was attempted.
 
 ## Preserved evidence and exact global timing
 
@@ -45,7 +45,7 @@ Reproduction creates these files in a new private output directory:
 | `D_listen_engine_decel.wav` / `D_listen_exhaust_decel.wav` | Raw recordings at corresponding scalar component attenuation; no fade/normalisation/EQ | Prepared for lower-level source comparison, not separately auditioned |
 | `E_full_reference.wav` | Exact copy of accepted mix | Previously accepted with deceleration limitation; preserved |
 
-The candidate has its own full engine/exhaust/mix files and separately isolated clip pack. It never overwrites A–E. Candidate clip and full candidate were heard locally by the user. Playback used the existing original local helper; successful device playback is recorded separately from listening judgments. No audio/cloud service was used. Raw D files retain the originals' higher level; do not confuse them with attenuated D_listen comparisons.
+The candidate has its own full engine/exhaust/mix files and separately isolated clip pack. It never overwrites A–E. I heard the candidate clip and full candidate locally. Playback used the existing original local helper; successful device playback is recorded separately from listening judgments. No audio/cloud service was used. Raw D files retain the originals' higher level; do not confuse them with attenuated D_listen comparisons.
 
 ## Focused numerical diagnosis
 
