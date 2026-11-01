@@ -3,11 +3,95 @@
 1 November 2026. Continues draft PR #76 on `feature/playable-01` from
 `54e41391a34c80f3b08fe4a7ab29ebdbd2615f0f`.
 
-**GO to request one separately authorised live multi-state experiment.** Offline
-build and validation passed. No PLAYABLE-07 deployment or launch has occurred.
-Fresh explicit approval of the final artifact and manifests is required.
-Integration and playable development remain **BLOCKED** until real
-multi-state evidence supports an accurately limited provider contract.
+**Live result: 1,869 complete real SHV observations returned a changing raw
+signal from 0.2 to 1.0. The independent native route is established beyond a
+single idle point. Formal multi-state qualification is INCOMPLETE; product
+integration and playable development remain BLOCKED.** One separately approved
+deployment, launch and operator-armed capture were performed, followed by normal
+exit and exact ownership-verified rollback. That approval is consumed.
+
+## Actual authorised result and evidence boundary
+
+The unchanged 378,880-byte ASI described below was explicitly approved, installed
+once and launched once through the existing RPH route. Real loader and SHV logs
+record its loading, registration, callback execution and later unregistration.
+The executable still matches Enhanced `1.0.1158.16`; SHV reports its internal
+compatibility enum as `VER_EN_1_0_1158_13`. This is a reported framework bucket,
+not a replacement claim about the executable's file version.
+
+The [sanitised live record](../evidence/playable-07-live.json) and
+[independent rollback verification](../evidence/playable-07-rollback.json) retain
+the actual result and integrity receipts. The original private capture, a stable
+hash-matched copy, logs, human statement and independent review remain local.
+
+| Measured fact | Actual result |
+| --- | --- |
+| Capture end | Operator chord early-stop after 105.2790288 seconds; no retry |
+| Completed observations | 1,869 matching declaration/raw-return/final-context triplets |
+| Raw result | `0x3E4CCCCD` / `0.20000000298023224` through `0x3F800000` / `1.0`; 1,351 distinct bit patterns |
+| Context | Same valid player/ped/Bati/driver throughout; every before/after engine-running raw value was 1 |
+| Independent speed | 0..48.4427528 m/s; never converted into an engine value |
+| Target starts | Active +0.0000301..105.2366993 seconds; gaps 54.6002..57.9446 ms |
+| Target window | Median 0.0011 ms, p95 0.0014 ms, maximum 0.4404 ms; caller/dispatch/copy window, not handler-only timing |
+| Errors | No recorded null/SEH/nonfinite/range failure, invalid bracket, running zero, stale gap, writer failure or unpublished outcome |
+| Requested markers | START OFF, then chord EARLY STOP OFF; zero ADVANCE events |
+| Output | 4,797,335 bytes across the three capture files, within 12 MiB |
+
+After capture, the operator reported: “idle, stationary revving, significant
+acceleration, acceleration redlining doing a wheelie, deceleration and idle
+again”. This is qualitative corroboration received later, not synchronised
+actuation timestamps or a measured redline/RPM calibration. No engine-off or
+verified gear-transition observation is established. No W-down state was sampled;
+keyboard intent cannot be substituted for actual throttle or used to explain the
+reported revving.
+
+The frozen primary analyser reports **incomplete**, with zero data-quality
+failures. Its only mandatory missing criteria are the requested-phase initial
+idle, return idle, acceleration/deceleration and associated ratio-trend regions.
+Those phase labels never advanced. The OFF text is not evidence of engine off;
+all actual running queries were true. The operator subsequently clarified that
+they started and stopped recording without advancing the phase labels. This
+explains the missing markers; no diagnostic keyboard-control defect is established.
+
+Independent exploratory review, explicitly separate from the unchanged primary
+gates, retains useful achieved-context evidence:
+
+- At active +4.0563..7.6055 seconds, speed was zero and ratio exactly the 0.2
+  baseline across a 3.54925-second plateau.
+- At +90.7022..97.6877 seconds, a 6.9856-second near-stationary running region
+  returned to median 0.20000000298, range 0.2..0.214125, with speed at most
+  0.08634 m/s. A further baseline region lasted +102.7017..105.2367 seconds.
+- An independently rising-speed window at +21.0136..23.9994 seconds had speed
+  quarter-median change +12.3852 m/s and ratio change +0.260365. Falling-speed
+  examples at +36.0557..38.9856 and +84.0542..86.9838 seconds had ratio decreases
+  of 0.127529 and 0.214122 respectively.
+- Across all fixed three-second speed-selected bins, 13 had rising speed
+  (five ratio rises, four opposite trends, four small changes); nine had falling
+  speed (six ratio falls, two opposite trends, one small change). These mixed
+  responses are disclosed rather than selecting only favourable examples.
+  Gear/load explanations remain unknown; monotonic speed-to-ratio coupling is
+  not established or required as an RPM conversion.
+
+This is positive evidence for continuing with the existing native candidate:
+it changes, reproduces a stationary baseline and returns toward that baseline
+during real manual operation. It is not a completed controlled phase comparison.
+The predeclared gates have not been relaxed or repaired by retrospective labels.
+No product adapter, audio host, sound suppression, listening test or recording
+subsystem was built or run after this result.
+
+The next relevant step is a separately approved phase-marked qualification of
+this same candidate, with short operator instructions and a deliberate check
+that the first phase advances before continuing the manual sequence.
+No new hash/framework investigation is justified by these successful native
+returns. Any additional deployment, launch or capture requires new specific
+approval. No automatic repeat is authorised.
+
+Normal exit used Alt+F4, the observed quit dialog and its Return confirmation.
+No forced termination was used. The exact owned ASI was removed after process
+exit. All 11 protected runtime files, four shortcut/settings fingerprints, 37
+prior artifact/evidence files and three frozen source inputs match; stock
+fallback remains selected. Both probe paths are absent. No game, RPH, product
+host, package-bound worker or matching launch wrapper remains.
 
 ## Evidence preserved
 
@@ -81,7 +165,11 @@ requests cancellation; it cannot preempt a hung native or blocked filesystem
 operation, contain every fatal framework path or guarantee GTA survives. The
 module remains process-pinned: rollback follows game exit, with no hot unload.
 
-## Operator procedure proposed for one separately approved launch
+## Reviewed operator procedure (approval now consumed)
+
+The instructions below preserve the preflight proposal. The actual attempt did
+not record the requested phase progression, as documented above; the table is
+not a claim that its timings or labels were achieved.
 
 Use one Bati, local player in the driver seat, offline Story Mode, on a clear
 route suitable for ordinary manual driving. Keep stock fallback selected. No

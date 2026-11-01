@@ -154,3 +154,18 @@ resolution proof, or controlled simultaneous RPH/SHV comparison. It does not
 establish the cause of either RPH symptom or justify rescaling the getter. The
 probe was removed after game exit. This upstream report remains a draft and has
 not been submitted.
+
+The subsequent separately approved [PLAYABLE-07 capture](PLAYABLE_07.md) made
+1,869 complete SHV observations over 105.2790288 seconds on that same executable.
+Raw results varied from `0x3E4CCCCD` (0.2) to `0x3F800000` (1.0), with 1,351
+distinct patterns, same-Bati/driver context, running true and independent speed
+0..48.4427528 m/s. No native exception, invalid bracket or unreadable outcome was
+recorded. Stationary baseline and return regions were observed. The operator
+reported idle, revving, acceleration and deceleration, but did not advance the
+requested phase labels, so controlled multi-state qualification remains incomplete.
+
+These real changing returns strengthen the independent call-path evidence.
+They do not establish physical RPM, a simultaneous RPH comparison, internal
+handler identity or the cause of either RPH failure. No additional RPH test was
+performed. Exact ownership-verified rollback retained stock fallback. This
+report is still unsubmitted.
