@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "mode": "continuous-recordings",
+  "rate": 48000,
+  "master": 0.2,
+  "gains": {"engine": 1, "exhaust": 0.75},
+  "idleSeconds": 2,
+  "crossfadeSeconds": 0.12,
+  "decelEngineScale": 0.75,
+  "description": "Diagnostic candidate only: engine deceleration -2.499 dB; all other reference controls unchanged. No phase/timing correction."
+}

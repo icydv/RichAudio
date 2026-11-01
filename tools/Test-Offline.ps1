@@ -19,6 +19,8 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Synthetic ownership tests failed.'}
     & node --test tests/Test-StockSourceAudio.mjs
     if($LASTEXITCODE -ne 0){throw 'Offline source-audio tests failed.'}
+    & node --test tests/Test-Deceleration.mjs
+    if($LASTEXITCODE -ne 0){throw 'Offline deceleration diagnosis tests failed.'}
     & (Join-Path $PSScriptRoot 'Build-OfflineAudio.ps1')
     & (Join-Path $repo 'tests\Test-OfflineAudioGuards.ps1')
     & (Join-Path $repo 'tests\Test-Phase1.ps1') -ReportPath (Join-Path $output 'phase1-results.json')
