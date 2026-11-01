@@ -8,7 +8,7 @@ This result supersedes the historical readiness decision in the [offline report]
 
 - Native ASI: 129,024 bytes, SHA-256 `05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40`. SHV logged one registration, one `main()` launch and one unregistration.
 - Passive RPH plugin: 328,192 bytes, SHA-256 `c97acbcb6af255a0497c28f8349d8be3447f53c6dc5e31a0d567a7ebbc76743d`. RPH loaded it and logged the rejection at 05:00:27.820 UTC on 1 November 2026.
-- The operator reported “Not ready / error shown”. READY, source Open, independent binding, clock calibration and BEGIN were not reached. No session journal directory or raw source records were created.
+- I reported “Not ready / error shown”. READY, source Open, independent binding, clock calibration and BEGIN were not reached. No session journal directory or raw source records were created.
 - No RichAudio audio host, generated playback, menu/recorder services or endpoint capture started. No broken RPH ratio fallback was used. Actual stock-audio listening acceptance was not assessed.
 
 These are actual framework/launch observations, not fixture output. They establish neither a real engine-state read from this new producer nor a live SHV/RPH vehicle correspondence. The restricted PLAYABLE-08 engine-state acceptance and the 32-case offline component result remain unchanged.
