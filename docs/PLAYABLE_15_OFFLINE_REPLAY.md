@@ -22,7 +22,7 @@ The offline run used CPU acceleration, the existing balanced acoustic quality, o
 
 The WAV retains **32 ms** of startup silence and approximately **1.068 seconds** of final silence, including the existing bounded release and retirement. Stereo-to-mono energy does not show gross cancellation in this render. Numerical step, history and gap checks found no corresponding fault; they do not establish perceptual smoothness, phase quality or enjoyment. Human listening remains pending. The original rejected 671st camera frame, dismount timing and any remount are still absent from the capture.
 
-The WAV and full report stay under the ignored private `.local/playable-15/replay-01` directory. They contain proprietary sound and must not be committed, uploaded to the PR or distributed. Portable hashes and measurements are in [the sanitised replay evidence](../evidence/playable-15-offline-replay.json). The waveform is independently listenable by the owner; rendering it did not play it.
+The WAV and full report stay under the ignored private `.local/playable-15/replay-01` directory. They contain proprietary sound and must not be committed, uploaded to the PR or distributed. Portable hashes and measurements are in [the sanitised replay evidence](../evidence/playable-15-offline-replay.json). The waveform is independently listenable by me; rendering it did not play it.
 
 WAV SHA-256: `f65361738e36ce0e1bdb248ff1b724ba85e6be8e22b8d2d6c59fdd7efb0d73d8` (15,228,972 bytes).
 
