@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-10",
+  "kind": "independent-actual-diagnostic-and-restoration-review",
+  "reviewedUtc": "2026-11-01T14:42:55.1855608Z",
+  "passed": true,
+  "reviewer": "assembly_investigation",
+  "independentOfCaptureCoordinator": true,
+  "independentOfReviewedImplementation": true,
+  "reviewerAuthored": "Earlier artifact research and managed regression receipts; not the reviewed entry/bootstrap/core or live coordinator/result drafts",
+  "reviewedDrafts": [
+    {
+      "name": "docs/PLAYABLE_10_LIVE_RESULT.md",
+      "sha256": "c222ac534cc141eb596d80e51f4304c3b496c9a7dd6b1cdaa8dbb7b94d5cef47",
+      "bytes": 8165
+    },
+    {
+      "name": "evidence/playable-10-live-01.json",
+      "sha256": "57ee184bfcc26f44855bf0432b0090907074b2bb7a0a82aa42838c3ad81e295a",
+      "bytes": 8952
+    },
+    {
+      "name": "evidence/playable-10-live-rollback.json",
+      "sha256": "e8a0ece05ef50d695d82534b89e472fd81ed64591f20bff3799650ea285d5e6b",
+      "bytes": 1521
+    }
+  ],
+  "privateReviewSha256": "54272d72faa42d2c942c967d6e32812640e962a16ff7a198b42ec5d7d083159f",
+  "privateRuntimeReportSha256": "ce2155c918c6cfc3e16f1ecaa9a3574c6f864084dd208749a2d135e772f47326",
+  "privateRuntimeReportBytes": 8687,
+  "privateRuntimeWitnessSha256": "ea18ddff9ccd41898a9bdc8c2ec2b7866176543e126810279e8732ab2e0a6d62",
+  "privateRuntimeWitnessBytes": 28720128,
+  "privateRollbackReceiptSha256": "144fa0ae65179350e5ae8d7143e6e121585365793d287443e6aacfd113620420",
+  "privateProcessExitReceiptSha256": "58226a2f73e8c693d9998aeb84aaa477d7353744f3a9ca039894e9e45129be32",
+  "privateUiExitReceiptSha256": "c98ff8bd268268d8f6b612d42fc32f38929d8d1c8b7832cabee06e5b00ed6e80",
+  "privateWitnessPreservationReceiptSha256": "a25cb013531df37a492643ae36b5ff17d4a1a9ba517b0d3155e0e26651574a95",
+  "privateCaptureIndexSha256": "a498b8c109240a4a9a98f666b1a428190cdcd9fda34fc1df208676b84db145cf",
+  "callerCompletionLogSha256": "4421cef411981e9be9e54685352077106212f2840c863ae8d9f022cb8459b59d",
+  "callerCompletionMatchesReport": true,
+  "comparisonCounts": {
+    "pass": 14,
+    "unreviewed": 7,
+    "fail": 0
+  },
+  "captureElapsedMilliseconds": 70.0792,
+  "historicalRuleOnThisCapture": {
+    "sha256": "fail",
+    "fileVersion": "pass",
+    "actual09OperandsRecovered": false
+  },
+  "findings": [
+    {
+      "area": "recorded diagnostic",
+      "result": "PASS",
+      "finding": "Exact report length/hash matches the unique terminal caller log. All14 scope/caller/capture checks pass; all7 API-policy comparisons remain unreviewed. Actual typed API metadata agrees with its stable file, and the private retained byte witness matches."
+    },
+    {
+      "area": "identity-model conclusion",
+      "result": "PASS",
+      "finding": "In THIS PLAYABLE-10 process the API and launcher have different paths, lengths and SHA-256, with the same FileVersion. The obsolete rule evaluates hash FAIL/version PASS on this witness. PLAYABLE-09 operands were not recovered; no retrospective exact09 identity is asserted."
+    },
+    {
+      "area": "authentication boundary",
+      "result": "PASS",
+      "finding": "Drafts distinguish observed identity from authenticated distribution. No extraction mechanism, future stability, native/framework defect or first-seen approval is inferred. Runtime remains UNREVIEWED; passive handoff/audio and another launch remain blocked."
+    },
+    {
+      "area": "scope and measurement bounds",
+      "result": "PASS",
+      "finding": "No source/Open/BEGIN/gameplay/audio permission was granted. No vehicle/producer/FIFO counters were sampled. Capture interval is not whole-launch latency; mode was visually observed by the coordinator before exit, not sampled by a game-mode native or independently timestamped at capture."
+    },
+    {
+      "area": "exit and rollback",
+      "result": "PASS",
+      "finding": "Reviewed successful normal-input/process-exit receipts, with no refresh error or force-kill claim. Independently rehashed11 protected files and4 settings, verified stock fallback/disabled flags, nine exact owned paths absent and relevant processes/recorded launcher PID absent. All32 indexed private captures still match."
+    },
+    {
+      "area": "public privacy and ownership",
+      "result": "PASS",
+      "finding": "Reviewed result document and both public receipts publish no absolute user paths, temporary directory tokens, process/session/file identifiers, volume serials, absolute QPC or proprietary runtime. Review is independent of the capture coordinator and implementation authors."
+    }
+  ],
+  "correctionsRequired": [],
+  "currentIndependentRollback": {
+    "protectedFiles": 11,
+    "settings": 4,
+    "originalPluginBytes": 222208,
+    "originalPluginSha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657",
+    "stockFallback": true,
+    "modificationAwareLoudness": false,
+    "synchronizedAudioRecording": false,
+    "ownedPathsChecked": 9,
+    "ownedPathsAbsent": true,
+    "relevantProcessesAbsent": true,
+    "recordedLauncherPidAbsent": true,
+    "indexedCapturesVerified": 32,
+    "indexedCaptureMismatches": 0
+  },
+  "reviewBoundary": {
+    "personallyOperatedOrObservedGameUi": false,
+    "coordinatorNormalExitReceiptsReviewed": true,
+    "testsRun": false,
+    "newResearchOrBroadScans": false,
+    "implementationOrDocumentEdits": false,
+    "gameFilesWritten": false,
+    "gameLaunched": false,
+    "runtimeOrNativeCallsByReviewer": false,
+    "endpointOpened": false,
+    "witnessExecutedOrInstalledByReviewer": false,
+    "prior723And579PreservationCheckedViaCoordinatorReceiptsNotRepeatedHere": true
+  },
+  "decision": "DIAGNOSTIC-EVIDENCE-CONSISTENT; AUTHENTICATION-AND-HANDOFF-AUDIO-STILL-BLOCKED",
+  "runtimeDistributionAuthenticated": false,
+  "firstSeenHashApproved": false,
+  "anotherLaunchAuthorised": false,
+  "limits": [
+    "Report observations and matching private witness do not authenticate distribution/extraction provenance or future byte stability.",
+    "This capture cannot reconstruct missing PLAYABLE-09 operands.",
+    "Normal-exit UI facts come from the coordinator receipts; the reviewer independently verified current files/process absence.",
+    "No newly observed runtime was separately executed, installed or promoted to policy by the reviewer."
+  ],
+  "privacy": "No absolute paths, process/session/file identifiers, temporary tokens, volume serials, absolute QPC or private log contents are published."
+}
