@@ -35,7 +35,7 @@ three prepared manifests matched their recorded hashes; no timeout override was
 set. The prior 229 fixture assertions across 14 cases were preserved, not rerun
 or relabelled as live evidence.
 
-The user was presented with that preflight and the automatic-trigger limitation,
+I was presented with that preflight and the automatic-trigger limitation,
 then explicitly answered **"Authorise one live SHV qualification"**. The initial
 PLAYABLE-05 prompt was not treated as deployment/launch permission.
 
@@ -61,7 +61,7 @@ observations:
 | What was returned? | Raw bits **`0x00000000`**, float **`0.0`**, classification `zero`. No scaling or replacement value. |
 | Did a detectable fault occur? | `exceptionCode = 0`, `targetReturned = true`, `producerCompleted = true`, terminal `completed-unvalidated`; no deadline was reached. No claim is made about universal fault containment. |
 | Was identity valid for this capture? | Both context snapshots identify model `0xF9300CC5` and the same local player, ped, vehicle and matching driver relationship, obtained independently through SHV. Private handles remain private. |
-| Was this a qualified idle observation? | **No. Both snapshots report `engineRunningRaw = 0`.** The user later confirmed a stationary, idling Bati, but that statement was not synchronised to the target instant. |
+| Was this a qualified idle observation? | **No. Both snapshots report `engineRunningRaw = 0`.** I later confirmed a stationary, idling Bati, but that statement was not synchronised to the target instant. |
 | Is a plausible nonzero operating-state signal established? | **No.** Only one zero was observed. |
 
 The target took **5,058 QPC ticks / 0.5058 ms** at a QPC frequency of
