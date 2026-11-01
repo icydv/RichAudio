@@ -52,6 +52,6 @@ The first build is retained as superseded because final diagnostic refinements c
 
 The optional render succeeded: **all 670 original gameplay frames**, in order and original timing, produced a private 39.658667-second 48 kHz stereo float32 WAV. Peak 0.0558993, RMS 0.0157166; no nonfinite/clipped/limited samples, missing history or interior exact-zero gap of at least 5 ms. The final source retires. No rejected camera observation or throttle data was invented. See [replay method, metrics and limitations](PLAYABLE_15_OFFLINE_REPLAY.md). Numerical analysis is not human listening or live GTA output.
 
-The subsequent passive camera recovery and [first audible Bati result](PLAYABLE_15_STAGE_B_RESULT.md) are established within their recorded limits. The recording failed on its first discontinuity-flagged loopback packet; the owner's 250-500 ms latency estimate remains subjective.
+The subsequent passive camera recovery and [first audible Bati result](PLAYABLE_15_STAGE_B_RESULT.md) are established within their recorded limits. The recording failed on its first discontinuity-flagged loopback packet; my 250-500 ms latency estimate remains subjective.
 
 The current follow-up is [offline recorder recovery](PLAYABLE_15_RECORDING_RECOVERY.md) with [bounded latency diagnostics](PLAYABLE_15_LATENCY_DIAGNOSTICS.md). Use only the [new hash-pinned single-test proposal](PLAYABLE_15_RECORDING_RECOVERY_PROPOSAL.md), subject to fresh explicit approval. Earlier proposals and consumed authorizations do not authorize its execution.
