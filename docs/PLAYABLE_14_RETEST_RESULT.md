@@ -1,5 +1,7 @@
 # PLAYABLE-14 retest: source stream expired after successful binding
 
+**Latest actual live test:** [Separately approved attempt 5](PLAYABLE_14_RETEST_05_RESULT.md) retained changing engine values and vehicle/camera movement before a recurring listener rejection. Full passive acceptance remains blocked; restoration passed. The source-expiry result below remains historical.
+
 **Later approval:** [Attempt 4 stopped at preflight](PLAYABLE_14_PREFLIGHT_04_RESULT.md) because the exact pinned coordinator is single-use and its attempt 3 directory already exists. No new deployment or gameplay session occurred. That report also records the retained draft-to-final analysis correction chain; the actual live result below is unchanged.
 
 **Decision: BLOCKED — `source-silence-or-expiry`. Startup, fresh-context binding, current-session supervision and restoration passed.** The approved attempt 3 used the exact passive artifacts and corrected coordinator named in the [retest proposal](PLAYABLE_14_RETEST_PROPOSAL.md) at `791a7e82e1f6767edd43d84bfa99f0a3727580ab`. There was one deployment, one existing-route invocation, one new Enhanced process and one operator Start. No retry, extra launch/session, RichAudio playback, endpoint access, recording or configuration/source change occurred.
