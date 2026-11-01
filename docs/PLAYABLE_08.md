@@ -19,8 +19,7 @@ requires a new exact candidate, validation and explicit authorisation.
 ## Guided live result and restricted acceptance
 
 After the first attempt established the usability problem below, the guided HUD
-revision was compiled and validated offline. The operator explicitly authorised
-its exact 380,416-byte artifact separately. The
+revision was compiled and validated offline. I explicitly authorised its exact 380,416-byte artifact separately. The
 [guided live record](../evidence/playable-08-guided-live.json),
 [independent cleanup](../evidence/playable-08-guided-rollback.json) and
 [restricted acceptance](../evidence/playable-08-engine-state-acceptance.json)
@@ -42,7 +41,7 @@ after real provenance, unchanged primary criteria and the human report agree.
 | Primary decision | `candidate-consistent`; all seven criteria true; zero quality failures, zero evidence gaps; independently reproduced without changing the analyser |
 | Boundaries | All target starts before the active deadline, maximum 20 Hz retained; no native failure, null result, running zero, missing outcome or invalid identity bracket recorded |
 
-The operator confirmed completing the phases, including slowdown and stationary
+I confirmed completing the phases, including slowdown and stationary
 return to idle. This corroborates the separately marked independent observations;
 it does not supply missing gear/throttle measurements. Every pre/post
 engine-running raw value was 1. The OFF label never proves engine off. Of the
@@ -77,7 +76,7 @@ occurred under either approval.
 The [sanitised live evidence](../evidence/playable-08-live.json) and
 [independent rollback evidence](../evidence/playable-08-rollback.json) preserve
 this attempt. Original captures, a hash-matched immutable copy, framework logs,
-the operator statement and independent review remain private. The unchanged
+my statement and independent review remain private. The unchanged
 primary analyser (`c246ea676c54b8298503cadfcc8603eac4c7f1fbfca012bf7e5a726e48937799`)
 was applied without changing its criteria; an independent review reproduced the
 result. No requested markers were invented from later recollection.
@@ -94,7 +93,7 @@ result. No requested markers were invented from later recollection.
 | Capture end | 120-second active deadline during GEAR_TRANSITIONS; all target dispatches started before that deadline; cooperative completion at 120.0127306 seconds |
 | End context | Same valid player/Bati/driver; independent speed 39.404747 m/s, engine-running query true; no final idle observed |
 
-The operator reported acceleration and natural deceleration inside the ACCEL
+I reported acceleration and natural deceleration inside the ACCEL
 phase, then going up and down gears until capture ended. This explains why a
 dedicated deceleration/return-idle comparison is missing. The ACCEL label spans
 speed increases and decreases: its last-versus-first quarter speed difference is
@@ -126,8 +125,7 @@ bytes were unchanged throughout.
 [actual live evidence](../evidence/playable-07-live.json) retain 1,869 complete
 same-Bati observations and 1,351 distinct raw values between 0.2 and 1.0. The
 independent route changes under real operation and includes stationary baseline
-and return regions. The phase chronology is missing because the operator started
-and stopped capture without advancing labels. No keyboard defect is established.
+and return regions. The phase chronology is missing because I started and stopped capture without advancing labels. No keyboard defect is established.
 The original captures and their analysis are not changed or retrospectively
 labelled. The earlier PLAYABLE-05 zero remains inconclusive.
 
@@ -140,8 +138,7 @@ matching its original build, complete binary fixtures, analysis tests, frozen
 source and current installation fingerprints. PLAYABLE-08 proposals must identify
 the reused PLAYABLE-07 build truthfully and preserve all earlier artifacts.
 This completed run establishes a further usability need: the HUD needs short
-phase-specific action guidance and visible phase/remaining time so the operator
-can finish all requested regions inside the unchanged 120-second budget. The
+phase-specific action guidance and visible phase/remaining time so I can finish all requested regions inside the unchanged 120-second budget. The
 small guided HUD revision is prepared offline; it does not change the native,
 capture limits, raw values, manual phase controls or frozen analysis.
 
@@ -173,7 +170,7 @@ and leave engine off unobserved. Gear and actual throttle getters remain
 unavailable in the reviewed native set; labels, key events and ratio drops do
 not establish a measured gear or throttle value.
 
-The unchanged ASI cannot interlock the operator's driving controls. First-advance
+The unchanged ASI cannot interlock my driving controls. First-advance
 confirmation is a procedural requirement backed by the new session's actual
 records, not a claim that motion is programmatically blocked. Observed movement
 before that confirmation invalidates the intended procedure. An inability to
@@ -209,7 +206,7 @@ advice: there is no automatic advance, vehicle actuation, inferred gear or
 invented phase achievement. A running-zero warning appears separately. Fixed
 stack text storage and a compile-time component-length bound avoid unbounded HUD
 formatting. An explicit formatting failure stops rather than forging an
-invocation exception. The operator successfully advanced and finished the actual
+invocation exception. I successfully advanced and finished the actual
 guided protocol. Exact font/layout fidelity is not independently certified by
 the fake-framework text checks or a screenshot of the active coach.
 
@@ -471,7 +468,7 @@ capture directory, approved candidate, launch time and current observation.
 device. It refuses old sessions, terminal/partial-terminal captures, malformed
 raw results, invalid identity/timing or motion before confirmation. It ends on
 the first confirmed IDLE bracket or a bounded failure, with no automatic retry.
-It cannot prevent the operator driving; the short operator card is essential.
+It cannot prevent me from driving; the short operator card is essential.
 
 **GO for offline handoff preparation. BLOCKED for actual handoff activation and
 playable/audio development until that separate live gate passes.** No further
