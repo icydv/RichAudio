@@ -27,6 +27,8 @@ unsigned nextMarker = 0;
 LONGLONG inputQpc = 0, lastTargetQpc = 0, firstTargetQpc = 0;
 struct Target { U64 before = 0, after = 0, bits = 0, running = 0, speedBits = 0, status = 0; };
 Target targets[2400]{};
+struct HudText {char text[128]{};U64 qpc=0,targetCount=0;};
+HudText hudTexts[512]{};unsigned hudTextCount=0;
 bool Is(const char* value) { return std::strcmp(scenario, value) == 0; }
 bool Sequence() { return std::strncmp(scenario, "sequence_", 9) == 0; }
 void Increment(int index) { InterlockedIncrement64(&counts[index]); }
@@ -185,6 +187,11 @@ void Hud() {
     case 0x25FBB336DF1804CBULL: Arguments(1); break;
     case 0x6C188BE134E074AAULL: {
         Arguments(1); const char* text = reinterpret_cast<const char*>(arguments[0]); char lower[512]{};
+        if(text){
+            const auto length=std::strlen(text);if(length>=128)Increment(42);
+            bool known=false;for(unsigned i=0;i<hudTextCount;++i)if(std::strcmp(hudTexts[i].text,text)==0){known=true;break;}
+            if(!known){if(hudTextCount<512&&length<128){auto& entry=hudTexts[hudTextCount++];std::memcpy(entry.text,text,length+1);entry.qpc=static_cast<U64>(Qpc());entry.targetCount=Count(4);Increment(40);}else Increment(41);}
+        }
         if (text) for (unsigned i = 0; i < 511 && text[i]; ++i) lower[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(text[i])));
         if (std::strstr(lower, "ready")) Increment(20);
         if (std::strstr(lower, "stop") || std::strstr(lower, "complete") || std::strstr(lower, "failed")) Increment(21);
@@ -311,3 +318,5 @@ extern "C" __declspec(dllexport) U64 FixtureTargetMetric(unsigned index, unsigne
     default: return ~0ULL;
     }
 }
+extern "C" __declspec(dllexport) const char* FixtureHudText(unsigned index){return index<hudTextCount?hudTexts[index].text:nullptr;}
+extern "C" __declspec(dllexport) U64 FixtureHudMetric(unsigned index,unsigned field){return index<hudTextCount?(field==0?hudTexts[index].qpc:hudTexts[index].targetCount):~0ULL;}

@@ -9,10 +9,11 @@ import {analyzeTimeline} from '../tools/Analyze-ShvTelemetry.mjs';
 const repo=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const args=process.argv.slice(2);
 const arg=name=>{const i=args.indexOf(name);return i<0?null:args[i+1];};
+const profile=(arg('--profile')??'PLAYABLE-07').toUpperCase();if(!['PLAYABLE-07','PLAYABLE-08'].includes(profile))throw Error('Explicit PLAYABLE-07 or PLAYABLE-08 profile required');
 const fixtureArg=arg('--fixture-root'),outputArg=arg('--output');
-if(!fixtureArg||!outputArg)throw Error('Use --fixture-root <actual PLAYABLE-07 fixture folder> --output <new .local/playable-07 JSON>.');
+if(!fixtureArg||!outputArg)throw Error('Use [--profile PLAYABLE-08] --fixture-root <actual fixture folder> --output <new profile-specific private JSON>.');
 const root=path.resolve(fixtureArg),output=path.resolve(outputArg);
-if(!['.local/playable-07','build/playable-07-fixtures'].some(name=>output.startsWith(path.join(repo,name)+path.sep)))throw Error('New PLAYABLE-07 output path required.');
+if(![`.local/${profile.toLowerCase()}`,`build/${profile.toLowerCase()}-fixtures`].some(name=>output.startsWith(path.join(repo,name)+path.sep)))throw Error('New matching-profile output path required.');
 if(fs.existsSync(output))throw Error('Refusing to overwrite an analysis validation receipt.');
 for(let parent=path.dirname(output);;parent=path.dirname(parent)){
   if(fs.existsSync(parent)&&fs.lstatSync(parent).isSymbolicLink())throw Error('Linked output parents are not permitted.');
@@ -21,7 +22,7 @@ for(let parent=path.dirname(output);;parent=path.dirname(parent)){
 const hash=file=>createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const fixtureReceipt=path.join(root,'fixture-result.json');
 const receipt=JSON.parse(fs.readFileSync(fixtureReceipt,'utf8'));
-assert.equal(receipt.profile,'PLAYABLE-07');
+assert.equal(receipt.profile,profile);
 assert.equal(receipt.fullMatrix,true);
 assert.equal(receipt.actualShvExecuted,false);
 assert.equal(receipt.gameStarted,false);
@@ -244,7 +245,7 @@ test('missing exact clock cannot produce a qualified timeline',()=>{
 });
 const failed=outcomes.filter(o=>!o.passed).length;
 const negativeNames=outcomes.slice(1,4);
-const report={schema:1,profile:'PLAYABLE-07',scope:'Analysis logic checked against actual production-ASI fake-framework timelines plus labelled malformed-data controls; no live provider qualification',candidateSha256:receipt.candidateSha256,fixtureReceiptSha256:hash(fixtureReceipt),analysisSourceSha256:hash(path.join(repo,'tools','Analyze-ShvTelemetry.mjs')),currentTestSourceSha256:hash(fileURLToPath(import.meta.url)),passed:outcomes.length-failed,failed,negativeControlsValidated:negativeNames.every(r=>r.passed),actualShvExecuted:false,gameStarted:false,endpointOpened:false,providerQualified:false,sourceCases:sourceCases.map(name=>({case:name,timelineSha256:data[name].timelineSha256,captureSha256:data[name].captureSha256,verdict:data[name].result.verdict,providerQualified:false})),outcomes};
+const report={schema:1,profile,scope:'Analysis logic checked against actual production-ASI fake-framework timelines plus labelled malformed-data controls; no live provider qualification',candidateSha256:receipt.candidateSha256,fixtureReceiptSha256:hash(fixtureReceipt),analysisSourceSha256:hash(path.join(repo,'tools','Analyze-ShvTelemetry.mjs')),currentTestSourceSha256:hash(fileURLToPath(import.meta.url)),passed:outcomes.length-failed,failed,negativeControlsValidated:negativeNames.every(r=>r.passed),actualShvExecuted:false,gameStarted:false,endpointOpened:false,providerQualified:false,sourceCases:sourceCases.map(name=>({case:name,timelineSha256:data[name].timelineSha256,captureSha256:data[name].captureSha256,verdict:data[name].result.verdict,providerQualified:false})),outcomes};
 fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n',{flag:'wx'});
 console.log(`${failed?'FAIL':'PASS'} ${report.passed}/${outcomes.length} timeline analysis checks; actual framework/game/audio not executed.`);
 if(failed)process.exitCode=1;

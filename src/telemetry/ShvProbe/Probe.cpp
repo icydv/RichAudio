@@ -38,7 +38,7 @@ enum class Terminal : std::uint32_t {
     OnlineContext, WorkerStartFailure, ArmContextFailed, ForegroundLost,
     SpeedNonfinite, SpeedInvalid, ContextInvalid, Discontinuity, SampleLimit,
     HudSeh, TargetNonfinite, TargetRange, QueueOverflow, OperatorOverflow,
-    OperatorStop, InputClockInvalid
+    OperatorStop, InputClockInvalid, HudFormatFailure
 };
 enum class Waiting : std::uint32_t {
     None, Loading, Switching, NotPlaying, InvalidPed, NoVehicle, InvalidVehicle,
@@ -159,6 +159,7 @@ struct Session {
     LONGLONG startQpc = 0;
     ULONGLONG activeStartTick = 0;
     LONGLONG activeStartQpc = 0;
+    LONGLONG phaseStartedQpc = 0; // Display only; never an acquisition deadline.
     LONGLONG activeEndQpc = 0;
     unsigned phase = 0;
     unsigned phaseMarkers = 0;
@@ -475,6 +476,7 @@ const char* TerminalName(Terminal terminal) noexcept {
     case Terminal::OperatorOverflow: return "operator-event-overflow";
     case Terminal::OperatorStop: return "operator-stop";
     case Terminal::InputClockInvalid: return "input-clock-invalid";
+    case Terminal::HudFormatFailure: return "hud-format-failure";
     default: return "not-completed";
     }
 }
@@ -518,14 +520,14 @@ bool HudCall(std::uint64_t hash, const UINT64* arguments, unsigned count) noexce
     return false;
 }
 
-bool DrawHud(const char* message) noexcept {
+bool DrawHud(const char* message, float y = 0.80f) noexcept {
     if (!OwnForeground() || state.nativeFault.load()) return !state.nativeFault.load();
     const UINT64 font[1]{0};
     const UINT64 scale[2]{FloatArgument(0.32f), FloatArgument(0.32f)};
     const UINT64 colour[4]{255, 220, 140, 255};
     const UINT64 begin[1]{reinterpret_cast<UINT64>("STRING")};
     const UINT64 text[1]{reinterpret_cast<UINT64>(message)};
-    const UINT64 position[3]{FloatArgument(0.02f), FloatArgument(0.80f), 0};
+    const UINT64 position[3]{FloatArgument(0.02f), FloatArgument(y), 0};
     return HudCall(NativeIds::TextFont, font, 1)
         && HudCall(NativeIds::TextScale, scale, 2)
         && HudCall(NativeIds::TextColour, colour, 4)
@@ -541,18 +543,71 @@ const char* WaitingHud(bool eligible, bool released) noexcept {
     return "Telemetry READY~n~Ctrl+Shift+Backslash STARTS capture. OFF is only a label.";
 }
 
-const char* ActiveHud() noexcept {
-    if (state.zeroWhileRunningCount != 0)
-        return "Telemetry WARNING~n~Zero while running recorded. Chord STOPS; inspect data.";
-    switch (state.phase) {
-    case 0: return "Telemetry OFF label~n~Backslash NEXT; Ctrl+Shift+Backslash STOP.";
-    case 1: return "Telemetry IDLE label~n~Backslash NEXT; Ctrl+Shift+Backslash STOP.";
-    case 2: return "Telemetry REV label~n~Backslash NEXT; Ctrl+Shift+Backslash STOP.";
-    case 3: return "Telemetry ACCEL label~n~Backslash NEXT; Ctrl+Shift+Backslash STOP.";
-    case 4: return "Telemetry GEAR label~n~Gear unavailable. Backslash NEXT; chord STOP.";
-    case 5: return "Telemetry DECEL label~n~Backslash NEXT; Ctrl+Shift+Backslash STOP.";
-    default: return "Telemetry RETURN IDLE label~n~Backslash FINISH; chord EARLY STOP.";
+constexpr const char* CoachNames[]{"OFF", "IDLE", "REV", "ACCEL", "GEAR", "DECEL", "RETURN IDLE"};
+constexpr const char* CoachActions[]{
+    "If off unavailable, NEXT.", "Stay still 8s, then NEXT.",
+    "Stay still; rev 8s, then NEXT.", "Speed up 8s; NEXT before slowing.",
+    "Optional 6s; gear unavailable.", "Slow down 8s, then NEXT.", "Stay still; idle 8s."};
+constexpr const char* CoachNext = "\\ NEXT | Ctrl+Shift+\\ STOP";
+constexpr const char* CoachFinish = "\\ FINISH | Ctrl+Shift+\\ STOP";
+constexpr std::size_t CoachCapacity = 96;
+constexpr std::size_t LiteralLength(const char* text) noexcept {
+    std::size_t length = 0;
+    while (text[length] != '\0') ++length;
+    return length;
+}
+constexpr bool CoachFits() noexcept {
+    for (unsigned i = 0; i < 7; ++i) {
+        const std::size_t maximum = LiteralLength("PHASE ") + LiteralLength(CoachNames[i])
+            + LiteralLength(" 120s | LEFT 120s~n~") + LiteralLength(CoachActions[i])
+            + LiteralLength("~n~") + LiteralLength(i == 6 ? CoachFinish : CoachNext);
+        if (maximum >= CoachCapacity || maximum >= 99) return false;
     }
+    return true;
+}
+static_assert(CoachFits(), "Every coach message fits its stack buffer and one native text component.");
+
+// Script-only fixed storage. No heap, filesystem, wall-clock formatting or
+// writer JSON formatter is used by the HUD. Display values alone are clamped.
+struct CoachText {
+    char bytes[CoachCapacity]{};
+    std::size_t used = 0;
+    bool good = true;
+    void Add(const char* text) noexcept {
+        const std::size_t length = std::strlen(text);
+        if (!good || length >= sizeof(bytes) - used) { good = false; return; }
+        std::memcpy(bytes + used, text, length); used += length; bytes[used] = '\0';
+    }
+    void Number(unsigned value) noexcept {
+        if (!good) return;
+        const auto result = std::to_chars(bytes + used, bytes + sizeof(bytes) - 1, value);
+        if (result.ec != std::errc{}) { good = false; return; }
+        used = static_cast<std::size_t>(result.ptr - bytes); bytes[used] = '\0';
+    }
+};
+
+unsigned DisplayElapsed(LONGLONG now, LONGLONG origin) noexcept {
+    if (now <= origin || state.frequency <= 0) return 0;
+    const LONGLONG seconds = (now - origin) / state.frequency;
+    return seconds > 120 ? 120U : static_cast<unsigned>(seconds);
+}
+
+bool DrawActiveHud() noexcept {
+    const LONGLONG now = Qpc();
+    const LONGLONG elapsed = now > state.activeStartQpc ? now - state.activeStartQpc : 0;
+    const LONGLONG limit = Ticks(ActiveDurationMs);
+    const LONGLONG left = elapsed < limit ? limit - elapsed : 0;
+    const LONGLONG rounded = state.frequency > 0 ? (left + state.frequency - 1) / state.frequency : 0;
+    const unsigned remaining = rounded > 120 ? 120U : static_cast<unsigned>(rounded);
+    const unsigned phase = state.phase < 7 ? state.phase : 6;
+    CoachText coach;
+    coach.Add("PHASE "); coach.Add(CoachNames[phase]); coach.Add(" ");
+    coach.Number(DisplayElapsed(now, state.phaseStartedQpc)); coach.Add("s | LEFT ");
+    coach.Number(remaining); coach.Add("s~n~"); coach.Add(CoachActions[phase]);
+    coach.Add("~n~"); coach.Add(phase == 6 ? CoachFinish : CoachNext);
+    if (!coach.good) { state.result.terminal = Terminal::HudFormatFailure; return false; }
+    if (!DrawHud(coach.bytes, 0.76f)) return false;
+    return state.zeroWhileRunningCount == 0 || DrawHud("WARNING: running ZERO", 0.89f);
 }
 
 const char* ResultHud() noexcept {
@@ -1154,6 +1209,7 @@ bool AdvanceInput(bool& released) noexcept {
     if (event.action == Action::Advance) {
         if (state.phase >= 6) { state.result.terminal = Terminal::OperatorOverflow; return false; }
         ++state.phase;
+        state.phaseStartedQpc = event.acceptedQpc;
         input.phase.store(state.phase, std::memory_order_release);
     }
     event.phase = state.phase;
@@ -1172,6 +1228,7 @@ bool AdvanceInput(bool& released) noexcept {
 void CaptureTimeline(const PhaseEvent& startEvent) noexcept {
     state.activeStartTick = GetTickCount64();
     state.activeStartQpc = Qpc();
+    state.phaseStartedQpc = state.activeStartQpc;
     state.activeStarted.store(true, std::memory_order_release);
     input.mode.store(InputMode::Active, std::memory_order_release);
     input.phase.store(0, std::memory_order_release);
@@ -1192,7 +1249,7 @@ void CaptureTimeline(const PhaseEvent& startEvent) noexcept {
         }
         const LONGLONG now = Qpc();
         if (now < nextAllowed) {
-            if (!DrawHud(ActiveHud())) break;
+            if (!DrawActiveHud()) break;
             scriptWait(0); continue;
         }
         Observation observation{};
@@ -1302,7 +1359,7 @@ void CaptureTimeline(const PhaseEvent& startEvent) noexcept {
         previousBefore = observation.beforeQpc;
         nextAllowed = observation.afterQpc + Ticks(SampleIntervalMs);
         if (state.result.terminal != Terminal::None) break;
-        if (!DrawHud(ActiveHud())) break;
+        if (!DrawActiveHud()) break;
         scriptWait(0);
     }
 }

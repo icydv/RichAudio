@@ -42,6 +42,9 @@ bool Same(const std::wstring& a, const std::wstring& b) { return CompareStringOr
 std::string Narrow(const wchar_t* value) {
     std::string result; for (; *value; ++value) { if (*value > 127) throw std::runtime_error("non-ASCII case/hash"); result += static_cast<char>(*value); } return result;
 }
+std::string JsonString(const char* value){
+    std::string result="\"";for(const unsigned char* at=reinterpret_cast<const unsigned char*>(value);*at;++at){if(*at=='"'||*at=='\\'){result+='\\';result+=static_cast<char>(*at);}else if(*at<32){char escaped[7];sprintf_s(escaped,"\\u%04x",static_cast<unsigned>(*at));result+=escaped;}else result+=static_cast<char>(*at);}return result+'"';
+}
 template<class T> T Export(HMODULE module, const char* name) {
     auto address = GetProcAddress(module, name); if (!address) throw std::runtime_error("fixture export missing");
     static_assert(sizeof(T) == sizeof address, "Windows x64 function-pointer width");
@@ -75,13 +78,21 @@ public:
         type.lpszClassName = L"RichAudio.ShvProbe.OfflineFixture"; type.hCursor = LoadCursorW(nullptr, MAKEINTRESOURCEW(32512));
         if (!RegisterClassW(&type) && GetLastError() != ERROR_CLASS_ALREADY_EXISTS) throw std::runtime_error("fixture window class");
         window = CreateWindowExW(activate ? 0 : WS_EX_NOACTIVATE, type.lpszClassName,
-            L"RichAudio offline fixture - no global keyboard input", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
+            activate ? L"RichAudio offline fixture - awaiting foreground" : L"RichAudio offline fixture - no global keyboard input", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
             40, 40, 500, 100, nullptr, nullptr, type.hInstance, nullptr);
         if (!window) throw std::runtime_error("fixture window creation");
         ShowWindow(window, activate ? SW_SHOWNORMAL : SW_SHOWNOACTIVATE); UpdateWindow(window);
         if (activate) SetForegroundWindow(window); // One ordinary activation; no focus bypass.
         DWORD foregroundProcess = 0; GetWindowThreadProcessId(GetForegroundWindow(), &foregroundProcess);
+        if(activate){
+            const ULONGLONG waiting=GetTickCount64();
+            while(foregroundProcess!=GetCurrentProcessId()&&GetTickCount64()-waiting<10000){
+                MSG message{};while(PeekMessageW(&message,nullptr,0,0,PM_REMOVE)){TranslateMessage(&message);DispatchMessageW(&message);}
+                Sleep(10);GetWindowThreadProcessId(GetForegroundWindow(),&foregroundProcess);
+            }
+        }
         if ((foregroundProcess == GetCurrentProcessId()) != activate) throw std::runtime_error("OS did not establish requested fixture foreground state");
+        if(activate)SetWindowTextW(window,L"RichAudio offline fixture - no global keyboard input");
     }
     ~FixtureWindow() { if (window && IsWindow(window)) DestroyWindow(window); }
 };
@@ -103,12 +114,15 @@ int wmain(int argc, wchar_t** argv) {
         if (!fixture || !Same(ModulePath(fixture), fixturePath) || Sha256(ModulePath(fixture)) != expectedFixture) throw std::runtime_error("fixture identity/path");
         using Identity = const char* (*)(); using Configure = void (*)(const char*); using Invoke = int (*)(); using Metric = unsigned long long (*)(int);
         using TargetMetric = unsigned long long (*)(unsigned, unsigned);
+        using HudText = const char* (*)(unsigned);
         const auto identity = Export<Identity>(fixture, "FixtureIdentity");
         if (std::strcmp(identity(), "RichAudio device-free SHV ABI fixture v3")) throw std::runtime_error("not a fixture DLL");
         const auto configure = Export<Configure>(fixture, "FixtureConfigure");
         const auto invoke = Export<Invoke>(fixture, "FixtureInvokeRegistered");
         const auto metric = Export<Metric>(fixture, "FixtureMetric");
         const auto targetMetric = Export<TargetMetric>(fixture, "FixtureTargetMetric");
+        const auto hudText = Export<HudText>(fixture,"FixtureHudText");
+        const auto hudMetric = Export<TargetMetric>(fixture,"FixtureHudMetric");
         const auto scenario = Narrow(argv[1]);
         FixtureWindow window(scenario != "wrong_foreground");
         configure(scenario.c_str());
@@ -130,7 +144,7 @@ int wmain(int argc, wchar_t** argv) {
         if (output == INVALID_HANDLE_VALUE) throw std::runtime_error("fixture result create-new");
         std::ostringstream json;
         json << "{\"schema\":3,\"fixture\":true,\"actualShvExecuted\":false,\"globalKeyboardInputInjected\":false,\"fixturePathAndHashVerified\":true,\"candidateHashVerified\":true";
-        const char* names[]{"registerCalls","unregisterCallsBeforeProcessExit","callbackInvocations","nativeCalls","targetCalls","nativeCallsAfterFault","contextViolations","unexpectedNativeCalls","argumentViolations","scriptWaitCalls","armedJournalSeenAtTarget","keyboardRegistrationCalls","keyboardUnregistrationCalls","deliveredKeyboardCallbackEvents","freshChordEvents","hudCalls","hudCallsAfterTarget","contextCalls","unused18","unused19","readyTextCalls","terminalTextCalls","ownedWindowMinimizations","engineRunningReads","speedReads","advanceEvents","fixtureInputQpc","fixtureTargetQpc","fixtureArmVirtualKey","earlyStopEvents","hudFaultsInjected","callsAfterHudFault","unused32","firstTargetQpc","minimumTargetEntryGapQpc","maximumTargetEntryGapQpc","unused36","unused37","overflowBatches","rawReturnVisibleWhilePostContextBlocked"};
+        const char* names[]{"registerCalls","unregisterCallsBeforeProcessExit","callbackInvocations","nativeCalls","targetCalls","nativeCallsAfterFault","contextViolations","unexpectedNativeCalls","argumentViolations","scriptWaitCalls","armedJournalSeenAtTarget","keyboardRegistrationCalls","keyboardUnregistrationCalls","deliveredKeyboardCallbackEvents","freshChordEvents","hudCalls","hudCallsAfterTarget","contextCalls","unused18","unused19","readyTextCalls","terminalTextCalls","ownedWindowMinimizations","engineRunningReads","speedReads","advanceEvents","fixtureInputQpc","fixtureTargetQpc","fixtureArmVirtualKey","earlyStopEvents","hudFaultsInjected","callsAfterHudFault","unused32","firstTargetQpc","minimumTargetEntryGapQpc","maximumTargetEntryGapQpc","unused36","unused37","overflowBatches","rawReturnVisibleWhilePostContextBlocked","distinctHudStrings","droppedHudStrings","oversizedHudStrings"};
         for (unsigned i = 0; i < sizeof names / sizeof names[0]; ++i) json << ",\"" << names[i] << "\":" << metric(static_cast<int>(i));
         if (metric(4) > 2400) throw std::runtime_error("production exceeded hard fixture target capacity");
         json << ",\"targets\":[";
@@ -140,6 +154,9 @@ int wmain(int argc, wchar_t** argv) {
                 << ",\"rawBits\":" << targetMetric(i, 2) << ",\"engineRunningRaw\":" << targetMetric(i, 3)
                 << ",\"speedBits\":" << targetMetric(i, 4) << ",\"status\":" << targetMetric(i, 5) << '}';
         }
+        json << "],\"hud\":[";
+        if(metric(40)>512)throw std::runtime_error("HUD trace bound");
+        for(unsigned i=0;i<static_cast<unsigned>(metric(40));++i){if(i)json<<',';const char* text=hudText(i);if(!text)throw std::runtime_error("Missing fixture HUD entry");json<<"{\"text\":"<<JsonString(text)<<",\"firstSeenQpc\":"<<hudMetric(i,0)<<",\"targetCalls\":"<<hudMetric(i,1)<<'}';}
         json << "]}\n";
         const auto text = json.str();
         if (text.size() > 1024 * 1024) throw std::runtime_error("fixture metrics budget");

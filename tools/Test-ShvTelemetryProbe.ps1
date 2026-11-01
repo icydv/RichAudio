@@ -1,6 +1,7 @@
 #requires -Version 7.0
 [CmdletBinding()]
 param(
+ [Alias('Profile')][ValidateSet('playable-07','playable-08')][string]$ProbeProfile='playable-07',
  [string]$BuildReceipt='',
  [string]$OutputRoot='',
  [string]$ValidateExistingRun='',
@@ -9,17 +10,19 @@ param(
 )
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
-if(!$BuildReceipt){$BuildReceipt=Join-Path $repo 'build/playable-07-shv-probe/build-receipt.json'}
+$profileTag=$ProbeProfile.ToUpperInvariant()
+if(!$BuildReceipt){$BuildReceipt=Join-Path $repo ('build/'+$ProbeProfile+'-shv-probe/build-receipt.json')}
 if($ValidateExistingRun){if($OutputRoot -or $Cases.Count){throw 'Existing full-run validation cannot change output root or case selection.'};$OutputRoot=$ValidateExistingRun}
-if(!$OutputRoot){$OutputRoot=Join-Path $repo ('.local/playable-07/shv-fixture-'+[guid]::NewGuid().ToString('N'))}
+if(!$OutputRoot){$OutputRoot=Join-Path $repo ('.local/'+$ProbeProfile+'/shv-fixture-'+[guid]::NewGuid().ToString('N'))}
 $output=[IO.Path]::GetFullPath($OutputRoot)
-$allowed=@((Join-Path $repo '.local/playable-07'),(Join-Path $repo 'build/playable-07-fixtures'))|ForEach-Object{[IO.Path]::GetFullPath($_).TrimEnd('\')+'\'}
-if(!@($allowed|Where-Object{$output.StartsWith($_,[StringComparison]::OrdinalIgnoreCase)}).Count -or ((Test-Path -LiteralPath $output) -and !$ValidateExistingRun)){throw 'New isolated PLAYABLE-07 fixture output is required; earlier artifacts are protected.'}
+$allowed=@((Join-Path $repo ('.local/'+$ProbeProfile)),(Join-Path $repo ('build/'+$ProbeProfile+'-fixtures')))|ForEach-Object{[IO.Path]::GetFullPath($_).TrimEnd('\')+'\'}
+if(!@($allowed|Where-Object{$output.StartsWith($_,[StringComparison]::OrdinalIgnoreCase)}).Count -or ((Test-Path -LiteralPath $output) -and !$ValidateExistingRun)){throw 'New isolated profile-specific fixture output is required; earlier artifacts are protected.'}
+if($ProbeProfile -eq 'playable-08'){$base=@($allowed|Where-Object{$output.StartsWith($_,[StringComparison]::OrdinalIgnoreCase)})[0];$leaf=$output.Substring($base.Length);if($leaf -notmatch '\Ashv-fixture-[a-f0-9]{32}\z'){throw 'PLAYABLE-08 fixtures require a new direct shv-fixture-<id> child; live captures, candidates and historical subdirectories are protected.'}}
 if($ValidateExistingRun -and (!(Test-Path -LiteralPath $output -PathType Container) -or (Test-Path -LiteralPath (Join-Path $output 'fixture-result.json')))){throw 'Existing outputs with no final validation receipt are required.'}
 if((Test-Path -LiteralPath $output) -and ((Get-Item -LiteralPath $output -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked fixture output leaf is not permitted.'}
 for($part=Split-Path -Parent $output;$part;$part=Split-Path -Parent $part){if((Test-Path -LiteralPath $part) -and ((Get-Item -LiteralPath $part -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked fixture output path is not permitted.'}}
 $receipt=Get-Content -LiteralPath $BuildReceipt -Raw|ConvertFrom-Json
-if($receipt.Profile -ne 'playable-07'){throw 'PLAYABLE-07 build receipt required.'}
+if($receipt.Profile -ne $ProbeProfile){throw 'Matching explicit probe-profile build receipt required.'}
 function Check-SourceLineage {
  foreach($inputFile in $receipt.SourceInputs){
   if(!$inputFile.Name.StartsWith('repo/')){throw 'Unexpected production source receipt path.'}
@@ -53,9 +56,9 @@ if((Get-FileHash -LiteralPath $copiedCandidate -Algorithm SHA256).Hash.ToLowerIn
 $executionPath=Join-Path $output 'fixture-execution.json'
 if($ValidateExistingRun){
  $execution=Get-Content -LiteralPath $executionPath -Raw|ConvertFrom-Json
- if($execution.profile -ne 'PLAYABLE-07' -or $execution.candidateSha256 -ne $candidateHash -or $execution.fixtureSha256 -ne $fixtureHash -or $execution.hostSha256 -ne $hostHash -or $execution.actualShvExecuted -ne $false -or $execution.gameStarted -ne $false -or $execution.fixtureSourceSha256 -ne (Get-FileHash -LiteralPath (Join-Path $repo 'tests/shv-probe/Fixture.cpp') -Algorithm SHA256).Hash.ToLowerInvariant() -or $execution.hostSourceSha256 -ne (Get-FileHash -LiteralPath (Join-Path $repo 'tests/shv-probe/Host.cpp') -Algorithm SHA256).Hash.ToLowerInvariant()){throw 'Original execution binary/source identities differ.'}
+ if($execution.profile -ne $profileTag -or $execution.candidateSha256 -ne $candidateHash -or $execution.fixtureSha256 -ne $fixtureHash -or $execution.hostSha256 -ne $hostHash -or $execution.actualShvExecuted -ne $false -or $execution.gameStarted -ne $false -or $execution.fixtureSourceSha256 -ne (Get-FileHash -LiteralPath (Join-Path $repo 'tests/shv-probe/Fixture.cpp') -Algorithm SHA256).Hash.ToLowerInvariant() -or $execution.hostSourceSha256 -ne (Get-FileHash -LiteralPath (Join-Path $repo 'tests/shv-probe/Host.cpp') -Algorithm SHA256).Hash.ToLowerInvariant()){throw 'Original execution binary/source identities differ.'}
 }else{
- $execution=[ordered]@{schema=1;profile='PLAYABLE-07';createdBeforeOriginalRun=$true;candidateSha256=$candidateHash;fixtureSha256=$fixtureHash;hostSha256=$hostHash;fixtureSourceSha256=(Get-FileHash -LiteralPath (Join-Path $repo 'tests/shv-probe/Fixture.cpp') -Algorithm SHA256).Hash.ToLowerInvariant();hostSourceSha256=(Get-FileHash -LiteralPath (Join-Path $repo 'tests/shv-probe/Host.cpp') -Algorithm SHA256).Hash.ToLowerInvariant();executionRunnerSourceSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant();actualShvExecuted=$false;gameStarted=$false;globalKeyboardInputInjected=$false}
+ $execution=[ordered]@{schema=1;profile=$profileTag;createdBeforeOriginalRun=$true;candidateSha256=$candidateHash;fixtureSha256=$fixtureHash;hostSha256=$hostHash;fixtureSourceSha256=(Get-FileHash -LiteralPath (Join-Path $repo 'tests/shv-probe/Fixture.cpp') -Algorithm SHA256).Hash.ToLowerInvariant();hostSourceSha256=(Get-FileHash -LiteralPath (Join-Path $repo 'tests/shv-probe/Host.cpp') -Algorithm SHA256).Hash.ToLowerInvariant();executionRunnerSourceSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant();actualShvExecuted=$false;gameStarted=$false;globalKeyboardInputInjected=$false}
  [IO.File]::WriteAllText($executionPath,($execution|ConvertTo-Json -Depth 4)+[Environment]::NewLine,[Text.UTF8Encoding]::new($false))
 }
 $priorResults=if($ValidateExistingRun){@(Get-Content -LiteralPath (Join-Path $output 'case-results.partial.json') -Raw|ConvertFrom-Json)}else{@()}
@@ -114,6 +117,32 @@ $selected=@($matrix|Where-Object{!$Cases.Count -or $_.Name -in $Cases})
 if(!$selected.Count -or @($Cases|Where-Object{$_ -notin $matrix.Name}).Count){throw 'Unknown or empty case selection.'}
 $script:checks=0
 function Check([bool]$Value,[string]$Message){$script:checks++;if(!$Value){throw $Message}}
+function Check-GuidedHud($Metrics,$Capture,$Phases,$Case){
+ Check ($Metrics.droppedHudStrings -eq 0 -and $Metrics.oversizedHudStrings -eq 0 -and @($Metrics.hud).Count -eq $Metrics.distinctHudStrings) ('Bounded actual HUD trace incomplete: '+$Case.Name)
+ foreach($entry in $Metrics.hud){Check ([Text.Encoding]::UTF8.GetByteCount($entry.text) -lt 99) ('Native text component exceeds documented display bound: '+$Case.Name)}
+ $active=@($Metrics.hud|Where-Object text -like 'PHASE *');$labels=@();$largestElapsed=0;$smallestRemaining=120
+ $names=@{'OFF'='OFF';'IDLE'='IDLE';'REV'='STATIONARY_REV';'ACCEL'='ACCELERATION';'GEAR'='GEAR_TRANSITIONS';'DECEL'='DECELERATION';'RETURN IDLE'='RETURN_IDLE'}
+ $actions=@{'OFF'='If off unavailable, NEXT.';'IDLE'='Stay still 8s, then NEXT.';'REV'='Stay still; rev 8s, then NEXT.';'ACCEL'='Speed up 8s; NEXT before slowing.';'GEAR'='Optional 6s; gear unavailable.';'DECEL'='Slow down 8s, then NEXT.';'RETURN IDLE'='Stay still; idle 8s.'}
+ $lastElapsed=@{}
+ foreach($entry in $active){
+  Check ($entry.text -match '^PHASE (RETURN IDLE|OFF|IDLE|REV|ACCEL|GEAR|DECEL) (\d+)s \| LEFT (\d+)s~n~(.+)~n~(.+)$') ('Actual HUD phase/timer/action format missing: '+$Case.Name)
+  $label=$Matches[1];$elapsed=[int]$Matches[2];$remaining=[int]$Matches[3];$action=$Matches[4];$footer=$Matches[5]
+  Check ($elapsed -ge 0 -and $elapsed -le 120 -and $remaining -ge 0 -and $remaining -le 120 -and $action -ceq $actions[$label]) ('Actual requested action/timer differs: '+$Case.Name)
+  $expectedFooter=if($label -eq 'RETURN IDLE'){'\ FINISH | Ctrl+Shift+\ STOP'}else{'\ NEXT | Ctrl+Shift+\ STOP'}
+  Check ($footer -ceq $expectedFooter) ('Advance/finish/early-stop guidance missing: '+$Case.Name)
+  $marker=@($Phases|Where-Object{$_.requestedPhase -eq $names[$label] -and $_.action -ne 'stop'})
+  Check ($marker.Count -eq 1) ('HUD shows a phase without exactly one accepted operator marker: '+$Case.Name)
+  $expectedElapsed=[Math]::Floor(($entry.firstSeenQpc-$marker[0].acceptedQpc)/[double]$Capture.qpcFrequency)
+  $expectedRemaining=[Math]::Max(0,[Math]::Min(120,[Math]::Ceiling(120-($entry.firstSeenQpc-$Capture.activeStartQpc)/[double]$Capture.qpcFrequency)))
+  Check ([Math]::Abs($elapsed-$expectedElapsed) -le 1 -and [Math]::Abs($remaining-$expectedRemaining) -le 1) ('Displayed countdown/phase clock does not track actual monotonic time: '+$Case.Name)
+  if($lastElapsed.ContainsKey($label)){Check ($elapsed -ge $lastElapsed[$label]) ('Phase elapsed display moved backwards: '+$Case.Name)}else{Check ($elapsed -le 1) ('Phase elapsed timer did not reset on operator advance: '+$Case.Name)}
+  $lastElapsed[$label]=$elapsed;$labels+=$label;$largestElapsed=[Math]::Max($largestElapsed,$elapsed);$smallestRemaining=[Math]::Min($smallestRemaining,$remaining)
+ }
+ if($Metrics.targetCalls -gt 0){Check ($active.Count -gt 0) ('Guidance was never emitted by the actual ASI: '+$Case.Name)}
+ if($Case.Sequence){Check (($labels|Select-Object -Unique) -join ',' -eq 'OFF,IDLE,REV,ACCEL,GEAR,DECEL,RETURN IDLE') ('Actual HUD did not visit each manually marked phase: '+$Case.Name)}
+ if($Case.FullDuration){Check ($largestElapsed -ge 118 -and $smallestRemaining -le 2 -and @($labels|Select-Object -Unique).Count -eq 1 -and $Capture.lastRequestedPhaseIndex -eq 0 -and $Capture.phaseMarkers -eq 1) 'Full countdown may guide but must never automatically advance a phase.'}
+ return [ordered]@{distinctStrings=$Metrics.distinctHudStrings;activeTimerStrings=$active.Count;phaseLabels=@($labels|Select-Object -Unique);largestPhaseElapsedSeconds=$largestElapsed;smallestRemainingSeconds=$smallestRemaining;actualGameRenderingVerified=$false}
+}
 $results=@()
 foreach($case in $selected){
  $caseRoot=Join-Path $output ('case-'+$case.Name)
@@ -125,7 +154,7 @@ foreach($case in $selected){
  try {
   if(!$child.Start()){throw 'Owned fixture host failed to start.'}
   $stdout=$child.StandardOutput.ReadToEndAsync();$stderr=$child.StandardError.ReadToEndAsync()
-  $limit=if($case.FullDuration){$CaseTimeoutSeconds}else{[Math]::Min($CaseTimeoutSeconds,30)}
+  $limit=if($case.FullDuration){$CaseTimeoutSeconds}else{[Math]::Min($CaseTimeoutSeconds,$(if($ProbeProfile-eq'playable-08'){40}else{30}))}
   if(!$child.WaitForExit($limit*1000)){
    try{$child.Kill();$child.WaitForExit(2000)|Out-Null}catch{}
    throw ('Owned device-free host exceeded its parent deadline: '+$case.Name)
@@ -206,21 +235,24 @@ foreach($case in $selected){
  if($case.Name -eq 'rising'){Check (($observations[-1].rawFloat-$observations[0].rawFloat) -gt .5) 'Actual rising sequence missing.'}
  if($case.Name -eq 'falling'){Check (($observations[-1].rawFloat-$observations[0].rawFloat) -lt -.5) 'Actual falling sequence missing.'}
  if($case.FullDuration){Check (($capture.activeEndQpc-$capture.activeStartQpc)*1000.0/$freq -ge 120000 -and $metrics.targetCalls -ge 400 -and ($metrics.firstTargetQpc-$capture.activeStartQpc)*1000.0/$freq -le 250 -and ($capture.activeEndQpc-$metrics.fixtureTargetQpc)*1000.0/$freq -le 250 -and $metrics.maximumTargetEntryGapQpc*1000.0/$freq -le 250) 'Unshortened120-second capture must retain observations across the full interval without a minimum-rate claim.'}
+ $hudGuidance=if($ProbeProfile -eq 'playable-08'){Check-GuidedHud $metrics $capture $phases $case}else{$null}
  $activeDuration=if($capture.activeStartQpc -gt 0){($capture.activeEndQpc-$capture.activeStartQpc)*1000.0/$freq}else{0}
  $elapsed=if($ValidateExistingRun){@($priorResults|Where-Object case -eq $case.Name)[0].fixtureElapsedMilliseconds}else{$clock.ElapsedMilliseconds}
  $maximumRowBytes=($lines|ForEach-Object{[Text.Encoding]::UTF8.GetByteCount($_)}|Measure-Object -Maximum).Maximum
  $result=[ordered]@{case=$case.Name;targetCalls=$metrics.targetCalls;targetOutcomesObserved=$capture.targetOutcomesObserved;observations=$observations.Count;declarations=$declared.Count;rawReturnRecords=$returns.Count;phaseRecords=$phases.Count;terminalReason=$capture.terminalReason;rawCopiesVerified=$copied;minimumActualTargetGapMs=$metrics.minimumTargetEntryGapQpc*1000.0/$freq;maximumActualTargetGapMs=$metrics.maximumTargetEntryGapQpc*1000.0/$freq;activeDurationMs=$activeDuration;zeroWhileRunningCount=$capture.zeroWhileRunningCount;captureBytes=$captureFiles[0].Length;journalBytes=$journalFiles[0].Length;timelineBytes=$timelineFiles[0].Length;maximumRowBytes=$maximumRowBytes;fixtureElapsedMilliseconds=$elapsed;fixture=$true;actualShvExecuted=$false;globalKeyboardInputInjected=$false;gameStarted=$false;endpointOpened=$false}
  $results+=$result
+ if($ProbeProfile -eq 'playable-08'){$result.hudGuidance=$hudGuidance}
  if(!$ValidateExistingRun){$results|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $output 'case-results.partial.json') -Encoding utf8}
  Write-Output ('PASS fixture '+$case.Name+'; target='+$metrics.targetCalls+'; terminal='+$capture.terminalReason)
 }
 Check-SourceLineage
 $full=$selected.Count -eq $matrix.Count
-$report=[ordered]@{schema=3;profile='PLAYABLE-07';scope='Unchanged production ASI against isolated fake SHV callbacks and an ordinary owned foreground window; no global input/game/audio';candidateSha256=$candidateHash;fixtureSha256=$fixtureHash;hostSha256=$hostHash;checks=$script:checks;cases=$results;passed=$results.Count;fullMatrix=$full;boundedMultiStateValidated=$full;phaseMarkersValidated=$full;fullDurationFixtureValidated=($full -and @($results|Where-Object case -eq 'max_duration').Count -eq 1);maximumCaptureSeconds=120;maximumObservations=2400;maximumHz=20;operatorPhaseProtocolValidated=$full;boundedTimelineValidated=$full;maximumActiveMs=120000;maximumTargetObservations=2400;maximumAcquisitionHz=20;actualShvExecuted=$false;globalKeyboardInputInjected=$false;gameStarted=$false;gameFilesWritten=$false;endpointOpened=$false;liveProviderEstablished=$false;providerQualified=$false;limits='Fake data/callbacks are not live SHV input, native resolution, gear/throttle support or GTA visual behaviour; watchdog cannot preempt blocked natives; hot-unload unsupported.'}
+$report=[ordered]@{schema=3;profile=$profileTag;scope='Unchanged production ASI against isolated fake SHV callbacks and an ordinary owned foreground window; no global input/game/audio';candidateSha256=$candidateHash;fixtureSha256=$fixtureHash;hostSha256=$hostHash;checks=$script:checks;cases=$results;passed=$results.Count;fullMatrix=$full;boundedMultiStateValidated=$full;phaseMarkersValidated=$full;guidedHudValidated=($full -and $ProbeProfile -eq 'playable-08');fullDurationFixtureValidated=($full -and @($results|Where-Object case -eq 'max_duration').Count -eq 1);maximumCaptureSeconds=120;maximumObservations=2400;maximumHz=20;operatorPhaseProtocolValidated=$full;boundedTimelineValidated=$full;maximumActiveMs=120000;maximumTargetObservations=2400;maximumAcquisitionHz=20;actualShvExecuted=$false;globalKeyboardInputInjected=$false;gameStarted=$false;gameFilesWritten=$false;endpointOpened=$false;liveProviderEstablished=$false;providerQualified=$false;limits='Fake data/callbacks are not live SHV input, native resolution, gear/throttle support or GTA visual behaviour; watchdog cannot preempt blocked natives; hot-unload unsupported.'}
 $report.readOnlyRevalidation=[bool]$ValidateExistingRun
 $report.executionReceiptSha256=(Get-FileHash -LiteralPath $executionPath -Algorithm SHA256).Hash.ToLowerInvariant()
 $report.executionRunnerSourceSha256=$execution.executionRunnerSourceSha256
 $report.validationRunnerSourceSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant()
+$report.foregroundSetup=[ordered]@{maximumPendingMilliseconds=10000;guard='Actual GetForegroundWindow process identity before production ASI load';activation='One ordinary Win32 activation; an approved computer-use activation of the exact owned pending window may establish foreground';pendingTitle='RichAudio offline fixture - awaiting foreground';keyboardOrMouseInputInjected=$false;foregroundReadersSubstituted=$false;wrongForegroundCaseNeverPending=$true}
 if($ValidateExistingRun){$report.validationNote='The unchanged original48-case execution was read back after correcting an arbitrary >2000 minimum count. Full120-second coverage and actual50..250ms spacing replace that minimum. No production/fixture binary changed and no native execution was repeated.'}
 $report|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $output 'fixture-result.json') -Encoding utf8
 Write-Output ('PASS '+$script:checks+' assertions across '+$results.Count+' actual-ASI timeline fixture cases; no real SHV/game/audio. '+(Join-Path $output 'fixture-result.json'))

@@ -2,10 +2,14 @@
 
 ## PLAYABLE-08 production foundations — 1 November 2026
 
-The [PLAYABLE-08 increment](docs/PLAYABLE_08.md) prepares an unchanged-SHV-ASI,
-phase-marked qualification and adds independent offline loudness/recording code.
-The measured PLAYABLE-07 signal is retained; missing requested-phase timestamps
-remain missing. No offline feature test clears telemetry or live listening gates.
+The [PLAYABLE-08 increment](docs/PLAYABLE_08.md) retains the real PLAYABLE-07
+signal and adds 2,131 genuine observations from one separately approved capture.
+Marked initial idle passes, but dedicated deceleration and return-idle regions
+were not captured before the deadline. Qualification and product handoff remain
+blocked. A small diagnostic HUD revision supplies timing/action guidance offline;
+it requires fresh approval before another deployment or launch. Independent
+loudness/recording foundations remain disabled. No offline feature test clears
+telemetry or live listening gates.
 
 - `src/acoustics/production/activation.mjs` separates disabled configuration
   requests from reviewed, game/hash/model/provider-scoped acceptance records and

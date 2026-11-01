@@ -1,10 +1,10 @@
 #requires -Version 7.0
 [CmdletBinding()]
-param([string]$Binary='',[string]$Output='',[ValidateSet('playable-04','playable-06','playable-07')][Alias('Profile')][string]$ProbeProfile='playable-07')
+param([string]$Binary='',[string]$Output='',[ValidateSet('playable-04','playable-06','playable-07','playable-08')][Alias('Profile')][string]$ProbeProfile='playable-07')
 $ErrorActionPreference='Stop'
 
 function Get-ShvExpectedExports {
- param([ValidateSet('playable-04','playable-06','playable-07')][Alias('Profile')][string]$ProbeProfile='playable-07')
+ param([ValidateSet('playable-04','playable-06','playable-07','playable-08')][Alias('Profile')][string]$ProbeProfile='playable-07')
  $names=@('?nativeInit@@YAX_K@Z','?nativePush64@@YAX_K@Z','?nativeCall@@YAPEA_KXZ','?scriptRegister@@YAXPEAUHINSTANCE__@@P6AXXZ@Z','?scriptUnregister@@YAXPEAUHINSTANCE__@@@Z','?scriptWait@@YAXK@Z')
  if($ProbeProfile -ne 'playable-04'){$names+=@('?keyboardHandlerRegister@@YAXP6AXKGEHHHH@Z@Z','?keyboardHandlerUnregister@@YAXP6AXKGEHHHH@Z@Z')}
  return $names
@@ -98,7 +98,7 @@ function Get-ShvPeImage {
 }
 
 function Assert-ShvProductImage {
- param([Parameter(Mandatory=$true)]$Image,[ValidateSet('playable-04','playable-06','playable-07')][Alias('Profile')][string]$ProbeProfile='playable-07')
+ param([Parameter(Mandatory=$true)]$Image,[ValidateSet('playable-04','playable-06','playable-07','playable-08')][Alias('Profile')][string]$ProbeProfile='playable-07')
  if($Image.Machine -ne 'Amd64' -or $Image.PeKind -ne 'PE32Plus' -or !$Image.IsDll -or !$Image.EntryPointPresent -or !$Image.EntryPointExecutable -or $Image.HasClrMetadata){throw 'Product must be a native AMD64 PE32+ DLL with a backed executable entry point.'}
  if(!$Image.GuardCF -or !$Image.DynamicBase -or !$Image.NxCompatible -or !$Image.HighEntropyVa){throw 'Product is missing requested PE hardening flags.'}
  if($Image.ExportFunctionCount -ne 0 -or $Image.Exports.Count -ne 0){throw 'Product must not export named or ordinal-only fixture, test or other API entry points.'}
@@ -123,11 +123,14 @@ if($MyInvocation.InvocationName -ne '.' -and $Binary){
  $result=Get-ShvPeImage -Path $Binary;$null=Assert-ShvProductImage -Image $result -Profile $ProbeProfile
  if($Output){
   $repo=Split-Path -Parent $PSScriptRoot;$target=Assert-ShvBuildOutputPath $Output $repo 'D:\Games\steamapps\common\Grand Theft Auto V Enhanced'
-  foreach($name in @('build/playable-04-shv-probe','build/playable-06-shv-probe','.local/playable-04','.local/playable-05','.local/playable-06')){
+  foreach($name in @('build/playable-04-shv-probe','build/playable-06-shv-probe','build/playable-07-shv-probe','.local/playable-04','.local/playable-05','.local/playable-06','.local/playable-07','.local/playable-08/live-01','.local/playable-08/candidate','.local/playable-08/original-probe-source','.local/playable-08/hud-coach/original')){
    $preserved=[IO.Path]::GetFullPath((Join-Path $repo $name)).TrimEnd('\','/')
-   if($target.Equals($preserved,[StringComparison]::OrdinalIgnoreCase) -or $target.StartsWith($preserved+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Preserved PLAYABLE-04/06 artifacts and receipts cannot be overwritten by static inspection; choose a new output path.'}
+   if($target.Equals($preserved,[StringComparison]::OrdinalIgnoreCase) -or $target.StartsWith($preserved+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Preserved artifacts, source snapshots and completed live receipts cannot be overwritten by static inspection; choose a new output path.'}
   }
-  [IO.Directory]::CreateDirectory((Split-Path -Parent $target))|Out-Null;$result|ConvertTo-Json -Depth 9|Set-Content -LiteralPath $target -Encoding utf8
+  if(Test-Path -LiteralPath $target){throw 'Static inspection evidence must be new; an existing receipt is never overwritten.'}
+  [IO.Directory]::CreateDirectory((Split-Path -Parent $target))|Out-Null
+  $stream=[IO.File]::Open($target,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
+  try{$bytes=[Text.UTF8Encoding]::new($false).GetBytes(($result|ConvertTo-Json -Depth 9));$stream.Write($bytes);$stream.Flush($true)}finally{$stream.Dispose()}
  }
  Write-Output ('PASS static '+$ProbeProfile+' AMD64 probe PE, exact '+@(Get-ShvExpectedExports -Profile $ProbeProfile).Count+' ScriptHookV imports, isolated entry point and reviewed OS dependencies. SHA256 '+$result.Sha256)
 }

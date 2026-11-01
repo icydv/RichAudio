@@ -1,6 +1,7 @@
 #requires -Version 7.0
 [CmdletBinding()]
 param(
+ [ValidateSet('playable-07','playable-08')][Alias('Profile')][string]$ProbeProfile='playable-07',
  [string]$GameRoot='D:\Games\steamapps\common\Grand Theft Auto V Enhanced',
  [string]$BuildToolsRoot='',
  [string]$OutputRoot='',
@@ -8,17 +9,18 @@ param(
 )
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
-. (Join-Path $PSScriptRoot 'Inspect-ShvProbe.ps1')
-if(!$OutputRoot){$OutputRoot=Join-Path $repo 'build/playable-07-shv-probe'}
+. (Join-Path $PSScriptRoot 'Inspect-ShvProbe.ps1') -ProbeProfile $ProbeProfile
+if(!$OutputRoot){$OutputRoot=Join-Path $repo ('build/'+$ProbeProfile+'-shv-probe')}
 $output=Assert-ShvBuildOutputPath $OutputRoot $repo $GameRoot
-$probeProfile='playable-07'
-foreach($name in @('build/playable-04-shv-probe','build/playable-06-shv-probe','.local/playable-04','.local/playable-05','.local/playable-06')){
+foreach($name in @('build/playable-04-shv-probe','build/playable-06-shv-probe','build/playable-07-shv-probe','.local/playable-04','.local/playable-05','.local/playable-06','.local/playable-07','.local/playable-08/live-01','.local/playable-08/candidate','.local/playable-08/original-probe-source','.local/playable-08/hud-coach/original')){
  $preservedRoot=[IO.Path]::GetFullPath((Join-Path $repo $name)).TrimEnd('\','/')
- if($output.Equals($preservedRoot,[StringComparison]::OrdinalIgnoreCase) -or $output.StartsWith($preservedRoot+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'PLAYABLE-04/06 build artifacts and receipts are preserved; choose the PLAYABLE-07 output directory.'}
+ if($output.Equals($preservedRoot,[StringComparison]::OrdinalIgnoreCase) -or $output.StartsWith($preservedRoot+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Earlier build artifacts, source snapshots and completed live receipts are preserved; choose the explicit new profile output directory.'}
 }
-if(!$PublicEvidencePath){$PublicEvidencePath=Join-Path $repo 'evidence/playable-07-build.json'}
+if(Test-Path -LiteralPath $output){throw 'Build output must be a new directory; earlier candidates and receipts are never overwritten.'}
+if(!$PublicEvidencePath){$PublicEvidencePath=Join-Path $repo ('evidence/'+$ProbeProfile+'-build.json')}
 $publicTarget=[IO.Path]::GetFullPath($PublicEvidencePath);$evidenceRoot=[IO.Path]::GetFullPath((Join-Path $repo 'evidence'))
-if(![IO.Path]::GetDirectoryName($publicTarget).Equals($evidenceRoot,[StringComparison]::OrdinalIgnoreCase) -or [IO.Path]::GetFileName($publicTarget) -notmatch '^playable-07-build(?:[-.][A-Za-z0-9_-]+)?\.json$'){throw 'Public build evidence must be a new playable-07-build JSON directly under this repository evidence directory.'}
+if(![IO.Path]::GetDirectoryName($publicTarget).Equals($evidenceRoot,[StringComparison]::OrdinalIgnoreCase) -or [IO.Path]::GetFileName($publicTarget) -notmatch ('^'+[regex]::Escape($ProbeProfile)+'-build(?:[-.][A-Za-z0-9_-]+)?\.json$')){throw 'Public build evidence must match the selected profile directly under this repository evidence directory.'}
+if(Test-Path -LiteralPath $publicTarget){throw 'Public build evidence must be new; existing evidence is never overwritten.'}
 for($cursor=$publicTarget;$cursor;$cursor=[IO.Path]::GetDirectoryName($cursor)){if((Test-Path -LiteralPath $cursor) -and ((Get-Item -LiteralPath $cursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Public evidence output through a reparse point is not permitted.'}}
 $sourceRoot=Join-Path $repo 'src/telemetry/ShvProbe'
 $sources=@('Probe.cpp','ScriptHookVApi.h','NativeIds.h')
@@ -71,6 +73,21 @@ $liveRoot=Join-Path $repo '.local/playable-06/live-01'
 $liveFiles=@(Get-ChildItem -LiteralPath $liveRoot -Recurse -Force)
 if($liveFiles.Count -gt 128 -or @($liveFiles|Where-Object {($_.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0}).Count){throw 'Prior live evidence directory exceeds the preservation bound or contains a reparse point.'}
 $preservedNames+=@($liveFiles|Where-Object {!$_.PSIsContainer}|ForEach-Object {[IO.Path]::GetRelativePath($repo,$_.FullName).Replace('\','/')})
+if($ProbeProfile -eq 'playable-08'){
+ $priorPreflight=Get-Content -LiteralPath (Join-Path $repo 'evidence/playable-08-preflight.json') -Raw|ConvertFrom-Json
+ if(@($priorPreflight.preservedPlayable07EvidenceAndLiveFiles).Count -ne 59){throw 'Expected the 59 frozen PLAYABLE-07 artifact/evidence pins.'}
+ foreach($pin in $priorPreflight.preservedPlayable07EvidenceAndLiveFiles){
+  $path=Join-Path $repo $pin.name
+  if((Get-FileHash -LiteralPath $path).Hash.ToLowerInvariant() -ne $pin.sha256 -or (Get-Item -LiteralPath $path).Length -ne $pin.bytes){throw 'A frozen PLAYABLE-07 artifact/evidence pin differs.'}
+  $preservedNames+=$pin.name
+ }
+ foreach($directory in @('.local/playable-08/live-01','.local/playable-08/candidate','.local/playable-08/original-probe-source','.local/playable-08/hud-coach/original')){
+  $files=@(Get-ChildItem -LiteralPath (Join-Path $repo $directory) -Recurse -Force)
+  if($files.Count -gt 256 -or @($files|Where-Object {($_.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0}).Count){throw 'Completed live/source preservation exceeds its bound or contains a reparse point.'}
+  $preservedNames+=@($files|Where-Object {!$_.PSIsContainer}|ForEach-Object {[IO.Path]::GetRelativePath($repo,$_.FullName).Replace('\','/')})
+ }
+ $preservedNames+=@(Get-ChildItem -LiteralPath (Join-Path $repo 'evidence') -Filter 'playable-08-*.json' -File|ForEach-Object {'evidence/'+$_.Name})
+}
 $preserved=@(foreach($name in $preservedNames|Sort-Object -Unique){
  $path=Join-Path $repo $name;$record=File-Record $path;[ordered]@{Name=$name;Bytes=$record.Bytes;Sha256=$record.Sha256}
 })
@@ -118,6 +135,10 @@ foreach($name in $exports){$match=@($framework.Exports | Where-Object {$_.Name -
 $provenanceFile=Join-Path $repo 'evidence/playable-07-header-provenance.json';$provenance=Get-Content -LiteralPath $provenanceFile -Raw|ConvertFrom-Json
 if($provenance.installedShv.expectedSha256 -ne $pins['ScriptHookV.dll'] -or @(Compare-Object ($exports|Sort-Object) (@($provenance.abi.PSObject.Properties.Value)|Sort-Object) -CaseSensitive).Count){throw 'Project header provenance and verified import boundary disagree.'}
 $projectInputs=@(foreach($name in $sources){$path=Join-Path $sourceRoot $name;[ordered]@{Name=(Portable-InputName $path);Bytes=(Get-Item -LiteralPath $path).Length;Sha256=(Get-FileHash -LiteralPath $path).Hash.ToLowerInvariant()}})
+foreach($pin in @(@{Name='repo/src/telemetry/ShvProbe/ScriptHookVApi.h';Sha256='131f609ff3db49e0bdaa9264a296825669fe897115c65d76fd3f593115d077ba'},@{Name='repo/src/telemetry/ShvProbe/NativeIds.h';Sha256='2c256ef63e179a17361d7f06f12af763d4891a8b494206c03bc4ebd7e2d751b5'})){
+ if(@($projectInputs|Where-Object {$_.Name -ceq $pin.Name -and $_.Sha256 -eq $pin.Sha256}).Count -ne 1){throw 'The frozen native API/header boundary must remain byte-identical.'}
+}
+if($ProbeProfile -eq 'playable-07' -and @($projectInputs|Where-Object {$_.Name -ceq 'repo/src/telemetry/ShvProbe/Probe.cpp' -and $_.Sha256 -eq '7ed8cc3f3cebb95982cf36502ebbda45b14d269ec2218cdf75475e31d278e1b8'}).Count -ne 1){throw 'Changed guided HUD source requires explicit playable-08 build profile.'}
 [IO.Directory]::CreateDirectory($output)|Out-Null
 $definition=Join-Path $output 'ScriptHookV.def';$importLibrary=Join-Path $output 'ScriptHookV.lib';$object=Join-Path $output 'Probe.obj';$binary=Join-Path $output 'RichAudio.OperatingState.Shv.asi';$dependencies=Join-Path $output 'source-dependencies.json'
 (@('LIBRARY ScriptHookV.dll','EXPORTS')+@($exports|ForEach-Object {'  '+$_})) | Set-Content -LiteralPath $definition -Encoding ascii
@@ -156,6 +177,7 @@ $public=[ordered]@{
  candidate=[ordered]@{name=$image.Name;bytes=$image.Bytes;sha256=$image.Sha256;pathHint=(Portable-InputName $binary).Substring(5);installablePlayableUpdate=$false}
  toolchain=[ordered]@{msvcVersion=$vcVersion;windowsSdkVersion=$sdkVersion;compiler=$tools.Compiler;linker=$tools.Linker;librarian=$tools.Librarian;compilerFlags=@('/std:c++17','/W4','/WX','/O2','/MT','/EHsc','/guard:cf','/Brepro','/utf-8');linkerFlags=@('/DLL','/MACHINE:X64','/INCREMENTAL:NO','/OPT:REF','/OPT:ICF','/GUARD:CF','/DYNAMICBASE','/NXCOMPAT','/HIGHENTROPYVA','/Brepro')}
  sourceInputs=$projectInputs;headerProvenanceSha256=(Get-FileHash -LiteralPath $provenanceFile).Hash.ToLowerInvariant();includedHeaderCount=$includedHeaders.Count;includedHeaderManifestSha256=(Get-FileHash -LiteralPath $includedManifest).Hash.ToLowerInvariant();linkedLibraries=$linkedLibraries
+ reusedNativeBoundaryProfile='playable-07';nativeApiAndIdentifiersByteIdentical=$true;guidedHud=($ProbeProfile -eq 'playable-08')
  generatedImportLibrary=[ordered]@{method='Local MSVC librarian generated a COFF import library from eight statically verified decorated exports, including documented keyboard callbacks; no proprietary import-library binary was copied';definitionSha256=(Get-FileHash -LiteralPath $definition).Hash.ToLowerInvariant();librarySha256=(Get-FileHash -LiteralPath $importLibrary).Hash.ToLowerInvariant();frameworkDll='ScriptHookV.dll';exactImportedNames=@($exports|Sort-Object)}
  declaredNativeSetMatchesFrozen06=$true;declaredNativeIds=$declaredNativeIds;nativeAllowlistSha256=$contractsSha256;nativeAllowlistQualification='Declaration names and values are checked; source review separately verifies dispatch and measurement behaviour.'
  preservedPriorFiles=$preserved;earlierArtifactAndReceiptsUnchanged=$true;priorLiveSnapshotAndReceiptsUnchanged=$true

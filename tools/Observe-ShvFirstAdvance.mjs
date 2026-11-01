@@ -6,6 +6,9 @@ import {execFileSync} from 'node:child_process';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 
 export const candidateSha256='21302b4c5c5fb99f63b7b25dce2fa973117bfb0246f16745d0782f062fe1a69e';
+// Exact reviewed builds only. This list does not grant deployment or launch permission.
+export const reviewedCandidateSha256=Object.freeze([candidateSha256,
+  '41361aa281493e1cc54fe196161aafc4a93ce002bfe0bb9da2effbc742465484']);
 const phases=['OFF','IDLE','STATIONARY_REV','ACCELERATION','GEAR_TRANSITIONS','DECELERATION','RETURN_IDLE'];
 const safe=x=>Number.isSafeInteger(x), u32=x=>safe(x)&&x>=0&&x<=0xffffffff;
 const i32=x=>safe(x)&&x>=-0x80000000&&x<=0x7fffffff;
@@ -40,7 +43,7 @@ function beneath(value,root) {
 }
 export function validateOwnership(owner,{allowedSessionRoot,nowMs=Date.now(),allowFixture=false}={}) {
   const fail=reason=>({valid:false,reason});
-  if(!owner||owner.schema!==1||owner.profile!=='PLAYABLE-08'||owner.candidateSha256!==candidateSha256)return fail('ownership-profile-or-candidate-mismatch');
+  if(!owner||owner.schema!==1||owner.profile!=='PLAYABLE-08'||!reviewedCandidateSha256.includes(owner.candidateSha256))return fail('ownership-profile-or-candidate-mismatch');
   const fixture=owner.mode==='fixture';
   if(fixture&&!allowFixture)return fail('fixture-ownership-cannot-authorise-live-observation');
   if(owner.mode!==undefined&&owner.mode!=='live'&&!fixture)return fail('unsupported-ownership-mode');
@@ -182,7 +185,7 @@ export async function runCli(args) {
     if(result?.ready&&hasTerminalCapture(owner.sessionPath))
       result=checkFirstAdvance(rows,{qpcFrequency:actual.qpcFrequency,terminal:true,sourceMode:'live-owned-session'});
     if(!result||result.state==='waiting')result={...(result??{}),schema:1,state:'failed',ready:false,reason:'first-advance-observer-timeout',providerQualified:false,drivingInterlock:false};
-    result.ownershipSha256=sha(ownerBytes);result.exactProcessIdentityVerifiedOnce=true;
+    result.ownershipSha256=sha(ownerBytes);result.candidateSha256=owner.candidateSha256;result.exactProcessIdentityVerifiedOnce=true;
     result.processQueryWasReadOnly=true;result.sourceCaptureFilesWritten=false;result.windowControlPerformed=false;
     result.gameNativeCalls=0;result.pollHz=5;result.maximumWaitMs=timeout;
     result.sourceSessionBirthTimeIsSupplementalOnly=true;

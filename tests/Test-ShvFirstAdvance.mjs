@@ -5,18 +5,24 @@ import path from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
 import {execFileSync,spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {checkFirstAdvance,validateOwnership,fileTimeFromUtc,candidateSha256,hasTerminalCapture} from '../tools/Observe-ShvFirstAdvance.mjs';
+import {checkFirstAdvance,validateOwnership,fileTimeFromUtc,reviewedCandidateSha256,hasTerminalCapture} from '../tools/Observe-ShvFirstAdvance.mjs';
 
 const repo=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const arg=name=>{const at=process.argv.indexOf(name);return at<0?null:process.argv[at+1];};
 const fixtureRoot=arg('--fixture-root');
-if(!fixtureRoot)throw Error('Supply --fixture-root to the preserved full PLAYABLE-07 ABI fixture directory.');
+if(!fixtureRoot)throw Error('Supply --fixture-root to a full reviewed PLAYABLE-07/08 ABI fixture directory.');
 const work=path.join(repo,'.local','playable-08','first-advance-tests-'+randomUUID());
 fs.mkdirSync(work,{recursive:true});
 const digest=file=>createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const fixtureReceipt=path.join(fixtureRoot,'fixture-result.json');
 const fixture=JSON.parse(fs.readFileSync(fixtureReceipt,'utf8'));
-assert.equal(fixture.profile,'PLAYABLE-07');assert.equal(fixture.fullMatrix,true);assert.equal(fixture.candidateSha256,candidateSha256);
+assert.ok(['PLAYABLE-07','PLAYABLE-08'].includes(fixture.profile));assert.equal(fixture.fullMatrix,true);
+const candidateSha256=fixture.candidateSha256;
+assert.ok(reviewedCandidateSha256.includes(candidateSha256));
+const buildReceipt=arg('--build-receipt')??path.join(repo,'build','playable-07-shv-probe','build-receipt.json');
+const build=JSON.parse(fs.readFileSync(buildReceipt,'utf8'));
+const analysisReceipt=arg('--analysis-receipt')??path.join(repo,'.local','playable-07','analysis-validation-final-01.json');
+assert.equal(build.Candidate.Sha256,candidateSha256);
 function load(name) {
   const root=path.join(fixtureRoot,'case-'+name,'RichAudio','ShvProbe');
   const sessions=fs.readdirSync(root,{withFileTypes:true}).filter(e=>e.isDirectory());
@@ -137,14 +143,19 @@ const ps7=arg('--powershell')??'pwsh.exe';
 if(execFileSync(ps7,['-NoLogo','-NoProfile','-NonInteractive','-Command','$PSVersionTable.PSVersion.Major'],{encoding:'utf8',windowsHide:true}).trim()!=='7')
   throw Error('Existing PowerShell7 is required for proposal-only checks.');
 const proposalArgs=['-NoLogo','-NoProfile','-NonInteractive','-File',path.join(repo,'tools','Prepare-ShvProbe.ps1'),
-  '-ProposalProfile','PLAYABLE-08','-FixtureReceipt',path.resolve(fixtureReceipt),'-AnalysisReceipt',path.join(repo,'.local','playable-07','analysis-validation-final-01.json'),
+  '-ProposalProfile','PLAYABLE-08','-BuildReceipt',path.resolve(buildReceipt),'-FixtureReceipt',path.resolve(fixtureReceipt),'-AnalysisReceipt',path.resolve(analysisReceipt),
   '-ShortcutBaselinePath',path.join(repo,'.local','playable-07','shortcut-baseline.json')];
-test('fresh08 proposal truthfully reuses07 artifact and pending ownership',()=>{
+if(build.Profile==='playable-08') {
+  const reviewed=arg('--reviewed-build-evidence-sha256');
+  if(!/^[a-f0-9]{64}$/.test(reviewed??''))throw Error('Supply --reviewed-build-evidence-sha256 for the exact reviewed guided08 public build evidence.');
+  proposalArgs.push('-ReviewedBuildEvidenceSha256',reviewed);
+}
+test('fresh08 proposal truthfully identifies the exact reviewed build and pending ownership',()=>{
   const output=path.join(work,'proposal');
   execFileSync(ps7,[...proposalArgs,'-OutputRoot',output],{encoding:'utf8',windowsHide:true,timeout:20000});
   const install=JSON.parse(fs.readFileSync(path.join(output,'installation-manifest.json'),'utf8'));
   const plan=JSON.parse(fs.readFileSync(path.join(output,'multi-state-proposal.json'),'utf8'));
-  assert.equal(install.profile,'PLAYABLE-08');assert.equal(install.reusedBuildProfile,'playable-07');
+  assert.equal(install.profile,'PLAYABLE-08');assert.equal(install.reusedBuildProfile,build.Profile);
   assert.equal(install.payload[0].sha256,candidateSha256);assert.match(install.payload[0].pendingPath,/\.playable08\.pending$/);
   assert.equal(install.executed,false);assert.equal(plan.firstAdvanceConfirmation.requiredBeforeManualDriving,true);
   assert.equal(plan.firstAdvanceConfirmation.probeProvidesDrivingInterlock,false);
@@ -163,6 +174,12 @@ test('proposal refuses incomplete matrix receipt without producing output',()=>{
   fs.writeFileSync(bad,JSON.stringify({...fixture,fullMatrix:false}),{flag:'wx'});
   const at=proposalArgs.indexOf('-FixtureReceipt'),args=[...proposalArgs];args[at+1]=bad;
   const output=path.join(work,'invalid-proposal');
+  const r=spawnSync(ps7,[...args,'-OutputRoot',output],{encoding:'utf8',windowsHide:true});
+  assert.notEqual(r.status,0);assert.equal(fs.existsSync(output),false);
+});
+if(build.Profile==='playable-08')test('guided proposal refuses a different reviewed build digest',()=>{
+  const at=proposalArgs.indexOf('-ReviewedBuildEvidenceSha256'),args=[...proposalArgs];args[at+1]='0'.repeat(64);
+  const output=path.join(work,'wrong-reviewed-build');
   const r=spawnSync(ps7,[...args,'-OutputRoot',output],{encoding:'utf8',windowsHide:true});
   assert.notEqual(r.status,0);assert.equal(fs.existsSync(output),false);
 });
