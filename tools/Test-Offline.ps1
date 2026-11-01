@@ -13,6 +13,8 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Repository auditor syntax check failed.'}
     & node --test tests/Test-SteamMetadata.mjs
     if($LASTEXITCODE -ne 0){throw 'Metadata parser tests failed.'}
+    & node --test tests/Test-DrivetrainAnalysis.mjs
+    if($LASTEXITCODE -ne 0){throw 'Drivetrain analysis tests failed.'}
     & (Join-Path $repo 'tests\Test-Phase1.ps1') -ReportPath (Join-Path $output 'phase1-results.json')
     & (Join-Path $PSScriptRoot 'Build-Telemetry.ps1') -CoreOnly
     $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
@@ -31,6 +33,11 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Configuration test compilation failed.'}
     & $configTest (Join-Path $output 'config-fixtures')
     if($LASTEXITCODE -ne 0){throw 'Configuration boundary tests failed.'}
+    $drivetrainTest=Join-Path $build 'RichAudio.Drivetrain.Tests.exe'
+    & $compiler /nologo /optimize+ /warnaserror+ /r:System.Runtime.Serialization.dll ('/r:'+(Join-Path $build 'RichAudio.Telemetry.Core.dll')) ('/out:'+$drivetrainTest) (Join-Path $repo 'src\telemetry\Rph\Configuration.cs') (Join-Path $repo 'tests\diagnostics\TestDrivetrain.cs')
+    if($LASTEXITCODE -ne 0){throw 'Drivetrain test compilation failed.'}
+    & $drivetrainTest (Join-Path $output 'drivetrain-fixtures')
+    if($LASTEXITCODE -ne 0){throw 'Drivetrain diagnostic tests failed.'}
     $appendTest=Join-Path $build 'RichAudio.Append.Tests.exe'
     & $compiler /nologo /optimize+ /warnaserror+ /r:System.Runtime.Serialization.dll ('/out:'+$appendTest) (Join-Path $repo 'tests\diagnostics\AppendProbe.cs')
     if($LASTEXITCODE -ne 0){throw 'Append probe compilation failed.'}
