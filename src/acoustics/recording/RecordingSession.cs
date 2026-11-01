@@ -29,9 +29,12 @@ namespace RichAudio.Beacon.Windows.Recording
         OwnedOutputTap tap;StreamingLoopback backend;
         Packet[] packets;int packetWrite,packetRead,packetInFlight;byte[] loopbackFormat;string endpointId;
         int accepting=1,attached,ownedDone=1,loopbackDone=1,abandoned,finalizing,disposed;long reserved=65536,ownedFrames,loopbackFrames,expectedOwned=-1,cutoffFrames;
-        string stopReason,failure;bool endpointOpened;RecordingSnapshot snapshot;
+        string stopReason,failure,loopbackFailure;bool endpointOpened,startupDiscontinuity,initialSamplesMissingUnknown;int loopbackRequested;RecordingSnapshot snapshot;
         public string RecordingId {get;private set;}
         public bool Accepting {get{return Volatile.Read(ref accepting)!=0&&Stopwatch.GetTimestamp()<deadline;}}
+        // Loopback integrity is independent of the post-gain submission tap.
+        // A capture-device failure must not discard healthy owned PCM evidence.
+        internal bool LoopbackAccepting {get{return Accepting&&Volatile.Read(ref loopbackFailure)==null;}}
         public RecordingSnapshot Snapshot {get{return Volatile.Read(ref snapshot);}}
         internal string DirectoryPath {get{return directory;}}
         internal long DeadlineTicks {get{return deadline;}}
@@ -99,33 +102,39 @@ namespace RichAudio.Beacon.Windows.Recording
         }
         internal bool StartFixtureLoopback(ILoopbackDriver driver,out string reason){if(!readiness.FixtureOnly||driver==null||!driver.DeviceFree)throw new InvalidOperationException("Device-free driver required");return StartLoopbackCore("fixture-not-a-device",driver,out reason);}
         bool StartLoopbackCore(string selectedOutputEndpointId,ILoopbackDriver driver,out string reason)
-        {lock(loopbackLifecycle){reason=null;if(!Accepting||Volatile.Read(ref disposed)!=0||String.IsNullOrEmpty(selectedOutputEndpointId)||selectedOutputEndpointId.Length>1024||backend!=null){reason="recording-stopped-or-endpoint-unavailable";return false;}try{Volatile.Write(ref loopbackDone,0);backend=new StreamingLoopback(this,selectedOutputEndpointId,driver);backend.Start();return true;}catch(Exception error){Volatile.Write(ref loopbackDone,1);reason=error.GetType().Name;Fault("loopback-start-failed");return false;}}}
+        {lock(loopbackLifecycle){
+            reason=null;if(!Accepting||Volatile.Read(ref disposed)!=0||backend!=null){reason="recording-stopped-or-endpoint-unavailable";return false;}
+            if(String.IsNullOrEmpty(selectedOutputEndpointId)||selectedOutputEndpointId.Length>1024){reason="loopback-endpoint-identity-unavailable";LoopbackUnavailable(reason);return false;}
+            Interlocked.Exchange(ref loopbackRequested,1);try{Volatile.Write(ref loopbackDone,0);backend=new StreamingLoopback(this,selectedOutputEndpointId,driver);backend.Start();return true;}catch(Exception error){Volatile.Write(ref loopbackDone,1);reason=error.GetType().Name;LoopbackFault("loopback-start-failed");return false;}
+        }}
         internal void SetLoopbackFormat(byte[] format,string selectedEndpoint)
-        {if(loopbackFormat!=null)throw new InvalidOperationException("Loopback cannot rebind");packets=new Packet[PacketCapacity];for(int i=0;i<packets.Length;i++)packets[i]=new Packet();endpointId=selectedEndpoint;Volatile.Write(ref loopbackFormat,(byte[])format.Clone());}
+        {if(loopbackFormat!=null)throw new InvalidOperationException("Loopback cannot rebind");packets=new Packet[PacketCapacity];for(int i=0;i<packets.Length;i++)packets[i]=new Packet();endpointId=selectedEndpoint;Interlocked.Exchange(ref loopbackRequested,1);Volatile.Write(ref loopbackFormat,(byte[])format.Clone());}
         internal unsafe int PrepareLoopback(IntPtr data,int frames,int bytes,uint flags,ulong deviceFrame,ulong qpc100ns,long before,long after)
         {
-            if(!Accepting)return -1;
-            if(frames<1||frames>MaximumPacketFrames||bytes<1||bytes>MaximumPacketBytes||before>after||data==IntPtr.Zero&&(flags&2)==0||loopbackFormat==null||bytes!=frames*BitConverter.ToUInt16(loopbackFormat,12)){Fault("loopback-packet-bound");return -1;}
-            int w=packetWrite;if(w-Volatile.Read(ref packetRead)>=PacketCapacity){Fault("loopback-queue-overflow");return -1;}
+            if(!LoopbackAccepting)return -1;
+            if(frames<1||frames>MaximumPacketFrames||bytes<1||bytes>MaximumPacketBytes||before>after||data==IntPtr.Zero&&(flags&2)==0||loopbackFormat==null||bytes!=frames*BitConverter.ToUInt16(loopbackFormat,12)){LoopbackFault("loopback-packet-bound");return -1;}
+            int w=packetWrite;if(w-Volatile.Read(ref packetRead)>=PacketCapacity){LoopbackFault("loopback-queue-overflow");return -1;}
             Interlocked.Increment(ref packetInFlight);var packet=packets[w%PacketCapacity];
             byte* source=(byte*)data;for(int i=0;i<bytes;i++)packet.Data[i]=(flags&2)!=0?(byte)0:source[i];
             packet.Frames=frames;packet.Bytes=bytes;packet.Flags=flags;packet.DeviceFrame=deviceFrame;packet.Qpc100ns=qpc100ns;packet.Before=before;packet.After=after;return w;
         }
         internal void CommitLoopback(int slot){if(slot<0)return;Volatile.Write(ref packetWrite,slot+1);Interlocked.Decrement(ref packetInFlight);}
-        internal void CancelLoopback(int slot){if(slot>=0)Interlocked.Decrement(ref packetInFlight);Fault("loopback-release-failed");}
-        internal void LoopbackStopped(string error){if(error!=null)Fault(error);Volatile.Write(ref loopbackDone,1);RequestStop(stopReason??"loopback-stopped");ScheduleFinalization();}
+        internal void CancelLoopback(int slot){if(slot>=0)Interlocked.Decrement(ref packetInFlight);LoopbackFault("loopback-release-failed");}
+        internal void LoopbackStopped(string error){if(error!=null)LoopbackFault(error);else if(LoopbackAccepting)LoopbackFault("loopback-ended-early");Volatile.Write(ref loopbackDone,1);ScheduleFinalization();}
+        internal void LoopbackFault(string error){Interlocked.CompareExchange(ref loopbackFailure,error,null);}
+        internal void LoopbackUnavailable(string error){Interlocked.Exchange(ref loopbackRequested,1);LoopbackFault(error);}
         internal void MarkEndpointOpened(){endpointOpened=true;}
         internal void Fault(string error){Interlocked.CompareExchange(ref failure,error,null);RequestStop("capture-fault");}
         public void RequestStop(){RequestStop("user-stop");}
         void RequestStop(string reason){lock(diagnosticAdmission){if(reason!="capture-fault"&&Stopwatch.GetTimestamp()>=deadline)reason="duration-limit";Interlocked.CompareExchange(ref stopReason,reason,null);Volatile.Write(ref accepting,0);}}
         FileStream New(string name){return new FileStream(Path.Combine(directory,name),FileMode.CreateNew,FileAccess.Write,FileShare.Read,65536,FileOptions.SequentialScan);}
-        void Publish(string state,bool complete=false){Volatile.Write(ref snapshot,new RecordingSnapshot(state,failure??stopReason,RecordingId,Interlocked.Read(ref ownedFrames),Interlocked.Read(ref loopbackFrames),Interlocked.Read(ref reserved),complete,endpointOpened));}
+        void Publish(string state,bool complete=false){Volatile.Write(ref snapshot,new RecordingSnapshot(state,failure??loopbackFailure??stopReason,RecordingId,Interlocked.Read(ref ownedFrames),Interlocked.Read(ref loopbackFrames),Interlocked.Read(ref reserved),complete,endpointOpened));}
         void Run()
         {
             try{
                 if(!Reserve(256))throw new IOException("Header budget");
                 owned=new LosslessWaveWriter(New("richaudio.wav"),LosslessWaveWriter.FloatStereo());ownedIndex=New("owned-index.ndjson");eventFile=New("diagnostics.ndjson");
-                ready.Set();Publish("recording");ulong nextDeviceFrame=0;bool haveDevice=false;long stoppingAt=0;
+                ready.Set();Publish("recording");ulong nextDeviceFrame=0,previousPacketQpc=0;bool haveDevice=false;long stoppingAt=0;
                 while(true){
                     if(Stopwatch.GetTimestamp()>=deadline)RequestStop("duration-limit");
                     var format=Volatile.Read(ref loopbackFormat);if(format!=null&&loopback==null){loopback=new LosslessWaveWriter(New("loopback.wav"),format);loopbackIndex=New("loopback-index.ndjson");if(!Reserve(256))break;}
@@ -133,9 +142,21 @@ namespace RichAudio.Beacon.Windows.Recording
                     int r=packetRead;while(r<Volatile.Read(ref packetWrite)){
                         var packet=packets[r%PacketCapacity];if(!Reserve(packet.Bytes)){Volatile.Write(ref packetRead,Volatile.Read(ref packetWrite));break;}
                         loopback.Write(packet.Data,packet.Bytes);
-                        Text(loopbackIndex,Json(new{type="loopback-packet",frames=packet.Frames,deviceFrame=packet.DeviceFrame,deviceQpc100ns=packet.Qpc100ns,flags=packet.Flags,hostGetBufferBeforeQpc=packet.Before,hostGetBufferAfterQpc=packet.After,hostQpcFrequency=Stopwatch.Frequency,missingDeviceFrames=haveDevice&&packet.DeviceFrame>nextDeviceFrame?packet.DeviceFrame-nextDeviceFrame:0,clockDomain="WASAPI-QPC-100ns",timestampValid=(packet.Flags&4)==0}));
-                        if((packet.Flags&5)!=0||haveDevice&&packet.DeviceFrame!=nextDeviceFrame)Fault("loopback-discontinuity-or-timestamp-error");
-                        nextDeviceFrame=packet.DeviceFrame+(ulong)packet.Frames;haveDevice=true;loopbackFrames+=packet.Frames;Volatile.Write(ref packetRead,++r);
+                        bool first=!haveDevice,discontinuity=(packet.Flags&1)!=0,timestampValid=(packet.Flags&4)==0&&packet.Qpc100ns>0;
+                        bool startup=first&&discontinuity&&timestampValid&&(packet.Flags&~7u)==0;
+                        string integrityFault=(packet.Flags&4)!=0?"loopback-timestamp-error":packet.Qpc100ns==0?"loopback-timestamp-unavailable":(packet.Flags&~7u)!=0?"loopback-unknown-packet-flags":
+                            discontinuity&&!first?"loopback-data-discontinuity":haveDevice&&packet.DeviceFrame>nextDeviceFrame?"loopback-device-frame-gap":haveDevice&&packet.DeviceFrame<nextDeviceFrame?"loopback-device-frame-regression":haveDevice&&packet.Qpc100ns<=previousPacketQpc?"loopback-qpc-regression":null;
+                        // DATA_DISCONTINUITY describes a break relative to the
+                        // preceding packet. There is no preceding retained packet
+                        // at startup. Keep the raw flag and valid packet, without
+                        // asserting how many samples preceded it or padding a gap.
+                        if(first&&discontinuity)initialSamplesMissingUnknown=true;
+                        if(startup)startupDiscontinuity=true;
+                        Text(loopbackIndex,Json(new{type="loopback-packet",wavFrameStart=loopbackFrames,frames=packet.Frames,deviceFrame=packet.DeviceFrame,deviceQpc100ns=packet.Qpc100ns,flags=packet.Flags,hostGetBufferBeforeQpc=packet.Before,hostGetBufferAfterQpc=packet.After,hostQpcFrequency=Stopwatch.Frequency,
+                            firstPacket=first,startupDiscontinuity=startup,initialSamplesMissingUnknown=first&&discontinuity,discontinuity=discontinuity,integrityFault=integrityFault,
+                            missingDeviceFrames=first?(ulong?)null:packet.DeviceFrame>nextDeviceFrame?packet.DeviceFrame-nextDeviceFrame:0,clockDomain="WASAPI-QPC-100ns",timestampValid=timestampValid}));
+                        if(integrityFault!=null)LoopbackFault(integrityFault);
+                        nextDeviceFrame=packet.DeviceFrame+(ulong)packet.Frames;previousPacketQpc=packet.Qpc100ns;haveDevice=true;loopbackFrames+=packet.Frames;Volatile.Write(ref packetRead,++r);
                     }
                     // Only the sealed flag (set under diagnosticAdmission) can
                     // authorize final drain. A clock-only expiry can race a
@@ -156,10 +177,18 @@ namespace RichAudio.Beacon.Windows.Recording
         {
                 foreach(var wave in new[]{owned,loopback})try{if(wave!=null)wave.Dispose();}catch(Exception error){Interlocked.CompareExchange(ref failure,"WAV-finalization: "+error.GetType().Name,null);}
                 foreach(var file in new[]{ownedIndex,loopbackIndex,eventFile})try{if(file!=null)try{file.Flush(true);}finally{file.Dispose();}}catch(Exception error){Interlocked.CompareExchange(ref failure,"index-finalization: "+error.GetType().Name,null);}
-                bool complete=failure==null&&ownedFrames>0&&(backend==null||loopbackFrames>0)&&Volatile.Read(ref ownedDone)!=0&&Volatile.Read(ref loopbackDone)!=0;
+                bool ownedComplete=failure==null&&ownedFrames>0&&Volatile.Read(ref ownedDone)!=0;
+                bool loopbackComplete=loopbackRequested!=0&&loopbackFailure==null&&failure==null&&loopbackFrames>0&&Volatile.Read(ref loopbackDone)!=0;
+                bool complete=ownedComplete&&(loopbackRequested==0||loopbackComplete);
                 try{
                     var files=new List<object>();long actual=0;foreach(string file in Directory.GetFiles(directory)){long length=new FileInfo(file).Length;actual+=length;using(var digest=SHA256.Create())using(var input=File.OpenRead(file))files.Add(new{file=Path.GetFileName(file),bytes=length,sha256=BitConverter.ToString(digest.ComputeHash(input)).Replace("-","").ToLowerInvariant()});}
-                    string manifest=Json(new{schema=1,recordingId=RecordingId,origin=readiness.FixtureOnly?"offline-fixture":"explicit-approved-production",state=complete?"stopped":"failed",complete=complete,reason=failure??stopReason,maximumSeconds=options.Seconds,maximumBytes=options.MaximumBytes,ownedFrames=ownedFrames,loopbackFrames=loopbackFrames,cutoffFrames=cutoffFrames,endpointOpened=endpointOpened,selectedEndpointId=endpointId,hostClockDomain="host-Stopwatch-QPC",hostQpcFrequency=Stopwatch.Frequency,hostStartQpc=startTicks,hostEndQpc=Stopwatch.GetTimestamp(),sampleFormat="owned Float32 stereo 48000; loopback exact endpoint mix format",clockAlignment="Submission QPC is not speaker time. WASAPI packet QPC uses 100 ns units. Source clocks need explicit measured anchors; no common origin assumed.",gameOrVehicleAudioVerified=false,physicalAcousticsCaptured=false,files=files});
+                    string manifest=Json(new{schema=1,recordingId=RecordingId,origin=readiness.FixtureOnly?"offline-fixture":"explicit-approved-production",state=complete?"stopped":"failed",complete=complete,reason=failure??loopbackFailure??stopReason,
+                        ownedCaptureComplete=ownedComplete,loopbackCaptureComplete=loopbackComplete,loopbackRequested=loopbackRequested!=0,loopbackFailure=loopbackFailure,
+                        startupDiscontinuity=startupDiscontinuity,initialSamplesMissingUnknown=initialSamplesMissingUnknown,fullSessionCoverageGuaranteed=false,synchronizationEstablished=false,
+                        captureClockIdentity=new{sharedWindowsPerformanceCounter=true,hostClockDomain="host-Stopwatch-QPC",captureClockDomain="WASAPI-QPC-100ns",hostQpcFrequency=Stopwatch.Frequency,
+                            origin=readiness.FixtureOnly?"synthetic-device-free":"native-WASAPI-contract",captureTimestampAccuracyMs=(double?)null},
+                        completenessScope="Complete means retained capture streams finalized without faults, not guaranteed coverage before their first packet or measured synchronization.",
+                        maximumSeconds=options.Seconds,maximumBytes=options.MaximumBytes,ownedFrames=ownedFrames,loopbackFrames=loopbackFrames,cutoffFrames=cutoffFrames,endpointOpened=endpointOpened,selectedEndpointId=endpointId,hostClockDomain="host-Stopwatch-QPC",hostQpcFrequency=Stopwatch.Frequency,hostStartQpc=startTicks,hostEndQpc=Stopwatch.GetTimestamp(),sampleFormat="owned Float32 stereo 48000; loopback exact endpoint mix format",clockAlignment="Submission QPC is not speaker time. WASAPI packet QPC uses 100 ns units. Source clocks need explicit measured anchors; no common origin assumed.",gameOrVehicleAudioVerified=false,physicalAcousticsCaptured=false,files=files});
                     byte[] bytes=Encoding.UTF8.GetBytes(manifest);if(bytes.Length>65536||actual+bytes.Length>options.MaximumBytes)throw new IOException("Final manifest budget");using(var output=New("session.json")){output.Write(bytes,0,bytes.Length);output.Flush(true);}
                 }catch(Exception error){complete=false;Interlocked.CompareExchange(ref failure,"manifest: "+error.GetType().Name,null);}
                 Publish(complete?"stopped":"failed",complete);try{lease.Dispose();}finally{completed.Set();}

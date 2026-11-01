@@ -3,11 +3,34 @@ import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';import {load
 import {observedAcousticScene,observationCoordinates} from '../src/acoustics/engine/observed-geometry.mjs';import {observedInput,demonstrationCoordinates} from './fixtures/ObservedGeometry.mjs';
 const root=process.env.PLAYABLE01_CANDIDATE,session='b'.repeat(32),skip=!root;
 let registry,profiles;function loaded(){if(registry)return;const m=JSON.parse(fs.readFileSync(path.join(root,'playable.json'))),assets=loadStockCatalogAssets(path.join(root,m.playerManifest),{sustainAtlasFile:path.join(root,m.atlas)}),npcAssets=loadStockNpcAssets(path.join(root,m.npcManifest));registry=loadInstalledStockRegistry({catalogFile:path.join(root,m.catalog),catalogSha256:m.catalogSha256,assets,npcAssets});profiles=JSON.parse(fs.readFileSync(path.join(root,m.profiles)));}
-function fixture(){loaded();let wall=0,sequence=0,generation=1,paused=false;const engine=new StockGameplay({registry,profiles,session,now:()=>wall});
+function fixture(latencyDiagnostics=false){loaded();let wall=0,sequence=0,generation=1,paused=false;const engine=new StockGameplay({registry,profiles,session,now:()=>wall,latencyDiagnostics});
  const vehicle=(id='bati',context='npc',model=0xf9300cc5)=>({id,generation:1,observationTicks:Math.round((1000+wall)*10000),model,context,position:[-.3,.1,.8],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],operatingPoint:.5,running:true,valid:true});
  function accept(vehicles=[vehicle()],opts={}){if(opts.paused!==undefined&&opts.paused!==paused){generation++;paused=opts.paused;}engine.accept({version:1,session,listener:{version:1,session,generation,sequence:sequence++,observationTicks:Math.round((1000+wall)*10000),clockFrequency:10000000,gameTimeMs:Math.round(wall),position:[.3,.1,.7],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],listenerKind:'camera',velocityKind:'estimated-camera-difference',paused,valid:opts.valid??true,reason:'valid',coordinates:'gta-native-unscaled',units:'native-unverified',sourceId:null},vehicles},0,opts.validForMs??null);}
  async function step(blocks,make=()=>[vehicle()],opts={}){let peak=0,reflections=0;for(let i=0;i<blocks;i++){if(i%4===0)accept(make(),opts);const channels=await engine.render();for(const c of channels)for(const x of c){assert.ok(Number.isFinite(x)&&Math.abs(x)<1);peak=Math.max(peak,Math.abs(x));}reflections=Math.max(reflections,engine.pipeline.lastControl.paths.filter(p=>p.order>0).length);wall+=512000/48000;}return {peak,reflections};}
  return {engine,vehicle,accept,step,now:()=>wall,advance:ms=>{wall+=ms;}};}
+test('sampled timing retains the actual operating-state brackets and leaves complete PCM bit-exact',{skip},async()=>{
+ const a=fixture(false),b=fixture(true);let rows=0,selected=0;try{
+  for(let i=0;i<112;i++){
+   if(i%4===0){for(const f of [a,b])f.accept([{...f.vehicle('bati-player','player'),operatingPoint:.1+i/140}],{validForMs:200});}
+   const x=await a.engine.render(),y=await b.engine.render();
+   for(let c=0;c<2;c++)assert.deepEqual(Buffer.from(x[c].buffer),Buffer.from(y[c].buffer),'diagnostics preserve every generated Float32 sample');
+   assert.equal(a.engine.lastTiming,null);
+   const timing=b.engine.lastTiming;assert.equal(Boolean(timing),i%8===0);
+   if(timing){rows++;assert.equal(timing.producerFrameStart,i*512);assert.equal(timing.frames,512);assert.equal(timing.nodeClockDomain,'node-performance-ms');assert.equal(timing.nodeFrequency,1000);assert.equal(timing.controlDelayMs,100);
+    assert.ok(timing.renderStartedNodeMs<=timing.renderCompletedNodeMs);assert.ok(timing.sourceBrackets.length<=2);assert.ok(JSON.stringify(timing).length<1500);
+    for(const s of timing.sourceBrackets){selected++;const left=b.engine.snapshots.find(x=>x.frame.listener.sequence===s.leftSequence),right=b.engine.snapshots.find(x=>x.frame.listener.sequence===s.rightSequence);
+     assert.ok(left);assert.equal(left.frame.vehicles[0].observationTicks,s.leftObservationTicks);assert.equal(s.clockFrequency,10000000);assert.equal(s.observationClockDomain,'host-Stopwatch-QPC');assert.match(s.observationBasis,/native operating interval remains in journal/);
+     if(s.rightSequence!==null){assert.ok(right);assert.equal(right.frame.vehicles[0].observationTicks,s.rightObservationTicks);assert.ok(s.interpolation>=0&&s.interpolation<=1);
+      assert.equal(s.operatingPoint,left.frame.vehicles[0].operatingPoint+(right.frame.vehicles[0].operatingPoint-left.frame.vehicles[0].operatingPoint)*s.interpolation);
+     }else{assert.equal(s.interpolation,null);assert.equal(s.rightObservationTicks,null);assert.equal(s.operatingPoint,left.frame.vehicles[0].operatingPoint);}
+     assert.equal(s.operatingPoint,b.engine.slots.find(slot=>slot.vehicle?.id===s.id).vehicle.operatingPoint);
+    }
+   }
+   a.advance(512000/48000);b.advance(512000/48000);
+  }
+  assert.equal(rows,14);assert.ok(selected>8);assert.equal(a.engine.diagnostics().pipeline.renderer.missingHistory,0);assert.equal(b.engine.diagnostics().pipeline.renderer.missingHistory,0);
+ }finally{a.engine.close();b.engine.close();}
+});
 test('an accepted Bati source lease expires independently of a newer listener or render clock',{skip},async()=>{
  const f=fixture();try{
   await f.step(24,()=>[f.vehicle('bati-player','player')],{validForMs:80});

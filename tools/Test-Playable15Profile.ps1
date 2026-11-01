@@ -7,7 +7,16 @@ function Hash([string]$Path){(Get-FileHash -LiteralPath $Path -Algorithm SHA256)
 function Check([string]$Path,[string]$Sha,[long]$Bytes=-1){if((Hash $Path)-cne$Sha-or($Bytes-ge0-and(Get-Item -LiteralPath $Path).Length-ne$Bytes)){throw ('Exact input differs: '+[IO.Path]::GetFileName($Path))}}
 function Local([string]$Path){$full=[IO.Path]::GetFullPath($Path);if(!$full.StartsWith(([IO.Path]::GetFullPath((Join-Path $repo '.local'))+'\'),[StringComparison]::OrdinalIgnoreCase)){throw 'Private validation paths required.'};for($at=$full;$at;$at=[IO.Path]::GetDirectoryName($at)){if((Test-Path -LiteralPath $at)-and((Get-Item -LiteralPath $at -Force).Attributes-band[IO.FileAttributes]::ReparsePoint)){throw 'Linked validation path refused.'}};return $full}
 $receiptPath=Local $BuildReceipt;$receiptSha=Hash $receiptPath;$build=Get-Content -LiteralPath $receiptPath -Raw|ConvertFrom-Json
-if($build.profile-cne'PLAYABLE-15'-or$build.gameFilesWritten-ne$false-or$build.gameLaunched-ne$false-or$build.endpointOpened-ne$false-or$build.hostRebuilt-ne$false-or$build.recorderRebuilt-ne$false){throw 'Offline15 build with preserved host/recorder required.'}
+if($build.profile-cne'PLAYABLE-15'-or$build.gameFilesWritten-ne$false-or$build.gameLaunched-ne$false-or$build.endpointOpened-ne$false){throw 'Offline15 build required.'}
+$recordingRecovery=$build.kind-ceq'recording-recovery-and-latency-diagnostics'
+if($recordingRecovery){
+ if($build.hostRebuilt-ne$true-or$build.recorderRebuilt-ne$true-or$build.rendererRebuilt-ne$false-or$build.sourceBanksRebuilt-ne$false-or$build.managedPluginRebuilt-ne$false-or$build.nativeProducerRebuilt-ne$false-or$build.liveAuthorized-ne$false){throw 'Explicit offline recorder recovery scope required.'}
+ Check $build.retained15BuildReceiptPath 'e7b448b35d577544c64cb030562b4ce0db83490340ae9552af73d7fa9f36d535'
+ $retained=Get-Content -LiteralPath $build.retained15BuildReceiptPath -Raw|ConvertFrom-Json
+ foreach($mode in @('passive','audible')){if($build.$mode.pluginSha256-cne$retained.$mode.pluginSha256-or$build.$mode.sourceManifestSha256-cne$retained.$mode.sourceManifestSha256){throw 'Recovery changed retained managed artifact.'}}
+ if($build.producer.sha256-cne$retained.producer.sha256-or$build.retainedHostSha256-cne$retained.host.sha256){throw 'Recovery changed native artifact or host baseline.'}
+ Check $build.package.isolatedSettingsPath $retained.package.initialIsolatedSettingsSha256
+}elseif($build.hostRebuilt-ne$false-or$build.recorderRebuilt-ne$false){throw 'Original offline15 build requires preserved host/recorder.'}
 $reader=Join-Path (Split-Path -Parent $repo) 'RichAudio/.local/rph/runtime-9695-1158.16/Mono.Cecil.dll';Check $reader '0f6465ce57a0cbabc37013c8e3c9f110672de1c127b6192177d59eb1c7809772';Add-Type -Path $reader
 function Types($Assembly){$queue=[Collections.Generic.Queue[object]]::new();foreach($type in $Assembly.MainModule.Types){$queue.Enqueue($type)};while($queue.Count){$type=$queue.Dequeue();$type;foreach($child in $type.NestedTypes){$queue.Enqueue($child)}}}
 function Calls($Method){if($Method.HasBody){@($Method.Body.Instructions|Where-Object{$_.Operand-is[Mono.Cecil.MethodReference]})}}
@@ -49,6 +58,12 @@ foreach($mode in @('passive','audible')){
 Check $build.host.path $build.host.sha256 $build.host.bytes;foreach($pin in $build.host.sources){Check $pin.path $pin.sha256}
 Check $build.package.manifestPath $build.package.manifestSha256;$manifest=Get-Content -LiteralPath $build.package.manifestPath -Raw|ConvertFrom-Json
 if($manifest.demoProfile-cne'PLAYABLE-13'-or$manifest.calibration.exhaustToEngine-ne10-or$manifest.calibration.commonSourceHeadroomTrim-ne0.25-or@($manifest.eligible).Count-ne1-or$manifest.eligible[0].model-ne4180675781){throw 'Preserved Bati host protocol/calibration required.'}
+if($recordingRecovery){
+ Check $retained.package.manifestPath $retained.package.manifestSha256
+ $originalManifest=Get-Content -LiteralPath $retained.package.manifestPath -Raw|ConvertFrom-Json
+ if(($manifest|Select-Object -ExcludeProperty bindings|ConvertTo-Json -Depth 12 -Compress)-cne($originalManifest|Select-Object -ExcludeProperty bindings|ConvertTo-Json -Depth 12 -Compress)){throw 'Recovery changed calibration, scope, buffer limits or manifest settings.'}
+ foreach($pin in $build.package.preservedAssetBindings){Check (Join-Path $retained.package.root $pin.file) $pin.sha256;Check (Join-Path $build.package.root $pin.file) $pin.sha256}
+}
 foreach($pin in $manifest.bindings){Check (Join-Path $build.package.root $pin.file) $pin.sha256};foreach($pin in $build.package.currentCode){Check $pin.path $pin.sha256}
 $checks=@();foreach($path in $ValidationReceipts){$path=Local $path;$value=Get-Content -LiteralPath $path -Raw|ConvertFrom-Json;if($value.passed-ne$true){throw 'Passing component receipt required.'};$checks+=[ordered]@{path=$path;sha256=(Hash $path);kind=$value.kind;checks=$value.checks;cases=$value.cases;assertions=$value.assertions}}
 Check $receiptPath $receiptSha

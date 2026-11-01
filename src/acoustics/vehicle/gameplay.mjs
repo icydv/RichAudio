@@ -14,7 +14,7 @@ function observePcmBlock(left,counters,right=null){let peak=0,energy=0;
  if(peak>0)counters.nonzeroBlocks++;counters.peak=Math.max(counters.peak,peak);counters.sumSquares+=energy;
 }
 export class StockGameplay {
- constructor({registry,profiles,session,now=()=>performance.now()}){
+ constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false}){
   this.registry=registry;this.profiles=profiles;this.now=now;this.session=session;this.settings={quality:'auto',acceleration:'auto',enabled:true,volume:1,reflections:true,mode:'experimental-additive'};
   // Fixed common observation clock: camera-stationary calibration cannot
   // relabel time while an independently moving vehicle is producing Doppler.
@@ -29,6 +29,9 @@ export class StockGameplay {
   this.stats={blocks:0,acceptedFrames:0,rejectedFrames:0,unsupported:0,arrivals:0,retired:0,headroomPathsOmitted:0,deadlineMisses:0,maximumProcessingMs:0,maximumActive:0,sourceBudgetReductions:0,geometryUpdates:0,geometryFallbacks:0,clippingFaults:0};
   this.stageCounters={validVehicleObservations:0,runningVehicleObservations:0,eligibleVehicleBlocks:0,sourceCreations:0,sourcePlaybackBlocks:0,acousticPathBlocks:0,
    engine:pcmCounters(),exhaust:pcmCounters(),stereo:pcmCounters()};
+  // One sampled block in eight, at most two selected sources. This is lineage
+  // metadata only; it does not participate in source selection or DSP.
+  this.latencyDiagnostics=latencyDiagnostics;this.lastTiming=null;this.captureTiming=false;this.latencyBrackets=[];
  }
  accept(frame,ageMs,validForMs=null){
   try{
@@ -82,7 +85,7 @@ export class StockGameplay {
   const result=[];for(const identity of this.snapshots.at(-1).frame.vehicles){if(!identity.valid)continue;
    let left=null,right=null;for(const snapshot of this.snapshots){const v=snapshot.frame.vehicles.find(v=>v.id===identity.id&&v.generation===identity.generation&&v.model===identity.model&&v.context===identity.context&&v.valid);if(!v)continue;
     const at=snapshot.time+(v.observationTicks-snapshot.frame.listener.observationTicks)/snapshot.frame.listener.clockFrequency;
-    if(at<=time)left={time:at,v};else{right={time:at,v};break;}}
+    if(at<=time)left={time:at,v,sequence:snapshot.frame.listener.sequence};else{right={time:at,v,sequence:snapshot.frame.listener.sequence};break;}}
    if(!left)continue;const old=left.v,next=right?.v;a={time:left.time};b=right;
    if(b&&!next)continue;
    const dt=next?b.time-a.time:0,u=dt>0?(time-a.time)/dt:0;
@@ -90,6 +93,10 @@ export class StockGameplay {
    if(!next&&time-a.time>.05)continue;
    const position=next?mix(old.position,next.position,u):old.position.map((x,i)=>x+old.velocity[i]*(time-a.time));
    const forward=next?unit(mix(old.forward,next.forward,u)):old.forward,up0=next?mix(old.up,next.up,u):old.up,dot=up0.reduce((n,x,i)=>n+x*forward[i],0),up=unit(up0.map((x,i)=>x-dot*forward[i]));
+   if(this.captureTiming)this.latencyBrackets.push({id:old.id,generation:old.generation,leftSequence:left.sequence,rightSequence:right?.sequence??null,
+    leftObservationTicks:old.observationTicks,rightObservationTicks:next?.observationTicks??null,clockFrequency:this.snapshots.at(-1).frame.listener.clockFrequency,
+    observationClockDomain:'host-Stopwatch-QPC',observationBasis:'gameplay-vehicle-pose; native operating interval remains in journal',
+    interpolation:next?u:null,operatingPoint:next?old.operatingPoint+(next.operatingPoint-old.operatingPoint)*u:old.operatingPoint});
    result.push({...old,position,forward,up,velocity:next?mix(old.velocity,next.velocity,u):old.velocity,
     operatingPoint:next?old.operatingPoint+(next.operatingPoint-old.operatingPoint)*u:old.operatingPoint,
     running:old.running&&(!next||next.running),lift:next?next.operatingPoint<old.operatingPoint-.002:false});
@@ -97,6 +104,7 @@ export class StockGameplay {
  }
  async render(){
   const start=this.now(),time=this.pipeline.renderer.frame/FS;this.sample=this.playout.sample(time,this.now());
+  this.captureTiming=this.latencyDiagnostics&&this.stats.blocks%8===0;this.lastTiming=null;if(this.captureTiming)this.latencyBrackets=[];
   if(this.pipeline.simulation.scene!==this.direct&&this.now()>=this.sceneExpiry){this.pipeline.replaceScene(this.direct);this.stats.geometryFallbacks++;}
   const listener=this.sample.state??{position:[0,0,0],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],valid:false,generation:this.lastGeneration||1};
   const offered=this.sample.state?this.vehiclesAt(this.sample.targetTime):[];
@@ -136,6 +144,10 @@ export class StockGameplay {
   this.pipeline.setQuality(this.quality.active);
   if(elapsed>BLOCK/FS*1000){this.stats.deadlineMisses++;this.consecutiveMisses++;this.lastGood=this.now();if(this.consecutiveMisses>=5&&this.activeLimit>1){this.activeLimit=1;this.stats.sourceBudgetReductions++;}}
   else{this.consecutiveMisses=0;if(this.now()-this.lastGood>5000)this.activeLimit=MAX;}
+  if(this.captureTiming){const selectedIds=new Set(selected.map(s=>s.v.id));this.lastTiming={producerFrameStart:Math.round(time*FS),frames:BLOCK,
+   nodeClockDomain:'node-performance-ms',nodeFrequency:1000,renderStartedNodeMs:start,renderCompletedNodeMs:this.now(),processingMs:elapsed,
+   sourceTargetTimeSeconds:this.sample.targetTime??null,latestAcceptedSequence:this.lastFrame,controlDelayMs:100,
+   sourceBrackets:this.latencyBrackets.filter(s=>selectedIds.has(s.id)).slice(0,MAX)};}
   return [this.left,this.right];
  }
  diagnostics(){return {...this.stats,active:this.slots.filter(s=>s.identity).length,activeLimit:this.activeLimit,mode:this.settings.mode,nativeReplacement:false,

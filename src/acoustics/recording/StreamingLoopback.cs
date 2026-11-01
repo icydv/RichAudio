@@ -20,22 +20,22 @@ namespace RichAudio.Beacon.Windows.Recording
         readonly RecordingSession session;readonly string endpoint;readonly Thread thread;readonly ILoopbackDriver driver;
         readonly object lifecycle=new object();volatile bool stop;bool started;
         internal StreamingLoopback(RecordingSession owner,string selectedOutputEndpointId,ILoopbackDriver fake=null)
-        {session=owner;endpoint=selectedOutputEndpointId;driver=fake??new NativeLoopbackDriver(owner,delegate{return !stop&&session.Accepting;});thread=new Thread(Run){IsBackground=true,Name="RichAudio selected endpoint loopback"};thread.SetApartmentState(ApartmentState.STA);}
-        internal void Start(){lock(lifecycle){if(started||stop||!session.Accepting)throw new InvalidOperationException("Loopback start was cancelled");if(session.FixtureOnly&&!driver.DeviceFree)throw new InvalidOperationException("Fixture capability cannot open an endpoint");started=true;thread.Start();}}
+        {session=owner;endpoint=selectedOutputEndpointId;driver=fake??new NativeLoopbackDriver(owner,delegate{return !stop&&session.LoopbackAccepting;});thread=new Thread(Run){IsBackground=true,Name="RichAudio selected endpoint loopback"};thread.SetApartmentState(ApartmentState.STA);}
+        internal void Start(){lock(lifecycle){if(started||stop||!session.LoopbackAccepting)throw new InvalidOperationException("Loopback start was cancelled");if(session.FixtureOnly&&!driver.DeviceFree)throw new InvalidOperationException("Fixture capability cannot open an endpoint");started=true;thread.Start();}}
         void Run()
         {
             string error=null;
             try{
-                driver.BeforeActivation();if(stop||!session.Accepting)return;
-                byte[] format=driver.Open(endpoint);if(stop||!session.Accepting)return;
-                session.SetLoopbackFormat(format,endpoint);driver.BeforeStart();if(stop||!session.Accepting)return;
+                driver.BeforeActivation();if(stop||!session.LoopbackAccepting)return;
+                byte[] format=driver.Open(endpoint);if(stop||!session.LoopbackAccepting)return;
+                session.SetLoopbackFormat(format,endpoint);driver.BeforeStart();if(stop||!session.LoopbackAccepting)return;
                 driver.Start();
-                while(!stop&&session.Accepting)if(!driver.ReadPacket())Thread.Sleep(2);
-            }catch(OperationCanceledException){if(!stop&&session.Accepting)error="unexpected-loopback-cancellation";}
+                while(!stop&&session.LoopbackAccepting)if(!driver.ReadPacket())Thread.Sleep(2);
+            }catch(OperationCanceledException){if(!stop&&session.LoopbackAccepting)error="unexpected-loopback-cancellation";}
             catch(Exception failure){error="loopback: "+failure.GetType().Name+": "+failure.Message;}
             finally{try{driver.Dispose();}catch(Exception failure){error=error??("loopback-stop: "+failure.GetType().Name);}session.LoopbackStopped(error);}
         }
-        public void Dispose(){bool join;lock(lifecycle){stop=true;join=started;}if(join&&thread.IsAlive&&!thread.Join(2000))session.Fault("loopback-stop-timeout; worker retains COM ownership");}
+        public void Dispose(){bool join;lock(lifecycle){stop=true;join=started;}if(join&&thread.IsAlive&&!thread.Join(2000))session.LoopbackFault("loopback-stop-timeout; worker retains COM ownership");}
     }
     internal sealed class NativeLoopbackDriver:ILoopbackDriver
     {

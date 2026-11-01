@@ -70,7 +70,7 @@ namespace RichAudio.Beacon.Windows.Recording
             string reason;
             bool accepted;
             if(permit.FixtureOnly){
-                if(fixtureDriver==null){LoopbackState="fixture-loopback-not-supplied";Failure=LoopbackState;return;}
+                if(fixtureDriver==null){LoopbackState="fixture-loopback-not-supplied";Failure=LoopbackState;session.LoopbackUnavailable(LoopbackState);return;}
                 accepted=session.StartFixtureLoopback(fixtureDriver,out reason);
             }else accepted=session.StartLoopback(actualSelectedEndpointId,out reason);
             LoopbackState=accepted?"selected-endpoint-loopback-requested":"loopback-unavailable";

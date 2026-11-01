@@ -15,8 +15,8 @@ const registry=loadInstalledStockRegistry({catalogFile:inside(config.catalog),ca
 // Warm the shared source timelines before the host releases any telemetry.
 const warmed=new Set();for(const pair of config.eligible){const r=registry.resolve(pair.model,pair.context);if(r.status!=='available')throw Error('prepared eligible model no longer maps');const key=pair.context+':'+r.bank.model;
  if(!warmed.has(key)){registry.createSource(pair.model,pair.context);warmed.add(key);}}
-const engine=new StockGameplay({registry,profiles,session}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
-let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,clock=null,lastFrame=null,latestGeometryRevision=0;
+const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
+let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
 let viewer=false,viewerClient=null;engine.telemetry=new SoundMapTelemetry();
 const packet=Buffer.alloc(4112),log=v=>process.stderr.write(JSON.stringify(v)+'\n');
 function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality;
@@ -29,7 +29,7 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality;
   richAudioEnabled:engine.settings.enabled,outputLevel:engine.settings.volume,earlyReflections:engine.settings.reflections,
   listenerState:d.listenerState,selectedPaths:d.selectedPaths,outputPeak:d.outputPeak,sourceStates:d.sourceStates,stageCounters:d.stageCounters,
   fallbackReason:d.geometry==='conditional-direct-unobserved-space-assumed-clear'?'Additive; conditional direct sound without collision coverage':b.fallbackReason,
-  controlDelayMs:100,propagationLimitSeconds:2,arrivals:d.arrivals,retired:d.retired}});
+  controlDelayMs:100,propagationLimitSeconds:2,arrivals:d.arrivals,retired:d.retired,latencyRows,latencyRowsOmitted}});
 }
 function finish(error){if(stopped)return;stopped=true;engine.close();if(viewerClient){viewerClient.close().catch(()=>{});viewerClient=null;}viewer=false;status();if(error){log({type:'gameplay-error',code:error.message});process.exitCode=1;}input.close();process.stdin.pause();}
 async function pump(){if(busy||stopped||credits<=0)return;busy=true;
@@ -39,11 +39,18 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
    if(s.clockFrequency!==clock.frequency)throw Error('producer observation clock changed');
    const age=Math.max(m.ageMs,(clock.ticks+(now-clock.at)*clock.frequency/1000-s.observationTicks)*1000/clock.frequency);
    const remaining=m.validForMs===undefined?null:m.validForMs-(now-m.receivedAt);
-   if(age<=250&&(remaining===null||remaining>0)){engine.accept(m.frame,age,remaining);lastFrame={frame:m.frame,age,at:now};}
+   if(age<=250&&(remaining===null||remaining>0)){engine.accept(m.frame,age,remaining);lastFrame={frame:m.frame,age,at:now,receivedAt:m.receivedAt,hostWriteBeforeQpc:m.hostWriteBeforeQpc??null,hostQpcFrequency:m.hostQpcFrequency??null};}
   }
   const channels=await engine.render();credits--;encodeVehicleRa07(...channels,sequence,packet);sequence=(sequence+1)>>>0;
   if(viewerClient&&engine.visual?.soundMapFrame)try{viewerClient.offer(engine.visual.soundMapFrame,engine.visual.soundMapGeometry);}catch{}
   await new Promise((resolve,reject)=>process.stdout.write(packet,e=>e?reject(e):resolve()));
+  if(engine.lastTiming){
+   // The host's existing bounded diagnostic writer receives this on its stderr
+   // worker. stdout completion is pipe completion, never endpoint submission.
+   const row={type:'producer-block-timing',...engine.lastTiming,stdoutCompletedNodeMs:performance.now(),snapshotReceiptNodeMs:lastFrame?.receivedAt??null,
+    snapshotAcceptedNodeMs:lastFrame?.at??null,snapshotHostWriteBeforeQpc:lastFrame?.hostWriteBeforeQpc??null,snapshotHostQpcFrequency:lastFrame?.hostQpcFrequency??null};
+   const text=JSON.stringify(row);if(latencyRows<1500&&text.length<=1900&&process.stderr.writableLength<16384){process.stderr.write(text+'\n');latencyRows++;}else latencyRowsOmitted++;
+  }
  }catch(e){finish(e);}finally{busy=false;if(credits>0&&!stopped)setImmediate(pump);}
 }
 function geometry(message){

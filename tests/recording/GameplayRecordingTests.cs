@@ -71,6 +71,10 @@ public static class GameplayRecordingTests
                     Need(File.ReadAllText(Path.Combine(capture,"diagnostics.ndjson")).Contains("\"humanListeningApproved\":false"),"No fabricated human-listening approval in evidence");
                 }
             }
+            using(var unavailable=GameplayRecording.TryStart(root,permit,out reason)){
+                unavailable.StartLoopback(null);string unavailablePath=unavailable.DirectoryPath;unavailable.Dispose();var failed=json.Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(unavailablePath,"session.json")));
+                Need((bool)failed["loopbackRequested"]&&!(bool)failed["complete"]&&failed["loopbackFailure"].ToString()=="fixture-loopback-not-supplied"&&!(bool)failed["endpointOpened"],"Approved missing loopback driver remains incomplete in final session manifest without endpoint activation");
+            }
             var fade=new GameplayShutdownFade();Need(fade.Begin(0,0,4096)&&!fade.Begin(1,1,0),"Fade request is one-way");Need(!fade.Complete(120,5760),"Old120ms shutdown cannot cut queued output");Need(!fade.Complete(649,31200),"Minimum sink grace preserved");Need(!fade.Complete(650,4096),"Queued reserve alone is insufficient");Need(fade.Complete(650,31200)&&fade.FullyConsumed(31200),"Queued reserve and500ms processing/control allowance consumed");Need(fade.Complete(1500,0)&&!fade.FullyConsumed(0),"Stalled sink has bounded honest incomplete fade");
             Console.WriteLine(json.Serialize(new{passed=true,assertions=checks,captureDirectory=capture,actualProductionFillExecuted=true,existingOwnedTapAndLoopbackExecuted=true,fixtureOnly=true,gameLaunched=false,endpointOpened=false,microphoneOpened=false,humanListeningApproved=false}));return 0;
         }catch(Exception e){Console.Error.WriteLine(e);return 1;}
