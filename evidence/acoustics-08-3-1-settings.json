@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "scope": "Offline settings availability correction; no new game deployment, GTA/RPH launch or audio endpoint",
+  "baseCommit": "48f493a5efcd285dd003505b951d556a2bb188f8",
+  "rootCause": "Assembly-relative sidecar lookup follows RPH's cached plugin copy instead of the deployed Plugins directory",
+  "preservedCandidate04": {
+    "pluginSha256": "769AC7867E583B142A08743F3A55B7BB30B778A2657BBD33088482D2F1A2B958",
+    "cachedPluginSha256Matches": true,
+    "cacheCreationUtc": "2026-10-29T18:59:23Z",
+    "cachedAdjacentSidecarExists": false,
+    "deployedSidecarHashMatched": true,
+    "exactDeployedSidecarAndPreferencesLoadInFrameworkProbe": true,
+    "cachedAssemblyRelativeProbeException": "FileNotFoundException",
+    "independentRestorationStillPreserved": true
+  },
+  "correction": "Resolve fixed Plugins/RichAudio.Menu.json from the exact guarded game executable directory; preserve sidecar/workspace validation",
+  "diagnostics": {
+    "fields": ["stage", "code", "classifiedExceptionType"],
+    "consoleCommand": "RichAudioSettingsStatus",
+    "automaticChangedReportsMaximum": 8,
+    "pathsContentsAndTokensExcluded": true
+  },
+  "validation": {
+    "localRegisteredNodeCases": 481,
+    "nodePassed": 481,
+    "nodeFailed": 0,
+    "nodeSkipped": 0,
+    "menuChecks": 988,
+    "settingsChecks": 44,
+    "preferenceBridgeChecks": 59,
+    "recordingBridgeChecks": 18,
+    "hostAssertions": 1701,
+    "deploymentLayoutChecks": 34,
+    "actualPinnedSdkCombinedPluginLayoutTested": true,
+    "ciLayoutUsesSameSharedComponentsWithoutPrivateSdk": true,
+    "actualSoundMapServiceWithStoppedHostTested": true,
+    "newLiveCompatibilityVerified": false
+  },
+  "nextCandidate": {
+    "name": "combined-083-review-05",
+    "loadingSeconds": 600,
+    "hostSecondsMaximum": 60,
+    "stopTargetSeconds": 45,
+    "quality": "balanced",
+    "acceleration": "auto",
+    "frequencyHz": 600,
+    "sourceLevel": 0.44,
+    "auditionTrimDb": 12,
+    "hostGain": 0.20,
+    "geometrySessionsMaximum": 2,
+    "freshExplicitAuthorizationRequired": true
+  }
+}

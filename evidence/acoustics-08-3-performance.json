@@ -1,0 +1,269 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual device-free producer/worker with original synthetic scene; separate loopback SoundMap service and telemetry recording enabled. No WASAPI endpoint; owned PCM tap measured separately.",
+  "parameters": {
+    "quality": "balanced",
+    "scenario": "demanding",
+    "sources": 1,
+    "blocks": 160,
+    "fps": 20
+  },
+  "pairs": [
+    {
+      "mode": "cpu",
+      "disabled": {
+        "sha256": "5c792057b063b5c215bfce46df607f4db481305d1da69197e828fc4b4347732f",
+        "frames": 81920,
+        "nodeCpuSeconds": 1.142,
+        "worker": {
+          "count": 160,
+          "median": 3.210899999999924,
+          "p95": 4.410499999999985,
+          "max": 8.520600000000002
+        },
+        "dsp": {
+          "count": 160,
+          "median": 0.2336999999999989,
+          "p95": 0.858199999999897,
+          "max": 3.3777999999999793
+        },
+        "helperCumulativeCpuMs": null,
+        "gpuResultsApplied": 0,
+        "gpuCompletedBatches": 0,
+        "gpuDevice": null,
+        "gpuCapability": "unverified",
+        "workerSchedulingAndDspOverPeriod": 1,
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "workerSchedulingMs": {
+          "count": 160,
+          "median": 3.3326999999999316,
+          "p95": 4.616800000000012,
+          "max": 46.8234
+        },
+        "transport": null
+      },
+      "enabled": {
+        "sha256": "5c792057b063b5c215bfce46df607f4db481305d1da69197e828fc4b4347732f",
+        "frames": 81920,
+        "nodeCpuSeconds": 0.954,
+        "worker": {
+          "count": 160,
+          "median": 3.2046000000000276,
+          "p95": 4.553700000000049,
+          "max": 10.804400000000001
+        },
+        "dsp": {
+          "count": 160,
+          "median": 0.22019999999997708,
+          "p95": 0.8913000000000011,
+          "max": 3.6544000000000096
+        },
+        "helperCumulativeCpuMs": null,
+        "gpuResultsApplied": 0,
+        "gpuCompletedBatches": 0,
+        "gpuDevice": null,
+        "gpuCapability": "unverified",
+        "workerSchedulingAndDspOverPeriod": 1,
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "workerSchedulingMs": {
+          "count": 160,
+          "median": 3.324600000000032,
+          "p95": 4.97889999999984,
+          "max": 50.6692
+        },
+        "transport": {
+          "offered": 32,
+          "sent": 36,
+          "sentFrames": 32,
+          "sentEvents": 4,
+          "dropped": 0,
+          "errors": 0,
+          "droppedEvents": 0
+        }
+      },
+      "exactPcmEqual": true,
+      "recordedVisualFrames": 32
+    },
+    {
+      "mode": "gpu",
+      "disabled": {
+        "sha256": "5c792057b063b5c215bfce46df607f4db481305d1da69197e828fc4b4347732f",
+        "frames": 81920,
+        "nodeCpuSeconds": 1.563,
+        "worker": {
+          "count": 160,
+          "median": 3.2092999999999847,
+          "p95": 4.482500000000073,
+          "max": 18.5976
+        },
+        "dsp": {
+          "count": 160,
+          "median": 0.22540000000003602,
+          "p95": 0.8600999999999885,
+          "max": 3.234199999999987
+        },
+        "helperCumulativeCpuMs": 218.75,
+        "gpuResultsApplied": 0,
+        "gpuCompletedBatches": 0,
+        "gpuDevice": "NVIDIA GeForce RTX 2080 SUPER",
+        "gpuCapability": "hardware-directcompute",
+        "workerSchedulingAndDspOverPeriod": 2,
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "workerSchedulingMs": {
+          "count": 160,
+          "median": 3.344100000000026,
+          "p95": 4.609699999999975,
+          "max": 49.8777
+        },
+        "transport": null
+      },
+      "enabled": {
+        "sha256": "5c792057b063b5c215bfce46df607f4db481305d1da69197e828fc4b4347732f",
+        "frames": 81920,
+        "nodeCpuSeconds": 0.765,
+        "worker": {
+          "count": 160,
+          "median": 1.6698000000000093,
+          "p95": 4.561800000000005,
+          "max": 11.04610000000001
+        },
+        "dsp": {
+          "count": 160,
+          "median": 0.21829999999999927,
+          "p95": 0.9232999999999834,
+          "max": 3.8342999999999847
+        },
+        "helperCumulativeCpuMs": 234.375,
+        "gpuResultsApplied": 152,
+        "gpuCompletedBatches": 152,
+        "gpuDevice": "NVIDIA GeForce RTX 2080 SUPER",
+        "gpuCapability": "hardware-directcompute",
+        "workerSchedulingAndDspOverPeriod": 1,
+        "gpuExecutionMs": {
+          "count": 152,
+          "median": 0.00688,
+          "p95": 0.007968,
+          "max": 0.008192
+        },
+        "workerSchedulingMs": {
+          "count": 160,
+          "median": 1.8116999999999734,
+          "p95": 5.033500000000004,
+          "max": 54.9493
+        },
+        "transport": {
+          "offered": 32,
+          "sent": 36,
+          "sentFrames": 32,
+          "sentEvents": 4,
+          "dropped": 0,
+          "errors": 0,
+          "droppedEvents": 0
+        }
+      },
+      "exactPcmEqual": true,
+      "recordedVisualFrames": 32
+    },
+    {
+      "mode": "auto",
+      "disabled": {
+        "sha256": "5c792057b063b5c215bfce46df607f4db481305d1da69197e828fc4b4347732f",
+        "frames": 81920,
+        "nodeCpuSeconds": 1.266,
+        "worker": {
+          "count": 160,
+          "median": 3.1707000000000107,
+          "p95": 4.538700000000006,
+          "max": 12.864599999999996
+        },
+        "dsp": {
+          "count": 160,
+          "median": 0.24259999999998172,
+          "p95": 0.7994999999999663,
+          "max": 3.4078000000000657
+        },
+        "helperCumulativeCpuMs": 218.75,
+        "gpuResultsApplied": 0,
+        "gpuCompletedBatches": 3,
+        "gpuDevice": "NVIDIA GeForce RTX 2080 SUPER",
+        "gpuCapability": "hardware-directcompute",
+        "workerSchedulingAndDspOverPeriod": 1,
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "workerSchedulingMs": {
+          "count": 160,
+          "median": 3.296000000000049,
+          "p95": 4.896200000000022,
+          "max": 49.996100000000006
+        },
+        "transport": null
+      },
+      "enabled": {
+        "sha256": "5c792057b063b5c215bfce46df607f4db481305d1da69197e828fc4b4347732f",
+        "frames": 81920,
+        "nodeCpuSeconds": 1.36,
+        "worker": {
+          "count": 160,
+          "median": 3.3032000000000608,
+          "p95": 4.71459999999999,
+          "max": 15.280999999999992
+        },
+        "dsp": {
+          "count": 160,
+          "median": 0.23700000000008004,
+          "p95": 0.7906000000000404,
+          "max": 3.547700000000077
+        },
+        "helperCumulativeCpuMs": 203.125,
+        "gpuResultsApplied": 0,
+        "gpuCompletedBatches": 3,
+        "gpuDevice": "NVIDIA GeForce RTX 2080 SUPER",
+        "gpuCapability": "hardware-directcompute",
+        "workerSchedulingAndDspOverPeriod": 1,
+        "gpuExecutionMs": {
+          "count": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "workerSchedulingMs": {
+          "count": 160,
+          "median": 3.4286999999999352,
+          "p95": 5.0861000000000445,
+          "max": 53.5544
+        },
+        "transport": {
+          "offered": 32,
+          "sent": 36,
+          "sentFrames": 32,
+          "sentEvents": 4,
+          "dropped": 0,
+          "errors": 0,
+          "droppedEvents": 0
+        }
+      },
+      "exactPcmEqual": true,
+      "recordedVisualFrames": 32
+    }
+  ],
+  "limitations": "Two sequential processes per mode; includes cold startup and scheduling/GC noise. CPU counters are quantized. The period count covers measured worker scheduling plus DSP only; it is a lower bound on complete block overruns and includes cold startup. No claim of live-game deadlines, viewer paint cost, physical output, or GPU speedup from telemetry."
+}

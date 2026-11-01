@@ -1,0 +1,2052 @@
+{
+ "schemaVersion": 2,
+ "scope": "ACOUSTICS-08.3.5 actual component offline stability proof",
+ "elapsedProofWallSeconds": 150.5978904,
+ "originalCommit": "247e7ff2af8f1670ba454ae303ba56cb4f16fb19",
+ "currentModulesSha256": {
+  "src/acoustics/engine/paths.mjs": "68FFF18CEB74B180EAD6630A11E57683D52E65C80746AC2B01E8A6E69B2613CE",
+  "src/acoustics/streaming/beacon-frequency.mjs": "292E28BED21DF509D33F929A3D75CF6950411E7DA15FE302282E42F18A55123E",
+  "src/acoustics/streaming/beacon-output-trim.mjs": "F2439452FF5489A090EA5BE8A1973DFABA4136C92FC8BA852E898B902FA68364",
+  "src/acoustics/streaming/causal.mjs": "6013D48C95438E41482F620AC9239324B4B96B61A7F4BA1CACDFCE5D600D151D",
+  "src/acoustics/streaming/listener-playout.mjs": "B6D4605015BB1B13AE69E2D38AE26528290FD828E48759D52A466F727DD987E9",
+  "src/acoustics/streaming/observed-live.mjs": "76759223E7E42D4C7ABE0CCE9DBC7F837AE3062A6891BC1F65CBC15A3EE5A5D3",
+  "src/acoustics/host/Windows/HostProgram.cs": "681961D2B10936F8624EB2BE7E93F02442389ED043C47D551DE699BB14BB2329",
+  "src/acoustics/host/Windows/HostListeningFixture.cs": "0338065DEEE3AA2C35396E1F0FFE847DD5734E9FD39A5B01923E5398B5BE920D",
+  "src/acoustics/host/Windows/GeometryRelayHost.cs": "FE6CAA236E7B511FE6F5182FFC3B2D5423EA287DE7D123E8A1E5C388FB44FE29",
+  "src/acoustics/host/Windows/HostShutdown.cs": "9590F79511ACF365F9E97B914B5298005DE666F2C07BCB6F44EEB2762B9D2A83",
+  "tools/Run-Acoustics07.mjs": "7E01EEA30E9D3847ED9757ED3681025CF9D540B1DB01672D89A2A5933221193D",
+  "tools/Run-SpatialStabilityProof.mjs": "F25ACF46FBBADF775F066506337D5719A80FF31029D5D235735ADD6023452B47",
+  "tools/Run-SpatialNativeProof.mjs": "C58D9FCD8C71C1B4F65370824292078AFD40BEA01436E7C983F276668D5972B8",
+  "tools/Test-SpatialStability.ps1": "7DCA157B62EF07B92BC34CDD55B373D669722CBF2C5F19F9A74B08521D43305B",
+  "tests/fixtures/SpatialTrajectories.mjs": "A9A1889F45155C5835924E8ED0F80C4C8EC9DAADF19C62664F38B750B8B00AEA",
+  "tests/geometry-live/SpatialStabilityIntegration.cs": "379B8CCCDBE9932E6379BBB741B5042692363AC252A48E34F20F08D604647C44",
+  "tests/Test-SpatialMotionMetrics.mjs": "8E0235793D9F8C0269F298C723BE454D47D5BDBCE160AF286812936220E7C57E",
+  "tools/Check-ListenerStartup.mjs": "3016D734411F0A6A0CD87AF1E6CED58882585AD1722BACDB2708A811A5FC873D",
+  "tools/Check-GeometryRelay.mjs": "88458A9765B4AB4F03F5155358100C4E1884E1FF16B76FF1D93D728ADF6A68DA"
+ },
+ "compiledFixturesSha256": {
+  "current": "EB9D611D8EF5CFE82555B8D2527AFFCB24674288A38C8733481C1118BF5D6425",
+  "original": "30F606D0175AB715A8C11097F54D617451F08D1F48AEAE7B629E82B34A6DD82A"
+ },
+ "sourceAndFixtureBindingsReverified": true,
+ "baselineAdapters": {
+  "scope": "headless-only existing listener context/delivery evidence and test-only native maximum12s to60s for identical planned50s fixture; original worker/acoustics/guard/live60s unchanged",
+  "originalProducerSha256": "F9A5680DE0F27F228B27B61585B2CA9EE1FC3FCB3A5588AE4324F6E70F98376E",
+  "harnessProducerSha256": "B9697650323FF6D99B8288B4CEC72D68300BFA045A4DC406DD9BF65B03E7C5E7",
+  "originalNativeFixtureSha256": "2ABC199F14927BE3A7E6BA4D0608A50941665B4F8A64DD164157252657324250",
+  "harnessNativeFixtureSha256": "5575618601CF0DAECF8803A788AA366F13D53277669810A2F0F7D30FD1F8ADBB",
+  "exactRemoved": ["options.geometry && ['geometry-config','geometry','owned-sources'].includes(m.type)","      audioTime: renderer.frame / FS,","Run(root,\"open-road\",\"harmonic\",1,12,.20f"],
+  "exactAdded": ["options.geometry && (['geometry-config','geometry','owned-sources'].includes(m.type)||(options.headless&&m.type==='listener-context-config'))","      audioTime: renderer.frame / FS, delivery:options.headless?{maximumMs:0,basis:'controlled-fixture',reference:'deterministic-audio-frame-delivery'}:undefined,","Run(root,\"open-road\",\"harmonic\",1,60,.20f"]
+ },
+ "gameLaunched": false,
+ "audioEndpointOpened": false,
+ "subjectiveSmoothness": "Not assessed offline",
+ "speakerToEarLatencyMeasured": false,
+ "profile": {
+  "source": "original harmonic beacon",
+  "frequencyHz": 600,
+  "sourceLevel": 0.44,
+  "auditionTrimDb": 12,
+  "hostGain": 0.2,
+  "quality": "balanced",
+  "acceleration": "auto",
+  "sampleRate": 48000,
+  "blockFrames": 512,
+  "preHostGuardPeak": 0.5,
+  "sourceNearFieldRadius": 10,
+  "farFieldUnchangedAtAndBeyondRadius": true,
+  "declaredModelScaleIsPhysicalGtaScale": false,
+  "measuredInitialStationaryRmsDeltaDb": -1.939467656,
+  "independentNormalization": false,
+  "originalHarmonicRatios": {
+   "secondToFundamental": 0.3494232222,
+   "thirdToFundamental": 0.1493416074
+  },
+  "correctedHarmonicRatios": {
+   "secondToFundamental": 0.3494232203,
+   "thirdToFundamental": 0.1493416045
+  }
+ },
+ "columns": {
+  "summary": ["count","minimum-if-measured","median","p95","maximum"],
+  "status": ["exitCode","frames","validationPassed","trimRejectedBlocks","nonfiniteSamples","overCeilingSamples","limitedFrames","missingHistory","cursorResets","historyUnavailableFrames","sourceContextResets","wholeQualityDeadlineMisses"],
+  "signal": ["preHostPeak","preHostRms","headroomTo0.5Guard","maximumSampleStep","maximumBlockBoundaryStep","blockBoundarySecondDifferenceRms","interiorSecondDifferenceRms","maximumFiveMsStereoBalanceStep","maximumFiveMsRmsStep","minimumZeroCrossingHz","maximumZeroCrossingHz","maximumCycleFrequencyJumpHz"],
+  "controls": ["maximumBlockPanStep","maximumBlockGainStep","maximumBlockRateStep","maximumSamplePanStep","maximumSampleGainStep","maximumSampleRateStep"],
+  "motion": ["fittedLagMs","trackingRms","maximumDirectionError","maximumIncrementError","maximumExcessIncrement","incrementErrorRms","windowCount"],
+  "rapidStop": ["oppositeSideBalanceOvershoot","settlingWithin0.02AfterMs"],
+  "causalRateBound": ["affectedFrames","maximumRateReduction"],
+  "panReconstruction": ["partialBlocks","maximumRetainedResidual","residualBoundFrames"],
+  "clock": ["minimumAdaptiveDelayMs","maximumAdaptiveDelayMs","startupPhaseCalibrations","maximumPhaseShiftMs"],
+  "processingDeadlineMisses": ["initializingFullPipeline","activeFullPipeline","wholeRunQualityCounter"]
+ },
+ "criteria": {
+  "authoredStepMargin": 0.002,
+  "maximumIncrementErrorNonregressionMargin": 0.002,
+  "incrementRmsNonregressionMargin": 0.0015,
+  "trackingRmsNonregressionMargin": 0.0015,
+  "oppositeSideOvershootMargin": 0.01,
+  "nominalActualSubmissionLagMinimumRelativeReduction": 0.15,
+  "nominalLagImprovementMustExceedFitResolutionTimes": 2,
+  "fitResolutionMs": 3.5,
+  "rejectedMotionColumns": ["originalLagMs","correctedLagMs","originalFiveMsBalanceStep","correctedFiveMsBalanceStep","correctedTrackingRms","correctedDerivativeResidualRms","oppositeSideOvershoot"]
+ },
+ "metricScopes": {
+  "continuity": "Contiguous actual submitted48kHz PCM on measured existing fixtureSinkBeginQPC + submittedFrame/48000. Controls use actual owned producerFrame-to-submittedFrame lineage. No fitted intercept, resampling or reordering.",
+  "nativeClosePassFit": "Native sourceY equals first listenerY via offsetY0. Actual pan is constant zero; the generic headless lateral-pass ideal usesY200.1 versus nativeY200.11. Both clock fits, including pressure, are unidentifiable and excluded. Original guard-failure prefix remains privately preserved.",
+  "deliveryLatency": "Actual submissionQPC + within512-frame offset relative to authored observationQPC. This is buffer admission, not a physical sample presentation clock. Keep delivery variation separate from uniform PCM continuity.",
+  "resolution": "3.5ms is grid/window fit resolution only, not complete delivery-latency uncertainty or a statistical confidence interval. Measured wake lateness and interval spread remain explicit.",
+  "retainedPacketAgeSinceReceiptMs": "Every-block age of the retained latest packet since receipt; not pure queue wait. receiptToFirstConsumptionMaxMs is the separate once-per-packet consumption maximum.",
+  "costs": "Matched core work is DSP+simulation in both versions. Full pipeline includes worker roundtrip/stdout and is unavailable in the original; do not compare these differing scopes.",
+  "longTrace": "At most4094prefixblocks plus latest overflowblock and terminal. Active trace summaries are prefix-limited; final whole-run counters and all submitted PCM/recording hashes remain complete."
+ },
+ "deterministic": {
+  "identicalAuthoredInputSha256": {
+   "stationary": "0179251554C7818FC0FAB2F22600B17084473B2D92E6377552E558C7684BF786",
+   "slow-rotation": "91581B5C89518A6CDC81ED7A6163B77DAE0A1A5731A52F1C56DE9FA01B48DFDF",
+   "rapid-rotation": "624ABFE28BD2DA8357FD3A56209D23EDEBB1BB876EF6F91A098324E8202266BE",
+   "slow-rotation-normal": "6FCB3328E671167BE51102534687FC69F07DDFA5D98312CAC9DFAB42D79D204D",
+   "rapid-rotation-normal": "6E6F8E32747595F53548888B27A1ACC3A31008AE50AAEB5EB1FC9829BAD8E995",
+   "orbit": "96DA4B4AF1EB47313608D195DFD7186AEB898D327091669A739FEADA4475CE9E",
+   "close-pass": "807E7211918077648ADE0C2CC7C35E23DB8C46C38157BE2FB4BEE3EC1902C139",
+   "close-pass-coincident": "0F68E63150F11ADA579A923EFCA4BEB9CF2B8979A8D6AAE7021ED1DAF08A0893",
+   "accelerate-away": "2EADC6381B0E809E9D65794D59DFB7ADEA9A867F87F9B138766D5C8FF6CDBEA2",
+   "fast-95": "7655D27EF8A733CC9E479F25CFA384947524F3760CDA8A285E2143296E72CFE3",
+   "fast-99": "BEE08660B2E36E958B135B585AE6B92FED372FD4E8A773EF7C7CFFE112598414",
+   "fast-100": "294F6B7D24C965BB896AF6DE3B29FC65EC8617CD9B4FD3836980FB3E01F328BA",
+   "discontinuity": "C0C3DBF9A334F432D5184493586000FE3C577CC7654CB2B4F4602576A5482E1C",
+   "missing-reacquisition": "9A3C1680FD78A3275F1E93ABE5FBDD65C0113B3C1699CD72F38CA72B1476CAE1",
+   "geometry-expiry": "5C27EFD707A0810D7058D5BA9FD624BE6B1A5F632D492B6837307DC99F4BAE8A",
+   "moving-source": "01126DBAB6B2B746EAAA2BBB5659B13E041F29DA9DBFEF1DDB80CEAE3D4BE7EA",
+   "close-reflection-transition": "D51EC528641E20E362D582AFD371A43AD11E7250825DE3D02730EE0686545624",
+   "full-session": "BDCE631588C2A150055C93236FE7454407281216720621A9EEC557E760EB5DE5"
+  },
+  "motionAcceptance": {
+   "passed": true,
+   "cases": [
+    {
+     "name": "slow-rotation",
+     "passed": true,
+     "checks": {
+      "authored-continuous-five-ms-step-bound": true,
+      "pointwise-increment-error-nonregression": true,
+      "direction-derivative-continuity": true,
+      "direction-tracking-nonregression": true
+     },
+     "authoredMaximumStep": 0.01549408023,
+     "formerRawMaximumStepHeuristicPassed": true
+    },
+    {
+     "name": "rapid-rotation",
+     "passed": true,
+     "checks": {
+      "authored-continuous-five-ms-step-bound": true,
+      "pointwise-increment-error-nonregression": true,
+      "direction-derivative-continuity": true,
+      "direction-tracking-nonregression": true,
+      "no-uncommanded-opposite-side-rotation-stop": true
+     },
+     "authoredMaximumStep": 0.1032477385,
+     "formerRawMaximumStepHeuristicPassed": true
+    },
+    {
+     "name": "slow-rotation-normal",
+     "passed": true,
+     "checks": {
+      "authored-continuous-five-ms-step-bound": true,
+      "pointwise-increment-error-nonregression": true,
+      "direction-derivative-continuity": true,
+      "direction-tracking-nonregression": true,
+      "resolved-material-nominal-latency-reduction": true
+     },
+     "authoredMaximumStep": 0.01549408023,
+     "improvementMs": 38,
+     "formerRawMaximumStepHeuristicPassed": true
+    },
+    {
+     "name": "rapid-rotation-normal",
+     "passed": true,
+     "checks": {
+      "authored-continuous-five-ms-step-bound": true,
+      "pointwise-increment-error-nonregression": true,
+      "direction-derivative-continuity": true,
+      "direction-tracking-nonregression": true,
+      "resolved-material-nominal-latency-reduction": true,
+      "no-uncommanded-opposite-side-rotation-stop": true
+     },
+     "authoredMaximumStep": 0.1032477385,
+     "improvementMs": 37,
+     "formerRawMaximumStepHeuristicPassed": true
+    },
+    {
+     "name": "orbit",
+     "passed": true,
+     "checks": {
+      "coherent-source-facing-orbit": true
+     }
+    }
+   ]
+  },
+  "cases": [
+   {
+    "name": "stationary",
+    "original": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1126773208,0.06623864666,0.3873226792,0.01596431783,0.01466906816,0.0006605919054,0.0008316656974,0,0,600,600,5.456968211e-11],
+     "controls": [0,0,5.107025913e-15,null,null,null],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1557,0.2846,3.718],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.09012870491,0.05298318576,0.4098712951,0.01276959153,0.0117335394,0.0005283983154,0.0006652354723,0,0,600,600,1.091393642e-10],
+     "controls": [0,0,5.107025913e-15,0,0.0002733007964,2.220446049e-16],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1667,0.3768,4.3673],
+     "fullBlockProcessingMs": [375,null,0.4332,0.831,52.5058],
+     "causalRateBound": [0,0],
+     "panReconstruction": [2,0,0],
+     "clock": [97,100,1,0]
+    }
+   },
+   {
+    "name": "slow-rotation",
+    "original": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1587868333,0.06623864666,0.3412131667,0.02249713289,0.02066750079,0.0006605939705,0.000831665777,0.01782594677,1.152875073e-9,599.9999773,600.0000293,0.00003752757175],
+     "controls": [0.03304958206,0,5.107025913e-15,null,null,null],
+     "pcmMotion": [115,0.001185126084,0.009735667856,0.007875590222,0.007875590222,0.001301399047,460],
+     "controlMotion": [100,0.00002902089279,0.00006068945617,0.00009387586591,0.00006476546948,0.00003796424043,216],
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1607,0.2967,3.7329],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1270239204,0.05298318554,0.3729760796,0.01799694542,0.01653656363,0.0005283979139,0.0006652355368,0.01572847897,6.418376455e-10,599.9999742,600.0000288,0.00005467893084],
+     "controls": [0.03305266797,0,5.107025913e-15,0.00006560318676,0.0002733007964,2.220446049e-16],
+     "pcmMotion": [97,0.0008749251588,0.006794405891,0.006615765161,0.005200563928,0.0004481695431,460],
+     "controlMotion": [97,3.829990986e-16,1.498801083e-15,1.221245327e-15,1.026956298e-15,3.049095335e-16,216],
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1819,0.4473,3.9397],
+     "fullBlockProcessingMs": [375,null,0.4796,0.9738,53.7929],
+     "causalRateBound": [0,0],
+     "panReconstruction": [4,0.005100182149,273],
+     "clock": [97,100,1,0]
+    }
+   },
+   {
+    "name": "rapid-rotation",
+    "original": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1577242464,0.06623864666,0.3422757536,0.02234663814,0.02053547278,0.0006605959171,0.0008316659222,0.1070325427,7.140208841e-10,599.999918,600.0002617,0.0003333523238],
+     "controls": [0.2197604292,0,5.107025913e-15,null,null,null],
+     "pcmMotion": [115,0.00641684775,0.05514320407,0.04681581381,0.03527490935,0.004456177608,460],
+     "controlMotion": [100,0.002463645821,0.01876344214,0.01876344214,0.0173512168,0.00320961981,216],
+     "rapidStop": [0,130],
+     "matchedCoreWorkMs": [null,null,0.1548,0.2926,3.6795],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1270205081,0.05298318566,0.3729794919,0.01799404435,0.01613177359,0.0005283989425,0.0006652356717,0.1023588203,3.741281798e-10,599.999966,600.0003058,0.0003265973015],
+     "controls": [0.218357638,0,5.107025913e-15,0.000426495121,0.0002733007964,2.220446049e-16],
+     "pcmMotion": [99,0.002064769973,0.01164260683,0.01563259593,0.005842256473,0.0009939367555,460],
+     "controlMotion": [100,0.001322719305,0.006886272739,0.006886272739,0.006886272739,0.0007558641063,216],
+     "rapidStop": [0,100],
+     "matchedCoreWorkMs": [null,null,0.1739,0.4982,3.9335],
+     "fullBlockProcessingMs": [375,null,0.4532,1.1065,51.9085],
+     "causalRateBound": [0,0],
+     "panReconstruction": [2,0.0004169083128,12],
+     "clock": [97,100,1,0]
+    }
+   },
+   {
+    "name": "slow-rotation-normal",
+    "original": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1587868333,0.06623864666,0.3412131667,0.02249713289,0.02066750079,0.0006605939705,0.000831665777,0.01782594677,1.152875073e-9,599.9999773,600.0000293,0.00003752757175],
+     "controls": [0.03304958206,0,5.107025913e-15,null,null,null],
+     "pcmMotion": [115,0.001185126084,0.009735667856,0.007875590222,0.007875590222,0.001301399047,460],
+     "controlMotion": [100,0.00002902089279,0.00006068945617,0.00009387586591,0.00006476546948,0.00003796424043,216],
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.158,0.2791,4.7597],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1270266771,0.05298318554,0.3729733229,0.01799735939,0.01653417572,0.000528397921,0.0006652355364,0.01549309169,6.887855217e-10,599.9999794,600.000021,0.00004156048817],
+     "controls": [0.03305194305,0,5.107025913e-15,0.00006455457253,0.0002733007964,2.220446049e-16],
+     "pcmMotion": [77,0.0006502849856,0.007265023597,0.006371496796,0.006371496796,0.0004553311468,460],
+     "controlMotion": [77,3.83366902e-16,1.554312234e-15,8.326672685e-16,8.326672685e-16,2.741197517e-16,216],
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1758,0.6773,4.8635],
+     "fullBlockProcessingMs": [375,null,0.4492,1.2091,52.8383],
+     "causalRateBound": [0,0],
+     "panReconstruction": [4,0.002992738609,296],
+     "clock": [74.33333333,100,1,0]
+    }
+   },
+   {
+    "name": "rapid-rotation-normal",
+    "original": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1577242464,0.06623864666,0.3422757536,0.02234663814,0.02053547278,0.0006605959171,0.0008316659222,0.1070325427,7.140208841e-10,599.999918,600.0002617,0.0003333523238],
+     "controls": [0.2197604292,0,5.107025913e-15,null,null,null],
+     "pcmMotion": [115,0.00641684775,0.05514320407,0.04681581381,0.03527490935,0.004456177608,460],
+     "controlMotion": [100,0.002463645821,0.01876344214,0.01876344214,0.0173512168,0.00320961981,216],
+     "rapidStop": [0,130],
+     "matchedCoreWorkMs": [null,null,0.1524,0.2873,4.6166],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1264937371,0.05298318574,0.3735062629,0.01792185334,0.01638238505,0.0005283992013,0.0006652356602,0.103503989,5.89304848e-10,599.9999657,600.0001391,0.0001733305847],
+     "controls": [0.217545492,0,5.107025913e-15,0.00043199321,0.0002733007964,2.220446049e-16],
+     "pcmMotion": [78,0.004006576037,0.02495704258,0.0185514643,0.004857731365,0.001408360077,460],
+     "controlMotion": [77,0.00009371103322,0.001377265288,0.001377265288,0.001377265288,0.0001394810776,216],
+     "rapidStop": [0,75],
+     "matchedCoreWorkMs": [null,null,0.1783,1.0134,4.8337],
+     "fullBlockProcessingMs": [375,null,0.4626,1.4088,51.5862],
+     "causalRateBound": [0,0],
+     "panReconstruction": [3,0.03399974082,780],
+     "clock": [74.33333333,100,1,0]
+    }
+   },
+   {
+    "name": "orbit",
+    "original": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1130070314,0.06265099782,0.3869929686,0.016068778,0.01602241048,0.0005614418302,0.0007867980282,0,0.0003251912616,597.0843209,603.7247719,5.450087462],
+     "controls": [5.256906022e-14,0.0008417095696,0.006691323818,null,null,null],
+     "pcmMotion": [null,9.250819768e-15,2.400131963e-14,3.974363004e-14,0,1.427253098e-14,460],
+     "controlMotion": [null,1.448781126e-14,4.073673887e-14,5.393264906e-14,4.281297539e-14,2.033546927e-14,216],
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1586,0.2887,3.9787],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.0902351886,0.05007613375,0.4097648114,0.01281698281,0.01275694487,0.0004308407748,0.0006289667241,0.00004416776555,0.0001485015419,597.622093,602.0090084,0.6902073993],
+     "controls": [0.00009540634221,0.0004943325983,0.006425770741,1.864978759e-7,0.0002733007964,0.00001676203173],
+     "pcmMotion": [null,0.0000343888622,0.00005586525046,0.00004416776553,0.00004416776553,0.0000227729179,460],
+     "controlMotion": [null,0.00004100182864,0.00006135795035,0.00009540634221,0.00009540634221,0.00005396477121,216],
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.176,0.4385,3.9011],
+     "fullBlockProcessingMs": [375,null,0.4434,1.0538,52.2088],
+     "causalRateBound": [0,0],
+     "panReconstruction": [4,0.00001906758086,942],
+     "clock": [97,100,1,0]
+    }
+   },
+   {
+    "name": "close-pass",
+    "original": {
+     "status": [1,108544,false,1,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": true,
+     "error": "Audition trim rejected nonfinite or over-ceiling block; no clipping or automatic gain reduction",
+     "signal": [0.4985384643,0.1167024901,0.001461535692,0.07145491615,0.06540789991,0.00143098864,0.001493318644,0.001023392143,0.001049524726,600,610.0272008,9.737672598],
+     "controls": [0.002104726804,0.02103161864,0.01089912434,null,null,null],
+     "pcmMotion": [115,0.000007614362301,0.00003161238257,0.00002934783605,0.00002934783605,0.00001069253712,132],
+     "controlMotion": [100,1.091209078e-16,7.494005416e-16,7.528699886e-16,7.494005416e-16,1.707910359e-16,62],
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1594,0.3059,3.6762],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,288256,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1392345279,0.05164138292,0.3607654721,0.01985459472,0.01571225189,0.0006751286704,0.0006499696403,0.07482589926,0.001381678255,590.8023795,611.4349527,1.477231103],
+     "controls": [0.1588548076,0.006257460498,0.0105670319,0.0003102486128,0.0002732867576,0.00003655101141],
+     "pcmMotion": [97,0.001636098721,0.02187158884,0.01361099171,0.002171579272,0.001111277375,460],
+     "controlMotion": [97,2.528180738e-14,2.666755705e-13,2.665645482e-13,2.665645482e-13,2.324299425e-14,216],
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1617,0.377,3.9165],
+     "fullBlockProcessingMs": [563,null,0.4216,0.7651,52.7701],
+     "causalRateBound": [0,0],
+     "panReconstruction": [5,0.003771196545,68],
+     "clock": [97,100,1,0]
+    }
+   },
+   {
+    "name": "close-pass-coincident",
+    "original": {
+     "status": [1,109056,false,1,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": true,
+     "error": "Audition trim rejected nonfinite or over-ceiling block; no clipping or automatic gain reduction",
+     "signal": [0.4985262454,0.1185053386,0.001473754644,0.07130808756,0.06288303807,0.001424115618,0.001516249117,0,0.00102624938,600,610.0285674,9.753202252],
+     "controls": [0,0.02254012142,0.01090060681,null,null,null],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1663,0.3485,3.7125],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,288256,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1030230969,0.05164873017,0.3969769031,0.01475574216,0.0147358221,0.0006668432841,0.0006501582569,0,0.004255507781,587.821807,611.436521,5.523734591],
+     "controls": [4.440892099e-16,0.03000000551,0.01239067055,8.690591191e-19,0.0002733007964,0.011661804],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1674,0.4153,3.9699],
+     "fullBlockProcessingMs": [563,null,0.4399,0.9013,53.1277],
+     "causalRateBound": [815,0.01166180758],
+     "panReconstruction": [5,8.690591242e-19,2],
+     "clock": [97,100,1,0]
+    }
+   },
+   {
+    "name": "accelerate-away",
+    "original": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1126927063,0.05064352349,0.3873072937,0.01596431783,0.01466908678,0.000568145538,0.0006278372477,0,0.00100723388,575.5231355,610.2980571,12.05436496],
+     "controls": [0,0.0008758375575,0.02515975105,null,null,null],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.15,0.2894,3.6801],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.09016850591,0.04321852367,0.4098314941,0.01276959153,0.012327448,0.0004975667885,0.0005341146013,0,0.0009916363637,575.5755241,612.9033167,3.60238052],
+     "controls": [2.592787086e-20,0.0007947347638,0.02641730385,5.064055357e-23,0.0002733007964,0.00008552623419],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1796,0.4377,3.8939],
+     "fullBlockProcessingMs": [375,null,0.4783,0.9572,52.7933],
+     "causalRateBound": [0,0],
+     "panReconstruction": [4,3.685835976e-21,5],
+     "clock": [97,100,1,0]
+    }
+   },
+   {
+    "name": "fast-95",
+    "original": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.088389121,0.04656122433,0.411610879,0.01365494612,0.01225893199,0.0006303342783,0.0005906047743,0,0.003301576788,544.9688542,670.4251265,115.6741963],
+     "controls": [3.828187767e-14,0.004771176913,0.1264550966,null,null,null],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1542,0.2819,3.871],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.08229002357,0.04350585828,0.4177099764,0.0121678554,0.01166721899,0.000590054381,0.0005479265786,0.002492783708,0.002194929039,554.4957475,631.112328,13.07152771],
+     "controls": [0.005200501285,0.003011514045,0.1264550966,0.00001016461654,0.0002469013429,0.0003247589312],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1725,0.3928,4.0304],
+     "fullBlockProcessingMs": [375,null,0.4298,0.7681,54.0987],
+     "causalRateBound": [0,0],
+     "panReconstruction": [0,0.00001094807863,621],
+     "clock": [100,100,0,0]
+    }
+   },
+   {
+    "name": "fast-99",
+    "original": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.08867618442,0.0465344501,0.4113238156,0.01388149895,0.01270500757,0.0006936898725,0.0005911897218,0,0.003280882771,540.3225348,676.3832825,128.7279262],
+     "controls": [3.353914368e-14,0.005117548122,0.1371483388,null,null,null],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1524,0.2814,3.8023],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.08249474317,0.04342551372,0.4175052568,0.01230334584,0.01125123911,0.0005544242253,0.0005474461554,0.002829537509,0.002530191454,550.5320935,633.8231492,14.29126288],
+     "controls": [0.005886365338,0.003253434242,0.1371483388,0.00001150513507,0.0002471140741,0.0003522693283],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1664,0.3726,3.9672],
+     "fullBlockProcessingMs": [375,null,0.4209,0.7747,52.8016],
+     "causalRateBound": [0,0],
+     "panReconstruction": [0,0.00001237841207,621],
+     "clock": [100,100,0,0]
+    }
+   },
+   {
+    "name": "fast-100",
+    "original": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.08871690184,0.0464722782,0.4112830982,0.01393767964,0.01216983423,0.0006998287923,0.0005905060728,0,0.01155540864,539.1332844,677.9095739,132.1746371],
+     "controls": [3.538835891e-14,0.005117611958,0.1398859315,null,null,null],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1618,0.2975,3.7102],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.08248118311,0.04335161067,0.4175188169,0.01232190733,0.01168185659,0.0005428878489,0.0005467349391,0.002916917128,0.01300030664,549.5159212,634.5181564,14.60663279],
+     "controls": [0.007920956792,0.003254630868,0.1398859315,0.00001185776423,0.0002471684562,0.000359313578],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1729,0.4012,4.0076],
+     "fullBlockProcessingMs": [375,null,0.4444,0.8311,53.0636],
+     "causalRateBound": [0,0],
+     "panReconstruction": [0,0.003981747677,1316],
+     "clock": [100,100,0,0]
+    }
+   },
+   {
+    "name": "discontinuity",
+    "original": {
+     "status": [0,288256,true,0,0,0,0,0,0,0,2,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1126773208,0.05421970606,0.3873226792,0.01596431783,0.01471027732,0.0006570920713,0.0006801079375,1.192415333e-8,0.01996161521,599.981678,1026.42903,426.4473525],
+     "controls": [0.4444444444,0.05429876158,5.107025913e-15,null,null,null],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1467,0.2721,3.7687],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,288256,true,0,0,0,0,0,0,0,2,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.09012870491,0.04812071295,0.4098712951,0.01276959153,0.0117665045,0.0006044231529,0.000603469986,9.91552257e-9,0.01596696204,599.9816781,1026.42903,426.4473522],
+     "controls": [0.4444444444,0.02303774677,5.107025913e-15,0,0.0002733007964,2.220446049e-16],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1692,0.3732,3.9868],
+     "fullBlockProcessingMs": [563,null,0.4302,0.801,54.107],
+     "causalRateBound": [0,0],
+     "panReconstruction": [6,0,0],
+     "clock": [91.66666667,100,2,0]
+    }
+   },
+   {
+    "name": "missing-reacquisition",
+    "original": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1440780312,0.06500654546,0.3559219688,0.02041325206,0.01875554025,0.0006471836699,0.0008162008053,0.007940883422,0.02177376926,599.9873407,789.9288424,189.9415017],
+     "controls": [0.2429929,0,5.107025913e-15,null,null,null],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1547,0.2867,3.7209],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1152539551,0.05191309713,0.3847460449,0.01632934576,0.01500397548,0.0005171327748,0.0006518025933,0.006897812473,0.0174164739,599.9650076,600.0000008,0.02974385098],
+     "controls": [0.2428497586,0,5.107025913e-15,0.0000287413039,0.0002733007964,2.220446049e-16],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1817,1.0892,3.9724],
+     "fullBlockProcessingMs": [375,null,0.4702,1.4529,54.5593],
+     "causalRateBound": [0,0],
+     "panReconstruction": [1,0.0000038545302,141],
+     "clock": [99.66666667,100,0,0]
+    }
+   },
+   {
+    "name": "geometry-expiry",
+    "original": {
+     "status": [0,288256,true,0,0,0,0,0,0,0,1,2],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.2926981747,0.09647946294,0.2073018253,0.03854477592,0.03760760278,0.0008431513678,0.00112969795,0.1098311451,0.02848457316,599.4766092,601.1114157,1.05143332],
+     "controls": [0.008414289874,0,4.163336342e-14,null,null,null],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1565,0.4221,13.5175],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,288256,true,0,0,0,0,0,0,0,1,2],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.2661901414,0.08312713053,0.2338098586,0.03484392771,0.03420729935,0.000704645315,0.0009615249964,0.1233982964,0.02768164777,599.287453,601.4703044,1.38907625],
+     "controls": [0.008413617026,0,4.163336342e-14,0.00001643284557,0.0002733007964,2.220446049e-16],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1805,0.7316,13.6289],
+     "fullBlockProcessingMs": [563,null,0.4681,1.0701,52.4366],
+     "causalRateBound": [0,0],
+     "panReconstruction": [0,0.000002584444085,376],
+     "clock": [100,100,0,0]
+    }
+   },
+   {
+    "name": "moving-source",
+    "original": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.2324504852,0.08347750851,0.2675495148,0.0329295788,0.03188389307,0.001075522048,0.001051700741,0.01495079146,0.001065199203,593.0679046,609.9362998,8.590240279],
+     "controls": [0.02829212767,0.002271855687,0.009729844567,null,null,null],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1565,0.2953,3.9321],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,192000,true,0,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.1281846613,0.05501546095,0.3718153387,0.018333124,0.01813163701,0.0006675105714,0.0006932651507,0.01319004151,0.0001887685571,596.3438004,608.5770211,1.309192607],
+     "controls": [0.02828602131,0.0002582826831,0.009729844567,0.00005526732876,0.0002733007964,0.00003224827763],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1704,0.4736,3.9713],
+     "fullBlockProcessingMs": [375,null,0.4312,0.9124,53.7671],
+     "causalRateBound": [0,0],
+     "panReconstruction": [0,0.01344285384,6107],
+     "clock": [100,100,0,0]
+    }
+   },
+   {
+    "name": "close-reflection-transition",
+    "original": {
+     "status": [1,5632,false,1,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": true,
+     "error": "Audition trim rejected nonfinite or over-ceiling block; no clipping or automatic gain reduction",
+     "signal": [0.4414774179,0.04589312161,0.05852258205,0.06173422374,0.000001319532885,3.827499718e-7,0.0005826979893,0,0,null,null,0],
+     "controls": [0,0,0,null,null,null],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.3075,3.7768,3.7768],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,384000,true,0,0,0,0,0,0,0,1,2],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.4239056408,0.1373698942,0.07609435916,0.05667567626,0.03793904185,0.002319514115,0.001593481141,0.1814981282,0.105169739,591.8213638,759.3341701,159.3534114],
+     "controls": [0.04925076963,0,4.174438573e-14,0.00003261915579,0.04993181566,2.220446049e-16],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.2923,0.7801,13.635],
+     "fullBlockProcessingMs": [750,null,0.5676,1.1706,52.5627],
+     "causalRateBound": [0,0],
+     "panReconstruction": [2,0.000004990392852,623],
+     "clock": [97,100,1,0]
+    }
+   },
+   {
+    "name": "full-session",
+    "original": {
+     "status": [1,300032,false,1,0,0,0,0,0,0,1,1],
+     "originalGuardFailureRetainedPrefix": true,
+     "error": "Audition trim rejected nonfinite or over-ceiling block; no clipping or automatic gain reduction",
+     "signal": [0.4967281818,0.1306831933,0.003271818161,0.07059122622,0.06129197776,0.001624746836,0.001648176637,0.003840681989,0.0006021420396,600,603.4080897,1.713372585],
+     "controls": [0.007132198987,0.003747443063,0.003318307959,null,null,null],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.1463,0.2608,3.8687],
+     "fullBlockProcessingMs": [0,null,null,null,null],
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null],
+     "clock": [null,null,null,null]
+    },
+    "corrected": {
+     "status": [0,2880000,true,0,0,0,0,0,0,0,2,2],
+     "originalGuardFailureRetainedPrefix": false,
+     "error": null,
+     "signal": [0.210343048,0.05500272622,0.289656952,0.02856595977,0.02761995234,0.0006814763592,0.0006842705964,0.06340010399,0.03810426743,590.5117051,849.7742755,250.0490447],
+     "controls": [0.957308425,0.01517700017,0.003199775733,0.000263396921,0.0004286010205,0.00001113034723],
+     "pcmMotion": null,
+     "controlMotion": null,
+     "rapidStop": null,
+     "matchedCoreWorkMs": [null,null,0.141,0.215,13.8361],
+     "fullBlockProcessingMs": [5625,null,0.3525,0.5312,52.8314],
+     "causalRateBound": [0,0],
+     "panReconstruction": [3,0.001687522603,9920],
+     "clock": [97,100,1,0]
+    }
+   }
+  ]
+ },
+ "native": {
+  "nominalResponseAcceptance": {
+   "passed": true,
+   "cases": [
+    {
+     "name": "slow-rotation-normal",
+     "passed": true,
+     "checks": {
+      "identifiable-submission-qpc-response": true,
+      "resolved-material-nominal-latency-reduction": true,
+      "authored-continuous-five-ms-step-bound": true,
+      "pointwise-increment-error-nonregression": true,
+      "actual-native-direction-derivative-continuity": true,
+      "actual-native-direction-tracking-nonregression": true
+     },
+     "authoredMaximumStep": 0.01549408023,
+     "improvementMs": 36,
+     "formerRawMaximumStepHeuristicPassed": true,
+     "formerActualQpcDerivativeHeuristicPassed": true
+    },
+    {
+     "name": "rapid-rotation-normal",
+     "passed": true,
+     "checks": {
+      "identifiable-submission-qpc-response": true,
+      "resolved-material-nominal-latency-reduction": true,
+      "authored-continuous-five-ms-step-bound": true,
+      "pointwise-increment-error-nonregression": true,
+      "actual-native-direction-derivative-continuity": true,
+      "actual-native-direction-tracking-nonregression": true,
+      "no-uncommanded-opposite-side-rotation-stop": true
+     },
+     "authoredMaximumStep": 0.1032477385,
+     "improvementMs": 25,
+     "formerRawMaximumStepHeuristicPassed": true,
+     "formerActualQpcDerivativeHeuristicPassed": true
+    }
+   ]
+  },
+  "cases": [
+   {
+    "name": "slow-rotation",
+    "original": {
+     "status": [0,187392,true,0,0,0,0,0,0,0,1,1],
+     "error": null,
+     "originalGuardFailureRetainedPrefix": false,
+     "wallSeconds": 4.2809194,
+     "packets": [80,0],
+     "readiness": {
+      "actualReadyBlocks": 361,
+      "emittingBlocks": 255,
+      "emittingWithoutReady": 0
+     },
+     "signal": [0.1586432457,0.05973501642,0.3413567543,0.02247798769,0.02064077184,0.0005967843447,0.0007496755388,0.02175292564,0.02200009182,599.8431227,600.0000305,0.1423545718],
+     "controls": [0.04065205941,0,2.087219286e-14,null,null,null],
+     "actualSubmissionQpcMotion": [163,0.01268025124,0.03536933239,0.03668942619,0.009425531996,0.01068118796,455],
+     "uniformPcmMotion": [155,0.00939351113,0.02627307959,0.01101890232,0.009425531996,0.001929750858,455],
+     "actualSubmissionQpcControl": [148,0.01271190461,0.0402881222,0.04057446332,0.04057446332,0.01560196794,213],
+     "uniformPcmControl": [140,0.009852577766,0.03002448671,0.02466270955,0.01132241595,0.003527269474,213],
+     "uniformRapidStop": null,
+     "pipeline": {
+      "observationToSolverPublicationMs": [62,97.609375,128.609375,151.609375,156.609375],
+      "latestObservationToSolverPublicationMs": [0,null,null,null,null],
+      "hostForwardedObservationAgeMs": [0,null,null,null,null],
+      "retainedPacketAgeSinceReceiptMs": [0,null,null,null,null],
+      "receiptToFirstConsumptionMaxMs": 0,
+      "listenerObservationIntervalMs": null,
+      "listenerReceiptIntervalMs": null,
+      "spatialControlDelayMs": [0,null,null,null,null],
+      "workerSolveMs": [255,0.1211,0.1844,0.2849,0.3578],
+      "workerRoundtripMs": [255,0.2187,0.3396,0.5235,0.6315],
+      "dspMs": [255,0.0207,0.0272,0.1059,0.8614],
+      "initializingFullProcessingMs": [0,null,null,null,null],
+      "activeFullProcessingMs": [0,null,null,null,null],
+      "wholeRunFullProcessingMs": null,
+      "stdoutWriteMs": null,
+      "processingDeadlineMisses": [0,0,1],
+      "maximumCommandQueueAgeMs": null,
+      "maximumControlWriteMs": null,
+      "pcmQueue": null
+     },
+     "delivery": {
+      "qpcIntervalsForFiveMsPcm": [773,-5.650366667,5,10.28953333,11.28813333],
+      "nonpositiveIntervals": 113,
+      "intervalsOutsideFourToSixMs": 362,
+      "submissionLatenessMs": [774,0.02713333333,7.794066667,14.5467,16.0471],
+      "sinkUnderflowFrames": 0,
+      "missedDeviceFreeWakeBudgets": 111,
+      "maximumSinkWakeLatenessMs": 16.0413
+     },
+     "recording": {
+      "frames": 185856,
+      "exactMatchedFrames": 185856,
+      "fileHashesVerified": 4,
+      "complete": true,
+      "gaps": [],
+      "files": {
+       "timeline.jsonl": {"bytes":481416,"sha256":"ECA92E528966847A8B083F0DEACD76D8F7975BD1B69C4DD74749F8E5F9F39916"},
+       "events.jsonl": {"bytes":4039,"sha256":"C86E7B469113D7017D0D9EF5E1BE39AEC0FF0D61799B487479001EDC1F597A30"},
+       "audio-index.jsonl": {"bytes":163480,"sha256":"4E876E964970F7006B31D8B3BB2191B61A2F6E606018D16AFCD86B75814FEBA4"},
+       "owned-output.f32le": {"bytes":1486848,"sha256":"26769FCC11A44F9522C7FF93E2D71899CD640105FBDFD507483E371AD1A8D086"}
+      }
+     },
+     "emissionStopRelativeObservationClockMs": 3529.772949,
+     "diagnosticPrefixDropped": 0,
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null]
+    },
+    "corrected": {
+     "status": [0,187392,true,0,0,0,0,0,0,0,1,1],
+     "error": null,
+     "originalGuardFailureRetainedPrefix": false,
+     "wallSeconds": 4.2647759,
+     "packets": [80,0],
+     "readiness": {
+      "actualReadyBlocks": 362,
+      "emittingBlocks": 255,
+      "emittingWithoutReady": 0
+     },
+     "signal": [0.1268924326,0.04778091785,0.3731075674,0.01797922421,0.0165094994,0.0004771269512,0.0005996506749,0.01744638324,0.01689074596,599.9312084,600.0000193,0.05738513298],
+     "controls": [0.04293754498,0,2.087219286e-14,0.00007338251603,0.0002732816577,2.220446049e-16],
+     "actualSubmissionQpcMotion": [144,0.01151210865,0.04356458952,0.03426194873,0.003338901947,0.01045862018,455],
+     "uniformPcmMotion": [136,0.007396148415,0.03305352002,0.01545678435,0.001980088435,0.001634554572,457],
+     "actualSubmissionQpcControl": [141,0.009233838834,0.0231328192,0.04287837122,0.04287837122,0.01547112012,214],
+     "uniformPcmControl": [134,0.001103439999,0.008465845243,0.009896215818,0.009895323432,0.001012221215,214],
+     "uniformRapidStop": null,
+     "pipeline": {
+      "observationToSolverPublicationMs": [62,81.13989258,124.1398926,150.1398926,153.1398926],
+      "latestObservationToSolverPublicationMs": [63,17.13989258,57.13989258,89.13989258,101.1398926],
+      "hostForwardedObservationAgeMs": [255,12.8406,27.5609,48.4253,54.5826],
+      "retainedPacketAgeSinceReceiptMs": [255,0.4097,17.58,63.512,78.3027],
+      "receiptToFirstConsumptionMaxMs": 16.2291,
+      "listenerObservationIntervalMs": [78,null,50,50,50],
+      "listenerReceiptIntervalMs": [78,null,46.9948,78.3878,79.3833],
+      "spatialControlDelayMs": [255,100,100,100,100],
+      "workerSolveMs": [255,0.1193,0.1939,0.3129,0.4444],
+      "workerRoundtripMs": [255,0.2297,0.3503,0.5816,0.7599],
+      "dspMs": [255,0.03,0.04,0.9075,1.3611],
+      "initializingFullProcessingMs": [69,0.4671,0.8386,2.9535,55.417],
+      "activeFullProcessingMs": [255,0.4253,0.6519,1.4958,2.4538],
+      "wholeRunFullProcessingMs": [368,null,0.648,1.6733,55.3484],
+      "stdoutWriteMs": [368,null,0.0237,0.0432,0.1547],
+      "processingDeadlineMisses": [1,0,1],
+      "maximumCommandQueueAgeMs": 1.6656,
+      "maximumControlWriteMs": 0.0191,
+      "pcmQueue": {
+       "samples": 258,
+       "blocks": [8,0,0,0,250,0,0,0,0],
+       "initialCredits": 4,
+       "ringCapacityBlocks": 8
+      }
+     },
+     "delivery": {
+      "qpcIntervalsForFiveMsPcm": [775,-5.652366667,5,10.30973333,11.06333333],
+      "nonpositiveIntervals": 114,
+      "intervalsOutsideFourToSixMs": 363,
+      "submissionLatenessMs": [776,0.01913333333,7.742666667,14.71923333,16.49236667],
+      "sinkUnderflowFrames": 0,
+      "missedDeviceFreeWakeBudgets": 113,
+      "maximumSinkWakeLatenessMs": 15.712
+     },
+     "recording": {
+      "frames": 186368,
+      "exactMatchedFrames": 186368,
+      "fileHashesVerified": 4,
+      "complete": true,
+      "gaps": [],
+      "files": {
+       "timeline.jsonl": {"bytes":570641,"sha256":"B798874A8BEC779E572E0941391B03098425CE5B1FDA3944BECF9AB1F2DEE7C8"},
+       "events.jsonl": {"bytes":4057,"sha256":"46758042C5BA84D08BC97F9094B5FF607C2C6E53CCF3F2AD104EDA4E2D77901B"},
+       "audio-index.jsonl": {"bytes":168127,"sha256":"3684D164E44F928405D1D92A838B4E885A039AA2E4E9D132A8EC9847A21C6F66"},
+       "owned-output.f32le": {"bytes":1490944,"sha256":"001D8EA07A233FB23F57F88359FE53A7C7F7B3854DB32ED4E30E7B8E2215D021"}
+      }
+     },
+     "emissionStopRelativeObservationClockMs": 3529.936279,
+     "diagnosticPrefixDropped": 0,
+     "causalRateBound": [0,0],
+     "panReconstruction": [22,0.04293275383,1000]
+    }
+   },
+   {
+    "name": "rapid-rotation",
+    "original": {
+     "status": [0,187392,true,0,0,0,0,0,0,0,1,1],
+     "error": null,
+     "originalGuardFailureRetainedPrefix": false,
+     "wallSeconds": 4.2897179,
+     "packets": [80,0],
+     "readiness": {
+      "actualReadyBlocks": 362,
+      "emittingBlocks": 255,
+      "emittingWithoutReady": 0
+     },
+     "signal": [0.1566192657,0.059734863,0.3433807343,0.02219075896,0.01957377791,0.0005964975411,0.0007496728309,0.07945382416,0.02111651354,599.9312087,600.0001877,0.05738475029],
+     "controls": [0.1615020265,0,2.087219286e-14,null,null,null],
+     "actualSubmissionQpcMotion": [160,0.02325124278,0.1577912556,0.1760966426,0.06171261725,0.01976597896,457],
+     "uniformPcmMotion": [151,0.01862923928,0.1347317304,0.04762644205,0.04265760442,0.006908681831,457],
+     "actualSubmissionQpcControl": [144,0.01992221447,0.1374247403,0.160833624,0.160833624,0.03057323123,213],
+     "uniformPcmControl": [137,0.01526738035,0.103450061,0.103450061,0.103450061,0.01387695387,214],
+     "uniformRapidStop": [0,169.6163],
+     "pipeline": {
+      "observationToSolverPublicationMs": [62,99.98364258,129.9836426,154.9836426,162.9836426],
+      "latestObservationToSolverPublicationMs": [0,null,null,null,null],
+      "hostForwardedObservationAgeMs": [0,null,null,null,null],
+      "retainedPacketAgeSinceReceiptMs": [0,null,null,null,null],
+      "receiptToFirstConsumptionMaxMs": 0,
+      "listenerObservationIntervalMs": null,
+      "listenerReceiptIntervalMs": null,
+      "spatialControlDelayMs": [0,null,null,null,null],
+      "workerSolveMs": [255,0.1179,0.1887,0.3019,0.3457],
+      "workerRoundtripMs": [255,0.2102,0.3633,0.5523,0.6392],
+      "dspMs": [255,0.021,0.0285,0.0777,0.8763],
+      "initializingFullProcessingMs": [0,null,null,null,null],
+      "activeFullProcessingMs": [0,null,null,null,null],
+      "wholeRunFullProcessingMs": null,
+      "stdoutWriteMs": null,
+      "processingDeadlineMisses": [0,0,1],
+      "maximumCommandQueueAgeMs": null,
+      "maximumControlWriteMs": null,
+      "pcmQueue": null
+     },
+     "delivery": {
+      "qpcIntervalsForFiveMsPcm": [775,-5.650766667,5,10.26383333,12.30503333],
+      "nonpositiveIntervals": 114,
+      "intervalsOutsideFourToSixMs": 363,
+      "submissionLatenessMs": [776,0.05173333333,7.7672,14.91116667,15.84583333],
+      "sinkUnderflowFrames": 0,
+      "missedDeviceFreeWakeBudgets": 111,
+      "maximumSinkWakeLatenessMs": 15.8401
+     },
+     "recording": {
+      "frames": 186368,
+      "exactMatchedFrames": 186368,
+      "fileHashesVerified": 4,
+      "complete": true,
+      "gaps": [],
+      "files": {
+       "timeline.jsonl": {"bytes":480879,"sha256":"761FA1697B5D592D7D38EEF13284EBE81505830389EABF3D9C40136455A68971"},
+       "events.jsonl": {"bytes":4039,"sha256":"3B7E58CCC86C22EA2EDC17F61F9EAED812F22DCC4914CA60129BFBC32909633D"},
+       "audio-index.jsonl": {"bytes":165903,"sha256":"380D0E4CE504EEFCC3CA0D58677F3C791F917BBCFB2DCE85257EC62338EBD9EE"},
+       "owned-output.f32le": {"bytes":1490944,"sha256":"EA61205B26E1FE6E2388E3E5179FC9DB22C4F7017276F67304FB37D65FC4DDAA"}
+      }
+     },
+     "emissionStopRelativeObservationClockMs": 3534.036133,
+     "diagnosticPrefixDropped": 0,
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null]
+    },
+    "corrected": {
+     "status": [0,187904,true,0,0,0,0,0,0,0,1,1],
+     "error": null,
+     "originalGuardFailureRetainedPrefix": false,
+     "wallSeconds": 4.2983981,
+     "packets": [80,0],
+     "readiness": {
+      "actualReadyBlocks": 361,
+      "emittingBlocks": 254,
+      "emittingWithoutReady": 0
+     },
+     "signal": [0.1249153167,0.04762191015,0.3750846833,0.01769908797,0.01622706652,0.0004763176328,0.000597654323,0.1058869549,0.01689074596,599.9312084,600.0002555,0.05738513298],
+     "controls": [0.214142505,0,2.087219286e-14,0.0004442600182,0.0002732816577,2.220446049e-16],
+     "actualSubmissionQpcMotion": [144,0.02091121043,0.1214573591,0.2166691256,0.0266097928,0.02118951668,457],
+     "uniformPcmMotion": [135,0.01513553986,0.09812571702,0.05013746125,0.01777399746,0.005347888317,457],
+     "actualSubmissionQpcControl": [137,0.01840458088,0.148009947,0.2137132936,0.2137132936,0.03243173726,213],
+     "uniformPcmControl": [129,0.001249875888,0.01671907842,0.01873471304,0.01873471304,0.001864355052,214],
+     "uniformRapidStop": [0,219.2406],
+     "pipeline": {
+      "observationToSolverPublicationMs": [61,94.19287109,122.1928711,147.1928711,150.1928711],
+      "latestObservationToSolverPublicationMs": [61,13.19287109,59.19287109,90.19287109,98.19287109],
+      "hostForwardedObservationAgeMs": [254,13.4785,26.5276,50.2883,56.0301],
+      "retainedPacketAgeSinceReceiptMs": [254,0.407,31.0722,65.0751,80.0447],
+      "receiptToFirstConsumptionMaxMs": 17.0894,
+      "listenerObservationIntervalMs": [78,null,50,50,50],
+      "listenerReceiptIntervalMs": [78,null,46.4766,78.9441,79.6795],
+      "spatialControlDelayMs": [254,100,100,100,100],
+      "workerSolveMs": [254,0.1232,0.194,0.2864,0.4551],
+      "workerRoundtripMs": [254,0.2293,0.355,0.5443,0.6895],
+      "dspMs": [254,0.029,0.0384,0.2007,1.3039],
+      "initializingFullProcessingMs": [69,0.481,0.896,2.2401,48.9272],
+      "activeFullProcessingMs": [254,0.4345,0.6571,1.062,2.1031],
+      "wholeRunFullProcessingMs": [368,null,0.6517,1.3968,48.8569],
+      "stdoutWriteMs": [368,null,0.0235,0.0404,0.1761],
+      "processingDeadlineMisses": [1,0,1],
+      "maximumCommandQueueAgeMs": 1.1081,
+      "maximumControlWriteMs": 0.0191,
+      "pcmQueue": {
+       "samples": 258,
+       "blocks": [8,0,0,0,250,0,0,0,0],
+       "initialCredits": 4,
+       "ringCapacityBlocks": 8
+      }
+     },
+     "delivery": {
+      "qpcIntervalsForFiveMsPcm": [775,-5.651066667,5,10.34723333,10.93963333],
+      "nonpositiveIntervals": 114,
+      "intervalsOutsideFourToSixMs": 363,
+      "submissionLatenessMs": [776,0.01786666667,7.742766667,14.9551,16.48003333],
+      "sinkUnderflowFrames": 0,
+      "missedDeviceFreeWakeBudgets": 112,
+      "maximumSinkWakeLatenessMs": 16.4748
+     },
+     "recording": {
+      "frames": 186368,
+      "exactMatchedFrames": 186368,
+      "fileHashesVerified": 4,
+      "complete": true,
+      "gaps": [],
+      "files": {
+       "timeline.jsonl": {"bytes":560890,"sha256":"0C39C28F8CA7F8ABBD831B91E973301B1CB6741DFB1FB1895F2D0DFF8F000C57"},
+       "events.jsonl": {"bytes":4056,"sha256":"9CDAF53E2C4AC1B22A1D62F526DD1C3954662F61637DA3C7C3BEF697968E7E15"},
+       "audio-index.jsonl": {"bytes":166998,"sha256":"9BAD276916092F75F28C25D84C001CD95A559799BD6A111AA39E077F60890717"},
+       "owned-output.f32le": {"bytes":1490944,"sha256":"C4142385719EF9D58269E5F94626F09CA2E9B0F446AF23E455B2770DEEAB30C6"}
+      }
+     },
+     "emissionStopRelativeObservationClockMs": 3523.798828,
+     "diagnosticPrefixDropped": 0,
+     "causalRateBound": [0,0],
+     "panReconstruction": [31,0.1547173878,551]
+    }
+   },
+   {
+    "name": "slow-rotation-normal",
+    "original": {
+     "status": [0,186880,true,0,0,0,0,0,0,0,1,1],
+     "error": null,
+     "originalGuardFailureRetainedPrefix": false,
+     "wallSeconds": 4.2873699,
+     "packets": [80,0],
+     "readiness": {
+      "actualReadyBlocks": 358,
+      "emittingBlocks": 256,
+      "emittingWithoutReady": 0
+     },
+     "signal": [0.1586418152,0.05993440458,0.3413581848,0.02247777209,0.02064137906,0.0005988040041,0.0007521779658,0.020962272,0.02200009182,599.8431227,600.000032,0.1423545718],
+     "controls": [0.03975405315,0,2.087219286e-14,null,null,null],
+     "actualSubmissionQpcMotion": [164,0.01120147921,0.03241628517,0.03705580649,0.0119772923,0.01073286671,454],
+     "uniformPcmMotion": [156,0.00679621786,0.01994259622,0.008854495207,0.008854495207,0.001621842777,454],
+     "actualSubmissionQpcControl": [149,0.01144741754,0.0360224405,0.03960173486,0.03960173486,0.01566927731,212],
+     "uniformPcmControl": [141,0.006984641348,0.02052282583,0.01242846011,0.01242846011,0.002442008145,213],
+     "uniformRapidStop": null,
+     "pipeline": {
+      "observationToSolverPublicationMs": [62,39.26245117,133.2624512,157.2624512,161.2624512],
+      "latestObservationToSolverPublicationMs": [0,null,null,null,null],
+      "hostForwardedObservationAgeMs": [0,null,null,null,null],
+      "retainedPacketAgeSinceReceiptMs": [0,null,null,null,null],
+      "receiptToFirstConsumptionMaxMs": 0,
+      "listenerObservationIntervalMs": null,
+      "listenerReceiptIntervalMs": null,
+      "spatialControlDelayMs": [0,null,null,null,null],
+      "workerSolveMs": [256,0.1121,0.1823,0.2814,0.3352],
+      "workerRoundtripMs": [256,0.2066,0.3407,0.5191,0.5876],
+      "dspMs": [256,0.0204,0.0269,0.1073,0.6403],
+      "initializingFullProcessingMs": [0,null,null,null,null],
+      "activeFullProcessingMs": [0,null,null,null,null],
+      "wholeRunFullProcessingMs": null,
+      "stdoutWriteMs": null,
+      "processingDeadlineMisses": [0,0,1],
+      "maximumCommandQueueAgeMs": null,
+      "maximumControlWriteMs": null,
+      "pcmQueue": null
+     },
+     "delivery": {
+      "qpcIntervalsForFiveMsPcm": [773,-5.651966667,5,10.33593333,11.11693333],
+      "nonpositiveIntervals": 114,
+      "intervalsOutsideFourToSixMs": 362,
+      "submissionLatenessMs": [774,0.05,8.035333333,14.9298,16.20093333],
+      "sinkUnderflowFrames": 0,
+      "missedDeviceFreeWakeBudgets": 114,
+      "maximumSinkWakeLatenessMs": 16.0333
+     },
+     "recording": {
+      "frames": 185856,
+      "exactMatchedFrames": 185856,
+      "fileHashesVerified": 4,
+      "complete": true,
+      "gaps": [],
+      "files": {
+       "timeline.jsonl": {"bytes":480536,"sha256":"4C23DD67448BEECF41B238FB0C53D4DB51958D2BF92666111E55401793FCA4EA"},
+       "events.jsonl": {"bytes":4273,"sha256":"4135BBFB597191BA353EBC9240C3EDECD1F9FE0CA0D1A2EFF9DFB6643DE268D3"},
+       "audio-index.jsonl": {"bytes":165701,"sha256":"8123848C0F6AD445AD951C50D26F5E756D30B0386E59060E2462195253D8A6A0"},
+       "owned-output.f32le": {"bytes":1486848,"sha256":"6E999BDF6926300B35755690177DB2875E30CAC932C88DE5E3998E8346054406"}
+      }
+     },
+     "emissionStopRelativeObservationClockMs": 3521.741943,
+     "diagnosticPrefixDropped": 0,
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null]
+    },
+    "corrected": {
+     "status": [0,186880,true,0,0,0,0,0,0,0,1,1],
+     "error": null,
+     "originalGuardFailureRetainedPrefix": false,
+     "wallSeconds": 4.2667418,
+     "packets": [80,0],
+     "readiness": {
+      "actualReadyBlocks": 358,
+      "emittingBlocks": 256,
+      "emittingWithoutReady": 0
+     },
+     "signal": [0.126900509,0.04794052769,0.373099491,0.01798036927,0.01650343835,0.0004789729169,0.0006016545674,0.01558555802,0.0175975054,599.8431227,600.0000269,0.1423546329],
+     "controls": [0.03305279947,0,2.087219286e-14,0.00006496007112,0.0002732816577,2.220446049e-16],
+     "actualSubmissionQpcMotion": [128,0.009459250045,0.02565097843,0.0329951025,0.004397705763,0.01054723053,454],
+     "uniformPcmMotion": [120,0.002930406143,0.01521746966,0.009126220597,0.004397705763,0.0007509878787,455],
+     "actualSubmissionQpcControl": [127,0.009317013288,0.02575709395,0.03296861568,0.03296861568,0.01545154765,213],
+     "uniformPcmControl": [120,0.001370801387,0.003954712776,0.003954712776,0.003954712776,0.0002901733613,213],
+     "uniformRapidStop": null,
+     "pipeline": {
+      "observationToSolverPublicationMs": [62,39.61279297,115.612793,139.612793,161.612793],
+      "latestObservationToSolverPublicationMs": [63,1.612792969,39.61279297,66.61279297,79.61279297],
+      "hostForwardedObservationAgeMs": [256,0.5619,13.8008,30.6014,35.2505],
+      "retainedPacketAgeSinceReceiptMs": [256,0.3708,30.916,62.192,63.6736],
+      "receiptToFirstConsumptionMaxMs": 28.4028,
+      "listenerObservationIntervalMs": [78,null,50,50,50],
+      "listenerReceiptIntervalMs": [78,null,48.2897,63.1466,63.5097],
+      "spatialControlDelayMs": [256,78.1713,83.04166667,83.6228,86.8027],
+      "workerSolveMs": [256,0.1243,0.1944,0.2856,0.381],
+      "workerRoundtripMs": [256,0.2245,0.359,0.5278,0.7098],
+      "dspMs": [256,0.0284,0.0373,0.1638,1.2091],
+      "initializingFullProcessingMs": [67,0.4547,0.8064,2.0097,50.3742],
+      "activeFullProcessingMs": [256,0.4326,0.6422,0.9962,1.9886],
+      "wholeRunFullProcessingMs": [367,null,0.6381,1.1136,50.3027],
+      "stdoutWriteMs": [367,null,0.0231,0.0404,0.1566],
+      "processingDeadlineMisses": [1,0,1],
+      "maximumCommandQueueAgeMs": 1.0801,
+      "maximumControlWriteMs": 0.0152,
+      "pcmQueue": {
+       "samples": 257,
+       "blocks": [7,1,0,0,249,0,0,0,0],
+       "initialCredits": 4,
+       "ringCapacityBlocks": 8
+      }
+     },
+     "delivery": {
+      "qpcIntervalsForFiveMsPcm": [773,-5.652566667,5,10.32303333,11.91003333],
+      "nonpositiveIntervals": 114,
+      "intervalsOutsideFourToSixMs": 362,
+      "submissionLatenessMs": [774,0.09206666667,7.5897,14.72736667,16.2254],
+      "sinkUnderflowFrames": 0,
+      "missedDeviceFreeWakeBudgets": 114,
+      "maximumSinkWakeLatenessMs": 16.2199
+     },
+     "recording": {
+      "frames": 185856,
+      "exactMatchedFrames": 185856,
+      "fileHashesVerified": 4,
+      "complete": true,
+      "gaps": [],
+      "files": {
+       "timeline.jsonl": {"bytes":570824,"sha256":"145F07D4CAEAB40B1B0FAE6DC311A7675F895A376CC2B1F0083C4B3529630B36"},
+       "events.jsonl": {"bytes":4291,"sha256":"BC627A82FFD2107F90B091C26037A2CB1FB87B29DD50CA5C94BCC82C02CF8ABE"},
+       "audio-index.jsonl": {"bytes":170790,"sha256":"0EE072374C8845F86E3F0B19BFB94B700ED97F061EA57B72AA7CE01E5EECD3C1"},
+       "owned-output.f32le": {"bytes":1486848,"sha256":"031033CC90C2C93C95EB2CDC831CB0B0D9B49EDC3EEEE70C2D91757ED86BAA2D"}
+      }
+     },
+     "emissionStopRelativeObservationClockMs": 3518.677002,
+     "diagnosticPrefixDropped": 0,
+     "causalRateBound": [0,0],
+     "panReconstruction": [13,0.01647245678,311]
+    }
+   },
+   {
+    "name": "rapid-rotation-normal",
+    "original": {
+     "status": [0,187392,true,0,0,0,0,0,0,0,1,1],
+     "error": null,
+     "originalGuardFailureRetainedPrefix": false,
+     "wallSeconds": 4.2601984,
+     "packets": [80,0],
+     "readiness": {
+      "actualReadyBlocks": 358,
+      "emittingBlocks": 254,
+      "emittingWithoutReady": 0
+     },
+     "signal": [0.1577315778,0.05961734615,0.3422684222,0.0223475066,0.02008004487,0.0005961346317,0.0007481973212,0.1188225841,0.02171134083,599.9734538,600.0002411,0.01896436068],
+     "controls": [0.2601983574,0,2.087219286e-14,null,null,null],
+     "actualSubmissionQpcMotion": [153,0.01723400786,0.1464151977,0.2116288022,0.02318151535,0.01927115661,454],
+     "uniformPcmMotion": [145,0.008932728416,0.05693218161,0.04168179621,0.0289177248,0.004388395751,454],
+     "actualSubmissionQpcControl": [138,0.01703735339,0.1214352316,0.2197777426,0.2197777426,0.02820451535,214],
+     "uniformPcmControl": [130,0.01054561044,0.1005712311,0.1005712311,0.06098150974,0.009695905028,213],
+     "uniformRapidStop": [0,159.5433],
+     "pipeline": {
+      "observationToSolverPublicationMs": [62,41.91381836,128.9138184,154.9138184,155.9138184],
+      "latestObservationToSolverPublicationMs": [0,null,null,null,null],
+      "hostForwardedObservationAgeMs": [0,null,null,null,null],
+      "retainedPacketAgeSinceReceiptMs": [0,null,null,null,null],
+      "receiptToFirstConsumptionMaxMs": 0,
+      "listenerObservationIntervalMs": null,
+      "listenerReceiptIntervalMs": null,
+      "spatialControlDelayMs": [0,null,null,null,null],
+      "workerSolveMs": [254,0.1043,0.2145,0.3247,0.4524],
+      "workerRoundtripMs": [254,0.1946,0.4014,0.5728,0.7296],
+      "dspMs": [254,0.0219,0.0269,0.0892,1.0516],
+      "initializingFullProcessingMs": [0,null,null,null,null],
+      "activeFullProcessingMs": [0,null,null,null,null],
+      "wholeRunFullProcessingMs": null,
+      "stdoutWriteMs": null,
+      "processingDeadlineMisses": [0,0,1],
+      "maximumCommandQueueAgeMs": null,
+      "maximumControlWriteMs": null,
+      "pcmQueue": null
+     },
+     "delivery": {
+      "qpcIntervalsForFiveMsPcm": [773,-5.651166667,5,10.31473333,11.32023333],
+      "nonpositiveIntervals": 113,
+      "intervalsOutsideFourToSixMs": 362,
+      "submissionLatenessMs": [774,0.09636666667,7.816566667,14.7275,15.96696667],
+      "sinkUnderflowFrames": 0,
+      "missedDeviceFreeWakeBudgets": 113,
+      "maximumSinkWakeLatenessMs": 15.9598
+     },
+     "recording": {
+      "frames": 185856,
+      "exactMatchedFrames": 185856,
+      "fileHashesVerified": 4,
+      "complete": true,
+      "gaps": [],
+      "files": {
+       "timeline.jsonl": {"bytes":479294,"sha256":"1FCE75EC40DC60B5D96C6DDE21A8664D77AF465181C2441287EB5C46AD0430DC"},
+       "events.jsonl": {"bytes":4273,"sha256":"4933540EC746759CD77EA4AD3B36E5481ED31B3DCFAB183A8388CDE9BBB5E1C9"},
+       "audio-index.jsonl": {"bytes":163466,"sha256":"B118428D7950F7DEF9BC9FDDCE60FFDD1D2475077F65A72637EF376E6CCCCF04"},
+       "owned-output.f32le": {"bytes":1486848,"sha256":"E0239C80E01B2EC6239B29064E1E37F3750650F48B8BCBB5B7BF78804E6C56BB"}
+      }
+     },
+     "emissionStopRelativeObservationClockMs": 3514.448486,
+     "diagnosticPrefixDropped": 0,
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null]
+    },
+    "corrected": {
+     "status": [0,186880,true,0,0,0,0,0,0,0,1,1],
+     "error": null,
+     "originalGuardFailureRetainedPrefix": false,
+     "wallSeconds": 4.2879834,
+     "packets": [80,0],
+     "readiness": {
+      "actualReadyBlocks": 357,
+      "emittingBlocks": 255,
+      "emittingWithoutReady": 0
+     },
+     "signal": [0.1268869191,0.04784633554,0.3731130809,0.01797529589,0.01616434753,0.0004781989146,0.0006004705845,0.1015122889,0.0174988691,599.9600164,600.0003149,0.03078382537],
+     "controls": [0.2174003311,0,2.087219286e-14,0.0004245993593,0.0002732816577,2.220446049e-16],
+     "actualSubmissionQpcMotion": [128,0.01690469534,0.1060720724,0.2085660028,0.01699322154,0.02138017347,452],
+     "uniformPcmMotion": [120,0.002195127059,0.0208854315,0.01699322154,0.01699322154,0.001313287139,452],
+     "actualSubmissionQpcControl": [128,0.01525128751,0.1057388089,0.2042633622,0.2042633622,0.02646094361,211],
+     "uniformPcmControl": [121,0.001490058051,0.008210682086,0.008210682086,0.008064546955,0.0008922397768,212],
+     "uniformRapidStop": [0,126.0563],
+     "pipeline": {
+      "observationToSolverPublicationMs": [61,57.32080078,117.3208008,144.3208008,170.3208008],
+      "latestObservationToSolverPublicationMs": [62,4.320800781,40.32080078,67.32080078,82.32080078],
+      "hostForwardedObservationAgeMs": [255,1.8877,14.057,30.6801,33.9382],
+      "retainedPacketAgeSinceReceiptMs": [255,0.3978,30.2266,60.9434,64.1527],
+      "receiptToFirstConsumptionMaxMs": 47.8536,
+      "listenerObservationIntervalMs": [78,null,50,50,50],
+      "listenerReceiptIntervalMs": [78,null,48.2482,63.5129,63.7379],
+      "spatialControlDelayMs": [255,80.83046667,84.3228,84.3228,85.3075],
+      "workerSolveMs": [255,0.1211,0.1975,0.3227,0.5261],
+      "workerRoundtripMs": [255,0.2213,0.358,0.5832,0.9526],
+      "dspMs": [255,0.0301,0.0373,0.1914,1.3014],
+      "initializingFullProcessingMs": [66,0.4417,0.7996,2.3241,53.3293],
+      "activeFullProcessingMs": [255,0.42,0.6627,1.1471,1.9425],
+      "wholeRunFullProcessingMs": [366,null,0.6913,1.4321,53.2604],
+      "stdoutWriteMs": [366,null,0.0253,0.0404,0.1561],
+      "processingDeadlineMisses": [1,0,1],
+      "maximumCommandQueueAgeMs": 3.5311,
+      "maximumControlWriteMs": 0.2522,
+      "pcmQueue": {
+       "samples": 258,
+       "blocks": [9,0,0,0,249,0,0,0,0],
+       "initialCredits": 4,
+       "ringCapacityBlocks": 8
+      }
+     },
+     "delivery": {
+      "qpcIntervalsForFiveMsPcm": [771,-5.652166667,5,10.28843333,11.46343333],
+      "nonpositiveIntervals": 113,
+      "intervalsOutsideFourToSixMs": 361,
+      "submissionLatenessMs": [772,0.1283666667,7.752366667,14.9437,15.79056667],
+      "sinkUnderflowFrames": 0,
+      "missedDeviceFreeWakeBudgets": 112,
+      "maximumSinkWakeLatenessMs": 15.7839
+     },
+     "recording": {
+      "frames": 185344,
+      "exactMatchedFrames": 185344,
+      "fileHashesVerified": 4,
+      "complete": true,
+      "gaps": [],
+      "files": {
+       "timeline.jsonl": {"bytes":560541,"sha256":"96B85473692CD57D4B4715B0624DA47EC7AF3AE931FDE45B72E3AE81007F28B5"},
+       "events.jsonl": {"bytes":4293,"sha256":"D405E348FD54B171183E4CE665F23CD0B233E1FBD3F9E22334969DA189FCF6B7"},
+       "audio-index.jsonl": {"bytes":171712,"sha256":"0C7B1F824689237B8AF6C332B8766D24FE500650F091EC6710223900F0E71D67"},
+       "owned-output.f32le": {"bytes":1482752,"sha256":"852B1E17A00EFC2C5B1CF8609F8DF2252F75A5329F5BAD8D2A4E4DF8F6AA85AB"}
+      }
+     },
+     "emissionStopRelativeObservationClockMs": 3516.118652,
+     "diagnosticPrefixDropped": 0,
+     "causalRateBound": [0,0],
+     "panReconstruction": [4,0.0003788976579,13]
+    }
+   },
+   {
+    "name": "close-pass",
+    "original": {
+     "status": [1,105984,false,1,0,0,0,0,0,0,1,1],
+     "error": "Audition trim rejected nonfinite or over-ceiling block; no clipping or automatic gain reduction",
+     "originalGuardFailureRetainedPrefix": true,
+     "wallSeconds": 2.6681878,
+     "packets": [47,0],
+     "readiness": {
+      "actualReadyBlocks": 201,
+      "emittingBlocks": 138,
+      "emittingWithoutReady": 0
+     },
+     "signal": [0.4943970144,0.1130448788,0.00560298562,0.07086729258,0.06756560132,0.001430502118,0.001449735931,0,0.02111651354,599.9312087,611.1479824,6.17662139],
+     "controls": [0,0.02176742545,0.007848158359,null,null,null],
+     "actualSubmissionQpcMotion": null,
+     "uniformPcmMotion": null,
+     "actualSubmissionQpcControl": null,
+     "uniformPcmControl": null,
+     "uniformRapidStop": null,
+     "motionFitUnavailableReason": "Constant native pan; see metricScopes.nativeClosePassFit",
+     "pipeline": {
+      "observationToSolverPublicationMs": [35,106.1816406,132.1816406,163.1816406,165.1816406],
+      "latestObservationToSolverPublicationMs": [0,null,null,null,null],
+      "hostForwardedObservationAgeMs": [0,null,null,null,null],
+      "retainedPacketAgeSinceReceiptMs": [0,null,null,null,null],
+      "receiptToFirstConsumptionMaxMs": 0,
+      "listenerObservationIntervalMs": null,
+      "listenerReceiptIntervalMs": null,
+      "spatialControlDelayMs": [0,null,null,null,null],
+      "workerSolveMs": [138,0.1178,0.185,0.2784,0.3408],
+      "workerRoundtripMs": [138,0.2176,0.3451,0.4884,0.5699],
+      "dspMs": [138,0.0212,0.0287,0.0856,0.9918],
+      "initializingFullProcessingMs": [0,null,null,null,null],
+      "activeFullProcessingMs": [0,null,null,null,null],
+      "wholeRunFullProcessingMs": null,
+      "stdoutWriteMs": null,
+      "processingDeadlineMisses": [0,0,1],
+      "maximumCommandQueueAgeMs": null,
+      "maximumControlWriteMs": null,
+      "pcmQueue": null
+     },
+     "delivery": {
+      "qpcIntervalsForFiveMsPcm": [449,-5.652266667,5,10.28833333,11.82673333],
+      "nonpositiveIntervals": 66,
+      "intervalsOutsideFourToSixMs": 210,
+      "submissionLatenessMs": [450,0.1716,7.704066667,14.5373,15.6328],
+      "sinkUnderflowFrames": 0,
+      "missedDeviceFreeWakeBudgets": 66,
+      "maximumSinkWakeLatenessMs": 15.6248
+     },
+     "recording": {
+      "frames": 108032,
+      "exactMatchedFrames": 108032,
+      "fileHashesVerified": 4,
+      "complete": true,
+      "gaps": [],
+      "files": {
+       "timeline.jsonl": {"bytes":274613,"sha256":"72AAC16675B7DFC8A666C030193F8724500AC9BFB36BAD1DF75D44C4BA4A231F"},
+       "events.jsonl": {"bytes":4742,"sha256":"7A449E4156307674DA92F3BD17720F21AFEB3B9161AC4B5E2C77A5501F056049"},
+       "audio-index.jsonl": {"bytes":103595,"sha256":"AE2FF8D0C478E797ACA0FFD2176CBBEE3C80232C475D875C3BB3E16973282383"},
+       "owned-output.f32le": {"bytes":864256,"sha256":"E91A030C0C9CCE1EC28756976723B56BEDE620EBD272B9298F0C4F0E72AFAD60"}
+      }
+     },
+     "emissionStopRelativeObservationClockMs": -1793323975000,
+     "diagnosticPrefixDropped": 0,
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null]
+    },
+    "corrected": {
+     "status": [0,284160,true,0,0,0,0,0,0,0,1,1],
+     "error": null,
+     "originalGuardFailureRetainedPrefix": false,
+     "wallSeconds": 6.3526536,
+     "packets": [120,0],
+     "readiness": {
+      "actualReadyBlocks": 550,
+      "emittingBlocks": 443,
+      "emittingWithoutReady": 0
+     },
+     "signal": [0.103022702,0.04813195727,0.396977298,0.01475557219,0.01474225607,0.0006418376384,0.0006059797589,0,0.01736653826,587.8290118,616.9249656,4.763868454],
+     "controls": [4.440892099e-16,0.03000137714,0.02826718606,8.690591191e-19,0.0002732816577,0.007790081901],
+     "actualSubmissionQpcMotion": null,
+     "uniformPcmMotion": null,
+     "actualSubmissionQpcControl": null,
+     "uniformPcmControl": null,
+     "uniformRapidStop": null,
+     "motionFitUnavailableReason": "Constant native pan; see metricScopes.nativeClosePassFit",
+     "pipeline": {
+      "observationToSolverPublicationMs": [94,95.63476563,129.6347656,162.6347656,178.6347656],
+      "latestObservationToSolverPublicationMs": [95,17.63476563,59.63476563,92.63476563,105.6347656],
+      "hostForwardedObservationAgeMs": [443,12.3969,26.8213,49.5437,55.9132],
+      "retainedPacketAgeSinceReceiptMs": [443,0.3621,31.0623,76.9168,93.5112],
+      "receiptToFirstConsumptionMaxMs": 49.4273,
+      "listenerObservationIntervalMs": [119,null,50,50,50],
+      "listenerReceiptIntervalMs": [119,null,46.5982,78.691,93.5418],
+      "spatialControlDelayMs": [443,100,100,100,100],
+      "workerSolveMs": [443,0.1135,0.1805,0.28,0.4149],
+      "workerRoundtripMs": [443,0.2173,0.3365,0.5036,0.7397],
+      "dspMs": [443,0.0319,0.0409,0.1888,1.15],
+      "initializingFullProcessingMs": [68,0.4449,0.8503,2.2502,50.0484],
+      "activeFullProcessingMs": [443,0.4045,0.6159,0.982,1.9119],
+      "wholeRunFullProcessingMs": [556,null,0.6169,1.1359,49.9809],
+      "stdoutWriteMs": [556,null,0.0215,0.0385,0.1733],
+      "processingDeadlineMisses": [1,0,1],
+      "maximumCommandQueueAgeMs": 1.1539,
+      "maximumControlWriteMs": 0.0563,
+      "pcmQueue": {
+       "samples": 386,
+       "blocks": [7,1,0,0,378,0,0,0,0],
+       "initialCredits": 4,
+       "ringCapacityBlocks": 8
+      }
+     },
+     "delivery": {
+      "qpcIntervalsForFiveMsPcm": [1176,-5.651466667,5,10.33943333,11.23643333],
+      "nonpositiveIntervals": 174,
+      "intervalsOutsideFourToSixMs": 551,
+      "submissionLatenessMs": [1177,0.0048,7.884233333,14.58776667,16.05213333],
+      "sinkUnderflowFrames": 0,
+      "missedDeviceFreeWakeBudgets": 171,
+      "maximumSinkWakeLatenessMs": 16.0443
+     },
+     "recording": {
+      "frames": 282624,
+      "exactMatchedFrames": 282624,
+      "fileHashesVerified": 4,
+      "complete": true,
+      "gaps": [],
+      "files": {
+       "timeline.jsonl": {"bytes":871989,"sha256":"F53B1635CA2962EE8D6EFD5F7BC9948C616F0D9E1F9959357D0BCA42D44DF4AB"},
+       "events.jsonl": {"bytes":4059,"sha256":"D02BF5004A0D3CEAF6E61C7C5BFB278DF7F4DEAEF7C06A1F62C0740C4D50D369"},
+       "audio-index.jsonl": {"bytes":255276,"sha256":"AC9A481581DF84FD525625642B56C36D5391D86AED2E179C0540A38FBFEE486A"},
+       "owned-output.f32le": {"bytes":2260992,"sha256":"53FC3CA1BA4D3950AE5DEC08CA86E2C9E321B1F1D8B9A4D8D78E59105EE0DAA8"}
+      }
+     },
+     "emissionStopRelativeObservationClockMs": 5524.115479,
+     "diagnosticPrefixDropped": 0,
+     "causalRateBound": [785,0.01166180758],
+     "panReconstruction": [36,8.690591226e-19,2]
+    }
+   },
+   {
+    "name": "geometry-expiry",
+    "original": {
+     "status": [0,284160,true,0,0,0,0,0,0,0,1,1],
+     "error": null,
+     "originalGuardFailureRetainedPrefix": false,
+     "wallSeconds": 6.356177,
+     "packets": [120,0],
+     "readiness": {
+      "actualReadyBlocks": 551,
+      "emittingBlocks": 442,
+      "emittingWithoutReady": 0
+     },
+     "signal": [0.2024972588,0.06981042862,0.2975027412,0.02775661065,0.02717681043,0.0006470920551,0.0008609810431,0.1130004587,0.02111651344,599.2039476,601.4268964,1.134872458],
+     "controls": [0.0151687329,0,4.163336342e-14,null,null,null],
+     "actualSubmissionQpcMotion": null,
+     "uniformPcmMotion": null,
+     "actualSubmissionQpcControl": null,
+     "uniformPcmControl": null,
+     "uniformRapidStop": null,
+     "pipeline": {
+      "observationToSolverPublicationMs": [95,95.20385742,127.2038574,158.2038574,163.2038574],
+      "latestObservationToSolverPublicationMs": [0,null,null,null,null],
+      "hostForwardedObservationAgeMs": [0,null,null,null,null],
+      "retainedPacketAgeSinceReceiptMs": [0,null,null,null,null],
+      "receiptToFirstConsumptionMaxMs": 0,
+      "listenerObservationIntervalMs": null,
+      "listenerReceiptIntervalMs": null,
+      "spatialControlDelayMs": [0,null,null,null,null],
+      "workerSolveMs": [442,0.1234,0.2035,0.3306,6.1825],
+      "workerRoundtripMs": [442,0.2247,0.3593,0.5558,6.7958],
+      "dspMs": [442,0.0207,0.0284,0.0612,1.0629],
+      "initializingFullProcessingMs": [0,null,null,null,null],
+      "activeFullProcessingMs": [0,null,null,null,null],
+      "wholeRunFullProcessingMs": null,
+      "stdoutWriteMs": null,
+      "processingDeadlineMisses": [0,0,1],
+      "maximumCommandQueueAgeMs": null,
+      "maximumControlWriteMs": null,
+      "pcmQueue": null
+     },
+     "delivery": {
+      "qpcIntervalsForFiveMsPcm": [1178,-5.653166667,5,10.30893333,11.15803333],
+      "nonpositiveIntervals": 174,
+      "intervalsOutsideFourToSixMs": 552,
+      "submissionLatenessMs": [1179,0.0854,7.7198,14.80713333,15.9756],
+      "sinkUnderflowFrames": 0,
+      "missedDeviceFreeWakeBudgets": 174,
+      "maximumSinkWakeLatenessMs": 15.9691
+     },
+     "recording": {
+      "frames": 283136,
+      "exactMatchedFrames": 283136,
+      "fileHashesVerified": 4,
+      "complete": true,
+      "gaps": [],
+      "files": {
+       "timeline.jsonl": {"bytes":774778,"sha256":"675A6F1FFF7DBCB362EBB02F034B9E8F403A11F327305692BBE9E661F1EBE306"},
+       "events.jsonl": {"bytes":4563,"sha256":"09FF7A6579070BD6972F7B7C259E26D6A34A3D99249A5AB12E8032E3D6E573AE"},
+       "audio-index.jsonl": {"bytes":254886,"sha256":"EB18CCFBE645000ABE5D6182B8655A35102DA13F110972013B1972B37BEBC12B"},
+       "owned-output.f32le": {"bytes":2265088,"sha256":"01581A3B65EC102146AFD325B0D4272C8F6EE1D1DE0AA29814120A91587A48EC"}
+      }
+     },
+     "emissionStopRelativeObservationClockMs": 5530.863037,
+     "diagnosticPrefixDropped": 0,
+     "causalRateBound": [null,null],
+     "panReconstruction": [null,null,null]
+    },
+    "corrected": {
+     "status": [0,283136,true,0,0,0,0,0,0,0,1,1],
+     "error": null,
+     "originalGuardFailureRetainedPrefix": false,
+     "wallSeconds": 6.1078812,
+     "packets": [120,0],
+     "readiness": {
+      "actualReadyBlocks": 549,
+      "emittingBlocks": 442,
+      "emittingWithoutReady": 0
+     },
+     "signal": [0.1768185943,0.05743460563,0.3231814057,0.02418718673,0.02383285016,0.0005213434326,0.0007055060676,0.1367495061,0.01759750551,598.9944891,601.8309634,0.993224343],
+     "controls": [0.01244717506,0,4.163336342e-14,0.00001899006928,0.0002732816577,2.220446049e-16],
+     "actualSubmissionQpcMotion": null,
+     "uniformPcmMotion": null,
+     "actualSubmissionQpcControl": null,
+     "uniformPcmControl": null,
+     "uniformRapidStop": null,
+     "pipeline": {
+      "observationToSolverPublicationMs": [94,95.67822266,122.6782227,146.6782227,150.6782227],
+      "latestObservationToSolverPublicationMs": [95,13.67822266,57.67822266,92.67822266,105.6782227],
+      "hostForwardedObservationAgeMs": [442,12.7702,29.5886,49.2994,55.1143],
+      "retainedPacketAgeSinceReceiptMs": [442,0.3676,30.9666,63.4395,79.8487],
+      "receiptToFirstConsumptionMaxMs": 16.148,
+      "listenerObservationIntervalMs": [118,null,50,50,50],
+      "listenerReceiptIntervalMs": [118,null,46.1926,79.1183,79.8754],
+      "spatialControlDelayMs": [442,98.93333333,100,100,100],
+      "workerSolveMs": [442,0.1258,0.2113,0.3438,5.9487],
+      "workerRoundtripMs": [442,0.228,0.3739,0.5777,6.4277],
+      "dspMs": [442,0.0293,0.0405,0.1678,1.8661],
+      "initializingFullProcessingMs": [67,0.4662,0.8442,2.3233,50.1016],
+      "activeFullProcessingMs": [442,0.408,0.6467,1.0192,6.9109],
+      "wholeRunFullProcessingMs": [555,null,0.6549,1.1831,50.0281],
+      "stdoutWriteMs": [555,null,0.0218,0.0389,0.6462],
+      "processingDeadlineMisses": [1,0,1],
+      "maximumCommandQueueAgeMs": 0.9531,
+      "maximumControlWriteMs": 0.3103,
+      "pcmQueue": {
+       "samples": 387,
+       "blocks": [8,0,0,1,378,0,0,0,0],
+       "initialCredits": 4,
+       "ringCapacityBlocks": 8
+      }
+     },
+     "delivery": {
+      "qpcIntervalsForFiveMsPcm": [1174,-5.651466667,5,10.30213333,11.02463333],
+      "nonpositiveIntervals": 173,
+      "intervalsOutsideFourToSixMs": 550,
+      "submissionLatenessMs": [1175,0.022,7.4948,14.66503333,16.16923333],
+      "sinkUnderflowFrames": 0,
+      "missedDeviceFreeWakeBudgets": 169,
+      "maximumSinkWakeLatenessMs": 16.1623
+     },
+     "recording": {
+      "frames": 282112,
+      "exactMatchedFrames": 282112,
+      "fileHashesVerified": 4,
+      "complete": true,
+      "gaps": [],
+      "files": {
+       "timeline.jsonl": {"bytes":897439,"sha256":"53F9331072A5A4679687934106A1B52747CD5092669BA6D90EAF3CDB56117A71"},
+       "events.jsonl": {"bytes":4579,"sha256":"8176F627E0E43C5367E7771C87ABA2E557EDDDE920B83E87EC0FF999F47B11DD"},
+       "audio-index.jsonl": {"bytes":255097,"sha256":"FD1B080D8E8A04ECE6228498100DEF2B247A5571BE8593466EF8BDBDC7295A09"},
+       "owned-output.f32le": {"bytes":2256896,"sha256":"070A90F5C9224C2F62F8B53448865727F2EB494594978EC63ABBE2C4B4ABF4DB"}
+      }
+     },
+     "emissionStopRelativeObservationClockMs": 5526.485107,
+     "diagnosticPrefixDropped": 0,
+     "causalRateBound": [0,0],
+     "panReconstruction": [48,0.01279857444,2037]
+    }
+   }
+  ],
+  "heavyJitterPointwiseLimits": [
+   {
+    "name": "slow-rotation",
+    "originalMaximumIncrementError": 0.01101890232,
+    "correctedMaximumIncrementError": 0.01545678435,
+    "nonregressionTolerance": 0.002,
+    "pointwiseNonregressionPassed": false,
+    "scope": "These retained heavy40ms-jitter stress maxima worsened; only nominal cases were subject to the quantitative native acceptance gates. RMS improved; no claim that every pointwise metric improved."
+   },
+   {
+    "name": "rapid-rotation",
+    "originalMaximumIncrementError": 0.04762644205,
+    "correctedMaximumIncrementError": 0.05013746125,
+    "nonregressionTolerance": 0.002,
+    "pointwiseNonregressionPassed": false,
+    "scope": "These retained heavy40ms-jitter stress maxima worsened; only nominal cases were subject to the quantitative native acceptance gates. RMS improved; no claim that every pointwise metric improved."
+   }
+  ],
+  "fullPlanned": {
+   "plannedEmissionStopSeconds": 45,
+   "plannedHostStopSeconds": 50,
+   "continuousGeneration": true,
+   "original": {
+    "status": [1,298496,false,1,0,0,0,0,0,0,1,1],
+    "error": "Audition trim rejected nonfinite or over-ceiling block; no clipping or automatic gain reduction",
+    "originalGuardFailureRetainedPrefix": true,
+    "wallSeconds": 6.5803755,
+    "packets": [127,0],
+    "readiness": {
+     "actualReadyBlocks": 577,
+     "emittingBlocks": 514,
+     "emittingWithoutReady": 0
+    },
+    "signal": [0.4997284114,0.1307486401,0.0002715885639,0.07094507758,0.06800711527,0.0016088321,0.001649254121,0.00493683128,0.02111651354,599.9312087,604.4120685,3.648435228],
+    "controls": [0.009508607762,0.004522165712,0.00479528016,null,null,null],
+    "actualSubmissionQpcMotion": null,
+    "uniformPcmMotion": null,
+    "actualSubmissionQpcControl": null,
+    "uniformPcmControl": null,
+    "uniformRapidStop": null,
+    "pipeline": {
+     "observationToSolverPublicationMs": [99,91.0012207,130.0012207,152.0012207,161.0012207],
+     "latestObservationToSolverPublicationMs": [0,null,null,null,null],
+     "hostForwardedObservationAgeMs": [0,null,null,null,null],
+     "retainedPacketAgeSinceReceiptMs": [0,null,null,null,null],
+     "receiptToFirstConsumptionMaxMs": 0,
+     "listenerObservationIntervalMs": null,
+     "listenerReceiptIntervalMs": null,
+     "spatialControlDelayMs": [0,null,null,null,null],
+     "workerSolveMs": [514,0.1116,0.1857,0.2814,0.4398],
+     "workerRoundtripMs": [514,0.2051,0.3354,0.5079,0.7685],
+     "dspMs": [514,0.0205,0.0267,0.077,0.9671],
+     "initializingFullProcessingMs": [0,null,null,null,null],
+     "activeFullProcessingMs": [0,null,null,null,null],
+     "wholeRunFullProcessingMs": null,
+     "stdoutWriteMs": null,
+     "processingDeadlineMisses": [0,0,1],
+     "maximumCommandQueueAgeMs": null,
+     "maximumControlWriteMs": null,
+     "pcmQueue": null
+    },
+    "delivery": {
+     "qpcIntervalsForFiveMsPcm": [1249,-5.652866667,5,10.33433333,12.76513333],
+     "nonpositiveIntervals": 185,
+     "intervalsOutsideFourToSixMs": 585,
+     "submissionLatenessMs": [1250,0.0066,7.679933333,14.5632,17.90933333],
+     "sinkUnderflowFrames": 0,
+     "missedDeviceFreeWakeBudgets": 181,
+     "maximumSinkWakeLatenessMs": 15.7901
+    },
+    "recording": {
+     "frames": 300032,
+     "exactMatchedFrames": 300032,
+     "fileHashesVerified": 4,
+     "complete": true,
+     "gaps": [],
+     "files": {
+      "timeline.jsonl": {"bytes":779660,"sha256":"197FB271CD2AFA92E176ECCC58A6AB9F7BC8D56584F89FBC2C7F24FD8FCF4F86"},
+      "events.jsonl": {"bytes":4472,"sha256":"46B7E5FA1C9C74C5EEA72811B328711E8A246D8584F0FBCFBE2FF59A06A9157F"},
+      "audio-index.jsonl": {"bytes":275461,"sha256":"ADF8CA70254FAE258ECCCD1CCC1A3965EC9700746FCB152F4DE391EF331B4B64"},
+      "owned-output.f32le": {"bytes":2400256,"sha256":"B4EB3338C41627585801179ECB4DD42954988F559015670BDBB3F7328A22BF17"}
+     }
+    },
+    "emissionStopRelativeObservationClockMs": -1793323998000,
+    "diagnosticPrefixDropped": 0,
+    "causalRateBound": [null,null],
+    "panReconstruction": [null,null,null]
+   },
+   "corrected": {
+    "status": [0,2396160,true,0,0,0,0,0,0,0,1,1],
+    "error": null,
+    "originalGuardFailureRetainedPrefix": false,
+    "wallSeconds": 50.3331676,
+    "packets": [1000,0],
+    "readiness": {
+     "actualReadyBlocks": 2823,
+     "emittingBlocks": 2759,
+     "emittingWithoutReady": 0
+    },
+    "signal": [0.1396465153,0.0544970998,0.3603534847,0.01982827345,0.01909447997,0.0006719056552,0.0006867987093,0.08058163265,0.01902605594,597.8380794,1199.658355,267.8832879],
+    "controls": [0.06405356084,0.009851695092,0.006297343314,0.0002632740754,0.0002732816577,0.00001619211245],
+    "actualSubmissionQpcMotion": null,
+    "uniformPcmMotion": null,
+    "actualSubmissionQpcControl": null,
+    "uniformPcmControl": null,
+    "uniformRapidStop": null,
+    "pipeline": {
+     "observationToSolverPublicationMs": [801,77.43652344,124.4365234,147.4365234,187.4365234],
+     "latestObservationToSolverPublicationMs": [802,12.43652344,61.43652344,94.43652344,125.4365234],
+     "hostForwardedObservationAgeMs": [2759,12.2213,27.709,50.4006,56.1158],
+     "retainedPacketAgeSinceReceiptMs": [2759,0.3237,31.0032,65.0009,109.8668],
+     "receiptToFirstConsumptionMaxMs": 17.0476,
+     "listenerObservationIntervalMs": [991,null,50,50,100],
+     "listenerReceiptIntervalMs": [991,null,46.5457,78.7944,109.9372],
+     "spatialControlDelayMs": [2759,100,100,100,100],
+     "workerSolveMs": [2759,0.0998,0.183,0.2926,6.174],
+     "workerRoundtripMs": [2759,0.1967,0.3265,0.5123,6.707],
+     "dspMs": [2759,0.0296,0.0369,0.0559,1.9377],
+     "initializingFullProcessingMs": [69,0.4674,0.8297,2.7018,49.5383],
+     "activeFullProcessingMs": [2759,0.3453,0.5431,0.8217,7.2981],
+     "wholeRunFullProcessingMs": [4681,null,0.529,0.7946,49.4711],
+     "stdoutWriteMs": [4681,null,0.0166,0.0256,0.1409],
+     "processingDeadlineMisses": [1,0,1],
+     "maximumCommandQueueAgeMs": 1.7875,
+     "maximumControlWriteMs": 0.859,
+     "pcmQueue": {
+      "samples": 3211,
+      "blocks": [8,0,0,0,3203,0,0,0,0],
+      "initialCredits": 4,
+      "ringCapacityBlocks": 8
+     }
+    },
+    "delivery": {
+     "qpcIntervalsForFiveMsPcm": [9976,-5.652866667,5,10.31773333,11.88503333],
+     "nonpositiveIntervals": 1474,
+     "intervalsOutsideFourToSixMs": 4676,
+     "submissionLatenessMs": [9977,0.01063333333,7.786266667,14.73806667,16.23783333],
+     "sinkUnderflowFrames": 0,
+     "missedDeviceFreeWakeBudgets": 1466,
+     "maximumSinkWakeLatenessMs": 16.2311
+    },
+    "recording": {
+     "frames": 2394624,
+     "exactMatchedFrames": 2394624,
+     "fileHashesVerified": 4,
+     "complete": true,
+     "gaps": [],
+     "files": {
+      "timeline.jsonl": {"bytes":7665573,"sha256":"B033E5FCFBB48C107EB258096BC4F4BFB55944FA7CB76419D5D5F07A92858FA5"},
+      "events.jsonl": {"bytes":4608,"sha256":"6DC89F8BE86BD6F3BA15AB96A1D729639955D1A83B8E7CDB5868049DD0F9F118"},
+      "audio-index.jsonl": {"bytes":2188087,"sha256":"7FF69A58983D1A37BEBAC4986D10702818BCBA58C7734943F76EFF8693FD4977"},
+      "owned-output.f32le": {"bytes":19156992,"sha256":"B4F75F3A34675F834A507B2A252478335B5F01F508CEEFE17280EEB0C2F1A62B"}
+     }
+    },
+    "emissionStopRelativeObservationClockMs": 45022.86475,
+    "diagnosticPrefixDropped": 2678,
+    "causalRateBound": [0,0],
+    "panReconstruction": [356,0.138732881,8180]
+   }
+  }
+ },
+ "pressure": {
+  "native": {
+   "status": [0,284160,true,0,0,0,0,0,0,0,1,1],
+   "error": null,
+   "originalGuardFailureRetainedPrefix": false,
+   "wallSeconds": 6.1009112,
+   "packets": [120,0],
+   "readiness": {
+    "actualReadyBlocks": 550,
+    "emittingBlocks": 443,
+    "emittingWithoutReady": 0
+   },
+   "signal": [0.1030217335,0.04812890189,0.3969782665,0.01475556055,0.0146812927,0.0006489218479,0.0006059124178,0,0.01736653826,587.754116,611.5053099,5.862784894],
+   "controls": [4.440892099e-16,0.02999930883,0.01977755102,9.25089487e-20,0.0002732816577,0.00983324057],
+   "actualSubmissionQpcMotion": null,
+   "uniformPcmMotion": null,
+   "actualSubmissionQpcControl": null,
+   "uniformPcmControl": null,
+   "uniformRapidStop": null,
+   "motionFitUnavailableReason": "Constant native pan; see metricScopes.nativeClosePassFit",
+   "pipeline": {
+    "observationToSolverPublicationMs": [95,80.00756836,126.0075684,151.0075684,154.0075684],
+    "latestObservationToSolverPublicationMs": [96,16.00756836,59.00756836,89.00756836,103.0075684],
+    "hostForwardedObservationAgeMs": [443,12.8144,28.1017,51.3938,55.6467],
+    "retainedPacketAgeSinceReceiptMs": [443,0.3947,19.3813,63.1366,78.8586],
+    "receiptToFirstConsumptionMaxMs": 16.1754,
+    "listenerObservationIntervalMs": [118,null,50,50,50],
+    "listenerReceiptIntervalMs": [118,null,46.5136,78.5406,79.208],
+    "spatialControlDelayMs": [443,100,100,100,100],
+    "workerSolveMs": [443,0.1191,0.2031,0.3091,0.4086],
+    "workerRoundtripMs": [443,0.2305,0.3758,0.5622,0.765],
+    "dspMs": [443,0.0323,0.0374,0.1617,1.282],
+    "initializingFullProcessingMs": [68,0.4837,0.8729,2.8737,51.2942],
+    "activeFullProcessingMs": [443,0.4099,0.668,1.0505,2.1897],
+    "wholeRunFullProcessingMs": [556,null,0.6653,1.2129,51.2225],
+    "stdoutWriteMs": [556,null,0.0238,0.0434,0.1541],
+    "processingDeadlineMisses": [1,0,1],
+    "maximumCommandQueueAgeMs": 0.897,
+    "maximumControlWriteMs": 0.0388,
+    "pcmQueue": {
+     "samples": 388,
+     "blocks": [8,0,0,0,380,0,0,0,0],
+     "initialCredits": 4,
+     "ringCapacityBlocks": 8
+    }
+   },
+   "delivery": {
+    "qpcIntervalsForFiveMsPcm": [1176,-5.649566667,5,10.27103333,10.87963333],
+    "nonpositiveIntervals": 172,
+    "intervalsOutsideFourToSixMs": 551,
+    "submissionLatenessMs": [1177,0.0102,7.719,14.74656667,16.4049],
+    "sinkUnderflowFrames": 0,
+    "missedDeviceFreeWakeBudgets": 170,
+    "maximumSinkWakeLatenessMs": 16.3979
+   },
+   "recording": {
+    "frames": 282624,
+    "exactMatchedFrames": 282624,
+    "fileHashesVerified": 4,
+    "complete": true,
+    "gaps": [],
+    "files": {
+     "timeline.jsonl": {"bytes":881145,"sha256":"7F957BDFD7665883DCBBB3AF5409CDE3C01F281DED5648FCC9482F43A884AB8C"},
+     "events.jsonl": {"bytes":4058,"sha256":"48F9CAF71E4A4D7C23E4809AB4DFB200392884C4CEC73378930E356A86BE5D68"},
+     "audio-index.jsonl": {"bytes":253015,"sha256":"E289733D25CEABDDF1A04196194B8F77C8322F3C268A01C76DD61460AAFE442A"},
+     "owned-output.f32le": {"bytes":2260992,"sha256":"A020EF1C18E234FB21DE57BFB517A891E41C96AF13A7E8C8EACEA6A045ED6B2C"}
+    }
+   },
+   "emissionStopRelativeObservationClockMs": 5532.005859,
+   "diagnosticPrefixDropped": 0,
+   "causalRateBound": [772,0.01166180758],
+   "panReconstruction": [34,4.440892098e-16,4]
+  },
+  "hardwarePressureEstablished": true,
+  "cpuWorkMeasured": true,
+  "overlapMs": 2746,
+  "workload": "Existing demanding balanced acoustic GPU512-block benchmark; started only on actual native emission event",
+  "loadError": false,
+  "gpuDevice": "NVIDIA GeForce RTX 2080 SUPER",
+  "dispatches": 512,
+  "completedBatches": 512,
+  "appliedResults": 512,
+  "cpuWorkMs": 3516.5,
+  "gpuDeadlineMisses": 0,
+  "blockDeadlineMisses": 1
+ },
+ "rejectedExperiments": [
+  {
+   "label": "Two-stage latest-pose follower",
+   "reason": "Faster response worsened actual PCM stepping and direction tracking",
+   "artifactRetained": true,
+   "cases": [
+    {
+     "name": "slow-rotation",
+     "values": [115,77,0.01782594677,0.03177426223,0.0191934464,0.006012540255,null]
+    },
+    {
+     "name": "rapid-rotation",
+     "values": [115,86,0.1070325427,0.131243898,0.01696084429,0.007625650858,0]
+    },
+    {
+     "name": "slow-rotation-normal",
+     "values": [115,59,0.01782594677,0.03158283635,0.01538940496,0.005271783819,null]
+    },
+    {
+     "name": "rapid-rotation-normal",
+     "values": [115,61,0.1070325427,0.1375209212,0.04589444442,0.01373043804,0]
+    }
+   ]
+  },
+  {
+   "label": "Six-stage latest-pose follower",
+   "reason": "Extra smoothing still failed unchanged continuity criteria",
+   "artifactRetained": true,
+   "cases": [
+    {
+     "name": "slow-rotation",
+     "values": [115,99,0.01782594677,0.02465469125,0.01267759545,0.003412664756,null]
+    },
+    {
+     "name": "rapid-rotation",
+     "values": [115,106,0.1070325427,0.1055703752,0.02658763692,0.007358916763,0]
+    },
+    {
+     "name": "slow-rotation-normal",
+     "values": [115,82,0.01782594677,0.02400317449,0.01157291436,0.002652595856,null]
+    },
+    {
+     "name": "rapid-rotation-normal",
+     "values": [115,81,0.1070325427,0.1227445481,0.02911747688,0.008933347376,0]
+    }
+   ]
+  },
+  {
+   "label": "Two steady credits",
+   "reason": "Rejected: endpoint batch safety unsupported and measured latency worsened; no endpoint used",
+   "artifactRetained": true,
+   "cases": [
+    {
+     "name": "slow-rotation-normal",
+     "values": [160,161,0.02459947578,0.01781868403,0.009381147447,0.01063872469,null]
+    },
+    {
+     "name": "rapid-rotation-normal",
+     "values": [156,167,0.1126614685,0.1056369069,0.01722411447,0.02154890402,0]
+    }
+   ]
+  },
+  {
+   "label": "Three steady credits",
+   "reason": "Rejected: minimum remaining-frame safety unsupported and measured latency worsened; original four credits retained",
+   "artifactRetained": true,
+   "cases": [
+    {
+     "name": "slow-rotation-normal",
+     "values": [159,169,0.02401291322,0.01783316569,0.009268658992,0.0106913131,null]
+    },
+    {
+     "name": "rapid-rotation-normal",
+     "values": [157,165,0.09245295855,0.1062073236,0.0192406414,0.01801965161,0]
+    }
+   ]
+  },
+  {
+   "label": "Startup phase correction alone",
+   "reason": "Continuity passed but actual native latency reduction remained below declared15percent criterion",
+   "artifactRetained": true,
+   "cases": [
+    {
+     "name": "slow-rotation-normal",
+     "values": [157,140,0.02566358908,0.01783294216,0.009372768175,0.01058378788,null]
+    },
+    {
+     "name": "rapid-rotation-normal",
+     "values": [159,137,0.1167081421,0.1096760932,0.01871955376,0.0194088398,0]
+    }
+   ]
+  },
+  {
+   "label": "Forced endpoint residual catchup",
+   "reason": "Known-bracket feedforward improved response but two raw maximum-step criteria failed; original artifacts retained",
+   "artifactRetained": true,
+   "cases": [
+    {
+     "name": "slow-rotation",
+     "values": [115,97,0.01782594677,0.02500421649,0.001567687752,0.001186757262,null]
+    },
+    {
+     "name": "rapid-rotation",
+     "values": [115,99,0.1070325427,0.1023604592,0.002055350676,0.0009973181825,0]
+    },
+    {
+     "name": "slow-rotation-normal",
+     "values": [115,77,0.01782594677,0.01795800681,0.001167638701,0.0008882867999,null]
+    },
+    {
+     "name": "rapid-rotation-normal",
+     "values": [115,77,0.1070325427,0.1176653299,0.001528860643,0.001481150072,0]
+    }
+   ]
+  },
+  {
+   "label": "Unbounded retained pan residual",
+   "reason": "Actual native latency and raw stepping passed but carried residual crossed the genuinely observed rotation-stop endpoint",
+   "artifactRetained": true,
+   "cases": [
+    {
+     "name": "slow-rotation-normal",
+     "values": [163,125,0.02109361562,0.01641349784,0.01120416615,0.01067437289,null]
+    },
+    {
+     "name": "rapid-rotation-normal",
+     "values": [161,127,0.1185203117,0.1081063471,0.04433516455,0.01943070422,0.05957781211]
+    }
+   ]
+  }
+ ],
+ "measurementCorrection": {
+  "retainedOldRawHeuristic": "Published in nominalResponseAcceptance as non-governing: a blurred baseline suppresses genuinely commanded rapid angular velocity.",
+  "retainedActualQpcDerivativeHeuristic": "Published as non-governing callback-delivery variation because catch-up produces nonpositive within-buffer timestamp intervals; uniform PCM continuity uses the measured existing deadline clock."
+ },
+ "limitations": ["No new subjective listening, GTA session or physical endpoint was used.","Submission QPC plus within512-frame offset measures the real owned device-free handoff, not speaker presentation time. Unix anchor pairing uncertainty is retained for publication-age metrics.","Fixed1ms lag search on5ms energy windows has3.5ms grid/window resolution, not a complete delivery-latency uncertainty or statistical confidence interval. Measured wake lateness and interval spread are retained separately. No fitted gain, intercept, resampling, reordering or independent normalization.","The deterministic512-frame clock does not reproduce native per-receipt scheduling; actual native recorded PCM comparisons establish that effect.","Native long traces retain4094prefixblocks, latest overflow block and terminal. Dropped trace counts remain visible; complete submitted PCM and four-file hashes remain available.","Device-free sink wake lateness is reported separately from underflows; no claim about live WASAPI deadlines or GTA frame rate.","Hardware-unavailable hosted runs do not prove GPU pressure; dispatch/applied counts and actual overlapping intervals are required locally."]
+}

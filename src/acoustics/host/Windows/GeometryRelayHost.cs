@@ -29,7 +29,7 @@ namespace RichAudio.Beacon.Windows
             fixtureDiagnostics=new Thread(ReadDiagnostics){IsBackground=true};fixtureDiagnostics.Start();geometryRelay.Start();
         }
         internal static void GeometryFixtureSend(string text){Send(text);}
-        internal static string[] GeometryFixtureDiagnostics(){lock(logLock)return rendererLog.ToArray();}
+        internal static string[] GeometryFixtureDiagnostics(){return RendererDiagnosticsSnapshot();}
         internal static void GeometryFixtureDrainDiagnostics(){fixtureDiagnostics.Join(1000);}
         internal static System.Collections.Generic.Dictionary<string,object> EndGeometryFixture()
         {

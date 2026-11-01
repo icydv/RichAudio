@@ -7,6 +7,13 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & node --test tests/Test-ListeningOperator.mjs
+    if($LASTEXITCODE-ne0){throw 'Focused listening operator orchestration failed.'}
+    & node --test tests/Test-ListenerBoundary.mjs
+    if($LASTEXITCODE-ne0){throw 'Measured listener stop admission/completion contract failed.'}
+    # Retain cold transport diagnostics before later audio-chain checks can fail.
+    & (Join-Path $repo 'tests\Test-UnsentExpiryDiagnostics.ps1')
+    & (Join-Path $repo 'tools\Test-UnsentExpiry.ps1')
     & (Join-Path $repo 'tools\Build-AcousticGpu.ps1') -Tests
     & node --test tests/Test-AcousticQuality.mjs tests/Test-AcousticGpuScenes.mjs tests/Test-AcousticAcceleration.mjs tests/Test-AcousticAccelerationBenchmark.mjs
     if($LASTEXITCODE-ne0){throw 'Acoustic quality, CPU fallback, adaptive selection or benchmark contracts failed.'}
@@ -19,10 +26,18 @@ try {
     & (Join-Path $repo 'tools\Build-AcousticSettings.ps1') -Tests
     & (Join-Path $repo 'tools\Test-AcousticSettingsHandoff.ps1')
     & (Join-Path $repo 'tools\Test-InGameMenu.ps1')
+    & (Join-Path $repo 'tools\Test-SoundMapMenu.ps1')
+    & (Join-Path $repo 'tools\Test-PassiveSoundMap.ps1')
+    & (Join-Path $repo 'tools\Test-MenuDeploymentLayout.ps1')
+    & node --test tests/Test-SoundMapTelemetry.mjs tests/Test-SoundMapViewer.mjs tests/Test-SoundMapService.mjs tests/Test-SoundMapProducer.mjs
+    if($LASTEXITCODE-ne0){throw 'SoundMap telemetry, viewer, recording, replay or actual producer checks failed.'}
     & node --test tests/Test-InGameAcousticControls.mjs
     if($LASTEXITCODE-ne0){throw 'Actual in-game acoustic settings integration failed.'}
     & node --test tests/Test-GeometryRelay.mjs
     if($LASTEXITCODE-ne0){throw 'Measured geometry relay admission failed.'}
+    & node --test tests/Test-ListenerOnlyStartup.mjs
+    if($LASTEXITCODE-ne0){throw 'Listener-only source context, conditional paths or geometry transitions failed.'}
+    & (Join-Path $repo 'tools\Test-ListenerStartup.ps1')
     & (Join-Path $repo 'tools\Test-GeometryLive.ps1')
     & node --test tests/Test-RealtimeGeometry.mjs
     if($LASTEXITCODE -ne 0){throw 'Actual observed geometry worker/RA07 integration failed.'}
@@ -48,11 +63,16 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Opt-in orientation presentation and silent lifecycle tests failed.'}
     & node --test tests/Test-BeaconFrequency.mjs
     if($LASTEXITCODE -ne 0){throw 'Owned beacon frequency and device-free continuity tests failed.'}
+    & node --test tests/Test-BeaconOutputTrim.mjs tests/Test-BeaconNearField.mjs tests/Test-GeometryAudition.mjs
+    if($LASTEXITCODE -ne 0){throw 'Bounded audition output and observed geometry PCM failed.'}
+    & (Join-Path $repo 'tools\Test-SpatialStability.ps1')
     & (Join-Path $repo 'tools\Prepare-Beacon600.ps1') -Output ('.local/beacon-ci-'+[guid]::NewGuid().ToString('N'))
     # Original PCM, bounded queues and local transport only: these tests never open an audio endpoint.
     & (Join-Path $repo 'tools\Build-AcousticsHost.ps1') -Tests
+    & node --test tests/Test-SoundMapHost.mjs
+    if($LASTEXITCODE-ne0){throw 'Native owned-output tap to private recording bundle failed.'}
     & (Join-Path $repo 'tools\Test-BeaconTransport.ps1')
-    & (Join-Path $repo 'tools\Test-UnsentExpiry.ps1')
+    & (Join-Path $repo 'tools\Test-ListenerEvidence.ps1')
     & (Join-Path $repo 'tools\Test-HostHandoff.ps1')
     & (Join-Path $repo 'tools\Measure-FirstFrameTiming.ps1') -Output ('.local/timing-ci-'+[guid]::NewGuid().ToString('N'))
     & (Join-Path $repo 'tests\Test-GeometryObservation.ps1')

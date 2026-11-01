@@ -6,12 +6,12 @@ import assert from 'node:assert/strict';
 import {audioMetrics} from '../../src/acoustics/engine/signals.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 export async function replayAcousticAcceleration({quality='quality',acceleration='cpu',scenario='demanding',sources=1,
-  blocks=160,changes=[],paceInitialBlocks=32,paceMs=11}={}){
+  blocks=160,changes=[],paceInitialBlocks=32,paceMs=11,soundMapConfig=null}={}){
   assert.ok(Number.isInteger(blocks)&&blocks>=96&&blocks<=512);assert.ok(sources>=1&&sources<=4);
   assert.ok(Number.isInteger(paceInitialBlocks)&&paceInitialBlocks>=0&&paceInitialBlocks<=blocks&&Number.isFinite(paceMs)&&paceMs>=0&&paceMs<=50);
   const child=spawn(process.execPath,['tools/Run-Acoustics07.mjs','--headless-clock','audio','--trace-blocks','yes',
     '--history-diagnostics','yes','--sources',String(sources),'--acoustic-quality',quality,'--acoustic-acceleration',acceleration,
-    '--acoustic-benchmark',scenario],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
+    '--acoustic-benchmark',scenario,...(soundMapConfig?['--soundmap-config',soundMapConfig]:[])],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
   const packets=[],traces=[],statuses=[];let pending=Buffer.alloc(0),text='',failure=null,final=null,exitCode=null,closed=false;
   const waiters=new Set(),notify=()=>{for(const f of [...waiters])f();};
   const fail=error=>{failure??=error;notify();};

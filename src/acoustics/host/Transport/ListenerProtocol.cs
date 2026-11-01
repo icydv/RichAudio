@@ -109,19 +109,27 @@ namespace RichAudio.Beacon.Transport
     // One connection uses one session. Generation advances invalidate continuity but do not reset sequence order.
     public sealed class StateValidator
     {
-        private string session;private long generation,sequence=-1,ticks=-1,gameTime=-1;
+        private string session;private long generation,sequence=-1,ticks=-1,gameTime=-1;private bool freshAccepted;
         public long SequenceGaps{get;private set;} public long GenerationChanges{get;private set;}
         public double LastAgeMs{get;private set;}
         public double DecisionAgeMs{get;private set;} public string AgeClass{get;private set;}
         public void Accept(ListenerState state,long nowTicks)
         {
+            AcceptOrDiscardStartup(state,nowTicks,false);
+        }
+        // A stale startup frame advances wire identity/order only. It never becomes
+        // an accepted listener observation or updates the last accepted age.
+        internal bool AcceptOrDiscardStartup(ListenerState state,long nowTicks,bool allowStaleDiscard)
+        {
             Protocol.Validate(state);
             double age=(nowTicks-state.ObservationTicks)*1000.0/Stopwatch.Frequency;
             DecisionAgeMs=age;AgeClass=age < -2 ? "future-dated" : age > 250 ? "too-old" : "within-bounds";
-            Protocol.Check(age>=-2&&age<=250,"stale or future observation");
             if(session!=null){Protocol.Check(state.Session==session,"session changed without reconnect");Protocol.Check(state.Sequence>sequence&&state.ObservationTicks>ticks,"duplicate or reordered state");Protocol.Check(state.Generation>=generation,"generation rollback");Protocol.Check(state.GameTimeMs>=gameTime||state.Generation>generation,"game clock reset without generation");}
+            Protocol.Check(age>=-2&&(age<=250||allowStaleDiscard&&!freshAccepted),"stale or future observation");
             if(sequence>=0){SequenceGaps+=state.Sequence-sequence-1;if(state.Generation>generation)GenerationChanges++;}
-            session=state.Session;sequence=state.Sequence;generation=state.Generation;ticks=state.ObservationTicks;gameTime=state.GameTimeMs;LastAgeMs=Math.Max(0,age);
+            session=state.Session;sequence=state.Sequence;generation=state.Generation;ticks=state.ObservationTicks;gameTime=state.GameTimeMs;
+            if(age>250)return false;
+            LastAgeMs=Math.Max(0,age);freshAccepted=true;return true;
         }
     }
 }

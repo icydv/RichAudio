@@ -57,6 +57,18 @@ public static class TestInGameMenu
         Check(HasText(menu.BuildFrame(1920,1080,null),"RESET UNAVAILABLE"),"unavailable recovery action is visibly disabled");
         menu.SetResetAvailable(true);Check(menu.Handle(MenuInput.Accept)==MenuAction.Reset&&menu.Pending.Same(defaults)&&!menu.CanApply,"bounded malformed-file recovery requests separate service action");
         menu.Close();Check(menu.Handle(MenuInput.Down)==MenuAction.None,"closed keyboard stays inactive");
+        menu.Open(defaults);Select(menu,12);
+        Check(menu.Handle(MenuInput.Accept)==MenuAction.None&&menu.NoticeIsError,"missing recorder cannot request capture");
+        menu.SetRecording(true,false,false,"Ready");
+        Check(menu.Handle(MenuInput.Accept)==MenuAction.StartRecording&&!menu.Dirty,"recording is explicit and separate from preferences");
+        Check(HasText(menu.BuildFrame(1920,1080,null),"START RECORDING"),"record start action is visible");
+        menu.SetRecording(true,true,true,"Pending");
+        Check(menu.Handle(MenuInput.Accept)==MenuAction.None,"pending recorder command cannot be repeated");
+        menu.SetRecording(true,true,false,"Recording");
+        Check(menu.Handle(MenuInput.Accept)==MenuAction.StopRecording,"recording stop is a distinct explicit action");
+        Check(HasText(menu.BuildFrame(1920,1080,null),"STOP RECORDING"),"record stop action is visible");
+        menu.Handle(MenuInput.Right);Check(menu.SelectedIndex==9,"four footer buttons wrap correctly");
+        menu.Close();
     }
     private static void PointerTests()
     {

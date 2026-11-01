@@ -5,6 +5,7 @@ import { ObservedSimulationInput } from './observed-live.mjs';
 import {AcousticAcceleration} from './acoustic-backend.mjs';
 import {AcousticQualityController,validateAcousticSettings} from './acoustic-quality.mjs';
 import {scenario} from '../../../tools/acoustics-08-2-scenes.mjs';
+import {SoundMapTelemetry} from './soundmap-telemetry.mjs';
 
 // This worker alone performs geometry and history construction. The PCM producer
 // sends one bounded request at a time; no future trajectory is supplied.
@@ -14,6 +15,7 @@ const observed=workerData.geometry?new ObservedSimulationInput(simulation,worker
 const initial=workerData.acousticSettings?validateAcousticSettings(workerData.acousticSettings):null;
 const quality=initial?new AcousticQualityController({selected:initial.acousticQuality}):null;
 const acceleration=initial?new AcousticAcceleration({mode:initial.acousticAcceleration}):null;
+const soundMap=new SoundMapTelemetry(workerData.soundMap??{});
 let settingsRevision=0,busy=false;
 let processingPreferences=initial;
 process.on('exit',()=>acceleration?.close());
@@ -23,6 +25,8 @@ parentPort.on("message", async (message) => {
   busy=true;
   const started = performance.now();
   try {
+    if(message.soundMapReset===true)soundMap.resetGeometry();
+    soundMap.begin(simulation,workerData.controlledClock?message.now*1000:started);
     if(message.acousticSettings){
       if(!quality||!acceleration||!Number.isSafeInteger(message.acousticSettings.revision)||message.acousticSettings.revision<=settingsRevision)
         throw Error('Acoustic settings revision or startup capacity');
@@ -60,12 +64,16 @@ parentPort.on("message", async (message) => {
       dopplerProcessing:'propagation-coupled',dopplerBypassSupported:false,
       actualPathCount:control.paths.length,sourceCount:Object.keys(control.sourceGenerations).length,
       availablePaths:simulation.availablePaths??0,maximumReflectionOrder:2,lateReverberation:'not-implemented'};
+    const milliseconds=performance.now()-started;
+    let visual={};
+    try{visual=soundMap.publish(simulation,control,{workerMs:milliseconds});}catch(error){visual=soundMap.failure(error);}
     parentPort.postMessage({
       id: message.id,
       control,
-      milliseconds: performance.now() - started,
+      milliseconds:performance.now()-started,
+      ...visual,
     });
   } catch (error) {
-    parentPort.postMessage({ id: message.id, error: error.message });
+    parentPort.postMessage({ id: message.id, error: error.message,...(soundMap.enabled?soundMap.failure(error):{}) });
   }finally{busy=false;}
 });

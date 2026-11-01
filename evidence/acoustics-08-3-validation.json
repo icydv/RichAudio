@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "scope": "Offline only; no game deployment, game/RPH launch, endpoint access, playback or capture of external audio",
+  "baseCommit": "5c9afa65908ed5616b04ac355e8f8ffb61dbcac8",
+  "requiredSuite": {
+    "command": "pwsh -NoProfile -File tools/Test-Offline.ps1",
+    "nodeTests": 469,
+    "passed": 469,
+    "failed": 0,
+    "skipped": 0,
+    "note": "Full suite passed before four final targeted regressions were added; final affected coverage is recorded separately"
+  },
+  "finalFocused": {
+    "telemetry": 11,
+    "viewer": 17,
+    "service": 11,
+    "nativeHostIntegration": 2,
+    "producerIntegration": 1,
+    "total": 42,
+    "failed": 0,
+    "menuChecks": 988,
+    "recorderControlChecks": 18,
+    "hostAssertions": 1692,
+    "authenticSdkCompile": true
+  },
+  "privateInstallRestorationFixtures": {
+    "cases": 10,
+    "actualGameMutated": false,
+    "historicalEvidenceUnchanged": true,
+    "approvalCreated": false,
+    "includes": [
+      "partial-copy-and-create-intents",
+      "journal-and-quarantine-collisions",
+      "modified-files-preserved",
+      "independent-original-check"
+    ]
+  },
+  "ownedPcm": {
+    "exactNativeFixtureFrames": 51200,
+    "sampleRate": 48000,
+    "channels": 2,
+    "floatSamplesVerified": 102400,
+    "producerPcmUnchanged": true,
+    "httpDelayFixtureMs": 900,
+    "replayOriginalFrameTimeMs": 100,
+    "microphone": false,
+    "desktopAudio": false,
+    "gtaMix": false
+  },
+  "componentMeasurements": [
+    {
+      "test": "actual-producer-soundmap-overhead",
+      "blocks": 200,
+      "baselineCpuSeconds": 0.234,
+      "soundMapCpuSeconds": 0.345,
+      "baselineDsp": {
+        "count": 200,
+        "median": 0.03190000000000737,
+        "p95": 0.6122000000000014,
+        "max": 1.4258000000000095
+      },
+      "soundMapDsp": {
+        "count": 200,
+        "median": 0.03139999999999077,
+        "p95": 0.6011000000000024,
+        "max": 1.4954999999999927
+      },
+      "baselineSimulation": {
+        "count": 200,
+        "median": 0.11379999999999768,
+        "p95": 0.19929999999999382,
+        "max": 2.8648000000000025
+      },
+      "soundMapSimulation": {
+        "count": 200,
+        "median": 0.12049999999999272,
+        "p95": 0.28249999999999886,
+        "max": 3.6176999999999992
+      },
+      "transport": {
+        "offered": 40,
+        "sent": 42,
+        "sentFrames": 39,
+        "sentEvents": 3,
+        "dropped": 1,
+        "errors": 0,
+        "droppedEvents": 0
+      },
+      "frames": 39,
+      "exactPcmEqual": true,
+      "scope": "Two sequential device-free process runs; wall scheduling noise, not realtime endpoint guarantee"
+    },
+    {
+      "test": "device-free-recorder-throughput",
+      "blocks": 1000,
+      "frames": 512000,
+      "bytes": 4096000,
+      "baselineReadMs": 0.1697999999998956,
+      "recordWriteMs": 13.12220000000002,
+      "recordMicrosecondsPerBlock": 13.12220000000002,
+      "scope": "Standalone service synchronous evidence writes; does not measure WASAPI or physical audibility",
+      "checksumFinite": true
+    }
+  ],
+  "hostCallback": {
+    "enabledMicrosecondsPer512FrameBlock": 0.443,
+    "disabledMicrosecondsPerBlock": 0.004,
+    "blocks": 20000,
+    "scope": "Preallocated copy fixture only; not endpoint scheduling"
+  },
+  "liveReady": "Awaiting one fresh exact-candidate authorization; actual GTA compatibility and audibility unverified",
+  "combinedMilestonePercent": 60,
+  "wholeProjectCompletionEstimate": false
+}

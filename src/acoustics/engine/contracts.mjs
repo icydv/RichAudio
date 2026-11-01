@@ -80,6 +80,37 @@ export function material({
     scattering: "not-modelled",
   });
 }
+function engineConfiguration(engineOptions) {
+  const config = {
+    soundSpeed: 343, referenceDistance: 1, airDbPerMetre: [0.0001, 0.001, 0.01],
+    order: 1, maxPaths: 12, maxReflectors: 8, maxDelay: 2, updateHz: 40, ...engineOptions,
+  };
+  requireValue(Number.isFinite(config.soundSpeed)&&config.soundSpeed>=250&&config.soundSpeed<=450,'sound speed');
+  requireValue(Number.isFinite(config.referenceDistance)&&config.referenceDistance>0&&config.referenceDistance<=10,'reference distance');
+  requireValue([0,1,2].includes(config.order)&&Number.isInteger(config.maxPaths)&&config.maxPaths>=1&&config.maxPaths<=bounds.paths,'path/order budget');
+  requireValue(Number.isInteger(config.maxReflectors)&&config.maxReflectors>=1&&config.maxReflectors<=bounds.reflectors,'reflector budget');
+  requireValue(Number.isFinite(config.maxDelay)&&config.maxDelay>0&&config.maxDelay<=bounds.delay&&[20,40,80,100].includes(config.updateHz),'delay/update budget');
+  requireValue(Array.isArray(config.airDbPerMetre)&&config.airDbPerMetre.length===3&&config.airDbPerMetre.every(x=>Number.isFinite(x)&&x>=0&&x<=1)&&
+    config.airDbPerMetre[0]<=config.airDbPerMetre[1]&&config.airDbPerMetre[1]<=config.airDbPerMetre[2],'air band loss');
+  return config;
+}
+
+// This is an explicit propagation assumption, not a tile or an observation.
+// It can render only the separately authorised original owned beacon. No
+// visibility queries, fabricated surfaces or observation clock are attached.
+export function conditionalDirectScene({calibration,modelBounds,listenerSession,contextEpoch,sourceId,visibilityAssumption,engine={}}) {
+  requireValue(calibration?.basis==='declared-demonstration-scale'&&calibration.physicalCalibration==='unverified'&&
+    visibilityAssumption==='unobserved-space-assumed-clear'&&sourceId==='beacon-0'&&
+    /^[a-f0-9]{32}$/.test(listenerSession)&&Number.isSafeInteger(contextEpoch)&&contextEpoch>0,'explicit original-beacon direct context required');
+  const min=vector(modelBounds?.min),max=vector(modelBounds?.max);
+  requireValue(min.every((x,i)=>max[i]>x&&max[i]-x<=256),'bounded conditional propagation region');
+  const directPath=freeze({mode:'listener-only-conditional-direct',sourceId,rights:'original-generated',visibilityAssumption,
+    calibration,listenerSession,contextEpoch,geometryPresent:false,observationEvidence:[]});
+  const result=freeze({version:1,tile:null,materials:{},config:engineConfiguration({...engine,order:0}),coordinateSpace,
+    geometryKey:'listener-direct:'+listenerSession+':'+contextEpoch,generation:contextEpoch,observationModel:null,directPath,modelBounds:{min,max}});
+  scenes.add(result);return result;
+}
+
 export function acousticScene(tile, materials = {}, options = {}) {
   const { observationModel = null, ...engineOptions } = options;
   if (observationModel) {
@@ -103,59 +134,7 @@ export function acousticScene(tile, materials = {}, options = {}) {
     tile.coordinateSpace === coordinateSpace && cacheStatus(tile, c).valid,
     "validated metre geometry required; no implicit GTA scale",
   );
-  const config = {
-    soundSpeed: 343,
-    referenceDistance: 1,
-    airDbPerMetre: [0.0001, 0.001, 0.01],
-    order: 1,
-    maxPaths: 12,
-    maxReflectors: 8,
-    maxDelay: 2,
-    updateHz: 40,
-    ...engineOptions,
-  };
-  requireValue(
-    Number.isFinite(config.soundSpeed) &&
-      config.soundSpeed >= 250 &&
-      config.soundSpeed <= 450,
-    "sound speed",
-  );
-  requireValue(
-    Number.isFinite(config.referenceDistance) &&
-      config.referenceDistance > 0 &&
-      config.referenceDistance <= 10,
-    "reference distance",
-  );
-  requireValue(
-    [0, 1, 2].includes(config.order) &&
-      Number.isInteger(config.maxPaths) &&
-      config.maxPaths >= 1 &&
-      config.maxPaths <= bounds.paths,
-    "path/order budget",
-  );
-  requireValue(
-    Number.isInteger(config.maxReflectors) &&
-      config.maxReflectors >= 1 &&
-      config.maxReflectors <= bounds.reflectors,
-    "reflector budget",
-  );
-  requireValue(
-    Number.isFinite(config.maxDelay) &&
-      config.maxDelay > 0 &&
-      config.maxDelay <= bounds.delay &&
-      [20, 40, 80, 100].includes(config.updateHz),
-    "delay/update budget",
-  );
-  requireValue(
-    Array.isArray(config.airDbPerMetre) &&
-      config.airDbPerMetre.length === 3 &&
-      config.airDbPerMetre.every(
-        (x) => Number.isFinite(x) && x >= 0 && x <= 1,
-      ) &&
-      config.airDbPerMetre[0] <= config.airDbPerMetre[1] &&
-      config.airDbPerMetre[1] <= config.airDbPerMetre[2],
-    "air band loss",
-  );
+  const config=engineConfiguration(engineOptions);
   const checked = {};
   for (const s of tile.surfaces)
     checked[s.id] = materials[s.id] ? material(materials[s.id]) : null;
