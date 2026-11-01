@@ -1,17 +1,78 @@
-# PLAYABLE-08: phase qualification and gated production foundations
+# PLAYABLE-08: scoped engine-state qualification and gated production foundations
 
 1 November 2026. Continues draft PR #76 on `feature/playable-01` from
 `7b42ab845bbf366afa39574cad72d835f53ef488`.
 
-**Live result: 2,131 complete genuine observations; formal qualification remains
-INCOMPLETE. Product handoff and playable development remain BLOCKED.** The one
-separately approved unchanged-ASI deployment, RPH-route launch and capture are
-complete. GTA exited and the owned probe was removed. That approval is consumed.
-Loudness and recording foundations remain disabled and uninstalled; no RichAudio
-audio host, output endpoint or microphone was activated. Any further deployment
-and launch require fresh approval of a concrete reviewed candidate.
+**The guided live test passes all seven frozen criteria across 1,633 complete
+genuine observations. Restricted engine-running Bati signal evidence is accepted
+for preparing the next handoff experiment.** The first attempt remains
+INCOMPLETE and preserved separately. Two individually approved diagnostic
+deployments/launches are complete; neither approval permits another test. GTA
+exited normally and the owned probe was removed after each attempt.
 
-## Actual authorised capture and decision
+**GO for offline handoff preparation; actual handoff, playable audio, listening,
+loudness activation and recording remain BLOCKED.** No RichAudio audio host,
+recording/loopback endpoint or microphone was activated. Loudness/recording requests remain
+false and the installed game retains stock fallback. Further deployment or launch
+requires a new exact candidate, validation and explicit authorisation.
+
+## Guided live result and restricted acceptance
+
+After the first attempt established the usability problem below, the guided HUD
+revision was compiled and validated offline. The operator explicitly authorised
+its exact 380,416-byte artifact separately. The
+[guided live record](../evidence/playable-08-guided-live.json),
+[independent cleanup](../evidence/playable-08-guided-rollback.json) and
+[restricted acceptance](../evidence/playable-08-engine-state-acceptance.json)
+bind that actual result. The source capture and the analyser still say
+`providerValid:false` / `providerQualified:false`: neither automatically grants
+qualification. The separate acceptance is the reviewed, narrowly scoped decision
+after real provenance, unchanged primary criteria and the human report agree.
+
+| Measured fact | Guided actual result |
+| --- | --- |
+| Route | One actual ASI load, script registration, main callback and later unregistration through the existing RPH launch route |
+| Scope | Protected Enhanced `1.0.1158.16` executable; installed SHV `3889.0/1158.13`; Bati `F9300CC5`, current local player as driver, offline Story Mode, engine-running observations only |
+| Observations | 1,633 complete declaration/raw-return/context triplets; 836 distinct raw bit patterns; raw `0.20000000298023224..1.0` without transformation |
+| Phase chronology | START OFF, six manual ADVANCE events through RETURN_IDLE, then plain-Backslash FINISH; operator-stop after 91.9985 seconds |
+| Initial idle | 263 observations over 14.7600852 seconds, speed zero, exact raw `0.2` |
+| Return idle | 237 observations over 13.2956572 seconds, speed zero, exact raw `0.2` |
+| Acceleration | Independent speed quarter delta +29.01069 m/s and raw ratio quarter delta +0.329007 |
+| Deceleration | Independent speed quarter delta −13.32540 m/s and raw ratio quarter delta −0.321840 |
+| Primary decision | `candidate-consistent`; all seven criteria true; zero quality failures, zero evidence gaps; independently reproduced without changing the analyser |
+| Boundaries | All target starts before the active deadline, maximum 20 Hz retained; no native failure, null result, running zero, missing outcome or invalid identity bracket recorded |
+
+The operator confirmed completing the phases, including slowdown and stationary
+return to idle. This corroborates the separately marked independent observations;
+it does not supply missing gear/throttle measurements. Every pre/post
+engine-running raw value was 1. The OFF label never proves engine off. Of the
+315 REV-labelled observations, 309 have both acquired speeds at or below
+0.10 m/s and span raw `0.2..1.0`; six briefly move faster, up to 0.8534 m/s.
+Those samples remain intact. No W/S actuation association, actual throttle or
+measured gear is inferred from labels, speed or ratio drops.
+
+The supported conclusion is a genuine **normalised engine operating-state
+signal for this engine-running, player-driven Bati on this exact stack**,
+sufficient to prepare and separately validate the next handoff experiment.
+Physical crankshaft RPM, engine-off/restart/stall semantics, running zero,
+other vehicles/NPCs/builds, prolonged/repeated-session reliability and
+cross-framework correspondence remain unqualified. The framework's internal
+`VER_EN_1_0_1158_13` compatibility label does not replace the executable's actual
+`1.0.1158.16` file version. The independent SHV route is supported; the earlier
+RPH failures still have no proven root cause.
+
+Normal exit used the observed GTA quit dialog. Return was issued to its Yes
+action; the input helper's post-action foreground-PID error occurred as the game
+closed, and is recorded rather than presented as helper-confirmed completion.
+OS process absence and loader unregistration independently establish exit. The
+exact receipt-owned ASI was removed only afterward. All 11 protected files,
+four settings fingerprints, 140 historical pins, 24 foundation pins and three
+compiled inputs match. Original/copied captures and logs are hash-matched;
+probe/pending paths and relevant owned processes are absent. Stock fallback and
+disabled feature requests remain unchanged. No automatic retry or audio test
+occurred under either approval.
+
+## First authorised attempt: incomplete, unchanged diagnostic
 
 The [sanitised live evidence](../evidence/playable-08-live.json) and
 [independent rollback evidence](../evidence/playable-08-rollback.json) preserve
@@ -44,8 +105,11 @@ comparison. Actual gear and throttle values remain unavailable.
 
 The signal is still a credible independently measured **normalised engine
 operating-state candidate**, not physical crankshaft RPM. No complete provider
-contract, SHV-to-RichAudio handoff or audible vehicle playback is qualified.
-There was no automatic retry, second launch, audio test or endpoint capture.
+contract, SHV-to-RichAudio handoff or audible vehicle playback was qualified at
+that first attempt's boundary.
+There was no automatic retry or additional launch under that first approval.
+The guided attempt above required separate approval. Neither authorised an audio
+test or endpoint capture.
 
 After normal exit, only the receipt-owned, exact-hash ASI was removed. Independent
 inspection confirmed all 11 protected installation files, four saved settings
@@ -81,7 +145,9 @@ can finish all requested regions inside the unchanged 120-second budget. The
 small guided HUD revision is prepared offline; it does not change the native,
 capture limits, raw values, manual phase controls or frozen analysis.
 
-## Short operator card for a separately approved guided run
+## Operator procedure used for the separately approved guided run
+
+This procedure was used once; it does not propose another diagnostic session.
 
 **Plain Backslash advances the phase. The start/stop chord does not advance it.**
 
@@ -126,12 +192,13 @@ and unexplained discontinuities. A successful recommendation is limited to a
 normalised engine operating-state quantity on the measured vehicle/build/stack,
 not physical crankshaft RPM or every vehicle.
 
-## Guided diagnostic candidate, separate from the consumed attempt
+## Guided diagnostic build and offline validation
 
 The [new build receipt](../evidence/playable-08-build.json) identifies the
 380,416-byte `build/playable-08-shv-probe/RichAudio.OperatingState.Shv.asi`, SHA-256
 `41361aa281493e1cc54fe196161aafc4a93ce002bfe0bb9da2effbc742465484`.
-It was compiled once from the reviewed HUD revision using the existing signed
+It was compiled once from the reviewed HUD revision, then used unchanged in the
+separately approved guided session above, using the existing signed
 Microsoft MSVC `14.44.35207` and Windows SDK `10.0.26100.0`, with warnings treated
 as errors. No additional system software, runtime or SDK was installed.
 
@@ -142,8 +209,9 @@ advice: there is no automatic advance, vehicle actuation, inferred gear or
 invented phase achievement. A running-zero warning appears separately. Fixed
 stack text storage and a compile-time component-length bound avoid unbounded HUD
 formatting. An explicit formatting failure stops rather than forging an
-invocation exception. Actual in-game layout/readability of this revision remains
-unobserved until a separately approved test.
+invocation exception. The operator successfully advanced and finished the actual
+guided protocol. Exact font/layout fidelity is not independently certified by
+the fake-framework text checks or a screenshot of the active coach.
 
 The reviewed change preserves native/API headers byte-for-byte, the same 25
 published identifiers, eight SHV imports and two read-only USER32 imports. Static
@@ -203,7 +271,8 @@ The canonical installation manifest SHA-256 is
 `8301f6296af197d96beb8b63c6cde068711345ae44aadaaceeb09c65d9643b20`;
 rollback is
 `8c79d8f3f56e61d902ca27b6861dfa5f2bad7273a2c18f5d76df28da096f346d`.
-These are preparation and integrity records, not approval for another live run.
+These historical preparation records preceded the separately granted and now
+consumed guided approval. They grant no additional live run.
 
 ## Independent production features and activation order
 
@@ -236,8 +305,59 @@ The executable order remains:
 5. Authorised loudness calibration, then expanded vehicle/traffic qualification.
 6. Explicit synchronised recording for subsequent objective audio tests.
 
-No new provider handoff or product activation is claimed before those gates pass.
+The restricted [telemetry acceptance](../evidence/playable-08-engine-state-acceptance.json)
+clears only the reviewed signal-evidence stage for the exact scoped artifact.
+It does not authenticate arbitrary JSON or grant consent, and a future trusted
+composition must enforce its engine-running/player/model/build restrictions.
+The [focused acceptance-gate controls](../evidence/playable-08-acceptance-gates.json)
+use the actual accepted record to verify that all downstream features remain
+blocked. No actual provider handoff or product activation is claimed.
 No synthetic RPM, alternate hashes, memory scans or NFSgauge integration is used.
+
+## Minimal handoff preparation and next independent milestone
+
+See [the isolated handoff preparation](PLAYABLE_08_HANDOFF_PREPARATION.md).
+The existing host already consumes a normalised operating point; no RPM
+conversion or second scripting runtime is required. The next producer can reuse
+the supported SHV call route while the RPH-side consumer keeps independent
+vehicle observations. A changed provider artifact must be reviewed and tested
+under its own digest rather than inheriting acceptance merely by its name.
+
+The preparation validates candidate observations separately from transport,
+rendering and deployment. It requires source/session/generation scope, exact raw
+float bits, sequence, complete same-domain driver brackets, explicit bounded
+source-to-host clock mapping/freshness and an independent vehicle-binding
+witness. It never equates SHV and RPH native handles. Model and scalar speed
+alone do not prove physical identity. Independently observed single-player
+current-player-driver relationships with overlapping stable brackets may be a
+correlation strategy, but actual authenticated composition and failure handling
+must establish that witness in a separately approved live test.
+
+The current diagnostic lacks that live channel and binding. An isolated
+candidate validator cannot establish them, produce a gameplay frame or activate
+audio. Handoff readiness remains false. The next independently verifiable
+milestone is a separately reviewed, exact-artifact passive handoff test proving
+identity correlation, clock alignment, stale/out-of-order rejection and
+fail-closed behaviour. Playback remains disabled during that test; its producer
+and runtime composition have not yet been built or approved.
+
+The isolated C# implementation compiles with the existing x64 .NET Framework
+C# 5 compiler and passes **68 cases / 250 assertions**, including full-interval
+uncertainty/expiry, sequence/continuity, identity changes, exact float32 promotion
+and permanent rejection retirement. Independent critical review passes. The
+[preparation receipt](../evidence/playable-08-handoff-preparation.json) pins its
+actual source, fixture, compiler and test binary. It is deliberately excluded
+from the current host build and has no live capability issuer. Arrival validation
+does not implement a missing-stream watchdog; a future consumer must enforce
+candidate expiry on every use and separately prove bounded silence handling.
+
+The practical primary path is the supported SHV native route for the restricted
+observed engine-running scope. Unknown, invalid, stale or out-of-scope state must
+retain stock fallback, without the broken RPH ratio, speed-derived RPM or
+last-good substitution. Retain the
+[upstream RPH report draft](UPSTREAM_RPH_ENGINE_TELEMETRY_REPORT.md) and recommend
+authorised submission through the official maintainer channel with the new SHV
+comparison evidence. No maintainer report has been submitted externally.
 
 ## Modification-aware loudness foundation
 
@@ -297,12 +417,13 @@ sources, artifacts, receipts and reviewed manifests.
 | Component | Implemented/offline-tested | Live-qualified or production-ready? |
 | --- | --- | --- |
 | Unchanged SHV diagnostic | Original build and complete 48-case/51,703-assertion binary evidence reused; frozen analyser retained | Real PLAYABLE-07 and first PLAYABLE-08 data preserved; marked initial idle passes, full phase qualification incomplete |
-| Guided HUD diagnostic | Separate 380,416-byte ASI; 48 genuine-binary fixture cases/53,747 assertions and 30 analysis controls pass | Not deployed or observed in GTA; no native/provider/audio qualification claimed by fake-framework data |
-| First-advance observer/proposal | Updated 50 checks using actual ABI fixture records and labelled negative controls; terminal captures, stale/invalid input and wrong reviewed-build digest fail closed | Actual first08 ADVANCE/IDLE confirmed using original observer; new readiness remains neither a driving interlock nor provider acceptance |
+| Guided HUD diagnostic | Separate 380,416-byte ASI; 48 genuine-binary fixture cases/53,747 assertions and 30 analysis controls pass | One authorised real capture: 1,633 observations and all seven primary criteria pass; restricted engine-running Bati signal accepted, then owned probe removed |
+| First-advance observer/proposal | Updated 50 checks using actual ABI fixture records and labelled negative controls; terminal captures, stale/invalid input and wrong reviewed-build digest fail closed | First ADVANCE/IDLE independently confirmed in both actual08 attempts; readiness remains neither a driving interlock nor provider acceptance |
+| Isolated handoff validator | Actual C# module compiles; 68 cases / 250 assertions and independent source review pass | Explicit offline composition only, outside product build; live source authentication, identity/clock mapping and silence watchdog remain unimplemented/unqualified |
 | Loudness policy | 18 tests: 13 new policy cases plus five original pressure/source cases | Disabled, not wired to gameplay, modification reads and acoustic defaults unvalidated live |
 | Recording/session/tap | Actual complete host compiles; 105 C# tests execute the real PCM fill path with fake renderer/loopback interfaces | Actual endpoint backend compiled only; no Windows endpoint, host or microphone started |
 | Recording analysis | 17 known-signal/format/negative controls; bounded spectrum/envelope/correlation/index/event diagnostics | No real GTA recordings or audible-output acceptance; aligned stems and real clock mapping still required for conditional measurements |
-| Production activation | 18 cross-stage/scope/session/fixture rejection checks | Shipped requests false; structural checks do not grant permission or authenticate arbitrary records |
+| Production activation | 18 cross-stage/scope/session/fixture checks plus 11 focused controls using actual restricted acceptance | Telemetry evidence passes for its scope; handoff/playback/listening absent, requests false and every audio feature remains blocked; structural checks do not grant consent or authenticate arbitrary records |
 | Menu and product bridge | 1,305 model/input/drawing checks; controlled preview inspected; authentic-SDK compiled product has one lifecycle entry pair/plugin identity | Installed menu untouched; Record Audio Test stays locked and requires a future qualified host command bridge |
 | Existing host regression | 1,702 original no-device host/ring/framing checks against final changed sources | Does not establish hardware callback timing or listening |
 
@@ -352,10 +473,10 @@ raw results, invalid identity/timing or motion before confirmation. It ends on
 the first confirmed IDLE bracket or a bounded failure, with no automatic retry.
 It cannot prevent the operator driving; the short operator card is essential.
 
-**GO to request one further telemetry-only guided test; product integration and
-playable development remain BLOCKED.** Review these exact artifacts and request fresh approval for one deployment,
-one RPH-route Story Mode launch and one bounded operator-controlled capture only.
-Run the unchanged primary analyser on that result. If accepted, document its
-limited normalised-signal scope and prepare the smallest independently validated
-handoff. Product deployment/playback, loudness activation and audio recording
-remain separate gates and are not included in the telemetry approval.
+**GO for offline handoff preparation. BLOCKED for actual handoff activation and
+playable/audio development until that separate live gate passes.** No further
+telemetry diagnostic launch is proposed by this increment. Both approvals are
+consumed. A future handoff deployment needs a concrete new artifact, offline
+checks, installation/rollback plan and fresh explicit approval. Live production
+PCM and human listening follow only after that handoff is independently
+validated; loudness calibration and opt-in recording follow afterward.

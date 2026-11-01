@@ -2,14 +2,16 @@
 
 ## PLAYABLE-08 production foundations — 1 November 2026
 
-The [PLAYABLE-08 increment](docs/PLAYABLE_08.md) retains the real PLAYABLE-07
-signal and adds 2,131 genuine observations from one separately approved capture.
-Marked initial idle passes, but dedicated deceleration and return-idle regions
-were not captured before the deadline. Qualification and product handoff remain
-blocked. A small diagnostic HUD revision supplies timing/action guidance offline;
-it requires fresh approval before another deployment or launch. Independent
-loudness/recording foundations remain disabled. No offline feature test clears
-telemetry or live listening gates.
+The [PLAYABLE-08 increment](docs/PLAYABLE_08.md) preserves its first incomplete
+2,131-observation attempt, then qualifies restricted engine-running Bati signal
+evidence with a separately approved guided capture: 1,633 complete real
+observations, all seven unchanged primary criteria and independent human/route
+review. It establishes a normalised operating-state signal, not physical RPM,
+engine-off behaviour or other vehicles/builds. The owned probe was removed and
+stock fallback retained. Isolated offline handoff preparation follows;
+authenticated cross-framework identity, clock/freshness handling and actual
+handoff remain unqualified. Loudness/recording foundations stay disabled; live
+RichAudio PCM and listening are still separate subsequent gates.
 
 - `src/acoustics/production/activation.mjs` separates disabled configuration
   requests from reviewed, game/hash/model/provider-scoped acceptance records and
