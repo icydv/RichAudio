@@ -1,12 +1,12 @@
 #requires -Version 7.0
 [CmdletBinding()]
-param([string]$Binary='',[string]$Output='',[ValidateSet('playable-04','playable-06')][Alias('Profile')][string]$ProbeProfile='playable-06')
+param([string]$Binary='',[string]$Output='',[ValidateSet('playable-04','playable-06','playable-07')][Alias('Profile')][string]$ProbeProfile='playable-07')
 $ErrorActionPreference='Stop'
 
 function Get-ShvExpectedExports {
- param([ValidateSet('playable-04','playable-06')][Alias('Profile')][string]$ProbeProfile='playable-06')
+ param([ValidateSet('playable-04','playable-06','playable-07')][Alias('Profile')][string]$ProbeProfile='playable-07')
  $names=@('?nativeInit@@YAX_K@Z','?nativePush64@@YAX_K@Z','?nativeCall@@YAPEA_KXZ','?scriptRegister@@YAXPEAUHINSTANCE__@@P6AXXZ@Z','?scriptUnregister@@YAXPEAUHINSTANCE__@@@Z','?scriptWait@@YAXK@Z')
- if($ProbeProfile -eq 'playable-06'){$names+=@('?keyboardHandlerRegister@@YAXP6AXKGEHHHH@Z@Z','?keyboardHandlerUnregister@@YAXP6AXKGEHHHH@Z@Z')}
+ if($ProbeProfile -ne 'playable-04'){$names+=@('?keyboardHandlerRegister@@YAXP6AXKGEHHHH@Z@Z','?keyboardHandlerUnregister@@YAXP6AXKGEHHHH@Z@Z')}
  return $names
 }
 
@@ -98,7 +98,7 @@ function Get-ShvPeImage {
 }
 
 function Assert-ShvProductImage {
- param([Parameter(Mandatory=$true)]$Image,[ValidateSet('playable-04','playable-06')][Alias('Profile')][string]$ProbeProfile='playable-06')
+ param([Parameter(Mandatory=$true)]$Image,[ValidateSet('playable-04','playable-06','playable-07')][Alias('Profile')][string]$ProbeProfile='playable-07')
  if($Image.Machine -ne 'Amd64' -or $Image.PeKind -ne 'PE32Plus' -or !$Image.IsDll -or !$Image.EntryPointPresent -or !$Image.EntryPointExecutable -or $Image.HasClrMetadata){throw 'Product must be a native AMD64 PE32+ DLL with a backed executable entry point.'}
  if(!$Image.GuardCF -or !$Image.DynamicBase -or !$Image.NxCompatible -or !$Image.HighEntropyVa){throw 'Product is missing requested PE hardening flags.'}
  if($Image.ExportFunctionCount -ne 0 -or $Image.Exports.Count -ne 0){throw 'Product must not export named or ordinal-only fixture, test or other API entry points.'}
@@ -107,9 +107,9 @@ function Assert-ShvProductImage {
  if($framework.Count -ne 1 -or $framework[0].Ordinals.Count -ne 0){throw 'Product must import exactly one named ScriptHookV.dll interface.'}
  $expected=@(Get-ShvExpectedExports -Profile $ProbeProfile | Sort-Object);$actual=@($framework[0].Functions | Sort-Object)
  if($actual.Count -ne $expected.Count -or @(Compare-Object $expected $actual -CaseSensitive).Count -ne 0){throw ('Product ScriptHookV imports differ from the '+$expected.Count+' verified decorated exports for '+$ProbeProfile+'.')}
- if($ProbeProfile -eq 'playable-06'){
+ if($ProbeProfile -ne 'playable-04'){
   $foreground=@($Image.Imports | Where-Object {$_.Module -ieq 'USER32.dll'});$readers=@('GetForegroundWindow','GetWindowThreadProcessId' | Sort-Object)
-  if($foreground.Count -ne 1 -or $foreground[0].Functions.Count -ne 2 -or @(Compare-Object $readers (@($foreground[0].Functions)|Sort-Object) -CaseSensitive).Count -ne 0){throw 'PLAYABLE-06 User32 imports must be exactly the two reviewed foreground readers; keyboard polling/hooks and other User32 APIs are not permitted.'}
+  if($foreground.Count -ne 1 -or $foreground[0].Functions.Count -ne 2 -or @(Compare-Object $readers (@($foreground[0].Functions)|Sort-Object) -CaseSensitive).Count -ne 0){throw 'User32 imports must be exactly the two reviewed foreground readers; keyboard polling/hooks and other User32 APIs are not permitted.'}
  }
  foreach($module in $Image.Imports){
   if($module.Module -ieq 'ScriptHookV.dll'){continue}
@@ -123,8 +123,10 @@ if($MyInvocation.InvocationName -ne '.' -and $Binary){
  $result=Get-ShvPeImage -Path $Binary;$null=Assert-ShvProductImage -Image $result -Profile $ProbeProfile
  if($Output){
   $repo=Split-Path -Parent $PSScriptRoot;$target=Assert-ShvBuildOutputPath $Output $repo 'D:\Games\steamapps\common\Grand Theft Auto V Enhanced'
-  $preserved=[IO.Path]::GetFullPath((Join-Path $repo 'build/playable-04-shv-probe')).TrimEnd('\','/')
-  if($target.StartsWith($preserved+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Preserved PLAYABLE-04 receipts cannot be overwritten by static inspection; choose a new output path.'}
+  foreach($name in @('build/playable-04-shv-probe','build/playable-06-shv-probe','.local/playable-04','.local/playable-05','.local/playable-06')){
+   $preserved=[IO.Path]::GetFullPath((Join-Path $repo $name)).TrimEnd('\','/')
+   if($target.Equals($preserved,[StringComparison]::OrdinalIgnoreCase) -or $target.StartsWith($preserved+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Preserved PLAYABLE-04/06 artifacts and receipts cannot be overwritten by static inspection; choose a new output path.'}
+  }
   [IO.Directory]::CreateDirectory((Split-Path -Parent $target))|Out-Null;$result|ConvertTo-Json -Depth 9|Set-Content -LiteralPath $target -Encoding utf8
  }
  Write-Output ('PASS static '+$ProbeProfile+' AMD64 probe PE, exact '+@(Get-ShvExpectedExports -Profile $ProbeProfile).Count+' ScriptHookV imports, isolated entry point and reviewed OS dependencies. SHA256 '+$result.Sha256)

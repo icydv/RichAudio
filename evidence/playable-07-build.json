@@ -1,0 +1,687 @@
+{
+  "schema": 1,
+  "profile": "playable-07",
+  "builtUtc": "2026-11-01T00:28:43.0173957Z",
+  "scope": "Offline Microsoft x64 C++ compilation of the bounded operator-armed multi-state diagnostic, exact public import-boundary linking and static PE inspection only",
+  "candidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "bytes": 378880,
+    "sha256": "21302b4c5c5fb99f63b7b25dce2fa973117bfb0246f16745d0782f062fe1a69e",
+    "pathHint": "build/playable-07-shv-probe/RichAudio.OperatingState.Shv.asi",
+    "installablePlayableUpdate": false
+  },
+  "toolchain": {
+    "msvcVersion": "14.44.35207",
+    "windowsSdkVersion": "10.0.26100.0",
+    "compiler": {
+      "Name": "cl.exe",
+      "Bytes": 677776,
+      "Sha256": "fe251ef50a1545b1b0835ee17b1e785459712b38d79e45b5c1d3d28970a36619",
+      "FileVersion": "19.44.35229.0",
+      "AuthenticodeStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    },
+    "linker": {
+      "Name": "link.exe",
+      "Bytes": 3252616,
+      "Sha256": "a364af801a8539e4324d9489313dbf001d959128451fc99a27b24676bbac058f",
+      "FileVersion": "14.44.35229.0",
+      "AuthenticodeStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    },
+    "librarian": {
+      "Name": "lib.exe",
+      "Bytes": 23376,
+      "Sha256": "fde148a275981855689c45f932dda56b10dc9289a0290826a0fb93478da34929",
+      "FileVersion": "14.44.35229.0",
+      "AuthenticodeStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    },
+    "compilerFlags": [
+      "/std:c++17",
+      "/W4",
+      "/WX",
+      "/O2",
+      "/MT",
+      "/EHsc",
+      "/guard:cf",
+      "/Brepro",
+      "/utf-8"
+    ],
+    "linkerFlags": [
+      "/DLL",
+      "/MACHINE:X64",
+      "/INCREMENTAL:NO",
+      "/OPT:REF",
+      "/OPT:ICF",
+      "/GUARD:CF",
+      "/DYNAMICBASE",
+      "/NXCOMPAT",
+      "/HIGHENTROPYVA",
+      "/Brepro"
+    ]
+  },
+  "sourceInputs": [
+    {
+      "Name": "repo/src/telemetry/ShvProbe/Probe.cpp",
+      "Bytes": 69809,
+      "Sha256": "7ed8cc3f3cebb95982cf36502ebbda45b14d269ec2218cdf75475e31d278e1b8"
+    },
+    {
+      "Name": "repo/src/telemetry/ShvProbe/ScriptHookVApi.h",
+      "Bytes": 1493,
+      "Sha256": "131f609ff3db49e0bdaa9264a296825669fe897115c65d76fd3f593115d077ba"
+    },
+    {
+      "Name": "repo/src/telemetry/ShvProbe/NativeIds.h",
+      "Bytes": 2506,
+      "Sha256": "2c256ef63e179a17361d7f06f12af763d4891a8b494206c03bc4ebd7e2d751b5"
+    }
+  ],
+  "headerProvenanceSha256": "c5d16c5d12f11ea44fc4bb124646721287ee84edf982d7f6274a3eb505d8bac5",
+  "includedHeaderCount": 170,
+  "includedHeaderManifestSha256": "6e7d00d087adbf55fb8d441c31dcccc01ed027ff5eb7339002c99a131ef388e6",
+  "linkedLibraries": [
+    {
+      "Name": "windows-sdk/Lib/10.0.26100.0/ucrt/x64/libucrt.lib",
+      "Bytes": 43336396,
+      "Sha256": "2b247d6a27c22c520c34134b8acf2da3366175a4690886927a51929f37725fdd"
+    },
+    {
+      "Name": "windows-sdk/Lib/10.0.26100.0/um/x64/kernel32.lib",
+      "Bytes": 311908,
+      "Sha256": "341c7d56125a03b458e4d5093e4c79b33123ccfdfd610fe236937b8e6f3134bb"
+    },
+    {
+      "Name": "windows-sdk/Lib/10.0.26100.0/um/x64/user32.lib",
+      "Bytes": 167864,
+      "Sha256": "f45759349ad08b848bdd4eee39cd9b428b2a7ae63a09889c09a197fe7b01421d"
+    },
+    {
+      "Name": "windows-sdk/Lib/10.0.26100.0/um/x64/uuid.lib",
+      "Bytes": 8936424,
+      "Sha256": "d077ffb106503e057428dc7bb4c5daac019c269ffc714edb18ca028723cc840a"
+    },
+    {
+      "Name": "repo/build/playable-07-shv-probe/ScriptHookV.lib",
+      "Bytes": 3912,
+      "Sha256": "c2d2f4b9e7a76a0361c6037ec80fdc58a0403502e9c4f4cf132b2f288b329519"
+    },
+    {
+      "Name": "msvc/14.44.35207/lib/x64/LIBCMT.lib",
+      "Bytes": 6534094,
+      "Sha256": "8fe40dd342b90b35d62b8f5d55b4e92df7785c122976618365cfe3b014cc857a"
+    },
+    {
+      "Name": "msvc/14.44.35207/lib/x64/libcpmt.lib",
+      "Bytes": 21684758,
+      "Sha256": "da86944db1497552c378e6252a7177fbefbdaeba4e69a6457de4db7fb2d235de"
+    },
+    {
+      "Name": "msvc/14.44.35207/lib/x64/libvcruntime.lib",
+      "Bytes": 2087406,
+      "Sha256": "e4f8daf356d63592ff6d6f7ad90c8c9da4c1230273ad113a9a2b56afd6bfcb04"
+    },
+    {
+      "Name": "msvc/14.44.35207/lib/x64/OLDNAMES.lib",
+      "Bytes": 157422,
+      "Sha256": "35bd82cfb02a0146ff9c0ca6bf7dbde61d49c6d4f3493befe584218c370ff41d"
+    }
+  ],
+  "generatedImportLibrary": {
+    "method": "Local MSVC librarian generated a COFF import library from eight statically verified decorated exports, including documented keyboard callbacks; no proprietary import-library binary was copied",
+    "definitionSha256": "23750cde4f9fa02c75b7275536e231a5cc6c9719c78744d4ea5cd45010c7fea8",
+    "librarySha256": "c2d2f4b9e7a76a0361c6037ec80fdc58a0403502e9c4f4cf132b2f288b329519",
+    "frameworkDll": "ScriptHookV.dll",
+    "exactImportedNames": [
+      "?keyboardHandlerRegister@@YAXP6AXKGEHHHH@Z@Z",
+      "?keyboardHandlerUnregister@@YAXP6AXKGEHHHH@Z@Z",
+      "?nativeCall@@YAPEA_KXZ",
+      "?nativeInit@@YAX_K@Z",
+      "?nativePush64@@YAX_K@Z",
+      "?scriptRegister@@YAXPEAUHINSTANCE__@@P6AXXZ@Z",
+      "?scriptUnregister@@YAXPEAUHINSTANCE__@@@Z",
+      "?scriptWait@@YAXK@Z"
+    ]
+  },
+  "declaredNativeSetMatchesFrozen06": true,
+  "declaredNativeIds": [
+    {
+      "Alias": "IsLoading",
+      "Hash": "0X10D0A8F259E93EC9"
+    },
+    {
+      "Alias": "NetworkGame",
+      "Hash": "0X10FAB35428CCC9D7"
+    },
+    {
+      "Alias": "NetworkSession",
+      "Hash": "0X9DE624D2FC4B603F"
+    },
+    {
+      "Alias": "PlayerSwitch",
+      "Hash": "0XD9D2CFFF49FAB35F"
+    },
+    {
+      "Alias": "PlayerId",
+      "Hash": "0X4F8644AF03D0E0D6"
+    },
+    {
+      "Alias": "PlayerPlaying",
+      "Hash": "0X5E9564D8246B909A"
+    },
+    {
+      "Alias": "PlayerPed",
+      "Hash": "0XD80958FC74E988A6"
+    },
+    {
+      "Alias": "EntityExists",
+      "Hash": "0X7239B21A38F536BA"
+    },
+    {
+      "Alias": "EntityIsPed",
+      "Hash": "0X524AC5ECEA15343E"
+    },
+    {
+      "Alias": "EntityIsVehicle",
+      "Hash": "0X6AC7003FA6E5575E"
+    },
+    {
+      "Alias": "EntityDead",
+      "Hash": "0X5F9532F3B5CC2551"
+    },
+    {
+      "Alias": "PedVehicle",
+      "Hash": "0X9A9112A0FE9A4713"
+    },
+    {
+      "Alias": "EntityModel",
+      "Hash": "0X9F47B058362C84B5"
+    },
+    {
+      "Alias": "VehicleSeatPed",
+      "Hash": "0XBB40DD2270B65366"
+    },
+    {
+      "Alias": "EngineRunning",
+      "Hash": "0XAE31E7DF9B5B132E"
+    },
+    {
+      "Alias": "CurrentRevRatio",
+      "Hash": "0XF9DDA40BC293A61E"
+    },
+    {
+      "Alias": "EntitySpeed",
+      "Hash": "0XD5037BA82E12416F"
+    },
+    {
+      "Alias": "PauseMenu",
+      "Hash": "0XB0034A223497FFCB"
+    },
+    {
+      "Alias": "TextFont",
+      "Hash": "0X66E0276CC5F6B9DA"
+    },
+    {
+      "Alias": "TextScale",
+      "Hash": "0X07C837F9A01C34C9"
+    },
+    {
+      "Alias": "TextColour",
+      "Hash": "0XBE6B23FFA53FB442"
+    },
+    {
+      "Alias": "TextOutline",
+      "Hash": "0X2513DFB0FB8400FE"
+    },
+    {
+      "Alias": "TextBegin",
+      "Hash": "0X25FBB336DF1804CB"
+    },
+    {
+      "Alias": "TextAdd",
+      "Hash": "0X6C188BE134E074AA"
+    },
+    {
+      "Alias": "TextEnd",
+      "Hash": "0XCD015E5BB0D96A57"
+    }
+  ],
+  "nativeAllowlistSha256": "5eaefdcb1e7969c71587b1adc0d0e71e0582a27c3186736917b812abe2b88639",
+  "nativeAllowlistQualification": "Declaration names and values are checked; source review separately verifies dispatch and measurement behaviour.",
+  "preservedPriorFiles": [
+    {
+      "Name": ".local/playable-06/live-01/authorisation.json",
+      "Bytes": 404,
+      "Sha256": "9c50b4267e347626004f89142c188752b23b1b5d361430640ebaf7ca333b1411"
+    },
+    {
+      "Name": ".local/playable-06/live-01/before-logs/asiloader.log",
+      "Bytes": 1501,
+      "Sha256": "15146d758932b5b4f55c0b1f2a0fc0c6d936ef28f8ee017f40b7936ffc6343a0"
+    },
+    {
+      "Name": ".local/playable-06/live-01/before-logs/RagePluginHook.log",
+      "Bytes": 16739,
+      "Sha256": "d09408d70f606b836f71ee8fde06a760514d3bc2e165b2d5449bf5a5b2abcf64"
+    },
+    {
+      "Name": ".local/playable-06/live-01/before-logs/ScriptHookV.log",
+      "Bytes": 1167,
+      "Sha256": "0429e19fde5f8608a10eb408668a92bb53d42f5aa7313b30f692f2e7fd9ed0cb"
+    },
+    {
+      "Name": ".local/playable-06/live-01/capture-observation.json",
+      "Bytes": 660,
+      "Sha256": "18869d3128c8053c6c4d6dc9ac321c2a0e8f7262318de484f41a35f9645f9958"
+    },
+    {
+      "Name": ".local/playable-06/live-01/capture-snapshot/capture.json",
+      "Bytes": 4249,
+      "Sha256": "dd7f1dda97477b247f4152a238560e49173b5bbdbd7ca8e35a427d570c487e43"
+    },
+    {
+      "Name": ".local/playable-06/live-01/capture-snapshot/journal.ndjson",
+      "Bytes": 3854,
+      "Sha256": "adeb9da924e127e305eb3b104f5edca36a6c804d239de906b4b3acdf10d4d93d"
+    },
+    {
+      "Name": ".local/playable-06/live-01/final-logs/asiloader.log",
+      "Bytes": 1647,
+      "Sha256": "b565c7d10e3518eb3a05bdfc21e3f18e080b2028ca37c2970c4295e264c52691"
+    },
+    {
+      "Name": ".local/playable-06/live-01/final-logs/RagePluginHook.log",
+      "Bytes": 16635,
+      "Sha256": "98cd547da77269444c101b36524fa841af6de31075e1dd25241a4ac2ada1ebbd"
+    },
+    {
+      "Name": ".local/playable-06/live-01/final-logs/ScriptHookV.log",
+      "Bytes": 1167,
+      "Sha256": "a41053bf7b4f6904cc3025527ef6850951c355e8e478637b2f3e3e559f3254c4"
+    },
+    {
+      "Name": ".local/playable-06/live-01/installation-receipt.json",
+      "Bytes": 413,
+      "Sha256": "79a2d333178ad35d2abb6892aaf2ba6f875aa7ff16386ca7b1e7e0ac65bc1472"
+    },
+    {
+      "Name": ".local/playable-06/live-01/launch-receipt.json",
+      "Bytes": 439,
+      "Sha256": "590165a1b957b32a1296210723528c6ac38dc16aed97296aca198776c5a860ca"
+    },
+    {
+      "Name": ".local/playable-06/live-01/normal-exit.json",
+      "Bytes": 392,
+      "Sha256": "1478006c56e5510814298750d6d471e6a3b5d6606daf3fde078c1cd5348eaec5"
+    },
+    {
+      "Name": ".local/playable-06/live-01/observed-processes.json",
+      "Bytes": 326,
+      "Sha256": "05edaaca85ec19cc2cfdc2831611525dd3840b25a893317788f8d88d00a9fd41"
+    },
+    {
+      "Name": ".local/playable-06/live-01/one-launch-started.json",
+      "Bytes": 164,
+      "Sha256": "3de7864f0dcda0fbfeae4711209725e5d6688cbedc2e99ad628891c566a5261c"
+    },
+    {
+      "Name": ".local/playable-06/live-01/pending-creation-receipt.json",
+      "Bytes": 343,
+      "Sha256": "7f6d48e81b15fbc33721e91967fe2f03783c840a256b6bf75f288d383ab0996a"
+    },
+    {
+      "Name": ".local/playable-06/live-01/preflight.json",
+      "Bytes": 610,
+      "Sha256": "6b08ad46fc697e79dc6ff92b8878b9482c92d008eb47f6ca8c124ac5e6c8cfc1"
+    },
+    {
+      "Name": ".local/playable-06/live-01/publication-audit.json",
+      "Bytes": 357,
+      "Sha256": "50faa9c943497607d29539fe4f5cf36fc692ac19b0d623bf5398f693651586fa"
+    },
+    {
+      "Name": ".local/playable-06/live-01/rollback-receipt.json",
+      "Bytes": 2712,
+      "Sha256": "df9fec217e527ddc28db87b8fc6f6e473457096561bb5b40df75c2350f227380"
+    },
+    {
+      "Name": ".local/playable-06/live-01/user-observation.json",
+      "Bytes": 267,
+      "Sha256": "7df85da6cfeb9d1cc7f1d52a1c838ffea8a511df56103dc52652eca2fafbfbdc"
+    },
+    {
+      "Name": "build/playable-04-shv-probe/build-receipt.json",
+      "Bytes": 37212,
+      "Sha256": "d945e51d966583ca711dcca4e26d098d7838ce9ed4bd92ce90adc482f24c25ab"
+    },
+    {
+      "Name": "build/playable-04-shv-probe/pe-inspection.json",
+      "Bytes": 3400,
+      "Sha256": "cd0c7d23c5f765cb7efc88c22acf7945fd2643efbb88ab91d292638eacbbf65e"
+    },
+    {
+      "Name": "build/playable-04-shv-probe/RichAudio.OperatingState.Shv.asi",
+      "Bytes": 288256,
+      "Sha256": "8f516dc5bdfd62f125c8f9624d3396c9c3f9debceb618c39f76784323fd7a083"
+    },
+    {
+      "Name": "build/playable-06-shv-probe/build-receipt.json",
+      "Bytes": 38933,
+      "Sha256": "b932f61fb37739d7a6b5e0ff5f591fbda004667f3473f573dfa59836793f3343"
+    },
+    {
+      "Name": "build/playable-06-shv-probe/pe-inspection.json",
+      "Bytes": 3684,
+      "Sha256": "75e2db6e93ed9d2d6d3fb7831775a3661c904ecfa5e4e587834046befab024a8"
+    },
+    {
+      "Name": "build/playable-06-shv-probe/RichAudio.OperatingState.Shv.asi",
+      "Bytes": 323584,
+      "Sha256": "af860dc42540a94c2176ee0dce09c77d9c16c9eeea46a1572d5011aaa8863be4"
+    },
+    {
+      "Name": "evidence/playable-04-build.json",
+      "Bytes": 10169,
+      "Sha256": "16a43f06dee0cf1e7445b7f13f1ffcadd70f2f6566ccda09aca68fa36fe2ea96"
+    },
+    {
+      "Name": "evidence/playable-04-fixtures.json",
+      "Bytes": 9376,
+      "Sha256": "6523b56791e9ed4788de92eb99b51c48f6f027c0b0d6b99477f9702785a25ce6"
+    },
+    {
+      "Name": "evidence/playable-05-rollback.json",
+      "Bytes": 6544,
+      "Sha256": "eca95581d9dbbbb75a569d4c2074c1825c3b12bae51f7ba12220d5c3e756063e"
+    },
+    {
+      "Name": "evidence/playable-06-build.json",
+      "Bytes": 12099,
+      "Sha256": "a8f5d7ef41dbc1286d35e222862bf82c518b98d98e1a0c524b2d387af7af0277"
+    },
+    {
+      "Name": "evidence/playable-06-fixtures.json",
+      "Bytes": 32099,
+      "Sha256": "ea8ba7469e700c4549295899c434ebb11a562ed779ce1730aa0aff10a2a7e16d"
+    },
+    {
+      "Name": "evidence/playable-06-header-provenance.json",
+      "Bytes": 6790,
+      "Sha256": "eaed6b2cbb9d31ca32a5756d656ebc32dc45dfda9eb16ec79465efe03bc412f9"
+    },
+    {
+      "Name": "evidence/playable-06-keyboard-review.json",
+      "Bytes": 2543,
+      "Sha256": "4223ba531adfc113c6d27a58a37126a1ee9b5c7e03ae664b44178bb6be8cfa6d"
+    },
+    {
+      "Name": "evidence/playable-06-live.json",
+      "Bytes": 15784,
+      "Sha256": "1c0982e755a1a71bd92dd4706f4dd03c0740364611985ea472b96b1af1e3b821"
+    },
+    {
+      "Name": "evidence/playable-06-native-contracts.json",
+      "Bytes": 15635,
+      "Sha256": "5eaefdcb1e7969c71587b1adc0d0e71e0582a27c3186736917b812abe2b88639"
+    },
+    {
+      "Name": "evidence/playable-06-offline.json",
+      "Bytes": 6149,
+      "Sha256": "0b3f9d4d4084cb30f35acde3a975b412212810ccd9830d7ea4712a9a3a4b07cc"
+    },
+    {
+      "Name": "evidence/playable-06-rollback.json",
+      "Bytes": 7724,
+      "Sha256": "bb33402d7321a174605a07ed97e0a657aa24be495a3f58cb8413b1da565640b7"
+    }
+  ],
+  "earlierArtifactAndReceiptsUnchanged": true,
+  "priorLiveSnapshotAndReceiptsUnchanged": true,
+  "protectedFilesAndSettings": [
+    {
+      "Name": "GTA5_Enhanced.exe",
+      "Bytes": 55819384,
+      "Sha256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea"
+    },
+    {
+      "Name": "RAGEPluginHook.exe",
+      "Bytes": 12237182,
+      "Sha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac"
+    },
+    {
+      "Name": "Plugins/RichAudio.dll",
+      "Bytes": 222208,
+      "Sha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657"
+    },
+    {
+      "Name": "Plugins/RichAudio.Playable.json",
+      "Bytes": 198,
+      "Sha256": "96a91834affba1f0c2bafcd7a6e14cb9fe17ac8846e98c72a14d14fd1b366001"
+    },
+    {
+      "Name": "Plugins/RichAudio.Menu.json",
+      "Bytes": 478,
+      "Sha256": "63a6f398e838fe5c4503f0e2bf8de401ee8a2ac54203d8ddf16a25f1b16bcea3"
+    },
+    {
+      "Name": "startup.rphs",
+      "Bytes": 28,
+      "Sha256": "4c7d8fb2dc1d84e4c84e7409c296744268f7f33be87af1b9585f104010141d1c"
+    },
+    {
+      "Name": "DirectStorageFix.asi",
+      "Bytes": 592384,
+      "Sha256": "7f50b8a9a2e8a376e2adb7d46bc9483c2754bbbdd964f0918787d4f6f1b76e2c"
+    },
+    {
+      "Name": "dstorage.dll",
+      "Bytes": 206880,
+      "Sha256": "8a7f9809b4630d22796445ab9aa44181458d0f73f03705b1dfafd79410e07334"
+    },
+    {
+      "Name": "dstoragecore.dll",
+      "Bytes": 1468960,
+      "Sha256": "77c7b3acf5b5a9acec6ad3ed7aa3c33e1ad43e73116b437adfcd26965a079b2b"
+    },
+    {
+      "Name": "dinput8.dll",
+      "Bytes": 131072,
+      "Sha256": "9fd9e02353b7d39fe07b9667f7ea2697229a7f2d0e7d389eb79eb212b1bb181d"
+    },
+    {
+      "Name": "ScriptHookV.dll",
+      "Bytes": 1987072,
+      "Sha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f"
+    },
+    {
+      "Name": "RPH shortcut settings",
+      "Bytes": 137,
+      "Sha256": "680d11524a930e2671bfd606aa2e5ffd4bf070c3d1818c16fa70d5be6a727a38"
+    },
+    {
+      "Name": "Trainer shortcut settings",
+      "Bytes": 124715,
+      "Sha256": "9f18051b30468cfa8c45a4fbea8727ff3286f9f822cf5b1b43916869b1e6f5de"
+    },
+    {
+      "Name": "GTA saved keyboard overrides",
+      "Bytes": 679,
+      "Sha256": "d6eab888b9e43445100d5b86ba8ac009dc7bfaa8e204d2a32366f7898cdac85a"
+    },
+    {
+      "Name": "RichAudio saved acoustic settings",
+      "Bytes": 274,
+      "Sha256": "73647afcfa175c643a6938c63fc25845c2527dc8c864221bcf35142ce956f711"
+    }
+  ],
+  "protectedFileCount": 11,
+  "shortcutAndSettingsCount": 4,
+  "protectedFilesAndSettingsUnchanged": true,
+  "pinnedInstalledBaselines": [
+    {
+      "Name": "ScriptHookV.dll",
+      "Bytes": 1987072,
+      "Sha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f",
+      "FileVersion": "3889.0.1158.13"
+    },
+    {
+      "Name": "dinput8.dll",
+      "Bytes": 131072,
+      "Sha256": "9fd9e02353b7d39fe07b9667f7ea2697229a7f2d0e7d389eb79eb212b1bb181d",
+      "FileVersion": "1.0.0.1"
+    },
+    {
+      "Name": "GTA5_Enhanced.exe",
+      "Bytes": 55819384,
+      "Sha256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea",
+      "FileVersion": "1.0.1158.16"
+    }
+  ],
+  "baselineHashesStillMatchAfterBuild": true,
+  "pe": {
+    "Name": "RichAudio.OperatingState.Shv.asi",
+    "Bytes": 378880,
+    "Sha256": "21302b4c5c5fb99f63b7b25dce2fa973117bfb0246f16745d0782f062fe1a69e",
+    "Machine": "Amd64",
+    "PeKind": "PE32Plus",
+    "IsDll": true,
+    "EntryPointPresent": true,
+    "EntryPointExecutable": true,
+    "HasClrMetadata": false,
+    "GuardCF": true,
+    "DynamicBase": true,
+    "NxCompatible": true,
+    "HighEntropyVa": true,
+    "Imports": [
+      {
+        "Module": "ScriptHookV.dll",
+        "Functions": [
+          "?scriptWait@@YAXK@Z",
+          "?scriptUnregister@@YAXPEAUHINSTANCE__@@@Z",
+          "?keyboardHandlerRegister@@YAXP6AXKGEHHHH@Z@Z",
+          "?nativeInit@@YAX_K@Z",
+          "?keyboardHandlerUnregister@@YAXP6AXKGEHHHH@Z@Z",
+          "?scriptRegister@@YAXPEAUHINSTANCE__@@P6AXXZ@Z",
+          "?nativeCall@@YAPEA_KXZ",
+          "?nativePush64@@YAX_K@Z"
+        ],
+        "Ordinals": []
+      },
+      {
+        "Module": "KERNEL32.dll",
+        "Functions": [
+          "TlsSetValue",
+          "WriteConsoleW",
+          "GetConsoleMode",
+          "GetConsoleOutputCP",
+          "HeapReAlloc",
+          "HeapSize",
+          "GetEnvironmentVariableW",
+          "CreateDirectoryW",
+          "CreateFileW",
+          "FlushFileBuffers",
+          "GetFileAttributesW",
+          "GetFileInformationByHandle",
+          "GetFullPathNameW",
+          "WriteFile",
+          "CloseHandle",
+          "QueryPerformanceCounter",
+          "QueryPerformanceFrequency",
+          "Sleep",
+          "GetProcessTimes",
+          "GetCurrentProcess",
+          "GetCurrentProcessId",
+          "CreateThread",
+          "GetTickCount64",
+          "GetModuleHandleExW",
+          "SetStdHandle",
+          "GetStringTypeW",
+          "SetFilePointerEx",
+          "RtlCaptureContext",
+          "RtlLookupFunctionEntry",
+          "RtlVirtualUnwind",
+          "UnhandledExceptionFilter",
+          "SetUnhandledExceptionFilter",
+          "TerminateProcess",
+          "IsProcessorFeaturePresent",
+          "GetCurrentThreadId",
+          "GetSystemTimeAsFileTime",
+          "InitializeSListHead",
+          "IsDebuggerPresent",
+          "GetStartupInfoW",
+          "GetModuleHandleW",
+          "RtlUnwindEx",
+          "InterlockedFlushSList",
+          "GetLastError",
+          "SetLastError",
+          "EncodePointer",
+          "RaiseException",
+          "EnterCriticalSection",
+          "LeaveCriticalSection",
+          "DeleteCriticalSection",
+          "InitializeCriticalSectionAndSpinCount",
+          "TlsAlloc",
+          "TlsGetValue",
+          "TlsFree",
+          "FreeLibrary",
+          "GetProcAddress",
+          "LoadLibraryExW",
+          "RtlPcToFileHeader",
+          "ExitProcess",
+          "GetModuleFileNameW",
+          "HeapFree",
+          "HeapAlloc",
+          "GetStdHandle",
+          "GetFileType",
+          "FindClose",
+          "FindFirstFileExW",
+          "FindNextFileW",
+          "IsValidCodePage",
+          "GetACP",
+          "GetOEMCP",
+          "GetCPInfo",
+          "GetCommandLineA",
+          "GetCommandLineW",
+          "MultiByteToWideChar",
+          "WideCharToMultiByte",
+          "GetEnvironmentStringsW",
+          "FreeEnvironmentStringsW",
+          "FlsAlloc",
+          "FlsGetValue",
+          "FlsSetValue",
+          "FlsFree",
+          "InitializeCriticalSectionEx",
+          "VirtualProtect",
+          "LCMapStringW",
+          "GetProcessHeap"
+        ],
+        "Ordinals": []
+      },
+      {
+        "Module": "USER32.dll",
+        "Functions": [
+          "GetWindowThreadProcessId",
+          "GetForegroundWindow"
+        ],
+        "Ordinals": []
+      }
+    ],
+    "Exports": [],
+    "ExportFunctionCount": 0,
+    "ExportNameCount": 0,
+    "DelayImportDirectoryPresent": false,
+    "CodeExecuted": false
+  },
+  "runtimeSupportEstablished": false,
+  "nativeResolutionEstablished": false,
+  "operatingStateContractValidated": false,
+  "sourceOrRenderedAudioEstablished": false,
+  "gameFilesWritten": false,
+  "deployed": false,
+  "gameOrProbeExecuted": false,
+  "deviceFreeFixturesExecutedByBuilder": false,
+  "newSystemSoftwareInstalledByBuilder": false,
+  "qualification": "A compiled isolated operator-armed multi-state diagnostic candidate only. Static imports/entry point do not prove correct operator gating, capture bounds, successful ASI loading, native availability, valid engine telemetry or audible vehicle sound. Device-free fixtures are reported separately. Gear, actual throttle and control-axis values remain unavailable; keyboard intent is not a measured throttle signal.",
+  "privacy": "Absolute project/toolchain/game paths, raw build logs, compiler dependency paths and private captures remain in ignored build storage. No source audio, SDK/runtime binaries or game assets are published."
+}

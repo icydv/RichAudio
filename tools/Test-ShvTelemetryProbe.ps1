@@ -3,19 +3,23 @@
 param(
  [string]$BuildReceipt='',
  [string]$OutputRoot='',
- [ValidateRange(8,30)][int]$CaseTimeoutSeconds=18,
+ [string]$ValidateExistingRun='',
+ [ValidateRange(10,180)][int]$CaseTimeoutSeconds=140,
  [string[]]$Cases=@()
 )
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
-if(!$BuildReceipt){$BuildReceipt=Join-Path $repo 'build/playable-06-shv-probe/build-receipt.json'}
-if(!$OutputRoot){$OutputRoot=Join-Path $repo ('.local/playable-06/shv-fixture-'+[guid]::NewGuid().ToString('N'))}
+if(!$BuildReceipt){$BuildReceipt=Join-Path $repo 'build/playable-07-shv-probe/build-receipt.json'}
+if($ValidateExistingRun){if($OutputRoot -or $Cases.Count){throw 'Existing full-run validation cannot change output root or case selection.'};$OutputRoot=$ValidateExistingRun}
+if(!$OutputRoot){$OutputRoot=Join-Path $repo ('.local/playable-07/shv-fixture-'+[guid]::NewGuid().ToString('N'))}
 $output=[IO.Path]::GetFullPath($OutputRoot)
-$allowed=@((Join-Path $repo '.local'),(Join-Path $repo 'build'))|ForEach-Object{[IO.Path]::GetFullPath($_).TrimEnd('\')+'\'}
-if(!@($allowed|Where-Object{$output.StartsWith($_,[StringComparison]::OrdinalIgnoreCase)}).Count -or (Test-Path -LiteralPath $output)){throw 'New isolated fixture output under this repository .local or build is required.'}
+$allowed=@((Join-Path $repo '.local/playable-07'),(Join-Path $repo 'build/playable-07-fixtures'))|ForEach-Object{[IO.Path]::GetFullPath($_).TrimEnd('\')+'\'}
+if(!@($allowed|Where-Object{$output.StartsWith($_,[StringComparison]::OrdinalIgnoreCase)}).Count -or ((Test-Path -LiteralPath $output) -and !$ValidateExistingRun)){throw 'New isolated PLAYABLE-07 fixture output is required; earlier artifacts are protected.'}
+if($ValidateExistingRun -and (!(Test-Path -LiteralPath $output -PathType Container) -or (Test-Path -LiteralPath (Join-Path $output 'fixture-result.json')))){throw 'Existing outputs with no final validation receipt are required.'}
+if((Test-Path -LiteralPath $output) -and ((Get-Item -LiteralPath $output -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked fixture output leaf is not permitted.'}
 for($part=Split-Path -Parent $output;$part;$part=Split-Path -Parent $part){if((Test-Path -LiteralPath $part) -and ((Get-Item -LiteralPath $part -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked fixture output path is not permitted.'}}
 $receipt=Get-Content -LiteralPath $BuildReceipt -Raw|ConvertFrom-Json
-if($receipt.Profile -ne 'playable-06'){throw 'PLAYABLE-06 build receipt required.'}
+if($receipt.Profile -ne 'playable-07'){throw 'PLAYABLE-07 build receipt required.'}
 function Check-SourceLineage {
  foreach($inputFile in $receipt.SourceInputs){
   if(!$inputFile.Name.StartsWith('repo/')){throw 'Unexpected production source receipt path.'}
@@ -31,60 +35,80 @@ $compiler=(Get-Item -LiteralPath $receipt.Toolchain.Compiler).FullName
 $includes=@($receipt.Toolchain.IncludeDirs|ForEach-Object{'/I'+[string]$_})
 $libraries=@($receipt.Toolchain.LibraryDirs|ForEach-Object{'/LIBPATH:'+ [string]$_})
 if(!$includes.Count -or !$libraries.Count){throw 'Reviewed compiler include and library directories required.'}
-[IO.Directory]::CreateDirectory($output)|Out-Null
+if(!$ValidateExistingRun){[IO.Directory]::CreateDirectory($output)|Out-Null}
 $fixture=Join-Path $output 'ScriptHookV.dll';$fixtureHost=Join-Path $output 'ShvProbe.FixtureHost.exe'
 $originalLocation=Get-Location
-try {
+if(!$ValidateExistingRun){try {
  Set-Location -LiteralPath $output
  & $compiler /nologo /O2 /W4 /WX /EHsc /std:c++17 /MT /LD @includes (Join-Path $repo 'tests/shv-probe/Fixture.cpp') ('/Fo'+(Join-Path $output 'Fixture.obj')) ('/Fe'+$fixture) /link @libraries /INCREMENTAL:NO /DYNAMICBASE /NXCOMPAT kernel32.lib user32.lib
  if($LASTEXITCODE -ne 0){throw 'Device-free SHV fixture compilation failed.'}
  & $compiler /nologo /O2 /W4 /WX /EHsc /std:c++17 /MT @includes (Join-Path $repo 'tests/shv-probe/Host.cpp') ('/Fo'+(Join-Path $output 'Host.obj')) ('/Fe'+$fixtureHost) /link @libraries /INCREMENTAL:NO /DYNAMICBASE /NXCOMPAT bcrypt.lib kernel32.lib user32.lib
  if($LASTEXITCODE -ne 0){throw 'Device-free host compilation failed.'}
-}finally{Set-Location -LiteralPath $originalLocation}
+}finally{Set-Location -LiteralPath $originalLocation}}
 $fixtureHash=(Get-FileHash -LiteralPath $fixture -Algorithm SHA256).Hash.ToLowerInvariant()
 $hostHash=(Get-FileHash -LiteralPath $fixtureHost -Algorithm SHA256).Hash.ToLowerInvariant()
 $copiedCandidate=Join-Path $output 'RichAudio.OperatingState.Shv.asi'
-Copy-Item -LiteralPath $candidate -Destination $copiedCandidate
+if(!$ValidateExistingRun){Copy-Item -LiteralPath $candidate -Destination $copiedCandidate}
 if((Get-FileHash -LiteralPath $copiedCandidate -Algorithm SHA256).Hash.ToLowerInvariant() -ne $candidateHash){throw 'Copied ASI differs.'}
+$executionPath=Join-Path $output 'fixture-execution.json'
+if($ValidateExistingRun){
+ $execution=Get-Content -LiteralPath $executionPath -Raw|ConvertFrom-Json
+ if($execution.profile -ne 'PLAYABLE-07' -or $execution.candidateSha256 -ne $candidateHash -or $execution.fixtureSha256 -ne $fixtureHash -or $execution.hostSha256 -ne $hostHash -or $execution.actualShvExecuted -ne $false -or $execution.gameStarted -ne $false -or $execution.fixtureSourceSha256 -ne (Get-FileHash -LiteralPath (Join-Path $repo 'tests/shv-probe/Fixture.cpp') -Algorithm SHA256).Hash.ToLowerInvariant() -or $execution.hostSourceSha256 -ne (Get-FileHash -LiteralPath (Join-Path $repo 'tests/shv-probe/Host.cpp') -Algorithm SHA256).Hash.ToLowerInvariant()){throw 'Original execution binary/source identities differ.'}
+}else{
+ $execution=[ordered]@{schema=1;profile='PLAYABLE-07';createdBeforeOriginalRun=$true;candidateSha256=$candidateHash;fixtureSha256=$fixtureHash;hostSha256=$hostHash;fixtureSourceSha256=(Get-FileHash -LiteralPath (Join-Path $repo 'tests/shv-probe/Fixture.cpp') -Algorithm SHA256).Hash.ToLowerInvariant();hostSourceSha256=(Get-FileHash -LiteralPath (Join-Path $repo 'tests/shv-probe/Host.cpp') -Algorithm SHA256).Hash.ToLowerInvariant();executionRunnerSourceSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant();actualShvExecuted=$false;gameStarted=$false;globalKeyboardInputInjected=$false}
+ [IO.File]::WriteAllText($executionPath,($execution|ConvertTo-Json -Depth 4)+[Environment]::NewLine,[Text.UTF8Encoding]::new($false))
+}
+$priorResults=if($ValidateExistingRun){@(Get-Content -LiteralPath (Join-Path $output 'case-results.partial.json') -Raw|ConvertFrom-Json)}else{@()}
 
 $matrix=@(
- @{Name='finite';Target=1;Class='finite-unvalidated';Bits=[Convert]::ToUInt32('3f000000',16);Float=.5;Terminal='completed-unvalidated';Arm=$true},
- @{Name='uk_oem102';Target=1;Class='finite-unvalidated';Bits=[Convert]::ToUInt32('3f000000',16);Float=.5;Terminal='completed-unvalidated';Arm=$true},
- @{Name='release_then_rising';Target=1;Class='finite-unvalidated';Bits=[Convert]::ToUInt32('3f000000',16);Float=.5;Terminal='completed-unvalidated';Arm=$true},
- @{Name='zero';Target=1;Class='zero';Bits=0;Float=0;Terminal='completed-unvalidated';Arm=$true},
- @{Name='nan';Target=1;Class='nonfinite';Bits=[Convert]::ToUInt32('7fc12345',16);NullFloat=$true;Terminal='completed-unvalidated';Arm=$true},
- @{Name='infinity';Target=1;Class='nonfinite';Bits=[Convert]::ToUInt32('7f800000',16);NullFloat=$true;Terminal='completed-unvalidated';Arm=$true},
- @{Name='out_of_range';Target=1;Class='out-of-plausible-range';Bits=[Convert]::ToUInt32('42480000',16);Float=50;Terminal='completed-unvalidated';Arm=$true},
- @{Name='null_pointer';Target=1;Class='null';Terminal='target-null';Pointer=$false;Arm=$true},
- @{Name='target_seh';Target=1;Class='seh';Terminal='target-seh';Pointer=$false;Exception=[Convert]::ToUInt32('e0420005',16);Arm=$true},
- @{Name='delayed_target';Target=1;Terminal=@('deadline-during-target-returned','watchdog-native-outcome-unobserved');Timeout=3000;Arm=$true},
- @{Name='eligible_no_input';Target=0;Class='not-attempted';Terminal='deadline-before-target';Timeout=1500},
- @{Name='held_startup';Target=0;Class='not-attempted';Terminal='deadline-before-target';Timeout=1500},
- @{Name='wrong_foreground';Target=0;Class='not-attempted';Terminal='deadline-before-target';Timeout=1500},
- @{Name='missing_ctrl';Target=0;Class='not-attempted';Terminal='deadline-before-target';Timeout=1500},
- @{Name='missing_shift';Target=0;Class='not-attempted';Terminal='deadline-before-target';Timeout=1500},
- @{Name='extra_alt';Target=0;Class='not-attempted';Terminal='deadline-before-target';Timeout=1500},
- @{Name='wrong_key';Target=0;Class='not-attempted';Terminal='deadline-before-target';Timeout=1500},
- @{Name='input_before_ready';Target=0;Class='not-attempted';Terminal='deadline-before-target';Timeout=2000},
- @{Name='wrong_model';Target=0;Class='not-attempted';Terminal='deadline-before-target';Timeout=1500},
- @{Name='passenger';Target=0;Class='not-attempted';Terminal='deadline-before-target';Timeout=1500},
- @{Name='online';Target=0;Class='not-attempted';Terminal='online-context';Timeout=1500},
- @{Name='no_vehicle';Target=0;Class='not-attempted';Terminal='deadline-before-target';Timeout=1500},
- @{Name='false_running';Target=0;Class='not-attempted';Terminal='gate-engine-not-running';Arm=$true},
- @{Name='flapping_running';Target=0;Class='not-attempted';Terminal='gate-engine-not-running';Arm=$true},
- @{Name='moving';Target=0;Class='not-attempted';Terminal='gate-not-stationary';Arm=$true},
- @{Name='nonfinite_speed';Target=0;Class='not-attempted';Terminal='gate-speed-nonfinite';Arm=$true},
- @{Name='negative_speed';Target=0;Class='not-attempted';Terminal='gate-speed-invalid';Arm=$true},
- @{Name='changed_context';Target=0;Class='not-attempted';Terminal='gate-identity-changed';Arm=$true},
- @{Name='offline_lost';Target=0;Class='not-attempted';Terminal='online-context';Arm=$true},
- @{Name='focus_loss';Target=0;Class='not-attempted';Terminal='foreground-lost';Arm=$true},
- @{Name='pause';Target=0;Class='not-attempted';Terminal='gate-context-invalid';Arm=$true},
- @{Name='sample_gap';Target=0;Class='not-attempted';Terminal='gate-sample-gap';Arm=$true},
- @{Name='final_gate_failure';Target=0;Class='not-attempted';Terminal='gate-engine-not-running';Arm=$true;Qualified=$true},
- @{Name='delayed_final_context';Target=0;Class='not-attempted';Terminal=@('gate-sample-gap','gate-timeout');Arm=$true;Qualified=$true},
- @{Name='context_seh';Target=0;Class='not-attempted';Terminal='precondition-seh';Exception=[Convert]::ToUInt32('e0420004',16)},
- @{Name='hud_seh_before';Target=0;Class='not-attempted';Terminal='hud-seh';HudFault=$true},
- @{Name='hud_seh_after';Target=1;Class='finite-unvalidated';Bits=[Convert]::ToUInt32('3f000000',16);Float=.5;Terminal='completed-unvalidated';Arm=$true;HudFault=$true}
+ @{Name='sequence_dynamic';Terminal='operator-stop';Sequence=$true},
+ @{Name='sequence_constant';Terminal='operator-stop';Sequence=$true},
+ @{Name='sequence_wrong_trend';Terminal='operator-stop';Sequence=$true},
+ @{Name='sequence_marker_only';Terminal='operator-stop';Sequence=$true},
+ @{Name='finite';Terminal='operator-stop'},
+ @{Name='uk_oem102';Terminal='operator-stop'},
+ @{Name='release_then_rising';Terminal='operator-stop'},
+ @{Name='rising';Terminal='operator-stop'},
+ @{Name='falling';Terminal='operator-stop'},
+ @{Name='zero_off';Terminal='operator-stop'},
+ @{Name='zero_running';Terminal='operator-stop'},
+ @{Name='nan';Terminal='target-nonfinite';Targets=3;Class='nonfinite'},
+ @{Name='infinity';Terminal='target-nonfinite';Targets=3;Class='nonfinite'},
+ @{Name='out_of_range';Terminal='target-out-of-range';Targets=3;Class='out-of-plausible-range'},
+ @{Name='negative_ratio';Terminal='target-out-of-range';Targets=3;Class='out-of-plausible-range'},
+ @{Name='null_pointer';Terminal='target-null';Targets=3;Class='null'},
+ @{Name='target_seh';Terminal='target-seh';Targets=3;Class='seh';Exception=[Convert]::ToUInt32('e0420005',16)},
+ @{Name='delayed_target';Terminal='observation-discontinuity';Targets=3},
+ @{Name='context_seh';Terminal='precondition-seh';Targets=3;Exception=[Convert]::ToUInt32('e0420004',16)},
+ @{Name='post_context_seh';Terminal='precondition-seh';Targets=3;Exception=[Convert]::ToUInt32('e0420004',16)},
+ @{Name='post_context_delay';Terminal='observation-discontinuity';Targets=3},
+ @{Name='hud_seh_before';Terminal='hud-seh';Targets=0},
+ @{Name='hud_seh_active';Terminal='hud-seh';Targets=3},
+ @{Name='stale_gap';Terminal='observation-discontinuity';Targets=3},
+ @{Name='slow_context';Terminal='observation-discontinuity';Targets=3},
+ @{Name='identity_changed';Terminal='context-changed'},
+ @{Name='post_identity_changed';Terminal='context-changed';Targets=3},
+ @{Name='player_changed';Terminal='context-changed'},
+ @{Name='driver_changed';Terminal='context-invalid'},
+ @{Name='offline_lost';Terminal='online-context'},
+ @{Name='focus_loss';Terminal='foreground-lost'},
+ @{Name='pause';Terminal='context-invalid'},
+ @{Name='negative_speed';Terminal='speed-invalid'},
+ @{Name='nonfinite_speed';Terminal='speed-nonfinite'},
+ @{Name='phase_overflow';Terminal='operator-event-overflow';Targets=3},
+ @{Name='eligible_no_input';Terminal='waiting-deadline';Targets=0;WaitMs=1500},
+ @{Name='held_startup';Terminal='waiting-deadline';Targets=0;WaitMs=1500},
+ @{Name='wrong_foreground';Terminal='waiting-deadline';Targets=0;WaitMs=1500},
+ @{Name='missing_ctrl';Terminal='waiting-deadline';Targets=0;WaitMs=1500},
+ @{Name='missing_shift';Terminal='waiting-deadline';Targets=0;WaitMs=1500},
+ @{Name='extra_alt';Terminal='waiting-deadline';Targets=0;WaitMs=1500},
+ @{Name='wrong_key';Terminal='waiting-deadline';Targets=0;WaitMs=1500},
+ @{Name='input_before_ready';Terminal='waiting-deadline';Targets=0;WaitMs=2000},
+ @{Name='wrong_model';Terminal='waiting-deadline';Targets=0;WaitMs=1500},
+ @{Name='passenger';Terminal='waiting-deadline';Targets=0;WaitMs=1500},
+ @{Name='online';Terminal='online-context';Targets=0;WaitMs=1500},
+ @{Name='no_vehicle';Terminal='waiting-deadline';Targets=0;WaitMs=1500},
+ @{Name='max_duration';Terminal=@('active-deadline','sample-limit');FullDuration=$true}
 )
 $selected=@($matrix|Where-Object{!$Cases.Count -or $_.Name -in $Cases})
 if(!$selected.Count -or @($Cases|Where-Object{$_ -notin $matrix.Name}).Count){throw 'Unknown or empty case selection.'}
@@ -92,16 +116,17 @@ $script:checks=0
 function Check([bool]$Value,[string]$Message){$script:checks++;if(!$Value){throw $Message}}
 $results=@()
 foreach($case in $selected){
- $caseRoot=Join-Path $output ('case-'+$case.Name);[IO.Directory]::CreateDirectory($caseRoot)|Out-Null
+ $caseRoot=Join-Path $output ('case-'+$case.Name)
+ if(!$ValidateExistingRun){[IO.Directory]::CreateDirectory($caseRoot)|Out-Null
  $start=[Diagnostics.ProcessStartInfo]::new($fixtureHost);$start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.WorkingDirectory=$output;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
  foreach($argument in @($case.Name,$fixtureHash,$candidateHash,$caseRoot)){$start.ArgumentList.Add([string]$argument)}
- $start.Environment['RICHAUDIO_SHV_PROBE_TIMEOUT_MS']=if($case.Timeout){[string]$case.Timeout}else{'5000'}
+ $start.Environment['RICHAUDIO_SHV_PROBE_TIMEOUT_MS']=if($case.WaitMs){[string]$case.WaitMs}else{'5000'}
  $child=[Diagnostics.Process]::new();$child.StartInfo=$start;$clock=[Diagnostics.Stopwatch]::StartNew()
  try {
   if(!$child.Start()){throw 'Owned fixture host failed to start.'}
   $stdout=$child.StandardOutput.ReadToEndAsync();$stderr=$child.StandardError.ReadToEndAsync()
-  if(!$child.WaitForExit($CaseTimeoutSeconds*1000)){
-   # Stop this exact owned test host only; no process-name or game cleanup.
+  $limit=if($case.FullDuration){$CaseTimeoutSeconds}else{[Math]::Min($CaseTimeoutSeconds,30)}
+  if(!$child.WaitForExit($limit*1000)){
    try{$child.Kill();$child.WaitForExit(2000)|Out-Null}catch{}
    throw ('Owned device-free host exceeded its parent deadline: '+$case.Name)
   }
@@ -110,73 +135,92 @@ foreach($case in $selected){
   [IO.File]::WriteAllText((Join-Path $caseRoot 'host.stderr.txt'),$err)
   Check ($child.ExitCode -eq 0) ('Fixture host failed '+$case.Name+': '+$err)
  } finally {$clock.Stop();$child.Dispose()}
- $metrics=Get-Content -LiteralPath (Join-Path $caseRoot 'fixture-metrics.json') -Raw | ConvertFrom-Json
- Check ($metrics.fixture -and !$metrics.actualShvExecuted -and !$metrics.globalKeyboardInputInjected -and $metrics.fixturePathAndHashVerified -and $metrics.candidateHashVerified) ('Fixture identity not proved: '+$case.Name)
- Check ($metrics.registerCalls -eq 1 -and $metrics.keyboardRegistrationCalls -eq 1 -and $metrics.callbackInvocations -eq 2) ('Actual ASI registration/reentry guard failed: '+$case.Name)
- Check ($metrics.targetCalls -eq $case.Target) ('Target invocation count differs: '+$case.Name)
- Check ($metrics.qualifiedJournalSeenBeforeTarget -eq $case.Target) ('Qualified journal was not present before target: '+$case.Name)
- Check ($metrics.forbiddenCallsAfterTarget -eq 0 -and $metrics.contextCallsAfterTarget -eq 0 -and $metrics.callsAfterTargetFault -eq 0 -and $metrics.callsAfterHudFault -eq 0 -and $metrics.contextViolations -eq 0 -and $metrics.unexpectedNativeCalls -eq 0 -and $metrics.argumentViolations -eq 0) ('Native context/argument/storage boundary failed: '+$case.Name)
- Check ($metrics.contextCalls -le 1600) ('Unbounded context acquisition: '+$case.Name)
- if($case.HudFault){Check ($metrics.hudFaultsInjected -eq 1) ('HUD fault not exercised: '+$case.Name)}
- $captureFiles=@(Get-ChildItem -LiteralPath (Join-Path $caseRoot 'RichAudio/ShvProbe') -Recurse -File -Filter 'capture.json')
- $journalFiles=@(Get-ChildItem -LiteralPath (Join-Path $caseRoot 'RichAudio/ShvProbe') -Recurse -File -Filter 'journal.ndjson')
- Check ($captureFiles.Count -eq 1 -and $journalFiles.Count -eq 1) ('One bounded capture/journal required: '+$case.Name)
- Check (($captureFiles[0].Length+$journalFiles[0].Length) -le 16383) ('Capture volume exceeds declared bound: '+$case.Name)
- $raw=Get-Content -LiteralPath $captureFiles[0].FullName -Raw;$capture=$raw | ConvertFrom-Json
- $events=@(Get-Content -LiteralPath $journalFiles[0].FullName|Where-Object{$_}|ForEach-Object{$_|ConvertFrom-Json})
- $qualifiedEvents=@($events|Where-Object stage -eq 'stable-idle-qualified')
- Check ($capture.schema -eq 2 -and $capture.measuredRPM -eq $false -and $capture.providerValid -eq $false) ('Fixture must not promote an RPM/provider claim: '+$case.Name)
- Check ($capture.targetAttempts -eq $case.Target -and $capture.terminalReason -in @($case.Terminal)) ('Actual source terminal/count evidence differs: '+$case.Name+' '+$raw)
- $gate=$capture.stableIdleGate;$operator=$capture.operatorArming;$gateSpanMs=0;$gateEvidenceSource='capture'
- if(!$capture.producerCompleted -and $case.Target -gt 0){
-  Check ($qualifiedEvents.Count -eq 1 -and $qualifiedEvents[0].stableIdleGate.qualified) 'Unobserved target must retain its qualified full gate in the durable journal.'
-  $gate=$qualifiedEvents[0].stableIdleGate;$gateEvidenceSource='durable-journal'
+ }else{
+  Check ((Get-Content -LiteralPath (Join-Path $caseRoot 'host.stdout.txt') -Raw).Contains('PASS device-free fixture case '+$case.Name+';') -and !(Get-Content -LiteralPath (Join-Path $caseRoot 'host.stderr.txt') -Raw)) ('Original owned host did not complete successfully: '+$case.Name)
  }
- Check ($operator.accepted -eq [bool]$case.Arm) ('Operator input wrongly accepted/rejected: '+$case.Name)
- Check ($gate.requiredDurationMs -eq 2000 -and $gate.sampleIntervalMs -eq 100 -and $gate.maxAllowedGapMs -eq 250 -and $gate.postArmLimitMs -eq 3000) ('Production gate timings changed: '+$case.Name)
- Check ($gate.sampleCount -le 25 -and @($gate.samples).Count -eq $gate.sampleCount) ('Stable sample bound differs: '+$case.Name)
- if($gate.sampleCount -gt 0){$gateSpanMs=($gate.lastQpc-$gate.firstQpc)*1000.0/$capture.qpcFrequency}
- if($case.Target -gt 0 -or $case.Qualified){
-  Check ($qualifiedEvents.Count -eq 1) ('Qualified journal event missing: '+$case.Name)
-  Check ($gate.qualified -eq $true -and $gateSpanMs -ge 2000 -and $gate.maxGapQpc*1000.0/$capture.qpcFrequency -le 250) ('Full unshortened stable gate not proved: '+$case.Name)
-  foreach($sample in $gate.samples){Check ($sample.engineRunningRaw -ne 0 -and $sample.sameIdentity -eq $true -and $null -ne $sample.speedMps -and [double]::IsFinite([double]$sample.speedMps) -and [double]$sample.speedMps -ge 0 -and [double]$sample.speedMps -le .1) ('Invalid stable sample accepted: '+$case.Name)}
-  if($capture.producerCompleted){
-   $durable=$qualifiedEvents[0].stableIdleGate
-   Check ($durable.sampleCount -eq $gate.sampleCount -and $durable.firstQpc -eq $gate.firstQpc -and $durable.lastQpc -eq $gate.lastQpc) ('Durable/final qualified gate differs: '+$case.Name)
-   for($n=0;$n -lt $gate.sampleCount;$n++){
-    $a=$durable.samples[$n];$b=$gate.samples[$n]
-    Check ($a.beforeQpc -eq $b.beforeQpc -and $a.afterQpc -eq $b.afterQpc -and $a.engineRunningRaw -eq $b.engineRunningRaw -and $a.speedBits -eq $b.speedBits -and $a.sameIdentity -eq $b.sameIdentity) ('Durable/final gate sample differs: '+$case.Name)
-   }
+ $metrics=Get-Content -LiteralPath (Join-Path $caseRoot 'fixture-metrics.json') -Raw|ConvertFrom-Json
+ Check ($metrics.fixture -and !$metrics.actualShvExecuted -and !$metrics.globalKeyboardInputInjected -and $metrics.fixturePathAndHashVerified -and $metrics.candidateHashVerified) ('Fixture identity not proved: '+$case.Name)
+ Check ($metrics.registerCalls -eq 1 -and $metrics.keyboardRegistrationCalls -eq 1 -and $metrics.callbackInvocations -eq 2) ('Actual ASI registration/reentry failed: '+$case.Name)
+ Check ($metrics.nativeCallsAfterFault -eq 0 -and $metrics.callsAfterHudFault -eq 0 -and $metrics.contextViolations -eq 0 -and $metrics.unexpectedNativeCalls -eq 0 -and $metrics.argumentViolations -eq 0) ('Native context/fault/argument boundary failed: '+$case.Name)
+ Check ($metrics.targetCalls -le 2400 -and $metrics.contextCalls -le 122500) ('Unbounded acquisition: '+$case.Name)
+ if($case.ContainsKey('Targets')){Check ($metrics.targetCalls -eq $case.Targets) ('Exact target count differs: '+$case.Name)}else{Check ($metrics.targetCalls -gt 3) ('Repeated observations not exercised: '+$case.Name)}
+ $files=@(Get-ChildItem -LiteralPath (Join-Path $caseRoot 'RichAudio/ShvProbe') -Recurse -File)
+ $captureFiles=@($files|Where-Object Name -eq 'capture.json');$journalFiles=@($files|Where-Object Name -eq 'journal.ndjson');$timelineFiles=@($files|Where-Object Name -eq 'timeline.ndjson')
+ Check ($captureFiles.Count -eq 1 -and $journalFiles.Count -eq 1 -and $timelineFiles.Count -eq 1 -and $files.Count -eq 3) ('Exactly one bounded output set required: '+$case.Name)
+ Check (($files|Measure-Object Length -Sum).Sum -le 12582912) ('Aggregate output exceeds12MiB: '+$case.Name)
+ $capture=Get-Content -LiteralPath $captureFiles[0].FullName -Raw|ConvertFrom-Json
+ $events=@(Get-Content -LiteralPath $journalFiles[0].FullName|Where-Object{$_}|ForEach-Object{$_|ConvertFrom-Json})
+ $lines=@(Get-Content -LiteralPath $timelineFiles[0].FullName|Where-Object{$_})
+ $records=@($lines|ForEach-Object{Check ([Text.Encoding]::UTF8.GetByteCount($_) -le 2047) ('Oversized row: '+$case.Name);$_|ConvertFrom-Json})
+ foreach($line in $lines){if($line -match '"kind":"target-return"'){Check ([Text.Encoding]::UTF8.GetByteCount($line) -le 511) ('Oversized minimal raw-return row: '+$case.Name)}}
+ $observations=@($records|Where-Object kind -eq 'observation');$declared=@($records|Where-Object kind -eq 'declared-precontext');$returns=@($records|Where-Object kind -eq 'target-return');$phases=@($records|Where-Object kind -eq 'phase')
+ Check ($capture.schema -eq 3 -and $capture.measuredRPM -eq $false -and $capture.providerValid -eq $false) ('Capture promoted provider/RPM claim: '+$case.Name)
+ Check ($capture.maximumActiveMs -eq 120000 -and $capture.maximumTargetObservations -eq 2400 -and $capture.minimumAfterToNextTargetMs -eq 50 -and $capture.maximumObservationGapMs -eq 250 -and $capture.ringCapacityRecords -eq 128 -and $capture.maximumTimelineRowBytes -eq 2047 -and $capture.aggregateFileBudgetBytes -eq 12582912) ('Production limits changed: '+$case.Name)
+ Check ($capture.producerCompleted -and $capture.terminalReason -in @($case.Terminal) -and $capture.targetAttempts -eq $metrics.targetCalls) ('Capture terminal/count differs: '+$case.Name+' '+$capture.terminalReason)
+ Check ($capture.targetOutcomesObserved -eq $metrics.targetCalls -and $capture.observationsProduced -eq $observations.Count -and $capture.timelineRecordsProduced -eq $records.Count) ('Stream/summary count mismatch: '+$case.Name)
+ Check (@($observations|Where-Object targetAttempted).Count -eq $metrics.targetCalls -and $returns.Count -eq $metrics.targetCalls -and $records.Count -le 7209) ('Target outcome missing or stream unbounded: '+$case.Name)
+ Check ($null -eq $capture.gear -and $null -eq $capture.throttle -and $null -eq $capture.controlAxis -and $capture.keyboardIntentIsThrottle -eq $false -and $capture.operatorLabelsAreAchievedStateProof -eq $false) ('Unsupported getter or operator label promoted: '+$case.Name)
+ Check (@($events|Where-Object{$_.stage -eq 'capture-terminal' -and $_.captureWritten}).Count -eq 1 -and $events.Count -le 16) ('Final journal missing/unbounded: '+$case.Name)
+ if($metrics.targetCalls -gt 0){
+  Check ($capture.operatorArming.accepted -and $capture.operatorArming.terminalVk -eq $metrics.fixtureArmVirtualKey -and $metrics.armedJournalSeenAtTarget -eq $metrics.targetCalls) ('Explicit start/durable armed journal not proved: '+$case.Name)
+  Check ($capture.operatorArming.inputBeforeQpc -le $capture.operatorArming.inputAfterQpc -and $capture.operatorArming.inputAfterQpc -le $capture.activeStartQpc) ('Start timestamp ordering differs: '+$case.Name)
+  Check ($capture.activeEndQpc -ge $capture.activeStartQpc) ('Invalid active bounds: '+$case.Name)
+ }
+ $freq=[double]$capture.qpcFrequency;$previous=$null;$copied=0
+ foreach($o in $observations){
+  Check ($o.schema -eq 3 -and $o.operatorLabelIsAchievedStateProof -eq $false -and $o.keyboardIntentIsThrottle -eq $false -and $o.measuredRPM -eq $false -and $o.providerValid -eq $false -and $null -eq $o.gear -and $null -eq $o.throttle) ('Observation provenance/unsupported fields differ: '+$case.Name)
+  if(!$o.targetAttempted){Check ($o.readStatus -eq 'not-attempted' -and $null -eq $o.rawBits -and $null -eq $o.rawFloat -and !$o.contextBracketValid) ('Unattempted observation borrowed a result/context: '+$case.Name);continue}
+  Check (@($declared|Where-Object observationIndex -eq $o.observationIndex).Count -eq 1) ('Declaration missing or duplicated: '+$case.Name)
+  $d=@($declared|Where-Object observationIndex -eq $o.observationIndex)[0]
+  Check ([array]::IndexOf($records,$d) -lt [array]::IndexOf($records,$o)) ('Outcome precedes its declaration: '+$case.Name)
+  $returned=@($returns|Where-Object observationIndex -eq $o.observationIndex)
+  Check ($returned.Count -eq 1 -and [array]::IndexOf($records,$d) -lt [array]::IndexOf($records,$returned[0]) -and [array]::IndexOf($records,$returned[0]) -lt [array]::IndexOf($records,$o)) ('Raw return handoff order differs: '+$case.Name)
+  $early=$returned[0]
+  Check ($early.rawBits -eq $o.rawBits -and $early.rawBitsHex -eq $o.rawBitsHex -and $early.readStatus -eq $o.readStatus -and $early.targetBeforeQpc -eq $o.targetBeforeQpc -and $early.targetAfterQpc -eq $o.targetAfterQpc -and $early.contextBracketValid -eq $false -and $early.providerValid -eq $false) ('Early raw return changed or claimed context: '+$case.Name)
+  Check ($d.invocationProven -eq $false -and $d.preContext.acquisitionStartQpc -eq $o.preContext.acquisitionStartQpc -and $d.preContext.acquisitionEndQpc -eq $o.preContext.acquisitionEndQpc) ('Declared context changed: '+$case.Name)
+  $t=$metrics.targets[[int]$o.observationIndex-1]
+  Check ($t.index -eq $o.observationIndex -and $o.targetBeforeQpc -le $t.beforeQpc -and $o.targetAfterQpc -ge $t.afterQpc) ('Independent target timing differs: '+$case.Name)
+  if($previous){Check (($t.beforeQpc-$previous.beforeQpc)*1000.0/$freq -ge 50) ('Actual target entries exceeded20Hz: '+$case.Name)}
+  $previous=$t
+  Check ($o.targetBeforeQpc -ge $capture.activeStartQpc -and ($o.targetBeforeQpc-$capture.activeStartQpc)*1000.0/$freq -lt 120000) ('Target started beyond active bound: '+$case.Name)
+  if($t.status -eq 0){Check ($o.readStatus -eq 'good' -and $o.pointerPresent -and [uint32]$o.rawBits -eq [uint32]$t.rawBits -and $o.rawBitsHex -eq ('{0:X8}' -f [uint32]$t.rawBits)) ('Immediate raw copy was lost: '+$case.Name);$copied++}
+  else{Check ($null -eq $o.rawBits -and $null -eq $o.rawFloat -and !$o.pointerPresent -and $o.readStatus -eq $(if($t.status -eq 1){'null'}else{'seh'})) ('Missing/SEH storage was fabricated: '+$case.Name)}
+  if($o.contextBracketValid){
+   Check ($o.postContextObserved -and $o.preContext.player -eq $o.postContext.player -and $o.preContext.ped -eq $o.postContext.ped -and $o.preContext.vehicle -eq $o.postContext.vehicle -and $o.preContext.driver -eq $o.postContext.driver -and $o.preContext.model -eq $o.postContext.model -and $o.preContext.driver -eq $o.preContext.ped) ('Invalid context bracket accepted: '+$case.Name)
+   Check ($o.preContext.acquisitionEndQpc -le $o.targetBeforeQpc -and $o.targetAfterQpc -le $o.postContext.acquisitionStartQpc) ('Context/target ordering differs: '+$case.Name)
   }
  }
- if($case.Target -gt 0){
-  Check ($operator.inputBeforeQpc -gt 0 -and $operator.inputBeforeQpc -le $operator.inputAfterQpc -and $operator.inputAfterQpc -le $operator.context.acquisitionStartQpc -and $operator.context.acquisitionEndQpc -le $operator.observedQpc -and $gate.firstQpc -eq $operator.context.acquisitionEndQpc) ('Operator timestamp association differs: '+$case.Name)
-  Check ($operator.terminalVk -eq $metrics.fixtureArmVirtualKey) ('Accepted physical key variant differs: '+$case.Name)
-  if($capture.producerCompleted){Check ($gate.preTargetRevalidated -eq $true) ('Fresh final gate missing: '+$case.Name)}
-  Check (($metrics.fixtureTargetQpc-$operator.inputBeforeQpc)*1000.0/$capture.qpcFrequency -ge 2000) ('Target preceded full stable interval: '+$case.Name)
+ Check (@($declared|Where-Object invocationProven -ne $false).Count -eq 0 -and $phases.Count -le 9) ('Marker/declaration falsely proves invocation: '+$case.Name)
+ if($case.Sequence){
+  Check (($phases.requestedPhase|Select-Object -Unique) -join ',' -eq 'OFF,IDLE,STATIONARY_REV,ACCELERATION,GEAR_TRANSITIONS,DECELERATION,RETURN_IDLE') ('Requested phase sequence differs: '+$case.Name)
+  Check ($phases[-1].action -eq 'stop' -and $phases[-1].earlyStop -eq $false -and $capture.operatorStopWasEarly -eq $false -and $capture.droppedOperatorEvents -eq 0) ('Explicit final stop not recorded: '+$case.Name)
  }
- if($case.Name -eq 'final_gate_failure'){Check ($gate.qualified -and !$gate.preTargetRevalidated -and $capture.targetAttempts -eq 0) 'Fresh failed final gate must prevent target after qualification.'}
- if($case.Name -eq 'negative_speed'){Check (@($gate.samples|Where-Object{[uint32]$_.speedBits -eq [Convert]::ToUInt32('bd4ccccd',16) -and $_.speedMps -lt 0}).Count -gt 0) 'Rejected negative speed must retain its raw bits rather than be clamped.'}
- if($case.Name -eq 'delayed_target'){
-  Check ($capture.deadlineReached -eq $true -and $capture.targetAttempts -eq 1 -and ($capture.producerCompleted -eq $true -or ($capture.classification -eq 'outcome-unobserved' -and $null -eq $capture.rawBits -and $null -eq $capture.rawFloat))) 'An unobserved attempted target must retain one attempt and explicit unknown/null result evidence.'
- }
- if($case.ContainsKey('Class')){Check ($capture.classification -eq $case.Class) ('Raw result classification differs: '+$case.Name+' '+$raw)}
- if($case.ContainsKey('Bits')){Check ([uint32]$capture.rawBits -eq [uint32]$case.Bits) ('Raw float bit pattern changed: '+$case.Name)}
- if($case.ContainsKey('Float')){Check ([double]$capture.rawFloat -eq [double]$case.Float) ('Raw float value changed: '+$case.Name)}
- if($case.NullFloat){Check ($null -eq $capture.rawFloat) ('Nonfinite must serialize as null plus raw bits: '+$case.Name)}
- if($case.ContainsKey('Exception')){Check ([uint32]$capture.exceptionCode -eq $case.Exception) ('Structured exception evidence was lost: '+$case.Name)}
- if($case.ContainsKey('Pointer')){Check ($capture.resultPointerPresent -eq $case.Pointer) ('Pointer presence differs: '+$case.Name)}
- elseif($case.ContainsKey('Bits')){Check ($capture.resultPointerPresent -eq $true) ('Returned result storage not reported: '+$case.Name)}
- Check ($raw -notmatch '"(?:pointerAddress|resultPointerAddress|memoryAddress|address)"\s*:') ('Raw pointer/address leaked: '+$case.Name)
- $lines=@(Get-Content -LiteralPath $journalFiles[0].FullName | Where-Object {$_})
- Check ($lines.Count -le 32) ('Journal record count unbounded: '+$case.Name)
- foreach($line in $lines){$null=$line | ConvertFrom-Json}
- Check ((($lines -join [Environment]::NewLine).Contains('operator-armed')) -eq [bool]$case.Arm) ('Operator journal boundary differs: '+$case.Name)
- $results+=[ordered]@{case=$case.Name;targetCalls=$metrics.targetCalls;contextCalls=$metrics.contextCalls;hudCalls=$metrics.hudCalls;keyboardCallbackEvents=$metrics.deliveredKeyboardCallbackEvents;callbackInvocations=$metrics.callbackInvocations;terminalReason=$capture.terminalReason;classification=$capture.classification;operatorAccepted=$operator.accepted;stableQualified=$gate.qualified;stableSampleCount=$gate.sampleCount;stableSpanMs=$gateSpanMs;maxGapMs=$gate.maxGapQpc*1000.0/$capture.qpcFrequency;preTargetRevalidated=$capture.stableIdleGate.preTargetRevalidated;gateEvidenceSource=$gateEvidenceSource;producerCompleted=$capture.producerCompleted;deadlineReached=$capture.deadlineReached;rawBits=$capture.rawBits;captureBytes=$captureFiles[0].Length;journalBytes=$journalFiles[0].Length;elapsedMilliseconds=$clock.ElapsedMilliseconds;fixture=$true;actualShvExecuted=$false;globalKeyboardInputInjected=$false;endpointOpened=$false}
- Write-Output ('PASS fixture '+$case.Name+'; target='+$metrics.targetCalls+'; stable='+[Math]::Round($gateSpanMs,2)+'ms')
+ elseif($capture.terminalReason -eq 'operator-stop'){Check ($capture.operatorStopWasEarly -eq $true -and $phases[-1].earlyStop -eq $true) ('Chord early stop was confused with completed phase progression: '+$case.Name)}
+ if($case.ContainsKey('Class')){Check ($observations[-1].classification -eq $case.Class) ('Terminal raw classification differs: '+$case.Name)}
+ if($case.ContainsKey('Exception')){Check ([uint32]$capture.exceptionCode -eq $case.Exception -or [uint32]$observations[-1].exceptionCode -eq $case.Exception) ('Structured exception was lost: '+$case.Name)}
+ if($case.Name -eq 'zero_running'){Check ($capture.zeroWhileRunningCount -gt 0 -and @($observations|Where-Object zeroWhileRunning).Count -gt 0) 'Zero with running context must be flagged, not inferred into valid RPM.'}
+ if($case.Name -eq 'zero_off'){Check ($capture.zeroWhileRunningCount -eq 0 -and @($observations|Where-Object{$_.rawFloat -eq 0 -and $_.preContext.engineRunningRaw -eq 0 -and $_.postContext.engineRunningRaw -eq 0}).Count -gt 3) 'Engine-off/zero fixture observations were not retained.'}
+ if($case.Name -eq 'phase_overflow'){Check ($capture.droppedOperatorEvents -gt 0) 'Lost operator events must terminate visibly.'}
+ if($case.Name -eq 'post_context_delay'){Check ($metrics.rawReturnVisibleWhilePostContextBlocked -eq 1) 'Raw target result must be visible in the off-thread file while the later context native is blocked.'}
+ if($case.Name -eq 'post_identity_changed' -or $case.Name -eq 'post_context_seh'){Check ($observations[-1].targetAttempted -and $null -ne $observations[-1].rawBits -and !$observations[-1].contextBracketValid) 'A known target result must survive failed post-context with an invalid bracket.'}
+ if($case.Name -eq 'rising'){Check (($observations[-1].rawFloat-$observations[0].rawFloat) -gt .5) 'Actual rising sequence missing.'}
+ if($case.Name -eq 'falling'){Check (($observations[-1].rawFloat-$observations[0].rawFloat) -lt -.5) 'Actual falling sequence missing.'}
+ if($case.FullDuration){Check (($capture.activeEndQpc-$capture.activeStartQpc)*1000.0/$freq -ge 120000 -and $metrics.targetCalls -ge 400 -and ($metrics.firstTargetQpc-$capture.activeStartQpc)*1000.0/$freq -le 250 -and ($capture.activeEndQpc-$metrics.fixtureTargetQpc)*1000.0/$freq -le 250 -and $metrics.maximumTargetEntryGapQpc*1000.0/$freq -le 250) 'Unshortened120-second capture must retain observations across the full interval without a minimum-rate claim.'}
+ $activeDuration=if($capture.activeStartQpc -gt 0){($capture.activeEndQpc-$capture.activeStartQpc)*1000.0/$freq}else{0}
+ $elapsed=if($ValidateExistingRun){@($priorResults|Where-Object case -eq $case.Name)[0].fixtureElapsedMilliseconds}else{$clock.ElapsedMilliseconds}
+ $maximumRowBytes=($lines|ForEach-Object{[Text.Encoding]::UTF8.GetByteCount($_)}|Measure-Object -Maximum).Maximum
+ $result=[ordered]@{case=$case.Name;targetCalls=$metrics.targetCalls;targetOutcomesObserved=$capture.targetOutcomesObserved;observations=$observations.Count;declarations=$declared.Count;rawReturnRecords=$returns.Count;phaseRecords=$phases.Count;terminalReason=$capture.terminalReason;rawCopiesVerified=$copied;minimumActualTargetGapMs=$metrics.minimumTargetEntryGapQpc*1000.0/$freq;maximumActualTargetGapMs=$metrics.maximumTargetEntryGapQpc*1000.0/$freq;activeDurationMs=$activeDuration;zeroWhileRunningCount=$capture.zeroWhileRunningCount;captureBytes=$captureFiles[0].Length;journalBytes=$journalFiles[0].Length;timelineBytes=$timelineFiles[0].Length;maximumRowBytes=$maximumRowBytes;fixtureElapsedMilliseconds=$elapsed;fixture=$true;actualShvExecuted=$false;globalKeyboardInputInjected=$false;gameStarted=$false;endpointOpened=$false}
+ $results+=$result
+ if(!$ValidateExistingRun){$results|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $output 'case-results.partial.json') -Encoding utf8}
+ Write-Output ('PASS fixture '+$case.Name+'; target='+$metrics.targetCalls+'; terminal='+$capture.terminalReason)
 }
 Check-SourceLineage
 $full=$selected.Count -eq $matrix.Count
-$report=[ordered]@{schema=2;profile='PLAYABLE-06';scope='Actual operator-armed ASI with public ABI keyboard callbacks and a real owned foreground window; fake SHV only, no global input or game/audio';candidateSha256=$candidateHash;fixtureSha256=$fixtureHash;hostSha256=$hostHash;checks=$script:checks;cases=$results;passed=$results.Count;fullMatrix=$full;operatorArmingValidated=$full;stableIdleGateValidated=$full;stableIdleMs=2000;actualShvExecuted=$false;globalKeyboardInputInjected=$false;gameStarted=$false;gameFilesWritten=$false;endpointOpened=$false;liveProviderEstablished=$false;limits='Fake callbacks are not actual SHV input delivery or GTA rendering. Real monotonic two-second gate retained. Watchdog cannot preempt blocked natives; hot-unload unsupported.'}
-$report | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $output 'fixture-result.json') -Encoding utf8
-Write-Output ('PASS '+$script:checks+' assertions across '+$results.Count+' actual-ASI ABI fixture cases; no real SHV, game or audio. '+(Join-Path $output 'fixture-result.json'))
+$report=[ordered]@{schema=3;profile='PLAYABLE-07';scope='Unchanged production ASI against isolated fake SHV callbacks and an ordinary owned foreground window; no global input/game/audio';candidateSha256=$candidateHash;fixtureSha256=$fixtureHash;hostSha256=$hostHash;checks=$script:checks;cases=$results;passed=$results.Count;fullMatrix=$full;boundedMultiStateValidated=$full;phaseMarkersValidated=$full;fullDurationFixtureValidated=($full -and @($results|Where-Object case -eq 'max_duration').Count -eq 1);maximumCaptureSeconds=120;maximumObservations=2400;maximumHz=20;operatorPhaseProtocolValidated=$full;boundedTimelineValidated=$full;maximumActiveMs=120000;maximumTargetObservations=2400;maximumAcquisitionHz=20;actualShvExecuted=$false;globalKeyboardInputInjected=$false;gameStarted=$false;gameFilesWritten=$false;endpointOpened=$false;liveProviderEstablished=$false;providerQualified=$false;limits='Fake data/callbacks are not live SHV input, native resolution, gear/throttle support or GTA visual behaviour; watchdog cannot preempt blocked natives; hot-unload unsupported.'}
+$report.readOnlyRevalidation=[bool]$ValidateExistingRun
+$report.executionReceiptSha256=(Get-FileHash -LiteralPath $executionPath -Algorithm SHA256).Hash.ToLowerInvariant()
+$report.executionRunnerSourceSha256=$execution.executionRunnerSourceSha256
+$report.validationRunnerSourceSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant()
+if($ValidateExistingRun){$report.validationNote='The unchanged original48-case execution was read back after correcting an arbitrary >2000 minimum count. Full120-second coverage and actual50..250ms spacing replace that minimum. No production/fixture binary changed and no native execution was repeated.'}
+$report|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $output 'fixture-result.json') -Encoding utf8
+Write-Output ('PASS '+$script:checks+' assertions across '+$results.Count+' actual-ASI timeline fixture cases; no real SHV/game/audio. '+(Join-Path $output 'fixture-result.json'))

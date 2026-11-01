@@ -6,6 +6,7 @@
 #include <cstring>
 #include <cwchar>
 #include <stdexcept>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -101,11 +102,13 @@ int wmain(int argc, wchar_t** argv) {
         HMODULE fixture = LoadLibraryExW(fixturePath.c_str(), nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32);
         if (!fixture || !Same(ModulePath(fixture), fixturePath) || Sha256(ModulePath(fixture)) != expectedFixture) throw std::runtime_error("fixture identity/path");
         using Identity = const char* (*)(); using Configure = void (*)(const char*); using Invoke = int (*)(); using Metric = unsigned long long (*)(int);
+        using TargetMetric = unsigned long long (*)(unsigned, unsigned);
         const auto identity = Export<Identity>(fixture, "FixtureIdentity");
-        if (std::strcmp(identity(), "RichAudio device-free SHV ABI fixture v2")) throw std::runtime_error("not a fixture DLL");
+        if (std::strcmp(identity(), "RichAudio device-free SHV ABI fixture v3")) throw std::runtime_error("not a fixture DLL");
         const auto configure = Export<Configure>(fixture, "FixtureConfigure");
         const auto invoke = Export<Invoke>(fixture, "FixtureInvokeRegistered");
         const auto metric = Export<Metric>(fixture, "FixtureMetric");
+        const auto targetMetric = Export<TargetMetric>(fixture, "FixtureTargetMetric");
         const auto scenario = Narrow(argv[1]);
         FixtureWindow window(scenario != "wrong_foreground");
         configure(scenario.c_str());
@@ -116,7 +119,7 @@ int wmain(int argc, wchar_t** argv) {
         const auto targetAfterFirst = metric(4), nativeAfterFirst = metric(3);
         if (!invoke()) throw std::runtime_error("registered callback missing on repeat");
         if (metric(4) != targetAfterFirst || metric(3) != nativeAfterFirst) throw std::runtime_error("completed callback rearmed native acquisition");
-        if (metric(0) != 1 || metric(11) != 1 || metric(6) || metric(7) || metric(8) || metric(5) || metric(18) || metric(19) || metric(31)) throw std::runtime_error("ABI/context/argument/after-target invariant");
+        if (metric(0) != 1 || metric(11) != 1 || metric(6) || metric(7) || metric(8) || metric(5) || metric(31)) throw std::runtime_error("ABI/context/argument/fault invariant");
         // Cancellation may return the script callback while the pinned writer
         // completes its bounded grace. Keep this fake process alive for it.
         const ULONGLONG waitStarted = GetTickCount64();
@@ -125,17 +128,23 @@ int wmain(int argc, wchar_t** argv) {
         const auto outputPath = caseRoot + L"\\fixture-metrics.json";
         HANDLE output = CreateFileW(outputPath.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
         if (output == INVALID_HANDLE_VALUE) throw std::runtime_error("fixture result create-new");
-        char text[3072]; const int count = sprintf_s(text,
-            "{\"schema\":2,\"fixture\":true,\"actualShvExecuted\":false,\"globalKeyboardInputInjected\":false,\"fixturePathAndHashVerified\":true,\"candidateHashVerified\":true,"
-            "\"registerCalls\":%llu,\"unregisterCallsBeforeProcessExit\":%llu,\"callbackInvocations\":%llu,\"nativeCalls\":%llu,\"targetCalls\":%llu,\"forbiddenCallsAfterTarget\":%llu,"
-            "\"contextViolations\":%llu,\"unexpectedNativeCalls\":%llu,\"argumentViolations\":%llu,\"scriptWaitCalls\":%llu,\"qualifiedJournalSeenBeforeTarget\":%llu,"
-            "\"keyboardRegistrationCalls\":%llu,\"keyboardUnregistrationCalls\":%llu,\"deliveredKeyboardCallbackEvents\":%llu,\"freshChordEvents\":%llu,"
-            "\"hudCalls\":%llu,\"hudCallsAfterTarget\":%llu,\"contextCalls\":%llu,\"contextCallsAfterTarget\":%llu,\"callsAfterTargetFault\":%llu,"
-            "\"readyTextCalls\":%llu,\"terminalTextCalls\":%llu,\"ownedWindowMinimizations\":%llu,\"engineRunningReads\":%llu,\"speedReads\":%llu,"
-            "\"fixtureInputQpc\":%llu,\"fixtureTargetQpc\":%llu,\"fixtureArmVirtualKey\":%llu,\"hudFaultsInjected\":%llu,\"callsAfterHudFault\":%llu}\n",
-            metric(0), metric(1), metric(2), metric(3), metric(4), metric(5), metric(6), metric(7), metric(8), metric(9), metric(10),
-            metric(11), metric(12), metric(13), metric(14), metric(15), metric(16), metric(17), metric(18), metric(19), metric(20), metric(21), metric(22), metric(23), metric(24), metric(26), metric(27), metric(28), metric(30), metric(31));
-        DWORD written = 0; const bool saved = count > 0 && WriteFile(output, text, static_cast<DWORD>(count), &written, nullptr) && written == static_cast<DWORD>(count) && FlushFileBuffers(output); CloseHandle(output);
+        std::ostringstream json;
+        json << "{\"schema\":3,\"fixture\":true,\"actualShvExecuted\":false,\"globalKeyboardInputInjected\":false,\"fixturePathAndHashVerified\":true,\"candidateHashVerified\":true";
+        const char* names[]{"registerCalls","unregisterCallsBeforeProcessExit","callbackInvocations","nativeCalls","targetCalls","nativeCallsAfterFault","contextViolations","unexpectedNativeCalls","argumentViolations","scriptWaitCalls","armedJournalSeenAtTarget","keyboardRegistrationCalls","keyboardUnregistrationCalls","deliveredKeyboardCallbackEvents","freshChordEvents","hudCalls","hudCallsAfterTarget","contextCalls","unused18","unused19","readyTextCalls","terminalTextCalls","ownedWindowMinimizations","engineRunningReads","speedReads","advanceEvents","fixtureInputQpc","fixtureTargetQpc","fixtureArmVirtualKey","earlyStopEvents","hudFaultsInjected","callsAfterHudFault","unused32","firstTargetQpc","minimumTargetEntryGapQpc","maximumTargetEntryGapQpc","unused36","unused37","overflowBatches","rawReturnVisibleWhilePostContextBlocked"};
+        for (unsigned i = 0; i < sizeof names / sizeof names[0]; ++i) json << ",\"" << names[i] << "\":" << metric(static_cast<int>(i));
+        if (metric(4) > 2400) throw std::runtime_error("production exceeded hard fixture target capacity");
+        json << ",\"targets\":[";
+        for (unsigned i = 0; i < static_cast<unsigned>(metric(4)); ++i) {
+            if (i) json << ',';
+            json << "{\"index\":" << i + 1 << ",\"beforeQpc\":" << targetMetric(i, 0) << ",\"afterQpc\":" << targetMetric(i, 1)
+                << ",\"rawBits\":" << targetMetric(i, 2) << ",\"engineRunningRaw\":" << targetMetric(i, 3)
+                << ",\"speedBits\":" << targetMetric(i, 4) << ",\"status\":" << targetMetric(i, 5) << '}';
+        }
+        json << "]}\n";
+        const auto text = json.str();
+        if (text.size() > 1024 * 1024) throw std::runtime_error("fixture metrics budget");
+        const auto count = static_cast<DWORD>(text.size());
+        DWORD written = 0; const bool saved = WriteFile(output, text.data(), count, &written, nullptr) && written == count && FlushFileBuffers(output); CloseHandle(output);
         if (!saved) throw std::runtime_error("fixture result write");
         std::printf("PASS device-free fixture case %s; target calls=%llu; no real SHV/game/audio\n", scenario.c_str(), metric(4));
         // Production ASI deliberately owns its module lifetime through process exit.
