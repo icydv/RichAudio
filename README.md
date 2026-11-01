@@ -6,7 +6,7 @@
 
 Not just louder sounds. **A world you can hear, feel and believe in.**
 
-> **Project status:** Early development. RichAudio is not yet a playable or downloadable sound overhaul. The experiences described below are our goals, not completed features.
+> **Project status:** Experimental development. Controlled in-game audio tests have succeeded, but RichAudio is **not yet a playable or downloadable sound overhaul**. The experiences described below are goals, not shipped features.
 
 ## Imagine Los Santos with RichAudio
 
@@ -38,11 +38,11 @@ We're also keeping potential **FiveM support** in mind. That is a future possibi
 
 ## Where we are now
 
-We've researched GTA V's audio files, designed the foundations of the new system and built an early vehicle-data prototype that passes offline tests.
+RichAudio has now run inside GTA V Enhanced Story Mode, collected real vehicle and collision observations, and produced **audible experimental audio** driven by an in-game camera feed. Development branches also contain a functioning offline acoustic renderer, a Windows audio host, GPU-assisted visibility research, and original V12 and supercharged V8 sound synthesis.
 
-The next challenge is getting that prototype running reliably inside GTA V, then proving we can enhance individual sounds without clashing with the game's existing audio.
+These are controlled research and prototype milestones, **not a finished in-game sound overhaul**. We still need trustworthy engine-state calibration, continuous vehicle-audio listening tests, safe coexistence with GTA's original sounds, and measured performance under gameplay load. See the [development progress](#development-progress) for evidence and remaining limits.
 
-**There is no finished audio engine or public release yet.** We're working through the difficult parts one step at a time, and we'll share real progress rather than promise features before they work.
+**There is no playable public release yet.**
 
 ## Follow the project
 
@@ -58,18 +58,22 @@ For the technical side, see the [roadmap](ROADMAP.md), [architecture](ARCHITECTU
 
 ## Development progress
 
-*Last reviewed: 26 October 2026. These are **research results**, not features in a playable release. The linked milestone PRs are open and unmerged, so their changes are not yet part of `main`.*
+*Last reviewed: **1 November 2026**. This is a record of **verified research and experimental prototypes**, not a list of features available to players. Most linked implementation pull requests are **open and unmerged**, so their code is not part of `main`. “In-game” and “offline” refer to different levels of evidence.*
 
-- **In-game vehicle data — verified:** RichAudio has run in GTA V Enhanced Story Mode and captured vehicle/player movement data. Reliable live engine RPM remains unresolved.
-- **Vehicle sound research — offline:** We have decoded and studied original vehicle-audio sources privately, with promising fixed-state motorcycle exhaust listening experiments. A reliable full acceleration/deceleration renderer is not yet proven. [Source research milestone](https://github.com/icydv/RichAudio/pull/25).
-- **Environmental acoustics — offline:** A local geometry model calculates valid first-order sound paths, including ground and wall reflections and blocked routes, in original synthetic scenes. [ACOUSTICS-01](https://github.com/icydv/RichAudio/pull/26).
-- **Real GTA geometry — verified in-game:** A supervised, single collision trace on Enhanced 1158.16 returned a validated point and normal from a wall; the installation was restored after the test. This does **not** establish the wall's size, material or real audible reflections. [ACOUSTICS-02](https://github.com/icydv/RichAudio/pull/27).
-- **Real surface reconstruction — qualified in-game result:** Nine controlled collision traces produced a consistent, bounded **inferred** surface patch (approximately 1.48 × 0.98 native game units). Its true edges, solidity between observations, physical scale and material remain unknown; it is **not** certified reflection geometry. [ACOUSTICS-03](https://github.com/icydv/RichAudio/pull/29).
+### Verified or partially verified in GTA V Enhanced
 
-- **Multi-surface visual debugger — verified in-game:** Eighteen bounded collision observations yielded separate **inferred** wall and ground patches, displayed using GTA world-space lines and an RPH text overlay. Review/hide/clear issued no extra traces. Material, physical scale, actual boundaries and audible reflections remain unverified. [ACOUSTICS-04](https://github.com/icydv/RichAudio/pull/30).
+- **First live vehicle telemetry — verified in-game:** RichAudio loaded in Story Mode and recorded **2,113 samples over 105.6 seconds**, including player and NPC vehicle observations. The normalised RPM getter was not trustworthy, and distant getter results did not prove distant audible traffic. [Runtime milestone](https://github.com/icydv/RichAudio/pull/10).
+- **Real-world geometry observations — verified in-game:** Controlled collision traces produced inferred wall and ground patches. An in-game line/HUD debugger displayed **18 valid observations** and supported review, hide and clear without additional scanning. Real surface boundaries, scale, materials and audible reflections remain unverified. [Surface reconstruction](https://github.com/icydv/RichAudio/pull/29) · [Visual debugger](https://github.com/icydv/RichAudio/pull/30).
+- **Camera-responsive audio — partial in-game success:** A supervised test delivered live camera observations to RichAudio's separate audio host and produced an audible harmonic beacon; it was **not** a vehicle sound replacement or full spatial/latency certification. A later **600 Hz beacon was heard inside GTA**, but that attempt ended after an output safety-ceiling rejection. The subsequent spatial/level corrections passed offline tests and still require a fresh in-game listening test. [First spatial-audio test](https://github.com/icydv/RichAudio/pull/49) · [Beacon stability milestone](https://github.com/icydv/RichAudio/pull/73).
+- **Changing native engine-state candidate — verified in-game, qualification incomplete (1 November):** A bounded Script Hook V experiment on a Bati produced **1,869 complete observations and 1,351 distinct raw values** spanning approximately **0.2–1.0**. The signal changed during the ride, but phase markers were not advanced, so stationary revving, acceleration, deceleration and return-to-idle were **not formally qualified**. It is not a calibrated crankshaft RPM, load or redline measurement. [PLAYABLE-07](https://github.com/icydv/RichAudio/pull/76).
 
-**Next research goal:** Investigate bounded maintenance of a local diagnostic geometry tile along a short manually walked path, with predefined observation stops and explicit expiry/invalidation. This is proposed work requiring separate authorisation; no continuous scanner or acoustic output is implemented.
+### Built and validated outside the game
 
-**Still to solve:** Continuous responsive vehicle audio, reliable RPM, duplicate-free ownership of GTA's original engine sounds, automatic geometry coverage, and real-time acoustic rendering. **There is no playable public release yet.**
+- **Original vehicle-audio research — offline:** GTA vehicle audio containers and engine/exhaust source behaviour have been investigated, with isolated motorcycle exhaust playback experiments. Seamless, responsive acceleration/deceleration from original recordings is not yet established. [Source research](https://github.com/icydv/RichAudio/pull/25).
+- **Causal acoustic rendering — offline:** RichAudio renders original test sound through finite scenes with distance loss, Doppler, obstruction, material filtering and first-/second-order reflections. Observed GTA surface hypotheses can feed the same renderer and PCM pipeline, but scale, materials and continuous in-game coverage remain uncalibrated or unproven. [First acoustic renderer](https://github.com/icydv/RichAudio/pull/47) · [Observed geometry integration](https://github.com/icydv/RichAudio/pull/69) · [Streaming geometry pipeline](https://github.com/icydv/RichAudio/pull/71).
+- **Windows audio and GPU foundations — device/offline tested:** An original WASAPI host and bounded PCM pipeline have produced real device output in supervised tests. Hardware DirectCompute visibility work has been measured on an RTX 2080 SUPER with CPU fallback. A separate quality/acceleration/settings overlay has been implemented and tested off-game, **not yet verified as a working in-game menu**. GPU acceleration is not ray tracing on RTX cores. [Audio host](https://github.com/icydv/RichAudio/pull/48) · [GPU and settings](https://github.com/icydv/RichAudio/pull/72).
+- **Original V12 and supercharged V8 synthesis — offline:** Two distinct engine profiles generate separate mechanical, exhaust, induction and other component streams through the acoustic renderer. The one-player vehicle pipeline has passed end-to-end tests from simulated/controlled telemetry transport through synthesis, spatial processing, native PCM and recording, **without a GTA launch or live speaker audition of those vehicle sounds**. RPM and load remain estimates. [Vehicle synthesis](https://github.com/icydv/RichAudio/pull/74) · [Vehicle pipeline](https://github.com/icydv/RichAudio/pull/75).
 
-> **Keeping this up to date:** Every completed milestone or significant validated development should update this section in the same pull request, including the date, evidence link and what remains unproven. The [pull request checklist](.github/PULL_REQUEST_TEMPLATE.md) prompts this review; updates are **not automatic**.
+**Next validation gates:** Complete a correctly phase-marked native engine-state experiment; repeat the supervised in-game spatial/audio listening test; validate the vehicle pipeline with actual gameplay data; and establish reversible, per-source ownership of stock engine audio so sounds are not doubled. Stability, timing, physical calibration and release readiness remain open. **No public playable build is available.**
+
+> **Keeping this up to date:** Each completed milestone or significant verified event should update this section with its date, evidence, limitations and next step. The [pull request checklist](.github/PULL_REQUEST_TEMPLATE.md) prompts this review; it does **not** update the README automatically.
