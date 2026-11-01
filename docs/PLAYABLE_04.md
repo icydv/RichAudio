@@ -46,7 +46,7 @@ build this C++ DLL. Existing managed compilers were not substituted for native
 ABI compilation. This is a scoped inventory, not a claim to enumerate every
 protected directory on the machine.
 
-The user separately authorised the minimal Microsoft Build Tools installation.
+I separately authorised the minimal Microsoft Build Tools installation.
 The [official bootstrap](https://aka.ms/vs/17/release/vs_BuildTools.exe), version
 `17.14.37827.9`, had a valid Microsoft signature and SHA-256
 `972d771c33c2887b13900c2052e5d2e88208531f6d5ee3c4405d7648e853009b`.
