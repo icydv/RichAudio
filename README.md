@@ -1,5 +1,13 @@
 # RichAudio
 
+## MAJOR MILESTONE — First Live Bati Audio (1 November 2026)
+
+**RichAudio's own motorcycle engine and exhaust audio was heard in GTA V Enhanced Story Mode for the first time.** In one supervised Bati session, the host submitted **27.832 seconds of 48 kHz stereo PCM** from genuine, changing gameplay telemetry, with **zero reported playback underflow**. This is the first audible in-game demonstration of the vehicle-audio pipeline—not a finished audio overhaul.
+
+**What remains:** The owner reported noticeable **250–500 ms latency** (subjective and not yet measured). A first-packet WASAPI loopback discontinuity cut the recording short, leaving only 32 ms of silent RichAudio PCM and 10 ms of endpoint-mix audio; a live camera-mode transition was not performed. Software fade/shutdown and independent restoration passed. **No playable public release is available.**
+
+[Full Stage B result](https://github.com/icydv/RichAudio/blob/a9e3fa713c1a2877bf3c31fd40c44e16776f53f6/docs/PLAYABLE_15_STAGE_B_RESULT.md) · [Draft milestone PR #76](https://github.com/icydv/RichAudio/pull/76)
+
 **SoundMap and session recording, implemented offline:** An independent 3D window displays the engine's real paths and observed geometry. Private synchronized bundles preserve acoustic state and owned output PCM, with offline replay and Start/Stop controls in the window and gold overlay. [Implementation, measurements and one proposed supervised test](docs/ACOUSTICS_08_3_SOUNDMAP_RECORDING.md). No new GTA deployment or listening result is claimed.
 
 **In-game settings, implemented offline:** A gold-branded RPH overlay adds F10, console and controller access to real quality/acceleration, smooth owned-output, reflection and diagnostic controls. This is a separate overlay; stock pause-menu insertion was not supported by the reviewed API evidence. Actual Enhanced rendering/input compatibility remains unverified. [Implementation, preview and limits](docs/ACOUSTICS_08_2_IN_GAME_SETTINGS.md).
@@ -44,7 +52,7 @@ We're also keeping potential **FiveM support** in mind. That is a future possibi
 
 We've verified vehicle movement telemetry inside GTA V Enhanced and privately decoded original vehicle sound material. Our geometry research has now reconstructed separate inferred wall and ground patches from 18 live collision observations, with a temporary in-game visual debugger.
 
-The next geometry challenge is safely maintaining a bounded local tile as the listener moves. An offline cache prototype can preserve inferred tiles between sessions without new collision queries, but live installation-aware mapping is not implemented. Reliable RPM, responsive source playback and duplicate-free control of individual native sounds remain unresolved.
+The next geometry challenge is safely maintaining a bounded local tile as the listener moves. An offline cache prototype can preserve inferred tiles between sessions without new collision queries, but live installation-aware mapping is not implemented. Calibrated RPM, objectively measured low-latency playback and duplicate-free control of individual native sounds remain unresolved. The first live Bati audio was subsequently heard on 1 November 2026; see the major milestone above.
 
 We now have a **working offline acoustic renderer**: original synthetic audio travels through finite scenes with distance loss, propagation delay, material filtering, obstruction, directional reflections and Doppler. Five reproducible stereo WAV demonstrations exercise it. This is synthetic-scene audio processing, **not a playable GTA audio overhaul or public release**. [Implementation and listening instructions](docs/ACOUSTICS_06_AUDIO_PROPAGATION_ENGINE.md).
 
@@ -64,7 +72,9 @@ For the technical side, see the [roadmap](ROADMAP.md), [architecture](ARCHITECTU
 
 ## Development progress
 
-*Last reviewed: 29 October 2026. These are **research results**, not features in a playable release. The linked research milestone PRs remain open and unmerged; the progress-summary process itself was merged through PR #28.*
+*Last reviewed: 1 November 2026. These are **research results**, not features in a playable release. The linked research milestone PRs remain open and unmerged; the progress-summary process itself was merged through PR #28.*
+
+- **MAJOR MILESTONE — first audible live Bati engine/exhaust demonstration (1 November 2026):** One approved GTA V Enhanced session delivered **490 native/gameplay observations**, **401 changing operating values** and **27.832 seconds of submitted stereo PCM**, with nonzero engine/exhaust output and **zero reported host underflow**. The owner heard the sound and described it as good, but estimated **250–500 ms latency** (unmeasured). The first loopback packet's discontinuity flag stopped capture (32 ms silent RichAudio PCM, 10 ms endpoint mix); no audible camera-mode switch was tested, and direct driver-loss causality remains unproved. Completed fade/shutdown and ownership-verified rollback **passed**. Stage B is only a **partial acceptance**; no public build is released. [Detailed result](https://github.com/icydv/RichAudio/blob/a9e3fa713c1a2877bf3c31fd40c44e16776f53f6/docs/PLAYABLE_15_STAGE_B_RESULT.md) · [Draft PR #76](https://github.com/icydv/RichAudio/pull/76).
 
 - **In-game vehicle data — verified:** RichAudio has run in GTA V Enhanced Story Mode and captured vehicle/player movement data. Reliable live engine RPM remains unresolved.
 - **Vehicle sound research — offline:** We have decoded and studied original vehicle-audio sources privately, with promising fixed-state motorcycle exhaust listening experiments. A reliable full acceleration/deceleration renderer is not yet proven. [Source research milestone](https://github.com/icydv/RichAudio/pull/25).
@@ -85,7 +95,7 @@ For the technical side, see the [roadmap](ROADMAP.md), [architecture](ARCHITECTU
 
 **Independent benchmark work:** Genuine NPC-controlled Bati movement has been observed; the abrupt-stop investigation remains separate and unchanged by this renderer. [Benchmark investigation](https://github.com/icydv/RichAudio/pull/45). The original [combined geometry/benchmark record](docs/ACOUSTICS_05_BENCHMARK_01.md) remains at its recorded 60%; offline acoustic work earns no additional live-test credit.
 
-**Still to solve:** Continuous responsive vehicle audio, reliable RPM, duplicate-free ownership of GTA's original engine sounds, calibrated/live geometry, diffuse late reverberation and dependable device/game integration. The owned synthetic-beacon host now has a successful strict transport/unsent-expiry/acknowledged-Stop result. Directional listening acceptance remains incomplete because the beacon was too quiet/low; a 600 Hz, higher-level candidate needs bounded offline preparation before another separately approved live attempt. **There is no playable public release yet.**
+**Still to solve:** The first live Bati engine/exhaust sound has now been heard, but response latency is not yet measured, synchronized full-session recording failed, and audible camera-transition and direct dismount/driver-loss behaviour remain unproved. Reliable RPM calibration, duplicate-free ownership of GTA's original sounds, live geometry/materials, diffuse late reverberation and dependable release-ready integration also remain open. Earlier beacon-only results are historical, not a substitute for Bati acceptance. **There is no playable public release yet.**
 
 > **Keeping this up to date:** Every completed milestone or significant validated development should update this section in the same pull request, including the date, evidence link and what remains unproven. The [pull request checklist](.github/PULL_REQUEST_TEMPLATE.md) prompts this review; updates are **not automatic**.
 
