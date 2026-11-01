@@ -123,14 +123,14 @@ An independent watchdog requests stop by 150 seconds including readiness;
 it cannot forcibly interrupt a stalled native/game thread. No vehicle setter,
 spawn, control injection, raw memory reader or audio endpoint is part of it.
 
-The user explicitly authorised temporary probe deployment and one Story Mode
+I explicitly authorised temporary probe deployment and one Story Mode
 session, then separately authorised a diagnostic capture after the first probe's
 exception message was found to be missing. The first RPH launch inherited the
 desktop app's working directory and stopped at an installation dialog without
 starting GTA. The existing launcher command then set the proper working directory
 and started one actual game process. RPH freshly identified Enhanced 1158.16 and
 automatically loaded the existing RichAudio plugin. Stock fallback and saved
-settings stayed unchanged throughout. The user prepared and operated the Bati;
+settings stayed unchanged throughout. I prepared and operated the Bati;
 the observer did not spawn, drive or change its engine state.
 
 Both captures recorded one running player Bati observation, with RPH ratio
