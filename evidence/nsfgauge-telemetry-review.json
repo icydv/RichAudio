@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-11-01",
+  "scope": "static-read-only",
+  "archive": {
+    "name": "090997-NSFgauge-2.7.0.zip",
+    "bytes": 4239634,
+    "sha256": "f372fdc6ac29aceb678bb2d0f9047d5403d993c48ec2f1db7d6cda579592cca2",
+    "entries": 33,
+    "totalExpandedBytes": 5658094,
+    "containsManagedDll": false,
+    "publisherChecksumMatchEstablished": false,
+    "validation": {
+      "allEntryPathsCheckedBeforeExtraction": true,
+      "rejectedConditions": ["absolute-or-rooted-path", "colon-or-ADS", "dot-traversal", "empty-path-component", "trailing-dot-or-space", "reserved-DOS-name", "case-insensitive-duplicate", "symlink", "destination-outside-staging"],
+      "maximumEntryBytes": 16777216,
+      "maximumExpansionRatio": 200,
+      "maximumTotalExpandedBytes": 33554432,
+      "allEntriesWithinLimits": true,
+      "extractionCreateNewOnly": true
+    },
+    "selectivelyExtracted": [
+      {"name": "NFSgauge.asi", "bytes": 2657280, "sha256": "ec1bc530328e4338a8436d982bbcd40ba25cd9a7b9393a777e61bf470f9f49ec"},
+      {"name": "NFSgauge.ini", "bytes": 1261, "sha256": "1d7f2628a2d6204816cfe28b8fb6284ecd65a39bb9b1f91bdebad94ec3b9e9ae"},
+      {"name": "README.txt", "bytes": 9365, "sha256": "9e92cecc89459dbf24e7e7ef84aee08577ca83829aba64aea083a5b767dbd866"}
+    ]
+  },
+  "staticPe": {
+    "machine": "Amd64",
+    "kind": "PE32Plus",
+    "isDll": true,
+    "hasClrMetadata": false,
+    "fileAndProductVersionStringsPresent": false,
+    "importModules": ["USER32.dll", "KERNEL32.dll", "ScriptHookV.dll"],
+    "scriptHookVImports": ["scriptRegister(HMODULE, callback)", "scriptUnregister(HMODULE)", "createTexture", "drawTexture", "nativePush64", "scriptWait", "nativeInit", "nativeCall"],
+    "sourceRpmSignatureByteOccurrences": 1,
+    "fingerprintProvesExactSourceBinaryCorrespondence": false,
+    "binaryExecutedOrLoaded": false
+  },
+  "primarySources": {
+    "releasePage": "https://www.gta5-mods.com/scripts/nfsgauge-rpm-gear-speedometer",
+    "repository": "https://github.com/lichguard/GTA-V-MOD-Project---NFSgauge",
+    "repositoryLinkedByReleaseAuthor": true,
+    "reviewedCommit": "ad1a94f1abf998d625633451837d5f4db9dd5ceb",
+    "sourceDescribesItselfAsReconstructed": true,
+    "reproducibleSourceBinaryMatchEstablished": false,
+    "snapshots": [
+      {"path": "NativeSpeedo/vehicle_memory.cpp", "sha256": "f35f9d4682b50fe68e81c7d069a0b134e4aab42e8c7943d2680649eb991f9ef7"},
+      {"path": "NativeSpeedo/gta_runtime.cpp", "sha256": "21f2eca595e8451fd5aca905dcdf31eca0c3681a3e50d2a3f8ea6c5498668b1e"},
+      {"path": "NativeSpeedo/domain.cpp", "sha256": "799cd5b6476e62f616a72e5f5cb9dea3d5f20666bd7b19836be7043f2da83075"},
+      {"path": "README.md", "sha256": "e25a093662d6772dd0c5c34c707e758b3bd2997703b5a6294f50327f0a3f2d4e"},
+      {"path": "REWRITE_NOTES.md", "sha256": "5df49a981eb6d8dca0ac90d0ea6f5313cafc4a223fa058978b62a9bfa5a5bd0c"}
+    ]
+  },
+  "sourceTelemetry": {
+    "getter": "VehicleMemory::rpm",
+    "acquisition": "Executable signature scanning, entity-pool resolution, direct vehicle float-field dereference",
+    "scriptHookVDotNetProperty": false,
+    "documentedRpmNativeUsedByReviewedGetter": false,
+    "executableDependentOffsets": true,
+    "missingResolutionReturnsZero": true,
+    "zeroDistinguishesUnavailableFromEngineState": false,
+    "presentationInput": "normalized rev fraction",
+    "presentationClamp": [0, 1],
+    "needleScaleMultiplier": 100,
+    "dampingTimeConstantSeconds": 0.12,
+    "physicalRevolutionsPerMinuteCalibrationEstablished": false,
+    "exactSuppliedBinaryPresentationEstablished": false
+  },
+  "compatibility": {
+    "releaseVersion": "2.7.0",
+    "releaseDate": "2026-10-03",
+    "authorAdvertisedGameVersion": "1.0.3889.0",
+    "authorTestedDistribution": "non-Steam",
+    "explicitEnhanced1158_16SupportEstablished": false,
+    "reviewedSourceInGameValidationClaim": false,
+    "archiveTestedHere": false
+  },
+  "decision": {
+    "verifiedEnhancedReplacementProviderEstablished": false,
+    "integratedIntoRichAudio": false,
+    "recommendation": "Retain existing sourced SHV native probe path; use this archive only as static corroboration of normalized gauge presentation.",
+    "additionalLiveTestAuthorizedOrPerformed": false,
+    "runtimeInstalledOrDeployed": false,
+    "thirdPartyBinaryOrAssetsPublished": false
+  }
+}

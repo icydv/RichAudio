@@ -138,3 +138,19 @@ meaning/range, or an explicit unsupported/unavailable result. The present data
 does not prove native absence, an outdated offset, percent units, a shared cause
 for both failures, or that a reference-SDK update fixes either one. Invalid values
 remain rejected and GTA stock audio is preserved.
+
+## Subsequent independent SHV observation
+
+The separately authorised [PLAYABLE-06 qualification](PLAYABLE_06.md) on the same
+Enhanced executable file version obtained one nonzero SHV call-path result for
+`F9DDA40BC293A61E`: raw `0x3E4CCCCD`, float `0.200000003`, after 20 same-Bati/
+driver, engine-running-true observations spanning 2.084065 seconds. Immediate
+final validation reported running true and speed zero; no exception was recorded.
+The exact ASI was
+`af860dc42540a94c2176ee0dce09c77d9c16c9eeea46a1572d5011aaa8863be4`.
+
+This is a single candidate point, not a qualified RPM contract, separate handler-
+resolution proof, or controlled simultaneous RPH/SHV comparison. It does not
+establish the cause of either RPH symptom or justify rescaling the getter. The
+probe was removed after game exit. This upstream report remains a draft and has
+not been submitted.

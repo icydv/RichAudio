@@ -1,8 +1,8 @@
 # PLAYABLE-05: first independent live SHV qualification
 
-Follow-up: [PLAYABLE-06](PLAYABLE_06.md) prepares an operator-armed candidate
-with a two-second running/stationary gate. It has not been deployed or tested
-in GTA; the zero and interpretation below remain unchanged.
+Follow-up: [PLAYABLE-06](PLAYABLE_06.md) ran a separately approved operator-armed
+candidate once after a two-second running/stationary gate and obtained a plausible
+nonzero point. The zero and interpretation below remain unchanged.
 
 31 October 2026. Continues draft PR #76 from
 `3a2640de41292c950eb4833f172e10f63ea3667d` on `feature/playable-01`.

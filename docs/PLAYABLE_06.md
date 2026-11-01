@@ -3,10 +3,12 @@
 31 October 2026. Continues draft PR #76 on `feature/playable-01` from
 `63b76557c27a4f40f0670af413ae896576b62097`.
 
-**GO for a separately authorised one-launch, operator-armed qualification:** the
-new isolated ASI compiled and passed offline binary fixtures. **Deployment and
-GTA launch are not authorised. Authentic operating-state integration and
-playable development remain BLOCKED.**
+**Live result: a separately approved operator-armed call returned raw
+`0x3E4CCCCD`, float `0.200000003`, after the running/stationary gate passed.**
+This establishes a credible nonzero provider candidate at one idle point.
+**GO to propose separate multi-state qualification; RPM semantics, product
+integration and playable development remain BLOCKED.** The one-launch approval
+has been consumed and the temporary ASI removed.
 
 ## Preserved evidence and corrected trigger
 
@@ -182,28 +184,90 @@ Refuse changed/unowned files. Never recursively delete, replace a runtime,
 touch existing ASIs or remove captures. Recheck the 11 protected hashes, saved
 stock-fallback settings and reviewed shortcut fingerprints.
 
-## Proposed live procedure and decision boundary
+## Approved one-launch procedure and actual result
 
-After offline validation and a separate explicit approval for the exact new
-artifact/hash, permit one deployment and one launch through the existing route.
-In offline Story Mode, take the Bati driver's seat, start the engine and let it
-settle stationary. Close other menus, release the chord keys, then press and
-release Ctrl+Shift+Backslash only when the diagnostic says ready. Leave the
-vehicle idling during the measured gate. A context failure ends with no target
-call; it must not be bypassed or retried. Preserve the result, exit GTA normally
-and perform receipt-bound rollback. No acceleration/shift/deceleration capture,
-second launch or audio test is included.
+After reviewing the exact candidate, manifests and offline checks, the user
+separately authorised **one operator-armed live qualification**. Only the pinned
+ASI was installed through the new pending path and ownership receipt, and the
+existing RPH launch route was invoked once. In offline Story Mode the operator
+reported arming once at stationary idle. Readiness text was visibly drawn in
+GTA; its final chord word was truncated, so the full shortcut instruction in the
+approved procedure remained necessary. No live code correction or retry was made.
 
-A plausible nonzero result after these gates would justify proposing a separate
-multi-state experiment. Zero with corroborated running context remains
-inconclusive and should lead to framework/native-resolution clarification. A
-failed running gate is a context failure. Repeated inconclusive results should
-be escalated to the relevant maintainers rather than followed by indefinite
-retries, guessed hashes or fabricated RPM. The existing upstream RPH draft
-remains unsubmitted.
+[Sanitised live evidence](../evidence/playable-06-live.json) records:
+
+| Observation | Actual result |
+| --- | --- |
+| ASI loading, script registration/callback | One each in the actual loader/SHV logs |
+| Operator action | Accepted fresh callback action, associated with own player-driven Bati |
+| Stable gate | 20 observations over **2.084065 s**, all engine-running raw `1` and same identity |
+| Near-stationary speed | **0..0.00927900895 m/s**, below the 0.10 m/s gate tolerance |
+| Maximum observed sample gap | **113.1492 ms**, below 250 ms |
+| Durable pre-call evidence | All 20 actual samples flushed before permission; journal and final capture agree |
+| Immediate final check | Running `1`, speed `0`, same Bati/driver; context ended **0.0009 ms** before target |
+| Target | One invocation of `F9DDA40BC293A61E`, returned non-null readable storage |
+| Raw result | **`0x3E4CCCCD`**, stored round-trip float **`0.200000003`** |
+| Invocation window | **0.4274 ms**, at session **+61.9928881..+61.9933155 s** |
+| Failure/deadline | No recorded exception or deadline; producer completed |
+| Data volume | **8,103 bytes combined**, four journal stages, no unbounded per-frame output |
+
+The operator callback was timestamped at session **+59.8851949 s**. That is the
+SDK callback observation time, not hardware key-contact time. Human confirmation
+was received after the call; the recorded arming event and contemporaneous game
+observations establish the measured context rather than retrospectively changing
+it. This is near-stationarity within the stated tolerance, not proof of exactly
+zero physical motion throughout. No value was rescaled, clamped or inferred.
+
+The normal-close action was requested through computer-use. A later input helper
+reported a foreground-process-ID error at the closing-window boundary; no quit
+dialog or completed confirmation is claimed. OS checks found game/RPH/host
+processes and game windows gone, and SHV logged script unregistration. No forced
+termination occurred. The exact owned/hash-matched ASI was removed after exit;
+its pending path was absent. [Rollback verification](../evidence/playable-06-rollback.json)
+records unchanged protected files, settings, shortcut files and preserved earlier
+captures. No second launch, retry, further operating phase or audio test occurred.
+
+This observation is materially stronger than PLAYABLE-05's zero with false
+running context. It still does not establish a revolution-ratio range, units,
+correct response over states, absolute crankshaft RPM or a product handoff. The
+generic SHV API has no separate handler-resolution receipt; a plausible nonzero
+point is candidate evidence, not a complete resolution/semantic proof. The
+earlier zero is not retrospectively validated as engine-off telemetry. Prior RPH
+failures and their unknown causes remain unchanged.
+
+## Next separately authorised qualification
+
+The nonzero idle candidate justifies proposing a separate, reviewed multi-state
+probe. First design/build/fixture that candidate and its data/identity/deadline
+controls, then obtain fresh approval for its exact artifact. A proposed initial
+recording should remain read-only and telemetry-only, bounded to at most 120 s
+and 2,400 observations, covering engine off, settled idle, stationary revving
+where safely supported, acceleration and deceleration. Phase prompts must be
+separate from achieved-state evidence; retain raw bits, running context, actual
+timing, identity and missing/fault status. Do not map any value into physical RPM
+without an established contract. No such candidate was implemented or authorised
+here, and the one-call ASI must not be repurposed by repeated launches.
+
+Zero despite corroborated running context would remain inconclusive and should
+lead to framework/native-resolution clarification. A failed running gate is a
+context failure. Repeated inconclusive results should be escalated to the
+relevant maintainers rather than followed by indefinite retries, guessed hashes
+or fabricated RPM. The existing upstream RPH draft remains unsubmitted.
 
 The later recording requirement is preserved: once genuine live RichAudio
 playback exists, synchronise RichAudio stereo PCM, Windows **WASAPI loopback**
 mix and vehicle/audio-processing timestamps for automated discontinuity,
 clipping, phase, dropout, spatial-movement and latency analysis, with optional
 human listening. No part of that subsystem is implemented here.
+
+## Supplied NFSgauge comparison
+
+The user-supplied NFSgauge 2.7.0 archive was inspected statically, not installed
+or executed. It contains a native SHV ASI, not a ScriptHookVDotNet script. The
+author-linked reconstructed source uses executable signatures and vehicle memory
+to obtain a normalized fraction, then scales it for a needle. Exact source-to-ASI
+equivalence and Enhanced 1.0.1158.16 support remain unproved. The
+[focused review](NSFGAUGE_TELEMETRY_REVIEW.md) records those boundaries and primary
+sources. It supplies no verified replacement contract that warrants abandoning
+the direct SHV candidate or introducing unsupported memory access. No code,
+assets or runtime from the package were integrated.
