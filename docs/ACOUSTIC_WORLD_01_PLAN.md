@@ -2,6 +2,8 @@
 
 **Status: architecture and implementation plan only (2 November 2026).** This document authorises no GTA/RPH deployment, live endpoint, game installation modification, automatic full-install scan or further audio test. No new engine or world-mapping functionality is claimed by this planning change. The first two live Bati results and their approvals remain closed, and [PR #76](https://github.com/icydv/RichAudio/pull/76) stays draft.
 
+**Subsequent offline implementation:** I separately authorised the first implementation and the opt-in latency/native-ownership investigations. [Actual implementation, measured results and remaining gates](ACOUSTIC_WORLD_01_IMPLEMENTATION.md) now accompany this original plan. This does not expand any live approval or grant installation access.
+
 ## What I am building
 
 I want an idling Bati across a real GTA street to sound physically present: powerful engine and exhaust fundamentals, audible mechanical character, appropriate low-frequency propagation, and real building-dependent early reflections. An open street should not sound like a tunnel; an alley should not sound like an empty runway; switching camera mode should not cut out a still-running motorcycle.
