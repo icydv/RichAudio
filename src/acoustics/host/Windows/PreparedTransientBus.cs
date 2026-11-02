@@ -73,7 +73,7 @@ namespace RichAudio.Beacon.Windows {
   readonly TransientReceiptState[] receipts=new TransientReceiptState[MaximumEvents+1];readonly long[] firstInCallback=new long[MaximumVoices];readonly long[] lastOccurrence=new long[9];
   readonly ulong sessionLow,sessionHigh;readonly double continuousBudget;readonly TransientBurstPolicy burstPolicy;ITransientFrameClock clock;
   PreparedTransientEvent[] clockPending;int clockPendingCount,unmappedOutstanding;
-  public long ClockDeferred,ClockMappingRejected;public int PeakClockPending;
+  public long ClockDeferred,ClockMappingRejected,RecoveredInterruptedDescriptors;public int PeakClockPending;
   int sealedState,stopState,firstCount,admissionClosed,inFlight,callbackGate;long writeFence,lastCallbackEnd,committedFence;public long Accepted,Rejected,QueueFull,VoiceCapacityRejected,EvictedLowPriority,Expired,Invalidated,MixedCallbacks,PeakActive;
   public long CallbackFaults,Completed,MaximumCallbackWork,CallbackIterations,ProtectedTailRejections;public double MaximumMixedPeak;
   public PreparedTransientBus(ulong low,ulong high,double continuousAbsolutePeakBudget):this(low,high,continuousAbsolutePeakBudget,TransientBurstPolicy.LegacyPrioritySteal02){}
@@ -101,7 +101,7 @@ namespace RichAudio.Beacon.Windows {
     e.KernelSlot==e.SourceId-1&&e.KernelSlot>=0&&e.KernelSlot<MaximumKernels&&(e.Priority==0||e.Priority==1)&&e.SessionLow==sessionLow&&e.SessionHigh==sessionHigh&&
     e.Frequency==clock.Frequency&&e.OccurrenceLowerQpc>=0&&e.OccurrenceUpperQpc>=e.OccurrenceLowerQpc&&e.ObservationAfterQpc>=e.OccurrenceUpperQpc&&
     (e.AcquisitionBeforeQpc==-1||e.AcquisitionBeforeQpc>=0&&e.AcquisitionBeforeQpc<=e.ObservationAfterQpc)&&ingressQpc>=e.ObservationAfterQpc&&
-    ingressQpc-e.ObservationAfterQpc<=e.Frequency/4&&ingressQpc-e.OccurrenceUpperQpc<=e.Frequency/4&&e.OccurrenceUpperQpc-e.OccurrenceLowerQpc<=e.Frequency*2/1000&&e.MaximumLatenessFrames>=0&&e.MaximumLatenessFrames<=2400&&
+    ingressQpc-e.ObservationAfterQpc<=e.Frequency/4&&ingressQpc-e.OccurrenceUpperQpc<=e.Frequency/4&&e.OccurrenceUpperQpc-e.OccurrenceLowerQpc<=e.Frequency*2/1000&&e.UncertaintyFrames>=0&&e.UncertaintyFrames<=4800&&e.MaximumLatenessFrames>=0&&e.MaximumLatenessFrames<=2400&&
     e.SourceSequence>=0&&e.SourceSequence>lastSequence[e.SourceId]&&e.OccurrenceLowerQpc>=lastOccurrence[e.SourceId]&&!seen[(int)e.EventId];
    if(valid){k=kernels[e.KernelSlot];valid=e.KernelGeneration==k.Generation&&e.SourceGeneration==k.SourceGeneration&&e.SceneGeneration==k.SceneGeneration&&e.ListenerGeneration==k.ListenerGeneration;}
    ideal=-1;if(!valid||!clock.MapOnConsumer&&clock.MapLatest(e.OccurrenceUpperQpc,e.UncertaintyFrames,out ideal)!=1){Rejected++;return false;}
@@ -123,7 +123,7 @@ namespace RichAudio.Beacon.Windows {
   }
   void AdmitOnConsumer(PreparedTransientEvent e,long frame) {
    PreparedTransientKernel k=kernels[e.KernelSlot];TransientReceiptState r=receipts[(int)e.EventId];
-   if(r.IdealEmissionFrame<0){long mapped=0;int outcome=clock.QualifiedQpc-e.ObservationAfterQpc>e.Frequency/4?-1:clock.MapLatest(e.OccurrenceUpperQpc,e.UncertaintyFrames,out mapped);if(outcome==0){if(clockPendingCount<clockPending.Length){clockPending[clockPendingCount++]=e;ClockDeferred++;PeakClockPending=Math.Max(PeakClockPending,clockPendingCount);}else{r.Status=-8;ClockMappingRejected++;Interlocked.Decrement(ref unmappedOutstanding);}return;}Interlocked.Decrement(ref unmappedOutstanding);if(outcome<0){r.Status=-8;ClockMappingRejected++;return;}r.IdealEmissionFrame=mapped;r.ClockQualifiedQpc=clock.QualifiedQpc;r.MappingUncertaintyFrames=clock.MappingUncertaintyFrames;}
+   if(r.IdealEmissionFrame<0){long mapped=0;int outcome=(clock.QualifiedQpc-e.ObservationAfterQpc>e.Frequency/4||clock.QualifiedQpc-e.OccurrenceUpperQpc>e.Frequency/4)?-1:clock.MapLatest(e.OccurrenceUpperQpc,e.UncertaintyFrames,out mapped);if(outcome==0){if(clockPendingCount<clockPending.Length){clockPending[clockPendingCount++]=e;ClockDeferred++;PeakClockPending=Math.Max(PeakClockPending,clockPendingCount);}else{r.Status=-8;ClockMappingRejected++;Interlocked.Decrement(ref unmappedOutstanding);}return;}Interlocked.Decrement(ref unmappedOutstanding);if(outcome<0){r.Status=-8;ClockMappingRejected++;return;}r.IdealEmissionFrame=mapped;r.ClockQualifiedQpc=clock.QualifiedQpc;r.MappingUncertaintyFrames=clock.MappingUncertaintyFrames;}
    r.FirstWritableFrameAtConsumer=frame;
    long conservativeGuard=Math.Max(0,(long)Math.Ceiling(k.DirectDelayFrames)-k.FirstNonzero);
    long original=r.IdealEmissionFrame+conservativeGuard,start=Math.Max(original,frame-k.FirstNonzero),late=start-original;
@@ -168,7 +168,7 @@ namespace RichAudio.Beacon.Windows {
   // Cancel is admission withdrawal/request, not completion. The control owner
   // joins ingress and consumer, then calls FinishCancellation outside callbacks.
   public void Cancel(){Thread.VolatileWrite(ref admissionClosed,1);Thread.VolatileWrite(ref stopState,1);}
-  public bool FinishCancellation(int timeoutMilliseconds){if(timeoutMilliseconds<0||timeoutMilliseconds>3000)throw new ArgumentOutOfRangeException("timeoutMilliseconds");Cancel();var wait=System.Diagnostics.Stopwatch.StartNew();while(Thread.VolatileRead(ref inFlight)!=0){if(wait.ElapsedMilliseconds>=timeoutMilliseconds)return false;Thread.Sleep(1);}if(Interlocked.CompareExchange(ref callbackGate,2,0)!=0)return false;for(int i=0;i<voices.Length;i++)if(voices[i].Active){receipts[(int)voices[i].EventId].Status=-5;voices[i].Active=false;Invalidated++;}Invalidated+=clockPendingCount;ClearClockPending(-5);PreparedTransientEvent e;while(high.Pop(out e)){DiscardDescriptor(e,-5);Invalidated++;}while(normal.Pop(out e)){DiscardDescriptor(e,-5);Invalidated++;}firstCount=0;return true;}
+  public bool FinishCancellation(int timeoutMilliseconds){if(timeoutMilliseconds<0||timeoutMilliseconds>3000)throw new ArgumentOutOfRangeException("timeoutMilliseconds");Cancel();var wait=System.Diagnostics.Stopwatch.StartNew();while(Thread.VolatileRead(ref inFlight)!=0){if(wait.ElapsedMilliseconds>=timeoutMilliseconds)return false;Thread.Sleep(1);}if(Interlocked.CompareExchange(ref callbackGate,2,0)!=0)return false;for(int i=0;i<voices.Length;i++)if(voices[i].Active){receipts[(int)voices[i].EventId].Status=-5;voices[i].Active=false;Invalidated++;}Invalidated+=clockPendingCount;ClearClockPending(-5);PreparedTransientEvent e;while(high.Pop(out e)){DiscardDescriptor(e,-5);Invalidated++;}while(normal.Pop(out e)){DiscardDescriptor(e,-5);Invalidated++;}for(int i=1;i<receipts.Length;i++)if(receipts[i].Status==1||receipts[i].Status==2){receipts[i].Status=-5;Invalidated++;RecoveredInterruptedDescriptors++;}Interlocked.Exchange(ref unmappedOutstanding,0);firstCount=0;return true;}
   public bool Stopped {get{return Thread.VolatileRead(ref stopState)!=0;}}
  }
  public static class OwnedPcmSubmission {

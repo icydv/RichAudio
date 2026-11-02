@@ -7,7 +7,7 @@ namespace RichAudio.Beacon.Windows {
  public enum Latency03Failure {None,Clock,Capacity,BufferAcquire,BufferRelease,ContinuousUnderflow,EventMix,ForbiddenRecording,Deadline,Padding}
  public struct Latency03SubmissionSample {
   public long FrameStart,Frames,AcquireBeforeQpc,AcquireAfterQpc,FillBeforeQpc,FillAfterQpc,ReleaseBeforeQpc,ReleaseAfterQpc,UnderflowBefore,UnderflowAfter;
-  public int AcquireHResult,ReleaseHResult;public uint PaddingFrames;public float Gain;
+  public int AcquireHResult,ReleaseHResult;public uint PaddingFrames,ReleaseFlags;public float Gain;
  }
  public struct Latency03CallbackSample {public long BeforeQpc,AfterQpc,AllocatedBytes;public uint PaddingFrames;}
  public struct Latency03PresentationEvidence {public bool Observed;public long FirstOutputFrame,LowerRawQpc100ns,UpperRawQpc100ns;public ulong LowerPosition,UpperPosition,DeviceFrequency;}
@@ -25,6 +25,7 @@ namespace RichAudio.Beacon.Windows {
   public bool AudioClient3Available,PeriodCapabilitiesQueried;public uint DefaultPeriodFrames,FundamentalPeriodFrames,MinimumPeriodFrames,MaximumPeriodFrames,CurrentPeriodFrames,EndpointBufferFrames;
   public ushort CurrentFormatTag,CurrentFormatChannels;public uint CurrentFormatSampleRate;public ulong LastDevicePosition;public long LastRawQpc100ns;
   public int PeriodQueryHResult=unchecked((int)0x80004002),CurrentPeriodQueryHResult=unchecked((int)0x80004002),InitializeHResult,StopHResult,ResetHResult;public bool StopResetAttempted;
+  public long FillExceptions,ReleaseExceptions;
   public long StreamStartBeforeQpc,StreamStartAfterQpc,StreamStopBeforeQpc,StreamStopAfterQpc;public bool Initialized,EverStarted;
   public Latency03OutputSession(PreparedTransientBus bus,string endpointId,uint requestedPeriodFrames,int maximumSeconds,float gain){
    if(bus==null||bus.ClockReady||String.IsNullOrWhiteSpace(endpointId)||endpointId.Length>1024||requestedPeriodFrames>48000||maximumSeconds<5||maximumSeconds>45||Single.IsNaN(gain)||Single.IsInfinity(gain)||gain<=0||gain>1)throw new ArgumentException("Fresh original-synthetic bus, explicit endpoint, period, duration and gain required");
@@ -60,12 +61,24 @@ namespace RichAudio.Beacon.Windows {
    LastSubmissionCommitted=false;
    if(frames==0)return true;if(frames>2048||submissionCount>=submissions.Length||padding>EndpointBufferFrames||Single.IsNaN(gain)||gain<0||gain>1){Fail(Latency03Failure.Capacity);return false;}
    var row=new Latency03SubmissionSample{FrameStart=outputFrame,Frames=frames,PaddingFrames=padding,Gain=gain,AcquireBeforeQpc=Stopwatch.GetTimestamp()};IntPtr data;
-   row.AcquireHResult=renderer.GetBuffer(frames,out data);row.AcquireAfterQpc=Stopwatch.GetTimestamp();if(row.AcquireHResult!=0||data==IntPtr.Zero){Fail(Latency03Failure.BufferAcquire);submissions[submissionCount]=row;Thread.VolatileWrite(ref submissionCount,submissionCount+1);return false;}
-   row.UnderflowBefore=ring.UnderflowFrames;long faults=Events.CallbackFaults;row.FillBeforeQpc=Stopwatch.GetTimestamp();
-   OwnedPcmSubmission.Fill(ring,(float*)data,(int)frames,gain,true,outputFrame,Events);row.FillAfterQpc=Stopwatch.GetTimestamp();row.UnderflowAfter=ring.UnderflowFrames;
-   row.ReleaseBeforeQpc=Stopwatch.GetTimestamp();row.ReleaseHResult=renderer.ReleaseBuffer(frames,0);row.ReleaseAfterQpc=Stopwatch.GetTimestamp();
-   submissions[submissionCount]=row;Thread.VolatileWrite(ref submissionCount,submissionCount+1);
-   if(row.ReleaseHResult!=0){Fail(Latency03Failure.BufferRelease);return false;}LastSubmissionCommitted=true;Events.CommitSubmission(row.ReleaseBeforeQpc,row.ReleaseAfterQpc);
+   row.AcquireHResult=renderer.GetBuffer(frames,out data);row.AcquireAfterQpc=Stopwatch.GetTimestamp();
+   if(row.AcquireHResult!=0){Fail(Latency03Failure.BufferAcquire);submissions[submissionCount]=row;Thread.VolatileWrite(ref submissionCount,submissionCount+1);return false;}
+   bool filled=false;row.UnderflowBefore=ring.UnderflowFrames;long faults=Events.CallbackFaults;
+   try {
+    if(data==IntPtr.Zero)Fail(Latency03Failure.BufferAcquire);
+    else {row.FillBeforeQpc=Stopwatch.GetTimestamp();OwnedPcmSubmission.Fill(ring,(float*)data,(int)frames,gain,true,outputFrame,Events);filled=true;}
+   } catch(Exception) {FillExceptions++;Fail(Latency03Failure.EventMix);}
+   finally {
+    if(row.FillBeforeQpc!=0)row.FillAfterQpc=Stopwatch.GetTimestamp();row.UnderflowAfter=ring.UnderflowFrames;
+    // A successful acquire has exactly one release attempt, even if filling
+    // failed. An unknown/partial packet is released SILENT and never produces
+    // an event acknowledgement. No exception is constructed on this path.
+    row.ReleaseFlags=filled?0u:2u;row.ReleaseBeforeQpc=Stopwatch.GetTimestamp();
+    try{row.ReleaseHResult=renderer.ReleaseBuffer(frames,row.ReleaseFlags);}catch(Exception){ReleaseExceptions++;row.ReleaseHResult=unchecked((int)0x80004005);Fail(Latency03Failure.BufferRelease);}
+    row.ReleaseAfterQpc=Stopwatch.GetTimestamp();submissions[submissionCount]=row;Thread.VolatileWrite(ref submissionCount,submissionCount+1);
+   }
+   if(row.ReleaseHResult!=0){Fail(Latency03Failure.BufferRelease);return false;}
+   LastSubmissionCommitted=true;if(!filled)return false;Events.CommitSubmission(row.ReleaseBeforeQpc,row.ReleaseAfterQpc);
    if(row.UnderflowAfter!=row.UnderflowBefore){Fail(Latency03Failure.ContinuousUnderflow);return false;}if(Events.CallbackFaults!=faults||Events.Stopped){Fail(Latency03Failure.EventMix);return false;}return true;
   }
   internal void FinishOutput(int stopResult,int resetResult,long before,long after){StopHResult=stopResult;ResetHResult=resetResult;StreamStopBeforeQpc=before;StreamStopAfterQpc=after;Events.Cancel();Thread.VolatileWrite(ref finished,1);}

@@ -7,6 +7,18 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & node --test tests/Test-VehicleComponents02.mjs tests/Test-CollisionAcoustics02.mjs tests/Test-WorldRuntime02.mjs tests/Test-PreparedWaveform02.mjs tests/Test-Latency03Kernels.mjs
+    if($LASTEXITCODE-ne0){throw 'Complete component/collision authored sources, unknown-world boundaries or original transient waveform regressions failed.'}
+    & (Join-Path $repo 'tools\Test-Latency03Output.ps1')
+    & (Join-Path $repo 'tools\Test-Latency03Burst.ps1')
+    & (Join-Path $repo 'tools\Test-Latency03Admission.ps1')
+    # Explicit optional open-source parser input only. Never discover/read a
+    # game directory or archive, including when this input is absent in CI.
+    if($env:RICHAUDIO_CODEWALKER_ROOT){
+        $legacyShell=Join-Path $env:WINDIR 'System32/WindowsPowerShell/v1.0/powershell.exe'
+        & $legacyShell -NoProfile -NonInteractive -File (Join-Path $repo 'tools/Test-StaticResources02.ps1') -CodeWalkerRoot $env:RICHAUDIO_CODEWALKER_ROOT -OutputRoot (Join-Path $repo ('.local/world-02/resource-fixture-'+[guid]::NewGuid().ToString('N')))
+        if($LASTEXITCODE-ne0){throw 'Original YMAP/YTYP/YBN byte fixtures or finite geometry integration failed.'}
+    }else{Write-Output 'UNVERIFIED here: optional trusted CodeWalker parser not supplied; normalized authored resource regressions still run. No installed assets scanned.'}
     & node --test tests/Test-Latency02Continuous.mjs tests/Test-EventAcquisitionCapability.mjs tests/Test-TransientEventPath.mjs
     if($LASTEXITCODE-ne0){throw 'LATENCY-02 continuous timing, event acquisition gates or prepared acoustic kernels failed.'}
     & node tools/Test-TransientEventTransport.mjs
