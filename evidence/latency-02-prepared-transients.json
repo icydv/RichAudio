@@ -1,0 +1,607 @@
+{
+  "schema": 1,
+  "kind": "latency-02-original-prepared-transient-and-priority-wire-offline-evidence",
+  "originalSyntheticOnly": true,
+  "productionEnabled": false,
+  "nativePrimary": true,
+  "nativeEventAcquired": false,
+  "endpointOpened": false,
+  "gameLaunched": false,
+  "gameFilesWritten": false,
+  "recordingStarted": false,
+  "physicalLatencyMeasured": false,
+  "actualWasapiPresentationClockEstablished": false,
+  "acquisitionGate": "production real direct and reflected events remain blocked",
+  "sceneAuthority": "original fixed authored metre-scale fixtures; no installed assets",
+  "sourcePins": [
+    {
+      "file": "src/acoustics/events/prepared-path.mjs",
+      "sha256": "a4d261453e0affa0a377677185bbcf72029f4ac30bc03cd1102b21d345adc108"
+    },
+    {
+      "file": "src/acoustics/events/fixture-scenes.mjs",
+      "sha256": "ec3396384587662218cc4c8d7629b75bb8fdf35ad8194f02409d65089ea75e02"
+    },
+    {
+      "file": "src/acoustics/events/fixture-library.mjs",
+      "sha256": "f94bf442ed720eb4edfde731deeb4d4e05be7ab42b266aa582d6cf9434757172"
+    },
+    {
+      "file": "src/acoustics/events/contracts.mjs",
+      "sha256": "78ffe68d34b264c7737fb26577c7bfb16c9beb753242ce8acc68c61f023af586"
+    },
+    {
+      "file": "src/acoustics/events/wire.mjs",
+      "sha256": "76de519ecbd1504761500cf705f9b5b79856acd7e026daff81051fa40d312fc9"
+    },
+    {
+      "file": "src/acoustics/events/acquisition-capability.mjs",
+      "sha256": "d02aca32860f029bec5d7f2cc51e29d42ab457645f8d3b3553a6976d9e89bbed"
+    },
+    {
+      "file": "tests/Test-TransientEventPath.mjs",
+      "sha256": "cbc97ec72adc1ddcece846964513baabf1e5129b81e5f0eb3e8d23c956aaee69"
+    },
+    {
+      "file": "tools/Prepare-TransientEventFixture.mjs",
+      "sha256": "669df615477c7d6379b0783b945f07930cb427b2a3e8462684c31cd6dca05a14"
+    },
+    {
+      "file": "tools/Run-TransientEventFixture.mjs",
+      "sha256": "48b8b26189daeedf46eddc841374a23ba5f1332fb77d9e88f000afeba88d391c"
+    },
+    {
+      "file": "tools/Test-TransientEventTransport.mjs",
+      "sha256": "a35d7d9d056c59c00fd9489f010c8cbc67975b839bf0e89ad017206cec127c24"
+    },
+    {
+      "file": "docs/LATENCY_02_PREPARED_TRANSIENTS.md",
+      "sha256": "8d6fc7edaff50560329001432c46d5dc70c27bfbb40d881bb8e526621fe98f45"
+    }
+  ],
+  "engine": "unchanged CausalSimulation and StreamingRenderer; no new acoustic renderer",
+  "fixedLimits": {
+    "sharedKernels": 8,
+    "maximumStereoFramesPerKernel": 24000,
+    "maximumSharedPcmBytes": 1536000,
+    "activeHostVoices": 32,
+    "hostQueuedDescriptors": 128,
+    "preparedPacketBuffers": 128,
+    "descriptorBytes": 144,
+    "maximumInputChunkBytes": 16384,
+    "maximumLineBytes": 4096,
+    "eventIdMinimum": 1,
+    "eventIdMaximum": 8192,
+    "eventIdLifetimeSeenBytes": 8193,
+    "maximumSources": 8,
+    "sourceAndTransportSequenceFirst": 0,
+    "maximumOccurrenceWidthMs": 2,
+    "maximumEventObservationLatenessMs": 250,
+    "maximumKernelPeak": 0.001,
+    "continuousDeclaredPeakBudget": 0.95,
+    "coherent32VoicePeakBound": 0.032,
+    "combinedDeclaredPeakBound": 0.982
+  },
+  "preparation": {
+    "receiptSha256": "7831252b4c156f394bd865d63944f07db4edda71203ff1201886385b462f3635",
+    "payloadSha256": "2b12e5858098e8a42517402e916b973643094e8f3069285702452923e012228b",
+    "payloadBytes": 524288,
+    "nodeVersion": "v24.19.0",
+    "kernelModel": "fixed authored source/listener pose; virtual stationary preparation is not future telemetry",
+    "oldRawPcmPreservedAcrossExactNonzeroMetadataCorrection": true,
+    "kernels": [
+      {
+        "slot": 0,
+        "name": "unknown-direct",
+        "frames": 8192,
+        "pcmSha256": "ef0c3fed80cc84779c6ffc27c6a06f6be283ab456a3a6c5a7e28dcc7e9bc242f",
+        "geometry": "conditional-direct-unobserved-space-assumed-clear",
+        "sourcePosition": [
+          0,
+          3.43,
+          1
+        ],
+        "listenerPosition": [
+          0,
+          0,
+          1
+        ],
+        "listenerGeneration": 1,
+        "firstNonzeroFrame": 480,
+        "lastNonzeroFrame": 659,
+        "firstSignificantFrame": 480,
+        "lastSignificantFrame": 480,
+        "significanceThreshold": 1e-10,
+        "last256Peak": 0,
+        "requiredRoundingGuardFrames": 0,
+        "physicalDirectDelayFrames": 480,
+        "peak": 0.000144307516166009,
+        "paths": [
+          {
+            "id": "beacon-0:direct:g4294967297",
+            "order": 0,
+            "distance": 3.43,
+            "delaySeconds": 0.01,
+            "delayFrames": 480,
+            "bands": [
+              0.29154518950437314,
+              0.29154518950437314,
+              0.29154518950437314
+            ],
+            "pan": 0
+          }
+        ],
+        "preparationWallMs": 35.6277,
+        "kernelAffectedHistoryFrames": 0
+      },
+      {
+        "slot": 1,
+        "name": "qualified-open",
+        "frames": 8192,
+        "pcmSha256": "ef0c3fed80cc84779c6ffc27c6a06f6be283ab456a3a6c5a7e28dcc7e9bc242f",
+        "geometry": "qualified-authored-static-fixture",
+        "sourcePosition": [
+          0,
+          3.43,
+          1
+        ],
+        "listenerPosition": [
+          0,
+          0,
+          1
+        ],
+        "listenerGeneration": 1,
+        "firstNonzeroFrame": 480,
+        "lastNonzeroFrame": 659,
+        "firstSignificantFrame": 480,
+        "lastSignificantFrame": 480,
+        "significanceThreshold": 1e-10,
+        "last256Peak": 0,
+        "requiredRoundingGuardFrames": 0,
+        "physicalDirectDelayFrames": 480,
+        "peak": 0.000144307516166009,
+        "paths": [
+          {
+            "id": "beacon-0:direct:g4294967297",
+            "order": 0,
+            "distance": 3.43,
+            "delaySeconds": 0.01,
+            "delayFrames": 480,
+            "bands": [
+              0.29154518950437314,
+              0.29154518950437314,
+              0.29154518950437314
+            ],
+            "pan": 0
+          }
+        ],
+        "preparationWallMs": 21.828699999999998,
+        "kernelAffectedHistoryFrames": 0
+      },
+      {
+        "slot": 2,
+        "name": "qualified-wall",
+        "frames": 8192,
+        "pcmSha256": "6b17175fadd182f2bb58c5a21c47bb646638aa244b2e308b6b815baeb0925cab",
+        "geometry": "qualified-authored-static-fixture",
+        "sourcePosition": [
+          0,
+          3.43,
+          1
+        ],
+        "listenerPosition": [
+          0,
+          0,
+          1
+        ],
+        "listenerGeneration": 1,
+        "firstNonzeroFrame": 480,
+        "lastNonzeroFrame": 3180,
+        "firstSignificantFrame": 480,
+        "lastSignificantFrame": 1634,
+        "significanceThreshold": 1e-10,
+        "last256Peak": 0,
+        "requiredRoundingGuardFrames": 0,
+        "physicalDirectDelayFrames": 480,
+        "peak": 0.000144307516166009,
+        "paths": [
+          {
+            "id": "beacon-0:direct:g4294967297",
+            "order": 0,
+            "distance": 3.43,
+            "delaySeconds": 0.01,
+            "delayFrames": 480,
+            "bands": [
+              0.29154518950437314,
+              0.29154518950437314,
+              0.29154518950437314
+            ],
+            "pan": 0
+          },
+          {
+            "id": "beacon-0:r:east:g4294967297",
+            "order": 1,
+            "distance": 10.571891978260089,
+            "delaySeconds": 0.030821842502216003,
+            "delayFrames": 1479.4484401063683,
+            "bands": [
+              0.07567235851871268,
+              0.06621331370387358,
+              0.04729522407419542
+            ],
+            "pan": 0.9459044814839084
+          }
+        ],
+        "preparationWallMs": 24.502800000000008,
+        "kernelAffectedHistoryFrames": 0
+      },
+      {
+        "slot": 3,
+        "name": "qualified-passage",
+        "frames": 8192,
+        "pcmSha256": "afb4f93610861b4b7fb5555cefdebb32070b37bbea861ddaf1b7a27b734f96d4",
+        "geometry": "qualified-authored-static-fixture",
+        "sourcePosition": [
+          0,
+          3.43,
+          1
+        ],
+        "listenerPosition": [
+          0,
+          0,
+          1
+        ],
+        "listenerGeneration": 1,
+        "firstNonzeroFrame": 480,
+        "lastNonzeroFrame": 4537,
+        "firstSignificantFrame": 480,
+        "lastSignificantFrame": 2991,
+        "significanceThreshold": 1e-10,
+        "last256Peak": 0,
+        "requiredRoundingGuardFrames": 0,
+        "physicalDirectDelayFrames": 480,
+        "peak": 0.000144307516166009,
+        "paths": [
+          {
+            "id": "beacon-0:direct:g4294967297",
+            "order": 0,
+            "distance": 3.43,
+            "delaySeconds": 0.01,
+            "delayFrames": 480,
+            "bands": [
+              0.29154518950437314,
+              0.29154518950437314,
+              0.29154518950437314
+            ],
+            "pan": 0
+          },
+          {
+            "id": "beacon-0:r:east:g4294967297",
+            "order": 1,
+            "distance": 10.571891978260089,
+            "delaySeconds": 0.030821842502216003,
+            "delayFrames": 1479.4484401063683,
+            "bands": [
+              0.07567235851871268,
+              0.06621331370387358,
+              0.04729522407419542
+            ],
+            "pan": 0.9459044814839084
+          },
+          {
+            "id": "beacon-0:r:west:g4294967297",
+            "order": 1,
+            "distance": 10.571891978260089,
+            "delaySeconds": 0.030821842502216003,
+            "delayFrames": 1479.4484401063683,
+            "bands": [
+              0.07567235851871268,
+              0.06621331370387358,
+              0.04729522407419542
+            ],
+            "pan": -0.9459044814839084
+          },
+          {
+            "id": "beacon-0:r:east>west:g4294967297",
+            "order": 2,
+            "distance": 20.291991030946175,
+            "delaySeconds": 0.059160323705382434,
+            "delayFrames": 2839.6955378583566,
+            "bands": [
+              0.031539536905174664,
+              0.024147457943024343,
+              0.01232013160358385
+            ],
+            "pan": -0.9856105282867079
+          },
+          {
+            "id": "beacon-0:r:west>east:g4294967297",
+            "order": 2,
+            "distance": 20.291991030946175,
+            "delaySeconds": 0.059160323705382434,
+            "delayFrames": 2839.6955378583566,
+            "bands": [
+              0.031539536905174664,
+              0.024147457943024343,
+              0.01232013160358385
+            ],
+            "pan": 0.9856105282867079
+          }
+        ],
+        "preparationWallMs": 39.04660000000001,
+        "kernelAffectedHistoryFrames": 0
+      },
+      {
+        "slot": 4,
+        "name": "camera-generation-two",
+        "frames": 8192,
+        "pcmSha256": "ec34dee9c20d870638d655d8fb940fce54baeeafd81d2eb64d97ab8c4b541232",
+        "geometry": "qualified-authored-static-fixture",
+        "sourcePosition": [
+          0,
+          3.43,
+          1
+        ],
+        "listenerPosition": [
+          0,
+          0,
+          1
+        ],
+        "listenerGeneration": 2,
+        "firstNonzeroFrame": 480,
+        "lastNonzeroFrame": 3176,
+        "firstSignificantFrame": 480,
+        "lastSignificantFrame": 1630,
+        "significanceThreshold": 1e-10,
+        "last256Peak": 0,
+        "requiredRoundingGuardFrames": 0,
+        "physicalDirectDelayFrames": 480,
+        "peak": 0.00020408164709806442,
+        "paths": [
+          {
+            "id": "beacon-0:direct:g4294967297",
+            "order": 0,
+            "distance": 3.43,
+            "delaySeconds": 0.01,
+            "delayFrames": 480,
+            "bands": [
+              0.29154518950437314,
+              0.29154518950437314,
+              0.29154518950437314
+            ],
+            "pan": -0.9999999999999999
+          },
+          {
+            "id": "beacon-0:r:east:g4294967297",
+            "order": 1,
+            "distance": 10.571891978260089,
+            "delaySeconds": 0.030821842502216003,
+            "delayFrames": 1479.4484401063683,
+            "bands": [
+              0.07567235851871268,
+              0.06621331370387358,
+              0.04729522407419542
+            ],
+            "pan": -0.3244452371489806
+          }
+        ],
+        "preparationWallMs": 11.985600000000005,
+        "kernelAffectedHistoryFrames": 0
+      },
+      {
+        "slot": 5,
+        "name": "left-impact",
+        "frames": 8192,
+        "pcmSha256": "f954ffe2b1e3347dd189ecbefb8245b1d83460b158ab487fdbefc2fe76deb1e7",
+        "geometry": "qualified-authored-static-fixture",
+        "sourcePosition": [
+          -1,
+          2,
+          1
+        ],
+        "listenerPosition": [
+          0,
+          0,
+          1
+        ],
+        "listenerGeneration": 1,
+        "firstNonzeroFrame": 312,
+        "lastNonzeroFrame": 3264,
+        "firstSignificantFrame": 312,
+        "lastSignificantFrame": 1718,
+        "significanceThreshold": 1e-10,
+        "last256Peak": 0,
+        "requiredRoundingGuardFrames": 1,
+        "physicalDirectDelayFrames": 312.91913387752163,
+        "peak": 0.00024476152611896396,
+        "paths": [
+          {
+            "id": "beacon-0:direct:g4294967297",
+            "order": 0,
+            "distance": 2.23606797749979,
+            "delaySeconds": 0.006519148622448367,
+            "delayFrames": 312.91913387752163,
+            "bands": [
+              0.4472135954999579,
+              0.4472135954999579,
+              0.4472135954999579
+            ],
+            "pan": -0.4472135954999579
+          },
+          {
+            "id": "beacon-0:r:east:g4294967297",
+            "order": 1,
+            "distance": 11.180339887498947,
+            "delaySeconds": 0.03259574311224183,
+            "delayFrames": 1564.5956693876078,
+            "bands": [
+              0.07155417527999328,
+              0.06260990336999411,
+              0.0447213595499958
+            ],
+            "pan": 0.9838699100999075
+          }
+        ],
+        "preparationWallMs": 11.803200000000004,
+        "kernelAffectedHistoryFrames": 0
+      },
+      {
+        "slot": 6,
+        "name": "right-impact",
+        "frames": 8192,
+        "pcmSha256": "e864e01368ffc15af543ff2f61fc1e614b63a440a34a76fcf82c5cb0a7190f63",
+        "geometry": "qualified-authored-static-fixture",
+        "sourcePosition": [
+          1,
+          2,
+          1
+        ],
+        "listenerPosition": [
+          0,
+          0,
+          1
+        ],
+        "listenerGeneration": 1,
+        "firstNonzeroFrame": 312,
+        "lastNonzeroFrame": 2993,
+        "firstSignificantFrame": 312,
+        "lastSignificantFrame": 1447,
+        "significanceThreshold": 1e-10,
+        "last256Peak": 0,
+        "requiredRoundingGuardFrames": 1,
+        "physicalDirectDelayFrames": 312.91913387752163,
+        "peak": 0.00024476152611896396,
+        "paths": [
+          {
+            "id": "beacon-0:direct:g4294967297",
+            "order": 0,
+            "distance": 2.23606797749979,
+            "delaySeconds": 0.006519148622448367,
+            "delayFrames": 312.91913387752163,
+            "bands": [
+              0.4472135954999579,
+              0.4472135954999579,
+              0.4472135954999579
+            ],
+            "pan": 0.4472135954999579
+          },
+          {
+            "id": "beacon-0:r:east:g4294967297",
+            "order": 1,
+            "distance": 9.219544457292887,
+            "delaySeconds": 0.02687913835945448,
+            "delayFrames": 1290.1986412538151,
+            "bands": [
+              0.08677218312746247,
+              0.07592566023652966,
+              0.05423261445466404
+            ],
+            "pan": 0.9761870601839527
+          }
+        ],
+        "preparationWallMs": 11.640299999999996,
+        "kernelAffectedHistoryFrames": 0
+      },
+      {
+        "slot": 7,
+        "name": "near-unknown-direct",
+        "frames": 8192,
+        "pcmSha256": "c5cda41409abd125de2ba6842314930aa8b156fa330130780c66ab86da02b372",
+        "geometry": "conditional-direct-unobserved-space-assumed-clear",
+        "sourcePosition": [
+          0,
+          1,
+          1
+        ],
+        "listenerPosition": [
+          0,
+          0,
+          1
+        ],
+        "listenerGeneration": 1,
+        "firstNonzeroFrame": 139,
+        "lastNonzeroFrame": 321,
+        "firstSignificantFrame": 139,
+        "lastSignificantFrame": 140,
+        "significanceThreshold": 1e-10,
+        "last256Peak": 0,
+        "requiredRoundingGuardFrames": 1,
+        "physicalDirectDelayFrames": 139.94169096209913,
+        "peak": 0.00046611326979473233,
+        "paths": [
+          {
+            "id": "beacon-0:direct:g4294967297",
+            "order": 0,
+            "distance": 1,
+            "delaySeconds": 0.0029154518950437317,
+            "delayFrames": 139.94169096209913,
+            "bands": [
+              1,
+              1,
+              1
+            ],
+            "pan": 0
+          }
+        ],
+        "preparationWallMs": 8.89930000000001,
+        "kernelAffectedHistoryFrames": 0
+      }
+    ],
+    "preparationCostScope": "Recorded setup cost on shared offline host, before READY; not event onset, deadline safety or callback work",
+    "tailScope": "Bounded existing-IIR window with exact Float32 nonzero and separate measured significant/residual bounds; no threshold-zeroing or normalization"
+  },
+  "focusedValidation": {
+    "kernelDescriptorWireTests": 14,
+    "acquisitionGateTests": 9,
+    "combined": 23,
+    "failed": 0,
+    "skipped": 0,
+    "authoredAutofireConcurrentSourceDescriptorAdmissions": 3000
+  },
+  "functionalTransport": {
+    "receiptSha256": "04d614995676ac1dc1ebba83ebf162b8c3927f808b66758003151a3073cf339d",
+    "cases": 6,
+    "descriptors": 2000,
+    "inputChunkBytes": 37,
+    "readerHoldAfterReadyMs": 200,
+    "measured": {
+      "maximumOutstanding": 128,
+      "blockedWrites": 0,
+      "poolWaits": 330,
+      "maximumWriteCompletionMs": 176.4566,
+      "maximumChunkBytes": 16384,
+      "maximumPartialLineBytes": 430
+    },
+    "transportOutputSha256": "f94575b5c0f96dd06e42c25febc7ad80aa6550bda197c63f65b43e9fcddde38f",
+    "perEventPcmWrites": 0,
+    "runtimeGeometryWork": 0,
+    "checks": {
+      "prewarmBeforeReady": true,
+      "chunkAndBackpressureSafeBufferOwnership": true,
+      "strictTransportSequence": true,
+      "sessionBytesPreserved": true,
+      "hostMapsOutputFrame": true,
+      "duplicateTerminates": true,
+      "wrongOriginTerminates": true,
+      "oversizedLineTerminates": true,
+      "boundedDiagnostics": true,
+      "alteredPoseMetadataRejectedBeforeReady": true,
+      "oversizedPreparationRejectedBeforeRead": true
+    },
+    "scope": "Functional Node pipe test only. Deliberately paused reader proves bounded pending ownership/backpressure; no sink, submitted-event latency or voice-overload result"
+  },
+  "timingContract": {
+    "occurrence": "original lower/upper authored QPC bounds preserved",
+    "receipt": "acquisitionBeforeQpc optional; observationAfterQpc remains receipt",
+    "outputMapping": "requested emission frame -1; host owns independent authored fixture presentation map, not first fake callback or minimum delay",
+    "physicalPropagation": "kernel includes direct and finite reflected travel once; host records rounding guard and any whole-kernel lateness",
+    "priorityLimit": "dedicated descriptor pipe bypasses continuous PCM, but is FIFO and cannot overtake bytes already buffered in that pipe"
+  },
+  "remainingLimits": [
+    "No real gunshot or impact acquisition, synthesis, echo, suppression or native coexistence is enabled.",
+    "Prepared fixed-pose kernels do not establish arbitrary origins, moving listeners, dynamic geometry or installed-world coverage.",
+    "A qualified immutable kernel can remain available during worker preparation; unknown geometry uses explicit conditional direct assumption.",
+    "Nearby 20-30 ms observation-to-submission is a host integration target, not a result of this functional transport test.",
+    "Temporary preparation renderer history, stored payload and normal process/GC overhead exceed the shared PCM table alone; no whole-process memory cap claimed."
+  ]
+}
