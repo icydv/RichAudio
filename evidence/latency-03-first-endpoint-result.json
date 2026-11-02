@@ -1,0 +1,611 @@
+{
+  "schema": 1,
+  "kind": "latency-03-first-real-endpoint-failed-result",
+  "scope": "One approved endpoint attempt; original raw rows retained privately; no physical speaker measurement",
+  "implementationHead": "62886953077efb374ac5f5c1c3340724da852d15",
+  "approvedProposalSha256": "0cfcb4577178186ef41e493bb660aa29ebce69956782c980e5d998b1818b2c79",
+  "candidateManifestSha256": "58f92cdc399a86e86e70587f6124cb837eaa82d604e86c7ec327b05296640432",
+  "independentCandidateReviewSha256": "bb3cc1f50fcab2bb0e60e7bf1455331c2e79b1518c4a45685ebf318a951c6c36",
+  "attempts": 1,
+  "consumed": true,
+  "retried": false,
+  "passed": false,
+  "protocolPassed": false,
+  "audioAcceptancePassed": false,
+  "endpointOpened": true,
+  "actualWasapiPacketSubmissions": true,
+  "syntheticEventSubmissionMeasured": false,
+  "nonzeroPcmSubmitted": false,
+  "physicalSpeakerLatencyMeasured": false,
+  "clock": {
+    "qpcFrequency": 10000000,
+    "deviceFrequency": 384000,
+    "rows": 6,
+    "accepted": 4,
+    "startupZeroRows": 1,
+    "queryHResults": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "queryCostMs": {
+      "count": 6,
+      "minimum": 0.0011,
+      "mean": 0.031749999999999994,
+      "p50": 0.0015,
+      "p95": 0.1803,
+      "p99": 0.1803,
+      "maximum": 0.1803
+    },
+    "recordedQueryUncertaintyFrames": [
+      9,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "exactRejectedGuard": "Latency03PresentationClock.Observe pair-consistency reason4; derived from retained raw rows",
+    "lastPair": {
+      "deviceDelta": 3840,
+      "deviceElapsedMs": 10,
+      "qpcElapsedMs": 10.7013,
+      "residualMs": 0.7012999999999998,
+      "permittedBracketMs": 0.04186666666666666
+    },
+    "uncertaintyLimit": "Recorded query/quantization estimates failed pair qualification; no event mapping or certified device/speaker uncertainty established",
+    "clockQualificationRejectedBeforeAnyEvent": true
+  },
+  "device": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "sampleFormat": "Float32",
+    "requestedPeriodFrames": 0,
+    "client3Available": true,
+    "capabilitiesQueried": true,
+    "defaultFrames": 480,
+    "fundamentalFrames": 480,
+    "minimumFrames": 480,
+    "maximumFrames": 480,
+    "currentFrames": 480,
+    "endpointBufferFrames": 1056,
+    "periodQueryHResult": 0,
+    "currentPeriodQueryHResult": 0,
+    "initializeHResult": 0,
+    "devicePeriod100ns": 100000,
+    "reportedStreamLatency100ns": 0,
+    "noLowerPeriodRequested": true,
+    "currentFormatSerialized": false
+  },
+  "time": {
+    "helperElapsedMs": 1212.0381,
+    "startCallMs": 0.53,
+    "streamStartAfterToStopBeforeMs": 51.4889,
+    "enclosingStartBeforeToStopAfterMs": 53.3451,
+    "eventEnableAfterStartAfterMs": 24.8406,
+    "eventEnableToStopBeforeMs": 26.6483,
+    "stopResetBracketMs": 1.3262,
+    "stopRequestMarkerExists": false,
+    "lifetimeLimit": "Helper wall time encloses the owned worker; no complete supervisor exit/timing receipt. Process absence verified separately."
+  },
+  "events": {
+    "planned": 526,
+    "ordinaryPlanned": 462,
+    "intentionalOverloadPlanned": 64,
+    "observed": 0,
+    "authored": 0,
+    "written": 0,
+    "decoded": 0,
+    "accepted": 0,
+    "rejected": 0,
+    "submitted": 0,
+    "completed": 0,
+    "postSubmissionRetirements": 0,
+    "capacityTailCuts": 0,
+    "protectedTailRejections": 0,
+    "queueFull": 0,
+    "expired": 0,
+    "neverAuthored": 526,
+    "interpretation": "All phases unreached: unobserved planned fixtures, not observed/transported events lost or rejected",
+    "phases": [
+      {
+        "phase": "isolated",
+        "planned": 6,
+        "observed": 0,
+        "written": 0,
+        "decoded": 0,
+        "admitted": 0,
+        "submitted": 0,
+        "rejected": 0,
+        "neverSubmitted": 6,
+        "intentionalOverload": false,
+        "observationToWasapiSubmissionMs": {
+          "count": 0
+        }
+      },
+      {
+        "phase": "automatic",
+        "planned": 64,
+        "observed": 0,
+        "written": 0,
+        "decoded": 0,
+        "admitted": 0,
+        "submitted": 0,
+        "rejected": 0,
+        "neverSubmitted": 64,
+        "intentionalOverload": false,
+        "observationToWasapiSubmissionMs": {
+          "count": 0
+        }
+      },
+      {
+        "phase": "bursts",
+        "planned": 128,
+        "observed": 0,
+        "written": 0,
+        "decoded": 0,
+        "admitted": 0,
+        "submitted": 0,
+        "rejected": 0,
+        "neverSubmitted": 128,
+        "intentionalOverload": false,
+        "observationToWasapiSubmissionMs": {
+          "count": 0
+        }
+      },
+      {
+        "phase": "impacts",
+        "planned": 160,
+        "observed": 0,
+        "written": 0,
+        "decoded": 0,
+        "admitted": 0,
+        "submitted": 0,
+        "rejected": 0,
+        "neverSubmitted": 160,
+        "intentionalOverload": false,
+        "observationToWasapiSubmissionMs": {
+          "count": 0
+        }
+      },
+      {
+        "phase": "transport-jitter",
+        "planned": 40,
+        "observed": 0,
+        "written": 0,
+        "decoded": 0,
+        "admitted": 0,
+        "submitted": 0,
+        "rejected": 0,
+        "neverSubmitted": 40,
+        "intentionalOverload": false,
+        "observationToWasapiSubmissionMs": {
+          "count": 0
+        }
+      },
+      {
+        "phase": "bounded-cpu",
+        "planned": 64,
+        "observed": 0,
+        "written": 0,
+        "decoded": 0,
+        "admitted": 0,
+        "submitted": 0,
+        "rejected": 0,
+        "neverSubmitted": 64,
+        "intentionalOverload": false,
+        "observationToWasapiSubmissionMs": {
+          "count": 0
+        }
+      },
+      {
+        "phase": "intentional-overload",
+        "planned": 64,
+        "observed": 0,
+        "written": 0,
+        "decoded": 0,
+        "admitted": 0,
+        "submitted": 0,
+        "rejected": 0,
+        "neverSubmitted": 64,
+        "intentionalOverload": true,
+        "observationToWasapiSubmissionMs": {
+          "count": 0
+        }
+      }
+    ],
+    "observationToAdmissionMs": {
+      "count": 0,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "maximum": null
+    },
+    "observationToFirstWritableFrameMs": {
+      "count": 0,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "maximum": null
+    },
+    "observationToWasapiSubmissionMs": {
+      "count": 0,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "maximum": null
+    },
+    "observationToEndpointPositionMs": {
+      "count": 0,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "maximum": null
+    },
+    "fakeSubmissionBaselineMedianMs": 15.5493,
+    "baselineComparison": "Unavailable: zero actual transient onsets"
+  },
+  "pcm": {
+    "successfulPackets": 6,
+    "submittedFrames": 3456,
+    "submittedDurationMs": 72,
+    "submittedReferencePrefixPeak": 0,
+    "firstNonzeroReferenceFrame": 10240,
+    "firstNonzeroReferenceMs": 213.33333333333334,
+    "underflowFrames": 0,
+    "referenceGain": 1,
+    "prefillPackets": 1,
+    "postStartPackets": 5,
+    "bufferAcquireHResults": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "bufferReleaseHResults": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "releaseFlags": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "allPackets": {
+      "acquireMs": {
+        "count": 6,
+        "minimum": 0.0008,
+        "mean": 0.032683333333333335,
+        "p50": 0.0009,
+        "p95": 0.191,
+        "p99": 0.191,
+        "maximum": 0.191
+      },
+      "fillMs": {
+        "count": 6,
+        "minimum": 0.0073,
+        "mean": 0.5336,
+        "p50": 0.0079,
+        "p95": 3.16,
+        "p99": 3.16,
+        "maximum": 3.16
+      },
+      "releaseMs": {
+        "count": 6,
+        "minimum": 0.0005,
+        "mean": 0.030866666666666667,
+        "p50": 0.0008,
+        "p95": 0.1815,
+        "p99": 0.1815,
+        "maximum": 0.1815
+      },
+      "acquireBeforeToReleaseAfterMs": {
+        "count": 6,
+        "minimum": 0.0093,
+        "mean": 0.5973,
+        "p50": 0.0096,
+        "p95": 3.533,
+        "p99": 3.533,
+        "maximum": 3.533
+      },
+      "firstWritableAccessToReleaseAfterMs": {
+        "count": 6,
+        "minimum": 0.0078,
+        "mean": 0.5646166666666667,
+        "p50": 0.0088,
+        "p95": 3.342,
+        "p99": 3.342,
+        "maximum": 3.342
+      }
+    },
+    "prefillPacketsTiming": {
+      "acquireMs": {
+        "count": 1,
+        "minimum": 0.191,
+        "mean": 0.191,
+        "p50": 0.191,
+        "p95": 0.191,
+        "p99": 0.191,
+        "maximum": 0.191
+      },
+      "fillMs": {
+        "count": 1,
+        "minimum": 3.16,
+        "mean": 3.16,
+        "p50": 3.16,
+        "p95": 3.16,
+        "p99": 3.16,
+        "maximum": 3.16
+      },
+      "releaseMs": {
+        "count": 1,
+        "minimum": 0.1815,
+        "mean": 0.1815,
+        "p50": 0.1815,
+        "p95": 0.1815,
+        "p99": 0.1815,
+        "maximum": 0.1815
+      },
+      "acquireBeforeToReleaseAfterMs": {
+        "count": 1,
+        "minimum": 3.533,
+        "mean": 3.533,
+        "p50": 3.533,
+        "p95": 3.533,
+        "p99": 3.533,
+        "maximum": 3.533
+      },
+      "firstWritableAccessToReleaseAfterMs": {
+        "count": 1,
+        "minimum": 3.342,
+        "mean": 3.342,
+        "p50": 3.342,
+        "p95": 3.342,
+        "p99": 3.342,
+        "maximum": 3.342
+      }
+    },
+    "postStartPacketsTiming": {
+      "acquireMs": {
+        "count": 5,
+        "minimum": 0.0008,
+        "mean": 0.00102,
+        "p50": 0.0008,
+        "p95": 0.0018,
+        "p99": 0.0018,
+        "maximum": 0.0018
+      },
+      "fillMs": {
+        "count": 5,
+        "minimum": 0.0073,
+        "mean": 0.00832,
+        "p50": 0.0078,
+        "p95": 0.0108,
+        "p99": 0.0108,
+        "maximum": 0.0108
+      },
+      "releaseMs": {
+        "count": 5,
+        "minimum": 0.0005,
+        "mean": 0.0007399999999999999,
+        "p50": 0.0006,
+        "p95": 0.0012,
+        "p99": 0.0012,
+        "maximum": 0.0012
+      },
+      "acquireBeforeToReleaseAfterMs": {
+        "count": 5,
+        "minimum": 0.0093,
+        "mean": 0.010159999999999999,
+        "p50": 0.0096,
+        "p95": 0.0128,
+        "p99": 0.0128,
+        "maximum": 0.0128
+      },
+      "firstWritableAccessToReleaseAfterMs": {
+        "count": 5,
+        "minimum": 0.0078,
+        "mean": 0.00914,
+        "p50": 0.0086,
+        "p95": 0.012,
+        "p99": 0.012,
+        "maximum": 0.012
+      }
+    },
+    "continuityLimit": "Only zero-valued original prefix submitted; nonzero Bati continuity and completed endpoint presentation untested"
+  },
+  "callback": {
+    "samples": 6,
+    "fullCostMs": {
+      "count": 6,
+      "minimum": 0.0142,
+      "mean": 0.30225,
+      "p50": 0.0206,
+      "p95": 1.614,
+      "p99": 1.614,
+      "maximum": 1.614
+    },
+    "reportedLoopWorkMs": {
+      "count": 5,
+      "minimum": 0.0143,
+      "mean": 0.38473999999999997,
+      "p50": 0.0171,
+      "p95": 1.8568,
+      "p99": 1.8568,
+      "maximum": 1.8568
+    },
+    "allocationBytes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "totalAllocationBytes": 0,
+    "callbackPaddingFrames": {
+      "count": 6,
+      "minimum": 576,
+      "mean": 576,
+      "p50": 576,
+      "p95": 576,
+      "p99": 576,
+      "maximum": 576
+    },
+    "wakeIntervalsMs": {
+      "count": 5,
+      "minimum": 0.4569,
+      "mean": 8.12934,
+      "p50": 9.9925,
+      "p95": 10.2053,
+      "p99": 10.2053,
+      "maximum": 10.2053
+    },
+    "emptyPaddingEvents": 0,
+    "wakeTimeouts": 0,
+    "minimumCallbackFrames": 480,
+    "maximumCallbackFrames": 1056,
+    "mmcssRegistered": true,
+    "mmcssReverted": true,
+    "mmcssError": 0,
+    "deadlineMisses": "No explicit deadline-miss counter; short six-callback sample cannot establish steady/adverse-load reliability",
+    "allCallbackStartIntervalsMs": {
+      "count": 5,
+      "minimum": 9.9917,
+      "mean": 10.17804,
+      "p50": 10.0003,
+      "p95": 10.7004,
+      "p99": 10.7004,
+      "maximum": 10.7004
+    },
+    "legacyWakeArrayLimit": "Legacy wake array includes initial wake and omits terminal rejected-clock callback; all-callback start intervals include terminal callback.",
+    "recordedBracketLimit": "Session callback bracket excludes its own diagnostic bookkeeping; legacy completed-loop cost is separately retained for five successful iterations."
+  },
+  "memory": {
+    "managedBytesAfterCleanup": 39017160,
+    "processPeakWorkingSetBytes": null,
+    "jobLimitMiB": 1024,
+    "limit": "GC.GetTotalMemory(false) after cleanup; not peak managed/process memory or allocation under event load"
+  },
+  "cleanup": {
+    "workerReports": {
+      "outputJoined": true,
+      "readerJoined": true,
+      "producerJoined": true,
+      "driverJoined": true,
+      "cpuJoined": true,
+      "nodeExited": true,
+      "nodeExitCode": 0,
+      "cleanup": true,
+      "stopHResult": 0,
+      "resetHResult": 0,
+      "fillExceptions": 0,
+      "releaseExceptions": 0
+    },
+    "supervisionReceiptExists": false,
+    "supervisorError": "InvalidOperationException in Process.get_ExitCode: Process was not started by this object, so requested information cannot be determined.",
+    "nativeWorkerExitCodeCapturedBySupervisor": false,
+    "manualIndependentPostflightSha256": "263f084c1d95c18099ec39591d7e11d470845a81da192904996031a498b7a0ec",
+    "originalOwnedLifetimesChecked": 4,
+    "originalOwnedLifetimesAbsent": true,
+    "originalInputsAnd65Payload60SourceBindingsUnchanged": true,
+    "restorationPassed": true,
+    "protocolOrExperimentPassInferredFromRestoration": false
+  },
+  "quantiles": "Sorted actual samples, index ceil((n-1)*q); N<=6, tails equal maximum; empty samples null, never zero",
+  "privateRawFilePins": [
+    {
+      "file": "private-candidate/attempt-consumed.json",
+      "bytes": 383,
+      "sha256": "7532c2efb40fb1150067a218baefe51851cec627d3ddb8deb3095e42f97ec328"
+    },
+    {
+      "file": "private-candidate/results/result.json",
+      "bytes": 488603,
+      "sha256": "3585fc93e5dcff4984046cde5fa13815cc7d72e0c7c406d3392c7292845b8a32"
+    },
+    {
+      "file": "private-candidate/results/started.json",
+      "bytes": 250,
+      "sha256": "77836f8de9824f3b919885b2b45fe9dfb1d3f275358ec8c7fbbe5317b34a76bd"
+    },
+    {
+      "file": "private-candidate/results/worker-admission.json",
+      "bytes": 244,
+      "sha256": "0b5dd0d88fbe40001548427569e192d160c2ea97062b6088dc2b3d89d089426d"
+    },
+    {
+      "file": "private-candidate/results/worker-claimed.json",
+      "bytes": 244,
+      "sha256": "0b5dd0d88fbe40001548427569e192d160c2ea97062b6088dc2b3d89d089426d"
+    },
+    {
+      "file": "private-invocation/preflight.json",
+      "bytes": 1396,
+      "sha256": "3e5f7dc85b70e2beb1d9fdf936e7dac6fae3761e82a49903d34af3a7a61017c7"
+    },
+    {
+      "file": "private-invocation/validation-stdout.txt",
+      "bytes": 453,
+      "sha256": "51685b1ff45b769db89e1c51c083d63a61f4745eefceaf2d87685fc971b03e6b"
+    },
+    {
+      "file": "private-invocation/invocation-admission.json",
+      "bytes": 773,
+      "sha256": "31767566ed56f7c8eaa7d9801878248a69c4c2248323a93c49dbe7e2c40f1a52"
+    },
+    {
+      "file": "private-invocation/invocation-return.json",
+      "bytes": 282,
+      "sha256": "1cb1a9249fbc53fa8ba5ae6d386a6ad7badfce2b80e81973bb71034f803704b3"
+    },
+    {
+      "file": "private-invocation/attempt-stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "private-invocation/attempt-stderr.txt",
+      "bytes": 428,
+      "sha256": "3b5e1e459f3095c6876645d2345f7939376af1a43047110c083a5b5ebd2a529e"
+    },
+    {
+      "file": "private-invocation/helper-failure.txt",
+      "bytes": 80,
+      "sha256": "16cb09ca3e4325a68cfb1944d22e3da387f9ed62e13845bf650f02310272c87f"
+    }
+  ],
+  "changes": {
+    "operationalArtifactsRepaired": false,
+    "windowsVolumeOrPreferencesChanged": false,
+    "gameLaunched": false,
+    "deployment": false,
+    "recording": false,
+    "nativeSuppression": false
+  },
+  "attemptInvokedAtUtc": "2026-11-02T14:58:21.9467549Z",
+  "bindingEvidence": {
+    "rootPreflightSha256": "3e5f7dc85b70e2beb1d9fdf936e7dac6fae3761e82a49903d34af3a7a61017c7",
+    "independentPreflightSha256": "d70696ceb71e2d0e185c7fb2931b87aa2ebc4f3548d8a22dcd33b0cfbc6fdd6b",
+    "rootPostflightSha256": "7a2cf5122ee04b273835139a1f161d7dd7d6c104052af7fdb1a2a1cd9d2978b7",
+    "independentPostflightSha256": "263f084c1d95c18099ec39591d7e11d470845a81da192904996031a498b7a0ec",
+    "independentActualAnalysisSha256": "ef482487aadbd60fe1ad98883859fe7133ccb707ed1d5a949a1fd536ff45caba",
+    "rootDerivedSummarySha256": "78a2d6e22ee6c2cf0d53a6269c40544af981297f8aa8615c6714da5fd8b46ec7"
+  },
+  "subjectiveFeedback": {
+    "supplied": false,
+    "scope": "No nonzero experiment PCM submitted; no subjective listening claim inferred"
+  }
+}
