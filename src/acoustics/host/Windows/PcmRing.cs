@@ -11,9 +11,13 @@ namespace RichAudio.Beacon.Windows
         // Gameplay reserves the existing fixed ring capacity. The measured live
         // 27.24 ms producer spike plus a 20 ms device chunk and control/IPC
         // scheduling jitter exceed the legacy 42.67 ms four-block reserve.
-        // Eight blocks add a documented fixed 42.67 ms; no resampling or drift.
+        // Eight512-frame blocks reserve85.333ms at startup (four extra blocks
+        // versus the older reserve). Actual steady occupancy/residence varies;
+        // this is not a fixed measured output delay. No resampling or drift.
         public const int GameplayStartupBlocks = 8;
         public const double GameplayReserveMilliseconds = GameplayStartupBlocks * MaximumFrames / 48.0;
+        public readonly int GameplayPrefillBlocks;
+        public double SelectedGameplayReserveMilliseconds {get{return GameplayPrefillBlocks*MaximumFrames/48.0;}}
         private readonly float[][] data = new float[Slots][];
         private readonly int[] lengths = new int[Slots];
         private int write, read, offset, credits;
@@ -21,7 +25,8 @@ namespace RichAudio.Beacon.Windows
         public long FirstUnderflowFrame = -1;
         public volatile bool EndOfStream;
         public double SumSquares, Peak;
-        public PcmRing() { for (int i = 0; i < Slots; i++) data[i] = new float[MaximumFrames * 2]; }
+        public PcmRing():this(GameplayStartupBlocks){}
+        public PcmRing(int gameplayPrefillBlocks) { if(gameplayPrefillBlocks<3||gameplayPrefillBlocks>Slots)throw new ArgumentOutOfRangeException("gameplayPrefillBlocks");GameplayPrefillBlocks=gameplayPrefillBlocks;for (int i = 0; i < Slots; i++) data[i] = new float[MaximumFrames * 2]; }
         public int Count { get { return Thread.VolatileRead(ref write) - Thread.VolatileRead(ref read); } }
         public int BufferedFrames { get { int a=Thread.VolatileRead(ref read),b=Thread.VolatileRead(ref write),n=0;for(int i=a;i<b&&i<a+Slots;i++)n+=lengths[i%Slots];return Math.Max(0,n-Thread.VolatileRead(ref offset)); } }
         // Both real and device-free sinks enforce this same fatal integrity

@@ -3,19 +3,22 @@ import fs from 'node:fs';import path from 'node:path';import readline from 'node
 import {loadStockCatalogAssets,loadStockNpcAssets} from '../src/acoustics/vehicle/stock-source.mjs';
 import {loadInstalledStockRegistry} from '../src/acoustics/vehicle/installed-stock-registry.mjs';
 import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';
+import {resolveLatencyProfile} from '../src/acoustics/vehicle/latency-profile.mjs';
 import {encodeVehicleRa07} from '../src/acoustics/vehicle/pipeline.mjs';
 import {observationCoordinates,observedAcousticScene} from '../src/acoustics/engine/observed-geometry.mjs';
 import {vehicleDistanceSceneOptions} from '../src/acoustics/vehicle/distance-presentation.mjs';
 import {SoundMapTelemetry} from '../src/acoustics/streaming/soundmap-telemetry.mjs';import {SoundMapClient} from './soundmap/producer-client.mjs';
 const args=process.argv.slice(2);if(args.length!==4||args[0]!=='--manifest'||args[2]!=='--session')throw Error('owned manifest/session required');
 const manifest=path.resolve(args[1]),root=path.dirname(manifest),config=JSON.parse(fs.readFileSync(manifest,'utf8')),session=args[3];
+const latencyProfile=resolveLatencyProfile(config.latencyProfile);
+if(latencyProfile.id==='low-latency-01'&&(config.demoProfile!=='PLAYABLE-13'||config.eligible?.length!==1||config.eligible[0].model!==0xf9300cc5||config.eligible[0].context!=='player'))throw Error('LOW-LATENCY-01 requires the Bati-player demonstration package');
 const inside=relative=>{const p=path.resolve(root,relative);if(!p.startsWith(root+path.sep))throw Error('package path escaped');return p;};
 const assets=loadStockCatalogAssets(inside(config.playerManifest),{sustainAtlasFile:inside(config.atlas)}),npcAssets=loadStockNpcAssets(inside(config.npcManifest));
 const registry=loadInstalledStockRegistry({catalogFile:inside(config.catalog),catalogSha256:config.catalogSha256,assets,npcAssets}),profiles=JSON.parse(fs.readFileSync(inside(config.profiles),'utf8'));
 // Warm the shared source timelines before the host releases any telemetry.
 const warmed=new Set();for(const pair of config.eligible){const r=registry.resolve(pair.model,pair.context);if(r.status!=='available')throw Error('prepared eligible model no longer maps');const key=pair.context+':'+r.bank.model;
  if(!warmed.has(key)){registry.createSource(pair.model,pair.context);warmed.add(key);}}
-const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
+const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true,latencyProfile:latencyProfile.id,continuityPolicy:config.continuityPolicy??'baseline'}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
 let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
 let viewer=false,viewerClient=null;engine.telemetry=new SoundMapTelemetry();
 const packet=Buffer.alloc(4112),log=v=>process.stderr.write(JSON.stringify(v)+'\n');
@@ -29,7 +32,7 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality;
   richAudioEnabled:engine.settings.enabled,outputLevel:engine.settings.volume,earlyReflections:engine.settings.reflections,
   listenerState:d.listenerState,selectedPaths:d.selectedPaths,outputPeak:d.outputPeak,sourceStates:d.sourceStates,stageCounters:d.stageCounters,
   fallbackReason:d.geometry==='conditional-direct-unobserved-space-assumed-clear'?'Additive; conditional direct sound without collision coverage':b.fallbackReason,
-  controlDelayMs:100,propagationLimitSeconds:2,arrivals:d.arrivals,retired:d.retired,latencyRows,latencyRowsOmitted}});
+  controlDelayMs:latencyProfile.controlDelayMs,propagationLimitSeconds:2,arrivals:d.arrivals,retired:d.retired,latencyRows,latencyRowsOmitted,...(latencyProfile.id==='baseline'?{}:{latencyProfile:latencyProfile.id,producerCreditBlocks:latencyProfile.producerCreditBlocks})}});
 }
 function finish(error){if(stopped)return;stopped=true;engine.close();if(viewerClient){viewerClient.close().catch(()=>{});viewerClient=null;}viewer=false;status();if(error){log({type:'gameplay-error',code:error.message});process.exitCode=1;}input.close();process.stdin.pause();}
 async function pump(){if(busy||stopped||credits<=0)return;busy=true;
@@ -66,7 +69,7 @@ function geometry(message){
 }
 const input=readline.createInterface({input:process.stdin,terminal:false});
 input.on('line',line=>{try{if(line.length>131072)throw Error('producer command size');const m=JSON.parse(line);
- if(m.type==='credit'){if(!Number.isInteger(m.blocks)||m.blocks<1||m.blocks>8||credits+m.blocks>8)throw Error('bounded PCM credits');credits+=m.blocks;}
+ if(m.type==='credit'){const cap=latencyProfile.startupBlocks;if(!Number.isInteger(m.blocks)||m.blocks<1||m.blocks>cap||credits+m.blocks>cap)throw Error('bounded PCM credits');credits+=m.blocks;}
  else if(m.type==='settings'){engine.setSettings({quality:m.quality,acceleration:m.acceleration,enabled:m.enabled,volume:m.volume,reflections:m.reflections,mode:m.mode});viewer=m.soundMapVisible===true;engine.telemetry.enabled=viewer;}
  else if(m.type==='snapshot'){if(!Array.isArray(m.frame?.vehicles)||m.frame.vehicles.some(v=>v.valid&&!allowed.has(v.model+':'+v.context))||m.validForMs!==undefined&&(!Number.isFinite(m.validForMs)||m.validForMs<=0||m.validForMs>252))throw Error('unprepared source identity or expiry');pendingSnapshot={...m,receivedAt:performance.now()};}
  else if(m.type==='geometry'){try{geometry(m.value);}catch(e){log({type:'geometry-rejected',reason:e.message});}}

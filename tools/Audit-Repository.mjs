@@ -38,7 +38,7 @@ if (!current) {
 }
 // Check every filename, including two paths that reference the same blob.
 // Blob deduplication must not hide a restricted extension behind a benign name.
-const restrictedAssetPath = path => /\.(?:exe|dll|asi|rpf|awc|ybn|ymap|ytyp|ydr|ytd|yft|wav|f32|f32le|pcm|rasoundmap-context|flac|ogg|mp3|zip|7z|pdb|ratile|pending)$/i.test(path);
+const restrictedAssetPath = path => /\.(?:exe|dll|asi|rpf|awc|ybn|ymap|ytyp|ydr|ytd|yft|wav|f32|f32le|pcm|rasoundmap-context|flac|ogg|mp3|zip|7z|pdb|ratile|rastatic|pending)$/i.test(path);
 for (const [oid, path] of entries) if (restrictedAssetPath(path)) {
   findings.push({oid, path, category: 'binary-or-restricted-asset-review'});
 }
@@ -46,7 +46,8 @@ for (const [oid, path] of objects) {
   if (git('cat-file', '-t', oid).toString().trim() !== 'blob') continue;
   const content = git('cat-file', 'blob', oid); blobs++; bytes += content.length;
   if (restrictedAssetPath(path)) continue;
-  if (content.subarray(0, 24).toString().startsWith('RichAudio-Acoustic-Tile\n') ||
+  if (content.subarray(0, 32).toString().startsWith('RichAudio-Acoustic-Tile\n') ||
+      content.subarray(0, 32).toString().startsWith('RichAudio-Static-Fixture-Tile\n') ||
       content.subarray(0, 2).toString() === 'MZ' || content.subarray(0, 4).equals(Buffer.from([80, 75, 3, 4])) || content.includes(0)) {
     findings.push({oid, path, category: 'binary-or-restricted-asset-review'}); continue;
   }

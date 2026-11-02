@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "kind": "private-retained-Bati-50-vs75-delay-exploration",
+  "sourceHead": "42481fcd0162e3571cba22651491258367c73ccb",
+  "productionProfileChanged": false,
+  "productionRetrospectiveMs": 75,
+  "experimentalRetrospectiveMs": 50,
+  "experimentalProfileQualified": false,
+  "originalForecastLimitMs": 50,
+  "guardsRelaxed": false,
+  "baselineContinuity": {
+    "schedules": ["retained", "authored-jitter-15ms", "authored-omit-every11"],
+    "completed75Arms": 3,
+    "completedFramesPer75Arm": 1594368,
+    "failed50Arms": 3,
+    "retained75PcmMatchesPrior": true,
+    "matchedSuccessfulPrefixBlocks": 1196,
+    "predictionBlockCounts": {
+      "retained": {"delay75": 4, "delay50": 185},
+      "jitter": {"delay75": 12, "delay50": 338},
+      "omission": {"delay75": 83, "delay50": 244}
+    },
+    "omissionPredictionExpiredBlocks": {"delay75": 1, "delay50": 33},
+    "receiptSha256": "933b22b32e926b7a5267c9ccb6df71ad6c7100c3c98419fa848f2d7be99814b7",
+    "harnessSha256": "5e586a20202b791f2a991467287f84998fb54ef729c2b803b210efa9e200354f"
+  },
+  "cameraSource01": {
+    "schedule": "retained",
+    "completed75Blocks": 3114,
+    "sourceCreations75": 1,
+    "failed50": true,
+    "jitterAndOmissionArmsRun": false,
+    "receiptSha256": "628139e05507e3bcfc00996493af4eb1de87278d8f43d53f5a6f9cae074d774c",
+    "harnessSha256": "0162e5f0c1c28344b13b2ac07046f824fc5b3aa7fca10e1a081aa1005f3c9325"
+  },
+  "sameFailureAcrossTested50Arms": {
+    "attemptedProducerFrame": 612352,
+    "renderSeconds": 12.757333333333333,
+    "entity": "listener",
+    "listenerGeneration": 2,
+    "previousMode": "predicted",
+    "previousForecastMs": 6.466633,
+    "failedMode": "interpolated",
+    "renderedPositionStepUnits": 1.212837,
+    "renderedStepDurationMs": 10.666666666666666,
+    "renderedSpeedModelUnitsPerSecond": 113.7035,
+    "existingGuardModelUnitsPerSecond": 100,
+    "sourceEmitterStepsBelowModelUnitsPerSecond": 14,
+    "originalAdjacentCameraPairSpeedNativeUnitsPerSecond": 65.7966,
+    "originalCameraPairIntervalMs": 55.9364,
+    "exception": "undeclared position discontinuity",
+    "throwPath": "unchanged CausalSimulation.observe listener speed invariant"
+  },
+  "independentBaselineReviewSha256": "35b43157bb17afd4bae6977740f5b4d59a627fa0817c4e68672727ed662e62d0",
+  "independentCameraSource01ReviewSha256": "e4d642021334e625b685fec6fef42c5125b4d7679933d19422dc71b919d4b631",
+  "gameLaunched": false,
+  "endpointOpened": false,
+  "newLiveRecording": false,
+  "installedAssetsAccessed": false,
+  "approvalArtifactModifiedOrRepinned": false,
+  "limitations": [
+    "Constructed replay scheduling uses retained observations; exact live Node acceptance scheduling was not retained.",
+    "Model/native-unit speed is not calibrated physical camera speed.",
+    "50ms run statistics are partial; prediction comparisons use only matched successful prefixes.",
+    "This is a rejection in these inputs and current algorithms, not a universal lower delay bound.",
+    "No speaker or stable end-to-end latency improvement is established."
+  ]
+}

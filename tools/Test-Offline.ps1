@@ -7,6 +7,16 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & node --test tests/Test-AudioOwnershipLegacy.mjs tests/Test-NativeAudioOwnership01.mjs tests/Test-AcousticWorld01.mjs tests/Test-AcousticWorld01Continuity.mjs tests/Test-AcousticWorld01Ablation.mjs tests/Test-LowLatency01.mjs
+    if($LASTEXITCODE-ne0){throw 'Offline ownership policy, static-world fixtures or camera/source continuity failed.'}
+    & node tests/Test-InstalledCollision.mjs
+    if($LASTEXITCODE-ne0){throw 'Existing collision resource fixtures failed.'}
+    & node tests/Test-InstalledPlacements.mjs
+    if($LASTEXITCODE-ne0){throw 'Existing placement/transform fixtures failed.'}
+    & node tests/Test-StaticWorldPlacement.mjs
+    if($LASTEXITCODE-ne0){throw 'Existing static-world placement proof failed.'}
+    & node tests/Test-WorldWarmup.mjs
+    if($LASTEXITCODE-ne0){throw 'Existing world warmup fixtures failed.'}
     & node --test tests/Test-VehicleSynthesis.mjs tests/Test-VehicleState.mjs tests/Test-VehicleEnvironment.mjs tests/Test-VehiclePropagation.mjs tests/Test-VehiclePipeline.mjs tests/Test-VehicleDemo.mjs
     if($LASTEXITCODE-ne0){throw 'Original vehicle sources, state ownership, propagation or private offline demo failed.'}
     & node --test tests/Test-ListeningOperator.mjs
@@ -65,6 +75,7 @@ try {
     & (Join-Path $repo 'tools\Prepare-Beacon600.ps1') -Output ('.local/beacon-ci-'+[guid]::NewGuid().ToString('N'))
     # Original PCM, bounded queues and local transport only: these tests never open an audio endpoint.
     & (Join-Path $repo 'tools\Build-AcousticsHost.ps1') -Tests
+    & (Join-Path $repo 'tools\Test-LowLatencyProfile.ps1')
     & (Join-Path $repo 'tools\Test-SynchronizedRecording.ps1')
     & (Join-Path $repo 'tools\Test-GameplayRecording13.ps1')
     & node --test tests/Test-SoundMapHost.mjs

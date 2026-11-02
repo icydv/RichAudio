@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "scope": "offline-authored-policy-and-public-interface-research",
+  "productionStatus": "BLOCKED",
+  "enabled": false,
+  "nativeMechanismsVerified": 0,
+  "historicalResearchCommit": "d7c961a22ccbfc75d0b1cbf74079b307a49fbcc2",
+  "baselineCommit": "d9fdc902f42d8f3a3c58103be2f7d19b782f33c8",
+  "sourcePins": {
+    "cfxNatives": "c00e0ed83d06dcba2457424ba254fbaa7a05bf7e",
+    "codeWalkerRel": "485d56bec00262ed7fa472261cce7bbc6202b96e",
+    "retainedSdkSha256": "5d439745604a5fedbf8fa401520d4f296c1b6800d77e2923ba3bf9772182c7e0",
+    "sdkFileVersion": "1.124.1393.17586",
+    "sdkMetadataReceiptSha256": "d52a5b34313870756da7ebfdf59c02733bac7ec8d610c667efee08e2e10c479d"
+  },
+  "sdkInspection": {
+    "mechanism": "ECMA-335-PEReader-no-assembly-execution",
+    "matchingVehicleDeclarations": 15,
+    "matchingMethodsWithImplementationRva": 0,
+    "enhancedRuntimeValidation": false
+  },
+  "tests": {
+    "legacy": 15,
+    "newPolicy": 17,
+    "authoredFrames": 4800,
+    "sampleRate": 48000,
+    "hypotheticalCommonSelector": {
+      "overlapFrames": 0,
+      "missingOwnerFrames": 0,
+      "maximumSampleError": 0,
+      "premise": "fixture owns both phase-identical synthetic copies and all auxiliary signals"
+    },
+    "negativeControls": {
+      "delayedMuteOverlapFrames": 8,
+      "delayedReplacementMissingFrames": 8,
+      "persistentMuteDeadReplacementMissingFrames": 32,
+      "negativeWindowFrames": 32
+    }
+  },
+  "componentPolicy": {
+    "proposedReplacement": ["engine", "exhaust"],
+    "retainedNative": ["horn", "tyres", "road-contact", "collision", "damage", "doors", "alarms", "radio", "pedestrians", "traffic", "ambience", "transmission", "induction", "turbo", "backfire"],
+    "bakedMechanicalAttribution": "unresolved-blocks-perfect-separation-claim"
+  },
+  "missingCapabilities": [
+    "exact-stack-unique-profile-registration",
+    "engine-exhaust-component-isolation",
+    "same-model-per-instance-acoustic-isolation",
+    "active-original-state-readback-or-verified-equivalent",
+    "independent-recovery-surviving-controller-failure",
+    "measured-native-owned-exclusivity-and-restoration"
+  ],
+  "gameLaunched": false,
+  "deployed": false,
+  "installedArchivesAccessed": false,
+  "endpointOpened": false,
+  "recordingStarted": false,
+  "nativeSuppressionCalled": false,
+  "merged": false,
+  "limitations": "Source declarations and hypothetical policy tests do not establish Enhanced native suppression, perceptual transitions, isolated external capture, or crash-safe native recovery. No production adapter imports the prototype."
+}
