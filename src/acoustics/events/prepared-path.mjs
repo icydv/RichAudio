@@ -26,12 +26,22 @@ export const transientPoseKey=pose=>JSON.stringify(stationaryTransientPose(pose)
 // immutable/validated. These kernels model a fixed authored pose, not a promise
 // about a future moving listener or unobserved native event.
 export function createPreparedTransientKernel({scene=null,sceneId,sceneGeneration,session,sourcePose,listenerPose,
-  frames=8192,amplitude=.001,masterGain=.7,authority}={}){
+  frames=8192,amplitude=.001,masterGain=.7,authority,dryWaveform=null,waveformId=null}={}){
   const begin=performance.now();
   check(authority==='authored-fixture-only'&&identifier(sceneId)&&/^[a-f0-9]{32}$/.test(session)&&
     Number.isSafeInteger(sceneGeneration)&&sceneGeneration>0&&sceneGeneration<=2147483647,'explicit authored transient context');
   check(Number.isSafeInteger(frames)&&frames>=512&&frames<=transientLimits.frames&&
     Number.isFinite(amplitude)&&amplitude>0&&amplitude<=.25&&Number.isFinite(masterGain)&&masterGain>0&&masterGain<=.7,'bounded original impulse');
+  let waveform=null,waveformMetadata=null;
+  if(dryWaveform!==null){
+    check(dryWaveform instanceof Float32Array&&dryWaveform.length>0&&dryWaveform.length<=4096&&identifier(waveformId),
+      'bounded named original authored waveform');
+    waveform=Float32Array.from(dryWaveform);
+    check(waveform.every(x=>Number.isFinite(x)&&Math.abs(x)<=.25)&&waveform.some(x=>x!==0),
+      'finite nonzero original waveform within declared source budget');
+    waveformMetadata={waveformId,waveformSha256:sha(Buffer.from(waveform.buffer)),waveformFrames:waveform.length,
+      waveformBasis:'original-authored-source-samples',waveformScale:'dry=amplitude*waveform; uncalibrated fixture level'};
+  }else check(waveformId===null,'waveform identity requires original source samples');
   const source=stationaryTransientPose(sourcePose),listener=stationaryTransientPose(listenerPose);
   const conditional=scene===null;
   if(conditional)scene=conditionalDirectScene({calibration:{basis:'declared-demonstration-scale',physicalCalibration:'unverified'},
@@ -50,7 +60,7 @@ export function createPreparedTransientKernel({scene=null,sceneId,sceneGeneratio
   const paths=solved.paths.map(p=>({id:p.id,order:p.order,distance:p.distance,delaySeconds:p.delay,delayFrames:p.delay*48000,
     bands:[...p.bands],pan:p.pan}));
   const direct=paths.find(p=>p.order===0),lastDelay=Math.max(...paths.map(p=>p.delayFrames));
-  check(direct&&lastDelay+4800<frames,'kernel must retain every finite path and 100ms filter tail');
+  check(direct&&lastDelay+(waveform?.length??0)+4800<frames,'kernel must retain source, every finite path and 100ms filter tail');
   const renderer=new StreamingRenderer({sourceIds:['beacon-0'],maxPathsPerSource:12,historyDiagnostics:true,masterGain});
   const dry=new Float32Array(512),left=new Float32Array(512),right=new Float32Array(512),inputs={'beacon-0':dry};
   const warmFrames=Math.ceil((scene.config.maxDelay*48000+5760)/512)*512,pcm=new Float32Array(frames*2);
@@ -60,7 +70,10 @@ export function createPreparedTransientKernel({scene=null,sceneId,sceneGeneratio
   const control=frame=>({...solved,frame,paths:solved.paths.map(p=>({...p,emissionFrame:frame-p.delay*48000}))});
   let rendered=0,historyAtEmission=0;
   for(let frame=0;frame<warmFrames+frames;frame+=512){
-    const n=Math.min(512,warmFrames+frames-frame);dry.fill(0);if(frame===warmFrames){dry[0]=amplitude;historyAtEmission=renderer.historyDiagnostics.affectedFrames;}
+    const n=Math.min(512,warmFrames+frames-frame);dry.fill(0);
+    if(frame===warmFrames)historyAtEmission=renderer.historyDiagnostics.affectedFrames;
+    if(waveform&&frame>=warmFrames){const at=frame-warmFrames;for(let i=0;i<n&&at+i<waveform.length;i++)dry[i]=amplitude*waveform[at+i];}
+    else if(!waveform&&frame===warmFrames)dry[0]=amplitude;
     renderer.accept(control(frame));renderer.process(inputs,left,right,n);
     if(frame>=warmFrames){for(let i=0;i<n;i++){pcm[rendered*2]=left[i];pcm[rendered*2+1]=right[i];rendered++;}}
   }
@@ -72,7 +85,8 @@ export function createPreparedTransientKernel({scene=null,sceneId,sceneGeneratio
   check(first>=0&&lastSignificant<frames-256&&last256Peak<=significanceThreshold&&renderer.stats.limited===0&&peak<=transientLimits.peakPerKernel,
     'bounded original impulse window and residual within declared aggregate headroom');
   const requiredRoundingGuardFrames=Math.max(0,Math.ceil(direct.delayFrames)-first);check(requiredRoundingGuardFrames<=2,'unexpected pre-physical-arrival samples');
-  const identity=JSON.stringify({session,sceneId,sceneGeneration,geometryKey:scene.geometryKey,source,listener,frames,amplitude,masterGain});
+  const identity=JSON.stringify({session,sceneId,sceneGeneration,geometryKey:scene.geometryKey,source,listener,frames,amplitude,masterGain,
+    ...(waveformMetadata?{waveform:waveformMetadata}: {})});
   const kernel=freeze({version:1,kernelId:sha(identity),session,sceneId,sceneGeneration,authority,
     sourcePose:source,listenerPose:listener,sourcePoseKey:transientPoseKey(source),listenerPoseKey:transientPoseKey(listener),
     sampleRate:48000,channels:2,frames,firstNonzeroFrame:first,lastNonzeroFrame:last,firstSignificantFrame:firstSignificant,lastSignificantFrame:lastSignificant,
@@ -81,7 +95,7 @@ export function createPreparedTransientKernel({scene=null,sceneId,sceneGeneratio
     paths,geometry:conditional?'conditional-direct-unobserved-space-assumed-clear':'qualified-authored-static-fixture',
     immutableSceneWhileWorkerBusy:true,motionModel:'fixed-authored-source-and-listener-pose',amplitude,masterGain,peak,energy,
     pcmSha256:sha(Buffer.from(pcm.buffer)),preparationMs:performance.now()-begin,pcmBytes:pcm.byteLength,
-    rendererSourceHistoryBytes:renderer.ownedArrayBytes,rendererLimited:renderer.stats.limited,
+    ...(waveformMetadata??{}),rendererSourceHistoryBytes:renderer.ownedArrayBytes,rendererLimited:renderer.stats.limited,
     kernelAffectedHistoryFrames:renderer.historyDiagnostics.affectedFrames-historyAtEmission});
   storage.set(kernel,pcm);return kernel;
 }
