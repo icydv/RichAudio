@@ -35,13 +35,15 @@ const same=(a,b)=>a&&b&&['session','generation','coordinates','units','listenerK
 // have ALREADY arrived. The interactive delay is measured and converges only
 // while the pose is stationary. This is control latency, not acoustic distance.
 export class ListenerPlayout {
-  constructor({ delayMs = 100, interactive = false, anchoredClock = false } = {}) {
+  constructor({ delayMs = 100, interactive = false, anchoredClock = false, preserveGenerationHistory = false } = {}) {
     if (![100, 75, 50].includes(delayMs))
       throw Error("Experimental listener delay");
     this.delay = delayMs / 1000;
     if(typeof interactive!=='boolean'||interactive&&delayMs!==100)throw Error('Interactive listener policy requires its reviewed 100 ms maximum');
     this.interactive=interactive;
     if(typeof anchoredClock!=='boolean')throw Error('Explicit observation clock policy');this.anchoredClock=anchoredClock;
+    if(typeof preserveGenerationHistory!=='boolean'||preserveGenerationHistory&&(!anchoredClock||interactive))throw Error('Piecewise generation history requires the fixed anchored clock');
+    this.preserveGenerationHistory=preserveGenerationHistory;
     this.delayMaximum=this.delay;
     this.delayTarget=this.delay;
     this.lastRenderTime=null;
@@ -84,7 +86,12 @@ export class ListenerPlayout {
       s.session !== this.lastState.session ||
       s.generation !== this.lastState.generation;
     const receiptMappedTime=audioTime-message.receiptAgeMs/1000;
-    const anchor=(this.interactive||this.anchoredClock)&&!changed?this.observationAnchor:null;
+    // Camera identity changes spatial history, not the independent QPC/audio
+    // clock mapping. The opt-in policy retains arrived historical generations
+    // on that one clock; sample() never interpolates across their boundary.
+    const retainGeneration=this.preserveGenerationHistory&&this.lastState&&s.session===this.lastState.session&&
+      s.clockFrequency===this.lastState.clockFrequency&&s.coordinates===this.lastState.coordinates&&s.units===this.lastState.units&&s.listenerKind===this.lastState.listenerKind;
+    const anchor=(this.interactive||this.anchoredClock)&&(!changed||retainGeneration)?this.observationAnchor:null;
     const time=anchor?anchor.time+(s.observationTicks-anchor.ticks)/s.clockFrequency:receiptMappedTime,
       previous=this.records.at(-1);
     if (previous && hostMs < previous.hostMs)
@@ -97,7 +104,7 @@ export class ListenerPlayout {
         s.listenerKind !== previous.state.listenerKind)
     )
       throw Error("Listener representation changed without generation");
-    if (!changed && previous && time < previous.time - 1e-9)
+    if ((!changed||retainGeneration) && previous && time < previous.time - 1e-9)
       throw Error("Mapped observation clock reversed");
     if (
       !changed &&
@@ -131,10 +138,10 @@ export class ListenerPlayout {
         throw Error("Listener position discontinuity needs generation");
     }
     if (changed) {
-      this.records = [];
+      if(!retainGeneration)this.records = [];
       this.cadence=[];
       this.delay=this.delayMaximum;this.delayTarget=this.delayMaximum;this.lastRenderTime=null;
-      this.observationAnchor={time,ticks:s.observationTicks};
+      if(!retainGeneration)this.observationAnchor={time,ticks:s.observationTicks};
       this.clockStartup={status:'warming',reference:s,firstTicks:s.observationTicks,shiftMs:0,samples:0};
       this.stats.resets++;
     } else if (previous && Math.abs(time - previous.time) <= 1e-9) {
@@ -264,6 +271,11 @@ export class ListenerPlayout {
       (b && (!b.state.valid || b.state.paused))
     )
       return missing("invalid-interval");
+    const generationGap=Boolean(b&&b.state.generation!==a.state.generation);
+    // An already received new camera pose is not evidence for an earlier
+    // retrospective timestamp. Keep only the old generation's existing
+    // <=50ms forecast, then report the unobserved interval as unavailable.
+    if(generationGap)b=null;
     let state,
       mode,
       extrapolationSeconds = 0;
@@ -287,7 +299,7 @@ export class ListenerPlayout {
     } else {
       extrapolationSeconds = targetTime - a.time;
       if (extrapolationSeconds > this.extrapolation + 1e-9)
-        return missing("prediction-expired");
+        return missing(generationGap?"generation-gap":"prediction-expired");
       state = {
         ...a.state,
         position: a.state.position.map(
