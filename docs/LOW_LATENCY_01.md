@@ -4,6 +4,8 @@ I now have a Bati-only opt-in profile that selects 75 ms of genuine observation 
 
 The evidence supports a roughly 25 ms reduction in **observation selection age on the same constructed replay clock**, and a smaller measured ring residence in device-free playback. Actual wall-clock source-pose submission ages have varied in both directions between cold runs. I cannot claim a stable end-to-end improvement, the <100 ms/<30 ms stretch targets, or heavy-load safety.
 
+**Additional delay exploration:** a subsequent private 50 ms comparison hits the unchanged listener position-discontinuity guard with both tested continuity policies. The published 75 ms candidate stays unchanged. [Matched-prefix prediction counts, failure and qualification scope](LOW_LATENCY_01_50MS_EXPLORATION.md).
+
 ## The selected profile
 
 | Setting | Default / absent `latencyProfile` | Explicit `low-latency-01` |
