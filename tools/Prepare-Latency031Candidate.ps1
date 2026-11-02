@@ -9,7 +9,9 @@ function Hash([string]$p){(Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash.
 function Unlinked([string]$p){for($at=[IO.Path]::GetFullPath($p);$at;$at=[IO.Path]::GetDirectoryName($at)){if((Test-Path -LiteralPath $at)-and((Get-Item -LiteralPath $at -Force).Attributes-band[IO.FileAttributes]::ReparsePoint)){throw 'Linked input/output refused'}}}
 $treeStatus=@(& git -C $repo status --porcelain);if($LASTEXITCODE-ne0-or$treeStatus.Count-ne0){throw 'Commit and independently review the complete source before preparing a new candidate'}
 $sourceCommit=& git -C $repo rev-parse HEAD;if($LASTEXITCODE-ne0){throw 'Committed source identity unavailable'}
-$node=(Get-Command node -CommandType Application).Source;$nodeSha=Hash $node
+$nodeCommand=Get-Command node;if(@($nodeCommand).Count-ne1-or$nodeCommand.CommandType-ne'Application'){throw 'One direct primary Node application is required; no alias or alternate executable substitution'}
+$node=$nodeCommand.Source;$nodeSha=Hash $node
+if($nodeSha-cne'3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237'){throw 'Exact existing Node executable required; no runtime upgrade or substitution'}
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe';$compilerSha=Hash $compiler
 Unlinked $RetainedBatiPcm;Unlinked $RetainedSessionMetadata
 $bedSha=Hash $RetainedBatiPcm;$metadataSha=Hash $RetainedSessionMetadata
