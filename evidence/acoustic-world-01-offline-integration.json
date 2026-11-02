@@ -63,6 +63,11 @@
     "manifestSha256": "62efb00fa7f5972e3d9211f8f135d1957e2f87e50f3c854b20766de4fc80c001",
     "allPreservedHashesStillMatch": true,
     "playable15ResultAndProposalDiffers": false,
+    "comparisonBasis": "Git content and original preserved checkout; not byte identity across checkouts",
+    "originalApprovedProposalSha256": "11d6dab69ed6d5cfa44b68f1e2a7001bc48c0ca371b62e86495dd712050a3ddf",
+    "newCheckoutProposalSha256": "08316ab7e050e63ffb50e3e684f0fc1539817ce21508e6d24fc20c118d09c4f6",
+    "newCheckoutProposalIsApprovedArtifact": false,
+    "checkoutDifference": "Existing core.autocrlf materialised CRLF instead of original LF; no original bytes or approval binding modified or substituted",
     "ownedFixtureProcessesRemaining": 0
   },
   "scope": {

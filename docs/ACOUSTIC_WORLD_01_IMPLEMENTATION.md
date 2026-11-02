@@ -58,6 +58,8 @@ An additional journal fixture initially completed its four executable cases but 
 
 The original 15 preserved live-evidence files, totalling **31,926,034 bytes**, were rehashed against preservation manifest `62efb00fa7f5972e3d9211f8f135d1957e2f87e50f3c854b20766de4fc80c001`. Recordings, bank material, derived WAVs, detailed traces and cache data remain private. Publication screening now also rejects the new static-cache extension/header.
 
+The original approved recording-recovery proposal in the preserved PLAYABLE-15 checkout still hashes to `11d6dab69ed6d5cfa44b68f1e2a7001bc48c0ca371b62e86495dd712050a3ddf`. Git's existing `core.autocrlf=true` materialised a CRLF copy in this new checkout (`08316ab7e050e63ffb50e3e684f0fc1539817ce21508e6d24fc20c118d09c4f6`), with identical Git content but different bytes. That new-checkout copy is **not an approved artifact** and was never substituted into an approval binding. Neither copy was edited or repinned; the original LF artifact and closed authorization remain preserved.
+
 ## Next controlled boundary
 
 The [future latency A/B proposal](LOW_LATENCY_01_LIVE_AB_PROPOSAL.md) describes **one experiment containing two independently sealed and restored attempts**, with identical continuity policy and unchanged sound settings. It requires new exact deployment candidates, supervision/rollback review and explicit approval covering both arms. Existing one-start session authorization cannot be stretched into two starts or a pointer swap. The present fixture packages are not approved deployment artifacts.
