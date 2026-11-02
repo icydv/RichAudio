@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {readFileSync,statSync} from 'node:fs';
+import {VehicleObservationReplay03,vehicleObservation03,vehicleContactObservation03} from '../src/acoustics/events/vehicle-observation03.mjs';
+const file=process.argv[2];
+assert.equal(typeof file,'string');assert(statSync(file).size<=131072,'Bounded authored trace input');
+const trace=JSON.parse(readFileSync(file,'utf8'));assert.equal(trace.length,3);
+const first=vehicleObservation03(trace[0]);
+assert.equal(first.evidenceBasis,'authored-device-free-api-fixture');
+const replay=new VehicleObservationReplay03({session:first.session,vehicleId:first.vehicleId,generation:first.generation});
+const results=trace.map(row=>replay.accept(row,{nowQpc:row.captureAfterQpc}));
+assert.equal(results[0].levelTransitions.length,0);
+assert.deepEqual(results[1].levelTransitions.map(row=>row.field).sort(),['currentGear','engineOn','hornPlaying']);
+assert(results[1].levelTransitions.every(row=>row.actualOccurrence.known===false&&row.mayGenerateAudio===false));
+assert.equal(results[2].retirement.reason,'player-driver-scope-lost');
+assert.equal(results[2].retirement.engineOffInferred,false);
+assert.equal(results[2].levelTransitions.length,0);
+console.log('VehicleObservation03 C# authored capture → JS replay passed; no gameplay or audio authority');
+const contactFile=process.argv[3];assert.equal(typeof contactFile,'string');assert(statSync(contactFile).size<=131072);
+const contacts=JSON.parse(readFileSync(contactFile,'utf8')).map(vehicleContactObservation03);
+assert.equal(contacts.length,3);assert.equal(contacts[0].found,true);assert.deepEqual(contacts[0].rawPosition,contacts[1].rawPosition);
+assert.equal(contacts[2].found,false);assert.equal(contacts[2].rawPosition,null);
+for(const contact of contacts){assert.equal(contact.collisionEventIdentity,null);assert.equal(contact.actualEventMultiplicity,'unavailable');assert.equal(contact.mayGenerateAudio,false);}
+console.log('VehicleContact03 C# authored last-history poll → JS validation passed; no collision trigger');

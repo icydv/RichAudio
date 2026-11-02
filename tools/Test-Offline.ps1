@@ -7,6 +7,16 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & node --test tests/Test-ResourceImport03.mjs tests/Test-WorldSceneUnion03.mjs tests/Test-VehicleObservation03.mjs tests/Test-VehicleWorldLink03.mjs
+    if($LASTEXITCODE-ne0){throw 'Resource-layout, scene identity/worker cleanup or read-only vehicle observation integration failed.'}
+    & (Join-Path $repo 'tools\Test-VehicleObservation03.ps1')
+    # Public, pinned parser source/dependencies only. Always test Gen9/legacy
+    # ORIGINAL bytes in CI; no installed asset discovery or private SDK input.
+    $parserRoot=Join-Path $repo ('.local/world-03/public-parser-'+[guid]::NewGuid().ToString('N'))
+    & (Join-Path $repo 'tools\Prepare-CodeWalkerPublicProfile03.ps1') -OutputRoot $parserRoot
+    $legacyShell=Join-Path $env:WINDIR 'System32/WindowsPowerShell/v1.0/powershell.exe'
+    & $legacyShell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $repo 'tools/Test-StaticResources03.ps1') -ProfileRoot (Join-Path $parserRoot 'profile') -OutputRoot (Join-Path $repo ('.local/world-03/resource-fixture-'+[guid]::NewGuid().ToString('N')))
+    if($LASTEXITCODE-ne0){throw 'Actual-format original Gen9/legacy resource decode, finite tile/cache or reflection PCM failed.'}
     & (Join-Path $repo 'tools\Test-Latency031Clock.ps1')
     & (Join-Path $repo 'tools\Test-Latency031Process.ps1')
     & (Join-Path $repo 'tools\Test-Latency031Supervision.ps1')
