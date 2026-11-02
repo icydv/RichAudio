@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
 import {SpatialTileIndex02,StaticWorldRuntime02,DynamicWorldOverlay02,composeDynamicWorldScene02,dynamicSceneMetadata02} from '../src/acoustics/world/runtime02.mjs';
 import {StaticFixtureTileStore} from '../src/acoustics/world/static-cache.mjs';
-import {fixtureWorld} from './fixtures/StaticWorld01.mjs';
+import {fixtureWorld,resource} from './fixtures/StaticWorld01.mjs';
 import {querySegment} from '../src/acoustics/research/local-geometry.mjs';
 
 test('a ten-thousand-tile index visits bounded neighboring cells rather than the entire world',()=>{
@@ -9,6 +9,7 @@ test('a ten-thousand-tile index visits bounded neighboring cells rather than the
  const index=new SpatialTileIndex02(entries),query=index.nearby([1,1,1]);assert.equal(query.indexed,10000);assert.equal(query.entries[0].tileId,'tile:0:0');assert(query.referencesVisited<16);assert(query.cellsVisited<=27);assert(query.candidates<16);
  assert.throws(()=>new SpatialTileIndex02([...entries,entries[0]]),/duplicate/);
  assert.throws(()=>new SpatialTileIndex02(Array.from({length:129},(_,i)=>({...entries[0],tileId:'overlap:'+i}))),/overlap/);
+ const priority=index.nearby([129,129,1],{sources:[[1,1,1]],maximum:1});assert.equal(priority.entries[0].tileId,'tile:1:1','listener tile takes precedence over a lexically earlier source tile');
 });
 
 test('nearby preparation uses the existing joined worker, keeps prior qualified tiles while loading and invalidates on override',async()=>{
@@ -22,6 +23,17 @@ test('nearby preparation uses the existing joined worker, keeps prior qualified 
 test('cancel/invalidate joins in-flight preparation without publishing an old world',async()=>{
  const runtime=new StaticWorldRuntime02(fixtureWorld()),pending=runtime.prepareNearby({listener:[0,0,1],maximumTiles:1}),change=runtime.invalidate(fixtureWorld('open'));await change;const old=await pending;assert(['cancelled','cancelled-or-invalidated'].includes(old.state));assert.equal(runtime.active,null);assert.equal(runtime.current(),null);
  const next=await runtime.prepareNearby({listener:[0,0,1],maximumTiles:1});assert.equal(next.prepared.scene.tile.surfaces.length,0);await runtime.close();
+});
+
+test('noncontiguous cached tiles cannot turn their unprepared union gap into verified clear space',async()=>{
+ const runtime=new StaticWorldRuntime02(fixtureWorld('open'));const result=await runtime.prepareNearby({listener:[10,10,1],sources:[[90,90,1]],maximumTiles:2});
+ assert.equal(result.state,'prepared');assert.equal(runtime.resident.size,2);assert.deepEqual(result.prepared.tileIds,['local']);assert.equal(result.prepared.scene.tile.bounds.max[0],16);
+ assert.throws(()=>querySegment(result.prepared.scene.tile,[40,40,1],[41,40,1]),/extent/);assert.equal(result.prepared.coverage,'selected-known-static-fixture-tiles');await runtime.close();
+});
+
+test('an unsupported winning primary resource remains unprepared rather than a qualified empty tile',async()=>{
+ const unknown=resource('unsupported-winner','placements',{entities:[]},{path:'base-map.json',order:10,scopeTiles:['local'],format:'binary-ymap-unimplemented'}),runtime=new StaticWorldRuntime02(fixtureWorld('wall',{extraResources:[unknown]}));
+ const result=await runtime.prepareNearby({listener:[0,0,1],maximumTiles:1});assert.equal(result.state,'unprepared-or-unknown');assert.deepEqual(result.unknown,['local']);assert.equal(runtime.current(),null);await runtime.close();
 });
 
 test('persistent cache IO stays on async preparation and a matching tile is reloaded without a worker',async()=>{

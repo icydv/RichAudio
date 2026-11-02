@@ -15,8 +15,10 @@ export async function renderCollisionFixture02(fixture,{masterGain=.35,late=true
  const ids=fixture.events.map(e=>e.sourceId),ledger=new CollisionEventLedger(fixture.context,{mode:'authored-fixture'}),sources=new Map(),headroom={omittedPaths:0};
  const pipeline=new VehicleAcousticPipeline({scene:environment.scene,sourceIds:ids,masterGain,quality:'quality',acceleration:'cpu',directStem:true,continuousRates:true,
   controlFilter:(control,renderer)=>{
-   const occupied=new Map();let bound=0;for(const slot of renderer.slots)if(slot.active){const pressure=Math.max(slot.gain[0],slot.releaseLeft?0:slot.target[0])*collisionLimits.maximumDryPeak*masterGain;occupied.set(slot.id,pressure);bound+=pressure;}
-   const paths=[];for(const p of [...control.paths].sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id))){const pressure=p.bands[0]*collisionLimits.maximumDryPeak*masterGain,extra=Math.max(0,pressure-(occupied.get(p.id)??0));if(bound+extra>.35){headroom.omittedPaths++;continue;}bound+=extra;paths.push(p);}return {...control,paths};
+   // The same conservative factor-two interpolation allowance used by the
+   // component mixer bounds the fractional history read as well as its input.
+   const weight=2*collisionLimits.maximumDryPeak*masterGain,occupied=new Map();let bound=0;for(const slot of renderer.slots)if(slot.active){const pressure=Math.max(slot.gain[0],slot.releaseLeft?0:slot.target[0])*weight;occupied.set(slot.id,pressure);bound+=pressure;}
+   const paths=[];for(const p of [...control.paths].sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id))){const pressure=p.bands[0]*weight,extra=Math.max(0,pressure-(occupied.get(p.id)??0));if(bound+extra>.35){headroom.omittedPaths++;continue;}bound+=extra;paths.push(p);}return {...control,paths};
   }});
  const diffuse=new BoundedLateReverb(late?environment.lateEvidence:null,{wet:.12}),dry=Object.fromEntries(ids.map(id=>[id,new Float32Array(BLOCK)])),left=new Float32Array(BLOCK),right=new Float32Array(BLOCK),directL=new Float32Array(BLOCK),directR=new Float32Array(BLOCK),wetL=new Float32Array(BLOCK),wetR=new Float32Array(BLOCK),allL=new Float32Array(fixture.frames),allR=new Float32Array(fixture.frames),costs=[],admissions=[];
  if(diffuse.evidence){const b=diffuse.evidence.bounds;need([fixture.listener.position,...fixture.events.map(e=>e.contact.position)].every(p=>p.every((x,i)=>x>=b.min[i]&&x<=b.max[i])),'every source/listener lies inside the complete authored late enclosure');}

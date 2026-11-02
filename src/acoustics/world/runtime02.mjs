@@ -15,12 +15,13 @@ export class SpatialTileIndex02 {
  constructor(entries){requireWorld(Array.isArray(entries)&&entries.length<=runtimeWorld02Limits.indexedTiles,'bounded scalable tile index');this.entries=new Map();this.cells=new Map();
   for(const input of entries){const tileId=identifier(input.tileId),region=bounds(input.bounds);requireWorld(!this.entries.has(tileId),'duplicate indexed tile');const entry=freeze({...input,tileId,bounds:region});this.entries.set(tileId,entry);
    const r=cellRange(region);for(let x=r[0][0];x<=r[0][1];x++)for(let y=r[1][0];y<=r[1][1];y++)for(let z=r[2][0];z<=r[2][1];z++){
-    const key=`${x},${y},${z}`;let bucket=this.cells.get(key);if(!bucket)this.cells.set(key,bucket=[]);requireWorld(bucket.length<runtimeWorld02Limits.bucketEntries,'spatial bucket overlap budget');bucket.push(entry);}}
+    const key=`${x},${y},${z}`;let bucket=this.cells.get(key);if(!bucket)this.cells.set(key,bucket=[]);requireWorld(bucket.length<runtimeWorld02Limits.bucketEntries,'spatial bucket overlap budget');
+    requireWorld(!bucket.some(old=>region.min.every((n,i)=>region.max[i]>old.bounds.min[i]&&n<old.bounds.max[i])),'overlapping static tile volumes require explicit layer resolution');bucket.push(entry);}}
  }
  nearby(listener,{sources=[],radius=64,maximum=8}={}){listener=vector(listener);requireWorld(Array.isArray(sources)&&sources.length<=16&&Number.isFinite(radius)&&radius>0&&radius<=128&&Number.isInteger(maximum)&&maximum>0&&maximum<=16,'bounded nearby query');const points=[listener,...sources.map(vector)],candidates=new Map();let cellsVisited=0,referencesVisited=0;
   for(const p of points){const a=p.map(n=>Math.floor((n-radius)/128)),b=p.map(n=>Math.floor((n+radius)/128));for(let x=a[0];x<=b[0];x++)for(let y=a[1];y<=b[1];y++)for(let z=a[2];z<=b[2];z++){
    cellsVisited++;for(const entry of this.cells.get(`${x},${y},${z}`)??[]){referencesVisited++;candidates.set(entry.tileId,entry);requireWorld(candidates.size<=runtimeWorld02Limits.queryCandidates&&referencesVisited<=65536,'nearby candidate work budget');}}}
-  const ranked=[...candidates.values()].map(entry=>({...entry,priority:Math.min(...points.map(p=>distance(p,entry.bounds)))})).filter(e=>e.priority<=radius).sort((a,b)=>a.priority-b.priority||a.tileId.localeCompare(b.tileId));
+  const ranked=[...candidates.values()].map(entry=>({...entry,priority:Math.min(...points.map(p=>distance(p,entry.bounds))),listenerPriority:distance(listener,entry.bounds)===0?0:1})).filter(e=>e.priority<=radius).sort((a,b)=>a.listenerPriority-b.listenerPriority||a.priority-b.priority||a.tileId.localeCompare(b.tileId));
   return freeze({entries:ranked.slice(0,maximum),eligible:ranked.length,candidates:candidates.size,cellsVisited,referencesVisited,indexed:this.entries.size,unpreparedTilesRemainUnknown:true});
  }
 }
@@ -49,12 +50,12 @@ export class StaticWorldRuntime02 {
    for(const tile of loaded){validateStaticTile(tile);this.resident.delete(tile.tileId);this.resident.set(tile.tileId,tile);}
    while(this.resident.size>runtimeWorld02Limits.resident)this.resident.delete(this.resident.keys().next().value);
    this.stats.preparations++;
-   const qualified=loaded.filter(tile=>tile.unknown.length===0);const unknown=loaded.filter(tile=>tile.unknown.length!==0).map(tile=>tile.tileId);
-   if(!qualified.length)return {state:'unprepared-or-unknown',unknown,previousSceneRetained:!!this.prepared,audioBuffersAdded:0};
-   const region={min:[0,1,2].map(i=>Math.min(...qualified.map(t=>t.bounds.min[i]))),max:[0,1,2].map(i=>Math.max(...qualified.map(t=>t.bounds.max[i])))};
-   // AW01's finite scene radius remains intact. Distant selected tiles can be
-   // retained in the cache without being promoted into an oversized scene.
-   if(region.min.some((n,i)=>region.max[i]-n>128))return {state:'tiles-prepared-scene-budget',tiles:loaded.length,unknown,previousSceneRetained:!!this.prepared,audioBuffersAdded:0};
+   const unknown=loaded.filter(tile=>tile.unknown.length!==0).map(tile=>tile.tileId),primary=loaded.find(tile=>listener.every((n,i)=>n>=tile.bounds.min[i]&&n<tile.bounds.max[i]));
+   if(!primary||primary.unknown.length){this.prepared=null;return {state:'unprepared-or-unknown',unknown,previousSceneRetained:false,audioBuffersAdded:0};}
+   // Cache up to eight surrounding tiles, but publish one exact bounded tile.
+   // A union rectangle could otherwise fill unprepared gaps between tiles.
+   // Cross-tile acoustic coverage awaits an independently qualified union.
+   const qualified=[primary],region=primary.bounds;
    const generation=this.stats.sceneGenerations+1;const scene=createQualifiedStaticScene({tiles:qualified,worldDigest:version,generation,session:this.session,listenerAnchor:listener,bounds:region});
    this.stats.sceneGenerations=generation;this.prepared=freeze({scene,generation,worldDigest:version,tileIds:qualified.map(t=>t.tileId),unknown,
     authority:'authored-fixture-only',coverage:'selected-known-static-fixture-tiles',wholeInstalledWorldVerified:false,audioBuffersAdded:0});
