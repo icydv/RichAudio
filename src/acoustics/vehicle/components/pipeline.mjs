@@ -24,6 +24,7 @@ export class ComponentAcousticSession {
  replaceScene(scene,options){requireComponent(!this.closed&&!this.failed&&!this.sources.renderPending,'Scene replacement requires a completed component block');this.pipeline.replaceScene(scene,options);}
  async render({listener,left,right,frames=512,geometryTimeMs=this.frame/48}={}) {
   requireComponent(!this.closed&&!this.failed&&Number.isSafeInteger(frames)&&frames>0&&frames<=512&&left instanceof Float32Array&&right instanceof Float32Array&&left!==right&&left.length>=frames&&right.length>=frames,'Caller-owned bounded stereo output required');
+  requireComponent(left.buffer!==right.buffer||left.byteOffset>=right.byteOffset+frames*4||right.byteOffset>=left.byteOffset+frames*4,'Independent nonoverlapping stereo buffers required');
   const pose=componentPose(listener),generation=listener.generation;
   requireComponent(Number.isSafeInteger(generation)&&generation>0,'Genuine declared listener generation required');
   try{const sources=this.sources.prepare(this.frame,frames),control=await this.pipeline.prepare({session:this.session,generation:1,time:this.frame/48000,listener:{...pose,generation},sources},{geometryTimeMs});

@@ -166,3 +166,10 @@ test('a settled source-worker failure is terminal and can close without claiming
  assert.equal(session.diagnostics().frame,0);assert.equal(session.diagnostics().failed,true);assert.equal(session.sources.renderPending,false);
  assert.equal(session.accept(componentFixtureObservation(identity,0,1)),false);assert.doesNotThrow(()=>session.close());assert.equal(session.diagnostics().closed,true);
 });
+test('overlapping stereo views are rejected before source or acoustic history advances',async()=>{
+ const identity=fixtureComponentIdentity('horn'),session=new ComponentAcousticSession({capability:cap(2048),identities:[identity],scene:createVehicleEnvironment('direct').scene});
+ try{session.accept(componentFixtureObservation(identity,0,0));const buffer=new ArrayBuffer(513*4);
+  await assert.rejects(session.render({listener:componentFixtureListener(),left:new Float32Array(buffer,0,512),right:new Float32Array(buffer,4,512)}),/nonoverlapping/);
+  assert.equal(session.frame,0);assert.equal(session.sources.lastFrame,-1);assert.equal(session.sources.renderPending,false);assert.equal(session.diagnostics().failed,false);
+ }finally{session.close();}
+});
