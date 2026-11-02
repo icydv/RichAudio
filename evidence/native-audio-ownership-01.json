@@ -21,7 +21,7 @@
   },
   "tests": {
     "legacy": 15,
-    "newPolicy": 16,
+    "newPolicy": 17,
     "authoredFrames": 4800,
     "sampleRate": 48000,
     "hypotheticalCommonSelector": {

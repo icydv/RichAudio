@@ -29,7 +29,7 @@ export class OfflineOwnershipPolicy {
     if (!validIdentity(identity) || typeof build !== 'string' || !build || !Number.isSafeInteger(ttlFrames) || ttlFrames < 1 ||
       !['disabled', 'authored-fixture'].includes(mode)) throw Error('Invalid offline ownership configuration');
     this.identity = frozen(identity); this.build = build; this.ttl = ttlFrames; this.mode = mode;
-    this.state = 'NativeOnly'; this.reason = null; this.time = -1; this.observed = -1;
+    this.state = 'NativeOnly'; this.reason = null; this.time = -1; this.observed = -1; this.eligible = false;
     this.baseline = null; this.expires = -1; this.transaction = 0; this.pending = null;
     this.nativeState = 'unchanged'; this.history = ['NativeOnly'];
   }
@@ -40,9 +40,9 @@ export class OfflineOwnershipPolicy {
   }
   move(state, reason = null) { this.state = state; this.reason = reason; this.history.push(state); }
   observe({identity, acquiredFrame, receivedFrame, eligible = true}) {
-    if (!this.matches(identity) || !validTime(acquiredFrame) || !validTime(receivedFrame) || receivedFrame < this.time ||
+    if (!this.matches(identity) || typeof eligible !== 'boolean' || !validTime(acquiredFrame) || !validTime(receivedFrame) || receivedFrame < this.time ||
       acquiredFrame > receivedFrame || acquiredFrame <= this.observed || receivedFrame - acquiredFrame >= this.ttl) return false;
-    this.advance(receivedFrame); this.observed = acquiredFrame;
+    this.advance(receivedFrame); this.observed = acquiredFrame; this.eligible = eligible;
     if (!eligible) { this.stop({identity, frame: receivedFrame, reason: 'source-scope-lost'}); return false; }
     return true;
   }
@@ -53,7 +53,7 @@ export class OfflineOwnershipPolicy {
       certificate.build === this.build && Array.isArray(certificate.components) && certificate.components.length === 2 &&
       takeoverComponents.every(c => certificate.components.includes(c)) && requiredEvidence.every(k => certificate[k] === true);
     if (!validCertificate) { this.reason = 'unverified-native-capability'; return false; }
-    if (replacementHealthy !== true || this.observed < 0 || frame - this.observed >= this.ttl ||
+    if (replacementHealthy !== true || this.eligible !== true || this.observed < 0 || frame - this.observed >= this.ttl ||
       !baseline || baseline.known !== true || typeof baseline.profile !== 'string' || !baseline.profile ||
       baseline.identityKey !== identityKey(this.identity)) { this.reason = 'replacement-or-baseline-unavailable'; return false; }
     this.baseline = frozen(baseline); this.expires = frame + this.ttl; this.move('Prepared'); return true;
@@ -61,7 +61,7 @@ export class OfflineOwnershipPolicy {
   takeover({identity, frame}) {
     if (!this.matches(identity) || this.state !== 'Prepared' || this.pending || !validTime(frame) || frame < this.time) return null;
     this.advance(frame);
-    if (frame >= this.expires || frame - this.observed >= this.ttl) { this.move('NativeOnly', 'prepared-expired'); return null; }
+    if (!this.eligible || frame >= this.expires || frame - this.observed >= this.ttl) { this.move('NativeOnly', 'prepared-expired'); return null; }
     // A command is only a request. Until independently acknowledged, output is unknown.
     this.pending = frozen({id: ++this.transaction, action: 'exclusive-handoff', identity: this.identity,
       components: takeoverComponents, baseline: this.baseline, deadlineFrame: this.expires});
@@ -71,7 +71,7 @@ export class OfflineOwnershipPolicy {
     if (!this.matches(identity) || !this.pending || transaction !== this.pending.id || !validTime(frame) || frame < this.time) return false;
     this.advance(frame);
     if (this.pending.action === 'exclusive-handoff') {
-      if (frame >= this.expires || frame - this.observed >= this.ttl || kind !== 'independent-fixture-measurement' ||
+      if (!this.eligible || frame >= this.expires || frame - this.observed >= this.ttl || kind !== 'independent-fixture-measurement' ||
         nativeSuppressed !== true || replacementAudible !== true || unrelatedPreserved !== true) {
         this.stop({identity, frame, reason: 'handoff-not-verified'}); return false;
       }
@@ -85,6 +85,7 @@ export class OfflineOwnershipPolicy {
   stop({identity, frame, reason = 'normal-stop', entityExists = true} = {}) {
     if (!this.matches(identity) || !validTime(frame) || frame < this.time) return null;
     this.advance(frame);
+    if (!entityExists || ['source-scope-lost', 'vehicle-switch', 'entity-lost'].includes(reason)) this.eligible = false;
     if (!entityExists && (this.pending || this.state === 'RichAudioOwned')) {
       this.pending = null; this.nativeState = 'unknown'; this.move('Failed', 'entity-unavailable-no-restore-write'); return null;
     }
@@ -100,6 +101,7 @@ export class OfflineOwnershipPolicy {
   health({identity, frame, replacementHealthy = true, sourceEligible = true, entityExists = true, nativeOverlap = false}) {
     if (!this.matches(identity) || !validTime(frame) || frame < this.time) return null;
     this.advance(frame);
+    if (!sourceEligible || !entityExists) this.eligible = false;
     if (!entityExists && this.state === 'Restoring') return this.stop({identity, frame, entityExists});
     if (this.state === 'Restoring' && frame >= this.pending.deadlineFrame) {
       this.pending = null; this.nativeState = 'unknown'; this.move('Failed', 'restoration-timeout'); return null;
@@ -112,7 +114,7 @@ export class OfflineOwnershipPolicy {
     return null;
   }
   snapshot() {
-    return frozen({mode: this.mode, state: this.state, reason: this.reason, identity: this.identity,
+    return frozen({mode: this.mode, state: this.state, reason: this.reason, identity: this.identity, sourceEligible: this.eligible,
       nativeState: this.nativeState, pending: this.pending, history: this.history,
       replacementPermitted: this.state === 'RichAudioOwned', nativeRecoveryVerified: this.nativeState === 'restored'});
   }

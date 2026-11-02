@@ -60,7 +60,7 @@ A crashed policy cannot execute its own timeout or cleanup. The old hypothetical
 
 ## Deterministic validation
 
-The focused runner passes **31 tests**: 15 preserved P2-02 tests and 16 new policy tests. Run:
+The focused runner passes **32 tests**: 15 preserved P2-02 tests and 17 new policy tests. A separate review caught and corrected a fixture-policy gap: a fresh timestamp from an ineligible source could previously prepare again. Latest eligibility now survives restoration and only a new eligible observation can qualify preparation; healthy-output status alone cannot revive it. Run:
 
 ```powershell
 node --test tests/Test-AudioOwnershipLegacy.mjs tests/Test-NativeAudioOwnership01.mjs

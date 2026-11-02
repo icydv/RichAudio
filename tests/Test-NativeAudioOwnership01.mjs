@@ -151,6 +151,23 @@ test('interrupted prepared state leaves native unchanged and scope loss never in
   assert.equal(JSON.stringify(m.snapshot()).includes('engine-off'), false);
 });
 
+test('fresh ineligible observations and restored scope loss cannot reprepare until a new eligible observation', () => {
+  const m = make();
+  assert.equal(m.observe({identity, acquiredFrame: 0, receivedFrame: 0, eligible: false}), false);
+  assert.equal(prepare(m), false); assert.equal(m.snapshot().sourceEligible, false);
+  assert(observe(m, 1)); assert(prepare(m, {frame: 1}));
+  m.stop({identity, frame: 2, reason: 'source-scope-lost'});
+  assert.equal(prepare(m, {frame: 2}), false);
+  assert(observe(m, 3)); assert(prepare(m, {frame: 3}));
+  const owned = make(); own(owned); const cmd = owned.stop({identity, frame: 1, reason: 'source-scope-lost'});
+  assert(owned.acknowledge({identity, frame: 2, transaction: cmd.id, kind: 'independent-fixture-measurement',
+    nativeRestored: true, unrelatedPreserved: true}));
+  assert.equal(prepare(owned, {frame: 2}), false);
+  owned.health({identity, frame: 3, sourceEligible: true});
+  assert.equal(prepare(owned, {frame: 3}), false, 'health alone does not invent a new eligible observation');
+  assert(observe(owned, 4)); assert(prepare(owned, {frame: 4}));
+});
+
 test('component policy explicitly retains auxiliary and unresolved transmission/induction/turbo/backfire layers', () => {
   assert.deepEqual(takeoverComponents, ['engine', 'exhaust']);
   for (const c of ['horn', 'tyres', 'collision', 'doors', 'radio', 'ambience', 'transmission', 'induction', 'turbo', 'backfire'])
