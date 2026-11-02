@@ -85,6 +85,10 @@ export class DynamicWorldOverlay02 {
   requireWorld(['closed-static','open','destroyed','moving-or-unknown'].includes(input.state)&&Number.isSafeInteger(input.observedFrame)&&input.observedFrame>=0&&
    input.observedFrame<=nowFrame&&(!old||input.observedFrame>=old.observedFrame)&&Number.isSafeInteger(input.validThroughFrame)&&input.validThroughFrame>nowFrame&&input.validThroughFrame-input.observedFrame<=12000,'dynamic finite observation lease');
   const region=bounds(input.region);requireWorld(Array.isArray(input.removes)&&input.removes.length<=16&&new Set(input.removes).size===input.removes.length,'bounded explicit static removals');input.removes.forEach(identifier);
+  for(const other of this.objects.values())if(other.objectId!==id){
+   requireWorld(!input.removes.some(surface=>other.removes.includes(surface)),'dynamic objects cannot share a removed static surface without a priority resolver');
+   requireWorld(!region.min.every((n,i)=>region.max[i]>other.region.min[i]&&n<other.region.max[i]),'overlapping dynamic regions require an explicit priority resolver');
+  }
   requireWorld(Array.isArray(input.panels)&&input.panels.length<=8&&(input.state==='closed-static'||input.panels.length===0),'moving or absent geometry cannot invent a static panel');
   if(input.panels.length){requireWorld(input.panels.every(p=>p.provenance?.kind==='synthetic'&&p.motion==='static'),'authored stationary overlay geometry');createTile({schemaVersion:1,id:'dynamic-panel-validation',coordinateSpace,timeUnit:'monotonic-ms',bounds:region,
    listenerAnchor:region.min.map((n,i)=>(n+region.max[i])/2),coverage:'complete-synthetic',surfaces:input.panels.map(p=>({...p,coordinateSpace,observedAt:input.observedFrame/48,validUntil:input.validThroughFrame/48,version:input.objectGeneration})),
@@ -103,8 +107,10 @@ export function composeDynamicWorldScene02(prepared,snapshot,nowFrame){
  const base=prepared?.scene;requireWorld(validated.scene(base)&&base.tile&&base.tile.surfaces.every(s=>s.provenance.kind==='synthetic')&&snapshots.has(snapshot)&&
   snapshot.session===base.tile.session&&snapshot.worldDigest===prepared.worldDigest&&snapshot.staticGeneration===prepared.generation&&
   Number.isSafeInteger(nowFrame)&&nowFrame>=snapshot.atFrame&&nowFrame-snapshot.atFrame<=512,'exact bounded authored dynamic/base scene');
- const baseIds=new Set(base.tile.surfaces.map(s=>s.id)),removes=new Set(),additions=[],unknown=[],materials={...base.materials};let validUntil=Math.min(base.tile.validUntil,nowFrame/48+250);
- for(const object of snapshot.objects){for(const id of object.removes){requireWorld(baseIds.has(id),'dynamic removal must bind an actual base surface');removes.add(id);}
+ const baseSurfaces=new Map(base.tile.surfaces.map(s=>[s.id,s])),removes=new Set(),additions=[],unknown=[],materials={...base.materials};let validUntil=Math.min(base.tile.validUntil,nowFrame/48+250);
+ for(const object of snapshot.objects){for(const id of object.removes){const surface=baseSurfaces.get(id);requireWorld(surface,'dynamic removal must bind an actual base surface');
+   requireWorld(surface.corners.every(p=>p.every((n,i)=>n>=object.region.min[i]-1e-8&&n<=object.region.max[i]+1e-8)),'dynamic region must cover the entire removed finite surface');
+   requireWorld(!removes.has(id),'conflicting dynamic surface removal requires a priority resolver');removes.add(id);}
   const fresh=nowFrame<object.validThroughFrame&&object.state!=='moving-or-unknown';
   if(!fresh)unknown.push({id:'dynamic-unknown:'+object.objectId,bounds:object.region,reason:'dynamic-state-expired-or-moving'});
   else{validUntil=Math.min(validUntil,object.validThroughFrame/48);if(object.state==='closed-static')for(const panel of object.panels){

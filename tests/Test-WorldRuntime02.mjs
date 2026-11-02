@@ -69,3 +69,12 @@ test('a valid same-world cache entry cannot substitute another indexed tile or s
   const second=await runtime.prepareNearby({listener:[0,0,1],maximumTiles:1});assert.deepEqual(second.prepared.scene.tile.bounds,revised.bounds);assert.equal(runtime.stats.rejectedCachedSelections,2);assert.equal(runtime.stats.workerLoads,2);await runtime.close();
  }finally{assert.equal(path.dirname(root),os.tmpdir());assert(path.basename(root).startsWith('RichAudioWorld02-'));fs.rmSync(root,{recursive:true,force:true});}
 });
+
+test('a dynamic packet cannot erase a whole wall using a tiny uncertainty region or conflicting object',async()=>{
+ const runtime=new StaticWorldRuntime02(fixtureWorld());await runtime.prepareNearby({listener:[0,0,1],maximumTiles:1});const prepared=runtime.current(),surface=prepared.scene.tile.surfaces[0];
+ const overlay=new DynamicWorldOverlay02({session:runtime.session,worldDigest:prepared.worldDigest,staticGeneration:prepared.generation});
+ const input={authority:'original-authored-dynamic-fixture',session:runtime.session,worldDigest:prepared.worldDigest,staticGeneration:prepared.generation,sequence:0,objectId:'small-door',objectGeneration:1,state:'open',observedFrame:0,validThroughFrame:12000,region:{min:[-1,3,0],max:[1,5,2]},removes:[surface.id],panels:[]};
+ overlay.accept(input,0);assert.throws(()=>composeDynamicWorldScene02(prepared,overlay.snapshot(0),0),/entire removed finite surface/);assert.equal(prepared.scene.tile.surfaces.length,1,'rejected composition leaves the qualified base immutable');
+ assert.throws(()=>overlay.accept({...input,objectId:'other-door',sequence:1,region:{min:[2,3,0],max:[3,5,2]}},0),/share a removed static surface/);
+ assert.throws(()=>overlay.accept({...input,objectId:'overlap',sequence:1,removes:[]},0),/overlapping dynamic regions/);await runtime.close();
+});
