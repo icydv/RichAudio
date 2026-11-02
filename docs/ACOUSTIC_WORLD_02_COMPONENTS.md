@@ -1,0 +1,84 @@
+# ACOUSTIC-WORLD-02: vehicle components and qualified ownership
+
+I now have an offline vehicle-component composition with original horn, rolling tyre, slipping tyre and mechanical-clunk sources passing through my existing `VehicleAcousticPipeline`, `CausalSimulation` and `StreamingRenderer`. Codex implemented and exercised this separate, opt-in composition. It adds no gameplay activation, native suppression or second acoustic engine. My existing Bati source, sound banks, calibration, gains, expiry, buffers and normal output route are unchanged by this component slice.
+
+My coverage contract is now **every supported vehicle sound**, rather than permanent GTA ownership of auxiliary sounds. GTA retains every component until its individual replacement and ownership requirements have been demonstrated. The previous [ownership research](NATIVE_AUDIO_OWNERSHIP_01.md) remains historical evidence; a future horn or tyre replacement must meet the same identity, coexistence and independent recovery requirements as an engine replacement.
+
+## Coverage and source contracts
+
+The immutable [registry](../src/acoustics/vehicle/components/registry.mjs) contains 48 component definitions across powertrain, road contact, mechanical, signalling, collision and category-specific families. Each records its cause, emission region, required operating evidence, lifetime, timing class, intensity limits, native overlap and takeover blockers. The complete per-component coverage and ownership matrix is in [the machine-readable evidence](../evidence/acoustic-world-02-components.json). Categories include motorcycles, cars, trucks, buses, emergency vehicles, heavy machinery, aircraft, helicopters and boats. A category does not assert that a particular model has a turbocharger, horn, rotor or other assembly.
+
+| Family | Covered contract | Executable support in this increment / remaining evidence |
+| --- | --- | --- |
+| Engine/exhaust | Running, ignition, shutdown, overrun, limiter, pops and backfires | Existing genuine running Bati remains additive. Engine/exhaust component separation, physical intensity and extra event acquisition are unresolved. Dismount is not shutdown. |
+| Intake/drivetrain | Intake, induction, supercharger, turbo spool/wastegate/flutter, gearbox, clutch, differential, vibration | Configuration and sufficiently timely load/shaft/pressure evidence remain required. Acceleration does not trigger a synthetic turbo or backfire event. |
+| Road contact | Rolling, longitudinal/lateral slip, loose material, wet/puddle contact, surface transitions, tyre impacts | Original authored rolling/slip sources run end to end. Contact, wheel/body motion, load, friction and surface are explicit authored inputs; no speed-only squeal. Native quantitative slip/load is unverified. |
+| Mechanical | Suspension, brakes, chassis, clunks, doors, windows, roof, cargo, alarms | Original authored gear/door/suspension clunks have bounded polyphony and event identity. A door-angle poll does not establish impact intensity or occurrence time. |
+| Signalling | Horn, siren, reverse and other warnings | Original sustained horn responds to an explicit activation state. Native pattern/timestamp/configuration and recoverable suppression remain unverified. |
+| Collision/destruction | Impact, continuing scrape, structure resonance, glass, debris, material impacts | Separate coordinated collision contracts and original fixtures feed the same renderer. Contact/material confidence, subevent deduplication and impulse/severity remain explicit; a synthetic fixture does not establish a GTA event. |
+| Other categories | Rotor, propeller, jet, marine propulsion, machinery | Declared extension points; no fabricated configuration or operating telemetry. |
+
+Every source identity includes session, exact vehicle ID, vehicle generation, model, component, assembly and component generation. Same-model vehicles cannot share an identity. Identity-based random seeds keep an existing original source unchanged when another component is added. Source phase, noise/filter history and grain-independent mechanical tails survive ordinary block and scene changes.
+
+The authored observation contract requires explicit finite pose, velocity, orientation, radiation and a finite lease. It rejects future receipts, reordered sequence, excessive lease, unqualified authority and invalid geometry. There is no fallback offset pretending to be a verified horn mount or contact point. The moving tyre fixtures emit 5 cm above the road; their separately declared 0.32 m wheel radius is a kinematic input. Point-emitter propagation uses the existing reference-distance guard. Nonzero finite emitter radii must satisfy that guard; it was not relaxed for these fixtures.
+
+Declared sources are bounded to eight. An observation lease is at most 12,000 frames (250 ms at 48 kHz), with terminal expiry for that source identity. Scope loss, disappearance, session stop and genuine observed engine shutdown remain distinct. The new component lifecycle never infers an engine-off event from dismount. Freshness is not extended by geometry work.
+
+Independent review found an async transaction race in the first composition: a next-block observation could change a source while acoustic preparation awaited. Codex fixed this with one pending prepare/render transaction, matching frame counts, admissions/retirement/scene changes barred until it settles, and terminal failure cleanup. The reviewer also requested overlapping stereo-array views be rejected before either source or renderer advances; that correction is covered by a regression. Earlier receipts remain unchanged. The final sequential PCM matches the pre-guard PCM exactly.
+
+## Original sound generation and acoustics
+
+The horn uses an original authored tonal signal with finite attack/release and a declared directional profile. Rolling and slip sources use distinct deterministic noise/filter histories. Slip requires wheel-versus-body or lateral motion plus contact load; high speed with zero slip produces exactly zero slip PCM. The friction-times-load-times-slip-speed quantity is an **authored friction-power upper-bound proxy**, not measured sound power. Asphalt, gravel, grass, sand, wet and puddle fixtures are declared filter/traction assumptions, not discovered GTA material mappings.
+
+Mechanical events require explicit IDs, sequence, kind, strength and occurrence. They admit at most four simultaneous voices and 128 events per source lifetime. Duplicate/replayed events and excess voices are rejected; an incoming clunk does not steal an existing tail. Original occurrence, observation, scheduled emission and common software lateness are retained separately. No gear event is inferred solely from speed.
+
+The component wrapper prepares paths outside the real-time callback. It preserves direct propagation, retarded moving-source history, Doppler and qualified finite reflections through the existing acoustic implementation. The conservative path budget reserves releasing paths and accounts for the existing fractional-read bound; there is no gain boost or limiter standing in for acoustic integration. This composition uses finite early/second-order paths. It does not enable the existing late-field implementation or claim complete indoor reverberation.
+
+The separate prepared-event bridge renders the **entire 4,800-frame original mechanical waveform** into the existing prepared-transient kernel API. Its dry SHA-256 is `a4bdad786bde7ca7aa0e340cc7d57ddc8b589519623722af84c08aca9010454b`. The 16,384-frame wall kernel retains a 480-frame direct travel time, 1,479.448-frame reflected travel time and zero last-256-frame residual. Kernel PCM SHA-256 is `849b7bac83fedf6d0581dcdcba72718fbfbf641917c5b9872ff5698d6a32902d`. Preparation requires stationary authored source/listener poses with matching generations, and both the tile and each surface must remain valid across the full prepared tail horizon. Negative expiry fixtures reject either a short tile or a short surface lifetime. It adds no retrospective vehicle-history wait or fixed PCM queue. Live gameplay event admission and native ownership remain disabled.
+
+## Matched private PCM evidence
+
+The final render runner produced 15 private WAV comparisons: horn, rolling tyre, slipping tyre, mechanical clunk and all four together, each in open space, a street canyon and a tunnel. Each arm contains 96,256 frames, including padding. Per-family dry PCM hashes match across the three environments; rendered PCM hashes differ. No original/proprietary GTA audio was copied for these demonstrations.
+
+The final private receipt SHA-256 is `b3e4a916521a45298ad4b2a9c0c9fe9f0e534f35d9b38bc8f6f190a8862c7c3c`. It binds 21 recursive module pins, the executed Node binary and every WAV. The sanitized evidence includes all 15 peak, energy, hash, timing, memory and cost rows. Prior source-bound receipts and the earlier report/evidence revision remain private historical artifacts; no prior approval is reused.
+
+| Four-source scene | Peak Float32 amplitude | Energy, sum of squared stereo samples | Worker median / p95 / p99 / max, ms |
+| --- | ---: | ---: | --- |
+| Open | 0.00144410 | 0.02907525 | 0.3179 / 0.4869 / 0.5524 / 0.5771 |
+| Street canyon | 0.00163688 | 0.02376548 | 1.4588 / 1.7386 / 1.8813 / 3.2362 |
+| Tunnel | 0.00191193 | 0.04380511 | 2.2611 / 2.7273 / 2.9159 / 3.0217 |
+
+All 15 arms preserve source object identity and report zero affected source-history frames, renderer limiting and cursor resets. Each has 188 worker cost samples and zero samples above the 10.667 ms block budget in this run. These source/solver worker measurements are **not WASAPI callback or adverse-load guarantees**. Same-process RSS snapshots range from 70,017,024 to 165,011,456 bytes; they are neither isolated component memory nor peak process allocation. Source-history storage is also reported separately.
+
+Authored dry-onset to first rendered output is 20.604 ms for the horn, 22.000 ms for rolling, 23.125 ms for slip and 20.458 ms for the clunk. These figures include this fixture's waveform and moving propagation behavior; they are not event-to-WASAPI submission or physical input-to-ear measurements. The prepared wall clunk first becomes nonzero at frame 481, after its 480-frame analytic direct delay. There is no claimed real-device timing result.
+
+Reflections can interfere destructively as well as constructively: the street horn energy is lower than the open horn energy. Different PCM and measurable paths establish functional environmental processing, not perceptual realism or a promise that every wall makes a signal louder. My original Bati's physical power, calibration and bank content are not retuned to make these engineering fixtures impressive.
+
+## Supported acquisition and native ownership evidence
+
+Codex read the retained reference SDK as ECMA-335 metadata, without loading or executing it. SHA-256 is `5d439745604a5fedbf8fa401520d4f296c1b6800d77e2923ba3bf9772182c7e0`, file version `1.124.1393.17586`; my target runtime is `1.132.1428.17748`. All 126 matched methods have RVA zero. Their presence is declaration evidence, not verification of behavior on Enhanced 1.0.1158.16.
+
+Credible declarations include `Entity.GetLastCollision` returning position, normal and a material name, `VehicleWheel.LastContactPoint` and `IsTouching`, `Vehicle.CurrentGear`, `VehicleModder.HasTurbo`, `Vehicle.IsSirenSilent` and `World.PedRunOver`. The latter exposes vehicle, pedestrian and spatial event data. No inspected payload supplies a measured contact impulse or exact occurrence clock. A last-contact poll does not identify every contact in a crash. Installed turbo configuration does not supply boost pressure or surge. `SuspensionStrength` is a configuration parameter, not instantaneous wheel load.
+
+Older official RPH documentation is indexed for [collision data](https://docs.ragepluginhook.net/html/M_Rage_Entity_GetLastCollision_2.htm), [wheel properties](https://docs.ragepluginhook.net/html/Properties_T_Rage_VehicleWheel.htm) and [siren silence](https://docs.ragepluginhook.net/html/P_Rage_Vehicle_IsSirenSilent.htm). Direct retrieval returned HTTP 404 in this investigation. Codex retained that availability failure separately; these pages are historical indexed references, not current retrieved runtime guarantees. The reproducible local metadata inspector is `tools/Inspect-VehicleComponents02.ps1`; its receipt SHA-256 is `08c5ce957779beb9e7ed9c832e8c1e75a376b8d47dfc5e0bef7a0f4bb068c599`.
+
+Codex retained eight primary declaration snapshots at Cfx native-doc commit `c00e0ed83d06dcba2457424ba254fbaa7a05bf7e`. These community-maintained declarations are not Rockstar or Enhanced/RPH guarantees. They identify narrow research opportunities rather than certify a takeover:
+
+| Surface | Credible meaning / remaining blocker |
+| --- | --- |
+| [`IS_HORN_ACTIVE`](https://github.com/citizenfx/natives/blob/c00e0ed83d06dcba2457424ba254fbaa7a05bf7e/AUDIO/IsHornActive.md) / [`SET_HORN_ENABLED`](https://github.com/citizenfx/natives/blob/c00e0ed83d06dcba2457424ba254fbaa7a05bf7e/AUDIO/SetHornEnabled.md) | Current horn-playing poll and per-vehicle enable request. Playing-state readback does not recover the original enable setting; exact-stack isolation and independent recovery remain unverified. |
+| `RPH Vehicle.IsSirenSilent` / [native declaration](https://github.com/citizenfx/natives/blob/c00e0ed83d06dcba2457424ba254fbaa7a05bf7e/VEHICLE/SetVehicleHasMutedSirens.md) | Reference getter/setter is credible component-specific research. Runtime proof, pattern/event timing, exact identity and surviving recovery are still required. |
+| [`ENABLE_VEHICLE_EXHAUST_POPS`](https://github.com/citizenfx/natives/blob/c00e0ed83d06dcba2457424ba254fbaa7a05bf7e/AUDIO/EnableVehicleExhaustPops.md) | Narrow named event category, with no verified original-state getter or independent restoration. It does not replace continuous exhaust. |
+| [`FORCE_USE_AUDIO_GAME_OBJECT`](https://github.com/citizenfx/natives/blob/c00e0ed83d06dcba2457424ba254fbaa7a05bf7e/AUDIO/ForceUseAudioGameObject.md) | A profile-assignment request, with no demonstrated component-only graph, active-profile readback, exact-stack registration or failure-safe restoration. An empty name is not a verified mute. |
+| [`IS_VEHICLE_IN_BURNOUT`](https://github.com/citizenfx/natives/blob/c00e0ed83d06dcba2457424ba254fbaa7a05bf7e/VEHICLE/IsVehicleInBurnout.md) / [`GET_VEHICLE_DOOR_ANGLE_RATIO`](https://github.com/citizenfx/natives/blob/c00e0ed83d06dcba2457424ba254fbaa7a05bf7e/VEHICLE/GetVehicleDoorAngleRatio.md) | Coarse state/angle declarations do not establish quantitative tyre slip, impact intensity or precise event time. |
+| [`SET_AUDIO_SCRIPT_CLEANUP_TIME`](https://github.com/citizenfx/natives/blob/c00e0ed83d06dcba2457424ba254fbaa7a05bf7e/AUDIO/SetAudioScriptCleanupTime.md) | Script cleanup is not independently verified restoration of a forced vehicle profile or component flag after failure. |
+
+Every one of the 48 production takeover rows remains **BLOCKED / NativeOnly**, even if a caller supplies optimistic flags. The new registry imports no muting backend. A unique isolated profile with a supported loader and transitive private graph remains a research route; it is not implemented by manipulating shared original records. Existing hypothetical ownership-state tests do not establish a surviving native recovery authority.
+
+## Regression and next boundary
+
+The component runner passes **22 tests**, including identity/lease rejection, bounded event deduplication, phase continuity across block sizes, speed-only nonslip silence, material fixtures, actual matched renderer PCM, stable source history across camera/geometry changes, pending-transaction rejection, terminal failure cleanup, stereo alias rejection and the full prepared-waveform bridge. The shared prepared-waveform extension remains bounded to 8,192 dry frames, rejects 8,193 and preserves the eight legacy prepared PCM hashes. No live gameplay caller imports this composition.
+
+Codex and the separate test runner retain failures and earlier receipts rather than replacing them. The complete project regression and original/default Bati comparisons are reported with the coordinated PR evidence. These component tests do not authorize installation access or a live audition.
+
+The next source-integration boundary is an exact-stack, independently reviewed observation adapter with honest occurrence intervals, positions and intensity confidence. The next ownership boundary additionally needs verified selective suppression, original state, same-model isolation, no duplicate direct sound and independent crash/failure restoration. Until those conditions hold, every native component continues sounding normally. No GTA/RPH launch, endpoint, deployment, game recording, proprietary archive modification or merge occurred for this work.

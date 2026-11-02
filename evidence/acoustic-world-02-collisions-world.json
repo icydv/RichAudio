@@ -1,0 +1,2428 @@
+{
+  "schema": 1,
+  "kind": "original-authored-collision-world-offline-not-live-evidence",
+  "passed": true,
+  "privateCollisionValidationSha256": "e605886fe1b24fda6328f17071e2f894c4c9dd40ee799edb5283ee2fafc31aa6",
+  "privateResourceValidationSha256": "72d207084c4d212d40ae32562caa676891833cd2d50505d696ee304e381fe780",
+  "independentResourceCheckSha256": "3ee8add11bc48964c93195cf723f1f541a77da74362831ccc9bc25f59a5adb5e",
+  "sourcePins": [
+    {
+      "file": "src/acoustics/collisions/contracts.mjs",
+      "sha256": "b83fb6e741ae41e74edf14c6c4089aea5b6301ac442906077ed00ce27b990d5c"
+    },
+    {
+      "file": "src/acoustics/collisions/fixtures.mjs",
+      "sha256": "87012b5393f68949460233cb3355937f6bbb0c5f1252de8c3499eee269a9536f"
+    },
+    {
+      "file": "src/acoustics/collisions/render.mjs",
+      "sha256": "7c7a21a74f41caec782c035fff8c0319ef483bfd5ad852e464442b7e23fb1bc4"
+    },
+    {
+      "file": "src/acoustics/collisions/source.mjs",
+      "sha256": "f49267aa98a83fd6dffb7d2b5f8e534fc501a980cb5f5b5024767079cca16f3d"
+    },
+    {
+      "file": "src/acoustics/engine/contracts.mjs",
+      "sha256": "9672b34552cbe20b84f2ef3ab5d23b2cc7a12732e3663945742d7c8f21515b94"
+    },
+    {
+      "file": "src/acoustics/engine/paths.mjs",
+      "sha256": "8cd93bdd65aee69ec982f73eb12f1e834e0e82fd6dbffd99bb4bd22a9d70e92b"
+    },
+    {
+      "file": "src/acoustics/events/prepared-path.mjs",
+      "sha256": "6749e62995f6297772d9d1aa46715c6e79d406c434690dd8b177b789a5be8017"
+    },
+    {
+      "file": "src/acoustics/gpu/client.mjs",
+      "sha256": "e7b664f38d9b5101fc9823f18c644b2a0bd8b1b31b487e423c8bf12efdccd4c1"
+    },
+    {
+      "file": "src/acoustics/research/local-geometry.mjs",
+      "sha256": "84b20261dd387e212f6c7a90c5b0ef7f94c1d42b78e5e8fa6cbeb99701a81cb7"
+    },
+    {
+      "file": "src/acoustics/streaming/acoustic-backend.mjs",
+      "sha256": "783b7f76d8ff6bb6dcc1e535d719bf1581eff97d9d2e22ee2249a78f2fe2dccf"
+    },
+    {
+      "file": "src/acoustics/streaming/acoustic-quality.mjs",
+      "sha256": "2545f7324b8999f1e6f1f9eef166912b1cd2c152884948ee198d5e704a34267c"
+    },
+    {
+      "file": "src/acoustics/streaming/causal.mjs",
+      "sha256": "d01fcd54dba17faa1048f52b99e8c9eefed1c5f31535ccaa6deadef4a8003105"
+    },
+    {
+      "file": "src/acoustics/vehicle/components/contracts.mjs",
+      "sha256": "b8ee1077471d7d48f098e58adc491b21d5a5a9ec596da100ecc610eb10103e03"
+    },
+    {
+      "file": "src/acoustics/vehicle/components/registry.mjs",
+      "sha256": "0a1cf03ed67bc6eec61da5465a38fc0edcb5a3b73f4b0a51bf13fda70347fdeb"
+    },
+    {
+      "file": "src/acoustics/vehicle/environment.mjs",
+      "sha256": "8ec78f17704f36432596a0da070257c023cb5a353cad316c741a58f1df1558da"
+    },
+    {
+      "file": "src/acoustics/vehicle/pipeline.mjs",
+      "sha256": "0336c5ffe72df7352596743475d1a1fba5f95f044f6ff7f009df1b3ed47af85d"
+    },
+    {
+      "file": "src/acoustics/vehicle/stock-pressure.mjs",
+      "sha256": "083aa011405305d1578b0c0c376f25ec51c83294cdd5d99bdf75dc60b35704dd"
+    },
+    {
+      "file": "src/acoustics/world/CodeWalkerCollisionAdapter.cs",
+      "sha256": "55f093c0e4f0d4c8986641b945684c3aa16e7cebc7d33af3aa3735c96ad22ddc"
+    },
+    {
+      "file": "src/acoustics/world/CodeWalkerStaticResourceAdapter02.cs",
+      "sha256": "0040a1a18ab7c755863dfb6c3a8f26e0ed07a899e13ed2c1bb5b86da6d494d9d"
+    },
+    {
+      "file": "src/acoustics/world/collision-mesh.mjs",
+      "sha256": "6b0957314e3639a42b6be7d4578bfc1f6aa12231bbf371391017eddee4de3f90"
+    },
+    {
+      "file": "src/acoustics/world/contracts.mjs",
+      "sha256": "64e8796c96db8250f0c0c58a83dea5487804d37698217419dec895bdac114eeb"
+    },
+    {
+      "file": "src/acoustics/world/placements.mjs",
+      "sha256": "604f5000e2edd71ae9be173424682ab6985207f39c128dbd481881ff73572cb1"
+    },
+    {
+      "file": "src/acoustics/world/resource-scene02.mjs",
+      "sha256": "6796afdb7fbe0286fa94c9fabc14f0977786c11bce3838a500970e25ea69e3db"
+    },
+    {
+      "file": "src/acoustics/world/runtime02.mjs",
+      "sha256": "997102fcc935835908d255edc268a33d032e8e843258317204c6fe4a957b1cba"
+    },
+    {
+      "file": "tests/Check-StaticResources02.mjs",
+      "sha256": "84675f8ed7cb351486d2a908711f885085a4146fc0f30e958a518dd789bf51fa"
+    },
+    {
+      "file": "tests/Test-CollisionAcoustics02.mjs",
+      "sha256": "6349e35a48b3113ee62b599b3ba3996e203a278b5cc82a8be71756448912cadc"
+    },
+    {
+      "file": "tests/Test-PreparedWaveform02.mjs",
+      "sha256": "6cd896a8522f0b13968e64673f7cb836566aa51f9d4d26ab70a2c526f67da13e"
+    },
+    {
+      "file": "tests/Test-ResourceScene02.mjs",
+      "sha256": "5634c4b639ddd3d2583a1be1f2b8792eb95186c249ae6fcff8da11fc98d75d38"
+    },
+    {
+      "file": "tests/Test-WorldRuntime02.mjs",
+      "sha256": "29e5c8c04e777663c412517a18e394c9d0c6f4c6d28c5def81896a4cd659b053"
+    },
+    {
+      "file": "tools/Render-CollisionAcoustics02.mjs",
+      "sha256": "bcf1683cba9883167d0f328075515c1491f2ec6dad0940406d1d67da82c7611c"
+    },
+    {
+      "file": "tools/Test-StaticResources02.ps1",
+      "sha256": "73b14cb452cd0f0bebe6877a84d2aab3328dca32d36eac263f805e2bd5ec92b7"
+    }
+  ],
+  "node": {
+    "version": "v24.19.0",
+    "sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"
+  },
+  "focusedTests": {
+    "passed": 23,
+    "slices": {
+      "collision": 7,
+      "runtime": 9,
+      "resourceScene": 4,
+      "waveform": 3
+    },
+    "command": "node --test tests/Test-CollisionAcoustics02.mjs tests/Test-WorldRuntime02.mjs tests/Test-ResourceScene02.mjs tests/Test-PreparedWaveform02.mjs",
+    "legacyDeltaHashesUnchanged": 8
+  },
+  "scope": {
+    "originalSyntheticOnly": true,
+    "actualOriginalRsc7BytesDecoded": true,
+    "gameFilesRead": false,
+    "endpointOpened": false,
+    "recordingStarted": false,
+    "nativeEventAcquired": false,
+    "nativeSuppression": false,
+    "productionEnabled": false,
+    "physicalSoundPowerCalibrated": false,
+    "physicalSpeakerLatencyMeasured": false
+  },
+  "collision": {
+    "limits": {
+      "lifetimeEventIds": 1024,
+      "crashes": 64,
+      "subeventsPerCrash": 32,
+      "simultaneousSources": 8,
+      "maximumOccurrenceWidthMs": 2,
+      "maximumObservationAgeMs": 250,
+      "maximumSourceFrames": 48000,
+      "dryPeak": 0.02,
+      "earlyOutputBudget": 0.35,
+      "outputGuard": 0.4
+    },
+    "framesPerArm": 144384,
+    "measurementBasis": "Whole source/control-worker block cost; empirical ceil((n-1)*q) quantiles; RSS same-process snapshots, not callback or isolated peak memory",
+    "matchedHighEnergyDryIdentical": true,
+    "arms": [
+      {
+        "name": "motorcycle-barrier",
+        "environment": "corner",
+        "frames": 144384,
+        "firstNonzeroFrame": 10593,
+        "peak": 0.0018381073605269194,
+        "energy": 0.00033763477950673375,
+        "lateEnergy": 0,
+        "sourceHashes": [
+          {
+            "eventId": "motorcycle-barrier:primary",
+            "frames": 3072,
+            "peak": 0.009885168634355068,
+            "sha256": "21c333e709b45522497db707fdb885b6d0c37ef619459396005b94d6dceb2a4a"
+          }
+        ],
+        "pcmSha256": "745ec5da6246c14736e9e970dfdcf8f41905686b8d47ad965f9e19a3803d5585",
+        "wavSha256": "90639216e83b8c6c55113534fc69cf69436894a081123ce4553c181538ab076a",
+        "admissions": [
+          {
+            "eventId": "motorcycle-barrier:primary",
+            "occurrenceUpperFrame": 10240,
+            "observationFrame": 10240,
+            "admittedFrame": 10240,
+            "scheduledFrame": 10240,
+            "softwareEmissionLatenessFrames": 0
+          }
+        ],
+        "paths": [
+          {
+            "sourceId": "collision:80cde5930918fdb9a0aedb98355ca57e9a9fcd98",
+            "order": 0,
+            "distance": 2.520416632225712,
+            "delayFrames": 352.7113654426652,
+            "bands": [
+              0.39674828767064785,
+              0.39664468787655205,
+              0.3956101766421119
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:80cde5930918fdb9a0aedb98355ca57e9a9fcd98",
+            "order": 1,
+            "distance": 2.579244075305786,
+            "delayFrames": 360.94377730226745,
+            "bands": [
+              0.2875252613735795,
+              0.2600068878747139,
+              0.19328045561201884
+            ],
+            "rate": 0.9999999999999974
+          },
+          {
+            "sourceId": "collision:80cde5930918fdb9a0aedb98355ca57e9a9fcd98",
+            "order": 1,
+            "distance": 3.5146123541579946,
+            "delayFrames": 491.84079591715374,
+            "bands": [
+              0.26230976509179693,
+              0.2379555606890295,
+              0.19009536133198063
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:80cde5930918fdb9a0aedb98355ca57e9a9fcd98",
+            "order": 2,
+            "distance": 3.557035282366482,
+            "delayFrames": 497.7775322262133,
+            "bands": [
+              0.1922139260449158,
+              0.1577209020065066,
+              0.09390950915583048
+            ],
+            "rate": 1
+          }
+        ],
+        "workerBlockMs": {
+          "count": 282,
+          "median": 0.2710999999999899,
+          "p95": 0.8726000000000056,
+          "p99": 4.4658000000000015,
+          "maximum": 6.649000000000001,
+          "deadlineMisses": 0
+        },
+        "rssSnapshotBytes": 69332992,
+        "sourceHistoryBytes": 2889728,
+        "directStemHistoryBytes": 2880096,
+        "historyAffectedFrames": 0,
+        "rendererLimited": 0,
+        "headroomPathsOmitted": 0,
+        "contactRadiators": [
+          {
+            "eventId": "motorcycle-barrier:primary",
+            "contact": {
+              "position": [
+                -2,
+                1.5,
+                1
+              ],
+              "normal": [
+                0,
+                1,
+                0
+              ],
+              "relativeVelocity": [
+                0,
+                -6,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                0.05,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                1.55,
+                1
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-effective-mass",
+              "effectiveMassKg": 250,
+              "normalClosingSpeed": 6,
+              "tangentialSpeed": 0,
+              "energyJ": 4500,
+              "impulseNs": null,
+              "frictionPowerProxyW": null,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "metal",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          }
+        ],
+        "lateModel": null
+      },
+      {
+        "name": "motorcycle-barrier",
+        "environment": "direct",
+        "frames": 144384,
+        "firstNonzeroFrame": 10593,
+        "peak": 0.001298663206398487,
+        "energy": 0.0000986502298159404,
+        "lateEnergy": 0,
+        "sourceHashes": [
+          {
+            "eventId": "motorcycle-barrier:primary",
+            "frames": 3072,
+            "peak": 0.009885168634355068,
+            "sha256": "21c333e709b45522497db707fdb885b6d0c37ef619459396005b94d6dceb2a4a"
+          }
+        ],
+        "pcmSha256": "40c1a442a8258753f4339fc09b3557d736e2d4c8cf446471d3ec901d37760dc8",
+        "wavSha256": "148f8b4cb3a857f8dcfbcdf28bce7a66ae7dd225b94f8da2a35ab7c2defde06f",
+        "admissions": [
+          {
+            "eventId": "motorcycle-barrier:primary",
+            "occurrenceUpperFrame": 10240,
+            "observationFrame": 10240,
+            "admittedFrame": 10240,
+            "scheduledFrame": 10240,
+            "softwareEmissionLatenessFrames": 0
+          }
+        ],
+        "paths": [
+          {
+            "sourceId": "collision:80cde5930918fdb9a0aedb98355ca57e9a9fcd98",
+            "order": 0,
+            "distance": 2.520416632225712,
+            "delayFrames": 352.7113654426652,
+            "bands": [
+              0.39674828767064785,
+              0.39664468787655205,
+              0.3956101766421119
+            ],
+            "rate": 1
+          }
+        ],
+        "workerBlockMs": {
+          "count": 282,
+          "median": 0.13179999999999836,
+          "p95": 0.34019999999998163,
+          "p99": 0.9526000000000181,
+          "maximum": 1.8699000000000012,
+          "deadlineMisses": 0
+        },
+        "rssSnapshotBytes": 79454208,
+        "sourceHistoryBytes": 2889728,
+        "directStemHistoryBytes": 2880096,
+        "historyAffectedFrames": 0,
+        "rendererLimited": 0,
+        "headroomPathsOmitted": 0,
+        "contactRadiators": [
+          {
+            "eventId": "motorcycle-barrier:primary",
+            "contact": {
+              "position": [
+                -2,
+                1.5,
+                1
+              ],
+              "normal": [
+                0,
+                1,
+                0
+              ],
+              "relativeVelocity": [
+                0,
+                -6,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                0.05,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                1.55,
+                1
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-effective-mass",
+              "effectiveMassKg": 250,
+              "normalClosingSpeed": 6,
+              "tangentialSpeed": 0,
+              "energyJ": 4500,
+              "impulseNs": null,
+              "frictionPowerProxyW": null,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "metal",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          }
+        ],
+        "lateModel": null
+      },
+      {
+        "name": "light-scrape",
+        "environment": "canyon",
+        "frames": 144384,
+        "firstNonzeroFrame": 10991,
+        "peak": 0.0004934999742545187,
+        "energy": 0.00018587877224890016,
+        "lateEnergy": 0,
+        "sourceHashes": [
+          {
+            "eventId": "light-scrape:primary",
+            "frames": 24000,
+            "peak": 0.0057842060923576355,
+            "sha256": "64e645ba90a91e8abe8f166e06acc2687629386ec9f8ed975c0ccd9af6a8b83f"
+          }
+        ],
+        "pcmSha256": "f0bb5daabb06cf2885d4616ecdd1dea6dc9a5840b1c97d1ee5b2391281087a34",
+        "wavSha256": "70a1b6cbbeea777dfd88172ca8334bf2d310f8c7e3533484526c7f90b6298b9f",
+        "admissions": [
+          {
+            "eventId": "light-scrape:primary",
+            "occurrenceUpperFrame": 10240,
+            "observationFrame": 10240,
+            "admittedFrame": 10240,
+            "scheduledFrame": 10240,
+            "softwareEmissionLatenessFrames": 0
+          }
+        ],
+        "paths": [
+          {
+            "sourceId": "collision:26d49ed151f83d52fbdcd270e041b7e8d1d0bd17",
+            "order": 0,
+            "distance": 5.362135768516124,
+            "delayFrames": 750.3863466145012,
+            "bands": [
+              0.1864813408692886,
+              0.1863777597143027,
+              0.18534510727859274
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:26d49ed151f83d52fbdcd270e041b7e8d1d0bd17",
+            "order": 1,
+            "distance": 5.895125104694556,
+            "delayFrames": 824.9737755840779,
+            "bands": [
+              0.15638207133975185,
+              0.14182775802756079,
+              0.113022697496726
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:26d49ed151f83d52fbdcd270e041b7e8d1d0bd17",
+            "order": 1,
+            "distance": 5.454585227127723,
+            "delayFrames": 763.3238801811391,
+            "bands": [
+              0.1690131351971511,
+              0.15329025928502765,
+              0.12221295141567937
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:26d49ed151f83d52fbdcd270e041b7e8d1d0bd17",
+            "order": 1,
+            "distance": 27.02873470956419,
+            "delayFrames": 3782.446839822394,
+            "bands": [
+              0.034099546525526124,
+              0.030858290816881205,
+              0.02405836856881519
+            ],
+            "rate": 0.9999999999999987
+          },
+          {
+            "sourceId": "collision:26d49ed151f83d52fbdcd270e041b7e8d1d0bd17",
+            "order": 2,
+            "distance": 27.139500732327413,
+            "delayFrames": 3797.947624349026,
+            "bands": [
+              0.03130987791841557,
+              0.025712198428714146,
+              0.016070926299522576
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:26d49ed151f83d52fbdcd270e041b7e8d1d0bd17",
+            "order": 2,
+            "distance": 5.979339428398425,
+            "delayFrames": 836.7588704464268,
+            "bands": [
+              0.14214638564277862,
+              0.11698922537781568,
+              0.0747428470060314
+            ],
+            "rate": 1.0000000000000027
+          },
+          {
+            "sourceId": "collision:26d49ed151f83d52fbdcd270e041b7e8d1d0bd17",
+            "order": 2,
+            "distance": 27.128444481761207,
+            "delayFrames": 3796.4003939490904,
+            "bands": [
+              0.03132264230740301,
+              0.02572271022779629,
+              0.01607768068809892
+            ],
+            "rate": 0.9999999999999987
+          },
+          {
+            "sourceId": "collision:26d49ed151f83d52fbdcd270e041b7e8d1d0bd17",
+            "order": 2,
+            "distance": 37.007465463065685,
+            "delayFrames": 5178.887295122895,
+            "bands": [
+              0.02295855476578781,
+              0.018834683394232544,
+              0.011652508771814726
+            ],
+            "rate": 1
+          }
+        ],
+        "workerBlockMs": {
+          "count": 282,
+          "median": 0.4241000000000099,
+          "p95": 0.8191999999999666,
+          "p99": 1.5197000000000003,
+          "maximum": 7.3045999999999935,
+          "deadlineMisses": 0
+        },
+        "rssSnapshotBytes": 80453632,
+        "sourceHistoryBytes": 2889728,
+        "directStemHistoryBytes": 2880096,
+        "historyAffectedFrames": 0,
+        "rendererLimited": 0,
+        "headroomPathsOmitted": 0,
+        "contactRadiators": [
+          {
+            "eventId": "light-scrape:primary",
+            "contact": {
+              "position": [
+                -2,
+                8,
+                1
+              ],
+              "normal": [
+                0,
+                -1,
+                0
+              ],
+              "relativeVelocity": [
+                8,
+                0.2,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                -0.05,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                7.95,
+                1
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-friction-proxy",
+              "normalForceN": 250,
+              "frictionCoefficient": 0.4,
+              "normalClosingSpeed": 0.2,
+              "tangentialSpeed": 8,
+              "energyJ": null,
+              "impulseNs": null,
+              "frictionPowerProxyW": 800,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "metal",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          }
+        ],
+        "lateModel": null
+      },
+      {
+        "name": "high-energy",
+        "environment": "direct",
+        "frames": 144384,
+        "firstNonzeroFrame": 10750,
+        "peak": 0.0009159044711850584,
+        "energy": 0.00007403586042217985,
+        "lateEnergy": 0,
+        "sourceHashes": [
+          {
+            "eventId": "high-energy:primary",
+            "frames": 4096,
+            "peak": 0.01250842772424221,
+            "sha256": "c026e22c13bc8319cae2ac24d02ca0fb9b2b19e18ad834ac8bcbf639436b3487"
+          },
+          {
+            "eventId": "high-energy:glass",
+            "frames": 4096,
+            "peak": 0.0035821127239614725,
+            "sha256": "7e5766b05be0386b04b95408f2de9884a03939ea4e21ae1053a10a69b166f7d9"
+          },
+          {
+            "eventId": "high-energy:debris",
+            "frames": 2048,
+            "peak": 0.0015354537172243,
+            "sha256": "d422d7851c229da75a1927b70288e43dbb94659b3ed3a635a056c6f6d9a42649"
+          }
+        ],
+        "pcmSha256": "28b89dc26a2774af77188181c13271c24e80d940fccc8881815087cd7e5c1350",
+        "wavSha256": "02b4ba0f457896301a450d43ee1050f59f1684ec0bba76cb2b84e59de8dd6cdd",
+        "admissions": [
+          {
+            "eventId": "high-energy:primary",
+            "occurrenceUpperFrame": 10240,
+            "observationFrame": 10240,
+            "admittedFrame": 10240,
+            "scheduledFrame": 10240,
+            "softwareEmissionLatenessFrames": 0
+          },
+          {
+            "eventId": "high-energy:glass",
+            "occurrenceUpperFrame": 10496,
+            "observationFrame": 10496,
+            "admittedFrame": 10752,
+            "scheduledFrame": 10752,
+            "softwareEmissionLatenessFrames": 256
+          },
+          {
+            "eventId": "high-energy:debris",
+            "occurrenceUpperFrame": 11264,
+            "observationFrame": 11264,
+            "admittedFrame": 11264,
+            "scheduledFrame": 11264,
+            "softwareEmissionLatenessFrames": 0
+          }
+        ],
+        "paths": [
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 0,
+            "distance": 3.640054944640259,
+            "delayFrames": 509.39544414790794,
+            "bands": [
+              0.27470961521314974,
+              0.2746060227633593,
+              0.27357224438452643
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 0,
+            "distance": 3.640054944640259,
+            "delayFrames": 509.39544414790794,
+            "bands": [
+              0.27470961521314974,
+              0.2746060227633593,
+              0.27357224438452643
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 0,
+            "distance": 3.640054944640259,
+            "delayFrames": 509.39544414790794,
+            "bands": [
+              0.27470961521314974,
+              0.2746060227633593,
+              0.27357224438452643
+            ],
+            "rate": 1
+          }
+        ],
+        "workerBlockMs": {
+          "count": 282,
+          "median": 0.24230000000000018,
+          "p95": 0.36810000000002674,
+          "p99": 1.25709999999998,
+          "maximum": 2.2369000000000483,
+          "deadlineMisses": 0
+        },
+        "rssSnapshotBytes": 92499968,
+        "sourceHistoryBytes": 8669184,
+        "directStemHistoryBytes": 8640288,
+        "historyAffectedFrames": 0,
+        "rendererLimited": 0,
+        "headroomPathsOmitted": 0,
+        "contactRadiators": [
+          {
+            "eventId": "high-energy:primary",
+            "contact": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "normal": [
+                0,
+                1,
+                0
+              ],
+              "relativeVelocity": [
+                0,
+                -20,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                0,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-effective-mass",
+              "effectiveMassKg": 1000,
+              "normalClosingSpeed": 20,
+              "tangentialSpeed": 0,
+              "energyJ": 200000,
+              "impulseNs": null,
+              "frictionPowerProxyW": null,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "metal",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          },
+          {
+            "eventId": "high-energy:glass",
+            "contact": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "normal": [
+                0,
+                1,
+                0
+              ],
+              "relativeVelocity": [
+                0,
+                -20,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                0,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-effective-mass",
+              "effectiveMassKg": 2,
+              "normalClosingSpeed": 20,
+              "tangentialSpeed": 0,
+              "energyJ": 400,
+              "impulseNs": null,
+              "frictionPowerProxyW": null,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "glass",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          },
+          {
+            "eventId": "high-energy:debris",
+            "contact": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "normal": [
+                0,
+                1,
+                0
+              ],
+              "relativeVelocity": [
+                0,
+                -20,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                0,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-contact-impulse",
+              "impulseNs": 25,
+              "normalClosingSpeed": 20,
+              "tangentialSpeed": 0,
+              "energyJ": null,
+              "frictionPowerProxyW": null,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "metal",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          }
+        ],
+        "lateModel": null
+      },
+      {
+        "name": "high-energy",
+        "environment": "canyon",
+        "frames": 144384,
+        "firstNonzeroFrame": 10750,
+        "peak": 0.0009159044711850584,
+        "energy": 0.00009185705859868385,
+        "lateEnergy": 0,
+        "sourceHashes": [
+          {
+            "eventId": "high-energy:primary",
+            "frames": 4096,
+            "peak": 0.01250842772424221,
+            "sha256": "c026e22c13bc8319cae2ac24d02ca0fb9b2b19e18ad834ac8bcbf639436b3487"
+          },
+          {
+            "eventId": "high-energy:glass",
+            "frames": 4096,
+            "peak": 0.0035821127239614725,
+            "sha256": "7e5766b05be0386b04b95408f2de9884a03939ea4e21ae1053a10a69b166f7d9"
+          },
+          {
+            "eventId": "high-energy:debris",
+            "frames": 2048,
+            "peak": 0.0015354537172243,
+            "sha256": "d422d7851c229da75a1927b70288e43dbb94659b3ed3a635a056c6f6d9a42649"
+          }
+        ],
+        "pcmSha256": "8242fe83f61a4109d60e1b5dc9bd75aff07c25258c2c4c309a7beddb33ea2af3",
+        "wavSha256": "6b8e3aad7a1e79407b219324f51101781f07b7cee5e9181cdf7fac03788829c8",
+        "admissions": [
+          {
+            "eventId": "high-energy:primary",
+            "occurrenceUpperFrame": 10240,
+            "observationFrame": 10240,
+            "admittedFrame": 10240,
+            "scheduledFrame": 10240,
+            "softwareEmissionLatenessFrames": 0
+          },
+          {
+            "eventId": "high-energy:glass",
+            "occurrenceUpperFrame": 10496,
+            "observationFrame": 10496,
+            "admittedFrame": 10752,
+            "scheduledFrame": 10752,
+            "softwareEmissionLatenessFrames": 256
+          },
+          {
+            "eventId": "high-energy:debris",
+            "occurrenceUpperFrame": 11264,
+            "observationFrame": 11264,
+            "admittedFrame": 11264,
+            "scheduledFrame": 11264,
+            "softwareEmissionLatenessFrames": 0
+          }
+        ],
+        "paths": [
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 0,
+            "distance": 3.640054944640259,
+            "delayFrames": 509.39544414790794,
+            "bands": [
+              0.27470961521314974,
+              0.2746060227633593,
+              0.27357224438452643
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 0,
+            "distance": 3.640054944640259,
+            "delayFrames": 509.39544414790794,
+            "bands": [
+              0.27470961521314974,
+              0.2746060227633593,
+              0.27357224438452643
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 0,
+            "distance": 3.640054944640259,
+            "delayFrames": 509.39544414790794,
+            "bands": [
+              0.27470961521314974,
+              0.2746060227633593,
+              0.27357224438452643
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 1,
+            "distance": 4.387482193696061,
+            "delayFrames": 613.991677251927,
+            "bands": [
+              0.21012230608493226,
+              0.19059621812773736,
+              0.1521237942089634
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 1,
+            "distance": 13.162446581088183,
+            "delayFrames": 1841.9750317557807,
+            "bands": [
+              0.07003369314794411,
+              0.0634679215181647,
+              0.050198230907777
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 1,
+            "distance": 19.11151485361639,
+            "delayFrames": 2674.497705462352,
+            "bands": [
+              0.04823017002990438,
+              0.043681579313911686,
+              0.034336449615912853
+            ],
+            "rate": 0.9999999999999974
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 1,
+            "distance": 4.387482193696061,
+            "delayFrames": 613.991677251927,
+            "bands": [
+              0.21012230608493226,
+              0.19059621812773736,
+              0.1521237942089634
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 1,
+            "distance": 13.162446581088183,
+            "delayFrames": 1841.9750317557807,
+            "bands": [
+              0.07003369314794411,
+              0.0634679215181647,
+              0.050198230907777
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 1,
+            "distance": 19.11151485361639,
+            "delayFrames": 2674.497705462352,
+            "bands": [
+              0.04823017002990438,
+              0.043681579313911686,
+              0.034336449615912853
+            ],
+            "rate": 0.9999999999999974
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 1,
+            "distance": 4.387482193696061,
+            "delayFrames": 613.991677251927,
+            "bands": [
+              0.21012230608493226,
+              0.19059621812773736,
+              0.1521237942089634
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 1,
+            "distance": 13.162446581088183,
+            "delayFrames": 1841.9750317557807,
+            "bands": [
+              0.07003369314794411,
+              0.0634679215181647,
+              0.050198230907777
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 1,
+            "distance": 19.11151485361639,
+            "delayFrames": 2674.497705462352,
+            "bands": [
+              0.04823017002990438,
+              0.043681579313911686,
+              0.034336449615912853
+            ],
+            "rate": 0.9999999999999974
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 2,
+            "distance": 13.388427838995883,
+            "delayFrames": 1873.5992311131263,
+            "bands": [
+              0.06347787816024994,
+              0.05220342968904406,
+              0.033097006685918064
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 2,
+            "distance": 19.267848867997692,
+            "delayFrames": 2696.3753517897644,
+            "bands": [
+              0.044105155267836815,
+              0.0362494495698744,
+              0.02284259070835328
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 2,
+            "distance": 35.06066171651642,
+            "delayFrames": 4906.4482868594405,
+            "bands": [
+              0.024233911297516307,
+              0.01988496809229169,
+              0.01232713279380943
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 2,
+            "distance": 29.073183520213263,
+            "delayFrames": 4068.5504634700774,
+            "bands": [
+              0.029226779971771706,
+              0.023996714863716007,
+              0.01496867407673789
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 2,
+            "distance": 13.388427838995883,
+            "delayFrames": 1873.5992311131263,
+            "bands": [
+              0.06347787816024994,
+              0.05220342968904406,
+              0.033097006685918064
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 2,
+            "distance": 19.267848867997692,
+            "delayFrames": 2696.3753517897644,
+            "bands": [
+              0.044105155267836815,
+              0.0362494495698744,
+              0.02284259070835328
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 2,
+            "distance": 35.06066171651642,
+            "delayFrames": 4906.4482868594405,
+            "bands": [
+              0.024233911297516307,
+              0.01988496809229169,
+              0.01232713279380943
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 2,
+            "distance": 29.073183520213263,
+            "delayFrames": 4068.5504634700774,
+            "bands": [
+              0.029226779971771706,
+              0.023996714863716007,
+              0.01496867407673789
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 2,
+            "distance": 13.388427838995883,
+            "delayFrames": 1873.5992311131263,
+            "bands": [
+              0.06347787816024994,
+              0.05220342968904406,
+              0.033097006685918064
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 2,
+            "distance": 19.267848867997692,
+            "delayFrames": 2696.3753517897644,
+            "bands": [
+              0.044105155267836815,
+              0.0362494495698744,
+              0.02284259070835328
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 2,
+            "distance": 35.06066171651642,
+            "delayFrames": 4906.4482868594405,
+            "bands": [
+              0.024233911297516307,
+              0.01988496809229169,
+              0.01232713279380943
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 2,
+            "distance": 29.073183520213263,
+            "delayFrames": 4068.5504634700774,
+            "bands": [
+              0.029226779971771706,
+              0.023996714863716007,
+              0.01496867407673789
+            ],
+            "rate": 1
+          }
+        ],
+        "workerBlockMs": {
+          "count": 282,
+          "median": 1.0708999999999378,
+          "p95": 1.5155999999999494,
+          "p99": 1.9366999999999734,
+          "maximum": 3.237500000000068,
+          "deadlineMisses": 0
+        },
+        "rssSnapshotBytes": 109027328,
+        "sourceHistoryBytes": 8669184,
+        "directStemHistoryBytes": 8640288,
+        "historyAffectedFrames": 0,
+        "rendererLimited": 0,
+        "headroomPathsOmitted": 0,
+        "contactRadiators": [
+          {
+            "eventId": "high-energy:primary",
+            "contact": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "normal": [
+                0,
+                1,
+                0
+              ],
+              "relativeVelocity": [
+                0,
+                -20,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                0,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-effective-mass",
+              "effectiveMassKg": 1000,
+              "normalClosingSpeed": 20,
+              "tangentialSpeed": 0,
+              "energyJ": 200000,
+              "impulseNs": null,
+              "frictionPowerProxyW": null,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "metal",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          },
+          {
+            "eventId": "high-energy:glass",
+            "contact": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "normal": [
+                0,
+                1,
+                0
+              ],
+              "relativeVelocity": [
+                0,
+                -20,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                0,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-effective-mass",
+              "effectiveMassKg": 2,
+              "normalClosingSpeed": 20,
+              "tangentialSpeed": 0,
+              "energyJ": 400,
+              "impulseNs": null,
+              "frictionPowerProxyW": null,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "glass",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          },
+          {
+            "eventId": "high-energy:debris",
+            "contact": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "normal": [
+                0,
+                1,
+                0
+              ],
+              "relativeVelocity": [
+                0,
+                -20,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                0,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-contact-impulse",
+              "impulseNs": 25,
+              "normalClosingSpeed": 20,
+              "tangentialSpeed": 0,
+              "energyJ": null,
+              "frictionPowerProxyW": null,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "metal",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          }
+        ],
+        "lateModel": null
+      },
+      {
+        "name": "high-energy",
+        "environment": "tunnel",
+        "frames": 144384,
+        "firstNonzeroFrame": 10750,
+        "peak": 0.0009159044711850584,
+        "energy": 0.00011470237301742825,
+        "lateEnergy": 5.3778819486668365e-8,
+        "sourceHashes": [
+          {
+            "eventId": "high-energy:primary",
+            "frames": 4096,
+            "peak": 0.01250842772424221,
+            "sha256": "c026e22c13bc8319cae2ac24d02ca0fb9b2b19e18ad834ac8bcbf639436b3487"
+          },
+          {
+            "eventId": "high-energy:glass",
+            "frames": 4096,
+            "peak": 0.0035821127239614725,
+            "sha256": "7e5766b05be0386b04b95408f2de9884a03939ea4e21ae1053a10a69b166f7d9"
+          },
+          {
+            "eventId": "high-energy:debris",
+            "frames": 2048,
+            "peak": 0.0015354537172243,
+            "sha256": "d422d7851c229da75a1927b70288e43dbb94659b3ed3a635a056c6f6d9a42649"
+          }
+        ],
+        "pcmSha256": "0f757864f5414651b863964c61d91e2356618e298bcf3030c3e6c39515af0119",
+        "wavSha256": "1ce473ecf4243188656e5330e768c398e9496b95ea97522f7549cbce5ad027f1",
+        "admissions": [
+          {
+            "eventId": "high-energy:primary",
+            "occurrenceUpperFrame": 10240,
+            "observationFrame": 10240,
+            "admittedFrame": 10240,
+            "scheduledFrame": 10240,
+            "softwareEmissionLatenessFrames": 0
+          },
+          {
+            "eventId": "high-energy:glass",
+            "occurrenceUpperFrame": 10496,
+            "observationFrame": 10496,
+            "admittedFrame": 10752,
+            "scheduledFrame": 10752,
+            "softwareEmissionLatenessFrames": 256
+          },
+          {
+            "eventId": "high-energy:debris",
+            "occurrenceUpperFrame": 11264,
+            "observationFrame": 11264,
+            "admittedFrame": 11264,
+            "scheduledFrame": 11264,
+            "softwareEmissionLatenessFrames": 0
+          }
+        ],
+        "paths": [
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 0,
+            "distance": 3.640054944640259,
+            "delayFrames": 509.39544414790794,
+            "bands": [
+              0.27470961521314974,
+              0.2746060227633593,
+              0.27357224438452643
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 0,
+            "distance": 3.640054944640259,
+            "delayFrames": 509.39544414790794,
+            "bands": [
+              0.27470961521314974,
+              0.2746060227633593,
+              0.27357224438452643
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 0,
+            "distance": 3.640054944640259,
+            "delayFrames": 509.39544414790794,
+            "bands": [
+              0.27470961521314974,
+              0.2746060227633593,
+              0.27357224438452643
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 1,
+            "distance": 10.161200716450786,
+            "delayFrames": 1421.9756104654161,
+            "bands": [
+              0.09230930898451883,
+              0.087920855100386,
+              0.07842076016817734
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 1,
+            "distance": 4.387482193696061,
+            "delayFrames": 613.991677251927,
+            "bands": [
+              0.21379819372129735,
+              0.2037559278425217,
+              0.18283004674618314
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 1,
+            "distance": 11.191514642799696,
+            "delayFrames": 1566.1594835404824,
+            "bands": [
+              0.083810129407766,
+              0.07981721137599493,
+              0.0711167749486484
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 1,
+            "distance": 17.124543789543708,
+            "delayFrames": 2396.4376148632596,
+            "bands": [
+              0.0547692385417351,
+              0.052127843156253205,
+              0.04616101993226424
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 1,
+            "distance": 10.161200716450786,
+            "delayFrames": 1421.9756104654161,
+            "bands": [
+              0.09230930898451883,
+              0.087920855100386,
+              0.07842076016817734
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 1,
+            "distance": 4.387482193696061,
+            "delayFrames": 613.991677251927,
+            "bands": [
+              0.21379819372129735,
+              0.2037559278425217,
+              0.18283004674618314
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 1,
+            "distance": 11.191514642799696,
+            "delayFrames": 1566.1594835404824,
+            "bands": [
+              0.083810129407766,
+              0.07981721137599493,
+              0.0711167749486484
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 1,
+            "distance": 17.124543789543708,
+            "delayFrames": 2396.4376148632596,
+            "bands": [
+              0.0547692385417351,
+              0.052127843156253205,
+              0.04616101993226424
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 1,
+            "distance": 10.161200716450786,
+            "delayFrames": 1421.9756104654161,
+            "bands": [
+              0.09230930898451883,
+              0.087920855100386,
+              0.07842076016817734
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 1,
+            "distance": 4.387482193696061,
+            "delayFrames": 613.991677251927,
+            "bands": [
+              0.21379819372129735,
+              0.2037559278425217,
+              0.18283004674618314
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 1,
+            "distance": 11.191514642799696,
+            "delayFrames": 1566.1594835404824,
+            "bands": [
+              0.083810129407766,
+              0.07981721137599493,
+              0.0711167749486484
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 1,
+            "distance": 17.124543789543708,
+            "delayFrames": 2396.4376148632596,
+            "bands": [
+              0.0547692385417351,
+              0.052127843156253205,
+              0.04616101993226424
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 2,
+            "distance": 13.009611831257686,
+            "delayFrames": 1820.5870784267315,
+            "bands": [
+              0.0676321642824047,
+              0.06140096089941961,
+              0.04922029497124638
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 2,
+            "distance": 14.671400751121208,
+            "delayFrames": 2053.140629894513,
+            "bands": [
+              0.059970509021199395,
+              0.05443582846605395,
+              0.04356182602292364
+            ],
+            "rate": 0.9999999999999974
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 2,
+            "distance": 12.051970793193952,
+            "delayFrames": 1686.5731722253927,
+            "bands": [
+              0.07300697292920182,
+              0.06628714555665974,
+              0.053189915540976775
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 2,
+            "distance": 11.456439237389601,
+            "delayFrames": 1603.2334792848421,
+            "bands": [
+              0.07680256665678038,
+              0.069737682185975,
+              0.05599322487552994
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 2,
+            "distance": 17.298843892006197,
+            "delayFrames": 2420.829465936727,
+            "bands": [
+              0.05086032117982268,
+              0.04615385329341692,
+              0.03683382794736401
+            ],
+            "rate": 1.0000000000000027
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 2,
+            "distance": 31.068472765811965,
+            "delayFrames": 4347.774614457651,
+            "bands": [
+              0.028314404012984497,
+              0.025657637099816374,
+              0.020186415823256844
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 2,
+            "distance": 19.576771950451892,
+            "delayFrames": 2739.6065703256295,
+            "bands": [
+              0.04494110086025375,
+              0.040772755851499067,
+              0.032462643984291426
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:3d4e0c9bbd3c9d9e264386229e60feeb427fe524",
+            "order": 2,
+            "distance": 25.08485598922186,
+            "delayFrames": 3510.417164672447,
+            "bands": [
+              0.035070797018123274,
+              0.03179978121996596,
+              0.025174410900488404
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 2,
+            "distance": 13.009611831257686,
+            "delayFrames": 1820.5870784267315,
+            "bands": [
+              0.0676321642824047,
+              0.06140096089941961,
+              0.04922029497124638
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 2,
+            "distance": 14.671400751121208,
+            "delayFrames": 2053.140629894513,
+            "bands": [
+              0.059970509021199395,
+              0.05443582846605395,
+              0.04356182602292364
+            ],
+            "rate": 0.9999999999999974
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 2,
+            "distance": 12.051970793193952,
+            "delayFrames": 1686.5731722253927,
+            "bands": [
+              0.07300697292920182,
+              0.06628714555665974,
+              0.053189915540976775
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 2,
+            "distance": 11.456439237389601,
+            "delayFrames": 1603.2334792848421,
+            "bands": [
+              0.07680256665678038,
+              0.069737682185975,
+              0.05599322487552994
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 2,
+            "distance": 17.298843892006197,
+            "delayFrames": 2420.829465936727,
+            "bands": [
+              0.05086032117982268,
+              0.04615385329341692,
+              0.03683382794736401
+            ],
+            "rate": 1.0000000000000027
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 2,
+            "distance": 31.068472765811965,
+            "delayFrames": 4347.774614457651,
+            "bands": [
+              0.028314404012984497,
+              0.025657637099816374,
+              0.020186415823256844
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 2,
+            "distance": 19.576771950451892,
+            "delayFrames": 2739.6065703256295,
+            "bands": [
+              0.04494110086025375,
+              0.040772755851499067,
+              0.032462643984291426
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:4e9e4fe70b06a67096b58f6aee2b4671a9bfcc42",
+            "order": 2,
+            "distance": 25.08485598922186,
+            "delayFrames": 3510.417164672447,
+            "bands": [
+              0.035070797018123274,
+              0.03179978121996596,
+              0.025174410900488404
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 2,
+            "distance": 13.009611831257686,
+            "delayFrames": 1820.5870784267315,
+            "bands": [
+              0.0676321642824047,
+              0.06140096089941961,
+              0.04922029497124638
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 2,
+            "distance": 14.671400751121208,
+            "delayFrames": 2053.140629894513,
+            "bands": [
+              0.059970509021199395,
+              0.05443582846605395,
+              0.04356182602292364
+            ],
+            "rate": 0.9999999999999974
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 2,
+            "distance": 12.051970793193952,
+            "delayFrames": 1686.5731722253927,
+            "bands": [
+              0.07300697292920182,
+              0.06628714555665974,
+              0.053189915540976775
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 2,
+            "distance": 11.456439237389601,
+            "delayFrames": 1603.2334792848421,
+            "bands": [
+              0.07680256665678038,
+              0.069737682185975,
+              0.05599322487552994
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 2,
+            "distance": 17.298843892006197,
+            "delayFrames": 2420.829465936727,
+            "bands": [
+              0.05086032117982268,
+              0.04615385329341692,
+              0.03683382794736401
+            ],
+            "rate": 1.0000000000000027
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 2,
+            "distance": 31.068472765811965,
+            "delayFrames": 4347.774614457651,
+            "bands": [
+              0.028314404012984497,
+              0.025657637099816374,
+              0.020186415823256844
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 2,
+            "distance": 19.576771950451892,
+            "delayFrames": 2739.6065703256295,
+            "bands": [
+              0.04494110086025375,
+              0.040772755851499067,
+              0.032462643984291426
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:716b7741535d2621c3c486b043037f22686228f6",
+            "order": 2,
+            "distance": 25.08485598922186,
+            "delayFrames": 3510.417164672447,
+            "bands": [
+              0.035070797018123274,
+              0.03179978121996596,
+              0.025174410900488404
+            ],
+            "rate": 1
+          }
+        ],
+        "workerBlockMs": {
+          "count": 282,
+          "median": 1.7580000000000382,
+          "p95": 2.1125999999999294,
+          "p99": 2.5838999999999714,
+          "maximum": 4.230000000000018,
+          "deadlineMisses": 0
+        },
+        "rssSnapshotBytes": 109772800,
+        "sourceHistoryBytes": 8669184,
+        "directStemHistoryBytes": 8640288,
+        "historyAffectedFrames": 0,
+        "rendererLimited": 0,
+        "headroomPathsOmitted": 0,
+        "contactRadiators": [
+          {
+            "eventId": "high-energy:primary",
+            "contact": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "normal": [
+                0,
+                1,
+                0
+              ],
+              "relativeVelocity": [
+                0,
+                -20,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                0,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-effective-mass",
+              "effectiveMassKg": 1000,
+              "normalClosingSpeed": 20,
+              "tangentialSpeed": 0,
+              "energyJ": 200000,
+              "impulseNs": null,
+              "frictionPowerProxyW": null,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "metal",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          },
+          {
+            "eventId": "high-energy:glass",
+            "contact": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "normal": [
+                0,
+                1,
+                0
+              ],
+              "relativeVelocity": [
+                0,
+                -20,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                0,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-effective-mass",
+              "effectiveMassKg": 2,
+              "normalClosingSpeed": 20,
+              "tangentialSpeed": 0,
+              "energyJ": 400,
+              "impulseNs": null,
+              "frictionPowerProxyW": null,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "glass",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          },
+          {
+            "eventId": "high-energy:debris",
+            "contact": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "normal": [
+                0,
+                1,
+                0
+              ],
+              "relativeVelocity": [
+                0,
+                -20,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                0,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                0,
+                1
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-contact-impulse",
+              "impulseNs": 25,
+              "normalClosingSpeed": 20,
+              "tangentialSpeed": 0,
+              "energyJ": null,
+              "frictionPowerProxyW": null,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "metal",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          }
+        ],
+        "lateModel": {
+          "basis": "complete-authored-analytic-enclosure",
+          "rt60Seconds": [
+            1.9600000000000002,
+            1.339009900990099,
+            0.8400000000000001
+          ],
+          "wet": 0.12,
+          "calibration": "authored diffuse approximation, not measured sound power"
+        }
+      },
+      {
+        "name": "glass",
+        "environment": "canyon",
+        "frames": 144384,
+        "firstNonzeroFrame": 10745,
+        "peak": 0.00010666617890819907,
+        "energy": 0.0000013949072690746583,
+        "lateEnergy": 0,
+        "sourceHashes": [
+          {
+            "eventId": "glass:primary",
+            "frames": 4096,
+            "peak": 0.0012468795757740736,
+            "sha256": "c6e0b0f7c2acb4e046d331fa7b9ba90e2e0d63ecdf05a6ec52d22291cb1366f2"
+          }
+        ],
+        "pcmSha256": "de547431b4539b46ae3df11bcea52893e4f969a0301688b97c29bb5d86158273",
+        "wavSha256": "831042f5f13a3d55250584e38bfe91b6be652dd27661a4b24856b648e6465d69",
+        "admissions": [
+          {
+            "eventId": "glass:primary",
+            "occurrenceUpperFrame": 10240,
+            "observationFrame": 10240,
+            "admittedFrame": 10240,
+            "scheduledFrame": 10240,
+            "softwareEmissionLatenessFrames": 0
+          }
+        ],
+        "paths": [
+          {
+            "sourceId": "collision:d1358f160d669ef592fade9f31a3afc17d91eec0",
+            "order": 0,
+            "distance": 3.6069377593742864,
+            "delayFrames": 504.76096924188266,
+            "bands": [
+              0.27723197381429077,
+              0.27712838114727617,
+              0.2760945811008145
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:d1358f160d669ef592fade9f31a3afc17d91eec0",
+            "order": 1,
+            "distance": 4.62709412050371,
+            "delayFrames": 647.523375464076,
+            "bands": [
+              0.1992406701125188,
+              0.1807212957046856,
+              0.14420634721065456
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:d1358f160d669ef592fade9f31a3afc17d91eec0",
+            "order": 1,
+            "distance": 13.153326575433303,
+            "delayFrames": 1840.6987627428528,
+            "bands": [
+              0.0700822591485324,
+              0.06351199439553937,
+              0.050233563850271584
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:d1358f160d669ef592fade9f31a3afc17d91eec0",
+            "order": 1,
+            "distance": 19.10523488471157,
+            "delayFrames": 2673.618875994622,
+            "bands": [
+              0.04824602697242742,
+              0.04369596922035197,
+              0.03434798448526731
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:d1358f160d669ef592fade9f31a3afc17d91eec0",
+            "order": 2,
+            "distance": 13.468852957843142,
+            "delayFrames": 1884.8540582404396,
+            "bands": [
+              0.06309878108133303,
+              0.05189123246363195,
+              0.032896331969514886
+            ],
+            "rate": 0.9999999999999974
+          },
+          {
+            "sourceId": "collision:d1358f160d669ef592fade9f31a3afc17d91eec0",
+            "order": 2,
+            "distance": 35.05723891010244,
+            "delayFrames": 4905.969293542033,
+            "bands": [
+              0.024236278325600248,
+              0.01988691739385975,
+              0.012328384932693733
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:d1358f160d669ef592fade9f31a3afc17d91eec0",
+            "order": 2,
+            "distance": 19.3238194982255,
+            "delayFrames": 2704.2079764280584,
+            "bands": [
+              0.04397737820269513,
+              0.03614422165525758,
+              0.02277496047219262
+            ],
+            "rate": 1
+          },
+          {
+            "sourceId": "collision:d1358f160d669ef592fade9f31a3afc17d91eec0",
+            "order": 2,
+            "distance": 29.069055712217416,
+            "delayFrames": 4067.972811039172,
+            "bands": [
+              0.02923093156576951,
+              0.024000133804563464,
+              0.01497087077564867
+            ],
+            "rate": 1.0000000000000013
+          }
+        ],
+        "workerBlockMs": {
+          "count": 282,
+          "median": 0.35930000000007567,
+          "p95": 0.4920999999999367,
+          "p99": 0.5998999999999342,
+          "maximum": 0.9728999999999814,
+          "deadlineMisses": 0
+        },
+        "rssSnapshotBytes": 127553536,
+        "sourceHistoryBytes": 2889728,
+        "directStemHistoryBytes": 2880096,
+        "historyAffectedFrames": 0,
+        "rendererLimited": 0,
+        "headroomPathsOmitted": 0,
+        "contactRadiators": [
+          {
+            "eventId": "glass:primary",
+            "contact": {
+              "position": [
+                -2,
+                0,
+                1.4
+              ],
+              "normal": [
+                0,
+                1,
+                0
+              ],
+              "relativeVelocity": [
+                0,
+                -7,
+                0
+              ],
+              "positionBasis": "authored-contact-point",
+              "relativeMotionBasis": "authored-relative-velocity",
+              "radiatorOffset": [
+                0,
+                0,
+                0
+              ]
+            },
+            "radiator": {
+              "position": [
+                -2,
+                0,
+                1.4
+              ],
+              "basis": "authored-contact-plus-explicit-offset",
+              "nativeAttachmentVerified": false
+            },
+            "severity": {
+              "basis": "authored-effective-mass",
+              "effectiveMassKg": 2,
+              "normalClosingSpeed": 7,
+              "tangentialSpeed": 0,
+              "energyJ": 49,
+              "impulseNs": null,
+              "frictionPowerProxyW": null,
+              "acousticIntensity": "unmeasured; explicit authored synthesis mapping only"
+            },
+            "material": {
+              "id": "glass",
+              "basis": "authored-material",
+              "confidence": 1
+            }
+          }
+        ],
+        "lateModel": null
+      }
+    ]
+  },
+  "resourceAdapter": {
+    "kinds": [
+      {
+        "kind": "ymap",
+        "header": "RSC7",
+        "version": 2
+      },
+      {
+        "kind": "ytyp",
+        "header": "RSC7",
+        "version": 2
+      },
+      {
+        "kind": "ybn",
+        "header": "RSC7",
+        "version": 43
+      }
+    ],
+    "maximumCompressedAndDecodedBytes": 16777216,
+    "maximumEntitiesOrArchetypes": 4096,
+    "parser": [
+      {
+        "file": "CodeWalker.Core.dll",
+        "sha256": "3d2bb91b35cf0d1888c12772a9af25441adea3ccc8510a149fcf0d47c8e71ca8"
+      },
+      {
+        "file": "SharpDX.dll",
+        "sha256": "a0af255ea4b09a8cdb995b8c6fd1075e46f098e23c2351c974e6ded9b8b620cf"
+      },
+      {
+        "file": "SharpDX.Mathematics.dll",
+        "sha256": "4c9615496970ea84320e2a6e99f8fb828e3c7790384df5585d93fc368885d94e"
+      }
+    ],
+    "originalFixtures": [
+      {
+        "kind": "ymap",
+        "sha256": "22a6835287cf5169b3ea37b5571780932fa7d8f30509c55d0e9c53b24c734a02",
+        "bytes": 839
+      },
+      {
+        "kind": "ytyp",
+        "sha256": "c4aba4b0183a4a0732aab89fab9e182a0ddb3f8533ddf9c7d96b28c328cbbe00",
+        "bytes": 478
+      },
+      {
+        "kind": "ybn",
+        "sha256": "82fcf00435f77def11c474e5ab0dad1b5dc750d74f53277ce43655b1e9be2543",
+        "bytes": 156
+      }
+    ],
+    "negativeControlsPassed": 9,
+    "finiteFootprintVerified": true,
+    "overrideInvalidatesCache": true,
+    "acousticComparison": {
+      "sameOriginalDryPcm": true,
+      "sourceSha256": "c026e22c13bc8319cae2ac24d02ca0fb9b2b19e18ad834ac8bcbf639436b3487",
+      "openSha256": "b117597b35a893c2d1d0177c6d7222b418629e8aec95712139f6ada4af4d12e1",
+      "resourceSceneSha256": "da27d9db1119e6763aeebb649bde0f857309b7b25365a834904bb6a29c2d80c0",
+      "physicalReflectedDistanceMetres": 3,
+      "physicalReflectedDelayFrames": 419.8250728862974,
+      "renderedWithoutLimitingOrHistoryFaults": true
+    },
+    "cacheSchema": "richaudio-explicit-resource-static-v2",
+    "converter": "explicit-rsc7-fixture-triangle-world-v2",
+    "actualEnhancedGen9Verified": false,
+    "installationMountsVerified": false,
+    "wholeInstalledWorldVerified": false,
+    "realResourcePersistentTileWriterImplemented": false
+  },
+  "runtime": {
+    "tileIndexCeiling": 262144,
+    "cellSideMetres": 128,
+    "queryCandidateLimit": 4096,
+    "residentTileLimit": 8,
+    "nearbyPreparationLimit": 8,
+    "dynamicObjectLimit": 32,
+    "dynamicLeaseMs": 250,
+    "publishedCoverage": "one exact qualified listener tile",
+    "cacheQualification": "world digest plus exact selected tile ID and bounds",
+    "unknownGapPreserved": true,
+    "unknownPrimaryWithdrawsScene": true,
+    "removedSurfaceEntireRegionRequired": true,
+    "overlappingDynamicObjectsRejected": true,
+    "expiredDynamicState": "affected region unknown; no restored wall or invented opening",
+    "movingReflectorsImplemented": false,
+    "fixedAudioQueueFramesAdded": 0,
+    "gameplayWiringEnabled": false
+  },
+  "peerReview": {
+    "collision": {
+      "sha256": "fb313733cf15d13474657c31dc6b0385ad1b12af76725396fa8865f2ba535533",
+      "reviewer": "separate Codex component agent",
+      "passed": true
+    },
+    "runtimeResource": {
+      "sha256": "2ca97682ca06512ca1bd86f06df73c40647b9b10b0add9c2a8c040b07b8cc26a",
+      "reviewer": "separate Codex endpoint agent",
+      "passed": true,
+      "independentFunctionalTestsPassed": 13,
+      "actualOriginalRscBytesVerified": 3
+    }
+  },
+  "limitations": [
+    "Every contact, material, effective mass, impulse, friction and vehicle configuration is authored, not a native observation.",
+    "Fixed contact radiators; moving structural/contact paths and live collision acquisition remain unimplemented.",
+    "GTA material IDs and physicsDictionary hashes do not prove acoustic coefficients or collision-resource links.",
+    "RSC7 original fixtures do not verify Enhanced Gen9 resources, effective mounts, MLO/conditional activation or a complete installed world.",
+    "Runtime disk preparation currently uses the existing authored fixture-static store; the actual-resource versioned cache identity is not a whole-world writer.",
+    "Cross-tile acoustic unions, moving overlays and live observation adapters remain unqualified.",
+    "Measured worker cost/RSS and rendered onset are not audio callback, WASAPI submission or speaker latency.",
+    "Functional PCM and analytic path differences do not establish perceptual realism or calibrated sound power.",
+    "No original Bati bank/calibration/gain/default route changed by this scope."
+  ]
+}
