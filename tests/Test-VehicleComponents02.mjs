@@ -138,3 +138,31 @@ test('complete original mechanical events prewarm through the existing low-laten
  assert.throws(()=>createPreparedMechanicalComponent({identity:{...identity,component:'horn'},capability,sceneId:'unknown',sourcePose:transientFixturePoses.source,listenerPose:transientFixturePoses.listener}));
  assert.throws(()=>createPreparedMechanicalComponent({identity,capability,sceneId:'unknown',sourcePose:{...transientFixturePoses.source,generation:2},listenerPose:transientFixturePoses.listener}));
 });
+test('source block preparation is a transaction: no future-state admission, duplicate prepare or mismatched render',()=>{
+ const identity=fixtureComponentIdentity('horn'),set=new ComponentSourceSet({capability:cap(2048),identities:[identity]}),input={[componentSourceId(identity)]:new Float32Array(512)};
+ assert.equal(set.accept(componentFixtureObservation(identity,0,0,{active:false})),true);set.prepare(0);
+ assert.equal(set.accept(componentFixtureObservation(identity,512,1,{active:true})),false);
+ assert.equal(set.retire(identity,'source-scope-lost',0),false);assert.throws(()=>set.prepare(512),/pending/);
+ assert.throws(()=>set.renderInto(input,256),/matching/);set.renderInto(input);assert.ok(input[componentSourceId(identity)].every(x=>x===0));
+ assert.throws(()=>set.renderInto(input),/matching/);assert.equal(set.accept(componentFixtureObservation(identity,512,1,{active:true})),true);
+ set.prepare(512);set.renderInto(input);assert.ok(input[componentSourceId(identity)].some(x=>x!==0));
+});
+test('admission during an actual awaited acoustic prepare cannot backdate next-block controls into current dry PCM',async()=>{
+ const identity=fixtureComponentIdentity('horn'),session=new ComponentAcousticSession({capability:cap(2048),identities:[identity],scene:createVehicleEnvironment('direct').scene});
+ let release;const gate=new Promise(resolve=>{release=resolve;}),prepare=session.pipeline.prepare.bind(session.pipeline);
+ session.pipeline.prepare=async(...args)=>{await gate;return prepare(...args);};
+ try{session.accept(componentFixtureObservation(identity,0,0,{active:false}));const left=new Float32Array(512),right=new Float32Array(512),pending=session.render({listener:componentFixtureListener(),left,right});
+  assert.equal(session.accept(componentFixtureObservation(identity,512,1,{active:true})),false);
+  assert.throws(()=>session.replaceScene(createVehicleEnvironment('tunnel').scene),/completed/);assert.throws(()=>session.close(),/pending/);
+  release();await pending;assert.ok(session.inputs[componentSourceId(identity)].every(x=>x===0));
+  assert.equal(session.accept(componentFixtureObservation(identity,512,1,{active:true})),true);await session.render({listener:componentFixtureListener(),left,right});
+  assert.ok(session.inputs[componentSourceId(identity)].some(x=>x!==0));
+ }finally{release();session.close();}
+});
+test('a settled source-worker failure is terminal and can close without claiming a pending block completed',async()=>{
+ const identity=fixtureComponentIdentity('horn'),session=new ComponentAcousticSession({capability:cap(2048),identities:[identity],scene:createVehicleEnvironment('direct').scene});
+ session.accept(componentFixtureObservation(identity,0,0));session.pipeline.prepare=async()=>{throw Error('authored-worker-fault');};
+ await assert.rejects(session.render({listener:componentFixtureListener(),left:new Float32Array(512),right:new Float32Array(512)}),/authored-worker-fault/);
+ assert.equal(session.diagnostics().frame,0);assert.equal(session.diagnostics().failed,true);assert.equal(session.sources.renderPending,false);
+ assert.equal(session.accept(componentFixtureObservation(identity,0,1)),false);assert.doesNotThrow(()=>session.close());assert.equal(session.diagnostics().closed,true);
+});
