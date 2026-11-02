@@ -16,7 +16,7 @@ try {
     # game directory or archive, including when this input is absent in CI.
     if($env:RICHAUDIO_CODEWALKER_ROOT){
         $legacyShell=Join-Path $env:WINDIR 'System32/WindowsPowerShell/v1.0/powershell.exe'
-        & $legacyShell -NoProfile -NonInteractive -File (Join-Path $repo 'tools/Test-StaticResources02.ps1') -CodeWalkerRoot $env:RICHAUDIO_CODEWALKER_ROOT -OutputRoot (Join-Path $repo ('.local/world-02/resource-fixture-'+[guid]::NewGuid().ToString('N')))
+        & $legacyShell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $repo 'tools/Test-StaticResources02.ps1') -CodeWalkerRoot $env:RICHAUDIO_CODEWALKER_ROOT -OutputRoot (Join-Path $repo ('.local/world-02/resource-fixture-'+[guid]::NewGuid().ToString('N')))
         if($LASTEXITCODE-ne0){throw 'Original YMAP/YTYP/YBN byte fixtures or finite geometry integration failed.'}
     }else{Write-Output 'UNVERIFIED here: optional trusted CodeWalker parser not supplied; normalized authored resource regressions still run. No installed assets scanned.'}
     & node --test tests/Test-Latency02Continuous.mjs tests/Test-EventAcquisitionCapability.mjs tests/Test-TransientEventPath.mjs
