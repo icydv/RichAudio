@@ -1,0 +1,798 @@
+{
+  "schema": 1,
+  "kind": "latency-031-offline-clock-supervisor-correction",
+  "basePr": 79,
+  "baseCommit": "57178c5986b8e82403ceeb9dbf80f2ef2ceaa935",
+  "operationalCommit": "14e23ee3ca6e2ca0c571a17deafcc6bde38e40e4",
+  "newCandidate": {
+    "manifestSha256": "3c074154fde2c2502ffd5b996d02451dac51da1ef76513c6ae67b1c182565807",
+    "proposalSha256": "1f50da0effe5716467d54f10d03076dee709391003e32bf90600d4b664ae52bb",
+    "independentReviewSha256": "f49a908a7c58f5163a05adaefd87cac95e043f9ca73c47ef768e2ccda9ad6702",
+    "binarySha256": "1d4735df218a7c7b041027043127c647a7372e97c823c989a1cb727c47bf735b",
+    "nodeSha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237",
+    "compilerSha256": "46809206887326d2d24db1eff1f3064de972c3451abe766b49111450a5e08e00",
+    "sourceTreeCleanAtPreparation": true,
+    "payloadCount": 68,
+    "sourceCount": 63,
+    "payloadBindings": [
+      {
+        "file": "assets/bati-reference.wav",
+        "bytes": 12753466,
+        "sha256": "e86d54d9f305b24dd86264d456f3f8786e741c0aaaaeab42a82bd70016a021fe"
+      },
+      {
+        "file": "assets/transients/kernels.f32le",
+        "bytes": 1048576,
+        "sha256": "833a27460efc3a9f2774859b7a097cf2c7ea881f0095f7b4091dc9a0a6c4868c"
+      },
+      {
+        "file": "assets/transients/preparation.json",
+        "bytes": 31400,
+        "sha256": "6a49bb311c9947f40577bd6ea350437314c06e8ba785498e3c3d113412038371"
+      },
+      {
+        "file": "runtime/Latency03.Experiment.exe",
+        "bytes": 510976,
+        "sha256": "1d4735df218a7c7b041027043127c647a7372e97c823c989a1cb727c47bf735b"
+      },
+      {
+        "file": "runtime/node.exe",
+        "bytes": 92825416,
+        "sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"
+      },
+      {
+        "file": "src/acoustics/engine/contracts.mjs",
+        "bytes": 13322,
+        "sha256": "9672b34552cbe20b84f2ef3ab5d23b2cc7a12732e3663945742d7c8f21515b94"
+      },
+      {
+        "file": "src/acoustics/engine/paths.mjs",
+        "bytes": 12258,
+        "sha256": "8cd93bdd65aee69ec982f73eb12f1e834e0e82fd6dbffd99bb4bd22a9d70e92b"
+      },
+      {
+        "file": "src/acoustics/events/acquisition-capability.mjs",
+        "bytes": 5822,
+        "sha256": "de18efb0cfccee5ff191eae9d592451e1645fe20ec77a25cf353ebf634688a00"
+      },
+      {
+        "file": "src/acoustics/events/contracts.mjs",
+        "bytes": 5303,
+        "sha256": "e8dadc64400e3eafab689efcc96ad6d5b562603d1514ff094bd1afaf5f466e4e"
+      },
+      {
+        "file": "src/acoustics/events/fixture-scenes.mjs",
+        "bytes": 1749,
+        "sha256": "e9459a74700ddf650610ad9121e08761b9204e315c22bdc64b9b9b1680c97424"
+      },
+      {
+        "file": "src/acoustics/events/latency03-library.mjs",
+        "bytes": 2266,
+        "sha256": "2447b23d22e4438e48e46b69d674500d775343744d0343e71567cdc79590b974"
+      },
+      {
+        "file": "src/acoustics/events/prepared-path.mjs",
+        "bytes": 9514,
+        "sha256": "6749e62995f6297772d9d1aa46715c6e79d406c434690dd8b177b789a5be8017"
+      },
+      {
+        "file": "src/acoustics/events/wire.mjs",
+        "bytes": 3255,
+        "sha256": "b6de607179a15a116fde1956756dcc8efa5550f7a9af05edbae201b1d67b1fe3"
+      },
+      {
+        "file": "src/acoustics/experiments/Latency031NativeChild.cs",
+        "bytes": 1165,
+        "sha256": "b64b08f353e86e737d9ca1d42ad4ba1c3c3da4bc5fa5f4b4bc54b1e088a723ec"
+      },
+      {
+        "file": "src/acoustics/experiments/Latency031Supervision.cs",
+        "bytes": 6308,
+        "sha256": "a7d31d410b85a5b5da576daf2e3e5ab81f3ba91c48c903d86c8a1bb755d53da7"
+      },
+      {
+        "file": "src/acoustics/experiments/Latency031SupervisionReceipt.cs",
+        "bytes": 1099,
+        "sha256": "25e7ce93c4781b2cd89312dd1570e82b3a7a98da151e361437a54e2c1353f9df"
+      },
+      {
+        "file": "src/acoustics/experiments/Latency03Experiment.cs",
+        "bytes": 10086,
+        "sha256": "f3c0d6b7bff13eaa40d4a08daccc559afe6fa88644a8845754405a5bf326e312"
+      },
+      {
+        "file": "src/acoustics/experiments/Latency03ExperimentRun.cs",
+        "bytes": 24335,
+        "sha256": "62a008b9aaced6dc7eb9cae0f74503bfb6b1f7f1d8a8b5174892844ba43e93e3"
+      },
+      {
+        "file": "src/acoustics/experiments/Latency03WorkerAdmission.cs",
+        "bytes": 2858,
+        "sha256": "7af199ff5a7e1158281f0ef95a6569e5d2e38a36e969142cffe336da1039f9a7"
+      },
+      {
+        "file": "src/acoustics/geometry/GeometryCapture.cs",
+        "bytes": 9262,
+        "sha256": "16e5be0a38afb65a6c61145a162ddcfaece5c0ebd174e661970b05ce9c14aa4d"
+      },
+      {
+        "file": "src/acoustics/geometry/GeometryHostRelay.cs",
+        "bytes": 14982,
+        "sha256": "a23ea9ce6942e53536cffc0bcf404c6e197f22e053b864553dbae70ffcdbd97a"
+      },
+      {
+        "file": "src/acoustics/geometry/GeometryPipe.cs",
+        "bytes": 11008,
+        "sha256": "be13b59a8b75612f841e20a6cce73ed801799c71de68bea583cd9413ef188ded"
+      },
+      {
+        "file": "src/acoustics/host/Transport/CameraBasis.cs",
+        "bytes": 860,
+        "sha256": "6da0749808bbdadcbc55f21c0529b31670e6e57d8f90c8643e0586c3b9f2fbaf"
+      },
+      {
+        "file": "src/acoustics/host/Transport/GameplayProtocol.cs",
+        "bytes": 8043,
+        "sha256": "5d098e294221cffa68f860cfe5efee6dbc7e6e1ba4914b3e5cdaecbe021e9180"
+      },
+      {
+        "file": "src/acoustics/host/Transport/ListenerProtocol.cs",
+        "bytes": 10780,
+        "sha256": "7d76e16d4e4ab184d4074ef3751795c070308a1e51ba443c8e4e84a80faf027b"
+      },
+      {
+        "file": "src/acoustics/host/Transport/OwnedProcessJob.cs",
+        "bytes": 15917,
+        "sha256": "13affdb31931e452bae3123f806c4ed4603e8800e28a96651d7867f608bde188"
+      },
+      {
+        "file": "src/acoustics/host/Transport/PipeDeadline.cs",
+        "bytes": 1879,
+        "sha256": "faf31e5a598dbfeb406f2f3ff24281ed0fd4e81d6d5eb50812fbdc076bed86a9"
+      },
+      {
+        "file": "src/acoustics/host/Transport/PlayableConfiguration.cs",
+        "bytes": 5776,
+        "sha256": "7c93d41be09d1ed91bab8e9fdacb8f15c24d056f0c4dd6c8a0f5849453ead1c5"
+      },
+      {
+        "file": "src/acoustics/host/Transport/StatePipe.cs",
+        "bytes": 24059,
+        "sha256": "67da56ca63bca4bb3631b1f6ae790148937ffe40766a6c06a92ab9cdf4c4534d"
+      },
+      {
+        "file": "src/acoustics/host/Windows/AcousticSettings.cs",
+        "bytes": 24622,
+        "sha256": "26430407cf2decb3e756ef38ce2cea76dec841be46089361289e4e31a6507953"
+      },
+      {
+        "file": "src/acoustics/host/Windows/BatiPlaybackSession.cs",
+        "bytes": 5069,
+        "sha256": "f43bf57271faff67a84e8aaf41b11d19c90293e88a78d6a4e490c411e6ad4162"
+      },
+      {
+        "file": "src/acoustics/host/Windows/GameplayFixtureLatency.cs",
+        "bytes": 4924,
+        "sha256": "3ec89182f06f4e4857d4b7a67d028e4ab237c933313c5ac8d17acd75f149df3f"
+      },
+      {
+        "file": "src/acoustics/host/Windows/GameplayHost.cs",
+        "bytes": 26005,
+        "sha256": "8f0e929d1a3acbc2c8d86650aceb91b9292cce3129fa6c35b1f2840461057d13"
+      },
+      {
+        "file": "src/acoustics/host/Windows/GameplayLatencyProfile.cs",
+        "bytes": 1597,
+        "sha256": "6dad593e321834b58c33938fc06b89bb9b40dcf096e07a8239b8839787afcedd"
+      },
+      {
+        "file": "src/acoustics/host/Windows/GameplayRuntime.cs",
+        "bytes": 12350,
+        "sha256": "c9a39e081a92a1f6f6d62352d65a06dcb93d622cfc63981bcb438f4777be0114"
+      },
+      {
+        "file": "src/acoustics/host/Windows/GeometryRelayHost.cs",
+        "bytes": 2714,
+        "sha256": "084cf1f5f7ca103e9d8eaa74bff399085571bc85a2f284e21dbc15ce40e98864"
+      },
+      {
+        "file": "src/acoustics/host/Windows/HostListeningFixture.cs",
+        "bytes": 9038,
+        "sha256": "6620ead7b52423e982935510be2c0383a86d061863ea77230a19b1cf2d27c86e"
+      },
+      {
+        "file": "src/acoustics/host/Windows/HostProgram.cs",
+        "bytes": 43948,
+        "sha256": "8ef000a0c99ef353e12f74a21b85c9abbb8c3e2678473d71b1eaed0233d560c8"
+      },
+      {
+        "file": "src/acoustics/host/Windows/HostShutdown.cs",
+        "bytes": 4928,
+        "sha256": "6185f1abb26aad313f82e8c1f51b512b23ebb6dda11ddcdc91a75c22ecc8f122"
+      },
+      {
+        "file": "src/acoustics/host/Windows/InGameRecordingBridge.cs",
+        "bytes": 9329,
+        "sha256": "908674c808ed97a9fc2804bf5b3c98e6d638e794ee49d559c78fc0dd594d4393"
+      },
+      {
+        "file": "src/acoustics/host/Windows/InGameSettingsBridge.cs",
+        "bytes": 17207,
+        "sha256": "02d5989950ae202df4c74cbafdd7b08530ec90df9ad3fa5290eabc0ecdd7485a"
+      },
+      {
+        "file": "src/acoustics/host/Windows/Latency03Interop.cs",
+        "bytes": 1915,
+        "sha256": "1ec2b8e9c1913b5db4be0939c382a9e3c9f2926650e6bdc1b15ab9667fd36a99"
+      },
+      {
+        "file": "src/acoustics/host/Windows/Latency03OutputSession.cs",
+        "bytes": 17222,
+        "sha256": "80b0d35f7d18858b07006870ea4d934b431740f7f06964037433e99a824a5769"
+      },
+      {
+        "file": "src/acoustics/host/Windows/Latency03PresentationClock.cs",
+        "bytes": 16053,
+        "sha256": "aaea922cbf526a4c9b50a53875b13d06abfe45a40f3ce92e8bfa4ccff29d6bde"
+      },
+      {
+        "file": "src/acoustics/host/Windows/LoopbackCapture.cs",
+        "bytes": 6688,
+        "sha256": "381739e7125d64536cf8066c61f62994c32c871d9240d4233e3d0b783a633c39"
+      },
+      {
+        "file": "src/acoustics/host/Windows/MenuDiagnostic.cs",
+        "bytes": 2106,
+        "sha256": "d1e1dc79fa02eb840085f474c90db30fb75c5f142941e3753396829c14c88d43"
+      },
+      {
+        "file": "src/acoustics/host/Windows/OwnedOutputTap.cs",
+        "bytes": 14977,
+        "sha256": "1a9e4581a225a5a440fcff942706d299b7e25d8e89eefcea9edee9b932d66af5"
+      },
+      {
+        "file": "src/acoustics/host/Windows/PassiveSoundMapBridge.cs",
+        "bytes": 11010,
+        "sha256": "4bcbe4577f8380736b8675961c6161d204851ea7088276070871e22c1faa2d3d"
+      },
+      {
+        "file": "src/acoustics/host/Windows/PcmRing.cs",
+        "bytes": 6283,
+        "sha256": "70069ca231812c26900d89c9829fe78da18b57963bf64cedbd70b1ce342c531c"
+      },
+      {
+        "file": "src/acoustics/host/Windows/PreparedTransientBus.cs",
+        "bytes": 22471,
+        "sha256": "03afe828173050c64071311492c6a2d97d3262243a4cd0618c8324fb6dd82a93"
+      },
+      {
+        "file": "src/acoustics/host/Windows/SharedPeriodPlan.cs",
+        "bytes": 703,
+        "sha256": "4c2260f1cbe95ebf9d63fab1e7c5f97b68bf4e3cd5283239d4743bfa5a8abf5b"
+      },
+      {
+        "file": "src/acoustics/host/Windows/TransientEventProtocol.cs",
+        "bytes": 1990,
+        "sha256": "25e2442393c59864eeeec3a2dc44078d838b67bfceefe70bfdf029c12f5ce53f"
+      },
+      {
+        "file": "src/acoustics/host/Windows/WasapiInterop.cs",
+        "bytes": 7476,
+        "sha256": "1ec3843bfff96f605e2b492d1add165719cc332aee6449773af78850764d7823"
+      },
+      {
+        "file": "src/acoustics/host/Windows/WasapiOutput.cs",
+        "bytes": 19742,
+        "sha256": "5fe7dfa2347aadf5e17f7954d13c36b1b041e771f4cea3bc4dc54577506336f2"
+      },
+      {
+        "file": "src/acoustics/observation/DiagnosticTile.cs",
+        "bytes": 20479,
+        "sha256": "905257bedb01671c2a5f9e9b7c63aae920061750502c27f1d741e37307d5e8fa"
+      },
+      {
+        "file": "src/acoustics/observation/GeometryObservation.cs",
+        "bytes": 9378,
+        "sha256": "93a7d4a22e43bb8c6739c26fa9eab9f9c836ab95556b6075fbe7e6d9d380a87e"
+      },
+      {
+        "file": "src/acoustics/observation/SurfaceAcquisition.cs",
+        "bytes": 4284,
+        "sha256": "496349333402f7fcce8caa74b24fcf8f266740b57e429f1304a31f58fec7cc26"
+      },
+      {
+        "file": "src/acoustics/recording/GameplayRecording.cs",
+        "bytes": 9824,
+        "sha256": "aafd2e6187e5974e2ecb4a69b21e0232b55a5ab032343fd44508d31e4a9eb606"
+      },
+      {
+        "file": "src/acoustics/recording/RecordingContracts.cs",
+        "bytes": 7441,
+        "sha256": "5d52e186932367d0d36c30a3095a3aadf2ee5079da38f4add4ed8e02ce4e5376"
+      },
+      {
+        "file": "src/acoustics/recording/RecordingSession.cs",
+        "bytes": 24359,
+        "sha256": "7068ce9204dbf9c9be08d5dfa081bb1e6916eb0b55ba32e541aeeab09e6e6732"
+      },
+      {
+        "file": "src/acoustics/recording/StreamingLoopback.cs",
+        "bytes": 5970,
+        "sha256": "96e98e39965795be1a34eaa9679c3b9b492d15d908cb4d05233d73d1d8317ca6"
+      },
+      {
+        "file": "src/acoustics/research/local-geometry.mjs",
+        "bytes": 11692,
+        "sha256": "84b20261dd387e212f6c7a90c5b0ef7f94c1d42b78e5e8fa6cbeb99701a81cb7"
+      },
+      {
+        "file": "src/acoustics/streaming/causal.mjs",
+        "bytes": 40188,
+        "sha256": "d01fcd54dba17faa1048f52b99e8c9eefed1c5f31535ccaa6deadef4a8003105"
+      },
+      {
+        "file": "tools/Invoke-Latency031Experiment.ps1",
+        "bytes": 2857,
+        "sha256": "3f22b7abfd575db15085ea26bed9ed5172ce6a93e22db9a8a7b8b326a399d2c5"
+      },
+      {
+        "file": "tools/latency03-source-pins.mjs",
+        "bytes": 1325,
+        "sha256": "9292f070d6bf4d71daa7f9b9c221af836ca1f17756176f2b39b729f0502a3805"
+      },
+      {
+        "file": "tools/Prepare-Latency031Candidate.ps1",
+        "bytes": 8019,
+        "sha256": "c31d8ed4f653f74d92c12d8c2f2111b310a220f225689731da4df192f3fcdc74"
+      },
+      {
+        "file": "tools/Prepare-Latency03Kernels.mjs",
+        "bytes": 2243,
+        "sha256": "35ba6bb830152dd57c022e28145ea2c75723d7048ede6fe49e4ce00305d3574e"
+      },
+      {
+        "file": "tools/Run-Latency03EventWorker.mjs",
+        "bytes": 8047,
+        "sha256": "b923bfe853b0ceaac1d73f6889723ef074e326f00a4cb15758647fd58571e909"
+      }
+    ],
+    "sourcePins": [
+      {
+        "file": "src/acoustics/engine/contracts.mjs",
+        "sha256": "9672b34552cbe20b84f2ef3ab5d23b2cc7a12732e3663945742d7c8f21515b94"
+      },
+      {
+        "file": "src/acoustics/engine/paths.mjs",
+        "sha256": "8cd93bdd65aee69ec982f73eb12f1e834e0e82fd6dbffd99bb4bd22a9d70e92b"
+      },
+      {
+        "file": "src/acoustics/events/acquisition-capability.mjs",
+        "sha256": "de18efb0cfccee5ff191eae9d592451e1645fe20ec77a25cf353ebf634688a00"
+      },
+      {
+        "file": "src/acoustics/events/contracts.mjs",
+        "sha256": "e8dadc64400e3eafab689efcc96ad6d5b562603d1514ff094bd1afaf5f466e4e"
+      },
+      {
+        "file": "src/acoustics/events/fixture-scenes.mjs",
+        "sha256": "e9459a74700ddf650610ad9121e08761b9204e315c22bdc64b9b9b1680c97424"
+      },
+      {
+        "file": "src/acoustics/events/latency03-library.mjs",
+        "sha256": "2447b23d22e4438e48e46b69d674500d775343744d0343e71567cdc79590b974"
+      },
+      {
+        "file": "src/acoustics/events/prepared-path.mjs",
+        "sha256": "6749e62995f6297772d9d1aa46715c6e79d406c434690dd8b177b789a5be8017"
+      },
+      {
+        "file": "src/acoustics/events/wire.mjs",
+        "sha256": "b6de607179a15a116fde1956756dcc8efa5550f7a9af05edbae201b1d67b1fe3"
+      },
+      {
+        "file": "src/acoustics/experiments/Latency031NativeChild.cs",
+        "sha256": "b64b08f353e86e737d9ca1d42ad4ba1c3c3da4bc5fa5f4b4bc54b1e088a723ec"
+      },
+      {
+        "file": "src/acoustics/experiments/Latency031Supervision.cs",
+        "sha256": "a7d31d410b85a5b5da576daf2e3e5ab81f3ba91c48c903d86c8a1bb755d53da7"
+      },
+      {
+        "file": "src/acoustics/experiments/Latency031SupervisionReceipt.cs",
+        "sha256": "25e7ce93c4781b2cd89312dd1570e82b3a7a98da151e361437a54e2c1353f9df"
+      },
+      {
+        "file": "src/acoustics/experiments/Latency03Experiment.cs",
+        "sha256": "f3c0d6b7bff13eaa40d4a08daccc559afe6fa88644a8845754405a5bf326e312"
+      },
+      {
+        "file": "src/acoustics/experiments/Latency03ExperimentRun.cs",
+        "sha256": "62a008b9aaced6dc7eb9cae0f74503bfb6b1f7f1d8a8b5174892844ba43e93e3"
+      },
+      {
+        "file": "src/acoustics/experiments/Latency03WorkerAdmission.cs",
+        "sha256": "7af199ff5a7e1158281f0ef95a6569e5d2e38a36e969142cffe336da1039f9a7"
+      },
+      {
+        "file": "src/acoustics/geometry/GeometryCapture.cs",
+        "sha256": "16e5be0a38afb65a6c61145a162ddcfaece5c0ebd174e661970b05ce9c14aa4d"
+      },
+      {
+        "file": "src/acoustics/geometry/GeometryHostRelay.cs",
+        "sha256": "a23ea9ce6942e53536cffc0bcf404c6e197f22e053b864553dbae70ffcdbd97a"
+      },
+      {
+        "file": "src/acoustics/geometry/GeometryPipe.cs",
+        "sha256": "be13b59a8b75612f841e20a6cce73ed801799c71de68bea583cd9413ef188ded"
+      },
+      {
+        "file": "src/acoustics/host/Transport/CameraBasis.cs",
+        "sha256": "6da0749808bbdadcbc55f21c0529b31670e6e57d8f90c8643e0586c3b9f2fbaf"
+      },
+      {
+        "file": "src/acoustics/host/Transport/GameplayProtocol.cs",
+        "sha256": "5d098e294221cffa68f860cfe5efee6dbc7e6e1ba4914b3e5cdaecbe021e9180"
+      },
+      {
+        "file": "src/acoustics/host/Transport/ListenerProtocol.cs",
+        "sha256": "7d76e16d4e4ab184d4074ef3751795c070308a1e51ba443c8e4e84a80faf027b"
+      },
+      {
+        "file": "src/acoustics/host/Transport/OwnedProcessJob.cs",
+        "sha256": "13affdb31931e452bae3123f806c4ed4603e8800e28a96651d7867f608bde188"
+      },
+      {
+        "file": "src/acoustics/host/Transport/PipeDeadline.cs",
+        "sha256": "faf31e5a598dbfeb406f2f3ff24281ed0fd4e81d6d5eb50812fbdc076bed86a9"
+      },
+      {
+        "file": "src/acoustics/host/Transport/PlayableConfiguration.cs",
+        "sha256": "7c93d41be09d1ed91bab8e9fdacb8f15c24d056f0c4dd6c8a0f5849453ead1c5"
+      },
+      {
+        "file": "src/acoustics/host/Transport/StatePipe.cs",
+        "sha256": "67da56ca63bca4bb3631b1f6ae790148937ffe40766a6c06a92ab9cdf4c4534d"
+      },
+      {
+        "file": "src/acoustics/host/Windows/AcousticSettings.cs",
+        "sha256": "26430407cf2decb3e756ef38ce2cea76dec841be46089361289e4e31a6507953"
+      },
+      {
+        "file": "src/acoustics/host/Windows/BatiPlaybackSession.cs",
+        "sha256": "f43bf57271faff67a84e8aaf41b11d19c90293e88a78d6a4e490c411e6ad4162"
+      },
+      {
+        "file": "src/acoustics/host/Windows/GameplayFixtureLatency.cs",
+        "sha256": "3ec89182f06f4e4857d4b7a67d028e4ab237c933313c5ac8d17acd75f149df3f"
+      },
+      {
+        "file": "src/acoustics/host/Windows/GameplayHost.cs",
+        "sha256": "8f0e929d1a3acbc2c8d86650aceb91b9292cce3129fa6c35b1f2840461057d13"
+      },
+      {
+        "file": "src/acoustics/host/Windows/GameplayLatencyProfile.cs",
+        "sha256": "6dad593e321834b58c33938fc06b89bb9b40dcf096e07a8239b8839787afcedd"
+      },
+      {
+        "file": "src/acoustics/host/Windows/GameplayRuntime.cs",
+        "sha256": "c9a39e081a92a1f6f6d62352d65a06dcb93d622cfc63981bcb438f4777be0114"
+      },
+      {
+        "file": "src/acoustics/host/Windows/GeometryRelayHost.cs",
+        "sha256": "084cf1f5f7ca103e9d8eaa74bff399085571bc85a2f284e21dbc15ce40e98864"
+      },
+      {
+        "file": "src/acoustics/host/Windows/HostListeningFixture.cs",
+        "sha256": "6620ead7b52423e982935510be2c0383a86d061863ea77230a19b1cf2d27c86e"
+      },
+      {
+        "file": "src/acoustics/host/Windows/HostProgram.cs",
+        "sha256": "8ef000a0c99ef353e12f74a21b85c9abbb8c3e2678473d71b1eaed0233d560c8"
+      },
+      {
+        "file": "src/acoustics/host/Windows/HostShutdown.cs",
+        "sha256": "6185f1abb26aad313f82e8c1f51b512b23ebb6dda11ddcdc91a75c22ecc8f122"
+      },
+      {
+        "file": "src/acoustics/host/Windows/InGameRecordingBridge.cs",
+        "sha256": "908674c808ed97a9fc2804bf5b3c98e6d638e794ee49d559c78fc0dd594d4393"
+      },
+      {
+        "file": "src/acoustics/host/Windows/InGameSettingsBridge.cs",
+        "sha256": "02d5989950ae202df4c74cbafdd7b08530ec90df9ad3fa5290eabc0ecdd7485a"
+      },
+      {
+        "file": "src/acoustics/host/Windows/Latency03Interop.cs",
+        "sha256": "1ec2b8e9c1913b5db4be0939c382a9e3c9f2926650e6bdc1b15ab9667fd36a99"
+      },
+      {
+        "file": "src/acoustics/host/Windows/Latency03OutputSession.cs",
+        "sha256": "80b0d35f7d18858b07006870ea4d934b431740f7f06964037433e99a824a5769"
+      },
+      {
+        "file": "src/acoustics/host/Windows/Latency03PresentationClock.cs",
+        "sha256": "aaea922cbf526a4c9b50a53875b13d06abfe45a40f3ce92e8bfa4ccff29d6bde"
+      },
+      {
+        "file": "src/acoustics/host/Windows/LoopbackCapture.cs",
+        "sha256": "381739e7125d64536cf8066c61f62994c32c871d9240d4233e3d0b783a633c39"
+      },
+      {
+        "file": "src/acoustics/host/Windows/MenuDiagnostic.cs",
+        "sha256": "d1e1dc79fa02eb840085f474c90db30fb75c5f142941e3753396829c14c88d43"
+      },
+      {
+        "file": "src/acoustics/host/Windows/OwnedOutputTap.cs",
+        "sha256": "1a9e4581a225a5a440fcff942706d299b7e25d8e89eefcea9edee9b932d66af5"
+      },
+      {
+        "file": "src/acoustics/host/Windows/PassiveSoundMapBridge.cs",
+        "sha256": "4bcbe4577f8380736b8675961c6161d204851ea7088276070871e22c1faa2d3d"
+      },
+      {
+        "file": "src/acoustics/host/Windows/PcmRing.cs",
+        "sha256": "70069ca231812c26900d89c9829fe78da18b57963bf64cedbd70b1ce342c531c"
+      },
+      {
+        "file": "src/acoustics/host/Windows/PreparedTransientBus.cs",
+        "sha256": "03afe828173050c64071311492c6a2d97d3262243a4cd0618c8324fb6dd82a93"
+      },
+      {
+        "file": "src/acoustics/host/Windows/SharedPeriodPlan.cs",
+        "sha256": "4c2260f1cbe95ebf9d63fab1e7c5f97b68bf4e3cd5283239d4743bfa5a8abf5b"
+      },
+      {
+        "file": "src/acoustics/host/Windows/TransientEventProtocol.cs",
+        "sha256": "25e2442393c59864eeeec3a2dc44078d838b67bfceefe70bfdf029c12f5ce53f"
+      },
+      {
+        "file": "src/acoustics/host/Windows/WasapiInterop.cs",
+        "sha256": "1ec3843bfff96f605e2b492d1add165719cc332aee6449773af78850764d7823"
+      },
+      {
+        "file": "src/acoustics/host/Windows/WasapiOutput.cs",
+        "sha256": "5fe7dfa2347aadf5e17f7954d13c36b1b041e771f4cea3bc4dc54577506336f2"
+      },
+      {
+        "file": "src/acoustics/observation/DiagnosticTile.cs",
+        "sha256": "905257bedb01671c2a5f9e9b7c63aae920061750502c27f1d741e37307d5e8fa"
+      },
+      {
+        "file": "src/acoustics/observation/GeometryObservation.cs",
+        "sha256": "93a7d4a22e43bb8c6739c26fa9eab9f9c836ab95556b6075fbe7e6d9d380a87e"
+      },
+      {
+        "file": "src/acoustics/observation/SurfaceAcquisition.cs",
+        "sha256": "496349333402f7fcce8caa74b24fcf8f266740b57e429f1304a31f58fec7cc26"
+      },
+      {
+        "file": "src/acoustics/recording/GameplayRecording.cs",
+        "sha256": "aafd2e6187e5974e2ecb4a69b21e0232b55a5ab032343fd44508d31e4a9eb606"
+      },
+      {
+        "file": "src/acoustics/recording/RecordingContracts.cs",
+        "sha256": "5d52e186932367d0d36c30a3095a3aadf2ee5079da38f4add4ed8e02ce4e5376"
+      },
+      {
+        "file": "src/acoustics/recording/RecordingSession.cs",
+        "sha256": "7068ce9204dbf9c9be08d5dfa081bb1e6916eb0b55ba32e541aeeab09e6e6732"
+      },
+      {
+        "file": "src/acoustics/recording/StreamingLoopback.cs",
+        "sha256": "96e98e39965795be1a34eaa9679c3b9b492d15d908cb4d05233d73d1d8317ca6"
+      },
+      {
+        "file": "src/acoustics/research/local-geometry.mjs",
+        "sha256": "84b20261dd387e212f6c7a90c5b0ef7f94c1d42b78e5e8fa6cbeb99701a81cb7"
+      },
+      {
+        "file": "src/acoustics/streaming/causal.mjs",
+        "sha256": "d01fcd54dba17faa1048f52b99e8c9eefed1c5f31535ccaa6deadef4a8003105"
+      },
+      {
+        "file": "tools/Invoke-Latency031Experiment.ps1",
+        "sha256": "3f22b7abfd575db15085ea26bed9ed5172ce6a93e22db9a8a7b8b326a399d2c5"
+      },
+      {
+        "file": "tools/latency03-source-pins.mjs",
+        "sha256": "9292f070d6bf4d71daa7f9b9c221af836ca1f17756176f2b39b729f0502a3805"
+      },
+      {
+        "file": "tools/Prepare-Latency031Candidate.ps1",
+        "sha256": "c31d8ed4f653f74d92c12d8c2f2111b310a220f225689731da4df192f3fcdc74"
+      },
+      {
+        "file": "tools/Prepare-Latency03Kernels.mjs",
+        "sha256": "35ba6bb830152dd57c022e28145ea2c75723d7048ede6fe49e4ce00305d3574e"
+      },
+      {
+        "file": "tools/Run-Latency03EventWorker.mjs",
+        "sha256": "b923bfe853b0ceaac1d73f6889723ef074e326f00a4cb15758647fd58571e909"
+      }
+    ],
+    "clockPolicy": "ArrivedPositionInterval031",
+    "maximumBracketFrames": 512,
+    "maximumAnchorGapMilliseconds": 20,
+    "maximumRateResidualFrames": 512,
+    "minimumAdvancingSamples": 3,
+    "exactPrivatePathBound": true,
+    "endpointIdentityPrivate": true,
+    "selectedHistoricalEndpointReverified": true,
+    "validationPassed": true,
+    "validationSha256": "93a89db5780cd7eacd62c744768acd7b377e030f3223a90354033ea9c878d56f",
+    "preparationReceiptSha256": "756a98f6110cb6d84f09e9bf8525ef183c72f438463f610124edfe93df115ef7",
+    "unconsumed": true,
+    "resultsAbsent": true,
+    "liveApprovalRequired": true
+  },
+  "retainedOriginal": {
+    "filesVerified": 74,
+    "originalBeforeInventorySha256": "c95da8780b2d007247c567b47aca434977b8bebc391f0d1408d35a608b667dcf",
+    "allOriginalBytesUnchanged": true,
+    "consumed": true,
+    "supervisionReceiptStillMissing": true,
+    "failedResultSha256": "3585fc93e5dcff4984046cde5fa13815cc7d72e0c7c406d3392c7292845b8a32",
+    "oldManifestSha256": "58f92cdc399a86e86e70587f6124cb837eaa82d604e86c7ec327b05296640432",
+    "oldProposalSha256": "0cfcb4577178186ef41e493bb660aa29ebce69956782c980e5d998b1818b2c79"
+  },
+  "unchangedInputs": {
+    "batiSha256": "e86d54d9f305b24dd86264d456f3f8786e741c0aaaaeab42a82bd70016a021fe",
+    "kernelPayloadSha256": "833a27460efc3a9f2774859b7a097cf2c7ea881f0095f7b4091dc9a0a6c4868c",
+    "eventWorkerSha256": "b923bfe853b0ceaac1d73f6889723ef074e326f00a4cb15758647fd58571e909",
+    "originalPlanIdentical": true,
+    "plannedEvents": 526,
+    "requestedPeriodFrames": 0,
+    "gain": 1,
+    "batiFrames": 1594176
+  },
+  "clock": {
+    "checks": 6812,
+    "oldReason4ResidualMilliseconds": 0.7013,
+    "oldReason4BudgetMilliseconds": 0.04186666666666667,
+    "sixOriginalRowsVerified": true,
+    "oldConstructorEpochRetained": false,
+    "replayEpoch": "Retained Start-before QPC before every query; not claimed recovered BindClock construction input",
+    "newFinalLowerFrame": 1440,
+    "newFinalUpperFrame": 1922,
+    "newFullWidthFrames": 482,
+    "newFullWidthMilliseconds": 10.041666666666666,
+    "sourcePositionInterpolation": false,
+    "futureExtrapolation": false,
+    "policy": "Arrived qualified monotonic bounds; conservative upper observed anchor plus one-sided margin once",
+    "boundsAreEngineeringAdmissionNotDriverCalibration": true,
+    "adverse": {
+      "authoredJitterMilliseconds": [
+        10,
+        20.7,
+        30.5,
+        40,
+        50.6
+      ],
+      "authoredNominalDriftPpm": 100,
+      "driftSamples": 5000,
+      "maximumLocalPhaseResidualFrames": 6.999999999997897,
+      "onePercentDriftRejectedAtSample": 110,
+      "scope": "Authored clocks prove admission behavior only; no calibrated driver frequency claim"
+    },
+    "pureClockCost": {
+      "iterations": 4950,
+      "allocatedBytes": 0,
+      "elapsedMilliseconds": 1.4447,
+      "scope": "Managed warmed pure-clock throughput, not an endpoint callback benchmark"
+    }
+  },
+  "supervision": {
+    "nativeChecks": 126,
+    "nativeFixturesAllOriginalLifetimesAbsent": true,
+    "productionFaultSwitchesAbsent": true,
+    "sourcePinsBeforeCompilationAndUnchangedAfter": true,
+    "nativeIntegrationChecks": 44,
+    "integrationOriginalLifetimesAbsent": true,
+    "policyChecks": 16,
+    "exactRootAdmissionChecks": 21,
+    "authoritativeOriginalKernelHandles": true,
+    "jobAssignmentBeforeResume": true,
+    "realExitCode259Handled": true,
+    "forcedZeroExitCannotPass": true,
+    "cleanupAndExecutionSeparate": true,
+    "stopRequestMilliseconds": 35000,
+    "hardContainmentMilliseconds": 42000,
+    "postCloseVerificationMilliseconds": 3000,
+    "internalOutputSeconds": 30,
+    "monotonicLateExitObservationFails": true,
+    "receiptIoFailureCannotBeOverriddenByParseableBytes": true,
+    "mandatoryIndependentManualPostflight": true
+  },
+  "diagnostics": {
+    "checks": 153,
+    "allocation": {
+      "measuredCallbacks": 24,
+      "allocatedBytes": 0,
+      "scope": "Warmed managed authored observations/admission/mixing only; not an actual callback cost claim"
+    },
+    "fullPrePostInitFormatsAndQueryBrackets": true,
+    "rawUnsignedClockDecimalCompanionAfterJoin": true,
+    "exceptionProvenanceSeparateFromEffectiveFailureMarker": true,
+    "freshnessSkippedBoundsUnavailable": true,
+    "recording": false,
+    "endpointOpened": false,
+    "realComInstantiated": false
+  },
+  "regressions": {
+    "expandedOfflinePassed": true,
+    "fullOfflineLogSha256": "0e49b8af84fe49da19c44689f3847560f63bdc9ad2938b99fe554b499830275e",
+    "completeNodeFileCount": 78,
+    "nodePassed": 828,
+    "nodeFailed": 0,
+    "nodeSkipped": 0,
+    "fullNodeLogSha256": "c7a66f2e4391e2014f91afca8afa4222494d1d08575ee9290693dc298c93060b",
+    "genuinePrivateInputsUsed": true,
+    "sourceAndNativeFreshnessOwnershipDefaultsPreserved": true,
+    "newAudioQueue": false,
+    "additionalFixedAudioHistoryDelay": false,
+    "finalAdmissionRerunAfterFullyQualifiedGuard": true,
+    "testGroupsOverlap": true
+  },
+  "reviewPins": [
+    {
+      "scope": "Clock model independent source/math",
+      "sha256": "a72b64faf669f29a8a7540442299a75f056112b7eb1966307f8c1ffad8003fbe"
+    },
+    {
+      "scope": "Original process handles independent source/native fixtures",
+      "sha256": "72a23e4f2eb391188c6e22c713865a03017c5ac30b16e77bb93f8c3beb5a2c60"
+    },
+    {
+      "scope": "Scoped supervisor/controller/receipt source and native integration",
+      "sha256": "5057bfc9ca546d9ac8810072252e5bd4812a6d9be9b76bae854a55c3d51053fe"
+    },
+    {
+      "scope": "Root-owned callback diagnostics and format snapshots",
+      "sha256": "ec335acd27fbd7fd4bbbb6b74f7d3e9494d82fcdf7ec3c476fc34225cd4513ba"
+    },
+    {
+      "scope": "Preparation/invocation and exact-root admission",
+      "sha256": "e4b04e7c657fea9745bdfc886b7962850a403a70dc9599a89591ef31615f00a4"
+    },
+    {
+      "scope": "Primary Node preparation discovery correction",
+      "sha256": "14bea259a7169b9bd2d3a1fff3258eb4e9b2e81800effc947081a316fe255741"
+    }
+  ],
+  "preparationFailure": {
+    "candidateCreated": false,
+    "stage": "Primary Node application discovery/hash before first executable use",
+    "reason": "Application-filtered command lookup returned two executables; corrected reviewed selection requires one primary application and original known hash",
+    "observationSha256": "c62aaf7655baed2ced1dced5963d2866225397f46bc6f2bcef7a341464a84ca9",
+    "originalRedirectedErrorLogBytes": 0,
+    "rawErrorInRedirectedFile": false,
+    "limitation": "Terminating PowerShell error propagated to the tool; observation receipt is not labeled raw stderr"
+  },
+  "unreviewedDraftClarification": {
+    "initialDraftPreserved": true,
+    "clarificationSha256": "a4576c5770b2e1cd6559142c0a9cb539dd7c8a237b3335d1605dc33207fe3562",
+    "approvedArtifactModified": false,
+    "operationalArtifactModified": false
+  },
+  "newRealEndpointTiming": {
+    "attemptPerformed": false,
+    "samples": 0,
+    "p50": null,
+    "p95": null,
+    "p99": null,
+    "maximum": null,
+    "fakeReferenceMedianMilliseconds": 15.5493,
+    "comparisonUnavailable": true,
+    "physicalSpeakerLatencyMeasured": false
+  },
+  "boundaries": {
+    "realEndpointQueried": false,
+    "realEndpointOpened": false,
+    "gtaOrRphLaunched": false,
+    "deployed": false,
+    "liveRecording": false,
+    "nativeSuppression": false,
+    "oldCandidateOrApprovalReused": false,
+    "merged": false
+  }
+}

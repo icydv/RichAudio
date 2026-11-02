@@ -1,0 +1,1431 @@
+{
+  "schema": 1,
+  "kind": "latency-031-first-real-endpoint-result-sanitized",
+  "dateUtc": "2026-11-02",
+  "approvedHead": "e49c3ac3838b5fb941bc09aef0b9cfbebf048a6d",
+  "operationalSourceCommit": "14e23ee3ca6e2ca0c571a17deafcc6bde38e40e4",
+  "scope": "One approved shared-mode synthetic endpoint attempt; no GTA, recording, deployment, native suppression, retry or merge.",
+  "evidenceSha256": {
+    "proposal": "1f50da0effe5716467d54f10d03076dee709391003e32bf90600d4b664ae52bb",
+    "review": "f49a908a7c58f5163a05adaefd87cac95e043f9ca73c47ef768e2ccda9ad6702",
+    "manifest": "3c074154fde2c2502ffd5b996d02451dac51da1ef76513c6ae67b1c182565807",
+    "rawResult": "ac69bacc6d7f3bd42668aec103d9110521485d53848bcd3c15edc8e274d3f0f5",
+    "rawSupervision": "4e87c4bcaec3af52cdbbe8ca294461fb367e5c128c79e989d1ce9b296c341aa8",
+    "rootPreflight": "9f0a871cae4e5e73f775a4b8bae2372c1ebfa3eb096252f4e704f3fa575be3eb",
+    "independentPreflight": "f6999cb619ca44de236412ea96de45dcd212a97317034c04bcdb5588bd8b4279",
+    "rootPostflight": "abe37daa75db9b3815be4980c6e6375e517ddbc936034b8d5fd50c17b4aa44aa",
+    "independentPostflight": "e990864de9f9f818e1837b5aa31b98461fb13b398161f77b0dc8090a7fff7c8c",
+    "rootAnalysis": "aafc1b0d3783aa45c148212a8e8ef4015055280b61ffd1c4c0ee644ef85c8716",
+    "independentAnalysis": "58539b1aa3c4fc9c21757060a82c27092684faa3549503ad6ebd39c402febfd0"
+  },
+  "preflight": {
+    "payloadsMatched": 68,
+    "sourcesMatched": 63,
+    "originalCandidateFilesMatched": 72,
+    "unconsumedBeforeRun": true,
+    "forbiddenProcessesAbsent": true,
+    "originalInputsUnchanged": true,
+    "exactHeadCiPassed": true,
+    "freshDeviceFreeValidationMatchedSealedOutput": true,
+    "qpcAvailable": true,
+    "callbackAllocationCounterAvailable": true,
+    "listeningConditionsConfirmedImmediatelyBeforeRun": true
+  },
+  "endpoint": {
+    "label": "Headphones — Astro A50 Game",
+    "sharedMode": true,
+    "sampleRate": 48000,
+    "channels": 2,
+    "float32": true,
+    "requestedPeriodFrames": 0,
+    "currentPeriodFrames": 480,
+    "postInitializePeriodFrames": 480,
+    "capabilities": {
+      "default": 480,
+      "fundamental": 480,
+      "minimum": 480,
+      "maximum": 480
+    },
+    "bufferFrames": 1056,
+    "paddingFrames": {
+      "count": 2805,
+      "minimum": 576,
+      "mean": 576,
+      "median": 576,
+      "p95": 576,
+      "p99": 576,
+      "maximum": 576
+    },
+    "preferencesChanged": false,
+    "volumeChangedByExperiment": false,
+    "exclusiveMode": false,
+    "formatSupportHResult": 0,
+    "initializeHResult": 0
+  },
+  "acceptance": {
+    "passed": true,
+    "protocolPassed": true,
+    "audioAcceptancePassed": true,
+    "outerInvocationPassed": true,
+    "supervisionEvidenceComplete": true,
+    "independentPostflightPassed": true
+  },
+  "events": {
+    "planned": 526,
+    "observed": 526,
+    "written": 526,
+    "decoded": 526,
+    "ingressAccepted": 526,
+    "ingressRejected": 0,
+    "ordinaryPlanned": 462,
+    "ordinarySubmitted": 462,
+    "intentionalOverloadPlanned": 64,
+    "intentionalOverloadSubmitted": 27,
+    "voiceCapacityRejected": 37,
+    "protectedTailRejectionSubset": 10,
+    "neverSubmitted": 37,
+    "unreachedOrUnobserved": 0,
+    "submitted": 489,
+    "completed": 489,
+    "tailSteals": 0,
+    "postSubmissionRetirements": 0,
+    "expired": 0,
+    "invalidated": 0,
+    "queueFull": 0,
+    "peakVoices": 32
+  },
+  "quantiles": "sorted ceil((n-1)*q), upper median for even counts",
+  "observationToSubmissionMs": {
+    "allSubmitted": {
+      "count": 489,
+      "mean": 5.057342331288346,
+      "minimum": 0.4941,
+      "median": 4.9706,
+      "p95": 9.7309,
+      "p99": 11.4315,
+      "maximum": 17.3542
+    },
+    "ordinary": {
+      "count": 462,
+      "minimum": 0.4941,
+      "mean": 5.25749826839827,
+      "median": 5.1588,
+      "p95": 9.7815,
+      "p99": 11.4315,
+      "maximum": 17.3542
+    },
+    "nominalIsolatedAndAutomatic": {
+      "count": 70,
+      "mean": 5.540347142857143,
+      "minimum": 0.5799,
+      "median": 5.4977,
+      "p95": 9.7956,
+      "p99": 17.3542,
+      "maximum": 17.3542
+    }
+  },
+  "phases": [
+    {
+      "phase": "isolated",
+      "planned": 6,
+      "observed": 6,
+      "written": 6,
+      "decoded": 6,
+      "admitted": 6,
+      "submitted": 6,
+      "rejected": 0,
+      "neverSubmitted": 0,
+      "intentionalOverload": false,
+      "observationToWasapiSubmissionMs": {
+        "count": 6,
+        "mean": 7.882666666666666,
+        "minimum": 1.7923,
+        "median": 7.705,
+        "p95": 17.3542,
+        "p99": 17.3542,
+        "maximum": 17.3542
+      },
+      "stages": {
+        "occurrenceBracketWidthMs": {
+          "count": 6,
+          "minimum": 0,
+          "median": 0.0001,
+          "p95": 0.0001,
+          "p99": 0.0001,
+          "maximum": 0.0001
+        },
+        "observationToWriteStartMs": {
+          "count": 6,
+          "minimum": 0.0051,
+          "median": 0.0104,
+          "p95": 0.7565,
+          "p99": 0.7565,
+          "maximum": 0.7565
+        },
+        "observationToWriteCompleteMs": {
+          "count": 6,
+          "minimum": 0.091,
+          "median": 0.0993,
+          "p95": 1.0619,
+          "p99": 1.0619,
+          "maximum": 1.0619
+        },
+        "observationToDecodedMs": {
+          "count": 6,
+          "minimum": 0.4815,
+          "median": 0.5498,
+          "p95": 3.4655,
+          "p99": 3.4655,
+          "maximum": 3.4655
+        },
+        "observationToIngressAcceptanceMs": {
+          "count": 6,
+          "minimum": 0.4821,
+          "median": 0.5503,
+          "p95": 4.8526,
+          "p99": 4.8526,
+          "maximum": 4.8526
+        },
+        "observationToFirstWritablePacketFillBeforeMs": {
+          "count": 6,
+          "minimum": 1.782,
+          "median": 7.6935,
+          "p95": 14.8023,
+          "p99": 14.8023,
+          "maximum": 14.8023
+        },
+        "observationToFirstWritablePacketFillAfterMs": {
+          "count": 6,
+          "minimum": 1.7916,
+          "median": 7.7042,
+          "p95": 17.3525,
+          "p99": 17.3525,
+          "maximum": 17.3525
+        },
+        "observationToSuccessfulSubmissionMs": {
+          "count": 6,
+          "minimum": 1.7923,
+          "median": 7.705,
+          "p95": 17.3542,
+          "p99": 17.3542,
+          "maximum": 17.3542
+        },
+        "clockMappingWidthMs": {
+          "count": 6,
+          "minimum": 10.041666666666666,
+          "median": 10.041666666666666,
+          "p95": 10.041666666666666,
+          "p99": 10.041666666666666,
+          "maximum": 10.041666666666666
+        },
+        "occurrenceToArrivedRightAnchorMs": {
+          "count": 6,
+          "minimum": 1.7802999913692474,
+          "median": 5.560900002717972,
+          "p95": 9.446799993515015,
+          "p99": 9.446799993515015,
+          "maximum": 9.446799993515015
+        },
+        "compositeSchedulingLatenessMs": {
+          "count": 6,
+          "minimum": 22.625,
+          "median": 22.625,
+          "p95": 32.625,
+          "p99": 32.625,
+          "maximum": 32.625
+        },
+        "endpointPositionCrossingLowerMs": {
+          "count": 6,
+          "minimum": 31.119,
+          "median": 37.6916,
+          "p95": 44.8183,
+          "p99": 44.8183,
+          "maximum": 44.8183
+        },
+        "endpointPositionCrossingUpperMs": {
+          "count": 6,
+          "minimum": 41.0759,
+          "median": 47.6823,
+          "p95": 55.4967,
+          "p99": 55.4967,
+          "maximum": 55.4967
+        }
+      }
+    },
+    {
+      "phase": "automatic",
+      "planned": 64,
+      "observed": 64,
+      "written": 64,
+      "decoded": 64,
+      "admitted": 64,
+      "submitted": 64,
+      "rejected": 0,
+      "neverSubmitted": 0,
+      "intentionalOverload": false,
+      "observationToWasapiSubmissionMs": {
+        "count": 64,
+        "mean": 5.3207546875,
+        "minimum": 0.5799,
+        "median": 5.4702,
+        "p95": 9.7309,
+        "p99": 10.1011,
+        "maximum": 10.1011
+      },
+      "stages": {
+        "occurrenceBracketWidthMs": {
+          "count": 64,
+          "minimum": 0,
+          "median": 0,
+          "p95": 0.0001,
+          "p99": 0.0001,
+          "maximum": 0.0001
+        },
+        "observationToWriteStartMs": {
+          "count": 64,
+          "minimum": 0.0034,
+          "median": 0.0056,
+          "p95": 0.0164,
+          "p99": 0.0207,
+          "maximum": 0.0207
+        },
+        "observationToWriteCompleteMs": {
+          "count": 64,
+          "minimum": 0.0648,
+          "median": 0.0885,
+          "p95": 0.1145,
+          "p99": 0.2051,
+          "maximum": 0.2051
+        },
+        "observationToDecodedMs": {
+          "count": 64,
+          "minimum": 0.2527,
+          "median": 0.3396,
+          "p95": 0.4487,
+          "p99": 0.5876,
+          "maximum": 0.5876
+        },
+        "observationToIngressAcceptanceMs": {
+          "count": 64,
+          "minimum": 0.2533,
+          "median": 0.3402,
+          "p95": 0.4492,
+          "p99": 0.5886,
+          "maximum": 0.5886
+        },
+        "observationToFirstWritablePacketFillBeforeMs": {
+          "count": 64,
+          "minimum": 0.5621,
+          "median": 5.453,
+          "p95": 9.713,
+          "p99": 10.0832,
+          "maximum": 10.0832
+        },
+        "observationToFirstWritablePacketFillAfterMs": {
+          "count": 64,
+          "minimum": 0.5792,
+          "median": 5.4694,
+          "p95": 9.7302,
+          "p99": 10.1003,
+          "maximum": 10.1003
+        },
+        "observationToSuccessfulSubmissionMs": {
+          "count": 64,
+          "minimum": 0.5799,
+          "median": 5.4702,
+          "p95": 9.7309,
+          "p99": 10.1011,
+          "maximum": 10.1011
+        },
+        "clockMappingWidthMs": {
+          "count": 64,
+          "minimum": 10.020833333333334,
+          "median": 10.041666666666666,
+          "p95": 10.0625,
+          "p99": 10.0625,
+          "maximum": 10.0625
+        },
+        "occurrenceToArrivedRightAnchorMs": {
+          "count": 64,
+          "minimum": 0.08210000395774841,
+          "median": 5.17739999294281,
+          "p95": 9.702099978923798,
+          "p99": 9.858699977397919,
+          "maximum": 9.858699977397919
+        },
+        "compositeSchedulingLatenessMs": {
+          "count": 64,
+          "minimum": 22.604166666666668,
+          "median": 22.625,
+          "p95": 22.625,
+          "p99": 32.625,
+          "maximum": 32.625
+        },
+        "endpointPositionCrossingLowerMs": {
+          "count": 64,
+          "minimum": 30.5601,
+          "median": 35.4775,
+          "p95": 39.7419,
+          "p99": 40.088,
+          "maximum": 40.088
+        },
+        "endpointPositionCrossingUpperMs": {
+          "count": 64,
+          "minimum": 40.6168,
+          "median": 45.637,
+          "p95": 49.7726,
+          "p99": 50.398,
+          "maximum": 50.398
+        }
+      }
+    },
+    {
+      "phase": "bursts",
+      "planned": 128,
+      "observed": 128,
+      "written": 128,
+      "decoded": 128,
+      "admitted": 128,
+      "submitted": 128,
+      "rejected": 0,
+      "neverSubmitted": 0,
+      "intentionalOverload": false,
+      "observationToWasapiSubmissionMs": {
+        "count": 128,
+        "mean": 5.07863125,
+        "minimum": 0.6361,
+        "median": 5.6232,
+        "p95": 9.4004,
+        "p99": 10.5728,
+        "maximum": 10.6046
+      },
+      "stages": {
+        "occurrenceBracketWidthMs": {
+          "count": 128,
+          "minimum": 0,
+          "median": 0,
+          "p95": 0.0001,
+          "p99": 0.0001,
+          "maximum": 0.1191
+        },
+        "observationToWriteStartMs": {
+          "count": 128,
+          "minimum": 0.0005,
+          "median": 0.0011,
+          "p95": 0.0068,
+          "p99": 0.0156,
+          "maximum": 0.0386
+        },
+        "observationToWriteCompleteMs": {
+          "count": 128,
+          "minimum": 0.0137,
+          "median": 0.0215,
+          "p95": 0.0929,
+          "p99": 0.1192,
+          "maximum": 1.3511
+        },
+        "observationToDecodedMs": {
+          "count": 128,
+          "minimum": 0.2273,
+          "median": 0.3722,
+          "p95": 0.5355,
+          "p99": 1.4202,
+          "maximum": 1.5103
+        },
+        "observationToIngressAcceptanceMs": {
+          "count": 128,
+          "minimum": 0.2277,
+          "median": 0.3725,
+          "p95": 0.5359,
+          "p99": 1.4206,
+          "maximum": 1.5109
+        },
+        "observationToFirstWritablePacketFillBeforeMs": {
+          "count": 128,
+          "minimum": 0.6113,
+          "median": 5.5967,
+          "p95": 9.3718,
+          "p99": 10.5472,
+          "maximum": 10.579
+        },
+        "observationToFirstWritablePacketFillAfterMs": {
+          "count": 128,
+          "minimum": 0.6354,
+          "median": 5.6224,
+          "p95": 9.3992,
+          "p99": 10.5721,
+          "maximum": 10.6039
+        },
+        "observationToSuccessfulSubmissionMs": {
+          "count": 128,
+          "minimum": 0.6361,
+          "median": 5.6232,
+          "p95": 9.4004,
+          "p99": 10.5728,
+          "maximum": 10.6046
+        },
+        "clockMappingWidthMs": {
+          "count": 128,
+          "minimum": 10.020833333333334,
+          "median": 10.041666666666666,
+          "p95": 10.0625,
+          "p99": 10.0625,
+          "maximum": 10.0625
+        },
+        "occurrenceToArrivedRightAnchorMs": {
+          "count": 128,
+          "minimum": 0.5455999970436096,
+          "median": 5.559799998998642,
+          "p95": 9.346499979496002,
+          "p99": 9.467099994421005,
+          "maximum": 9.47969999909401
+        },
+        "compositeSchedulingLatenessMs": {
+          "count": 128,
+          "minimum": 22.604166666666668,
+          "median": 22.625,
+          "p95": 22.625,
+          "p99": 32.625,
+          "maximum": 32.625
+        },
+        "endpointPositionCrossingLowerMs": {
+          "count": 128,
+          "minimum": 30.608,
+          "median": 35.5935,
+          "p95": 39.0179,
+          "p99": 40.5389,
+          "maximum": 40.5707
+        },
+        "endpointPositionCrossingUpperMs": {
+          "count": 128,
+          "minimum": 40.6021,
+          "median": 45.5186,
+          "p95": 49.0044,
+          "p99": 50.5775,
+          "maximum": 50.6093
+        }
+      }
+    },
+    {
+      "phase": "impacts",
+      "planned": 160,
+      "observed": 160,
+      "written": 160,
+      "decoded": 160,
+      "admitted": 160,
+      "submitted": 160,
+      "rejected": 0,
+      "neverSubmitted": 0,
+      "intentionalOverload": false,
+      "observationToWasapiSubmissionMs": {
+        "count": 160,
+        "mean": 4.939964375,
+        "minimum": 0.8717,
+        "median": 4.418,
+        "p95": 9.6516,
+        "p99": 10.3177,
+        "maximum": 10.3979
+      },
+      "stages": {
+        "occurrenceBracketWidthMs": {
+          "count": 160,
+          "minimum": 0,
+          "median": 0,
+          "p95": 0.0001,
+          "p99": 0.0001,
+          "maximum": 0.0001
+        },
+        "observationToWriteStartMs": {
+          "count": 160,
+          "minimum": 0.0005,
+          "median": 0.001,
+          "p95": 0.0083,
+          "p99": 0.0111,
+          "maximum": 0.0154
+        },
+        "observationToWriteCompleteMs": {
+          "count": 160,
+          "minimum": 0.0129,
+          "median": 0.0191,
+          "p95": 0.0863,
+          "p99": 0.0939,
+          "maximum": 0.1072
+        },
+        "observationToDecodedMs": {
+          "count": 160,
+          "minimum": 0.2396,
+          "median": 0.3456,
+          "p95": 0.4947,
+          "p99": 0.6242,
+          "maximum": 0.638
+        },
+        "observationToIngressAcceptanceMs": {
+          "count": 160,
+          "minimum": 0.2398,
+          "median": 0.3463,
+          "p95": 0.4951,
+          "p99": 0.6244,
+          "maximum": 0.6384
+        },
+        "observationToFirstWritablePacketFillBeforeMs": {
+          "count": 160,
+          "minimum": 0.8387,
+          "median": 4.3847,
+          "p95": 9.6187,
+          "p99": 10.2852,
+          "maximum": 10.3654
+        },
+        "observationToFirstWritablePacketFillAfterMs": {
+          "count": 160,
+          "minimum": 0.871,
+          "median": 4.4173,
+          "p95": 9.6506,
+          "p99": 10.3169,
+          "maximum": 10.3971
+        },
+        "observationToSuccessfulSubmissionMs": {
+          "count": 160,
+          "minimum": 0.8717,
+          "median": 4.418,
+          "p95": 9.6516,
+          "p99": 10.3177,
+          "maximum": 10.3979
+        },
+        "clockMappingWidthMs": {
+          "count": 160,
+          "minimum": 10.020833333333334,
+          "median": 10.041666666666666,
+          "p95": 10.0625,
+          "p99": 10.0625,
+          "maximum": 10.0625
+        },
+        "occurrenceToArrivedRightAnchorMs": {
+          "count": 160,
+          "minimum": 0.8364000022411346,
+          "median": 4.382299989461899,
+          "p95": 9.616299986839294,
+          "p99": 10.282999992370605,
+          "maximum": 10.363199979066849
+        },
+        "compositeSchedulingLatenessMs": {
+          "count": 160,
+          "minimum": 22.583333333333332,
+          "median": 26.0625,
+          "p95": 26.104166666666668,
+          "p99": 26.104166666666668,
+          "maximum": 26.104166666666668
+        },
+        "endpointPositionCrossingLowerMs": {
+          "count": 160,
+          "minimum": 30.883,
+          "median": 34.3534,
+          "p95": 39.3385,
+          "p99": 39.5743,
+          "maximum": 39.6545
+        },
+        "endpointPositionCrossingUpperMs": {
+          "count": 160,
+          "minimum": 40.8512,
+          "median": 44.3779,
+          "p95": 49.3355,
+          "p99": 49.5753,
+          "maximum": 49.6555
+        }
+      }
+    },
+    {
+      "phase": "transport-jitter",
+      "planned": 40,
+      "observed": 40,
+      "written": 40,
+      "decoded": 40,
+      "admitted": 40,
+      "submitted": 40,
+      "rejected": 0,
+      "neverSubmitted": 0,
+      "intentionalOverload": false,
+      "observationToWasapiSubmissionMs": {
+        "count": 40,
+        "mean": 6.590375,
+        "minimum": 2.427,
+        "median": 6.0115,
+        "p95": 11.9212,
+        "p99": 12.0613,
+        "maximum": 12.0613
+      },
+      "stages": {
+        "occurrenceBracketWidthMs": {
+          "count": 40,
+          "minimum": 0,
+          "median": 0,
+          "p95": 0.0001,
+          "p99": 0.0001,
+          "maximum": 0.0001
+        },
+        "observationToWriteStartMs": {
+          "count": 40,
+          "minimum": 2,
+          "median": 2.0001,
+          "p95": 2.0002,
+          "p99": 2.0002,
+          "maximum": 2.0002
+        },
+        "observationToWriteCompleteMs": {
+          "count": 40,
+          "minimum": 2.0531,
+          "median": 2.0698,
+          "p95": 2.0899,
+          "p99": 2.0974,
+          "maximum": 2.0974
+        },
+        "observationToDecodedMs": {
+          "count": 40,
+          "minimum": 2.2119,
+          "median": 2.2889,
+          "p95": 2.3371,
+          "p99": 2.4985,
+          "maximum": 2.4985
+        },
+        "observationToIngressAcceptanceMs": {
+          "count": 40,
+          "minimum": 2.2125,
+          "median": 2.2895,
+          "p95": 2.3379,
+          "p99": 2.4995,
+          "maximum": 2.4995
+        },
+        "observationToFirstWritablePacketFillBeforeMs": {
+          "count": 40,
+          "minimum": 2.4133,
+          "median": 5.9953,
+          "p95": 11.8985,
+          "p99": 12.0455,
+          "maximum": 12.0455
+        },
+        "observationToFirstWritablePacketFillAfterMs": {
+          "count": 40,
+          "minimum": 2.4262,
+          "median": 6.0105,
+          "p95": 11.9204,
+          "p99": 12.0604,
+          "maximum": 12.0604
+        },
+        "observationToSuccessfulSubmissionMs": {
+          "count": 40,
+          "minimum": 2.427,
+          "median": 6.0115,
+          "p95": 11.9212,
+          "p99": 12.0613,
+          "maximum": 12.0613
+        },
+        "clockMappingWidthMs": {
+          "count": 40,
+          "minimum": 10.020833333333334,
+          "median": 10.041666666666666,
+          "p95": 10.083333333333334,
+          "p99": 10.083333333333334,
+          "maximum": 10.083333333333334
+        },
+        "occurrenceToArrivedRightAnchorMs": {
+          "count": 40,
+          "minimum": 0.04659998416900635,
+          "median": 3.6082000136375427,
+          "p95": 8.533399999141693,
+          "p99": 8.954900026321411,
+          "maximum": 8.954900026321411
+        },
+        "compositeSchedulingLatenessMs": {
+          "count": 40,
+          "minimum": 22.083333333333332,
+          "median": 22.625,
+          "p95": 32.625,
+          "p99": 32.625,
+          "maximum": 32.625
+        },
+        "endpointPositionCrossingLowerMs": {
+          "count": 40,
+          "minimum": 32.4198,
+          "median": 35.9828,
+          "p95": 41.9258,
+          "p99": 42.7435,
+          "maximum": 42.7435
+        },
+        "endpointPositionCrossingUpperMs": {
+          "count": 40,
+          "minimum": 42.3992,
+          "median": 45.9901,
+          "p95": 52.0493,
+          "p99": 52.5169,
+          "maximum": 52.5169
+        }
+      }
+    },
+    {
+      "phase": "bounded-cpu",
+      "planned": 64,
+      "observed": 64,
+      "written": 64,
+      "decoded": 64,
+      "admitted": 64,
+      "submitted": 64,
+      "rejected": 0,
+      "neverSubmitted": 0,
+      "intentionalOverload": false,
+      "observationToWasapiSubmissionMs": {
+        "count": 64,
+        "mean": 5.2666531249999995,
+        "minimum": 0.4941,
+        "median": 5.3253,
+        "p95": 9.5636,
+        "p99": 10.1731,
+        "maximum": 10.1731
+      },
+      "stages": {
+        "occurrenceBracketWidthMs": {
+          "count": 64,
+          "minimum": 0,
+          "median": 0,
+          "p95": 0.0001,
+          "p99": 0.0001,
+          "maximum": 0.0001
+        },
+        "observationToWriteStartMs": {
+          "count": 64,
+          "minimum": 0.0033,
+          "median": 0.0055,
+          "p95": 0.0138,
+          "p99": 0.0154,
+          "maximum": 0.0154
+        },
+        "observationToWriteCompleteMs": {
+          "count": 64,
+          "minimum": 0.0574,
+          "median": 0.0828,
+          "p95": 0.096,
+          "p99": 0.1023,
+          "maximum": 0.1023
+        },
+        "observationToDecodedMs": {
+          "count": 64,
+          "minimum": 0.2196,
+          "median": 0.306,
+          "p95": 0.3428,
+          "p99": 0.4096,
+          "maximum": 0.4096
+        },
+        "observationToIngressAcceptanceMs": {
+          "count": 64,
+          "minimum": 0.2201,
+          "median": 0.3066,
+          "p95": 0.3438,
+          "p99": 0.4105,
+          "maximum": 0.4105
+        },
+        "observationToFirstWritablePacketFillBeforeMs": {
+          "count": 64,
+          "minimum": 0.476,
+          "median": 5.3058,
+          "p95": 9.5453,
+          "p99": 10.1565,
+          "maximum": 10.1565
+        },
+        "observationToFirstWritablePacketFillAfterMs": {
+          "count": 64,
+          "minimum": 0.4935,
+          "median": 5.3244,
+          "p95": 9.5627,
+          "p99": 10.1727,
+          "maximum": 10.1727
+        },
+        "observationToSuccessfulSubmissionMs": {
+          "count": 64,
+          "minimum": 0.4941,
+          "median": 5.3253,
+          "p95": 9.5636,
+          "p99": 10.1731,
+          "maximum": 10.1731
+        },
+        "clockMappingWidthMs": {
+          "count": 64,
+          "minimum": 10.020833333333334,
+          "median": 10.041666666666666,
+          "p95": 10.0625,
+          "p99": 10.0625,
+          "maximum": 10.0625
+        },
+        "occurrenceToArrivedRightAnchorMs": {
+          "count": 64,
+          "minimum": 0.17870000004768372,
+          "median": 5.215700000524521,
+          "p95": 9.470800012350082,
+          "p99": 9.874799996614456,
+          "maximum": 9.874799996614456
+        },
+        "compositeSchedulingLatenessMs": {
+          "count": 64,
+          "minimum": 22.583333333333332,
+          "median": 22.625,
+          "p95": 22.625,
+          "p99": 32.604166666666664,
+          "maximum": 32.604166666666664
+        },
+        "endpointPositionCrossingLowerMs": {
+          "count": 64,
+          "minimum": 29.8205,
+          "median": 35.2717,
+          "p95": 39.5427,
+          "p99": 40.3095,
+          "maximum": 40.3095
+        },
+        "endpointPositionCrossingUpperMs": {
+          "count": 64,
+          "minimum": 39.804,
+          "median": 45.2146,
+          "p95": 49.4608,
+          "p99": 50.1535,
+          "maximum": 50.1535
+        }
+      }
+    },
+    {
+      "phase": "intentional-overload",
+      "planned": 64,
+      "observed": 64,
+      "written": 64,
+      "decoded": 64,
+      "admitted": 64,
+      "submitted": 27,
+      "rejected": 37,
+      "neverSubmitted": 37,
+      "intentionalOverload": true,
+      "observationToWasapiSubmissionMs": {
+        "count": 27,
+        "mean": 1.6324518518518518,
+        "minimum": 0.5271,
+        "median": 1.8557,
+        "p95": 2.2371,
+        "p99": 2.3034,
+        "maximum": 2.3034
+      },
+      "stages": {
+        "occurrenceBracketWidthMs": {
+          "count": 64,
+          "minimum": 0,
+          "median": 0,
+          "p95": 0.0001,
+          "p99": 0.0001,
+          "maximum": 0.0001
+        },
+        "observationToWriteStartMs": {
+          "count": 64,
+          "minimum": 0.0004,
+          "median": 0.0005,
+          "p95": 0.0032,
+          "p99": 0.0059,
+          "maximum": 0.0059
+        },
+        "observationToWriteCompleteMs": {
+          "count": 64,
+          "minimum": 0.015,
+          "median": 0.0184,
+          "p95": 0.2349,
+          "p99": 0.4054,
+          "maximum": 0.4054
+        },
+        "observationToDecodedMs": {
+          "count": 64,
+          "minimum": 0.2323,
+          "median": 0.5783,
+          "p95": 0.8183,
+          "p99": 0.9214,
+          "maximum": 0.9214
+        },
+        "observationToIngressAcceptanceMs": {
+          "count": 64,
+          "minimum": 0.2324,
+          "median": 0.5785,
+          "p95": 0.8185,
+          "p99": 0.9219,
+          "maximum": 0.9219
+        },
+        "observationToFirstWritablePacketFillBeforeMs": {
+          "count": 64,
+          "minimum": 0.4579,
+          "median": 1.8577,
+          "p95": 10.4329,
+          "p99": 10.4816,
+          "maximum": 10.4816
+        },
+        "observationToFirstWritablePacketFillAfterMs": {
+          "count": 64,
+          "minimum": 0.5263,
+          "median": 1.9261,
+          "p95": 10.4808,
+          "p99": 10.5295,
+          "maximum": 10.5295
+        },
+        "observationToSuccessfulSubmissionMs": {
+          "count": 27,
+          "minimum": 0.5271,
+          "median": 1.8557,
+          "p95": 2.2371,
+          "p99": 2.3034,
+          "maximum": 2.3034
+        },
+        "clockMappingWidthMs": {
+          "count": 64,
+          "minimum": 10.041666666666666,
+          "median": 10.041666666666666,
+          "p95": 10.041666666666666,
+          "p99": 10.0625,
+          "maximum": 10.0625
+        },
+        "occurrenceToArrivedRightAnchorMs": {
+          "count": 64,
+          "minimum": 0.006400018930435181,
+          "median": 1.2761000096797943,
+          "p95": 2.165600001811981,
+          "p99": 9.63960000872612,
+          "maximum": 9.63960000872612
+        },
+        "compositeSchedulingLatenessMs": {
+          "count": 27,
+          "minimum": 22.625,
+          "median": 22.625,
+          "p95": 26.104166666666668,
+          "p99": 29.708333333333332,
+          "maximum": 29.708333333333332
+        },
+        "endpointPositionCrossingLowerMs": {
+          "count": 27,
+          "minimum": 30.46,
+          "median": 31.7886,
+          "p95": 32.17,
+          "p99": 32.2363,
+          "maximum": 32.2363
+        },
+        "endpointPositionCrossingUpperMs": {
+          "count": 27,
+          "minimum": 40.4541,
+          "median": 41.7827,
+          "p95": 42.1641,
+          "p99": 42.2304,
+          "maximum": 42.2304
+        }
+      }
+    }
+  ],
+  "aggregateStages": {
+    "observationToWriteStartMs": {
+      "count": 526,
+      "minimum": 0.0004,
+      "mean": 0.15681026615969595,
+      "median": 0.0028,
+      "p95": 2,
+      "p99": 2.0001,
+      "maximum": 2.0002
+    },
+    "observationToWriteCompleteMs": {
+      "count": 526,
+      "minimum": 0.0129,
+      "mean": 0.20853117870722435,
+      "median": 0.0311,
+      "p95": 2.0673,
+      "p99": 2.0785,
+      "maximum": 2.0974
+    },
+    "writeCallMs": {
+      "count": 526,
+      "minimum": 0.0124,
+      "mean": 0.051720912547528516,
+      "median": 0.0292,
+      "p95": 0.0937,
+      "p99": 0.2344,
+      "maximum": 1.3481
+    },
+    "writeCompleteToDecodedMs": {
+      "count": 526,
+      "minimum": 0.1553,
+      "mean": 0.33719182509505713,
+      "median": 0.2894,
+      "p95": 0.597,
+      "p99": 0.7744,
+      "maximum": 2.4036
+    },
+    "observationToDecodedMs": {
+      "count": 526,
+      "minimum": 0.2196,
+      "mean": 0.5457230038022818,
+      "median": 0.3571,
+      "p95": 2.2807,
+      "p99": 2.3211,
+      "maximum": 3.4655
+    },
+    "decodedToAdmissionMs": {
+      "count": 526,
+      "minimum": 0.0001,
+      "mean": 0.0031068441064638777,
+      "median": 0.0005,
+      "p95": 0.0009,
+      "p99": 0.001,
+      "maximum": 1.3871
+    },
+    "observationToAdmissionMs": {
+      "count": 526,
+      "minimum": 0.2201,
+      "mean": 0.5488298479087451,
+      "median": 0.3582,
+      "p95": 2.2812,
+      "p99": 2.3217,
+      "maximum": 4.8526
+    },
+    "observationToSubmissionMs": {
+      "count": 489,
+      "minimum": 0.4941,
+      "mean": 5.057342331288346,
+      "median": 4.9706,
+      "p95": 9.7309,
+      "p99": 11.4315,
+      "maximum": 17.3542
+    },
+    "admissionToSubmissionMs": {
+      "count": 489,
+      "minimum": 0.0666,
+      "mean": 4.514774846625765,
+      "median": 4.3529,
+      "p95": 9.1955,
+      "p99": 9.9304,
+      "maximum": 12.5016
+    },
+    "observationToPacketAcquireMs": {
+      "count": 489,
+      "minimum": 0.4571,
+      "mean": 5.023938241308792,
+      "median": 4.9382,
+      "p95": 9.7122,
+      "p99": 11.4154,
+      "maximum": 14.8015
+    },
+    "observationToPacketFillStartMs": {
+      "count": 489,
+      "minimum": 0.4579,
+      "mean": 5.0248464212678945,
+      "median": 4.9393,
+      "p95": 9.713,
+      "p99": 11.4162,
+      "maximum": 14.8023
+    },
+    "observationToPacketFillEndMs": {
+      "count": 489,
+      "minimum": 0.4935,
+      "mean": 5.056511247443763,
+      "median": 4.97,
+      "p95": 9.7302,
+      "p99": 11.4308,
+      "maximum": 17.3525
+    },
+    "clockIntervalWidthMs": {
+      "count": 489,
+      "minimum": 10.020833333333334,
+      "mean": 10.042902181322393,
+      "median": 10.041666666666666,
+      "p95": 10.0625,
+      "p99": 10.0625,
+      "maximum": 10.083333333333334
+    },
+    "scheduledMinusConservativeUpperMs": {
+      "count": 489,
+      "minimum": 22.083333333333332,
+      "mean": 23.544265507839064,
+      "median": 22.625,
+      "p95": 26.104166666666668,
+      "p99": 32.625,
+      "maximum": 32.625
+    },
+    "firstNonzeroMinusScheduledMs": {
+      "count": 489,
+      "minimum": 2.8958333333333335,
+      "mean": 9.398559986366736,
+      "median": 10,
+      "p95": 10,
+      "p99": 10,
+      "maximum": 10
+    },
+    "packetCommittedAheadOfClockMs": {
+      "count": 489,
+      "minimum": 32.104166666666664,
+      "mean": 32.640039195637584,
+      "median": 32.645833333333336,
+      "p95": 32.645833333333336,
+      "p99": 32.645833333333336,
+      "maximum": 32.833333333333336
+    },
+    "observationToEndpointPositionCrossingLowerMs": {
+      "count": 489,
+      "minimum": 29.820500016212463,
+      "mean": 35.016257463362074,
+      "median": 34.94820001721382,
+      "p95": 39.57430002093315,
+      "p99": 41.42980000376701,
+      "maximum": 44.818300008773804
+    },
+    "observationToEndpointPositionCrossingUpperMs": {
+      "count": 489,
+      "minimum": 39.80399999022484,
+      "mean": 45.01468609434939,
+      "median": 44.84469997882843,
+      "p95": 49.554899990558624,
+      "p99": 51.42579999566078,
+      "maximum": 55.49670001864433
+    },
+    "endpointPositionCrossingBracketMs": {
+      "count": 489,
+      "minimum": 9.286,
+      "mean": 9.998428629856852,
+      "median": 9.9971,
+      "p95": 10.6958,
+      "p99": 10.7161,
+      "maximum": 10.7322
+    },
+    "occurrenceBracketWidthMs": {
+      "count": 526,
+      "minimum": 0,
+      "median": 0,
+      "p95": 0.0001,
+      "p99": 0.0001,
+      "maximum": 0.1191
+    }
+  },
+  "firstWritableTimingMeaning": "The actual consumer frame is retained. Its exact QPC instant is not instrumented; packet FillBefore/FillAfter brackets contain consumer selection. Acquisition timestamps are packet context, not that selection instant.",
+  "clock": {
+    "model": "ArrivedPositionInterval031",
+    "queries": 2805,
+    "acceptedAdvancingObservations": 2804,
+    "unacceptedStartupRows": 1,
+    "repeatedAcceptedSamples": 0,
+    "rejections": 0,
+    "inconsistencies": 0,
+    "eventMappings": 526,
+    "deferred": 0,
+    "awaitingBracket": 0,
+    "mappingRejected": 0,
+    "admissionWidthLimitFrames": 512,
+    "anchorGapLimitMs": 20,
+    "rateResidualLimitFrames": 512,
+    "minimumAdvancing": 3,
+    "measuredWidthAllEventsMs": {
+      "count": 526,
+      "minimum": 10.020833333333334,
+      "mean": 10.042894486692004,
+      "median": 10.041666666666666,
+      "p95": 10.0625,
+      "p99": 10.0625,
+      "maximum": 10.083333333333334
+    },
+    "rateResidualFrames": {
+      "count": 2804,
+      "minimum": 0,
+      "mean": 12.388453067047005,
+      "median": 0.4944000000008941,
+      "p95": 52.452800000001076,
+      "p99": 108.6768000000049,
+      "maximum": 145.45120000000367
+    },
+    "queryCostMs": {
+      "count": 2805,
+      "minimum": 0.0004,
+      "mean": 0.0011177540106951623,
+      "median": 0.0009,
+      "p95": 0.0018,
+      "p99": 0.0026,
+      "maximum": 0.1954
+    },
+    "queryPairGapMs": {
+      "count": 2803,
+      "minimum": 8.2953,
+      "mean": 9.998578523011048,
+      "median": 9.9999,
+      "p95": 10.6994,
+      "p99": 10.7082,
+      "maximum": 10.7387
+    },
+    "uncertaintyMeaning": "Guarded device-position interval; not calibrated hardware, physical speaker accuracy or an additional fixed wait. Composite scheduling lateness also includes the already-committed output frontier and prepared-kernel offset; it does not isolate a clock-only causal penalty."
+  },
+  "output": {
+    "successfulPackets": 2806,
+    "submittedFrames": 1347456,
+    "submittedSeconds": 28.072,
+    "contiguous": true,
+    "underflowFrames": 0,
+    "emptyPaddingEvents": 0,
+    "wakeTimeouts": 0,
+    "callbackSamples": 2805,
+    "callbackStartIntervalsMs": {
+      "count": 2804,
+      "minimum": 8.2968,
+      "mean": 9.998682310984288,
+      "median": 9.9999,
+      "p95": 10.699,
+      "p99": 10.708,
+      "maximum": 10.7384
+    },
+    "callbackCostMs": {
+      "count": 2805,
+      "minimum": 0.0102,
+      "mean": 0.023623921568627484,
+      "median": 0.0204,
+      "p95": 0.0346,
+      "p99": 0.0453,
+      "maximum": 2.5571
+    },
+    "callbackAllocatedBytes": 0,
+    "allocationCounterAvailable": true,
+    "callbackExecutionOver10Ms": 0,
+    "callbackStartIntervalsOver10Ms": 1375,
+    "callbackStartIntervalsOver20Ms": 0,
+    "callbackIntervalMeaning": "Wake spacing varies around 10 ms; exceeding exactly one period is scheduling jitter, not independently proof of an audio deadline miss.",
+    "callbackFillMs": {
+      "count": 2805,
+      "minimum": 0.0062,
+      "mean": 0.0162372549019608,
+      "median": 0.0143,
+      "p95": 0.0268,
+      "p99": 0.0377,
+      "maximum": 2.5502
+    },
+    "prefillFrames": 1056,
+    "prefillFillCostMs": 3.1621,
+    "prefillAcquireThroughReleaseCostMs": 3.5436,
+    "acquireCostMs": {
+      "count": 2806,
+      "minimum": 0.0003,
+      "mean": 0.0009035994297932661,
+      "median": 0.0008,
+      "p95": 0.0013,
+      "p99": 0.0017,
+      "maximum": 0.188
+    },
+    "releaseCostMs": {
+      "count": 2806,
+      "minimum": 0.0003,
+      "mean": 0.0008052031361368253,
+      "median": 0.0007,
+      "p95": 0.0011,
+      "p99": 0.0014,
+      "maximum": 0.1933
+    },
+    "clockQueryCostMs": {
+      "count": 2805,
+      "minimum": 0.0004,
+      "mean": 0.0011177540106951623,
+      "median": 0.0009,
+      "p95": 0.0018,
+      "p99": 0.0026,
+      "maximum": 0.1954
+    },
+    "peak": 0.16770119965076447,
+    "mmcssRegistered": true,
+    "mmcssReverted": true
+  },
+  "nonzeroEvidence": {
+    "ringPeak": 0.16770119965076447,
+    "submittedBedPrefixFrames": 1347456,
+    "submittedBedPrefixNonzeroSampleCount": 2656764,
+    "submittedBedPrefixPeak": 0.16770119965076447,
+    "submittedBedPrefixRms": 0.03368813142484304,
+    "allPacketsGainOneFlagsZero": true,
+    "ringUnderflowZero": true,
+    "nonzeroSyntheticFirstFramesAcknowledged": 489,
+    "syntheticKernelPositionsMatch": true,
+    "contributionEvidence": "Source-level nonzero kernel contribution followed by successful WASAPI ReleaseBuffer; no captured PCM, audibility or microphone proof."
+  },
+  "endpointPositionEvidence": {
+    "submittedEventsBracketed": 489,
+    "lowerMs": {
+      "count": 489,
+      "minimum": 29.820500016212463,
+      "mean": 35.016257463362074,
+      "median": 34.94820001721382,
+      "p95": 39.57430002093315,
+      "p99": 41.42980000376701,
+      "maximum": 44.818300008773804
+    },
+    "upperMs": {
+      "count": 489,
+      "minimum": 39.80399999022484,
+      "mean": 45.01468609434939,
+      "median": 44.84469997882843,
+      "p95": 49.554899990558624,
+      "p99": 51.42579999566078,
+      "maximum": 55.49670001864433
+    },
+    "bracketWidthMs": {
+      "count": 489,
+      "minimum": 9.286,
+      "mean": 9.998428629856852,
+      "median": 9.9971,
+      "p95": 10.6958,
+      "p99": 10.7161,
+      "maximum": 10.7322
+    },
+    "meaning": "Observed nominal-rate device-position crossing brackets for the first nonzero event frame; not microphone, acoustic output, audibility or input-to-ear evidence."
+  },
+  "memory": {
+    "managedBytesAfterCleanup": 49938872,
+    "scope": "GC.GetTotalMemory(false) after cleanup; not peak managed allocation, working set or a memory-leak measurement."
+  },
+  "timingBounds": {
+    "internalOutputLimitSeconds": 30,
+    "stopRequestSeconds": 35,
+    "containmentSeconds": 42,
+    "finalExitVerificationSeconds": 3,
+    "streamStartAfterToStopBeforeMs": 28047.0812,
+    "eventEnableAfterStreamStartMs": 31.6681,
+    "supervisorElapsedMs": 28868.3228,
+    "outerInvocationMs": 29579.5483,
+    "stopRequested": false,
+    "forcedContainment": false,
+    "lateExitObserved": false,
+    "meaning": "Observed process/control boundaries; not independently measured acoustic silence."
+  },
+  "cleanup": {
+    "stopHResult": 0,
+    "resetHResult": 0,
+    "allFiveThreadGroupsJoined": true,
+    "nodeExitCode": 0,
+    "workerExitCode": 0,
+    "originalKernelHandleExitEvidenceComplete": true,
+    "jobCloseSucceeded": true,
+    "processHandleCloseSucceeded": true,
+    "allFourOriginalOwnedLifetimesAbsent": true,
+    "all68PayloadsAnd63SourcesUnchanged": true,
+    "all72OriginalCandidateFilesUnchanged": true,
+    "historical74ConsumedCandidateFilesUnchanged": true,
+    "consumed": true,
+    "rawArtifactsPreserved": true,
+    "recordingStarted": false
+  },
+  "comparison": {
+    "historicalFakeMedianMs": 15.5493,
+    "realNominalMedianMs": 5.4977,
+    "medianDifferenceMs": -10.0516,
+    "controlledBeforeAfterSaving": false,
+    "physicalLatencyMeasured": false
+  },
+  "listeningFeedback": {
+    "attribution": "My listening feedback, supplied after this attempt; separate from measured telemetry.",
+    "summary": "I heard the bike and thought it resembled my earlier in-game recording. I could not distinguish anything besides the bike and asked whether that was intentional.",
+    "syntheticAudibilityConfirmed": false,
+    "discomfortExplicitlyReported": false,
+    "absenceOfDiscomfortEstablished": false,
+    "interpretation": "The exact retained Bati recording was the bed. Synthetic kernel peaks remained at most 0.001; their low level may explain the report, but audibility or masking was not measured and no gain was changed."
+  },
+  "limitations": [
+    "One endpoint, one attempt; no repeated or generalized reliability claim.",
+    "No authoritative GTA event acquisition or native ownership demonstrated.",
+    "No physical speaker, headphone or input-to-ear latency measured.",
+    "No new continuous Bati response latency or controlled before/after software saving established.",
+    "Synthetic event contribution and successful release do not prove that I perceptually distinguished the events.",
+    "No unapproved level change or further audition; this candidate is consumed."
+  ]
+}

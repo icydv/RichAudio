@@ -3,6 +3,10 @@ namespace RichAudio.Experiments {
  // Control-thread file gate only. No audio/COM/native dependency. The parent
  // admits the exact suspended-job child lifetime, and each worker claims once.
  internal static class Latency03WorkerAdmission {
+  static bool FullyQualified(string value){if(String.IsNullOrWhiteSpace(value))return false;string p=value.Replace('/','\\');if(p.Length>=3&&Char.IsLetter(p[0])&&p[1]==':'&&p[2]=='\\')return true;if(!p.StartsWith("\\\\",StringComparison.Ordinal))return false;string[] parts=p.Substring(2).Split('\\');return parts.Length>=2&&parts[0].Length>0&&parts[0]!="?"&&parts[0]!="."&&parts[1].Length>0;}
+  internal static void RequireReviewedRoot(string candidateRoot,string reviewedRoot){
+   if(!FullyQualified(candidateRoot)||!FullyQualified(reviewedRoot)||!String.Equals(Path.GetFullPath(candidateRoot).TrimEnd(Path.DirectorySeparatorChar),Path.GetFullPath(reviewedRoot).TrimEnd(Path.DirectorySeparatorChar),StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("Exact reviewed candidate path required; copied approval cannot be replayed elsewhere");
+  }
   static string PathIn(string root,string name){root=Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar);string p=Path.GetFullPath(Path.Combine(root,name));if(!p.StartsWith(root+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("Admission path escape");for(string at=p;at!=null;at=Path.GetDirectoryName(at))if(File.Exists(at)||Directory.Exists(at))if((File.GetAttributes(at)&FileAttributes.ReparsePoint)!=0)throw new InvalidDataException("Linked admission path");return p;}
   internal static void Claim(string root,string token,string parentIdentity,string manifestSha,int workerPid,long workerStartUtcTicks){
    string admission=PathIn(root,"results/worker-admission.json");if(new FileInfo(admission).Length>65536)throw new InvalidDataException("Admission bound");var json=new JavaScriptSerializer();var data=json.Deserialize<Dictionary<string,object>>(File.ReadAllText(admission));
