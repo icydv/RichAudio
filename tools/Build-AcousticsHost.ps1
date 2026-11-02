@@ -18,6 +18,7 @@ $options=@($options|Where-Object{$_-notlike '/define:*'})+'/define:STATE_TRANSPO
 & $compiler @options '/main:RichAudio.Beacon.Windows.HostProgram' ('/out:'+(Join-Path $out 'RichAudio.Acoustics.Host.exe')) @sources
 if($LASTEXITCODE-ne0){throw 'Windows audio host compilation failed.'}
 if($Tests){
+  & (Join-Path $PSScriptRoot 'Test-HostConnectionBoundary03.ps1')
   & $compiler @options '/main:RichAudio.Beacon.Tests.TestAudioHost' ('/out:'+(Join-Path $out 'RichAudio.Acoustics.Host.Tests.exe')) @sources (Join-Path $repo 'tests\host\TestAudioHost.cs')
   if($LASTEXITCODE-ne0){throw 'Host test compilation failed.'}
   & (Join-Path $out 'RichAudio.Acoustics.Host.Tests.exe')
