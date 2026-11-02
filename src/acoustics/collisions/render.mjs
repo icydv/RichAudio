@@ -48,8 +48,13 @@ export async function renderCollisionFixture02(fixture,{masterGain=.35,late=true
 
 // Short primary impacts use the LATENCY-02 branded kernel and descriptor path.
 // Long continuing scrapes remain continuous sources, not a disguised shot queue.
-export function prepareCollisionEventKernel02(event,{scene,listenerPose,sceneId='collision-original',sceneGeneration=1,frames=16384}={}){
+export function prepareCollisionEventKernel02(event,{scene=null,listenerPose,listenerKnownThroughFrame,sceneId='collision-original',sceneGeneration=1,frames=16384}={}){
  need(isAuthoredCollisionEvent(event)&&event.durationFrames<=4096,'short original collision source required by bounded transient waveform path');
+ const end=event.timing.occurrenceUpperFrame+frames;
+ need(Number.isSafeInteger(frames)&&Number.isSafeInteger(listenerKnownThroughFrame)&&event.poseKnownThroughFrame>=end&&listenerKnownThroughFrame>=end,
+  'source and listener must cover the full prepared tail horizon');
+ need(scene===null||validated.scene(scene)&&scene.tile?.session===event.identity.session&&scene.tile.createdAt*48<=event.timing.occurrenceUpperFrame&&scene.tile.validUntil*48>=end,
+  'prepared collision scene must match the exact authored session and full horizon');
  const original=new OriginalCollisionSource(event,{outputStartFrame:event.timing.occurrenceUpperFrame});
  const waveform=new Float32Array(original.durationFrames);original.copyDryInto(waveform);
  const kernel=createPreparedTransientKernel({scene,sceneId,sceneGeneration,session:event.identity.session,sourcePose:{position:event.radiator.position,generation:event.identity.componentGeneration},

@@ -5,8 +5,11 @@ import {OriginalCollisionSource,collisionSourceLevel} from '../src/acoustics/col
 import {renderCollisionFixture02,prepareCollisionEventKernel02} from '../src/acoustics/collisions/render.mjs';
 import {createVehicleEnvironment} from '../src/acoustics/vehicle/environment.mjs';
 import {AuthoredTransientDescriptorSource} from '../src/acoustics/events/contracts.mjs';
+import {createTile} from '../src/acoustics/research/local-geometry.mjs';
+import {acousticScene} from '../src/acoustics/engine/contracts.mjs';
 const fixture=()=>collisionFixture02('high-energy',{seconds:1});
 const revised=(event,context,change)=>{const input=structuredClone(event);change(input);return createAuthoredCollisionEvent(input,context);};
+const matchingScene=f=>{const scene=createVehicleEnvironment('direct').scene;return acousticScene(createTile({...scene.tile,session:f.context.session}),scene.materials,scene.config);};
 
 test('collision authority, exact component identity, occurrence and physical evidence stay separate',()=>{
  const f=fixture(),event=f.events[0];assert(isAuthoredCollisionEvent(event));assert.equal(event.severity.energyJ,200000);assert.equal(event.severity.acousticIntensity,'unmeasured; explicit authored synthesis mapping only');
@@ -58,6 +61,7 @@ test('original impact, glass and scrape sounds are deterministic, finite and sen
   const x=new Float32Array(512),y=new Float32Array(512);for(let at=0;at<48000;at+=512){a.renderAtInto(x,at);b.renderAtInto(y,at);assert.deepEqual(x,y);if(at+512<=event.timing.occurrenceUpperFrame||at>=event.timing.occurrenceUpperFrame+event.durationFrames)assert(x.every(v=>v===0));}
   assert(a.peak>0&&a.peak<=.02);assert.equal(a.samples,undefined);const copy=new Float32Array(a.durationFrames);a.copyDryInto(copy);copy.fill(1);assert.equal(a.pcmSha256,b.pcmSha256);
   assert.throws(()=>a.renderAtInto(x,0),/contiguous/);
+  assert.throws(()=>new OriginalCollisionSource(event,{outputStartFrame:event.timing.occurrenceUpperFrame,firstProcessFrame:event.timing.occurrenceUpperFrame+1}),/schedule/);
  }
  const f=fixture(),event=f.events[0],rest=revised(event,f.context,e=>e.contact.relativeVelocity=[0,0,0]);assert.equal(collisionSourceLevel(rest),0);
  const unknown=revised(event,f.context,e=>e.material={id:'unknown',basis:'unknown',confidence:null});assert.notEqual(new OriginalCollisionSource(unknown,{outputStartFrame:10240}).pcmSha256,new OriginalCollisionSource(event,{outputStartFrame:10240}).pcmSha256);
@@ -65,13 +69,17 @@ test('original impact, glass and scrape sounds are deterministic, finite and sen
 });
 
 test('short collision sources enter the existing LATENCY-02 branded kernel/descriptor path without vehicle history',()=>{
- const f=fixture(),event=f.events[0],prepared=prepareCollisionEventKernel02(event,{scene:createVehicleEnvironment('direct').scene,listenerPose:f.listener}),kernel=prepared.kernel;
+ const f=fixture(),event=f.events[0],options={scene:matchingScene(f),listenerPose:f.listener,listenerKnownThroughFrame:f.context.knownThroughFrame},prepared=prepareCollisionEventKernel02(event,options),kernel=prepared.kernel;
  assert.equal(kernel.waveformFrames,event.durationFrames);assert.equal(kernel.waveformSha256,prepared.originalSourceSha256);assert.equal(kernel.kernelAffectedHistoryFrames,0);assert(kernel.peak<=.001);
  const source=new AuthoredTransientDescriptorSource({library:[{kernelSlot:0,kernel}],session:f.context.session,qpcFrequency:48000,mode:'authored-fixture'});
  const result=source.admit({eventId:1,sourceId:1,sourceGeneration:1,sourceEventSequence:event.sequence,kernelSlot:0,kernelGeneration:1,listenerGeneration:1,sceneGeneration:1,
   sourcePose:kernel.sourcePose,listenerPose:kernel.listenerPose,timing:{basis:'authored-fixture-clock',qpcFrequency:48000,occurrenceLowerQpc:event.timing.occurrenceLowerFrame,
    occurrenceUpperQpc:event.timing.occurrenceUpperFrame,acquisitionBeforeQpc:event.timing.observationFrame,observationAfterQpc:event.timing.observationFrame}});
  assert(result.admitted);assert.equal(result.descriptor.occurrenceUpperQpc,event.timing.occurrenceUpperFrame);assert.equal(source.stats.retrospectiveDelayMs,0);
+ assert.throws(()=>prepareCollisionEventKernel02(revised(event,f.context,e=>e.poseKnownThroughFrame=e.timing.occurrenceUpperFrame+e.durationFrames),options),/full prepared tail horizon/);
+ assert.throws(()=>prepareCollisionEventKernel02(event,{...options,listenerKnownThroughFrame:event.timing.occurrenceUpperFrame+4096}),/full prepared tail horizon/);
+ assert.throws(()=>prepareCollisionEventKernel02(event,{...options,scene:createVehicleEnvironment('direct').scene}),/exact authored session/);
+ assert.throws(()=>prepareCollisionEventKernel02(event,{...options,listenerPose:{...f.listener,generation:0}}),/generation/);
  assert.throws(()=>prepareCollisionEventKernel02(collisionFixture02('light-scrape',{seconds:1}).events[0],{scene:createVehicleEnvironment('direct').scene,listenerPose:f.listener}),/short/);
 });
 

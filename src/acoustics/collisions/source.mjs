@@ -11,7 +11,7 @@ export function collisionSourceLevel(event){
 export class OriginalCollisionSource {
  constructor(event,{outputStartFrame,firstProcessFrame=outputStartFrame}={}){
   need(isAuthoredCollisionEvent(event)&&Number.isSafeInteger(outputStartFrame)&&outputStartFrame>=event.timing.occurrenceUpperFrame&&
-   outputStartFrame+event.durationFrames<=event.poseKnownThroughFrame&&Number.isSafeInteger(firstProcessFrame)&&firstProcessFrame>=0,'qualified finite collision source schedule');
+   outputStartFrame+event.durationFrames<=event.poseKnownThroughFrame&&Number.isSafeInteger(firstProcessFrame)&&firstProcessFrame>=0&&firstProcessFrame<=outputStartFrame,'qualified finite collision source schedule');
   this.event=event;this.outputStartFrame=outputStartFrame;this.nextFrame=firstProcessFrame;const samples=new Float32Array(event.durationFrames);this.durationFrames=samples.length;this.cancelAtFrame=Infinity;
   const level=collisionSourceLevel(event),seedBytes=createHash('sha256').update(event.eventId+':'+event.material.id).digest();let seed=seedBytes.readUInt32LE(0)||1,low=0;
   const frequencies=event.material.id==='glass'?[1367,2179,3359,4813]:event.material.id==='plastic'?[241,419,683]:[103,271,613,1129];
