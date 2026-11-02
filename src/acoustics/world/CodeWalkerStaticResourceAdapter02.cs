@@ -65,7 +65,16 @@ namespace RichAudio.World {
   static byte[] AuthoredYbn(){
    var geometry=new BoundGeometry{Type=BoundsType.Geometry,Vertices=new[]{new Vector3(-1,0,-1),new Vector3(1,0,-1),new Vector3(0,0,1)},CenterGeom=Vector3.Zero,
     BoxMin=new Vector3(-1,-.04f,-1),BoxMax=new Vector3(1,.04f,1),Materials=new[]{new BoundMaterial_s{Data1=7,Data2=0}},PolygonMaterialIndices=new byte[]{0}};
-   geometry.Polygons=new BoundPolygon[]{new BoundPolygonTriangle{triIndex1=0,triIndex2=1,triIndex3=2,triArea=2,Owner=geometry,edgeIndex1=-1,edgeIndex2=-1,edgeIndex3=-1}};
+   var triangle=new BoundPolygonTriangle{triIndex1=0,triIndex2=1,triIndex3=2,triArea=2,Owner=geometry};
+   // dev46 exposes signed-short edge indices; the separately selected public
+   // Gen9-capable profile exposes unsigned-short indices. Preserve the exact
+   // 0xffff missing-edge representation without changing default fixture bytes.
+   foreach(string name in new[]{"edgeIndex1","edgeIndex2","edgeIndex3"}){
+    var property=typeof(BoundPolygonTriangle).GetProperty(name);
+    Check(property!=null&&(property.PropertyType==typeof(short)||property.PropertyType==typeof(ushort)),"Known triangle edge sentinel type required");
+    property.SetValue(triangle,property.PropertyType==typeof(short)?(object)(short)-1:(object)ushort.MaxValue,null);
+   }
+   geometry.Polygons=new BoundPolygon[]{triangle};
    geometry.CalculateQuantum();return new YbnFile{Bounds=geometry}.Save();
   }
   public static string OriginalRoundTrips(){
