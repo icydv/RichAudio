@@ -7,6 +7,9 @@ import {ComponentSourceSet} from '../src/acoustics/vehicle/components/lifecycle.
 import {ComponentAcousticSession} from '../src/acoustics/vehicle/components/pipeline.mjs';
 import {createVehicleEnvironment} from '../src/acoustics/vehicle/environment.mjs';
 import {fixtureComponentIdentity,componentFixtureSession,componentFixtureState,componentFixtureObservation,componentFixtureListener,renderVehicleComponentsFixture} from '../src/acoustics/vehicle/components/fixtures.mjs';
+import {createPreparedMechanicalComponent} from '../src/acoustics/vehicle/components/prepared.mjs';
+import {transientFixtureSession,transientFixturePoses,transientFixtureScene} from '../src/acoustics/events/fixture-scenes.mjs';
+import {createHash} from 'node:crypto';
 const cap=frames=>createAuthoredComponentCapability({session:componentFixtureSession,maximumFrame:frames-1});
 const contact=()=>componentFixtureState('tyre-slip',0);
 const output=(source,frames)=>{const all=new Float32Array(frames);for(let at=0;at<frames;at+=512){const n=Math.min(512,frames-at),block=new Float32Array(n);source.renderInto(block);all.set(block,at);}return all;};
@@ -123,4 +126,14 @@ test('component pipeline is explicit and cannot change an existing stock gamepla
  try{session.accept(componentFixtureObservation(identity,0,0));const left=new Float32Array(512),right=new Float32Array(512);await session.render({listener:componentFixtureListener(),left,right});
   assert.equal(session.diagnostics().productionEnabled,false);assert.equal(session.diagnostics().nativeSuppression,false);assert.equal(evaluateComponentTakeover({component:'horn'}).permitted,false);
  }finally{session.close();}
+});
+test('complete original mechanical events prewarm through the existing low-latency kernel path without replacing their waveform',()=>{
+ const identity={...fixtureComponentIdentity('mechanical-clunk'),session:transientFixtureSession},capability=createAuthoredComponentCapability({session:identity.session,maximumFrame:20000});
+ const result=createPreparedMechanicalComponent({identity,capability,scene:transientFixtureScene('wall'),sceneId:'wall',sourcePose:transientFixturePoses.source,listenerPose:transientFixturePoses.listener});
+ const source=new OriginalComponentSource('mechanical-clunk');source.setState({});source.trigger({eventId:'independent-shape',sequence:0,occurrenceFrame:0,observedFrame:0,strength:.8,kind:'gear-clunk'},0);
+ const dry=output(source,4800),sha=createHash('sha256').update(Buffer.from(dry.buffer)).digest('hex');
+ assert.equal(result.drySha256,sha);assert.equal(result.sourceFrames,4800);assert.equal(result.kernel.waveformSha256,sha);assert.ok(result.kernel.paths.some(p=>p.order>0));
+ assert.equal(result.kernel.kernelAffectedHistoryFrames,0);assert.equal(result.kernel.rendererLimited,0);assert.equal(result.extraFixedQueueFrames,0);assert.equal(result.productionEnabled,false);assert.equal(result.nativeSuppression,false);
+ assert.throws(()=>createPreparedMechanicalComponent({identity:{...identity,component:'horn'},capability,sceneId:'unknown',sourcePose:transientFixturePoses.source,listenerPose:transientFixturePoses.listener}));
+ assert.throws(()=>createPreparedMechanicalComponent({identity,capability,sceneId:'unknown',sourcePose:{...transientFixturePoses.source,generation:2},listenerPose:transientFixturePoses.listener}));
 });
