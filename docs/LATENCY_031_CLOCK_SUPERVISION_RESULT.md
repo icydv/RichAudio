@@ -1,5 +1,7 @@
 # LATENCY-03.1: my offline clock and supervisor recovery
 
+The subsequent separately approved one-use endpoint attempt is documented in [my first completed real endpoint result](LATENCY_031_FIRST_ENDPOINT_RESULT.md). This document preserves the preceding offline recovery and its original evidence boundaries.
+
 I've continued my project in a separate branch stacked on PR #79 at `57178c5986b8e82403ceeb9dbf80f2ef2ceaa935`. Codex reproduced both failures from my first endpoint attempt, implemented focused corrections and prepared a fresh candidate from clean operational commit `14e23ee3ca6e2ca0c571a17deafcc6bde38e40e4`.
 
 **This increment is offline. No real endpoint was queried/opened, no GTA/RPH launched, no deployment or live recording occurred, and no merge or native suppression was performed.** My previous candidate/approval remain consumed. The original raw result, missing supervisor receipt and independently passed cleanup remain preserved as historical facts. A new candidate is preparation for fresh approval, not proof that an entire real device run will now pass.
