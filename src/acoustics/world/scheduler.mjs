@@ -16,4 +16,3 @@ export class StaticWorldWarmup{
  }
  cancel(){this.closed=true;return this.cancelActive?.()??Promise.resolve();}
 }
-

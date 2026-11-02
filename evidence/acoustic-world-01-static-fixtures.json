@@ -212,7 +212,9 @@
           "observedDeadlineMisses": 1
         }
       }
-    ]
+    ],
+    "sourceWhitespaceOnlyRebindSha256": "25f1d9a7637630a77460f52e2b2b8cfe36ec499bcd2052d5b5e304356d110df4",
+    "sourceWhitespaceRebindAlgorithmChanged": false
   },
   "gameLaunched": false,
   "endpointOpened": false,
