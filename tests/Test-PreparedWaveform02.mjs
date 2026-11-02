@@ -29,7 +29,7 @@ test('a named original waveform retains physical path timing and immutable conte
 });
 
 test('waveform preparation rejects missing identity, oversized/nonfinite/unbounded sources and clipped tails',()=>{
- for(const waveform of [new Float32Array(),new Float32Array(4097),new Float32Array([NaN]),new Float32Array([.251]),new Float32Array([0])])
+ for(const waveform of [new Float32Array(),new Float32Array(8193),new Float32Array([NaN]),new Float32Array([.251]),new Float32Array([0])])
   assert.throws(()=>createPreparedTransientKernel({...options,dryWaveform:waveform,waveformId:'original'}));
  assert.throws(()=>createPreparedTransientKernel({...options,dryWaveform:new Float32Array([.1])}));
  assert.throws(()=>createPreparedTransientKernel({...options,waveformId:'missing-samples'}));

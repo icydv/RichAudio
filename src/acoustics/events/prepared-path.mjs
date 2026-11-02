@@ -34,7 +34,7 @@ export function createPreparedTransientKernel({scene=null,sceneId,sceneGeneratio
     Number.isFinite(amplitude)&&amplitude>0&&amplitude<=.25&&Number.isFinite(masterGain)&&masterGain>0&&masterGain<=.7,'bounded original impulse');
   let waveform=null,waveformMetadata=null;
   if(dryWaveform!==null){
-    check(dryWaveform instanceof Float32Array&&dryWaveform.length>0&&dryWaveform.length<=4096&&identifier(waveformId),
+    check(dryWaveform instanceof Float32Array&&dryWaveform.length>0&&dryWaveform.length<=8192&&identifier(waveformId),
       'bounded named original authored waveform');
     waveform=Float32Array.from(dryWaveform);
     check(waveform.every(x=>Number.isFinite(x)&&Math.abs(x)<=.25)&&waveform.some(x=>x!==0),
