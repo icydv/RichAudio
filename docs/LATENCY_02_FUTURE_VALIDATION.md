@@ -1,0 +1,23 @@
+# LATENCY-02: proposed next validation boundary
+
+This is a proposal, not authorization or an executable deployment receipt. I have not approved a launch, endpoint query/playback, recording, native suppression, installation access or retry in this scope.
+
+## One future Bati comparison
+
+I retain the exact experimental protocol in [LOW-LATENCY-01's A/B proposal](LOW_LATENCY_01_LIVE_AB_PROPOSAL.md): **one experiment with two separately sealed and independently restored attempts**, because the existing instance admits one Start. A future approval would need to cover two deployments, two GTA/RPH launches, two AudioOn actions and two Starts, without retries. A single approved attempt is not implicitly permission for both arms.
+
+Both arms must have identical current reviewed code, banks/calibration/gains/source history, `camera-source-01`, settings, endpoint selection and approved recording policy. Arm A selects the unchanged baseline 100 ms/eight credits; arm B selects the reviewed 75 ms/eight startup then six qualified credits. The new arrived-only 50 ms and authored stationary-emission options are excluded: neither is a qualified live improvement. The event bus remains null in both arms and native GTA audio stays operational.
+
+Each attempt has an independently supervised 45-second active-output stop-request bound and approximately 30–35 seconds of the same idle/gentle-rev/slow-driving sequence, two safe camera changes and final deliberate dismount. Readiness, Stop request, completed output quiescence, normal game exit, owned-process absence and protected-installation/settings restoration are separate observations. A fault, invalid identity, expiry, recording failure or unexpected artifact drift ends the experiment; nothing is silently rebuilt or substituted under that approval.
+
+Analysis must retain source-selection/acquisition intervals, source generation/phase, producer scheduling/deadlines, ring residence, first submission clock phase, output padding/callback intervals, complete recordings if separately authorized, all starvation and camera gaps. My subjective listening feedback stays separate. The 146/204 ms historical native baseline already includes the 62.695 ms ring interval. Neither the new authored-pose pair nor a ring-capacity difference establishes physical latency savings.
+
+Exact **deployment** binaries/manifests, source bindings, proposal digest, ownership manifests, independent supervisors and restoration contracts for this branch do not exist yet. Codex's new offline fixture packages are deliberately not deployment candidates and cannot fill those missing approval fields. The older proposal's fixture hashes remain historical. Before seeking live approval, a newly prepared operational candidate needs an exact independent review against the restored installation and absent owned processes. This is the current required live-testing boundary, not a request to reuse consumed PLAYABLE-15 authorization.
+
+## Future transient/output research
+
+The current native event acquisition/ownership capability is blocked. RPH hit notifications and native polls do not establish complete timestamped muzzle events. A live direct gunshot replacement has no proposal ready for approval: it needs independently verified occurrence/identity/multiplicity and native component suppression/restoration. Any reflection-only adjunct separately needs verified native/direct component separation and attribution. A coexistence policy flag cannot authorize a duplicate RichAudio direct muzzle blast over GTA's native blast.
+
+A distinct endpoint-only proposal could later compare current shared WASAPI output with **queried** legal `IAudioClient3` shared periods, using original synthetic signals. It must first bind the exact selected endpoint, Float32 stereo 48 kHz support, returned min/max/fundamental/default periods, actual buffer/padding, `IAudioClock`/QPC mapping and uncertainties. It must preserve GTA's unrelated session audio and avoid exclusive ownership. No smaller period is assumed or silently rounded.
+
+That future experiment should compare the same prepared event sequence under nominal/adverse wake timing and simultaneous continuous playback, recording observation, ingress, first writable frame, ideal physical arrival, common software lateness, first actual `ReleaseBuffer` acknowledgement and endpoint presentation evidence. Report p50/p95/p99/max, sample counts, voice/transport overload, underflow, processing/allocation bounds, headroom and completed cleanup. A 20–30 ms observation-to-submission result would still not establish physical input-to-ear latency. All endpoint access and recording would need separate explicit authorization.
