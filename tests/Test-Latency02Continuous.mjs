@@ -36,6 +36,13 @@ test('stationary qualification rejects motion, identity or horizon permanently; 
  const c=new StationaryEmissionController(contract());assert.throws(()=>c.select([],3*FS+1,1),/horizon exhausted/);assert.throws(()=>new StationaryEmissionController(structuredClone(contract())),/Branded/);
  const expired=new StationaryEmissionController(contract());assert.equal(expired.select([{time:0,frame:frame(0,0),wallExpires:Infinity}],0,0),null,'unbounded expiry cannot qualify current-emission mode');
 });
+test('each candidate record must carry a finite original lease and valid unpaused observation',()=>{
+ for(const fault of ['infinite-lease','invalid','paused']){const c=new StationaryEmissionController(contract()),old=frame(0,.15,{operatingPoint:.9}),current=frame(1,.16,{operatingPoint:.2});old.vehicles[0].observationTicks+=500000;
+  if(fault==='invalid')old.listener.valid=false;if(fault==='paused')old.listener.paused=true;c.observe(old);c.observe(current);
+  const selected=c.select([{time:.15,frame:old,wallExpires:fault==='infinite-lease'?Infinity:300},{time:.16,frame:current,wallExpires:300}],9600,200);
+  assert.equal(selected.sequence,1);assert.equal(selected.operatingPoint,.2,'an older invalid/unbounded record cannot supply apparently newer state');
+ }
+});
 function engine(options={}){let wall=0,e;const calls=[],sources=[],asset={frames:8192,sampleRate:24000,samples:new Float32Array(8192).fill(.1),nativePeak:.1},bank={model:'bati',layers:Object.fromEntries(['engine','exhaust'].map(r=>[r,Object.fromEntries(['idle','accel','decel'].map(m=>[m,asset]))]))},registry={resolve:()=>({status:'available',bank}),createSource:()=>{const s=new StockVehicleSource(bank),render=s.renderInto.bind(s);s.renderInto=(control,...outputs)=>{calls.push({frame:e.pipeline.renderer.frame,sourceFrame:s.frame,...control});return render(control,...outputs);};sources.push(s);return s;}};
  e=new StockGameplay({registry,session,now:()=>wall,latencyProfile:'low-latency-01',continuityPolicy:'camera-source-01',...options});return {e,calls,sources,setWall:ms=>{wall=ms;}};}
 test('actual grain/source pipeline applies newer state at current emission frame only in qualified stationary mode',async()=>{

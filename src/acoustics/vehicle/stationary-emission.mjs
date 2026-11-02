@@ -1,5 +1,7 @@
 // Authored offline geometry only. This never certifies a live pose after its
 // newest observation, and does not turn old spatial time into emission time.
+// State time is authored at vehicle ticks here. Native getter acquisition is
+// a separate interval; a nearby pose timestamp alone cannot qualify it.
 const contracts=new WeakSet(),FS=48000,BLOCK=512;
 const check=(yes,message)=>{if(!yes)throw Error(message);};
 const same=(a,b)=>Array.isArray(a)&&a.length===3&&a.every((x,i)=>x===b[i]);
@@ -28,7 +30,7 @@ export class StationaryEmissionController {
   if(!Array.isArray(snapshots)||snapshots.length>64||!Number.isFinite(now)||now<0)return this.reject('invalid bounded selection clock');
   const latest=snapshots.at(-1),emissionTime=renderFrame/FS;
   if(!latest||!Number.isFinite(latest.wallExpires)||now>=latest.wallExpires||!latest.frame.listener.valid||latest.frame.listener.paused){this.stats.unavailable++;return null;}
-  let found=null;for(const s of snapshots){if(now>=s.wallExpires)continue;const v=s.frame.vehicles.find(v=>v.id===c.source.id&&v.generation===c.source.generation&&v.model===c.source.model&&v.context===c.source.context&&v.valid);if(!v)continue;
+  let found=null;for(const s of snapshots){if(!Number.isFinite(s.wallExpires)||now>=s.wallExpires||!s.frame.listener.valid||s.frame.listener.paused)continue;const v=s.frame.vehicles.find(v=>v.id===c.source.id&&v.generation===c.source.generation&&v.model===c.source.model&&v.context===c.source.context&&v.valid);if(!v)continue;
    const q=s.time+(v.observationTicks-s.frame.listener.observationTicks)/s.frame.listener.clockFrequency;
    if(!Number.isFinite(q))return this.reject('operating observation mapping is not finite');
    if(q>emissionTime+1e-12||(renderFrame+BLOCK-1)/FS-q>.25+1e-12)continue;
@@ -37,7 +39,7 @@ export class StationaryEmissionController {
   if(!latest.frame.vehicles.some(v=>v.id===c.source.id&&v.valid)||!found){this.stats.unavailable++;return null;}
   if(this.selected&&found.observationTime<this.selected.observationTime-1e-12)return this.reject('operating observation clock moved backwards');
   const lift=this.selected?(found.observationTime===this.selected.observationTime?this.selected.lift:found.v.operatingPoint<this.selected.operatingPoint-.002):false;
-  this.selected={observationTime:found.observationTime,operatingPoint:found.v.operatingPoint,running:found.v.running,lift,sequence:found.sequence,emissionFrame:renderFrame,emissionTime,observationAgeMs:(emissionTime-found.observationTime)*1000,clockBasis:'Current PCM emission frame; observed pose timestamp conservatively bounds operating acquisition',authority:c.authority};this.stats.selections++;
+  this.selected={observationTime:found.observationTime,operatingPoint:found.v.operatingPoint,running:found.v.running,lift,sequence:found.sequence,emissionFrame:renderFrame,emissionTime,observationAgeMs:(emissionTime-found.observationTime)*1000,clockBasis:'Authored state observation time mapped to current PCM emission frame; native getter interval unavailable',authority:c.authority};this.stats.selections++;
   // Geometry is valid at CURRENT emission time only because the separately
   // branded authored world is stationary for the entire declared horizon.
   return {...this.selected,vehicle:found.v};
