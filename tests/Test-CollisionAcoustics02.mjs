@@ -19,6 +19,16 @@ test('collision authority, exact component identity, occurrence and physical evi
  assert.throws(()=>revised(event,f.context,e=>e.participants[0].model=123),/participant/);
 });
 
+test('barrier and wall contacts lie on authored surfaces while radiator offsets remain explicit',()=>{
+ for(const [name,environment,surfaceId]of [['motorcycle-barrier','corner','barrier'],['light-scrape','canyon','wall-north']]){
+  const f=collisionFixture02(name,{environment,seconds:1}),event=f.events[0],surface=createVehicleEnvironment(environment).scene.tile.surfaces.find(s=>s.id===surfaceId);
+  const planeDistance=event.contact.position.reduce((sum,n,i)=>sum+(n-surface.center[i])*surface.normal[i],0);assert.equal(planeDistance,0);
+  assert.deepEqual(event.contact.normal,surface.normal);assert.equal(Math.hypot(...event.contact.radiatorOffset),.05);assert.equal(event.radiator.basis,'authored-contact-plus-explicit-offset');
+  assert.deepEqual(event.radiator.position,event.contact.position.map((n,i)=>n+event.contact.radiatorOffset[i]));assert.equal(event.radiator.nativeAttachmentVerified,false);assert(event.severity.normalClosingSpeed>0);
+  assert.throws(()=>revised(event,f.context,e=>e.contact.radiatorOffset=[0,1,0]),/radiator offset/);
+ }
+});
+
 test('crash subevents retain parent/participant identity and reject event replay or capacity bypass',()=>{
  const f=fixture(),ledger=new CollisionEventLedger(f.context,{mode:'authored-fixture'}),[primary,glass,debris]=f.events;
  assert.throws(()=>new CollisionEventLedger(f.context),/production/);

@@ -6,15 +6,15 @@ export function collisionFixture02(name='high-energy',{environment='direct',seco
   component:name==='light-scrape'?'collision-scrape':name==='glass'?'glass-break':'collision-impact',assembly:'contact',componentGeneration:1};
  const participants=[{vehicleId:identity.vehicleId,vehicleGeneration:1,model:identity.model}];if(name==='high-energy')participants.push({vehicleId:'authored-other-car',vehicleGeneration:1,model:2});
  const definitions={
-  'motorcycle-barrier':{velocity:[0,-6,0],mass:250,material:'metal',position:[-2,0,1],duration:3072},
-  'light-scrape':{velocity:[8,-.2,0],mass:100,material:'metal',position:[-2,6.9,1],duration:24000},
+  'motorcycle-barrier':{velocity:[0,-6,0],mass:250,material:'metal',position:[-2,1.5,1],normal:[0,1,0],radiatorOffset:[0,.05,0],duration:3072},
+  'light-scrape':{velocity:[8,.2,0],mass:100,material:'metal',position:[-2,8,1],normal:[0,-1,0],radiatorOffset:[0,-.05,0],duration:24000},
   'high-energy':{velocity:[0,-20,0],mass:1000,material:'metal',position:[-2,0,1],duration:4096},
   glass:{velocity:[0,-7,0],mass:2,material:'glass',position:[-2,0,1.4],duration:4096},
  };
  const d=definitions[name];if(!d)throw Error('explicit original collision fixture');
  const make=(suffix,edit={})=>createAuthoredCollisionEvent({identity,participants,eventId:name+':'+suffix,crashId:'crash:'+name,sequence:0,contactOrdinal:0,parentEventId:null,
   timing:{basis:'authored-audio-frame-clock',occurrenceLowerFrame:start,occurrenceUpperFrame:start,observationFrame:start,validThroughFrame:start+12000},
-  contact:{position:d.position,normal:[0,1,0],relativeVelocity:d.velocity,positionBasis:'authored-contact-point',relativeMotionBasis:'authored-relative-velocity'},
+  contact:{position:d.position,normal:d.normal??[0,1,0],relativeVelocity:d.velocity,positionBasis:'authored-contact-point',relativeMotionBasis:'authored-relative-velocity',radiatorOffset:d.radiatorOffset??[0,0,0]},
   severity:name==='light-scrape'?{basis:'authored-friction-proxy',normalForceN:250,frictionCoefficient:.4}:{basis:'authored-effective-mass',effectiveMassKg:d.mass},
   material:{id:d.material,basis:'authored-material',confidence:1},durationFrames:d.duration,radiatorMotion:'authored-fixed-world-contact',poseKnownThroughFrame:knownThroughFrame,...edit},context);
  const events=[make('primary')];

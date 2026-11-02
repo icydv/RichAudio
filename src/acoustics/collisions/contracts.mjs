@@ -34,6 +34,8 @@ export function createAuthoredCollisionEvent(input,context){
  const contact=input.contact,position=vector(contact?.position),normal=vector(contact?.normal),relativeVelocity=vector(contact?.relativeVelocity);
  need(Math.abs(Math.hypot(...normal)-1)<1e-7&&Math.hypot(...relativeVelocity)<=100&&contact.positionBasis==='authored-contact-point'&&
   contact.relativeMotionBasis==='authored-relative-velocity','qualified authored contact orientation/motion');
+ const radiatorOffset=vector(contact.radiatorOffset??[0,0,0]);need(Math.hypot(...radiatorOffset)<=.25,'bounded explicit authored radiator offset');
+ const radiatorPosition=position.map((n,i)=>n+radiatorOffset[i]);
  const material=input.material;
  need(material&&['metal','glass','plastic','gravel','unknown'].includes(material.id)&&
   (material.id==='unknown'?material.basis==='unknown'&&material.confidence===null:material.basis==='authored-material'&&material.confidence===1),
@@ -58,7 +60,8 @@ export function createAuthoredCollisionEvent(input,context){
  const key=componentIdentityKey(identity),assemblySourceId=componentSourceId(identity),sourceId='collision:'+createHash('sha256').update(key+':'+input.eventId).digest('hex').slice(0,40);
  const event=freeze({schema:1,authority:context.authority,identity,identityKey:key,sourceId,assemblySourceId,participants,eventId:input.eventId,crashId:input.crashId,
   sequence:input.sequence,contactOrdinal:input.contactOrdinal,parentEventId:input.parentEventId,kind:families[identity.component],
-  timing:{...timing},contact:{position,normal,relativeVelocity,positionBasis:contact.positionBasis,relativeMotionBasis:contact.relativeMotionBasis},
+  timing:{...timing},contact:{position,normal,relativeVelocity,positionBasis:contact.positionBasis,relativeMotionBasis:contact.relativeMotionBasis,radiatorOffset},
+  radiator:{position:radiatorPosition,basis:'authored-contact-plus-explicit-offset',nativeAttachmentVerified:false},
   material:{...material},severity:{...severity,normalClosingSpeed:closingSpeed,tangentialSpeed,energyJ,impulseNs,frictionPowerProxyW,
    acousticIntensity:'unmeasured; explicit authored synthesis mapping only'},durationFrames:input.durationFrames,radiatorMotion:input.radiatorMotion,
   poseKnownThroughFrame:input.poseKnownThroughFrame,nativeOverlap:'native-owned; offline demonstration only',

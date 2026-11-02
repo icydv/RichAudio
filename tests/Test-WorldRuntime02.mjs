@@ -1,6 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
 import {SpatialTileIndex02,StaticWorldRuntime02,DynamicWorldOverlay02,composeDynamicWorldScene02,dynamicSceneMetadata02} from '../src/acoustics/world/runtime02.mjs';
 import {StaticFixtureTileStore} from '../src/acoustics/world/static-cache.mjs';
+import {buildStaticTile} from '../src/acoustics/world/fixture-placements.mjs';
+import {effectiveStaticInventory} from '../src/acoustics/world/inventory.mjs';
 import {fixtureWorld,resource} from './fixtures/StaticWorld01.mjs';
 import {querySegment} from '../src/acoustics/research/local-geometry.mjs';
 
@@ -53,4 +55,17 @@ test('door/destruction overlay is separate; expired or moving geometry becomes u
  assert.equal(prepared.scene.geometryKey,originalKey);assert.equal(prepared.scene.tile.surfaces.length,1);assert.equal(dynamicSceneMetadata02(open).staticCacheModified,false);
  assert.throws(()=>overlay.accept({...input,sequence:2,observedFrame:0},512),/clock/);assert.throws(()=>overlay.snapshot(512),/clock/);assert.throws(()=>composeDynamicWorldScene02(prepared,{...finalSnapshot},12512),/exact/);
  await runtime.close();
+});
+
+test('a valid same-world cache entry cannot substitute another indexed tile or stale resident bounds',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'RichAudioWorld02-')),dir=path.join(root,'.local','cache');fs.mkdirSync(dir,{recursive:true});
+ try{const world=fixtureWorld(),inventory=effectiveStaticInventory(world.input),store=new StaticFixtureTileStore(root,dir);
+  // The far tile legitimately omits local-scoped wall placements; it still has
+  // a valid content digest and world identity. Mapping its key to local is bad.
+  const wrong=buildStaticTile(inventory,world.resources,{tileId:'far',bounds:world.tiles[0].bounds}),publication=await store.publish(wrong);
+  const runtime=new StaticWorldRuntime02({...world,store,cacheKeys:{local:publication.key}}),first=await runtime.prepareNearby({listener:[0,0,1],maximumTiles:1});
+  assert.equal(first.state,'prepared');assert.deepEqual(first.prepared.tileIds,['local']);assert.equal(first.prepared.scene.tile.surfaces.length,1);assert.equal(runtime.stats.rejectedCachedSelections,1);assert.equal(runtime.stats.workerLoads,1);assert.equal(runtime.stats.cachedLoads,0);
+  const revised={tileId:'local',bounds:{min:[-15,-12,-4],max:[15,12,12]}};runtime.index=new SpatialTileIndex02([revised]);
+  const second=await runtime.prepareNearby({listener:[0,0,1],maximumTiles:1});assert.deepEqual(second.prepared.scene.tile.bounds,revised.bounds);assert.equal(runtime.stats.rejectedCachedSelections,2);assert.equal(runtime.stats.workerLoads,2);await runtime.close();
+ }finally{assert.equal(path.dirname(root),os.tmpdir());assert(path.basename(root).startsWith('RichAudioWorld02-'));fs.rmSync(root,{recursive:true,force:true});}
 });

@@ -10,6 +10,10 @@ import {freeze,identifier,vector,bounds,digest,requireWorld} from './contracts.m
 export const runtimeWorld02Limits=Object.freeze({indexedTiles:262144,cellSide:128,bucketEntries:128,queryCandidates:4096,
  resident:8,nearbyTiles:8,dynamicObjects:32,dynamicRegions:32,maximumDynamicLeaseFrames:12000});
 const distance=(point,b)=>Math.hypot(...point.map((n,i)=>Math.max(b.min[i]-n,0,n-b.max[i])));
+function matchesIndexedTile(tile,entry,worldDigest){
+ validateStaticTile(tile);return tile.worldDigest===worldDigest&&tile.tileId===entry.tileId&&
+  ['min','max'].every(side=>tile.bounds[side].every((n,i)=>n===entry.bounds[side][i]));
+}
 function cellRange(b){return b.min.map((n,i)=>[Math.floor(n/128),Math.ceil(b.max[i]/128)-1]);}
 export class SpatialTileIndex02 {
  constructor(entries){requireWorld(Array.isArray(entries)&&entries.length<=runtimeWorld02Limits.indexedTiles,'bounded scalable tile index');this.entries=new Map();this.cells=new Map();
@@ -27,7 +31,7 @@ export class SpatialTileIndex02 {
 }
 
 export class StaticWorldRuntime02 {
- constructor({input,resources,tiles,store=null,cacheKeys={},session='cccccccccccccccccccccccccccccccc'}){requireWorld(/^[a-f0-9]{32}$/.test(session),'explicit authored runtime session');this.session=session;this.inventory=effectiveStaticInventory(input);this.input=structuredClone(input);this.resources=resources;this.index=new SpatialTileIndex02(tiles);this.store=store;this.cacheKeys={...cacheKeys};this.resident=new Map();this.prepared=null;this.active=null;this.closed=false;this.stats={preparations:0,cachedLoads:0,workerLoads:0,invalidations:0,sceneGenerations:0,audioBuffersAdded:0};}
+ constructor({input,resources,tiles,store=null,cacheKeys={},session='cccccccccccccccccccccccccccccccc'}){requireWorld(/^[a-f0-9]{32}$/.test(session),'explicit authored runtime session');this.session=session;this.inventory=effectiveStaticInventory(input);this.input=structuredClone(input);this.resources=resources;this.index=new SpatialTileIndex02(tiles);this.store=store;this.cacheKeys={...cacheKeys};this.resident=new Map();this.prepared=null;this.active=null;this.closed=false;this.stats={preparations:0,cachedLoads:0,rejectedCachedSelections:0,workerLoads:0,invalidations:0,sceneGenerations:0,audioBuffersAdded:0};}
  async prepareNearby({listener,sources=[],maximumTiles=4,budgetMs=2000,paused=false,signal}={}){
   requireWorld(!this.closed&&!this.active&&Number.isInteger(maximumTiles)&&maximumTiles>0&&maximumTiles<=runtimeWorld02Limits.nearbyTiles,'one bounded background scene preparation');
   const selection=this.index.nearby(listener,{sources,maximum:maximumTiles});if(paused)return {state:'paused',previousSceneRetained:!!this.prepared,audioBuffersAdded:0};
@@ -36,15 +40,17 @@ export class StaticWorldRuntime02 {
   // IO and publication run only on this explicitly async background method.
   let finish;const token={cancelled:false,worker:null,done:new Promise(resolve=>finish=resolve)};this.active=token;
   try{
-   for(const entry of selection.entries){const old=this.resident.get(entry.tileId);if(old?.worldDigest===version){loaded.push(old);continue;}
-    const key=this.cacheKeys[entry.tileId];if(this.store&&key){const result=await this.store.load(key,version);if(result.state==='static-fixture-verified'){loaded.push(result.tile);this.stats.cachedLoads++;continue;}}
+   for(const entry of selection.entries){const old=this.resident.get(entry.tileId);if(old&&matchesIndexedTile(old,entry,version)){loaded.push(old);continue;}if(old)this.resident.delete(entry.tileId);
+    const key=this.cacheKeys[entry.tileId];if(this.store&&key){const result=await this.store.load(key,version);if(result.state==='static-fixture-verified'){
+     if(matchesIndexedTile(result.tile,entry,version)){loaded.push(result.tile);this.stats.cachedLoads++;continue;}this.stats.rejectedCachedSelections++;
+    }}
     missing.push(entry);
    }
    if(missing.length&&!token.cancelled&&!signal?.aborted){
     token.worker=new StaticWorldWarmup({input:this.input,resources:this.resources,tiles:missing.map(({priority,...entry})=>entry)});
     const result=await token.worker.prepareLocal({listener,sources,maximumTiles:missing.length,budgetMs,signal});
     if(result.state!=='complete')return {state:result.state,reason:result.reason,workerJoined:result.workerJoined,previousSceneRetained:!!this.prepared,audioBuffersAdded:0};
-    for(const resultTile of result.tiles){const tile=resultTile.tile;loaded.push(tile);this.stats.workerLoads++;if(this.store&&tile.unknown.length===0){const publication=await this.store.publish(tile);if(publication.published)this.cacheKeys[tile.tileId]=publication.key;}}
+    for(const resultTile of result.tiles){const tile=resultTile.tile,entry=selection.entries.find(e=>e.tileId===tile.tileId);requireWorld(entry&&matchesIndexedTile(tile,entry,version),'worker tile must match selected index identity and bounds');loaded.push(tile);this.stats.workerLoads++;if(this.store&&tile.unknown.length===0){const publication=await this.store.publish(tile);if(publication.published)this.cacheKeys[tile.tileId]=publication.key;}}
    }
    if(token.cancelled||signal?.aborted||this.closed||this.inventory.fingerprint!==version)return {state:'cancelled-or-invalidated',previousSceneRetained:!!this.prepared,audioBuffersAdded:0};
    for(const tile of loaded){validateStaticTile(tile);this.resident.delete(tile.tileId);this.resident.set(tile.tileId,tile);}

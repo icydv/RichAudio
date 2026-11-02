@@ -21,7 +21,7 @@ export async function renderCollisionFixture02(fixture,{masterGain=.35,late=true
    const paths=[];for(const p of [...control.paths].sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id))){const pressure=p.bands[0]*weight,extra=Math.max(0,pressure-(occupied.get(p.id)??0));if(bound+extra>.35){headroom.omittedPaths++;continue;}bound+=extra;paths.push(p);}return {...control,paths};
   }});
  const diffuse=new BoundedLateReverb(late?environment.lateEvidence:null,{wet:.12}),dry=Object.fromEntries(ids.map(id=>[id,new Float32Array(BLOCK)])),left=new Float32Array(BLOCK),right=new Float32Array(BLOCK),directL=new Float32Array(BLOCK),directR=new Float32Array(BLOCK),wetL=new Float32Array(BLOCK),wetR=new Float32Array(BLOCK),allL=new Float32Array(fixture.frames),allR=new Float32Array(fixture.frames),costs=[],admissions=[];
- if(diffuse.evidence){const b=diffuse.evidence.bounds;need([fixture.listener.position,...fixture.events.map(e=>e.contact.position)].every(p=>p.every((x,i)=>x>=b.min[i]&&x<=b.max[i])),'every source/listener lies inside the complete authored late enclosure');}
+ if(diffuse.evidence){const b=diffuse.evidence.bounds;need([fixture.listener.position,...fixture.events.map(e=>e.radiator.position)].every(p=>p.every((x,i)=>x>=b.min[i]&&x<=b.max[i])),'every source/listener lies inside the complete authored late enclosure');}
  let peak=0,energy=0,lateEnergy=0,firstNonzero=-1,firstPaths=null;
  try{for(let frame=0;frame<fixture.frames;frame+=BLOCK){const begin=performance.now(),n=Math.min(BLOCK,fixture.frames-frame);
    for(const event of fixture.events)if(!sources.has(event.eventId)&&frame>=event.timing.observationFrame){const admitted=ledger.admit(event,frame);need(admitted.admitted,'fixture event admission');const scheduled=Math.max(frame,event.timing.occurrenceUpperFrame);
@@ -30,7 +30,7 @@ export async function renderCollisionFixture02(fixture,{masterGain=.35,late=true
    // The whole stationary radiator geometry is explicitly authored/prewarmed;
    // admission of an event never fabricates a newly observed source trajectory.
    const control=await pipeline.prepare({time:frame/FS,session:fixture.context.session,generation:1,listener:fixture.listener,sources:fixture.events.map(event=>({id:event.sourceId,generation:event.identity.componentGeneration,
-    position:event.contact.position,velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],valid:true}))},{geometryTimeMs:frame/48});
+    position:event.radiator.position,velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],valid:true}))},{geometryTimeMs:frame/48});
    if(!firstPaths&&frame>=10240)firstPaths=control.paths.map(p=>({sourceId:p.sourceId,order:p.order,distance:p.distance,delayFrames:p.delay*FS,bands:p.bands,rate:p.rate}));
    pipeline.process(dry,left,right,n,directL,directR);diffuse.processInto(directL,directR,wetL,wetR,{enabled:late&&!!environment.lateEvidence});
    for(let i=0;i<n;i++){const l=left[i]+wetL[i],r=right[i]+wetR[i];need(Number.isFinite(l)&&Number.isFinite(r)&&Math.abs(l)<=.4&&Math.abs(r)<=.4,'bounded unnormalised mixed collision output');allL[frame+i]=l;allR[frame+i]=r;const p=Math.max(Math.abs(l),Math.abs(r));if(p>0&&firstNonzero<0)firstNonzero=frame+i;peak=Math.max(peak,p);energy+=l*l+r*r;lateEnergy+=wetL[i]**2+wetR[i]**2;}
@@ -52,7 +52,7 @@ export function prepareCollisionEventKernel02(event,{scene,listenerPose,sceneId=
  need(isAuthoredCollisionEvent(event)&&event.durationFrames<=4096,'short original collision source required by bounded transient waveform path');
  const original=new OriginalCollisionSource(event,{outputStartFrame:event.timing.occurrenceUpperFrame});
  const waveform=new Float32Array(original.durationFrames);original.copyDryInto(waveform);
- const kernel=createPreparedTransientKernel({scene,sceneId,sceneGeneration,session:event.identity.session,sourcePose:{position:event.contact.position,generation:event.identity.componentGeneration},
+ const kernel=createPreparedTransientKernel({scene,sceneId,sceneGeneration,session:event.identity.session,sourcePose:{position:event.radiator.position,generation:event.identity.componentGeneration},
   listenerPose,frames,amplitude:.02,masterGain:.7,authority:'authored-fixture-only',dryWaveform:waveform,waveformId:'collision:'+event.kind+':'+event.material.id});
  return {kernel,event,originalSourceSha256:original.pcmSha256,originalScale:.02,productionAcquisitionVerified:false,nativePrimary:true};
 }
