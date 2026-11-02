@@ -53,7 +53,8 @@ export function prepareCollisionEventKernel02(event,{scene=null,listenerPose,lis
  const end=event.timing.occurrenceUpperFrame+frames;
  need(Number.isSafeInteger(frames)&&Number.isSafeInteger(listenerKnownThroughFrame)&&event.poseKnownThroughFrame>=end&&listenerKnownThroughFrame>=end,
   'source and listener must cover the full prepared tail horizon');
- need(scene===null||validated.scene(scene)&&scene.tile?.session===event.identity.session&&scene.tile.createdAt*48<=event.timing.occurrenceUpperFrame&&scene.tile.validUntil*48>=end,
+ need(scene===null||validated.scene(scene)&&scene.tile?.session===event.identity.session&&scene.tile.createdAt*48<=event.timing.occurrenceUpperFrame&&scene.tile.validUntil*48>=end&&
+  scene.tile.surfaces.every(s=>s.observedAt*48<=event.timing.occurrenceUpperFrame&&s.validUntil*48>=end),
   'prepared collision scene must match the exact authored session and full horizon');
  const original=new OriginalCollisionSource(event,{outputStartFrame:event.timing.occurrenceUpperFrame});
  const waveform=new Float32Array(original.durationFrames);original.copyDryInto(waveform);

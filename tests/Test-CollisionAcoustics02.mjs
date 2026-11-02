@@ -79,6 +79,8 @@ test('short collision sources enter the existing LATENCY-02 branded kernel/descr
  assert.throws(()=>prepareCollisionEventKernel02(revised(event,f.context,e=>e.poseKnownThroughFrame=e.timing.occurrenceUpperFrame+e.durationFrames),options),/full prepared tail horizon/);
  assert.throws(()=>prepareCollisionEventKernel02(event,{...options,listenerKnownThroughFrame:event.timing.occurrenceUpperFrame+4096}),/full prepared tail horizon/);
  assert.throws(()=>prepareCollisionEventKernel02(event,{...options,scene:createVehicleEnvironment('direct').scene}),/exact authored session/);
+ const expiring=createVehicleEnvironment('canyon').scene,earlySurface=acousticScene(createTile({...expiring.tile,session:f.context.session,surfaces:expiring.tile.surfaces.map(s=>({...s,validUntil:530}))}),expiring.materials,expiring.config);
+ assert.throws(()=>prepareCollisionEventKernel02(event,{...options,scene:earlySurface}),/full horizon/);
  assert.throws(()=>prepareCollisionEventKernel02(event,{...options,listenerPose:{...f.listener,generation:0}}),/generation/);
  assert.throws(()=>prepareCollisionEventKernel02(collisionFixture02('light-scrape',{seconds:1}).events[0],{scene:createVehicleEnvironment('direct').scene,listenerPose:f.listener}),/short/);
 });
