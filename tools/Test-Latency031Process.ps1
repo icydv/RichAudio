@@ -4,7 +4,9 @@ $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
 $out=Join-Path $repo ('.local/latency-03-1/process-'+[guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory($out)|Out-Null
+$pins=@('src/acoustics/host/Transport/OwnedProcessJob.cs','tests/host/TestLatency031Process.cs','tests/host/ProcessFixture031.cs','tools/Test-Latency031Process.ps1')|ForEach-Object{[ordered]@{file=$_;sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $repo $_)).Hash.ToLowerInvariant()}}
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
+$compilerSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $compiler).Hash.ToLowerInvariant()
 $helper=Join-Path $out 'Original.ProcessFixture031.exe'
 & $compiler /nologo /optimize+ /warnaserror+ /platform:x64 ('/out:'+$helper) (Join-Path $repo 'tests/host/ProcessFixture031.cs')
 if($LASTEXITCODE-ne0){throw 'Original process helper compilation failed.'}
@@ -24,8 +26,10 @@ $sources=@((Join-Path $repo 'src/acoustics/host/Transport/OwnedProcessJob.cs'),(
 & $compiler /nologo /optimize+ /warnaserror+ /platform:x64 /define:OWNED_PROCESS_FIXTURES /r:System.Web.Extensions.dll ('/out:'+$exe) @sources
 if($LASTEXITCODE-ne0){throw 'Native lifetime fixture compilation failed.'}
 & $exe $helper (Join-Path $out 'fixture') 1> (Join-Path $out 'result.json') 2> (Join-Path $out 'stderr.txt')
-if($LASTEXITCODE-ne0){throw ('Native lifetime fixture failed; preserve '+$out)}
+$resultCode=$LASTEXITCODE
+foreach($pin in $pins){if((Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $repo $pin.file)).Hash.ToLowerInvariant()-cne$pin.sha256){throw 'Source changed during native process fixture; preserve output without promoting result.'}}
+if((Get-FileHash -Algorithm SHA256 -LiteralPath $compiler).Hash.ToLowerInvariant()-cne$compilerSha256){throw 'Compiler changed during native process fixture; preserve output without promoting result.'}
+if($resultCode-ne0){throw ('Native lifetime fixture failed; preserve '+$out)}
 $result=Get-Content -LiteralPath (Join-Path $out 'result.json') -Raw|ConvertFrom-Json
-$pins=@('src/acoustics/host/Transport/OwnedProcessJob.cs','tests/host/TestLatency031Process.cs','tests/host/ProcessFixture031.cs','tools/Test-Latency031Process.ps1')|ForEach-Object{[ordered]@{file=$_;sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $repo $_)).Hash.ToLowerInvariant()}}
-[ordered]@{schema=1;passed=$result.passed;checks=$result.checks;sourcePins=@($pins);originalSourceCommit='57178c5986b8e82403ceeb9dbf80f2ef2ceaa935';resultSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $out 'result.json')).Hash.ToLowerInvariant();helperSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $helper).Hash.ToLowerInvariant();productionAssemblySha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $production).Hash.ToLowerInvariant();productionFaultSwitchesAbsent=$true;allOriginalFixtureLifetimesAbsent=$result.allOriginalFixtureLifetimesAbsent;endpointOpened=$false;gameLaunched=$false;recordingStarted=$false;scope='Original native kernel process fixtures and clearly authored native-failure injections; no real audio endpoint'}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $out 'validation.json') -Encoding utf8
+[ordered]@{schema=1;passed=$result.passed;checks=$result.checks;sourcePins=@($pins);sourcePinsBeforeCompilationAndUnchangedAfter=$true;compilerSha256=$compilerSha256;originalSourceCommit='57178c5986b8e82403ceeb9dbf80f2ef2ceaa935';resultSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $out 'result.json')).Hash.ToLowerInvariant();helperSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $helper).Hash.ToLowerInvariant();productionAssemblySha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $production).Hash.ToLowerInvariant();productionFaultSwitchesAbsent=$true;allOriginalFixtureLifetimesAbsent=$result.allOriginalFixtureLifetimesAbsent;endpointOpened=$false;gameLaunched=$false;recordingStarted=$false;scope='Original native kernel process fixtures and clearly authored native-failure injections; no real audio endpoint'}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $out 'validation.json') -Encoding utf8
 Write-Output ('PASS native process lifetime fixtures; '+$out)
