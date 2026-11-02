@@ -1,6 +1,6 @@
 # PLAYABLE-15 recording recovery and latency investigation
 
-The first audible Bati result remains established as recorded in [Stage B](PLAYABLE_15_STAGE_B_RESULT.md). My 250–500 ms latency estimate remains subjective. This follow-up changes recording fault handling and adds timing diagnostics offline; it does not tune sound or prove a second live result.
+The first audible Bati result remains established as recorded in [Stage B](PLAYABLE_15_STAGE_B_RESULT.md). My 250–500 ms latency estimate remains subjective. The offline correction described below preserved sound settings and prepared diagnostics before I separately approved [my second live demonstration](PLAYABLE_15_RECORDING_RECOVERY_LIVE_RESULT.md). That subsequent run recovered continuous capture and measured software timing, while total audible latency and natural shutdown remain unresolved.
 
 ## Confirmed failure and WASAPI contract
 
