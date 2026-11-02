@@ -4,13 +4,16 @@ import {createHash} from 'node:crypto';
 import {createPreparedTransientKernel} from '../../events/prepared-path.mjs';
 import {componentIdentity,componentSourceId,requireAuthoredComponentCapability,requireComponent,freezeComponent} from './contracts.mjs';
 import {OriginalComponentSource} from './source.mjs';
+import {validated} from '../../engine/contracts.mjs';
 export function createPreparedMechanicalComponent({capability,identity,sourcePose,listenerPose,scene=null,sceneId,sceneGeneration=1,
  kind='gear-clunk',strength=.8,amplitude=.25}={}) {
  const context=requireAuthoredComponentCapability(capability),owner=componentIdentity(identity);
  requireComponent(owner.session===context.session&&owner.component==='mechanical-clunk'&&context.maximumFrame>=16383&&
   sourcePose?.generation===owner.componentGeneration&&Number.isFinite(amplitude)&&amplitude>0&&amplitude<=.25,
   'Exact authored mechanical identity, whole prepared-window horizon and generation required');
- requireComponent(scene===null||scene.tile?.session===owner.session,'Prepared component scene must match its authored session');
+ requireComponent(scene===null||validated.scene(scene)&&scene.tile?.session===owner.session&&scene.tile.createdAt<=0&&scene.tile.validUntil*48>=16384&&
+  scene.tile.surfaces.every(surface=>surface.observedAt<=0&&surface.validUntil*48>=16384),
+  'Prepared component scene must match its authored session and complete tile/surface horizon');
  const source=new OriginalComponentSource('mechanical-clunk');source.setState({});
  source.trigger({eventId:'prepared-original-mechanical-shape',sequence:0,occurrenceFrame:0,observedFrame:0,strength,kind},0);
  const dry=new Float32Array(4800),block=new Float32Array(512);

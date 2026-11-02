@@ -10,6 +10,8 @@ import {fixtureComponentIdentity,componentFixtureSession,componentFixtureState,c
 import {createPreparedMechanicalComponent} from '../src/acoustics/vehicle/components/prepared.mjs';
 import {transientFixtureSession,transientFixturePoses,transientFixtureScene} from '../src/acoustics/events/fixture-scenes.mjs';
 import {createHash} from 'node:crypto';
+import {createTile} from '../src/acoustics/research/local-geometry.mjs';
+import {acousticScene} from '../src/acoustics/engine/contracts.mjs';
 const cap=frames=>createAuthoredComponentCapability({session:componentFixtureSession,maximumFrame:frames-1});
 const contact=()=>componentFixtureState('tyre-slip',0);
 const output=(source,frames)=>{const all=new Float32Array(frames);for(let at=0;at<frames;at+=512){const n=Math.min(512,frames-at),block=new Float32Array(n);source.renderInto(block);all.set(block,at);}return all;};
@@ -137,6 +139,11 @@ test('complete original mechanical events prewarm through the existing low-laten
  assert.equal(result.kernel.kernelAffectedHistoryFrames,0);assert.equal(result.kernel.rendererLimited,0);assert.equal(result.extraFixedQueueFrames,0);assert.equal(result.productionEnabled,false);assert.equal(result.nativeSuppression,false);
  assert.throws(()=>createPreparedMechanicalComponent({identity:{...identity,component:'horn'},capability,sceneId:'unknown',sourcePose:transientFixturePoses.source,listenerPose:transientFixturePoses.listener}));
  assert.throws(()=>createPreparedMechanicalComponent({identity,capability,sceneId:'unknown',sourcePose:{...transientFixturePoses.source,generation:2},listenerPose:transientFixturePoses.listener}));
+ const wall=transientFixtureScene('wall'),options={identity,capability,sceneId:'wall',sourcePose:transientFixturePoses.source,listenerPose:transientFixturePoses.listener};
+ const shortTile=acousticScene(createTile({...wall.tile,validUntil:1,surfaces:wall.tile.surfaces.map(surface=>({...surface,validUntil:1}))}),wall.materials,wall.config);
+ const shortSurface=acousticScene(createTile({...wall.tile,surfaces:wall.tile.surfaces.map(surface=>({...surface,validUntil:1}))}),wall.materials,wall.config);
+ assert.throws(()=>createPreparedMechanicalComponent({...options,scene:shortTile}),/complete tile\/surface horizon/);
+ assert.throws(()=>createPreparedMechanicalComponent({...options,scene:shortSurface}),/complete tile\/surface horizon/);
 });
 test('source block preparation is a transaction: no future-state admission, duplicate prepare or mismatched render',()=>{
  const identity=fixtureComponentIdentity('horn'),set=new ComponentSourceSet({capability:cap(2048),identities:[identity]}),input={[componentSourceId(identity)]:new Float32Array(512)};
