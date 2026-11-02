@@ -127,7 +127,9 @@ namespace RichAudio.Beacon.Windows
             MaximumCallbackFrames=Math.Max(MaximumCallbackFrames,frames);MinimumCallbackFrames=Math.Min(MinimumCallbackFrames,frames);
             int captureSlot=-1;OwnedOutputTap recorder=OwnedRecorder;
             try {long underflow=ring.UnderflowFrames,endSilence=ring.EndSilenceFrames,producerStart=ring.ConsumedFrames-underflow-endSilence;
-                int supplied=calibratedGameplay?ring.FillCalibrated((float*)data,(int)frames,Muted?0:volume):ring.Fill((float*)data, (int)frames, Muted ? 0 : volume);
+                // The live route deliberately passes no event bus: native
+                // event acquisition/coexistence/clock mapping are unqualified.
+                int supplied=OwnedPcmSubmission.Fill(ring,(float*)data,(int)frames,Muted?0:volume,calibratedGameplay,SubmittedFrames,null);
                 if(recorder!=null)captureSlot=recorder.Prepare((float*)data,(int)frames,SubmittedFrames,ring.ConsumedFrames,producerStart,supplied,ring.UnderflowFrames-underflow,ring.EndSilenceFrames-endSilence); }
             finally {try{Native.Check(renderer.ReleaseBuffer(frames, 0));}catch{if(recorder!=null)recorder.Cancel(captureSlot);throw;} }
             if(recorder!=null)recorder.Commit(captureSlot);
