@@ -1,0 +1,335 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-08",
+  "dateUtc": "2026-11-01",
+  "scope": "One freshly authorised actual telemetry-only capture using the unchanged PLAYABLE-07 diagnostic ASI; no audio/loudness feature activation",
+  "acceptance": "INCOMPLETE: genuine changing route and marked initial idle preserved; controlled full phase qualification and product integration remain BLOCKED",
+  "candidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "sha256": "21302b4c5c5fb99f63b7b25dce2fa973117bfb0246f16745d0782f062fe1a69e",
+    "bytes": 378880,
+    "unchangedFromPlayable07": true,
+    "onlyOneTemporaryAsiAdded": true
+  },
+  "authorisation": {
+    "freshExplicitApproval": true,
+    "maximumDeployments": 1,
+    "maximumLaunches": 1,
+    "maximumCaptures": 1,
+    "maximumActiveMs": 120000,
+    "maximumTargets": 2400,
+    "maximumHz": 20,
+    "firstAdvanceRequired": true,
+    "automaticRetry": false,
+    "audioPlaybackAuthorised": false,
+    "audioCaptureAuthorised": false,
+    "loudnessActivationAuthorised": false,
+    "furtherCaptureRequiresFreshApproval": true
+  },
+  "actualExecution": {
+    "gameStarted": true,
+    "actualScriptHookVExecuted": true,
+    "route": "Existing working RPH launch route",
+    "probeAsiLoads": 1,
+    "probeRegistrations": 1,
+    "probeCallbackLaunches": 1,
+    "probeUnregistrations": 1,
+    "gameFileVersion": "1.0.1158.16",
+    "rphVersion": "1.132.1428.17748",
+    "scriptHookVVersion": "3889.0/1158.13",
+    "scriptHookVInternalGameLabel": "VER_EN_1_0_1158_13",
+    "nativeRetryPerformed": false,
+    "secondCapturePerformed": false
+  },
+  "capture": {
+    "targetHash": "F9DDA40BC293A61E",
+    "targetAttempts": 2131,
+    "targetOutcomesObserved": 2131,
+    "completeBracketedObservations": 2131,
+    "declaredPrecontexts": 2131,
+    "earlyRawReturns": 2131,
+    "timelineRecords": 6398,
+    "phaseMarkers": 5,
+    "terminalReason": "active-deadline",
+    "producerCompleted": true,
+    "deadlineReached": true,
+    "writerFailed": false,
+    "exceptionCode": 0,
+    "presentationExceptionCodeAtCapture": 0,
+    "droppedOperatorEvents": 0,
+    "zeroWhileRunningCount": 0,
+    "measuredRPM": false,
+    "providerValid": false,
+    "stableCopiedHashesVerified": true
+  },
+  "rawSignal": {
+    "minimum": 0.20000000298023224,
+    "minimumBitsHex": "3E4CCCCD",
+    "maximum": 1,
+    "maximumBitsHex": "3F800000",
+    "distinctBitPatterns": 1308,
+    "largestConsecutiveAbsoluteChange": 0.05727007985115051
+  },
+  "context": {
+    "modelHash": "F9300CC5",
+    "allIdentityBracketsValid": true,
+    "uniqueIdentityCount": 1,
+    "allDriversMatchOwnPed": true,
+    "allPrePostEngineRunningRawOne": true,
+    "engineOffObserved": false,
+    "pairedSpeedMinimumMps": 0,
+    "pairedSpeedMaximumMps": 46.7415352,
+    "finalSpeedMps": 39.404747,
+    "finalRatio": 0.7540220022201538,
+    "actualGearAvailable": false,
+    "actualThrottleAvailable": false
+  },
+  "timing": {
+    "basis": "Relative monotonic QPC deltas; no absolute QPC values published",
+    "firstTargetStartSeconds": 2.96E-05,
+    "lastTargetStartSeconds": 119.9982946,
+    "lastTargetEndSeconds": 119.998296,
+    "cooperativeEndSeconds": 120.0127306,
+    "dispatchDeadlineSeconds": 120,
+    "allDispatchStartsBeforeDeadline": true,
+    "cooperativeCompletionAfterDeadlineMs": 12.7306,
+    "minimumStartGapMs": 54.2043,
+    "maximumStartGapMs": 57.7967,
+    "minimumAfterToNextStartGapMs": 54.2026,
+    "targetWindowMedianMs": 0.0011,
+    "targetWindowMaximumMs": 0.4598,
+    "windowIsIsolatedHandlerOrAudioBenchmark": false,
+    "watchdogCanPreemptNative": false
+  },
+  "firstAdvance": {
+    "ready": true,
+    "reason": "advance-to-idle-and-stationary-running-bracket-recorded",
+    "confirmingObservationIndex": 349,
+    "acceptedAdvanceSeconds": 19.4789277,
+    "confirmationSeconds": 19.6053293,
+    "readOnlyObserver": true,
+    "gameNativeCalls": 0,
+    "drivingInterlock": false,
+    "onlyInitialReadinessEstablished": true
+  },
+  "phaseChronology": [
+    {
+      "action": "start",
+      "requestedPhase": "OFF",
+      "acceptedSeconds": -0.0136209,
+      "nextMarkerOrTerminalAfterSeconds": 19.4925486
+    },
+    {
+      "action": "advance",
+      "requestedPhase": "IDLE",
+      "acceptedSeconds": 19.4789277,
+      "nextMarkerOrTerminalAfterSeconds": 15.8727211
+    },
+    {
+      "action": "advance",
+      "requestedPhase": "STATIONARY_REV",
+      "acceptedSeconds": 35.3516488,
+      "nextMarkerOrTerminalAfterSeconds": 23.6479931
+    },
+    {
+      "action": "advance",
+      "requestedPhase": "ACCELERATION",
+      "acceptedSeconds": 58.9996419,
+      "nextMarkerOrTerminalAfterSeconds": 26.365539400000003
+    },
+    {
+      "action": "advance",
+      "requestedPhase": "GEAR_TRANSITIONS",
+      "acceptedSeconds": 85.3651813,
+      "nextMarkerOrTerminalAfterSeconds": 34.647549299999994
+    }
+  ],
+  "phaseMeasurements": [
+    {
+      "requestedPhase": "OFF",
+      "samples": 346,
+      "startSeconds": 2.96E-05,
+      "lastSeconds": 19.4363079,
+      "spanSeconds": 19.436278299999998,
+      "ratioMinimum": 0.20000000298023224,
+      "ratioMaximum": 0.20000000298023224,
+      "ratioMedian": 0.20000000298023224,
+      "ratioQuarterDelta": 0,
+      "speedMinimumMps": 0,
+      "speedMaximumMps": 0.00837944821,
+      "speedStartMps": 0,
+      "speedEndMps": 0,
+      "speedQuarterDeltaMps": 0
+    },
+    {
+      "requestedPhase": "IDLE",
+      "samples": 282,
+      "startSeconds": 19.4928184,
+      "lastSeconds": 35.3240472,
+      "spanSeconds": 15.831228800000002,
+      "ratioMinimum": 0.20000000298023224,
+      "ratioMaximum": 0.20000000298023224,
+      "ratioMedian": 0.20000000298023224,
+      "ratioQuarterDelta": 0,
+      "speedMinimumMps": 0,
+      "speedMaximumMps": 0,
+      "speedStartMps": 0,
+      "speedEndMps": 0,
+      "speedQuarterDeltaMps": 0
+    },
+    {
+      "requestedPhase": "STATIONARY_REV",
+      "samples": 420,
+      "startSeconds": 35.3797832,
+      "lastSeconds": 58.9857695,
+      "spanSeconds": 23.605986300000005,
+      "ratioMinimum": 0.20000000298023224,
+      "ratioMaximum": 1,
+      "ratioMedian": 0.7041401267051697,
+      "ratioQuarterDelta": -0.3236977905035019,
+      "speedMinimumMps": 0,
+      "speedMaximumMps": 0.0127892848,
+      "speedStartMps": 0,
+      "speedEndMps": 0,
+      "speedQuarterDeltaMps": -0.0023748395
+    },
+    {
+      "requestedPhase": "ACCELERATION",
+      "samples": 468,
+      "startSeconds": 59.0419152,
+      "lastSeconds": 85.3510629,
+      "spanSeconds": 26.309147700000004,
+      "ratioMinimum": 0.20000000298023224,
+      "ratioMaximum": 0.975606381893158,
+      "ratioMedian": 0.7898932695388794,
+      "ratioQuarterDelta": -0.19721686840057373,
+      "speedMinimumMps": 0,
+      "speedMaximumMps": 43.0716171,
+      "speedStartMps": 0,
+      "speedEndMps": 10.7388258,
+      "speedQuarterDeltaMps": -8.247359199999998
+    },
+    {
+      "requestedPhase": "GEAR_TRANSITIONS",
+      "samples": 615,
+      "startSeconds": 85.4074848,
+      "lastSeconds": 119.9982946,
+      "spanSeconds": 34.59080979999999,
+      "ratioMinimum": 0.20000000298023224,
+      "ratioMaximum": 1,
+      "ratioMedian": 0.7887095212936401,
+      "ratioQuarterDelta": -0.009550750255584717,
+      "speedMinimumMps": 10.1925354,
+      "speedMaximumMps": 46.7415352,
+      "speedStartMps": 10.838316,
+      "speedEndMps": 39.404747,
+      "speedQuarterDeltaMps": 12.5445079
+    }
+  ],
+  "primaryAnalysis": {
+    "frozenAnalyzerSha256": "c246ea676c54b8298503cadfcc8603eac4c7f1fbfca012bf7e5a726e48937799",
+    "verdict": "incomplete",
+    "criteria": {
+      "initialIdleContextAndStability": true,
+      "returnIdleContextAndStability": false,
+      "independentAcceleration": false,
+      "independentDeceleration": false,
+      "ratioRiseDuringObservedAcceleration": false,
+      "ratioFallDuringObservedDeceleration": false,
+      "meaningfulRunningVariation": true
+    },
+    "qualityFailures": [],
+    "evidenceGaps": [
+      "returnIdleContextAndStability",
+      "independentAcceleration",
+      "independentDeceleration",
+      "ratioRiseDuringObservedAcceleration",
+      "ratioFallDuringObservedDeceleration"
+    ],
+    "providerQualified": false,
+    "measuredRPM": false
+  },
+  "humanCorroboration": {
+    "receivedAfterCapture": true,
+    "summary": "The operator reported natural deceleration within the ACCELERATION label, then moving up/down gears until the capture ended.",
+    "exactActionTransitionTimesEstablished": false,
+    "reportedGearChangesAreIndependentGearTelemetry": false,
+    "retrospectivePhaseRelabellingPerformed": false,
+    "additionalCaptureAuthorised": false
+  },
+  "interpretation": {
+    "markedInitialIdlePassed": true,
+    "markedIdleSamples": 282,
+    "markedIdleSeconds": 15.8312288,
+    "markedIdleRatio": 0.20000000298023224,
+    "stationaryRevRequestedSamples": 420,
+    "stationaryRevRequestedSeconds": 23.6059863,
+    "stationaryRevRatioMinimum": 0.20000000298023224,
+    "stationaryRevRatioMaximum": 1,
+    "stationaryRevSpeedMaximumMps": 0.0127892848,
+    "stationaryLabelOrKeysProveActuation": false,
+    "accelerationLabelContainedMixedSpeedBehaviour": true,
+    "wholeAccelerationSpeedQuarterDeltaMps": -8.247359275817871,
+    "wholeAccelerationRatioQuarterDelta": -0.19721686840057373,
+    "decelerationPhaseMarked": false,
+    "returnIdlePhaseMarked": false,
+    "finalIdleObserved": false,
+    "gearSemanticsEstablished": false,
+    "normalisedOperatingStateProviderQualified": false,
+    "physicalRpmEstablished": false,
+    "productIntegration": "BLOCKED",
+    "conclusion": "Keep the valid changing signal, stationary response and marked initial idle. Missing final labels, mixed acceleration/deceleration within one requested phase and an ending speed of 39.4 m/s prevent completion of the predefined experiment. Do not invent phase timing or alter primary criteria."
+  },
+  "features": {
+    "richAudioPlaybackActivated": false,
+    "synchronizedRecordingActivated": false,
+    "loopbackOrMicrophoneActivated": false,
+    "loudnessPolicyActivated": false,
+    "stockFallbackPreserved": true
+  },
+  "cleanup": {
+    "shvUnregistrationObserved": true,
+    "rollbackEvidence": "evidence/playable-08-rollback.json",
+    "rollbackOwnedBySeparateReceipt": true
+  },
+  "integrity": {
+    "files": [
+      {
+        "file": "capture.json",
+        "bytes": 2218,
+        "sha256": "16fa92c6d5b2251f609fad5dafc569221a31dea5967ade223a3621d77219e74c"
+      },
+      {
+        "file": "journal.ndjson",
+        "bytes": 913,
+        "sha256": "85e96fbaed97bb9ea850f6f4bcc25dfb48dceaa6e50516320d8d8e49b592a164"
+      },
+      {
+        "file": "timeline.ndjson",
+        "bytes": 5495342,
+        "sha256": "b3a808d3718701bd66d873318e2bf05941593a45fd81e326e820e1ec460730cb"
+      }
+    ],
+    "analysisSha256": "97f418b2e87c60a153f7e27d74fc5a17c11ef320446818b98776ab7d3f8e17a3",
+    "independentReviewSha256": "390f9fae8a5a510994e8fed9bd394217a7d6877defda2e3789e75722014c74c5",
+    "capturePreservationSha256": "95c4e2fd7512907ca64c9dff452aded284ccf5e05a06501b5d8540294c6c7834",
+    "firstAdvanceSha256": "4ddd8aed6af71f9b1dbf5953461d967380422c331f385ec7047453a39a30cb58",
+    "authorisationSha256": "87a6e64d190a7c26654bf7eeaf1102f3d5615dd5a11c18b661520a3101e516d8",
+    "userObservationSha256": "c0729fb20036b63bec7c4411d75cc361873dde123a989f1c8bb7e62cda92f52a",
+    "logs": [
+      {
+        "file": "asiloader.log",
+        "sha256": "9e5d13e07ca905db2d4498042a63cd45269ef1d908f4380fdb1205cb33869fd2"
+      },
+      {
+        "file": "RagePluginHook.log",
+        "sha256": "739c7d4fd3becdd7cc6ee3cd1df6491c566220bc032aacb624c1c9846ad2887e"
+      },
+      {
+        "file": "ScriptHookV.log",
+        "sha256": "33f3741f8984e7ad72fee985d8ae2b30077a5a587cd0232fec5801af100e8618"
+      }
+    ]
+  },
+  "privacy": "No absolute paths, process identifiers, native handles, absolute QPC timestamps, raw addresses or raw logs/captures included."
+}

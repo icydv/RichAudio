@@ -1,0 +1,203 @@
+{
+  "schema": 1,
+  "verifiedUtc": "2026-10-31T23:59:40.1501478Z",
+  "scope": "Independent read-only post-PLAYABLE-06 integrity, ownership-aware process and preserved-capture checks",
+  "result": "PASS",
+  "issues": [],
+  "protectedFileCount": 11,
+  "protectedFiles": [
+    {
+      "name": "GTA5_Enhanced.exe",
+      "sha256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea",
+      "matchesPreparedBaselineAndRollbackReceipt": true
+    },
+    {
+      "name": "RAGEPluginHook.exe",
+      "sha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac",
+      "matchesPreparedBaselineAndRollbackReceipt": true
+    },
+    {
+      "name": "Plugins/RichAudio.dll",
+      "sha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657",
+      "matchesPreparedBaselineAndRollbackReceipt": true
+    },
+    {
+      "name": "Plugins/RichAudio.Playable.json",
+      "sha256": "96a91834affba1f0c2bafcd7a6e14cb9fe17ac8846e98c72a14d14fd1b366001",
+      "matchesPreparedBaselineAndRollbackReceipt": true
+    },
+    {
+      "name": "Plugins/RichAudio.Menu.json",
+      "sha256": "63a6f398e838fe5c4503f0e2bf8de401ee8a2ac54203d8ddf16a25f1b16bcea3",
+      "matchesPreparedBaselineAndRollbackReceipt": true
+    },
+    {
+      "name": "startup.rphs",
+      "sha256": "4c7d8fb2dc1d84e4c84e7409c296744268f7f33be87af1b9585f104010141d1c",
+      "matchesPreparedBaselineAndRollbackReceipt": true
+    },
+    {
+      "name": "DirectStorageFix.asi",
+      "sha256": "7f50b8a9a2e8a376e2adb7d46bc9483c2754bbbdd964f0918787d4f6f1b76e2c",
+      "matchesPreparedBaselineAndRollbackReceipt": true
+    },
+    {
+      "name": "dstorage.dll",
+      "sha256": "8a7f9809b4630d22796445ab9aa44181458d0f73f03705b1dfafd79410e07334",
+      "matchesPreparedBaselineAndRollbackReceipt": true
+    },
+    {
+      "name": "dstoragecore.dll",
+      "sha256": "77c7b3acf5b5a9acec6ad3ed7aa3c33e1ad43e73116b437adfcd26965a079b2b",
+      "matchesPreparedBaselineAndRollbackReceipt": true
+    },
+    {
+      "name": "dinput8.dll",
+      "sha256": "9fd9e02353b7d39fe07b9667f7ea2697229a7f2d0e7d389eb79eb212b1bb181d",
+      "matchesPreparedBaselineAndRollbackReceipt": true
+    },
+    {
+      "name": "ScriptHookV.dll",
+      "sha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f",
+      "matchesPreparedBaselineAndRollbackReceipt": true
+    }
+  ],
+  "reviewedShortcutAndSettingsCount": 4,
+  "reviewedShortcutsAndSettings": [
+    {
+      "name": "RPH shortcut settings",
+      "sha256": "680d11524a930e2671bfd606aa2e5ffd4bf070c3d1818c16fa70d5be6a727a38",
+      "matchesPreparedBaseline": true
+    },
+    {
+      "name": "Trainer shortcut settings",
+      "sha256": "9f18051b30468cfa8c45a4fbea8727ff3286f9f822cf5b1b43916869b1e6f5de",
+      "matchesPreparedBaseline": true
+    },
+    {
+      "name": "GTA saved keyboard overrides",
+      "sha256": "d6eab888b9e43445100d5b86ba8ac009dc7bfaa8e204d2a32366f7898cdac85a",
+      "matchesPreparedBaseline": true
+    },
+    {
+      "name": "RichAudio saved acoustic settings",
+      "sha256": "73647afcfa175c643a6938c63fc25845c2527dc8c864221bcf35142ce956f711",
+      "matchesPreparedBaseline": true
+    }
+  ],
+  "savedSettings": {
+    "sha256": "73647afcfa175c643a6938c63fc25845c2527dc8c864221bcf35142ce956f711",
+    "matchesPreparedBaselineAndRollbackReceipt": true,
+    "stockFallbackSelected": true
+  },
+  "preservedCandidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "bytes": 323584,
+    "sha256": "af860dc42540a94c2176ee0dce09c77d9c16c9eeea46a1572d5011aaa8863be4",
+    "matchesApprovedBuildAndOwnedRemovalReceipt": true,
+    "sourceInputsStillMatchBuildReceipt": true,
+    "privateBuildReceiptSha256": "b932f61fb37739d7a6b5e0ff5f591fbda004667f3473f573dfa59836793f3343"
+  },
+  "temporaryAsiDestinationAbsent": true,
+  "temporaryPlayable06PendingPathAbsent": true,
+  "processVerification": {
+    "method": "Recorded PID plus exact UTC process start time; no PID-only ownership assumption",
+    "recordedIdentities": [
+      {
+        "role": "RAGEPluginHook",
+        "recordedIdentityPresent": false,
+        "recordedPidCurrentlyAbsent": true,
+        "pidReusedByDifferentIdentity": false
+      },
+      {
+        "role": "GTA5_Enhanced",
+        "recordedIdentityPresent": false,
+        "recordedPidCurrentlyAbsent": true,
+        "pidReusedByDifferentIdentity": false
+      },
+      {
+        "role": "launch-wrapper",
+        "recordedIdentityPresent": false,
+        "recordedPidCurrentlyAbsent": true,
+        "pidReusedByDifferentIdentity": false
+      }
+    ],
+    "namedGameRphHostGpuRemaining": 0,
+    "productCacheBoundNodeWorkersRemaining": 0,
+    "processesStoppedByVerifier": 0
+  },
+  "exitHistory": {
+    "normalCloseRequestedAccordingToReceipt": true,
+    "normalCloseMethod": "Alt+F4 requested through computer-use",
+    "quitDialogObserved": false,
+    "confirmationInputCompletionVerifiedByHelper": false,
+    "followupInputHelperReportedError": true,
+    "shvScriptUnregistrationRecorded": true,
+    "forcedTerminationRecorded": false,
+    "qualification": "Historical close request and unregistration are receipt-based. No quit dialog or helper-confirmed follow-up input is claimed. Current process absence was independently verified."
+  },
+  "preservedCaptures": [
+    {
+      "name": "capture.json",
+      "bytes": 4249,
+      "sha256": "dd7f1dda97477b247f4152a238560e49173b5bbdbd7ca8e35a427d570c487e43",
+      "originalAndSnapshotMatch": true
+    },
+    {
+      "name": "journal.ndjson",
+      "bytes": 3854,
+      "sha256": "adeb9da924e127e305eb3b104f5edca36a6c804d239de906b4b3acdf10d4d93d",
+      "originalAndSnapshotMatch": true
+    }
+  ],
+  "priorCaptureRecords": [
+    {
+      "captureBytes": 865,
+      "captureSha256": "a75ae7bd08b6e18ec4cd2a66e86e466c685dcb6eead2295287feec158a962a04",
+      "journalBytes": 483,
+      "journalSha256": "45981f0d7fa42c3761b300aa714c7755832845d5fdd03dbd197fd91189948da1",
+      "preserved": true
+    }
+  ],
+  "privateReceiptHashes": [
+    {
+      "name": "preflight.json",
+      "sha256": "6b08ad46fc697e79dc6ff92b8878b9482c92d008eb47f6ca8c124ac5e6c8cfc1"
+    },
+    {
+      "name": "installation-receipt.json",
+      "sha256": "79a2d333178ad35d2abb6892aaf2ba6f875aa7ff16386ca7b1e7e0ac65bc1472"
+    },
+    {
+      "name": "pending-creation-receipt.json",
+      "sha256": "7f6d48e81b15fbc33721e91967fe2f03783c840a256b6bf75f288d383ab0996a"
+    },
+    {
+      "name": "launch-receipt.json",
+      "sha256": "590165a1b957b32a1296210723528c6ac38dc16aed97296aca198776c5a860ca"
+    },
+    {
+      "name": "observed-processes.json",
+      "sha256": "05edaaca85ec19cc2cfdc2831611525dd3840b25a893317788f8d88d00a9fd41"
+    },
+    {
+      "name": "capture-observation.json",
+      "sha256": "18869d3128c8053c6c4d6dc9ac321c2a0e8f7262318de484f41a35f9645f9958"
+    },
+    {
+      "name": "normal-exit.json",
+      "sha256": "1478006c56e5510814298750d6d471e6a3b5d6606daf3fde078c1cd5348eaec5"
+    },
+    {
+      "name": "rollback-receipt.json",
+      "sha256": "df9fec217e527ddc28db87b8fc6f6e473457096561bb5b40df75c2350f227380"
+    }
+  ],
+  "preparedManifestSha256": "938fcbc3f1f55164132174cf80bf17bd8900e60afca3da2b7632601e0484cc19",
+  "furtherLaunchOrNativeRetryRecorded": false,
+  "gameFilesWrittenByVerifier": false,
+  "dllLoadedByVerifier": false,
+  "sourceAudioMenuGainChangedByVerifier": false,
+  "archiveAccessedByVerifier": false,
+  "privacy": "No absolute user/game paths, process identifiers, raw logs, raw capture values, native handles, session identifiers or opaque download URLs are included"
+}

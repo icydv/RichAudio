@@ -9,12 +9,21 @@ using System.Web.Script.Serialization;
 
 namespace RichAudio.Beacon.Windows
 {
+    // Local adapters run only on this tap's background consumer. They never
+    // receive an endpoint callback, COM interface or microphone capability.
+    public interface ILocalOwnedPcmSink
+    {
+        string RecordingId {get;}
+        bool Accepting {get;}
+        void WriteOwned(float[] samples,int frames,long submitted,long consumed,long producer,int supplied,long preparedBefore,long copiedAfter,long committedAfter,long underflow,long endSilence);
+        void OwnedStopped(long droppedFrames,long queuedTail,bool quiescent,string failure);
+    }
     // One WASAPI producer, one network consumer. No locks, allocation, disk or
     // HTTP on the endpoint callback. Full queue drops evidence, never audio.
     public sealed class OwnedOutputTap : IDisposable
     {
         internal const int Capacity=64, MaximumFrames=2048;
-        internal sealed class Chunk { internal readonly float[] Samples=new float[MaximumFrames*2]; internal int Frames,SuppliedFrames;internal long SubmittedFrame,ConsumedFrame,ProducerFrameStart,QpcTicks,UnderflowFrames,EndSilenceFrames;internal string RecordingId; }
+        internal sealed class Chunk { internal readonly float[] Samples=new float[MaximumFrames*2]; internal int Frames,SuppliedFrames;internal long SubmittedFrame,ConsumedFrame,ProducerFrameStart,QpcTicks,PreparedBeforeTicks,CommittedAfterTicks,UnderflowFrames,EndSilenceFrames;internal string RecordingId; }
         private readonly Chunk[] slots=new Chunk[Capacity];
         private int write,read,inFlight;private volatile string recordingId;private volatile bool stop;
         private readonly Thread writer;private string url,token;private readonly string configurationPath,hostId=Guid.NewGuid().ToString("N");
@@ -23,6 +32,12 @@ namespace RichAudio.Beacon.Windows
         public long CapturedFrames,DroppedFrames,DroppedChunks,UploadedFrames,UploadFailures,MaximumCopyTicks;
         public string LastError;
         public string TerminalFailure;
+        private readonly ILocalOwnedPcmSink localSink;
+        private int localFault;
+        public static OwnedOutputTap ForLocalSink(ILocalOwnedPcmSink sink)
+        {if(sink==null||!sink.Accepting||String.IsNullOrEmpty(sink.RecordingId))throw new InvalidOperationException("An explicitly started local recording is required");return new OwnedOutputTap(sink,true);}
+        private OwnedOutputTap(ILocalOwnedPcmSink sink,bool local):this()
+        {localSink=sink;recordingId=sink.RecordingId;writer=new Thread(RunLocal){IsBackground=true,Name="RichAudio local PCM writer"};writer.Start();}
         public OwnedOutputTap(string configuration) : this()
         {
             configurationPath=Path.GetFullPath(configuration);ReadConfiguration();
@@ -46,16 +61,16 @@ namespace RichAudio.Beacon.Windows
         internal unsafe int Prepare(float* samples,int frames,long submittedFrame,long consumedFrame,long producerFrameStart=-1,int suppliedFrames=-1,long underflowFrames=0,long endSilenceFrames=0)
         {
             Interlocked.Increment(ref inFlight);string id=recordingId;if(id==null){Interlocked.Decrement(ref inFlight);return -1;}
-            if(frames<1||frames>MaximumFrames){Interlocked.Increment(ref DroppedChunks);Interlocked.Add(ref DroppedFrames,frames);Interlocked.Decrement(ref inFlight);return -1;}
-            int w=write;if(w-Thread.VolatileRead(ref read)>=Capacity){Interlocked.Increment(ref DroppedChunks);Interlocked.Add(ref DroppedFrames,frames);Interlocked.Decrement(ref inFlight);return -1;}
+            if(frames<1||frames>MaximumFrames){Interlocked.Increment(ref DroppedChunks);Interlocked.Add(ref DroppedFrames,frames);if(localSink!=null){Interlocked.Exchange(ref localFault,1);recordingId=null;}Interlocked.Decrement(ref inFlight);return -1;}
+            int w=write;if(w-Thread.VolatileRead(ref read)>=Capacity){Interlocked.Increment(ref DroppedChunks);Interlocked.Add(ref DroppedFrames,frames);if(localSink!=null){Interlocked.Exchange(ref localFault,1);recordingId=null;}Interlocked.Decrement(ref inFlight);return -1;}
             long started=Stopwatch.GetTimestamp();Chunk chunk=slots[w%Capacity];
             for(int i=0;i<frames*2;i++)chunk.Samples[i]=samples[i];
-            chunk.Frames=frames;chunk.SubmittedFrame=submittedFrame;chunk.ConsumedFrame=consumedFrame;chunk.QpcTicks=Stopwatch.GetTimestamp();chunk.RecordingId=id;
+            chunk.Frames=frames;chunk.SubmittedFrame=submittedFrame;chunk.ConsumedFrame=consumedFrame;chunk.PreparedBeforeTicks=started;chunk.QpcTicks=Stopwatch.GetTimestamp();chunk.RecordingId=id;
             chunk.ProducerFrameStart=producerFrameStart<0?consumedFrame-frames:producerFrameStart;chunk.SuppliedFrames=suppliedFrames<0?frames:suppliedFrames;chunk.UnderflowFrames=underflowFrames;chunk.EndSilenceFrames=endSilenceFrames;
             MaximumCopyTicks=Math.Max(MaximumCopyTicks,Stopwatch.GetTimestamp()-started);return w;
         }
-        internal void Commit(int slot){if(slot<0)return;Interlocked.Add(ref CapturedFrames,slots[slot%Capacity].Frames);Thread.VolatileWrite(ref write,slot+1);Interlocked.Decrement(ref inFlight);}
-        internal void Cancel(int slot){if(slot>=0)Interlocked.Decrement(ref inFlight);}
+        internal void Commit(int slot){if(slot<0)return;slots[slot%Capacity].CommittedAfterTicks=Stopwatch.GetTimestamp();Interlocked.Add(ref CapturedFrames,slots[slot%Capacity].Frames);Thread.VolatileWrite(ref write,slot+1);Interlocked.Decrement(ref inFlight);}
+        internal void Cancel(int slot){if(slot>=0){if(localSink!=null){Interlocked.Exchange(ref localFault,2);recordingId=null;}Interlocked.Decrement(ref inFlight);}}
         internal bool Quiescent {get{return Thread.VolatileRead(ref inFlight)==0;}}
         internal Chunk Peek(){int r=read;return r==Thread.VolatileRead(ref write)?null:slots[r%Capacity];}
         internal void Release(){Thread.VolatileWrite(ref read,read+1);}
@@ -96,6 +111,24 @@ namespace RichAudio.Beacon.Windows
             }
             recordingId=null;long deadline=watch.ElapsedMilliseconds+750;while((Peek()!=null||!Quiescent)&&watch.ElapsedMilliseconds<deadline){if(Peek()!=null)Upload();else Thread.Sleep(1);}
             try{PostJson("/api/host/event",new Dictionary<string,object>{{"type","host-capture-stop"},{"recordingId",active},{"metrics",Status()},{"queuedTailChunks",write-read},{"callbackInFlight",!Quiescent},{"captureSuspensions",activeCaptureSuspensions},{"terminalFailure",TerminalFailure}});}catch(Exception ex){LastError=ex.GetType().Name;}
+        }
+        private void RunLocal()
+        {
+            string failure=null;
+            try{
+                while(!stop&&localSink.Accepting&&Thread.VolatileRead(ref localFault)==0){
+                    Chunk chunk=Peek();if(chunk==null){Thread.Sleep(2);continue;}
+                    localSink.WriteOwned(chunk.Samples,chunk.Frames,chunk.SubmittedFrame,chunk.ConsumedFrame,chunk.ProducerFrameStart,chunk.SuppliedFrames,chunk.PreparedBeforeTicks,chunk.QpcTicks,chunk.CommittedAfterTicks,chunk.UnderflowFrames,chunk.EndSilenceFrames);Release();
+                }
+                recordingId=null;
+                long until=Stopwatch.GetTimestamp()+Stopwatch.Frequency;
+                while((Peek()!=null||!Quiescent)&&Stopwatch.GetTimestamp()<until){
+                    Chunk chunk=Peek();if(chunk==null){Thread.Sleep(1);continue;}
+                    localSink.WriteOwned(chunk.Samples,chunk.Frames,chunk.SubmittedFrame,chunk.ConsumedFrame,chunk.ProducerFrameStart,chunk.SuppliedFrames,chunk.PreparedBeforeTicks,chunk.QpcTicks,chunk.CommittedAfterTicks,chunk.UnderflowFrames,chunk.EndSilenceFrames);Release();
+                }
+                if(Thread.VolatileRead(ref localFault)!=0)failure=Thread.VolatileRead(ref localFault)==2?"render-submission-cancelled":"owned-queue-overflow-or-packet-bound";
+            }catch(Exception error){failure=error.GetType().Name+": "+error.Message;LastError=failure;recordingId=null;}
+            finally{try{localSink.OwnedStopped(Interlocked.Read(ref DroppedFrames),write-read,Quiescent,failure??TerminalFailure);}catch(Exception error){LastError="local-stop: "+error.GetType().Name;}}
         }
         public Dictionary<string,object> Metrics(){var value=Status();value["maximumCallbackCopyMs"]=MaximumCopyTicks*1000.0/Stopwatch.Frequency;value["queueCapacityChunks"]=Capacity;value["queueCapacityBytes"]=Capacity*MaximumFrames*8;value["queuedChunks"]=write-read;value["error"]=LastError;return value;}
         public void Dispose(){recordingId=null;stop=true;if(writer!=null&&writer.IsAlive&&!writer.Join(2000))LastError="Recorder writer shutdown timeout; background writer only";}

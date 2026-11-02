@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-12",
+  "kind": "actual-live-result-additions",
+  "baseCommit": "30146a702a97e4a3bc433b16adb100a2ca6f107b",
+  "createdUtc": "2026-11-01T16:22:42.0524605Z",
+  "files": [
+    {
+      "name": "docs/PLAYABLE_12_LIVE_RESULT.md",
+      "bytes": 6697,
+      "sha256": "2558d72b3143b2193f845650c3a12408a566d39a2bdba8dcab0509f5855f7c43"
+    },
+    {
+      "name": "evidence/playable-12-live-01.json",
+      "bytes": 6656,
+      "sha256": "cd48af63a2ab18da9eba8a9631322095a2a34245d3664c2cc94ae74a70d374ca"
+    },
+    {
+      "name": "evidence/playable-12-live-rollback.json",
+      "bytes": 1648,
+      "sha256": "5025b00fe8b7ac7f7ab3001381479331f2d58f75daf476df1f3842218fdd9d71"
+    },
+    {
+      "name": "evidence/playable-12-live-review.json",
+      "bytes": 3679,
+      "sha256": "32876217a832cbdc68d2ca2abf49bb93721358655a83b24feb270e60320a619e"
+    }
+  ],
+  "manifestSelfDigestExcluded": true,
+  "productionSourcesAndApprovedBinariesChanged": false,
+  "privateBinariesLogsAndIdentifiersPublished": false,
+  "approvalConsumed": true,
+  "additionalLaunchAuthorised": false
+}

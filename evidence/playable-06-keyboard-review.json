@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "dateUtc": "2026-10-31",
+  "scope": "Read-only shortcut and published SDK review; no game launch or input injection",
+  "armingChord": "Ctrl+Shift+Backslash",
+  "terminalVirtualKeys": [
+    {
+      "name": "VK_OEM_5",
+      "value": 220
+    },
+    {
+      "name": "VK_OEM_102",
+      "value": 226
+    }
+  ],
+  "keyboardContract": "Published SHV KeyboardHandler, register/unregister callbacks; no control consumption",
+  "sdkEvidence": "evidence/playable-06-header-provenance.json",
+  "sources": [
+    {
+      "file": "RagePluginHook.ini",
+      "sha256": "680d11524a930e2671bfd606aa2e5ffd4bf070c3d1818c16fa70d5be6a727a38",
+      "consoleKey": "F4"
+    },
+    {
+      "file": "trainerv.ini",
+      "sha256": "9f18051b30468cfa8c45a4fbea8727ff3286f9f822cf5b1b43916869b1e6f5de",
+      "inspectedBindingCount": 129,
+      "backslashAssignments": 0,
+      "menuKey": "F3",
+      "hideMenuKey": "F4",
+      "teleportKey": "F10"
+    },
+    {
+      "file": "GTA saved control overrides user.xml",
+      "sha256": "d6eab888b9e43445100d5b86ba8ac009dc7bfaa8e204d2a32366f7898cdac85a",
+      "savedKeyboardKeys": [
+        "KEY_F11",
+        "KEY_NULL",
+        "KEY_LMENU"
+      ],
+      "backslashOverridePresent": false
+    },
+    {
+      "file": "RichAudio saved acoustic-settings.json",
+      "sha256": "73647afcfa175c643a6938c63fc25845c2527dc8c864221bcf35142ce956f711",
+      "menuToggleKey": "F10",
+      "stockFallback": true
+    }
+  ],
+  "references": [
+    {
+      "url": "https://www.rockstargames.com/newswire/article/51974aa3a724o2/rockstar-game-tips-tailoring-your-settings-and-controls-in",
+      "use": "Default F5-F8 character switches; avoid for arming"
+    },
+    {
+      "url": "https://docs.fivem.net/docs/game-references/controls/",
+      "use": "Maintained primary default-control reference; no backslash default assignment found; F9/F10 are weapon/ammo controls"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes",
+      "use": "Documented OEM virtual-key identifiers; layout-dependent key positions"
+    }
+  ],
+  "limits": [
+    "Inspected saved overrides are not a complete dump of every Enhanced built-in binding",
+    "No universal guarantee about third-party/global custom shortcuts or unusual keyboard layouts",
+    "Live preflight must recheck these exact settings fingerprints",
+    "No game bindings, modifier state or existing controls are consumed or rewritten by the probe"
+  ]
+}

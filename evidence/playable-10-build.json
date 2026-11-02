@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-10",
+  "kind": "exact-authentic-SDK-diagnostic-build",
+  "baseCommit": "49d220866a27697303a9c5b34dcc132ed2bd01be",
+  "artifact": {
+    "name": "RichAudio.RuntimeProvenance.Rph.dll",
+    "installName": "RichAudio.dll",
+    "bytes": 66560,
+    "sha256": "cb2555ba00169af86d2728ba545c808a825df0ab04ba08026f1268e02d3caf3a",
+    "platform": "x64",
+    "executed": false
+  },
+  "privateBuildReceiptSha256": "0b8f884941ef4b9efa84ad2d19a19aeaf863702f3994142a100bd9705c363ea3",
+  "compilerSha256": "46809206887326d2d24db1eff1f3064de972c3451abe766b49111450a5e08e00",
+  "authenticSdkSha256": "5d439745604a5fedbf8fa401520d4f296c1b6800d77e2923ba3bf9772182c7e0",
+  "generatedPolicySha256": "7bc4ab56206bfb586b5b3eec23de7cae58fef4f2fa49652d6732af8ab2235ad9",
+  "sources": [
+    {
+      "name": "src/acoustics/bridge/Rph/RphProvenanceEntry.Rph.cs",
+      "sha256": "6e6d9948fbead579ca9e879c378a0775276ed9b0f11f7e17355b063654052c8f"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/RphProvenanceBootstrap.Rph.cs",
+      "sha256": "778dca93a2287507e77ed48f713972f29eb74183c220ee26d3b883e29950b61e"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/RphRuntimeProvenance.cs",
+      "sha256": "b4626b77782f9e40d40759bcb1bf3fb5f22b7a4baefc1b24035d866171e6b379"
+    },
+    {
+      "name": "RphProvenanceBuildPolicy.generated.cs",
+      "sha256": "7bc4ab56206bfb586b5b3eec23de7cae58fef4f2fa49652d6732af8ab2235ad9"
+    }
+  ],
+  "builderSha256": "d332a6089a60572826a4b9e8462cb0b6b8bfc64c70ec547bb4331d2351b9655e",
+  "leaseTemplateSha256": "000f72117ec1610ac355bdd944801883f19a810b90bc89d79a249e7c7657d3f5",
+  "diagnosticOnly": true,
+  "fixturePolicy": false,
+  "expectedApiRuntime": "UNREVIEWED",
+  "runtimeIdentityAuthenticated": false,
+  "sourceAttachmentAllowed": false,
+  "handoffAllowed": false,
+  "audioAllowed": false,
+  "asiDeploymentAllowed": false,
+  "compiledArtifactExecuted": false,
+  "deviceFreeOnly": true,
+  "newSoftwareInstalled": false,
+  "gameFilesWritten": false,
+  "gameLaunched": false,
+  "limits": [
+    "Authentic SDK compilation and static image inspection do not establish actual RPH loader compatibility or runtime identity.",
+    "Production image not executed; separate fixture policy entry tests are identified in profile evidence."
+  ]
+}

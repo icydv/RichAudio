@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "dateUtc": "2026-10-31",
+  "scope": "PLAYABLE-06 source-contract extension and static export verification; no installed framework or game execution",
+  "provenanceClass": "Existing pinned author-credited SDK header plus exact installed export verification; keyboard callback declarations newly included",
+  "completeOfficialSdkObtained": false,
+  "officialSdkPriorResult": "HTML rather than ZIP, as recorded in PLAYABLE-03",
+  "sourceSnapshots": [
+    {
+      "name": "shvdn-sdk-main.h",
+      "repo": "scripthookvdotnet/scripthookvdotnet",
+      "commit": "3a0b4786ea8cff050fbccf7993a2cfedc8d4a64f",
+      "path": "source/loader/sdk/inc/main.h",
+      "sourceUrl": "https://raw.githubusercontent.com/scripthookvdotnet/scripthookvdotnet/3a0b4786ea8cff050fbccf7993a2cfedc8d4a64f/source/loader/sdk/inc/main.h",
+      "gitBlobSha1": "9d33995d19aa342d7e8ee738585fd1d533f0ab5f",
+      "sha256": "c451bad0c25feb3d4a622c392caa62f25fb9820bce21a451ffbc79e5fd342ecb",
+      "bytes": 5075
+    },
+    {
+      "name": "shvdn-loader-DllMain.cpp",
+      "repo": "scripthookvdotnet/scripthookvdotnet",
+      "commit": "3a0b4786ea8cff050fbccf7993a2cfedc8d4a64f",
+      "path": "source/loader/DllMain.cpp",
+      "sourceUrl": "https://raw.githubusercontent.com/scripthookvdotnet/scripthookvdotnet/3a0b4786ea8cff050fbccf7993a2cfedc8d4a64f/source/loader/DllMain.cpp",
+      "gitBlobSha1": "f3617076d662f1a7c26d95198f93d1e5cdaef73b",
+      "sha256": "d63e774e9e918168bbf38b4cd69086e143daca4313b4e700743972d23d1138b2",
+      "bytes": 10318
+    },
+    {
+      "name": "shvdn-LICENSE.txt",
+      "repo": "scripthookvdotnet/scripthookvdotnet",
+      "commit": "3a0b4786ea8cff050fbccf7993a2cfedc8d4a64f",
+      "path": "LICENSE.txt",
+      "sourceUrl": "https://raw.githubusercontent.com/scripthookvdotnet/scripthookvdotnet/3a0b4786ea8cff050fbccf7993a2cfedc8d4a64f/LICENSE.txt",
+      "gitBlobSha1": "25fa991e7ab453aca5d42494b72e74a1106d89b5",
+      "sha256": "9f28b448ad8518c702f6222da394b573dfbe87f06b54b8173e65dc6b848928de",
+      "bytes": 884
+    },
+    {
+      "name": "shvdn-COPYRIGHT.md",
+      "repo": "scripthookvdotnet/scripthookvdotnet",
+      "commit": "3a0b4786ea8cff050fbccf7993a2cfedc8d4a64f",
+      "path": "COPYRIGHT.md",
+      "sourceUrl": "https://raw.githubusercontent.com/scripthookvdotnet/scripthookvdotnet/3a0b4786ea8cff050fbccf7993a2cfedc8d4a64f/COPYRIGHT.md",
+      "gitBlobSha1": "91fa2dda1293d6dfc7e1806b70b3d854bd4c6771",
+      "sha256": "65aa82f1d362f2534048b4675bd0d6c9f12db1983503ce9ff21cf8aeaee0d3f9",
+      "bytes": 3155
+    },
+    {
+      "name": "shvdne-NativeFunc.cs",
+      "repo": "Chiheb-Bacha/ScriptHookVDotNetEnhanced",
+      "commit": "d8e474fb2779f12a0c04282645d561a1d675ec77",
+      "path": "source/core/NativeFunc.cs",
+      "sourceUrl": "https://raw.githubusercontent.com/Chiheb-Bacha/ScriptHookVDotNetEnhanced/d8e474fb2779f12a0c04282645d561a1d675ec77/source/core/NativeFunc.cs",
+      "gitBlobSha1": "4253c4f6eae98ebf4fd0c9c35a3ec89b2defb339",
+      "sha256": "0fff3dba31036bb71dd819dfa0cd738a14ce833c724d9a94b33cf40ccfad5909",
+      "bytes": 13249
+    },
+    {
+      "name": "shvdne-DllMain.cpp",
+      "repo": "Chiheb-Bacha/ScriptHookVDotNetEnhanced",
+      "commit": "d8e474fb2779f12a0c04282645d561a1d675ec77",
+      "path": "source/core/DllMain.cpp",
+      "sourceUrl": "https://raw.githubusercontent.com/Chiheb-Bacha/ScriptHookVDotNetEnhanced/d8e474fb2779f12a0c04282645d561a1d675ec77/source/core/DllMain.cpp",
+      "gitBlobSha1": "a65e912f0bec29b0d135493c6b48f228a043b66c",
+      "sha256": "8d8806c65cacaa6caf5d289acb07f19a552e39d426c6591a0d7b78dc5aee1d44",
+      "bytes": 36019
+    },
+    {
+      "name": "shvdne-Native.cs",
+      "repo": "Chiheb-Bacha/ScriptHookVDotNetEnhanced",
+      "commit": "d8e474fb2779f12a0c04282645d561a1d675ec77",
+      "path": "source/scripting_v3/GTA.Native/Native.cs",
+      "sourceUrl": "https://raw.githubusercontent.com/Chiheb-Bacha/ScriptHookVDotNetEnhanced/d8e474fb2779f12a0c04282645d561a1d675ec77/source/scripting_v3/GTA.Native/Native.cs",
+      "gitBlobSha1": "e256c443a25d18c539df53a2b2013031ecfd654b",
+      "sha256": "3342857853e1bc161a0eebadfc0eb68e9a0d4d5d968bc0312e050133237b6e96",
+      "bytes": 165454
+    }
+  ],
+  "typesHeader": {
+    "presentAtPinnedSdkPath": false,
+    "headerUses": "Windows.h",
+    "gameStructuresNeededForSixExports": false
+  },
+  "installedShv": {
+    "expectedSha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f",
+    "bytes": 1987072,
+    "fileVersion": "3889.0.1158.13",
+    "machine": "AMD64",
+    "format": "PE32+",
+    "exportComparison": "Eight exact non-forwarded decorated exports statically verified",
+    "executionPerformed": false
+  },
+  "abi": {
+    "scriptRegister": "?scriptRegister@@YAXPEAUHINSTANCE__@@P6AXXZ@Z",
+    "scriptUnregisterModule": "?scriptUnregister@@YAXPEAUHINSTANCE__@@@Z",
+    "scriptWait": "?scriptWait@@YAXK@Z",
+    "nativeInit": "?nativeInit@@YAX_K@Z",
+    "nativePush64": "?nativePush64@@YAX_K@Z",
+    "nativeCall": "?nativeCall@@YAPEA_KXZ",
+    "keyboardHandlerRegister": "?keyboardHandlerRegister@@YAXP6AXKGEHHHH@Z@Z",
+    "keyboardHandlerUnregister": "?keyboardHandlerUnregister@@YAXP6AXKGEHHHH@Z@Z"
+  },
+  "constraints": {
+    "binaryDownloads": 0,
+    "runtimeInstalled": false,
+    "proprietaryImportLibraryCopied": false,
+    "gameNativeAddressesUsed": false,
+    "nativeInvocations": 0,
+    "gameLaunches": 0,
+    "licenseClaim": "Header retains Alexander Blade copyright; no blanket zlib claim over the historical SDK; independently authored minimal factual ABI facade is distinct from copied SDK",
+    "missingNativeFaultBehaviour": "Not documented by generic header; null or finite/default result cannot establish resolution; process-fatal failure remains unexcluded",
+    "nativeResult": "Copy low four bytes as float immediately from non-null framework-owned result storage; never retain or free pointer",
+    "lifetime": "Native queries and HUD only in registered ScriptMain; documented keyboard callback only publishes atomic input state and QPC; registration/unregistration in DllMain; process-pinned module"
+  },
+  "keyboardContract": {
+    "signature": "void(DWORD,WORD,BYTE,BOOL,BOOL,BOOL,BOOL)",
+    "parameterOrder": [
+      "key",
+      "repeats",
+      "scanCode",
+      "isExtended",
+      "isWithAlt",
+      "wasDownBefore",
+      "isUpNow"
+    ],
+    "registerAt": "DLL_PROCESS_ATTACH",
+    "unregisterAt": "DLL_PROCESS_DETACH",
+    "callbackConsumesInput": false,
+    "callbackMayInvokeNatives": false,
+    "sourceHeaderSha256": "c451bad0c25feb3d4a622c392caa62f25fb9820bce21a451ffbc79e5fd342ecb",
+    "callbackLiveQualificationEstablished": false
+  }
+}

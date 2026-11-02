@@ -23,7 +23,7 @@ namespace RichAudio.Beacon.Windows
         private static void PublishTerminal(string directory,Dictionary<string,object> result)
         {
             string diagnostics=Path.Combine(directory,"renderer-diagnostics.txt");
-            if(!File.Exists(diagnostics))ShutdownStep("diagnostic-evidence",delegate{lock(logLock)WriteNew(diagnostics,string.Join(Environment.NewLine,rendererLog.ToArray()));});
+            if(!File.Exists(diagnostics))ShutdownStep("diagnostic-evidence",delegate{WriteNew(diagnostics,string.Join(Environment.NewLine,RendererDiagnosticsSnapshot()));});
             lock(failureLock){result["producerError"]=producerError;result["primaryFailure"]=primaryFailure;result["secondaryFailures"]=secondaryFailures.ToArray();}
             result["listenerTerminal"]=listenerTerminal;result["controlsRejectedDuringShutdown"]=controlsRejectedDuringShutdown;
             result["listenerTerminalBoundary"]=listenerTerminalBoundary;

@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "dateUtc": "2026-10-31",
+  "scope": "Offline actual native probe build, controlled fake-framework validation, and proposal preparation only",
+  "startingCommit": "646fffd4bb036a1f48bd35051d7d042a0f0166e5",
+  "branch": "feature/playable-01",
+  "candidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "bytes": 288256,
+    "sha256": "8f516dc5bdfd62f125c8f9624d3396c9c3f9debceb618c39f76784323fd7a083",
+    "pathHint": "build/playable-04-shv-probe/RichAudio.OperatingState.Shv.asi",
+    "installablePlayableUpdate": false
+  },
+  "prerequisites": {
+    "separateApprovalReceived": true,
+    "source": "https://aka.ms/vs/17/release/vs_BuildTools.exe",
+    "installerSha256": "972d771c33c2887b13900c2052e5d2e88208531f6d5ee3c4405d7648e853009b",
+    "validMicrosoftSignature": true,
+    "components": [
+      "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+      "Microsoft.VisualStudio.Component.Windows11SDK.26100"
+    ],
+    "installExitCode": 0,
+    "restartRequested": false,
+    "minimalComponentsInstalled": true,
+    "firstAttemptRejectedLongRoot": true
+  },
+  "validation": {
+    "realX64CompilationPassed": true,
+    "strictStaticPeInspectionPassed": true,
+    "assertions": 229,
+    "cases": 14,
+    "actualProductionBinaryTested": true,
+    "fakeFrameworkOnly": true,
+    "actualInstalledFrameworkLoaded": false,
+    "nativeContractsVerified": 16,
+    "buildSourceArtifactFixtureHashesAgree": true,
+    "preparationRefusesOverwriteAndGameOutput": true
+  },
+  "preparation": {
+    "schema": 1,
+    "candidateSha256": "8f516dc5bdfd62f125c8f9624d3396c9c3f9debceb618c39f76784323fd7a083",
+    "buildReceiptSha256": "d945e51d966583ca711dcca4e26d098d7838ce9ed4bd92ce90adc482f24c25ab",
+    "fixtureReceiptSha256": "8ee3e28992deeeeb30c2b3f0cde8a03522c4e38dbeb972670206efa7532b43a7",
+    "protectedFiles": 11,
+    "protectedHashesMatch": true,
+    "settingsSha256": "73647afcfa175c643a6938c63fc25845c2527dc8c864221bcf35142ce956f711",
+    "stockFallback": true,
+    "gameProcesses": 0,
+    "probeDestinationAbsent": true,
+    "gameFilesWritten": false,
+    "deployed": false,
+    "launched": false,
+    "manifests": [
+      {
+        "name": "installation-manifest.json",
+        "sha256": "6dcdc7656e094626c09487e30f5cbc8292e1df2e86297fb1486c2a8a0cf6fa08"
+      },
+      {
+        "name": "one-call-proposal.json",
+        "sha256": "db816533fb1c421ec01a34f9b32b9c2d67028da111c4fe26968672d62698cff9"
+      },
+      {
+        "name": "rollback-manifest.json",
+        "sha256": "da8e9a5f72a5cc1106f18aea606c8b4d79afae3380cf2ad2432a48f6d6e92a59"
+      }
+    ]
+  },
+  "installation": {
+    "protectedFilesVerified": 11,
+    "protectedHashesMatch": true,
+    "savedSettingsHashMatch": true,
+    "integrationMode": "stock-fallback",
+    "temporaryRphProbesPresent": 0,
+    "newAsiPresent": false,
+    "gameOrHostProcesses": 0,
+    "gameFilesWritten": false,
+    "deployed": false,
+    "launched": false
+  },
+  "decision": {
+    "offlinePreparation": "PASS",
+    "firstOneCallLiveQualification": "GO only after specific separate deployment and launch approval",
+    "authenticTelemetryProvider": "BLOCKED: no live native evidence",
+    "playableDevelopment": "BLOCKED",
+    "humanListeningProved": false,
+    "upstreamRphDraftRetained": true,
+    "upstreamReportSubmitted": false
+  },
+  "limits": [
+    "ABI-compatible fake SHV tests prove caller behaviour, not real framework fibers or native resolution",
+    "No live quantity, range, RPM or human listening result",
+    "Watchdog cannot preempt a native, guarantee fault containment or force filesystem completion",
+    "Installation and rollback manifests are proposals, never execution authority"
+  ],
+  "privacy": "No runtime/compiler/SDK/game binaries, original recordings, raw captures, local identifiers or absolute user paths are published"
+}

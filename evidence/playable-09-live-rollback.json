@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-09",
+  "attempt": "live-01",
+  "result": "PASS",
+  "rollbackReceiptSha256": "eb99dfd4518a7745654cac9f3f14fa032efea14593895ff55ec26c2e609c3251",
+  "normalExitWitnessSha256": "bfdac237983ba02b0a9e919da260a788bdcbcfe6ef3dba45e5198199f0e0af1d",
+  "normalQuitPromptObserved": true,
+  "confirmationInputOutcome": "unobserved after tool foreground-PID error",
+  "gameAndRphProcessExitVerified": true,
+  "forcedTerminationByAgent": false,
+  "originalPluginSha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657",
+  "originalPluginBytes": 222208,
+  "protectedInstallation": [
+    {
+      "relativePath": "GTA5_Enhanced.exe",
+      "sha256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea",
+      "bytes": 55819384
+    },
+    {
+      "relativePath": "RAGEPluginHook.exe",
+      "sha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac",
+      "bytes": 12237182
+    },
+    {
+      "relativePath": "Plugins/RichAudio.dll",
+      "sha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657",
+      "bytes": 222208
+    },
+    {
+      "relativePath": "Plugins/RichAudio.Playable.json",
+      "sha256": "96a91834affba1f0c2bafcd7a6e14cb9fe17ac8846e98c72a14d14fd1b366001",
+      "bytes": 198
+    },
+    {
+      "relativePath": "Plugins/RichAudio.Menu.json",
+      "sha256": "63a6f398e838fe5c4503f0e2bf8de401ee8a2ac54203d8ddf16a25f1b16bcea3",
+      "bytes": 478
+    },
+    {
+      "relativePath": "startup.rphs",
+      "sha256": "4c7d8fb2dc1d84e4c84e7409c296744268f7f33be87af1b9585f104010141d1c",
+      "bytes": 28
+    },
+    {
+      "relativePath": "DirectStorageFix.asi",
+      "sha256": "7f50b8a9a2e8a376e2adb7d46bc9483c2754bbbdd964f0918787d4f6f1b76e2c",
+      "bytes": 592384
+    },
+    {
+      "relativePath": "dstorage.dll",
+      "sha256": "8a7f9809b4630d22796445ab9aa44181458d0f73f03705b1dfafd79410e07334",
+      "bytes": 206880
+    },
+    {
+      "relativePath": "dstoragecore.dll",
+      "sha256": "77c7b3acf5b5a9acec6ad3ed7aa3c33e1ad43e73116b437adfcd26965a079b2b",
+      "bytes": 1468960
+    },
+    {
+      "relativePath": "dinput8.dll",
+      "sha256": "9fd9e02353b7d39fe07b9667f7ea2697229a7f2d0e7d389eb79eb212b1bb181d",
+      "bytes": 131072
+    },
+    {
+      "relativePath": "ScriptHookV.dll",
+      "sha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f",
+      "bytes": 1987072
+    }
+  ],
+  "settingsVerified": 4,
+  "stockFallbackSelected": true,
+  "productionFeaturesDisabled": true,
+  "ownedAsiPendingLeaseAndBackupPathsAbsent": true,
+  "temporaryCandidatePluginReplacedByOriginal": true,
+  "ownedProcessesAbsent": true,
+  "independentReadOnlyVerificationPassed": true,
+  "capturesDeleted": false,
+  "recursiveDeletion": false,
+  "noSecondLaunch": true
+}

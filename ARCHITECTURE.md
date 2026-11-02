@@ -1,5 +1,46 @@
 # Proposed architecture
 
+## PLAYABLE-08 production foundations — 1 November 2026
+
+The [PLAYABLE-08 increment](docs/PLAYABLE_08.md) preserves its first incomplete
+2,131-observation attempt, then qualifies restricted engine-running Bati signal
+evidence with a separately approved guided capture: 1,633 complete real
+observations, all seven unchanged primary criteria and independent human/route
+review. It establishes a normalised operating-state signal, not physical RPM,
+engine-off behaviour or other vehicles/builds. The owned probe was removed and
+stock fallback retained. Isolated offline handoff preparation follows;
+authenticated cross-framework identity, clock/freshness handling and actual
+handoff remain unqualified. Loudness/recording foundations stay disabled; live
+RichAudio PCM and listening are still separate subsequent gates.
+
+- `src/acoustics/production/activation.mjs` separates disabled configuration
+  requests from reviewed, game/hash/model/provider-scoped acceptance records and
+  current-session permission. It is a structural composition gate, not a consent
+  authority or an authenticator of arbitrary files. Handoff requires independently
+  correlated identity and explicit clock/freshness validation across frameworks.
+- `src/acoustics/vehicle/loudness-policy.mjs` classifies observed modification
+  state and creates bounded smooth emission and bus envelopes. Persistent
+  treatment affects new dry emissions before history insertion; presentation
+  prominence affects the propagated vehicle bus. The 10x exhaust reference and
+  0.25 common trim remain immutable. Gains are uncalibrated and the policy is
+  disabled and unwired into gameplay.
+- `src/acoustics/recording` extends the existing exact post-gain WASAPI submission
+  tap with an explicit local session, lossless owned/mix WAV writers, timestamped
+  diagnostics and offline analysis. Selected-render-endpoint loopback requires
+  separate approval. Default flags and menu presentation cannot start capture;
+  a session requires an explicit approved start. Device-free fixtures do not
+  establish endpoint behaviour.
+- The gold menu has a distinct locked **Record Audio Test** intent, preserving
+  the existing layout and separate SoundMap action contract. A qualified host
+  command bridge remains a future integration gate; no installed menu/settings
+  or playable package are replaced by these offline builds.
+
+Ordering is telemetry qualification → supported handoff → actual nonzero vehicle
+playback → human listening → loudness calibration and opt-in recording → expanded
+vehicle/NPC coverage. Source histories, Doppler, finite reflections and CPU/GPU
+paths remain shared and unchanged. Live approvals are specific to each proposed
+artifact/session; feature requests never imply deployment or endpoint permission.
+
 The [in-game settings overlay](docs/ACOUSTICS_08_2_IN_GAME_SETTINGS.md) uses public RPH drawing/input APIs, an immutable presentation frame and background private-file persistence. It reuses the existing host → worker → renderer controls; it neither replaces the stock pause frontend nor starts an audio session. Doppler bypass, late reverberation and diffraction remain unavailable controls until their independent implementations exist.
 
 **ACOUSTICS-08.2 implementation — 29 October 2026:** [Optional Direct3D11 visibility compute and functional quality controls](docs/ACOUSTICS_08_2_GPU_ACCELERATION.md) now extend the existing finite solver/streaming renderer. The CPU remains complete; the GPU supplies conservative potential-contact masks for exact CPU refinement. Explicit 12/16/32/64-path capacities and separately adaptive hardware selection preserve source history. Real RTX 2080 SUPER comparisons are bit-identical, but full simulation/DSP costs still exceed the block budget at demanding Quality/Max settings. No hardware ray-tracing backend, extra reflection order, late field or GTA rendering-performance claim is implied.

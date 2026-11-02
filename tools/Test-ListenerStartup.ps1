@@ -6,6 +6,7 @@ $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 $build=Join-Path $repo 'build\listener-startup'
 [IO.Directory]::CreateDirectory($build)|Out-Null
 $sources=@(Get-ChildItem (Join-Path $repo 'src\acoustics\host\Windows') -Filter '*.cs'|ForEach-Object FullName)
+$sources+=@(Get-ChildItem (Join-Path $repo 'src\acoustics\recording') -Filter '*.cs'|ForEach-Object FullName)
 $sources+=@(Get-ChildItem (Join-Path $repo 'src\acoustics\host\Transport') -Filter '*.cs'|ForEach-Object FullName)
 $sources+=@(Get-ChildItem (Join-Path $repo 'src\acoustics\geometry') -Filter '*.cs'|ForEach-Object FullName)
 $sources+=@('GeometryObservation.cs','SurfaceAcquisition.cs','DiagnosticTile.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\observation\'+$_)}

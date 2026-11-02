@@ -1,0 +1,54 @@
+# PLAYABLE-11: API identity established, distribution provenance unresolved
+
+**BLOCKED pending an official, independently verifiable launcher-to-API relationship.** The retained distribution confirms the reviewed launcher bytes, and the private runtime witness confirms the distinct API bytes. Neither establishes that those API bytes are an authentic output of that launcher. No API hash was approved, trust check weakened, or accepted passive candidate created. This local increment starts from `8c06c46ee0c1925d93692fbac6672116cd7f8537` on `feature/playable-01`; nothing was submitted or pushed externally.
+
+The [PLAYABLE-10 live result](PLAYABLE_10_LIVE_RESULT.md), [preparation report](PLAYABLE_10.md), [actual capture evidence](../evidence/playable-10-live-01.json), [PLAYABLE-09 report](PLAYABLE_09.md) and [historical rejection](PLAYABLE_09_LIVE_RESULT.md) remain unchanged. PLAYABLE-10 proved the launcher/API equality false in its own run. It did not recover PLAYABLE-09's uncaptured runtime operands. No new GTA/RPH run was performed here.
+
+| Artifact | Bytes | SHA-256 | What this establishes |
+| --- | ---: | --- | --- |
+| Retained Enhanced distribution archive | 86,824,044 | `8524e534f219c7f33634ed45ced055f3c7b0b461fa8302ff2f0ac46470c7ed34` | Identity of the retained package, not an independently published checksum |
+| Installed launcher and its archive entry | 12,237,182 | `73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac` | Exact reviewed launcher identity; both retained launcher copies also match |
+| Private observed API witness | 28,720,128 | `ea18ddff9ccd41898a9bdc8c2ec2b7866176543e126810279e8732ab2e0a6d62` | Exact bytes supplying typed `Rage.Game` calls in PLAYABLE-10; independently rehashed here |
+
+Both executable and API report FileVersion `1.132.1428.17748`. The observed API is `RagePluginHook, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null`, module `RagePluginHook.dll`, MVID `4c493f3e-e913-497c-a0d6-b293f9b8c3ef`. These are observations, not authentication factors. The original private report and capture index still match their published PLAYABLE-10 digests.
+
+The 1,134-entry archive has no `RagePluginHook.dll` entry and no entry of 28,720,128 bytes. All 23 original installation-receipt hashes match their archive entries. This rules out a direct separate API file in this retained archive; it says nothing conclusive about opaque launcher content or dynamic extraction. No protected content was unpacked, decrypted, patched, or executed. No binaries were downloaded.
+
+The [official LMS Enhanced distribution page](https://www.lcpdfr.com/downloads/gta5mods/g17media/52970-lspd-first-response-enhanced-preview/?changelog=0) identifies build 9695 for Enhanced 1158.16 and says its RPH bundle was updated for that game version. Its accessible release information does not publish the current managed API digest or a supported extraction/verification relationship. The retained archive's local download-origin metadata is mutable and cannot independently authenticate it. The official publishing route and retained exact launcher identity do not fill the missing API link.
+
+The [maintainer SDK publication](https://www.lcpdfr.com/forums/topic/156960-lspdfr-api-documentation-and-rph-sdk/) and retained reference SDKs establish a compilation contract. Their older versions do not identify the observed 1.132 runtime. The [historical official API documentation](https://docs.ragepluginhook.net/html/P_Rage_Game_LocalPlayer.htm) names `RagePluginHook.dll` but applies to 0.56. No credible current API digest, supported reproducible extraction contract, or explicit current maintainer verification guidance was established in this bounded review. Some direct official-site requests failed or timed out; this is a limit on this investigation, not proof that no such method exists.
+
+There is one qualification to whole-installation claims: 22 of the original 23 distribution files currently match the archive. `XInput1_4.dll` is 133,632 bytes, SHA-256 `a1a8bde409ed75d94a0439c37cf881bc354b13c2f8cd32e4bef3b10f308f1392`; the original archive entry is 34,816 bytes, SHA-256 `bd0ba909de46470e0ddbf88cd72d7cf6f1eb04b709616366692eaea87b4c0551`. The official Enhanced page documents replacing this file with SHV's version when using DirectStorageFix. That explains a supported substitution class, but does not authenticate these exact installed bytes. PLAYABLE-09 reviewed `dinput8.dll` as its loader, not this XInput artifact. No malfunction, tampering, or API causation follows from this difference. All 23 current file hashes remained unchanged during this review; no repair or replacement was attempted.
+
+The defensible identity policy remains:
+
+1. Preserve the exact reviewed launcher identity separately from the actual API supplying the typed calls.
+2. Leave the production expected API policy **UNREVIEWED** until independent official evidence authenticates its expected bytes and supported location/content contract. Version, name, MVID, cache membership, first observation, or syntactically valid evidence digests cannot supply that evidence.
+3. Do not use the rejected PLAYABLE-09 passive profile for another qualification. Its obsolete equality remains frozen historical code. The separate-artifact PLAYABLE-10 diagnostic model is suitable for observation and denial; it is not a corrected handoff candidate.
+4. Once the missing evidence exists, review the API and launcher expectations independently and require the actual typed API reference, file bytes, loaded/file identity, process/session/caller ownership, and change rejection. Any legitimately variable content/location needs an official supported verification contract, not an arbitrary allowance.
+5. Retain protection for the actual API throughout a future handoff lifetime. PLAYABLE-10's diagnostic file pins end after capture; the existing handoff's lifetime pins do not yet cover the actual API. Reusing a successful diagnostic snapshot alone would not implement that requirement.
+
+These controls address ordinary wrong, stale, replaced, or cross-session artifacts. They do not defend against fully privileged malicious code in the same process. No new trusted API expectation or handoff-lifetime guarantee is claimed in this increment.
+
+New offline validation, with unchanged canonical runners and new output directories, passed:
+
+| Check | New result | Evidence boundary |
+| --- | --- | --- |
+| Typed provenance controls | 35 cases / 337 assertions | Separate authored launcher/API fixtures; same-version wrong bytes, unexpected path/version/identity, mutation/linkage, missing evidence, ownership and report failure controls |
+| Retained diagnostic profile | 25 controls | Actual production image inspected; six serialized mutants rejected; independent authentic-SDK rebuild matches all 187 methods |
+| Source-identical entry fixtures, included above | 16 cases / 260 assertions | Explicit fixture policy and test CLR facade; rejected/unreviewed inputs cannot activate a source, BEGIN, gameplay, or audio |
+| Default product regression, included above | 655 methods / zero differences | Compared with retained PLAYABLE-09 reference; no installed framework execution |
+
+These are new fixture/static checks, not official API authenticity, a valid corrected passive-source qualification, or live proof. The diagnostic image physically omits source Open/BEGIN and gameplay publication. The old passive gate's rejection still precedes attachment/Open/BEGIN by preserved control flow; no new end-to-end accepted-source claim is made. The existing handoff validator, retirement, clock, adapter, journal and native matrix results remain historical, unmodified and explicitly not rerun. A new native matrix would not authenticate this DLL.
+
+All 750 previously tracked files, 579 pinned PLAYABLE-09 private files and 532 preexisting PLAYABLE-10 private files remain byte-identical. All 11 protected files and four settings fingerprints match the preserved baseline. Stock fallback remains selected; modification-aware loudness and synchronised recording flags remain false. Relevant game/RPH/audio-host processes were absent at the checks. The evidence is before/after integrity plus this offline action record, not continuous OS-wide monitoring.
+
+No product or trust-policy source changed. The original SHV producer, authenticated session ownership, independent RPH vehicle correspondence, measured clock mapping, raw float32 fidelity, freshness/sequence rules and autonomous permanent retirement remain intact. There is no new RPM source or broken RPH revolution-getter fallback. PLAYABLE-08's restricted engine-running Bati qualification is unchanged.
+
+The preserved audio foundations include Rockstar decoding, source histories, spatial rendering, Doppler/reflections, output gain, CPU/GPU paths and the PCM/WASAPI-loopback/timestamp/anomaly recording foundation. The existing loudness policy still covers naturally audible stock civilian cars, factory performance models, verified exhaust upgrades or EMS Level 1+ eligibility, and conservative treatment of unknown NPC modifications. Its 10× relative exhaust-pressure reference and 0.25 common trim remain uncalibrated and unchanged. No subsystem was activated.
+
+Independent critical review is recorded in [the PLAYABLE-11 review receipt](../evidence/playable-11-independent-review.json). The new [provenance findings](../evidence/playable-11-provenance.json), [offline controls](../evidence/playable-11-offline-controls.json) and [preservation receipt](../evidence/playable-11-preservation.json) contain sanitised results and private receipt digests. New test outputs remain private. The [artifact manifest](../evidence/playable-11-artifacts.json) identifies every added report/receipt by exact digest; no binary is a new accepted candidate.
+
+**The remaining dependency is precise:** an authenticated official artifact/statement or independently verifiable supported relationship from the reviewed launcher/distribution to the observed API, including its byte and location stability rules. The finished [maintainer question](UPSTREAM_RPH_API_PROVENANCE_QUESTION.md) is separate from the older engine-revolution report and ready for explicit user approval. Neither report has been sent. No private binary, log, path, process/session information, or runtime material accompanies the question.
+
+A new passive live test cannot responsibly be proposed yet. After that dependency is satisfied, prepare and independently review the smallest corrected managed candidate while retaining the existing SHV/RPH architecture and controls. Any future live work then requires a new exact-artifact review, installation/rollback procedure and separate explicit user authorisation. No launch, plugin replacement, ASI deployment, recording or audio test is authorised by this result.

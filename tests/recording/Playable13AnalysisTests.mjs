@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {recordingFindings} from '../../tools/Analyze-Playable13Recording.mjs';
+const base={nonfiniteSamples:0,overFullScaleSamples:0,nearFullScaleSamples:0,peak:.2,silenceRuns:[],stereo:{available:false},pitchJumpCandidates:[],candidateDiscontinuityEdgeCount:0};
+const unknown={owned:{recordedUnderflowFrames:null,submittedFrameDiscontinuities:null},loopback:{discontinuityFlags:null,timestampErrorFlags:null}};
+let f=recordingFindings(base,unknown,{recordingComplete:true});
+assert(!f.some(x=>x.code==='recorded-playback-underflow'||x.code==='loopback-discontinuity'));assert(f.find(x=>x.code==='source-balance-context').level==='unavailable');
+f=recordingFindings({...base,overFullScaleSamples:4,peak:1.2},unknown,{recordingComplete:true});assert(f.some(x=>x.code==='owned-full-scale-exceeded'&&x.recommendation.includes('0.25')&&!x.automaticChangeApplied));
+f=recordingFindings(base,{owned:{recordedUnderflowFrames:32,submittedFrameDiscontinuities:1},loopback:{discontinuityFlags:1,timestampErrorFlags:0}},{recordingComplete:false});assert(f.some(x=>x.code==='recorded-playback-underflow'));assert(f.some(x=>x.code==='capture-incomplete'));
+f=recordingFindings({...base,stereo:{available:true,leftRightEnergyCorrelation:-1,monoSumEnergyRelativeDb:-90}},unknown,{recordingComplete:true});assert(f.some(x=>x.code==='stereo-mono-cancellation-risk'&&x.limit.includes('not isolated')));
+f=recordingFindings({...base,silenceRuns:[{startFrame:10,frames:2000}],pitchJumpCandidates:[{frame:20}],candidateDiscontinuityEdgeCount:2},unknown,{recordingComplete:true,telemetryEvents:3});assert(f.filter(x=>x.level==='review').length===3);assert(f.every(x=>x.automaticChangeApplied===false));
+console.log('PASS5 focused recording findings/recommendation controls; missing evidence stays unavailable, no gain edits or listening claims.');

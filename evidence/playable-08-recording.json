@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-08-recording",
+  "dateUtc": "2026-11-01",
+  "scope": "Actual production PCM submission path through a managed fake renderer; bounded local file writers and known-signal analysis only",
+  "status": "IMPLEMENTED AND OFFLINE-TESTED FOUNDATION; DISABLED IN GAMEPLAY; LIVE ACCEPTANCE BLOCKED",
+  "privateValidationReceiptSha256": "10fcfdaea514940f4271fc1dec4cb345d89f403083133def2d008ceb2aa98b48",
+  "validation": {
+    "csharpAssertions": 105,
+    "analysisControls": 17,
+    "failed": 0,
+    "actualProductionFillExecuted": true,
+    "losslessSubmissionBytesVerified": true,
+    "actualBufferComparisonFrames": 3840,
+    "actualBufferComparisonBytes": 30720,
+    "callbackFrames": 960,
+    "gameStarted": false,
+    "productHostStarted": false,
+    "audioEndpointOpened": false,
+    "microphoneOpened": false,
+    "realLoopbackBackendExecuted": false,
+    "realLoopbackBackendCompiled": true,
+    "newRuntimeOrDriverInstalled": false,
+    "liveAcceptance": false,
+    "physicalAcousticsVerified": false,
+    "humanListeningPerformed": false
+  },
+  "sourcePins": [
+    {
+      "file": "src/acoustics/host/Windows/OwnedOutputTap.cs",
+      "sha256": "1a9e4581a225a5a440fcff942706d299b7e25d8e89eefcea9edee9b932d66af5"
+    },
+    {
+      "file": "src/acoustics/host/Windows/WasapiOutput.cs",
+      "sha256": "034cb0ff85f2dda9f01ad20adf72e46a8121e651d6ddfe658605e46dd04b37d6"
+    },
+    {
+      "file": "src/acoustics/recording/RecordingContracts.cs",
+      "sha256": "1172d4db47ac9eb17ab8dea8a3486277b341c7bf0c0eb64887fc1563d99a0128"
+    },
+    {
+      "file": "src/acoustics/recording/RecordingSession.cs",
+      "sha256": "4a55ad6ad90838565b0a67526dd367734f49c29fe015b47d192686cf40efce8e"
+    },
+    {
+      "file": "src/acoustics/recording/StreamingLoopback.cs",
+      "sha256": "9aaac8ba8c8cf4de018e64398284f00b76749209f84968d81e61333ceeef16c0"
+    },
+    {
+      "file": "src/acoustics/recording/analyze.mjs",
+      "sha256": "5feec96b510aaa63e8961ab6273dd5574f9788da757c892ccc24d0278818f1a8"
+    },
+    {
+      "file": "tests/recording/RecordingTests.cs",
+      "sha256": "3f7d6b27a322c9fb3661b3069728c79cc744982127478372d4a93ad984b43273"
+    },
+    {
+      "file": "tests/recording/AnalysisTests.mjs",
+      "sha256": "04cb56319b27c80b5b14a3682ca9625194c90a8c8c4b1dd071a7239c208d9088"
+    },
+    {
+      "file": "tools/Test-SynchronizedRecording.ps1",
+      "sha256": "c83821f498738bbdcc94baf39cddfcbfadd338b7657b7d5dfdfa92f0d6f34a27"
+    },
+    {
+      "file": "tools/Build-AcousticsHost.ps1",
+      "sha256": "47ba3d052884a57f5de69512ccadde929f7f3cebb883908a1f5feb757c288af5"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "RichAudio.Acoustics.Host.exe",
+      "sha256": "e1692fd84332c4e8d10a3dbbc7bc299ee1c4c8ec6d1e87a7ffbcc4be49a64514"
+    },
+    {
+      "name": "Recording.Tests.exe",
+      "sha256": "c51c3b30cec4639b42e8a90cfc763ef7e58369fe51339325760d5863d78e7493"
+    }
+  ],
+  "productionIntegration": {
+    "ownedTap": "Existing OwnedOutputTap queue and successful ReleaseBuffer commit reused; actual post-gain bytes are retained without regeneration or conversion",
+    "callbackTapOwnership": "One callback-local tap reference spans Prepare, successful Commit or failed Cancel despite concurrent detach/swap",
+    "selectedEndpointIdentity": "Read-only ID from the already selected output device during future startup; no constructor/getter activation and no guessed endpoint fallback",
+    "loopback": "Exact explicitly selected render endpoint, original mix-format samples/channels, bounded separate packet queue, no microphone or resampling",
+    "controller": "Qualified GameplayHost/menu command adapter remains unwired and current gameplay recording remains gated unavailable",
+    "defaultEnabled": false,
+    "configurationAloneCanStart": false,
+    "coreReadinessFields": [
+      "FeatureEnabled",
+      "ExplicitUserStart",
+      "TelemetryQualified",
+      "HandoffQualified",
+      "LivePcmVerified",
+      "HumanListeningApproved"
+    ],
+    "loopbackAdditionalReadinessField": "LoopbackExplicitlyApproved",
+    "fixtureCapabilityCanActivateRealEndpoint": false
+  },
+  "bounds": {
+    "minimumSeconds": 1,
+    "maximumSeconds": 120,
+    "defaultAllFileBytes": 134217728,
+    "minimumAllFileBytes": 1048576,
+    "maximumAllFileBytes": 268435456,
+    "reservedFinalManifestBytes": 65536,
+    "workspaceStorageCapBytes": 1073741824,
+    "workspaceSessionCap": 128,
+    "additionalFreeDiskReserveBytes": 16777216,
+    "ownedQueueSlots": 64,
+    "ownedMaximumFrames": 2048,
+    "ownedSampleStorageBytes": 1048576,
+    "loopbackQueueSlots": 16,
+    "loopbackMaximumPacketFrames": 8192,
+    "loopbackMaximumPacketBytes": 262144,
+    "loopbackSampleStorageBytes": 4194304,
+    "diagnosticQueueRows": 128,
+    "diagnosticRowBytes": 4096,
+    "newFilesOnly": true,
+    "automaticDeletion": false,
+    "automaticUpload": false,
+    "stopPreemptsBlockedNativeOrFilesystem": false
+  },
+  "raceAndFaultControls": [
+    "Default acceptance gates reject recording without filesystem or endpoint activation.",
+    "Actual WasapiOutput.Fill is invoked with a managed fake IAudioRenderClient; saved Float32 WAV bytes equal the submitted post-gain buffers.",
+    "Callback detach/swap during fake ReleaseBuffer commits or cancels the original tap; no orphan reservation reaches a replacement.",
+    "Fake pre-activation and pre-Start barriers prove cancellation stops queued loopback initialization without invoking real Core Audio.",
+    "Manual stop and a real one-second natural deadline cannot lose an accepted diagnostic row; late prepared rows are rejected or drained before finalization.",
+    "Null/unavailable selected endpoint IDs remain unavailable and do not alter the playback path.",
+    "Raw loopback packet bytes and explicit SILENT packets remain distinct; timestamp faults mark incomplete capture.",
+    "All-file byte caps, actual duration, queue overflow, storage exceptions, cancelled submissions and odd PCM24 RIFF padding are tested."
+  ],
+  "analysis": {
+    "implementedMeasurements": [
+      "Peak/RMS/crest and per-channel energy",
+      "Windowed RMS range and measured silence runs",
+      "Waveform edge and near-full-scale candidates",
+      "Stereo balance/correlation and mono-sum energy",
+      "Bounded Hann FFT bands/centroid with explicit resolution",
+      "Conditional recorded-channel autocorrelation pitch-step candidates",
+      "Conditional envelope-similarity lag with substantial overlap and bounded search",
+      "Recorded index underflow/frame gaps and loopback timestamp/discontinuity flags",
+      "Recorded processing timing/overrun events when actually supplied",
+      "Source-response delay only after explicit frame/clock mapping",
+      "Aligned-stem correlation/cancellation only with explicit common recording/timeline/sample alignment"
+    ],
+    "decodedPcm32Precision": "Float64 preserves normalized low bits; no float32 rounding into invented unity rails",
+    "maximumDecodedBytesPerWave": 268435456,
+    "maximumDecodedSeconds": 120,
+    "fftMaximumWindowFrames": 4096,
+    "envelopeBinMilliseconds": 10,
+    "lagMaximumMilliseconds": 1000,
+    "lagMinimumOverlapBins": 20,
+    "lagMinimumOverlapFraction": 0.5,
+    "missingStemsOrInstrumentation": "Unavailable, never silently treated as zero anomalies or verified phase/latency",
+    "analysisVerdictIsPerceptualQuality": false,
+    "absoluteLatencyEstablished": false,
+    "physicalRpmEstablished": false
+  },
+  "remainingAcceptance": [
+    "Formal phase-marked engine-state qualification and a scoped authentic telemetry handoff",
+    "A qualified current-session production recording controller and same-output endpoint binding",
+    "Full vehicle/listener/source/render diagnostics forwarding outside game/audio callbacks",
+    "Measured game/renderer clock anchors, drift and presentation alignment",
+    "Actual paired owned/loopback endpoint recording, sustained throughput and compatibility",
+    "Supported live Bati playback, human listening and explicit recording approval",
+    "Exact engine/exhaust stems for component phase analysis; final stereo alone cannot supply them"
+  ],
+  "dependencies": [
+    "Existing installed x64 .NET Framework compiler/runtime and standard libraries",
+    "Windows Core Audio/SDK ABI for future approved loopback; backend compiled but not invoked",
+    "PowerShell7 and the existing Node runtime; no external package installation"
+  ],
+  "privacy": "Portable source labels, hashes and named checks only; no private paths, endpoint IDs, process identifiers, audio samples or absolute QPC timestamps."
+}

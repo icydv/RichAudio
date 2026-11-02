@@ -41,23 +41,27 @@ public static class TestInGameMenu
         Select(menu,3);for(int i=0;i<5;i++)menu.Handle(MenuInput.Left);Check(Math.Abs(menu.Pending.OutputLevel-.75)<1e-12,"level steps by five percent");
         for(int i=0;i<40;i++)menu.Handle(MenuInput.Right);Check(menu.Pending.OutputLevel==1,"level never boosts beyond profile");
         Select(menu,4);menu.Handle(MenuInput.Accept);Check(!menu.Pending.EarlyReflections,"early processing toggle");
-        foreach(int locked in new[]{5,7,8}){Select(menu,locked);var before=menu.Pending;menu.Handle(MenuInput.Accept);menu.Handle(MenuInput.Left);Check(menu.Pending.Same(before),"unsupported effect stays read-only");}
+        Select(menu,5);var lockedBefore=menu.Pending;menu.Handle(MenuInput.Accept);menu.Handle(MenuInput.Left);Check(menu.Pending.Same(lockedBefore),"unsupported Doppler bypass stays read-only");
+        Select(menu,7);menu.Handle(MenuInput.Accept);Check(menu.Pending.SoundMapVisible,"SoundMap visibility is a real preference");
+        Select(menu,8);menu.Handle(MenuInput.Accept);Check(menu.Pending.IntegrationMode=="experimental-additive","integration mode accurately selects additive playback");
+        Select(menu,AcousticMenuModel.MenuKeyRow);Check(menu.Pending.MenuToggleKey=="F10","default menu key remains F10");
+        menu.Handle(MenuInput.Left);Check(menu.Pending.MenuToggleKey=="F9","menu key can be changed without saving immediately");
         Select(menu,6);menu.Handle(MenuInput.Accept);Check(menu.Pending.DiagnosticsOverlay,"diagnostics preference changes");
-        Select(menu,9);Check(menu.Handle(MenuInput.Accept)==MenuAction.Apply,"Apply requests persistence, not an engine launch");
+        Select(menu,AcousticMenuModel.ApplyRow);Check(menu.Handle(MenuInput.Accept)==MenuAction.Apply,"Apply requests persistence, not an engine launch");
         var submitted=menu.Pending;menu.Acknowledge(submitted,"Saved; awaiting engine report");Check(!menu.Dirty,"save acknowledgment updates baseline");
         Select(menu,3);menu.Handle(MenuInput.Left);var newer=menu.Pending;menu.Acknowledge(submitted,"Earlier save finished");Check(menu.Pending.Same(newer)&&menu.Dirty,"old save acknowledgement cannot erase newer edits");
         Check(menu.Notice=="Previous preferences saved; current edits remain pending.","save notice cannot claim newer edits were saved");
-        Select(menu,10);menu.Handle(MenuInput.Accept);Check(menu.Pending.Same(MenuPreferences.Defaults),"Reset Defaults prepares genuine defaults");
+        Select(menu,AcousticMenuModel.ResetRow);menu.Handle(MenuInput.Accept);Check(menu.Pending.Same(MenuPreferences.Defaults),"Reset Defaults prepares genuine defaults");
         Check(menu.Handle(MenuInput.Back)==MenuAction.Close&&!menu.Visible,"Back closes and releases model focus");
         Check(menu.Pending.Same(submitted),"unapplied defaults are discarded on Back");
-        menu.Open(defaults,false);Select(menu,9);Check(menu.Handle(MenuInput.Accept)==MenuAction.None&&menu.NoticeIsError,"unavailable storage cannot claim Apply");
+        menu.Open(defaults,false);Select(menu,AcousticMenuModel.ApplyRow);Check(menu.Handle(MenuInput.Accept)==MenuAction.None&&menu.NoticeIsError,"unavailable storage cannot claim Apply");
         menu.SetWritable(true);Check(menu.Handle(MenuInput.Accept)==MenuAction.Apply,"service readiness restores Apply");
-        menu.Open(defaults.With(quality:"max"),false);Select(menu,10);
+        menu.Open(defaults.With(quality:"max"),false);Select(menu,AcousticMenuModel.ResetRow);
         Check(menu.Handle(MenuInput.Accept)==MenuAction.None&&menu.Pending.Quality=="max"&&menu.NoticeIsError,"unavailable reset cannot change or save preferences");
         Check(HasText(menu.BuildFrame(1920,1080,null),"RESET UNAVAILABLE"),"unavailable recovery action is visibly disabled");
         menu.SetResetAvailable(true);Check(menu.Handle(MenuInput.Accept)==MenuAction.Reset&&menu.Pending.Same(defaults)&&!menu.CanApply,"bounded malformed-file recovery requests separate service action");
         menu.Close();Check(menu.Handle(MenuInput.Down)==MenuAction.None,"closed keyboard stays inactive");
-        menu.Open(defaults);Select(menu,12);
+        menu.Open(defaults);Select(menu,AcousticMenuModel.RecordingRow);
         Check(menu.Handle(MenuInput.Accept)==MenuAction.None&&menu.NoticeIsError,"missing recorder cannot request capture");
         menu.SetRecording(true,false,false,"Ready");
         Check(menu.Handle(MenuInput.Accept)==MenuAction.StartRecording&&!menu.Dirty,"recording is explicit and separate from preferences");
@@ -67,7 +71,20 @@ public static class TestInGameMenu
         menu.SetRecording(true,true,false,"Recording");
         Check(menu.Handle(MenuInput.Accept)==MenuAction.StopRecording,"recording stop is a distinct explicit action");
         Check(HasText(menu.BuildFrame(1920,1080,null),"STOP RECORDING"),"record stop action is visible");
-        menu.Handle(MenuInput.Right);Check(menu.SelectedIndex==9,"four footer buttons wrap correctly");
+        var saved=menu.Pending.With();
+        menu.SetAudioTestRecording(false,false,false,"Telemetry and playback acceptance required");
+        Check(menu.AudioTestRecordingMode&&HasText(menu.BuildFrame(1920,1080,null),"RECORD AUDIO TEST"),"locked production audio test keeps an identifiable action label");
+        Check(menu.Handle(MenuInput.Accept)==MenuAction.None&&menu.NoticeIsError,"locked production audio test cannot dispatch a recording");
+        menu.SetAudioTestRecording(true,false,false,"Ready after qualified host session and explicit approval");
+        Check(menu.Handle(MenuInput.Accept)==MenuAction.StartAudioTest,"explicit audio test intent is distinct from SoundMap recording");
+        menu.SetAudioTestRecording(true,true,true,"Pending");
+        Check(menu.Handle(MenuInput.Accept)==MenuAction.None,"pending audio test action cannot repeat");
+        menu.SetAudioTestRecording(true,true,false,"Recording");
+        Check(HasText(menu.BuildFrame(1920,1080,null),"STOP AUDIO TEST")&&menu.Handle(MenuInput.Accept)==MenuAction.StopAudioTest,"production stop is explicit and mode specific");
+        Check(menu.Pending.Same(saved),"recording intent never changes stored acoustic preferences");
+        menu.SetRecording(true,false,false,"Legacy SoundMap ready");
+        Check(!menu.AudioTestRecordingMode&&menu.Handle(MenuInput.Accept)==MenuAction.StartRecording,"SoundMap retains its separate existing action contract");
+        menu.Handle(MenuInput.Right);Check(menu.SelectedIndex==AcousticMenuModel.ApplyRow,"four footer buttons wrap correctly");
         menu.Close();
     }
     private static void PointerTests()
@@ -76,8 +93,10 @@ public static class TestInGameMenu
         Click(menu,Region(frame,HitRegionKind.QualityChoice,0,4));Check(menu.Pending.Quality=="max","mouse selects Max target");
         Click(menu,Region(frame,HitRegionKind.AccelerationChoice,1,1));Check(menu.Pending.Acceleration=="cpu"&&menu.Pending.Quality=="max","mouse acceleration independent");
         Click(menu,Region(frame,HitRegionKind.Level,3,-1),.25f);Check(menu.Pending.OutputLevel==.25,"mouse output slider reaches actual preference");
-        var before=menu.Pending;Click(menu,Region(frame,HitRegionKind.Row,7,-1));Check(menu.Pending.Same(before),"clicking unavailable reverb does not enable it");
-        Check(Click(menu,Region(frame,HitRegionKind.Row,9,-1))==MenuAction.Apply,"mouse Apply dispatches action");
+        var before=menu.Pending;Click(menu,Region(frame,HitRegionKind.Row,7,-1));Check(menu.Pending.SoundMapVisible!=before.SoundMapVisible,"SoundMap visibility is a real preference");
+        before=menu.Pending;Click(menu,Region(frame,HitRegionKind.Row,8,-1));Check(menu.Pending.IntegrationMode!=before.IntegrationMode,"integration selector distinguishes additive from GTA fallback");
+        Click(menu,Region(frame,HitRegionKind.MenuKeyChoice,AcousticMenuModel.MenuKeyRow,1));Check(menu.Pending.MenuToggleKey=="F7","mouse key choice selects F7 without stealing gameplay/reserved keys");
+        Check(Click(menu,Region(frame,HitRegionKind.Row,AcousticMenuModel.ApplyRow,-1))==MenuAction.Apply,"mouse Apply dispatches action");
         int selected=menu.SelectedIndex;menu.Pointer(1,1,false,1);Check(menu.SelectedIndex!=selected,"wheel navigates bounded selection");
         menu.BuildFrame(800,600,null);frame=menu.BuildFrame(3440,1440,null);
         Click(menu,Region(frame,HitRegionKind.QualityChoice,0,2));Check(menu.Pending.Quality=="balanced","hit regions rebuild after resize");
@@ -98,7 +117,8 @@ public static class TestInGameMenu
         menu.Handle(MenuInput.Right);var fallback=menu.BuildFrame(1920,1080,CpuFallback());
         Check(HasText(fallback,"CPU")&&HasText(fallback,"GPU deadline exceeded"),"actual fallback remains visible while edits are pending");
         Check(HasText(fallback,"Active: On / 60% / early Off")&&menu.Pending.OutputLevel==1&&menu.Pending.EarlyReflections,"active audio is distinct from pending preferences");
-        Check(HasText(fallback,"experimental")&&HasText(fallback,"timing limits"),"unsafe high tiers clearly experimental");
+        Check(HasText(fallback,"experimental")&&HasText(fallback,"higher processing cost"),"high tiers disclose processing cost without implying a gameplay time cap");
+        var stock=menu.BuildFrame(1920,1080,MenuStatus.StockFallback());Check(HasText(stock,"Stock audio active")&&!HasText(stock,"backend unavailable"),"intentional stock mode has a truthful, non-error heading");
         bool goldTitle=false;foreach(var c in fallback.Commands)if(c.Text=="RichAudio"&&c.Argb==unchecked((int)0xFFD4AF37))goldTitle=true;
         Check(goldTitle,"actual heading command uses metallic gold accent");
         foreach(int[] size in new[]{new[]{800,600},new[]{1280,720},new[]{1920,1080},new[]{3440,1440},new[]{3840,2160}}){
@@ -141,6 +161,13 @@ public static class TestInGameMenu
         var unavailable=menu.BuildFrame(1920,1080,MenuStatus.Unavailable("Host offline. Saved settings apply at configured startup."));
         Draw(unavailable,1920,1080,Path.Combine(dest,"richaudio-menu-unavailable.png"));
         var original=menu.BuildFrame(1920,1080,CpuFallback());
+        var transition=new MenuTransition();transition.SetOpen(true,0);
+        foreach(int time in new[]{55,110,165,220})Draw(MenuTransition.Present(original,transition.Sample(time),1920,1080),1920,1080,Path.Combine(dest,"richaudio-opening-"+time+"ms.png"));
+        transition.SetOpen(false,220);foreach(int time in new[]{275,330,385,440})Draw(MenuTransition.Present(original,transition.Sample(time),1920,1080),1920,1080,Path.Combine(dest,"richaudio-closing-"+(time-220)+"ms.png"));
+        var stock=menu.BuildFrame(1920,1080,MenuStatus.StockFallback());Draw(stock,1920,1080,Path.Combine(dest,"richaudio-stock-fallback.png"));
+        Select(menu,AcousticMenuModel.RecordingRow);
+        menu.SetAudioTestRecording(false,false,false,"Locked until an approved vehicle playback test passes.");
+        Draw(menu.BuildFrame(1920,1080,MenuStatus.StockFallback()),1920,1080,Path.Combine(dest,"richaudio-audio-test-locked.png"));
         var json=new JavaScriptSerializer{MaxJsonLength=262144};File.WriteAllText(Path.Combine(dest,"draw-commands.json"),json.Serialize(original.Commands));
         File.WriteAllText(Path.Combine(dest,"result.json"),json.Serialize(new Dictionary<string,object>{{"schemaVersion",1},{"checks",assertions},
             {"provenance","Software preview of actual menu drawing commands and illustrative status. Not an in-game screenshot."},
@@ -153,6 +180,7 @@ public static class TestInGameMenu
         try{
             if(args.Length!=2)throw new ArgumentException("Repository root and fresh private preview output required");
             ModelTests();PointerTests();StatusAndLayoutTests();
+            assertions+=TestMenuTransition.Run();
 #if MENU_INPUT_TESTS
             assertions+=TestMenuInputRouter.Run();
 #endif

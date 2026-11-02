@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-09",
+  "dateUtc": "2026-11-01",
+  "startingCommit": "c4b90cb2542eec40519168b8c07e30d4920c07be",
+  "branch": "feature/playable-01",
+  "result": "OFFLINE-CANDIDATE-READY-FOR-SEPARATE-PASSIVE-APPROVAL",
+  "scope": "Actual compiled native producer and managed handoff components validated with explicit fake SDK/peer/camera fixtures. Authentic RPH SDK compilation and static product isolation verified. No actual live SHV/RPH/GTA handoff or playback acceptance.",
+  "evidence": [
+    {
+      "file": "evidence/playable-09-handoff-build.json",
+      "sha256": "13c8ccb344844d33af482223da11fe290ec9e2d43cec230df0cd5daf7aaadf05"
+    },
+    {
+      "file": "evidence/playable-09-identity-contracts.json",
+      "sha256": "aa38481fba0eb17ae916b04104e3afa69f3ef3b96ce7c0cb509cdc535fb9b1a0"
+    },
+    {
+      "file": "evidence/playable-09-bridge.json",
+      "sha256": "9c277fc5bac1d3f151aadfcf15d10827b839eecaa0d6a800a47e6aabcabca7d0"
+    },
+    {
+      "file": "evidence/playable-09-pipeline.json",
+      "sha256": "caef01dc028ea51e18c1b0713d171f26781055f2046ef55104d30b6097747710"
+    },
+    {
+      "file": "evidence/playable-09-critical-review.json",
+      "sha256": "712df30ede5043f0bcdc4237844e93e144e624fc1dcaf47a8939f190b9dbc69f"
+    },
+    {
+      "file": "evidence/playable-09-candidate.json",
+      "sha256": "4423b1a112efc712dcf5e3bc297e81b4886a1116e248d81ebb0fc252fbf8c3c6"
+    }
+  ],
+  "implementation": {
+    "route": "Already-loaded exact ASI, seven owned bounded same-process C exports, independently captured RPH witnesses, reused08 validator, autonomous expiry consumer, existing gameplay scalar/frame/codec, private passive evidence sink",
+    "nativeCallsOnlyInRegisteredShvScript": true,
+    "crossFrameworkHandleEqualityUsed": false,
+    "entityMemoryDereferenced": false,
+    "gameMetadataWritten": false,
+    "newRuntimeInstalled": false,
+    "normalProductRendererPlaybackGainsAndHistoriesChanged": false,
+    "passiveMenuAndRecorderServicesStarted": false
+  },
+  "artifacts": [
+    {
+      "name": "RichAudio.OperatingState.ShvHandoff.asi",
+      "bytes": 129024,
+      "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40"
+    },
+    {
+      "name": "RichAudio.dll",
+      "bytes": 328192,
+      "sha256": "c97acbcb6af255a0497c28f8349d8be3447f53c6dc5e31a0d567a7ebbc76743d"
+    }
+  ],
+  "validation": [
+    {
+      "kind": "genuine-compiled-component-chain-with-labelled-fixture-inputs",
+      "cases": 32,
+      "assertions": 22464,
+      "receiptSha256": "48d362c7b89366bdec17f66323028b93089f395834d03fbf51311116d0211a6b",
+      "actualProducerExecuted": true,
+      "actualInstalledShvExecuted": false,
+      "actualRphSamplerExecuted": false
+    },
+    {
+      "kind": "unchanged08-validator-regression",
+      "cases": 68,
+      "assertions": 250,
+      "receiptSha256": "df13da1dacac684d6182c83aa28800fe4d17e7bc96e1ce508d6c7ebd5fe7aa08"
+    },
+    {
+      "kind": "clock-and-autonomous-expiry-controls",
+      "cases": 13,
+      "assertions": 43,
+      "receiptSha256": "df13da1dacac684d6182c83aa28800fe4d17e7bc96e1ce508d6c7ebd5fe7aa08"
+    },
+    {
+      "kind": "gameplay-adapter-and-existing-codec",
+      "cases": 14,
+      "assertions": 63,
+      "receiptSha256": "ec6085ed5dafac5585402de6fbc44c1c3c1d2f5ab980e43603432efa24c91657"
+    },
+    {
+      "kind": "actual-journal-and-process-lease",
+      "cases": 8,
+      "assertions": 65,
+      "receiptSha256": "fedfcc4b3abbf5d0eccbd20743fbebd615a266547145aad32ee215a04359685a"
+    },
+    {
+      "kind": "default-product-conditional-isolation",
+      "methodsCompared": 655,
+      "differences": 0,
+      "receiptSha256": "3bec9f1d72718a3c57d5260c657e42d2622af386e39c3f29ac13b8761280b0a7"
+    },
+    {
+      "kind": "proposal-pinned-copy-guards",
+      "cases": 5,
+      "receiptSha256": "3d1645b6daa2db55390ed9785779d367c633e8cd2a246c1d8e13bb935c263c8c"
+    },
+    {
+      "kind": "proposal-negative-controls",
+      "cases": 4,
+      "receiptSha256": "5bd4d4eca4a8920e5815634b8c89afb5af97d8279c3d42d4c239a944ab1a4136"
+    }
+  ],
+  "realDurationFixture": {
+    "elapsedMilliseconds": 120448,
+    "actualFakeSdkTargetCalls": 1929,
+    "acceptedObservations": 1928,
+    "consumerRetirement": "consumer-active-deadline",
+    "nativeTerminalCode": 3,
+    "producerCallbackCompleted": true,
+    "limitsShortened": false
+  },
+  "independentReview": {
+    "sourceVerdict": "PASS-WITH-DECLARED-BOUNDS",
+    "candidateVerdict": "GO-FOR-REQUESTING-ONE-PASSIVE-TELEMETRY-TEST-ONLY",
+    "authorSelfReviewDistinguishedFromIndependentReview": true,
+    "remainingLimits": [
+      "Real supported SDK opaque-address correspondence and actual loaded RPH runtime bytes are live gates, not fixture facts",
+      "Entirely unobserved full8-bit pool-counter wrap plus address reuse between samples is excluded by user-selected read-only boundary",
+      "Same-user/equivalent-privilege arbitrary code is outside the isolation claim",
+      "Native/OS hangs, fatal faults and forced termination can prevent complete evidence or cleanup",
+      "The first proposed live exit test does not independently prove silence as the causal trigger if exit retired first"
+    ]
+  },
+  "preservation": {
+    "protectedFilesVerified": 11,
+    "settingsAndShortcutsVerified": 4,
+    "historicalAndPreservedSourcePinsVerified": 170,
+    "bridgeCompiledSourcesVerified": 44,
+    "nativeCompiledSourcesVerified": 4,
+    "pipelineSourcePinsVerified": 12,
+    "stockFallbackSelected": true,
+    "productionFlagsDisabled": true,
+    "ownedGameDestinationsPendingAndBackupPathsAbsent": true,
+    "gameRphAndRichAudioProcessesAbsent": true,
+    "timeoutOverridesAbsentInProcessUserMachineScopes": true
+  },
+  "liveProposal": {
+    "installationManifestSha256": "47b9a925d100cef5d65fb9defdff5828b55934f3f4b3a3eabfdeb0f9aa34556b",
+    "rollbackManifestSha256": "e8d5a2fa440bbe9db3c053420ba93f1e9a4dea349f7cdb577d3fe74a08c1c3e0",
+    "independentPreflightSha256": "b406ccecc18d9e975bb530970fe6596c0921628f4fe9e670acafcdbdfe4d7075",
+    "oneLaunch": true,
+    "oneBegin": true,
+    "automaticRetry": false,
+    "nativeWaitingMilliseconds": 300000,
+    "nativeActiveMilliseconds": 120000,
+    "maximumTargetCalls": 2400,
+    "maximumHz": 20,
+    "maximumEvidenceBytes": 12582912,
+    "newProducerLiveQualificationInherited": false,
+    "approvalGranted": false
+  },
+  "acceptance": {
+    "restricted08Telemetry": "ACCEPTED-UNCHANGED",
+    "passiveCandidate": "GO-FOR-REQUESTING-EXACT-BOUNDED-TEST",
+    "actualLiveHandoff": "BLOCKED-PENDING-SEPARATELY-AUTHORISED-EVIDENCE",
+    "gameplayPcm": "BLOCKED",
+    "humanListening": "BLOCKED",
+    "loudness": "BLOCKED-DISABLED",
+    "synchronisedRecording": "BLOCKED-DISABLED"
+  },
+  "boundaries": {
+    "gameFilesWritten": false,
+    "deployed": false,
+    "gameLaunched": false,
+    "actualInstalledShvExecuted": false,
+    "actualRphRuntimeExecuted": false,
+    "playbackHostStarted": false,
+    "audioEndpointOpened": false,
+    "recordingStarted": false,
+    "featureFlagsEnabled": false,
+    "upstreamReportSubmitted": false
+  },
+  "privacy": "Only sanitised counts, reviewed source/artifact hashes and receipt digests are published. SDK/runtime/game binaries, local policy paths, process identities, opaque addresses, captures, secrets and original recordings remain private."
+}

@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-10",
+  "scope": "Relevant unchanged09 managed components only, using actual canonical runner copies with precisely bounded private rewrites",
+  "verifiedUtc": "2026-11-01T05:24:31.2363066Z",
+  "passed": true,
+  "privateIndexSha256": "d953c5b6c5cb5853f9462c2252e7bf403ba9a13294ba50bf038dda356569d870",
+  "runnerDerivationSha256": "03225f8b111e46ddd533095e571845935bc63e43aa9d0ad5b4a7654257ffaa11",
+  "runs": [
+    {
+      "canonicalRunnerName": "Test-ShvHandoffComposition.ps1",
+      "canonicalRunnerSha256": "38a665e649c127b2e2e679369dd5397ec9cf248076bb58e60c34e021c7b4cf04",
+      "derivedRunnerSha256": "bfe8abb953dcd9b1017d3818f330ee2ddd5c15f22d7b6e408bd03da45a89f7e0",
+      "repositoryLiteralRewrites": 1,
+      "outputPrefixRewrites": 1,
+      "inverseTextExactlyCanonical": true,
+      "receiptSha256": "3709c6fee951763070da0181901cb7a5a8a0568001278eea21c843d2e86be7d1",
+      "cases": 13,
+      "assertions": 43,
+      "passed": true,
+      "binarySha256": "761be1d4654d7746679f0d8786b3644e94bedb7de300ddeea717213968982a12"
+    },
+    {
+      "canonicalRunnerName": "Test-ShvGameplayFrameAdapter.ps1",
+      "canonicalRunnerSha256": "5f11a9fd349d323ef92f42fa39440a9dd0d7cc38efdda60c35aa5e6170131f9a",
+      "derivedRunnerSha256": "85ed3d8e8a2eddf2a06c595ed2fb8014b96eee47e79e5c549bec354cad911a5c",
+      "repositoryLiteralRewrites": 1,
+      "outputPrefixRewrites": 1,
+      "inverseTextExactlyCanonical": true,
+      "receiptSha256": "e777cf70293e4a9bfd599f9017d04e7d50f82fffdf7ecc7000c990053e397dc4",
+      "cases": 14,
+      "assertions": 63,
+      "passed": true,
+      "binarySha256": "eb7f83606865f26130344cdfb4c1534a231e306ede8cdfdd091c54c47a16ef0e"
+    },
+    {
+      "canonicalRunnerName": "Test-ShvHandoffJournal.ps1",
+      "canonicalRunnerSha256": "8e1945448ae0ddf273d06e7fb311c9eb2c739c3a0a8490f9b614e86116f0ca52",
+      "derivedRunnerSha256": "462e7b2612efabc7acac9a3bf1bc9402b0eb975f39303d044efaacef5a386c9f",
+      "repositoryLiteralRewrites": 1,
+      "outputPrefixRewrites": 1,
+      "inverseTextExactlyCanonical": true,
+      "receiptSha256": "ffd749d9be89ac772af05207277f33c6d2ad17621e12fc7b3fbbc65f237d7e86",
+      "cases": 8,
+      "assertions": 65,
+      "passed": true,
+      "binarySha256": "b5daf851eb64ca1275fa21032160ba6fd4dee0efb92a6bb3f379c6c0518066c6"
+    }
+  ],
+  "legacyValidatorRegression": {
+    "cases": 68,
+    "assertions": 250,
+    "unchangedTestSourceSha256": "ac7cbdc992fa230b8f0da1c313f215e59a32514818e6e528e1b1016a3045a728",
+    "extendedValidatorSourceSha256": "b16bc4168e9d9ce2c4f5996f633f17156ee75cf217bea5d642ef33c6b3b0152a",
+    "binarySha256": "814adaa7666bf0ea104d5b1ef42ecf0badea1dd0334d9d8a3a1ed999e98fa622"
+  },
+  "currentFrozenSourcePins": [
+    {
+      "name": "src/acoustics/bridge/Rph/ShvHandoffBootstrap.Rph.cs",
+      "sha256": "b012bbca646da898ebd90c8095a721a15012387d1914b93da5fe702e3b9831f7"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/ShvHandoffJournal.Rph.cs",
+      "sha256": "f0ce6da8df54b5e9317583492385b9e0380d71da8eaecb96b6015fc768e17da2"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvClockCalibration.cs",
+      "sha256": "52891eb31cee846682ac1bc7e66dab6e36a7456c01f4d40ee4b31513bb983cc5"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvGameplayFrameAdapter.cs",
+      "sha256": "783f358ca9f6f1c64f4213cb55233adf10b3b61ffd91db927adb5fb4b5089dbe"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvHandoffConsumer.cs",
+      "sha256": "71b7e034c75ea16616692aacfc020bc793af8caf06fc06fae45f6264b6a9ae89"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvOperatingStateHandoff.cs",
+      "sha256": "b16bc4168e9d9ce2c4f5996f633f17156ee75cf217bea5d642ef33c6b3b0152a"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvProducerModule.cs",
+      "sha256": "1209b605130f47ccbdadadfb89efaeed53a72f18d93ee34455b099fece594298"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/TrustedShvComposition.cs",
+      "sha256": "9fe4517599265f180b43390f36fd1f7946c7642673b4ab9cffbe1c541877d464"
+    },
+    {
+      "name": "src/acoustics/host/Transport/GameplayProtocol.cs",
+      "sha256": "493b07e5c23e2d30c394929f71b66235fa101621adaa3fc56ea943e1a2d83c68"
+    },
+    {
+      "name": "src/acoustics/host/Transport/ListenerProtocol.cs",
+      "sha256": "7d76e16d4e4ab184d4074ef3751795c070308a1e51ba443c8e4e84a80faf027b"
+    },
+    {
+      "name": "src/acoustics/host/Transport/PipeDeadline.cs",
+      "sha256": "f28a13fcecd969a1475458a3db44a2b9bb9ac84f9b5bb3aa35b869a5bc4eb940"
+    },
+    {
+      "name": "src/acoustics/host/Transport/StatePipe.cs",
+      "sha256": "67da56ca63bca4bb3631b1f6ae790148937ffe40766a6c06a92ab9cdf4c4534d"
+    },
+    {
+      "name": "tests/host/TestShvGameplayFrameAdapter.cs",
+      "sha256": "b6e4bf4e2ec2ba41a7de2709ed844b4a01e47e09d035a6c833145bfa9fd03095"
+    },
+    {
+      "name": "tests/host/TestShvHandoffComposition.cs",
+      "sha256": "68d2549fe0638321af54cfcbd5710037a2788339a06c4f1ff9585f429516787c"
+    },
+    {
+      "name": "tests/host/TestShvHandoffJournal.cs",
+      "sha256": "fceaf9b9e0fc3efc10b715b1c245d7781739cb1563a99f7e35e41983b7ea070f"
+    }
+  ],
+  "canonicalRunnersAndTestsUnmodified": true,
+  "outputsIsolatedToNewPlayable10Storage": true,
+  "prior09ReceiptsPreserved": true,
+  "nativeMatrix": {
+    "rerun": false,
+    "frozenCases": 32,
+    "frozenReceiptSha256": "48d362c7b89366bdec17f66323028b93089f395834d03fbf51311116d0211a6b",
+    "reason": "The nativeASI remains unchanged and is not linked or deployed by the diagnostic-only profile; its full32/120second evidence remains frozen. Re-running it cannot authenticate the missing API runtime identity."
+  },
+  "actualGameRphOrShvExecuted": false,
+  "gameFilesWritten": false,
+  "endpointOpened": false,
+  "audioPlayback": false,
+  "newRuntimeTrusted": false,
+  "privacy": "Only repository-relative canonical source names and digests are public. Derived runner literals, fixture paths, process identities and test files remain private."
+}

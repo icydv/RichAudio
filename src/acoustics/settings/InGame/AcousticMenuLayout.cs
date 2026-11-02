@@ -12,15 +12,16 @@ namespace RichAudio.Settings.InGame
         private static readonly string[] Descriptions={
             "Sets the maximum direct and early-path detail per source. Auto adapts to measured workload. 32/64-path tiers are experimental and can exceed audio deadlines.",
             "Chooses acoustic computation independently of quality. GPU uses owned DirectCompute resources; unavailable or late work falls back to CPU. Active status is measured below.",
-            "Smoothly mutes or restores RichAudio's owned output. It does not start a beacon, publisher, host or new audio session and does not change GTA's stock sounds.",
+            "Enables or stops the installed automatic Story Mode audio. GTA's original sounds remain active in experimental additive mode. No manual host command is needed.",
             "Scales RichAudio's owned output from 0 to 100% of the reviewed profile. It cannot boost above that profile; loudness is not a substitute for acoustic realism.",
             "Includes or removes valid first- and second-order reflection paths. Old contributions fade through the existing renderer; source history and direct sound remain intact.",
             "Doppler follows the causal propagation cursor. Independent Doppler bypass is not implemented; this read-only control cannot pretend to turn it off.",
             "Shows a compact, noninteractive overlay with fresh host/backend information. Unavailable or stale state is labelled unavailable rather than inferred from your selection.",
-            "Environment-dependent late reverberation remains a planned acoustic feature. No artificial tail or uniform reverb preset is enabled by this menu.",
-            "Advanced diffraction is not implemented. This menu does not replace unobserved propagation paths with invented effects.",
-            "Saves validated preferences through the background service and updates a configured host. The menu never blocks an audio callback or starts a live session.",
-            "Restores Auto quality, Auto acceleration, enabled output at the reviewed level, early reflections on and diagnostics off. Apply to persist these defaults.",
+            "Shows or hides the optional SoundMap viewer. Gameplay audio works independently of the viewer. Its local service remains owned by RichAudio.",
+            "Stock fallback uses only GTA audio. Experimental additive plays verified RichAudio sources alongside GTA engine audio. Selective native replacement is unavailable; no horns, tyres or other GTA sounds are muted.",
+            "Chooses the menu key for future openings. Apply to save. Other mods may use the same key; choose another if needed. F4, Escape and gameplay keys are reserved.",
+            "Saves your preferences for this and future launches. Enabled additive mode starts automatically when offline Story Mode is ready.",
+            "Restores safe defaults, including GTA stock fallback and hidden SoundMap. Apply to save the defaults.",
             "Closes the menu and releases its input focus. Unapplied edits are discarded; an already requested background save may still complete.",
             "Records a private acoustic timeline and RichAudio-owned PCM through SoundMap. This does not start the host, sound source or world publisher. Microphone and system audio are excluded."
         };
@@ -57,7 +58,7 @@ namespace RichAudio.Settings.InGame
         {
             if(width<640||height<360||width>7680||height>4320)throw new ArgumentException("Bounded menu viewport required");
             scale=Math.Min(height/1080f,width/1100f);float panel=760*scale;
-            x=Math.Max(18*scale,(width-panel)*.075f);y=(height-960*scale)/2;
+            x=Math.Max(18*scale,(width-panel)*.075f);y=(height-1000*scale)/2;
         }
         private void Row(Painter p,int row,float y,float height,string label,string value,bool locked=false)
         {
@@ -72,8 +73,9 @@ namespace RichAudio.Settings.InGame
             if(!Visible)return new MenuFrame(new DrawCommand[0],new HitRegion[0]);
             float s,x,y;Viewport(width,height,out s,out x,out y);var p=new Painter(x,y,s,760);
             status=status??MenuStatus.Unavailable("No host status received");
-            p.Rect(0,0,760,960,Background);p.Rect(0,0,760,3,Gold);p.Rect(0,0,1,960,unchecked((int)0x8AD4AF37));
-            p.Rect(759,0,1,960,unchecked((int)0x5CD4AF37));
+            p.Rect(5,7,760,1000,unchecked((int)0x35000000));
+            p.Rect(0,0,760,1000,Background);p.Rect(0,0,760,3,Gold);p.Rect(0,0,1,1000,unchecked((int)0x8AD4AF37));
+            p.Rect(759,0,1,1000,unchecked((int)0x5CD4AF37));
             // Subtle metallic rim and shadow use the same supported text/rect
             // primitives in the RPH adapter and controlled preview.
             p.Text("RichAudio",31,20,45,unchecked((int)0xFF30250D),true);
@@ -83,7 +85,7 @@ namespace RichAudio.Settings.InGame
                 unchecked((int)0xFFF3E2AB),GoldLight,Gold,unchecked((int)0xFFAF8B29)};
             for(int i=0;i<metal.Length;i++)p.Rect(30+i*87.5f,98,87.5f,2,metal[i]);
             p.Rect(16,112,728,96,unchecked((int)0xB5222B33));
-            p.Text("ACTIVE ENGINE",30,122,13,Gold,true);
+            p.Text("RICHAUDIO STATUS",30,122,13,Gold,true);
             if(status.Available){
                 p.Text(Title(status.ActiveQuality)+"  /  cap "+status.PathBudget+" paths/source",30,145,20,TextColor,true);
                 p.Text(status.ActiveAcceleration.ToUpperInvariant(),542,145,20,Gold,true);
@@ -91,12 +93,15 @@ namespace RichAudio.Settings.InGame
                 p.Wrap(device,30,171,680,13,Muted,1);
                 p.Wrap(!String.IsNullOrEmpty(status.FallbackReason)?"Fallback: "+status.FallbackReason:status.Detail,30,188,680,13,
                     !String.IsNullOrEmpty(status.FallbackReason)?Warning:Muted,1);
+            }else if(status.StockAudioActive){
+                p.Text("Stock audio active",30,145,20,TextColor,true);
+                p.Wrap(status.Detail,30,174,680,14,Muted,1);
             }else{
                 p.Text("Quality / backend unavailable",30,145,20,TextColor,true);
                 p.Wrap(status.Detail,30,174,680,14,Muted,1);
             }
             p.Text("ACOUSTICS",30,214,15,Muted,true);
-            p.Text("* Experimental: timing limits apply",382,214,13,Warning);
+            p.Text("* 32 / 64: higher processing cost",382,214,13,Warning);
             Row(p,0,238,68,"Acoustic Quality",Title(Pending.Quality)+(qualityExperimental(Pending.Quality)?" (experimental)":""));
             string[] names={"AUTO","12","16","32*","64*"};int quality=Array.IndexOf(MenuPreferences.Qualities,Pending.Quality);
             for(int i=0;i<5;i++){
@@ -112,7 +117,7 @@ namespace RichAudio.Settings.InGame
                 p.Hit(HitRegionKind.AccelerationChoice,1,i,cx,315,104,36);
             }
             p.Text("AUDIO",30,376,15,Muted,true);
-            string activeAudio=status.Available&&status.ActiveOutputEnabled.HasValue&&status.ActiveOutputLevel.HasValue&&status.ActiveEarlyReflections.HasValue?
+            string activeAudio=status.StockAudioActive?"GTA audio active / RichAudio stopped":status.Available&&status.ActiveOutputEnabled.HasValue&&status.ActiveOutputLevel.HasValue&&status.ActiveEarlyReflections.HasValue?
                 "Active: "+(status.ActiveOutputEnabled.Value?"On":"Muted")+" / "+
                 ((int)Math.Round(status.ActiveOutputLevel.Value*100)).ToString(CultureInfo.InvariantCulture)+"% / early "+
                 (status.ActiveEarlyReflections.Value?"On":"Off"):"Active audio state unavailable";
@@ -125,26 +130,35 @@ namespace RichAudio.Settings.InGame
             Row(p,4,506,44,"Early Reflections",Pending.EarlyReflections?"On":"Off");
             Row(p,5,550,44,"Doppler", "On (fixed)",true);
             Row(p,6,594,44,"Diagnostics Overlay",Pending.DiagnosticsOverlay?"On":"Off");
-            Row(p,7,638,38,"Environmental Reverb","Not available",true);
-            Row(p,8,676,38,"Advanced Diffraction","Not available",true);
-            p.Rect(16,728,728,86,unchecked((int)0x9E10171E));p.Rect(16,728,3,86,Gold);
+            Row(p,7,638,38,"SoundMap viewer",Pending.SoundMapVisible?"Visible":"Hidden");
+            Row(p,8,676,38,"Audio integration",Pending.IntegrationMode=="experimental-additive"?"Additive (experimental)":"GTA stock fallback");
+            Row(p,MenuKeyRow,714,44,"Open menu key",null);int menuKey=Array.IndexOf(MenuPreferences.MenuToggleKeys,Pending.MenuToggleKey);
+            for(int i=0;i<MenuPreferences.MenuToggleKeys.Length;i++){
+                float cx=382+i*66;p.Rect(cx,724,60,25,i==menuKey?Ink:unchecked((int)0xAF303842));
+                p.Text(MenuPreferences.MenuToggleKeys[i],cx+14,728,14,i==menuKey?Gold:TextColor,i==menuKey);
+                p.Hit(HitRegionKind.MenuKeyChoice,MenuKeyRow,i,cx,720,60,34);
+            }
+            p.Rect(16,774,728,66,unchecked((int)0x9E10171E));p.Rect(16,774,3,66,Gold);
             string description=Descriptions[SelectedIndex];
-            if(SelectedIndex==12)description=Descriptions[12]+" "+RecordingDetail;
-            if(SelectedIndex==10&&!CanApply)description=ResetAvailable?
+            if(SelectedIndex==RecordingRow)description=(AudioTestRecordingMode?
+                "Local WAVs: RichAudio and the selected output mix, including other apps. No microphone or uploads.":Descriptions[RecordingRow])+" "+RecordingDetail;
+            if(SelectedIndex==ResetRow&&!CanApply)description=ResetAvailable?
                 "Recovers this supported configuration by preserving its exact original bytes before saving validated defaults. The background service rechecks the file before replacement.":
                 "Settings recovery is unavailable for this configuration. No file or preference will be replaced.";
-            p.Wrap(description,31,741,680,17,TextColor,3);
-            string[] buttons={"APPLY CHANGES","RESET DEFAULTS","BACK",RecordingPending?"REC PENDING":RecordingActive?"STOP RECORDING":"START RECORDING"};
+            p.Wrap(description,31,784,680,15,TextColor,3);
+            string recordingButton=AudioTestRecordingMode?(RecordingPending?"TEST PENDING":RecordingActive?"STOP AUDIO TEST":"RECORD AUDIO TEST"):
+                (RecordingPending?"REC PENDING":RecordingActive?"STOP RECORDING":"START RECORDING");
+            string[] buttons={"APPLY CHANGES","RESET DEFAULTS","BACK",recordingButton};
             for(int i=0;i<4;i++){
-                int row=9+i;float cx=16+i*184;bool selected=SelectedIndex==row;bool locked=i==0&&!CanApply||i==1&&!CanApply&&!ResetAvailable||i==3&&(!RecordingAvailable||RecordingPending);
-                p.Rect(cx,830,176,45,selected&&!locked?Gold:RowBackground);
-                p.Text(locked?(i==0?"APPLY UNAVAILABLE":i==1?"RESET UNAVAILABLE":RecordingPending?"REC PENDING":"REC UNAVAILABLE"):buttons[i],cx+10,844,14,locked?Muted:selected?Ink:TextColor,selected);
-                p.Hit(HitRegionKind.Row,row,-1,cx,830,176,45);
+                int row=ApplyRow+i;float cx=16+i*184;bool selected=SelectedIndex==row;bool locked=i==0&&!CanApply||i==1&&!CanApply&&!ResetAvailable||i==3&&(!RecordingAvailable||RecordingPending);
+                p.Rect(cx,856,176,45,selected&&!locked?Gold:RowBackground);
+                p.Text(locked?(i==0?"APPLY UNAVAILABLE":i==1?"RESET UNAVAILABLE":AudioTestRecordingMode?recordingButton:RecordingPending?"REC PENDING":"REC UNAVAILABLE"):buttons[i],cx+10,870,14,locked?Muted:selected?Ink:TextColor,selected);
+                p.Hit(HitRegionKind.Row,row,-1,cx,856,176,45);
             }
-            p.Text("ARROWS  Navigate / adjust     ENTER  Select     ESC  Back",30,892,15,Muted);
+            p.Text("ARROWS  Navigate / adjust     ENTER  Select     ESC  Back",30,920,15,Muted);
             string notice=Notice;
             if(String.IsNullOrEmpty(notice))notice=Dirty?"Pending changes - Apply to save.":"Preferences saved. Active state is measured separately.";
-            p.Wrap(notice,30,923,700,14,NoticeIsError?unchecked((int)0xFFE0A28B):Warning,1);
+            p.Wrap(notice,30,955,700,14,NoticeIsError?unchecked((int)0xFFE0A28B):Warning,1);
             lastFrame=new MenuFrame(p.Commands.ToArray(),p.Hits.ToArray());return lastFrame;
         }
         public MenuFrame BuildDiagnosticFrame(int width,int height,MenuStatus status)
@@ -152,7 +166,7 @@ namespace RichAudio.Settings.InGame
             float s,x,y;Viewport(width,height,out s,out x,out y);var p=new Painter(24*s,height-137*s,s,760);
             status=status??MenuStatus.Unavailable("Host status unavailable");
             p.Rect(0,0,470,112,Background);p.Rect(0,0,3,112,Gold);p.Text("RichAudio",15,10,21,Gold,true);
-            string active=status.Available?Title(status.ActiveQuality)+" / "+status.ActiveAcceleration.ToUpperInvariant()+" / cap "+status.PathBudget+" paths":"Quality / backend unavailable";
+            string active=status.StockAudioActive?"GTA stock audio":status.Available?Title(status.ActiveQuality)+" / "+status.ActiveAcceleration.ToUpperInvariant()+" / cap "+status.PathBudget+" paths":"Quality / backend unavailable";
             p.Text(active,15,40,18,TextColor);
             string detail=!String.IsNullOrEmpty(status.FallbackReason)?"Fallback: "+status.FallbackReason:status.Available?status.Detail:status.Detail;
             p.Wrap(detail,15,70,435,14,Muted,2);

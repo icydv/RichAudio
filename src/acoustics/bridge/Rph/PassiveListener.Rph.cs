@@ -12,7 +12,13 @@ namespace RichAudio.Beacon.Rph
         private static PassiveSoundMapBridge bridge;private static volatile bool stopping;
         internal static void Start()
         {
-            stopping=false;bridge=new PassiveSoundMapBridge(InGameSettingsLink.SidecarForGameExecutable(Process.GetCurrentProcess().MainModule.FileName));bridge.Start();
+            stopping=false;
+#if PLAYABLE_PRODUCT
+            bridge=new PassiveSoundMapBridge(InGameSettingsLink.SidecarForGameExecutable(Process.GetCurrentProcess().MainModule.FileName),true);
+#else
+            bridge=new PassiveSoundMapBridge(InGameSettingsLink.SidecarForGameExecutable(Process.GetCurrentProcess().MainModule.FileName));
+#endif
+            bridge.Start();
             GameFiber.StartNew(Run,"RichAudio passive camera");
         }
         [ConsoleCommand(Name="RichAudioSoundMapStatus",Description="Passive camera feed status; no audio or sensing starts")]

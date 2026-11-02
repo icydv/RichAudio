@@ -8,6 +8,7 @@ Describe the change and why it matters. State what was actually verified, not ju
 - [ ] I've distinguished **in-game verified**, **offline tested**, **inferred** and **unverified** claims.
 - [ ] I've checked sensitive/private and copyrighted material before publication.
 - [ ] I've preserved existing working state and clearly described any restoration or rollback.
+- [ ] I've used **first-person singular** for my project decisions, listening, driving and test approvals ("I / my"), rather than calling myself "the owner" or "the user". Technical ownership and separate automation roles remain accurately named.
 
 ## Public development progress
 

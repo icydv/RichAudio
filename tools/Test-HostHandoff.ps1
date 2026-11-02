@@ -8,7 +8,7 @@ for($d=[IO.DirectoryInfo]::new($out);$d;$d=$d.Parent){if($d.Exists -and ($d.Attr
 if(Test-Path $out){throw 'Fresh output required'}
 [IO.Directory]::CreateDirectory($out)|Out-Null
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-$sources=@(Get-ChildItem src/acoustics/host/Windows,src/acoustics/host/Transport -Filter '*.cs'|ForEach-Object FullName)+(Join-Path $repo 'tests/host/HostHandoff.cs')
+$sources=@(Get-ChildItem src/acoustics/host/Windows,src/acoustics/host/Transport,src/acoustics/recording -Filter '*.cs'|ForEach-Object FullName)+(Join-Path $repo 'tests/host/HostHandoff.cs')
 $exe=Join-Path $out 'Handoff.exe'
 & $compiler /nologo /optimize+ /unsafe+ /warnaserror+ /platform:x64 /define:STATE_TRANSPORT /main:RichAudio.Beacon.Windows.HostHandoff /r:System.Runtime.Serialization.dll /r:System.Web.Extensions.dll ('/out:'+$exe) @sources
 if($LASTEXITCODE){throw 'Harness build'}

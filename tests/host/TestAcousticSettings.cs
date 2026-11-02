@@ -21,6 +21,19 @@ namespace RichAudio.Settings.Tests
                 Directory.CreateDirectory(root);string path=AcousticSettingsStore.DefaultPath(root),resolved;
                 Check(AcousticSettingsStore.Resolve(root,null,null,null,out resolved)==null,"absent settings preserve the legacy launch");
                 var selected=new AcousticSettings("quality","cpu",1);
+                Check(selected.MenuToggleKey=="F10"&&AcousticSettings.Defaults(1).MenuToggleKey=="F10","legacy/default menu key remains F10");
+                var rebound=new AcousticSettings("quality","cpu",1,false,.35,false,true,"experimental-additive",true,"F7");
+                Check(AcousticSettings.Parse(rebound.Serialize()).SamePreferences(rebound),"rebound menu key and all audio preferences survive serialization");
+                Check(rebound.WithRevision(2).MenuToggleKey=="F7"&&rebound.WithSelections("balanced","auto",2).MenuToggleKey=="F7"&&rebound.WithAudio(true,.5,true,false).MenuToggleKey=="F7","background revisions, editor selections and audio updates retain the menu binding");
+                Check(!rebound.SamePreferences(new AcousticSettings("quality","cpu",1,false,.35,false,true,"experimental-additive",true,"F9")),"menu-only changes count as changed preferences");
+                Check(AcousticSettings.Parse("{\"schemaVersion\":1,\"revision\":1,\"acousticQuality\":\"auto\",\"acousticAcceleration\":\"auto\"}").MenuToggleKey=="F10","old four-field preferences retain usable default binding");
+                foreach(string bad in new[]{"Escape","F4","Enter","W","Ctrl+F7",""})
+                    Check(AcousticSettings.Parse(rebound.Serialize().Replace("\"F7\"","\""+bad+"\"")).MenuToggleKey=="F10","reserved or invalid persisted key falls back safely");
+                Check(AcousticSettings.Parse(rebound.Serialize().Replace("\"F7\"","9")).MenuToggleKey=="F10","wrong key scalar falls back without discarding validated audio preferences");
+                Check(AcousticSettings.Parse(rebound.Serialize().Replace("\"F7\"","\" f9 \"")).MenuToggleKey=="F9","case and whitespace normalize to a supported binding");
+                Reject(delegate{AcousticSettings.Parse(rebound.Serialize().Replace("\"menuToggleKey\":\"F7\"","\"menuToggleKey\":\"F7\",\"menuToggleKey\":\"F9\""));},"duplicate menu key remains rejected");
+                string reboundPath=Path.Combine(root,".local","rebound.json");AcousticSettingsStore.Save(root,reboundPath,rebound);
+                Check(AcousticSettingsStore.Load(root,reboundPath).MenuToggleKey=="F7","selected menu key is persisted for subsequent launches");
                 Check(selected.ProducerArguments()==" --acoustic-quality quality --acoustic-acceleration cpu","actual producer argument contract");
                 var command=new JavaScriptSerializer().DeserializeObject(selected.ControlMessage()) as Dictionary<string,object>;
                 Check((string)command["type"]=="acoustic-settings"&&(string)command["quality"]=="quality"&&(string)command["acceleration"]=="cpu","actual live control contract");

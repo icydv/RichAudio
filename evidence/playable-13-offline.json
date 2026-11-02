@@ -1,0 +1,231 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-13",
+  "kind": "sanitised-offline-preparation-evidence",
+  "recordedUtc": "2026-11-01T17:19:36.7907625Z",
+  "startingCommit": "fe61a45be6caef51f161aca7b89db6327155659d",
+  "decision": {
+    "offlinePreparation": "PASS",
+    "livePassiveHandoff": "BLOCKED-pending-new-authorization",
+    "audibleDemonstration": "UNVERIFIED",
+    "humanListening": "NOT-PERFORMED"
+  },
+  "runtimePolicy": "functional-compatibility",
+  "build": {
+    "receipt": ".local/playable-13/build-05/playable13-build-receipt.json",
+    "receiptSha256": "c3122cfd845b4bd96b549a006f1e6f5804a0d7f659c9bc0d1286564a009f6719",
+    "validationReceiptSha256": "1c30ae26aac3280af3325cb5fce206168f299dcee0c3005c6038a89405b9d021",
+    "passivePluginBytes": 343040,
+    "passivePluginSha256": "720812a0ff9af2890bcc05da998bca17c6db0746145bd76601480e899f07f8e9",
+    "audiblePluginBytes": 349184,
+    "audiblePluginSha256": "182903fbcc7ed6e87b5fa20de9f4c78a48d5e9fe796cad18cb8e9fc1875d7b4b",
+    "hostBytes": 306176,
+    "hostSha256": "5c64559983b81a19b0c66c7f01fb19a3b584eef30a9980ed6ef2296b5b611f42",
+    "producerBytes": 129024,
+    "producerSha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+    "packageRoot": ".local/playable-13/build-05/package",
+    "packageManifestSha256": "c4406978e5f97384f4b3ddab26ebbecfd67529a9665d021419275b90c785f750",
+    "packageBindings": 132,
+    "retainedPayloadDigestsVerified": 132,
+    "retainedManifestDigestsVerified": 1,
+    "privateSourceMaterialPublished": false
+  },
+  "startup": {
+    "evidence": "saved-existing-launcher-traces-only",
+    "failedSteamAction": 10,
+    "lastRecordedStage": "ShowGameArgs",
+    "continuedOrCreatedProcessRecorded": false,
+    "previousSuccessfulAction": 9,
+    "successfulStages": [
+      "ShowGameArgs",
+      "continued",
+      "ShowInterstitials",
+      "continued",
+      "CreatingProcess",
+      "Enhanced registered"
+    ],
+    "underlyingMechanismEstablished": false,
+    "minimalCorrection": "Verify actual Steam continuation and any second interstitial during the next separately authorized existing launch route; add read-only bounded stage/process observer.",
+    "thirdPartyOrConfigurationChanges": false,
+    "newLaunchPerformed": false
+  },
+  "integration": {
+    "explicitAudioEnableRequired": true,
+    "defaultAudioEnabled": false,
+    "runningPlayerBatiOnly": true,
+    "originalAbsoluteSourceExpiryPreserved": true,
+    "permanentRetirement": true,
+    "automaticFaultRetry": false,
+    "atomicScopedPermitPublication": true,
+    "recordingPerRunPermitRequired": true,
+    "recordingDefault": false,
+    "loopbackDefault": false,
+    "nativeAudioSuppressed": false,
+    "physicalRpmInferred": false,
+    "sourceGainChanged": false,
+    "rendererChanged": false,
+    "exhaustPressureReference": 10,
+    "commonHeadroomTrim": 0.25,
+    "productMaster": 0.175
+  },
+  "tests": {
+    "adapterCases": 14,
+    "adapterAssertions": 64,
+    "nodeGameplayTests": 7,
+    "exactFinalCandidateBatiChecks": 42,
+    "recordingAssertions": 64,
+    "analysisFindingControls": 5,
+    "automaticRecordedFileFinalizerPassed": true,
+    "canonicalLegacyGameplayChecks": 71,
+    "legacyRecordingAssertions": 105,
+    "legacyAnalysisControls": 17,
+    "legacyRunLimit": "Legacy gameplay run used build03 host and same unchanged legacy branch; final delta is demo-only atomic permit publication. Legacy recording production files are unchanged. These are not exact05 legacy reruns.",
+    "compiledProfilesHaveNoEngineRevolutionsRatioRefs": true,
+    "passiveCompiledPlaybackTypes": 0,
+    "independentSourceReviewsPassed": true
+  },
+  "firstEnabledFixtureSnapshot": {
+    "observations": "authored valid observations, genuine existing Rockstar source files, device-free production host sink",
+    "engine": {
+      "nonzeroBlocks": 36,
+      "peak": 0.43751055002212524,
+      "sumSquares": 272.8600081256032
+    },
+    "exhaust": {
+      "nonzeroBlocks": 36,
+      "peak": 0.780814528465271,
+      "sumSquares": 1443.1194107852468
+    },
+    "stereo": {
+      "nonzeroBlocks": 34,
+      "peak": 0.07276368886232376,
+      "sumSquares": 16.55056884466643
+    },
+    "ringConsumedFrames": 24000,
+    "ringEnergy": 14.37474219197714,
+    "ringUnderflowFrames": 0,
+    "processingDeadlineMisses": 1,
+    "processingMaximumMs": 30.195799999999963,
+    "clippedSamples": 0,
+    "limitedSamples": 0,
+    "missingHistory": 0,
+    "gpuLiveProof": false
+  },
+  "retirementFixture": {
+    "disableTrailingExactZeroFrames": 29953,
+    "disableLastPeak": 0,
+    "disableLastEnergy": 0,
+    "disableFadeReserveConsumed": true,
+    "expiryTrailingExactZeroFrames": 30849,
+    "expiryLastPeak": 0,
+    "expiryLastEnergy": 0,
+    "expiryFadeReserveConsumed": true,
+    "expiryUnderflowFrames": 0,
+    "retirementObservedAfterDeadlineMs": 47.4195,
+    "observationLimit": "Includes fixture polling/scheduling. Not a hard20ms or live latency guarantee."
+  },
+  "recording": {
+    "liveCaptured": false,
+    "fixtureOnly": true,
+    "fakeLoopbackOnly": true,
+    "actualProductionFillAndTapTested": true,
+    "automaticWaveformAndSpectrogramsPassed": true,
+    "automaticFindingsAndRecommendationsPassed": true,
+    "losslessWavsRetainedPrivately": true,
+    "maximumSeconds": 120,
+    "maximumAggregateBytes": 134217728,
+    "sameFirstAudibleSessionPrepared": true,
+    "requiresExplicitPcmAndLoopbackApproval": true,
+    "globalFeatureFlagChanged": false,
+    "subjectiveListeningPerformed": false,
+    "limits": [
+      "Mixed stereo and dry energy counters cannot isolate engine/exhaust or native coexistence phase cancellation.",
+      "Physical spatial correctness, perceptual balance, analogue audibility and speaker latency remain unestablished.",
+      "Latency/pitch/transient estimates are candidates with recorded clock/harmonic/mixture limits.",
+      "Initial selected-endpoint loopback coverage is not guaranteed.",
+      "Capture failure stops capture without retry and must not delay healthy already approved playback."
+    ]
+  },
+  "preservation": {
+    "trackedBaselineFiles": 781,
+    "unchangedTrackedFiles": 764,
+    "intentionalExistingFilesChanged": 17,
+    "unexpectedTrackedChanges": 0,
+    "privateFilesMatched": 1596,
+    "protectedFilesMatched": 11,
+    "settingsMatched": 4,
+    "savedStockFallback": true,
+    "bothProductionFeatureFlagsFalse": true,
+    "ownedProcessesAbsent": true,
+    "sourceAssetsAndCalibrationPreserved": true,
+    "originalPluginSha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657"
+  },
+  "execution": {
+    "deployed": false,
+    "gameLaunched": false,
+    "endpointOpened": false,
+    "audioPlayed": false,
+    "liveRecording": false,
+    "humanListeningPerformed": false,
+    "liveHandoffAccepted": false,
+    "playableInGame": false
+  },
+  "claimLimits": [
+    "WASAPI activation is asynchronous: fresh admission is checked before startup request, not atomically at physical activation.",
+    "Receiver/Node/watchdog expire source state; already queued/fading audio can remain during bounded readiness/teardown.",
+    "No preemption of stuck native/COM/OS calls is claimed.",
+    "Only running player Bati Enhanced1.0.1158.16 has prior telemetry qualification; no whole-world coverage or physical RPM.",
+    "Conditional direct rendering without qualified collision coverage does not prove environmental reflections."
+  ],
+  "privateEvidence": [
+    {
+      "path": ".local/playable-13/bati-session-fixture-c39c99c1a35d4838916c574b68f30e2a/validation.json",
+      "sha256": "4756ba56f9419a9acd0a7658f6073ce8e1e2f4c74f79fe23a0f11c1635684aab"
+    },
+    {
+      "path": ".local/playable-13/recording-validation-2f316f3e315e4d61ae75238a853f2be4/validation.json",
+      "sha256": "17fcb7abd811b0ab79d17fe487e85473d41806255a91d575e69be63d4508663d"
+    },
+    {
+      "path": ".local/playable-13/build-05/compiled-profile-inspection.json",
+      "sha256": "81f757fb9e97c5efd18a4eb96828b5dd7978c9eff0fda5a2d96f68215a74ac26"
+    },
+    {
+      "path": ".local/playable-13/coordinator-focused-tests.json",
+      "sha256": "ed8b57a29b409eb028a193dad4935abef0bc6702a5b2fb98d399e26716adc299"
+    },
+    {
+      "path": ".local/playable-13/independent-runtime-review-05.json",
+      "sha256": "425f02277960b9b0bf69c42c712ce766381d66e1a38df1cef5c1cb04b397acf1"
+    },
+    {
+      "path": ".local/playable-13/host-recording-independent-review.json",
+      "sha256": "4ab7f3e9441d60cd9174e879c3791590a0681ecfe402539e824f8e6817d382a1"
+    },
+    {
+      "path": ".local/playable-13/preservation-final.json",
+      "sha256": "0a14b80807316cc10b05879d1f0688f02d53e05d00d57aa3ffca08eb1acecb90"
+    },
+    {
+      "path": ".local/playable-13/legacy-regression-8726318566e144f880db3d9030143101/validation.json",
+      "sha256": "58b0848dba2a7b069168590f5b159ea94e3b3c34b43f0f38cc5d26413d533e39"
+    },
+    {
+      "path": ".local/playable-08/recording-validation-f0ac2e292a6c443ba6e00d739b9b8e71/validation.json",
+      "sha256": "4a147fad748550db7363f474abb2b763078eefe089ccc1a72e841d8dda69e99c"
+    },
+    {
+      "path": ".local/playable-13/startup-research.json",
+      "sha256": "795182c33657c5ab8d04144e2bdd91eadf40bd06548ce495b6d4ccc110869714"
+    },
+    {
+      "path": ".local/playable-13/bati-session-fixture-c39c99c1a35d4838916c574b68f30e2a/expiry-fade-review.json",
+      "sha256": "3796c204c709bd6147638d2488a8babdaf1f44b051701a8b5080956ce0efca4d"
+    },
+    {
+      "path": ".local/playable-13/root-hooks-peer-host-review-final.json",
+      "sha256": "2469e93ad20a451559b654828af00065d884c35ca4796857221003fed0c2c3e8"
+    }
+  ],
+  "nextAction": "Fresh explicit approval of exact Phase B passive proposal; genuine passive acceptance before separate Phase C audio approval. Optional first-audible PCM+loopback approval is separate and default-off."
+}

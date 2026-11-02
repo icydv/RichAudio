@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-14",
+  "kind": "sanitised-corrected-observer-policy-and-prepared-integration",
+  "result": "PASS-OFFLINE-REVIEW-ONLY",
+  "observedDefect": "Attempt02 admitted retained attempt01 same-profile ACTIVE/terminal at launch+0.1841328s without a game process or lease",
+  "helper": "tools/Select-CurrentHandoffLog.ps1",
+  "helperSha256": "ef7dfed835b36d597b4bc3b913d400b0d2d74ca4d83279c675ab4144669664d1",
+  "runner": "tools/Test-HandoffLogScope.ps1",
+  "runnerSha256": "7a8dad2d6cdc3ca97ec4a27751368655162a76b6413fa62a9e9d0d1abe4d7e84",
+  "tests": {
+    "cases": 12,
+    "assertions": 36,
+    "caseResults": [
+      {
+        "name": "actual-live02-reproduces-prior-live01-false-terminal-without-process-or-lease",
+        "passed": true,
+        "assertions": 3
+      },
+      {
+        "name": "identical-prior-profile-still-rejected-with-fresh-process-and-lease",
+        "passed": true,
+        "assertions": 2
+      },
+      {
+        "name": "new-current-entry-appended-after-baseline",
+        "passed": true,
+        "assertions": 2
+      },
+      {
+        "name": "truncate-and-rotate-require-fresh-current-entry",
+        "passed": true,
+        "assertions": 3
+      },
+      {
+        "name": "missing-process-lease-or-live-lifetime",
+        "passed": true,
+        "assertions": 3
+      },
+      {
+        "name": "pid-reuse-session-and-lease-hash-mismatch",
+        "passed": true,
+        "assertions": 6
+      },
+      {
+        "name": "missing-ambiguous-and-unparseable-epoch-entry",
+        "passed": true,
+        "assertions": 3
+      },
+      {
+        "name": "partial-lines-and-partial-prelaunch-utf8-are-not-events",
+        "passed": true,
+        "assertions": 2
+      },
+      {
+        "name": "fresh-current-lifecycle-error-can-stop-before-profile-entry",
+        "passed": true,
+        "assertions": 1
+      },
+      {
+        "name": "post-launch-but-before-current-process-messages-rejected",
+        "passed": true,
+        "assertions": 1
+      },
+      {
+        "name": "only-entry-after-current-process-creation-establishes-epoch",
+        "passed": true,
+        "assertions": 2
+      },
+      {
+        "name": "original-monotonic-startup-waiting-and-active-anchors-never-reset",
+        "passed": true,
+        "assertions": 8
+      }
+    ],
+    "receiptSha256": "d83eac03eaac494ae153ad868840c5029725635cd3413c8dac841069d1438623",
+    "actualRetainedLogReproduction": true,
+    "fakeScopeAndSyntheticLogsAreFixtureInputs": true,
+    "gameOrNativeExecuted": false,
+    "processQueried": false,
+    "endpointOpened": false
+  },
+  "requirements": [
+    "actual current process path and positive PID",
+    "exact kernel-backed process creation within launch..observation",
+    "fresh matching session and actual installed lease bytes/hash",
+    "immutable prelaunch caller-log byte/hash boundary",
+    "dated current epoch at or after exact process creation",
+    "capture and summary reads gated on validated current scope",
+    "direct process startup observation; receipt shape cannot defer startup deadline",
+    "original monotonic startup/waiting/active anchors never reset by log rotation"
+  ],
+  "preparedCoordinator": {
+    "directory": ".local/playable-14/scoped-03",
+    "receiptSha256": "8fb6a5e22f9808bc787126d2245d931a7595e649ed47d9ad91bdce50c7d24f66",
+    "files": [
+      {
+        "name": "Inspect-Startup.ps1",
+        "bytes": 9791,
+        "sha256": "b3036ed1a54ab57d94a3dcfec7a7764433c34355abee220b479dbefba0d723a5"
+      },
+      {
+        "name": "LiveActions.ps1",
+        "bytes": 25659,
+        "sha256": "3214e33df2bb54e315ff85213c60ae04512c138de1bed4fe8d6b9c3f88263936"
+      },
+      {
+        "name": "Observe-Live.ps1",
+        "bytes": 9870,
+        "sha256": "b9dc8d932b2296788a369734bb7e6bad359369245911691f9f09f90b2a829b28"
+      },
+      {
+        "name": "Run-LaunchOnce.ps1",
+        "bytes": 1039,
+        "sha256": "a1ca65fb8c355781eb40a05551679b95852c033eba1091fa96616333def87b4a"
+      }
+    ],
+    "observerReviewSha256": "d2c05209feb98523960e59e65c1530a12ac710a0e216af444e30b061b5b9575a",
+    "coordinatorReviewSha256": "986f307cc0bdc219464effa8c9cc5f23ceeaca0d7f5f7e549409a011007b5a18",
+    "byteReaderOnlyChecks": 4,
+    "byteReaderValidationSha256": "83ea4a1538e4b82577d1a4796cbfc0fa008c11ab3cc6ae071b76f473bf977199",
+    "fullObserverExecuted": false,
+    "modesExecuted": false,
+    "liveDirectoryAbsent": true,
+    "freshAttempt3AuthorizationRequired": true
+  },
+  "startupWaitingActiveSeconds": [
+    120,
+    300,
+    120
+  ],
+  "originalCandidateReceiptUnchanged": "1f4bc2a8b53565ebee5c2a1ccef4a5a7b3c9522339e724b4f049e27454ba77e3",
+  "approvedBinariesRebuilt": false,
+  "nativeOrAudioInfrastructureChanged": false,
+  "oldFaultyScriptsAndRejectedDraftRetained": true,
+  "finalLivePreservationReviewSha256": "68bfe81f632536026cf2778e4e6642a98f3e0123e45b39c802e33986730f9d0c",
+  "thirdLiveAttemptAuthorised": false,
+  "gameStarted": false,
+  "endpointOpened": false,
+  "newLiveQualificationClaimed": false,
+  "freshExplicitApprovalRequired": true,
+  "report": "docs/PLAYABLE_14_LIVE_RESULT.md",
+  "proposal": "docs/PLAYABLE_14_RETEST_PROPOSAL.md"
+}

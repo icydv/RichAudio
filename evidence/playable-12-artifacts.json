@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-12",
+  "kind": "changed-and-added-publication-file-manifest",
+  "baseCommit": "8c06c46ee0c1925d93692fbac6672116cd7f8537",
+  "createdUtc": "2026-11-01T15:52:56.7433292Z",
+  "files": [
+    {
+      "name": "docs/PLAYABLE_11.md",
+      "bytes": 10841,
+      "sha256": "d7a4e5845fc0864fb08330aa2d7b5e8631c242da271ac887c556f92099132da5"
+    },
+    {
+      "name": "docs/PLAYABLE_12_LIVE_PROPOSAL.md",
+      "bytes": 6597,
+      "sha256": "6f0700d6bc1e7a99a2e1b36ee862a245c89a9b4d3ea865a5147a9c22806fe38a"
+    },
+    {
+      "name": "docs/PLAYABLE_12.md",
+      "bytes": 12011,
+      "sha256": "09d3661b5b8b6a266a62343f9c49f42d015ca43e848882a1dd0f975613935072"
+    },
+    {
+      "name": "docs/UPSTREAM_RPH_API_PROVENANCE_QUESTION.md",
+      "bytes": 2465,
+      "sha256": "fed08dd0b51d7421357dcb0d72e181aaa554c8e89aec8e251968b2414417ac27"
+    },
+    {
+      "name": "evidence/playable-11-artifacts.json",
+      "bytes": 1473,
+      "sha256": "d632503610dea4d3688b069abe3892db839baf133f6369929e4fe30e5ee1a833"
+    },
+    {
+      "name": "evidence/playable-11-independent-review.json",
+      "bytes": 3735,
+      "sha256": "8ac080a9e0eef22ec5fdc6580a0ee6bcf211a55e1ebc3582e4ccc5442243f8af"
+    },
+    {
+      "name": "evidence/playable-11-offline-controls.json",
+      "bytes": 9075,
+      "sha256": "f36b31ce722831d062fc6af347aa67a12615dd582fa0f3771401771f1fa9f0b5"
+    },
+    {
+      "name": "evidence/playable-11-preservation.json",
+      "bytes": 961,
+      "sha256": "0986bbc7656a52d8fe47bd2ad70ea1e31a76095c215bcd7370550029364f4f15"
+    },
+    {
+      "name": "evidence/playable-11-provenance.json",
+      "bytes": 5770,
+      "sha256": "d11d3987b7e49cf3af9fd3f70b121ab77fa46d7dfa1c0454275c68a860835fe3"
+    },
+    {
+      "name": "evidence/playable-12-build.json",
+      "bytes": 9509,
+      "sha256": "f790b86e499b9a9a563e4df73e9a1e97c7d13e9b3e634e4dfdbf6749a80f2a87"
+    },
+    {
+      "name": "evidence/playable-12-candidate.json",
+      "bytes": 3037,
+      "sha256": "56a918dfb5b77fa37207602dc3ed1dfdd9e6b69d368923d238de0e9a46ec8775"
+    },
+    {
+      "name": "evidence/playable-12-independent-review.json",
+      "bytes": 4913,
+      "sha256": "82b032cb96d764c5c43110bb87b54e8a55b257b1c225693189b9815476df6dc8"
+    },
+    {
+      "name": "evidence/playable-12-offline.json",
+      "bytes": 7060,
+      "sha256": "7296e18583497d6548c828fcc85d41e09c71bf3a084cb19d5d5e9342725baaf3"
+    },
+    {
+      "name": "evidence/playable-12-preservation.json",
+      "bytes": 3945,
+      "sha256": "6d7a54ce9e3f48bbe8b3904355c56505de352c5729b32929f2fd22e23c957dce"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/Playable.Rph.cs",
+      "bytes": 11881,
+      "sha256": "2759d4596f0141dcab35a1eb2132f13ee2e55ba33712313308feac75dd027755"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/RphHandoffCompatibility.Rph.cs",
+      "bytes": 8347,
+      "sha256": "50e8ac5d57c6c8c05badb250042811aefb6a800aa49e301fa3d2211fdbbc7ab9"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/ShvHandoffBootstrap.Rph.cs",
+      "bytes": 8843,
+      "sha256": "076fbbe6155a2946b563257de4dd1cc1ba0a4c702688dbb2978b117c4fc8451b"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/ShvHandoffJournal.Rph.cs",
+      "bytes": 13411,
+      "sha256": "c598d6260d735cdb3697d736940d9d77ea83592470e6eb9d391d9e2f8e977aca"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/ShvPassiveHandoff.Rph.cs",
+      "bytes": 20387,
+      "sha256": "132d9be8420d678951d6697682164236e0807b9e572206764677b8ef765a14a6"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvOperatingStateHandoff.cs",
+      "bytes": 21995,
+      "sha256": "5df84d09cfdce5176a3be3ff591b2874dbb83d489e7084c32bffe3c098b84d91"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvProducerModule.cs",
+      "bytes": 25775,
+      "sha256": "fe8351f1c2c73817a639c93c30d129c58ad88e79e6f8668808585356bcb9af39"
+    },
+    {
+      "name": "tests/host/TestShvHandoffJournal.cs",
+      "bytes": 14303,
+      "sha256": "613b39d10cf21c2a144e304107e54233962af568c650c6a18670dd39de809fd9"
+    },
+    {
+      "name": "tests/host/TestShvOperatingStateHandoff.cs",
+      "bytes": 27249,
+      "sha256": "af0ea6f7cea8b095bbe31d41d3dc42accec41319d569586f15f7f4833bcaa9d6"
+    },
+    {
+      "name": "tests/rph-compatibility/FakeRph.cs",
+      "bytes": 4046,
+      "sha256": "2a73e29147544691abb2a1d4404182d03a11d0d883d50e2291024d4556bf9c29"
+    },
+    {
+      "name": "tests/rph-compatibility/FixtureHarness.cs",
+      "bytes": 7104,
+      "sha256": "cb41130034f75f4e0aaee96b51c97fc56c58e7f73bdcf891416b7c492ceb16fe"
+    },
+    {
+      "name": "tests/rph-compatibility/FixtureLoader.cs",
+      "bytes": 1216,
+      "sha256": "752a3baf8720939eb3348e0e1daf1df973bf952247dadb639048db189c14c761"
+    },
+    {
+      "name": "tests/rph-compatibility/Launcher.cs",
+      "bytes": 173,
+      "sha256": "830606fe02c51573dddd67b3d4340f23c3022411842460334281d50f7061b3b6"
+    },
+    {
+      "name": "tests/rph-compatibility/SamplerSupport.cs",
+      "bytes": 1432,
+      "sha256": "b11c88656d609117eb469ca438f0c40cfe4c819f26635767a7ff1fd3b797bd71"
+    },
+    {
+      "name": "tests/shv-handoff/Host.cs",
+      "bytes": 31405,
+      "sha256": "97f806efb908d039a6319a59b4117840286d0768df4ef3c6e7bc19631f1277db"
+    },
+    {
+      "name": "tools/Build-BeaconBridge.ps1",
+      "bytes": 7141,
+      "sha256": "172d7f20a5f4c87a9c5e57ed7f65baa467df6ed1b88a9075e9f96f8d7771ce83"
+    },
+    {
+      "name": "tools/Build-PassiveShvHandoff12.ps1",
+      "bytes": 11521,
+      "sha256": "fa6a820b4054a6c2f9956f14cc367f03754dd6df87f97e7412c39cfaf698a91c"
+    },
+    {
+      "name": "tools/Prepare-PassiveShvHandoff12.ps1",
+      "bytes": 17348,
+      "sha256": "7d5438c4c87f7503f6431c696e51cc5b338386d0708fc6c0771fbf2794a4552b"
+    },
+    {
+      "name": "tools/Test-PassiveShvHandoff12Profile.ps1",
+      "bytes": 15693,
+      "sha256": "aa7e818240b8dda19c172cc6dda3a97ae67ecd8fa7fe601a2e4682de2249c217"
+    },
+    {
+      "name": "tools/Test-RphHandoffCompatibility.ps1",
+      "bytes": 8537,
+      "sha256": "5e689b5716b7e7a05205e97686bd34a85e92ed85162d66a75d4fcc187683b414"
+    },
+    {
+      "name": "tools/Test-ShvHandoff12Pipeline.ps1",
+      "bytes": 8931,
+      "sha256": "fccb315b28d56294e96e6cdf0b05d606427259e99608de11d0cb2f23ed8592d4"
+    },
+    {
+      "name": "tools/Test-ShvHandoffComposition.ps1",
+      "bytes": 4218,
+      "sha256": "46f3b0a51a02d90f0fbc7f5ae86ded799b3499c0a0ed5ff36006f8e81358d2d1"
+    },
+    {
+      "name": "tools/Test-ShvHandoffJournal.ps1",
+      "bytes": 4152,
+      "sha256": "dbfd6bd1d13e1f0cd16922f0e4da91c81bb1326bed0a2c912de2bb3d4dc14dbe"
+    }
+  ],
+  "fileCount": 37,
+  "includesSevenUnchangedLocal11Findings": true,
+  "manifestSelfDigestExcluded": true,
+  "privateBinariesAndCapturesPublished": false,
+  "liveApprovalGranted": false
+}

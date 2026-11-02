@@ -1,0 +1,196 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-15",
+  "kind": "sanitised-listener-recovery-integrated-audible-candidate",
+  "result": "PASS-OFFLINE-READY-FOR-SEPARATELY-APPROVED-LIVE-STAGES",
+  "startingCommit": "25fdfadd77784f2d600508c9c650ccc1f33fe0af",
+  "listenerFailure": {
+    "originalBranchProven": true,
+    "originalFailureReproducedOffline": true,
+    "lastLiveRejectedOperandsAvailable": false,
+    "lastLivePhysicalCauseKnown": false,
+    "oldSpeedBoundaryNativeUnitsPerSecond": 100,
+    "speedBoundaryChanged": false,
+    "controlledCutFramePublished": false,
+    "freshCameraObservationRequired": true,
+    "spatialGenerationAdvances": true,
+    "vehiclePoseSnapshotsCleared": true,
+    "originalSourceExpiryUnchanged": true,
+    "safeOfflineRecoveryVerified": true,
+    "liveCorrectedRecoveryVerified": false,
+    "invalidObservationRemainsTerminal": true,
+    "driverLossPrioritised": true,
+    "diagnosticWriteFailureVisible": true
+  },
+  "artifacts": [
+    {
+      "sha256": "3a124f3b0bb15e4790645d8ef1b0fa2268639a64386c6ae95f83009465efefda",
+      "bytes": 381952,
+      "file": "passive/RichAudio.dll"
+    },
+    {
+      "sha256": "765b3a8e08b9624ada1c4756ca2dec10fcc2a8ebd11bfd4a35af6568883e0a1a",
+      "bytes": 387584,
+      "file": "audible/RichAudio.dll"
+    },
+    {
+      "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+      "bytes": 129024,
+      "file": "RichAudio.OperatingState.ShvHandoff.asi"
+    },
+    {
+      "sha256": "5c64559983b81a19b0c66c7f01fb19a3b584eef30a9980ed6ef2296b5b611f42",
+      "bytes": 306176,
+      "file": "runtime/RichAudio.Acoustics.Host.exe"
+    }
+  ],
+  "buildReceiptSha256": "30ac14ccac5376c9a246644da9b0031c920cfddffcdb0414d6967df26d6b62ab",
+  "validationReceiptSha256": "861f9c6c3b6ada4d58b8ce07e12da08549689fdb955a69c4368031f864b9996e",
+  "candidateReceiptSha256": "94c582f5d961125fe91988698a300405bc0b6849aee5441b34c34359efcd295d",
+  "packageManifestSha256": "abd313481b5048aa06caab5784cdded948754c8bd4b54e015e643d31dcb8c8c7",
+  "packageBindings": 132,
+  "hostRebuilt": false,
+  "sourceBanksRebuilt": false,
+  "recorderRebuilt": false,
+  "onlyChangedExistingJavascriptBinding": "src/acoustics/vehicle/gameplay.mjs",
+  "calibrationChanged": false,
+  "gtaStockSoundPreserved": true,
+  "globalFeaturesEnabled": false,
+  "baselineProtectedFiles": 11,
+  "baselineSettings": 4,
+  "baselineSha256": "8fce329188b82f650f7885e40e54243f8c43bb3a0816ef994dc112d34763b642",
+  "focusedValidation": [
+    {
+      "kind": "actual-camera-listener-and-diagnostics-with-fake-SDK",
+      "cases": 11,
+      "assertions": 37
+    },
+    {
+      "kind": "actual-frame-adapter",
+      "cases": 15,
+      "assertions": 74
+    },
+    {
+      "kind": "actual-native-fresh-binding-with-fake-SHV-RPH",
+      "cases": 7,
+      "assertions": 624
+    },
+    {
+      "kind": "actual-bounded-journal-bootstrap",
+      "cases": 8,
+      "assertions": 67
+    },
+    {
+      "kind": "listener-streaming-spatial-generation",
+      "tests": 64
+    },
+    {
+      "kind": "final-package-Bati-production-chain-device-free",
+      "checks": 55
+    },
+    {
+      "kind": "existing-recording-and-finalizer-with-fake-loopback",
+      "assertions": 64,
+      "findingsControls": 5
+    }
+  ],
+  "componentReceiptHashes": [
+    {
+      "kind": "actual-camera-listener-and-retained-driver-device-free",
+      "sha256": "5c6a9b567f3fc6f84327e93cfa6b9d45b928d8346bcd0d9b3ea5b2af57ddf43d"
+    },
+    {
+      "kind": "existing-gameplay-frame-adapter-device-free",
+      "sha256": "fef91b10cc4ad536ef705697b47d2fc6b90f55014508d6e1b727a789d2f63332"
+    },
+    {
+      "kind": "focused-actual-native-managed-waiting-binding-fixtures",
+      "sha256": "1d264f05532cf5f6473a7c357bf4daff5006341746171da90c7f1db050eaa87b"
+    },
+    {
+      "kind": "actual-bounded-journal-and-process-lease-private-fixtures",
+      "sha256": "82898a19caaab5791c85128ad07b38297f2e80f818e0ae716aaeffcb53c0793f"
+    },
+    {
+      "kind": "gated-Bati-actual-production-components-fixture",
+      "sha256": "aeff8768c59dea18e140b698f82a0687787002af47af6d56cfe99e4f81ee2f1e"
+    },
+    {
+      "kind": "first-demo-recording-integration-device-free",
+      "sha256": "4e7cf33d9bb6f9055d21032341037ec34da8f04ab346d1579be6535e151e3ff7"
+    },
+    {
+      "kind": "listener-generation-propagation-doppler-and-streaming-device-free",
+      "sha256": "ddd2cff7566c418ad79ae7bc84d736290db5da5434342e10bd77808c20a84cc8"
+    }
+  ],
+  "driverRetirement": {
+    "fixtureOnly": true,
+    "retirementReason": "rph-current-driver-changed",
+    "remountReplayDenied": true,
+    "hostStopped": true,
+    "trailingSilentFrames": 31489,
+    "lastPeak": 0,
+    "lastEnergy": 0,
+    "underflowFrames": 0,
+    "fadeReserveConsumed": true,
+    "liveDismountVerified": false
+  },
+  "performance": {
+    "deadlineMissesRemain": true,
+    "maximumBatiFixtureProcessingMs": 30.049900000000036,
+    "deviceSchedulingProven": false
+  },
+  "modes": [
+    {
+      "mode": "passive",
+      "installationManifestSha256": "3c39ca0941db90d4d336bbd7df049334347366d7e0da386934f74cb1ee1066df",
+      "rollbackManifestSha256": "6924cf0b6781d1b869a6a94e304a806549ba3941a5f7615b82b0dfcbb91e86b7",
+      "preflightSha256": "70c938955f9684f419f1c745998623ded1e4c8ce0f5303027174bbfde53ab659",
+      "leaseTemplateSha256": "c003ee1c725855f0b40555d91b8f4efd1d99d86e6b19367f71b5931309b795fb",
+      "leaseFields": 21,
+      "optionalRecordingLeaseSha256": null
+    },
+    {
+      "mode": "audible",
+      "installationManifestSha256": "d15fce916cdc2b3eb19cb7d28e4027504e459639ca55e49d47b76dedc024fe3d",
+      "rollbackManifestSha256": "dd3b7043371b96ad1aaf2cc4b3da00ce4f0a5b38060af98912d8d0f3bf7d0e46",
+      "preflightSha256": "3d13ea7c4384e7ba08a49b5eef54a101e71f55d7614e8802cc9a3b5cf1d5fe9b",
+      "leaseTemplateSha256": "7f2285ae8f2efb1240324455bbc2b5e83a98ef6a1ba2c643836a5fdd79009547",
+      "leaseFields": 24,
+      "optionalRecordingLeaseSha256": "a6fa5bde14440fc54bc8afe9983b9a69a7b08e3ddff2bb308f3429b7205424a2"
+    }
+  ],
+  "independentReviews": [
+    {
+      "kind": "integration-source-lifecycle-and-final-candidate",
+      "sha256": "4f18685ada4b63b2a36e62316abaae88c9aed0b610254aa14250aea24425d990",
+      "result": "PASS"
+    },
+    {
+      "kind": "package-manifests-replay-and-privacy",
+      "sha256": "548284cf51da2b0758f948800c0add8722101c48f47e1932555cd023382d2d25",
+      "result": "PASS"
+    }
+  ],
+  "genuineTraceOfflineWavProduced": true,
+  "genuineReplayEvidence": "evidence/playable-15-offline-replay.json",
+  "gameFilesWritten": false,
+  "deployed": false,
+  "gameLaunched": false,
+  "endpointOpened": false,
+  "audioPlayed": false,
+  "liveRecordingStarted": false,
+  "humanListeningPerformed": false,
+  "inGameAudibilityProven": false,
+  "separateStageAThenStageBApprovalRequired": true,
+  "report": "docs/PLAYABLE_15.md",
+  "proposal": "docs/PLAYABLE_15_LIVE_PROPOSAL.md",
+  "limits": [
+    "Controlled offline recovery is not the missing attempt5 camera operands or live causal proof.",
+    "Recovery must beat the previous original audio expiry; slow or repeated transitions still retire permanently.",
+    "Existing buffered/release PCM is bounded, not instantaneous physical silence.",
+    "Host/source/renderer device-free results are not WASAPI/GTA/perceptual or deadline-free proof.",
+    "Same-game StageB is conditional, console may stall source, and a dismount consumes the session."
+  ]
+}

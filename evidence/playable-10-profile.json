@@ -1,0 +1,234 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-10",
+  "kind": "diagnostic-profile-isolation-entry-fixtures-default-product-regression",
+  "passed": true,
+  "cases": 25,
+  "entryCases": 16,
+  "entryAssertions": 260,
+  "productionArtifact": {
+    "name": "RichAudio.RuntimeProvenance.Rph.dll",
+    "bytes": 66560,
+    "sha256": "cb2555ba00169af86d2728ba545c808a825df0ab04ba08026f1268e02d3caf3a",
+    "buildReceiptSha256": "0b8f884941ef4b9efa84ad2d19a19aeaf863702f3994142a100bd9705c363ea3",
+    "executed": false
+  },
+  "validationReceiptSha256": "66381837ed41890aef9a645c25961b4820f277e1e48efc2951528e3d195ab8a7",
+  "runner": {
+    "name": "tools/Test-RphProvenanceProfile.ps1",
+    "sha256": "d05100782e2e2455e49f3be23138b1a25ef53c91098c9862ed38ca6b1d443d0c"
+  },
+  "sources": [
+    {
+      "name": "src/acoustics/bridge/Rph/RphProvenanceEntry.Rph.cs",
+      "sha256": "6e6d9948fbead579ca9e879c378a0775276ed9b0f11f7e17355b063654052c8f"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/RphProvenanceBootstrap.Rph.cs",
+      "sha256": "778dca93a2287507e77ed48f713972f29eb74183c220ee26d3b883e29950b61e"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/RphRuntimeProvenance.cs",
+      "sha256": "b4626b77782f9e40d40759bcb1bf3fb5f22b7a4baefc1b24035d866171e6b379"
+    },
+    {
+      "name": "RphProvenanceBuildPolicy.generated.cs",
+      "sha256": "7bc4ab56206bfb586b5b3eec23de7cae58fef4f2fa49652d6732af8ab2235ad9"
+    }
+  ],
+  "fixtureSources": [
+    {
+      "name": "tests/rph-provenance/FakeRph.cs",
+      "sha256": "5a83930818b8e56a80b08e320276c0c5373111144c318779072c3e3792f67625"
+    },
+    {
+      "name": "tests/rph-provenance/EntryFixture.cs",
+      "sha256": "d4a4379a72047e57b3d9d2facdafa12a5c806ac44a376e8f74ffa9561a59ad6d"
+    }
+  ],
+  "compilerSha256": "46809206887326d2d24db1eff1f3064de972c3451abe766b49111450a5e08e00",
+  "sdkSha256": "5d439745604a5fedbf8fa401520d4f296c1b6800d77e2923ba3bf9772182c7e0",
+  "metadataReaderSha256": "0f6465ce57a0cbabc37013c8e3c9f110672de1c127b6192177d59eb1c7809772",
+  "actualCompiledInspection": {
+    "typeCount": 24,
+    "methodCount": 187,
+    "rphMethodCalls": [
+      "System.Void Rage.Game::LogTrivial(System.String)",
+      "System.Void Rage.GameFiber::Sleep(System.Int32)"
+    ],
+    "unmanagedImports": [
+      "CreateFileW",
+      "GetFileInformationByHandle",
+      "GetFinalPathNameByHandleW",
+      "GetProcessTimes"
+    ],
+    "exactPublicEntryPair": true,
+    "pluginAttributeTargetsChecked": true,
+    "sourceTypes": 0,
+    "gameplayTypes": 0,
+    "audioTypes": 0,
+    "gameNativeTypes": 0,
+    "activationOrDynamicRoutes": 0,
+    "allMethodBodiesInspected": true
+  },
+  "independentAuthenticSdkRebuild": {
+    "sha256": "c6e65ebc37e645cfc89a440df2d4bda010803183aabe35f842e9a1d63bdec7ec",
+    "methodCount": 187,
+    "methodDifferences": 0,
+    "normalization": "Only compiler-generated PrivateImplementationDetails module GUID normalized. Method attributes, locals, opcodes/operands, branch targets, exception regions and referenced initializer bytes retained."
+  },
+  "negativeSerializedMutants": [
+    "source-type-injection",
+    "gameplay-field-reference",
+    "extra-lifecycle-entry",
+    "unexpected-audio-dependency",
+    "forbidden-native-import",
+    "plugin-entry-target-mutation"
+  ],
+  "entryFixtures": [
+    {
+      "name": "valid-unreviewed",
+      "assertions": 30,
+      "terminalReason": "api-runtime-policy-unreviewed",
+      "reportWritten": true
+    },
+    {
+      "name": "wrong-process",
+      "assertions": 27,
+      "terminalReason": "process-id-mismatch",
+      "reportWritten": true
+    },
+    {
+      "name": "wrong-creation",
+      "assertions": 27,
+      "terminalReason": "process-creation-mismatch",
+      "reportWritten": true
+    },
+    {
+      "name": "wrong-caller",
+      "assertions": 27,
+      "terminalReason": "caller-assembly-digest-mismatch",
+      "reportWritten": true
+    },
+    {
+      "name": "wrong-session",
+      "assertions": 11,
+      "terminalReason": "bootstrap-session-format",
+      "reportWritten": false
+    },
+    {
+      "name": "wrong-profile",
+      "assertions": 11,
+      "terminalReason": "bootstrap-policy-mismatch:profile",
+      "reportWritten": false
+    },
+    {
+      "name": "source-opt-in",
+      "assertions": 11,
+      "terminalReason": "bootstrap-purpose-mismatch:sourceAttachmentAllowed",
+      "reportWritten": false
+    },
+    {
+      "name": "audio-opt-in",
+      "assertions": 11,
+      "terminalReason": "bootstrap-purpose-mismatch:audioPlaybackAllowed",
+      "reportWritten": false
+    },
+    {
+      "name": "asi-opt-in",
+      "assertions": 11,
+      "terminalReason": "bootstrap-purpose-mismatch:asiDeploymentAllowed",
+      "reportWritten": false
+    },
+    {
+      "name": "runtime-self-review",
+      "assertions": 11,
+      "terminalReason": "bootstrap-policy-mismatch:runtimeExpectationState",
+      "reportWritten": false
+    },
+    {
+      "name": "unknown-lease-field",
+      "assertions": 11,
+      "terminalReason": "unknown-or-duplicate-bootstrap-field",
+      "reportWritten": false
+    },
+    {
+      "name": "duplicate-lease-field",
+      "assertions": 11,
+      "terminalReason": "unknown-or-duplicate-bootstrap-field",
+      "reportWritten": false
+    },
+    {
+      "name": "changed-installed-scope",
+      "assertions": 11,
+      "terminalReason": "diagnostic-installed-scope-mismatch",
+      "reportWritten": false
+    },
+    {
+      "name": "changed-launcher",
+      "assertions": 27,
+      "terminalReason": "launcher-digest-mismatch",
+      "reportWritten": true
+    },
+    {
+      "name": "occupied-report-output",
+      "assertions": 12,
+      "terminalReason": "provenance-session-output-already-exists",
+      "reportWritten": false
+    },
+    {
+      "name": "unload-before-entry",
+      "assertions": 11,
+      "terminalReason": "diagnostic-lease-not-acquired",
+      "reportWritten": false
+    }
+  ],
+  "entryExecutionBoundary": {
+    "threeProductionSourcesIdentical": true,
+    "separateExplicitFixtureGeneratedPolicy": true,
+    "allDiagnosticCompilationsUseAuthenticSdk": true,
+    "fakeRphUsedAsCompilationSdk": false,
+    "testOnlyClrRuntimeFacade": true,
+    "actualCurrentFixtureProcessIdentityObserved": true,
+    "productionPolicyOrBinaryExecuted": false,
+    "apiRuntimeRemainedUnreviewed": true,
+    "observedHashPromoted": false,
+    "oneRunOnlyNoRetry": true,
+    "sourceAttached": false,
+    "sourceOpen": false,
+    "sourceBegin": false,
+    "gameplayFramesPublished": 0,
+    "audioAllowed": false
+  },
+  "defaultProduct": {
+    "referenceSha256": "28cfb8588ac546b90afca569cca62912816a513173a6a04d77d04d00fec14eaa",
+    "compiledCurrentSha256": "968155ed54d0f36a927c206fcf678ce84beedfd724aec08ce6732c2e1d39ffa7",
+    "methods": 655,
+    "methodDifferences": 0,
+    "executed": false
+  },
+  "earlierAttempts": [
+    {
+      "outcome": "INCOMPLETE",
+      "reason": "Initial inspector matched a compiler-generated generic parameter named gameplayPublicationAllowed. Checker corrected to inspect the declaring element type; production code unchanged."
+    },
+    {
+      "outcome": "PASS-TESTS-NONCANONICAL-RECEIPT",
+      "reason": "All controls passed, but the PowerShell OrderedDictionary assertion sum was null. Aggregation corrected and complete final run repeated; prior outputs retained."
+    }
+  ],
+  "limits": [
+    "Fixture-policy entry execution is not execution of the production DLL or actual RPH.",
+    "A matching launcher/API fixture does not authenticate the installed runtime. The production runtime policy remains UNREVIEWED.",
+    "Static inspection and synthetic failure controls do not prove live loader compatibility, report completion under OS/fatal failure, or human approval.",
+    "No actual SHV/RPH/GTA, source module, endpoint, gameplay publisher or audio was executed."
+  ],
+  "gameFilesWritten": false,
+  "gameLaunched": false,
+  "actualRphExecuted": false,
+  "actualShvExecuted": false,
+  "deployed": false,
+  "endpointOpened": false,
+  "audioPlayback": false,
+  "privacy": "No process/session identifiers, absolute paths, absolute QPC values or private logs are published."
+}
