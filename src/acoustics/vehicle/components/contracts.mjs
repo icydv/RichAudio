@@ -27,6 +27,11 @@ export function componentPose(input) {
   Math.abs(input.forward.reduce((n,x,i)=>n+x*input.up[i],0))<1e-6, 'Qualified component pose speed/orientation required');
  return freezeComponent(Object.fromEntries(['position','velocity','forward','up'].map(k=>[k,[...input[k]]])));
 }
+export function componentRadiation(input) {
+ requireComponent(input&&Object.keys(input).length===3&&input.basis==='authored-assumption'&&Number.isFinite(input.directivity)&&input.directivity>=0&&input.directivity<=1&&
+  Number.isFinite(input.nearFieldRadius)&&input.nearFieldRadius>=0&&input.nearFieldRadius<=2,'Explicit bounded authored component radiation profile required');
+ return freezeComponent({directivity:input.directivity,nearFieldRadius:input.nearFieldRadius,basis:input.basis});
+}
 export function componentObservation(input,capability) {
  const c=requireAuthoredComponentCapability(capability),identity=componentIdentity(input?.identity);
  requireComponent(identity.session===c.session && input.authority===c.authority && Number.isSafeInteger(input.sequence)&&input.sequence>=0&&
@@ -42,5 +47,5 @@ export function componentObservation(input,capability) {
   else requireComponent(typeof value==='boolean'||typeof value==='number'&&Number.isFinite(value)||typeof value==='string'&&label(value,64),'Bounded scalar component state required');
  }
  return freezeComponent({identity,sequence:input.sequence,observedFrame:input.observedFrame,receivedFrame:input.receivedFrame,
-  validThroughFrame:input.validThroughFrame,eligible:input.eligible,authority:c.authority,pose:componentPose(input.pose),state:structuredClone(state)});
+  validThroughFrame:input.validThroughFrame,eligible:input.eligible,authority:c.authority,pose:componentPose(input.pose),radiation:componentRadiation(input.radiation),state:structuredClone(state)});
 }

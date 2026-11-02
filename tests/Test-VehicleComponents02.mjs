@@ -43,7 +43,7 @@ test('exact component identities distinguish same-model vehicles, assemblies and
 test('authored capability, source pose and finite lease cannot be replaced by JSON claims or future receipts',()=>{
  const c=cap(4096),identity=fixtureComponentIdentity('horn'),o=componentFixtureObservation(identity,0,0);
  assert.throws(()=>componentObservation(o,{...c}),/Branded/);
- for(const edit of [{identity:{...identity,session:'a'.repeat(32)}},{pose:null},{validThroughFrame:Infinity},{validThroughFrame:12001},{state:{...o.state,slip:[]}}])assert.throws(()=>componentObservation({...o,...edit},c));
+ for(const edit of [{identity:{...identity,session:'a'.repeat(32)}},{pose:null},{radiation:null},{radiation:{directivity:2,nearFieldRadius:0,basis:'authored-assumption'}},{validThroughFrame:Infinity},{validThroughFrame:12001},{state:{...o.state,slip:[]}}])assert.throws(()=>componentObservation({...o,...edit},c));
  const set=new ComponentSourceSet({capability:c,identities:[identity]});assert.equal(set.accept({...o,observedFrame:1,receivedFrame:1}),false);
  assert.equal(set.accept(o),true);assert.equal(set.accept(o),false);
 });
@@ -125,6 +125,7 @@ test('component pipeline is explicit and cannot change an existing stock gamepla
  const identity=fixtureComponentIdentity('horn'),session=new ComponentAcousticSession({capability:cap(1024),identities:[identity],scene:createVehicleEnvironment('direct').scene});
  try{session.accept(componentFixtureObservation(identity,0,0));const left=new Float32Array(512),right=new Float32Array(512);await session.render({listener:componentFixtureListener(),left,right});
   assert.equal(session.diagnostics().productionEnabled,false);assert.equal(session.diagnostics().nativeSuppression,false);assert.equal(evaluateComponentTakeover({component:'horn'}).permitted,false);
+  assert.throws(()=>session.accept({...componentFixtureObservation(identity,512,1),radiation:{directivity:.5,nearFieldRadius:.12,basis:'authored-assumption'}}),/reference distance/);
  }finally{session.close();}
 });
 test('complete original mechanical events prewarm through the existing low-latency kernel path without replacing their waveform',()=>{

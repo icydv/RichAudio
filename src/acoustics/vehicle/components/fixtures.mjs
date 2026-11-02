@@ -16,10 +16,15 @@ export function componentFixtureState(component,frame,{active=true,mechanicalEve
   normalForceN:active?2400:0,frictionCoefficient:.75,wheelRadiusM:.32,surface:'asphalt'};
 }
 export function componentFixtureObservation(identity,frame,sequence,{active=true,mechanicalEvent=false,eligible=true}={}) {
- const t=frame/48000,offset=identity.component.startsWith('tyre-')?[0,identity.component==='tyre-slip'?-.5:.5,.32]:
+ // Tyre radiator is in the authored contact region 5cm above the road, not
+ // at the wheel centre; wheelRadiusM remains a separate kinematic input.
+ const t=frame/48000,offset=identity.component.startsWith('tyre-')?[0,identity.component==='tyre-slip'?-.5:.5,.05]:
   identity.component==='horn'?[.6,0,.9]:[0,0,.7];
  return {identity,authority:'original-authored-component-fixture',sequence,observedFrame:frame,receivedFrame:frame,validThroughFrame:frame+511,eligible,
   pose:{position:[-8+4*t+offset[0],offset[1],offset[2]],velocity:[4,0,0],forward:[1,0,0],up:[0,0,1]},
+  // Zero selects the existing point-emitter/reference-distance model. The
+  // tyre's physical wheelRadiusM is not the engine's finite-spreading radius.
+  radiation:{directivity:identity.component==='horn'?.55:0,nearFieldRadius:0,basis:'authored-assumption'},
   state:componentFixtureState(identity.component,frame,{active,mechanicalEvent})};
 }
 export const componentPcmDigest=channels=>{const pcm=Buffer.alloc(channels[0].length*8);for(let i=0;i<channels[0].length;i++){pcm.writeFloatLE(channels[0][i],i*8);pcm.writeFloatLE(channels[1][i],i*8+4);}return createHash('sha256').update(pcm).digest('hex');};

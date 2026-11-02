@@ -29,7 +29,8 @@ export class ComponentSourceSet {
   for(const e of this.entries.values()) {
    const o=e.observation,qualified=!e.retired&&o&&o.eligible&&o.receivedFrame<=frame&&o.observedFrame<=frame&&o.validThroughFrame>=frame+frames-1;
    if(o&&!e.retired&&o.validThroughFrame<frame+frames-1){e.retired=true;e.reason='source-expired';this.stats.expired++;this.stats.retired++;}
-   if(qualified){if(o.state.event&&o.sequence!==e.lastTriggeredSequence){e.source.trigger(o.state.event,frame);e.lastTriggeredSequence=o.sequence;}result.push({id:e.id,generation:e.identity.componentGeneration,...o.pose,valid:true,emitting:true});}
+   if(qualified){if(o.state.event&&o.sequence!==e.lastTriggeredSequence){e.source.trigger(o.state.event,frame);e.lastTriggeredSequence=o.sequence;}result.push({id:e.id,generation:e.identity.componentGeneration,...o.pose,
+    directivity:o.radiation.directivity,nearFieldRadius:o.radiation.nearFieldRadius,valid:true,emitting:true});}
    e.qualified=Boolean(qualified);
   }
   this.lastFrame=frame+frames-1;return result;

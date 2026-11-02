@@ -18,7 +18,9 @@ export class ComponentAcousticSession {
     return {...control,paths};
    }});
  }
- accept(observation){return this.sources.accept(observation);}
+ accept(observation){const radius=observation?.radiation?.nearFieldRadius,reference=this.pipeline.simulation.scene?.config.referenceDistance;
+  requireComponent(radius===0||Number.isFinite(radius)&&Number.isFinite(reference)&&radius>=reference,'Finite spreading radius must support the selected scene reference distance');
+  return this.sources.accept(observation);}
  replaceScene(scene,options){this.pipeline.replaceScene(scene,options);}
  async render({listener,left,right,frames=512,geometryTimeMs=this.frame/48}={}) {
   requireComponent(Number.isSafeInteger(frames)&&frames>0&&frames<=512&&left instanceof Float32Array&&right instanceof Float32Array&&left!==right&&left.length>=frames&&right.length>=frames,'Caller-owned bounded stereo output required');
