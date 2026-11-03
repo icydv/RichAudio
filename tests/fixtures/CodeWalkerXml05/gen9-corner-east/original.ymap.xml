@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CMapData>
+ <name>hash_00A98AC7</name>
+ <parent />
+ <flags value="0" />
+ <contentFlags value="0" />
+ <streamingExtentsMin x="32" y="-8" z="-2" />
+ <streamingExtentsMax x="48" y="8" z="8" />
+ <entitiesExtentsMin x="32" y="-8" z="-2" />
+ <entitiesExtentsMax x="48" y="8" z="8" />
+ <entities>
+  <Item type="CEntityDef">
+   <archetypeName>hash_075BCD15</archetypeName>
+   <flags value="0" />
+   <guid value="0" />
+   <position x="40" y="0" z="0" />
+   <rotation x="0" y="0" z="0" w="1" />
+   <scaleXY value="1" />
+   <scaleZ value="1" />
+   <parentIndex value="-1" />
+   <lodDist value="100" />
+   <childLodDist value="0" />
+   <lodLevel>LODTYPES_DEPTH_HD</lodLevel>
+   <numChildren value="0" />
+   <priorityLevel>PRI_REQUIRED</priorityLevel>
+   <extensions />
+   <ambientOcclusionMultiplier value="0" />
+   <artificialAmbientOcclusion value="0" />
+   <tintValue value="0" />
+  </Item>
+ </entities>
+ <containerLods itemType="rage__fwContainerLodDef" />
+ <boxOccluders itemType="BoxOccluder" />
+ <occludeModels itemType="OccludeModel" />
+ <physicsDictionaries />
+ <instancedData>
+ <error>Couldn't find structure info rage__fwInstancedMapData!</error>
+ </instancedData>
+ <timeCycleModifiers itemType="CTimeCycleModifier" />
+ <carGenerators itemType="CCarGen" />
+ <LODLightsSOA>
+ <error>Couldn't find structure info CLODLight!</error>
+ </LODLightsSOA>
+ <DistantLODLightsSOA>
+ <error>Couldn't find structure info CDistantLODLight!</error>
+ </DistantLODLightsSOA>
+ <block>
+  <version value="0" />
+  <flags value="0" />
+  <name>original-world05-closed-exterior</name>
+  <exportedBy>RichAudio-original-fixture</exportedBy>
+  <owner></owner>
+  <time>01 January 2000 00:00</time>
+ </block>
+</CMapData>

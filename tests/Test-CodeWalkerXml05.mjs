@@ -1,0 +1,56 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {decodeCodeWalkerXmlBuilding05,parseCodeWalkerXml05,codeWalkerNameHash05,codeWalkerXmlLimits05} from '../src/acoustics/world/codewalker-xml05.mjs';
+import {convertCollision,transformPoint,resourcePoint} from '../src/acoustics/world/collision-mesh.mjs';
+import {entityMatrix,transformInstance} from '../src/acoustics/world/placements.mjs';
+import {originalCodeWalkerXml05,originalXmlReference05,originalXmlGroups05} from './fixtures/CodeWalkerXml05.mjs';
+const hash=b=>createHash('sha256').update(b).digest('hex');
+function modify(input,kind,change){const r=input.resources.find(r=>r.kind===kind);r.xml=Buffer.from(change(r.xml.toString()));r.expectedSHA256=hash(r.xml);return input;}
+function approximately(a,b,at='root'){if(typeof a==='number'&&typeof b==='number'){assert.ok(Math.abs(a-b)<=Math.max(.0002,Math.abs(b)*2e-6),at+': '+a+' vs '+b);return;}if(Array.isArray(a)){assert.ok(Array.isArray(b),at);assert.equal(a.length,b.length,at);a.forEach((x,i)=>approximately(x,b[i],at+'['+i+']'));return;}if(a&&typeof a==='object'){for(const k of Object.keys(a))approximately(a[k],b[k],at+'.'+k);return;}assert.equal(a,b,at);}
+test('24 selected original XML resources match actual CodeWalker DTO/world references; empty-map selection rejects',()=>{
+ assert.equal(originalXmlReference05.passed,true);assert.equal(originalXmlReference05.gameFilesRead,false);
+ for(const group of originalXmlGroups05){const input=originalCodeWalkerXml05(group);if(group==='gen9-open'){assert.throws(()=>decodeCodeWalkerXmlBuilding05(input),/selected entity index/);continue;}const result=decodeCodeWalkerXmlBuilding05(input),reference=originalXmlReference05.fixtureSets.find(r=>r.group===group);assert.equal(result.supported,true);assert.equal(result.installedResourceVerified,false);assert.equal(result.state,'decoded-unqualified-codewalker-xml-static-subset');
+  for(const item of result.resources){const ref=reference.resources.find(r=>r.kind===item.kind);assert.equal(item.xmlSHA256,ref.xmlSHA256);assert.equal(item.bytes,ref.xmlBytes);assert.equal(item.sourceSHA256,null);assert.equal(item.normalized.sourceAuthority,'unqualified-codewalker-xml-export');const actual=item.normalized.data;
+   if(item.kind==='ymap')approximately(actual.entities,[ref.data.entities[0]],group+' entities');
+   else if(item.kind==='ytyp')approximately(actual.archetypes,ref.data.archetypes,group+' archetypes');
+   else{assert.equal(actual.nodes.length,ref.data.nodes.length);actual.nodes.forEach((n,i)=>{const oracle=ref.data.nodes[i];for(const key of ['id','parent','type','center','transform','vertices','polygons','materials','unsupportedBound','declaredBounds'])approximately(n[key],oracle[key],group+'.'+key);for(const sample of oracle.oracleSamples)approximately(transformPoint(n.vertices[sample.index].map((v,j)=>v+n.center[j]),n.transform),sample.positionInParent,group+' parent oracle');});}
+  }
+  const collision=result.resources.find(r=>r.kind==='ybn').normalized.data,map=result.resources.find(r=>r.kind==='ymap').normalized.data.entities[0],placement=entityMatrix(map);approximately(placement,reference.world.entityMatrix,group+' actual YmapEntityDef matrix');for(const sample of reference.world.samples){const node=collision.nodes[sample.node],chain=[node.transform];for(let p=node.parent;p!==null;p=collision.nodes.find(n=>n.id===p).parent)chain.push(collision.nodes.find(n=>n.id===p).transform);approximately(transformPoint(resourcePoint(node.vertices[sample.vertex],node.center,chain),placement),sample.positionInWorld,group+' actual CodeWalker world vertex');}
+ }
+});
+test('XML hash text preserves pinned CodeWalker case-sensitive GetHash behavior',()=>{for(const v of originalXmlReference05.nameHashVectors)assert.equal(codeWalkerNameHash05(v.text),v.hash);assert.notEqual(codeWalkerNameHash05('Original_MixedCase05'),codeWalkerNameHash05('original_mixedcase05'));});
+test('stored ordinary quaternion, nonuniform scale, GeometryCenter and child matrix remain separate and apply once in existing converters',()=>{
+ const result=decodeCodeWalkerXmlBuilding05(originalCodeWalkerXml05('gen9-transform-challenge')),map=result.resources.find(r=>r.kind==='ymap').normalized.data.entities[0],raw=result.resources.find(r=>r.kind==='ybn').normalized.data,reference=originalXmlReference05.fixtureSets.find(r=>r.group==='gen9-transform-challenge');
+ approximately(map.rotation,reference.resources[0].data.entities[0].rotation);assert.equal(map.scaleXY,2);assert.equal(map.scaleZ,3);assert.deepEqual(raw.nodes[1].center,[10,2,-3]);assert.deepEqual(raw.nodes[0].transform,[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
+ const collision=convertCollision(raw);assert.equal(collision.counts.triangles,1);assert.equal(collision.unknownRegions.length,0);const world=transformInstance(collision.chunks[0].triangles,{matrix:entityMatrix(map),coordinateSpace:'world',evidence:'metadata-resolved-runtime-unverified',instanceId:'original-xml05'});assert.ok(world[0].positions.every(p=>p.every(Number.isFinite)));assert.notDeepEqual(world[0].positions,collision.chunks[0].triangles[0].positions);
+});
+test('XML tokenizer accepts predefined literal entities and comments without resolving any resource',()=>{
+ const root=parseCodeWalkerXml05(Buffer.from('<?xml version="1.0" encoding="UTF-8"?><root a="&amp;&quot;&apos;&lt;&gt;">original &amp; bounded<!-- inert --></root>'));assert.equal(root.attributes.a,'&"\'<>');assert.equal(root.text,'original & bounded');
+ for(const xml of ['<!DOCTYPE x [<!ENTITY y "z">]><x>&y;</x>','<!DOCTYPE x SYSTEM "file:///never-opened"><x/>','<x>&unknown;</x>','<x>&#65;</x>','<x>&amp</x>','<x><![CDATA[value]]></x>','<?unapproved?><x/>','<ns:x/>','<x xmlns="urn:unapproved"/>','<x a="1" a="2"/>','<x><y></x>','<x/><y/>','<x>\u0000</x>','<x><!-- bad--comment --></x>'])assert.throws(()=>parseCodeWalkerXml05(Buffer.from(xml)),/XML05/);
+});
+test('bounded XML rejects size, node, attribute, nesting and malformed UTF8 before DTO conversion',()=>{
+ assert.throws(()=>parseCodeWalkerXml05(Buffer.alloc(codeWalkerXmlLimits05.resourceBytes+1)),/byte bound/);assert.throws(()=>parseCodeWalkerXml05(Buffer.from('<x>'+('<x>'.repeat(49))+('</x>'.repeat(49))+'</x>')),/depth/);assert.throws(()=>parseCodeWalkerXml05(Buffer.from('<x>'+('<n/>'.repeat(codeWalkerXmlLimits05.nodes))+'</x>')),/node/);assert.throws(()=>parseCodeWalkerXml05(Buffer.from('<x a="'+'x'.repeat(1025)+'"/>')),/attribute size/);assert.throws(()=>parseCodeWalkerXml05(Buffer.from([60,120,62,0xc0,0xaf,60,47,120,62])),/encoded data|encoding|UTF/i);
+});
+test('exact XML, logical source and selected dependency identities reject substitutions and filename guessing',()=>{
+ const input=originalCodeWalkerXml05();input.resources[0].xml[20]^=1;assert.throws(()=>decodeCodeWalkerXmlBuilding05(input),/hash/);
+ for(const change of [s=>s.archetypeHash++,s=>s.physicsDictionary++,s=>s.entityIndex=2,s=>s.collisionFrame='unknown',s=>s.associationEvidenceSHA256=null,s=>s.ybnId='different']){const next=originalCodeWalkerXml05();change(next.selection);assert.throws(()=>decodeCodeWalkerXmlBuilding05(next),/XML05/);}
+ const traversal=originalCodeWalkerXml05();traversal.resources[0].logicalMember='../original.ymap';assert.throws(()=>decodeCodeWalkerXmlBuilding05(traversal),/logical/);
+ const world=originalCodeWalkerXml05();world.selection.collisionFrame='world';const result=decodeCodeWalkerXmlBuilding05(world);assert.equal(result.selection.collisionFrame,'world');assert.equal(result.selection.associationStatus,'declared-unverified');assert.deepEqual(result.resources[2].normalized.data.nodes[0].transform,decodeCodeWalkerXmlBuilding05(originalCodeWalkerXml05()).resources[2].normalized.data.nodes[0].transform);
+});
+test('MLO, extensions, duplicate placement fields, bad scales and nonfinite coordinates fail closed',()=>{
+ for(const [kind,change] of [['ymap',x=>x.replace('type="CEntityDef"','type="CMloInstanceDef"')],['ymap',x=>x.replace('<scaleXY value="1" />','<scaleXY value="0" />')],['ymap',x=>x.replace(/<position x="[^"]+"/,'<position x="NaN"')],['ymap',x=>x.replace('<extensions />','<extensions><Item/></extensions>')],['ymap',x=>x.replace('<scaleZ value="1" />','<scaleZ value="1" /><scaleZ value="1" />')],['ytyp',x=>x.replace('type="CBaseArchetypeDef"','type="CMloArchetypeDef"')],['ytyp',x=>x.replace('<extensions />','<extensions><Item/></extensions>').replace('<extensions />','<extensions><Item/></extensions>')]])assert.throws(()=>decodeCodeWalkerXmlBuilding05(modify(originalCodeWalkerXml05(),kind,change)),/XML05/);
+});
+test('collision references, vertex triples, matrices, material ranges and finite triangle bounds reject malformed geometry',()=>{
+ for(const change of [x=>x.replace('v3="2"','v3="99"'),x=>x.replace('m="0"','m="1"'),x=>x.replace('<Type value="7"','<Type value="256"'),x=>x.replace('-4, 0, -2.5','-40, 0, -2.5'),x=>x.replace('-4, 0, -2.5','-4 0 -2.5'),x=>x.replace('v2="1"','v2="0"')])assert.throws(()=>decodeCodeWalkerXmlBuilding05(modify(originalCodeWalkerXml05(),'ybn',change)),/XML05/);
+ for(const change of [x=>x.replace('100 20 30 1','100 20 30 0'),x=>x.replace('<CompositeTransform>','<CompositeTransform>1 '),x=>x.replace('0.87758255 0.47942555 0 0','0 0 0 0')])assert.throws(()=>decodeCodeWalkerXmlBuilding05(modify(originalCodeWalkerXml05('gen9-transform-challenge'),'ybn',change)),/matrix|transform|XML05/);
+});
+test('unsupported collision families remain explicit unknown regions rather than empty qualified geometry',()=>{
+ const input=modify(originalCodeWalkerXml05(),'ybn',x=>x.replace('<Triangle m="0" v1="0" v2="1" v3="2" f1="0" f2="0" f3="0" />','<Box m="0" v1="0" v2="1" v3="2" v4="3" />'));const result=decodeCodeWalkerXmlBuilding05(input),mesh=convertCollision(result.resources[2].normalized.data);assert.equal(result.supported,false);assert.equal(mesh.counts.triangles,1);assert.equal(mesh.unknownRegions.length,1);assert.equal(result.diagnostics.find(d=>d.kind==='unsupported-polygon').family,'Box');assert.match(result.coverage,/unknown/);
+ const bvh=decodeCodeWalkerXmlBuilding05(modify(originalCodeWalkerXml05(),'ybn',x=>x.replace('type="Geometry"','type="GeometryBVH"')));assert.equal(bvh.resources[2].normalized.data.nodes[0].type,'BoundBVH');
+ const empty=decodeCodeWalkerXmlBuilding05(modify(originalCodeWalkerXml05(),'ybn',x=>x.replace(/<Triangle[^>]+\/>/g,'')));assert.equal(empty.supported,false);assert.equal(empty.diagnostics.at(-1).kind,'unsupported-empty-triangle-subset');
+});
+test('own data fields and dense closed input arrays prevent hidden retained payloads or getters',()=>{
+ const input=originalCodeWalkerXml05();input.resources.extra='undeclared';assert.throws(()=>decodeCodeWalkerXmlBuilding05(input),/dense/);const getter=originalCodeWalkerXml05();let reads=0;Object.defineProperty(getter.selection,'physicsDictionary',{get(){reads++;return 987654321;},enumerable:true});assert.throws(()=>decodeCodeWalkerXmlBuilding05(getter),/data fields/);assert.equal(reads,0);
+ const hidden=originalCodeWalkerXml05();Object.defineProperty(hidden.resources[0],'hidden',{value:'unbounded',enumerable:false});assert.throws(()=>decodeCodeWalkerXmlBuilding05(hidden),/unexpected field/);
+});

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BoundsFile>
+ <Bounds type="Geometry">
+  <BoxMin x="-3" y="-2" z="0" />
+  <BoxMax x="3" y="2" z="4" />
+  <BoxCenter x="0" y="0" z="2" />
+  <SphereCenter x="0" y="0" z="2" />
+  <SphereRadius value="4.12310553" />
+  <Margin value="0" />
+  <Volume value="0" />
+  <Inertia x="0" y="0" z="0" />
+  <MaterialIndex value="0" />
+  <MaterialColourIndex value="0" />
+  <ProceduralID value="0" />
+  <RoomID value="0" />
+  <PedDensity value="0" />
+  <UnkFlags value="0" />
+  <PolyFlags value="0" />
+  <UnkType value="1" />
+  <GeometryCenter x="0" y="0" z="2" />
+  <UnkFloat1 value="0" />
+  <UnkFloat2 value="0" />
+  <Materials>
+   <Item>
+    <Type value="7" />
+    <ProceduralID value="0" />
+    <RoomID value="0" />
+    <PedDensity value="0" />
+    <Flags>NONE</Flags>
+    <MaterialColourIndex value="0" />
+    <Unk value="0" />
+   </Item>
+  </Materials>
+  <Vertices>
+   -3, -2, -2
+   3, -2, -2
+   3, 2, -2
+   -3, 2, -2
+   -3, -2, 2
+   3, -2, 2
+   3, 2, 2
+   -3, 2, 2
+  </Vertices>
+  <Polygons>
+   <Triangle m="0" v1="0" v2="1" v3="5" f1="0" f2="0" f3="0" />
+   <Triangle m="0" v1="0" v2="5" v3="4" f1="0" f2="0" f3="0" />
+   <Triangle m="0" v1="1" v2="2" v3="6" f1="0" f2="0" f3="0" />
+   <Triangle m="0" v1="1" v2="6" v3="5" f1="0" f2="0" f3="0" />
+   <Triangle m="0" v1="2" v2="3" v3="7" f1="0" f2="0" f3="0" />
+   <Triangle m="0" v1="2" v2="7" v3="6" f1="0" f2="0" f3="0" />
+   <Triangle m="0" v1="3" v2="0" v3="4" f1="0" f2="0" f3="0" />
+   <Triangle m="0" v1="3" v2="4" v3="7" f1="0" f2="0" f3="0" />
+   <Triangle m="0" v1="0" v2="2" v3="1" f1="0" f2="0" f3="0" />
+   <Triangle m="0" v1="0" v2="3" v3="2" f1="0" f2="0" f3="0" />
+   <Triangle m="0" v1="4" v2="5" v3="6" f1="0" f2="0" f3="0" />
+   <Triangle m="0" v1="4" v2="6" v3="7" f1="0" f2="0" f3="0" />
+  </Polygons>
+ </Bounds>
+</BoundsFile>
