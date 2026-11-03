@@ -1,5 +1,5 @@
-import {VisualState,PassiveState,presentation,DisplayCadence,RateMeter,TELEMETRY_POLL_FPS,ReplayClock,project,pathStyle,parseVisualContext,visibleContext,clampFps,isPoint,LIMITS} from './model.mjs';
-const $=id=>document.getElementById(id),state=new VisualState(),passive=new PassiveState(),replay=new ReplayClock();
+import {VisualState,PassiveState,presentation,DisplayCadence,RateMeter,TELEMETRY_POLL_FPS,ReplayClock,project,pathStyle,parseVisualContext,visibleContext,clampFps,isPoint,LIMITS,CachedWorldState041,cachedWorldPresentation041} from './model.mjs';
+const $=id=>document.getElementById(id),state=new VisualState(),passive=new PassiveState(),replay=new ReplayClock(),cacheWorld=new CachedWorldState041();
 const displayCadence=new DisplayCadence(20),displayRate=new RateMeter(),solverRate=new RateMeter(),passiveRate=new RateMeter();
 const canvas=$('scene'),ctx=canvas.getContext('2d'),camera={target:[0,0,0],yaw:-.7,pitch:.65,scale:13,topDown:false,width:800,height:600};
 let token=null,serviceStatus={},isReplay=false,viewPaused=false,follow=true,fps=20,connected=false,context=null;
@@ -20,6 +20,16 @@ function bind(id,callback){$(id).addEventListener('click',()=>Promise.resolve().
 function line(points,color,width=1,dash=[]){if(!points?.length)return;ctx.beginPath();points.forEach((p,i)=>{const s=project(p,camera);if(i)ctx.lineTo(s.x,s.y);else ctx.moveTo(s.x,s.y);});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.stroke();ctx.setLineDash([]);}
 function dot(point,color,size=4,label,diamond=false){if(!isPoint(point))return;const p=project(point,camera);ctx.beginPath();if(diamond){ctx.moveTo(p.x,p.y-size);ctx.lineTo(p.x+size,p.y);ctx.lineTo(p.x,p.y+size);ctx.lineTo(p.x-size,p.y);ctx.closePath();}else ctx.arc(p.x,p.y,size,0,2*Math.PI);ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='#f7faff';ctx.lineWidth=2;ctx.stroke();if(label){ctx.font='600 12px Segoe UI';const w=ctx.measureText(label).width;ctx.fillStyle='#0a0e14';ctx.fillRect(p.x+size+5,p.y-10,w+10,21);ctx.fillStyle='#f4f7fb';ctx.fillText(label,p.x+size+10,p.y+5);}}
 function facePath(points){points.forEach((p,i)=>{const s=project(p,camera);if(i)ctx.lineTo(s.x,s.y);else ctx.moveTo(s.x,s.y);});ctx.closePath();}
+function currentPresentation(now){
+  const base=presentation(state,passive,now,connected),cached=cachedWorldPresentation041(cacheWorld,base,now,{enabled:$('show-cache-world').checked&&!isReplay});
+  if(cached.visible&&cached.cacheOnly)return {...base,kind:'cached-world',frame:null,geometry:null,listener:null,coordinateKey:cached.coordinateKey,
+    health:{state:'cache',message:cached.reason,expired:false,ageMs:null},cacheLayer:cached};
+  return {...base,cacheLayer:cached};
+}
+function wireBox(box,color,dash=[7,5]){
+  const corners=[0,1].flatMap(x=>[0,1].flatMap(y=>[0,1].map(z=>[x?box.max[0]:box.min[0],y?box.max[1]:box.min[1],z?box.max[2]:box.min[2]])));
+  for(let a=0;a<8;a++)for(const bit of [1,2,4]){const b=a^bit;if(a<b)line([corners[a],corners[b]],color,1.2,dash);}
+}
 function grid(){
   const step=camera.scale<8?10:5,span=Math.min(150,Math.max(20,camera.width/camera.scale)),[x,y,z]=camera.target;
   for(let n=-span;n<=span;n+=step){const a=Math.round(x/step)*step+n,b=Math.round(y/step)*step+n;
@@ -42,23 +52,32 @@ function draw(now){
   const start=performance.now(),bounds=canvas.getBoundingClientRect(),dpr=Math.min(3,devicePixelRatio||1);
   if(canvas.width!==Math.round(bounds.width*dpr)||canvas.height!==Math.round(bounds.height*dpr)){canvas.width=Math.round(bounds.width*dpr);canvas.height=Math.round(bounds.height*dpr);}
   camera.width=bounds.width;camera.height=bounds.height;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#0A0E14';ctx.fillRect(0,0,bounds.width,bounds.height);
-  const view=presentation(state,passive,now,connected),f=view.frame,g=view.geometry,health=view.health;
-  if(lastCoordinateKey!==view.coordinateKey){lastCoordinateKey=view.coordinateKey;camera.target=view.listener?.valid?[...view.listener.position]:[0,0,0];camera.scale=13;contextSelectionKey='';}
+  const view=currentPresentation(now),f=view.frame,g=view.geometry,health=view.health,cached=view.cacheLayer;
+  if(lastCoordinateKey!==view.coordinateKey){lastCoordinateKey=view.coordinateKey;camera.target=view.listener?.valid?[...view.listener.position]:cached.visible?[...cached.target]:[0,0,0];camera.scale=13;contextSelectionKey='';}
   if(follow&&view.listener?.valid&&isPoint(view.listener.position))camera.target=[...view.listener.position];
   grid();compileGeometry(g);compileContext(view);
-  const faces=[...contextFaces,...geometryFaces].map(face=>({...face,depth:face.vertices.reduce((n,p)=>n+project(p,camera).depth,0)/face.vertices.length})).sort((a,b)=>a.depth-b.depth);
+  const cachedFaces=cached.visible?cached.tiles.flatMap(tile=>tile.surfaces.map(surface=>({...surface,context:false,cached:true,expired:['expired-fixture','future-fixture'].includes(tile.state)}))):[];
+  const faces=[...contextFaces,...cachedFaces,...geometryFaces].map(face=>({...face,depth:face.vertices.reduce((n,p)=>n+project(p,camera).depth,0)/face.vertices.length})).sort((a,b)=>a.depth-b.depth);
   for(const face of faces){
     // Openings can overlap a convex footprint edge. Clip to the actual footprint
     // before using even-odd holes so no exterior part of a hole becomes a face.
     ctx.save();ctx.beginPath();facePath(face.vertices);ctx.clip();
     ctx.beginPath();facePath(face.vertices);for(const opening of face.openings)facePath(opening.vertices);
     const shade=face.normal?Math.round(43+16*Math.abs(face.normal[2]||0)):35;
-    ctx.fillStyle=face.context?'#18212f':health.expired?'#242b38':`rgb(${shade},${shade+7},${shade+16})`;
+    ctx.fillStyle=face.context?'#18212f':face.cached?'#1d3545':health.expired?'#242b38':`rgb(${shade},${shade+7},${shade+16})`;
     ctx.fill('evenodd');ctx.restore();
     // Stroke outside the clipped fill so the full 2.2 CSS-pixel outline survives
     // at high DPI and along a finite support edge. Holes stay clipped inside it.
-    ctx.beginPath();facePath(face.vertices);ctx.lineWidth=face.context?1.8:2.2;ctx.strokeStyle=face.context?'#97a8c2':health.expired?'#b0bed2':'#f5f7fc';ctx.setLineDash(face.context?[7,5]:health.expired?[5,5]:view.kind==='replay'?[12,3]:[]);ctx.stroke();ctx.setLineDash([]);
+    ctx.beginPath();facePath(face.vertices);ctx.lineWidth=face.context?1.8:2.2;ctx.strokeStyle=face.context?'#97a8c2':face.cached?'#8fcbe8':health.expired?'#b0bed2':'#f5f7fc';ctx.setLineDash(face.context?[7,5]:face.expired||health.expired?[5,5]:view.kind==='replay'?[12,3]:[]);ctx.stroke();ctx.setLineDash([]);
     if(face.openings.length){ctx.save();ctx.beginPath();facePath(face.vertices);ctx.clip();ctx.beginPath();for(const opening of face.openings)facePath(opening.vertices);ctx.stroke();ctx.restore();}
+  }
+  if(cached.visible){
+    for(const tile of cached.tiles){wireBox(tile.bounds,tile.state==='prepared-fixture'?'#53758b':'#e4cc80');const p=project(tile.bounds.min,camera);ctx.font='11px Segoe UI';ctx.fillStyle='#b7d9e8';ctx.fillText(`${tile.tileId} · ${tile.state}`,p.x+4,p.y-5);
+      for(const missing of tile.missingRegions)wireBox(missing.bounds,'#e4cc80');}
+    for(const interior of cached.interiors){
+      for(const room of interior.rooms){wireBox(room.bounds,room.completeness==='known'?'#a8a0ce':'#e4cc80',[3,5]);const p=project(room.bounds.min,camera);ctx.fillStyle='#c8bde6';ctx.fillText(`${room.id} · Z ${room.bounds.min[2]}–${room.bounds.max[2]} · ${room.completeness}`,p.x+4,p.y+13);}
+      for(const portal of interior.portals)line([...portal.vertices,portal.vertices[0]],portal.topology==='known'?'#d7abe3':'#e4cc80',2,[3,4]);
+    }
   }
   // Missing-region wire boxes are evidence, never an invented city boundary.
   for(const r of g?.missingRegions||[]){if(!isPoint(r.bounds?.min)||!isPoint(r.bounds?.max))continue;const [lo,hi]=[r.bounds.min,r.bounds.max];const a=[[lo[0],lo[1],lo[2]],[hi[0],lo[1],lo[2]],[hi[0],hi[1],lo[2]],[lo[0],hi[1],lo[2]]];line([...a,a[0]],'#e4cc80',2,[7,5]);}
@@ -73,20 +92,23 @@ function draw(now){
 }
 function metric(label,value){const term=document.createElement('dt'),definition=document.createElement('dd');safeText(term,label);safeText(definition,value);$('metrics').append(term,definition);}
 function metadata(now){
-  const view=presentation(state,passive,now,connected),f=view.frame,g=view.geometry,h=view.health,d=f?.diagnostics,isPassive=view.kind==='passive';
+  const view=currentPresentation(now),f=view.frame,g=view.geometry,h=view.health,d=f?.diagnostics,isPassive=view.kind==='passive',isCached=view.kind==='cached-world',cached=view.cacheLayer;
   safeText($('connection'),viewPaused?'View paused · recording is independent':h.message);
   $('status-dot').style.background=h.state==='live'?'#63e8d3':h.state==='passive'?'#73bcff':h.state==='historical'?'#c6adff':'#e4cc80';
   const conditional=f?.readiness?.mode==='listener-only-conditional-direct';
-  const mode=isReplay?'HISTORICAL':isPassive?'PASSIVE CAMERA':conditional?'CONDITIONAL DIRECT':view.kind==='acoustic'?'ACOUSTIC SOLVER':h.state.toUpperCase();
+  const mode=isReplay?'HISTORICAL':isCached?'CACHED FIXTURE':isPassive?'PASSIVE CAMERA':conditional?'CONDITIONAL DIRECT':view.kind==='acoustic'?'ACOUSTIC SOLVER':h.state.toUpperCase();
   safeText($('mode-chip'),mode);safeText($('mode-label'),viewPaused?'VISUAL UPDATES PAUSED':mode);
-  safeText($('scene-title'),isPassive?'Your listener, live.':f?isReplay?'A recorded acoustic moment.':'Sound, mapped.':'Ready when Story Mode is.');
+  safeText($('scene-title'),isCached?'Cached acoustic geometry.':isPassive?'Your listener, live.':f?isReplay?'A recorded acoustic moment.':'Sound, mapped.':'Ready when Story Mode is.');
   if(isPassive&&h.expired)safeText($('scene-title'),'Camera tracking unavailable.');
   const coverage=g?`${g.surfaces.length} finite surfaces · ${g.coverage}. `:'No accepted geometry. ';
-  safeText($('knowledge'),isPassive?'Passive camera telemetry only. Acoustic processing is inactive. The reference grid is not world geometry.':conditional?'Listener-only conditional direct path. Unobserved space is assumed clear for the owned beacon; this is not verified unobstructed geometry.':coverage+(h.expired?'Geometry unavailable or expired at this moment. ':'')+'Unobserved space remains unknown.');
+  safeText($('knowledge'),isCached?'Original authored cache fixtures only. Tile and room boxes are bounds, not invented walls. Unsupported, unprepared and outside space remain unknown. Runtime doors and activation are unavailable.':isPassive?'Passive camera telemetry only. Acoustic processing is inactive. The reference grid is not world geometry.':conditional?'Listener-only conditional direct path. Unobserved space is assumed clear for the owned beacon; this is not verified unobstructed geometry.':coverage+(h.expired?'Geometry unavailable or expired at this moment. ':'')+'Unobserved space remains unknown.');
+  const packet=cacheWorld.packet;
+  safeText($('cache-world-status'),packet?`${packet.tiles.length} declared tiles · ${packet.tiles.reduce((n,t)=>n+t.surfaces.length,0)} finite collision surfaces · ${packet.interiors.length} interior fixtures. ${cached.visible?cached.reason:'Inspection hidden.'} Installed-world compatibility remains unqualified.`:'No qualified cache snapshot supplied. The reference grid is not a building map.');
+  safeText($('cache-world-identities'),cached.visible?cached.tiles.flatMap(t=>t.buildingBindings.slice(0,4).map(b=>`${t.tileId}: archetype ${b.archetypeHash} → ${b.collisionResourceId}`)).slice(0,16).join(' · '):'');
   const actualFps=displayRate.rate(now),incoming=(isPassive?passiveRate:solverRate).rate(now);
   safeText($('display-fps'),actualFps.toFixed(1));safeText($('telemetry-rate'),incoming.toFixed(1));safeText($('telemetry-age'),Number.isFinite(h.ageMs)?`${Math.round(h.ageMs)} ms`:'—');
   $('display-fps').dataset.target=String(fps);$('telemetry-rate').dataset.pollTarget=String(TELEMETRY_POLL_FPS);
-  safeText($('grid-note'),isPassive?'Reference grid only · native units, physical scale unverified':'Reference grid only · model metres, physical scale unverified');
+  safeText($('grid-note'),isCached?'Reference grid only · authored cache model metres':isPassive?'Reference grid only · native units, physical scale unverified':'Reference grid only · model metres, physical scale unverified');
   $('metrics').replaceChildren();
   metric('Tracking',mode);metric('Session',f?.sessionId||(isPassive?passive.frame.sessionId:'No session'));metric(isPassive?'Camera sequence':'Solver sequence',isPassive?passive.frame.sequence:f?.sequence??'—');
   metric('Display / telemetry',`${actualFps.toFixed(1)} / ${incoming.toFixed(1)} FPS`);metric('Observation age',Number.isFinite(h.ageMs)?`${format(h.ageMs)} ms`:'unavailable');
@@ -102,9 +124,9 @@ function metadata(now){
   metric('Visual updates skipped',`${state.dropped} client / ${serviceStatus.droppedUpdates??0} transport`);
   metric('Paths omitted by producer',d?.omittedPaths??0);metric('Input / solver state',d?.reason||'Available');
   const calibration=f?.calibration||g?.calibration;
-  safeText($('coordinate-note'),isPassive?'Unscaled GTA-native coordinates · right-handed Z-up. No acoustic calibration or world surfaces are implied.':calibration?`Engine model coordinates; ${calibration.metresPerNativeUnit} model m/native unit. Physical calibration: ${calibration.physicalCalibration||'unverified'}.`:'Engine model coordinates only. Physical GTA scale remains unverified.');
+  safeText($('coordinate-note'),isCached?'Independent authored metre cache view. Live camera, sources and solver paths are hidden without an exact declared model alignment.':isPassive?'Unscaled GTA-native coordinates · right-handed Z-up. No acoustic calibration or world surfaces are implied.':calibration?`Engine model coordinates; ${calibration.metresPerNativeUnit} model m/native unit. Physical calibration: ${calibration.physicalCalibration||'unverified'}.`:'Engine model coordinates only. Physical GTA scale remains unverified.');
   safeText($('path-count'),`${f?.paths.length||0} paths`);$('paths').replaceChildren();
-  if(!f?.paths.length){const p=document.createElement('p');p.className='muted';safeText(p,isPassive?'Passive tracking has no sound sources, acoustic surfaces or solver paths.':d?.reason||'No solver paths available. No visual rays are invented.');$('paths').append(p);}
+  if(!f?.paths.length){const p=document.createElement('p');p.className='muted';safeText(p,isCached?'Cached geometry supplies no solver paths. Reflections appear only in accepted solver evidence.':isPassive?'Passive tracking has no sound sources, acoustic surfaces or solver paths.':d?.reason||'No solver paths available. No visual rays are invented.');$('paths').append(p);}
   for(const p of (f?.paths||[]).filter(p=>$('show-rejected').checked||p.status==='selected').slice(0,64)){
     const style=pathStyle(p),row=document.createElement('div'),title=document.createElement('strong'),detail=document.createElement('span'),reason=document.createElement('small');row.className='path';row.style.borderColor=style.color;
     safeText(title,`${style.label} · ${p.sourceId}`);safeText(detail,`${p.order} bounce(s) · ${p.delay==null?'delay unavailable':format(p.delay*1000)+' ms'} · ${p.distance==null?'distance unavailable':format(p.distance)+' model m'}`);
@@ -127,13 +149,14 @@ async function telemetryLoop(){
     if(!isReplay||pendingSeek||replay.playing||lastReplayRequest<0){
       const epoch=requestEpoch,requestStarted=performance.now();
       try{
-        const query=`geometryGeneration=${encodeURIComponent(state.geometryRequestKey())}`;
+        const query=`geometryGeneration=${encodeURIComponent(state.geometryRequestKey())}&cacheWorldGeneration=${encodeURIComponent(cacheWorld.requestKey())}`;
         const url=isReplay?`/api/replay/frame?timeMs=${Math.round(playbackTime)}&${query}`:`/api/frame?${query}`;
         const envelope=await api(url);
         if(epoch===requestEpoch){
           const received=performance.now(),timing={requestElapsedMs:received-requestStarted};
           if(envelope.status){serviceStatus={...serviceStatus,...envelope.status};connected=envelope.status.connected===true;}
           if(!isReplay&&passive.ingest(envelope.passive,received,timing))passiveRate.mark(received);
+          if(!isReplay)cacheWorld.ingest(envelope.cacheWorld,received,timing);
           if(state.ingest(envelope,received,timing))solverRate.mark(received);
           lastReplayRequest=playbackTime;pendingSeek=false;
         }
@@ -191,6 +214,7 @@ bind('reset-camera',()=>{Object.assign(camera,{yaw:-.7,pitch:.65,scale:13});foll
 bind('visual-toggle',()=>{viewPaused=!viewPaused;replay.lastNow=null;displayCadence.reset();displayRate.reset();safeText($('visual-toggle'),viewPaused?'Resume view':'Pause view');if(!viewPaused)pendingSeek=true;});
 $('fps').addEventListener('change',()=>{fps=clampFps($('fps').value);displayCadence.setRate(fps);displayRate.reset();});
 $('show-rejected').addEventListener('change',()=>{metadata(performance.now());});
+$('show-cache-world').addEventListener('change',()=>{lastCoordinateKey=null;metadata(performance.now());});
 $('context-file').addEventListener('change',async event=>{try{const file=event.target.files?.[0];if(!file)return;if(file.size>LIMITS.contextBytes)throw Error('Private context file exceeds 4 MiB');context=parseVisualContext(await file.text());contextSelectionKey='reload';compileContext(presentation(state,passive,performance.now(),connected));}catch(error){context=null;contextFaces=[];safeText($('context-status'),'Context rejected: '+error.message);notice(error.message,true);}});
 bind('clear-context',()=>{context=null;contextFaces=[];contextSelectionKey='';$('context-file').value='';safeText($('context-status'),'None loaded · no complete buildings inferred');});
 bind('popout',()=>{const popup=window.open(location.href,'RichAudioSoundMap','popup,width=1280,height=820,resizable=yes');if(!popup)throw Error('Allow this local page to open its independent SoundMap window.');});

@@ -6,6 +6,7 @@ import {bounds, vector, identifier, fields, requireWorld, digest, freeze} from '
 export const interiorRevision04='explicit-interior-topology-v1';
 export const interiorLimits04=Object.freeze({rooms:32,portals:64,surfaceReferences:192,activationKeys:32,paths:16,hops:8,expansions:256});
 const topologies=new WeakSet(),states=new WeakSet(),outside='outside';
+export const isInteriorTopology04=value=>topologies.has(value);
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x);
 const contains=(box,p)=>p.every((n,i)=>n>=box.min[i]-1e-8&&n<=box.max[i]+1e-8);
 const inside=(box,p)=>p.every((n,i)=>n>box.min[i]+1e-8&&n<box.max[i]-1e-8);

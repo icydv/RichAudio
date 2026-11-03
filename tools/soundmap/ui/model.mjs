@@ -200,3 +200,50 @@ export class ReplayClock {
   seek(ms){this.timeMs=Math.max(0,Math.min(this.durationMs,Number(ms)||0));this.lastNow=null;return this.timeMs;}
   tick(now){if(this.playing&&this.lastNow!==null)this.timeMs=Math.min(this.durationMs,this.timeMs+Math.max(0,now-this.lastNow));this.lastNow=now;if(this.timeMs>=this.durationMs)this.playing=false;return this.timeMs;}
 }
+
+// Cached geometry is a separate inspection layer. It cannot supply a listener,
+// a source, a reflection path or authority to the acoustic renderer.
+export function checkCachedAcousticWorld041(p){
+  fail(p?.schemaVersion===1&&p.kind==='richaudio-cached-acoustic-world041'&&p.purpose==='read-only-cache-inspection'&&p.authority==='original-authored-fixture-only'&&p.coordinateSpace===MODEL_SPACE,'Unsupported cached acoustic world');
+  const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x),box=b=>isPoint(b?.min)&&isPoint(b?.max)&&b.min.every((v,i)=>b.max[i]>v&&b.max[i]-v<=128);
+  fail(hex(p.generation)&&hex(p.worldDigest)&&typeof p.session==='string'&&/^[a-f0-9]{32}$/.test(p.session)&&finite(p.geometryTimeMs)&&p.geometryTimeMs>=0,'Cached world identity/clock');
+  fail(p.installedWorldVerified===false&&p.runtimeActivationVerified===false&&p.viewerCanPublishAcoustics===false&&p.solverPathEvidence===false&&p.outsideCoverage==='unknown'&&Array.isArray(p.paths)&&p.paths.length===0,'Cached world cannot fabricate compatibility or solver paths');
+  fail(Array.isArray(p.tiles)&&p.tiles.length<=64&&Array.isArray(p.interiors)&&p.interiors.length<=8,'Cached world display budget');
+  const ids=new Set();let surfaces=0,rooms=0,portals=0;
+  for(const t of p.tiles){
+    fail(ident(t.tileId)&&!ids.has(t.tileId)&&box(t.bounds)&&hex(t.planDigest)&&['prepared-fixture','partial-fixture','future-fixture','expired-fixture','unprepared','unsupported-or-unknown'].includes(t.state),'Cached tile identity/state');ids.add(t.tileId);
+    fail(Array.isArray(t.surfaces)&&Array.isArray(t.unknown)&&t.unknown.length<=256&&Array.isArray(t.missingRegions)&&t.missingRegions.length<=32&&Array.isArray(t.resourceBindings)&&t.resourceBindings.length<=32&&Array.isArray(t.buildingBindings)&&t.buildingBindings.length<=128,'Cached tile evidence budgets');
+    fail(t.tileDigest===null?t.surfaces.length===0:hex(t.tileDigest)&&finite(t.createdAt)&&finite(t.validUntil)&&t.validUntil>t.createdAt,'Cached tile lease');
+    for(const s of t.surfaces){fail(ident(s.id)&&Array.isArray(s.vertices)&&s.vertices.length>=3&&s.vertices.length<=16&&s.vertices.every(v=>isPoint(v)&&v.every((n,i)=>n>=t.bounds.min[i]-1e-8&&n<=t.bounds.max[i]+1e-8))&&isPoint(s.normal)&&finite(s.validUntil),'Cached finite collision footprint');fail(Array.isArray(s.openings)&&s.openings.length<=8&&s.openings.every(o=>Array.isArray(o.vertices)&&o.vertices.length===4&&o.vertices.every(isPoint)),'Cached finite openings');}
+    for(const r of t.missingRegions)fail(ident(r.id)&&box(r.bounds)&&ident(r.reason),'Cached unknown region');
+    surfaces+=t.surfaces.length;fail(surfaces<=1024,'Cached surface aggregate budget');
+  }
+  for(const interior of p.interiors){
+    fail(ident(interior.id)&&ids.has(interior.tileId)&&hex(interior.topologyDigest)&&['base','dlc','custom'].includes(interior.mapKind)&&interior.runtimeState==='not-supplied'&&interior.connectivity==='static-declared-fixture-only','Cached interior identity/authority');
+    fail(Array.isArray(interior.rooms)&&Array.isArray(interior.portals)&&Array.isArray(interior.unknown)&&interior.unknown.length<=32,'Cached room/portal lists');
+    const roomIds=new Set();for(const room of interior.rooms){fail(ident(room.id)&&!roomIds.has(room.id)&&box(room.bounds)&&['known','unknown'].includes(room.completeness),'Cached room bounds');roomIds.add(room.id);}
+    for(const portal of interior.portals)fail(ident(portal.id)&&['known','unknown'].includes(portal.topology)&&[portal.a,portal.b].every(id=>id===null||id==='outside'||roomIds.has(id))&&Array.isArray(portal.vertices)&&portal.vertices.length>=3&&portal.vertices.length<=4&&portal.vertices.every(isPoint),'Cached portal endpoints/aperture');
+    rooms+=interior.rooms.length;portals+=interior.portals.length;fail(rooms<=128&&portals<=256,'Cached topology aggregate budget');
+  }
+  if(p.alignment!==null)fail(p.alignment&&Object.keys(p.alignment).sort().join(',')==='acousticSession,basis,coordinateKey,session'&&p.alignment.basis==='original-authored-exact-model-alignment'&&p.alignment.session===p.session&&typeof p.alignment.acousticSession==='string'&&/^[A-Za-z0-9_.:-]{1,256}$/.test(p.alignment.acousticSession)&&typeof p.alignment.coordinateKey==='string'&&p.alignment.coordinateKey.startsWith('model:')&&p.alignment.coordinateKey.length<=1024,'Cached model alignment');
+  return immutable(p);
+}
+export class CachedWorldState041{
+  constructor(){this.packet=null;this.clockAt=0;this.receivedAt=0;this.reason='not-supplied';}
+  ingest(envelope,now,{requestElapsedMs=0}={}){
+    if(!envelope?.status?.available){this.packet=null;this.reason=envelope?.status?.reason??'not-supplied';return false;}
+    fail(finite(now)&&finite(envelope.status.geometryTimeMs)&&envelope.status.geometryTimeMs>=0&&finite(requestElapsedMs)&&requestElapsedMs>=0,'Cached display elapsed clock');
+    if(envelope.packet){const packet=checkCachedAcousticWorld041(envelope.packet);fail(packet.generation===envelope.status.generation,'Cached display generation mismatch');fail(this.packet?.generation!==packet.generation||JSON.stringify(this.packet)===JSON.stringify(packet),'Immutable cached generation changed');this.packet=packet;}
+    fail(this.packet&&this.packet.generation===envelope.status.generation,'Cached display requires matching original packet');this.clockAt=envelope.status.geometryTimeMs+requestElapsedMs;this.receivedAt=now;this.reason=null;return true;
+  }
+  requestKey(){return this.packet?.generation??'';}
+}
+export function cachedWorldPresentation041(cache,base,now,{enabled=false}={}){
+  if(!enabled||!cache.packet)return {visible:false,reason:cache.packet?'Cached fixture available · enable inspection':cache.reason??'not-supplied',packet:null};
+  const packet=cache.packet,clock=cache.clockAt+Math.max(0,now-cache.receivedAt),aligned=!!packet.alignment&&base.kind==='acoustic'&&packet.alignment.coordinateKey===base.coordinateKey&&packet.alignment.acousticSession===(base.frame?.listenerSessionId??base.frame?.sessionId);
+  const tiles=packet.tiles.map(t=>({...t,state:t.tileDigest!==null&&clock<t.createdAt?'future-fixture':t.tileDigest!==null&&clock>=t.validUntil?'expired-fixture':t.state==='future-fixture'?'partial-fixture':t.state}));
+  return {visible:true,packet,tiles,interiors:packet.interiors,overlay:aligned,cacheOnly:!aligned,coordinateKey:aligned?base.coordinateKey:'cached-world:'+packet.session+':'+packet.worldDigest,
+    target:tiles[0]?.bounds.min.map((v,i)=>(v+tiles[0].bounds.max[i])/2)??[0,0,0],geometryTimeMs:clock,
+    reason:aligned?'Cached fixture geometry · exact declared model alignment':'Cached fixture inspection · live poses and paths hidden without exact model alignment',
+    badges:['Original authored fixtures','Installed world unqualified','Runtime activation unknown','Unprepared/outside coverage unknown']};
+}
