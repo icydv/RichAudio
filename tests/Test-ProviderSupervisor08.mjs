@@ -30,6 +30,7 @@ test('actual Core worker decodes original archive under fixed AppContainer/Job a
  assert.equal(result.state,'completed',JSON.stringify(result.receipt??result.supervisorStderr));assert.equal(result.workerResult.resources.length,3);
  assert.equal(result.receipt.atomicJobVerified,true);assert.equal(result.receipt.zeroCapabilitiesVerified,true);assert.equal(result.receipt.profileScratchWritesDenied,true);assert.equal(result.receipt.profileDeletionHRESULT,0);
  assert.equal(result.receipt.sourceBindings.length,1);assert.equal(result.receipt.sourceBindings[0].identityUnchanged,true);assert.ok(progress.length>0);assert.ok(progress.every(p=>p.total===null||p.completed<=p.total));
+ assert.equal(result.workerResult.sources[0].identity.kind,'inherited-readonly-handle','staged originals use the same pinned handle route as direct sources');
  const trusted=verifyProviderRun08(result);assert.equal(trusted.request.sourceAuthority,'original-authored-fixture');assert.equal(trusted.request.archives[0].sha256,result.receipt.sourceBindings[0].fullSHA256);assert.equal(trusted.installationAccessAuthenticated,false);
  stopped(result.pid);stopped(result.receipt.processId);await assert.rejects(runProviderProcess08(prepared),/single-use/);
 });

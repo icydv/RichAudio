@@ -37,9 +37,11 @@ test('scrambled stored RPF resource headers rebuild actual RSC7 from entry flags
 test('actual CodeWalker NG decrypts separately encrypted tables/names using only explicitly staged original synthetic state',{skip:!native},async()=>{
  const original=await fs.readFile(path.join(fixtureRoot,'original.rpf')),f=originalEncryptedArchive08(original),capInputs=[{path:f.capability.file,bytes:f.state}];
  const plain=completed(await run()),ng=completed(await run('ng.rpf',{capability:f.capability,capInputs}));assert.deepEqual(dto(ng),dto(plain));assert.equal(ng.resources.length,3);assert.deepEqual(ng.unknown,[]);assert.equal(ng.bootstrap.implicitExecutableReads,0);
+ assert.equal(ng.sources[0].identity.kind,'inherited-readonly-handle');assert.ok(ng.stats.sourceReadBytes>=f.state.length,'explicit NG handle bytes count against the existing read budget');
  const rejected=await run('ng.rpf');assert.equal(rejected.state,'failed');assert.equal(rejected.workerJoined,true);assert.equal(isProviderRun08(rejected),false);
  const wrong=Buffer.from(f.state);for(let k=0;k<101;k++)wrong[k*272]^=1;const bad=await run('ng.rpf',{capability:{...f.capability,sha256:providerByteSHA08(wrong)},capInputs:[{path:f.capability.file,bytes:wrong}]});assert.equal(bad.state,'failed');assert.equal(bad.workerJoined,true);
  const aes=originalEncryptedArchive08(original,{aes:true}),aesResult=completed(await run('aes.rpf',{capability:aes.capability,capInputs:[{path:aes.capability.file,bytes:aes.state},{path:aes.capability.aes.file,bytes:aes.aesKey}]}));assert.deepEqual(dto(aesResult),dto(plain));assert.deepEqual(aesResult.unknown,[]);
+ assert.ok(aesResult.stats.sourceReadBytes>=aes.state.length+aes.aesKey.length,'both explicit capability handles count against the existing read budget');
 });
 
 test('metadata-first discovery pages actual entry identities without reading geometry payloads',{skip:!native},async()=>{
