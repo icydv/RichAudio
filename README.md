@@ -58,6 +58,12 @@ If you're interested in where I'm taking RichAudio, watch or star this repositor
 
 For the technical side of my work, see the [roadmap](ROADMAP.md), [architecture](ARCHITECTURE.md), [research](GTA_AUDIO_RESEARCH.md) and [known challenges](RISKS.md).
 
+## Acknowledgements
+
+**[dexyfex](https://github.com/dexyfex)** — creator of **[CodeWalker](https://github.com/dexyfex/CodeWalker)**, the GTA V world viewer and map editor. RichAudio will use CodeWalker to inspect world geometry and help create acoustic maps for modelling how sound is obstructed, reflected and shaped by the environment.
+
+CodeWalker is an independent project; this credit does not imply dexyfex is affiliated with or endorses RichAudio.
+
 ---
 
 **RichAudio — Don't just hear the world. Feel its presence.**
