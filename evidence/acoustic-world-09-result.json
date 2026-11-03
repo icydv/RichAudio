@@ -1,0 +1,560 @@
+{
+  "schema": 1,
+  "kind": "RichAudioAcousticWorld09Result",
+  "baseCommit": "dc85e26281f2251b027003125f716eb69ba77e7f",
+  "technicalInitialization": {
+    "pinnedCodeWalkerCommit": "485d56bec00262ed7fa472261cce7bbc6202b96e",
+    "legitimateHeadlessUpstreamRouteExists": true,
+    "boundedMemoryInitializerImplemented": true,
+    "opaqueBytes": {
+      "minimum": 16,
+      "maximum": 1048576
+    },
+    "aesBytes": 32,
+    "exactDecodedBytes": 306272,
+    "implicitExecutableOrResourceLoaderEnabled": false,
+    "proprietaryBootstrapIncluded": false,
+    "genuineEnhancedInitialized": false,
+    "missing": [
+      "approved opaque bootstrap source and identity",
+      "matching AES or reviewed legitimate provisioner",
+      "real source/placement/ownership identities",
+      "private native containment qualification"
+    ]
+  },
+  "validation": {
+    "world08": {
+      "schema": 1,
+      "kind": "RichAudioOffline08Validation",
+      "passed": true,
+      "tests": 37,
+      "testFiles": 9,
+      "skipped": 0,
+      "freshPublicPreparation": true,
+      "freshCoreReproducibility": true,
+      "coreOriginalApiControls": 23,
+      "freshWorkerBuild": true,
+      "freshOriginalFixtures": true,
+      "freshPackage": true,
+      "testLogSHA256": "c50a7c07695d156428f3ee33ab6cf240b52bcd571de1693eb7e40241090ec33b",
+      "actualPipelineSHA256": "019f4d0a8ca4332012dd7189b6d94c7b0bcafc2aabc7e85f6d68139ff59f947d",
+      "coreSourceCommit": "485d56bec00262ed7fa472261cce7bbc6202b96e",
+      "packageManifestSHA256": "ff30c3889df3256182c45cfbba00391f25a3728fb2bea15b784196c457edf4ea",
+      "packageZIP_SHA256": "95d8b77eaf9b8995fd6256eaf2113cb5dbd99ad8c7d8e75f381e486d4d0407d7",
+      "actualBinaryResources": 3,
+      "cacheHitsOnRestart": 1,
+      "conversionsOnRestart": 0,
+      "dryPcmIdentical": true,
+      "stereoPcmDifferent": true,
+      "inheritedOffline06Passed": true,
+      "protectedBootstrapAvailable": false,
+      "privateInputsRead": false,
+      "installedResourcesRead": false,
+      "endpointOpened": false,
+      "gameLaunched": false,
+      "deployed": false,
+      "merged": false
+    },
+    "world09Tests": 22,
+    "world09Skipped": 0,
+    "world09TAP_SHA256": "046e0262a0776d44a25a4723dd4fb457380792ee02fe26157d62177ad0719ed6",
+    "inheritedResultSHA256": "7d23d42d27c3b5f8871e0e3dcb7eb9c7333948b52c9d34e49dd4a68fa172d82f",
+    "fullAttemptLogSHA256": "05ecf095e56a5c3f12b902c25a17b61073e7bc92ddbd4e6e26c055e33841f3c0",
+    "wrapperPassed": false,
+    "wrapperFailure": "profile CLI invocation used old arguments from the already-running PowerShell script; all 37 WORLD08, 22 WORLD09 and complete inherited suites passed before this runner failure",
+    "runnerCorrected": true,
+    "correctedProfilePassed": true,
+    "packageRefreshedAfterCoordinatorFix": true,
+    "package": {
+      "schema": 1,
+      "kind": "CodeWalkerProviderPackage08Validation",
+      "passed": true,
+      "manifestSHA256": "0aa9d1e017693ca7c9fc42ea0bdcc9848d57bbb74cbf820b5c17a29b96c209c1",
+      "zipSHA256": "b0335045bc07db7edb1ee34d0b072167313b0ee7c6b7ff996042361f14dea02e",
+      "verifiedFiles": 287,
+      "packageRelativeImports": 4,
+      "nodeBundled": true,
+      "officialNodeChecksumMatched": true,
+      "unplannedCliRejected": true,
+      "checkoutFallback": false,
+      "installedResourcesRead": false,
+      "workerInvoked": false,
+      "endpointOpened": false,
+      "gameLaunched": false
+    },
+    "fullCurrentHostedRunRequired": true
+  },
+  "processing": {
+    "historicalHostedMaximumMs": 42.9559,
+    "historicalCauseEstablished": false,
+    "independentProfile02SHA256": "ab86018826433c8d654fa5e9791363385b002731ad6dee16656ecdfe162c148b",
+    "fresh03SHA256": "df7781dbda7087b8f6713801983be2ab4bb038f81ebafd7029d4e080bbfc567d",
+    "fresh03LogSHA256": "3da189d10da6004e1255f5fa10ba8c4b83d4ee9a2857bbde0716c3900393c9e8",
+    "fresh03Trials": [
+      {
+        "profile": "constructor-defaults",
+        "repetition": 0,
+        "variant": "reference-direct",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.6990000000000123,
+          "p99Ms": 5.109200000000001,
+          "maximumMs": 19.7573,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.6891000000000247,
+          "p99Ms": 1.9791999999999916,
+          "maximumMs": 2.2983999999999867,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "constructor-defaults",
+        "repetition": 0,
+        "variant": "instrumented-direct",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.7317999999999927,
+          "p99Ms": 5.376100000000008,
+          "maximumMs": 19.578900000000004,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.7101000000000113,
+          "p99Ms": 1.5886000000000138,
+          "maximumMs": 2.0567000000000064,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "constructor-defaults",
+        "repetition": 0,
+        "variant": "reference-walls",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.8728999999999587,
+          "p99Ms": 5.5908000000000015,
+          "maximumMs": 20.1759,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.8661999999999921,
+          "p99Ms": 2.0678000000000054,
+          "maximumMs": 2.3377000000000123,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "constructor-defaults",
+        "repetition": 0,
+        "variant": "instrumented-walls",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.8779999999999859,
+          "p99Ms": 6.023400000000009,
+          "maximumMs": 20.914199999999994,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.8663000000000238,
+          "p99Ms": 2.0534999999999854,
+          "maximumMs": 2.1747000000000014,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "constructor-defaults",
+        "repetition": 1,
+        "variant": "instrumented-walls",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.8753999999999564,
+          "p99Ms": 5.82820000000001,
+          "maximumMs": 19.662300000000016,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.8427000000000362,
+          "p99Ms": 2.320300000000003,
+          "maximumMs": 2.4043000000000063,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "constructor-defaults",
+        "repetition": 1,
+        "variant": "reference-walls",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.8543000000000234,
+          "p99Ms": 4.944700000000012,
+          "maximumMs": 20.999599999999987,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.8363000000000227,
+          "p99Ms": 2.155300000000011,
+          "maximumMs": 2.2113999999999976,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "constructor-defaults",
+        "repetition": 1,
+        "variant": "instrumented-direct",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.7685000000000173,
+          "p99Ms": 5.409300000000002,
+          "maximumMs": 19.774100000000004,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.7629999999999768,
+          "p99Ms": 1.9534000000000162,
+          "maximumMs": 1.9729000000000099,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "constructor-defaults",
+        "repetition": 1,
+        "variant": "reference-direct",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.6967999999999961,
+          "p99Ms": 5.456100000000006,
+          "maximumMs": 21.03880000000001,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.6876000000000033,
+          "p99Ms": 1.6743000000000166,
+          "maximumMs": 1.8573000000000093,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "fixed-cpu-balanced",
+        "repetition": 0,
+        "variant": "reference-direct",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.7377999999999929,
+          "p99Ms": 5.2376000000000005,
+          "maximumMs": 20.17479999999999,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.7302999999999997,
+          "p99Ms": 1.557799999999986,
+          "maximumMs": 1.8091000000000008,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "fixed-cpu-balanced",
+        "repetition": 0,
+        "variant": "instrumented-direct",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.7715000000000032,
+          "p99Ms": 5.092300000000009,
+          "maximumMs": 20.23509999999999,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.762500000000017,
+          "p99Ms": 1.4975000000000023,
+          "maximumMs": 1.9287999999999954,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "fixed-cpu-balanced",
+        "repetition": 0,
+        "variant": "reference-walls",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.8645999999999958,
+          "p99Ms": 5.027500000000003,
+          "maximumMs": 20.400499999999994,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.8471000000000117,
+          "p99Ms": 1.9277999999999906,
+          "maximumMs": 2.6251000000000033,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "fixed-cpu-balanced",
+        "repetition": 0,
+        "variant": "instrumented-walls",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.9019000000000119,
+          "p99Ms": 5.224800000000016,
+          "maximumMs": 20.06740000000002,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.8601999999999634,
+          "p99Ms": 2.1041000000000167,
+          "maximumMs": 2.206499999999977,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "fixed-cpu-balanced",
+        "repetition": 1,
+        "variant": "instrumented-walls",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.9039999999999964,
+          "p99Ms": 5.23490000000001,
+          "maximumMs": 19.818700000000007,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.8928999999999974,
+          "p99Ms": 2.1743999999999915,
+          "maximumMs": 2.397500000000008,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "fixed-cpu-balanced",
+        "repetition": 1,
+        "variant": "reference-walls",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.8824999999999932,
+          "p99Ms": 5.386799999999994,
+          "maximumMs": 19.776099999999985,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.8772999999999911,
+          "p99Ms": 1.9883000000000095,
+          "maximumMs": 2.2043000000000177,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "fixed-cpu-balanced",
+        "repetition": 1,
+        "variant": "instrumented-direct",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.7117999999999824,
+          "p99Ms": 5.3478000000000065,
+          "maximumMs": 20.629400000000004,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.7023000000000081,
+          "p99Ms": 1.9553999999999974,
+          "maximumMs": 2.2279000000000053,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      },
+      {
+        "profile": "fixed-cpu-balanced",
+        "repetition": 1,
+        "variant": "reference-direct",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.7202000000000055,
+          "p99Ms": 5.7727,
+          "maximumMs": 24.813900000000004,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.7042000000000144,
+          "p99Ms": 1.494100000000003,
+          "maximumMs": 2.237099999999998,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        }
+      }
+    ],
+    "pcmPairs": [
+      {
+        "profile": "constructor-defaults",
+        "repetition": 0,
+        "scene": "direct",
+        "dryBitIdentical": true,
+        "stereoBitIdentical": true,
+        "everyBlockBitIdentical": true,
+        "framesIdentical": true,
+        "sourceCursorIdentical": true,
+        "continuous": true
+      },
+      {
+        "profile": "constructor-defaults",
+        "repetition": 0,
+        "scene": "walls",
+        "dryBitIdentical": true,
+        "stereoBitIdentical": true,
+        "everyBlockBitIdentical": true,
+        "framesIdentical": true,
+        "sourceCursorIdentical": true,
+        "continuous": true
+      },
+      {
+        "profile": "constructor-defaults",
+        "repetition": 1,
+        "scene": "direct",
+        "dryBitIdentical": true,
+        "stereoBitIdentical": true,
+        "everyBlockBitIdentical": true,
+        "framesIdentical": true,
+        "sourceCursorIdentical": true,
+        "continuous": true
+      },
+      {
+        "profile": "constructor-defaults",
+        "repetition": 1,
+        "scene": "walls",
+        "dryBitIdentical": true,
+        "stereoBitIdentical": true,
+        "everyBlockBitIdentical": true,
+        "framesIdentical": true,
+        "sourceCursorIdentical": true,
+        "continuous": true
+      },
+      {
+        "profile": "fixed-cpu-balanced",
+        "repetition": 0,
+        "scene": "direct",
+        "dryBitIdentical": true,
+        "stereoBitIdentical": true,
+        "everyBlockBitIdentical": true,
+        "framesIdentical": true,
+        "sourceCursorIdentical": true,
+        "continuous": true
+      },
+      {
+        "profile": "fixed-cpu-balanced",
+        "repetition": 0,
+        "scene": "walls",
+        "dryBitIdentical": true,
+        "stereoBitIdentical": true,
+        "everyBlockBitIdentical": true,
+        "framesIdentical": true,
+        "sourceCursorIdentical": true,
+        "continuous": true
+      },
+      {
+        "profile": "fixed-cpu-balanced",
+        "repetition": 1,
+        "scene": "direct",
+        "dryBitIdentical": true,
+        "stereoBitIdentical": true,
+        "everyBlockBitIdentical": true,
+        "framesIdentical": true,
+        "sourceCursorIdentical": true,
+        "continuous": true
+      },
+      {
+        "profile": "fixed-cpu-balanced",
+        "repetition": 1,
+        "scene": "walls",
+        "dryBitIdentical": true,
+        "stereoBitIdentical": true,
+        "everyBlockBitIdentical": true,
+        "framesIdentical": true,
+        "sourceCursorIdentical": true,
+        "continuous": true
+      }
+    ],
+    "latestInheritedContinuity": [
+      {
+        "kind": "device-free-render-processing-ms",
+        "calls": 144,
+        "p50": 0.8094999999999573,
+        "p99": 3.3926999999999907,
+        "maximum": 60.5282,
+        "overBudget": 1,
+        "blockBudgetMs": 10.666666666666666,
+        "endpointAccess": false,
+        "privateAssetsRead": false
+      }
+    ],
+    "physicalLatencyMeasured": false,
+    "osSchedulerCauseEstablished": false
+  },
+  "review": {
+    "bootstrapSHA256": "829846d5a99fdbc78ebaba3789ac1c432a29761f3f71a098ebf33ecc61b6fb78",
+    "processing02SHA256": "25b803d48ec682336b36f783eba78b13e4fbe042fdd9cf808c132f6f52ffee70",
+    "sessionFailedReviewSHA256": "bc02f73e4466897346fecb092a96c3a07b812457417bf40a0ecbccc41a472cd3",
+    "sessionCorrectedReviewSHA256": "99ca6d220281fcf727afb9ad9b751f1359686aaa62a5163f726e59a974600377"
+  },
+  "qualification": {
+    "actualCodeWalkerUsed": true,
+    "originalOpaqueBootstrapAndNgDecoded": true,
+    "originalNgGeometryCacheSoundMapPcmPassed": true,
+    "threePassOriginalSessionPassed": true,
+    "genuineResourceQualified": false,
+    "installedWorldCoverageQualified": false,
+    "realInteriorCompatibilityQualified": false,
+    "privateCandidateSealed": false,
+    "privateSourceOrCapabilityRead": false,
+    "gameLaunched": false,
+    "audioEndpointOpened": false,
+    "sourceAudioOrDspChanged": false,
+    "additionalFixedPcmQueueFrames": 0,
+    "deployed": false,
+    "merged": false
+  }
+}
