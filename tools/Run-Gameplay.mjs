@@ -1,6 +1,8 @@
-// Continuous owned producer. No WASAPI, game API, archive decode or synthetic source.
+// Continuous owned producer. Separate authored startup JIT PCM is discarded.
+// Playback uses verified stock banks; no WASAPI, game API or archive decode.
 import fs from 'node:fs';import path from 'node:path';import readline from 'node:readline';import {performance} from 'node:perf_hooks';
 import {loadStockCatalogAssets,loadStockNpcAssets} from '../src/acoustics/vehicle/stock-source.mjs';
+import {prepareStockSourcesForStartup10} from '../src/acoustics/vehicle/stock-source-preparation10.mjs';
 import {loadInstalledStockRegistry} from '../src/acoustics/vehicle/installed-stock-registry.mjs';
 import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';
 import {resolveLatencyProfile} from '../src/acoustics/vehicle/latency-profile.mjs';
@@ -15,9 +17,9 @@ if(latencyProfile.id==='low-latency-01'&&(config.demoProfile!=='PLAYABLE-13'||co
 const inside=relative=>{const p=path.resolve(root,relative);if(!p.startsWith(root+path.sep))throw Error('package path escaped');return p;};
 const assets=loadStockCatalogAssets(inside(config.playerManifest),{sustainAtlasFile:inside(config.atlas)}),npcAssets=loadStockNpcAssets(inside(config.npcManifest));
 const registry=loadInstalledStockRegistry({catalogFile:inside(config.catalog),catalogSha256:config.catalogSha256,assets,npcAssets}),profiles=JSON.parse(fs.readFileSync(inside(config.profiles),'utf8'));
-// Warm the shared source timelines before the host releases any telemetry.
-const warmed=new Set();for(const pair of config.eligible){const r=registry.resolve(pair.model,pair.context);if(r.status!=='available')throw Error('prepared eligible model no longer maps');const key=pair.context+':'+r.bank.model;
- if(!warmed.has(key)){registry.createSource(pair.model,pair.context);warmed.add(key);}}
+// Prepare pure bank data before the host releases telemetry or output startup.
+// Actual sources are first constructed by the unchanged eligibility selection.
+const sourceStartupPreparation10=prepareStockSourcesForStartup10(registry,config.eligible);
 const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true,latencyProfile:latencyProfile.id,continuityPolicy:config.continuityPolicy??'baseline'}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
 let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
 let viewer=false,viewerClient=null;engine.telemetry=new SoundMapTelemetry();
@@ -77,4 +79,4 @@ input.on('line',line=>{try{if(line.length>131072)throw Error('producer command s
  }catch(e){finish(e);}});
 input.on('close',()=>{if(!stopped)finish();});process.on('SIGTERM',()=>finish());process.on('SIGINT',()=>finish());
 const timer=setInterval(()=>{if(!stopped)status();},500);timer.unref();
-log({type:'gameplay-ready',warmedBanks:warmed.size,mode:'experimental-additive',nativeSuppression:false});
+log({type:'gameplay-ready',...sourceStartupPreparation10,mode:'experimental-additive',nativeSuppression:false});

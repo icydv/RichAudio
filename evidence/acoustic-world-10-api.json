@@ -1,0 +1,312 @@
+{
+  "schema": 1,
+  "kind": "RichAudioWorld10CodeWalkerApiEvidence",
+  "observationDate": "2026-11-03",
+  "validation": {
+    "schema": 1,
+    "kind": "RichAudioCodeWalkerPublicApi10Validation",
+    "passed": true,
+    "controls": 57,
+    "binaryRole": "research-api-probe-only",
+    "researchCoreSHA256": "f58d70197c8c8a6d17b36567649d8b799a82a3ae686ee0bab7e87f9d6466c547",
+    "compilerSHA256": "cf32cb7e8e5691b962e1b6f92b03d87409dd9e7afbed71c5bf77b8203cc56ee1",
+    "adapter": {
+      "file": "RichAudio.CodeWalkerApiAdapter10.dll",
+      "bytes": 70656,
+      "sha256": "5600fd6db02c05e599be9b6043a48b2806894ffc84b91523c6dcbecea2542c46"
+    },
+    "ownedSourcePins": [
+      {
+        "file": "src/acoustics/world/CodeWalkerPublicApiAdapter10.cs",
+        "sha256": "81558679d39a8fdfcaf20d6c2ae00d98068c6588cbb80c363cbf433ededff133"
+      },
+      {
+        "file": "src/acoustics/world/CodeWalkerResourceBoundary03.cs",
+        "sha256": "f671c718e3b1075dfea871a28135eee24825ba7495ce572e08efd15d8bc8e81f"
+      },
+      {
+        "file": "src/acoustics/world/CodeWalkerStaticResourceAdapter02.cs",
+        "sha256": "17d662e80be9eaa2d37dadd7544ff39fd91007f47820e1986176c6506ee4e4b6"
+      },
+      {
+        "file": "src/acoustics/world/CodeWalkerCollisionAdapter.cs",
+        "sha256": "55f093c0e4f0d4c8986641b945684c3aa16e7cebc7d33af3aa3735c96ad22ddc"
+      }
+    ],
+    "coreBuilt": false,
+    "officialBinaryAcquired": false,
+    "standardBinaryQualified": false,
+    "distributionQualified": false,
+    "genuineEnhancedGeometryQualified": false,
+    "gameFilesRead": false,
+    "endpointOpened": false
+  },
+  "metadataAudit": {
+    "schema": 1,
+    "kind": "RichAudioCodeWalkerApiAudit10",
+    "passed": true,
+    "binaryRole": "research-api-probe-only",
+    "mode": "reflection-only-metadata-no-resource-values-or-code-execution",
+    "files": [
+      {
+        "file": "SharpDX.dll",
+        "bytes": 274944,
+        "sha256": "a0af255ea4b09a8cdb995b8c6fd1075e46f098e23c2351c974e6ded9b8b620cf",
+        "name": "SharpDX",
+        "version": "4.2.0.0",
+        "mvid": "0988cdfd-1a0b-4c70-be6b-f3ca351241b2",
+        "targetFramework": ".NETFramework,Version=v4.5",
+        "imageRuntimeVersion": "v4.0.30319",
+        "manifestResources": [],
+        "references": [
+          {
+            "name": "mscorlib",
+            "version": "4.0.0.0",
+            "publicKeyToken": "b77a5c561934e089"
+          },
+          {
+            "name": "System",
+            "version": "4.0.0.0",
+            "publicKeyToken": "b77a5c561934e089"
+          },
+          {
+            "name": "System.Core",
+            "version": "4.0.0.0",
+            "publicKeyToken": "b77a5c561934e089"
+          }
+        ]
+      },
+      {
+        "file": "SharpDX.Mathematics.dll",
+        "bytes": 215552,
+        "sha256": "4c9615496970ea84320e2a6e99f8fb828e3c7790384df5585d93fc368885d94e",
+        "name": "SharpDX.Mathematics",
+        "version": "4.2.0.0",
+        "mvid": "29711e7a-ffbb-4179-9560-d08ce7f3badb",
+        "targetFramework": ".NETFramework,Version=v4.5",
+        "imageRuntimeVersion": "v4.0.30319",
+        "manifestResources": [],
+        "references": [
+          {
+            "name": "mscorlib",
+            "version": "4.0.0.0",
+            "publicKeyToken": "b77a5c561934e089"
+          },
+          {
+            "name": "SharpDX",
+            "version": "4.2.0.0",
+            "publicKeyToken": "b4dcf0f35e5521f1"
+          }
+        ]
+      },
+      {
+        "file": "CodeWalker.Core.dll",
+        "bytes": 4484096,
+        "sha256": "f58d70197c8c8a6d17b36567649d8b799a82a3ae686ee0bab7e87f9d6466c547",
+        "name": "CodeWalker.Core",
+        "version": "0.0.0.0",
+        "mvid": "a203cd39-657f-4c62-9def-84985df90d48",
+        "targetFramework": null,
+        "imageRuntimeVersion": "v4.0.30319",
+        "manifestResources": [],
+        "references": [
+          {
+            "name": "mscorlib",
+            "version": "4.0.0.0",
+            "publicKeyToken": "b77a5c561934e089"
+          },
+          {
+            "name": "SharpDX.Mathematics",
+            "version": "4.2.0.0",
+            "publicKeyToken": "b4dcf0f35e5521f1"
+          },
+          {
+            "name": "System",
+            "version": "4.0.0.0",
+            "publicKeyToken": "b77a5c561934e089"
+          },
+          {
+            "name": "System.Core",
+            "version": "4.0.0.0",
+            "publicKeyToken": "b77a5c561934e089"
+          },
+          {
+            "name": "System.Xml",
+            "version": "4.0.0.0",
+            "publicKeyToken": "b77a5c561934e089"
+          },
+          {
+            "name": "System.Xml.Linq",
+            "version": "4.0.0.0",
+            "publicKeyToken": "b77a5c561934e089"
+          }
+        ]
+      },
+      {
+        "file": "RichAudio.CodeWalkerApiAdapter10.dll",
+        "bytes": 70656,
+        "sha256": "5600fd6db02c05e599be9b6043a48b2806894ffc84b91523c6dcbecea2542c46",
+        "name": "RichAudio.CodeWalkerApiAdapter10",
+        "version": "0.0.0.0",
+        "mvid": "a91234b3-7be8-4134-8244-204b85b770ad",
+        "targetFramework": null,
+        "imageRuntimeVersion": "v4.0.30319",
+        "manifestResources": [],
+        "references": [
+          {
+            "name": "CodeWalker.Core",
+            "version": "0.0.0.0",
+            "publicKeyToken": ""
+          },
+          {
+            "name": "mscorlib",
+            "version": "4.0.0.0",
+            "publicKeyToken": "b77a5c561934e089"
+          },
+          {
+            "name": "SharpDX.Mathematics",
+            "version": "4.2.0.0",
+            "publicKeyToken": "b4dcf0f35e5521f1"
+          },
+          {
+            "name": "System",
+            "version": "4.0.0.0",
+            "publicKeyToken": "b77a5c561934e089"
+          },
+          {
+            "name": "System.Core",
+            "version": "4.0.0.0",
+            "publicKeyToken": "b77a5c561934e089"
+          },
+          {
+            "name": "System.Web.Extensions",
+            "version": "4.0.0.0",
+            "publicKeyToken": "31bf3856ad364e35"
+          }
+        ]
+      }
+    ],
+    "features": {
+      "publicYmapLoadBytes": true,
+      "publicYtypLoadBytes": true,
+      "publicYbnLoadBytes": true,
+      "publicGen9Selector": true,
+      "researchAugmentationMarkers": [
+        "ReadHeaderForRichAudio08",
+        "InitializeFromRichAudio09"
+      ],
+      "publicBoundedArchiveHeaderInUnmodifiedPinnedSource": false,
+      "publicExplicitBootstrapInUnmodifiedPinnedSource": false
+    },
+    "standardBinaryQualified": false,
+    "distributionQualified": false,
+    "proprietaryPayloadAbsenceQualified": false,
+    "gameFilesRead": false,
+    "endpointOpened": false
+  },
+  "originalControls": {
+    "schema": 1,
+    "kind": "RichAudioCodeWalkerPublicApi10Controls",
+    "passed": true,
+    "checks": 57,
+    "controls": [
+      "exact authored YMAP/YTYP/YBN closure",
+      "ymap repeated normalized decode deterministic; selector initially False",
+      "ymap restores public Gen9 selector; initially False",
+      "ymap keeps evidence boundaries",
+      "ymap decoded digest binds actual output",
+      "ymap uses existing geometry DTO contract",
+      "ymap preserves every established geometry and transform field",
+      "ymap repeated normalized decode deterministic; selector initially True",
+      "ymap restores public Gen9 selector; initially True",
+      "ymap keeps evidence boundaries",
+      "ymap decoded digest binds actual output",
+      "ymap uses existing geometry DTO contract",
+      "ymap preserves every established geometry and transform field",
+      "ymap rejects changed digest",
+      "ymap rejects unqualified authority",
+      "ymap rejects unsupported version",
+      "ymap rejects truncated compressed pages",
+      "ytyp repeated normalized decode deterministic; selector initially False",
+      "ytyp restores public Gen9 selector; initially False",
+      "ytyp keeps evidence boundaries",
+      "ytyp decoded digest binds actual output",
+      "ytyp uses existing geometry DTO contract",
+      "ytyp preserves every established geometry and transform field",
+      "ytyp repeated normalized decode deterministic; selector initially True",
+      "ytyp restores public Gen9 selector; initially True",
+      "ytyp keeps evidence boundaries",
+      "ytyp decoded digest binds actual output",
+      "ytyp uses existing geometry DTO contract",
+      "ytyp preserves every established geometry and transform field",
+      "ytyp rejects changed digest",
+      "ytyp rejects unqualified authority",
+      "ytyp rejects unsupported version",
+      "ytyp rejects truncated compressed pages",
+      "ybn repeated normalized decode deterministic; selector initially False",
+      "ybn restores public Gen9 selector; initially False",
+      "ybn keeps evidence boundaries",
+      "ybn decoded digest binds actual output",
+      "ybn uses existing geometry DTO contract",
+      "ybn preserves every established geometry and transform field",
+      "ybn repeated normalized decode deterministic; selector initially True",
+      "ybn restores public Gen9 selector; initially True",
+      "ybn keeps evidence boundaries",
+      "ybn decoded digest binds actual output",
+      "ybn uses existing geometry DTO contract",
+      "ybn preserves every established geometry and transform field",
+      "ybn rejects changed digest",
+      "ybn rejects unqualified authority",
+      "ybn rejects unsupported version",
+      "ybn rejects truncated compressed pages",
+      "unsupported resource remains unknown",
+      "requires parser identity binding",
+      "null bytes rejected before parser",
+      "invalid Meta root rejected inside selector guard; initially False",
+      "selector restored after inner Meta failure; initially False",
+      "invalid Meta root rejected inside selector guard; initially True",
+      "selector restored after inner Meta failure; initially True",
+      "probe restores caller selector"
+    ],
+    "binaryRole": "research-api-probe-only",
+    "standardBinaryQualified": false,
+    "distributionQualified": false,
+    "originalFixturesOnly": true,
+    "gameFilesRead": false,
+    "endpointOpened": false
+  },
+  "publicResearch": {
+    "sourceCommit": "485d56bec00262ed7fa472261cce7bbc6202b96e",
+    "officialGitHubReleaseCount": 0,
+    "officialCoreOnlyArtifactQualified": false,
+    "nugetCandidate": {
+      "payloadAcquired": false,
+      "enhancedCompatibilityQualified": false,
+      "owner": "Ancapo",
+      "version": "1.0.3",
+      "publishedUtc": "2024-08-12T23:46:41.957Z",
+      "officialAuthorProvenanceQualified": false,
+      "id": "CodeWalker.Core"
+    },
+    "projectDeclaresMagicResource": true,
+    "resourceAccessorExpectsMagicByteArray": true,
+    "unmodifiedBinaryResourceContentsInspected": false,
+    "corePackageOrApplicationPayloadDownloaded": false,
+    "upstreamSourceCopiedIntoWorld10": false,
+    "newCoreBuilt": false,
+    "modifiedResearchCoreRetained": true
+  },
+  "qualification": {
+    "originalPublicMemoryDecodePassed": true,
+    "researchOnlyApiProbe": true,
+    "standardDllQualified": false,
+    "distributionQualified": false,
+    "genuineBuildingQualified": false,
+    "privateSourceRead": false,
+    "proprietaryBootstrapAcquired": false,
+    "gameLaunched": false,
+    "endpointOpened": false,
+    "deployed": false,
+    "merged": false
+  }
+}

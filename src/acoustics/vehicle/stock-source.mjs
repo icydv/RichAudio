@@ -3,13 +3,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {StockGrainVoice} from './stock-grain.mjs';
+import {StockGrainVoice,prepareStockGrain10,grainPreparationLimits10} from './stock-grain.mjs';
 import {StockExhaustEvents} from './stock-events.mjs';
+import {SourcePreparationBudgetError10} from './source-preparation-budget10.mjs';
 export {loadStockExhaustPops} from './stock-events.mjs';
 export {StockGrainVoice,NativePcmVoice} from './stock-grain.mjs';
+export {warmStockSourceJit10} from './stock-source-preparation10.mjs';
 const FS=48000,clamp=x=>Math.max(0,Math.min(1,x));
 const check=(ok,message)=>{if(!ok)throw Error(message);};
 const verifiedVehicleBanks=new WeakSet();
+const sourcePreparations10=new WeakMap();
+export const sourcePreparationLimits10=Object.freeze({maximumBanks:8,maximumBytes:grainPreparationLimits10.maximumBytes,maximumConcurrentPreparations:1});
 export const isVerifiedStockBank=bank=>verifiedVehicleBanks.has(bank);
 const validModel=model=>typeof model==='string'&&/^[a-zA-Z0-9_:-]{1,64}$/.test(model);
 export const stockModels=Object.freeze(['bati','lectro','prototipo','schafter3']);
@@ -20,6 +24,25 @@ export const stockModes=Object.freeze(['idle','accel','decel']);
 const analyticFixture=vehicle=>stockModels.includes(vehicle?.model)&&vehicle.provenance===undefined&&
   stockRoles.every(role=>stockModes.every(mode=>{const a=vehicle.layers?.[role]?.[mode];return a?.samples instanceof Float32Array&&
     a.file===undefined&&a.sha256===undefined&&a.sourceFormat===undefined;}));
+
+/** Pure startup data. This does not construct a source, consume observations or
+ * emit samples. Each later source starts with its own untouched playback state. */
+export function prepareStockSource10(vehicle,{atlas=null,maximumBytes=sourcePreparationLimits10.maximumBytes}={}){
+ check(verifiedVehicleBanks.has(vehicle)||analyticFixture(vehicle),'verified model or explicit analytical fixture required');
+ check(Number.isSafeInteger(maximumBytes)&&maximumBytes>0&&maximumBytes<=sourcePreparationLimits10.maximumBytes,'bounded source preparation memory required');
+ const modes=vehicle.audioContext==='npc'?['idle','accel']:stockModes,entries=[],unique=[],peaks={};let bytes=0;
+ for(const role of stockRoles){let peak=0;for(const mode of modes){
+  const asset=vehicle.layers[role][mode],regions=atlas?.[role]?.[mode]??null;
+  let item=unique.find(x=>x.asset===asset&&x.regions===regions);
+  if(!item){if(bytes>=maximumBytes)throw new SourcePreparationBudgetError10('bytes',maximumBytes);
+   const preparation10=prepareStockGrain10(asset,{regions,maximumBytes:maximumBytes-bytes});
+   item={asset,regions,preparation10,nativePeak:asset.nativePeak};unique.push(item);bytes+=preparation10.bytes;}
+  entries.push({role,mode,...item});peak=Math.max(peak,asset.nativePeak??asset.samples.reduce((p,v)=>Math.max(p,Math.abs(v)),0));
+ }peaks[role]=peak;}
+ const token=Object.freeze({kind:'RichAudioStockSourcePreparation10',bytes,grainPlans:unique.length,npc:vehicle.audioContext==='npc',
+  voiceTextures:Object.freeze(entries.map(e=>e.preparation10.textureEnabled)),sourceFramesAdvanced:0,pcmQueueFramesAdded:0});
+ sourcePreparations10.set(token,{vehicle,model:vehicle.model,audioContext:vehicle.audioContext,atlas,modes,entries,peaks});return token;
+}
 
 export function loadStockAssets(manifestFile,{sustainAtlasFile=null}={}){
   return readStockAssetLibrary(manifestFile,{sustainAtlasFile},stockModels);
@@ -76,8 +99,10 @@ function readStockAssetLibrary(manifestFile,{sustainAtlasFile},allowedModels,con
 }
 
 export class StockVehicleSource {
-  constructor(vehicle,{sourceGain=1,atlas=null,pressureShares={engine:.5,exhaust:.5},pressureSharesByState=null,exhaustEvents=null}={}){
+  constructor(vehicle,{sourceGain=1,atlas=null,pressureShares={engine:.5,exhaust:.5},pressureSharesByState=null,exhaustEvents=null,preparation10=null}={}){
     check((verifiedVehicleBanks.has(vehicle)||analyticFixture(vehicle))&&Number.isFinite(sourceGain)&&sourceGain>0&&sourceGain<=2,'verified model or explicit analytical fixture and bounded shared source calibration');
+    const prepared=preparation10===null?null:sourcePreparations10.get(preparation10);
+    check(preparation10===null||prepared&&prepared.vehicle===vehicle&&prepared.model===vehicle.model&&prepared.audioContext===vehicle.audioContext&&prepared.atlas===atlas&&prepared.entries.every(e=>vehicle.layers[e.role][e.mode]===e.asset&&e.asset.nativePeak===e.nativePeak),'exact branded source preparation required');
     this.npc=vehicle.audioContext==='npc';this.modes=this.npc?Object.freeze(['idle','accel']):stockModes;
     const shareStates=pressureSharesByState?[pressureSharesByState.idle,pressureSharesByState.load,pressureSharesByState.lift]:[pressureShares,pressureShares,pressureShares];
     check(shareStates.every(s=>s&&stockRoles.every(role=>Number.isFinite(s[role])&&s[role]>0&&s[role]<1)&&Math.abs(s.engine+s.exhaust-1)<1e-12),'explicit pressure shares must sum to one');
@@ -85,7 +110,7 @@ export class StockVehicleSource {
     this.pressureShares=Object.freeze({...pressureShares});
     this.pressureSharesByState=pressureSharesByState?Object.freeze({idle:this.shareStates[0],load:this.shareStates[1],lift:this.shareStates[2]}):null;
     this.inputBounds=Object.fromEntries(stockRoles.map(role=>{
-      const peak=Math.max(...this.modes.map(mode=>{const a=vehicle.layers[role][mode];return a.nativePeak??a.samples.reduce((p,v)=>Math.max(p,Math.abs(v)),0);}));
+      const peak=prepared?.peaks[role]??Math.max(...this.modes.map(mode=>{const a=vehicle.layers[role][mode];return a.nativePeak??a.samples.reduce((p,v)=>Math.max(p,Math.abs(v)),0);}));
       const bound=sourceGain*Math.max(...this.shareStates.map(s=>s[role]))*peak;
       check(bound<=.98,'calibrated native PCM exceeds declared individual input budget');return [role,bound];}));
     this.vehicle=vehicle;this.gain=sourceGain;this.frame=0;this.envelope=0;this.position=.1;
@@ -97,7 +122,8 @@ export class StockVehicleSource {
     this.previous={engine:0,exhaust:0};this.commonRates={engine:null,exhaust:null};
     if(exhaustEvents){check(!this.npc&&vehicle.model==='prototipo','verified native pops must not be substituted across vehicles or contexts');
       this.events=new StockExhaustEvents({...exhaustEvents,bedPeakBound:this.inputBounds.exhaust,roleGainBound:sourceGain*Math.max(...this.shareStates.map(s=>s.exhaust))});this.stats.events=this.events.stats;}
-    for(const role of stockRoles)this.voices[role]=Object.fromEntries(this.modes.map(mode=>[mode,new StockGrainVoice(vehicle.layers[role][mode],{regions:atlas?.[role]?.[mode]})]));
+    for(const role of stockRoles)this.voices[role]=Object.fromEntries(this.modes.map(mode=>[mode,new StockGrainVoice(vehicle.layers[role][mode],{regions:atlas?.[role]?.[mode],
+      ...(prepared?{preparation10:prepared.entries.find(e=>e.role===role&&e.mode===mode).preparation10}:{})})]));
     if(this.npc)this.stats.transitionPolicy='authored: follow operating point through accel PCM on lift; blend to recorded idle below .28; no decel voice or native scheduling claim';
   }
   renderInto(control,engine,exhaust,frames=engine.length){
