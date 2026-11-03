@@ -36,7 +36,7 @@ export function createWorldCoverageSnapshot06(coordinator,{offset=0,maximumTiles
 }
 
 export async function loadWorldCoverageInspection06({coordinator,pageId,tileId,inventory,geometryTimeMs=0,interiors=[]}={}){
- requireWorld(isStartupCoordinator06(coordinator)&&isResourceInventory04(inventory)&&inventory.origin==='original-authored-fixture','qualified original page and coordinator required');identifier(pageId);identifier(tileId);
+ requireWorld(isStartupCoordinator06(coordinator)&&isResourceInventory04(inventory)&&(inventory.origin==='original-authored-fixture'||inventory.origin==='separately-authorized-installed-metadata'&&inventory.tilePlans.every(p=>p.inputFormat==='codewalker-native08')),'qualified original or reviewed native page and coordinator required');identifier(pageId);identifier(tileId);
  const row=coordinator.snapshot().tiles.find(t=>t.pageId===pageId&&t.tileId===tileId),plan=inventory.tilePlans.find(p=>p.tileId===tileId);
  requireWorld(row&&plan&&row.planDigest===plan.planDigest,'exact current catalogue/page tile plan');
  const result=await coordinator.loadPrepared({pageId,tileId,engine:vehicleDistanceSceneOptions('authored-detail-loss-v1')});
@@ -62,7 +62,7 @@ export function createWorldCoverageSolver06({inspection,source,listener}={}){
  };
  let sample;for(let i=0;i<=6;i++)sample=step(i*.05);
  requireWorld(sample.soundMapFrame&&geometry,'actual existing solver/telemetry publication required');
- const frame=sample.soundMapFrame,alignment={basis:'original-authored-exact-model-alignment',session,acousticSession:frame.listenerSessionId??frame.sessionId,coordinateKey:'model:'+frame.streamId+':'+frame.sessionId+':'+JSON.stringify(geometry.calibration??geometry.observationModel?.calibration??null)};
+ const frame=sample.soundMapFrame,alignment={basis:record.args.inventory.origin==='separately-authorized-installed-metadata'?'reviewed-static-native-model-alignment08':'original-authored-exact-model-alignment',session,acousticSession:frame.listenerSessionId??frame.sessionId,coordinateKey:'model:'+frame.streamId+':'+frame.sessionId+':'+JSON.stringify(geometry.calibration??geometry.observationModel?.calibration??null)};
  const cachedGeometry=createCachedAcousticWorld041({...record.args,alignment}),solver={step,sample,geometry:cachedGeometry,simulation,get closed(){return closed;},close(){closed=true;}};
  solvers.set(solver,{inspection,coordinator:record.coordinator});return Object.freeze(solver);
 }
