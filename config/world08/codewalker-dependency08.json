@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "kind": "RichAudioCodeWalkerDependency08",
+  "sourceRepository": "https://github.com/dexyfex/CodeWalker",
+  "sourceCommit": "485d56bec00262ed7fa472261cce7bbc6202b96e",
+  "sourceFiles": 114,
+  "acquisition": "Public C# and original notices only, sparse partial clone; no embedded resources or game assets",
+  "attribution": "CodeWalker by dexyfex",
+  "authorPage": "https://www.gta5-mods.com/tools/codewalker-gtav-interactive-3d-map",
+  "upstreamSourceNoticePreserved": true,
+  "blanketRedistributionLicenceVerified": false,
+  "projectUseAndPackagingDecision": "Proceed as requested by the RichAudio project creator, with original notices and attribution",
+  "protectedBootstrapIncluded": false,
+  "gen9SelectorAvailable": true,
+  "installedEnhancedCompatibilityVerified": false,
+  "dependencies": [
+    {"name": "SharpDX", "version": "4.2.0", "target": "net45", "file": "SharpDX.dll", "sha256": "a0af255ea4b09a8cdb995b8c6fd1075e46f098e23c2351c974e6ded9b8b620cf", "packageSHA256": "117126040200faaa118f1312ad5a5b1e7d067c90abf6e726f18b6d1635216fc3"},
+    {"name": "SharpDX.Mathematics", "version": "4.2.0", "target": "net45", "file": "SharpDX.Mathematics.dll", "sha256": "4c9615496970ea84320e2a6e99f8fb828e3c7790384df5585d93fc368885d94e", "packageSHA256": "cb107f2b73c7982a31a7f9dd2e74c1c262f7b79e8b40344053a22f2ad8f1d594"}
+  ]
+}

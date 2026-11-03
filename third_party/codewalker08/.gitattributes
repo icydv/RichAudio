@@ -1,0 +1,2 @@
+# Preserve upstream licence bytes, including their original final blank lines.
+*.LICENSE -text whitespace=-blank-at-eof
