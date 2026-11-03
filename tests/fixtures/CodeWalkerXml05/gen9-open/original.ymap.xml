@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CMapData>
+ <name>hash_00A98AC7</name>
+ <parent />
+ <flags value="0" />
+ <contentFlags value="0" />
+ <streamingExtentsMin x="-16" y="-16" z="-16" />
+ <streamingExtentsMax x="16" y="16" z="16" />
+ <entitiesExtentsMin x="-16" y="-16" z="-16" />
+ <entitiesExtentsMax x="16" y="16" z="16" />
+ <entities />
+ <containerLods itemType="rage__fwContainerLodDef" />
+ <boxOccluders itemType="BoxOccluder" />
+ <occludeModels itemType="OccludeModel" />
+ <physicsDictionaries />
+ <instancedData>
+ <error>Couldn't find structure info rage__fwInstancedMapData!</error>
+ </instancedData>
+ <timeCycleModifiers itemType="CTimeCycleModifier" />
+ <carGenerators itemType="CCarGen" />
+ <LODLightsSOA>
+ <error>Couldn't find structure info CLODLight!</error>
+ </LODLightsSOA>
+ <DistantLODLightsSOA>
+ <error>Couldn't find structure info CDistantLODLight!</error>
+ </DistantLODLightsSOA>
+ <block>
+  <version value="0" />
+  <flags value="0" />
+  <name>original-world03</name>
+  <exportedBy>RichAudio-original-fixture</exportedBy>
+  <owner></owner>
+  <time>01 January 2000 00:00</time>
+ </block>
+</CMapData>

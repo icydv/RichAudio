@@ -4,7 +4,7 @@ const displayCadence=new DisplayCadence(20),displayRate=new RateMeter(),solverRa
 const canvas=$('scene'),ctx=canvas.getContext('2d'),camera={target:[0,0,0],yaw:-.7,pitch:.65,scale:13,topDown:false,width:800,height:600};
 let token=null,serviceStatus={},isReplay=false,viewPaused=false,follow=true,fps=20,connected=false,context=null;
 let lastMetadataAt=-Infinity,noticeUntil=0,lastReplayRequest=-1,pendingSeek=true,requestEpoch=0,lastCoordinateKey=null;
-let geometryCompiled=null,geometryFaces=[],contextFaces=[],contextSelectionKey='',lastDrawMs=0,paintMs=0;
+let geometryCompiled=null,geometryFaces=[],contextFaces=[],contextBoxes=[],contextSelectionKey='',lastDrawMs=0,paintMs=0;
 let replayAudioInfo=null,audioObjectUrl=null;
 const player=$('replay-audio');
 const format=n=>Number.isFinite(n)?n.toFixed(2):'unavailable';
@@ -45,6 +45,7 @@ function compileContext(view){
   const key=context?JSON.stringify([view.coordinateKey,geometry?.generation,listener?.map(x=>Math.round(x/8))]):'';
   if(key===contextSelectionKey)return;contextSelectionKey=key;
   const selected=visibleContext(context,geometry,listener);
+  contextBoxes=selected.tiles.filter(t=>t.showBounds===true).map(t=>({bounds:t.bounds,unknown:t.classification==='unknown-inspection'}));
   contextFaces=selected.tiles.flatMap(t=>t.faces.map(f=>({vertices:f.map(i=>t.vertices[i]),openings:[],normal:null,context:true})));
   if(context)safeText($('context-status'),`${selected.reason} · ${selected.tiles.length} visible tiles`);
 }
@@ -55,7 +56,7 @@ function draw(now){
   const view=currentPresentation(now),f=view.frame,g=view.geometry,health=view.health,cached=view.cacheLayer;
   if(lastCoordinateKey!==view.coordinateKey){lastCoordinateKey=view.coordinateKey;camera.target=view.listener?.valid?[...view.listener.position]:cached.visible?[...cached.target]:[0,0,0];camera.scale=13;contextSelectionKey='';}
   if(follow&&view.listener?.valid&&isPoint(view.listener.position))camera.target=[...view.listener.position];
-  grid();compileGeometry(g);compileContext(view);
+  grid();compileGeometry(g);compileContext(view);for(const box of contextBoxes)wireBox(box.bounds,box.unknown?'#efc46c':'#95b9df',[7,5]);
   const cachedFaces=cached.visible?cached.tiles.flatMap(tile=>tile.surfaces.map(surface=>({...surface,context:false,cached:true,expired:['expired-fixture','future-fixture'].includes(tile.state)}))):[];
   const faces=[...contextFaces,...cachedFaces,...geometryFaces].map(face=>({...face,depth:face.vertices.reduce((n,p)=>n+project(p,camera).depth,0)/face.vertices.length})).sort((a,b)=>a.depth-b.depth);
   for(const face of faces){
@@ -95,13 +96,15 @@ function metadata(now){
   const view=currentPresentation(now),f=view.frame,g=view.geometry,h=view.health,d=f?.diagnostics,isPassive=view.kind==='passive',isCached=view.kind==='cached-world',cached=view.cacheLayer;
   safeText($('connection'),viewPaused?'View paused · recording is independent':h.message);
   $('status-dot').style.background=h.state==='live'?'#63e8d3':h.state==='passive'?'#73bcff':h.state==='historical'?'#c6adff':'#e4cc80';
-  const conditional=f?.readiness?.mode==='listener-only-conditional-direct';
-  const mode=isReplay?'HISTORICAL':isCached?'CACHED FIXTURE':isPassive?'PASSIVE CAMERA':conditional?'CONDITIONAL DIRECT':view.kind==='acoustic'?'ACOUSTIC SOLVER':h.state.toUpperCase();
+  const conditional=f?.readiness?.mode==='listener-only-conditional-direct',inspectionOnly=!g&&context?.inspection05?.mode==='unqualified-xml05';
+  const mode=inspectionOnly?'UNQUALIFIED XML':isReplay?'HISTORICAL':isCached?'CACHED FIXTURE':isPassive?'PASSIVE CAMERA':conditional?'CONDITIONAL DIRECT':view.kind==='acoustic'?'ACOUSTIC SOLVER':h.state.toUpperCase();
   safeText($('mode-chip'),mode);safeText($('mode-label'),viewPaused?'VISUAL UPDATES PAUSED':mode);
   safeText($('scene-title'),isCached?'Cached acoustic geometry.':isPassive?'Your listener, live.':f?isReplay?'A recorded acoustic moment.':'Sound, mapped.':'Ready when Story Mode is.');
+  if(!g&&context?.inspection05?.mode==='unqualified-xml05')safeText($('scene-title'),'Unqualified XML inspection.');
   if(isPassive&&h.expired)safeText($('scene-title'),'Camera tracking unavailable.');
   const coverage=g?`${g.surfaces.length} finite surfaces · ${g.coverage}. `:'No accepted geometry. ';
   safeText($('knowledge'),isCached?'Original authored cache fixtures only. Tile and room boxes are bounds, not invented walls. Unsupported, unprepared and outside space remain unknown. Runtime doors and activation are unavailable.':isPassive?'Passive camera telemetry only. Acoustic processing is inactive. The reference grid is not world geometry.':conditional?'Listener-only conditional direct path. Unobserved space is assumed clear for the owned beacon; this is not verified unobstructed geometry.':coverage+(h.expired?'Geometry unavailable or expired at this moment. ':'')+'Unobserved space remains unknown.');
+  if(inspectionOnly)safeText($('knowledge'),'Unqualified XML inspection only. Source identity and placement remain unverified; no acoustic surfaces or solver paths are authorized. Outside coverage is unknown.');
   const packet=cacheWorld.packet;
   safeText($('cache-world-status'),packet?`${packet.tiles.length} declared tiles · ${packet.tiles.reduce((n,t)=>n+t.surfaces.length,0)} finite collision surfaces · ${packet.interiors.length} interior fixtures. ${cached.visible?cached.reason:'Inspection hidden.'} Installed-world compatibility remains unqualified.`:'No qualified cache snapshot supplied. The reference grid is not a building map.');
   safeText($('cache-world-identities'),cached.visible?cached.tiles.flatMap(t=>t.buildingBindings.slice(0,4).map(b=>`${t.tileId}: archetype ${b.archetypeHash} → ${b.collisionResourceId}`)).slice(0,16).join(' · '):'');
@@ -215,8 +218,9 @@ bind('visual-toggle',()=>{viewPaused=!viewPaused;replay.lastNow=null;displayCade
 $('fps').addEventListener('change',()=>{fps=clampFps($('fps').value);displayCadence.setRate(fps);displayRate.reset();});
 $('show-rejected').addEventListener('change',()=>{metadata(performance.now());});
 $('show-cache-world').addEventListener('change',()=>{lastCoordinateKey=null;metadata(performance.now());});
-$('context-file').addEventListener('change',async event=>{try{const file=event.target.files?.[0];if(!file)return;if(file.size>LIMITS.contextBytes)throw Error('Private context file exceeds 4 MiB');context=parseVisualContext(await file.text());contextSelectionKey='reload';compileContext(presentation(state,passive,performance.now(),connected));}catch(error){context=null;contextFaces=[];safeText($('context-status'),'Context rejected: '+error.message);notice(error.message,true);}});
-bind('clear-context',()=>{context=null;contextFaces=[];contextSelectionKey='';$('context-file').value='';safeText($('context-status'),'None loaded · no complete buildings inferred');});
+$('context-file').addEventListener('change',async event=>{try{const file=event.target.files?.[0];if(!file)return;if(file.size>LIMITS.contextBytes)throw Error('Private context file exceeds 4 MiB');context=parseVisualContext(await file.text());contextSelectionKey='reload';compileContext(presentation(state,passive,performance.now(),connected));}catch(error){context=null;contextFaces=[];contextBoxes=[];safeText($('context-status'),'Context rejected: '+error.message);notice(error.message,true);}});
+window.addEventListener('richaudio-inspection-context05',event=>{try{context=parseVisualContext(JSON.stringify(event.detail));contextSelectionKey='reload';if(context.inspection05?.mode==='unqualified-xml05'){camera.target=[...context.inspection05.anchor];follow=false;}compileContext(presentation(state,passive,performance.now(),connected));}catch{context=null;contextFaces=[];contextBoxes=[];safeText($('context-status'),'Inspection context rejected');}});
+bind('clear-context',()=>{context=null;contextFaces=[];contextBoxes=[];contextSelectionKey='';$('context-file').value='';safeText($('context-status'),'None loaded · no complete buildings inferred');});
 bind('popout',()=>{const popup=window.open(location.href,'RichAudioSoundMap','popup,width=1280,height=820,resizable=yes');if(!popup)throw Error('Allow this local page to open its independent SoundMap window.');});
 let drag=null;
 canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});
