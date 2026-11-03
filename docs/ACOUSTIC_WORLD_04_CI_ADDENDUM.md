@@ -1,0 +1,13 @@
+# ACOUSTIC-WORLD-04: my synthetic CI environment correction
+
+My first hosted [run 41560583971](https://github.com/icydv/RichAudio/actions/runs/41560583971) passed the 33 portable focused checks, then stopped while preparing the synthetic Windows header fixture. The strict header helper rejected the runner's inherited `DOTNET_SKIP_FIRST_TIME_EXPERIENCE` variable before the eight Windows controls could execute. The failed run remains preserved.
+
+Codex changed only `tests/Test-HeaderCandidate04.ps1`: the synthetic harness snapshots that one known .NET CLI first-run preference, removes it while running its fixture, and restores its exact prior existence and value in `finally`. The sealed header reader keeps its environment rejection policy. The negative `DOTNET_STARTUP_HOOKS` control still rejects before a consumed marker or input access.
+
+The deterministic local reproduction set `DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1` in the outer caller, ran all eight synthetic controls successfully, and verified that the inherited value was restored after success. A deliberate fresh-output preflight rejection separately verified restoration on failure. Consumed-attempt reuse still rejects. Codex retained an earlier failed development reproduction showing that setting the environment value to null left an empty-but-present variable on this PowerShell runtime; the final harness uses explicit environment-provider removal.
+
+The production C# source, candidate03 executable, manifest, original proposal, approval addendum, preparation receipt and runtime pins are unchanged. Their original independent review receipts remain historical evidence; this harness correction has separate evidence and review. No installed candidate was invoked and no installed paths were inspected. The next invocation of my exact installed header candidate still requires my explicit approval.
+
+A new hosted run must validate the corrected published head independently. The earlier local suite, final focused results and processing overruns remain unchanged; this environment correction supplies no real-resource, runtime, endpoint or acoustic compatibility proof.
+
+The failed hosted run also retained 144 authored render-processing calls: p50 1.3316 ms, p99 20.3405 ms, maximum 26.2615 ms and two calls above the 10.6667 ms block budget. The complete failed log is retained privately (SHA-256 `b6ee6656da328c52b9dbdab7e9299b15dedf7e2a552bc7dc1bbfe9105a4a9d45`). These processing overruns remain findings; no endpoint or audible dropout was measured. The original implementation evidence remains the snapshot at `9fd184266ca9439cff3614d87355cf0c6d685143`.

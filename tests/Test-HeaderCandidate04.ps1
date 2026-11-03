@@ -4,6 +4,14 @@ $ErrorActionPreference='Stop'
 $repo=Split-Path $PSScriptRoot -Parent
 function Hash([string]$p){(Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash.ToLowerInvariant()}
 function Check([bool]$ok,[string]$why){if(!$ok){throw $why}}
+# GitHub's CLI first-run preference is unrelated to the Framework header
+# fixture. Isolate that one known benign inherited flag in this synthetic
+# harness only; the sealed reader keeps its strict environment rejection.
+$ciFirstRunFlagName='DOTNET_SKIP_FIRST_TIME_EXPERIENCE'
+$ciFirstRunFlagExisted=Test-Path ('Env:\'+$ciFirstRunFlagName)
+$ciFirstRunFlagValue=[Environment]::GetEnvironmentVariable($ciFirstRunFlagName,'Process')
+try{
+Remove-Item ('Env:\'+$ciFirstRunFlagName) -ErrorAction SilentlyContinue
 $root=[IO.Path]::GetFullPath($OutputRoot)
 if(Test-Path -LiteralPath $root){throw 'Fresh synthetic header test output required'}
 [IO.Directory]::CreateDirectory($root)|Out-Null
@@ -45,3 +53,6 @@ foreach($case in @('success','missing','timeout','bad-digest','reparse','clr-env
 }
 $results|ConvertTo-Json -Depth 4|Set-Content -LiteralPath (Join-Path $root 'result.json') -Encoding utf8NoBOM
 Write-Output 'PASS 8 synthetic header controls, one-shot reuse rejection, no installed reads'
+}finally{
+ if($ciFirstRunFlagExisted){Set-Item ('Env:\'+$ciFirstRunFlagName) -Value $ciFirstRunFlagValue}else{Remove-Item ('Env:\'+$ciFirstRunFlagName) -ErrorAction SilentlyContinue}
+}
