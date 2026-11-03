@@ -7,6 +7,9 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & node --test tests/Test-CacheBuilder04.mjs tests/Test-Interior04.mjs tests/Test-WorldContinuity04.mjs tests/Test-ResourceProposal04.mjs tests/Test-World04Review.mjs
+    if($LASTEXITCODE-ne0){throw 'Offline installed-world cache, interior contracts, continuity or read-only proposal controls failed.'}
+    & (Join-Path $repo 'tests\Test-HeaderCandidate04.ps1') -OutputRoot (Join-Path $output 'world04-header-controls')
     & node --test tests/Test-ResourceImport03.mjs tests/Test-WorldSceneUnion03.mjs tests/Test-VehicleObservation03.mjs tests/Test-VehicleWorldLink03.mjs
     if($LASTEXITCODE-ne0){throw 'Resource-layout, scene identity/worker cleanup or read-only vehicle observation integration failed.'}
     & (Join-Path $repo 'tools\Test-VehicleObservation03.ps1')
