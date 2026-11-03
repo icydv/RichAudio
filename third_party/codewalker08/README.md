@@ -6,7 +6,7 @@ Credit: **CodeWalker by dexyfex**. [Author's download page](https://www.gta5-mod
 
 Original source headers, `Notice.txt` and `Readme_Src.txt` are preserved. My project decision to use and redistribute this component is not a claim that Codex verified a blanket upstream licence or written authorisation. The notices retain their original meanings.
 
-The build adapts only bounded in-memory archive admission and unavailable-bootstrap errors. It includes no `magic.dat`, `.resx`, game executable, archive, exported game asset or private key material. Protected bootstrap is explicitly unavailable in this package. Actual archive/resource readers remain functional for supported original and unencrypted inputs; that is not proof of installed Enhanced compatibility.
+The build adapts bounded in-memory archive admission, unavailable implicit-bootstrap errors and WORLD09's explicit bounded memory initializer. It includes no `magic.dat`, `.resx`, game executable, archive, exported game asset or private key material. Protected bootstrap material is unavailable in this package. The memory initializer can consume separately approved opaque/AES inputs through the supervised worker; authored containers exercise it offline. Actual archive/resource readers remain functional for supported inputs; that is not proof of installed Enhanced compatibility.
 
 SharpDX and SharpDX.Mathematics are version 4.2.0 from public NuGet, using the net45 libraries. Their upstream notice is included. CodeWalker's notice also credits Neodymium, Cameron Berry and Hamish Milne's FBX library; the upstream GPL/LGPL texts are retained alongside that notice. No original copyright header is removed.
 
