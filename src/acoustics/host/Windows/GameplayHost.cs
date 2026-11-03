@@ -32,12 +32,17 @@ namespace RichAudio.Beacon.Windows {
     child=new Process{StartInfo=new ProcessStartInfo{FileName=PlayableConfiguration.Inside(config.Root,"runtime/node.exe"),Arguments=Q(PlayableConfiguration.Inside(config.Root,"tools/Run-Gameplay.mjs"))+" --manifest "+Q(config.Manifest)+" --session "+session,WorkingDirectory=config.Root,UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true}};child.Start();childId=child.Id;nodeJob.Assign(child);
     writer=new Thread(WriteControls){IsBackground=true,Name="RichAudio gameplay control"};reader=new Thread(ReadPcm){IsBackground=true,Name="RichAudio RA07 reader"};diagnostics=new Thread(ReadDiagnostics){IsBackground=true};receiver=new Thread(Receive){IsBackground=true,Name="RichAudio gameplay pipe"};
     writer.Start();reader.Start();diagnostics.Start();receiver.Start();lastPcmTicks=lastSnapshotTicks=Stopwatch.GetTimestamp();
-    if(demo){var startup=Stopwatch.StartNew();while(!workerReady||Interlocked.Read(ref admittedLease)<=Stopwatch.GetTimestamp()){
+    // Preparation finishes before either output sink starts. The demo lease
+    // and worker share the existing five-second startup allowance.
+    var startup=Stopwatch.StartNew();while(!workerReady){
+     if(shutdownRequested||stop||readerEnded||!OwnerAlive()||child.HasExited||startup.ElapsedMilliseconds>=5000)throw new InvalidOperationException("producer preparation unavailable before output startup");wake.WaitOne(10);}
+    if(demo){while(Interlocked.Read(ref admittedLease)<=Stopwatch.GetTimestamp()){
       if(shutdownRequested||stop||!OwnerAlive()||child.HasExited||startup.ElapsedMilliseconds>=5000)throw new InvalidOperationException("fresh accepted Bati snapshot unavailable before output startup");wake.WaitOne(10);}
      recording=GameplayRecording.TryStart(config.Root,demoPermit,out recordingFailure);
      if(recording!=null)recordingDirectory=recording.DirectoryPath;
      if(shutdownRequested||Interlocked.Read(ref admittedLease)<=Stopwatch.GetTimestamp())throw new InvalidOperationException("Bati lease expired during output preparation");
     }
+    if(shutdownRequested||stop||readerEnded||!OwnerAlive()||child.HasExited||startup.ElapsedMilliseconds>=5000)throw new InvalidOperationException("producer preparation ended before output startup");
     if(fixture){sink=new Thread(ConsumeFixture){IsBackground=true};sink.Start();}
     else{audio=new WasapiOutput(ring,-1,true);audio.Volume=1;audio.Muted=false;if(recording!=null)audio.OwnedRecorder=recording.Tap;audio.Start();if(!audio.Ready.WaitOne(5000)||audio.Error!=null)throw new InvalidOperationException("playback endpoint unavailable");if(recording!=null)recording.StartLoopback(audio.SelectedEndpointId);}
     var command=new Thread(delegate(){try{while(!stop){string s=Console.ReadLine();if(s==null||s=="stop"){shutdownRequested=true;wake.Set();break;}}}catch(IOException){}}){IsBackground=true};command.Start();

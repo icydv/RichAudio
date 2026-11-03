@@ -1,9 +1,69 @@
 // Genuine PCM with a continuous interval-phase clock. Metadata spans are cycle-
 // rate evidence, not recovered crank RPM or a claim of GTA's native algorithm.
+import {SourcePreparationBudgetError10} from './source-preparation-budget10.mjs';
 const FS=48000;
 const check=(ok,message)=>{if(!ok)throw Error(message);};
 const smooth=x=>x*x*(3-2*x);
 const sourceTimelines=new WeakMap();
+// Prepared data contains no reader, random state, phase, clock or emitted PCM.
+// Tokens bind the exact loaded asset/options; changing assets requires a new plan.
+const preparations10=new WeakMap();
+const binding10=(asset,regions)=>({asset,regions,samples:asset.samplesFloat32??asset.samples,frames:asset.frames,sampleRate:asset.sampleRate,
+ intervals:asset.intervals,sustain:asset.sustain,sustainState:asset.sustain?.state,sha256:asset.sha256,playbackState:asset.playbackState});
+const matches10=(a,b)=>Object.keys(a).every(k=>a[k]===b[k]);
+export const grainPreparationLimits10=Object.freeze({maximumFrames:2097152,maximumIntervals:65536,maximumBytes:64*1024*1024});
+const bytes10=samples=>Buffer.from(samples.buffer,samples.byteOffset,samples.byteLength);
+const frozenCopy10=value=>{
+ if(value===null||typeof value!=='object')return value;
+ return Object.freeze(Array.isArray(value)?value.map(frozenCopy10):Object.fromEntries(Object.entries(value).map(([k,v])=>[k,frozenCopy10(v)])));
+};
+
+/** Startup-only pure preparation. No StockGrainVoice or playback history exists. */
+export function prepareStockGrain10(asset,{regions=null,texture=true,maximumBytes=grainPreparationLimits10.maximumBytes}={}){
+ check(Number.isSafeInteger(asset?.frames)&&asset.frames>=16,'bounded prepared source length required');
+ check(Number.isSafeInteger(maximumBytes)&&maximumBytes>0&&maximumBytes<=grainPreparationLimits10.maximumBytes,'bounded grain preparation memory required');
+ const samples=validated(asset),increment=asset.sampleRate/FS,supplied=regions?.candidateIntervals??regions??asset.intervals;
+ if(asset.frames>grainPreparationLimits10.maximumFrames)throw new SourcePreparationBudgetError10('frames',grainPreparationLimits10.maximumFrames);
+ check(supplied==null||Array.isArray(supplied),'ordered source interval array required');
+ if(supplied?.length>grainPreparationLimits10.maximumIntervals)throw new SourcePreparationBudgetError10('intervals',grainPreparationLimits10.maximumIntervals);
+ const selected=supplied?.length?supplied:[idleLoop(samples,asset.sampleRate)];
+ const textureEnabled=Boolean(texture&&supplied?.length>1);
+ const arrayBytes=samples.byteLength+(textureEnabled?(asset.frames+1)*8:0);
+ if(arrayBytes+selected.length*256>maximumBytes)throw new SourcePreparationBudgetError10('bytes',maximumBytes);
+ const intervals=selected.map((r,i)=>{
+  const start=r.startFrame,end=r.endFrame;
+  check(Number.isFinite(start)&&Number.isFinite(end)&&start>=0&&end<=asset.frames&&end-start>=8*increment,'invalid or too-short source interval');
+  if(supplied?.length)check(Number.isInteger(start)&&Number.isInteger(end),'metadata sample offsets must be integers');
+  if(i)check(start>=selected[i-1].endFrame,'source intervals overlap or are unordered');
+  const last=linear(samples,Math.max(start,end-increment)),first=linear(samples,start),selfJoin=Math.abs(first-last),contextJoin=start>=increment?Math.abs(first-linear(samples,start-increment)):Infinity;
+  return {start,end,length:end-start,centre:(start+end)/2,seam:contextJoin<selfJoin?Math.min((end-start)*.15,asset.sampleRate*.005,start):0};
+ });
+ const suppliedFeatures=asset.sustain?.intervals;
+ if(suppliedFeatures)check(suppliedFeatures.length===intervals.length&&suppliedFeatures.every((f,i)=>f.index===i&&f.startFrame===intervals[i].start&&f.endFrame===intervals[i].end),'sustain features must bind exact source intervals');
+ const features=suppliedFeatures??intervals.map(r=>{let e=0,peak=0,detail=0;for(let i=r.start;i<r.end;i++){
+  const v=samples[i];e+=v*v;peak=Math.max(peak,Math.abs(v));if(i>r.start)detail+=(v-samples[i-1])**2;}
+  const rms=Math.sqrt(e/r.length);return {rms,crestDb:rms?20*Math.log10(peak/rms):0,detailRatio:Math.sqrt(detail/Math.max(e,1e-30)),transientRisk:false};});
+ for(let i=1;i<intervals.length;i++)if(features[i-1].transientRisk)intervals[i].seam=0;
+ const intervalSignature=JSON.stringify(supplied??null),featureSignature=JSON.stringify(suppliedFeatures??null);
+ // Charge typed arrays exactly and conservatively charge the copied metadata
+ // and retained binding strings. This is a preparation cap, not a heap meter.
+ const requiredBytes=arrayBytes+selected.length*128+8*(intervalSignature.length+featureSignature.length+JSON.stringify(intervals).length+JSON.stringify(features).length);
+ if(requiredBytes>maximumBytes)throw new SourcePreparationBudgetError10('bytes',maximumBytes);
+ let timeline=null;
+ if(textureEnabled){const mapping={asset,intervals,pair:StockGrainVoice.prototype.pair},rateAt=StockGrainVoice.prototype.rateAt;
+  timeline=new Float64Array(asset.frames+1);for(let i=0;i<asset.frames;i++)timeline[i+1]=timeline[i]+rateAt.call(mapping,(i+.5)/(asset.frames-1))/asset.sampleRate;}
+ const token=Object.freeze({kind:'RichAudioStockGrainPreparation10',bytes:requiredBytes,textureEnabled,sourceFramesAdvanced:0});
+ preparations10.set(token,{binding:binding10(asset,regions),texture:Boolean(texture),samples,intervals:frozenCopy10(intervals),features:frozenCopy10(features),timeline,
+  snapshot:Buffer.from(bytes10(samples)),intervalSignature,featureSignature});
+ return token;
+}
+export function validateStockGrainPreparation10(asset,{regions=null,texture=true,preparation10}={}){
+ const p=preparations10.get(preparation10);
+ check(p&&matches10(p.binding,binding10(asset,regions))&&p.texture===Boolean(texture),'exact branded grain preparation required');
+ check(bytes10(p.samples).equals(p.snapshot)&&JSON.stringify(regions?.candidateIntervals??regions??asset.intervals??null)===p.intervalSignature&&
+  JSON.stringify(asset.sustain?.intervals??null)===p.featureSignature,'prepared source content changed; prepare a new plan');
+ return true;
+}
 function validated(asset){
   const samples=asset.samplesFloat32??asset.samples;
   check(samples instanceof Float32Array&&samples.length===asset.frames&&asset.frames>=16,'bounded decoded PCM required');
@@ -39,13 +99,18 @@ function idleLoop(samples,rate){
 }
 
 export class StockGrainVoice {
-  constructor(asset,{regions=null,texture=true}={}){
-    this.samples=validated(asset);this.asset=asset;this.increment=asset.sampleRate/FS;
+  #sourceTimeline=null;
+  constructor(asset,{regions=null,texture=true,preparation10=null}={}){
+    const prepared=preparation10===null?null:preparations10.get(preparation10);
+    if(preparation10!==null)validateStockGrainPreparation10(asset,{regions,texture,preparation10});
+    this.samples=prepared?.samples??validated(asset);this.asset=asset;this.increment=asset.sampleRate/FS;
     const supplied=regions?.candidateIntervals??regions??asset.intervals;
     check(supplied==null||Array.isArray(supplied),'ordered source interval array required');
     this.intervalBasis=supplied?.length?'observed-offset-whole-interval-phase-approximation':'waveform-matched-long-idle-loop-approximation';
-    const selected=supplied?.length?supplied:[idleLoop(this.samples,asset.sampleRate)];
-    this.intervals=selected.map((r,i)=>{
+    const selected=prepared?null:supplied?.length?supplied:[idleLoop(this.samples,asset.sampleRate)];
+    // Source-owned ordinary arrays retain the hot reader's original layout.
+    // A caller mutating one voice cannot corrupt another prepared source.
+    this.intervals=prepared?prepared.intervals.map(r=>({start:r.start,end:r.end,length:r.length,centre:r.centre,seam:r.seam})):selected.map((r,i)=>{
       const start=r.startFrame,end=r.endFrame;
       check(Number.isFinite(start)&&Number.isFinite(end)&&start>=0&&end<=asset.frames&&end-start>=8*this.increment,'invalid or too-short source interval');
       if(supplied?.length)check(Number.isInteger(start)&&Number.isInteger(end),'metadata sample offsets must be integers');
@@ -66,18 +131,24 @@ export class StockGrainVoice {
       minimumIntervalRateHz:Infinity,maximumIntervalRateHz:0,clock:'full interval phase; no overlap-hop rate or neighbour pattern'};
     this.textureEnabled=Boolean(texture&&supplied?.length>1);
     const features=asset.sustain?.intervals;
-    if(features)check(features.length===this.intervals.length&&features.every((f,i)=>f.index===i&&f.startFrame===this.intervals[i].start&&f.endFrame===this.intervals[i].end),'sustain features must bind exact source intervals');
-    this.features=features??this.intervals.map(r=>{let e=0,peak=0,detail=0;for(let i=r.start;i<r.end;i++){
+    if(features&&!prepared)check(features.length===this.intervals.length&&features.every((f,i)=>f.index===i&&f.startFrame===this.intervals[i].start&&f.endFrame===this.intervals[i].end),'sustain features must bind exact source intervals');
+    this.features=prepared?prepared.features.map(f=>({...f,...(f.bandFractions?{bandFractions:{...f.bandFractions}}:{})})):features??this.intervals.map(r=>{let e=0,peak=0,detail=0;for(let i=r.start;i<r.end;i++){
       const v=this.samples[i];e+=v*v;peak=Math.max(peak,Math.abs(v));if(i>r.start)detail+=(v-this.samples[i-1])**2;}
       const rms=Math.sqrt(e/r.length);return {rms,crestDb:rms?20*Math.log10(peak/rms):0,detailRatio:Math.sqrt(detail/Math.max(e,1e-30)),transientRisk:false};});
-    for(let i=1;i<this.intervals.length;i++)if(this.features[i-1].transientRisk)this.intervals[i].seam=0;
+    if(!prepared)for(let i=1;i<this.intervals.length;i++)if(this.features[i-1].transientRisk)this.intervals[i].seam=0;
     this.textureOccupancy=new Uint32Array(this.intervals.length);
     this.textureMix=1;
     this.textureSeed=(parseInt(asset.sha256?.slice(0,8)??'9e3779b9',16)^asset.frames^asset.sampleRate)>>>0;
     this.stats.texture={enabled:this.textureEnabled,basis:features?'rate-level-spectrum-gated-original-PCM':'rate-level-detail-gated-original-PCM',
       uniqueIntervals:0,cyclesAdvanced:0,phrasesStarted:0,minimumPoolCycles:null,maximumPoolCycles:0,transientRiskReads:0,
-      maximumMaterialRateDifference:0,insufficientMaterialFrames:0,stateLocalFallbackFrames:0,texturePlanRefreshes:0};
-    if(this.textureEnabled)this.timeline();
+      maximumMaterialRateDifference:0,insufficientMaterialFrames:0,stateLocalFallbackFrames:0,texturePlanRefreshes:0,
+      maximumReaderStepChange:undefined,minimumSpliceCorrelation:undefined,lowCoherenceSplices:undefined,modeRegistrations:undefined,chronologicalFrames:undefined,splices:undefined};
+    // Materialize the reader's empty slots without inventing a reader or past
+    // playback. First genuine synthesis fills these same formerly-lazy fields.
+    this.head=undefined;this.join=undefined;this.texturePlan=undefined;this.lastPlanAnchor=undefined;
+    this.lastPair=undefined;this.current=undefined;this.lastRate=undefined;this.pendingBoundary=undefined;
+    if(prepared?.timeline)this.#sourceTimeline=prepared.timeline;
+    if(this.textureEnabled)this.#timeline();
   }
   pair(u){
     const target=u*(this.asset.frames-1),r=this.intervals;let low=0,high=r.length-1;
@@ -144,7 +215,7 @@ export class StockGrainVoice {
   // Within a contiguous run this reads original chronology without any blend.
   rateAt(u){const p=this.pair(u);return this.asset.sampleRate/((1-p.w)*this.intervals[p.a].length+p.w*this.intervals[p.b].length);}
   advanceHead(head,rate){
-    const i=Math.floor(head.q),r=this.intervals[i],position=r.start+(head.q-i)*r.length,timeline=this.timeline();
+    const i=Math.floor(head.q),r=this.intervals[i],position=r.start+(head.q-i)*r.length,timeline=this.#timeline();
     const target=this.coordinate(head.q)+rate/FS;
     let k=Math.floor(position);while(k+1<timeline.length&&timeline[k+1]<=target)k++;
     check(k+1<timeline.length,'source-time advance escaped finite continuation');
@@ -154,18 +225,18 @@ export class StockGrainVoice {
     let index=i;while(index+1<this.intervals.length&&next>=this.intervals[index].end)index++;
     head.q=index+(next-this.intervals[index].start)/this.intervals[index].length;
   }
-  timeline(){
-    if(this.sourceTimeline)return this.sourceTimeline;
+  #timeline(){
+    if(this.#sourceTimeline)return this.#sourceTimeline;
     let entries=sourceTimelines.get(this.samples);if(!entries){entries=new Map();sourceTimelines.set(this.samples,entries);}
     const key=this.intervals.map(r=>r.start+':'+r.end).join(',');
-    if(entries.has(key))return this.sourceTimeline=entries.get(key);
+    if(entries.has(key))return this.#sourceTimeline=entries.get(key);
     const t=new Float64Array(this.asset.frames+1);
     for(let i=0;i<this.asset.frames;i++)t[i+1]=t[i]+this.rateAt((i+.5)/(this.asset.frames-1))/this.asset.sampleRate;
-    entries.set(key,t);return this.sourceTimeline=t;
+    entries.set(key,t);return this.#sourceTimeline=t;
   }
   coordinate(q){
-    if(q===this.intervals.length)return this.timeline()[this.intervals.at(-1).end];
-    const i=Math.floor(q),r=this.intervals[i],p=r.start+(q-i)*r.length,k=Math.floor(p),w=p-k,t=this.timeline();
+    if(q===this.intervals.length)return this.#timeline()[this.intervals.at(-1).end];
+    const i=Math.floor(q),r=this.intervals[i],p=r.start+(q-i)*r.length,k=Math.floor(p),w=p-k,t=this.#timeline();
     return (1-w)*t[k]+w*t[k+1];
   }
   clockRoom(q,plan){
