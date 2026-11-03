@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "kind": "RichAudioSavedNgInputProposal042",
+  "state": "blocked-missing-inputs-provenance-real-adapter-and-review",
+  "canExecute": false,
+  "command": null,
+  "candidateIdentity": null,
+  "approval": null,
+  "descriptorSHA256": null,
+  "inputs": {
+    "provenance": { "path": null, "bytes": null, "sha256": null, "maximumBytes": 16384 },
+    "captureAcquisitionMetadata": { "path": null, "bytes": null, "sha256": null, "maximumBytes": 4096 },
+    "savedCiphertext": { "path": null, "bytes": 46128, "sha256": null },
+    "expandedKeys": { "path": null, "bytes": 272, "sha256": null },
+    "decryptTables": { "path": null, "bytes": 278528, "sha256": null },
+    "hashLookup": { "path": null, "bytes": 256, "sha256": null }
+  },
+  "descriptorMaximumBytes": 16384,
+  "maximumAggregateInputBytes": 362048,
+  "archive": { "originalFileNameCaseSensitive": null, "wholeFileBytes": null, "completeArchiveSHA256": null, "captureProvenanceSHA256": null },
+  "tableLayout": { "entryCount": null, "namesBytes": null, "ciphertextPartition": "entryCount*16 followed by namesBytes, total46128; decrypt each block separately", "encryptionTag": null, "headerBytesReconstructedInMemory": 16, "rawHeaderFileRequired": false, "reconstructedHeaderSHA256": null },
+  "capability": { "provider": null, "permissionEvidenceSHA256": null, "targetEdition": null, "selectedKeyIndex": null, "realAdapterSHA256": null, "retentionPolicy": null },
+  "metadataCaps": { "entryCount": 2048, "namesBytes": 32768, "outputRows": 2048 },
+  "supervisionProposal": { "childCount": 1, "jobMemoryBytes": 268435456, "workMilliseconds": 5000, "joinMilliseconds": 2000, "stdoutBytes": 1048576, "stderrBytes": 16384, "totalOutputBytes": 2097152, "profile": null, "closureSHA256": null },
+  "installedReadAllowlist": [],
+  "loaderAllowlist": [],
+  "networkAllowlist": [],
+  "oneInvocationIncludingPreflightRejection": true,
+  "consumedMarkerAbsenceAllowsRetry": false,
+  "installedWorldVerified": false
+}
