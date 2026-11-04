@@ -27,3 +27,14 @@ jobs:
           $ErrorActionPreference = 'Stop'
           ./tools/Test-InGameMenu.ps1
           if ($LASTEXITCODE -ne 0) { throw 'F10 menu acceptance failed' }
+      - name: Retain original-only controlled menu previews
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # pinned v4.6.2
+        with:
+          name: richaudio-f10-sidebar-preview
+          path: |
+            .local/in-game-menu-*/richaudio-menu-1920x1080.png
+            .local/in-game-menu-*/richaudio-sidebar-cursor.png
+            .local/in-game-menu-*/richaudio-opening-110ms.png
+          if-no-files-found: error
+          retention-days: 7
