@@ -60,9 +60,23 @@ public static class TestMenuTransition
         var full=MenuTransition.Transform(frame,transition.Sample(220),48);Check(full.Commands[0].X==rect.X&&full.Commands[0].Argb==rect.Argb&&full.Regions[0].X==region.X,"fully open presentation exactly retains geometry and colour");
         var dimTransition=new MenuTransition();dimTransition.SetOpen(true,0);var dim=MenuTransition.Present(frame,dimTransition.Sample(110),1920,1080);
         Check(dim.Commands[0].X==0&&dim.Commands[0].Y==0&&dim.Commands[0].Width==1920&&dim.Commands[0].Height==1080,"scene dimming remains fixed to the viewport rather than sliding with the panel");
-        Check(dim.Commands[0].Argb==unchecked((int)0x29000000)&&dim.Commands[1].X==84&&dim.Regions[0].X==84,"the actual presentation shares eased opacity and aligned control geometry");
+        double halfShift=AcousticMenuModel.SidebarWidth*AcousticMenuModel.SidebarScale(1920,1080)*.5;
+        Check(dim.Commands[0].Argb==unchecked((int)0x17000000),"scene dimmer is deliberately subtle at half-open");
+        Near(dim.Commands[1].X,100-halfShift,"entire left sidebar slides from beyond the viewport edge");
+        Near(dim.Regions[0].X,100-halfShift,"animated hit geometry stays aligned with sidebar commands");
+        var open=MenuTransition.Present(frame,dimTransition.Sample(220),1920,1080);
+        var pointer=MenuTransition.Present(frame,dimTransition.Sample(220),1920,1080,210,140,true);
+        Check(pointer.Commands.Count==open.Commands.Count+14,"seven two-layer cursor segments render after all panel commands");
+        Check(pointer.Commands[pointer.Commands.Count-1].Argb==unchecked((int)0xFFF2EFE7),
+            "custom pointer is the last, fully opaque RPH draw layer");
+        Check(pointer.Commands[pointer.Commands.Count-1].X>=210&&pointer.Commands[pointer.Commands.Count-1].Y>=140,
+            "cursor location uses untransformed normalized input coordinates");
+        Check(MenuTransition.Present(frame,dimTransition.Sample(220),1920,1080,1200,140,true).Commands.Count==open.Commands.Count,
+            "pointer outside the sidebar is not doubled over the GTA scene");
+        Check(MenuTransition.Present(frame,dimTransition.Sample(220),1920,1080,210,140,false).Commands.Count==open.Commands.Count,
+            "keyboard-only presentation adds no decorative pointer");
         dimTransition.SetOpen(false,110);Check(MenuTransition.Present(frame,dimTransition.Sample(330),1920,1080).Commands.Count==0,"fully closed actual presentation removes dimmer and panel");
-        Reject(()=>MenuTransition.Transform(frame,state,Single.NaN),"nonfinite slide rejected");Reject(()=>MenuTransition.Transform(frame,state,-1),"negative slide rejected");Reject(()=>MenuTransition.Transform(frame,state,513),"unbounded slide rejected");Reject(()=>MenuTransition.Transform(null,state),"null frame rejected");Reject(()=>MenuTransition.Transform(frame,null),"null transition state rejected");
+        Reject(()=>MenuTransition.Transform(frame,state,Single.NaN),"nonfinite slide rejected");Reject(()=>MenuTransition.Transform(frame,state,-1),"negative slide rejected");Reject(()=>MenuTransition.Transform(frame,state,4097),"unbounded slide rejected");Reject(()=>MenuTransition.Transform(null,state),"null frame rejected");Reject(()=>MenuTransition.Transform(frame,null),"null transition state rejected");
     }
     public static int Main(){try{Console.WriteLine("PASS "+Run()+" menu transition, focus-release and immutable hit-transform checks; no game or device");return 0;}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
 }
