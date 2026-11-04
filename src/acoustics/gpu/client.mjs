@@ -18,7 +18,7 @@ const softwareAdapter=cap=>(Number.isInteger(cap.adapterFlags)&&(cap.adapterFlag
 export class AcousticGpuClient {
   constructor({executable=defaultGpuExecutable,initializationDeadlineMs=5000}={}){
     check(typeof executable==='string'&&initializationDeadlineMs>=100&&initializationDeadlineMs<=10000,'GPU helper options');
-    this.executable=executable;this.initializationDeadlineMs=initializationDeadlineMs;this.child=null;this.ready=null;this.cap=null;this.buffer=Buffer.alloc(0);this.pending=null;this.nextId=0;this.closed=false;
+    this.executable=executable;this.initializationDeadlineMs=initializationDeadlineMs;this.child=null;this.ready=null;this.cap=null;this.buffer=Buffer.alloc(0);this.pending=null;this.nextId=0;this.closed=false;this.processClosure=null;
     this.stats={submitted:0,completed:0,rejected:0,deadlines:0,maximumRoundTripMs:0};
   }
   async capability(){
@@ -28,12 +28,17 @@ export class AcousticGpuClient {
     this.ready=new Promise(resolve=>{
       this.resolveCapability=resolve;
       this.initialTimer=setTimeout(()=>this.fail('GPU initialization deadline'),this.initializationDeadlineMs);
-      const child=this.child=spawn(this.executable,[],{stdio:['pipe','pipe','pipe'],windowsHide:true,shell:false});
+      const closure=this.processClosure={pid:null,processStarted:false,exitObserved:false,exitCode:null,exitSignal:null,closeObserved:false,closeCode:null,closeSignal:null,spawnErrorCode:null,processErrorCode:null,launchFailedSynchronously:false};
+      closure.done=new Promise(yes=>{closure.resolve= yes;});
+      let child;try{child=this.child=spawn(this.executable,[],{stdio:['pipe','pipe','pipe'],windowsHide:true,shell:false});closure.pid=child.pid??null;}
+      catch(error){closure.spawnErrorCode=error.code??'unknown';closure.launchFailedSynchronously=true;closure.resolve();this.fail('GPU helper process unavailable');return;}
+      child.once('spawn',()=>{closure.processStarted=true;closure.pid=child.pid??null;});
       child.stdout.on('data',b=>this.receive(b));
       // Diagnostic text is never a protocol substitute and cannot grow unbounded.
       let stderrBytes=0;child.stderr.on('data',b=>{stderrBytes+=b.length;if(stderrBytes>8192)this.fail('GPU diagnostic bound');});
-      child.on('error',()=>this.fail('GPU helper process unavailable'));
-      child.on('exit',()=>this.fail('GPU helper disconnected'));
+      child.on('error',error=>{if(!closure.processStarted)closure.spawnErrorCode=error.code??'unknown';else closure.processErrorCode=error.code??'unknown';this.fail('GPU helper process unavailable');});
+      child.once('exit',(code,signal)=>{closure.exitObserved=true;closure.exitCode=code;closure.exitSignal=signal;this.fail('GPU helper disconnected');});
+      child.once('close',(code,signal)=>{closure.closeObserved=true;closure.closeCode=code;closure.closeSignal=signal;closure.resolve();this.fail('GPU helper disconnected');});
       child.stdin.on('error',()=>this.fail('GPU helper input unavailable'));
     });
     return this.ready;
@@ -110,5 +115,31 @@ export class AcousticGpuClient {
     if(this.pending){const p=this.pending;this.pending=null;clearTimeout(p.timer);this.stats.rejected++;p.reject(Error(reason));}
     this.close();
   }
-  close(){if(this.closed)return;this.closed=true;clearTimeout(this.initialTimer);if(this.pending){const p=this.pending;this.pending=null;clearTimeout(p.timer);p.reject(Error('GPU client closed'));}if(this.child){this.child.stdin.destroy();this.child.stdout.destroy();this.child.stderr.destroy();this.child.kill();this.child=null;}}
+  // An opt-in shutdown observer for controllers/tests. The render path keeps
+  // synchronous close(); observing closure never extends a dispatch deadline,
+  // closes a process, retries work, or claims CPU time that was not collected.
+  // joined means an actual ChildProcess close event. A failed launch can emit
+  // close without spawn/exit; processStarted and both observations stay separate.
+  waitForClose({timeoutMs=5000}={}){
+    check(Number.isInteger(timeoutMs)&&timeoutMs>=1&&timeoutMs<=5000,'GPU close observation bound');
+    const closure=this.processClosure,started=performance.now();
+    const snapshot=state=>Object.freeze({state,launchAttempted:closure!==null,processStarted:closure?.processStarted??false,pid:closure?.pid??null,
+      exitObserved:closure?.exitObserved??false,exitCode:closure?.exitCode??null,exitSignal:closure?.exitSignal??null,
+      closeObserved:closure?.closeObserved??false,closeCode:closure?.closeCode??null,closeSignal:closure?.closeSignal??null,
+      spawnErrorCode:closure?.spawnErrorCode??null,processErrorCode:closure?.processErrorCode??null,
+      joined:state==='closed'?true:state==='join-timeout'?false:null,timeoutMs,elapsedMs:performance.now()-started,
+      helperCpuMs:null,helperCpuReason:'Client close observation does not collect helper CPU'});
+    if(!closure)return Promise.resolve(snapshot('not-started'));
+    if(closure.closeObserved)return Promise.resolve(snapshot('closed'));
+    if(closure.launchFailedSynchronously)return Promise.resolve(snapshot('launch-failed'));
+    return new Promise(resolve=>{
+      const timer=setTimeout(()=>resolve(snapshot('join-timeout')),timeoutMs);
+      closure.done.then(()=>{clearTimeout(timer);resolve(snapshot(performance.now()-started>timeoutMs?'join-timeout':closure.closeObserved?'closed':'launch-failed'));});
+    });
+  }
+  close(){if(this.closed)return;this.closed=true;clearTimeout(this.initialTimer);
+    if(!this.cap)this.cap=Object.freeze({supported:false,hardware:false,reason:'GPU client closed'});
+    const resolve=this.resolveCapability;this.resolveCapability=null;resolve?.(this.cap);
+    if(this.pending){const p=this.pending;this.pending=null;clearTimeout(p.timer);p.reject(Error('GPU client closed'));}
+    if(this.child){this.child.stdin.destroy();this.child.stdout.destroy();this.child.stderr.destroy();this.child.kill();this.child=null;}}
 }

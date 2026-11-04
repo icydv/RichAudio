@@ -1,0 +1,190 @@
+{
+  "kind": "World13GpuReadinessCorrectionEvidence",
+  "createdUtc": "2026-11-04T14:50:12.7034997Z",
+  "originalClientSHA256": "e7b664f38d9b5101fc9823f18c644b2a0bd8b1b31b487e423c8bf12efdccd4c1",
+  "originalFailure": {
+    "actualChildCloseIndependentlyAwaited": true,
+    "failed": 1,
+    "reason": "Close left pending capability unresolved",
+    "retainedUnchanged": true,
+    "file": ".local/world13-gpu-readiness-prefixed-node22-01.tap",
+    "selectedTests": 1,
+    "actualOriginalHelperEntryObserved": true
+  },
+  "bindings": [
+    {
+      "file": "src/acoustics/gpu/client.mjs",
+      "sha256": "f150aae1a1ed7958ac9607b58fc1557f843bfabe4f98ed5a78777a64ac2e7e2a"
+    },
+    {
+      "file": "tests/Test-GpuReadiness13.mjs",
+      "sha256": "006b4a7cf3c76fcbefe1969c18744fcdd569fc51ab9bc69e2b8e9cbd9b2910e1"
+    },
+    {
+      "file": ".local/world13-gpu-readiness-frozen-node22-01.tap",
+      "sha256": "ff2c0e054c2a67f1e1210fe87fbd0e92f75f21c2ef18642797bc8452637ce3ea"
+    },
+    {
+      "file": ".local/world13-gpu-readiness-frozen-node24-01.tap",
+      "sha256": "66df56145659dc6b93698c747d89c3ec29f9da0d04f5f62c772c3b6bb1c03acf"
+    },
+    {
+      "file": ".local/world13-gpu-readiness-final-node22-01.tap",
+      "sha256": "4eea1e52c2bec1effe8816c24754c82611271790afe1f4657507b054e4f179ab"
+    },
+    {
+      "file": ".local/world13-gpu-readiness-final-node24-01.tap",
+      "sha256": "0611cc749f457812c8f2f062baae6664571e03ed892f69aec56424dd71600e79"
+    },
+    {
+      "file": ".local/world13-gpu-readiness-prefixed-node22-01.tap",
+      "sha256": "fdcdafb99f279f43404b7abcd13c802a58b2f3e3e8b4712a83b68d2b63a6b586"
+    }
+  ],
+  "functional": {
+    "overlappingPopulationsReportedSeparately": true,
+    "earlierCombinedNewAndInheritedBackendTestsPerRuntime": {
+      "tests": 19,
+      "skipped": 0,
+      "failed": 0,
+      "passed": 19
+    },
+    "finalFrozenNewReadinessSuitePerRuntime": {
+      "tests": 7,
+      "skipped": 0,
+      "failed": 0,
+      "passed": 7
+    },
+    "runtimePopulations": [
+      "v22.23.4",
+      "v24.19.0"
+    ]
+  },
+  "finalObservationBindings": [
+    {
+      "fixtureMode": "deliberately-absent",
+      "bytes": 682,
+      "file": ".local/gpu-readiness13-XOunQB/deliberately-absent.json",
+      "controller": "v24.19.0",
+      "sha256": "17afc8e13d1808a940a12598590de1eaad7b2e6c442491bf68618e547b651375"
+    },
+    {
+      "fixtureMode": "hold-capability-backend",
+      "bytes": 762,
+      "file": ".local/gpu-readiness13-XOunQB/hold-capability-backend.json",
+      "controller": "v24.19.0",
+      "sha256": "28cc937a277b5419bfb32e3907689234c175ca9d899246e3f18746cdc81a088c"
+    },
+    {
+      "fixtureMode": "hold-capability-close",
+      "bytes": 767,
+      "file": ".local/gpu-readiness13-XOunQB/hold-capability-close.json",
+      "controller": "v24.19.0",
+      "sha256": "e4e286195e8061dfa0bcb53dcdd7745cd5723a0b4591c8e631e1b58cd72e9a3e"
+    },
+    {
+      "fixtureMode": "hold-capability-join-timeout",
+      "bytes": 1074,
+      "file": ".local/gpu-readiness13-XOunQB/hold-capability-join-timeout.json",
+      "controller": "v24.19.0",
+      "sha256": "2b914617eb37bbff583afb21d1ce2c5942519084c7f3062c094c3889c56c83ed"
+    },
+    {
+      "fixtureMode": "hold-dispatch-close",
+      "bytes": 710,
+      "file": ".local/gpu-readiness13-XOunQB/hold-dispatch-close.json",
+      "controller": "v24.19.0",
+      "sha256": "eae016c7f02a031a46b6e5faa242c5d7433d7e4bb71cc6d65d50210b01ab8029"
+    },
+    {
+      "fixtureMode": "invalid-original-fixture",
+      "bytes": 704,
+      "file": ".local/gpu-readiness13-XOunQB/invalid-original-fixture.json",
+      "controller": "v24.19.0",
+      "sha256": "3a9368ba5e6aa3bbfc455b8ace038828951d04097e3cba8a6cb6e51733182ab8"
+    },
+    {
+      "fixtureMode": "natural-exit-observed",
+      "bytes": 629,
+      "file": ".local/gpu-readiness13-XOunQB/natural-exit-observed.json",
+      "controller": "v24.19.0",
+      "sha256": "349c0a8c4bfae7b05771d2c34d732dfab8fb0ca43ed13bcb267bd8e2e4dfe109"
+    },
+    {
+      "fixtureMode": "deliberately-absent",
+      "bytes": 681,
+      "file": ".local/gpu-readiness13-VneaOn/deliberately-absent.json",
+      "controller": "v22.23.4",
+      "sha256": "e2fb3ce4dbc45dde5df32fbc51ed3be6249a707ec498a892a6c757c8cdecf6df"
+    },
+    {
+      "fixtureMode": "hold-capability-backend",
+      "bytes": 763,
+      "file": ".local/gpu-readiness13-VneaOn/hold-capability-backend.json",
+      "controller": "v22.23.4",
+      "sha256": "aa658cfa4e428d2679ad82fd6be8266c37b5421aa3390a348b9ac82dcdc26523"
+    },
+    {
+      "fixtureMode": "hold-capability-close",
+      "bytes": 766,
+      "file": ".local/gpu-readiness13-VneaOn/hold-capability-close.json",
+      "controller": "v22.23.4",
+      "sha256": "1d0caf0ded7fee79735a1abb5106b685918de440b5a5d7d15e9df7c5d900bb01"
+    },
+    {
+      "fixtureMode": "hold-capability-join-timeout",
+      "bytes": 1086,
+      "file": ".local/gpu-readiness13-VneaOn/hold-capability-join-timeout.json",
+      "controller": "v22.23.4",
+      "sha256": "8f1886247259422c473b7e1b1ac3b346f607289f92ad084bd28a1ee3e8b523e9"
+    },
+    {
+      "fixtureMode": "hold-dispatch-close",
+      "bytes": 710,
+      "file": ".local/gpu-readiness13-VneaOn/hold-dispatch-close.json",
+      "controller": "v22.23.4",
+      "sha256": "38ca69b482d3576a72316c64e2e9f60a7a302234a4937072dc40122c44496749"
+    },
+    {
+      "fixtureMode": "invalid-original-fixture",
+      "bytes": 704,
+      "file": ".local/gpu-readiness13-VneaOn/invalid-original-fixture.json",
+      "controller": "v22.23.4",
+      "sha256": "50940d896369c40bba5b4bef53646a2a27833be9c9d5dafccc42bb27fea4f46b"
+    },
+    {
+      "fixtureMode": "natural-exit-observed",
+      "bytes": 630,
+      "file": ".local/gpu-readiness13-VneaOn/natural-exit-observed.json",
+      "controller": "v22.23.4",
+      "sha256": "e4d531dc5e0af95726ba93c8432be9e43e12243ef5e172e36a52d9afb22b1c55"
+    }
+  ],
+  "contracts": {
+    "dispatchDefaultMs": 8,
+    "pendingCapabilitySettlesOnceUnsupportedClosed": true,
+    "spawnFailureCanHaveCloseWithoutProcessStart": true,
+    "joinTimeoutIsFailedUnknown": true,
+    "lateProtocolBytesIgnored": true,
+    "observerDoesNotCloseRetryOrRunWork": true,
+    "initDefaultMs": 5000,
+    "pendingDispatchRejected": true,
+    "newObservationDefaultAndMaximumMs": 5000,
+    "joinedMeansActualChildProcessCloseEvent": true,
+    "closeRemainsSynchronous": true,
+    "processStartedAndExitAndCloseDistinct": true,
+    "helperCpuRemainsUnknownNotZero": true
+  },
+  "scope": {
+    "commitOrPushPerformed": false,
+    "gameOrInstalledAssetOrPrivateCaptureRead": false,
+    "sourceHistoryBuffersOrRendererChanged": false,
+    "historicalHostedDd1RunChanged": false,
+    "graphicsApiCalledByFixture": false,
+    "hardwarePerformanceEstablished": false,
+    "gpuBenchmarkRun": false,
+    "audioEndpointOpened": false,
+    "originalAuthoredNativeProcessProtocolFixturesOnly": true,
+    "measurementDriverChanged": false
+  }
+}
