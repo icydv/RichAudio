@@ -164,7 +164,10 @@ export class StockGrainVoice {
     const k=Math.floor(position),next=Math.min(k+1,this.samples.length-1);
     this.stats.reads++;this.stats.minimumReadFrame=Math.min(this.stats.minimumReadFrame??k,k);
     this.stats.maximumReadFrame=Math.max(this.stats.maximumReadFrame??next,next);
-    return linear(this.samples,position);
+    // The bounds/statistics already resolved these interpolation addresses.
+    // Keep linear()'s multiplication/addition order without resolving twice.
+    const f=position-k;
+    return this.samples[k]*(1-f)+this.samples[next]*f;
   }
   cycle(r){
     const position=this.phase*r.length,p=Math.min(r.start+position,r.end-1e-9),k=Math.floor(p);
@@ -270,28 +273,37 @@ export class StockGrainVoice {
     check(horizon>0,'outgoing source continuation must remain bounded');
     const target=Float64Array.from({length:n},(_,k)=>reference.voice.sampleHead(reference.q+horizon*k/n));
     const minimumRoom=Math.min(.5,Math.max(.000001,4*this.rateAt(this.state??.5)/FS));
+    // The reference and plan stay fixed throughout this synchronous search.
+    // Reuse their room while retaining candidate order and every PCM score.
+    const sameVoice=reference.voice===this,selfRoom=sameVoice&&longestRun>=3?
+      Math.min(this.available(reference.q,plan)+.5,longestRun*.75):0;
+    // Scores are consumed immediately by this search. Retain scalar results
+    // instead of a result per probe and a copy of each improved best.
+    let correlation=0;
     const score=q=>{let diff=0,energy=0,xy=0,xx=0,yy=0;
-      if(q<0||q+horizon>this.intervals.length||this.available(q,plan)<Math.max(horizon,minimumRoom))return {error:Infinity,correlation:0};
-      if(reference.voice===this&&longestRun>=3&&this.available(q,plan)<Math.min(this.available(reference.q,plan)+.5,longestRun*.75))return {error:Infinity,correlation:0};
-      if(reference.voice===this&&longestRun>=8&&this.available(q,plan)<longestRun*.5)return {error:Infinity,correlation:0};
+      if(q<0||q+horizon>this.intervals.length){correlation=0;return Infinity;}
+      const room=this.available(q,plan);
+      if(room<Math.max(horizon,minimumRoom)){correlation=0;return Infinity;}
+      if(sameVoice&&longestRun>=3&&room<selfRoom){correlation=0;return Infinity;}
+      if(sameVoice&&longestRun>=8&&room<longestRun*.5){correlation=0;return Infinity;}
       for(let k=0;k<n;k++){const x=target[k],y=this.sampleHead(q+horizon*k/n);diff+=(x-y)**2;energy+=x*x+y*y;xy+=x*y;xx+=x*x;yy+=y*y;}
-      return {error:diff/Math.max(energy,1e-20),correlation:xy/Math.sqrt(Math.max(xx*yy,1e-30))};};
+      const error=diff/Math.max(energy,1e-20);correlation=xy/Math.sqrt(Math.max(xx*yy,1e-30));return error;};
     // First test the existing phase: identical periodic inputs need no shift.
-    let best=null;const phase=((reference.q%1)+1)%1;
+    let bestQ=null,bestError=Infinity,bestCorrelation=0;const phase=((reference.q%1)+1)%1;
     const candidates=[];for(let k=0;k<Math.min(12,list.length);k++){
       const i=list[Math.min(list.length-1,Math.floor((k+this.random()*.5)*list.length/Math.min(12,list.length)))];
       if(!candidates.includes(i))candidates.push(i);
     }
     for(const i of candidates){
-      const q=i+phase,c=score(q);if(!best||c.error<best.error)best={q,...c};
-      if(c.error<1e-12)break;
-      for(let j=0;j<32;j++){const q=i+j/32,c=score(q);if(c.error<best.error)best={q,...c};}
+      const q=i+phase,error=score(q);if(bestQ===null||error<bestError){bestQ=q;bestError=error;bestCorrelation=correlation;}
+      if(error<1e-12)break;
+      for(let j=0;j<32;j++){const q=i+j/32,error=score(q);if(error<bestError){bestQ=q;bestError=error;bestCorrelation=correlation;}}
     }
-    for(const step of [1/256,1/2048]){const centre=best.q;for(let k=-8;k<=8;k++){const q=centre+k*step,c=score(q);if(c.error<best.error)best={q,...c};}}
-    check(Number.isFinite(best.error),'no bounded waveform continuation');
-    this.stats.texture.minimumSpliceCorrelation=Math.min(this.stats.texture.minimumSpliceCorrelation??1,best.correlation);
-    if(best.correlation<.8)this.stats.texture.lowCoherenceSplices=(this.stats.texture.lowCoherenceSplices??0)+1;
-    return {q:best.q,correlation:best.correlation};
+    for(const step of [1/256,1/2048]){const centre=bestQ;for(let k=-8;k<=8;k++){const q=centre+k*step,error=score(q);if(error<bestError){bestQ=q;bestError=error;bestCorrelation=correlation;}}}
+    check(Number.isFinite(bestError),'no bounded waveform continuation');
+    this.stats.texture.minimumSpliceCorrelation=Math.min(this.stats.texture.minimumSpliceCorrelation??1,bestCorrelation);
+    if(bestCorrelation<.8)this.stats.texture.lowCoherenceSplices=(this.stats.texture.lowCoherenceSplices??0)+1;
+    return {q:bestQ,correlation:bestCorrelation};
   }
   alignTo(reference,u,rateHz){
     if(!this.textureEnabled||!reference.textureEnabled)return false;

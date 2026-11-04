@@ -190,6 +190,7 @@ foreach($child in @($wideReceiver,$wideSender)){
 }
 $wideProcess=[pscustomobject]@{Started=$true;Exited=$true;ExitCode=$wideNumber;KillRequested=$true;InspectionFailed=$true}
 $wideExecution=[pscustomobject]@{ReadinessObserved=$false;SenderWaitCompleted=$false;ReceiverWaitCompleted=$false;PrimaryTerminal=[pscustomobject]@{Code='receiver-start-failed';ExceptionType='UnauthorizedAccessException';HResult=$wideNumber};CleanupErrors=@(1..7|ForEach-Object{[pscustomobject]@{Role='receiver';Code='kill-exit-unverified';ExceptionType='UnauthorizedAccessException';HResult=$wideNumber}});Sender=$wideProcess;Receiver=$wideProcess}
+foreach($name in @('SenderWaitBudgetMs','SenderBudgetElapsedMs','ReceiverWaitBudgetMs','ReceiverBudgetElapsedMs')){Set-StressExpiryValue $wideExecution $name $wideNumber}
 foreach($child in @($wideReceiver,$wideSender)){Assert-Expiry ([Text.Encoding]::UTF8.GetByteCount(($child|ConvertTo-Json -Depth 20 -Compress)) -lt 65536) 'maximum-width raw fixture stays inside parser byte bound'}
 $wide=New-ExpiryDiagnostic 'domain-late' $false (New-FixtureRead $wideReceiver) (New-FixtureRead $wideSender) $wideExecution
 $originalWidePredicates=@($wide.FailedPredicates)
@@ -203,7 +204,7 @@ Assert-Expiry (!$compact.Passed -and $compact.ProjectionMode -eq 'compact' -and 
 foreach($predicate in $originalWidePredicates){Assert-Expiry ($compact.FailedPredicates -contains $predicate) 'compact projection retains each original failed predicate'}
 Assert-Expiry ($compact.FailedPredicatesOmitted -eq 0 -and $compact.OriginalFailedPredicateCount -eq $originalWidePredicates.Count) 'generated failure names are retained without omission'
 Assert-Expiry ($compact.Receiver.accepted -eq $wideNumber -and $compact.Sender.attempts -eq $wideNumber -and $compact.Receiver.Transport.Outcome -eq 'unexpected-eof' -and $compact.Sender.HarnessFailure.ExceptionType -eq 'CannotUnloadAppDomainException') 'compact counts/outcomes/source exception operands remain exact'
-Assert-Expiry ($compact.Sender.Fixture.Encoding[0].ObservationTicks -eq $wideClock -and $compact.Sender.Fixture.Encoding[0].BeforeEncodeQpc -eq $wideClock -and $compact.Sender.Fixture.PreparationBeforeQpc -eq $wideClock -and $compact.Execution.Sender.ExitCode -eq $wideNumber) 'compact projection retains causal timestamps, preparation and process exits'
+Assert-Expiry ($compact.Sender.Fixture.Encoding[0].ObservationTicks -eq $wideClock -and $compact.Sender.Fixture.Encoding[0].BeforeEncodeQpc -eq $wideClock -and $compact.Sender.Fixture.PreparationBeforeQpc -eq $wideClock -and $compact.Execution.Sender.ExitCode -eq $wideNumber -and $compact.Execution.SenderWaitBudgetMs -eq $wideNumber -and $compact.Execution.SenderBudgetElapsedMs -eq $wideNumber -and $compact.Execution.ReceiverWaitBudgetMs -eq $wideNumber -and $compact.Execution.ReceiverBudgetElapsedMs -eq $wideNumber) 'compact projection retains causal timestamps, preparation, process exits and wait budget operands'
 Assert-Expiry ($compact.Sender.Fixture.EncodingRecordCount -eq 32 -and $compact.Sender.Fixture.EncodingRecordsOmitted -eq 31 -and $compact.Execution.CleanupErrorCount -eq 7 -and $compact.Execution.CleanupErrorsOmitted -eq 6 -and $compact.Sender.CleanupFailureCount -eq 6 -and $compact.OmittedSections.Count -gt 0) 'all compact section omissions and original counts are explicit'
 Assert-Expiry ([Text.Encoding]::UTF8.GetByteCount($wideOutput[0]) -le 16384 -and $wideOutput[0] -notmatch $privateMarker) 'compact stdout remains within fixed privacy and size bounds'
 Assert-Expiry ([IO.File]::ReadAllText((Join-Path $wideLocal 'domain-late.json')) -ceq $wideOutput[0] -and [IO.File]::ReadAllText((Join-Path $wideHosted 'domain-late.json')) -ceq $wideOutput[0]) 'both durable destinations retain identical compact evidence before throw'
@@ -215,12 +216,19 @@ foreach($child in @($wide.Receiver,$wide.Sender)){$child.Transport.FirstCandidat
 $wide.FailedPredicates=@(1..64|ForEach-Object{('diagnostic.{0:d2}'-f$_)+('a'*83)})
 $widestJson=ConvertTo-ExpiryDiagnosticJson $wide
 Assert-Expiry ([Text.Encoding]::UTF8.GetByteCount($widestJson) -le 16384 -and ($widestJson|ConvertFrom-Json).FailedPredicatesOmitted -eq 0) '64 maximum-width predicate names and all timing sections remain bounded'
+$journalEvents=[Collections.Generic.List[object]]::new();foreach($unused in 1..64){$journalEvents.Add(@('first-completion-observed',$wideClock,$wideNumber))}
+$maximumJournal=[pscustomobject]@{State='qualified';ParentEventCount=16;ChildEventCount=48;LastParentStage='parent-exit-observed';LastChildStage='first-completion-observed';Events=$journalEvents.ToArray()}
+$wide|Add-Member -NotePropertyName StageJournals -NotePropertyValue ([pscustomobject]@{Sender=$maximumJournal;Receiver=$maximumJournal})
+$wide|Add-Member -NotePropertyName DiagnosticFault -NotePropertyValue 'terminal-record-before'
+$journalJson=ConvertTo-ExpiryDiagnosticJson $wide;$journalCompact=$journalJson|ConvertFrom-Json
+Assert-Expiry ([Text.Encoding]::UTF8.GetByteCount($journalJson) -le 16384 -and $journalCompact.StageJournals.Sender.LastChildQpc -eq $wideClock) 'maximum-width compact journal retains exact final stage timestamp inside publication bound'
+Assert-Expiry ($journalCompact.StageJournals.Sender.LastChildStage -eq 'first-completion-observed' -and $journalCompact.StageJournals.Sender.EventsOmitted -eq 64 -and $journalCompact.StageJournals.Receiver.ParentEventCount -eq 16) 'compact journal retains final stages and explicit original event counts'
 $wideRetentionOutput=[Collections.Generic.List[string]]::new();$wideRetentionThrew=$false
 try{Publish-ExpiryDiagnostic $wide $blockedLocal $blockedHosted|ForEach-Object{$wideRetentionOutput.Add([string]$_)}}catch{$wideRetentionThrew=$true}
 Assert-Expiry ($wideRetentionThrew -and $wideRetentionOutput.Count -eq 2 -and [Text.Encoding]::UTF8.GetByteCount($wideRetentionOutput[1]) -le 16384) 'maximum compact record also retains both destination failures inside the fixed bound'
 $wideRetentionRecord=$wideRetentionOutput[1]|ConvertFrom-Json
 Assert-Expiry (!$wideRetentionRecord.Passed -and $wideRetentionRecord.RetentionFailures.Count -eq 2 -and $wideRetentionRecord.FailedPredicates -contains 'diagnostic.retention-succeeded' -and $wideRetentionRecord.FailedPredicatesOmitted -eq 0) 'compact retention failure cannot mask size or original predicate failures'
-$stressProof=[ordered]@{kind='authored-maximum-width-publication-regression';originalProjectedBytes=[Text.Encoding]::UTF8.GetByteCount(($wide|ConvertTo-Json -Depth 12 -Compress));widestCompactBytes=[Text.Encoding]::UTF8.GetByteCount($widestJson);compactWithBothRetentionFailuresBytes=[Text.Encoding]::UTF8.GetByteCount($wideRetentionOutput[1]);fixedBound=16384;maximumPredicateNames=64;predicateCharacters=96;rawCaptureRecordsPerArray=32;endpointConstructed=$false}
+$stressProof=[ordered]@{kind='authored-maximum-width-publication-regression';originalProjectedBytes=[Text.Encoding]::UTF8.GetByteCount(($wide|ConvertTo-Json -Depth 12 -Compress));widestCompactBytes=[Text.Encoding]::UTF8.GetByteCount($widestJson);compactWithMaximumJournalsBytes=[Text.Encoding]::UTF8.GetByteCount($journalJson);compactWithBothRetentionFailuresBytes=[Text.Encoding]::UTF8.GetByteCount($wideRetentionOutput[1]);fixedBound=16384;maximumPredicateNames=64;predicateCharacters=96;rawCaptureRecordsPerArray=32;journalEventsPerRole=64;endpointConstructed=$false}
 [IO.File]::WriteAllText((Join-Path $fixture 'maximum-width-proof.json'),($stressProof|ConvertTo-Json),[Text.UTF8Encoding]::new($false))
 $wide.Passed=$true;$wide.FailedPredicates=@();$sizeOnlyOutput=[Collections.Generic.List[string]]::new();$sizeOnlyThrew=$false
 try{Publish-ExpiryDiagnostic $wide (Join-Path $fixture 'maximum-width-pass') $null|ForEach-Object{$sizeOnlyOutput.Add([string]$_)}}catch{$sizeOnlyThrew=$true}
@@ -230,10 +238,17 @@ $scriptText=[IO.File]::ReadAllText((Join-Path $repo 'tools/Test-UnsentExpiry.ps1
 $scriptTokens=$null;$parseErrors=$null
 [void][Management.Automation.Language.Parser]::ParseInput($scriptText,[ref]$scriptTokens,[ref]$parseErrors)
 Assert-Expiry ($parseErrors.Count -eq 0) 'expiry script parses'
-Assert-Expiry ($scriptText.Contains('$sender.WaitForExit(5000)') -and $scriptText.Contains('$receiver.WaitForExit(6000)') -and $scriptText.Contains('$w.ElapsedMilliseconds -lt 2000')) 'child and readiness deadlines unchanged'
+Assert-Expiry ($scriptText.Contains('Get-ExpiryRemainingWaitMs $senderBudget.Elapsed.TotalMilliseconds 5000') -and $scriptText.Contains('Get-ExpiryRemainingWaitMs $receiverBudget.Elapsed.TotalMilliseconds 6000') -and $scriptText.Contains('$w.ElapsedMilliseconds -lt 2000') -and $scriptText.IndexOf('$senderBudget=[Diagnostics.Stopwatch]::StartNew()') -lt $scriptText.IndexOf('Add-ExpiryParentStage $senderJournal 2') -and $scriptText.IndexOf('$w=[Diagnostics.Stopwatch]::StartNew()') -lt $scriptText.IndexOf('Add-ExpiryParentStage $receiverJournal 2')) 'fixed child/readiness monotonic budgets charge new stage observations'
+Assert-Expiry ((Get-ExpiryRemainingWaitMs 0 5000) -eq 5000) 'fresh sender budget has five-second maximum'
+Assert-Expiry ((Get-ExpiryRemainingWaitMs 0.1 5000) -eq 4999) 'sub-millisecond observation work rounds upward against budget'
+Assert-Expiry ((Get-ExpiryRemainingWaitMs 4999.1 5000) -eq 0) 'final fractional millisecond cannot extend sender budget'
+Assert-Expiry ((Get-ExpiryRemainingWaitMs 5200 5000) -eq 0) 'exhausted observation budget remains a failure'
+Assert-Expiry ((Get-ExpiryRemainingWaitMs 10 6000) -eq 5990) 'receiver observations are charged against original six-second budget'
+$invalidBudgets=0;foreach($elapsed in @(-1,[double]::NaN,[double]::PositiveInfinity)){try{Get-ExpiryRemainingWaitMs $elapsed 5000|Out-Null}catch{$invalidBudgets++}}
+Assert-Expiry ($invalidBudgets -eq 3) 'invalid elapsed measurements cannot produce an unbounded wait'
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
 $recordTest=Join-Path $fixture 'ExpiryRecordTests.exe'
-$sources=@(Get-ChildItem (Join-Path $repo 'src/acoustics/host/Transport') -Filter '*.cs'|ForEach-Object FullName)+@(Join-Path $repo 'tests/host/ExpiryExperiment.cs')+@(Join-Path $repo 'tests/host/ExpiryRecordTests.cs')
+$sources=@(Get-ChildItem (Join-Path $repo 'src/acoustics/host/Transport') -Filter '*.cs'|ForEach-Object FullName)+@(Join-Path $repo 'tests/host/ExpiryExperiment.cs')+@(Join-Path $repo 'tests/host/ExpiryStageJournal.cs')+@(Join-Path $repo 'tests/host/ExpiryRecordTests.cs')
 & $compiler /nologo /optimize+ /warnaserror+ /platform:x64 /define:TRANSPORT_EXPIRY_TEST /r:System.Runtime.Serialization.dll /r:System.Web.Extensions.dll /main:ExpiryRecordTests ('/out:'+$recordTest) @sources
 if($LASTEXITCODE -ne 0){throw 'Expiry record fixture build failed'}
 & $recordTest
