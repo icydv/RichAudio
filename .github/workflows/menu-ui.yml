@@ -37,4 +37,5 @@ jobs:
             .local/in-game-menu-*/richaudio-sidebar-cursor.png
             .local/in-game-menu-*/richaudio-opening-110ms.png
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 7
