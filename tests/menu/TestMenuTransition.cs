@@ -62,8 +62,8 @@ public static class TestMenuTransition
         Check(dim.Commands[0].X==0&&dim.Commands[0].Y==0&&dim.Commands[0].Width==1920&&dim.Commands[0].Height==1080,"scene dimming remains fixed to the viewport rather than sliding with the panel");
         double halfShift=AcousticMenuModel.SidebarWidth*AcousticMenuModel.SidebarScale(1920,1080)*.5;
         Check(dim.Commands[0].Argb==unchecked((int)0x17000000),"scene dimmer is deliberately subtle at half-open");
-        Near(dim.Commands[1].X,100-halfShift,"entire left sidebar slides from beyond the viewport edge");
-        Near(dim.Regions[0].X,100-halfShift,"animated hit geometry stays aligned with sidebar commands");
+        Check(Math.Abs(dim.Commands[1].X-(100-halfShift))<.001,"entire left sidebar slides from beyond the viewport edge");
+        Check(Math.Abs(dim.Regions[0].X-(100-halfShift))<.001,"animated hit geometry stays aligned with sidebar commands");
         var open=MenuTransition.Present(frame,dimTransition.Sample(220),1920,1080);
         var pointer=MenuTransition.Present(frame,dimTransition.Sample(220),1920,1080,210,140,true);
         Check(pointer.Commands.Count==open.Commands.Count+14,"seven two-layer cursor segments render after all panel commands");
