@@ -1,0 +1,72 @@
+{
+  "kind": "Menu02RecoveryPreparationEvidence",
+  "schema": 1,
+  "baselineCommit": "036ce80c29477d2bfbbd45d7dff44e42489a0428",
+  "manifestSha256": "4d0194bb15de6d283c8e97b9737b3d5c7122b334b71713918c3c30fb78828581",
+  "priorAttempt": {
+    "terminal": "STARTUP-ABORTED-RESTORED",
+    "approvalConsumed": true,
+    "terminalSealSha256": "21f99da3c95699ff28e86e79715a776d93abdbc12b634ccf7beeb5e941b0429a",
+    "retainedMembersVerified": 30,
+    "modified": false
+  },
+  "candidate": {
+    "rebuilt": false,
+    "menuSourcesChanged": false,
+    "dllSha256": "8e70ddbbcc5d98b57239c54eb764427f6d055c808b3b9fd616ac71daaa525d0b",
+    "sidecarSha256": "15a4ec13441701642a38ceb16eafa74302d91e9163e20a126e86731d9d55a41a"
+  },
+  "sourcePins": {
+    "coordinator": "1c60001c3ffbdaa5db6f996cb705d1702b5fb27f6907537a3c9e089bffb01c80",
+    "launcher": "7c5a15a32bc20170e0df258e155a1cc4017c27727f268a109d39a840e4ef93f7",
+    "restoration": "a6ba6b8a53447481f0474fd6f4d8d7fc3be6ca589640d487387117e30c60f2c0",
+    "supervision": "6c11a105994f007dc8675dc5d4c457cd0b7dd4bc91df46ed424cd85b2c41cb63"
+  },
+  "validation": {
+    "launchConstruction": 36,
+    "launchGates": 34,
+    "danglingLinks": 5,
+    "restoration": 33,
+    "independentSameRestoration": 33,
+    "coordinatorIntegration": 8,
+    "pureClock": 28,
+    "separatePopulations": true,
+    "independentRestorationReceipt": "39fe102b14a94b0f4b12a2139f20528fb02d730eb37f17a2d4d7d601927deeb4",
+    "coordinatorReceipt": "fede12684e8c3ddd6086ea6ee0d7708386346751063c4308ca7c45c66ce9086c",
+    "exactRealPreviewReceipt": "e3b8117d116dd8f26cae1664e96fd9f387bfdefa721dd851aa0832d5d215ce35",
+    "freshOriginalFingerprints": 13,
+    "watcherLifecycleExecuted": false,
+    "actualGtaStartupProven": false,
+    "externalReceiptBindings": 10,
+    "testedCoordinatorSha256": "c6f5a4c3fe63c620246ea0ebc7ebb772745fd860a61bd9b34dd57a718a42c0e8",
+    "finalCoordinatorSemanticTokensEqual": true,
+    "semanticTokenCount": 2517,
+    "formatEquivalenceReceiptSha256": "dffddfe7e0d3ec04215edf1daa74d3fd55e54a4ec27ec6a2f036a736e53350ef"
+  },
+  "retainedFailures": [
+    "Fixture02 invalid metadata-lock premise31/32, retained and corrected.",
+    "Initial pure-clock remaining-time overload precision failure, retained and corrected.",
+    "Earlier procedure reparse guard gap, corrected with five actual dangling-link regressions.",
+    "First recovery draft rejected: helper import cleared manifest parameters; initial seven-case result lacked independent hash assertions. Corrected eight-case result binds ten actual receipts to external hash."
+  ],
+  "proposed": {
+    "writeTargets": 2,
+    "transaction": "menu02-live-02",
+    "launches": 1,
+    "startupSeconds": 600,
+    "menuSeconds": 900,
+    "overallSeconds": 1500,
+    "loadedApiIdentity": "unresolved",
+    "freshApprovalRequired": true
+  },
+  "currentScope": {
+    "installedFilesWritten": false,
+    "gameOrRphLaunched": false,
+    "richAudioPlayback": false,
+    "warming": false,
+    "gpuAcousticProcessing": false,
+    "recording": false,
+    "privateAssetsRead": false,
+    "merged": false
+  }
+}
