@@ -1,0 +1,369 @@
+{
+  "kind": "World13LocalFunctionalEvidence",
+  "schema": 1,
+  "createdUtc": "2026-11-04T14:10:03.481Z",
+  "parent": "85646ec65f2f88f0eb935374a79260a75e96b728",
+  "populations": [
+    {
+      "runtime": "v22.23.4",
+      "executableSha256": "dccc52de28d8df2ee22d2062424f8c563070d95d8ad70c54c4bf01d590dec14f",
+      "passed": true,
+      "controllerBindings": [
+        {
+          "sha256": "805525e89e789e6b1e07592a49681e08f1e380f95ab69f5adb607d07b0263b03",
+          "path": "tools/Test-Offline13.ps1"
+        },
+        {
+          "sha256": "7f2d51a5ffcc290aa538a052d611c9ab2dab7f28df01f25dc6752155704c8a44",
+          "path": "tools/Processing-Verdict13.mjs"
+        },
+        {
+          "sha256": "d8e0a956fcf0919b22cac5c2a646c78596d396cf31013c75782db1d2f3885f12",
+          "path": "tools/ci-gates13.mjs"
+        },
+        {
+          "sha256": "948bd99ba5f08772dbd91610aae07a0349b33d9b06467066e747ea5526e3fd3d",
+          "path": ".github/workflows/offline.yml"
+        }
+      ],
+      "controllerBindingsStable": true,
+      "stages": [
+        {
+          "name": "inherited-controls",
+          "startedUtc": "2026-11-04T13:38:17.4918486Z",
+          "passed": true,
+          "failure": null,
+          "finishedUtc": "2026-11-04T13:45:30.9166417Z",
+          "originalLogSha256": "cd7afc5a0c1d5876031501f495e79304bbe29a83b9c8133e3cfbcde88fa8d155"
+        },
+        {
+          "name": "independent-cleanup-controls",
+          "startedUtc": "2026-11-04T13:45:30.9318669Z",
+          "passed": true,
+          "failure": null,
+          "finishedUtc": "2026-11-04T13:45:35.1845946Z",
+          "originalLogSha256": "8d62ff64b919d440b4b05b8ad2e43816808178e517be8b9e9f4de77339f9ac05"
+        }
+      ],
+      "counts": {
+        "inherited": {
+          "tests": 838,
+          "pass": 838,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "skippedCases": [],
+          "parser": "node-tap-or-spec-summary-v1",
+          "scope": "Node summary footers only; standalone native/PowerShell assertions are reported separately",
+          "skippedCasesComplete": true
+        },
+        "portable": {
+          "tests": 215,
+          "pass": 191,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 24,
+          "skippedCases": [
+            "actual Core memory initializer decodes original opaque bootstrap and then NG directory metadata",
+            "bounded upstream initialization rejects short, excess and inflated bootstrap before archive IO",
+            "synthetic AES cannot initialize the real-source lane and missing AES never starts a reader",
+            "opaque bootstrap plus original NG archive reaches existing tiles, persistent reuse, SoundMap paths and identical dry PCM",
+            "actual full CodeWalker archive resources/cache/YMF/DLC parse without a GUI or bootstrap",
+            "scrambled stored RPF resource headers rebuild actual RSC7 from entry flags without decrypting ordinary geometry",
+            "actual CodeWalker NG decrypts separately encrypted tables/names using only explicitly staged original synthetic state",
+            "metadata-first discovery pages actual entry identities without reading geometry payloads",
+            "resource phase opens only exact selected logical members and retains missing selections as unknown",
+            "nested OPEN archives preserve physical source ranges and metadata phase avoids whole child copies",
+            "unknown encryption tags, absent NG capability, malformed ownership trees and out-of-range entries fail closed",
+            "production-sized original sparse source is range decoded with no whole-source allocation/hash",
+            "presealed stable native review is attached to a fresh joined run and reused by the actual preparation plan",
+            "two actual original-file decoder invocations retain stable cache identity while rejecting a stale source receipt",
+            "actual Core worker decodes original archive under fixed AppContainer/Job and source closure",
+            "inherited read-only source is range decoded without a full source hash and preserves source identity",
+            "large sparse original archive stays range-bound and needs no whole-archive staging or hash",
+            "pre-abort consumes preparation without starting a worker and rejects reuse",
+            "manifest/runtime/configuration drift cannot publish a qualified worker result",
+            "post-worker output and receipt substitutions fail the native pipe bindings",
+            "native deadline/output limits preserve bounded failure output and join worker",
+            "live progress cancellation withdraws publication and joins the contained worker",
+            "explicit source input closure rejects extra buffers and accessors before reading them",
+            "three actual contained original reader passes retain exact closure and feed the same provider/cache/SoundMap without another reader"
+          ],
+          "parser": "node-tap-or-spec-summary-v1",
+          "scope": "Node summary footers only; standalone native/PowerShell assertions are reported separately",
+          "skippedCasesComplete": true
+        },
+        "world11": {
+          "tests": 23,
+          "pass": 23,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        },
+        "world12": {
+          "tests": 45,
+          "pass": 45,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        },
+        "world13Focused": {
+          "tests": 72,
+          "pass": 72,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        },
+        "world13Cleanup": {
+          "tests": 13,
+          "pass": 13,
+          "fail": 0,
+          "skipped": 0
+        }
+      },
+      "exclusions": [
+        "Upstream-source and modified-Core preparation/reference runners are excluded.",
+        "Research/native WORLD08 and WORLD09 Core cases are explicitly skipped without supplied package/fixtures; their TAP names/counts remain visible.",
+        "WORLD04.2/05 actual Core XML exporters/oracles and WORLD08/09 research package integration are excluded.",
+        "A standard precompiled CodeWalker.Core DLL and its genuine Enhanced compatibility remain unqualified."
+      ],
+      "scope": {
+        "gameFilesRead": false,
+        "privateInputsRead": false,
+        "endpointOpened": false,
+        "gameLaunched": false,
+        "deployed": false,
+        "merged": false
+      },
+      "bindings": [
+        {
+          "name": ".local/world13-functional-local22-final01/result.json",
+          "bytes": 2005,
+          "sha256": "5d5dbfa82a102bf053cfdc11f2e1113f04a7c62aa038eb5c7dcbbc497846cd24"
+        },
+        {
+          "name": ".local/world13-functional-local22-final01/inherited-world12/result.json",
+          "bytes": 5945,
+          "sha256": "fe499c8a6aa1cc78f9e77490139ff1d74f9c8e0ca6653e420770a36ec62e3569"
+        },
+        {
+          "name": ".local/world13-functional-local22-final01/inherited-world12/inherited-world11/result.json",
+          "bytes": 5528,
+          "sha256": "1747d8a45ebd3cdea02b0cd039cf43a4c891ea2cff8066fcf35fea005aab28e0"
+        },
+        {
+          "name": ".local/world13-functional-local22-final01/inherited-world12/inherited-world11/inherited-world10/result.json",
+          "bytes": 6647,
+          "sha256": "dd441ebfd6c81ed347636f2c54279b6894a3e6abf46e9039e01826d15a143f17"
+        },
+        {
+          "name": ".local/world13-functional-local22-final01/independent-cleanup-controls.log",
+          "bytes": 3727,
+          "sha256": "8d62ff64b919d440b4b05b8ad2e43816808178e517be8b9e9f4de77339f9ac05"
+        },
+        {
+          "name": ".local/world13-processing-local22-final01/processing-preconditions.log",
+          "bytes": 17609,
+          "sha256": "e048041f650e10e796d2acc697df8830c727c4373802e077cacc12819eab60de"
+        },
+        {
+          "name": ".local/world13-functional-local22-final01.log",
+          "bytes": 495975,
+          "sha256": "1a775b38b506b2715edb4dd0eaf171cc1703d26df50352ef985d238918582934"
+        }
+      ],
+      "controllerRevisionScope": "This full inherited run predates publication-only amendments and final job-timeout restoration. Its bound fixture and functional predicates are unchanged. Final 72 controls and the processing controller run separately on this same runtime; fresh hosted validation is still required."
+    },
+    {
+      "runtime": "v24.19.0",
+      "executableSha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237",
+      "passed": true,
+      "controllerBindings": [
+        {
+          "path": "tools/Test-Offline13.ps1",
+          "sha256": "4a89e90b3e79ff4a59147c05c4cb68caf86f959b398dd63e7362c5307e1e51b3"
+        },
+        {
+          "path": "tools/Processing-Verdict13.mjs",
+          "sha256": "7f2d51a5ffcc290aa538a052d611c9ab2dab7f28df01f25dc6752155704c8a44"
+        },
+        {
+          "path": "tools/ci-gates13.mjs",
+          "sha256": "d8e0a956fcf0919b22cac5c2a646c78596d396cf31013c75782db1d2f3885f12"
+        },
+        {
+          "path": "tools/Publish-Processing13.mjs",
+          "sha256": "12a0d47381312e7c127e687b9cf5ee693594fad93a3f1923e56db4a726d61491"
+        },
+        {
+          "path": ".github/workflows/offline.yml",
+          "sha256": "3d18db528e8f3c2365f1b10896b04842f4bd8053704836044eaa70596b0e6032"
+        }
+      ],
+      "controllerBindingsStable": true,
+      "stages": [
+        {
+          "name": "inherited-controls",
+          "startedUtc": "2026-11-04T13:49:20.4638794Z",
+          "passed": true,
+          "failure": null,
+          "finishedUtc": "2026-11-04T13:56:16.6281621Z",
+          "originalLogSha256": "fe01c0c7ef87a6dd6a03babf2cd5bdbe5792369a49fb97c60ab34448d5663ab8"
+        },
+        {
+          "name": "independent-cleanup-controls",
+          "startedUtc": "2026-11-04T13:56:16.6438221Z",
+          "passed": true,
+          "failure": null,
+          "finishedUtc": "2026-11-04T13:56:20.7871406Z",
+          "originalLogSha256": "6f765f868746639ab60c0afec9b9771dcabd51393867d6b5a8286b54612149bf"
+        }
+      ],
+      "counts": {
+        "inherited": {
+          "tests": 838,
+          "pass": 838,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "skippedCases": [],
+          "parser": "node-tap-or-spec-summary-v1",
+          "scope": "Node summary footers only; standalone native/PowerShell assertions are reported separately",
+          "skippedCasesComplete": true
+        },
+        "portable": {
+          "tests": 215,
+          "pass": 191,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 24,
+          "skippedCases": [
+            "actual Core memory initializer decodes original opaque bootstrap and then NG directory metadata",
+            "bounded upstream initialization rejects short, excess and inflated bootstrap before archive IO",
+            "synthetic AES cannot initialize the real-source lane and missing AES never starts a reader",
+            "opaque bootstrap plus original NG archive reaches existing tiles, persistent reuse, SoundMap paths and identical dry PCM",
+            "actual full CodeWalker archive resources/cache/YMF/DLC parse without a GUI or bootstrap",
+            "scrambled stored RPF resource headers rebuild actual RSC7 from entry flags without decrypting ordinary geometry",
+            "actual CodeWalker NG decrypts separately encrypted tables/names using only explicitly staged original synthetic state",
+            "metadata-first discovery pages actual entry identities without reading geometry payloads",
+            "resource phase opens only exact selected logical members and retains missing selections as unknown",
+            "nested OPEN archives preserve physical source ranges and metadata phase avoids whole child copies",
+            "unknown encryption tags, absent NG capability, malformed ownership trees and out-of-range entries fail closed",
+            "production-sized original sparse source is range decoded with no whole-source allocation/hash",
+            "presealed stable native review is attached to a fresh joined run and reused by the actual preparation plan",
+            "two actual original-file decoder invocations retain stable cache identity while rejecting a stale source receipt",
+            "actual Core worker decodes original archive under fixed AppContainer/Job and source closure",
+            "inherited read-only source is range decoded without a full source hash and preserves source identity",
+            "large sparse original archive stays range-bound and needs no whole-archive staging or hash",
+            "pre-abort consumes preparation without starting a worker and rejects reuse",
+            "manifest/runtime/configuration drift cannot publish a qualified worker result",
+            "post-worker output and receipt substitutions fail the native pipe bindings",
+            "native deadline/output limits preserve bounded failure output and join worker",
+            "live progress cancellation withdraws publication and joins the contained worker",
+            "explicit source input closure rejects extra buffers and accessors before reading them",
+            "three actual contained original reader passes retain exact closure and feed the same provider/cache/SoundMap without another reader"
+          ],
+          "parser": "node-tap-or-spec-summary-v1",
+          "scope": "Node summary footers only; standalone native/PowerShell assertions are reported separately",
+          "skippedCasesComplete": true
+        },
+        "world11": {
+          "tests": 23,
+          "pass": 23,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        },
+        "world12": {
+          "tests": 45,
+          "pass": 45,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        },
+        "world13Focused": {
+          "tests": 72,
+          "pass": 72,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        },
+        "world13Cleanup": {
+          "tests": 13,
+          "pass": 13,
+          "fail": 0,
+          "skipped": 0
+        }
+      },
+      "exclusions": [
+        "Upstream-source and modified-Core preparation/reference runners are excluded.",
+        "Research/native WORLD08 and WORLD09 Core cases are explicitly skipped without supplied package/fixtures; their TAP names/counts remain visible.",
+        "WORLD04.2/05 actual Core XML exporters/oracles and WORLD08/09 research package integration are excluded.",
+        "A standard precompiled CodeWalker.Core DLL and its genuine Enhanced compatibility remain unqualified."
+      ],
+      "scope": {
+        "gameFilesRead": false,
+        "privateInputsRead": false,
+        "endpointOpened": false,
+        "gameLaunched": false,
+        "deployed": false,
+        "merged": false
+      },
+      "bindings": [
+        {
+          "name": ".local/world13-functional-local24-final01/result.json",
+          "bytes": 2776,
+          "sha256": "3c4dc5113c832baa5c33976c269f6f289f009f7ce3ffdbd2f922fcda73596a7b"
+        },
+        {
+          "name": ".local/world13-functional-local24-final01/inherited-world12/result.json",
+          "bytes": 5945,
+          "sha256": "7de0c7b463b1f7f424d5a333b12b2b89a2fb08b72e5ba3ebd7a175ebc4b1508b"
+        },
+        {
+          "name": ".local/world13-functional-local24-final01/inherited-world12/inherited-world11/result.json",
+          "bytes": 5528,
+          "sha256": "7b0ceb23648d9644dd034afd8e4062e3789ea546c8fb47819d4991df733e1d58"
+        },
+        {
+          "name": ".local/world13-functional-local24-final01/inherited-world12/inherited-world11/inherited-world10/result.json",
+          "bytes": 6647,
+          "sha256": "cc3bb9a07d81f97ba38709865b9de251fc2eb4239c47acab3215c41ca625dead"
+        },
+        {
+          "name": ".local/world13-functional-local24-final01/independent-cleanup-controls.log",
+          "bytes": 1715,
+          "sha256": "6f765f868746639ab60c0afec9b9771dcabd51393867d6b5a8286b54612149bf"
+        },
+        {
+          "name": ".local/world13-processing-local24-final01/processing-preconditions.log",
+          "bytes": 17607,
+          "sha256": "6439fd4acf734d8a09aa996c05f7cf1256bdd4fa19f99a2d6ac2075547152129"
+        },
+        {
+          "name": ".local/world13-functional-local24-final01.log",
+          "bytes": 377371,
+          "sha256": "52bb737c609703275249905a47b47d44540a1b4fb65664c0d82e322aced0ba2d"
+        },
+        {
+          "name": ".local/world13-functional-local24-final01/artifact/processing-publication.json",
+          "bytes": 3629,
+          "sha256": "6a8d78cc894ef4d8a6ffe32e5f3c6a6197a712717d4c7c49e6c82f37f8b6eb8b"
+        }
+      ],
+      "publication": {
+        "selectedNames": [
+          "world10-retention-control-a3ce4566-2552-4bf0-9447-206a1325470b.json",
+          "world10-retention-control-fb252ad4-12ea-42f6-b906-0efe4dc74651.json",
+          "world10-retention-control-fc65f9be-21dc-426f-a036-1f4d360c60b9.json",
+          "world11-lifecycle-control-a6fb66bc-6d81-44bb-8648-a4e60f3edf67.json",
+          "world11-retention-control-f5d1c26c-9ce9-4ae7-bf93-7e33c6971faa.json",
+          "world12-lifecycle-control-7a59c2d1-3e79-45b7-ae73-825848a77d75.json",
+          "world12-retention-control-1711931f-71cd-45b0-b343-555c26050fac.json"
+        ],
+        "passed": true
+      }
+    }
+  ],
+  "limits": "Separate runner/test populations; no invented unique total. Named research skips are unchanged exclusions, not executed geometry qualification. This evidence is offline and does not qualify game, endpoint, private banks or physical latency."
+}
