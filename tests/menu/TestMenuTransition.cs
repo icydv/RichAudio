@@ -75,7 +75,7 @@ public static class TestMenuTransition
             "pointer outside the sidebar is not doubled over the GTA scene");
         Check(MenuTransition.Present(frame,dimTransition.Sample(220),1920,1080,210,140,false).Commands.Count==open.Commands.Count,
             "keyboard-only presentation adds no decorative pointer");
-        dimTransition.SetOpen(false,110);Check(MenuTransition.Present(frame,dimTransition.Sample(330),1920,1080).Commands.Count==0,"fully closed actual presentation removes dimmer and panel");
+        dimTransition.SetOpen(false,220);Check(MenuTransition.Present(frame,dimTransition.Sample(440),1920,1080).Commands.Count==0,"fully closed actual presentation removes dimmer and panel");
         Reject(()=>MenuTransition.Transform(frame,state,Single.NaN),"nonfinite slide rejected");Reject(()=>MenuTransition.Transform(frame,state,-1),"negative slide rejected");Reject(()=>MenuTransition.Transform(frame,state,4097),"unbounded slide rejected");Reject(()=>MenuTransition.Transform(null,state),"null frame rejected");Reject(()=>MenuTransition.Transform(frame,null),"null transition state rejected");
     }
     public static int Main(){try{Console.WriteLine("PASS "+Run()+" menu transition, focus-release and immutable hit-transform checks; no game or device");return 0;}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
