@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "kind": "RichAudioWorld12FunctionalEvidence",
+  "executor": "Codex local Windows runner",
+  "fullWrapperPassed": true,
+  "runtime": {
+    "executableSha256": "dccc52de28d8df2ee22d2062424f8c563070d95d8ad70c54c4bf01d590dec14f",
+    "node": "v22.23.4"
+  },
+  "fullWrapperWorld12Counts": {
+    "tests": 41,
+    "pass": 41,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "inherited": {
+    "world11Controls": {
+      "tests": 23,
+      "pass": 23,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "passed": true,
+    "resultSha256": "de7910fcead88d2b981410f3d4b0e6ec70b093081202afc7ba494ffdae3384e0",
+    "originalControls": {
+      "inheritedNodeCounts": {
+        "tests": 838,
+        "pass": 838,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "skippedCases": [],
+        "parser": "node-tap-or-spec-summary-v1",
+        "scope": "Node summary footers only; standalone native/PowerShell assertions are reported separately",
+        "skippedCasesComplete": true
+      },
+      "originalMetadataControls": 22,
+      "resultSha256": "20ec70ef728d0c797bd10d48529c4ff0fb1ac1d9282d568b71b42795dbb30fe5",
+      "portableCounts": {
+        "tests": 215,
+        "pass": 191,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 24,
+        "skippedCases": [
+          "actual Core memory initializer decodes original opaque bootstrap and then NG directory metadata",
+          "bounded upstream initialization rejects short, excess and inflated bootstrap before archive IO",
+          "synthetic AES cannot initialize the real-source lane and missing AES never starts a reader",
+          "opaque bootstrap plus original NG archive reaches existing tiles, persistent reuse, SoundMap paths and identical dry PCM",
+          "actual full CodeWalker archive resources/cache/YMF/DLC parse without a GUI or bootstrap",
+          "scrambled stored RPF resource headers rebuild actual RSC7 from entry flags without decrypting ordinary geometry",
+          "actual CodeWalker NG decrypts separately encrypted tables/names using only explicitly staged original synthetic state",
+          "metadata-first discovery pages actual entry identities without reading geometry payloads",
+          "resource phase opens only exact selected logical members and retains missing selections as unknown",
+          "nested OPEN archives preserve physical source ranges and metadata phase avoids whole child copies",
+          "unknown encryption tags, absent NG capability, malformed ownership trees and out-of-range entries fail closed",
+          "production-sized original sparse source is range decoded with no whole-source allocation/hash",
+          "presealed stable native review is attached to a fresh joined run and reused by the actual preparation plan",
+          "two actual original-file decoder invocations retain stable cache identity while rejecting a stale source receipt",
+          "actual Core worker decodes original archive under fixed AppContainer/Job and source closure",
+          "inherited read-only source is range decoded without a full source hash and preserves source identity",
+          "large sparse original archive stays range-bound and needs no whole-archive staging or hash",
+          "pre-abort consumes preparation without starting a worker and rejects reuse",
+          "manifest/runtime/configuration drift cannot publish a qualified worker result",
+          "post-worker output and receipt substitutions fail the native pipe bindings",
+          "native deadline/output limits preserve bounded failure output and join worker",
+          "live progress cancellation withdraws publication and joins the contained worker",
+          "explicit source input closure rejects extra buffers and accessors before reading them",
+          "three actual contained original reader passes retain exact closure and feed the same provider/cache/SoundMap without another reader"
+        ],
+        "parser": "node-tap-or-spec-summary-v1",
+        "scope": "Node summary footers only; standalone native/PowerShell assertions are reported separately",
+        "skippedCasesComplete": true
+      },
+      "passed": true,
+      "exclusions": [
+        "Upstream-source and modified-Core preparation/reference runners are excluded.",
+        "Research/native WORLD08 and WORLD09 Core cases are explicitly skipped without supplied package/fixtures; their TAP names/counts remain visible.",
+        "WORLD04.2/05 actual Core XML exporters/oracles and WORLD08/09 research package integration are excluded.",
+        "A standard precompiled CodeWalker.Core DLL and its genuine Enhanced compatibility remain unqualified."
+      ]
+    }
+  },
+  "standaloneAssertions": {
+    "originalPe": 22,
+    "originalRunnerEvidence": 23,
+    "expiryPowerShell": 115,
+    "expiryCSharp": 11,
+    "normalExpiryCases": 10,
+    "authoredHoldCases": 10,
+    "authoredHoldAssertions": 83
+  },
+  "expiryTermination": {
+    "recordedChildren": 40,
+    "allTerminated": true,
+    "cleanupErrors": 0,
+    "forcedKills": 11,
+    "rawJournalFiles": 40,
+    "matchedCommittedEvents": 704,
+    "senderRemainingWaitMs": 4999,
+    "observedSenderWaitRangeMs": [
+      4999.4113,
+      5009.9075
+    ],
+    "lateObservationsAccepted": false,
+    "automaticRetries": 0
+  },
+  "postAnalysisControls": {
+    "reason": "After all timing trials completed, only the summarizer changed to explicitly disqualify signed-negative V8 sample timelines. Earlier summaries and raw data remain unchanged.",
+    "includedInFullWrapper": false,
+    "testsPerRuntime": 4,
+    "passedPerRuntime": 4,
+    "node22LogSha256": "2e003842591bbb55a4a2b90fa5e8de61b14ecf099c09c354447219b45a6251ca",
+    "node24LogSha256": "b25287c71e55dcf762baa7ebfc2672e377e01ce2d3b392f7ba6d034af4a53c68",
+    "summarizerSha256": "712d39ec6a1140d6a3f74288ef8b9b11e0f0f8ab46bb9f6a20eb6849e0873a7b"
+  },
+  "fullWrapperResultSha256": "9b43d3731df55209a7ef339184c7a4fdf5e566179abada4efcfc03e138f31154",
+  "fullWrapperLogSha256": "1214363d2a63c89ad3cd902d385e2aaffc94ed18cbb1472d9a8a4537747946bb",
+  "newNodeLogSha256": "9dd727b36bb7e953c8f0352c532f9f2ce3e9abb1f17761a4628501f8feb07c0a",
+  "expiryControlsLogSha256": "c442cad10ee8e96207d66cdb9798cf51f08bb3f7571ced9f3803a105c065b05e",
+  "independentAggregationReviewSha256": "e5dfeccca80ef7395335eae8e373a479138791df7894b00ecd3b0e36830c72a6",
+  "independentRawJournalCorrespondenceSha256": "df5548dad2c67b9f1cc3f63016d24b7f91ce35814ac6fd05541c9812f6ef6ccb",
+  "timingRanInsideFullWrapper": false,
+  "functionalAndTimingSeparate": true,
+  "uniquePooledTestTotalClaimed": false,
+  "standardCoreQualified": false,
+  "genuineWorldQualified": false,
+  "endpointUnderflows": null,
+  "gameFilesRead": false,
+  "privateInputsRead": false,
+  "endpointOpened": false,
+  "gameLaunched": false,
+  "deployed": false,
+  "merged": false
+}
