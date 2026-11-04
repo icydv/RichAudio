@@ -138,9 +138,13 @@ export class StockVehicleSource {
       check(output.buffer!==s.buffer||output.byteOffset+frames*4<=s.byteOffset||s.byteOffset+s.byteLength<=output.byteOffset,'output must not overwrite verified finite event PCM');}
     const idle=1-clamp((control.operatingPoint-.08)/.2),decel=control.lift?1:clamp((.25-control.load)/.2),target=this.npc?[idle,1-idle]:[idle,(1-idle)*(1-decel),(1-idle)*decel];
     const a=1-Math.exp(-1/(FS*.04)),e=1-Math.exp(-1/(FS*.025));
+    // Call-local scratch never escapes into a voice or survives this render.
+    // Refill in the original order so source history and floating-point sums
+    // stay exact without allocating mode arrays for every emitted sample.
+    const entering=[],previousWeights=new Array(this.weights.length),addresses=[.5,0,0],rates=new Array(this.modes.length);
     for(let i=0;i<frames;i++){
       this.position+=a*(control.operatingPoint-this.position);this.envelope+=e*((control.running?1:0)-this.envelope);
-      const entering=[],previousWeights=[...this.weights];
+      entering.length=0;for(let m=0;m<this.weights.length;m++)previousWeights[m]=this.weights[m];
       for(let m=0;m<this.modes.length;m++){
         this.weights[m]+=a*(target[m]-this.weights[m]);
         // Complete only numerically negligible IIR tails. This is floating-
@@ -148,17 +152,21 @@ export class StockVehicleSource {
         if(target[m]===0&&this.weights[m]<Number.EPSILON)this.weights[m]=0;
         if(previousWeights[m]===0&&this.weights[m]>0)entering.push(m);
       }
-      const addresses=[.5,this.position,1-this.position],weightTotal=this.weights.reduce((s,w)=>s+w,0);
+      addresses[1]=this.position;addresses[2]=1-this.position;
+      let weightTotal=0;for(let m=0;m<this.weights.length;m++)weightTotal+=this.weights[m];
       for(let roleIndex=0;roleIndex<2;roleIndex++){
         const role=stockRoles[roleIndex],output=roleIndex?exhaust:engine;
-        const voices=this.voices[role],rates=this.modes.map((mode,m)=>voices[mode].rateAt(addresses[m]));
-        const rate=this.weights.reduce((s,w,m)=>s+w*rates[m],0)/weightTotal,transition=this.stats.transitions.roles[role];
+        const voices=this.voices[role];
+        for(let m=0;m<this.modes.length;m++)rates[m]=voices[this.modes[m]].rateAt(addresses[m]);
+        let weightedRate=0;for(let m=0;m<this.weights.length;m++)weightedRate+=this.weights[m]*rates[m];
+        const rate=weightedRate/weightTotal,transition=this.stats.transitions.roles[role];
         transition.minimumCommonRateHz=Math.min(transition.minimumCommonRateHz,rate);
         transition.maximumCommonRateHz=Math.max(transition.maximumCommonRateHz,rate);
         if(this.commonRates[role]!==null)transition.maximumRateStepHz=Math.max(transition.maximumRateStepHz,Math.abs(rate-this.commonRates[role]));
         this.commonRates[role]=rate;
         if(entering.length){
-          const dominant=previousWeights.reduce((best,w,m)=>w>previousWeights[best]?m:best,0),reference=voices[this.modes[dominant]];
+          let dominant=0;for(let m=0;m<previousWeights.length;m++)if(previousWeights[m]>previousWeights[dominant])dominant=m;
+          const reference=voices[this.modes[dominant]];
           // Register before rendering this sample. Every active head then
           // consumes the same interval-rate increment, independently per role.
           for(const m of entering){transition.alignmentRequests++;this.stats.transitions.alignmentRequests++;
@@ -174,7 +182,8 @@ export class StockVehicleSource {
         // Load selects real accel/decel material;
         // only graph-bound finite PCM events may be explicitly scheduled.
         if(role==='exhaust'&&this.events){
-          const eventShare=this.weights.reduce((s,w,m)=>s+w*this.shareStates[m][role],0),event=this.events.next(this.frame)*eventShare;
+          let eventShare=0;for(let m=0;m<this.weights.length;m++)eventShare+=this.weights[m]*this.shareStates[m][role];
+          const event=this.events.next(this.frame)*eventShare;
           expected+=2*sum*event+event*event;sum+=event;
         }
         const value=sum*this.gain*this.envelope;check(Number.isFinite(value)&&Math.abs(value)<=.98+1e-12,'source PCM bound');

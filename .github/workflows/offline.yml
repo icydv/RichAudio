@@ -23,20 +23,27 @@ jobs:
           persist-credentials: false
           # The regression runs the exact pre-fix relay and producer source.
           fetch-depth: 0
-      - name: Validate original controls and bounded processing without a source-built Core
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6 official reviewed pin
+        with:
+          node-version: 22.23.4
+          package-manager-cache: false
+      - name: Validate original controls and matched WORLD11 processing without a source-built Core
         shell: pwsh
-        run: ./tools/Test-Offline10.ps1
-      - name: Retain sanitized WORLD10 functional and timing evidence
+        run: ./tools/Test-Offline11.ps1
+      - name: Retain sanitized WORLD11 functional and separate timing evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2, reused reviewed official pin
         with:
-          name: world10-offline-${{ github.run_id }}-${{ github.run_attempt }}
+          name: world11-offline-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
-            .local/world10-offline-*/artifact/*.tap
-            .local/world10-offline-*/artifact/result.json
-            .local/world10-offline-*/artifact/performance.json
-            .local/world10-ci-*.json
-            .local/world10-current-ci-*/snapshot10.json
+            .local/world11-offline-*/artifact/*.tap
+            .local/world11-offline-*/artifact/result.json
+            .local/world11-offline-*/artifact/performance.json
+            .local/world11-ci-*.json
+            .local/world11-current-ci-*/snapshot11.json
+            .local/world11-baseline-ci-*/snapshot11.json
+            .local/world11-retention-control-*.json
+            .local/world11-lifecycle-control-*.json
             .local/world10-retention-control-*.json
           include-hidden-files: true
           if-no-files-found: error
