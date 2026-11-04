@@ -23,7 +23,7 @@ namespace RichAudio.Beacon.Rph
         private static InGameRecordingBridge recordingBridge;
         private static readonly AcousticMenuModel menu=new AcousticMenuModel();
         private static readonly MenuInputRouter input=new MenuInputRouter();
-        private static readonly MenuTransition transition=new MenuTransition(220);
+        private static readonly MenuTransition transition=new MenuTransition(260);
         private static MenuFrame openPresentation;
         private static readonly MenuShortcutLatch shortcut=new MenuShortcutLatch();
         private static long editingRevision,awaitingRevision=-1;
@@ -210,7 +210,7 @@ namespace RichAudio.Beacon.Rph
                         if(menu.Visible)openPresentation=menu.BuildFrame(size.Width,size.Height,status);
                     }
                     transition.SetOpen(menu.Visible,now);motion=transition.Sample(now,closingInputHeld);
-                    if(eligible&&motion.Visible&&openPresentation!=null){var size=Game.Resolution;presentation=MenuTransition.Present(openPresentation,motion,size.Width,size.Height);}
+                    if(eligible&&motion.Visible&&openPresentation!=null){var size=Game.Resolution;presentation=MenuTransition.Present(openPresentation,motion,size.Width,size.Height,mouseX,mouseY,mouseVisible);}
                     else if(story&&!paused&&!console&&state.Settings.DiagnosticsOverlay&&!motion.CapturesInput)
                     {
                         var size=Game.Resolution;presentation=menu.BuildDiagnosticFrame(size.Width,size.Height,
