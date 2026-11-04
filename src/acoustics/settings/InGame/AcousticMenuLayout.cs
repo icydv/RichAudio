@@ -7,7 +7,7 @@ namespace RichAudio.Settings.InGame
     public sealed partial class AcousticMenuModel
     {
         private static readonly int Gold=unchecked((int)0xFFD4AF37),GoldLight=unchecked((int)0xFFE6CF81),
-            Ink=unchecked((int)0xFF111318),TextColor=unchecked((int)0xFFECEFF2),Muted=unchecked((int)0xFF9BA4AD),
+            TextColor=unchecked((int)0xFFECEFF2),Muted=unchecked((int)0xFF9BA4AD),
             Background=unchecked((int)0xE80D1116),RowBackground=unchecked((int)0xA91E242B),Warning=unchecked((int)0xFFE7C778);
         private static readonly string[] Descriptions={
             "Sets the maximum direct and early-path detail per source. Auto adapts to measured workload. 32/64-path tiers are experimental and can exceed audio deadlines.",
