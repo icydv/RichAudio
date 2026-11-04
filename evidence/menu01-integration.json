@@ -1,0 +1,291 @@
+{
+  "kind": "Menu01LocalIntegrationEvidence",
+  "schema": 1,
+  "createdUtc": "2026-11-04T15:57:53.985Z",
+  "branch": "feature/world-13-reliable-ci-render-tails",
+  "baselineWorld13": "1f496a7e05c978c4b2eade0524055ac93b56e413",
+  "importedUi": "6a515f21b956e62cf86945cbdd3f7e86856ec807",
+  "commonParent": "85646ec65f2f88f0eb935374a79260a75e96b728",
+  "backupRef": "backup/menu-01-before-integration-1f496a7",
+  "gitIntegration": "Conflict-free local no-commit merge; final commit follows validation. Neither GitHub PR is merged.",
+  "runtime": [
+    {
+      "path": "src/acoustics/bridge/Rph/InGameMenu.Rph.cs",
+      "importedGitBlob": "59fccb9ffe4c07721557e2b7ad100c7c4e94ffb9",
+      "working": {
+        "name": "src/acoustics/bridge/Rph/InGameMenu.Rph.cs",
+        "bytes": 18207,
+        "sha256": "9b0bf415b15f0dfc7fa4c6ce343e2508236cce37bc148e1428b4d8f8dc5b1c02"
+      },
+      "rawVsGit": "Physical checkout line endings may differ; Git content equality is independently checked."
+    },
+    {
+      "path": "src/acoustics/settings/InGame/AcousticMenuLayout.cs",
+      "importedGitBlob": "876fe8e9974f4ce55f6aa23a0be0fc91b58cc331",
+      "working": {
+        "name": "src/acoustics/settings/InGame/AcousticMenuLayout.cs",
+        "bytes": 16064,
+        "sha256": "aa12950335f62fc79767c8a151464a519b8f254b9c8ce0274c4e9a454e61b50e"
+      },
+      "rawVsGit": "Physical checkout line endings may differ; Git content equality is independently checked."
+    },
+    {
+      "path": "src/acoustics/settings/InGame/MenuTransition.cs",
+      "importedGitBlob": "c0ddcd52a18a94b1b8346ac3f99dbaacf35497d5",
+      "working": {
+        "name": "src/acoustics/settings/InGame/MenuTransition.cs",
+        "bytes": 7387,
+        "sha256": "18422a7a00d1441450d6be6ed56374708f3d7439a9ea2d444dec54ec22e0e15b"
+      },
+      "rawVsGit": "Physical checkout line endings may differ; Git content equality is independently checked."
+    }
+  ],
+  "uiChecks": 1568,
+  "targeted": [
+    {
+      "runtime": "22",
+      "counts": {
+        "tests": 63,
+        "pass": 63,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "log": {
+        "name": ".local/menu01-audio-regression-node22-01.tap",
+        "bytes": 14570,
+        "sha256": "0b9fb6ffebfe94769aa670fa39da65fc08b318569556861948d9a08c0cdffd0e"
+      }
+    },
+    {
+      "runtime": "24",
+      "counts": {
+        "tests": 63,
+        "pass": 63,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "log": {
+        "name": ".local/menu01-audio-regression-node24-01.tap",
+        "bytes": 14565,
+        "sha256": "d901a8524bf3cdaec161f32d24056f8636f08907e1fea7bdc4384390184bea44"
+      }
+    }
+  ],
+  "fullFunctional": {
+    "runtime": {
+      "executableSha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237",
+      "node": "v24.19.0"
+    },
+    "passed": true,
+    "stages": [
+      {
+        "name": "inherited-controls",
+        "passed": true
+      },
+      {
+        "name": "independent-cleanup-controls",
+        "passed": true
+      }
+    ],
+    "inherited": {
+      "tests": 838,
+      "pass": 838,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "skippedCases": [],
+      "parser": "node-tap-or-spec-summary-v1",
+      "scope": "Node summary footers only; standalone native/PowerShell assertions are reported separately",
+      "skippedCasesComplete": true
+    },
+    "portable": {
+      "tests": 215,
+      "pass": 191,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 24,
+      "skippedCases": [
+        "actual Core memory initializer decodes original opaque bootstrap and then NG directory metadata",
+        "bounded upstream initialization rejects short, excess and inflated bootstrap before archive IO",
+        "synthetic AES cannot initialize the real-source lane and missing AES never starts a reader",
+        "opaque bootstrap plus original NG archive reaches existing tiles, persistent reuse, SoundMap paths and identical dry PCM",
+        "actual full CodeWalker archive resources/cache/YMF/DLC parse without a GUI or bootstrap",
+        "scrambled stored RPF resource headers rebuild actual RSC7 from entry flags without decrypting ordinary geometry",
+        "actual CodeWalker NG decrypts separately encrypted tables/names using only explicitly staged original synthetic state",
+        "metadata-first discovery pages actual entry identities without reading geometry payloads",
+        "resource phase opens only exact selected logical members and retains missing selections as unknown",
+        "nested OPEN archives preserve physical source ranges and metadata phase avoids whole child copies",
+        "unknown encryption tags, absent NG capability, malformed ownership trees and out-of-range entries fail closed",
+        "production-sized original sparse source is range decoded with no whole-source allocation/hash",
+        "presealed stable native review is attached to a fresh joined run and reused by the actual preparation plan",
+        "two actual original-file decoder invocations retain stable cache identity while rejecting a stale source receipt",
+        "actual Core worker decodes original archive under fixed AppContainer/Job and source closure",
+        "inherited read-only source is range decoded without a full source hash and preserves source identity",
+        "large sparse original archive stays range-bound and needs no whole-archive staging or hash",
+        "pre-abort consumes preparation without starting a worker and rejects reuse",
+        "manifest/runtime/configuration drift cannot publish a qualified worker result",
+        "post-worker output and receipt substitutions fail the native pipe bindings",
+        "native deadline/output limits preserve bounded failure output and join worker",
+        "live progress cancellation withdraws publication and joins the contained worker",
+        "explicit source input closure rejects extra buffers and accessors before reading them",
+        "three actual contained original reader passes retain exact closure and feed the same provider/cache/SoundMap without another reader"
+      ],
+      "parser": "node-tap-or-spec-summary-v1",
+      "scope": "Node summary footers only; standalone native/PowerShell assertions are reported separately",
+      "skippedCasesComplete": true
+    },
+    "world11": {
+      "tests": 23,
+      "pass": 23,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "world12": {
+      "tests": 45,
+      "pass": 45,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "separateCleanupChecks": 13,
+    "publicationPassed": true
+  },
+  "selectedHostContracts": {
+    "settings": 59,
+    "menuPersistenceCas": 60,
+    "recordingBridge": 18,
+    "deploymentLayout": 34,
+    "handoff": {
+      "changesAcknowledged": true,
+      "sourceIdentities": 1,
+      "receivedPcmBlocks": 390,
+      "deviceConstructed": false,
+      "scope": "Actual host/settings/Node fixture; not physical endpoint or gameplay evidence."
+    }
+  },
+  "previews": {
+    "reference": {
+      "kind": "Menu01PinnedPreviewReference",
+      "run": 41853033357,
+      "head": "6a515f21b956e62cf86945cbdd3f7e86856ec807",
+      "artifact": 13335767496,
+      "zipBytes": 78857,
+      "zipSha256": "b3f9ff0de55334efed59c0dcce122b97ac271cd61da3621abb6fe6ece1197884",
+      "expandedBytes": 114201,
+      "members": [
+        {
+          "name": "richaudio-menu-1920x1080.png",
+          "bytes": 45762,
+          "sha256": "93313f1feac16a8c9d0d4b445cabd54c98bc15c11173389e302b6839e73d5d1b",
+          "crc32": 3772087844
+        },
+        {
+          "name": "richaudio-opening-110ms.png",
+          "bytes": 22331,
+          "sha256": "61fa837b7324f09c536ea8ee989ee970b7f5622a86f51768a859221ce5e97f9a",
+          "crc32": 2704525842
+        },
+        {
+          "name": "richaudio-sidebar-cursor.png",
+          "bytes": 46108,
+          "sha256": "37d30ea28413309f7c505e5913c2e3d681413199dc9d67d300a2a128a855a8e4",
+          "crc32": 1950121688
+        }
+      ],
+      "executedMembers": false,
+      "source": "Original controlled rendering previews; not GTA screenshots."
+    },
+    "integratedResult": {
+      "schemaVersion": 1,
+      "checks": 1568,
+      "provenance": "Software preview of actual menu drawing commands and illustrative status. Not an in-game screenshot.",
+      "gameLaunched": false,
+      "audioEndpointOpened": false,
+      "visibleWindowOpened": false,
+      "drawCommands": 102,
+      "hitRegions": 28,
+      "goldArgb": "D4AF37",
+      "resolutions": [
+        "800x600",
+        "1280x720",
+        "1920x1080",
+        "3440x1440"
+      ]
+    },
+    "actual260": [
+      {
+        "name": ".local/menu01-integrated-menu-01/richaudio-runtime260-half.png",
+        "bytes": 22331,
+        "sha256": "61fa837b7324f09c536ea8ee989ee970b7f5622a86f51768a859221ce5e97f9a"
+      },
+      {
+        "name": ".local/menu01-integrated-menu-01/richaudio-runtime260-cursor.png",
+        "bytes": 46182,
+        "sha256": "f9577ef9ac46e80a265d69336fbf7e813b626de0c3695d378d4182d6d48453ae"
+      },
+      {
+        "name": ".local/menu01-integrated-menu-01/richaudio-runtime260-ultrawide.png",
+        "bytes": 85516,
+        "sha256": "da4fd8b3f49daa77e5621f9c5bd98c856014c99fb8f09eb8c934ee74a8047924"
+      }
+    ]
+  },
+  "frameCost": {
+    "name": "evidence/menu01-frame-cost.json",
+    "bytes": 142137,
+    "sha256": "517218e667a17f614e2c671330b50deb34d34b73e469a7689b315a796d56d9d0"
+  },
+  "bindings": [
+    {
+      "name": ".local/menu01-full-functional-01/result.json",
+      "bytes": 2776,
+      "sha256": "ef77dafac3843ee0bcce04fa708ec05ca83085fbaf9509cb244bca41c76f85e5"
+    },
+    {
+      "name": ".local/menu01-full-functional-01/inherited-world12/result.json",
+      "bytes": 5945,
+      "sha256": "9e4542a99b06cc5e59a7de1f0c82a0daf1dc22d62ab3f9878843f1891ce03eb7"
+    },
+    {
+      "name": ".local/menu01-full-functional-01/inherited-world12/inherited-world11/result.json",
+      "bytes": 5528,
+      "sha256": "bfa56fb508a060767d1128ab1d05b8f41508d4b56f249b5d607f46b98fca135e"
+    },
+    {
+      "name": ".local/menu01-full-functional-01/inherited-world12/inherited-world11/inherited-world10/result.json",
+      "bytes": 6647,
+      "sha256": "4676063207b7a1275abc87ba3919dadd7e3559eaa98cfdd1af017d49903e9474"
+    },
+    {
+      "name": ".local/menu01-full-functional-01/inherited-world12/inherited-world11/inherited-world10/inherited-original-suite.log",
+      "bytes": 290428,
+      "sha256": "a86028c35a44c0ad02bd4d59a438f9495fa3bae0b43cff2ee21ee1864634b8a2"
+    },
+    {
+      "name": ".local/menu01-integrated-menu-01.tap",
+      "bytes": 206,
+      "sha256": "90f515714c43c163164c5ece31a31076c6d060e88142c34feb6a295736a730f6"
+    },
+    {
+      "name": ".local/menu01-full-functional-01/independent-cleanup-controls.log",
+      "bytes": 1715,
+      "sha256": "15b025655d9b95ae4447ebd6ee2cfe37b0f7713f23808b77458a4c2eb9512f23"
+    }
+  ],
+  "limits": {
+    "privateSdkRead": false,
+    "combinedRphPluginQualified": false,
+    "gameLaunched": false,
+    "gameResourcesRead": false,
+    "audioEndpointOpened": false,
+    "recordingStarted": false,
+    "deployed": false,
+    "pullRequestsMerged": false,
+    "liveCompositorVerified": false,
+    "gameFpsMeasured": false,
+    "world13ProcessingAcceptance": "Prior failed hard/headroom findings remain unchanged; no timing matrix rerun for UI-only code."
+  }
+}

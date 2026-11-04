@@ -1,0 +1,316 @@
+{
+  "kind": "World13FirstHostedRetentionEvidence",
+  "run": 41847073761,
+  "head": "dd1a2127af752c675fa551b0084e4e802f159127",
+  "attempt": 1,
+  "conditions": [
+    {
+      "mode": "functional",
+      "version": "22.23.4",
+      "job": 126633272569,
+      "artifact": 13332187060,
+      "download": {
+        "kind": "World13HostedDownloadReceipt",
+        "repository": "icydv/RichAudio",
+        "manifestSHA256": "f7db0c5ec11f5488223df31575201418aa67114c528e60c910cc86bfd9ce996a",
+        "run": 41847073761,
+        "head": "dd1a2127af752c675fa551b0084e4e802f159127",
+        "attempt": 1,
+        "mode": "functional",
+        "version": "22.23.4",
+        "job": 126633272569,
+        "artifact": 13332187060,
+        "jobName": "functional-node-22.23.4",
+        "artifactName": "world13-functional-22.23.4-41847073761-1",
+        "bytes": 842086,
+        "sha256": "3143f6b4aa51bed8767806f3cb4effb0678d0e708e8e4479dc34e7c8e5255499",
+        "metadataDigest": "sha256:3143f6b4aa51bed8767806f3cb4effb0678d0e708e8e4479dc34e7c8e5255499",
+        "metadataSHA256": "358ace7f587a961ef736bac799d1b11c03d51d9dceb1525fc896a33873d52302",
+        "matched": true
+      },
+      "rawLog": {
+        "kind": "World13HostedJobLogReceipt",
+        "repository": "icydv/RichAudio",
+        "manifestSHA256": "f7db0c5ec11f5488223df31575201418aa67114c528e60c910cc86bfd9ce996a",
+        "run": 41847073761,
+        "head": "dd1a2127af752c675fa551b0084e4e802f159127",
+        "attempt": 1,
+        "mode": "functional",
+        "version": "22.23.4",
+        "job": 126633272569,
+        "artifact": 13332187060,
+        "jobName": "functional-node-22.23.4",
+        "artifactName": "world13-functional-22.23.4-41847073761-1",
+        "metadataSHA256": "954bc1e9eee7c119e1e2e00da056c85fa0d19202858aee6ecf6c2dc2359f2ff6",
+        "bytes": 780660,
+        "sha256": "6a4928f34d5c5cc011585b80e7ce71c42c02d075e775e9bddb7229248f326e13",
+        "escapeSequencesNotRendered": true,
+        "source": "gh api raw Buffer; no connector log conversion"
+      },
+      "boundedReadback": {
+        "memberCount": 89,
+        "expandedBytes": 6003780,
+        "zipSHA256": "3143f6b4aa51bed8767806f3cb4effb0678d0e708e8e4479dc34e7c8e5255499",
+        "rawLogSHA256": "6a4928f34d5c5cc011585b80e7ce71c42c02d075e775e9bddb7229248f326e13",
+        "centralDirectoryPreflight": true,
+        "executedMembers": false
+      },
+      "bindings": [
+        {
+          "name": "download-receipt.json",
+          "bytes": 921,
+          "sha256": "bfa0a77e6afb1348fa7e7a0fbd302962ab648cc6d1b5dd1b9065f54e4cf1eb1f"
+        },
+        {
+          "name": "job-log-receipt.json",
+          "bytes": 745,
+          "sha256": "07d7e3ba10956f7612984eac4b10310b91e26b9c9295460ec1d179de56208165"
+        },
+        {
+          "name": "bounded-readback.json",
+          "bytes": 19385,
+          "sha256": "e2d7807b2053df542ee9f0d8ab72339e437914249fa58068ee778b60a222fd22"
+        }
+      ]
+    },
+    {
+      "mode": "functional",
+      "version": "24.19.0",
+      "job": 126633272014,
+      "artifact": 13331293770,
+      "download": {
+        "kind": "World13HostedDownloadReceipt",
+        "repository": "icydv/RichAudio",
+        "manifestSHA256": "f7db0c5ec11f5488223df31575201418aa67114c528e60c910cc86bfd9ce996a",
+        "run": 41847073761,
+        "head": "dd1a2127af752c675fa551b0084e4e802f159127",
+        "attempt": 1,
+        "mode": "functional",
+        "version": "24.19.0",
+        "job": 126633272014,
+        "artifact": 13331293770,
+        "jobName": "functional-node-24.19.0",
+        "artifactName": "world13-functional-24.19.0-41847073761-1",
+        "bytes": 789385,
+        "sha256": "60cbd9c9e28a47a7779db1f6b443c8ca083670b0709d251be2a6f872a67b91c9",
+        "metadataDigest": "sha256:60cbd9c9e28a47a7779db1f6b443c8ca083670b0709d251be2a6f872a67b91c9",
+        "metadataSHA256": "52a1d50b0d7d072220159f522040a44f327ba234063652f2e76e709b29be127f",
+        "matched": true
+      },
+      "rawLog": {
+        "kind": "World13HostedJobLogReceipt",
+        "repository": "icydv/RichAudio",
+        "manifestSHA256": "f7db0c5ec11f5488223df31575201418aa67114c528e60c910cc86bfd9ce996a",
+        "run": 41847073761,
+        "head": "dd1a2127af752c675fa551b0084e4e802f159127",
+        "attempt": 1,
+        "mode": "functional",
+        "version": "24.19.0",
+        "job": 126633272014,
+        "artifact": 13331293770,
+        "jobName": "functional-node-24.19.0",
+        "artifactName": "world13-functional-24.19.0-41847073761-1",
+        "metadataSHA256": "0267003bd26a11de4419e230fef85d8f539074ede1a02030f66971aa814d660c",
+        "bytes": 536604,
+        "sha256": "7d340bb73a08079ed2c6f6a9124fdaba2ff3a3213e6c7afda4163285651024f9",
+        "escapeSequencesNotRendered": true,
+        "source": "gh api raw Buffer; no connector log conversion"
+      },
+      "boundedReadback": {
+        "memberCount": 89,
+        "expandedBytes": 5366311,
+        "zipSHA256": "60cbd9c9e28a47a7779db1f6b443c8ca083670b0709d251be2a6f872a67b91c9",
+        "rawLogSHA256": "7d340bb73a08079ed2c6f6a9124fdaba2ff3a3213e6c7afda4163285651024f9",
+        "centralDirectoryPreflight": true,
+        "executedMembers": false
+      },
+      "bindings": [
+        {
+          "name": "download-receipt.json",
+          "bytes": 921,
+          "sha256": "5cadfdddfb81e5538ee7f7ec7bf086c12c3cc09da46b033f283202cc591f8d44"
+        },
+        {
+          "name": "job-log-receipt.json",
+          "bytes": 745,
+          "sha256": "f8828f50703b17ef0f9cb45b4fc9a7acaff9ccc2a142d44cc49194759766a215"
+        },
+        {
+          "name": "bounded-readback.json",
+          "bytes": 19385,
+          "sha256": "ccba9ae53048e938d95f568fc06ad6e7bdcb3dc3abca6f39eaac5e27278e189c"
+        }
+      ]
+    },
+    {
+      "mode": "processing",
+      "version": "22.23.4",
+      "job": 126633272477,
+      "artifact": 13332186515,
+      "download": {
+        "kind": "World13HostedDownloadReceipt",
+        "repository": "icydv/RichAudio",
+        "manifestSHA256": "f7db0c5ec11f5488223df31575201418aa67114c528e60c910cc86bfd9ce996a",
+        "run": 41847073761,
+        "head": "dd1a2127af752c675fa551b0084e4e802f159127",
+        "attempt": 1,
+        "mode": "processing",
+        "version": "22.23.4",
+        "job": 126633272477,
+        "artifact": 13332186515,
+        "jobName": "processing-node-22.23.4",
+        "artifactName": "world13-processing-22.23.4-41847073761-1",
+        "bytes": 13761041,
+        "sha256": "93dbd2c1e0173f852b10f84cfcf428c66eacc9e7dc65b5fb76f008fde4127eb0",
+        "metadataDigest": "sha256:93dbd2c1e0173f852b10f84cfcf428c66eacc9e7dc65b5fb76f008fde4127eb0",
+        "metadataSHA256": "b9ba76c2de1df3f55e87f4c0107c055361902350481120f5f3bc2fbbcdabaf09",
+        "matched": true
+      },
+      "rawLog": {
+        "kind": "World13HostedJobLogReceipt",
+        "repository": "icydv/RichAudio",
+        "manifestSHA256": "f7db0c5ec11f5488223df31575201418aa67114c528e60c910cc86bfd9ce996a",
+        "run": 41847073761,
+        "head": "dd1a2127af752c675fa551b0084e4e802f159127",
+        "attempt": 1,
+        "mode": "processing",
+        "version": "22.23.4",
+        "job": 126633272477,
+        "artifact": 13332186515,
+        "jobName": "processing-node-22.23.4",
+        "artifactName": "world13-processing-22.23.4-41847073761-1",
+        "metadataSHA256": "2910367152ef9e8e27458a142aa2206279d5acddf9457c2b07b3f2fc7823dbe7",
+        "bytes": 133600,
+        "sha256": "c457fecb899d1b66ce814829fc63c5d0a41bacf10b8e1895bb5df2bc9a356067",
+        "escapeSequencesNotRendered": true,
+        "source": "gh api raw Buffer; no connector log conversion"
+      },
+      "boundedReadback": {
+        "memberCount": 16,
+        "expandedBytes": 167062844,
+        "zipSHA256": "93dbd2c1e0173f852b10f84cfcf428c66eacc9e7dc65b5fb76f008fde4127eb0",
+        "rawLogSHA256": "c457fecb899d1b66ce814829fc63c5d0a41bacf10b8e1895bb5df2bc9a356067",
+        "centralDirectoryPreflight": true,
+        "executedMembers": false
+      },
+      "bindings": [
+        {
+          "name": "download-receipt.json",
+          "bytes": 923,
+          "sha256": "d05e80c54e6639585920f3069ead405c89d8bb3e880700e83759c60f946ff7ee"
+        },
+        {
+          "name": "job-log-receipt.json",
+          "bytes": 745,
+          "sha256": "98e33ebc201e1a9c2571b567223fe512b8300278cbd2b8d637944bd24b7539ca"
+        },
+        {
+          "name": "bounded-readback.json",
+          "bytes": 4537,
+          "sha256": "5bd6dd3ece50bc06f509c8142a214f880729b9259429abfbdacc248ea9d9e37e"
+        }
+      ]
+    },
+    {
+      "mode": "processing",
+      "version": "24.19.0",
+      "job": 126633272760,
+      "artifact": 13331213328,
+      "download": {
+        "kind": "World13HostedDownloadReceipt",
+        "repository": "icydv/RichAudio",
+        "manifestSHA256": "f7db0c5ec11f5488223df31575201418aa67114c528e60c910cc86bfd9ce996a",
+        "run": 41847073761,
+        "head": "dd1a2127af752c675fa551b0084e4e802f159127",
+        "attempt": 1,
+        "mode": "processing",
+        "version": "24.19.0",
+        "job": 126633272760,
+        "artifact": 13331213328,
+        "jobName": "processing-node-24.19.0",
+        "artifactName": "world13-processing-24.19.0-41847073761-1",
+        "bytes": 13295414,
+        "sha256": "27db7733e030098b6283077d8eed1dbda2a2c6a6bfc7541189d5d5ba6c05cafa",
+        "metadataDigest": "sha256:27db7733e030098b6283077d8eed1dbda2a2c6a6bfc7541189d5d5ba6c05cafa",
+        "metadataSHA256": "092c8a5b3084f042d75a8f1544b7643014ff10d1670b38af69ac72bd9cb3f926",
+        "matched": true
+      },
+      "rawLog": {
+        "kind": "World13HostedJobLogReceipt",
+        "repository": "icydv/RichAudio",
+        "manifestSHA256": "f7db0c5ec11f5488223df31575201418aa67114c528e60c910cc86bfd9ce996a",
+        "run": 41847073761,
+        "head": "dd1a2127af752c675fa551b0084e4e802f159127",
+        "attempt": 1,
+        "mode": "processing",
+        "version": "24.19.0",
+        "job": 126633272760,
+        "artifact": 13331213328,
+        "jobName": "processing-node-24.19.0",
+        "artifactName": "world13-processing-24.19.0-41847073761-1",
+        "metadataSHA256": "83f506c59506506dfc25c45e714c92bd3354640d80daa9999eee4204a9d21ec3",
+        "bytes": 133775,
+        "sha256": "b39d2d6c147872368ae78e908546b5e3d96be77fe99287cc8deb37f09ab9604a",
+        "escapeSequencesNotRendered": true,
+        "source": "gh api raw Buffer; no connector log conversion"
+      },
+      "boundedReadback": {
+        "memberCount": 16,
+        "expandedBytes": 161918856,
+        "zipSHA256": "27db7733e030098b6283077d8eed1dbda2a2c6a6bfc7541189d5d5ba6c05cafa",
+        "rawLogSHA256": "b39d2d6c147872368ae78e908546b5e3d96be77fe99287cc8deb37f09ab9604a",
+        "centralDirectoryPreflight": true,
+        "executedMembers": false
+      },
+      "bindings": [
+        {
+          "name": "download-receipt.json",
+          "bytes": 923,
+          "sha256": "0387a4e31c92c474f386e6010ccb2c4817284f6023a8b44b4d19627cf0839c81"
+        },
+        {
+          "name": "job-log-receipt.json",
+          "bytes": 745,
+          "sha256": "7970e32ab384b778ea76ab8767856b531c014fb3fae5840ad9b6b53077297bed"
+        },
+        {
+          "name": "bounded-readback.json",
+          "bytes": 4536,
+          "sha256": "92d9b7cc8eda4ad7a2d977b069b88261160441c83efacf434a626de74c9f984c"
+        }
+      ]
+    }
+  ],
+  "aggregate": {
+    "kind": "World13TerminalRunAggregateEvidence",
+    "run": 41847073761,
+    "head": "dd1a2127af752c675fa551b0084e4e802f159127",
+    "attempt": 1,
+    "job": 126639066691,
+    "status": "completed",
+    "conclusion": "failure",
+    "runMetadataSha256": "edf16255e2c4a4195c22da6642cff4021ded652d3ff2e0e27150a22a89ea412f",
+    "jobMetadataSha256": "1015b47914f8df3fdb90708319dbf08bc4d96e683264337eaa72d95e123ed2ee",
+    "rawLogBytes": 18284,
+    "rawLogSha256": "59ae23c5b43f350d4fee738bbf9586777aee861094f68c712e72c9b6038e990c",
+    "noRerun": true
+  },
+  "independentFunctionalSourceReviewSha256": "0e34c833fad53c1fc8723a0e908ce71d3a5bb045fc7c7ed7084917e8e3fdcc0b",
+  "numericAuditSha256": "980e52132feae17f4af3f5674f63c31393f32be58e238d43814da49200183d1e",
+  "readbackDependencyCorrection": {
+    "kind": "World13HostedReadbackDependencyCorrection",
+    "firstReadbackRejectedBeforeDownloadCompletion": true,
+    "measurementsRerun": false,
+    "originalFailurePreserved": true,
+    "inputDirectory": "world13-ci-inspect-41847073761-processing-22.23.4-01",
+    "originalReaderSha256": "fb21a04087cefdb914e4ffd55fcaa7f6a594e9c5279973ddb2701fd80e36888c",
+    "newReaderSha256": "f1aba888a4d3551a059ee47b7a0eda0968381b5e78cfab8e37b18f728ae52e66",
+    "onlyReaderTextChange": "New failure receipt filename; all input bindings, ranges and limits unchanged",
+    "firstFailureBinding": {
+      "name": "bounded-readback-failure.json",
+      "bytes": 392,
+      "sha256": "15a650922662187c52efd2974f40db644cc64b2332946f073cf762be40af114c"
+    }
+  },
+  "limits": "Download/ZIP bytes and expanded published JSON are independently hash-bound. Original unredacted host reports are publisher hash attestations, not independently rehashed locally. All archive members are authored evidence and none is executed. Source/runtime/GPU scope is separate; no gameplay or GPU-performance proof."
+}

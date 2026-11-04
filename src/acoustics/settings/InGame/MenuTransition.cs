@@ -64,7 +64,7 @@ namespace RichAudio.Settings.InGame
         {
             if(frame==null)throw new ArgumentNullException("frame");
             if(state==null)throw new ArgumentNullException("state");
-            if(Single.IsNaN(slidePixels)||Single.IsInfinity(slidePixels)||slidePixels<0||slidePixels>512)
+            if(Single.IsNaN(slidePixels)||Single.IsInfinity(slidePixels)||slidePixels<0||slidePixels>4096)
                 throw new ArgumentOutOfRangeException("slidePixels");
             if(!state.Visible)return new MenuFrame(new DrawCommand[0],new HitRegion[0]);
             float dx=-slidePixels*(1-state.Opacity);
@@ -83,14 +83,53 @@ namespace RichAudio.Settings.InGame
             }
             return new MenuFrame(commands,regions);
         }
-        public static MenuFrame Present(MenuFrame frame,MenuTransitionState state,int width,int height)
+        // Native GTA's pointer may be drawn below RPH's RawFrameRender.
+        // Compose a small high-contrast RichAudio cursor AFTER all sidebar
+        // commands in the same immutable render frame. Pointer hit testing uses
+        // the original normalized game coordinates (no transformed pointer).
+        private static readonly float[,] CursorSegments={
+            {0,0,3,19},{2,3,4,14},{5,6,4,11},
+            {8,9,4,7},{11,12,3,3},{3,15,5,4},{5,18,3,4}
+        };
+        public static MenuFrame Present(MenuFrame frame,MenuTransitionState state,int width,int height,
+            float cursorX=-1,float cursorY=-1,bool cursorVisible=false)
         {
-            if(width<640||height<360||width>7680||height>4320)throw new ArgumentOutOfRangeException("width","Bounded menu viewport required");
-            var view=Transform(frame,state,Math.Min(48,32*height/1080f));
+            if(width<640||height<360||width>7680||height>4320)
+                throw new ArgumentOutOfRangeException("width","Bounded menu viewport required");
+            float panelWidth=AcousticMenuModel.SidebarWidth*AcousticMenuModel.SidebarScale(width,height);
+            var view=Transform(frame,state,panelWidth);
             if(!state.Visible)return view;
-            var commands=new DrawCommand[view.Commands.Count+1];
-            commands[0]=new DrawCommand(DrawCommandKind.Rectangle,0,0,width,height,((int)Math.Round(82*state.Opacity))<<24);
-            view.Commands.CopyTo(commands,1);var regions=new HitRegion[view.Regions.Count];view.Regions.CopyTo(regions,0);
+            bool pointer=state.FullyOpen&&cursorVisible&&
+                !Single.IsNaN(cursorX)&&!Single.IsInfinity(cursorX)&&
+                !Single.IsNaN(cursorY)&&!Single.IsInfinity(cursorY)&&
+                cursorX>=0&&cursorX<panelWidth&&cursorY>=0&&cursorY<height;
+            int segments=CursorSegments.GetLength(0);
+            var commands=new DrawCommand[view.Commands.Count+1+(pointer?segments*2:0)];
+            // Less than one-fifth darkness at full open. Gameplay is still visible.
+            commands[0]=new DrawCommand(DrawCommandKind.Rectangle,0,0,width,height,
+                ((int)Math.Round(46*state.Opacity))<<24);
+            view.Commands.CopyTo(commands,1);
+            if(pointer)
+            {
+                float scale=Math.Max(.8f,Math.Min(2f,height/1080f));
+                int index=1+view.Commands.Count;
+                for(int i=0;i<segments;i++)
+                {
+                    float x=cursorX+CursorSegments[i,0]*scale+1.4f*scale,
+                        y=cursorY+CursorSegments[i,1]*scale+1.4f*scale;
+                    commands[index++]=new DrawCommand(DrawCommandKind.Rectangle,x,y,
+                        CursorSegments[i,2]*scale+1.2f*scale,CursorSegments[i,3]*scale+1.2f*scale,
+                        unchecked((int)0xF6090C10));
+                }
+                for(int i=0;i<segments;i++)
+                {
+                    float x=cursorX+CursorSegments[i,0]*scale,y=cursorY+CursorSegments[i,1]*scale;
+                    commands[index++]=new DrawCommand(DrawCommandKind.Rectangle,x,y,
+                        CursorSegments[i,2]*scale,CursorSegments[i,3]*scale,
+                        unchecked((int)0xFFF2EFE7));
+                }
+            }
+            var regions=new HitRegion[view.Regions.Count];view.Regions.CopyTo(regions,0);
             return new MenuFrame(commands,regions);
         }
     }

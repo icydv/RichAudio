@@ -1,0 +1,142 @@
+{
+  "kind": "World13GpuAddendumPublicationSeal",
+  "schema": 1,
+  "createdUtc": "2026-11-04T15:09:27.095Z",
+  "parent": "dd1a2127af752c675fa551b0084e4e802f159127",
+  "parentTree": "28f52b3caecabcf77e2fbee91b3d0e3b13e2ece4",
+  "reviewedTreeBeforeThisSeal": "09eeb80d43789c14ed9ad82f06cab401a57c6d51",
+  "originalWorld13Parent": "85646ec65f2f88f0eb935374a79260a75e96b728",
+  "originalPublicationSealSha256": "44ce65e718c52be4ecc29a5aa25a75d971f37ea688417a6173f41b79dc0ffd02",
+  "reviewedFiles": 12,
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "mode": "100644",
+      "gitBlobSha1": "585cd15514f3968461044ab2c5d9997df188144e",
+      "bytes": 4404,
+      "sha256": "c2c3840830db1afcee618367f1e197cfc1ba4137c3320e7fa9e770072d0f110b"
+    },
+    {
+      "path": "docs/WORLD_13_GPU_ADDENDUM_RESULT.md",
+      "mode": "100644",
+      "gitBlobSha1": "a174ad1601248d8625cb602a469e54a50d827e31",
+      "bytes": 7904,
+      "sha256": "ffe7750ac96986bac6a17437381a40cffe2fd090ea9eac0393f7b7a332aff1a4"
+    },
+    {
+      "path": "docs/WORLD_13_GPU_FALLBACK_COST.md",
+      "mode": "100644",
+      "gitBlobSha1": "69a654c5d09059062d94852aa06d7158475b9026",
+      "bytes": 3956,
+      "sha256": "0ae09c1d5606f9705fc4dd675c8c22c5abda7871145e7d4a57f9d05b414ed7ed"
+    },
+    {
+      "path": "docs/WORLD_13_GPU_FIRST.md",
+      "mode": "100644",
+      "gitBlobSha1": "49fcf93cf14c4b26d1cde0a1480d9441b42cfa7b",
+      "bytes": 10184,
+      "sha256": "64c94e5eff30c6d499f0091d18988d67e783297dda8f186b6287885ecf664ea8"
+    },
+    {
+      "path": "docs/WORLD_13_GPU_REVIEW.md",
+      "mode": "100644",
+      "gitBlobSha1": "21976d81a39d0db2c91dcb7bc48e7a5e2428ae18",
+      "bytes": 5799,
+      "sha256": "3783a0ab11a7379ba1ad925ba76dd3bbb0c6e807f1e5dc1c8a388984bf81b991"
+    },
+    {
+      "path": "docs/WORLD_13_GPU_SOURCE_ASSESSMENT.md",
+      "mode": "100644",
+      "gitBlobSha1": "0ff4b2c9ac3c33f0da42f8db64f9f9fa1595338d",
+      "bytes": 5963,
+      "sha256": "e3f89995996f60a6f4d0c254d154ea897f1cf74a5e5853f88d26e34979c75cfd"
+    },
+    {
+      "path": "evidence/world13-gpu-fallback-cost.json",
+      "mode": "100644",
+      "gitBlobSha1": "87e922f3a3998acaa5fff4aec4470696394deb17",
+      "bytes": 24135,
+      "sha256": "1b098762b40efaeffc6349a1cea633acf319feff43fa7ef3e542c0a617aaa827"
+    },
+    {
+      "path": "evidence/world13-gpu-readiness.json",
+      "mode": "100644",
+      "gitBlobSha1": "3a2af72d838d596e6f5c51b08c56b297eb5d32be",
+      "bytes": 6924,
+      "sha256": "aaa746884530028de411987e65eff0954a6c5262fa5df2003bf4f393941c6bcc"
+    },
+    {
+      "path": "evidence/world13-hosted-41847073761.json",
+      "mode": "100644",
+      "gitBlobSha1": "cc5dee46911d610c57b6255d709c0b4a43726471",
+      "bytes": 2604187,
+      "sha256": "980e52132feae17f4af3f5674f63c31393f32be58e238d43814da49200183d1e"
+    },
+    {
+      "path": "evidence/world13-hosted-retention.json",
+      "mode": "100644",
+      "gitBlobSha1": "a07f78f48e7866aa3aca70fbbac1527bb78a77ac",
+      "bytes": 13237,
+      "sha256": "134309000bd0c08eb274ca93a949d861c29a3b680e6af9a8696e0e674a1d5392"
+    },
+    {
+      "path": "src/acoustics/gpu/client.mjs",
+      "mode": "100644",
+      "gitBlobSha1": "5234e5986213ec40f7e501163b4ff2dbe6f2722f",
+      "bytes": 13469,
+      "sha256": "b97856a06458400515a1877dbecfc4164b5b52a1e0be1400b4d0f663a46b7693"
+    },
+    {
+      "path": "tests/Test-GpuReadiness13.mjs",
+      "mode": "100644",
+      "gitBlobSha1": "a7677d7a32c38327f2cbd01047786cfda7cf32d6",
+      "bytes": 11627,
+      "sha256": "006b4a7cf3c76fcbefe1969c18744fcdd569fc51ab9bc69e2b8e9cbd9b2910e1"
+    }
+  ],
+  "independentReceipts": [
+    {
+      "name": "gpu-addendum-staged-review13.json",
+      "bytes": 69584,
+      "sha256": "800d96b7cab30e05392eaf4b32d30feff1343dc23fd4e0f44666cd938e815173"
+    },
+    {
+      "name": "gpu-readiness-review13.json",
+      "bytes": 18974,
+      "sha256": "45f75e626fcff17a82b82b9070d07b2d234e6c510e6d48a3a8b1d21e118ddbb2"
+    },
+    {
+      "name": "gpu-assessment-evidence-review13.json",
+      "bytes": 9134,
+      "sha256": "5a2e4cf22235f155cc9e7a581c6d041b95d1e0432587e8ae6fa906056df3902a"
+    },
+    {
+      "name": "hosted-functional-source-review13.json",
+      "bytes": 84064,
+      "sha256": "0e34c833fad53c1fc8723a0e908ce71d3a5bb045fc7c7ed7084917e8e3fdcc0b"
+    },
+    {
+      "name": "hosted-numeric-projection-review13.json",
+      "bytes": 13271,
+      "sha256": "c8ae5e276a7c11795e8c56abd8901cfacdd753d7baba13860bea96c6a535a143"
+    },
+    {
+      "name": "remote-publication-review13.json",
+      "bytes": 16782,
+      "sha256": "1c8b6a5a1705ba6f54a05ae28ae4d5c6363d32c40d92261e6938e31e82e19bc1"
+    }
+  ],
+  "clientWorkingSha256": "f150aae1a1ed7958ac9607b58fc1557f843bfabe4f98ed5a78777a64ac2e7e2a",
+  "clientGitSha256": "b97856a06458400515a1877dbecfc4164b5b52a1e0be1400b4d0f663a46b7693",
+  "clientEncodingDifference": "Only LF-to-CRLF checkout conversion; raw identities remain separate.",
+  "synthesisAndPcmKernelsChanged": false,
+  "defaultBuffersOrSourceHistoryChanged": false,
+  "gpuPerformanceQualified": false,
+  "autoSelectionPolicyChanged": false,
+  "originalHostedRun": 41847073761,
+  "originalHostedAttempt": 1,
+  "originalRequiredAcceptance": "failed",
+  "addendumHostedValidation": "not yet executed at sealing",
+  "selfExclusion": "This seal excludes itself. Final commit/tree and hosted outcomes are verified separately.",
+  "scope": "Separate Codex-agent reviews and original offline fixtures. No human approval, actual GPU benchmark, gameplay, endpoint, private resources or merge inferred."
+}

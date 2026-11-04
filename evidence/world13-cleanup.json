@@ -1,0 +1,303 @@
+{
+  "schema": 1,
+  "kind": "World13OriginalOnlyCleanupQualification",
+  "base": "85646ec65f2f88f0eb935374a79260a75e96b728",
+  "hostedHistoricalEvidence": {
+    "historicalLockOwnerIdentified": false,
+    "worker": "v26.13.0",
+    "run": 41811430122,
+    "jobLogSHA256": "95c1382ff9e5f8a66c56e28c09a3ab0e5749b2f96d4487025e09bb108aaa9655",
+    "actualErrno": null,
+    "numericErrnoNotRetainedInHostedEvidence": true,
+    "artifactSHA256": "fba62600bac01f11ff14a15f46c8947f22e19b158822d8503ee90663c5d5c5a9",
+    "actualAPI": "node:fs/promises.unlink",
+    "job": 126511370383,
+    "controller": "v22.23.4",
+    "afterDeadlineAndJoinAssertions": true,
+    "historicalCauseProved": false,
+    "actualCode": "EBUSY"
+  },
+  "budget": {
+    "retryPredicate": "actual CreateFileW ERROR_SHARING_VIOLATION32 only",
+    "workerExecutionDeadlinesChanged": false,
+    "terminalEvidencePublicationExcludedFromAcceptance": true,
+    "workerOrSupervisorRelaunched": false,
+    "cleanupAcceptanceMs": 2000,
+    "availabilityPollMs": 25,
+    "maximumAttempts": 16
+  },
+  "sourceBindings": [
+    {
+      "sha256": "e5ecc7b5a4208cbe43c6c009785390ef52b545aaecdc51ebb17f255ec7b78bae",
+      "file": "tools/runtime-cleanup13.mjs"
+    },
+    {
+      "sha256": "3c5ac3ec9fde48f9ab901bcf7943923595f327a00cc35bf9c7a9192479747e75",
+      "file": "tests/fixtures/RuntimeCleanup13.cs"
+    },
+    {
+      "sha256": "2bb3d3bd8b264ddca0e9a423970c8b5779e496d14635222a938b8b8a501fe995",
+      "file": "tests/Test-RuntimeCleanup13.mjs"
+    },
+    {
+      "sha256": "cfd7946f4e669611b7a4699cd771009f5c757baa1ceeaa2f375243c0a9d96bfe",
+      "file": "tests/Test-NgContained041.mjs"
+    },
+    {
+      "sha256": "59515efeb611b79f114ce5f861035487028397830960713637a110b51f43e11b",
+      "file": "tools/Build-RuntimeCleanup13.ps1"
+    },
+    {
+      "sha256": "2861354bf472b4748e59a09181563731f5c9f6da54e43fdc0ca8ff913c0d74bb",
+      "file": "tools/Test-RuntimeCleanup13.ps1"
+    },
+    {
+      "sha256": "bb36e87f635d2cc1042d9b19736f5480e4a312cfdb1c73138de7907d678e9e5f",
+      "file": "tools/Test-NgContainment041.ps1"
+    }
+  ],
+  "logs": [
+    {
+      "sha256": "e118bed502fc4605e0caf22f61b864761a13e7070df2af4f2e234dbac9878373",
+      "file": ".local/world13-cleanup-final-node22-01.tap"
+    },
+    {
+      "sha256": "1e76eb6e950f0061b56279946f30e0f42e84fd2539f9de059e55d6b192660517",
+      "file": ".local/world13-cleanup-final-node24-01.tap"
+    },
+    {
+      "sha256": "f069b74e05d7bf708cad24d49a6acc10b272398e2100e8816f7985ccfd1eb9f7",
+      "file": ".local/world13-ng-final-node22-01.tap"
+    },
+    {
+      "sha256": "58471920c2fdf9275b3580101cc8d632d39a46bceb7f59888f26c7a97e86789d",
+      "file": ".local/world13-ng-final-node24-01.tap"
+    }
+  ],
+  "populations": [
+    {
+      "controller": "v22.23.4",
+      "cleanupTests": {
+        "skipped": 0,
+        "passed": 13,
+        "failed": 0
+      },
+      "inheritedContainmentTests": {
+        "skipped": 0,
+        "passed": 7,
+        "failed": 0
+      },
+      "nativeControlledCleanupReceipts": 12,
+      "nativeControlledOutcomes": [
+        {
+          "outcome": "deleted-after-recorded-busy",
+          "count": 1
+        },
+        {
+          "outcome": "deleted-first-attempt",
+          "count": 2
+        },
+        {
+          "outcome": "failed cleanup-attempt-limit",
+          "count": 1
+        },
+        {
+          "outcome": "failed cleanup-budget-exhausted",
+          "count": 1
+        },
+        {
+          "outcome": "failed cleanup-precondition-refused",
+          "count": 1
+        },
+        {
+          "outcome": "failed native-cleanup-refused",
+          "count": 1
+        },
+        {
+          "outcome": "failed owned-runtime-identity-drift",
+          "count": 3
+        },
+        {
+          "outcome": "failed unverified-execution-exists",
+          "count": 2
+        }
+      ],
+      "failedControlCopiesRetained": 9,
+      "actualNodeUnlinkControls": [
+        {
+          "firstOutcome": {
+            "deleted": false,
+            "code": "EPERM",
+            "errno": -4048,
+            "syscall": "unlink"
+          },
+          "releaseAcknowledged": true,
+          "absenceVerified": true,
+          "mode": "image-map"
+        },
+        {
+          "firstOutcome": {
+            "deleted": false,
+            "code": "EBUSY",
+            "errno": -4082,
+            "syscall": "unlink"
+          },
+          "releaseAcknowledged": true,
+          "absenceVerified": true,
+          "mode": "no-delete-share"
+        },
+        {
+          "firstOutcome": {
+            "deleted": true
+          },
+          "releaseAcknowledged": true,
+          "absenceVerified": true,
+          "mode": "data-map"
+        },
+        {
+          "firstOutcome": {
+            "deleted": true
+          },
+          "releaseAcknowledged": true,
+          "absenceVerified": true,
+          "mode": "delete-share"
+        }
+      ],
+      "publicNode26CopyReceipts": 8,
+      "publicNode26CopyAllFirstAttemptDeleted": true,
+      "publicNode26CleanupElapsedMs": {
+        "maximum": 260.4125,
+        "minimum": 240.12329999999997
+      },
+      "launchedWorkersWithCompletedJoins": 6,
+      "beforeLaunchCopies": 2
+    },
+    {
+      "controller": "v24.19.0",
+      "cleanupTests": {
+        "skipped": 0,
+        "passed": 13,
+        "failed": 0
+      },
+      "inheritedContainmentTests": {
+        "skipped": 0,
+        "passed": 7,
+        "failed": 0
+      },
+      "nativeControlledCleanupReceipts": 12,
+      "nativeControlledOutcomes": [
+        {
+          "outcome": "deleted-after-recorded-busy",
+          "count": 1
+        },
+        {
+          "outcome": "deleted-first-attempt",
+          "count": 2
+        },
+        {
+          "outcome": "failed cleanup-attempt-limit",
+          "count": 1
+        },
+        {
+          "outcome": "failed cleanup-budget-exhausted",
+          "count": 1
+        },
+        {
+          "outcome": "failed cleanup-precondition-refused",
+          "count": 1
+        },
+        {
+          "outcome": "failed native-cleanup-refused",
+          "count": 1
+        },
+        {
+          "outcome": "failed owned-runtime-identity-drift",
+          "count": 3
+        },
+        {
+          "outcome": "failed unverified-execution-exists",
+          "count": 2
+        }
+      ],
+      "failedControlCopiesRetained": 9,
+      "actualNodeUnlinkControls": [
+        {
+          "firstOutcome": {
+            "deleted": false,
+            "code": "EBUSY",
+            "errno": -4082,
+            "syscall": "unlink"
+          },
+          "releaseAcknowledged": true,
+          "absenceVerified": true,
+          "mode": "no-delete-share"
+        },
+        {
+          "firstOutcome": {
+            "deleted": true
+          },
+          "releaseAcknowledged": true,
+          "absenceVerified": true,
+          "mode": "delete-share"
+        },
+        {
+          "firstOutcome": {
+            "deleted": true
+          },
+          "releaseAcknowledged": true,
+          "absenceVerified": true,
+          "mode": "data-map"
+        },
+        {
+          "firstOutcome": {
+            "deleted": false,
+            "code": "EPERM",
+            "errno": -4048,
+            "syscall": "unlink"
+          },
+          "releaseAcknowledged": true,
+          "absenceVerified": true,
+          "mode": "image-map"
+        }
+      ],
+      "publicNode26CopyReceipts": 8,
+      "publicNode26CopyAllFirstAttemptDeleted": true,
+      "publicNode26CleanupElapsedMs": {
+        "maximum": 278.8753999999999,
+        "minimum": 237.81850000000009
+      },
+      "launchedWorkersWithCompletedJoins": 6,
+      "beforeLaunchCopies": 2
+    }
+  ],
+  "selectedRawReceiptCount": 88,
+  "maximumSelectedCleanupRecordBytes": 8122.0,
+  "allSelectedRecordsAtMost16384Bytes": true,
+  "selectedReceiptManifestSHA256": "7792243e6a5652d7af0468a0787653ed818b73ba54d3ebb088bdceb7c3c98568",
+  "nativeHelperSourceSHA256": "3c5ac3ec9fde48f9ab901bcf7943923595f327a00cc35bf9c7a9192479747e75",
+  "publicNode26SHA256": "14319838b3f355e0398c13569a90270bce4fc68f25189f58c59b03dadae0e6d5",
+  "publication": {
+    "maximumLocalReceiptPublicationMs": 0.7281999999999016,
+    "recordCount": 40,
+    "separatelyMeasured": true,
+    "ownPublicationReceiptWriteExcluded": true,
+    "maximumSanitizedReceiptPublicationMs": 0.3830000000000382
+  },
+  "earlierDevelopmentFailure": {
+    "kind": "duplicate-local-JavaScript-identifier",
+    "failedBeforeAnyWorkerLaunch": true,
+    "file": ".local/world13-ngcontained-node22-01.tap",
+    "retained": true,
+    "sha256": "c37661ae4eb09c3e644dc03a081d204faf4e072ab544cb1a29bc87dd1cde5c35"
+  },
+  "scope": {
+    "originalAuthoredOrPublicFixturesOnly": true,
+    "deployed": false,
+    "installedResourceOrPrivateCaptureOrKeyRead": false,
+    "gameExecutableRead": false,
+    "freshHostedQualificationEstablished": false,
+    "audioEndpointOpened": false,
+    "gameLaunched": false,
+    "merged": false
+  }
+}

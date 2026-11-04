@@ -1,0 +1,326 @@
+{
+  "kind": "World13PublicationSeal",
+  "schema": 1,
+  "createdUtc": "2026-11-04T14:22:46.411Z",
+  "parent": "85646ec65f2f88f0eb935374a79260a75e96b728",
+  "parentTree": "19afad95f69af3070d0f3a7458c6be80e0d55f35",
+  "reviewedTreeBeforeThisSeal": "0aa3a98d6ba43bc1ce482e6b24492f1237235845",
+  "reviewedFiles": 34,
+  "files": [
+    {
+      "mode": "100644",
+      "gitBlob": "aecacab1ed00cc987a34b55400782f0b3b3269da",
+      "stage": 0,
+      "path": ".github/workflows/offline.yml",
+      "bytes": 3891,
+      "sha256": "03551be7679ad132d061dcd0f24a647d0c207cf037d3999952aa1f8b1d3588a5"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "25d686d3259731d00ae8e365893ae06fd6b0007a",
+      "stage": 0,
+      "path": "docs/WORLD_13_CLEANUP.md",
+      "bytes": 7293,
+      "sha256": "e96a058f9f39dfe862cd56fab2eee26177b7e59815d8620436f62bb0e8a59407"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "e46fc9bee2b942053fce385cbdbd53a9cc209b5a",
+      "stage": 0,
+      "path": "docs/WORLD_13_IMPLEMENTATION_REVIEW.md",
+      "bytes": 10026,
+      "sha256": "278451c847351351e352df3fcadbcfb4cda3fc5fbd7ab4ee2e488534b73356b4"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "28f892684ec55b647fa19991ea982e71f3095d4d",
+      "stage": 0,
+      "path": "docs/WORLD_13_MEASUREMENT_SCOPE.md",
+      "bytes": 6555,
+      "sha256": "e6b1bff041abe790e3111f94559f537b42bf17c52f25812684b931696a137088"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "0578af1544bcef44cbabb5acf76b953aae558faa",
+      "stage": 0,
+      "path": "docs/WORLD_13_PERFORMANCE_EXPERIMENTS.md",
+      "bytes": 12125,
+      "sha256": "e696030c4f79247a36810f3abd3ecaf8605c849a7d54acc08d8f7a0dbb9bde90"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "69df28c3674373a76693ed8fe79f7b4a95e246ac",
+      "stage": 0,
+      "path": "docs/WORLD_13_PERFORMANCE.md",
+      "bytes": 8626,
+      "sha256": "79349daa0e647317597b1c10d2a4b11691a677902fb43ab43c911829a15c6257"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "5ef5a90ee0be6369490afbe245d045888f1a84f1",
+      "stage": 0,
+      "path": "docs/WORLD_13_RESULT.md",
+      "bytes": 6967,
+      "sha256": "a23607fc647c570e06525530a7222113725584962101da2b93127786e22eefd5"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "fb2881672ee5af63746b900f84362ee2d0882a9d",
+      "stage": 0,
+      "path": "evidence/world13-cleanup.json",
+      "bytes": 8923,
+      "sha256": "6fac4d739ea4d32e341fafc9dc58a4f71ba92afb685be23f2a7019806429bbca"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "be9f514edf132a7da8899d2b5c100ec21597da44",
+      "stage": 0,
+      "path": "evidence/world13-experiments.json",
+      "bytes": 191134,
+      "sha256": "09df6d2ae0e0eefd36a975530db9f1842381dd169882656bcd0c522afe0c89f0"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "d291de172114c40745d8c62bfb23fbb3ada545b1",
+      "stage": 0,
+      "path": "evidence/world13-local-functional.json",
+      "bytes": 17696,
+      "sha256": "c273f39a34096782a5059c2f5306e6816cd226df172cfc5f125941753100dd3f"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "298c685d6c91f6dba8c46be4efef468add735576",
+      "stage": 0,
+      "path": "evidence/world13-local-processing.json",
+      "bytes": 1974865,
+      "sha256": "787000b036831325378397c8d014902822fd6217e660a109f545e165e260d838"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "466136edc6d7f6daa984639dac9d6ada72efcffe",
+      "stage": 0,
+      "path": "tests/fixtures/Processing13.mjs",
+      "bytes": 1079,
+      "sha256": "8d2ff7e7e936760e7d4725f3014fb0f024fb4543905289bf379e77e0b913db5c"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "35d0f0cc3b17dad3ab88346087136566791f9a62",
+      "stage": 0,
+      "path": "tests/fixtures/RuntimeCleanup13.cs",
+      "bytes": 7245,
+      "sha256": "3c5ac3ec9fde48f9ab901bcf7943923595f327a00cc35bf9c7a9192479747e75"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "5b5a27ac56053819b40b7b43167c6c4a53738b73",
+      "stage": 0,
+      "path": "tests/Test-Ci13.mjs",
+      "bytes": 6337,
+      "sha256": "19555e65ea85f2d156652f5779ae3d623fd4364885054131d01298fa628800b7"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "cce3cb0ce482cb73048ee34f495372b3c438fcdf",
+      "stage": 0,
+      "path": "tests/Test-CiStages13.ps1",
+      "bytes": 1721,
+      "sha256": "96accfa3a7e0b47325d4bb9685fcd90e647f347f59a4a9dcb4aae66fe7f3d1fc"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "904f7c11c40cfcc09cebbb56f7a61a2df7073966",
+      "stage": 0,
+      "path": "tests/Test-NgContained041.mjs",
+      "bytes": 9282,
+      "sha256": "d26fda836219a1f4ebbf3260e294bd3fe10f60f35e7bba724fe44ca533c8b71e"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "5de9b0ce2e966e50d724c3e9c6e094e4a0b9ee21",
+      "stage": 0,
+      "path": "tests/Test-Processing13.mjs",
+      "bytes": 10642,
+      "sha256": "adf085767ec6e76a40d9f526dda71492bbbc019e846ab20119b07c52ed9204ad"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "2773940180a44ff5068279f0f8ff38bdfd6bc800",
+      "stage": 0,
+      "path": "tests/Test-Renderer13.mjs",
+      "bytes": 18891,
+      "sha256": "763fb5308a447446e3945bf0ec5bc4c3faf9a2d651d5a087f2c9cf219f6eecd1"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "e55a9e84fba0c26a91b50278458d59758017d6df",
+      "stage": 0,
+      "path": "tests/Test-RuntimeCleanup13.mjs",
+      "bytes": 12569,
+      "sha256": "2bb3d3bd8b264ddca0e9a423970c8b5779e496d14635222a938b8b8a501fe995"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "f44a5467794c5ad859de61352b428ab9c16090c3",
+      "stage": 0,
+      "path": "tests/Test-Summary13.mjs",
+      "bytes": 2136,
+      "sha256": "969f1074bbffef4f76190e2778dc99fd9d85765842429669e68b636b48668970"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "d483908437d737f45c16e90c08680af702bcc579",
+      "stage": 0,
+      "path": "tests/Test-Synthesis13.mjs",
+      "bytes": 17410,
+      "sha256": "fffe8d10252d4a1833d018e577c827fec62d183d23170542939b56229147a833"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "07c5ae8f5bfd92512258573ca6d6f98b4ecf1bc4",
+      "stage": 0,
+      "path": "tools/Build-RuntimeCleanup13.ps1",
+      "bytes": 1799,
+      "sha256": "59515efeb611b79f114ce5f861035487028397830960713637a110b51f43e11b"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "fc32349e51b7c1bf3e508e534bbb8094f88e9e05",
+      "stage": 0,
+      "path": "tools/ci-gates13.mjs",
+      "bytes": 2952,
+      "sha256": "d8e0a956fcf0919b22cac5c2a646c78596d396cf31013c75782db1d2f3885f12"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "72b38e22a19f0ab60878d1c4aaea31923acc46e4",
+      "stage": 0,
+      "path": "tools/Freeze-Processing13.mjs",
+      "bytes": 6372,
+      "sha256": "2efb4b72e78a3a04ba6e0d9efe396b19d281e3a8530920845b1b9fa3affa0cfa"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "8a3f35d47e58e2cfebf64822a1fbc30bdf83e6d6",
+      "stage": 0,
+      "path": "tools/Owned-Processing13.mjs",
+      "bytes": 11783,
+      "sha256": "1f93f4f1387e1e644204f154201928c93c24b0b0f58bb8c483db0995c67b2e15"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "01e0971ead62c802a8d6380da722d304b1b2d9b1",
+      "stage": 0,
+      "path": "tools/Processing-Continuity13.mjs",
+      "bytes": 1543,
+      "sha256": "a28c2e5b01c710242dcbeb33f477539fd1e75e6958be5e92a5b60cf60b8ebe34"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "a0ea118705bf47b775825d97ef30121e1856d2e2",
+      "stage": 0,
+      "path": "tools/Processing-Verdict13.mjs",
+      "bytes": 631,
+      "sha256": "7f2d51a5ffcc290aa538a052d611c9ab2dab7f28df01f25dc6752155704c8a44"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "4b8e704fad5e00c3e00caa2e033d00b5e9813286",
+      "stage": 0,
+      "path": "tools/Profile-Processing13.mjs",
+      "bytes": 27240,
+      "sha256": "9b24d31fca70584d954840472d497b1b35a07bf7b9ec7255722cd6d16c82144b"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "39755676fba3f175522ebabdbba62fc05557cf6f",
+      "stage": 0,
+      "path": "tools/Publish-Processing13.mjs",
+      "bytes": 5496,
+      "sha256": "12a0d47381312e7c127e687b9cf5ee693594fad93a3f1923e56db4a726d61491"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "633eab988f634071f1702f941276cec9cfce2875",
+      "stage": 0,
+      "path": "tools/runtime-cleanup13.mjs",
+      "bytes": 11542,
+      "sha256": "e5ecc7b5a4208cbe43c6c009785390ef52b545aaecdc51ebb17f255ec7b78bae"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "6f7c5e80daaf3adb6e0e3fe8a66b829139d94907",
+      "stage": 0,
+      "path": "tools/Summarize-Processing13.mjs",
+      "bytes": 14900,
+      "sha256": "acebe23d0e52692c8b5da3d52d335b7449d9da6f9a8028c122f6c4ed6dac2372"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "8eea5767dbc04f36a66cc0394df19c88cdfd0553",
+      "stage": 0,
+      "path": "tools/Test-NgContainment041.ps1",
+      "bytes": 1219,
+      "sha256": "f7194b7ceeaef7cd3558cffdf5703e6ff01a77038d997b9078a7cbf32e9b7d7b"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "7692533c1c33caf15187af7cb0842d16984a325d",
+      "stage": 0,
+      "path": "tools/Test-Offline13.ps1",
+      "bytes": 10958,
+      "sha256": "f4985fc1b668b4ad4dd901c8d68ac9d41bf6ff5dccb4730f603466b940f2ce4a"
+    },
+    {
+      "mode": "100644",
+      "gitBlob": "22279c416d09931786988acc0d84ef81e21df1a0",
+      "stage": 0,
+      "path": "tools/Test-RuntimeCleanup13.ps1",
+      "bytes": 607,
+      "sha256": "2861354bf472b4748e59a09181563731f5c9f6da54e43fdc0ca8ff913c0d74bb"
+    }
+  ],
+  "independentReceipts": [
+    {
+      "name": "staged-review13-final02.json",
+      "bytes": 11792,
+      "sha256": "53b88d09451c237b01400711a11a19696b94f39fc856cd9c6b141f527a8b4826"
+    },
+    {
+      "name": "cleanup-review13.json",
+      "bytes": 3963,
+      "sha256": "2849b608c3f0475c718556eacb2c5bda659d968c0234214c64543f5367181775"
+    },
+    {
+      "name": "experiment-review13.json",
+      "bytes": 3623,
+      "sha256": "723bf0e8ad612d8d0a95334c90f579553b79575de75efb8d8ec1c2da90fa5d84"
+    },
+    {
+      "name": "harness-ci-review13.json",
+      "bytes": 5386,
+      "sha256": "c97deb777985588b3d7c2cdc975d6177f5779603f70f695d05367800af050358"
+    },
+    {
+      "name": "final-results-review13.json",
+      "bytes": 37314,
+      "sha256": "03e8998e7b19eb8215f75439dc71bc725845d1e3c54569bc15985a4bf71a4123"
+    },
+    {
+      "name": "world13-frozen-source-git-audit02.json",
+      "bytes": 2351,
+      "sha256": "d35905d01b08ce26c4bd7d1f8c0d32ef3818ef0677fd14335a149bc323c7c229"
+    },
+    {
+      "name": "source-review-final01.json",
+      "bytes": 5726,
+      "sha256": "2cac4818df192fec9fbd852bc32312293197914419199c643ceba3ce2e58d126"
+    }
+  ],
+  "requiredProcessingVerdict": "failed",
+  "productionAcousticSourceChanged": false,
+  "rawGitBytesBound": true,
+  "physicalCheckoutEncodingNotInferred": true,
+  "selfExclusion": "This seal excludes itself to avoid recursive hashing. The final commit and tree are independently verified after publication.",
+  "limits": "Separate Codex-agent reviews and offline authored data only. No human approval, gameplay, endpoint, installed resources, private-bank or real-time acceptance inferred."
+}
