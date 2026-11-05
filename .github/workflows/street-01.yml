@@ -80,6 +80,8 @@ jobs:
             .local/catalog-publication-legacy-*/*.log
             .local/resolver-publication-*/validation.json
             .local/resolver-publication-*/*-result.json
+            .local/resolver-publication-*/*.log
+            .local/resolver-publication-*/child-closure*.json
             .local/ns01-*/validation.json
             .local/ns01-*/initializer-and-timing-audit.json
             .local/ns01-*/failed-rehearsal.json
