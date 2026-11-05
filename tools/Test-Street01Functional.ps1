@@ -34,6 +34,7 @@ $nodeFiles=@(
  'tests/Test-NativeSupportBoundsCompletion01.mjs','tests/Test-InteriorPlacementCompletion01.mjs'
 )
 $scripts=@(
+ @{name='production-pipe-completion-lifetime';file='tools/Test-PipeDeadlineLifetime01.ps1';arguments=@()},
  @{name='product-capture-continuity';file='tools/Test-StreetContinuity01.ps1';arguments=@()},
  @{name='preparation-only-initial-pose';file='tools/Test-InitialPreparationOffer01.ps1';arguments=@()},
  @{name='persisted-settings-handoff';file='tools/Test-AcousticSettingsHandoff.ps1';arguments=@()},

@@ -62,6 +62,10 @@ jobs:
             .local/street01-completion/atomic-publication-*/reader-lifecycle.json
             .local/street01-completion/atomic-publication-*/publication.json
             .local/street01-completion/atomic-publication-*/test-failure.json
+            .local/street01-completion/pipe-lifetime01/*/build.log
+            .local/street01-completion/pipe-lifetime01/*/*.stdout.log
+            .local/street01-completion/pipe-lifetime01/*/*.stderr.log
+            .local/street01-completion/pipe-lifetime01/*/*.json
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 7

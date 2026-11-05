@@ -95,7 +95,7 @@ namespace RichAudio.Beacon.Windows {
    }else File.WriteAllText(permit,"owned gameplay job");
    publisher.Configure(pipe,host.Id);state="automatic host starting";
   }
-  void StopHost(){var p=host;host=null;if(publisher!=null)publisher.Configure(null,0);if(p!=null){try{if(!p.HasExited){byte[] b=Encoding.UTF8.GetBytes("stop\n");var op=p.StandardInput.BaseStream.BeginWrite(b,0,b.Length,null,null);using(var wait=op.AsyncWaitHandle)if(wait.WaitOne(200))p.StandardInput.BaseStream.EndWrite(op);p.WaitForExit(batiDemo?6000:1500);}}catch(Exception){}finally{if(job!=null){job.Dispose();job=null;}try{if(!p.HasExited)p.Kill();p.WaitForExit(1000);}catch(Exception){}p.Dispose();}}else if(job!=null){job.Dispose();job=null;}Interlocked.Exchange(ref livePid,0);}
+  void StopHost(){var p=host;host=null;if(publisher!=null)publisher.Configure(null,0);if(p!=null){try{if(!p.HasExited){byte[] b=Encoding.UTF8.GetBytes("stop\n");try{PipeDeadline.Write(p.StandardInput.BaseStream,b,200,"host stop write deadline");}catch(TimeoutException){}p.WaitForExit(batiDemo?6000:1500);}}catch(Exception){}finally{if(job!=null){job.Dispose();job=null;}try{if(!p.HasExited)p.Kill();p.WaitForExit(1000);}catch(Exception){}p.Dispose();}}else if(job!=null){job.Dispose();job=null;}Interlocked.Exchange(ref livePid,0);}
   static void PublishFallback(PlayableConfiguration c,AcousticSettings s,string reason){
    var j=new System.Web.Script.Serialization.JavaScriptSerializer();string text=j.Serialize(new{schemaVersion=1,hostState="stopped",recordedAtUtc=DateTime.UtcNow.ToString("o"),status=new{integrationMode="stock-fallback",nativeReplacement=false,reason}});
    AcousticSettingsStore.WriteAtomic(c.Root,AcousticSettingsStore.StatusPath(AcousticSettingsStore.DefaultPath(c.Root)),text,16384);
