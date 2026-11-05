@@ -26,9 +26,13 @@ namespace Rage {
 namespace Rage.Attributes {public sealed class ConsoleCommandAttribute:Attribute {public string Name,Description;}}
 namespace Rage.Native {public static class NativeFunction {
  public static bool GameplayCamera=true,VehicleCamera=true;
+ public static double CameraX;public static uint CameraGameTime;
  public static T CallByName<T>(string name,params object[] args){
   if(name=="IS_GAMEPLAY_CAM_RENDERING")return (T)(object)GameplayCamera;
   if(name=="IS_FOLLOW_VEHICLE_CAM_ACTIVE")return (T)(object)VehicleCamera;
+  if(name=="GET_FINAL_RENDERED_CAM_COORD")return (T)(object)new Rage.Vector3((float)CameraX,0,1);
+  if(name=="GET_FINAL_RENDERED_CAM_ROT"){if(args.Length!=1||Convert.ToInt32(args[0])!=2)throw new InvalidOperationException("Expected actual sampler ZXY rotation order");return (T)(object)new Rage.Vector3(0,0,0);}
+  if(name=="GET_GAME_TIMER")return (T)(object)CameraGameTime;
   throw new InvalidOperationException("Unexpected fixture native: "+name);
  }
 }}
@@ -50,6 +54,7 @@ internal static class TestStreetContinuity01 {
  static void Test(string name,Action action){action();cases.Add(name);}
  static void Capture(GameplayRuntime runtime,double cameraX=0){
   Thread.Sleep(60);long now=Stopwatch.GetTimestamp();
+  Rage.Native.NativeFunction.CameraX=cameraX;Rage.Native.NativeFunction.CameraGameTime=(uint)(now/Stopwatch.Frequency);
   typeof(CameraSampler).GetField("cached",BindingFlags.NonPublic|BindingFlags.Static).SetValue(null,new CameraObservation{Before=now,After=now,Observed=now,GameTime=(uint)(now/Stopwatch.Frequency),Position=new[]{cameraX,0d,1d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d}});
   typeof(PlayableEntry).GetMethod("Capture",BindingFlags.NonPublic|BindingFlags.Static).Invoke(null,new object[]{runtime});
  }

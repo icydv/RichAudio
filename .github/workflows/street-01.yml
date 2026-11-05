@@ -31,6 +31,8 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # existing reviewed publisher v6 pin
         with:
           persist-credentials: false
+          # Role-aware and cold-history controls execute their exact Git parent.
+          fetch-depth: 0
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # existing reviewed official v6 pin
         with:
           node-version: ${{ matrix.node }}
@@ -47,6 +49,14 @@ jobs:
             .local/street01/functional-*/logs/*.log
             .local/street01/functional-*/receipt.json
             .local/street01/cold-npc-failure-*/*.json
+            .local/street01/initial-preparation-offer-*/build.log
+            .local/street01/initial-preparation-offer-*/attempt.json
+            .local/street01/initial-preparation-offer-*/validation.json
+            .local/street01/initial-preparation-offer-*/*/stdout.log
+            .local/street01/initial-preparation-offer-*/*/stderr.log
+            .local/street01/initial-preparation-offer-*/*/failure-context.json
+            .local/street01/initial-preparation-offer-*/*/failure.json
+            .local/street01/initial-preparation-offer-*/*/expected-camera-cache-failure.json
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
