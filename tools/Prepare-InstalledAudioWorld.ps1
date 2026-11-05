@@ -10,6 +10,8 @@ param([Parameter(Mandatory=$true)][string]$GameRoot,
       [ValidatePattern('^[a-zA-Z0-9_]{1,64}$')][string]$VehicleModelFilter='bati',
       [string]$ObservationNotBeforeUtc='',
       [switch]$ImportQualifiedGeometry,
+      [switch]$RequireCachedGeometry,
+      [string]$RetainedReadinessPosePath='',
       [switch]$ForceRefresh)
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 if($PSVersionTable.PSEdition -ne 'Core'){throw 'Run with installed PowerShell 7 (pwsh)'}
@@ -137,6 +139,8 @@ try {
     Stage 'resolved' $resolverTool $resolverArguments @('resolved-catalog.json','resolved-binding01.json','summary.json') (Get-PreparationFingerprint @{Catalog=$catalogHash;SourceRefresh=$refreshHash})
     $resolvedPath=Join-Path $output 'resolved\resolved-catalog.json';$resolvedHash=Get-PreparationHash $resolvedPath
     $geometryArguments='-ResolvedCatalogPath '+(ConvertTo-PreparationLiteral $resolvedPath)+' -ResolvedCatalogSHA256 '+(ConvertTo-PreparationLiteral $resolvedHash)+' -MaximumResources '+$MaximumGeometryResources+' -MaximumMemoryMiB '+$MaximumMemoryMiB+' -ParentInvocationId '+(ConvertTo-PreparationLiteral $runId)+' -ObservationNotBeforeUtc '+(ConvertTo-PreparationLiteral $workflowStartedUtc)
+    if($RequireCachedGeometry){$geometryArguments+=' -RequireCachedGeometry'}
+    if($RetainedReadinessPosePath){$geometryArguments+=' -RetainedReadinessPosePath '+(ConvertTo-PreparationLiteral $RetainedReadinessPosePath)}
     if(!$ImportQualifiedGeometry){$geometryArguments+=' -PlanOnly'}
     Stage 'geometry' $geometryTool $geometryArguments @('summary.json','manifest.json') $resolvedHash
     $stable=(Get-PreparationFingerprint (Input-Binding)) -ceq $fingerprint

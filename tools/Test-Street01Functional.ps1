@@ -31,6 +31,7 @@ $nodeFiles=@(
  'tests/Test-ColdNpcHistory01.mjs','tests/Test-ColdNpcFailureRetention01.mjs',
  'tests/Test-Synthesis12.mjs',
  'tests/Test-WorldCompletion01.mjs','tests/Test-WorldStartupCompletion01.mjs','tests/Test-WorldValidationEpochOrderingCompletion01.mjs',
+ 'tests/Test-NormalReadinessReader01.mjs','tests/Test-NormalWorldReadiness01.mjs','tests/Test-NormalReadinessVerdict01.mjs',
  'tests/Test-NativeSupportBoundsCompletion01.mjs','tests/Test-InteriorPlacementCompletion01.mjs'
 )
 $scripts=@(
@@ -48,7 +49,9 @@ $scripts=@(
  @{name='production-continuation-checkpoint';file='tests/Test-WorldContinuationCheckpoint01.ps1';arguments=@()},
  @{name='retained-bati-graph';file='tests/Test-BatiMetadataGraph01.ps1';arguments=@()},
  @{name='mlo-placement-projection';file='tests/Test-MloPlacementProjectionCompletion01.ps1';arguments=@()},
- @{name='disabled-native-diagnostic-fixture';file='tools/Test-StreetTrackedDiagnostic01.ps1';arguments=@('-FixtureOnly')}
+ @{name='disabled-native-diagnostic-fixture';file='tools/Test-StreetTrackedDiagnostic01.ps1';arguments=@('-FixtureOnly')},
+ @{name='passive-candidate-transaction';file='tests/Test-StreetTrackedCandidate01.ps1';arguments=@()},
+ @{name='passive-session-supervision';file='tests/Test-StreetTrackedSupervision01.ps1';arguments=@()}
 )
 $requiredSteps=1+$scripts.Count
 $inputFiles=@($PSCommandPath)+@($nodeFiles|ForEach-Object{Join-Path $repo $_})+@($scripts|ForEach-Object{Join-Path $repo $_.file})

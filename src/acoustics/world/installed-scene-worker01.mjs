@@ -6,31 +6,37 @@ import {InstalledStaticWorld01,encodeInstalledStaticScene01,prepareInstalledStat
 import {prepareInstalledSoundMapGeometry01} from '../streaming/soundmap-telemetry.mjs';
 import {createInitialWorldObservationWriter01} from './initial-observation01.mjs';
 const reason=e=>String(e?.message??e).replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,240);
-let world=null,failed=false,lastRequest=0,catalogSHA256=null,bindingEpoch=0,poll=null,manifestStamp=null;
+let world=null,failed=false,lastRequest=0,catalogSHA256=null,bindingEpoch=0,poll=null,manifestStamp=null,waitingStamp=null;
 const {schema,config,session}=workerData??{};
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x),automatic=config?.catalogSHA256==null;
 let initialPriority=null,initialPriorityFailure=null;
 let validationEpochUtc01=null;
+const cacheTimings={manifestLoads:0,manifestReadMilliseconds:0,catalogueAndIndexMilliseconds:0,maximumRefreshMilliseconds:0};
 const epoch=x=>typeof x==='string'&&x.length<=40&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,7})?Z$/.test(x)&&Number.isFinite(Date.parse(x));
 const pendingStatus=()=>({stage:'preparing/indexing',installedWorldVerified:false,genuineResourceVerified:false,runtimeActivationVerified:false,preparation:{completedEligibleTiles:0,eligibleTiles:0,totalTiles:0},actualWorldCoverage:'unmeasured'});
-function worldStatus(){const status=world.status();return {...status,genuineResourceVerified:status.lastWindow?.genuineResourceVerified===true&&status.lastWindow.activeSurfaces>0};}
+function worldStatus(){const status=world.status();return {...status,cacheTimings:{...cacheTimings},localReadiness:status.lastWindow?.localReadiness??{state:'waiting-for-window',firstBlocker:'no-valid-local-window'},genuineResourceVerified:status.lastWindow?.genuineResourceVerified===true&&status.lastWindow.activeSurfaces>0};}
 function post(type,extra={},transfer=[]){parentPort.postMessage({schema:1,type,session,catalogSHA256,bindingEpoch,validationEpochUtc01,...extra},transfer);}
 function fail(error,phase,requestId=null){if(failed)return;failed=true;clearTimeout(poll);post('failed',{reason:reason(error),phase,requestId});world?.close();world=null;parentPort.close();}
 function refresh(){
+ const began=performance.now();
  try{
+  if(automatic&&!epoch(validationEpochUtc01)){post('status',{ready:false,status:{...pendingStatus(),cacheTimings:{...cacheTimings},reason:'waiting-normal-supervisor-epoch'}});return false;}
   const info=fs.statSync(config.manifestPath,{bigint:true}),stamp=[info.dev,info.ino,info.size,info.mtimeNs,info.ctimeNs].join(':');
   if(world&&stamp===manifestStamp)return true;
+  if(automatic&&waitingStamp===stamp+'|'+validationEpochUtc01)return false;
   if(info.size<=0||info.size>67108864n)throw Error('Bounded known installed scene manifest required');
-  const manifest=JSON.parse(fs.readFileSync(config.manifestPath,'utf8').replace(/^\uFEFF/,'')),admitted=manifest.ResolvedCatalogSHA256;
+  const readAt=performance.now(),manifest=JSON.parse(fs.readFileSync(config.manifestPath,'utf8').replace(/^\uFEFF/,'')),admitted=manifest.ResolvedCatalogSHA256;cacheTimings.manifestLoads++;cacheTimings.manifestReadMilliseconds+=performance.now()-readAt;
   if(manifest.Schema!==1||!hex(admitted)||(config.expectedGameSHA256!==undefined&&manifest.InputBinding?.GameExecutableSHA256!==config.expectedGameSHA256)||(!automatic&&admitted!==config.catalogSHA256))throw Error('Installed scene manifest game/catalogue identity');
   if(automatic&&(!epoch(validationEpochUtc01)||manifest.ValidationEpochUtc01!==validationEpochUtc01)){
    if(world){world.close();world=null;catalogSHA256=null;bindingEpoch++;manifestStamp=null;}
-   post('status',{ready:false,status:{...pendingStatus(),reason:validationEpochUtc01?'waiting-current-archive-validation':'waiting-normal-supervisor-epoch'}});return false;
+   waitingStamp=stamp+'|'+validationEpochUtc01;post('status',{ready:false,status:{...pendingStatus(),cacheTimings:{...cacheTimings},reason:'waiting-current-archive-validation'}});return false;
   }
   const changed=catalogSHA256!==admitted;
+  const indexAt=performance.now();
   if(changed||world===null){world?.close();world=null;catalogSHA256=admitted;bindingEpoch++;world=new InstalledStaticWorld01({...config,catalogSHA256,...(automatic?{requiredValidationEpochUtc01:validationEpochUtc01}:{})});}
   else world.reload();
-  manifestStamp=stamp;post(changed?'ready':'status',{ready:true,status:worldStatus()});return true;
+  cacheTimings.catalogueAndIndexMilliseconds+=performance.now()-indexAt;cacheTimings.maximumRefreshMilliseconds=Math.max(cacheTimings.maximumRefreshMilliseconds,performance.now()-began);
+  manifestStamp=stamp;waitingStamp=null;post(changed?'ready':'status',{ready:true,status:worldStatus()});return true;
  }catch(error){
   if(automatic&&error.code==='ENOENT'){
    if(world){world.close();world=null;catalogSHA256=null;bindingEpoch++;manifestStamp=null;}

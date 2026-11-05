@@ -2,7 +2,7 @@
 #include "../../src/telemetry/ShvHandoff/NativeIds.h"
 #include <atomic>
 #include <cstring>
-namespace {namespace N=HandoffNativeIds;void(*entry)()=nullptr;std::atomic<unsigned> calls{0},targets{0},registrations{0},unregistrations{0},pauseStage{0},reached{0};std::atomic<int> attached{1},running{1},exists{1},revision{0};std::atomic<unsigned> ratio{0x3f000000};thread_local UINT64 hash=0,args[4]{},result=0;thread_local unsigned count=0;}
+namespace {namespace N=HandoffNativeIds;void(*entry)()=nullptr;std::atomic<unsigned> calls{0},targets{0},registrations{0},unregistrations{0},pauseStage{0},reached{0};std::atomic<int> attached{1},running{1},exists{1},revision{0};std::atomic<unsigned> ratio{0x3f000000};std::atomic<UINT64> failedHash{0};thread_local UINT64 hash=0,args[4]{},result=0;thread_local unsigned count=0;}
 void StreetFixtureTransition01(unsigned stage){if(pauseStage.load()==stage){reached=stage;while(pauseStage.load()==stage)Sleep(1);}}
 void scriptRegister(HMODULE,void(*p)()){entry=p;registrations++;}
 void scriptUnregister(HMODULE){unregistrations++;entry=nullptr;}
@@ -10,6 +10,7 @@ void scriptWait(DWORD ms){Sleep(ms);}
 void nativeInit(UINT64 h){hash=h;count=0;calls++;if(h==N::CurrentRevRatio)targets++;}
 void nativePush64(UINT64 value){if(count<4)args[count++]=value;}
 UINT64* nativeCall(){
+ if(hash==failedHash.load())return nullptr;
  result=0;
  if(hash==N::PlayerId)result=0;
  else if(hash==N::PlayerPed)result=101;
@@ -30,3 +31,4 @@ extern "C" __declspec(dllexport) void __cdecl StreetFixtureCounts01(unsigned* n,
 extern "C" __declspec(dllexport) void __cdecl StreetFixturePause01(unsigned stage){pauseStage=stage;}
 extern "C" __declspec(dllexport) unsigned __cdecl StreetFixtureReached01(){return reached.load();}
 extern "C" __declspec(dllexport) unsigned __cdecl StreetFixtureTargets01(){return targets.load();}
+extern "C" __declspec(dllexport) void __cdecl StreetFixtureFailQuery01(UINT64 h){failedHash=h;}

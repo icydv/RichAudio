@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/street-01.yml"
       - "src/acoustics/**"
+      - "src/telemetry/StreetTracked01/**"
       - "tests/**"
       - "tools/**"
   workflow_dispatch:
@@ -66,6 +67,16 @@ jobs:
             .local/street01-completion/pipe-lifetime01/*/*.stdout.log
             .local/street01-completion/pipe-lifetime01/*/*.stderr.log
             .local/street01-completion/pipe-lifetime01/*/*.json
+            .local/street01-normal-readiness01/focused*/*.json
+            .local/street01-normal-readiness01/focused*/*.log
+            .local/street01-normal-readiness01/original/*/validation.json
+            .local/street01-normal-readiness01/original/*/driver.stdout.log
+            .local/street01-normal-readiness01/original/*/driver.stderr.log
+            .local/street01-passive-fixtures-*/validation.json
+            .local/street01-passive-telemetry01/supervision-*/validation.json
+            .local/street01/tracked-diagnostic-*/validation.json
+            .local/street01/tracked-diagnostic-*/*/run.log
+            .local/street01/tracked-diagnostic-*/*/stderr.log
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 7

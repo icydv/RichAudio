@@ -1,5 +1,7 @@
 # STREET-01: vehicle continuity and selective native ownership
 
+My [focused passive diagnostic](STREET_01_PASSIVE_TELEMETRY.md) and [single-session proposal](STREET_01_PASSIVE_SESSION_PROPOSAL.md) continue this work without enabling takeover. Codex is preparing the candidate offline; the prior closed live approvals remain closed.
+
 I still require one Bati's engine/exhaust to be replaced selectively. STREET-01 does **not** satisfy that requirement yet. The implementation remains additive, and native takeover remains disabled. Codex has not launched GTA, suppressed a native component or reused a closed PLAYABLE approval for this revision.
 
 ## Changes in the actual main-mod adapter

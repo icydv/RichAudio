@@ -41,12 +41,14 @@ if(!config.demoProfile&&config.acousticWorld!==false){
  // Its two relative metadata paths cannot escape that declared cache root.
  const privateCacheRoot=c.privateCacheRoot===undefined?root:path.resolve(c.privateCacheRoot);
  if(c.privateCacheRoot!==undefined&&(!path.isAbsolute(c.privateCacheRoot)||!privateCacheRoot.split(path.sep).includes('.local')))throw Error('explicit private installed-world cache root');
+ const derivedCacheRoot=c.derivedCacheRoot===undefined?undefined:path.resolve(c.derivedCacheRoot);
+ if(c.derivedCacheRoot!==undefined&&(!path.isAbsolute(c.derivedCacheRoot)||!derivedCacheRoot.split(path.sep).includes('.local')))throw Error('explicit private derived-world cache root');
  const worldInside=relative=>{if(typeof relative!=='string'||path.isAbsolute(relative))throw Error('relative installed cache metadata path');const p=path.resolve(privateCacheRoot,relative);if(!p.startsWith(privateCacheRoot+path.sep))throw Error('installed cache metadata escaped');return p;};
  const worldConfig={manifestPath:worldInside(c.manifestPath??worldRoot+'/geometry/manifest.json'),catalogPath:worldInside(c.catalogPath??worldRoot+'/resolved/resolved-catalog.json'),expectedGameSHA256:config.gameSha256,
-  ...(c.catalogSHA256?{catalogSHA256:c.catalogSHA256}:{}),...((c.initialObservationPath!==undefined||c.privateCacheRoot===undefined)?{initialObservationPath:worldInside(c.initialObservationPath??worldRoot+'/geometry/initial-observation01.json')}:{ }),maximumResidentResources:8};
+  ...(c.catalogSHA256?{catalogSHA256:c.catalogSHA256}:{}),...(derivedCacheRoot?{privateRoot:derivedCacheRoot}:{}),...((c.initialObservationPath!==undefined||c.privateCacheRoot===undefined)?{initialObservationPath:worldInside(c.initialObservationPath??worldRoot+'/geometry/initial-observation01.json')}:{ }),maximumResidentResources:8};
  installedScenes=new InstalledSceneService01({config:worldConfig,session,onStatus:s=>{
   worldStatus={stage:s.stage,installedWorldVerified:false,genuineResourceVerified:s.genuineResourceVerified===true,preparation:s.preparation??{completedEligibleTiles:0,eligibleTiles:0,totalTiles:0},
-   reason:s.reason??s.failure??s.worker?.failure??null,residentResources:s.residentResources??0,resourceLoads:s.resourceLoads??0,controller:s.worker??s.controller??null,coverageStates:s.coverageStates??null,initialPreparationPriority:s.initialPreparationPriority??null};
+   reason:s.reason??s.failure??s.worker?.failure??null,residentResources:s.residentResources??0,resourceLoads:s.resourceLoads??0,controller:s.worker??s.controller??null,coverageStates:s.coverageStates??null,initialPreparationPriority:s.initialPreparationPriority??null,localReadiness:s.localReadiness??null,cacheTimings:s.cacheTimings??null};
  },onScene:(scene,receipt)=>{
   if(worldAdmissionRows<2400&&process.stderr.writableLength<16384){log({type:'installed-world-producer-admission',requestId:receipt.requestId,validationMs:receipt.validationMs,elapsedSinceRequestMs:receipt.admissionMs,workerPreparationMs:receipt.workerPreparationMilliseconds,scope:'validation is on producer; worker preparation is concurrent, not additive audio latency'});worldAdmissionRows++;}else worldAdmissionRowsOmitted++;
   // An observed live snapshot remains authoritative until its own lease ends.

@@ -1,5 +1,7 @@
 # STREET-01 completion pass
 
+My next focused pass is [normal cache readiness and passive Bati qualification](STREET_01_READINESS_QUALIFICATION.md). Codex is preserving the completion results below as historical evidence. The follow-up does not turn failed warm starts, unknown activation, the cold NPC discrepancy or failed processing deadlines into passes.
+
 I have advanced the implementation from `58491c7`, but STREET-01 remains incomplete. My required outcomes still include selective native replacement, qualified normal Bati telemetry, full supported-world acoustics and complete processing deadlines. Codex has not prepared an audible main-mod candidate while those prerequisites remain unresolved.
 
 ## Comparison correctness

@@ -40,6 +40,10 @@ export function worldCoverageStates01(plan) {
   activation:{observedActive:0,unobserved:rows.length,conditionalResources:count('activation',s=>s.conditions.length>0),interiorResources:count('activation',s=>s.interiorActivationRequired),potentialVariantsNeverSimultaneouslyEnabled:true},fullWorldReady:false};
 }
 export function readInitialWorldPriority01(filename,{gameSHA256,notBeforeUtc,nowUtc=new Date().toISOString(),previous=null}={}) {
+ const earliest=Date.parse(notBeforeUtc),priorTime=Date.parse(previous?.receivedUtc);
+ // A retained first pose belongs to this preparation epoch. Missing/invalid
+ // input in a later startup must not silently revive an earlier session.
+ if(!previous||previous.origin!=='normal-gameplay-observation'||previous.GameExecutableSHA256!==gameSHA256||!Number.isFinite(earliest)||!Number.isFinite(priorTime)||priorTime<earliest-2000)previous=null;
  try {
   const info=fs.lstatSync(filename);if(!info.isFile()||info.isSymbolicLink()||info.size<1||info.size>8192)throw Error('priority-file-type-or-size');
   const p=JSON.parse(fs.readFileSync(filename,'utf8').replace(/^\uFEFF/,''));
@@ -58,4 +62,8 @@ export function orderWorldPreparationQueue01(plan) {
  const position=plan.InitialPriority01?.listener;
  const distance=row=>{const b=row.PreparationStates01?.placement?.nativeBounds;if(!position||!b||row.PreparationStates01?.activation?.interiorActivationRequired===true)return Infinity;return Math.hypot(...position.map((v,i)=>Math.max(b.min[i]-v,0,v-b.max[i])));};
  return [...plan.Resources].filter(r=>r.GeometryEligibility==='eligible-resource-root'||r.Eligibility==='eligible-exterior').sort((a,b)=>distance(a)-distance(b)||String(a.PhysicalArchive).localeCompare(String(b.PhysicalArchive))||a.EntryPath.localeCompare(b.EntryPath));
+}
+export function localWorldPreparationIds01(plan,radius=32){
+ const p=plan.InitialPriority01?.listener;if(!vector(p))return [];
+ return orderWorldPreparationQueue01(plan).filter(r=>r.Eligibility==='eligible-exterior'&&r.PreparationStates01?.placement?.nativeBounds&&r.PreparationStates01.activation?.interiorActivationRequired!==true).filter(r=>{const b=r.PreparationStates01.placement.nativeBounds;return p.every((v,i)=>v+radius>=b.min[i]&&v-radius<=b.max[i]);}).map(r=>r.Id);
 }

@@ -1,5 +1,7 @@
 # STREET-01 world completion pass
 
+The [focused normal-readiness report](STREET_01_NORMAL_READINESS.md) follows this result through the actual startup driver and persistent consumer. My completed geometry checkpoint and the failed installed attempts below remain separate historical results; no fresh installed qualification is implied by source corrections.
+
 I am continuing from `58491c7` using my existing genuine collision cache. My earlier STREET-01 reports, cache indexes, receipts, failures and measurement scopes remain historical. This pass does not establish complete installed-world acoustics or observed GTA activation.
 
 ## Changes in my normal startup path

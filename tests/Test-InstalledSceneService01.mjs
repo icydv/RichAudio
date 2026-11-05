@@ -60,7 +60,7 @@ test('normal cache rows require the current archive proof and a supervisor epoch
 
 test('wrong game binding fails explicitly without worker restart',async()=>{
  const f=installedSceneFixture01(),statuses=[];const service=new InstalledSceneService01({config:{manifestPath:f.manifestPath,catalogPath:f.catalogPath,expectedGameSHA256:'f'.repeat(64)},session,onStatus:s=>statuses.push(s)});
- try{await until(()=>service.failed);assert.match(service.failure,/game\/catalogue identity/);assert.equal(service.stats.publications,0);assert.equal(service.stats.workersStarted,1);assert.equal(statuses.at(-1).stage,'failed');assert.equal((await service.close()).workerJoined,true);}
+ try{assert.equal(service.bindPreparationEpoch01(epoch),true);await until(()=>service.failed);assert.match(service.failure,/game\/catalogue identity/);assert.equal(service.stats.publications,0);assert.equal(service.stats.workersStarted,1);assert.equal(statuses.at(-1).stage,'failed');assert.equal((await service.close()).workerJoined,true);}
  finally{await service.close();f.close();}
 });
 

@@ -2,6 +2,7 @@
 // coalesced into one latest window, never a growing queue or PCM delay.
 import {Worker} from 'node:worker_threads';
 import {performance} from 'node:perf_hooks';
+import path from 'node:path';
 import {bindInstalledStaticSceneWorker01} from './installed-static-scene01.mjs';
 import {requireWorld,vector} from './contracts.mjs';
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x),interval=500;
@@ -13,7 +14,8 @@ export class InstalledSceneService01 {
   const maximumResidentResources=config.maximumResidentResources??8;
   requireWorld(Number.isInteger(maximumResidentResources)&&maximumResidentResources>=1&&maximumResidentResources<=16,'bounded installed scene resident resources');
   requireWorld(config.initialObservationPath===undefined||typeof config.initialObservationPath==='string'&&hex(config.expectedGameSHA256),'bound priority output configuration');
-  this.config={manifestPath:config.manifestPath,catalogPath:config.catalogPath,...(config.catalogSHA256==null?{}:{catalogSHA256:config.catalogSHA256}),...(config.expectedGameSHA256===undefined?{}:{expectedGameSHA256:config.expectedGameSHA256}),...(config.initialObservationPath===undefined?{}:{initialObservationPath:config.initialObservationPath}),maximumResidentResources};this.catalogBinding=config.catalogSHA256??null;this.bindingEpoch=0;this.session=session;this.onScene=onScene;this.onStatus=onStatus;this.priorityPending=false;this.priorityAccepted=false;this.priorityRejections=0;this.lastPriorityAttempt=-Infinity;
+  requireWorld(config.privateRoot===undefined||typeof config.privateRoot==='string'&&path.isAbsolute(config.privateRoot)&&path.resolve(config.privateRoot).split(path.sep).includes('.local'),'explicit private derived-cache reuse root');
+  this.config={manifestPath:config.manifestPath,catalogPath:config.catalogPath,...(config.privateRoot===undefined?{}:{privateRoot:path.resolve(config.privateRoot)}),...(config.catalogSHA256==null?{}:{catalogSHA256:config.catalogSHA256}),...(config.expectedGameSHA256===undefined?{}:{expectedGameSHA256:config.expectedGameSHA256}),...(config.initialObservationPath===undefined?{}:{initialObservationPath:config.initialObservationPath}),maximumResidentResources};this.catalogBinding=config.catalogSHA256??null;this.bindingEpoch=0;this.session=session;this.onScene=onScene;this.onStatus=onStatus;this.priorityPending=false;this.priorityAccepted=false;this.priorityRejections=0;this.lastPriorityAttempt=-Infinity;
   this.closed=false;this.failed=false;this.ready=false;this.state='preparing/indexing';this.failure=null;this.active=null;this.pending=null;this.latestGeneration=null;this.serial=0;this.lastDispatch=-Infinity;this.dispatchTimer=null;this.operationTimer=null;this.closePromise=null;this.exited=false;this.exitCode=null;this.baseStatus={stage:'preparing/indexing',installedWorldVerified:false,genuineResourceVerified:false,runtimeActivationVerified:false,preparation:{completedEligibleTiles:0,eligibleTiles:0,totalTiles:0},actualWorldCoverage:'unmeasured'};
   this.stats={workersStarted:0,workersJoined:0,requests:0,dispatched:0,coalesced:0,publications:0,staleResults:0,generationDiscards:0,pendingExpired:0,callbackFailures:0,failures:0,maximumAdmissionMs:0,maximumValidationMs:0,maximumWorkerPreparationMs:0,maximumPublicationCallbackMs:0,minimumDispatchIntervalMs:null,pcmQueueFramesAdded:0};
   let joined;this.exitPromise=new Promise(resolve=>joined=resolve);this.joined=joined;

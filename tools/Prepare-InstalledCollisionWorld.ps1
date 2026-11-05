@@ -12,6 +12,8 @@ param(
  [string]$PrepareScriptPath='',
  [ValidatePattern('^[a-f0-9]{32}$')][string]$ParentInvocationId='',
  [string]$ObservationNotBeforeUtc='',
+ [switch]$RequireCachedGeometry,
+ [string]$RetainedReadinessPosePath='',
  [switch]$PlanOnly
 )
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
@@ -33,7 +35,7 @@ if(!$ObservationNotBeforeUtc){$ObservationNotBeforeUtc=[DateTimeOffset]::UtcNow.
 $script:phaseMetrics=New-Object Collections.Generic.List[object]
 function Metrics {Json (Join-Path $output 'startup-metrics01.json') ([ordered]@{Schema=1;Kind='RichAudioWorldStartupMetrics01';RunId=$runId;ElapsedSeconds=$clock.Elapsed.TotalSeconds;Phases=$script:phaseMetrics.ToArray();GameLaunched=$false;EndpointOpened=$false;PhysicalDiskIoMeasured=$false;FullWorldReady=$false})}
 function Literal([string]$Text){return "'"+$Text.Replace("'","''")+"'"}
-function Json([string]$Path,$Value){$pending=$Path+'.pending-'+$runId;[IO.File]::WriteAllText($pending,($Value|ConvertTo-Json -Depth 16 -Compress),(New-Object Text.UTF8Encoding($false)));if([IO.File]::Exists($Path)){[IO.File]::Replace($pending,$Path,[NullString]::Value)}else{[IO.File]::Move($pending,$Path)}}
+function Json([string]$Path,$Value){$pending=$Path+'.pending-'+$runId;[IO.File]::WriteAllText($pending,(ConvertTo-Json -InputObject $Value -Depth 16 -Compress),(New-Object Text.UTF8Encoding($false)));if([IO.File]::Exists($Path)){[IO.File]::Replace($pending,$Path,[NullString]::Value)}else{[IO.File]::Move($pending,$Path)}}
 function Status([string]$State,[string]$Detail){Json $statusPath ([ordered]@{Schema=1;RunId=$runId;State=$State;Detail=$Detail;ElapsedSeconds=[Math]::Round($clock.Elapsed.TotalSeconds,3);Completed=$false;Resumable=$true;GameWrites=$false;EndpointOpened=$false;RuntimeReplacementImplemented=$false})}
 function RunOwned([string]$Command,[string]$Phase){
  if(Test-Path -LiteralPath $cancel){throw 'World preparation cancelled; checkpoints retained.'}
@@ -45,7 +47,10 @@ function RunOwned([string]$Command,[string]$Phase){
  $commandWithLocation='Set-Location -LiteralPath '+(Literal $repo)+';'+$Command
  $result=Invoke-PreparationProcess -Executable $framework -CommandText $commandWithLocation -PrivateRoot $output -StageOutput $stageOutput -CancellationPath $cancel -MaximumSeconds $remaining -MaximumMemoryMiB $MaximumMemoryMiB -MaximumOwnedProcesses 8
  $script:lastOwnedProcess=$result
- $script:phaseMetrics.Add([ordered]@{Phase=$Phase;ElapsedSeconds=$result.ElapsedSeconds;PeakJobMemoryBytes=$result.PeakJobMemoryBytes;WorkMetrics01=$result.WorkMetrics01;ControlJoined=$result.ControlJoined;Completed=$result.Completed});Metrics
+ $phaseRecord=[ordered]@{Phase=$Phase;ElapsedSeconds=$result.ElapsedSeconds;PeakJobMemoryBytes=$result.PeakJobMemoryBytes;WorkMetrics01=$result.WorkMetrics01;ControlJoined=$result.ControlJoined;Completed=$result.Completed}
+ $stdoutFile=Join-Path $stageOutput 'coordinator.stdout.log'
+ if([IO.File]::Exists($stdoutFile)-and(Get-Item -LiteralPath $stdoutFile).Length-le65536){foreach($line in (Get-Content -LiteralPath $stdoutFile -Tail 4)){try{$entry=$line|ConvertFrom-Json;if($entry.type-eq'world-metadata-publication01'){$phaseRecord.MetadataPublication01=$entry}}catch{}}}
+ $script:phaseMetrics.Add($phaseRecord);Metrics
  if(!$result.Completed){throw ('Owned '+$Phase+' helper '+$result.State+'; checkpoints retained. Inspect private phase stderr.')}
 }
 function RunNode([string[]]$Values,[string]$Phase){$parts=@('& node',(Literal (Join-Path $repo 'src\acoustics\world\world-warmup.mjs')));foreach($value in $Values){$parts+=Literal $value};RunOwned (($parts -join ' ')+'; if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}') $Phase}
@@ -76,7 +81,7 @@ try{
  $plan=Read-DriverPlan01
  $visitedArchives=New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
  while($true){
-  RunNode @('queue',$manifestPath,(Join-Path $output 'initial-observation01.json'),$ObservationNotBeforeUtc) 'prioritizing-complete-world-queue'
+  RunNode @('queue',$manifestPath,(Join-Path $output 'initial-observation01.json'),$ObservationNotBeforeUtc,$RetainedReadinessPosePath) 'prioritizing-complete-world-queue'
   $queue=[IO.File]::ReadAllText((Join-Path $output 'queue.json'))|ConvertFrom-Json
   $next=@($queue.Resources|Where-Object { !$visitedArchives.Contains([string]$_.PhysicalArchive) }|Select-Object -First 1)
   if(!$next.Count){break}
@@ -87,18 +92,41 @@ try{
   $beforeHash=[IO.File]::ReadAllText((Join-Path $output 'archive-hash.txt')).Trim()
   $plan=Read-DriverPlan01
   $priorHashes=@($plan.Resources|Where-Object{$_.PhysicalArchive-eq$archive}|ForEach-Object ResultArchiveSHA256|Where-Object{$_}|Sort-Object -Unique)
-  RunNode @('revalidate',$manifestPath,$archive,$beforeHash,$catalog,$ResolvedCatalogSHA256) 'validating-private-geometry-cache'
+  $archiveRows=@($plan.Resources|Where-Object{$_.PhysicalArchive-eq$archive})
+  $localIds=@($queue.Resources|Where-Object{$_.PhysicalArchive-eq$archive-and$_.LocalReadinessPriority01}|Select-Object -First 16|ForEach-Object Id)
+  $incremental=$localIds.Count-gt0-and$localIds.Count-lt$archiveRows.Count
+  $selectionPath=Join-Path $output 'archive-validation-selection01.json'
+  if($incremental){Json $selectionPath $localIds;RunNode @('revalidate',$manifestPath,$archive,$beforeHash,$catalog,$ResolvedCatalogSHA256,'-',$selectionPath) 'validating-current-local-cache'}
+  else{RunNode @('revalidate',$manifestPath,$archive,$beforeHash,$catalog,$ResolvedCatalogSHA256) 'validating-private-geometry-cache'}
   if(@($priorHashes|Where-Object{$_-cne$beforeHash}).Count){
    $refreshPath=Join-Path $output 'catalog-source-change01.json';$refresh=$null;if([IO.File]::Exists($refreshPath)-and(Get-Item -LiteralPath $refreshPath).Length-le8192){$refresh=Get-Content -LiteralPath $refreshPath -Raw|ConvertFrom-Json}
    $refreshed=$refresh-and$refresh.Schema-eq1-and$refresh.Kind-eq'RichAudioCatalogSourceChange01'-and$refresh.GameExecutableSHA256-ceq$resolved.InputBinding.GameExecutableSHA256-and$refresh.Archive-ceq$archive-and$refresh.ArchiveSHA256-ceq$beforeHash-and$resolved.SourceArchiveRefreshId-ceq$refresh.RefreshId
    if(!$refreshed){Json $refreshPath ([ordered]@{Schema=1;Kind='RichAudioCatalogSourceChange01';RefreshId=$runId;Archive=$archive;ArchiveSHA256=$beforeHash;GameExecutableSHA256=$resolved.InputBinding.GameExecutableSHA256;GeneratedUtc=[DateTimeOffset]::UtcNow.ToString('o');State='fresh-catalogue-initialization-required'});throw 'Current archive content changed; affected cache withdrawn and a fresh normal catalogue/metadata pass is required before decoding.'}
   }
+  $upgradeSelection=@()
+  if($incremental){
+   RunOwned $hashCommand 'verifying-local-source-archive-after-cache-work'
+   $localAfterHash=[IO.File]::ReadAllText((Join-Path $output 'archive-hash.txt')).Trim()
+   if($beforeHash-cne$localAfterHash){RunNode @('revalidate',$manifestPath,$archive,$localAfterHash,$catalog,$ResolvedCatalogSHA256) 'withdrawing-changed-source-checkpoints';Json (Join-Path $output 'catalog-source-change01.json') ([ordered]@{Schema=1;Kind='RichAudioCatalogSourceChange01';RefreshId=$runId;Archive=$archive;ArchiveSHA256=$localAfterHash;GameExecutableSHA256=$resolved.InputBinding.GameExecutableSHA256;GeneratedUtc=[DateTimeOffset]::UtcNow.ToString('o');State='fresh-catalogue-initialization-required'});throw 'Source archive changed during local validation; affected checkpoints invalidated.'}
+   RunNode @('revalidate',$manifestPath,$archive,$localAfterHash,$catalog,$ResolvedCatalogSHA256,$ObservationNotBeforeUtc,$selectionPath) 'publishing-current-local-cache'
+   $remainingIds=@($archiveRows|Where-Object{$_.Id-notin$localIds}|ForEach-Object Id)
+   Json $selectionPath $remainingIds
+   RunNode @('revalidate',$manifestPath,$archive,$beforeHash,$catalog,$ResolvedCatalogSHA256,'-',$selectionPath) 'validating-remaining-private-geometry-cache'
+   $upgradeSelection=@($selectionPath)
+  }
   $localAnalyticBudget=[int][Math]::Floor([Math]::Max(1,[Math]::Min(15000,($MaximumSeconds-$clock.Elapsed.TotalSeconds-20)*1000)))
-  RunNode @('upgrade-analytic',$manifestPath,(Join-Path $repo '.local'),$catalog,$ResolvedCatalogSHA256,[string]$localAnalyticBudget,$archive,$beforeHash) 'upgrading-revalidated-local-analytic-models'
+  $plan=Read-DriverPlan01
+  $upgradeRows=@($plan.Resources|Where-Object{$_.PhysicalArchive-eq$archive-and$_.AnalyticUpgradeNeeded01})
+  if($upgradeRows.Count){
+   if($RequireCachedGeometry){throw 'Cached-geometry qualification requires an analytic cache upgrade; no historical cache was written.'}
+   if($incremental){$upgradeIds=@($plan.Resources|Where-Object{$_.PhysicalArchive-eq$archive-and($_.Id-notin$localIds-or$_.AnalyticUpgradeNeeded01)}|ForEach-Object Id);Json $selectionPath $upgradeIds}
+   RunNode (@('upgrade-analytic',$manifestPath,(Join-Path $repo '.local'),$catalog,$ResolvedCatalogSHA256,[string]$localAnalyticBudget,$archive,$beforeHash)+$upgradeSelection) 'upgrading-revalidated-local-analytic-models'
+  }
   $plan=Read-DriverPlan01
   $remaining=$MaximumResources-$processedThisRun
   $ranks=@{};for($qi=0;$qi -lt $queue.Resources.Count;$qi++){$ranks[$queue.Resources[$qi].Id]=$qi}
   $pending=@($plan.Resources|Where-Object { $_.PhysicalArchive -eq $archive -and ($_.Status -eq 'pending-exterior-import' -or $_.PotentialStatus -eq 'pending-import') }|Sort-Object {$ranks[$_.Id]}|Select-Object -First ([Math]::Min(256,$remaining)))
+  if($RequireCachedGeometry-and$pending.Count){throw 'Cached-geometry qualification found resources requiring decode; no decoder was started.'}
   while($pending.Count -and $processedThisRun -lt $MaximumResources){
    $batchRoot=Join-Path $output ('runs\'+$runId+'-'+$script:phaseNumber);[IO.Directory]::CreateDirectory($batchRoot)|Out-Null
    $listPath=Join-Path $batchRoot 'entry-list.json';Json $listPath @($pending|ForEach-Object EntryPath)
@@ -109,7 +137,7 @@ try{
    $processedThisRun+=$pending.Count
    $plan=Read-DriverPlan01
    $remaining=$MaximumResources-$processedThisRun
-   RunNode @('queue',$manifestPath,(Join-Path $output 'initial-observation01.json'),$ObservationNotBeforeUtc) 'refreshing-initial-observation-priority'
+   RunNode @('queue',$manifestPath,(Join-Path $output 'initial-observation01.json'),$ObservationNotBeforeUtc,$RetainedReadinessPosePath) 'refreshing-initial-observation-priority'
    $queue=[IO.File]::ReadAllText((Join-Path $output 'queue.json'))|ConvertFrom-Json;$ranks=@{};for($qi=0;$qi -lt $queue.Resources.Count;$qi++){$ranks[$queue.Resources[$qi].Id]=$qi}
    $pending=@($plan.Resources|Where-Object { $_.PhysicalArchive -eq $archive -and ($_.Status -eq 'pending-exterior-import' -or $_.PotentialStatus -eq 'pending-import') }|Sort-Object {$ranks[$_.Id]}|Select-Object -First ([Math]::Min(256,$remaining)))
    $preferred=@($queue.Resources|Where-Object{!$visitedArchives.Contains([string]$_.PhysicalArchive)}|Select-Object -First 1)

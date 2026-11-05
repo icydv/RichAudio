@@ -200,11 +200,10 @@ export class StockGameplay {
     riderAttached:old.riderAttached===true&&(!next||next.riderAttached===true),riderViewAttached:old.riderViewAttached===true&&(!next||next.riderViewAttached===true)});
   }return result;
  }
- async render(){
-  const preparation=this.sourcePreparation05;
-  if(preparation){if(preparation.rendering)throw Error('One opt-in gameplay render at a time');preparation.rendering=true;}
-  try{
-  const start=this.now(),time=this.pipeline.renderer.frame/FS;this.sample=this.playout.sample(time,this.now());
+ // The normal render calls this at its existing block boundary, after the
+ // previous asynchronous block has completed. Offline readiness qualification
+ // can exercise this same consumer without synthesizing or submitting PCM.
+ applyPendingInstalledStaticScene01(){
   const pendingScene=this.pendingInstalledStaticScene01;this.pendingInstalledStaticScene01=null;
   if(pendingScene&&pendingScene.receipt.expiresAt>this.now()&&pendingScene.receipt.generation===this.lastGeneration&&
     !(this.pipeline.simulation.scene.observationModel?.kind==='conditional-observed-model'&&this.sceneExpiry>this.now())){
@@ -214,7 +213,16 @@ export class StockGameplay {
    // included in this block's measured complete processing duration.
    if(receipt.preparedSoundMapGeometry)registerPreparedSoundMapGeometry01(scene,receipt.preparedSoundMapGeometry,{requestId:receipt.requestId,bindingEpoch:receipt.bindingEpoch,packetDigest:receipt.packetDigest,catalogSHA256:receipt.catalogSHA256});
    this.setInstalledStaticScene01(scene,{expiresAt:receipt.expiresAt});
+   return true;
   }
+  return false;
+ }
+ async render(){
+  const preparation=this.sourcePreparation05;
+  if(preparation){if(preparation.rendering)throw Error('One opt-in gameplay render at a time');preparation.rendering=true;}
+  try{
+  const start=this.now(),time=this.pipeline.renderer.frame/FS;this.sample=this.playout.sample(time,this.now());
+  this.applyPendingInstalledStaticScene01();
   this.captureTiming=this.latencyDiagnostics&&this.stats.blocks%8===0;this.lastTiming=null;if(this.captureTiming)this.latencyBrackets=[];
   if(this.pipeline.simulation.scene!==this.direct&&this.now()>=this.sceneExpiry){this.pipeline.replaceScene(this.direct);this.staticSceneBinding=null;this.stats.geometryFallbacks++;}
   const listener=this.sample.state??{position:[0,0,0],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],valid:false,generation:this.lastGeneration||1};
