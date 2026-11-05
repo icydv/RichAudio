@@ -97,12 +97,17 @@ export class CausalSimulation {
         'coverage-only preservation requires exactly identical complete finite reflectors, materials and propagation settings');
     }
     if (scene?.geometryKey === this.scene?.geometryKey) return;
+    const stableInstalledWorld=this.scene?.observationModel?.kind==='conditional-installed-static-model'&&
+      scene?.observationModel?.kind==='conditional-installed-static-model'&&
+      this.scene.observationModel.sourceCatalogueSHA256===scene.observationModel.sourceCatalogueSHA256&&
+      this.scene.tile.id===scene.tile.id;
     this.scene = scene;
     this.candidates = scene ? candidatePaths(scene,this.processingSettings?{maxReflectors:this.processingSettings.maxReflectors}:{}) : [];
     this.geometryEpoch++;
     // A geometry replacement changes reflector identity, not the existing
     // direct arrival history. Preserve its retarded-time rate/smoothing.
-    if(!preserveIdenticalReflectors)for(const id of this.previous.keys())if(!id.includes(':direct:g'))this.previous.delete(id);
+    if(!preserveIdenticalReflectors){const candidates=stableInstalledWorld?new Set(this.candidates.map(c=>c.id)):null;
+      for(const [id,value] of this.previous)if(!id.includes(':direct:g')&&(!candidates||!candidates.has(value.candidateId)))this.previous.delete(id);}
     this.stats.sceneReplacements++;
   }
   setProcessingSettings({pathBudget,maxReflectors,earlyReflections=true}) {
@@ -315,7 +320,8 @@ export class CausalSimulation {
           continue;
         }
         const identity = id + ":" + candidate.id + ":g" + p.generation +
-            (this.scene.observationModel && p.order ? ':geometry' + this.geometryEpoch : ''),
+            (this.scene.observationModel && p.order ? this.scene.observationModel.kind==='conditional-installed-static-model'?
+              ':world'+this.scene.observationModel.sourceCatalogueSHA256.slice(0,24):':geometry' + this.geometryEpoch : ''),
           previous = this.previous.get(identity);
         let rate =
           previous && now > previous.time
@@ -329,6 +335,7 @@ export class CausalSimulation {
         this.previous.set(identity, {
           time: now,
           emissionTime: p.emissionTime,
+          ...(this.scene.observationModel?.kind==='conditional-installed-static-model'?{candidateId:candidate.id}:{}),
         });
         if(visual){visual.identity=identity;visual.reason='path-budget';}
         eligible.push({
@@ -344,6 +351,7 @@ export class CausalSimulation {
           distance: p.distance,
           delay: p.delay,
           order: p.order,
+          ...(p.visibility==='conditional-direct-unknown-coverage'?{coverageFallback:'conditional-direct-unknown-coverage'}:{}),
         });
       }
       eligible.sort(
@@ -752,7 +760,7 @@ export class StreamingRenderer {
         if (this.slots[i].active) this.activeSlotIndices[this.activeSlotCount++] = i;
     }
   }
-  process(inputs, left, right, frames = left.length) {
+  process(inputs, left, right, frames = left.length, localStereo = null) {
     requireValue(
       left instanceof Float32Array &&
         right instanceof Float32Array &&
@@ -769,6 +777,7 @@ export class StreamingRenderer {
       a.byteOffset < b.byteOffset + frames * 4 &&
       b.byteOffset < a.byteOffset + frames * 4;
     requireValue(!overlaps(left, right), "overlapping stereo outputs");
+    if(localStereo!==null)requireValue(Array.isArray(localStereo)&&localStereo.length===2&&localStereo.every(a=>a instanceof Float32Array&&a.length>=frames&&!overlaps(a,left)&&!overlaps(a,right))&&!overlaps(localStereo[0],localStereo[1]),'independent local stereo input buffers');
     for (let i = 0; i < this.sourceList.length; i++) {
       const s = this.sourceList[i];
       requireValue(
@@ -922,6 +931,9 @@ export class StreamingRenderer {
         slot.cursor = this.continuousRates?Math.min(frame+1,slot.cursor+readRate):slot.cursor+readRate;
         if (slot.correctionLeft > 0) slot.correctionLeft--;
       }
+      // Rider turbulence is pressure at the listener. It shares the final
+      // output envelope/headroom check, with no world path, delay or Doppler.
+      if(localStereo!==null){const ll=localStereo[0][j],rr=localStereo[1][j];requireValue(Number.isFinite(ll)&&Number.isFinite(rr)&&Math.abs(ll)<=.25&&Math.abs(rr)<=.25,'bounded local stereo PCM');l+=ll;r+=rr;}
       if(this.outputGain!==this.outputTarget){
         this.outputGain+=this.outputSmooth*(this.outputTarget-this.outputGain);
         if(Math.abs(this.outputTarget-this.outputGain)<1e-9)this.outputGain=this.outputTarget;

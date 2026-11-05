@@ -5,6 +5,7 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {SessionRecorder,privateDirectory,replayFrame,LIMITS} from './recorder.mjs';
 import {PassiveListener} from './passive.mjs';
+import {SOUND_MAP_WIRE,geometryWireBudget} from './ui/wire-limits.mjs';
 
 const ui=path.join(path.dirname(fileURLToPath(import.meta.url)),'ui');
 const equal=(a,b)=>typeof a==='string'&&a.length===b.length&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
@@ -25,9 +26,9 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
     invalidate(worldDigest){if(typeof worldDigest!=='string'||!/^[a-f0-9]{64}$/.test(worldDigest))throw Error('Explicit next inventory digest');cacheEpoch++;cacheRevision++;cacheReason='resource-inventory-changed';return cacheFeed?.invalidate(worldDigest)??emptyCacheStatus();}
   };
   let frame=null,receivedAt=0,sessionId=null,streamId=null,sequence=-1,replay=null,lastHost=null,stopping=null;
-  const geometry=new Map(),stats={accepted:0,droppedUpdates:0,invalidUpdates:0,sessionChanges:0,geometryCacheEvictions:0};
+  const geometry=new Map(),geometrySizes=new Map(),stats={accepted:0,droppedUpdates:0,invalidUpdates:0,sessionChanges:0,geometryCacheEvictions:0};let geometryCacheBytes=0;
   let boundPort;
-  const status=()=>({connected:!!frame&&now()-receivedAt<=1500,sessionId,streamId,ageMs:frame?now()-receivedAt:null,...stats,
+  const status=()=>({connected:!!frame&&now()-receivedAt<=1500,sessionId,streamId,ageMs:frame?now()-receivedAt:null,...stats,geometryCacheBytes,geometryCacheMaximumBytes:SOUND_MAP_WIRE.serviceGeometryCacheBytes,geometryCacheCount:geometry.size,
     passive:passive.status(),cacheWorld:cacheWorld.status(),recording:recorder.status(),replay:replay?{id:replay.id,durationMs:replay.durationMs}:null,
     audio:{hostConnected:!!lastHost&&now()-lastHost.receivedAt<1500,host:lastHost?.info??null}});
   const server=http.createServer(async(req,res)=>{
@@ -43,7 +44,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
       let value=null;
       if(req.method==='POST'&&route!=='/api/host/pcm'){
         if(!String(req.headers['content-type']).startsWith('application/json'))throw Error('JSON content type required');
-        value=JSON.parse((await body(req,LIMITS.frameBytes)).toString('utf8')||'{}');
+        value=JSON.parse((await body(req,route==='/api/telemetry'?LIMITS.telemetryBytes:LIMITS.frameBytes)).toString('utf8')||'{}');
       }
       if(route==='/api/status'&&req.method==='GET')send(status());
       else if(route==='/api/frame'&&req.method==='GET'){
@@ -59,19 +60,22 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
       }else if(route==='/api/telemetry'&&req.method==='POST'){
         const f=value.frame,g=value.geometry;
         if(!f||f.schemaVersion!==1||typeof f.sessionId!=='string'||f.sessionId.length>256||f.streamId!==undefined&&(typeof f.streamId!=='string'||f.streamId.length>128)||!Number.isSafeInteger(f.audioFrame)||f.audioFrame<0||!Number.isSafeInteger(f.sequence)||!Array.isArray(f.paths)||f.paths.length>512)throw Error('Telemetry schema/bounds');
+        if(Buffer.byteLength(JSON.stringify(f))>SOUND_MAP_WIRE.frameBytes)throw Error('Telemetry frame byte budget');
+        let geometrySize=0;if(g){const budget=geometryWireBudget(g);geometrySize=Buffer.byteLength(JSON.stringify(g));if(g.schemaVersion!==1||g.sessionId!==f.sessionId||typeof g.generation!=='string'||g.generation!==f.geometryGeneration||!Array.isArray(g.surfaces)||g.surfaces.length>budget.surfaces||geometrySize>budget.bytes)throw Error('Geometry schema/byte/surface bounds');}
         if(f.sessionId!==sessionId||(f.streamId??null)!==streamId){
           const initialQualification=sessionId==='uninitialised'&&frame?.listenerSessionId===null&&(f.streamId??null)===streamId&&f.sessionId!=='uninitialised'&&typeof f.listenerSessionId==='string';
           if(initialQualification&&f.sequence<=sequence){stats.droppedUpdates++;recorder.event('stale-telemetry',{sessionId:f.sessionId,sequence:f.sequence,lastAccepted:sequence});send({accepted:false,reason:'old-sequence'});return;}
           const reason=initialQualification?'listener-initialised':sessionId!==null&&(f.streamId??null)!==streamId?'stream-change':'session-change';
           recorder.event(reason,{previous:sessionId,current:f.sessionId,previousStreamId:streamId,streamId:f.streamId??null});
           if(!initialQualification&&sessionId!==null&&recorder.active)recorder.stop(reason);
-          geometry.clear();sessionId=f.sessionId;streamId=f.streamId??null;if(!initialQualification)sequence=-1;stats.sessionChanges++;
+          geometry.clear();geometrySizes.clear();geometryCacheBytes=0;sessionId=f.sessionId;streamId=f.streamId??null;if(!initialQualification)sequence=-1;stats.sessionChanges++;
         }
         if(f.sequence<=sequence){stats.droppedUpdates++;recorder.event('stale-telemetry',{sessionId:f.sessionId,sequence:f.sequence,lastAccepted:sequence});send({accepted:false,reason:'old-sequence'});return;}
         if(sequence>=0&&f.sequence>sequence+1)stats.droppedUpdates+=f.sequence-sequence-1;
-        if(g){if(g.schemaVersion!==1||g.sessionId!==sessionId||typeof g.generation!=='string'||!Array.isArray(g.surfaces)||g.surfaces.length>4096)throw Error('Geometry schema/bounds');
+        if(g){
           if(geometry.has(g.generation)&&JSON.stringify(geometry.get(g.generation))!==JSON.stringify(g))throw Error('Immutable geometry generation changed');
-          geometry.set(g.generation,g);while(geometry.size>16){geometry.delete(geometry.keys().next().value);stats.geometryCacheEvictions++;}}
+          geometryCacheBytes-=geometrySizes.get(g.generation)??0;geometry.set(g.generation,g);geometrySizes.set(g.generation,geometrySize);geometryCacheBytes+=geometrySize;
+          while(geometry.size>16||geometryCacheBytes>SOUND_MAP_WIRE.serviceGeometryCacheBytes){const oldest=geometry.keys().next().value;geometry.delete(oldest);geometryCacheBytes-=geometrySizes.get(oldest);geometrySizes.delete(oldest);stats.geometryCacheEvictions++;}}
         if(frame?.sessionId===f.sessionId){
           if(JSON.stringify(frame.sources?.map(s=>[s.id,s.generation]))!==JSON.stringify(f.sources?.map(s=>[s.id,s.generation])))recorder.event('source-generation',{sources:f.sources?.map(s=>({id:s.id,generation:s.generation}))});
           if(frame.paths?.map(p=>p.id+':'+p.status).join('|')!==f.paths.map(p=>p.id+':'+p.status).join('|'))recorder.event('path-change',{sequence:f.sequence});

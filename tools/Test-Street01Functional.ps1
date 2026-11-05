@@ -1,0 +1,64 @@
+#requires -Version 7.0
+[CmdletBinding()]
+param([string]$OutputRoot='')
+$ErrorActionPreference='Stop'
+$repo=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+if(!$OutputRoot){$OutputRoot=Join-Path $repo ('.local/street01/functional-'+[Guid]::NewGuid().ToString('N'))}
+$out=[IO.Path]::GetFullPath($OutputRoot)
+$prefix=[IO.Path]::GetFullPath((Join-Path $repo '.local/street01')).TrimEnd('\')+'\'
+if(!$out.StartsWith($prefix,[StringComparison]::OrdinalIgnoreCase)-or(Test-Path -LiteralPath $out)){throw 'New isolated .local/street01 output required'}
+for($at=$out;$at;$at=[IO.Path]::GetDirectoryName($at)){if((Test-Path -LiteralPath $at)-and((Get-Item -LiteralPath $at -Force).Attributes-band[IO.FileAttributes]::ReparsePoint)){throw 'Linked original-fixture output refused'}}
+[IO.Directory]::CreateDirectory((Join-Path $out 'logs'))|Out-Null
+$node=(Get-Command node -ErrorAction Stop).Source
+$pwsh=(Get-Process -Id $PID).Path
+$nodeFiles=@(
+ 'tests/Test-AirflowStreet01.mjs','tests/Test-AirflowStreet01Review.mjs',
+ 'tests/Test-StreetGameplayWorker01.mjs','tests/Test-StreetLatencyProfile01.mjs','tests/Test-LowLatency01.mjs',
+ 'tests/Test-StartupServiceStreet01.mjs','tests/Test-StartupService01Review.mjs',
+ 'tests/Test-IndexedWorldGeometry01.mjs','tests/Test-InstalledStaticSceneStreet01.mjs',
+ 'tests/Test-InstalledSceneService01.mjs','tests/Test-InstalledSceneAdmission01.mjs',
+ 'tests/Test-PreparedInstalledTransfer01.mjs','tests/Test-AnalyticPrimitives01.mjs',
+ 'tests/Test-AnalyticCollisionCache01.mjs','tests/Test-InstalledCollision.mjs',
+ 'tests/Test-AnalyticCollisionProgress01.mjs',
+ 'tests/Test-WorldResourceIdentity01.mjs',
+ 'tests/Test-SoundMapInstalledWorkset01.mjs','tests/Test-SoundMapTelemetry.mjs',
+ 'tests/Test-SoundMapService.mjs','tests/Test-SoundMapViewer.mjs','tests/Test-SoundMapProducer.mjs',
+ 'tests/Test-AcousticWorld01Continuity.mjs','tests/Test-SourcePressureCalibration.mjs',
+ 'tests/Test-StockPressureSelection.mjs','tests/Test-VehiclePipeline.mjs'
+)
+$scripts=@(
+ @{name='product-capture-continuity';file='tools/Test-StreetContinuity01.ps1';arguments=@()},
+ @{name='persisted-settings-handoff';file='tools/Test-AcousticSettingsHandoff.ps1';arguments=@()},
+ @{name='sidebar-input-status-animation';file='tools/Test-InGameMenu.ps1';arguments=@('-Output',(Join-Path $out 'original-menu-previews'))},
+ @{name='recording-menu-bridge';file='tools/Test-SoundMapMenu.ps1';arguments=@()},
+ @{name='production-capture-fake-backend';file='tools/Test-GameplayRecording13.ps1';arguments=@()},
+ @{name='supported-initializer-original-api';file='tests/Test-CodeWalkerInitialization01.ps1';arguments=@()},
+ @{name='normal-generated-sidecar-supervisor';file='tests/Test-WorldWarmupStartup.ps1';arguments=@()},
+ @{name='street-source-installation';file='tests/Test-StreetInstaller01.ps1';arguments=@()},
+ @{name='street-owned-continuation';file='tests/Test-StreetWarmupContinuation01.ps1';arguments=@()},
+ @{name='production-continuation-checkpoint';file='tests/Test-WorldContinuationCheckpoint01.ps1';arguments=@()}
+)
+$requiredSteps=1+$scripts.Count
+$inputFiles=@($PSCommandPath)+@($nodeFiles|ForEach-Object{Join-Path $repo $_})+@($scripts|ForEach-Object{Join-Path $repo $_.file})
+$pins=@($inputFiles|Select-Object -Unique|ForEach-Object{[ordered]@{path=$_.Substring($repo.Length+1).Replace('\','/');sha256=(Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash.ToLowerInvariant()}})
+$started=[DateTime]::UtcNow.ToString('o');$steps=[Collections.Generic.List[object]]::new();$sourcePinsUnchanged=$false
+function SaveReceipt {
+ $value=[ordered]@{schema=1;kind='STREET-01-original-only-functional';startedUtc=$started;updatedUtc=[DateTime]::UtcNow.ToString('o');nodeVersion=(& $node --version);head=(& git -C $repo rev-parse HEAD);passed=($sourcePinsUnchanged-and$steps.Count-eq$requiredSteps-and@($steps|Where-Object exitCode -ne 0).Count-eq0);sourcePinsUnchanged=$sourcePinsUnchanged;steps=@($steps.ToArray());testRunnerPins=$pins;installedGameResourcesRead=$false;vendorBinaryRequired=$false;gameLaunched=$false;endpointOpened=$false;realPlaybackOrCapture=$false;gpuHardwareQualified=$false;functionalChecksOnly=$true;completePerformanceAcceptance=$false;inheritedPerformanceGates='Existing offline.yml and 8ms/10.6667ms checks remain separate and unchanged; this receipt cannot override them';populationAccounting='Node TAP tests and individual C# fixture cases remain separate; assertion counts are not combined'}
+ $value|ConvertTo-Json -Depth 9|Set-Content -LiteralPath (Join-Path $out 'receipt.json') -Encoding utf8
+}
+function RunOriginal([string]$Name,[string]$Command,[string[]]$Arguments){
+ $log=Join-Path $out ('logs/'+$Name+'.log');$clock=[Diagnostics.Stopwatch]::StartNew();$code=-1;$failure=$null
+ try{& $Command @Arguments 2>&1|Tee-Object -FilePath $log;$code=$LASTEXITCODE}catch{$failure=$_.Exception.Message;$_|Out-String|Add-Content -LiteralPath $log -Encoding utf8}
+ $steps.Add([ordered]@{name=$Name;exitCode=$code;elapsedMilliseconds=$clock.Elapsed.TotalMilliseconds;failure=$failure;log=('logs/'+$Name+'.log');sha256=(Get-FileHash -LiteralPath $log -Algorithm SHA256).Hash.ToLowerInvariant()});SaveReceipt
+}
+Push-Location $repo
+try{
+ SaveReceipt
+ RunOriginal 'node-functional' $node (@('--test','--test-reporter=tap','--test-concurrency=1')+$nodeFiles)
+ foreach($script in $scripts){RunOriginal $script.name $pwsh (@('-NoProfile','-NonInteractive','-File',(Join-Path $repo $script.file))+$script.arguments)}
+ foreach($pin in $pins){if((Get-FileHash -LiteralPath (Join-Path $repo $pin.path) -Algorithm SHA256).Hash.ToLowerInvariant()-cne$pin.sha256){throw ('Functional runner source changed while executing: '+$pin.path)}}
+ $sourcePinsUnchanged=$true
+ SaveReceipt
+ if(@($steps|Where-Object exitCode -ne 0).Count){throw ('STREET-01 functional failure retained in '+(Join-Path $out 'receipt.json'))}
+ Write-Output ('PASS separate STREET-01 original-only functional populations; '+(Join-Path $out 'receipt.json'))
+}finally{Pop-Location;SaveReceipt}

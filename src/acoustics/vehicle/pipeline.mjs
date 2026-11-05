@@ -47,12 +47,12 @@ export class VehicleAcousticPipeline {
     return control;
   }
   // Existing bounded synchronous PCM renderer: caller supplies all buffers.
-  process(inputs, left, right, frames = left.length, directLeft = null, directRight = null) {
+  process(inputs, left, right, frames = left.length, directLeft = null, directRight = null, localStereo = null) {
     if (this.directRenderer && (!(directLeft instanceof Float32Array) || !(directRight instanceof Float32Array) ||
       directLeft.length < frames || directRight.length < frames || directLeft === directRight ||
       directLeft === left || directLeft === right || directRight === left || directRight === right))
       throw Error('independent caller-owned direct-stem buffers required');
-    this.renderer.process(inputs, left, right, frames);
+    this.renderer.process(inputs, left, right, frames, localStereo);
     if (this.directRenderer) {
       this.directRenderer.process(inputs, directLeft, directRight, frames);
     }

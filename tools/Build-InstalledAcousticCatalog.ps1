@@ -87,8 +87,11 @@ foreach($path in @($core,$exe)){if(!(Test-Path -LiteralPath $path -PathType Leaf
 $codeHash=File-Hash $core
 $binding=[ordered]@{GameExecutable='GTA5_Enhanced.exe';GameVersion=[Diagnostics.FileVersionInfo]::GetVersionInfo($exe).FileVersion;GameExecutableSHA256=File-Hash $exe;CodeWalkerCoreSHA256=$codeHash;ScriptSHA256=File-Hash $scriptPath;HelperSHA256=File-Hash (Join-Path $repo 'src\acoustics\startup\InstalledCatalog.psm1');LifecycleSHA256=File-Hash $lifecyclePath}
 Write-Json (Join-Path $output 'current-input-binding.json') $binding
-foreach($dll in Get-ChildItem -LiteralPath $cw -Filter '*.dll'){[Reflection.Assembly]::Load([IO.File]::ReadAllBytes($dll.FullName))|Out-Null}
-[CodeWalker.GameFiles.GTA5Keys]::LoadFromPath($game,$null)
+foreach($dll in @('SharpDX.dll','SharpDX.Mathematics.dll','CodeWalker.Core.dll')){[Reflection.Assembly]::Load([IO.File]::ReadAllBytes((Join-Path $cw $dll)))|Out-Null}
+$initHelper=Join-Path $repo 'src\acoustics\startup\CodeWalkerInitialization01.psm1'
+Import-Module (New-Module -Name RichAudioCodeWalkerInitialization01 -ScriptBlock ([ScriptBlock]::Create([IO.File]::ReadAllText($initHelper)))) -Force
+$initialization=Initialize-InstalledCodeWalker01 -GameRoot $game
+$binding.InitializationHelperSHA256=File-Hash $initHelper
 $cache=Join-Path $output 'archive-cache';[IO.Directory]::CreateDirectory($cache)|Out-Null
 $all=New-Object Collections.Generic.List[object]
 $issues=New-Object Collections.Generic.List[object]

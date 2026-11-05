@@ -19,6 +19,19 @@ namespace RichAudio.Settings.InGame
             if(Double.IsNaN(n)||Double.IsInfinity(n)||n<0||n>9007199254740991d||n!=Math.Floor(n))throw new FormatException();
             return (long)n;
         }
+        private static string World(Dictionary<string,object> state)
+        {
+            object raw;var world=state.TryGetValue("acousticWorld",out raw)?raw as Dictionary<string,object>:null;
+            if(world==null)return "World: no qualified installed coverage";
+            string stage=Text(world,"stage");
+            var p=world.TryGetValue("preparation",out raw)?raw as Dictionary<string,object>:world;
+            long completed=Count(p,"completedEligibleTiles"),eligible=Count(p,"eligibleTiles"),declared=Count(p,"totalTiles");
+            if(completed>eligible||eligible>declared)return "World: invalid coverage report";
+            bool verified=world.TryGetValue("installedWorldVerified",out raw)&&Equals(raw,true);
+            if(stage=="ready-within-declared-coverage"&&!verified)stage="partial / installed coverage unverified";
+            return "World: "+(String.IsNullOrEmpty(stage)?"partial / unsupported":stage)+
+                (declared>0?" "+completed+"/"+eligible+" cached; "+declared+" declared":"");
+        }
         public static MenuStatus Read(string json,DateTime utcNow,long savedRevision=0)
         {
             if(String.IsNullOrEmpty(json))return MenuStatus.Unavailable("No configured engine status. Save before host startup; an unconfigured host needs restart.");
@@ -35,8 +48,8 @@ namespace RichAudio.Settings.InGame
                 if(Text(wrapper,"hostState")!="running"){
                     string reason=Text(state,"reason");
                     if(Text(wrapper,"hostState")=="stopped"&&Text(state,"integrationMode")=="stock-fallback"&&
-                        state.TryGetValue("nativeReplacement",out raw)&&Equals(raw,false)&&reason=="GTA stock fallback")return MenuStatus.StockFallback();
-                    return MenuStatus.Unavailable(String.IsNullOrEmpty(reason)?"RichAudio output is stopped; no active processing is established.":reason);
+                        state.TryGetValue("nativeReplacement",out raw)&&Equals(raw,false)&&reason=="GTA stock fallback")return MenuStatus.StockFallback().WithWorldDetail(World(state));
+                    return MenuStatus.Unavailable(String.IsNullOrEmpty(reason)?"RichAudio output is stopped; no active processing is established.":reason).WithWorldDetail(World(state));
                 }
                 string acceleration=Text(state,"activeAcceleration"),device=Text(state,"gpuDevice");
                 long applied=Count(state,"gpuResultsApplied"),budget=Count(state,"pathBudget");
@@ -57,7 +70,7 @@ namespace RichAudio.Settings.InGame
                 bool? early=state.TryGetValue("earlyReflections",out raw)&&raw is bool?(bool?)raw:null;
                 double? level=null;if(state.TryGetValue("outputLevel",out raw)&&(raw is int||raw is long||raw is double||raw is decimal))level=Convert.ToDouble(raw,CultureInfo.InvariantCulture);
                 return MenuStatus.Measured(Text(state,"requestedQuality"),Text(state,"activeQuality"),Text(state,"requestedAcceleration"),
-                    acceleration,device,Text(state,"fallbackReason"),(int)Math.Min(budget,Int32.MaxValue),applied,detail,enabled,level,early);
+                    acceleration,device,Text(state,"fallbackReason"),(int)Math.Min(budget,Int32.MaxValue),applied,detail,enabled,level,early).WithWorldDetail(World(state));
             }
             catch{return MenuStatus.Unavailable("Invalid host status. Active processing has not been established.");}
         }

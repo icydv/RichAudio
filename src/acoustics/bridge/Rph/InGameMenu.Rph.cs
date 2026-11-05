@@ -82,7 +82,7 @@ namespace RichAudio.Beacon.Rph
             // persistent game-control mutation needs restoration.
         }
         private static MenuPreferences Preferences(AcousticSettings s)
-        {return new MenuPreferences(s.Quality,s.Acceleration,s.RichAudioEnabled,s.OutputLevel,s.EarlyReflections,s.DiagnosticsOverlay,s.IntegrationMode,s.SoundMapVisible,s.MenuToggleKey);}
+        {return new MenuPreferences(s.Quality,s.Acceleration,s.RichAudioEnabled,s.OutputLevel,s.EarlyReflections,s.DiagnosticsOverlay,s.IntegrationMode,s.SoundMapVisible,s.MenuToggleKey,s.AirflowEnabled,s.AirflowLevel);}
         private static bool Key(Keys key){return Game.IsKeyDownRightNow(key);}
         private static bool Button(bool connected,ControllerButtons button){return connected&&Game.IsControllerButtonDownRightNow(button);}
         private static void Run()
@@ -229,7 +229,7 @@ namespace RichAudio.Beacon.Rph
                         if(action==MenuAction.Apply)
                         {
                             var p=menu.Pending;
-                            var desired=new AcousticSettings(p.Quality,p.Acceleration,Math.Max(1,editingRevision),p.Enabled,p.OutputLevel,p.EarlyReflections,p.DiagnosticsOverlay,p.IntegrationMode,p.SoundMapVisible,p.MenuToggleKey);
+                            var desired=new AcousticSettings(p.Quality,p.Acceleration,Math.Max(1,editingRevision),p.Enabled,p.OutputLevel,p.EarlyReflections,p.DiagnosticsOverlay,p.IntegrationMode,p.SoundMapVisible,p.MenuToggleKey,p.AirflowEnabled,p.AirflowLevel);
                             stage=MenuOperationStage.QueueApply;
                             if(service.TryApply(desired,editingRevision)){awaitingRevision=editingRevision;awaitingPreferences=p.With();menu.SetNotice("Saving preferences in the background...");}
                             else menu.SetNotice("Save unavailable or already pending. Preferences have not been applied.",true);
@@ -265,7 +265,7 @@ namespace RichAudio.Beacon.Rph
                         // render callback has drawn this exact immutable frame.
                         now=Stopwatch.GetTimestamp()*1000d/Stopwatch.Frequency;
                         transition.ResetClosed(now);
-                        if(firstOpenFrame!=null&&Object.ReferenceEquals(firstOpenRenderedFrame,firstOpenFrame))
+                        if(firstOpenFrame!=null&&System.Object.ReferenceEquals(firstOpenRenderedFrame,firstOpenFrame))
                         {firstOpenAnimationStarted=true;firstOpenFrame=firstOpenRenderedFrame=null;}
                     }
                     transition.SetOpen(menu.Visible,now);motion=transition.Sample(now,closingInputHeld);
@@ -312,7 +312,7 @@ namespace RichAudio.Beacon.Rph
                 }
                 // Reference identity rejects a late callback from an older
                 // lifecycle; no game API, wait or lock is added to rendering.
-                if(Object.ReferenceEquals(view,firstOpenFrame))firstOpenRenderedFrame=view;
+                if(System.Object.ReferenceEquals(view,firstOpenFrame))firstOpenRenderedFrame=view;
             }
             catch(ThreadAbortException){throw;}
             catch{renderFailed=true;presentation=null;}

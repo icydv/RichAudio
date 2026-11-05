@@ -3,10 +3,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {sha256} from './collision-mesh.mjs';
 import {loadCollisionResource} from './collision-resource.mjs';
+import {freeze} from './contracts.mjs';
+import {validateAnalyticPrimitive01,analyticPrimitiveRevision01} from './analytic-primitives01.mjs';
 const digest=v=>typeof v==='string'&&/^[a-f0-9]{64}$/i.test(v);
 const normalized=v=>typeof v==='string'?v.replaceAll('\\','/').toLowerCase():'';
 const bounds=b=>b&&['min','max'].every(k=>Array.isArray(b[k])&&b[k].length===3&&b[k].every(Number.isFinite))&&b.min.every((v,i)=>v<=b.max[i]);
 const selectedByCatalog=new WeakMap();
+const retainedCatalogues=new Map();
 export function collisionNameHash(name){let value=0;for(const byte of Buffer.from(name.toLowerCase(),'utf8')){value=(value+byte)>>>0;value=(value+(value<<10))>>>0;value=(value^(value>>>6))>>>0;}value=(value+(value<<3))>>>0;value=(value^(value>>>11))>>>0;return '0x'+((value+(value<<15))>>>0).toString(16).padStart(8,'0');}
 export function collisionProjection(catalog,hash){
  const all=catalog.CollisionPlacementIndex;
@@ -34,14 +37,28 @@ export function classifyStaticWorldResource(index,catalog,receipt,pins){
  if(normalized(selected.Path)!==normalized(index.source.entry)||selected.Kind!=='ybn'||normalized(selected.Hash)!==hash||normalized(projection.Hash)!==hash||normalized(item.NameHash)!==hash)return unresolved('selected-resource-identity-mismatch');
  if(!Number.isInteger(Number(item.Layer))||Number(item.Layer)!==0||typeof item.CacheFile!=='string'||!item.CacheFile.length||!digest(item.CacheMetadataSHA256))return unresolved('layer-zero-cache-provenance-required');
  const cacheBounds={min:item.Min,max:item.Max};if(!bounds(cacheBounds))return unresolved('cache-bounds-invalid');
- const outsideDistance=Math.max(0,...index.bounds.min.map((v,i)=>cacheBounds.min[i]-v),...index.bounds.max.map((v,i)=>v-cacheBounds.max[i]));
+ // Unsupported analytic envelopes are deliberately conservative and may exceed
+ // the native primitive bounds. They remain unknown coverage, not exact points
+ // with which to reject otherwise correctly placed supported triangles.
+ const excess=b=>Math.max(0,...b.min.map((v,i)=>cacheBounds.min[i]-v),...b.max.map((v,i)=>v-cacheBounds.max[i]));
+ if(!Array.isArray(index.chunks)||index.chunks.some(c=>!bounds(c.bounds)))return unresolved('no-valid-supported-acoustic-surface-bounds');
+ const support=index.chunks.map(c=>c.bounds);let admittedAnalytic=0;
+ if(index.analyticPrimitives01!==undefined){const a=index.analyticPrimitives01;if(a.revision!==analyticPrimitiveRevision01||a.sourceSHA256!==index.source.sha256||!Array.isArray(a.primitives)||a.primitives.length>65536)return unresolved('invalid-compact-analytic-source');for(const p of a.primitives){try{validateAnalyticPrimitive01(p);}catch{return unresolved('invalid-compact-analytic-source');}if(excess(p.bounds)<=.001){support.push(p.bounds);admittedAnalytic++;}}}
+ if(!support.length)return unresolved('no-valid-supported-acoustic-surface-bounds');
+ const supportedBounds={min:[0,1,2].map(i=>Math.min(...support.map(b=>b.min[i]))),max:[0,1,2].map(i=>Math.max(...support.map(b=>b.max[i])))};
+ const outsideDistance=excess(supportedBounds),unknownEnvelopeOutsideDistance=excess(index.bounds);
  // Float32 cache/parser arithmetic can differ at sub-unit precision. This is an explicit
  // 0.001 native-unit sanity tolerance, not an acoustic clearance or measurement claim.
  if(outsideDistance>.001)return unresolved('export-outside-native-cache-bounds');
- return {state:'codewalker-exterior-static-model',algorithm:'codewalker-exterior-static-gate-v1',coordinateSpace:'world',placement:'codewalker-cache-exterior-identity',offlineCoordinateFrameVerified:true,worldPlacementVerified:false,runtimeActivation:'unverified',sourceSHA256:index.source.sha256,sourceEntry:index.source.entry,resourceHash:hash,indexSHA256:pins.indexSHA256,catalogSHA256:pins.catalogSHA256,receiptSHA256:pins.receiptSHA256,cacheFile:item.CacheFile,cacheMetadataSHA256:item.CacheMetadataSHA256,cacheBounds,boundsToleranceNativeUnits:.001,maxOutsideCacheBoundsNativeUnits:outsideDistance,manifestFilesVisited:projection.ManifestFilesVisited,cacheFilesVisited:projection.CacheFilesVisited,interiorMemberships:0,conditionalMapGroupMemberships:0,selectedDlc:catalog.SelectedDlc,gen9SelectorAvailable:catalog.Gen9SelectorAvailable,coverage:index.coverage};
+ return {state:'codewalker-exterior-static-model',algorithm:'codewalker-exterior-supported-bounds01',coordinateSpace:'world',placement:'codewalker-cache-exterior-identity',offlineCoordinateFrameVerified:true,worldPlacementVerified:false,runtimeActivation:'unverified',sourceSHA256:index.source.sha256,sourceEntry:index.source.entry,resourceHash:hash,indexSHA256:pins.indexSHA256,catalogSHA256:pins.catalogSHA256,receiptSHA256:pins.receiptSHA256,cacheFile:item.CacheFile,cacheMetadataSHA256:item.CacheMetadataSHA256,cacheBounds,boundsToleranceNativeUnits:.001,maxOutsideCacheBoundsNativeUnits:outsideDistance,coordinateCheck:'supported-triangle-and-in-bounds-analytic-model-bounds',admittedAnalyticPrimitiveBounds:admittedAnalytic,unsupportedEnvelopeMaxOutsideCacheBoundsNativeUnits:unknownEnvelopeOutsideDistance,unsupportedEnvelopesRemainUnknown:true,manifestFilesVisited:projection.ManifestFilesVisited,cacheFilesVisited:projection.CacheFilesVisited,interiorMemberships:0,conditionalMapGroupMemberships:0,selectedDlc:catalog.SelectedDlc,gen9SelectorAvailable:catalog.Gen9SelectorAvailable,coverage:index.coverage};
 }
 function pinnedJson(filename,expected){if(!digest(expected))throw Error('expected evidence SHA-256 required');const stat=fs.statSync(filename);if(stat.size>67108864)throw Error('evidence byte limit');const bytes=fs.readFileSync(filename);if(sha256(bytes)!==expected.toLowerCase())throw Error('evidence integrity');return JSON.parse(bytes.toString('utf8').replace(/^\uFEFF/,''));}
+function pinnedCatalogue(filename,expected){
+ const absolute=path.resolve(filename),stat=fs.lstatSync(absolute);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>67108864)throw Error('regular bounded catalogue required');const key=absolute+'\n'+expected,identity=[stat.dev,stat.ino,stat.size,stat.mtimeMs,stat.ctimeMs].join(':'),held=retainedCatalogues.get(key);
+ if(held?.identity===identity){retainedCatalogues.delete(key);retainedCatalogues.set(key,held);return held.value;}
+ const value=freeze(pinnedJson(absolute,expected));retainedCatalogues.set(key,{identity,value});while(retainedCatalogues.size>2)retainedCatalogues.delete(retainedCatalogues.keys().next().value);return value;
+}
 export function loadStaticWorldResource({indexPath,catalogPath,receiptPath,indexSHA256,catalogSHA256,receiptSHA256}){
- const resource=loadCollisionResource(indexPath,{expectedSHA256:indexSHA256}),catalog=pinnedJson(catalogPath,catalogSHA256),receipt=pinnedJson(receiptPath,receiptSHA256),classification=classifyStaticWorldResource(resource.index,catalog,receipt,{indexSHA256,catalogSHA256,receiptSHA256});
- return {classification,resource,query(query,limits){if(classification.state!=='codewalker-exterior-static-model')throw Error('world-coordinate query blocked: '+classification.reason);const view=resource.query(query,limits);return {...view,coordinateSpace:'world',placement:classification.placement,offlineCoordinateFrameVerified:true,worldPlacementVerified:false,runtimeActivation:'unverified',classificationState:classification.state};}};
+ const resource=loadCollisionResource(indexPath,{expectedSHA256:indexSHA256}),catalog=pinnedCatalogue(catalogPath,catalogSHA256),receipt=pinnedJson(receiptPath,receiptSHA256),classification=classifyStaticWorldResource(resource.index,catalog,receipt,{indexSHA256,catalogSHA256,receiptSHA256});
+ return {classification,resource,query(query,limits){if(classification.state!=='codewalker-exterior-static-model')throw Error('world-coordinate query blocked: '+classification.reason);const view=resource.query(query,{...limits,nativeBounds:classification.cacheBounds});return {...view,coordinateSpace:'world',placement:classification.placement,offlineCoordinateFrameVerified:true,worldPlacementVerified:false,runtimeActivation:'unverified',classificationState:classification.state};}};
 }

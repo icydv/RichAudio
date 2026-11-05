@@ -9,6 +9,7 @@ param(
     [ValidatePattern('^(0x)?[A-Fa-f0-9]{8}$')][string]$TargetCollisionHash='1c0c33c3',
     [string]$ReferenceCatalogPath='',
     [switch]$VerifyBankStreams,
+    [ValidatePattern('^[a-zA-Z0-9_]{1,64}$')][string]$VehicleModelFilter='',
     [string]$CatalogScriptPath='',
     [string]$RunId='',
     [switch]$Worker
@@ -40,6 +41,7 @@ if(!$Worker){
         $command='$resolverPath='+(Literal $scriptPath)+'; & ([ScriptBlock]::Create([IO.File]::ReadAllText($resolverPath))) -CatalogScriptPath $resolverPath -Worker -RunId '+(Literal $RunId)+' -GameRoot '+(Literal $game)+' -CodeWalkerRoot '+(Literal $cw)+' -OutputRoot '+(Literal $output)+' -MaximumSeconds '+$MaximumSeconds+' -MaximumMemoryMiB '+$MaximumMemoryMiB+' -TargetCollisionHash '+(Literal $TargetCollisionHash)
         if($ReferenceCatalogPath){$command+=' -ReferenceCatalogPath '+(Literal $ReferenceCatalogPath)}
         if($VerifyBankStreams){$command+=' -VerifyBankStreams'}
+        if($VehicleModelFilter){$command+=' -VehicleModelFilter '+(Literal $VehicleModelFilter)}
         $framework=Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'
         $process=Start-Process -FilePath $framework -ArgumentList @('-NoProfile','-NonInteractive','-EncodedCommand',[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))) -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $output 'worker.stdout.log') -RedirectStandardError (Join-Path $output 'worker.stderr.log')
         $watch=[Diagnostics.Stopwatch]::StartNew();$stopped=$null
@@ -98,6 +100,13 @@ function Audio-Summary($Record){
     $key=$Record.GetType().Name+'|'+(Rel-Origin $Record)+'|'+$Record.NameHash.Hex
     if($script:soundProjections.ContainsKey($key)){return $script:soundProjections[$key]}
     $summary=[ordered]@{Hash=$Record.NameHash.Hex;ParserType=$Record.GetType().Name;SourceRel=Rel-Origin $Record}
+    # Preserve named native component relationships without reading/decoding PCM.
+    # Field names/types are metadata, not proof of native scheduling or audibility.
+    $references=@(foreach($field in $Record.GetType().GetFields([Reflection.BindingFlags]'Public,Instance')){if($field.FieldType.FullName -eq 'CodeWalker.GameFiles.MetaHash'){$value=$field.GetValue($Record);[pscustomobject]@{Field=$field.Name;Hash=('0x{0:x8}' -f [uint32]$value.Hash)}}})
+    $references+=@(foreach($property in $Record.GetType().GetProperties([Reflection.BindingFlags]'Public,Instance')){if($property.CanRead -and $property.GetIndexParameters().Length -eq 0 -and $property.PropertyType.FullName -eq 'CodeWalker.GameFiles.MetaHash'){$value=$property.GetValue($Record,$null);[pscustomobject]@{Field=$property.Name;Hash=('0x{0:x8}' -f [uint32]$value.Hash)}}})
+    $references=@($references|Sort-Object Field -Unique)
+    if($references.Count -gt 256){throw 'Audio metadata relationship bound exceeded'}
+    $summary.HashReferences=$references
     if($Record.PSObject.Properties['Channel0']){
         $channels=New-Object Collections.Generic.List[object]
         for($i=0;$i -lt 6;$i++){
@@ -122,8 +131,11 @@ function Vector-Value($Value){if($null -eq $Value){return $null};return @([doubl
 try {
     $core=Join-Path $cw 'CodeWalker.Core.dll';$exe=Join-Path $game 'GTA5_Enhanced.exe'
     $binding=[ordered]@{GameVersion=[Diagnostics.FileVersionInfo]::GetVersionInfo($exe).FileVersion;GameExecutableSHA256=Hash $exe;CodeWalkerCoreSHA256=Hash $core;ScriptSHA256=Hash $scriptPath;HelperSHA256=Hash $helperPath}
-    foreach($dll in Get-ChildItem -LiteralPath $cw -Filter '*.dll'){[Reflection.Assembly]::Load([IO.File]::ReadAllBytes($dll.FullName))|Out-Null}
-    [CodeWalker.GameFiles.GTA5Keys]::LoadFromPath($game,$null)
+    foreach($dll in @('SharpDX.dll','SharpDX.Mathematics.dll','CodeWalker.Core.dll')){[Reflection.Assembly]::Load([IO.File]::ReadAllBytes((Join-Path $cw $dll)))|Out-Null}
+    $initHelper=Join-Path $repo 'src\acoustics\startup\CodeWalkerInitialization01.psm1'
+    Import-Module (New-Module -Name RichAudioCodeWalkerInitialization01 -ScriptBlock ([ScriptBlock]::Create([IO.File]::ReadAllText($initHelper)))) -Force
+    $initialization=Initialize-InstalledCodeWalker01 -GameRoot $game
+    $binding.InitializationHelperSHA256=Hash $initHelper
     $mods=Test-Path -LiteralPath (Join-Path $game 'mods') -PathType Container
     $listArchive=if($mods -and (Test-Path -LiteralPath (Join-Path $game 'mods\update\update.rpf'))){'mods\update\update.rpf'}else{'update\update.rpf'}
     $rpf=New-Object CodeWalker.GameFiles.RpfFile((Resolve-CatalogArchivePath $game $listArchive),$listArchive)
@@ -178,6 +190,7 @@ try {
     $vehicles=New-Object Collections.Generic.List[object]
     foreach($pair in $cache.VehiclesInitDict.GetEnumerator()){
         $vehicle=$pair.Value;$model=[string]$vehicle.modelName;$alias=[string]$vehicle.audioNameHash
+        if($VehicleModelFilter -and $model -ine $VehicleModelFilter){continue}
         $identifier=if($alias){$alias}else{$model};$audioHash=Name-Hash $identifier
         $record=Find-Audio $cache.AudioGameDict $audioHash
         $engine=$null;$granular=$null
@@ -227,12 +240,15 @@ try {
     $targetEvidence=[ordered]@{Hash=$targetKey;ManifestFilesVisited=$placementIndex.ManifestFilesVisited;CacheFilesVisited=$placementIndex.CacheFilesVisited;ProjectionSchemaGaps=$projectionGaps;InteriorBoundsMembership=if($interiorByHash.ContainsKey($targetKey)){$interiorByHash[$targetKey].ToArray()}else{@()};MapGroupMembership=if($mapByHash.ContainsKey($targetKey)){$mapByHash[$targetKey].ToArray()}else{@()};BoundsStoreItems=if($boundsByHash.ContainsKey($targetKey)){$boundsByHash[$targetKey].ToArray()}else{@()};SelectedYbn=@($resources|Where-Object{$_.Kind -eq 'ybn' -and $_.Hash -eq $targetKey});RuntimeSpaceObserved=$false;WorldGeometryImported=$false;Classification='consumer must evaluate complete manifest/cache evidence; no automatic coordinate promotion'}
     $result=[ordered]@{Schema=1;Stage='codewalker-resolved-installation-model';GeneratedUtc=[DateTime]::UtcNow.ToString('o');InputBinding=$binding;SelectedDlc=$cache.SelectedDlc;SelectedDlcBasis='highest setup.order-sorted CodeWalker DlcNameList level';LastRawDlcDeclaration=$selected;DlcListSource=$listArchive;DlcListSHA256=Get-CatalogByteHash $listBytes;DlcNames=@($cache.DlcNameList);ReferenceCoverage=$referenceCoverage;ModsFolderResolutionEnabled=[bool]$mods;Gen9SelectorAvailable=$gen9;Resources=@($resources.ToArray()|Sort-Object Kind,Hash);Vehicles=@($vehicles.ToArray()|Sort-Object Model);ActiveMapArchives=$active;PatchedPaths=$patches;TargetCollisionEvidence=$targetEvidence;ParserErrors=$messages.ToArray();ParserErrorCount=$script:errorCount;AcousticWorldImported=$false;RuntimeReplacementImplemented=$false;RuntimeMountStateObserved=$false;Limitations=@('Selected dictionaries model CodeWalker mount/patch rules; they are not observed GTA runtime state','No world-space placement/triangle/portal/acoustic-material assembly','Legacy six-argument parser has no explicit Gen9 mode; capability is reported rather than inferred','Vehicle metadata winning-source paths are not exposed by the public dictionary','Resource identifiers and output/input bindings are hashed; resource payload content hashes are not computed','No audio PCM extraction or native suppression')}
     $result.CollisionPlacementIndex=$placementIndex
+    $result.Initialization=$initialization
+    if($VehicleModelFilter){$result.VehicleModelFilter=$VehicleModelFilter}
     $result.AudioBankTables=@($script:bankTables.Values|Sort-Object Path)
     $result.AudioBankVerificationRequested=[bool]$VerifyBankStreams
     $catalogPath=Join-Path $output 'resolved-catalog.json';Json $catalogPath $result 15
     $summary=[ordered]@{Schema=1;State='codewalker-resolved-model';GameVersion=$binding.GameVersion;GameExecutableSHA256=$binding.GameExecutableSHA256;CodeWalkerCoreSHA256=$binding.CodeWalkerCoreSHA256;ResolvedCatalogSHA256=Hash $catalogPath;SelectedDlc=$cache.SelectedDlc;Gen9SelectorAvailable=$gen9;ModsFolderResolutionEnabled=[bool]$mods;VehicleModels=$vehicles.Count;ModelsWithVehicleAudioRecord=@($vehicles|Where-Object VehicleAudioRecord).Count;ModelsWithGranularRecord=@($vehicles|Where-Object GranularRecord).Count;YbnEntries=$cache.YbnDict.Count;YmapEntries=$cache.YmapDict.Count;YtypEntries=$cache.YtypDict.Count;ActiveMapArchives=$active.Count;PatchedPaths=$patches.Count;ReferenceDeclaredModels=if($referenceCoverage){$referenceCoverage.DeclaredModels}else{$null};ReferenceMissingFromResolvedModels=if($referenceCoverage){$referenceCoverage.DeclaredMissingFromResolved.Count}else{$null};ParserErrorCount=$script:errorCount;ElapsedSeconds=[Math]::Round($clock.Elapsed.TotalSeconds,3);RuntimeMountStateObserved=$false;AcousticWorldImported=$false;RuntimeReplacementImplemented=$false;GameWrites=$false;PcmDecoded=$false;EndpointOpened=$false}
     $channelRows=@($script:soundProjections.Values|ForEach-Object{$_.ChannelLinks})
     $summary.AudioBankVerificationRequested=[bool]$VerifyBankStreams
+    if($VehicleModelFilter){$summary.VehicleModelFilter=$VehicleModelFilter}
     $summary.AwcTablesParsed=@($script:bankTables.Values|Where-Object State -EQ 'parsed-stream-table').Count
     $summary.VerifiedBankStreamChannels=@($channelRows|Where-Object State -EQ 'verified-installed-container-and-stream').Count
     $summary.AmbiguousBankChannels=@($channelRows|Where-Object State -EQ 'ambiguous-installed-container').Count

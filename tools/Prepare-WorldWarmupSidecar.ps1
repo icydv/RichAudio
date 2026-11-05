@@ -5,10 +5,10 @@ param([Parameter(Mandatory=$true)][string]$GameRoot,
  [string]$PowerShellPath=(Get-Process -Id $PID).Path,
  [string]$OutputPath='',
  [string]$CacheRoot='',
- [ValidateRange(20,3600)][int]$MaximumSeconds=900,
- [ValidateRange(5,900)][int]$MaximumStageSeconds=300,
+ [ValidateRange(20,3600)][int]$MaximumSeconds=1800,
+ [ValidateRange(5,1800)][int]$MaximumStageSeconds=1800,
  [ValidateRange(256,4096)][int]$MaximumMemoryMiB=3072,
- [ValidateRange(1,128)][int]$MaximumGeometryResources=16,
+ [ValidateRange(1,262144)][int]$MaximumGeometryResources=262144,
  [bool]$Enabled=$true,
  [switch]$PlanOnly)
 $ErrorActionPreference='Stop'

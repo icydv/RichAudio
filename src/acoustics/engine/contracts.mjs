@@ -8,6 +8,7 @@ import {
   length,
   cross,
   dot,
+  isValidatedTileSnapshot01,
 } from "../research/local-geometry.mjs";
 export const bounds = Object.freeze({
   sources: 16,
@@ -28,6 +29,13 @@ export const validated = Object.freeze({
   track: (x) => tracks.has(x),
   source: (x) => sources.has(x),
 });
+// Only the installed factory's source-bound Worker receiver uses this path.
+// Full geometry/material/config validation has already run on that worker;
+// arbitrary caller packets retain the existing validating constructors.
+export function adoptSourceBoundAcousticScene01(scene){
+ if(!Object.isFrozen(scene)||scene.version!==1||scene.coordinateSpace!==coordinateSpace||!isValidatedTileSnapshot01(scene.tile)||scene.geometryKey!==scene.tile.observationKey||scene.generation!==scene.tile.version||!Object.isFrozen(scene.materials)||!Object.isFrozen(scene.config)||scene.observationModel?.kind!=='conditional-installed-static-model')throw Error('source-bound prepared acoustic scene header');
+ scenes.add(scene);return scene;
+}
 export const requireValue = (ok, message) => {
   if (!ok) throw Error(message);
 };
@@ -133,7 +141,7 @@ export function conditionalDirectScene({calibration,modelBounds,listenerSession,
 // is asserted. Native coordinates use the declared1unit/metre assumption.
 export function conditionalStockScene(sourceIds,session,engine={}) {
   requireValue(Array.isArray(sourceIds)&&sourceIds.length>0&&sourceIds.length<=16&&
-    new Set(sourceIds).size===sourceIds.length&&sourceIds.every(s=>/^stock:[\w:-]+:(engine|exhaust)$/.test(s))&&/^[a-f0-9]{32}$/.test(session),'owned stock conditional context');
+    new Set(sourceIds).size===sourceIds.length&&sourceIds.every(s=>/^stock:[\w:-]+:(engine|exhaust|aero)$/.test(s))&&/^[a-f0-9]{32}$/.test(session),'owned stock conditional context');
   const result=freeze({version:1,tile:null,materials:{},config:engineConfiguration({...engine,order:0}),coordinateSpace,
     geometryKey:'stock-direct:'+session,generation:1,observationModel:null,
     directPath:{mode:'listener-only-conditional-direct',sourceIds:[...sourceIds],rights:'private-decoded-game-assets',visibilityAssumption:'unobserved-space-assumed-clear',geometryPresent:false},
@@ -144,13 +152,14 @@ export function conditionalStockScene(sourceIds,session,engine={}) {
 export function acousticScene(tile, materials = {}, options = {}) {
   const { observationModel = null, ...engineOptions } = options;
   if (observationModel) {
-    requireValue(observationModel.kind === 'conditional-observed-model' &&
+    const installedStatic=observationModel.kind==='conditional-installed-static-model';
+    requireValue((observationModel.kind === 'conditional-observed-model'||installedStatic) &&
       observationModel.visibilityAssumption === 'unobserved-space-assumed-clear' &&
       observationModel.motionAssumption === 'static-during-snapshot' &&
       observationModel.calibration?.basis === 'declared-demonstration-scale' &&
       Number.isFinite(observationModel.calibration.metresPerNativeUnit) &&
       observationModel.calibration.metresPerNativeUnit > 0 &&
-      ['live-snapshot','historical-replay'].includes(observationModel.mode),
+      (installedStatic?observationModel.mode==='installed-static-model'&&observationModel.staticGeometryOnly===true&&observationModel.runtimeActivationVerified===false&&observationModel.installedWorldVerified===false&&/^[a-f0-9]{64}$/.test(observationModel.sourceCatalogueSHA256):['live-snapshot','historical-replay'].includes(observationModel.mode)),
     'explicit observed-model assumptions required');
     requireValue(tile.coverage === 'partial', 'observed coverage must remain partial');
   }

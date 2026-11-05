@@ -3,10 +3,11 @@
 param([Parameter(Mandatory=$true)][string]$GameRoot,
       [Parameter(Mandatory=$true)][string]$CodeWalkerRoot,
       [string]$OutputRoot='.local/installed-audio-world',
-      [ValidateRange(20,3600)][int]$MaximumSeconds=900,
-      [ValidateRange(5,900)][int]$MaximumStageSeconds=300,
+      [ValidateRange(20,3600)][int]$MaximumSeconds=1800,
+      [ValidateRange(5,1800)][int]$MaximumStageSeconds=1800,
       [ValidateRange(256,4096)][int]$MaximumMemoryMiB=3072,
-      [ValidateRange(1,128)][int]$MaximumGeometryResources=16,
+      [ValidateRange(1,262144)][int]$MaximumGeometryResources=262144,
+      [ValidatePattern('^[a-zA-Z0-9_]{1,64}$')][string]$VehicleModelFilter='bati',
       [switch]$ImportQualifiedGeometry,
       [switch]$ForceRefresh)
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
@@ -43,7 +44,7 @@ function Input-Binding {
     if([IO.File]::Exists($geometryTool)){$sourceFiles+=$geometryTool}
     foreach($area in @('src\acoustics\startup','src\acoustics\world')){if(Test-Path -LiteralPath (Join-Path $repo $area)){$sourceFiles+=@(Get-ChildItem -LiteralPath (Join-Path $repo $area) -File -Recurse|Where-Object{$_.Extension -in @('.ps1','.psm1','.mjs','.js','.cs','.json')}|ForEach-Object FullName)}}
     $sources=@($sourceFiles|Sort-Object -Unique|ForEach-Object{[ordered]@{Path=$_.Substring($repo.Length+1).Replace('\','/');SHA256=Get-PreparationHash $_}})
-    return [ordered]@{GameVersion=[Diagnostics.FileVersionInfo]::GetVersionInfo($exe).FileVersion;GameExecutableSHA256=Get-PreparationHash $exe;CodeWalkerCoreSHA256=Get-PreparationHash $core;PowerShellSHA256=Get-PreparationHash $executable;Archives=$archiveIdentity;LooseResourceMetadata=$looseIdentity;RootLoaderBindings=$loaders;Sources=$sources;ModsDirectoryPresent=(Test-Path -LiteralPath (Join-Path $game 'mods') -PathType Container);PluginDirectoryPresent=(Test-Path -LiteralPath (Join-Path $game 'Plugins') -PathType Container);ArchiveContentHashesComplete=$false;CustomRuntimeMountsObserved=$false;GeometryPlanOnly=(!$ImportQualifiedGeometry);MaximumGeometryResources=$MaximumGeometryResources}
+    return [ordered]@{GameVersion=[Diagnostics.FileVersionInfo]::GetVersionInfo($exe).FileVersion;GameExecutableSHA256=Get-PreparationHash $exe;CodeWalkerCoreSHA256=Get-PreparationHash $core;PowerShellSHA256=Get-PreparationHash $executable;Archives=$archiveIdentity;LooseResourceMetadata=$looseIdentity;RootLoaderBindings=$loaders;Sources=$sources;ModsDirectoryPresent=(Test-Path -LiteralPath (Join-Path $game 'mods') -PathType Container);PluginDirectoryPresent=(Test-Path -LiteralPath (Join-Path $game 'Plugins') -PathType Container);ArchiveContentHashesComplete=$false;CustomRuntimeMountsObserved=$false;GeometryPlanOnly=(!$ImportQualifiedGeometry);MaximumGeometryResources=$MaximumGeometryResources;VehicleModelFilter=$VehicleModelFilter}
 }
 function Stage([string]$Name,[string]$Tool,[string]$Arguments,[string[]]$Artifacts,[string]$DependencyFingerprint='') {
     if([IO.File]::Exists($cancel)){throw 'Preparation cancelled'}
@@ -53,7 +54,14 @@ function Stage([string]$Name,[string]$Tool,[string]$Arguments,[string[]]$Artifac
     $stageFingerprint=Get-PreparationFingerprint ([ordered]@{Workflow=$fingerprint;Stage=$Name;Dependency=$DependencyFingerprint})
     $receiptPath=Join-Path $output ('receipts\'+$Name+'-'+$stageFingerprint+'.json')
     $receipt=Read-CatalogCacheJson -PrivateRoot $output -Path $receiptPath -ExpectedFingerprint $stageFingerprint
-    if(!$ForceRefresh -and (Test-PreparationReceipt $output $receipt $stageFingerprint)){
+    $workRemaining=$false
+    if($Name -eq 'geometry' -and [IO.File]::Exists((Join-Path $stageOutput 'summary.json'))){
+        $previousGeometry=Get-Content -LiteralPath (Join-Path $stageOutput 'summary.json') -Raw|ConvertFrom-Json
+        # A successful bounded batch is not completion of the remaining queue.
+        # Reuse the catalogue but continue geometry on the next startup.
+        $workRemaining=([int]$previousGeometry.PendingResources -gt [int]$previousGeometry.FailedResources)
+    }
+    if(!$ForceRefresh -and !$workRemaining -and (Test-PreparationReceipt $output $receipt $stageFingerprint)){
         $stageResults.Add([pscustomobject]@{Stage=$Name;State='reused';Completed=$true;Receipt=$receiptPath});return
     }
     $remaining=$MaximumSeconds-$watch.Elapsed.TotalSeconds-3
@@ -70,16 +78,44 @@ function Stage([string]$Name,[string]$Tool,[string]$Arguments,[string[]]$Artifac
     $stageResults.Add([pscustomobject]@{Stage=$Name;State=$process.State;Completed=[bool]$process.Completed;Receipt=$receiptPath})
     if(!$process.Completed){throw ('Preparation stage '+$Name+' '+$process.State)}
 }
-$failure=$null;$readiness=$null
+function Continuation-Checkpoint {
+    $batchId=[string]$env:RICHAUDIO_WORLD_BATCH_ID
+    $checkpoint=[ordered]@{Schema=1;Kind='RichAudioWorldContinuation01';SupervisorBatchId=$batchId;RunId=$runId;Reason='not-resumable';Resumable=$false;WorkerClosureVerified=$false;UnknownClosure=$true;PendingResources=0;FailedResources=0;EligibleResources=0;InputFingerprint=$fingerprint;GameExecutableSHA256=$binding.GameExecutableSHA256;CodeWalkerCoreSHA256=$binding.CodeWalkerCoreSHA256;GeneratedUtc=[DateTime]::UtcNow.ToString('o')}
+    try {
+        if($batchId -notmatch '^[a-f0-9]{32}$' -or !$binding -or !$fingerprint -or [IO.File]::Exists($cancel) -or !$stageResults.Count){return $checkpoint}
+        $last=$stageResults[$stageResults.Count-1];if($last.Stage -ne 'geometry' -or ![IO.File]::Exists($last.Receipt)){return $checkpoint}
+        $receipt=Get-Content -LiteralPath $last.Receipt -Raw|ConvertFrom-Json
+        $joined=$receipt.Process.ControlJoined -eq $true -and $receipt.Process.UnknownClosure -eq $false
+        $checkpoint.WorkerClosureVerified=$joined;$checkpoint.UnknownClosure=(!$joined)
+        if(!$joined){return $checkpoint}
+        $controlled=$receipt.Process.State -eq 'deadline'
+        $innerPath=Join-Path $output 'geometry\continuation-checkpoint.json'
+        if(!$controlled -and [IO.File]::Exists($innerPath)){
+            $inner=Get-Content -LiteralPath $innerPath -Raw|ConvertFrom-Json
+            $controlled=$inner.Schema -eq 1 -and $inner.Kind -eq 'RichAudioInstalledGeometryContinuation01' -and $inner.ParentInvocationId -ceq $runId -and $inner.Cause -eq 'budget-deadline' -and $inner.CanContinue -eq $true -and $inner.ControlJoined -eq $true -and $inner.UnknownClosure -eq $false
+        }
+        if(!$controlled){return $checkpoint}
+        $manifestFile=Join-Path $output 'geometry\manifest.json';$resolvedFile=Join-Path $output 'resolved\resolved-catalog.json'
+        if(![IO.File]::Exists($manifestFile) -or (Get-Item -LiteralPath $manifestFile).Length -gt 67108864 -or ![IO.File]::Exists($resolvedFile)){return $checkpoint}
+        $snapshot=Get-Content -LiteralPath $manifestFile -Raw|ConvertFrom-Json
+        $catalogPin=Get-PreparationHash $resolvedFile
+        if($snapshot.ResolvedCatalogSHA256 -cne $catalogPin -or $snapshot.InputBinding.GameExecutableSHA256 -cne $binding.GameExecutableSHA256 -or $snapshot.InputBinding.CodeWalkerCoreSHA256 -cne $binding.CodeWalkerCoreSHA256 -or (Get-PreparationFingerprint (Input-Binding)) -cne $fingerprint){return $checkpoint}
+        $eligible=@($snapshot.Resources|Where-Object Eligibility -EQ 'eligible-exterior');$prepared=@($eligible|Where-Object Status -EQ 'imported-exterior-incomplete-surfaces').Count;$failed=@($eligible|Where-Object Status -EQ 'deferred-resource-import-failed').Count
+        $checkpoint.PendingResources=$eligible.Count-$prepared;$checkpoint.FailedResources=$failed;$checkpoint.EligibleResources=$eligible.Count;$checkpoint.CatalogSHA256=$catalogPin;$checkpoint.ManifestSHA256=Get-PreparationHash $manifestFile
+        $checkpoint.Reason='budget-deadline';$checkpoint.Resumable=($checkpoint.PendingResources -gt $failed)
+    }catch{$checkpoint.Resumable=$false;$checkpoint.Reason='checkpoint-validation-failed'}
+    return $checkpoint
+}
+$failure=$null;$readiness=$null;$fingerprint=$null;$binding=$null
 try {
     $binding=Input-Binding;$fingerprint=Get-PreparationFingerprint $binding
     Publish (Join-Path $output 'input-binding.json') ([ordered]@{Schema=1;Fingerprint=$fingerprint;Binding=$binding})
     Stage 'catalog' $catalogTool '' @('catalog.json','summary.json','current-input-binding.json')
     $catalogPath=Join-Path $output 'catalog\catalog.json'
     $catalogHash=Get-PreparationHash $catalogPath
-    Stage 'resolved' $resolverTool ('-ReferenceCatalogPath '+(ConvertTo-PreparationLiteral $catalogPath)+' -VerifyBankStreams -MaximumMemoryMiB '+$MaximumMemoryMiB) @('resolved-catalog.json','summary.json') $catalogHash
+    Stage 'resolved' $resolverTool ('-VehicleModelFilter '+(ConvertTo-PreparationLiteral $VehicleModelFilter)+' -VerifyBankStreams -MaximumMemoryMiB '+$MaximumMemoryMiB) @('resolved-catalog.json','summary.json') $catalogHash
     $resolvedPath=Join-Path $output 'resolved\resolved-catalog.json';$resolvedHash=Get-PreparationHash $resolvedPath
-    $geometryArguments='-ResolvedCatalogPath '+(ConvertTo-PreparationLiteral $resolvedPath)+' -ResolvedCatalogSHA256 '+(ConvertTo-PreparationLiteral $resolvedHash)+' -MaximumResources '+$MaximumGeometryResources+' -MaximumMemoryMiB '+$MaximumMemoryMiB
+    $geometryArguments='-ResolvedCatalogPath '+(ConvertTo-PreparationLiteral $resolvedPath)+' -ResolvedCatalogSHA256 '+(ConvertTo-PreparationLiteral $resolvedHash)+' -MaximumResources '+$MaximumGeometryResources+' -MaximumMemoryMiB '+$MaximumMemoryMiB+' -ParentInvocationId '+(ConvertTo-PreparationLiteral $runId)
     if(!$ImportQualifiedGeometry){$geometryArguments+=' -PlanOnly'}
     Stage 'geometry' $geometryTool $geometryArguments @('summary.json','manifest.json') $resolvedHash
     $stable=(Get-PreparationFingerprint (Input-Binding)) -ceq $fingerprint
@@ -92,6 +128,9 @@ try {
 } catch {$failure=$_.Exception.Message}
 finally {
     if(!$readiness){$readiness=Get-InstalledPreparationReadiness $null $null $null}
+    $continuation=Continuation-Checkpoint
+    Publish (Join-Path $output 'continuation-checkpoint.json') $continuation
+    if($continuation.SupervisorBatchId -match '^[a-f0-9]{32}$'){Publish (Join-Path $output ('continuation-'+$continuation.SupervisorBatchId+'.json')) $continuation}
     Publish (Join-Path $output 'preparation.json') ([ordered]@{Schema=1;RunId=$runId;State=if($failure){'incomplete'}else{'prepared-with-explicit-gaps'};Failure=$failure;Stages=$stageResults.ToArray();Readiness=$readiness;GameWrites=$false;EndpointOpened=$false;GameLaunched=$false})
     Publish (Join-Path $output 'summary.json') ([ordered]@{Schema=1;State=if($failure){'incomplete'}else{'prepared-with-explicit-gaps'};PreparationCompleted=$readiness.PreparationCompleted;InputsStable=$readiness.InputsStable;VehicleModels=$readiness.VehicleModels;ChannelLinks=$readiness.ChannelLinks;VerifiedBankStreamLinks=$readiness.VerifiedBankStreamLinks;UnresolvedBankStreamLinks=$readiness.UnresolvedBankStreamLinks;GeometryProcessedResources=$readiness.GeometryProcessedResources;GeometryPendingResources=$readiness.GeometryPendingResources;GeometryBlockedResources=$readiness.GeometryBlockedResources;AllSelectedExteriorImported=$readiness.AllSelectedExteriorImported;FullArchiveContentFreshnessVerified=$false;CustomRuntimeMountsObserved=$false;DecodedSourcesReady=$false;AcousticWorldComplete=$false;StartupPluginHookImplemented=$false;NativeAudioSuppressionVerified=$false;LiveGainChainVerified=$false;RuntimeReplacementImplemented=$false;ReadyForGameLaunch=$false;GameWrites=$false;EndpointOpened=$false;GameLaunched=$false;Stages=@($stageResults|Select-Object Stage,State,Completed);ElapsedSeconds=[Math]::Round($watch.Elapsed.TotalSeconds,3)})
     Publish (Join-Path $output 'status.json') ([ordered]@{RunId=$runId;State=if($failure){'incomplete'}else{'complete'};PreparationCompleted=$readiness.PreparationCompleted;ReadyForGameLaunch=$false})

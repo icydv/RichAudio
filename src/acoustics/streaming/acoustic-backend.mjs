@@ -62,6 +62,10 @@ export class AcousticAcceleration {
     this.totals.requests++;
     if(this.closed||this.requested==='cpu')return this.useCpu(tile,segments,this.closed?'backend-closed':null,key);
     if(!pairs)return this.useCpu(tile,segments,'no-visibility-work',key);
+    // The established shader has a 128-surface conservative mask. Larger
+    // indexed product worksets remain exact on CPU until complete multi-batch
+    // costs justify offload; never submit an invalid mask or truncate geometry.
+    if(tile.surfaces.length>gpuLimits.surfaces)return this.useCpu(tile,segments,'indexed-workset-exceeds-qualified-gpu-surface-batch',key);
     if(this.requested==='auto'&&pairs<this.minimumPairs)return this.useCpu(tile,segments,'small-workload-prefers-cpu',key);
     if(this.requested==='auto'&&!this.autoGpu&&this.now()<this.nextProbeAt)return this.useCpu(tile,segments,'cpu-measured-faster-probe-cooldown',key);
     this.start();

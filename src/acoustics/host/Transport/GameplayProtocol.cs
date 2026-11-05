@@ -14,6 +14,10 @@ namespace RichAudio.Beacon.Transport {
   [DataMember(Name="operatingPoint",IsRequired=true)]public double OperatingPoint;
   [DataMember(Name="running",IsRequired=true)]public bool Running;
   [DataMember(Name="valid",IsRequired=true)]public bool Valid;
+  // Attachment is independent of the selected acoustic bank context. Missing
+  // legacy evidence never grants the listener-local airflow layer.
+  [DataMember(Name="riderAttached",EmitDefaultValue=false)]public bool? RiderAttached;
+  [DataMember(Name="riderViewAttached",EmitDefaultValue=false)]public bool? RiderViewAttached;
  }
  [DataContract] public sealed class GameplayFrame {
   [DataMember(Name="version",IsRequired=true)]public int Version=1;

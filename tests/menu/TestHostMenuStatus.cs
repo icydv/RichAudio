@@ -17,6 +17,14 @@ namespace RichAudio.Settings.InGame
             var json=new JavaScriptSerializer();
             Func<MenuStatus> read=()=>HostMenuStatus.Read(json.Serialize(wrapper),now,5);
             var cpu=read();Check(cpu.Available&&cpu.ActiveAcceleration=="cpu");Check(cpu.Detail.Contains("waiting for engine acknowledgement"));
+            Check(cpu.WorldDetail.Contains("no qualified installed coverage"));
+            var world=new Dictionary<string,object>{{"stage","building-missing-regions"},{"installedWorldVerified",false},
+                {"preparation",new Dictionary<string,object>{{"completedEligibleTiles",3},{"eligibleTiles",9},{"totalTiles",12}}}};
+            status["acousticWorld"]=world;Check(read().WorldDetail.Contains("3/9 cached; 12 declared"));
+            world["stage"]="ready-within-declared-coverage";Check(read().WorldDetail.Contains("installed coverage unverified"));
+            world["installedWorldVerified"]=true;Check(read().WorldDetail.Contains("ready-within-declared-coverage"));
+            ((Dictionary<string,object>)world["preparation"])["completedEligibleTiles"]=10;Check(read().WorldDetail.Contains("invalid coverage"));
+            status.Remove("acousticWorld");
             status["activeAcceleration"]="gpu";Check(!read().Available);
             status["gpuCapability"]="hardware-directcompute";Check(!read().Available);
             status["gpuResultsApplied"]=12;var gpu=read();Check(gpu.Available&&gpu.GpuResultsApplied==12&&gpu.ActiveAcceleration=="gpu");

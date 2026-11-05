@@ -14,7 +14,8 @@ namespace RichAudio.Beacon.Windows
         public readonly string Quality, Acceleration;
         public readonly long Revision;
         public readonly bool RichAudioEnabled,EarlyReflections,DiagnosticsOverlay;
-        public readonly double OutputLevel;
+        public readonly double OutputLevel,AirflowLevel;
+        public readonly bool AirflowEnabled;
         public readonly string IntegrationMode,MenuToggleKey;public readonly bool SoundMapVisible;
         public static readonly string[] Qualities = {"auto", "performance", "balanced", "quality", "max"};
         public static readonly string[] Accelerations = {"auto", "cpu", "gpu"};
@@ -24,19 +25,21 @@ namespace RichAudio.Beacon.Windows
         public static string NormalizeMenuToggleKey(string value)
         {value=(value??"").Trim().ToUpperInvariant();return Array.IndexOf(MenuToggleKeys,value)>=0?value:"F10";}
 
-        public AcousticSettings(string quality, string acceleration, long revision,bool richAudioEnabled=true,double outputLevel=1,bool earlyReflections=true,bool diagnosticsOverlay=false,string integrationMode="stock-fallback",bool soundMapVisible=false,string menuToggleKey="F10")
+        public AcousticSettings(string quality, string acceleration, long revision,bool richAudioEnabled=true,double outputLevel=1,bool earlyReflections=true,bool diagnosticsOverlay=false,string integrationMode="stock-fallback",bool soundMapVisible=false,string menuToggleKey="F10",bool airflowEnabled=false,double airflowLevel=.35)
         {
             if(Array.IndexOf(Qualities, quality)<0 || Array.IndexOf(Accelerations, acceleration)<0 || revision<1 || revision>9007199254740991L)
                 throw new ArgumentException("Validated acoustic quality, acceleration and revision required");
             if(Double.IsNaN(outputLevel)||Double.IsInfinity(outputLevel)||outputLevel<0||outputLevel>1)throw new ArgumentException("Owned output level must be finite and within 0..1");
+            if(Double.IsNaN(airflowLevel)||Double.IsInfinity(airflowLevel)||airflowLevel<0||airflowLevel>1)throw new ArgumentException("Airflow level must be finite and within 0..1");
+            AirflowEnabled=airflowEnabled;AirflowLevel=airflowLevel;
             Quality=quality; Acceleration=acceleration; Revision=revision;RichAudioEnabled=richAudioEnabled;OutputLevel=outputLevel;EarlyReflections=earlyReflections;DiagnosticsOverlay=diagnosticsOverlay;
             if(integrationMode!="stock-fallback"&&integrationMode!="experimental-additive")throw new ArgumentException("Native replacement is not verified");IntegrationMode=integrationMode;SoundMapVisible=soundMapVisible;MenuToggleKey=NormalizeMenuToggleKey(menuToggleKey);
         }
         public static AcousticSettings Defaults(long revision){return new AcousticSettings("auto","auto",revision);}
-        public AcousticSettings WithRevision(long revision){return new AcousticSettings(Quality,Acceleration,revision,RichAudioEnabled,OutputLevel,EarlyReflections,DiagnosticsOverlay,IntegrationMode,SoundMapVisible,MenuToggleKey);}
-        public AcousticSettings WithSelections(string quality,string acceleration,long revision){return new AcousticSettings(quality,acceleration,revision,RichAudioEnabled,OutputLevel,EarlyReflections,DiagnosticsOverlay,IntegrationMode,SoundMapVisible,MenuToggleKey);}
-        public AcousticSettings WithAudio(bool? enabled,double? outputLevel,bool? earlyReflections,bool? diagnosticsOverlay){return new AcousticSettings(Quality,Acceleration,Revision,enabled??RichAudioEnabled,outputLevel??OutputLevel,earlyReflections??EarlyReflections,diagnosticsOverlay??DiagnosticsOverlay,IntegrationMode,SoundMapVisible,MenuToggleKey);}
-        public bool SamePreferences(AcousticSettings other){return other!=null&&Quality==other.Quality&&Acceleration==other.Acceleration&&RichAudioEnabled==other.RichAudioEnabled&&OutputLevel==other.OutputLevel&&EarlyReflections==other.EarlyReflections&&DiagnosticsOverlay==other.DiagnosticsOverlay&&IntegrationMode==other.IntegrationMode&&SoundMapVisible==other.SoundMapVisible&&MenuToggleKey==other.MenuToggleKey;}
+        public AcousticSettings WithRevision(long revision){return new AcousticSettings(Quality,Acceleration,revision,RichAudioEnabled,OutputLevel,EarlyReflections,DiagnosticsOverlay,IntegrationMode,SoundMapVisible,MenuToggleKey,AirflowEnabled,AirflowLevel);}
+        public AcousticSettings WithSelections(string quality,string acceleration,long revision){return new AcousticSettings(quality,acceleration,revision,RichAudioEnabled,OutputLevel,EarlyReflections,DiagnosticsOverlay,IntegrationMode,SoundMapVisible,MenuToggleKey,AirflowEnabled,AirflowLevel);}
+        public AcousticSettings WithAudio(bool? enabled,double? outputLevel,bool? earlyReflections,bool? diagnosticsOverlay){return new AcousticSettings(Quality,Acceleration,Revision,enabled??RichAudioEnabled,outputLevel??OutputLevel,earlyReflections??EarlyReflections,diagnosticsOverlay??DiagnosticsOverlay,IntegrationMode,SoundMapVisible,MenuToggleKey,AirflowEnabled,AirflowLevel);}
+        public bool SamePreferences(AcousticSettings other){return other!=null&&Quality==other.Quality&&Acceleration==other.Acceleration&&RichAudioEnabled==other.RichAudioEnabled&&OutputLevel==other.OutputLevel&&EarlyReflections==other.EarlyReflections&&DiagnosticsOverlay==other.DiagnosticsOverlay&&IntegrationMode==other.IntegrationMode&&SoundMapVisible==other.SoundMapVisible&&MenuToggleKey==other.MenuToggleKey&&AirflowEnabled==other.AirflowEnabled&&AirflowLevel==other.AirflowLevel;}
         public static AcousticSettings Parse(string text)
         {
             if(text==null || text.Length>4096)throw new InvalidDataException("Bounded acoustic settings required");
@@ -44,28 +47,31 @@ namespace RichAudio.Beacon.Windows
                 if(System.Text.RegularExpressions.Regex.Matches(text,"\""+key+"\"\\s*:").Count!=1)
                     throw new InvalidDataException("Canonical unique acoustic settings fields required");
             var d=new JavaScriptSerializer{MaxJsonLength=4096,RecursionLimit=4}.DeserializeObject(text) as Dictionary<string,object>;
-            if(d==null || d.Count<4 || d.Count>11 || !d.ContainsKey("schemaVersion") || !(d["schemaVersion"] is int) || (int)d["schemaVersion"]!=1 ||
+            if(d==null || d.Count<4 || d.Count>13 || !d.ContainsKey("schemaVersion") || !(d["schemaVersion"] is int) || (int)d["schemaVersion"]!=1 ||
                !d.ContainsKey("revision") || !(d["revision"] is int || d["revision"] is long) ||
                !d.ContainsKey("acousticQuality") || !d.ContainsKey("acousticAcceleration"))
                 throw new InvalidDataException("Acoustic settings schema/version");
             foreach(string key in d.Keys){
-                if(Array.IndexOf(new[]{"schemaVersion","revision","acousticQuality","acousticAcceleration","richAudioEnabled","outputLevel","earlyReflections","diagnosticsOverlay","integrationMode","soundMapVisible","menuToggleKey"},key)<0 ||
+                if(Array.IndexOf(new[]{"schemaVersion","revision","acousticQuality","acousticAcceleration","richAudioEnabled","outputLevel","earlyReflections","diagnosticsOverlay","integrationMode","soundMapVisible","menuToggleKey","airflowEnabled","airflowLevel"},key)<0 ||
                     System.Text.RegularExpressions.Regex.Matches(text,"\""+key+"\"\\s*:").Count!=1)throw new InvalidDataException("Unknown or duplicate acoustic preference");}
-            foreach(string key in new[]{"richAudioEnabled","earlyReflections","diagnosticsOverlay","soundMapVisible"})
+            foreach(string key in new[]{"richAudioEnabled","earlyReflections","diagnosticsOverlay","soundMapVisible","airflowEnabled"})
                 if(d.ContainsKey(key)&&!(d[key] is bool))throw new InvalidDataException("Boolean acoustic preference required");
-            object level;double output=1;
+            object level;double output=1,airflow=.35;
             if(d.TryGetValue("outputLevel",out level)){
                 if(!(level is int||level is long||level is double||level is decimal))throw new InvalidDataException("Numeric output level required");
                 output=Convert.ToDouble(level,CultureInfo.InvariantCulture);}
+            if(d.TryGetValue("airflowLevel",out level)){
+                if(!(level is int||level is long||level is double||level is decimal))throw new InvalidDataException("Numeric airflow level required");
+                airflow=Convert.ToDouble(level,CultureInfo.InvariantCulture);}
             return new AcousticSettings(d["acousticQuality"] as string,d["acousticAcceleration"] as string,
                 Convert.ToInt64(d["revision"],CultureInfo.InvariantCulture),!d.ContainsKey("richAudioEnabled")||(bool)d["richAudioEnabled"],output,
-                !d.ContainsKey("earlyReflections")||(bool)d["earlyReflections"],d.ContainsKey("diagnosticsOverlay")&&(bool)d["diagnosticsOverlay"],d.ContainsKey("integrationMode")?d["integrationMode"] as string:"stock-fallback",d.ContainsKey("soundMapVisible")&&(bool)d["soundMapVisible"],d.ContainsKey("menuToggleKey")?d["menuToggleKey"] as string:"F10");
+                !d.ContainsKey("earlyReflections")||(bool)d["earlyReflections"],d.ContainsKey("diagnosticsOverlay")&&(bool)d["diagnosticsOverlay"],d.ContainsKey("integrationMode")?d["integrationMode"] as string:"stock-fallback",d.ContainsKey("soundMapVisible")&&(bool)d["soundMapVisible"],d.ContainsKey("menuToggleKey")?d["menuToggleKey"] as string:"F10",d.ContainsKey("airflowEnabled")&&(bool)d["airflowEnabled"],airflow);
         }
         public string Serialize()
         {
             return new JavaScriptSerializer().Serialize(new Dictionary<string,object>{{"schemaVersion",1},{"revision",Revision},
                 {"acousticQuality",Quality},{"acousticAcceleration",Acceleration},{"richAudioEnabled",RichAudioEnabled},{"outputLevel",OutputLevel},
-                {"earlyReflections",EarlyReflections},{"diagnosticsOverlay",DiagnosticsOverlay},{"integrationMode",IntegrationMode},{"soundMapVisible",SoundMapVisible},{"menuToggleKey",MenuToggleKey}});
+                {"earlyReflections",EarlyReflections},{"diagnosticsOverlay",DiagnosticsOverlay},{"integrationMode",IntegrationMode},{"soundMapVisible",SoundMapVisible},{"menuToggleKey",MenuToggleKey},{"airflowEnabled",AirflowEnabled},{"airflowLevel",AirflowLevel}});
         }
         public string ProducerArguments(){return " --acoustic-quality "+Quality+" --acoustic-acceleration "+Acceleration+
             (RichAudioEnabled?"":" --rich-audio-enabled false")+(OutputLevel==1?"":" --rich-audio-output-level "+OutputLevel.ToString("R",CultureInfo.InvariantCulture))+
