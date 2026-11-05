@@ -1,6 +1,6 @@
 # STREET-01 normal cache readiness
 
-Current status: proposal04 and the later proposal05 are closed and consumed. Proposal05 reached the real catalogue worker, then failed at private atomic publication. Codex reproduced and repaired that mechanism and passed the complete offline wrapper → catalogue publisher → geometry reader → actual consumer pathway. Disabled successor proposal06 awaits fresh approval. See [the publication repair](STREET_01_CATALOGUE_PUBLICATION.md); neither fixture timing nor an earlier launcher failure qualifies genuine installed-cache readiness.
+Current status: proposals04–06 are closed and consumed. Proposal06 completed genuine catalogue, resolver and cached-resource validation, but no fresh nonempty scene reached my actual consumer: 350 results expired. Codex's [responsive-scene implementation and original-only comparisons](STREET_01_RESPONSIVE_SCENES.md) address this handoff. Genuine normal warm readiness remains unqualified until a separately approved successor passes. The earlier publication and launcher failures remain preserved.
 
 I am addressing the normal cache-to-scene dependency from `81dd4e3`. My earlier completion, warm-start and performance results remain historical. This source work does not qualify installed startup, live activation, Bati telemetry, selective takeover or audible readiness.
 

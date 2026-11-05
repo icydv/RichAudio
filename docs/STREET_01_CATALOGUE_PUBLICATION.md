@@ -1,6 +1,6 @@
 # STREET-01: catalogue publication and complete startup rehearsal
 
-My proposal05 attempt is closed and consumed. It reached the normal preparation driver and one metadata initializer, then failed before current nearby geometry validation or consumer acceptance. Codex has now reproduced and corrected the publication mechanism and passed the complete offline startup pathway. Genuine installed-cache qualification still requires a fresh approval.
+This records the publication repair at `1bda854`. My later approved proposal06 completed genuine preparation but failed fresh nonempty consumer delivery; its approval is also consumed. The [responsive-scene follow-up](STREET_01_RESPONSIVE_SCENES.md) contains the current status. My proposal05 failure and this repair's original evidence remain unchanged.
 
 ## The failure mechanism
 
@@ -53,4 +53,4 @@ Proposal06 is prepared separately from consumed proposals04/05. It retains the n
 
 Its private template is `.local/street01-normal-readiness01/proposal06/qualification-template.json`, identity `street01-normal-proposal06-7a2cb41b364d440caa977627c4ee106a`, SHA256 `124d6363f23f18c9cf01cf606d36e3b03413bd1cdb24af9648845673e13cbbcd`. It remains disabled and requires a new explicit approval; the original consumed approvals are not reused.
 
-Codex has not executed proposal06 against genuine resources. My historical cache and all previous evidence remain untouched. Passive candidate04 remains byte-for-byte unchanged and unexecuted. No installed-resource read/hash, game launch, deployment, endpoint, recording, native muting, quarantine change or merge occurred during this repair. Independent source, reproduction, complete-chain and successor reviews are retained privately with the exact proposal identity and digest.
+At that source checkpoint, Codex had prepared proposal06 without executing it. Its later separately approved execution and failed freshness result are recorded in the follow-up. My historical cache and all previous evidence remain untouched. Passive candidate04 remains byte-for-byte unchanged and unexecuted. No installed-resource read/hash, game launch, deployment, endpoint, recording, native muting, quarantine change or merge occurred during the publication repair. Independent source, reproduction, complete-chain and successor reviews remain retained privately with their exact proposal identity and digest.

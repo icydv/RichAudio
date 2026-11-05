@@ -49,6 +49,7 @@ export class StockGameplay {
   this.airflowState={windBasis:'explicit-still-air-assumption',velocityBasis:'source-observed-velocity; native-unverified uses declared 1 unit/metre assumption',riderActive:false,exteriorSources:0,maximumSynthesisMs:0};
   this.activeLimit=MAX;this.lastGood=now();this.consecutiveMisses=0;this.sceneExpiry=-Infinity;this.lastFrame=-1;this.lastGeneration=0;
   this.stats={blocks:0,acceptedFrames:0,rejectedFrames:0,unsupported:0,arrivals:0,retired:0,headroomPathsOmitted:0,deadlineMisses:0,maximumProcessingMs:0,maximumActive:0,sourceBudgetReductions:0,geometryUpdates:0,geometryFallbacks:0,clippingFaults:0};
+  this.installedSceneDiagnostics01={queued:0,coalesced:0,accepted:0,rejected:0,maximumApplicationMilliseconds:0,recent:[]};
   this.stageCounters={validVehicleObservations:0,runningVehicleObservations:0,eligibleVehicleBlocks:0,sourceCreations:0,sourcePlaybackBlocks:0,acousticPathBlocks:0,
    engine:pcmCounters(),exhaust:pcmCounters(),stereo:pcmCounters()};
   this.lifecycle={observedNotRunning:0,scopeRetirements:0,lastRetirements:[]};
@@ -118,12 +119,17 @@ export class StockGameplay {
    scene.observationModel?.kind!=='conditional-installed-static-model'||
    JSON.stringify(scene.config.airDbPerMetre)!==JSON.stringify(this.direct.config.airDbPerMetre))throw Error('Conditional installed world binding or freshness');
   this.pipeline.replaceScene(scene);this.staticSceneBinding=Object.freeze({...metadata,mode:'installed-static-conditional-partial'});
-  this.sceneExpiry=expiresAt;this.geometryAnchor={at,observationMs:scene.tile.validUntil-(expiresAt-at)};this.stats.geometryUpdates++;
+  // Replacement may prepare indexes. Its cost belongs inside the original
+  // observation lease, including the final consumer boundary.
+  const acceptedAt=this.now();
+  if(acceptedAt>=expiresAt){this.pipeline.replaceScene(this.direct);this.staticSceneBinding=null;this.sceneExpiry=-Infinity;this.stats.geometryFallbacks++;return false;}
+  this.sceneExpiry=expiresAt;this.geometryAnchor={at:acceptedAt,observationMs:scene.tile.validUntil-(expiresAt-acceptedAt)};this.stats.geometryUpdates++;return true;
  }
  queueInstalledStaticScene01(scene,receipt){
   if(!isInstalledStaticScene01(scene)||!receipt||!Number.isFinite(receipt.expiresAt)||!Number.isSafeInteger(receipt.generation))throw Error('Bounded prepared installed scene publication');
   // Coalesce control publications; this is never a PCM/observation queue.
-  this.pendingInstalledStaticScene01={scene,receipt};
+  const d=this.installedSceneDiagnostics01;d.queued++;if(this.pendingInstalledStaticScene01)d.coalesced++;
+  this.pendingInstalledStaticScene01={scene,receipt,queuedAt:this.now()};
  }
  // Separate qualification for original authored static fixtures. Its finite
  // experiment horizon is never represented as a fresh live observation lease.
@@ -205,17 +211,26 @@ export class StockGameplay {
  // can exercise this same consumer without synthesizing or submitting PCM.
  applyPendingInstalledStaticScene01(){
   const pendingScene=this.pendingInstalledStaticScene01;this.pendingInstalledStaticScene01=null;
-  if(pendingScene&&pendingScene.receipt.expiresAt>this.now()&&pendingScene.receipt.generation===this.lastGeneration&&
-    !(this.pipeline.simulation.scene.observationModel?.kind==='conditional-observed-model'&&this.sceneExpiry>this.now())){
+  if(!pendingScene)return false;
+  const start=performance.now(),at=this.now(),d=this.installedSceneDiagnostics01;
+  let reason=pendingScene.receipt.expiresAt<=at?'expired-before-application':pendingScene.receipt.generation!==this.lastGeneration?'source-generation-changed':
+    this.pipeline.simulation.scene.observationModel?.kind==='conditional-observed-model'&&this.sceneExpiry>at?'observed-scene-retained':null;
+  let soundMapMilliseconds=0,replacementMilliseconds=0,accepted=false;
+  if(!reason){
    const {scene,receipt}=pendingScene;
    // No scene/epoch mutation can occur while the previous block awaits its
    // asynchronous visibility result. Validation and admission costs remain
    // included in this block's measured complete processing duration.
-   if(receipt.preparedSoundMapGeometry)registerPreparedSoundMapGeometry01(scene,receipt.preparedSoundMapGeometry,{requestId:receipt.requestId,bindingEpoch:receipt.bindingEpoch,packetDigest:receipt.packetDigest,catalogSHA256:receipt.catalogSHA256});
-   this.setInstalledStaticScene01(scene,{expiresAt:receipt.expiresAt});
-   return true;
+   const soundMapAt=performance.now();if(receipt.preparedSoundMapGeometry)registerPreparedSoundMapGeometry01(scene,receipt.preparedSoundMapGeometry,{requestId:receipt.requestId,bindingEpoch:receipt.bindingEpoch,packetDigest:receipt.packetDigest,catalogSHA256:receipt.catalogSHA256});soundMapMilliseconds=performance.now()-soundMapAt;
+   const replaceAt=performance.now();
+   if(receipt.expiresAt<=this.now())reason='expired-after-soundmap';
+   else{accepted=this.setInstalledStaticScene01(scene,{expiresAt:receipt.expiresAt});if(!accepted)reason='expired-after-replacement';}
+   replacementMilliseconds=performance.now()-replaceAt;
   }
-  return false;
+  const completedAt=this.now(),applicationMilliseconds=performance.now()-start;
+  d[accepted?'accepted':'rejected']++;d.maximumApplicationMilliseconds=Math.max(d.maximumApplicationMilliseconds,applicationMilliseconds);
+  d.recent.push({requestId:pendingScene.receipt.requestId??null,generation:pendingScene.receipt.generation,requestedAt:pendingScene.receipt.requestedAt??null,expiresAt:pendingScene.receipt.expiresAt,queuedAt:pendingScene.queuedAt,applicationAt:at,completedAt,queueMilliseconds:at-pendingScene.queuedAt,soundMapMilliseconds,replacementMilliseconds,applicationMilliseconds,accepted,reason});if(d.recent.length>64)d.recent.shift();
+  return accepted;
  }
  async render(){
   const preparation=this.sourcePreparation05;

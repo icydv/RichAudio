@@ -1,6 +1,6 @@
 # STREET-01: normal cache readiness and passive Bati qualification
 
-Current status: the original two attempts at fc7ca1b and the later warm proposal05 are closed and consumed. Proposal05 failed inside catalogue pending-file publication. The [production publication repair and complete offline startup rehearsal](STREET_01_CATALOGUE_PUBLICATION.md) now pass; genuine successor proposal06 requires fresh approval. Passive candidate04 remains unchanged and unexecuted.
+Current status: all earlier normal qualifications through proposal06 are closed and consumed. Proposal06 passed genuine preparation but failed fresh nonempty consumer delivery. The [responsive-scene repair](STREET_01_RESPONSIVE_SCENES.md) records the source changes, original-only measurements and separately disabled successor. Genuine normal readiness remains unqualified. Passive candidate04 remains unchanged and unexecuted.
 
 I am narrowing this pass to my normal cache startup and one passive telemetry candidate. My larger STREET-01 requirements remain unchanged: full supported-world acoustic mapping, genuine reflections, selective native replacement, airflow and qualified GPU-first complete processing. This pass cannot qualify an audible integrated mod.
 

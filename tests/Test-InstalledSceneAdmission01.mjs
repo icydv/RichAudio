@@ -10,6 +10,19 @@ import {pathGeometry} from '../src/acoustics/engine/paths.mjs';
 import {CausalSimulation} from '../src/acoustics/streaming/causal.mjs';
 const BLOCK=512,FS=48000,engineOptions={order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1')};
 
+test('consumer rejects expiry during replacement and source-generation drift with bounded diagnostics',async()=>{
+ const f=installedSceneFixture01(),run=await originalAirflowEngineStreet01({enabled:false}),engine=run.engine,world=new InstalledStaticWorld01(f.config);
+ try{
+  run.setWall(0);engine.accept(airflowFrameStreet01(0,0,{speed:0}),0,200);
+  const scene=world.window({listener:[0,3,1.65],sources:[[0,3,1]],session:budgetSession042,generation:1,geometryTimeMs:0,durationMs:1000,engine:engineOptions});
+  engine.queueInstalledStaticScene01(scene,{requestedAt:0,expiresAt:1000,generation:2});assert.equal(engine.applyPendingInstalledStaticScene01(),false);assert.equal(engine.installedSceneDiagnostics01.recent.at(-1).reason,'source-generation-changed');
+  const replace=engine.pipeline.replaceScene.bind(engine.pipeline);engine.pipeline.replaceScene=(...args)=>{replace(...args);run.setWall(1000);};
+  engine.queueInstalledStaticScene01(scene,{requestedAt:0,expiresAt:1000,generation:1});assert.equal(engine.applyPendingInstalledStaticScene01(),false);assert.equal(engine.pipeline.simulation.scene,engine.direct);assert.equal(engine.staticSceneBinding,null);assert.equal(engine.stats.geometryUpdates,0);assert.equal(engine.installedSceneDiagnostics01.recent.at(-1).reason,'expired-after-replacement');
+  for(let i=0;i<100;i++){engine.queueInstalledStaticScene01(scene,{requestedAt:0,expiresAt:1000,generation:1});assert.equal(engine.applyPendingInstalledStaticScene01(),false);}
+  assert.equal(engine.installedSceneDiagnostics01.recent.length,64);assert.equal(engine.installedSceneDiagnostics01.accepted,0);
+ }finally{await run.close();world.close();f.close();}
+});
+
 test('installed scene arriving during held asynchronous visibility stays queued until the next real render boundary',async()=>{
  const f=installedSceneFixture01(),run=await originalAirflowEngineStreet01({enabled:false}),engine=run.engine,world=new InstalledStaticWorld01(f.config);
  let release=null;

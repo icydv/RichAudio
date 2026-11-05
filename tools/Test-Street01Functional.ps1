@@ -17,6 +17,7 @@ $nodeFiles=@(
  'tests/Test-StartupServiceStreet01.mjs','tests/Test-StartupService01Review.mjs',
  'tests/Test-IndexedWorldGeometry01.mjs','tests/Test-InstalledStaticSceneStreet01.mjs',
  'tests/Test-InstalledSceneService01.mjs','tests/Test-InstalledSceneAdmission01.mjs',
+ 'tests/Test-InstalledSceneLifecycle01.mjs','tests/Test-InstalledStaticReuse01.mjs','tests/Test-ResponsiveScene01.mjs',
  'tests/Test-PreparedInstalledTransfer01.mjs','tests/Test-AnalyticPrimitives01.mjs',
  'tests/Test-AnalyticCollisionCache01.mjs','tests/Test-InstalledCollision.mjs',
  'tests/Test-AnalyticCollisionProgress01.mjs',

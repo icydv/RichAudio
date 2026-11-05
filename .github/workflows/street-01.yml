@@ -85,6 +85,7 @@ jobs:
             .local/ns01-*/failed-rehearsal.json
             .local/ns01-*/**/case-validation.json
             .local/ns01-*/**/*.log
+            .local/street01-responsive-controls/original-*/validation.json
             .local/street01-passive-telemetry01/supervision-*/validation.json
             .local/street01/tracked-diagnostic-*/validation.json
             .local/street01/tracked-diagnostic-*/*/run.log
