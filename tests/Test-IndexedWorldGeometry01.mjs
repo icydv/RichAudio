@@ -27,9 +27,9 @@ test('large spatial worksets preserve exact predicates while the research defaul
  assert.ok(indexedTests<segments.length*tile.surfaces.length*.1,'index must avoid most exact finite-surface tests without losing contacts');
  assert.equal(Object.isFrozen(tile),true);assert.equal(tile.surfaces.length,1024);
 });
-test('oversized hardware masks are never submitted or silently truncated for a large workset',async()=>{
- let dispatches=0;const client={closed:false,async capability(){return {supported:true,hardware:true};},async dispatch(){dispatches++;throw Error('no oversized submission');},close(){this.closed=true;}};
- const tile=createTile(input(),{maximumSurfaces:2048}),backend=new AcousticAcceleration({mode:'auto',clientFactory:()=>client});
+test('a legacy hardware helper never receives an oversized mask or a truncated large workset',async()=>{
+ let dispatches=0;const client={closed:false,async capability(){return {supported:true,hardware:true,maximumSurfaces:128,visibilityProtocol:1};},async dispatch(request){if(request.generation===0){assert.equal(request.surfaces.length,1);return {masks:new Uint32Array([1,0,0,0]),metrics:{roundTripMs:0}};}dispatches++;throw Error('no oversized submission');},close(){this.closed=true;}};
+ const tile=createTile(input(),{maximumSurfaces:2048}),backend=new AcousticAcceleration({mode:'gpu',clientFactory:()=>client});await backend.ready();
  const rays=[{a:[-100,-100,-4],b:[100,100,4]}];
- try{const got=await backend.query(tile,rays,{generation:1});assert.deepEqual(got,rays.map(r=>querySegment(tile,r.a,r.b)));assert.equal(dispatches,0);assert.equal(backend.diagnostics().activeAcceleration,'cpu');assert.match(backend.diagnostics().fallbackReason,/indexed-workset/);}finally{backend.close();}
+ try{const got=await backend.query(tile,rays,{generation:1});assert.deepEqual(got,rays.map(r=>querySegment(tile,r.a,r.b)));assert.equal(tile.surfaces.length,1024);assert.equal(dispatches,0);assert.equal(backend.diagnostics().activeAcceleration,'cpu');assert.match(backend.diagnostics().fallbackReason,/extended-global-mask/);}finally{backend.close();}
 });
