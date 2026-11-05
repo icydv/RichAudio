@@ -2,6 +2,7 @@
 // SDK values are explicitly authored; no RPH/game, host, device or asset runs.
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
@@ -41,7 +42,7 @@ namespace RichAudio.Beacon.Windows {public sealed class GameplayRuntime {
 namespace RichAudio.Beacon.Rph {
  internal static class InGameMenu {internal static void Start(){}internal static void Stop(){}}
  internal static class PassiveListener {internal static void Start(){}internal static void Stop(){}}
- internal static class InstalledWorldWarmup {internal static int Starts,Stops;internal static void Start(){Starts++;}internal static void Stop(){Stops++;}}
+ internal static class InstalledWorldWarmup {internal static int Starts,Stops;internal static string StartedUtc="2026-11-05T13:54:25.2639009Z";internal static void Start(){Starts++;}internal static void Stop(){Stops++;}}
 }
 internal static class TestStreetContinuity01 {
  static int assertions;static readonly List<string> cases=new List<string>();
@@ -69,12 +70,29 @@ internal static class TestStreetContinuity01 {
    player.CurrentVehicle=vehicle;vehicle.Driver=player;Capture(runtime,2);var detached=Only(runtime);
    Check(detached.RiderAttached==true&&detached.RiderViewAttached==false,"rider relation alone cannot authorise local airflow");
   });
+  Test("rejected operating ratio withholds evidence without replacing the same pool owner or refreshing its lease",delegate{
+   var records=(IList)typeof(PlayableEntry).GetField("tracked",BindingFlags.NonPublic|BindingFlags.Static).GetValue(null);
+   var retained=records[0];var type=retained.GetType();long observed=(long)type.GetField("Ticks").GetValue(retained);var position=type.GetField("Position").GetValue(retained);
+   vehicle.EngineRevolutionsRatio=50;Capture(runtime,2);
+   Check(runtime.Frames[runtime.Frames.Count-1].Vehicles.Length==0,"invalid ratio creates no observation or invented engine-off state");
+   Check(records.Count==1&&Object.ReferenceEquals(records[0],retained),"independently valid exact pool owner remains retained");
+   Check((long)type.GetField("Ticks").GetValue(retained)==observed&&Object.ReferenceEquals(type.GetField("Position").GetValue(retained),position),"invalid ratio cannot refresh original source time or pose");
+   vehicle.EngineRevolutionsRatio=.6;Capture(runtime,2);var recovered=Only(runtime);
+   Check(recovered.Id==initial.Id&&recovered.Context==initial.Context&&recovered.Generation==initial.Generation&&recovered.Running,"short rejection preserves original identity, bank latch and genuine running getter");
+  });
   Test("camera cut consumes discarded pose and recovers independently without source restart",delegate{
    int count=runtime.Frames.Count;Capture(runtime,100);Check(runtime.Frames.Count==count,"cut frame is never published");
    Capture(runtime,101);var after=Only(runtime);var listener=runtime.Frames[runtime.Frames.Count-1].Listener;
    Check(after.Id==initial.Id&&after.Generation==initial.Generation,"camera boundary preserves source operating/grain lifetime");
    Check(listener.Generation==2&&listener.Velocity[0]>0&&listener.Velocity[0]<100,"new spatial generation uses fresh post-cut measured difference");
    Check(listener.Units=="native-unverified","native coordinate uncertainty is preserved");
+  });
+  Test("a real rejected-evidence gap over 250 ms retains pool ownership but keeps the original generation boundary",delegate{
+   vehicle.EngineRevolutionsRatio=Double.NaN;Capture(runtime,101);
+   Thread.Sleep(260);Capture(runtime,101);vehicle.EngineRevolutionsRatio=.6;Capture(runtime,101);var recovered=Only(runtime);
+   Check(recovered.Id==initial.Id&&recovered.Context==initial.Context,"long operating-state gap does not manufacture a new pool acquisition");
+   Check(recovered.Generation==initial.Generation+1,"original gap boundary remains required after unrefreshed invalid evidence");
+   initial=recovered;
   });
   Test("observed engine stop preserves identity and differs from source loss",delegate{
    vehicle.IsEngineOn=false;Capture(runtime,102);var stopped=Only(runtime);
@@ -90,6 +108,14 @@ internal static class TestStreetContinuity01 {
    Check(decoded.Vehicles[0].RiderAttached==true&&decoded.Vehicles[0].RiderViewAttached==false,"explicit false survives nullable JSON");
    f.Vehicles[0].RiderAttached=null;f.Vehicles[0].RiderViewAttached=null;decoded=GameplayWire.Decode(GameplayWire.Encode(f,runtime.Session),runtime.Session);
    Check(!decoded.Vehicles[0].RiderAttached.HasValue&&!decoded.Vehicles[0].RiderViewAttached.HasValue,"legacy omission remains unknown");
+  });
+  Test("normal startup epoch survives the actual wire without becoming observation time",delegate{
+   var f=runtime.Frames[runtime.Frames.Count-1];long sampled=f.Listener.ObservationTicks;
+   Check(f.WorldPreparationStartedUtc==InstalledWorldWarmup.StartedUtc,"actual Capture carries supervisor epoch");
+   var decoded=GameplayWire.Decode(GameplayWire.Encode(f,runtime.Session),runtime.Session);
+   Check(decoded.WorldPreparationStartedUtc==f.WorldPreparationStartedUtc&&decoded.Listener.ObservationTicks==sampled,"exact epoch and original sample clock survive codec");
+   f.WorldPreparationStartedUtc="invented";bool rejected=false;try{GameplayWire.Encode(f,runtime.Session);}catch(Exception){rejected=true;}Check(rejected,"invalid epoch cannot qualify normal cache");
+   f.WorldPreparationStartedUtc=null;decoded=GameplayWire.Decode(GameplayWire.Encode(f,runtime.Session),runtime.Session);Check(decoded.WorldPreparationStartedUtc==null,"old packets omit epoch and retain limited world status");
   });
   Test("listener invalidation preserves monotonic identity without interpolating old poses",delegate{
    var tracker=new CameraListenerTracker();long now=Stopwatch.GetTimestamp();var first=tracker.Observe(runtime.Session,new CameraObservation{Before=now,After=now,Observed=now,Position=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d}});

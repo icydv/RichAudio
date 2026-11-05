@@ -19,6 +19,10 @@ namespace RichAudio.Settings.InGame
             if(Double.IsNaN(n)||Double.IsInfinity(n)||n<0||n>9007199254740991d||n!=Math.Floor(n))throw new FormatException();
             return (long)n;
         }
+        private static Dictionary<string,object> ObjectRow(Dictionary<string,object> d,string key)
+        {object raw;if(d==null||!d.TryGetValue(key,out raw)||!(raw is Dictionary<string,object>))throw new FormatException();return (Dictionary<string,object>)raw;}
+        private static long DeclaredCount(Dictionary<string,object> d,string key)
+        {if(d==null||!d.ContainsKey(key))throw new FormatException();return Count(d,key);}
         private static string World(Dictionary<string,object> state)
         {
             object raw;var world=state.TryGetValue("acousticWorld",out raw)?raw as Dictionary<string,object>:null;
@@ -29,6 +33,14 @@ namespace RichAudio.Settings.InGame
             if(completed>eligible||eligible>declared)return "World: invalid coverage report";
             bool verified=world.TryGetValue("installedWorldVerified",out raw)&&Equals(raw,true);
             if(stage=="ready-within-declared-coverage"&&!verified)stage="partial / installed coverage unverified";
+            if(world.TryGetValue("coverageStates",out raw)&&raw!=null){
+                try{
+                    var coverage=raw as Dictionary<string,object>;var geometry=ObjectRow(coverage,"geometry");var placement=ObjectRow(coverage,"placement");var activation=ObjectRow(coverage,"activation");
+                    long total=DeclaredCount(coverage,"denominator"),prepared=DeclaredCount(geometry,"prepared"),available=DeclaredCount(geometry,"eligible"),placed=DeclaredCount(placement,"cacheIdentityQualified"),observed=DeclaredCount(activation,"observedActive"),unknown=DeclaredCount(activation,"unobserved");
+                    if(total>262144||available>total||prepared>available||placed>total||observed>total||unknown>total||observed+unknown>total)return "World: invalid coverage report";
+                    return "World: "+(String.IsNullOrEmpty(stage)?"partial":stage)+"; models "+prepared+"/"+total+"; placed(model) "+placed+"; runtime "+(unknown>0?"unobserved":observed+" observed");
+                }catch{return "World: invalid coverage report";}
+            }
             return "World: "+(String.IsNullOrEmpty(stage)?"partial / unsupported":stage)+
                 (declared>0?" "+completed+"/"+eligible+" cached; "+declared+" declared":"");
         }

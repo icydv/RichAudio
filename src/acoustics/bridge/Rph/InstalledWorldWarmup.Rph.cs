@@ -5,6 +5,7 @@ using RichAudio.Preparation;
 namespace RichAudio.Beacon.Rph {
  internal static class InstalledWorldWarmup {
   static readonly WorldWarmupSupervisor worker=new WorldWarmupSupervisor();
+  internal static string StartedUtc {get{return worker.StartedUtc;}}
   internal static void Start(){string executable=Process.GetCurrentProcess().MainModule.FileName;worker.Start(WorldWarmupSupervisor.ConfigurationForGameExecutable(executable),executable);}
   internal static void Stop(){worker.Stop();}
   [ConsoleCommand(Name="RichAudioWorldWarmupStatus",Description="Startup world preparation status; does not start audio or native replacement")]

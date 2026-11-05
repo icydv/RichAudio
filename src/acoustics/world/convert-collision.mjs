@@ -3,6 +3,7 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {convertCollision,encodeChunk,sha256,meshLimits} from './collision-mesh.mjs';
 import {collectAnalyticPrimitives01,analyticPrimitiveRevision01} from './analytic-primitives01.mjs';
+import {collectNativeSupportBounds01} from './native-support-bounds-completion01.mjs';
 function analyticIndex(raw,index,normalizedSHA256){
  if(raw.source?.sha256!==index.source?.sha256||raw.source?.entry!==index.source?.entry||raw.source?.archive!==index.source?.archive)throw Error('Retained normalizer and collision index source identity');
  const analyticPrimitives01=collectAnalyticPrimitives01(raw),byKey=new Map(analyticPrimitives01.primitives.map(p=>[p.node+':'+p.polygon+':'+p.sourceFamily,p]));
@@ -14,7 +15,7 @@ export function exportCollision(input,output){
  const directory=path.join(path.resolve(output),resourceId);fs.mkdirSync(directory);const records=[];
  // Publish the index last. Partial directories have no usable index and are not a cache hit.
  for(const chunk of converted.chunks){const bytes=encodeChunk(chunk.triangles),filename=`chunk-${String(chunk.id).padStart(6,'0')}.racmesh`;fs.writeFileSync(path.join(directory,filename),bytes,{flag:'wx'});records.push({id:chunk.id,file:filename,count:chunk.count,bounds:chunk.bounds,bytes:bytes.length,sha256:sha256(bytes)});}
- const index=analyticIndex(raw,{...converted,chunks:records},sha256(fs.readFileSync(input))),indexBytes=Buffer.from(JSON.stringify(index));if(indexBytes.length>67108864||records.reduce((s,r)=>s+r.bytes,0)>meshLimits.bytes)throw Error('export byte limit');fs.writeFileSync(path.join(directory,'index.pending'),indexBytes,{flag:'wx'});fs.renameSync(path.join(directory,'index.pending'),path.join(directory,'index.json'));
+ const normalizedSHA256=sha256(fs.readFileSync(input)),index=analyticIndex(raw,{...converted,chunks:records,nativeSupportBounds01:collectNativeSupportBounds01(raw,records,normalizedSHA256)},normalizedSHA256),indexBytes=Buffer.from(JSON.stringify(index));if(indexBytes.length>67108864||records.reduce((s,r)=>s+r.bytes,0)>meshLimits.bytes)throw Error('export byte limit');fs.writeFileSync(path.join(directory,'index.pending'),indexBytes,{flag:'wx'});fs.renameSync(path.join(directory,'index.pending'),path.join(directory,'index.json'));
  return {resourceId,index:path.join(directory,'index.json'),indexSHA256:sha256(indexBytes),counts:index.counts,unsupported:index.unsupported,coverage:index.coverage,coordinateSpace:index.coordinateSpace,placement:index.placement,chunks:records.length};
 }
 // Derived-cache upgrade only: original index/chunks/receipts stay untouched.

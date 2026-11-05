@@ -5,13 +5,15 @@ import {performance} from 'node:perf_hooks';
 import {bindInstalledStaticSceneWorker01} from './installed-static-scene01.mjs';
 import {requireWorld,vector} from './contracts.mjs';
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x),interval=500;
+const epoch=x=>typeof x==='string'&&x.length<=40&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,7})?Z$/.test(x)&&Number.isFinite(Date.parse(x));
 const reason=e=>String(e?.message??e).replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,240);
 export class InstalledSceneService01 {
  constructor({config,session,onScene=()=>{},onStatus=()=>{}}={}){
   requireWorld(config&&typeof config.manifestPath==='string'&&typeof config.catalogPath==='string'&&(hex(config.catalogSHA256)||config.catalogSHA256==null&&hex(config.expectedGameSHA256))&&(config.expectedGameSHA256===undefined||hex(config.expectedGameSHA256))&&/^[a-f0-9]{32}$/.test(session)&&typeof onScene==='function'&&typeof onStatus==='function','bound installed scene service configuration');
   const maximumResidentResources=config.maximumResidentResources??8;
   requireWorld(Number.isInteger(maximumResidentResources)&&maximumResidentResources>=1&&maximumResidentResources<=16,'bounded installed scene resident resources');
-  this.config={manifestPath:config.manifestPath,catalogPath:config.catalogPath,...(config.catalogSHA256==null?{}:{catalogSHA256:config.catalogSHA256}),...(config.expectedGameSHA256===undefined?{}:{expectedGameSHA256:config.expectedGameSHA256}),maximumResidentResources};this.catalogBinding=config.catalogSHA256??null;this.bindingEpoch=0;this.session=session;this.onScene=onScene;this.onStatus=onStatus;
+  requireWorld(config.initialObservationPath===undefined||typeof config.initialObservationPath==='string'&&hex(config.expectedGameSHA256),'bound priority output configuration');
+  this.config={manifestPath:config.manifestPath,catalogPath:config.catalogPath,...(config.catalogSHA256==null?{}:{catalogSHA256:config.catalogSHA256}),...(config.expectedGameSHA256===undefined?{}:{expectedGameSHA256:config.expectedGameSHA256}),...(config.initialObservationPath===undefined?{}:{initialObservationPath:config.initialObservationPath}),maximumResidentResources};this.catalogBinding=config.catalogSHA256??null;this.bindingEpoch=0;this.session=session;this.onScene=onScene;this.onStatus=onStatus;this.priorityPending=false;this.priorityAccepted=false;this.priorityRejections=0;this.lastPriorityAttempt=-Infinity;
   this.closed=false;this.failed=false;this.ready=false;this.state='preparing/indexing';this.failure=null;this.active=null;this.pending=null;this.latestGeneration=null;this.serial=0;this.lastDispatch=-Infinity;this.dispatchTimer=null;this.operationTimer=null;this.closePromise=null;this.exited=false;this.exitCode=null;this.baseStatus={stage:'preparing/indexing',installedWorldVerified:false,genuineResourceVerified:false,runtimeActivationVerified:false,preparation:{completedEligibleTiles:0,eligibleTiles:0,totalTiles:0},actualWorldCoverage:'unmeasured'};
   this.stats={workersStarted:0,workersJoined:0,requests:0,dispatched:0,coalesced:0,publications:0,staleResults:0,generationDiscards:0,pendingExpired:0,callbackFailures:0,failures:0,maximumAdmissionMs:0,maximumValidationMs:0,maximumWorkerPreparationMs:0,maximumPublicationCallbackMs:0,minimumDispatchIntervalMs:null,pcmQueueFramesAdded:0};
   let joined;this.exitPromise=new Promise(resolve=>joined=resolve);this.joined=joined;
@@ -24,9 +26,22 @@ export class InstalledSceneService01 {
    this.operationTimer=setTimeout(()=>this.#fail('worker-initialization-timeout'),10000);
   }catch(error){this.exited=true;this.joined(null);this.#fail('worker-start-failed: '+reason(error));}
  }
- snapshot(){return {...this.baseStatus,stage:this.failed?'failed':this.closed?'stopped':this.baseStatus.stage,worker:{kind:'persistent-derived-cache-worker',state:this.state,ready:this.ready,closed:this.closed,failed:this.failed,failure:this.failure,inFlight:this.active!==null,pendingLatest:this.pending!==null,rateLimitHz:2,maxOldGenerationMiB:512,cacheIoOffProducer:true,archiveDecode:false,catalogSHA256:this.catalogBinding,bindingEpoch:this.bindingEpoch,workerExited:this.exited,...this.stats}};}
+ snapshot(){return {...this.baseStatus,initialPreparationPriority:{configured:!!this.config.initialObservationPath,pending:this.priorityPending,accepted:this.priorityAccepted,rejections:this.priorityRejections,activationAuthority:false},stage:this.failed?'failed':this.closed?'stopped':this.baseStatus.stage,worker:{kind:'persistent-derived-cache-worker',state:this.state,ready:this.ready,closed:this.closed,failed:this.failed,failure:this.failure,inFlight:this.active!==null,pendingLatest:this.pending!==null,rateLimitHz:2,maxOldGenerationMiB:512,cacheIoOffProducer:true,archiveDecode:false,catalogSHA256:this.catalogBinding,bindingEpoch:this.bindingEpoch,workerExited:this.exited,...this.stats}};}
  #emit(){try{this.onStatus(this.snapshot());}catch{this.stats.callbackFailures++;}}
- #fail(message){if(this.failed||this.closed)return;this.failed=true;this.failure=reason(message);this.state='failed';this.stats.failures++;this.pending=null;this.active=null;clearTimeout(this.dispatchTimer);clearTimeout(this.operationTimer);this.dispatchTimer=this.operationTimer=null;this.adopter?.close();this.#emit();if(this.worker&&!this.exited)void this.worker.terminate().catch(()=>{});}
+ #fail(message){if(this.failed||this.closed)return;this.failed=true;this.failure=reason(message);this.state='failed';this.stats.failures++;this.pending=null;this.active=null;this.priorityPending=false;clearTimeout(this.dispatchTimer);clearTimeout(this.operationTimer);this.dispatchTimer=this.operationTimer=null;this.adopter?.close();this.#emit();if(this.worker&&!this.exited)void this.worker.terminate().catch(()=>{});}
+ bindPreparationEpoch01(value){
+  if(this.closed||this.failed||this.config.catalogSHA256!==undefined||!epoch(value))return false;
+  if(this.validationEpochUtc01===value)return true;
+  if(this.validationEpochUtc01!==undefined){this.#fail('changed-normal-preparation-epoch');return false;}
+  this.validationEpochUtc01=value;this.ready=false;
+  try{this.worker.postMessage({schema:1,type:'preparation-epoch',session:this.session,catalogSHA256:this.catalogBinding,validationEpochUtc01:value});return true;}catch(error){this.#fail('worker-epoch-command-failed: '+reason(error));return false;}
+ }
+ observeInitial01({sequence,generation,geometryTimeMs,sourceAgeMs,listener,sources=[]}={}){
+  if(this.closed||this.failed||this.priorityAccepted||this.priorityPending||this.priorityRejections>=8||performance.now()-this.lastPriorityAttempt<1000||!this.config.initialObservationPath)return false;
+  if(!Number.isSafeInteger(sequence)||sequence<1||!Number.isSafeInteger(generation)||generation<1||!Number.isFinite(geometryTimeMs)||geometryTimeMs<0||!Number.isFinite(sourceAgeMs)||sourceAgeMs<0||sourceAgeMs>500||!Array.isArray(sources)||sources.length>2)return false;
+  try{listener=vector(listener);sources=sources.map(vector);this.lastPriorityAttempt=performance.now();this.priorityPending=true;this.worker.postMessage({schema:1,type:'initial-observation',session:this.session,catalogSHA256:this.catalogBinding,record:{Schema:1,Kind:'RichAudioInitialWorldObservation01',GameExecutableSHA256:this.config.expectedGameSHA256,session:this.session,sequence,generation,geometryTimeMs,sourceAgeMs,listener,sources,origin:'normal-gameplay-observation',receivedUtc:new Date().toISOString()}});return true;}
+  catch{this.priorityPending=false;this.priorityRejections++;return false;}
+ }
  updateWindow({listener,sources=[],generation,geometryTimeMs,durationMs=1000,radius=32,maximumSurfaces=2048,adaptiveRadius=true,engine={}}={}){
   requireWorld(!this.closed&&!this.failed,'active installed scene service');listener=vector(listener);requireWorld(Array.isArray(sources)&&sources.length<=2,'bounded installed source window');sources=sources.map(vector);
   requireWorld(Number.isSafeInteger(generation)&&generation>0&&(this.latestGeneration===null||generation>=this.latestGeneration)&&Number.isFinite(geometryTimeMs)&&geometryTimeMs>=0&&Number.isFinite(durationMs)&&durationMs>0&&durationMs<=1000&&engine&&typeof engine==='object'&&!Array.isArray(engine),'fresh bounded installed scene request');
@@ -47,7 +62,9 @@ export class InstalledSceneService01 {
   if(this.closed||this.failed)return;
   try{
    requireWorld(message?.schema===1&&message.session===this.session&&Number.isSafeInteger(message.bindingEpoch)&&message.bindingEpoch>=this.bindingEpoch&&(message.catalogSHA256===null||hex(message.catalogSHA256))&&(this.config.catalogSHA256===undefined||message.catalogSHA256===this.config.catalogSHA256||message.type==='failed'&&message.catalogSHA256===null),'installed scene worker message identity');
+   if(message.type==='initial-observation-result'){this.priorityPending=false;this.priorityAccepted=message.result?.accepted===true;if(!this.priorityAccepted)this.priorityRejections++;this.#emit();return;}
    if(message.type==='failed'){this.#fail('worker-'+message.phase+': '+reason(message.reason));return;}
+   if(this.config.catalogSHA256===undefined&&(message.type==='scene'||message.type==='ready'||message.ready===true))requireWorld(epoch(this.validationEpochUtc01)&&message.validationEpochUtc01===this.validationEpochUtc01,'current normal archive-validation epoch');
    if(message.type==='ready'||message.type==='status'){
     const wasReady=this.ready;this.bindingEpoch=message.bindingEpoch;this.catalogBinding=message.catalogSHA256;this.baseStatus=message.status;this.ready=message.ready===true||message.type==='ready';
     if(!wasReady&&!this.active){clearTimeout(this.operationTimer);this.operationTimer=null;}
@@ -72,7 +89,7 @@ export class InstalledSceneService01 {
  }
  close({budgetMilliseconds=2000}={}){
   requireWorld(Number.isFinite(budgetMilliseconds)&&budgetMilliseconds>=100&&budgetMilliseconds<=10000,'bounded installed scene close');if(this.closePromise)return this.closePromise;
-  this.closed=true;this.state='stopping';this.pending=null;this.active=null;clearTimeout(this.dispatchTimer);clearTimeout(this.operationTimer);this.dispatchTimer=this.operationTimer=null;this.#emit();
+  this.closed=true;this.state='stopping';this.pending=null;this.active=null;this.priorityPending=false;clearTimeout(this.dispatchTimer);clearTimeout(this.operationTimer);this.dispatchTimer=this.operationTimer=null;this.#emit();
   this.adopter?.close();
   this.closePromise=(async()=>{
    const began=performance.now();let timer;

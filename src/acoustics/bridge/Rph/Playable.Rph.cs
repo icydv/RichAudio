@@ -92,7 +92,10 @@ namespace RichAudio.Beacon.Rph {
      // changes rider attachment, not the existence/running state or grain owner.
      string context=t.Context;stage="source.registry";if(!t.Identity.StartsWith(actual,StringComparison.Ordinal)||model!=t.Model||!r.Configuration.Allows(model,context)){identityRetirements++;lastReason="source-identity-model-context-changed";tracked.Remove(t);continue;}
      long before=Stopwatch.GetTimestamp();stage="source.position";var position=V(v.Position);stage="source.velocity";var vel=V(v.Velocity);stage="source.forward";var forward=V(v.ForwardVector);stage="source.up";var up=V(v.UpVector);stage="source.engine-on";bool running=v.IsEngineOn;stage="source.revolutions-ratio";double ratio=v.EngineRevolutionsRatio;lastRatio=ratio;lastRunning=running;long after=Stopwatch.GetTimestamp(),at=before+(after-before)/2;
-     if(!Protocol.Finite(ratio)||ratio<0||ratio>1){ratioRejections++;lastReason="source-ratio-out-of-contract";tracked.Remove(t);continue;}
+     // A rejected quantity withholds this observation, not the independently
+     // retained pool lifetime/bank context. Do not refresh position or time;
+     // later valid evidence still crosses the existing 250 ms gap boundary.
+     if(!Protocol.Finite(ratio)||ratio<0||ratio>1){ratioRejections++;lastReason="source-ratio-out-of-contract";continue;}
      // Recheck identity/relationship after getters; a recycled instance must
      // never inherit the original source, and an interrupted dismount supplies
      // no guessed attachment evidence for rider-local synthesis.
@@ -106,7 +109,7 @@ namespace RichAudio.Beacon.Rph {
    double elapsed=(Stopwatch.GetTimestamp()-began)*1000d/Stopwatch.Frequency;r.MaximumObservationMs=Math.Max(r.MaximumObservationMs,elapsed);bool valid=elapsed<=10;
    if(!valid){slowBatches++;lastReason="slow-observation-batch";}else if(observations.Count>0)lastReason="observed-vehicles:"+observations.Count;publishedVehicles+=valid?observations.Count:0;
    var listener=decision.Listener;listener.Valid=valid;listener.Reason=valid?"valid":"slow-observation";
-   r.Publish(new GameplayFrame{Session=r.Session,Listener=listener,Vehicles=valid?observations.ToArray():new GameplayVehicle[0]});
+   r.Publish(new GameplayFrame{Session=r.Session,Listener=listener,Vehicles=valid?observations.ToArray():new GameplayVehicle[0],WorldPreparationStartedUtc=InstalledWorldWarmup.StartedUtc});
    Diagnostic(lastReason);
   }
 #endif

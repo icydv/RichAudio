@@ -19,10 +19,10 @@ namespace RichAudio.Beacon.Windows
             try{
                 string path=AcousticSettingsStore.PrivatePath(root,Path.Combine(".local","plugin-world-warmup","geometry","summary.json"));
                 var json=new JavaScriptSerializer{MaxJsonLength=16384,RecursionLimit=20};
-                object raw;long complete=0,eligible=0,declared=0;bool summaryAvailable=File.Exists(path),running=false;
+                object raw,coverageStates=null;long complete=0,eligible=0,declared=0;bool summaryAvailable=File.Exists(path),running=false;
                 if(summaryAvailable){var summary=json.DeserializeObject(AcousticSettingsStore.ReadBounded(path,16384)) as Dictionary<string,object>;
                     if(summary==null||!summary.TryGetValue("Schema",out raw)||!Equals(raw,1))return hostJson;
-                    complete=Count(summary,"ProcessedResources");eligible=Count(summary,"EligibleExteriorCount");declared=Count(summary,"SelectedYbnCount");}
+                    complete=Count(summary,"ProcessedResources");eligible=Count(summary,"EligibleExteriorCount");declared=Count(summary,"SelectedYbnCount");summary.TryGetValue("CoverageStates01",out coverageStates);}
                 if(complete>eligible||eligible>declared)return hostJson;
                 string heartbeat=AcousticSettingsStore.PrivatePath(root,Path.Combine(".local","plugin-world-warmup","supervisor-status.json"));
                 if(File.Exists(heartbeat))try{var pulse=json.DeserializeObject(AcousticSettingsStore.ReadBounded(heartbeat,4096)) as Dictionary<string,object>;DateTime at;
@@ -32,6 +32,7 @@ namespace RichAudio.Beacon.Windows
                 if(!summaryAvailable&&!running)return hostJson;
                 var world=new Dictionary<string,object>{{"stage",running?"preparing / validating cache":"partial / cached geometry"},{"installedWorldVerified",false},{"genuineResourceVerified",complete>0},
                     {"preparation",new Dictionary<string,object>{{"completedEligibleTiles",complete},{"eligibleTiles",eligible},{"totalTiles",declared}}}};
+                if(coverageStates!=null)world["coverageStates"]=coverageStates;
                 Dictionary<string,object> wrapper=null;try{if(hostJson!=null)wrapper=json.DeserializeObject(hostJson) as Dictionary<string,object>;}catch{}
                 DateTime recorded;bool fresh=wrapper!=null&&wrapper.TryGetValue("recordedAtUtc",out raw)&&raw is string&&DateTime.TryParse((string)raw,CultureInfo.InvariantCulture,DateTimeStyles.RoundtripKind,out recorded)&&
                     (DateTime.UtcNow-recorded.ToUniversalTime()).TotalSeconds>=-1&&(DateTime.UtcNow-recorded.ToUniversalTime()).TotalSeconds<=3;

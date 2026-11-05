@@ -17,6 +17,7 @@ param($GameRoot,$CodeWalkerRoot,$OutputRoot,$MaximumSeconds,$MaximumStageSeconds
 $ErrorActionPreference='Stop'
 $scenario=[IO.File]::ReadAllText((Join-Path $OutputRoot 'scenario.txt'))
 $attempt=Join-Path $OutputRoot 'attempt.txt';$n=if(Test-Path -LiteralPath $attempt){[int][IO.File]::ReadAllText($attempt)+1}else{1};[IO.File]::WriteAllText($attempt,[string]$n)
+[IO.File]::WriteAllText((Join-Path $OutputRoot ('startup-epoch-'+$n+'.txt')),[string]$env:RICHAUDIO_WORLD_START_UTC)
 if($n-gt1-and(Test-Path -LiteralPath (Join-Path $OutputRoot 'child.pid'))){$oldId=[int][IO.File]::ReadAllText((Join-Path $OutputRoot 'child.pid'));if(Get-Process -Id $oldId -ErrorAction SilentlyContinue){throw 'Previous owned descendant remained active at continuation'}}
 if($n-eq1-and$scenario-eq'joined-before-resume'){$command=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes('Start-Sleep -Seconds 60'));$child=Start-Process -FilePath (Get-Process -Id $PID).Path -ArgumentList @('-NoProfile','-NonInteractive','-EncodedCommand',$command) -WindowStyle Hidden -PassThru;[IO.File]::WriteAllText((Join-Path $OutputRoot 'child.pid'),[string]$child.Id)}
 foreach($folder in @('resolved','geometry')){[IO.Directory]::CreateDirectory((Join-Path $OutputRoot $folder))|Out-Null}
@@ -51,12 +52,14 @@ function RunCase([string]$name,[int]$expected,[bool]$legacy=$false){
   $large=Join-Path $root 'original-validation-zeros.bin';$stream=[IO.File]::Create($large);try{$stream.SetLength(268435456)}finally{$stream.Dispose()}
   $c.Sources+=@{RelativePath='original-validation-zeros.bin';SHA256=(Hash $large)}
  }
- [IO.File]::WriteAllText($configuration,($c|ConvertTo-Json -Depth 5));$worker=[RichAudio.Preparation.WorldWarmupSupervisor]::new();$worker.Start($configuration,$exe);$watch=[Diagnostics.Stopwatch]::StartNew();$heartbeats=@();$last=$null
+ [IO.File]::WriteAllText($configuration,($c|ConvertTo-Json -Depth 5));$worker=[RichAudio.Preparation.WorldWarmupSupervisor]::new();$calledBefore=[DateTimeOffset]::UtcNow;$worker.Start($configuration,$exe);$returnedAt=[DateTimeOffset]::UtcNow;$watch=[Diagnostics.Stopwatch]::StartNew();$heartbeats=@();$last=$null
  try{
   if($name-eq'cancel-during-revalidation'){while($worker.State-ne'validating-continuation'){if($watch.Elapsed.TotalSeconds-gt15){throw ('Actual resumed validation window not observed: '+$worker.State)};Start-Sleep -Milliseconds 1};$worker.Stop()}
   while($true){$path=Join-Path $out 'supervisor-status.json';if(Test-Path -LiteralPath $path){try{$status=Get-Content -LiteralPath $path -Raw|ConvertFrom-Json;if($status.RecordedUtc-cne$last){$heartbeats+=$status;$last=$status.RecordedUtc};if(!$status.Running-and$status.Batch-gt0){break}}catch{}}
    if($watch.Elapsed.TotalSeconds-gt20){throw ('Continuation fixture exceeded bound: '+$name+' '+$worker.State)};Start-Sleep -Milliseconds 30}
   $attempts=[int][IO.File]::ReadAllText((Join-Path $out 'attempt.txt'));Check ($attempts-eq$expected) ('Unexpected continuation count: '+$name)
+  $epochText=[IO.File]::ReadAllText((Join-Path $out 'startup-epoch-1.txt'));$epoch=[DateTimeOffset]::Parse($epochText,[Globalization.CultureInfo]::InvariantCulture);Check ($epoch-ge$calledBefore-and$epoch-le$returnedAt) ('Initial observation epoch is captured synchronously in Start: '+$name)
+  if($attempts-gt1){Check ([IO.File]::ReadAllText((Join-Path $out 'startup-epoch-2.txt'))-ceq$epochText) ('Bounded continuation preserves the original initial-observation epoch: '+$name)}
   Check ($heartbeats[-1].WorkerJoined) ('Final job closure must be observed: '+$name)
   if($name-eq'joined-before-resume'){Check ($worker.State-eq'preparation-finished-read-summary') 'Resumed success is reported after exact previous job closure'}
   if($name-eq'cancel-during-revalidation'){Check ($worker.State-eq'cancelled'-and$heartbeats[-1].Batch-eq1) 'Stop during real resumed source validation cannot launch a second worker';Remove-Item -LiteralPath $large}

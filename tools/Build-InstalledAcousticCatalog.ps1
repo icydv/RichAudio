@@ -8,6 +8,7 @@ param(
     [ValidateRange(1,600)][int]$MaximumArchiveSeconds=180,
     [ValidateRange(1,512)][int]$MaximumArchives=256,
     [switch]$HashArchives,
+    [ValidatePattern('^[a-zA-Z0-9_]{0,64}$')][string]$VehicleModelFilter='',
     [string]$CatalogScriptPath='',
     [string]$RunId='',
     [switch]$Worker
@@ -45,6 +46,7 @@ if(!$Worker){
     # Same trusted ScriptBlock loading as Trace-StockVehicles; execution policy is unchanged.
     $command='$catalogPath='+(Ps-Literal $scriptPath)+'; & ([ScriptBlock]::Create([IO.File]::ReadAllText($catalogPath))) -CatalogScriptPath $catalogPath -Worker -RunId '+(Ps-Literal $RunId)+' -GameRoot '+(Ps-Literal $game)+' -CodeWalkerRoot '+(Ps-Literal $cw)+' -OutputRoot '+(Ps-Literal $output)+' -MaximumSeconds '+$MaximumSeconds+' -MaximumArchiveSeconds '+$MaximumArchiveSeconds+' -MaximumArchives '+$MaximumArchives
     if($HashArchives){$command+=' -HashArchives'}
+    if($VehicleModelFilter){$command+=' -VehicleModelFilter '+(Ps-Literal $VehicleModelFilter)}
     $arguments=@('-NoProfile','-NonInteractive','-EncodedCommand',[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command)))
     $process=Start-Process -FilePath $framework -ArgumentList $arguments -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $output 'worker.stdout.log') -RedirectStandardError (Join-Path $output 'worker.stderr.log')
     $watch=[Diagnostics.Stopwatch]::StartNew();$stopped=$null
@@ -105,7 +107,7 @@ function Read-ArchiveCatalog([string]$Relative,[string]$Layer,[int]$DeclaredOrde
     $path=Resolve-CatalogArchivePath $game $Relative
     if(!(Test-Path -LiteralPath $path -PathType Leaf)){$issues.Add([pscustomobject]@{Kind='archive-missing';Archive=$Relative});return}
     $info=Get-Item -LiteralPath $path
-    $stamp=[ordered]@{Archive=$Relative;Layer=$Layer;DeclaredDlcIndex=$DeclaredOrder;Bytes=$info.Length;LastWriteUtc=$info.LastWriteTimeUtc.ToString('o');GameExecutable=$binding.GameExecutableSHA256;CodeWalker=$codeHash;Script=$binding.ScriptSHA256;Helper=$binding.HelperSHA256;HashArchives=[bool]$HashArchives}
+    $stamp=[ordered]@{Archive=$Relative;Layer=$Layer;DeclaredDlcIndex=$DeclaredOrder;Bytes=$info.Length;LastWriteUtc=$info.LastWriteTimeUtc.ToString('o');GameExecutable=$binding.GameExecutableSHA256;CodeWalker=$codeHash;Script=$binding.ScriptSHA256;Helper=$binding.HelperSHA256;HashArchives=[bool]$HashArchives;VehicleModelFilter=$VehicleModelFilter}
     $key=Get-CatalogArchiveFingerprint $stamp
     $cached=Join-Path $cache ($key+'.json')
     Write-Json $statusFile ([ordered]@{State='scanning';Archive=$Relative;ArchiveStartedUtc=[DateTime]::UtcNow.ToString('o');CompletedArchives=$all.Count})
@@ -153,7 +155,7 @@ function Read-ArchiveCatalog([string]$Relative,[string]$Layer,[int]$DeclaredOrde
         if($entry.Name -notmatch '^vehicles(?:_[A-Za-z0-9_-]+)?\.meta$' -and !$extraVehiclePaths.Contains($entry.Path)){continue}
         Check-Cancel
         try{$bytes=$record.Owner.ExtractFile($entry);$doc=Read-CatalogXml $bytes;$source=$entry.Path.Replace('\','/');$hash=Get-CatalogByteHash $bytes
-            foreach($vehicle in @(Get-CatalogVehicleDeclarations $doc $source)){$vehicle|Add-Member -NotePropertyName MetadataSHA256 -NotePropertyValue $hash;$vehicles.Add($vehicle)}
+            foreach($vehicle in @(Get-CatalogVehicleDeclarations $doc $source)){if($VehicleModelFilter-and$vehicle.Model-ine$VehicleModelFilter){continue};$vehicle|Add-Member -NotePropertyName MetadataSHA256 -NotePropertyValue $hash;$vehicles.Add($vehicle)}
         }catch{$localIssues.Add([pscustomobject]@{Kind='vehicle-meta-parse-failed';Path=$entry.Path.Replace('\','/')})}
     }
     $after=Get-Item -LiteralPath $path

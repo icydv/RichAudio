@@ -43,10 +43,10 @@ if(!config.demoProfile&&config.acousticWorld!==false){
  if(c.privateCacheRoot!==undefined&&(!path.isAbsolute(c.privateCacheRoot)||!privateCacheRoot.split(path.sep).includes('.local')))throw Error('explicit private installed-world cache root');
  const worldInside=relative=>{if(typeof relative!=='string'||path.isAbsolute(relative))throw Error('relative installed cache metadata path');const p=path.resolve(privateCacheRoot,relative);if(!p.startsWith(privateCacheRoot+path.sep))throw Error('installed cache metadata escaped');return p;};
  const worldConfig={manifestPath:worldInside(c.manifestPath??worldRoot+'/geometry/manifest.json'),catalogPath:worldInside(c.catalogPath??worldRoot+'/resolved/resolved-catalog.json'),expectedGameSHA256:config.gameSha256,
-  ...(c.catalogSHA256?{catalogSHA256:c.catalogSHA256}:{}),maximumResidentResources:8};
+  ...(c.catalogSHA256?{catalogSHA256:c.catalogSHA256}:{}),...((c.initialObservationPath!==undefined||c.privateCacheRoot===undefined)?{initialObservationPath:worldInside(c.initialObservationPath??worldRoot+'/geometry/initial-observation01.json')}:{ }),maximumResidentResources:8};
  installedScenes=new InstalledSceneService01({config:worldConfig,session,onStatus:s=>{
   worldStatus={stage:s.stage,installedWorldVerified:false,genuineResourceVerified:s.genuineResourceVerified===true,preparation:s.preparation??{completedEligibleTiles:0,eligibleTiles:0,totalTiles:0},
-   reason:s.reason??s.failure??s.worker?.failure??null,residentResources:s.residentResources??0,resourceLoads:s.resourceLoads??0,controller:s.worker??s.controller??null};
+   reason:s.reason??s.failure??s.worker?.failure??null,residentResources:s.residentResources??0,resourceLoads:s.resourceLoads??0,controller:s.worker??s.controller??null,coverageStates:s.coverageStates??null,initialPreparationPriority:s.initialPreparationPriority??null};
  },onScene:(scene,receipt)=>{
   if(worldAdmissionRows<2400&&process.stderr.writableLength<16384){log({type:'installed-world-producer-admission',requestId:receipt.requestId,validationMs:receipt.validationMs,elapsedSinceRequestMs:receipt.admissionMs,workerPreparationMs:receipt.workerPreparationMilliseconds,scope:'validation is on producer; worker preparation is concurrent, not additive audio latency'});worldAdmissionRows++;}else worldAdmissionRowsOmitted++;
   // An observed live snapshot remains authoritative until its own lease ends.
@@ -81,7 +81,12 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
    const age=Math.max(m.ageMs,(clock.ticks+(now-clock.at)*clock.frequency/1000-s.observationTicks)*1000/clock.frequency);
    const remaining=m.validForMs===undefined?null:m.validForMs-(now-m.receivedAt);
    if(age<=250&&(remaining===null||remaining>0)){engine.accept(m.frame,age,remaining);lastFrame={frame:m.frame,age,at:now,receivedAt:m.receivedAt,hostWriteBeforeQpc:m.hostWriteBeforeQpc??null,hostQpcFrequency:m.hostQpcFrequency??null};
-    if(installedScenes&&!installedScenes.failed&&!installedScenes.closed&&s.valid&&!s.paused)installedScenes.updateWindow({listener:s.position,sources:m.frame.vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-s.position[i])<=128)).slice(0,2).map(v=>v.position),generation:s.generation,geometryTimeMs:now,durationMs:1000,engine:{order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1')}});
+    if(installedScenes&&!installedScenes.failed&&!installedScenes.closed&&s.valid&&!s.paused){
+     installedScenes.bindPreparationEpoch01(m.frame.worldPreparationStartedUtc);
+     const sources=m.frame.vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-s.position[i])<=128)).slice(0,2).map(v=>v.position);
+     installedScenes.observeInitial01({sequence:s.sequence,generation:s.generation,geometryTimeMs:now,sourceAgeMs:age,listener:s.position,sources});
+     if(!installedScenes.failed)installedScenes.updateWindow({listener:s.position,sources,generation:s.generation,geometryTimeMs:now,durationMs:1000,maximumSurfaces:4096,engine:{order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1')}});
+    }
    }
   }
   if(pendingGeometry){const value=pendingGeometry;pendingGeometry=null;try{geometry(value);}catch(e){log({type:'geometry-rejected',reason:e.message});}}

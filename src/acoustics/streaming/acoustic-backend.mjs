@@ -4,12 +4,21 @@
 // geometry, openings, uncertainty and missing-region rules.
 import {performance} from 'node:perf_hooks';
 import {querySegment} from '../research/local-geometry.mjs';
-import {AcousticGpuClient,gpuLimits} from '../gpu/client.mjs';
+import {AcousticGpuClient,gpuLimits,gpuMaskWords,gpuMaskLayout} from '../gpu/client.mjs';
+import {preparedGpuGeometry01,prepareGpuGeometry01} from '../gpu/geometry.mjs';
 const modes=['auto','cpu','gpu'];
 const cpuStamp=()=>typeof process.threadCpuUsage==='function'?process.threadCpuUsage():process.cpuUsage();
 const cpuMs=(start)=>{const end=cpuStamp();return (end.user-start.user+end.system-start.system)/1000;};
 const measure=fn=>{const start=performance.now(),cpu=cpuStamp(),value=fn();return {value,wallMs:performance.now()-start,cpuMs:cpuMs(cpu)};};
 const ewma=(old,n)=>old===null?n:old*.8+n*.2;
+const packedTiles=new WeakMap();
+function packedTile(tile){
+  const cached=packedTiles.get(tile);if(cached)return {...cached,cached:true};
+  const origin=Object.freeze(tile.bounds.min.map((x,i)=>(x+tile.bounds.max[i])/2)),local=p=>Object.freeze(p.map((x,i)=>x-origin[i]));
+  const surfaces=Object.freeze(tile.surfaces.map(s=>Object.freeze({center:local(s.center),normal:Object.freeze([...s.normal]),
+    min:local([0,1,2].map(i=>Math.min(...s.corners.map(p=>p[i])))),max:local([0,1,2].map(i=>Math.max(...s.corners.map(p=>p[i]))))})));
+  const value={origin,surfaces};packedTiles.set(tile,value);return {...value,cached:false};
+}
 
 export class AcousticAcceleration {
   constructor({mode='cpu',clientFactory=()=>new AcousticGpuClient(),now=()=>performance.now(),deadlineMs=8,
@@ -22,8 +31,8 @@ export class AcousticAcceleration {
     this.attempts=0;this.closed=false;this.busy=false;this.active='cpu';this.fallbackReason=mode==='cpu'?null:'gpu-initializing';
     this.cooldownUntil=0;this.nextProbeAt=0;this.probeAttempts=0;this.autoGpu=false;this.lastSwitch=-Infinity;this.wins=0;this.losses=0;this.samples=new Map();this.lastHelperCpu=null;
     this.totals={requests:0,gpuAcousticDispatches:0,gpuCompletedBatches:0,gpuResultsApplied:0,calibrationCpuSurfaceTests:0,cpuFallbacks:0,deadlineMisses:0,
-      droppedResults:0,invalidResults:0,cpuSurfaceTests:0,gpuSurfaceTests:0,avoidedCpuSurfaceTests:0,backendChanges:0};
-    this.revision=0;this.last={};this.lastCalibration=null;this.lastRejectedAttempt=null;if(mode==='gpu')this.start();
+      droppedResults:0,invalidResults:0,cpuSurfaceTests:0,gpuSurfaceTests:0,cartesianReferenceSurfacePairs:0,unindexedReferencePairsExcludedByGpu:0,avoidedCpuSurfaceTests:0,backendChanges:0};
+    this.revision=0;this.last={};this.lastCalibration=null;this.lastRejectedAttempt=null;this.autoProbeDecision=null;if(mode==='gpu')this.start();
   }
   start(){
     if(this.requested==='cpu'||this.closed||this.initializing||this.client||this.attempts>=3||this.now()<this.cooldownUntil)return this.initializing;
@@ -45,6 +54,9 @@ export class AcousticAcceleration {
     })();return this.initializing;
   }
   async ready(){this.start();if(this.initializing)await this.initializing;return this.capability;}
+  // Explicit scene/control preparation only; render/query never starts this
+  // potentially large geometry transform. Installed scenes arrive prepacked.
+  prepareGeometry(tile){return prepareGpuGeometry01(tile);}
   setMode(mode){if(!modes.includes(mode))throw Error('Acoustic acceleration value');if(mode===this.requested)return;
     this.revision++;this.requested=mode;this.autoGpu=false;this.wins=this.losses=this.probeAttempts=0;this.nextProbeAt=0;this.lastSwitch=this.now();
     if(mode==='gpu')this.start();else if(mode==='cpu')this.fallbackReason=null;}
@@ -54,18 +66,15 @@ export class AcousticAcceleration {
   useCpu(tile,segments,reason,key){const m=this.cpu(tile,segments);this.recordCpu(key,m);this.active='cpu';this.fallbackReason=reason;
     if(this.requested==='gpu')this.totals.cpuFallbacks++;this.last={queryWallMs:m.wallMs,queryCpuMs:m.cpuMs,cpuTaskWallMs:m.wallMs,cpuTaskCpuMs:m.cpuMs,taskWallMs:m.wallMs,
       taskCpuMs:m.cpuMs,segments:segments.length,surfaces:tile.surfaces.length};
-    this.totals.cpuSurfaceTests+=segments.length*tile.surfaces.length;return m.value;}
+    this.totals.cpuSurfaceTests+=m.value.reduce((n,q)=>n+q.surfaceTests,0);return m.value;}
   async query(tile,segments,{generation=0}={}){
     if(!Array.isArray(segments)||segments.length>16384||!Number.isInteger(generation)||generation<0||generation>0xffffffff)
       throw Error('Bounded acoustic visibility batch');
     const pairs=segments.length*tile.surfaces.length,key=Math.floor(Math.log2(Math.max(1,pairs)));
-    this.totals.requests++;
+    this.totals.requests++;this.totals.cartesianReferenceSurfacePairs+=pairs;
     if(this.closed||this.requested==='cpu')return this.useCpu(tile,segments,this.closed?'backend-closed':null,key);
     if(!pairs)return this.useCpu(tile,segments,'no-visibility-work',key);
-    // The established shader has a 128-surface conservative mask. Larger
-    // indexed product worksets remain exact on CPU until complete multi-batch
-    // costs justify offload; never submit an invalid mask or truncate geometry.
-    if(tile.surfaces.length>gpuLimits.surfaces)return this.useCpu(tile,segments,'indexed-workset-exceeds-qualified-gpu-surface-batch',key);
+    if(tile.surfaces.length>gpuLimits.sceneSurfaces)return this.useCpu(tile,segments,'indexed-workset-exceeds-bounded-gpu-scene-capacity',key);
     if(this.requested==='auto'&&pairs<this.minimumPairs)return this.useCpu(tile,segments,'small-workload-prefers-cpu',key);
     if(this.requested==='auto'&&!this.autoGpu&&this.now()<this.nextProbeAt)return this.useCpu(tile,segments,'cpu-measured-faster-probe-cooldown',key);
     this.start();
@@ -73,6 +82,9 @@ export class AcousticAcceleration {
       const why=this.initializing?'gpu-initializing':this.fallbackReason??'hardware-compute-unavailable';
       return this.useCpu(tile,segments,why,key);
     }
+    if(tile.surfaces.length>(this.capability.maximumSurfaces??128)||tile.surfaces.length>128&&(this.capability.visibilityProtocol!==2||this.capability.maskLayout!==gpuMaskLayout))return this.useCpu(tile,segments,'helper-does-not-support-extended-global-mask',key);
+    const preparedGeometry=preparedGpuGeometry01(tile);
+    if(tile.surfaces.length>128&&!preparedGeometry)return this.useCpu(tile,segments,'gpu-geometry-not-prepared-use-exact-cpu',key);
     if(this.busy)return this.useCpu(tile,segments,'bounded-gpu-queue-occupied',key);
     if(this.now()<this.cooldownUntil)return this.useCpu(tile,segments,'gpu-deadline-cooldown',key);
     const sample=this.samples.get(key);
@@ -81,15 +93,12 @@ export class AcousticAcceleration {
     // Auto probes real equal-work inputs. Calibration's duplicate work is
     // explicit; the returned control is CPU until repeated GPU wins are proved.
     let reference=probe?this.cpu(tile,segments):null;
-    if(reference){this.recordCpu(key,reference);this.totals.calibrationCpuSurfaceTests+=pairs;}
+    if(reference){this.recordCpu(key,reference);const tests=reference.value.reduce((n,q)=>n+q.surfaceTests,0);this.totals.calibrationCpuSurfaceTests+=tests;this.totals.cpuSurfaceTests+=tests;}
     this.busy=true;const started=performance.now(),cpu=cpuStamp(),client=this.client,attemptMetrics=[];
     const execute=async()=>{try{
       let ownCpuMs=0,stageCpu=cpuStamp();
-      const origin=tile.bounds.min.map((x,i)=>(x+tile.bounds.max[i])/2);
+      const packed=preparedGeometry?{origin:preparedGeometry.origin,surfaces:tile.surfaces,cached:true}:packedTile(tile),{origin,surfaces}=packed,maskWordsPerSegment=gpuMaskWords(surfaces.length);
       const local=p=>p.map((x,i)=>x-origin[i]);
-      const surfaces=tile.surfaces.map(s=>({center:local(s.center),normal:s.normal,
-        min:local([0,1,2].map(i=>Math.min(...s.corners.map(p=>p[i])))),
-        max:local([0,1,2].map(i=>Math.max(...s.corners.map(p=>p[i]))))}));
       ownCpuMs+=cpuMs(stageCpu);
       const results=[],metrics=[];let exactTests=0;
       for(let start=0;start<segments.length;start+=gpuLimits.segments){
@@ -97,18 +106,20 @@ export class AcousticAcceleration {
         const batch=segments.slice(start,start+gpuLimits.segments),remaining=this.deadlineMs-(performance.now()-started);
         if(remaining<1)throw Error('GPU acoustic deadline exceeded');
         const localized=batch.map(s=>({a:local(s.a),b:local(s.b)}));ownCpuMs+=cpuMs(stageCpu);
-        const result=await client.dispatch({segments:localized,surfaces,generation,deadlineMs:remaining});
+        const result=await client.dispatch({segments:localized,surfaces,geometry:preparedGeometry,generation,deadlineMs:remaining});
         ownCpuMs+=(result.metrics?.nodeSubmissionCpuMs??0)+(result.metrics?.nodeDecodeCpuMs??0);stageCpu=cpuStamp();
-        if(result.generation!==generation||!(result.masks instanceof Uint32Array)||result.masks.length!==batch.length*4||
+        if(result.generation!==generation||!(result.masks instanceof Uint32Array)||result.masks.length!==batch.length*maskWordsPerSegment||
+          surfaces.length>128&&(result.protocolVersion!==2||result.maskWordsPerSegment!==maskWordsPerSegment||result.metrics?.maskLayout!==gpuMaskLayout||result.metrics?.readbackCount!==1)||
           result.metrics?.completedDispatch!==true||result.metrics?.hardware!==true)throw Error('GPU acoustic context or completion mismatch');
         this.totals.gpuAcousticDispatches++;this.totals.gpuCompletedBatches++;metrics.push(result.metrics);attemptMetrics.push(result.metrics);
         for(let i=0;i<batch.length;i++){
           const indices=[];
-          for(let word=0;word<4;word++){let bits=result.masks[i*4+word]>>>0;
+          for(let word=0;word<maskWordsPerSegment;word++){let bits=result.masks[i*maskWordsPerSegment+word]>>>0;
+            if(!bits)continue;
             const available=Math.max(0,Math.min(32,surfaces.length-word*32)),allowed=available===32?0xffffffff:2**available-1;
             if((bits&~allowed)!==0)throw Error('GPU mask outside finite scene');
             while(bits){const bit=31-Math.clz32((bits&-bits)>>>0);indices.push(word*32+bit);bits=(bits&(bits-1))>>>0;}}
-          const q=querySegment(tile,batch[i].a,batch[i].b,{surfaceIndices:indices});exactTests+=q.surfaceTests;results.push(q);
+          const q=querySegment(tile,batch[i].a,batch[i].b,{surfaceIndices:indices});exactTests+=q.surfaceTests;this.totals.cpuSurfaceTests+=q.surfaceTests;results.push(q);
         }
         ownCpuMs+=cpuMs(stageCpu);
       }
@@ -121,7 +132,7 @@ export class AcousticAcceleration {
         for(let i=0;i<results.length;i++)if(JSON.stringify({hits:results[i].hits,ambiguous:results[i].ambiguous,unknown:results[i].unknown})!==
           JSON.stringify({hits:reference.value[i].hits,ambiguous:reference.value[i].ambiguous,unknown:reference.value[i].unknown}))throw Error('GPU conservative mask disagrees with CPU reference');
       }
-      this.totals.cpuSurfaceTests+=exactTests;this.totals.gpuSurfaceTests+=pairs;this.totals.avoidedCpuSurfaceTests+=pairs-exactTests;
+      this.totals.gpuSurfaceTests+=pairs;this.totals.unindexedReferencePairsExcludedByGpu+=pairs-exactTests;this.totals.avoidedCpuSurfaceTests+=pairs-exactTests;
       const gpuTimingValid=metrics.every(m=>m.gpuTimingValid===true&&[m.gpuExecutionMs,m.gpuUploadMs,m.gpuCopyMs].every(Number.isFinite));
       const aggregate={gpuTimingValid,gpuSubmitMs:metrics.reduce((n,m)=>n+(m.submitMs??0),0),gpuExecutionMs:gpuTimingValid?metrics.reduce((n,m)=>n+m.gpuExecutionMs,0):null,
         gpuTransferMs:gpuTimingValid?metrics.reduce((n,m)=>n+m.gpuUploadMs+m.gpuCopyMs,0):null,gpuReadbackMs:metrics.reduce((n,m)=>n+(m.readbackMs??0),0),
@@ -129,13 +140,15 @@ export class AcousticAcceleration {
         gpuOwnedBytes:metrics.at(-1)?.ownedBufferBytes??null,gpuDeviceUsageBytes:metrics.at(-1)?.processVideoMemoryBytes??null,
         helperWorkingSetBytes:metrics.at(-1)?.processWorkingSetBytes??null};
       const diagnostic={...aggregate,queryWallMs:taskWallMs,queryCpuMs:taskCpuMs,taskWallMs,taskCpuMs,cpuReferenceWallMs:reference?.wallMs??sample?.cpuWall??null,
-        cpuReferenceCpuMs:reference?.cpuMs??sample?.cpuCpu??null,segments:segments.length,surfaces:surfaces.length,exactCpuSurfaceTests:exactTests};
+        cpuReferenceCpuMs:reference?.cpuMs??sample?.cpuCpu??null,segments:segments.length,surfaces:surfaces.length,exactCpuSurfaceTests:exactTests,
+        geometryPackingCached:packed.cached,maskWordsPerSegment,surfacePages:maskWordsPerSegment/4,readbackBatches:metrics.length};
+      if(preparedGeometry)Object.assign(diagnostic,{gpuGeometryBytes:preparedGeometry.bodyBytes.length,gpuGeometryPreparationMs:preparedGeometry.preparationMilliseconds,gpuGeometryAdoptionMs:preparedGeometry.adoptionMilliseconds});
       if(probe)this.lastCalibration=diagnostic;else this.last=diagnostic;
       if(this.requested==='auto'){
         const baseline=this.samples.get(key);baseline.gpuWall=ewma(baseline.gpuWall,taskWallMs);baseline.gpuCpuTotal+=taskCpuMs+helperCpuMs;baseline.gpuSamples++;
         baseline.gpuCpu=baseline.gpuCpuTotal/baseline.gpuSamples;
         const wins=baseline.gpuWall<baseline.cpuWall*.8&&baseline.gpuCpu<baseline.cpuCpu*.9;
-        if(probe){this.probeAttempts++;this.wins=wins?this.wins+1:0;if(this.wins>=3&&this.now()-this.lastSwitch>=this.cooldownMs){this.autoGpu=true;this.lastSwitch=this.now();this.totals.backendChanges++;}
+        if(probe){this.probeAttempts++;this.wins=wins?this.wins+1:0;this.autoProbeDecision={workloadBucket:key,wallWin:baseline.gpuWall<baseline.cpuWall*.8,cpuWin:baseline.gpuCpu<baseline.cpuCpu*.9,cpuWallEwmaMs:baseline.cpuWall,gpuWallEwmaMs:baseline.gpuWall,cpuCpuEwmaMs:baseline.cpuCpu,gpuCpuAverageMs:baseline.gpuCpu,gpuSamples:baseline.gpuSamples,consecutiveWins:this.wins,requiredConsecutiveWins:3,hysteresisReady:this.now()-this.lastSwitch>=this.cooldownMs,cpuAccounting:'Quantized Node counters plus acknowledged helper CPU; zero samples are not proof of zero cost'};if(this.wins>=3&&this.now()-this.lastSwitch>=this.cooldownMs){this.autoGpu=true;this.lastSwitch=this.now();this.totals.backendChanges++;}
           else if(this.probeAttempts>=3){this.nextProbeAt=this.now()+this.cooldownMs;this.probeAttempts=0;}}
         else{this.losses=wins?0:this.losses+1;if(this.losses>=3&&this.now()-this.lastSwitch>=this.cooldownMs){this.autoGpu=false;this.cooldownUntil=this.now()+this.cooldownMs;this.lastSwitch=this.now();this.totals.backendChanges++;}}
       }
@@ -165,8 +178,11 @@ export class AcousticAcceleration {
     gpuCapability:!this.capability?'unverified':this.capability.supported&&this.capability.hardware?'hardware-directcompute':'unsupported',
     gpuApi:this.capability?.api??null,usesHardwareRayTracing:false,rayTracingCapability:'not-probed',rayTracingBackend:'not-implemented',helperCumulativeCpuMs:this.lastHelperCpu,
     fallbackReason:this.fallbackReason,initializationMs:this.initializationMs,warmupMs:this.warmupMs,initializationAttempts:this.attempts,
-    accelerationDeadlineMs:this.deadlineMs,autoMinimumPairs:this.minimumPairs,autoGpuQualified:this.autoGpu,lastCalibration:this.lastCalibration,lastRejectedGpuAttempt:this.lastRejectedAttempt,...this.totals,...this.last,
-    cpuAccounting:typeof process.threadCpuUsage==='function'?'Node thread CPU plus helper request CPU':'Node process CPU plus helper request CPU',
+    accelerationDeadlineMs:this.deadlineMs,autoMinimumPairs:this.minimumPairs,autoGpuQualified:this.autoGpu,autoProbeDecision:this.autoProbeDecision,gpuVisibilityProtocol:this.capability?.visibilityProtocol??1,gpuMaximumSurfaces:this.capability?.maximumSurfaces??128,lastCalibration:this.lastCalibration,lastRejectedGpuAttempt:this.lastRejectedAttempt,...this.totals,...this.last,
+    cpuSurfaceTestsScope:'Actual CPU finite-support predicates, including calibration, GPU refinement and any fallback; index traversal is separate',
+    cartesianReferenceSurfacePairsScope:'Segments times all represented supports before CPU/GPU broadphase; a theoretical unindexed ceiling, not actual CPU work',
+    avoidedCpuSurfaceTestsDeprecated:true,avoidedCpuSurfaceTestsScope:'Deprecated alias of unindexedReferencePairsExcludedByGpu; never actual avoided indexed CPU predicates',
+    actualAvoidedIndexedCpuSurfaceTests:null,cpuAccounting:typeof process.threadCpuUsage==='function'?'Node thread CPU plus helper request CPU':'Node process CPU plus helper request CPU',
     cpuAccountingNote:'Per-task counters may be quantized; use aggregate Node plus helper CPU deltas for savings'};}
   close(){this.closed=true;this.client?.close();this.client=null;}
 }

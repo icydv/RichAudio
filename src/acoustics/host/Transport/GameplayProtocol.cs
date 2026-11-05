@@ -27,6 +27,9 @@ namespace RichAudio.Beacon.Transport {
   // Absolute expiry in the original publisher's host-clock domain. Zero is the
   // unchanged legacy contract; accepted SHV frames carry their shorter lease.
   [DataMember(Name="validThroughTicks",EmitDefaultValue=false)]public long ValidThroughTicks;
+  // The normal supervisor's immutable validation epoch. This is neither an
+  // observation timestamp nor runtime map-activation evidence.
+  [DataMember(Name="worldPreparationStartedUtc",EmitDefaultValue=false)]public string WorldPreparationStartedUtc;
  }
  public static class GameplayWire {
   public const int MaximumBytes=32768;
@@ -37,6 +40,7 @@ namespace RichAudio.Beacon.Transport {
   public static void Validate(GameplayFrame f,string session){
    Protocol.Check(f!=null&&f.Version==1&&f.Session==session,"gameplay session");Protocol.Validate(f.Listener);Protocol.Check(f.Listener.Session==session&&f.Vehicles!=null&&f.Vehicles.Length<=8,"gameplay frame budget");
    Protocol.Check(f.ValidThroughTicks==0||f.ValidThroughTicks>=f.Listener.ObservationTicks&&(decimal)f.ValidThroughTicks-f.Listener.ObservationTicks<=Stopwatch.Frequency/4m,"gameplay original source expiry");
+   if(f.WorldPreparationStartedUtc!=null){DateTimeOffset epoch;Protocol.Check(f.WorldPreparationStartedUtc.Length<=40&&f.WorldPreparationStartedUtc.EndsWith("Z",StringComparison.Ordinal)&&DateTimeOffset.TryParse(f.WorldPreparationStartedUtc,System.Globalization.CultureInfo.InvariantCulture,System.Globalization.DateTimeStyles.RoundtripKind,out epoch),"world preparation epoch");}
    var seen=new HashSet<string>();foreach(var v in f.Vehicles){Protocol.Check(v!=null&&v.Id!=null&&System.Text.RegularExpressions.Regex.IsMatch(v.Id,"\\A[\\w:-]{1,64}\\z")&&seen.Add(v.Id)&&v.Generation>0&&(v.Context=="player"||v.Context=="npc"),"vehicle identity/context");
     Protocol.Check(Protocol.Finite(v.OperatingPoint)&&v.OperatingPoint>=0&&v.OperatingPoint<=1,"observed operating ratio");
     Protocol.Check(v.ObservationTicks>=0&&Math.Abs(v.ObservationTicks-f.Listener.ObservationTicks)<=Stopwatch.Frequency/20,"source sampling clock");

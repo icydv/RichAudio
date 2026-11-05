@@ -100,6 +100,7 @@ namespace RichAudio.Preparation {
   [StructLayout(LayoutKind.Sequential)] struct Io { public ulong ReadOps,WriteOps,OtherOps,ReadBytes,WriteBytes,OtherBytes; }
   [StructLayout(LayoutKind.Sequential)] struct Extended { public Basic Basic; public Io Io; public UIntPtr ProcessMemory,JobMemory,PeakProcessMemory,PeakJobMemory; }
   [StructLayout(LayoutKind.Sequential)] struct Accounting { public long User,Kernel,PeriodUser,PeriodKernel; public uint PageFaults,TotalProcesses,ActiveProcesses,TerminatedProcesses; }
+  [StructLayout(LayoutKind.Sequential)] struct AccountingIo { public Accounting Basic; public Io Io; }
   [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern IntPtr CreateJobObject(IntPtr attributes,string name);
   [DllImport("kernel32.dll",SetLastError=true)] static extern bool SetInformationJobObject(IntPtr job,int kind,IntPtr value,uint length);
   [DllImport("kernel32.dll",SetLastError=true)] static extern bool AssignProcessToJobObject(IntPtr job,IntPtr process);
@@ -116,6 +117,7 @@ namespace RichAudio.Preparation {
   }
   public void Assign(Process process){if(!AssignProcessToJobObject(handle,process.Handle))throw new Win32Exception();}
   public ulong PeakMemoryBytes(){int size=Marshal.SizeOf(typeof(Extended));IntPtr data=Marshal.AllocHGlobal(size);try{if(!QueryInformationJobObject(handle,9,data,(uint)size,IntPtr.Zero))throw new Win32Exception();return ((Extended)Marshal.PtrToStructure(data,typeof(Extended))).PeakJobMemory.ToUInt64();}finally{Marshal.FreeHGlobal(data);}}
+  public ulong[] WorkMetrics(){int size=Marshal.SizeOf(typeof(AccountingIo));IntPtr data=Marshal.AllocHGlobal(size);try{if(!QueryInformationJobObject(handle,8,data,(uint)size,IntPtr.Zero))throw new Win32Exception();var value=(AccountingIo)Marshal.PtrToStructure(data,typeof(AccountingIo));return new[]{(ulong)value.Basic.User,(ulong)value.Basic.Kernel,value.Io.ReadBytes,value.Io.WriteBytes,value.Io.ReadOps,value.Io.WriteOps};}finally{Marshal.FreeHGlobal(data);}}
   public bool TerminateAndJoin(int milliseconds){
    if(!TerminateJobObject(handle,1))return false;int size=Marshal.SizeOf(typeof(Accounting));IntPtr data=Marshal.AllocHGlobal(size);var clock=Stopwatch.StartNew();
    try{do{if(!QueryInformationJobObject(handle,1,data,(uint)size,IntPtr.Zero))return false;if(((Accounting)Marshal.PtrToStructure(data,typeof(Accounting))).ActiveProcesses==0)return true;System.Threading.Thread.Sleep(10);}while(clock.ElapsedMilliseconds<milliseconds);return false;}finally{Marshal.FreeHGlobal(data);}
@@ -153,7 +155,7 @@ function Invoke-PreparationProcess {
     # kill-on-close Windows job. A stale permit is never reused.
     $gated='$permit='+(ConvertTo-PreparationLiteral $permit)+';$gate=[Diagnostics.Stopwatch]::StartNew();while(![IO.File]::Exists($permit)){if($gate.Elapsed.TotalSeconds -gt 10){throw ''Preparation start permit expired''};Start-Sleep -Milliseconds 10};'+$CommandText
     $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($gated))
-    $process=$null;$assigned=$false;$state='failed';$watch=[Diagnostics.Stopwatch]::StartNew();$exitCode=$null;$controlJoined=$false;$peakJobMemoryBytes=$null
+    $process=$null;$assigned=$false;$state='failed';$watch=[Diagnostics.Stopwatch]::StartNew();$exitCode=$null;$controlJoined=$false;$peakJobMemoryBytes=$null;$workMetrics=$null
     try {
         $stdout=Assert-CatalogPrivatePath $PrivateRoot (Join-Path $StageOutput 'coordinator.stdout.log')
         $stderr=Assert-CatalogPrivatePath $PrivateRoot (Join-Path $StageOutput 'coordinator.stderr.log')
@@ -176,11 +178,12 @@ function Invoke-PreparationProcess {
         # Observe zero active owned processes before publishing a resumable
         # checkpoint. A cleanup callback alone cannot establish process closure.
         try{$peakJobMemoryBytes=$job.PeakMemoryBytes();$controlJoined=$job.TerminateAndJoin(2000)}catch{$controlJoined=$false}
+        try{$values=$job.WorkMetrics();$workMetrics=[ordered]@{UserCpuMilliseconds=$values[0]/10000.0;KernelCpuMilliseconds=$values[1]/10000.0;ReadTransferBytes=$values[2];WriteTransferBytes=$values[3];ReadOperations=$values[4];WriteOperations=$values[5];Scope='all-owned-process-Job-accounting; logical-I/O-not-physical-disk'}}catch{$workMetrics=$null}
         $job.Dispose()
         if($process){if(!$assigned -and !$process.HasExited){$process.Kill($true)};if(!$process.HasExited){$process.WaitForExit(2000)|Out-Null};$process.Dispose()}
     }
     if(!$controlJoined){$state='closure-unknown'}
-    return [pscustomobject]@{State=$state;Completed=($state -eq 'complete' -and $controlJoined);ExitCode=$exitCode;ElapsedSeconds=[Math]::Round($watch.Elapsed.TotalSeconds,3);MaximumSeconds=$MaximumSeconds;CleanupGraceSeconds=2;ClosureJoinMilliseconds=2000;ControlJoined=$controlJoined;UnknownClosure=(!$controlJoined);MaximumOwnedProcesses=$MaximumOwnedProcesses;JobMemoryMiB=$MaximumMemoryMiB;PeakJobMemoryBytes=$peakJobMemoryBytes;Supervision='owned-Windows-job-kill-on-close-monotonic-deadline-and-observed-empty-job'}
+    return [pscustomobject]@{State=$state;Completed=($state -eq 'complete' -and $controlJoined);ExitCode=$exitCode;ElapsedSeconds=[Math]::Round($watch.Elapsed.TotalSeconds,3);MaximumSeconds=$MaximumSeconds;CleanupGraceSeconds=2;ClosureJoinMilliseconds=2000;ControlJoined=$controlJoined;UnknownClosure=(!$controlJoined);MaximumOwnedProcesses=$MaximumOwnedProcesses;JobMemoryMiB=$MaximumMemoryMiB;PeakJobMemoryBytes=$peakJobMemoryBytes;WorkMetrics01=$workMetrics;Supervision='owned-Windows-job-kill-on-close-monotonic-deadline-and-observed-empty-job'}
 }
 
 Export-ModuleMember -Function Get-PreparationHash,Get-PreparationFingerprint,ConvertTo-PreparationLiteral,Get-PreparationField,Test-PreparationReceipt,Get-InstalledPreparationReadiness,Invoke-PreparationProcess

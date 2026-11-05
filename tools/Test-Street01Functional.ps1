@@ -24,7 +24,13 @@ $nodeFiles=@(
  'tests/Test-SoundMapInstalledWorkset01.mjs','tests/Test-SoundMapTelemetry.mjs',
  'tests/Test-SoundMapService.mjs','tests/Test-SoundMapViewer.mjs','tests/Test-SoundMapProducer.mjs',
  'tests/Test-AcousticWorld01Continuity.mjs','tests/Test-SourcePressureCalibration.mjs',
- 'tests/Test-StockPressureSelection.mjs','tests/Test-VehiclePipeline.mjs'
+ 'tests/Test-StockPressureSelection.mjs','tests/Test-VehiclePipeline.mjs',
+ 'tests/Test-ProcessingRolesStreet01.mjs','tests/Test-ProcessingRoleIntegrationStreet01.mjs',
+ 'tests/Test-InitialWorldPriority01.mjs','tests/Test-AcousticGpuPages01.mjs',
+ 'tests/Test-ColdNpcHistory01.mjs','tests/Test-ColdNpcFailureRetention01.mjs',
+ 'tests/Test-Synthesis12.mjs',
+ 'tests/Test-WorldCompletion01.mjs','tests/Test-WorldStartupCompletion01.mjs',
+ 'tests/Test-NativeSupportBoundsCompletion01.mjs','tests/Test-InteriorPlacementCompletion01.mjs'
 )
 $scripts=@(
  @{name='product-capture-continuity';file='tools/Test-StreetContinuity01.ps1';arguments=@()},
@@ -36,7 +42,10 @@ $scripts=@(
  @{name='normal-generated-sidecar-supervisor';file='tests/Test-WorldWarmupStartup.ps1';arguments=@()},
  @{name='street-source-installation';file='tests/Test-StreetInstaller01.ps1';arguments=@()},
  @{name='street-owned-continuation';file='tests/Test-StreetWarmupContinuation01.ps1';arguments=@()},
- @{name='production-continuation-checkpoint';file='tests/Test-WorldContinuationCheckpoint01.ps1';arguments=@()}
+ @{name='production-continuation-checkpoint';file='tests/Test-WorldContinuationCheckpoint01.ps1';arguments=@()},
+ @{name='retained-bati-graph';file='tests/Test-BatiMetadataGraph01.ps1';arguments=@()},
+ @{name='mlo-placement-projection';file='tests/Test-MloPlacementProjectionCompletion01.ps1';arguments=@()},
+ @{name='disabled-native-diagnostic-fixture';file='tools/Test-StreetTrackedDiagnostic01.ps1';arguments=@('-FixtureOnly')}
 )
 $requiredSteps=1+$scripts.Count
 $inputFiles=@($PSCommandPath)+@($nodeFiles|ForEach-Object{Join-Path $repo $_})+@($scripts|ForEach-Object{Join-Path $repo $_.file})

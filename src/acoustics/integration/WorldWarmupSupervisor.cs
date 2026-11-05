@@ -66,13 +66,16 @@ namespace RichAudio.Preparation {
  public sealed class WorldWarmupSupervisor {
   readonly ManualResetEvent stop=new ManualResetEvent(false);
   volatile string state="not-started";
+  string workflowStartedUtc;
   int used;
   public string State { get { return state; } }
+  public string StartedUtc { get { return workflowStartedUtc; } }
   // RPH can load the DLL from its cache. Configuration remains beside the
   // installed plugin in the game's Plugins directory, not beside that copy.
   public static string ConfigurationForGameExecutable(string executable){return Path.Combine(Path.GetDirectoryName(Path.GetFullPath(executable)),"Plugins","RichAudio.WorldWarmup.json");}
   public void Start(string configurationPath,string currentGameExecutable) {
    if(Interlocked.Exchange(ref used,1)!=0)return;
+   workflowStartedUtc=DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture);
    state="queued";
    ThreadPool.QueueUserWorkItem(delegate { Run(configurationPath,currentGameExecutable); });
   }
@@ -164,6 +167,7 @@ namespace RichAudio.Preparation {
      var start=new ProcessStartInfo(c.PowerShellPath,"-NoProfile -NonInteractive -EncodedCommand "+Convert.ToBase64String(Encoding.Unicode.GetBytes(command))){UseShellExecute=false,CreateNoWindow=true,WindowStyle=ProcessWindowStyle.Hidden,WorkingDirectory=c.WorkspaceRoot};
      if(c.NodeExecutable!=null)start.EnvironmentVariables["PATH"]=Path.GetDirectoryName(c.NodeExecutable)+Path.PathSeparator+(start.EnvironmentVariables["PATH"]??"");
      start.EnvironmentVariables["RICHAUDIO_WORLD_BATCH_ID"]=batchId;
+     start.EnvironmentVariables["RICHAUDIO_WORLD_START_UTC"]=workflowStartedUtc??DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture);
      job=new OwnedJob((ulong)c.MaximumMemoryMiB*1024*1024);worker=Process.Start(start);job.Assign(worker);
      if(stop.WaitOne(0)){state="cancelled";break;}
      File.WriteAllText(permit,"owned-startup-job");

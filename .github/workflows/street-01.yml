@@ -46,6 +46,7 @@ jobs:
           path: |
             .local/street01/functional-*/logs/*.log
             .local/street01/functional-*/receipt.json
+            .local/street01/cold-npc-failure-*/*.json
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 7

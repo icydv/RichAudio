@@ -4,6 +4,7 @@ import {installedStaticSceneMetadata01} from '../src/acoustics/world/installed-s
 import {registerPreparedSoundMapGeometry01} from '../src/acoustics/streaming/soundmap-telemetry.mjs';
 import {installedSceneFixture01} from './fixtures/InstalledSceneService01.mjs';
 const session='e'.repeat(32),request=(generation=1)=>({listener:[0,0,1],sources:[[-1,0,1]],generation,geometryTimeMs:100,durationMs:1000,engine:{order:2}});
+const epoch='2026-11-05T13:54:25.2639009Z';
 async function until(predicate,timeout=4000){const began=performance.now();while(!predicate()){if(performance.now()-began>timeout)throw Error('Scene service fixture timeout');await delay(10);}}
 
 test('real persistent worker reads original cache, coalesces windows, rate limits and joins without archive decode',async()=>{
@@ -39,9 +40,21 @@ test('normal first launch waits for known cache paths then follows changed catal
  const f=installedSceneFixture01({write:false}),scenes=[],statuses=[];const service=new InstalledSceneService01({config:{manifestPath:f.manifestPath,catalogPath:f.catalogPath,expectedGameSHA256:f.gameSHA256},session,onScene:(scene,binding)=>scenes.push({scene,binding}),onStatus:s=>statuses.push(s)});
  try{
   await until(()=>statuses.some(s=>s.worker.workerExited===false&&s.worker.state==='preparing/indexing'&&s.worker.ready===false));await delay(50);assert.equal(service.failed,false,service.failure);
-  const first=f.publish();await until(()=>service.ready||service.failed);assert.equal(service.failed,false,service.failure);service.updateWindow(request());await until(()=>scenes.length===1||service.failed);
+  f.publish();await delay(100);assert.equal(service.ready,false);assert.equal(service.bindPreparationEpoch01('invented'),false);assert.equal(service.bindPreparationEpoch01(epoch),true);await delay(100);assert.equal(service.ready,false,'historical manifest cannot precede current archive validation');
+  const first=f.publish(1,{validationEpochUtc01:epoch});await until(()=>service.ready||service.failed);assert.equal(service.failed,false,service.failure);service.updateWindow(request());await until(()=>scenes.length===1||service.failed);
   assert.equal(scenes[0].binding.catalogSHA256,first.catalogSHA256);
-  const changed=f.publish(2);service.updateWindow(request());await until(()=>scenes.length===2||service.failed);assert.equal(service.failed,false,service.failure);assert.equal(scenes[1].binding.catalogSHA256,changed.catalogSHA256);assert.ok(scenes[1].binding.bindingEpoch>scenes[0].binding.bindingEpoch);assert.equal(service.stats.workersStarted,1);
+  const changed=f.publish(2,{validationEpochUtc01:epoch});service.updateWindow(request());await until(()=>scenes.length===2||service.failed);assert.equal(service.failed,false,service.failure);assert.equal(scenes[1].binding.catalogSHA256,changed.catalogSHA256);assert.ok(scenes[1].binding.bindingEpoch>scenes[0].binding.bindingEpoch);assert.equal(service.stats.workersStarted,1);
+ }finally{await service.close();f.close();}
+});
+
+test('normal cache rows require the current archive proof and a supervisor epoch cannot change within a session',async()=>{
+ const f=installedSceneFixture01({write:false}),scenes=[];f.publish(1,{validationEpochUtc01:epoch,rowEpochUtc01:'2026-11-04T13:54:25.2639009Z'});
+ const service=new InstalledSceneService01({config:{manifestPath:f.manifestPath,catalogPath:f.catalogPath,expectedGameSHA256:f.gameSHA256},session,onScene:scene=>scenes.push(scene)});
+ try{
+  await delay(50);assert.equal(service.ready,false,'existing files supply no current validation authority');assert.equal(service.bindPreparationEpoch01(epoch),true);await until(()=>service.ready||service.failed);assert.equal(service.failed,false,service.failure);
+  service.updateWindow(request());await until(()=>scenes.length===1||service.failed);assert.equal(service.failed,false,service.failure);assert.equal(installedStaticSceneMetadata01(scenes[0]).activeSurfaces,0,'stale row is an unknown gap');
+  f.publish(1,{validationEpochUtc01:epoch});service.updateWindow(request());await until(()=>scenes.length===2||service.failed);assert.equal(service.failed,false,service.failure);assert.equal(installedStaticSceneMetadata01(scenes[1]).activeSurfaces,2);
+  assert.equal(service.bindPreparationEpoch01('2026-11-05T13:54:26.2639009Z'),false);assert.equal(service.failed,true);assert.match(service.failure,/changed-normal-preparation-epoch/);
  }finally{await service.close();f.close();}
 });
 

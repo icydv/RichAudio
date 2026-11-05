@@ -4,11 +4,13 @@ param(
     [Parameter(Mandatory=$true)][string]$GameRoot,
     [Parameter(Mandatory=$true)][string]$CodeWalkerRoot,
     [string]$OutputRoot='.local/resolved-game-cache',
-    [ValidateRange(5,900)][int]$MaximumSeconds=300,
+    [ValidateRange(5,1800)][int]$MaximumSeconds=300,
     [ValidateRange(256,4096)][int]$MaximumMemoryMiB=2048,
     [ValidatePattern('^(0x)?[A-Fa-f0-9]{8}$')][string]$TargetCollisionHash='1c0c33c3',
     [string]$ReferenceCatalogPath='',
     [switch]$VerifyBankStreams,
+    [switch]$IncludeInteriorPlacementMetadata,
+    [ValidatePattern('^([a-f0-9]{32})?$')][string]$SourceArchiveRefreshId='',
     [ValidatePattern('^[a-zA-Z0-9_]{1,64}$')][string]$VehicleModelFilter='',
     [string]$CatalogScriptPath='',
     [string]$RunId='',
@@ -41,6 +43,8 @@ if(!$Worker){
         $command='$resolverPath='+(Literal $scriptPath)+'; & ([ScriptBlock]::Create([IO.File]::ReadAllText($resolverPath))) -CatalogScriptPath $resolverPath -Worker -RunId '+(Literal $RunId)+' -GameRoot '+(Literal $game)+' -CodeWalkerRoot '+(Literal $cw)+' -OutputRoot '+(Literal $output)+' -MaximumSeconds '+$MaximumSeconds+' -MaximumMemoryMiB '+$MaximumMemoryMiB+' -TargetCollisionHash '+(Literal $TargetCollisionHash)
         if($ReferenceCatalogPath){$command+=' -ReferenceCatalogPath '+(Literal $ReferenceCatalogPath)}
         if($VerifyBankStreams){$command+=' -VerifyBankStreams'}
+        if($IncludeInteriorPlacementMetadata){$command+=' -IncludeInteriorPlacementMetadata'}
+        if($SourceArchiveRefreshId){$command+=' -SourceArchiveRefreshId '+(Literal $SourceArchiveRefreshId)}
         if($VehicleModelFilter){$command+=' -VehicleModelFilter '+(Literal $VehicleModelFilter)}
         $framework=Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'
         $process=Start-Process -FilePath $framework -ArgumentList @('-NoProfile','-NonInteractive','-EncodedCommand',[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))) -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $output 'worker.stdout.log') -RedirectStandardError (Join-Path $output 'worker.stderr.log')
@@ -127,6 +131,88 @@ function Audio-Summary($Record){
     return $summary
 }
 function Hash-Value($Value){if($null -eq $Value){return [uint32]0};if($Value.PSObject.Properties['Hash']){return [uint32]$Value.Hash};return [uint32]$Value}
+function Audio-SourceBinding01($Record,$State){
+    $entry=if($Record -and $Record.Rel){$Record.Rel.RpfFileEntry}else{$null};$source=Entry-Path $entry
+    if(!$source){return [pscustomobject]@{State='source-entry-not-exposed';SourceRel=$null;SHA256=$null}}
+    if($State.Sources.ContainsKey($source)){return $State.Sources[$source]}
+    if($State.Sources.Count -ge 16){return [pscustomobject]@{State='source-file-budget';SourceRel=$source;SHA256=$null}}
+    if($source -notmatch '(?i)\.rel$' -or !$entry.File){return [pscustomobject]@{State='source-is-not-exposed-rel-metadata';SourceRel=$source;SHA256=$null}}
+    # Only the source REL files reached by the bounded Bati graph are hashed.
+    # The existing decoder owns extraction; no stream PCM method is called.
+    $bytes=$entry.File.ExtractFile($entry)
+    if(!$bytes -or $bytes.Length -gt 64MB -or $State.SourceBytes+$bytes.Length -gt 256MB){throw 'Bati REL metadata byte budget'}
+    $State.SourceBytes+=$bytes.Length
+    $binding=[pscustomobject]@{State='exact-rel-metadata-bytes-sha256';SourceRel=$source;SourceArchive=Relative-Path $entry.File.Path;Bytes=$bytes.Length;SHA256=Get-CatalogByteHash $bytes;PcmDecoded=$false}
+    $State.Sources[$source]=$binding;return $binding
+}
+function Audio-ProjectValue01($Value,[string]$Path,[int]$Depth,$Projection,$Ancestors){
+    if($null -eq $Value){return}
+    if($Projection.Members -ge 512){$Projection.Gaps.Add('member-budget:'+ $Path);return};$Projection.Members++
+    $type=$Value.GetType();$name=$type.FullName
+    if($name -eq 'CodeWalker.GameFiles.MetaHash'){
+        $namespace=if($Path -match '(^|\.)(Channel[0-9]+)\.(ContainerName|FileName)$'){'awc-container-or-stream'}else{'audio-record-candidate'}
+        $Projection.References.Add([pscustomobject]@{Field=$Path;DeclaredType=$name;Hash=('0x{0:x8}' -f [uint32]$Value.Hash);Namespace=$namespace});return
+    }
+    if($type.IsEnum){$underlying=[Enum]::GetUnderlyingType($type);$raw=[Convert]::ChangeType($Value,$underlying,[Globalization.CultureInfo]::InvariantCulture);$Projection.Scalars.Add([pscustomobject]@{Field=$Path;DeclaredType=$name;Kind='enum';RawDecimal=[Convert]::ToString($raw,[Globalization.CultureInfo]::InvariantCulture);Name=[string]$Value});return}
+    if($Value -is [string]){if($Value.Length -gt 512){$Projection.Gaps.Add('string-budget:'+ $Path);return};$Projection.Scalars.Add([pscustomobject]@{Field=$Path;DeclaredType=$name;Kind='string';Value=$Value});return}
+    if($type.IsPrimitive -or $Value -is [decimal]){
+        $Projection.Scalars.Add([pscustomobject]@{Field=$Path;DeclaredType=$name;Kind='scalar';RawValue=[Convert]::ToString($Value,[Globalization.CultureInfo]::InvariantCulture)});return
+    }
+    if($Value -is [byte[]]){$Projection.Gaps.Add('opaque-binary-not-projected:'+ $Path);return}
+    if($Depth -ge 4){$Projection.Gaps.Add('nested-depth-budget:'+ $Path);return}
+    if(@($Ancestors|Where-Object{[Object]::ReferenceEquals($_,$Value)}).Count){$Projection.Gaps.Add('nested-reference-cycle:'+ $Path);return}
+    $next=@($Ancestors)+ ,$Value
+    if($Value -is [Array]){
+        if($Value.Length -gt 256){$Projection.Gaps.Add('array-budget:'+ $Path);return}
+        for($i=0;$i -lt $Value.Length;$i++){Audio-ProjectValue01 $Value.GetValue($i) ($Path+'['+$i+']') ($Depth+1) $Projection $next};return
+    }
+    $members=@{}
+    foreach($field in $type.GetFields([Reflection.BindingFlags]'Public,Instance')){if(!$members.ContainsKey($field.Name)){$members[$field.Name]=[pscustomobject]@{Kind='field';Member=$field}}}
+    foreach($property in $type.GetProperties([Reflection.BindingFlags]'Public,Instance')){if($property.CanRead -and $property.GetIndexParameters().Length -eq 0 -and !$members.ContainsKey($property.Name)){$members[$property.Name]=[pscustomobject]@{Kind='property';Member=$property}}}
+    foreach($memberName in @($members.Keys|Sort-Object)){
+        # REL ownership and RPF objects are provenance, not audio dependencies.
+        if($memberName -in @('Rel','RpfFileEntry','Parent','Owner') -or ($Depth -eq 0 -and $memberName -eq 'NameHash')){continue}
+        if($memberName.Length -gt 128){$Projection.Gaps.Add('member-name-budget');continue}
+        $member=$members[$memberName];$child=if($Path){$Path+'.'+$memberName}else{$memberName}
+        try{$memberValue=if($member.Kind -eq 'field'){,($member.Member.GetValue($Value))}else{,($member.Member.GetValue($Value,$null))}}catch{$Projection.Gaps.Add('unreadable-public-member:'+ $child);continue}
+        Audio-ProjectValue01 $memberValue $child ($Depth+1) $Projection $next
+    }
+}
+function Audio-RecordProjection01($Record){
+    $projection=@{Members=0;Scalars=New-Object Collections.Generic.List[object];References=New-Object Collections.Generic.List[object];Gaps=New-Object Collections.Generic.List[string]}
+    Audio-ProjectValue01 $Record '' 0 $projection @()
+    return [pscustomobject]@{Scalars=$projection.Scalars.ToArray();HashReferences=$projection.References.ToArray();ProjectionGaps=$projection.Gaps.ToArray();NumericUnits='raw-decoded-metadata-not-applied-as-gain';PublicMemberTraversalOnly=$true}
+}
+function Audio-DependencyGraph01($Cache,$Roots){
+    $state=@{Sources=@{};SourceBytes=0};$dictionaries=New-Object Collections.Generic.List[object];$lookupGaps=New-Object Collections.Generic.List[string]
+    foreach($property in @($Cache.PSObject.Properties|Where-Object Name -Match '^Audio[A-Za-z0-9]*Dict$'|Sort-Object Name)){
+        try{$dictionary=$property.Value;if($dictionary -and $dictionary.GetType().IsGenericType){$arguments=$dictionary.GetType().GetGenericArguments();if($arguments.Count -eq 2 -and $arguments[0].FullName -eq 'CodeWalker.GameFiles.MetaHash'){$dictionaries.Add([pscustomobject]@{Name=$property.Name;Value=$dictionary})}}}catch{$lookupGaps.Add('unavailable-dictionary:'+ $property.Name)}
+    }
+    if($dictionaries.Count -gt 32){throw 'Bounded public audio dictionary collection'}
+    $queue=New-Object Collections.Queue;$nodes=New-Object Collections.Generic.List[object];$edges=New-Object Collections.Generic.List[object];$seen=@{};$rootRows=New-Object Collections.Generic.List[object]
+    foreach($root in $Roots){if(!$root.Record){$rootRows.Add([pscustomobject]@{Label=$root.Label;State='unresolved-root';NodeId=$null});continue};$queue.Enqueue([pscustomobject]@{Domain=$root.Domain;Record=$root.Record;Depth=0;RootLabel=$root.Label})}
+    $depthOmitted=0;$recordOmitted=0;$edgeOmitted=0
+    while($queue.Count){
+        $work=$queue.Dequeue();$record=$work.Record;$nodeId=$work.Domain+'|'+$record.GetType().Name+'|'+(Rel-Origin $record)+'|'+$record.NameHash.Hex
+        if($work.RootLabel){$rootRows.Add([pscustomobject]@{Label=$work.RootLabel;State='resolved-metadata-root';NodeId=$nodeId})}
+        if($seen.ContainsKey($nodeId)){continue}
+        if($nodes.Count -ge 256){$recordOmitted++;continue};$seen[$nodeId]=$true
+        $projection=Audio-RecordProjection01 $record
+        $nodes.Add([pscustomobject]@{Id=$nodeId;Dictionary=$work.Domain;Depth=$work.Depth;Record=Audio-Summary $record;SourceBinding=Audio-SourceBinding01 $record $state;TypedScalars=$projection.Scalars;HashReferences=$projection.HashReferences;ProjectionGaps=$projection.ProjectionGaps;NumericUnits=$projection.NumericUnits})
+        foreach($reference in $projection.HashReferences){
+            if($edges.Count -ge 4096){$edgeOmitted++;continue}
+            $targets=New-Object Collections.Generic.List[object];[uint32]$hash=[Convert]::ToUInt32(($reference.Hash -replace '^0x',''),16)
+            if($hash -ne 0 -and $reference.Namespace -eq 'audio-record-candidate'){
+                foreach($dictionary in $dictionaries){$target=Find-Audio $dictionary.Value $hash;if($target){$targetId=$dictionary.Name+'|'+$target.GetType().Name+'|'+(Rel-Origin $target)+'|'+$target.NameHash.Hex;$targets.Add([pscustomobject]@{Id=$targetId;Dictionary=$dictionary.Name;Record=$target})}}
+            }
+            $resolution=if($hash -eq 0){'zero-reference-not-proof-of-silence'}elseif($reference.Namespace -eq 'awc-container-or-stream'){'container-or-stream-not-audio-record-lookup'}elseif(!$targets.Count){'unresolved-public-audio-reference'}elseif($targets.Count -gt 1){'multiple-dictionary-matches-no-selection-inferred'}else{'unique-public-audio-record'}
+            $edges.Add([pscustomobject]@{From=$nodeId;Field=$reference.Field;DeclaredType=$reference.DeclaredType;Hash=$reference.Hash;Namespace=$reference.Namespace;Resolution=$resolution;Targets=@($targets|ForEach-Object Id);RuntimeSchedulingObserved=$false})
+            foreach($target in $targets){if($work.Depth -ge 8){$depthOmitted++}elseif($queue.Count -lt 8192){$queue.Enqueue([pscustomobject]@{Domain=$target.Dictionary;Record=$target.Record;Depth=($work.Depth+1);RootLabel=$null})}else{$recordOmitted++}}
+        }
+    }
+    $projectionGaps=@($nodes|ForEach-Object ProjectionGaps);$unbound=@($nodes|Where-Object{$_.SourceBinding.State -ne 'exact-rel-metadata-bytes-sha256'}).Count;$unresolved=@($edges|Where-Object Resolution -EQ 'unresolved-public-audio-reference').Count
+    return [pscustomobject]@{Schema=1;Kind='RichAudioBatiAudioDependencyGraph01';Roots=$rootRows.ToArray();Nodes=$nodes.ToArray();Edges=$edges.ToArray();PublicDictionaries=@($dictionaries|ForEach-Object Name);LookupGaps=$lookupGaps.ToArray();MaximumDepth=8;MaximumRecords=256;MaximumEdges=4096;DepthOmitted=$depthOmitted;RecordsOmitted=$recordOmitted;EdgesOmitted=$edgeOmitted;ProjectionGapCount=$projectionGaps.Count;UnresolvedNonzeroReferences=$unresolved;ReferenceClosureComplete=($unresolved -eq 0 -and $depthOmitted -eq 0 -and $recordOmitted -eq 0 -and $edgeOmitted -eq 0);UnboundSourceNodes=$unbound;SourceBindingsComplete=($unbound -eq 0);SourceMetadataFiles=$state.Sources.Count;SourceMetadataBytes=$state.SourceBytes;TraversalCompleteWithinPublicProjection=($depthOmitted -eq 0 -and $recordOmitted -eq 0 -and $edgeOmitted -eq 0 -and $projectionGaps.Count -eq 0 -and $lookupGaps.Count -eq 0);PcmDecoded=$false;NativeProfileAssignmentObserved=$false;RuntimeSelectionObserved=$false;Scope='typed-public-record-metadata; no interpretation of zero/common references as silence or absence'}
+}
 function Vector-Value($Value){if($null -eq $Value){return $null};return @([double]$Value.X,[double]$Value.Y,[double]$Value.Z)}
 try {
     $core=Join-Path $cw 'CodeWalker.Core.dll';$exe=Join-Path $game 'GTA5_Enhanced.exe'
@@ -198,7 +284,13 @@ try {
         if($record -and $record.PSObject.Properties['EngineGranular']){$granular=Find-Audio $cache.AudioGameDict $record.EngineGranular.Hash}
         $sounds=[ordered]@{}
         foreach($field in @('EngineAccel','ExhaustAccel','EngineAccelNPC','ExhaustAccelNPC')){if($granular -and $granular.PSObject.Properties[$field]){$sounds[$field]=Audio-Summary (Find-Audio $cache.AudioSoundsDict $granular.$field.Hash)}}
-        $vehicles.Add([pscustomobject]@{Model=$model;ModelHash=$pair.Key.Hex;AudioNameHash=$alias;AudioIdentifier=$identifier;AudioIdentifierHash=('0x{0:x8}' -f $audioHash);AudioSelectionBasis=if($alias){'declared-audioNameHash'}else{'model-name-fallback-inferred'};VehicleClass=[string]$vehicle.vehicleClass;VehicleType=[string]$vehicle.type;VehicleAudioRecord=Audio-Summary $record;EngineRecord=Audio-Summary $engine;GranularRecord=Audio-Summary $granular;Sounds=$sounds;ResolutionBasis='CodeWalker.GameFileCache.VehiclesInitDict';VehicleMetadataSource='winning metadata source not exposed by public vehicle dictionary';RuntimeSelectionObserved=$false;PcmDecoded=$false})
+        $dependencyGraph=$null
+        if($VehicleModelFilter -ieq 'bati'){
+            $roots=@([pscustomobject]@{Label='VehicleAudioRecord';Domain='AudioGameDict';Record=$record},[pscustomobject]@{Label='EngineRecord';Domain='AudioGameDict';Record=$engine},[pscustomobject]@{Label='GranularRecord';Domain='AudioGameDict';Record=$granular})
+            foreach($field in @('EngineAccel','ExhaustAccel','EngineAccelNPC','ExhaustAccelNPC')){if($granular -and $granular.PSObject.Properties[$field]){$roots+= [pscustomobject]@{Label=('Sounds.'+$field);Domain='AudioSoundsDict';Record=(Find-Audio $cache.AudioSoundsDict $granular.$field.Hash)}}}
+            $dependencyGraph=Audio-DependencyGraph01 $cache $roots
+        }
+        $vehicles.Add([pscustomobject]@{Model=$model;ModelHash=$pair.Key.Hex;AudioNameHash=$alias;AudioIdentifier=$identifier;AudioIdentifierHash=('0x{0:x8}' -f $audioHash);AudioSelectionBasis=if($alias){'declared-audioNameHash'}else{'model-name-fallback-inferred'};VehicleClass=[string]$vehicle.vehicleClass;VehicleType=[string]$vehicle.type;VehicleAudioRecord=Audio-Summary $record;EngineRecord=Audio-Summary $engine;GranularRecord=Audio-Summary $granular;Sounds=$sounds;AudioDependencyGraph01=$dependencyGraph;ResolutionBasis='CodeWalker.GameFileCache.VehiclesInitDict';VehicleMetadataSource='winning metadata source not exposed by public vehicle dictionary';RuntimeSelectionObserved=$false;PcmDecoded=$false})
     }
     $active=@($cache.ActiveMapRpfFiles.GetEnumerator()|ForEach-Object{[pscustomobject]@{VirtualPath=$_.Key;Archive=Relative-Path $_.Value.Path}})
     $patches=@($cache.DlcPatchedPaths.GetEnumerator()|ForEach-Object{[pscustomobject]@{Original=$_.Key;Replacement=$_.Value}})
@@ -240,11 +332,55 @@ try {
     $targetEvidence=[ordered]@{Hash=$targetKey;ManifestFilesVisited=$placementIndex.ManifestFilesVisited;CacheFilesVisited=$placementIndex.CacheFilesVisited;ProjectionSchemaGaps=$projectionGaps;InteriorBoundsMembership=if($interiorByHash.ContainsKey($targetKey)){$interiorByHash[$targetKey].ToArray()}else{@()};MapGroupMembership=if($mapByHash.ContainsKey($targetKey)){$mapByHash[$targetKey].ToArray()}else{@()};BoundsStoreItems=if($boundsByHash.ContainsKey($targetKey)){$boundsByHash[$targetKey].ToArray()}else{@()};SelectedYbn=@($resources|Where-Object{$_.Kind -eq 'ybn' -and $_.Hash -eq $targetKey});RuntimeSpaceObserved=$false;WorldGeometryImported=$false;Classification='consumer must evaluate complete manifest/cache evidence; no automatic coordinate promotion'}
     $result=[ordered]@{Schema=1;Stage='codewalker-resolved-installation-model';GeneratedUtc=[DateTime]::UtcNow.ToString('o');InputBinding=$binding;SelectedDlc=$cache.SelectedDlc;SelectedDlcBasis='highest setup.order-sorted CodeWalker DlcNameList level';LastRawDlcDeclaration=$selected;DlcListSource=$listArchive;DlcListSHA256=Get-CatalogByteHash $listBytes;DlcNames=@($cache.DlcNameList);ReferenceCoverage=$referenceCoverage;ModsFolderResolutionEnabled=[bool]$mods;Gen9SelectorAvailable=$gen9;Resources=@($resources.ToArray()|Sort-Object Kind,Hash);Vehicles=@($vehicles.ToArray()|Sort-Object Model);ActiveMapArchives=$active;PatchedPaths=$patches;TargetCollisionEvidence=$targetEvidence;ParserErrors=$messages.ToArray();ParserErrorCount=$script:errorCount;AcousticWorldImported=$false;RuntimeReplacementImplemented=$false;RuntimeMountStateObserved=$false;Limitations=@('Selected dictionaries model CodeWalker mount/patch rules; they are not observed GTA runtime state','No world-space placement/triangle/portal/acoustic-material assembly','Legacy six-argument parser has no explicit Gen9 mode; capability is reported rather than inferred','Vehicle metadata winning-source paths are not exposed by the public dictionary','Resource identifiers and output/input bindings are hashed; resource payload content hashes are not computed','No audio PCM extraction or native suppression')}
     $result.CollisionPlacementIndex=$placementIndex
+    $result.SourceArchiveRefreshId=$SourceArchiveRefreshId
+    if($IncludeInteriorPlacementMetadata){
+        $placementHelper=Join-Path $repo 'src\acoustics\startup\CodeWalkerPlacementCompletion01.psm1'
+        Import-Module (New-Module -Name RichAudioPlacementCompletion01 -ScriptBlock ([ScriptBlock]::Create([IO.File]::ReadAllText($placementHelper)))) -Force
+        $binding.PlacementHelperSHA256=Hash $placementHelper
+        $mloArchetypes=New-Object Collections.Generic.List[object];$mloInstances=New-Object Collections.Generic.List[object];$placementErrors=New-Object Collections.Generic.List[object];$ymapBindings=New-Object Collections.Generic.List[object]
+        $ytypHashes=@{};$visitedArchetypes=New-Object 'Collections.Generic.HashSet[uint32]';$mapsVisited=0
+        foreach($file in $cache.YtypDict.Values){foreach($archetype in $file.AllArchetypes){
+            if($archetype -isnot [CodeWalker.GameFiles.MloArchetype]){continue}
+            if(!$visitedArchetypes.Add([uint32]$archetype.Hash.Hash)){continue}
+            Progress-Status 'projecting-mlo-archetypes' ([string]$archetype.Name)
+            $entry=$archetype.Ytyp.RpfFileEntry;$entryName=Entry-Path $entry
+            try {if(!$entry){throw 'Selected MLO archetype source unavailable'};if(!$ytypHashes.ContainsKey($entryName)){$data=$entry.File.ExtractFile($entry);if(!$data-or$data.Length-gt64MB){throw 'YTYP metadata byte bound'};$ytypHashes[$entryName]=Get-CatalogByteHash $data};$mloArchetypes.Add((Get-MloArchetypeProjection01 -Archetype $archetype -SourcePath $entryName -SourceSHA256 $ytypHashes[$entryName]))}
+            catch {$placementErrors.Add([ordered]@{Source=$entryName;Stage='archetype';Reason=$_.Exception.Message})}
+            if($mloArchetypes.Count-gt16384){throw 'MLO archetype aggregate bound'}
+        }}
+        foreach($pair in $cache.YmapDict.GetEnumerator()){
+            $entry=$pair.Value;$entryName=Entry-Path $entry;Progress-Status 'projecting-selected-mlo-instances' $entryName
+            try {$data=$entry.File.ExtractFile($entry);if(!$data-or$data.Length-gt64MB){throw 'YMAP metadata byte bound'};$sourceHash=Get-CatalogByteHash $data;$map=New-Object CodeWalker.GameFiles.YmapFile;$map.Load($data,$entry);$map.InitYmapEntityArchetypes($cache);$mapsVisited++
+                $ymapBindings.Add([ordered]@{Path=$entryName;SHA256=$sourceHash;Bytes=$data.Length;MloInstances=if($null-eq$map.MloEntities){0}else{@($map.MloEntities).Count}})
+                foreach($entity in $map.MloEntities){$matrix=[SharpDX.Matrix]::Transformation([SharpDX.Vector3]::Zero,[SharpDX.Quaternion]::Identity,$entity.Scale,[SharpDX.Vector3]::Zero,$entity.Orientation,$entity.Position);$mloInstances.Add((Get-MloInstanceProjection01 -Entity $entity -Matrix @($matrix.ToArray()|ForEach-Object{[double]$_}) -SourcePath $entryName -SourceSHA256 $sourceHash));if($mloInstances.Count-gt65536){throw 'MLO instance aggregate bound'}}
+            }catch{$placementErrors.Add([ordered]@{Source=$entryName;Stage='instance';Reason=$_.Exception.Message})}
+            if($mapsVisited%64-eq0){[GC]::Collect()}
+        }
+        $result.InteriorPlacementMetadata01=[ordered]@{Schema=1;Kind='RichAudioInstalledMloPlacementMetadata01';Archetypes=$mloArchetypes.ToArray();Instances=$mloInstances.ToArray();YmapSourceBindings=$ymapBindings.ToArray();YtypSourceBindings=@($ytypHashes.GetEnumerator()|ForEach-Object{[ordered]@{Path=$_.Key;SHA256=$_.Value}});YmapFilesVisited=$mapsVisited;YmapFilesSelected=$cache.YmapDict.Count;Failures=$placementErrors.ToArray();Complete=($placementErrors.Count-eq0-and$mapsVisited-eq$cache.YmapDict.Count);RuntimeActivationObserved=$false;PortalsAreDeclaredMetadataNotOpenings=$true}
+    }
+    if($VehicleModelFilter -ieq 'bati'){
+        # One explicitly identified existing DLC example. It is metadata about
+        # registration, not a supported unique-profile loader or native proof.
+        $example=@($cache.AllRpfs|Where-Object{(Relative-Path $_.Path) -match '(?i)(^|/)mpbiker/dlc\.rpf$'})
+        $exampleRows=New-Object Collections.Generic.List[object];$exampleFailures=New-Object Collections.Generic.List[object]
+        if($example.Count-eq1){foreach($name in @('content.xml','setup2.xml')){
+            $entries=@($example[0].AllEntries|Where-Object{$_.Name-ieq$name})
+            if($entries.Count-ne1){$exampleFailures.Add([ordered]@{File=$name;Reason='unique-example-config-unavailable'});continue}
+            try{$entry=$entries[0];$data=$entry.File.ExtractFile($entry);if(!$data-or$data.Length-gt4MB){throw 'Bounded audio registration XML required'};$xml=Read-CatalogXml $data
+                $directives=@($xml.SelectNodes('//*')|Where-Object{$_.LocalName-in@('fileType','filename','disabled','persistent','contents','enable','order','deviceName','name','type')}|ForEach-Object{[ordered]@{Element=$_.LocalName;Parent=$_.ParentNode.LocalName;Value=$_.InnerText;ValueAttribute=if($_.Attributes['value']){$_.Attributes['value'].Value}else{$null}}})
+                if($directives.Count-gt16384){throw 'Registration directive count bound'}
+                $exampleRows.Add([ordered]@{Path=Entry-Path $entry;SourceSHA256=Get-CatalogByteHash $data;Bytes=$data.Length;Directives=$directives;RuntimeLoaderVerified=$false})
+            }catch{$exampleFailures.Add([ordered]@{File=$name;Reason=$_.Exception.Message})}
+        }}else{$exampleFailures.Add([ordered]@{File='mpbiker/dlc.rpf';Reason='exact-example-archive-not-unique'})}
+        $result.AudioRegistrationMetadata01=[ordered]@{Schema=1;ExamplePack='mpbiker';ExampleOnly=$true;Files=$exampleRows.ToArray();Failures=$exampleFailures.ToArray();SelectedBatiRelPaths=@($vehicles|ForEach-Object{$_.VehicleAudioRecord.SourceRel;$_.EngineRecord.SourceRel;$_.GranularRecord.SourceRel}|Where-Object{$_}|Sort-Object -Unique);BaseBootstrapRegistrationObserved=$false;UniqueOwnedProfileRegistrationVerified=$false;NoPcmDecoded=$true}
+    }
     $result.Initialization=$initialization
     if($VehicleModelFilter){$result.VehicleModelFilter=$VehicleModelFilter}
     $result.AudioBankTables=@($script:bankTables.Values|Sort-Object Path)
     $result.AudioBankVerificationRequested=[bool]$VerifyBankStreams
     $catalogPath=Join-Path $output 'resolved-catalog.json';Json $catalogPath $result 15
+    $slimVehicles=@($vehicles|ForEach-Object{$v=$_;$sounds=[ordered]@{};foreach($sound in $v.Sounds.GetEnumerator()){$sounds[$sound.Key]=if($sound.Value){[ordered]@{Hash=$sound.Value.Hash;ChannelLinks=$sound.Value.ChannelLinks}}else{$null}};[ordered]@{Model=$v.Model;VehicleAudioRecord=if($v.VehicleAudioRecord){@{Present=$true}}else{$null};GranularRecord=if($v.GranularRecord){@{Present=$true}}else{$null};Sounds=$sounds}})
+    Json (Join-Path $output 'resolved-binding01.json') ([ordered]@{Schema=1;Stage=$result.Stage;InputBinding=$binding;ReferenceCoverage=$referenceCoverage;SourceArchiveRefreshId=$SourceArchiveRefreshId;Vehicles=$slimVehicles}) 12
     $summary=[ordered]@{Schema=1;State='codewalker-resolved-model';GameVersion=$binding.GameVersion;GameExecutableSHA256=$binding.GameExecutableSHA256;CodeWalkerCoreSHA256=$binding.CodeWalkerCoreSHA256;ResolvedCatalogSHA256=Hash $catalogPath;SelectedDlc=$cache.SelectedDlc;Gen9SelectorAvailable=$gen9;ModsFolderResolutionEnabled=[bool]$mods;VehicleModels=$vehicles.Count;ModelsWithVehicleAudioRecord=@($vehicles|Where-Object VehicleAudioRecord).Count;ModelsWithGranularRecord=@($vehicles|Where-Object GranularRecord).Count;YbnEntries=$cache.YbnDict.Count;YmapEntries=$cache.YmapDict.Count;YtypEntries=$cache.YtypDict.Count;ActiveMapArchives=$active.Count;PatchedPaths=$patches.Count;ReferenceDeclaredModels=if($referenceCoverage){$referenceCoverage.DeclaredModels}else{$null};ReferenceMissingFromResolvedModels=if($referenceCoverage){$referenceCoverage.DeclaredMissingFromResolved.Count}else{$null};ParserErrorCount=$script:errorCount;ElapsedSeconds=[Math]::Round($clock.Elapsed.TotalSeconds,3);RuntimeMountStateObserved=$false;AcousticWorldImported=$false;RuntimeReplacementImplemented=$false;GameWrites=$false;PcmDecoded=$false;EndpointOpened=$false}
     $channelRows=@($script:soundProjections.Values|ForEach-Object{$_.ChannelLinks})
     $summary.AudioBankVerificationRequested=[bool]$VerifyBankStreams
