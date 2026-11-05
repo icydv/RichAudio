@@ -1,6 +1,6 @@
 # STREET-01: proposed single passive Bati telemetry session
 
-I propose one separately approved passive experiment with my existing disabled SHV/RPH diagnostic. Codex is preparing this proposal without installing, loading or launching it. My approval for read-only cache qualification would not approve this session.
+I approved candidate02 once. Its preflight stopped before deployment or launch because TrainerV exceeded the8MiB inspection allowance. That attempt is closed and consumed; it establishes no telemetry or gameplay failure. Codex has prepared candidate04 with the same binaries and session rules and a Trainer-only inspection correction. It awaits its own fresh approval; see [the preparation repair report](STREET_01_PREFLIGHT_REPAIR.md).
 
 ## Exact candidate and authority
 
@@ -8,7 +8,7 @@ The candidate receipt binds the production native ASI, separately compiled diagn
 
 Fresh preflight under a future approval must verify the existing installation against those exact pins, path/link constraints, startup inventory, process absence and quarantine. Historical receipts are not a current installation check. The previously observed loaded RPH API assembly is bound separately from the launcher and compile SDK. Its origin remains independently unauthenticated; a passive reproducibility pin does not promote it to trusted normal/audio authority. Changed bytes, unknown automatic startup, unexpected plugin/service state or unreviewed dependencies stop before deployment. There is no automatic refresh of expected identities.
 
-The retained loader inventory contains `DirectStorageFix.asi`, `OpenRPF.asi`, `StraightToStoryMode.asi` and `TrainerV.asi`. Prior byte hashes are available for the first two. The last two are supplementary existing environment, with no retained byte pin found; the proposed fresh preflight explicitly includes reading/hash-binding these four files, each at most 8 MiB. Those two newly measured hashes remain environment observations, not telemetry API authentication. Their initial preflight receipt is pinned and must still match immediately before launch and after restoration. An extra or missing ASI stops the proposal rather than extending its namespace.
+The retained loader inventory contains `DirectStorageFix.asi`, `OpenRPF.asi`, `StraightToStoryMode.asi` and `TrainerV.asi`. Prior byte hashes are available for the first two. The last two are supplementary existing environment, with no retained byte pin found; the successor preflight proposes complete bounded hashing of these four files. Only TrainerV has a27,073,536-byte maximum and exact expected length; the other three retain8,388,608-byte maxima. TrainerV content remains unverified; this larger full-file read requires a new explicit approval. Those two newly measured hashes remain environment observations, not telemetry API authentication. Their initial preflight receipt is pinned and must still match immediately before launch and after restoration. An extra or missing ASI stops the proposal rather than extending its namespace.
 
 ## Proposed temporary installation changes
 
@@ -50,7 +50,7 @@ The verdict identifies the first failing getter, identity, timing, output or lif
 
 An invalid RPH operating value disqualifies that interface for the affected phase; it does not automatically end the independent SHV measurement while identity and timing remain valid. Structural association/timing loss or a failed native target call ends the lifetime. This distinction permits the experiment to explain the existing RPH getter failure without hiding a separately usable native result.
 
-The exact prepared artifacts and future commands are retained in [candidate02](../.local/street01-passive-telemetry01/candidate02-423e77df3e9547768439b791c98a316a/candidate.json). The final operator protocol, false approval template and independent verification remain private. Superseded preparation is preserved; none of it grants authority or constitutes a deployment.
+The closed candidate02 and its raw failure remain historical. The exact successor artifacts and future commands are retained in [candidate04](../.local/street01-passive-telemetry01/candidate04-inspection-budget02/candidate.json). The final operator protocol, false approval template and independent verification remain private. Superseded preparation is preserved; none of it grants authority or constitutes a deployment.
 
 ## Shutdown, evidence and restoration
 

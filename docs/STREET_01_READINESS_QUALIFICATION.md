@@ -1,5 +1,7 @@
 # STREET-01: normal cache readiness and passive Bati qualification
 
+Current status: both approved attempts at fc7ca1b are closed and consumed. Warm qualification failed before its Job/worker; passive preflight stopped before deployment/launch. Neither reached its intended workload or proves a map/telemetry/gameplay failure. The narrowly corrected, independently reviewed warm proposal05 and passive candidate04 await separate fresh approvals. See [the preparation repair report](STREET_01_PREFLIGHT_REPAIR.md).
+
 I am narrowing this pass to my normal cache startup and one passive telemetry candidate. My larger STREET-01 requirements remain unchanged: full supported-world acoustic mapping, genuine reflections, selective native replacement, airflow and qualified GPU-first complete processing. This pass cannot qualify an audible integrated mod.
 
 Codex started from my clean `feature/street-01-integrated-presence` checkout at `81dd4e3e2eba45cb4d158dfa13ebf84bb6c9492f`. My completed cache, private failures, sidebar and first-open correction are preserved. No closed installed-resource or live approval was reused.
@@ -20,7 +22,7 @@ My passive proposal has no RichAudio audio host, PCM generation/submission, endp
 
 ## Separate approval boundaries
 
-1. **Read-only normal warm qualification:** the prepared, hash-bound Track A request covers the actual normal outer driver and persistent consumer, the existing installation and cache, one retained test position, private status/cache outputs, resource limits, measurements and stop conditions. It authorizes no game launch, plugin change, audio operation or telemetry experiment. Its result is pending until I explicitly approve it.
+1. **Read-only normal warm qualification:** the prepared, hash-bound Track A request covers the actual normal outer driver and persistent consumer, the existing installation and cache, one retained test position, private status/cache outputs, resource limits, measurements and stop conditions. It authorizes no game launch, plugin change, audio operation or telemetry experiment. The proposal04 attempt is consumed after a launcher dependency failure; successor proposal05 requires new explicit approval.
 2. **One passive GTA telemetry session:** the separately bound Track B proposal covers only its exact artifacts, fresh preflight, four temporary target changes, one established launch, private telemetry logging, manual diagnostic load, bounded observation, complete game exit and exact restoration. It authorizes no cache qualification or audible mod. It is presented for approval only when its own offline prerequisites pass.
 
 Neither approval grants the other. Codex will not execute either proposal under this source-development instruction.

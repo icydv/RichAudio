@@ -59,7 +59,25 @@ $asi=@();foreach($name in @('DirectStorageFix.asi','OpenRPF.asi','StraightToStor
 $script:pfPlan.baseline|Add-Member rootAsiInventory $asi;$script:pfPlan.sidecar.gameSHA256=$script:pfPlan.baseline.gameExecutable.sha256
 $side=@($script:pfPlan.payload|Where-Object relative -CEQ 'Plugins/RichAudio.StreetTrackedDiagnostic01.json')[0];[IO.File]::WriteAllText($side.source,($script:pfPlan.sidecar|ConvertTo-Json -Depth 12));$side.sha256=Get-StreetTrackedHash01 $side.source;$side.bytes=(Get-Item -LiteralPath $side.source).Length
 [IO.File]::WriteAllText($script:pfCandidate,($script:pfPlan|ConvertTo-Json -Depth 30));$script:pfSha=Get-StreetTrackedHash01 $script:pfCandidate
+# The exact retained Trainer size is represented by original zero bytes here.
+$trainer=Join-Path $game 'TrainerV.asi';$stream=[IO.File]::Open($trainer,[IO.FileMode]::Open,[IO.FileAccess]::Write);try{$stream.SetLength(27073536)}finally{$stream.Dispose()}
+Reject {Assert-StreetTrackedFreshPreflight01 -Plan $script:pfPlan -CandidateSha256 $script:pfSha -FixtureProcessClosure {$true}} 'Old 8MiB policy must reject the retained Trainer size before a complete hash'
+$policy=@($asi|ForEach-Object{@{name=$_.name;expectedBytes=(Get-Item -LiteralPath (Join-Path $game $_.name)).Length;maximumBytes=$(if($_.name-ceq'TrainerV.asi'){27073536}else{8388608})}})
+$script:pfPlan|Add-Member rootAsiReadPolicy $policy
+[IO.File]::WriteAllText($script:pfCandidate,($script:pfPlan|ConvertTo-Json -Depth 30));$script:pfSha=Get-StreetTrackedHash01 $script:pfCandidate
 $proof=Assert-StreetTrackedFreshPreflight01 -Plan $script:pfPlan -CandidateSha256 $script:pfSha -FixtureProcessClosure {$true}
+$trainerProof=@($proof.rootAsiPins|Where-Object name -CEQ 'TrainerV.asi')[0]
+Check ($trainerProof.complete-and$trainerProof.bytesRead-eq27073536-and$trainerProof.sha256-ceq(Get-StreetTrackedHash01 $trainer)) 'New Trainer-only policy hashes every byte with bounded memory'
+Reject {Get-StreetTrackedBoundedAsi01 -Path $trainer -ExpectedBytes 27073536 -MaximumBytes 8388608} 'No complete digest may be returned under a partial-file allowance'
+Reject {Get-StreetTrackedBoundedAsi01 -Path $trainer -ExpectedBytes 27073535 -MaximumBytes 27073536} 'Exact expected length rejects partial digest even inside maximum allowance'
+$wrongIdentity=@{CanonicalPath=$trainer;VolumeSerial=$trainerProof.identity.VolumeSerial;FileId='0000000000000000'}
+Reject {Get-StreetTrackedBoundedAsi01 -Path $trainer -ExpectedBytes 27073536 -MaximumBytes 27073536 -ExpectedIdentity $wrongIdentity} 'Same content cannot silently refresh a different expected file identity'
+$knownAsi=Join-Path $game 'DirectStorageFix.asi';$knownBytes=[IO.File]::ReadAllBytes($knownAsi);$changed=[byte[]]$knownBytes.Clone();$changed[0]=$changed[0]-bxor1;[IO.File]::WriteAllBytes($knownAsi,$changed)
+Reject {Assert-StreetTrackedFreshPreflight01 -Plan $script:pfPlan -CandidateSha256 $script:pfSha -FixtureProcessClosure {$true}} 'Same-size content mutation rejects the retained expected hash';[IO.File]::WriteAllBytes($knownAsi,$knownBytes)
+$stream=[IO.File]::Open($trainer,[IO.FileMode]::Append,[IO.FileAccess]::Write);try{$stream.WriteByte(1)}finally{$stream.Dispose()}
+Reject {Assert-StreetTrackedFreshPreflight01 -Plan $script:pfPlan -CandidateSha256 $script:pfSha -FixtureProcessClosure {$true}} 'Trainer growth beyond exact allowance rejects before hashing';$stream=[IO.File]::OpenWrite($trainer);try{$stream.SetLength(27073536)}finally{$stream.Dispose()}
+$link=Join-Path $root 'trainer-hardlink.authored';New-Item -ItemType HardLink -Path $link -Target $trainer|Out-Null
+Reject {Get-StreetTrackedBoundedAsi01 -Path $trainer -ExpectedBytes 27073536 -MaximumBytes 27073536} 'Unexpected hardlinks reject complete hashing';Remove-Item -LiteralPath $link
 Check ($proof.rootAsiPins.Count-eq4-and@($proof.rootAsiPins|Where-Object basis -LIKE 'preflight-observed-only*').Count-eq2) 'Actual default preflight records two supplementary hashes as observed, not trusted'
 $extra=Join-Path $game 'unexpected.asi';[IO.File]::WriteAllBytes($extra,[byte[]]@());Reject {Assert-StreetTrackedFreshPreflight01 -Plan $script:pfPlan -CandidateSha256 $script:pfSha -FixtureProcessClosure {$true}} 'Default namespace check rejects unreviewed native module';Remove-Item -LiteralPath $extra
 $prod=($script:pfPlan|ConvertTo-Json -Depth 30)|ConvertFrom-Json;$prod.fixtureOnly=$false

@@ -1,5 +1,7 @@
 # STREET-01 normal cache readiness
 
+Current status: I approved proposal04 once; its launcher failed before any Job or workload because the qualification wrappers omitted CatalogLifecycle. That attempt is closed and consumed. Codex has corrected and rehearsed the actual wrappers; disabled successor proposal05 awaits separate fresh approval. Neither launcher failure establishes an acoustic-map failure. See [the preparation repair report](STREET_01_PREFLIGHT_REPAIR.md).
+
 I am addressing the normal cache-to-scene dependency from `81dd4e3`. My earlier completion, warm-start and performance results remain historical. This source work does not qualify installed startup, live activation, Bati telemetry, selective takeover or audible readiness.
 
 ## The first observed readiness blocker
@@ -38,7 +40,7 @@ The offline consumer control exercises the same geometry-adoption boundary used 
 
 ## Prepared read-only qualification
 
-The next run is prepared, **not executed or authorised**. Previous installed-read approvals remain closed. My final private configuration binds 278 source files, the exact retained terminal manifest, installation/software/runtime identities and known intersecting pose. The [immutable proposal 04 template](../.local/street01-normal-readiness01/proposal04/qualification-template.json), [prepared-only receipt](../.local/street01-normal-readiness01/proposal04/prepared-only.json) and [guard checks](../.local/street01-normal-readiness01/proposal04/guard-validation.json) are local private evidence links; their contents are excluded from the public repository. Earlier proposals remain preserved. Execution requires a separate approval copy with a new explicit UTC window; the template remains disabled.
+The earlier proposal04 preparation is retained as historical context. Its later approved execution failed before its Job or worker, and its approval is consumed. The separately prepared proposal05 binds281 executable source files with corrected wrapper dependencies, accurate receipt identities and a fresh output. Its disabled template remains private under `.local/street01-normal-readiness01/proposal05`; execution requires new explicit approval. Earlier proposals and all failed execution evidence remain unchanged.
 
 I propose one new read-only qualification with these limits:
 

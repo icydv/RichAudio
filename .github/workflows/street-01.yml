@@ -73,6 +73,8 @@ jobs:
             .local/street01-normal-readiness01/original/*/driver.stdout.log
             .local/street01-normal-readiness01/original/*/driver.stderr.log
             .local/street01-passive-fixtures-*/validation.json
+            .local/street01-launcher-rehearsal-*/validation.json
+            .local/street01-launcher-rehearsal-*/**/*.log
             .local/street01-passive-telemetry01/supervision-*/validation.json
             .local/street01/tracked-diagnostic-*/validation.json
             .local/street01/tracked-diagnostic-*/*/run.log

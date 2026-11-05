@@ -8,6 +8,56 @@ $ErrorActionPreference='Stop'
 $script:StreetTrackedRepo01=Split-Path -Parent $PSScriptRoot
 $script:StreetTrackedTargets01=@('RichAudio.StreetTracked01.asi','Plugins/RichAudio.StreetTrackedDiagnostic01.Rph.dll','Plugins/RichAudio.StreetTrackedDiagnostic01.json','startup.rphs')
 function Get-StreetTrackedHash01([string]$Path){(Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()}
+function Get-StreetTrackedBoundedAsi01([string]$Path,[long]$ExpectedBytes,[long]$MaximumBytes,$ExpectedIdentity=$null){
+ Assert-Menu02UnlinkedPath $Path
+ if($ExpectedBytes-lt0-or$ExpectedBytes-gt$MaximumBytes-or$MaximumBytes-lt1){throw 'ASI length exceeds approved per-file allowance'}
+ if(!('RichAudio.StreetTracked.BoundedHash01'-as[type])){
+ Add-Type -TypeDefinition @'
+using System;
+using System.IO;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.Win32.SafeHandles;
+namespace RichAudio.StreetTracked {
+ public sealed class AsiHash01 { public string sha256,canonicalPath,volumeSerial,fileId; public long bytes,bytesRead; public bool complete; }
+ public static class BoundedHash01 {
+  [StructLayout(LayoutKind.Sequential)] struct Info { public uint Attr,CL,CH,AL,AH,WL,WH,Volume,SizeH,SizeL,Links,IndexH,IndexL; }
+  [DllImport("kernel32.dll",SetLastError=true)] static extern bool GetFileInformationByHandle(SafeFileHandle h,out Info i);
+  [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern uint GetFinalPathNameByHandle(SafeFileHandle h,StringBuilder s,uint n,uint f);
+  static Info Inspect(SafeFileHandle h) { Info i;if(!GetFileInformationByHandle(h,out i))throw new Win32Exception();if((i.Attr & (0x400|0x10))!=0||i.Links!=1)throw new IOException("Linked or non-regular ASI refused");return i; }
+  static long Length(Info i){return checked((long)(((ulong)i.SizeH<<32)|i.SizeL));}
+  static string Id(Info i){return (((ulong)i.IndexH<<32)|i.IndexL).ToString("x16");}
+  static string Canonical(SafeFileHandle h){var s=new StringBuilder(32768);uint n=GetFinalPathNameByHandle(h,s,32768,0);if(n==0||n>=32768)throw new Win32Exception();string p=s.ToString();return p.StartsWith(@"\\?\")?p.Substring(4):p;}
+  public static AsiHash01 Read(string path,long expected,long maximum){
+   if(expected<0||expected>maximum)throw new IOException("ASI expected length exceeds allowance");
+   using(var stream=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read,65536,FileOptions.SequentialScan)){
+    var before=Inspect(stream.SafeFileHandle);string canonical=Canonical(stream.SafeFileHandle);
+    if(!String.Equals(canonical,Path.GetFullPath(path),StringComparison.OrdinalIgnoreCase)||Length(before)!=expected||stream.Length!=expected)throw new IOException("ASI exact path/length differs before hashing");
+    long read=0;byte[] buffer=new byte[65536];string digest;
+    using(var hash=IncrementalHash.CreateHash(HashAlgorithmName.SHA256)){
+     while(read<expected){int n=stream.Read(buffer,0,(int)Math.Min(buffer.Length,expected-read));if(n==0)throw new IOException("Incomplete ASI hash; early EOF");read+=n;if(read>maximum)throw new IOException("ASI byte allowance exceeded");hash.AppendData(buffer,0,n);}
+     if(stream.Position!=expected||stream.Length!=expected)throw new IOException("ASI grew or is incomplete; partial digest refused");
+     digest=BitConverter.ToString(hash.GetHashAndReset()).Replace("-","").ToLowerInvariant();
+    }
+    var after=Inspect(stream.SafeFileHandle);
+    if(before.Volume!=after.Volume||Id(before)!=Id(after)||before.CL!=after.CL||before.CH!=after.CH||before.WL!=after.WL||before.WH!=after.WH||Length(after)!=expected||stream.Length!=expected||read!=expected)throw new IOException("ASI identity or length changed while hashing");
+    using(var current=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read)){
+     var now=Inspect(current.SafeFileHandle);if(now.Volume!=before.Volume||Id(now)!=Id(before)||!String.Equals(Canonical(current.SafeFileHandle),canonical,StringComparison.OrdinalIgnoreCase))throw new IOException("ASI path replaced while hashing");
+    }
+    return new AsiHash01{sha256=digest,bytes=expected,bytesRead=read,complete=true,canonicalPath=canonical,volumeSerial=before.Volume.ToString("x8"),fileId=Id(before)};
+   }
+  }
+ }
+}
+'@
+ }
+ $result=[RichAudio.StreetTracked.BoundedHash01]::Read($Path,$ExpectedBytes,$MaximumBytes)
+ Assert-Menu02UnlinkedPath $Path
+ if($ExpectedIdentity-and($result.volumeSerial-cne$ExpectedIdentity.VolumeSerial-or$result.fileId-cne$ExpectedIdentity.FileId-or![string]::Equals($result.canonicalPath,$ExpectedIdentity.CanonicalPath,[StringComparison]::OrdinalIgnoreCase))){throw 'ASI expected stable identity differs'}
+ return $result
+}
 function Assert-StreetTrackedLocal01([string]$Path){
  $p=[IO.Path]::GetFullPath($Path);$local=[IO.Path]::GetFullPath((Join-Path $script:StreetTrackedRepo01 '.local'))+'\'
  if(!$p.StartsWith($local,[StringComparison]::OrdinalIgnoreCase)){throw 'Private repository .local path required'}
@@ -31,6 +81,11 @@ function Assert-StreetTrackedPlan01($Plan){
  if($Plan.sidecar.passiveOnly-ne$true-or$Plan.sidecar.audioAllowed-ne$false-or$Plan.sidecar.nativeMutationAllowed-ne$false-or$Plan.sidecar.maximumRecords-ne2400-or$Plan.sidecar.maximumSeconds-ne120-or$Plan.sidecar.rphSHA256-cne$Plan.baseline.observedApi.sha256-or$Plan.sidecar.gameSHA256-cne$Plan.baseline.gameExecutable.sha256){throw 'Diagnostic sidecar binding or bounds differ'}
  if($Plan.launch.method-cne'Windows-shell-open-existing-cmd-once'-or$Plan.launch.useShellExecute-ne$true-or$Plan.launch.verb-cne'open'-or$Plan.launch.arguments-cne''-or$Plan.launch.alternateLaunchOrRetry-ne$false){throw 'Reviewed single existing CMD route required'}
  if([IO.Path]::GetFileName($Plan.launch.fileName)-cne'Launch RAGE Plugin Hook.cmd'-or![string]::Equals($Plan.launch.workingDirectory,$Plan.gameRoot,[StringComparison]::OrdinalIgnoreCase)-or![string]::Equals([IO.Path]::GetDirectoryName($Plan.launch.fileName),$Plan.gameRoot,[StringComparison]::OrdinalIgnoreCase)){throw 'Exact reviewed game working directory/CMD required'}
+ if($Plan.rootAsiReadPolicy){
+  $policy=@($Plan.rootAsiReadPolicy)
+  if($policy.Count-ne4-or($policy.name|Sort-Object -Unique)-join'|' -cne 'DirectStorageFix.asi|OpenRPF.asi|StraightToStoryMode.asi|TrainerV.asi'){throw 'Exact four ASI inspection policies required'}
+  foreach($p in $policy){$limit=if($p.name-ceq'TrainerV.asi'){27073536}else{8388608};if($p.maximumBytes-ne$limit-or$p.expectedBytes-lt0-or$p.expectedBytes-gt$limit-or($p.name-ceq'TrainerV.asi'-and$p.expectedBytes-ne27073536)){throw 'Only exact TrainerV inspection allowance may increase'}}
+ }
 }
 function New-StreetTrackedCandidate01 {
  [CmdletBinding()]param([Parameter(Mandatory)][string]$BuildReceipt,[Parameter(Mandatory)][string]$ReviewedBuildReceiptSha256,[Parameter(Mandatory)][string]$HistoricalBaseline,[Parameter(Mandatory)][string]$ReviewedBaselineSha256,[string]$AsiInventory,[string]$ReviewedAsiInventorySha256,[Parameter(Mandatory)][string]$OutputRoot)
@@ -54,6 +109,7 @@ function New-StreetTrackedCandidate01 {
  $empty=Join-Path $out 'startup.rphs';[IO.File]::WriteAllBytes($empty,[byte[]]@());$payload+=[ordered]@{relative='startup.rphs';source=$empty;sha256=(Get-StreetTrackedHash01 $empty);bytes=0;expectedOriginalExists=$true;expectedOriginalSha256=$baseline.startupSnapshot.sha256;expectedOriginalBytes=$baseline.startupSnapshot.bytes}
  $watch=Join-Path $script:StreetTrackedRepo01 'tools/Watch-StreetTrackedSession01.ps1'
  $plan=[ordered]@{schema=1;kind='RichAudioStreetTrackedCandidate01';fixtureOnly=[bool]$build.fixtureOnly;gameRoot=$baseline.gameRoot;session=$session;buildReceiptSha256=$ReviewedBuildReceiptSha256;baselineSha256=$ReviewedBaselineSha256;asiInventorySha256=$ReviewedAsiInventorySha256;baseline=$baseline;payload=$payload;sidecar=$sidecar;launch=$baseline.launch;maximumLaunches=1;automaticRetry=$false;approvalGranted=$false;currentActivation=$false;proposedSessionSidecarEnabled=$true;audioAllowed=$false;nativeMutationAllowed=$false;mappingAllowed=$false;recordingAllowed=$false;hotUnloadAllowed=$false;normalMainModMustRemainUnloaded=$true;manualLoadRequired=$true;manualCommand='LoadPlugin "RichAudio.StreetTrackedDiagnostic01.Rph.dll"';runtimeOriginAuthenticated=$false;currentInstallationVerified=$false;freshInventoryRequired=$true;processExitBeforeRestorationRequired=$true;supervisorSha256=(Get-StreetTrackedHash01 $watch);supervision='tools/Watch-StreetTrackedSession01.ps1:600+10+120+3+180=913s; no retry; original lifetime closure before removal';installationMachinery='tools/playable/Setup.ps1 Invoke-InstallTransaction';restorationMachinery='tools/menu02-recovery/Restoration.ps1 Invoke-Menu02Restoration';sourcePins=@(@('tools/Prepare-StreetTrackedCandidate01.ps1','tools/Watch-StreetTrackedSession01.ps1','tools/playable/Setup.ps1','tools/menu02-recovery/Restoration.ps1','tools/menu02-recovery/Supervision.ps1','tools/menu02-recovery/Launch.ps1')|ForEach-Object{[ordered]@{path=$_;sha256=(Get-StreetTrackedHash01 (Join-Path $script:StreetTrackedRepo01 $_))}})}
+ if(!$build.fixtureOnly){$plan.rootAsiReadPolicy=@(@{name='DirectStorageFix.asi';expectedBytes=592384;maximumBytes=8388608},@{name='OpenRPF.asi';expectedBytes=1173504;maximumBytes=8388608},@{name='StraightToStoryMode.asi';expectedBytes=42496;maximumBytes=8388608},@{name='TrainerV.asi';expectedBytes=27073536;maximumBytes=27073536})}
  Assert-StreetTrackedPlan01 $plan;$manifest=Join-Path $out 'candidate.json';Write-StreetTrackedNew01 $manifest $plan;Write-StreetTrackedNew01 (Join-Path $out 'preflight.json') ([ordered]@{schema=1;kind='RichAudioStreetTrackedPreparedOnly01';candidateSha256=(Get-StreetTrackedHash01 $manifest);prepared=$true;currentInstalledPreflightPerformed=$false;approvalGranted=$false;gameFilesRead=$false;gameFilesWritten=$false;launched=$false;endpointOpened=$false;fixtureOnly=[bool]$build.fixtureOnly});return $manifest
 }
 function Assert-StreetTrackedApproval01($Plan,[string]$CandidateSha256,$Approval){
@@ -103,7 +159,22 @@ function Assert-StreetTrackedFreshPreflight01($Plan,[string]$CandidateSha256,[st
  if(!$Plan.baseline.rootAsiInventory){throw 'Complete retained root ASI inventory is required; no inferred allowlist'}
  $expectedAsi=@($Plan.baseline.rootAsiInventory|Sort-Object name);$names=@($expectedAsi.name);if($Deployed){$names+='RichAudio.StreetTracked01.asi'};$actualAsi=@(Get-ChildItem -LiteralPath $Plan.gameRoot -File -Filter '*.asi'|Sort-Object Name);if(($actualAsi.Name-join'|')-cne(($names|Sort-Object)-join'|')){throw 'Unexpected or missing root ASI; fresh review required'}
  $sessionPins=$null;if($Deployed-or$AfterRestoration){$tx=Join-Path (Split-Path $Plan.payload[0].source -Parent) 'transaction';$binding=Get-Content -LiteralPath (Join-Path $tx 'preflight-binding.json') -Raw|ConvertFrom-Json;$prior=Join-Path $tx 'fresh-preflight.json';if($binding.candidateSha256-cne$CandidateSha256-or$binding.freshPreflightSha256-cne(Get-StreetTrackedHash01 $prior)){throw 'Session ASI baseline receipt differs'};if($Deployed){$installed=Get-Content -LiteralPath (Join-Path $tx 'deployed.json') -Raw|ConvertFrom-Json;if($installed.candidateSha256-cne$CandidateSha256-or$installed.freshPreflightSha256-cne$binding.freshPreflightSha256){throw 'Deployment ASI baseline differs'}};$sessionPins=(Get-Content -LiteralPath $prior -Raw|ConvertFrom-Json).rootAsiPins}
- $observedAsi=@();foreach($pin in $expectedAsi){if($pin.name-like'RichAudio*'){throw 'Another RichAudio native producer must not load'};$asi=Join-Path $Plan.gameRoot $pin.name;if((Get-Item -LiteralPath $asi).Length-gt8388608){throw 'ASI preflight read exceeds8MiB bound'};$state=Get-Menu02RestoreFileState $asi;if($pin.sha256){if($state.sha256-cne$pin.sha256-or$state.bytes-ne$pin.bytes){throw 'Root ASI content differs'}}elseif($pin.hashStatus-cne'not-retained-preflight-observation-required'){throw 'Unclassified missing ASI content pin'};if($pin.identityAfter){Assert-StreetTrackedIdentity01 $state.path $pin.identityAfter};if($Deployed-or$AfterRestoration){$prior=@($sessionPins|Where-Object name -CEQ $pin.name);if($prior.Count-ne1-or$state.sha256-cne$prior[0].sha256-or$state.bytes-ne$prior[0].bytes){throw 'Observed session ASI content changed'}};$observedAsi+=@{name=$pin.name;sha256=$state.sha256;bytes=$state.bytes;basis=$(if($pin.sha256){'matched-retained-pin'}else{'preflight-observed-only; not API authentication'})}}
+ $observedAsi=@();foreach($pin in $expectedAsi){
+  if($pin.name-like'RichAudio*'){throw 'Another RichAudio native producer must not load'}
+  $asi=Join-Path $Plan.gameRoot $pin.name
+  $policy=@($Plan.rootAsiReadPolicy|Where-Object name -CEQ $pin.name)
+  $limit=8388608;$length=(Get-Item -LiteralPath $asi).Length
+  if($policy.Count){$limit=[long]$policy[0].maximumBytes;$expectedLength=[long]$policy[0].expectedBytes}else{$expectedLength=if($null-ne$pin.bytes){[long]$pin.bytes}else{$length}}
+  if($length-gt$limit){throw 'ASI preflight read exceeds approved per-file bound'}
+  $state=Get-StreetTrackedBoundedAsi01 -Path $asi -ExpectedBytes $expectedLength -MaximumBytes $limit -ExpectedIdentity $pin.identityAfter
+  if(!$state.complete-or$state.bytesRead-ne$state.bytes){throw 'Incomplete ASI digest refused'}
+  if($pin.sha256){if($state.sha256-cne$pin.sha256-or$state.bytes-ne$pin.bytes){throw 'Root ASI content differs'}}elseif($pin.hashStatus-cne'not-retained-preflight-observation-required'){throw 'Unclassified missing ASI content pin'}
+  if($Deployed-or$AfterRestoration){
+   $prior=@($sessionPins|Where-Object name -CEQ $pin.name)
+   if($prior.Count-ne1-or$state.sha256-cne$prior[0].sha256-or$state.bytes-ne$prior[0].bytes-or!$prior[0].complete-or$state.fileId-cne$prior[0].identity.FileId-or$state.volumeSerial-cne$prior[0].identity.VolumeSerial){throw 'Observed session ASI content or identity changed'}
+  }
+  $observedAsi+=@{name=$pin.name;sha256=$state.sha256;bytes=$state.bytes;bytesRead=$state.bytesRead;complete=$state.complete;maximumBytes=$limit;identity=@{CanonicalPath=$state.canonicalPath;VolumeSerial=$state.volumeSerial;FileId=$state.fileId};basis=$(if($pin.sha256){'matched-retained-pin'}else{'preflight-observed-only; not API authentication'})}
+ }
  $allowedManaged=@('RichAudio.dll');if($Deployed){$allowedManaged+='RichAudio.StreetTrackedDiagnostic01.Rph.dll'};$unexpected=@(Get-ChildItem -LiteralPath (Join-Path $Plan.gameRoot 'Plugins') -File -Filter 'RichAudio*.dll'|Where-Object{$_.Name-cnotin$allowedManaged});if($unexpected.Count){throw 'Unexpected RichAudio managed startup target'}
  if(@(Get-ChildItem -LiteralPath $Plan.gameRoot -File -Filter '*.rphs'|Where-Object Name -CNE 'startup.rphs').Count-or@(Get-ChildItem -LiteralPath (Join-Path $Plan.gameRoot 'Plugins') -File -Filter '*.rphs').Count){throw 'Unexpected additional RPH startup script'}
  foreach($p in $Plan.payload){$state=Get-Menu02RestoreFileState (Safe-Path $Plan.gameRoot $p.relative);if($Deployed){if(!$state.exists-or$state.sha256-cne$p.sha256-or$state.bytes-ne$p.bytes){throw 'Staged diagnostic payload differs'}}elseif(!$p.expectedOriginalExists-and$state.exists){throw 'Create-only diagnostic target occupied'}elseif($AfterRestoration-and$p.expectedOriginalExists-and(!$state.exists-or$state.sha256-cne$p.expectedOriginalSha256-or$state.bytes-ne$p.expectedOriginalBytes)){throw 'Original changed target was not restored'}}

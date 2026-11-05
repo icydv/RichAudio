@@ -51,6 +51,7 @@ $scripts=@(
  @{name='mlo-placement-projection';file='tests/Test-MloPlacementProjectionCompletion01.ps1';arguments=@()},
  @{name='disabled-native-diagnostic-fixture';file='tools/Test-StreetTrackedDiagnostic01.ps1';arguments=@('-FixtureOnly')},
  @{name='passive-candidate-transaction';file='tests/Test-StreetTrackedCandidate01.ps1';arguments=@()},
+ @{name='normal-qualification-entrypoints';file='tests/Test-NormalReadinessLauncher01.ps1';arguments=@()},
  @{name='passive-session-supervision';file='tests/Test-StreetTrackedSupervision01.ps1';arguments=@()}
 )
 $requiredSteps=1+$scripts.Count
