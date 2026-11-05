@@ -57,6 +57,11 @@ jobs:
             .local/street01/initial-preparation-offer-*/*/failure-context.json
             .local/street01/initial-preparation-offer-*/*/failure.json
             .local/street01/initial-preparation-offer-*/*/expected-camera-cache-failure.json
+            .local/street01-completion/atomic-publication-*/reader.stdout.log
+            .local/street01-completion/atomic-publication-*/reader.stderr.log
+            .local/street01-completion/atomic-publication-*/reader-lifecycle.json
+            .local/street01-completion/atomic-publication-*/publication.json
+            .local/street01-completion/atomic-publication-*/test-failure.json
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
