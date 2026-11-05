@@ -1,6 +1,6 @@
 # STREET-01 normal cache readiness
 
-Current status: I approved proposal04 once; its launcher failed before any Job or workload because the qualification wrappers omitted CatalogLifecycle. That attempt is closed and consumed. Codex has corrected and rehearsed the actual wrappers; disabled successor proposal05 awaits separate fresh approval. Neither launcher failure establishes an acoustic-map failure. See [the preparation repair report](STREET_01_PREFLIGHT_REPAIR.md).
+Current status: proposal04 and the later proposal05 are closed and consumed. Proposal05 reached the real catalogue worker, then failed at private atomic publication. Codex reproduced and repaired that mechanism and passed the complete offline wrapper → catalogue publisher → geometry reader → actual consumer pathway. Disabled successor proposal06 awaits fresh approval. See [the publication repair](STREET_01_CATALOGUE_PUBLICATION.md); neither fixture timing nor an earlier launcher failure qualifies genuine installed-cache readiness.
 
 I am addressing the normal cache-to-scene dependency from `81dd4e3`. My earlier completion, warm-start and performance results remain historical. This source work does not qualify installed startup, live activation, Bati telemetry, selective takeover or audible readiness.
 

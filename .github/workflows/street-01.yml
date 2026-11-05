@@ -75,6 +75,16 @@ jobs:
             .local/street01-passive-fixtures-*/validation.json
             .local/street01-launcher-rehearsal-*/validation.json
             .local/street01-launcher-rehearsal-*/**/*.log
+            .local/catalog-publication-tests-*/validation.json
+            .local/catalog-publication-legacy-*/validation.json
+            .local/catalog-publication-legacy-*/*.log
+            .local/resolver-publication-*/validation.json
+            .local/resolver-publication-*/*-result.json
+            .local/ns01-*/validation.json
+            .local/ns01-*/initializer-and-timing-audit.json
+            .local/ns01-*/failed-rehearsal.json
+            .local/ns01-*/**/case-validation.json
+            .local/ns01-*/**/*.log
             .local/street01-passive-telemetry01/supervision-*/validation.json
             .local/street01/tracked-diagnostic-*/validation.json
             .local/street01/tracked-diagnostic-*/*/run.log

@@ -32,6 +32,7 @@ $nodeFiles=@(
  'tests/Test-Synthesis12.mjs',
  'tests/Test-WorldCompletion01.mjs','tests/Test-WorldStartupCompletion01.mjs','tests/Test-WorldValidationEpochOrderingCompletion01.mjs',
  'tests/Test-NormalReadinessReader01.mjs','tests/Test-NormalWorldReadiness01.mjs','tests/Test-NormalReadinessVerdict01.mjs',
+ 'tests/Test-NormalStartupPublication01.mjs',
  'tests/Test-NativeSupportBoundsCompletion01.mjs','tests/Test-InteriorPlacementCompletion01.mjs'
 )
 $scripts=@(
@@ -52,6 +53,9 @@ $scripts=@(
  @{name='disabled-native-diagnostic-fixture';file='tools/Test-StreetTrackedDiagnostic01.ps1';arguments=@('-FixtureOnly')},
  @{name='passive-candidate-transaction';file='tests/Test-StreetTrackedCandidate01.ps1';arguments=@()},
  @{name='normal-qualification-entrypoints';file='tests/Test-NormalReadinessLauncher01.ps1';arguments=@()},
+ @{name='catalogue-publication-lifecycle';file='tests/Test-CatalogPublication01.ps1';arguments=@()},
+ @{name='catalogue-publication-legacy';file='tests/Test-CatalogPublicationLegacy01.ps1';arguments=@()},
+ @{name='resolver-publication';file='tests/Test-ResolverPublication01.ps1';arguments=@()},
  @{name='passive-session-supervision';file='tests/Test-StreetTrackedSupervision01.ps1';arguments=@()}
 )
 $requiredSteps=1+$scripts.Count

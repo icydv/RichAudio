@@ -31,7 +31,9 @@ $cancel=Join-Path $output 'cancel.request'
 $statusFile=Join-Path $output 'status.json'
 function Write-Json([string]$Path,$Value,[int]$Depth=14){
     if($Path -eq $statusFile -and $Value -is [Collections.IDictionary]){$Value['RunId']=$RunId}
-    [void](Write-CatalogAtomicJson -PrivateRoot $output -Path $Path -Value $Value -Depth $Depth)
+    $publication=@{PrivateRoot=$output;Path=$Path;Value=$Value;Depth=$Depth}
+    if($Path -ne $statusFile){$publication.CancellationPath=$cancel}
+    [void](Write-CatalogAtomicJson @publication)
 }
 if(!$Worker){
     $lease=[IO.File]::Open((Join-Path $output 'worker.lock'),[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)

@@ -26,10 +26,12 @@ if(!$output.StartsWith($private,[StringComparison]::OrdinalIgnoreCase)){throw 'P
 foreach($inputRoot in @($game,$cw)){if($output -eq $inputRoot -or $output.StartsWith($inputRoot+'\',[StringComparison]::OrdinalIgnoreCase)){throw 'Output/input overlap'}}
 for($part=[IO.DirectoryInfo]::new($output);$null -ne $part;$part=$part.Parent){if($part.Exists -and ($part.Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked output unsupported'}}
 [IO.Directory]::CreateDirectory($output)|Out-Null
+$lifecyclePath=Join-Path $repo 'src\acoustics\startup\CatalogLifecycle.psm1'
+Import-Module (New-Module -Name RichAudioResolvedCatalogLifecycle -ScriptBlock ([ScriptBlock]::Create([IO.File]::ReadAllText($lifecyclePath)))) -Force
 function Json([string]$Path,$Value,[int]$Depth=14){
-    $temporary=$Path+'.pending-'+[Guid]::NewGuid().ToString('N')
-    [IO.File]::WriteAllText($temporary,($Value|ConvertTo-Json -Depth $Depth -Compress),[Text.UTF8Encoding]::new($false))
-    if([IO.File]::Exists($Path)){[IO.File]::Replace($temporary,$Path,[NullString]::Value)}else{[IO.File]::Move($temporary,$Path)}
+    $publication=@{PrivateRoot=$output;Path=$Path;Value=$Value;Depth=$Depth}
+    if($Path -ne $status){$publication.CancellationPath=$cancel}
+    [void](Write-CatalogAtomicJson @publication)
 }
 function Hash([string]$Path){$stream=[IO.File]::OpenRead($Path);$sha=[Security.Cryptography.SHA256]::Create();try{return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-','').ToLowerInvariant()}finally{$stream.Dispose();$sha.Dispose()}}
 $status=Join-Path $output 'status.json';$cancel=Join-Path $output 'cancel.request'

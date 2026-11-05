@@ -4,6 +4,9 @@
 function Initialize-InstalledCodeWalker01 {
  [CmdletBinding()]
  param([Parameter(Mandatory=$true)][string]$GameRoot)
+ # A reflected initializer error must terminate this module function even when
+ # its caller/module uses Continue; no successful binding may follow failure.
+ $ErrorActionPreference='Stop'
  $initRoot=[IO.Path]::GetFullPath($GameRoot).TrimEnd('\')
  $initExe=Join-Path $initRoot 'GTA5_Enhanced.exe'
  for($initAt=$initExe;$initAt;$initAt=[IO.Path]::GetDirectoryName($initAt)){if((Get-Item -LiteralPath $initAt -Force).Attributes -band [IO.FileAttributes]::ReparsePoint){throw 'Linked Enhanced initializer input refused'}}
