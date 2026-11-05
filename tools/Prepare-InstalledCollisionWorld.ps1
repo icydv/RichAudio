@@ -49,6 +49,13 @@ function RunOwned([string]$Command,[string]$Phase){
  if(!$result.Completed){throw ('Owned '+$Phase+' helper '+$result.State+'; checkpoints retained. Inspect private phase stderr.')}
 }
 function RunNode([string[]]$Values,[string]$Phase){$parts=@('& node',(Literal (Join-Path $repo 'src\acoustics\world\world-warmup.mjs')));foreach($value in $Values){$parts+=Literal $value};RunOwned (($parts -join ' ')+'; if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}') $Phase}
+function Read-DriverPlan01 {
+ $file=Join-Path $output 'driver-plan01.json'
+ if(![IO.File]::Exists($file)-or(Get-Item -LiteralPath $file).Length-gt16777216){throw 'Missing or oversized compact driver view; restart normal planning.'}
+ $view=[IO.File]::ReadAllText($file)|ConvertFrom-Json
+ if($view.Schema-ne1-or$view.ManifestSHA256-notmatch'^[a-f0-9]{64}$'-or$view.ManifestSHA256-cne(Get-PreparationHash (Join-Path $output 'manifest.json'))){throw 'Stale compact driver view; restart normal planning before counts or decoders.'}
+ return $view
+}
 try{
  if($ResolvedCatalogSHA256 -notmatch '^[a-fA-F0-9]{64}$'){throw 'Pinned resolved catalogue SHA-256 required.'}
  $catalog=[IO.Path]::GetFullPath($ResolvedCatalogPath)
@@ -66,7 +73,7 @@ try{
  RunNode @('plan',$catalog,$ResolvedCatalogSHA256,$output,$game,$ObservationNotBeforeUtc) 'preindexing-all-selected-ybn'
  if($PlanOnly){Status 'planned-no-geometry-export' 'Every selected YBN is indexed; geometry export was not run.';Get-Content -LiteralPath (Join-Path $output 'summary.json') -Raw;return}
  $manifestPath=Join-Path $output 'manifest.json';$processedThisRun=0
- $plan=[IO.File]::ReadAllText((Join-Path $output 'driver-plan01.json'))|ConvertFrom-Json
+ $plan=Read-DriverPlan01
  $visitedArchives=New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
  while($true){
   RunNode @('queue',$manifestPath,(Join-Path $output 'initial-observation01.json'),$ObservationNotBeforeUtc) 'prioritizing-complete-world-queue'
@@ -78,9 +85,9 @@ try{
   $hashCommand='$stream=[IO.File]::OpenRead('+(Literal $physical)+');$sha=[Security.Cryptography.SHA256]::Create();try{$h=([BitConverter]::ToString($sha.ComputeHash($stream))).Replace(''-'','''').ToLowerInvariant();[IO.File]::WriteAllText('+(Literal (Join-Path $output 'archive-hash.txt'))+',$h)}finally{$sha.Dispose();$stream.Dispose()}'
   RunOwned $hashCommand 'hashing-source-archive'
   $beforeHash=[IO.File]::ReadAllText((Join-Path $output 'archive-hash.txt')).Trim()
-  $plan=[IO.File]::ReadAllText((Join-Path $output 'driver-plan01.json'))|ConvertFrom-Json
+  $plan=Read-DriverPlan01
   $priorHashes=@($plan.Resources|Where-Object{$_.PhysicalArchive-eq$archive}|ForEach-Object ResultArchiveSHA256|Where-Object{$_}|Sort-Object -Unique)
-  RunNode @('revalidate',$manifestPath,$archive,$beforeHash,$catalog,$ResolvedCatalogSHA256,$ObservationNotBeforeUtc) 'validating-private-geometry-cache'
+  RunNode @('revalidate',$manifestPath,$archive,$beforeHash,$catalog,$ResolvedCatalogSHA256) 'validating-private-geometry-cache'
   if(@($priorHashes|Where-Object{$_-cne$beforeHash}).Count){
    $refreshPath=Join-Path $output 'catalog-source-change01.json';$refresh=$null;if([IO.File]::Exists($refreshPath)-and(Get-Item -LiteralPath $refreshPath).Length-le8192){$refresh=Get-Content -LiteralPath $refreshPath -Raw|ConvertFrom-Json}
    $refreshed=$refresh-and$refresh.Schema-eq1-and$refresh.Kind-eq'RichAudioCatalogSourceChange01'-and$refresh.GameExecutableSHA256-ceq$resolved.InputBinding.GameExecutableSHA256-and$refresh.Archive-ceq$archive-and$refresh.ArchiveSHA256-ceq$beforeHash-and$resolved.SourceArchiveRefreshId-ceq$refresh.RefreshId
@@ -88,7 +95,7 @@ try{
   }
   $localAnalyticBudget=[int][Math]::Floor([Math]::Max(1,[Math]::Min(15000,($MaximumSeconds-$clock.Elapsed.TotalSeconds-20)*1000)))
   RunNode @('upgrade-analytic',$manifestPath,(Join-Path $repo '.local'),$catalog,$ResolvedCatalogSHA256,[string]$localAnalyticBudget,$archive,$beforeHash) 'upgrading-revalidated-local-analytic-models'
-  $plan=[IO.File]::ReadAllText((Join-Path $output 'driver-plan01.json'))|ConvertFrom-Json
+  $plan=Read-DriverPlan01
   $remaining=$MaximumResources-$processedThisRun
   $ranks=@{};for($qi=0;$qi -lt $queue.Resources.Count;$qi++){$ranks[$queue.Resources[$qi].Id]=$qi}
   $pending=@($plan.Resources|Where-Object { $_.PhysicalArchive -eq $archive -and ($_.Status -eq 'pending-exterior-import' -or $_.PotentialStatus -eq 'pending-import') }|Sort-Object {$ranks[$_.Id]}|Select-Object -First ([Math]::Min(256,$remaining)))
@@ -100,7 +107,7 @@ try{
    RunOwned $command 'converting-bounded-potential-geometry-batch'
    RunNode @('accept',$manifestPath,(Join-Path $batchRoot 'batch-receipt.json'),$catalog,$ResolvedCatalogSHA256) 'qualifying-geometry-checkpoint'
    $processedThisRun+=$pending.Count
-   $plan=[IO.File]::ReadAllText((Join-Path $output 'driver-plan01.json'))|ConvertFrom-Json
+   $plan=Read-DriverPlan01
    $remaining=$MaximumResources-$processedThisRun
    RunNode @('queue',$manifestPath,(Join-Path $output 'initial-observation01.json'),$ObservationNotBeforeUtc) 'refreshing-initial-observation-priority'
    $queue=[IO.File]::ReadAllText((Join-Path $output 'queue.json'))|ConvertFrom-Json;$ranks=@{};for($qi=0;$qi -lt $queue.Resources.Count;$qi++){$ranks[$queue.Resources[$qi].Id]=$qi}
@@ -110,8 +117,8 @@ try{
   }
   RunOwned $hashCommand 'verifying-source-archive-after-cache-work'
   $afterHash=[IO.File]::ReadAllText((Join-Path $output 'archive-hash.txt')).Trim()
+  if($beforeHash -ne $afterHash){RunNode @('revalidate',$manifestPath,$archive,$afterHash,$catalog,$ResolvedCatalogSHA256) 'withdrawing-changed-source-checkpoints';Json (Join-Path $output 'catalog-source-change01.json') ([ordered]@{Schema=1;Kind='RichAudioCatalogSourceChange01';RefreshId=$runId;Archive=$archive;ArchiveSHA256=$afterHash;GameExecutableSHA256=$resolved.InputBinding.GameExecutableSHA256;GeneratedUtc=[DateTimeOffset]::UtcNow.ToString('o');State='fresh-catalogue-initialization-required'});throw 'Source archive changed during preparation; affected checkpoints invalidated.'}
   RunNode @('revalidate',$manifestPath,$archive,$afterHash,$catalog,$ResolvedCatalogSHA256,$ObservationNotBeforeUtc) 'binding-checkpoints-to-current-archive'
-  if($beforeHash -ne $afterHash){Json (Join-Path $output 'catalog-source-change01.json') ([ordered]@{Schema=1;Kind='RichAudioCatalogSourceChange01';RefreshId=$runId;Archive=$archive;ArchiveSHA256=$afterHash;GameExecutableSHA256=$resolved.InputBinding.GameExecutableSHA256;GeneratedUtc=[DateTimeOffset]::UtcNow.ToString('o');State='fresh-catalogue-initialization-required'});throw 'Source archive changed during preparation; affected checkpoints invalidated.'}
   if(!$pending.Count){[void]$visitedArchives.Add($archive)}
  }
  # Per-archive upgrades already cover validated resources. A global retained-
@@ -124,7 +131,7 @@ try{
  $checkpoint=[ordered]@{Schema=1;Kind='RichAudioInstalledGeometryContinuation01';ParentInvocationId=$ParentInvocationId;RunId=$runId;Cause=if($controlled){'budget-deadline'}else{'not-resumable'};ControlJoined=[bool]($script:lastOwnedProcess -and $script:lastOwnedProcess.ControlJoined);UnknownClosure=[bool](!$script:lastOwnedProcess -or $script:lastOwnedProcess.UnknownClosure);CanContinue=$false}
  $manifestFile=Join-Path $output 'manifest.json'
  if($controlled -and [IO.File]::Exists($manifestFile) -and (Get-Item -LiteralPath $manifestFile).Length -le 67108864){
-  $snapshot=Get-Content -LiteralPath (Join-Path $output 'driver-plan01.json') -Raw|ConvertFrom-Json
+  $snapshot=Read-DriverPlan01
   $eligible=@($snapshot.Resources|Where-Object { $_.Eligibility -eq 'eligible-exterior' -or $_.GeometryEligibility -eq 'eligible-resource-root' });$prepared=@($eligible|Where-Object { $_.Status -eq 'imported-exterior-incomplete-surfaces' -or $_.PotentialStatus -eq 'imported-resource-root-incomplete-surfaces' }).Count;$failed=@($eligible|Where-Object { $_.Status -eq 'deferred-resource-import-failed' -or $_.PotentialStatus -eq 'failed-resource-import' }).Count
   $checkpoint.CanContinue=($snapshot.ResolvedCatalogSHA256 -ceq $ResolvedCatalogSHA256 -and $eligible.Count-$prepared -gt $failed)
   $checkpoint.CatalogSHA256=$ResolvedCatalogSHA256;$checkpoint.ManifestSHA256=Get-PreparationHash $manifestFile;$checkpoint.PendingResources=$eligible.Count-$prepared;$checkpoint.FailedResources=$failed;$checkpoint.EligibleResources=$eligible.Count

@@ -38,7 +38,7 @@ export class InstalledSceneService01 {
  }
  observeInitial01({sequence,generation,geometryTimeMs,sourceAgeMs,listener,sources=[]}={}){
   if(this.closed||this.failed||this.priorityAccepted||this.priorityPending||this.priorityRejections>=8||performance.now()-this.lastPriorityAttempt<1000||!this.config.initialObservationPath)return false;
-  if(!Number.isSafeInteger(sequence)||sequence<1||!Number.isSafeInteger(generation)||generation<1||!Number.isFinite(geometryTimeMs)||geometryTimeMs<0||!Number.isFinite(sourceAgeMs)||sourceAgeMs<0||sourceAgeMs>500||!Array.isArray(sources)||sources.length>2)return false;
+  if(!Number.isSafeInteger(sequence)||sequence<0||!Number.isSafeInteger(generation)||generation<1||!Number.isFinite(geometryTimeMs)||geometryTimeMs<0||!Number.isFinite(sourceAgeMs)||sourceAgeMs<0||sourceAgeMs>500||!Array.isArray(sources)||sources.length>2)return false;
   try{listener=vector(listener);sources=sources.map(vector);this.lastPriorityAttempt=performance.now();this.priorityPending=true;this.worker.postMessage({schema:1,type:'initial-observation',session:this.session,catalogSHA256:this.catalogBinding,record:{Schema:1,Kind:'RichAudioInitialWorldObservation01',GameExecutableSHA256:this.config.expectedGameSHA256,session:this.session,sequence,generation,geometryTimeMs,sourceAgeMs,listener,sources,origin:'normal-gameplay-observation',receivedUtc:new Date().toISOString()}});return true;}
   catch{this.priorityPending=false;this.priorityRejections++;return false;}
  }

@@ -108,7 +108,8 @@ function Continuation-Checkpoint {
         if(!$controlled){return $checkpoint}
         $manifestFile=Join-Path $output 'geometry\manifest.json';$resolvedFile=Join-Path $output 'resolved\resolved-catalog.json'
         if(![IO.File]::Exists($manifestFile) -or (Get-Item -LiteralPath $manifestFile).Length -gt 67108864 -or ![IO.File]::Exists($resolvedFile)){return $checkpoint}
-        $compact=Join-Path $output 'geometry\driver-plan01.json';$snapshot=if([IO.File]::Exists($compact)){Get-Content -LiteralPath $compact -Raw|ConvertFrom-Json}else{Get-Content -LiteralPath $manifestFile -Raw|ConvertFrom-Json}
+        $compact=Join-Path $output 'geometry\driver-plan01.json';if(![IO.File]::Exists($compact)-or(Get-Item -LiteralPath $compact).Length-gt16777216){return $checkpoint};$snapshot=Get-Content -LiteralPath $compact -Raw|ConvertFrom-Json
+        if($snapshot.Schema-ne1-or$snapshot.ManifestSHA256-notmatch'^[a-f0-9]{64}$'-or$snapshot.ManifestSHA256-cne(Get-PreparationHash $manifestFile)){return $checkpoint}
         $catalogPin=Get-PreparationHash $resolvedFile
         if($snapshot.ResolvedCatalogSHA256 -cne $catalogPin -or $snapshot.InputBinding.GameExecutableSHA256 -cne $binding.GameExecutableSHA256 -or $snapshot.InputBinding.CodeWalkerCoreSHA256 -cne $binding.CodeWalkerCoreSHA256 -or (Get-PreparationFingerprint (Input-Binding)) -cne $fingerprint){return $checkpoint}
         $eligible=@($snapshot.Resources|Where-Object { $_.Eligibility -eq 'eligible-exterior' -or $_.GeometryEligibility -eq 'eligible-resource-root' });$prepared=@($eligible|Where-Object { $_.Status -eq 'imported-exterior-incomplete-surfaces' -or $_.PotentialStatus -eq 'imported-resource-root-incomplete-surfaces' }).Count;$failed=@($eligible|Where-Object { $_.Status -eq 'deferred-resource-import-failed' -or $_.PotentialStatus -eq 'failed-resource-import' }).Count

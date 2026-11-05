@@ -42,7 +42,7 @@ namespace RichAudio.Beacon.Windows {public sealed class GameplayRuntime {
 namespace RichAudio.Beacon.Rph {
  internal static class InGameMenu {internal static void Start(){}internal static void Stop(){}}
  internal static class PassiveListener {internal static void Start(){}internal static void Stop(){}}
- internal static class InstalledWorldWarmup {internal static int Starts,Stops;internal static string StartedUtc="2026-11-05T13:54:25.2639009Z";internal static void Start(){Starts++;}internal static void Stop(){Stops++;}}
+ internal static class InstalledWorldWarmup {internal static int Starts,Stops,Offers;internal static string StartedUtc="2026-11-05T13:54:25.2639009Z";internal static bool OfferInitial01(string session,ListenerState listener){Offers++;return true;}internal static void Start(){Starts++;}internal static void Stop(){Stops++;}}
 }
 internal static class TestStreetContinuity01 {
  static int assertions;static readonly List<string> cases=new List<string>();

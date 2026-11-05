@@ -27,13 +27,15 @@ $nodeFiles=@(
  'tests/Test-StockPressureSelection.mjs','tests/Test-VehiclePipeline.mjs',
  'tests/Test-ProcessingRolesStreet01.mjs','tests/Test-ProcessingRoleIntegrationStreet01.mjs',
  'tests/Test-InitialWorldPriority01.mjs','tests/Test-AcousticGpuPages01.mjs',
+ 'tests/Test-AtomicPublication01.mjs',
  'tests/Test-ColdNpcHistory01.mjs','tests/Test-ColdNpcFailureRetention01.mjs',
  'tests/Test-Synthesis12.mjs',
- 'tests/Test-WorldCompletion01.mjs','tests/Test-WorldStartupCompletion01.mjs',
+ 'tests/Test-WorldCompletion01.mjs','tests/Test-WorldStartupCompletion01.mjs','tests/Test-WorldValidationEpochOrderingCompletion01.mjs',
  'tests/Test-NativeSupportBoundsCompletion01.mjs','tests/Test-InteriorPlacementCompletion01.mjs'
 )
 $scripts=@(
  @{name='product-capture-continuity';file='tools/Test-StreetContinuity01.ps1';arguments=@()},
+ @{name='preparation-only-initial-pose';file='tools/Test-InitialPreparationOffer01.ps1';arguments=@()},
  @{name='persisted-settings-handoff';file='tools/Test-AcousticSettingsHandoff.ps1';arguments=@()},
  @{name='sidebar-input-status-animation';file='tools/Test-InGameMenu.ps1';arguments=@('-Output',(Join-Path $out 'original-menu-previews'))},
  @{name='recording-menu-bridge';file='tools/Test-SoundMapMenu.ps1';arguments=@()},

@@ -1,5 +1,7 @@
 # STREET-01 integrated development result
 
+This report preserves my initial integrated checkpoint and its failed hosted results. My subsequent [completion pass](STREET_01_COMPLETION_PASS.md) records the newer implementation, measurements and remaining gates separately.
+
 My STREET-01 milestone is **not complete**. Codex connected genuine installed collision data, persistent world preparation, my existing main gameplay worker, early reflections, Bati continuity, procedural airflow, settings and SoundMap. Selective native engine/exhaust replacement remains unavailable. Full installed-world coverage, exact-stack telemetry, complete deadlines and my integrated GTA listening acceptance remain open.
 
 The initial integrated implementation is commit [`a7ccbf8b259e2e091eca8e28bdcec7c26fcbf298`](https://github.com/icydv/RichAudio/commit/a7ccbf8b259e2e091eca8e28bdcec7c26fcbf298) on `feature/street-01-integrated-presence`, followed by documentation and a hosted source-closure correction. The prerequisite commit preserves my reviewed uncommitted menu diagnostics and first-open correction. No existing draft PR or closed evidence was rewritten.

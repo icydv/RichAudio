@@ -18,12 +18,14 @@ $receiptPath=Join-Path $output 'original-stage.json';$stageResults=[Collections.
 $receipt=[ordered]@{Process=[ordered]@{State='deadline';ControlJoined=$true;UnknownClosure=$false}}
 Write-Original 'resolved\resolved-catalog.json' @{kind='original-complete-catalogue'};$catalogHash=Get-PreparationHash (Join-Path $output 'resolved\resolved-catalog.json')
 $manifest=[ordered]@{ResolvedCatalogSHA256=$catalogHash;InputBinding=$binding;Resources=@(@{Eligibility='eligible-exterior';Status='imported-exterior-incomplete-surfaces'},@{Eligibility='eligible-exterior';Status='deferred-resource-import-failed'},@{Eligibility='eligible-exterior';Status='pending-exterior-import'})}
-function Reset-Original {Write-Original 'original-stage.json' $receipt;Write-Original 'geometry\manifest.json' $manifest}
+function Reset-Original {Write-Original 'original-stage.json' $receipt;Write-Original 'geometry\manifest.json' $manifest;$view=[ordered]@{Schema=1;ManifestSHA256=Get-PreparationHash (Join-Path $output 'geometry\manifest.json');ResolvedCatalogSHA256=$manifest.ResolvedCatalogSHA256;InputBinding=$manifest.InputBinding;Resources=$manifest.Resources};Write-Original 'geometry\driver-plan01.json' $view}
 try {
  Reset-Original;$value=Continuation-Checkpoint
  Assert ($value.Resumable -and $value.WorkerClosureVerified -and !$value.UnknownClosure) 'A joined typed deadline with exact source/catalogue and genuinely pending work must be resumable'
  Assert ($value.SupervisorBatchId -ceq $env:RICHAUDIO_WORLD_BATCH_ID -and $value.RunId -ceq $runId) 'Parent and child attempt identities must be retained separately'
  Assert ($value.PendingResources -eq 2 -and $value.FailedResources -eq 1 -and $value.ManifestSHA256 -eq (Get-PreparationHash (Join-Path $output 'geometry\manifest.json'))) 'Counts must derive from the exact durable manifest, not files scanned'
+ [IO.File]::AppendAllText((Join-Path $output 'geometry\manifest.json'),' ');Assert (!(Continuation-Checkpoint).Resumable) 'An older compact view cannot supply counts for a newer manifest generation';Reset-Original
+ Remove-Item -LiteralPath (Join-Path $output 'geometry\driver-plan01.json');Assert (!(Continuation-Checkpoint).Resumable) 'A missing compact view must stop continuation without materialising the full manifest';Reset-Original
  $receipt.Process.UnknownClosure=$true;Reset-Original;Assert (!(Continuation-Checkpoint).Resumable) 'Unknown owned-process closure must stop continuation';$receipt.Process.UnknownClosure=$false
  $receipt.Process.State='failed';Reset-Original;Assert (!(Continuation-Checkpoint).Resumable) 'A generic failed worker is not a budget terminal'
  $inner=[ordered]@{Schema=1;Kind='RichAudioInstalledGeometryContinuation01';ParentInvocationId=$runId;Cause='budget-deadline';CanContinue=$true;ControlJoined=$true;UnknownClosure=$false};Write-Original 'geometry\continuation-checkpoint.json' $inner

@@ -75,6 +75,7 @@ namespace RichAudio.Beacon.Rph {
    // A measured camera cut is consumed privately, never interpolated through.
    // Existing vehicle observations can continue on the next independent pose.
    if(!decision.Publish){Diagnostic(decision.Classification);return;}
+   InstalledWorldWarmup.OfferInitial01(r.Session,decision.Listener);
    bool vehicleView=false;
    try{vehicleView=Rage.Native.NativeFunction.CallByName<bool>("IS_GAMEPLAY_CAM_RENDERING")&&Rage.Native.NativeFunction.CallByName<bool>("IS_FOLLOW_VEHICLE_CAM_ACTIVE");}
    catch(ThreadAbortException){throw;}catch{vehicleView=false;}

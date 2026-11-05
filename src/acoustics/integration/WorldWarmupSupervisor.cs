@@ -1,4 +1,5 @@
-// Preparation worker only. No native audio, telemetry, game mutation or endpoint.
+// Preparation worker and advisory initial-pose writer. No native call, audio,
+// game mutation or endpoint; Capture offers only copied in-memory values.
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -10,6 +11,15 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 namespace RichAudio.Preparation {
+ [DataContract] sealed class InitialObservation01 {
+  [DataMember(IsRequired=true)] public int Schema=1;
+  [DataMember(IsRequired=true)] public string Kind="RichAudioInitialWorldObservation01";
+  [DataMember(IsRequired=true)] public string GameExecutableSHA256,session,origin="normal-gameplay-observation",receivedUtc;
+  [DataMember(IsRequired=true)] public long sequence,generation;
+  [DataMember(IsRequired=true)] public double geometryTimeMs,sourceAgeMs;
+  [DataMember(IsRequired=true)] public double[] listener;
+  [DataMember(IsRequired=true)] public double[][] sources=new double[0][];
+ }
  [DataContract] public sealed class WarmupBinding {
   [DataMember] public string RelativePath;
   [DataMember] public string SHA256;
@@ -39,7 +49,7 @@ namespace RichAudio.Preparation {
  }
  [DataContract] sealed class SupervisorStatus01 {
   [DataMember] public int Schema=1;
-  [DataMember] public string RecordedUtc,State,Stage;
+  [DataMember] public string RecordedUtc,State,Stage,InitialObservationState;
   [DataMember] public int Batch,MaximumBatches;
   [DataMember] public bool Running,WorkerJoined;
  }
@@ -67,9 +77,64 @@ namespace RichAudio.Preparation {
   readonly ManualResetEvent stop=new ManualResetEvent(false);
   volatile string state="not-started";
   string workflowStartedUtc;
+  sealed class PriorityPose01 {internal string Session;internal long Sequence,Generation,Ticks;internal double[] Position;}
+  sealed class PriorityBinding01 {internal string Output,GameSHA256;}
+  readonly object priorityGate=new object();PriorityPose01 priorityPending;PriorityBinding01 priorityBinding;
+  string prioritySession;bool priorityAccepted;int priorityWriter,priorityAttempts;long priorityNextAttempt;
+  volatile string priorityState="waiting-valid-configuration";
   int used;
   public string State { get { return state; } }
   public string StartedUtc { get { return workflowStartedUtc; } }
+  public string InitialObservationState {get{return priorityState;}}
+  // Capture offers memory only. No file operation, wait or host is involved.
+  // A contended metadata lock simply withholds this advisory offer.
+  public bool OfferInitialObservation01(string session,long sequence,long generation,long observedTicks,long clockFrequency,double[] position){
+   if(stop.WaitOne(0)||clockFrequency!=Stopwatch.Frequency||sequence<0||sequence>9007199254740991L||generation<1||generation>9007199254740991L||session==null||!System.Text.RegularExpressions.Regex.IsMatch(session,"\\A[a-f0-9]{32}\\z")||position==null||position.Length!=3)return false;
+   foreach(double x in position)if(Double.IsNaN(x)||Double.IsInfinity(x)||Math.Abs(x)>100000)return false;
+   long now=Stopwatch.GetTimestamp();if(observedTicks<0||(decimal)now-observedTicks>Stopwatch.Frequency/2m||(decimal)observedTicks-now>Stopwatch.Frequency/500m)return false;
+   if(!Monitor.TryEnter(priorityGate))return false;
+   try{
+    if(stop.WaitOne(0)||priorityAccepted||priorityAttempts>=8||prioritySession!=null&&prioritySession!=session)return false;
+    if(prioritySession==null)prioritySession=session;
+    if(priorityPending==null||(decimal)now-priorityPending.Ticks>Stopwatch.Frequency/2m)priorityPending=new PriorityPose01{Session=session,Sequence=sequence,Generation=generation,Ticks=observedTicks,Position=(double[])position.Clone()};
+   }finally{Monitor.Exit(priorityGate);}
+   QueuePriority01();return true;
+  }
+  void QueuePriority01(){
+   if(stop.WaitOne(0)||Volatile.Read(ref priorityBinding)==null||Stopwatch.GetTimestamp()<Interlocked.Read(ref priorityNextAttempt))return;
+   if(Interlocked.CompareExchange(ref priorityWriter,1,0)==0)ThreadPool.QueueUserWorkItem(delegate{WritePriority01();});
+  }
+  static bool ExistingPriority01(string target,PriorityPose01 pose,string gameSHA,string epoch){
+   if(!File.Exists(target))return false;NoLinks(target);if(new FileInfo(target).Length>8192)return false;InitialObservation01 value;
+   using(var stream=File.OpenRead(target))value=(InitialObservation01)new DataContractJsonSerializer(typeof(InitialObservation01)).ReadObject(stream);
+   DateTimeOffset received,start;if(value==null||value.Schema!=1||value.Kind!="RichAudioInitialWorldObservation01"||value.GameExecutableSHA256!=gameSHA||value.session!=pose.Session||value.origin!="normal-gameplay-observation"||value.sequence<0||value.sequence>9007199254740991L||value.generation<1||value.generation>9007199254740991L||Double.IsNaN(value.geometryTimeMs)||Double.IsInfinity(value.geometryTimeMs)||value.geometryTimeMs<0||value.listener==null||value.listener.Length!=3||value.sources==null||value.sources.Length>2||Double.IsNaN(value.sourceAgeMs)||Double.IsInfinity(value.sourceAgeMs)||value.sourceAgeMs<0||value.sourceAgeMs>500||value.receivedUtc==null||!System.Text.RegularExpressions.Regex.IsMatch(value.receivedUtc,"\\A[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,7})?Z\\z")||!DateTimeOffset.TryParse(value.receivedUtc,CultureInfo.InvariantCulture,DateTimeStyles.RoundtripKind,out received)||!DateTimeOffset.TryParse(epoch,CultureInfo.InvariantCulture,DateTimeStyles.RoundtripKind,out start)||received<start.AddSeconds(-2)||received>DateTimeOffset.UtcNow.AddMilliseconds(250))return false;
+   foreach(double x in value.listener)if(Double.IsNaN(x)||Double.IsInfinity(x)||Math.Abs(x)>100000)return false;
+   foreach(var p in value.sources){if(p==null||p.Length!=3)return false;foreach(double x in p)if(Double.IsNaN(x)||Double.IsInfinity(x)||Math.Abs(x)>100000)return false;}return true;
+  }
+  void WritePriority01(){
+   string pendingFile=null,lockPath=null;FileStream writerLock=null;PriorityPose01 pose=null;
+   try{
+    var binding=Volatile.Read(ref priorityBinding);if(binding==null||stop.WaitOne(0))return;
+    lock(priorityGate){if(priorityAccepted||priorityAttempts>=8)return;pose=priorityPending;priorityPending=null;}
+    if(pose==null)return;long now=Stopwatch.GetTimestamp();double age=(now-pose.Ticks)*1000d/Stopwatch.Frequency;
+    if(age< -2||age>500){priorityState="stale-offer-withheld";return;}
+    Interlocked.Increment(ref priorityAttempts);string target=Path.Combine(binding.Output,"geometry","initial-observation01.json");NoLinks(target);Directory.CreateDirectory(Path.GetDirectoryName(target));lockPath=target+".lock";
+    writerLock=new FileStream(lockPath,FileMode.CreateNew,FileAccess.Write,FileShare.None);
+    if(ExistingPriority01(target,pose,binding.GameSHA256,workflowStartedUtc)){lock(priorityGate){priorityAccepted=true;priorityPending=null;}priorityState=stop.WaitOne(0)?"cancelled":"existing-first-position-preserved";return;}
+    pendingFile=target+".pending-"+Guid.NewGuid().ToString("N");
+    age=(Stopwatch.GetTimestamp()-pose.Ticks)*1000d/Stopwatch.Frequency;
+    var value=new InitialObservation01{GameExecutableSHA256=binding.GameSHA256,session=pose.Session,sequence=pose.Sequence,generation=pose.Generation,geometryTimeMs=pose.Ticks*1000d/Stopwatch.Frequency,sourceAgeMs=Math.Max(0,age),listener=pose.Position,receivedUtc=DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture)};
+    using(var stream=new FileStream(pendingFile,FileMode.CreateNew,FileAccess.Write,FileShare.None))new DataContractJsonSerializer(typeof(InitialObservation01)).WriteObject(stream,value);
+    // Recheck original acquisition after directory/lock/serialization work.
+    // Stop cannot preempt an OS rename already executing; it prevents any
+    // queued offer from entering this commit after cancellation is observed.
+    now=Stopwatch.GetTimestamp();age=(now-pose.Ticks)*1000d/Stopwatch.Frequency;
+    if(stop.WaitOne(0)||age< -2||age>500){priorityState=stop.WaitOne(0)?"cancelled":"stale-offer-withheld";return;}
+    if(File.Exists(target))File.Replace(pendingFile,target,null);else File.Move(pendingFile,target);pendingFile=null;
+    lock(priorityGate){priorityAccepted=true;priorityPending=null;}priorityState=stop.WaitOne(0)?"cancelled":"initial-position-retained";
+   }catch(Exception){priorityState=stop.WaitOne(0)?"cancelled":priorityAttempts>=8?"bounded-priority-write-failed":"priority-write-deferred";Interlocked.Exchange(ref priorityNextAttempt,Stopwatch.GetTimestamp()+Stopwatch.Frequency);}
+   finally{if(pendingFile!=null)try{File.Delete(pendingFile);}catch(Exception){}if(writerLock!=null){writerLock.Dispose();try{File.Delete(lockPath);}catch(Exception){}}Interlocked.Exchange(ref priorityWriter,0);}
+  }
   // RPH can load the DLL from its cache. Configuration remains beside the
   // installed plugin in the game's Plugins directory, not beside that copy.
   public static string ConfigurationForGameExecutable(string executable){return Path.Combine(Path.GetDirectoryName(Path.GetFullPath(executable)),"Plugins","RichAudio.WorldWarmup.json");}
@@ -81,7 +146,7 @@ namespace RichAudio.Preparation {
   }
   // No file IO or join on the game fiber. The worker cooperatively cancels,
   // then closes its owned Windows job after a bounded cleanup grace period.
-  public void Stop(){stop.Set();}
+  public void Stop(){stop.Set();priorityState="cancelled";}
   public static string Hash(string filename) {
    using(var stream=File.OpenRead(filename))using(var sha=SHA256.Create())
     return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-","").ToLowerInvariant();
@@ -121,7 +186,7 @@ namespace RichAudio.Preparation {
   }
   static string Literal(string text){return "'"+text.Replace("'","''")+"'";}
   void PublishStatus(string output,int batch,int batches,bool running,bool joined) {
-   try{var value=new SupervisorStatus01{RecordedUtc=DateTime.UtcNow.ToString("o"),State=state,Stage=running?(File.Exists(Path.Combine(output,"geometry","summary.json"))?"building":"preparing/indexing"):state,Batch=batch,MaximumBatches=batches,Running=running,WorkerJoined=joined};
+   try{var value=new SupervisorStatus01{RecordedUtc=DateTime.UtcNow.ToString("o"),State=state,InitialObservationState=priorityState,Stage=running?(File.Exists(Path.Combine(output,"geometry","summary.json"))?"building":"preparing/indexing"):state,Batch=batch,MaximumBatches=batches,Running=running,WorkerJoined=joined};
     string target=Path.Combine(output,"supervisor-status.json"),temporary=target+".next";
     using(var stream=File.Create(temporary))new DataContractJsonSerializer(typeof(SupervisorStatus01)).WriteObject(stream,value);
     if(File.Exists(target))File.Replace(temporary,target,null);else File.Move(temporary,target);
@@ -143,10 +208,11 @@ namespace RichAudio.Preparation {
    OwnedJob job=null;Process worker=null;string output=null;int batch=0,batches=1;bool joined=false;
    try {
     if(stop.WaitOne(0)){state="cancelled";return;}
-    if(!File.Exists(filename)){state="not-configured";return;}
-    state="validating";var c=ReadConfiguration(filename,gameExecutable);string configurationSHA256=Hash(filename);if(!c.Enabled){state="disabled";return;}
+    if(!File.Exists(filename)){state="not-configured";priorityState="configuration-not-found";return;}
+    state="validating";var c=ReadConfiguration(filename,gameExecutable);string configurationSHA256=Hash(filename);if(!c.Enabled){state="disabled";priorityState="configuration-disabled";return;}
     if(stop.WaitOne(0)){state="cancelled";return;}
     output=Full(c.OutputRoot);Directory.CreateDirectory(output);
+    Volatile.Write(ref priorityBinding,new PriorityBinding01{Output=output,GameSHA256=c.GameExecutableSHA256});QueuePriority01();
     string cancel=Path.Combine(output,"cancel.request");
     if(File.Exists(cancel)){
      string marker=File.ReadAllText(cancel);Guid id;

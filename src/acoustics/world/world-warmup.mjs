@@ -4,6 +4,7 @@ import {pathToFileURL,fileURLToPath} from 'node:url';
 import {sha256} from './collision-mesh.mjs';
 import {collisionProjection,loadStaticWorldResource,classifyPotentialCollisionResource01} from './static-world-resource.mjs';
 import {loadCollisionResource} from './collision-resource.mjs';
+import {atomicWriteJson01} from './atomic-publication01.mjs';
 import {resourcePreparationStates01,geometryQueueCounts01,worldCoverageStates01,readInitialWorldPriority01,orderWorldPreparationQueue01} from './world-state-completion01.mjs';
 import {worldGeometryDecoderSHA25601,resourceDependencyFingerprint01,compatibleLegacyStreet01Plan,compatiblePriorDecoderResource01} from './world-cache-identity01.mjs';
 const algorithm='installed-exterior-collision-warmup-v1';
@@ -15,7 +16,7 @@ const canonical=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray
 const digest=v=>typeof v==='string'&&/^[a-f0-9]{64}$/i.test(v);
 const norm=v=>v.replaceAll('\\','/').toLowerCase();
 function readJson(filename,expected){const info=fs.statSync(filename);if(info.size>67108864)throw Error('warmup input byte limit');const bytes=fs.readFileSync(filename);if(expected&&sha256(bytes)!==expected.toLowerCase())throw Error('warmup input integrity');return JSON.parse(bytes.toString('utf8').replace(/^\uFEFF/,''));}
-function atomic(filename,value){const pending=filename+'.pending-'+process.pid;fs.writeFileSync(pending,JSON.stringify(value));fs.renameSync(pending,filename);if(path.basename(filename)==='manifest.json'&&Array.isArray(value.Resources))atomic(path.join(path.dirname(filename),'driver-plan01.json'),{Schema:1,ResolvedCatalogSHA256:value.ResolvedCatalogSHA256,InputBinding:value.InputBinding,ValidationEpochUtc01:value.ValidationEpochUtc01??null,Resources:value.Resources.map(r=>({Id:r.Id,Hash:r.Hash,EntryPath:r.EntryPath,PhysicalArchive:r.PhysicalArchive,Eligibility:r.Eligibility,GeometryEligibility:r.GeometryEligibility,Status:r.Status,PotentialStatus:r.PotentialStatus??null,ResultArchiveSHA256:(r.Result??r.PotentialResult??r.RejectedResult)?.ArchiveSHA256??null}))});}
+function atomic(filename,value){const published=atomicWriteJson01(filename,value);if(path.basename(filename)==='manifest.json'&&Array.isArray(value.Resources))atomicWriteJson01(path.join(path.dirname(filename),'driver-plan01.json'),{Schema:1,ManifestSHA256:published.sha256,ResolvedCatalogSHA256:value.ResolvedCatalogSHA256,InputBinding:value.InputBinding,ValidationEpochUtc01:value.ValidationEpochUtc01??null,Resources:value.Resources.map(r=>({Id:r.Id,Hash:r.Hash,EntryPath:r.EntryPath,PhysicalArchive:r.PhysicalArchive,Eligibility:r.Eligibility,GeometryEligibility:r.GeometryEligibility,Status:r.Status,PotentialStatus:r.PotentialStatus??null,ResultArchiveSHA256:(r.Result??r.PotentialResult??r.RejectedResult)?.ArchiveSHA256??null}))});return published;}
 function relativeEntry(value){if(typeof value!=='string'||value.length>8192||value.includes(':')||value.startsWith('/')||value.startsWith('\\')||value.replaceAll('\\','/').split('/').includes('..'))throw Error('bounded game-relative collision entry');return value.replaceAll('\\','/');}
 export function physicalArchive(gameRoot,entry,exists=p=>fs.existsSync(p)&&fs.statSync(p).isFile()){
  const relative=relativeEntry(entry),pieces=relative.split('/');for(let i=0;i<pieces.length;i++)if(/\.rpf$/i.test(pieces[i])){const candidate=pieces.slice(0,i+1).join('/');if(exists(path.join(gameRoot,candidate)))return candidate;}return null;
@@ -57,6 +58,7 @@ export function revalidateArchive(plan,archive,archiveSHA256,catalogPath,catalog
   try{if(norm(candidate.ArchiveSHA256)!==norm(archiveSHA256))throw Error('archive changed');row.PotentialResult={...candidate,Classification:checkedPotentialResult01(row,catalog,catalogSHA256)};row.PotentialStatus='imported-resource-root-incomplete-surfaces';row.PotentialFailure=null;row.PotentialFailureArchiveSHA256=null;}
   catch(error){row.PotentialResult=null;row.PotentialStatus='pending-import';row.PotentialFailure=String(error.message).slice(0,2048);row.PotentialFailureArchiveSHA256=null;}
  }
+ for(const row of plan.Resources.filter(r=>r.PhysicalArchive===archive))delete row.ArchiveValidation01;
  if(validationEpochUtc01){if(validationEpochUtc01!==plan.ValidationEpochUtc01||!Number.isFinite(Date.parse(validationEpochUtc01)))throw Error('exact validation epoch required');for(const row of plan.Resources.filter(r=>r.PhysicalArchive===archive))row.ArchiveValidation01={EpochUtc:validationEpochUtc01,ArchiveSHA256:archiveSHA256,ValidatedUtc:new Date().toISOString(),Source:'current-archive-sha256'};}
  return refreshPreparationStates01(plan,catalog,new Set(plan.Resources.filter(r=>r.PhysicalArchive===archive).map(r=>r.Id)));
 }
@@ -79,7 +81,7 @@ export function acceptBatch(plan,batch,catalogPath,catalogSHA256){
   catch(error){row.RejectedResult=row.Result;row.Result=null;row.Status='deferred-resource-import-failed';row.Failure=String(error.message).slice(0,2048);row.FailureArchiveSHA256=batch.AfterSHA256;}
  }
  for(const failure of batch.Failures??[]){const row=byEntry.get(norm(failure.Entry));if(!row||(row.Eligibility!=='eligible-exterior'&&row.GeometryEligibility!=='eligible-resource-root'))throw Error('failed batch entry outside eligible plan');if(row.Eligibility==='eligible-exterior'){row.Result=null;row.Status='deferred-resource-import-failed';row.Failure=String(failure.Error).slice(0,2048);row.FailureArchiveSHA256=batch.AfterSHA256;}else{row.PotentialResult=null;row.PotentialStatus='failed-resource-import';row.PotentialFailure=String(failure.Error).slice(0,2048);row.PotentialFailureArchiveSHA256=batch.AfterSHA256;}}
- if(plan.ValidationEpochUtc01)for(const item of [...batch.Resources,...(batch.Failures??[])])byEntry.get(norm(item.Entry)).ArchiveValidation01={EpochUtc:plan.ValidationEpochUtc01,ArchiveSHA256:batch.AfterSHA256,ValidatedUtc:new Date().toISOString(),Source:'current-archive-sha256'};
+ for(const item of [...batch.Resources,...(batch.Failures??[])])delete byEntry.get(norm(item.Entry)).ArchiveValidation01;
  return refreshPreparationStates01(plan,catalog,new Set([...batch.Resources,...(batch.Failures??[])].map(r=>byEntry.get(norm(r.Entry)).Id)));
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
