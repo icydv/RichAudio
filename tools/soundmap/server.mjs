@@ -8,14 +8,15 @@ import {PassiveListener} from './passive.mjs';
 import {SOUND_MAP_WIRE,geometryWireBudget} from './ui/wire-limits.mjs';
 
 const ui=path.join(path.dirname(fileURLToPath(import.meta.url)),'ui');
+const wireContract=fileURLToPath(new URL('../../src/acoustics/streaming/soundmap-wire.mjs',import.meta.url));
 const equal=(a,b)=>typeof a==='string'&&a.length===b.length&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 async function body(req,limit){const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>limit)throw Error('Request byte bound');chunks.push(chunk);}return Buffer.concat(chunks);}
 export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.now,ownerId=null}={}) {
   if(!Number.isInteger(port)||port<0||port>65535)throw Error('Port bound');
   const privateRoot=privateDirectory(root),token=randomBytes(32).toString('hex'),recorder=new SessionRecorder(privateRoot,{now});
   if(ownerId!==null&&(typeof ownerId!=='string'||!/^[a-f0-9]{32}$/.test(ownerId)))throw Error('Owner identity bound');
-  // The standalone passive viewer is also packaged without engine sources.
-  // Load the opt-in cache adapter only after trusted local code publishes one.
+  // Passive presentation needs only the pure shared wire contract. Load the
+  // opt-in cache adapter only after trusted local code publishes one.
   const passive=new PassiveListener(now);let cacheFeed=null,cacheLoading=null,cacheEpoch=0,cacheRevision=0,cacheReason='not-supplied',requestClose;
   const emptyCacheStatus=()=>({available:false,generation:null,revision:cacheRevision,reason:cacheReason,clockQualified:true,ageMs:null,geometryTimeMs:null,authority:'original-authored-fixture-only',installedWorldVerified:false,viewerCanPublishAcoustics:false});
   const cacheWorld={
@@ -127,6 +128,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
         header.write('RIFF');header.writeUInt32LE(bytes+36,4);header.write('WAVEfmt ',8);header.writeUInt32LE(16,16);header.writeUInt16LE(3,20);header.writeUInt16LE(2,22);header.writeUInt32LE(48000,24);header.writeUInt32LE(384000,28);header.writeUInt16LE(8,32);header.writeUInt16LE(32,34);header.write('data',36);header.writeUInt32LE(bytes,40);
         res.setHeader('Content-Type','audio/wav');res.setHeader('Content-Disposition','attachment; filename="owned-output.wav"');res.write(header);fs.createReadStream(path.join(replay.dir,'owned-output.f32le')).pipe(res);
       }else if(req.method==='GET'&&!route.startsWith('/api/')){
+        if(route==='/wire-limits.mjs'){res.setHeader('Content-Type','text/javascript');fs.createReadStream(wireContract).pipe(res);return;}
         const relative=route==='/'?'index.html':decodeURIComponent(route.slice(1));
         if(relative.includes('..')||relative.includes('\\')||path.isAbsolute(relative))throw Error('Static path rejected');
         const file=path.join(ui,relative);if(!fs.existsSync(file)||!fs.statSync(file).isFile()){send({error:'Not found'},404);return;}

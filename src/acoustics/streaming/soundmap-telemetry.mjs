@@ -3,7 +3,7 @@
 import {freeze, requireValue,validated} from '../engine/contracts.mjs';
 import {coordinateSpace} from '../research/local-geometry.mjs';
 import {randomUUID,createHash} from 'node:crypto';
-import {SOUND_MAP_WIRE,INSTALLED_GEOMETRY_PROFILE,geometryWireBudget,rememberPreparedGeometryEncoding} from '../../../tools/soundmap/ui/wire-limits.mjs';
+import {SOUND_MAP_WIRE,INSTALLED_GEOMETRY_PROFILE,geometryWireBudget,rememberPreparedGeometryEncoding} from './soundmap-wire.mjs';
 
 export const soundMapLimits=Object.freeze({minimumFps:15,maximumFps:30,defaultFps:20,
   defaultPaths:128,maximumPaths:256,frameBytes:SOUND_MAP_WIRE.frameBytes,geometryBytes:SOUND_MAP_WIRE.compactGeometryBytes,
