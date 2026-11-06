@@ -2,6 +2,8 @@
 // invokes CodeWalker, acquires telemetry or produces PCM.
 import {parentPort,workerData} from 'node:worker_threads';
 import fs from 'node:fs';
+import {Worker} from 'node:worker_threads';
+import {createMetadataStage01} from './prepared-world-metadata01.mjs';
 import {InstalledStaticWorld01,encodeInstalledStaticScene01,prepareInstalledStaticSceneTransfer01} from './installed-static-scene01.mjs';
 import {prepareInstalledSoundMapGeometry01} from '../streaming/soundmap-telemetry.mjs';
 import {createInitialWorldObservationWriter01} from './initial-observation01.mjs';
@@ -14,67 +16,65 @@ const clock01=Object.freeze({kind:'node-process-performance',processId:process.p
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x),automatic=config?.catalogSHA256==null;
 let initialPriority=null,initialPriorityFailure=null;
 let validationEpochUtc01=null;
-let consumerProof01=null;
+let consumerProof01=null;let metadataWorker01=null,metadataBusy01=false,metadataSerial01=0,metadataVersion01=0,metadataStage01=null,metadataTarget01=null,metadataTimeout01=null,closing01=false;
 const cacheTimings={manifestLoads:0,manifestReadMilliseconds:0,manifestReadCallMilliseconds:0,manifestReadBytes:0,manifestParseMilliseconds:0,catalogueAndIndexMilliseconds:0,maximumRefreshMilliseconds:0};
 const profileThreadCpu01=new WeakMap();
 function startProfileCpu01(profile){if(typeof process.threadCpuUsage==='function')profileThreadCpu01.set(profile,process.threadCpuUsage());return profile;}
 function operationDelta01(current={},before={}){return Object.fromEntries(Object.entries(current).map(([key,value])=>[key,Math.max(0,value-(before[key]??0))]));}
 const epoch=x=>typeof x==='string'&&x.length<=40&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,7})?Z$/.test(x)&&Number.isFinite(Date.parse(x));
-const pendingStatus=()=>({stage:'preparing/indexing',installedWorldVerified:false,genuineResourceVerified:false,runtimeActivationVerified:false,preparation:{completedEligibleTiles:0,eligibleTiles:0,totalTiles:0},actualWorldCoverage:'unmeasured'});
+const pendingStatus=()=>({cacheTimings:{...cacheTimings},stage:'preparing/indexing',installedWorldVerified:false,genuineResourceVerified:false,runtimeActivationVerified:false,preparation:{completedEligibleTiles:0,eligibleTiles:0,totalTiles:0},actualWorldCoverage:'unmeasured'});
 function worldStatus(){const status=world.status();return {...status,cacheTimings:{...cacheTimings},localReadiness:status.lastWindow?.localReadiness??{state:'waiting-for-window',firstBlocker:'no-valid-local-window'},genuineResourceVerified:status.lastWindow?.genuineResourceVerified===true&&status.lastWindow.activeSurfaces>0};}
-function post(type,extra={},transfer=[]){if(progressBuffer01&&['scene','expired','static-prepared','not-ready'].includes(type))phase01('result-post');const began=performance.now();parentPort.postMessage({schema:1,type,session,catalogSHA256,bindingEpoch,validationEpochUtc01,clock01,sentAt01:began,...extra},transfer);return performance.now()-began;}
+function post(type,extra={},transfer=[]){if(progressBuffer01&&['scene','expired','static-prepared','not-ready'].includes(type))phase01('result-post');const began=performance.now();parentPort.postMessage({schema:1,type,session,catalogSHA256,bindingEpoch,validationEpochUtc01,metadataVersion01,clock01,sentAt01:began,...extra},transfer);return performance.now()-began;}
 function finishProfile(profile){const cpuStart=profileThreadCpu01.get(profile);profile.workerThreadCpuAvailable=!!cpuStart;if(cpuStart){const cpu=process.threadCpuUsage(cpuStart);profile.workerThreadUserMicroseconds=cpu.user;profile.workerThreadKernelMicroseconds=cpu.system;}profile.finishedAt=performance.now();return {workerProfile01:profile,workerPreparationMilliseconds:profile.finishedAt-profile.startedAt};}
 function internalStatus(profile){const began=performance.now(),status=worldStatus(),computed=Number.isFinite(profile.windowCompletedAt);profile.statusMilliseconds+=performance.now()-began;profile.computedForRequest=computed;profile.activeSurfaces=computed?status.lastWindow?.activeSurfaces??0:0;profile.qualifiedResourceCount=computed?status.localReadiness?.qualifiedResources??0:0;profile.genuineResourceVerified=computed&&status.genuineResourceVerified===true;profile.localReadinessState=computed?status.localReadiness?.state??'unknown':'not-computed-for-observation';return status;}
 function residencyEvidence01(profile){const at=performance.now(),cacheResidency01=world.cacheResidencyTimeline01();profile.cacheDiagnosticsMilliseconds=performance.now()-at;return {cacheResidency01};}
 function expired(message,profile,phase){profile.expiryPhase=phase;const status=internalStatus(profile),postMs=post('expired',{requestId:message.requestId,status,...residencyEvidence01(profile),...finishProfile(profile)});post('delivery-timing',{requestId:message.requestId,postMessageMilliseconds:postMs});}
-function fail(error,phase,requestId=null){if(failed)return;failed=true;clearTimeout(poll);post('failed',{reason:reason(error),phase,requestId});world?.close();world=null;parentPort.close();}
+function fail(error,phase,requestId=null){if(failed)return;failed=true;clearTimeout(poll);post('failed',{reason:reason(error),phase,requestId});world?.close();world=null;closing01=true;clearTimeout(metadataTimeout01);void metadataWorker01?.terminate().finally(()=>parentPort.close());}
 function checkConsumerProof01(){
  if(!consumerProof01)return;const {consumerRequestId,selectionProof01}=consumerProof01,manifest=world?.manifest,required=validationEpochUtc01??manifest?.ValidationEpochUtc01;
- const proofCurrent=!!world&&selectionProof01.every(e=>{const entry=world.rows.find(x=>x.row.Id===e.resourceId),row=entry?.row,result=row?.Result;return row?.Status==='imported-exterior-incomplete-surfaces'&&result?.IndexSHA256===e.indexSHA256&&result.ReceiptSHA256===e.receiptSHA256&&(!required||manifest.ValidationEpochUtc01===required&&row.ArchiveValidation01?.EpochUtc===required&&row.ArchiveValidation01.Source==='current-archive-sha256'&&row.ArchiveValidation01.ArchiveSHA256===result.ArchiveSHA256);});
+ const proofCurrent=!!world&&selectionProof01.every(e=>{const entry=world.sourceProofRow01(e.resourceId),row=entry?.row,result=row?.Result;return row?.Status==='imported-exterior-incomplete-surfaces'&&result?.IndexSHA256===e.indexSHA256&&result.ReceiptSHA256===e.receiptSHA256&&(!required||manifest.ValidationEpochUtc01===required&&row.ArchiveValidation01?.EpochUtc===required&&row.ArchiveValidation01.Source==='current-archive-sha256'&&row.ArchiveValidation01.ArchiveSHA256===result.ArchiveSHA256);});
  if(consumerProof01.lastVerdict!==proofCurrent){consumerProof01.lastVerdict=proofCurrent;post('consumer-proof-status',{consumerRequestId,proofCurrent});}
 }
+function stamp01(){const i=fs.statSync(config.manifestPath,{bigint:true});if(i.size<=0||i.size>67108864n)throw Error('Bounded metadata manifest');return [i.dev,i.ino,i.size,i.mtimeNs,i.ctimeNs].join(':');}
 function refresh(){
- phase01('refresh-check');
- const began=performance.now();
- try{
-  if(automatic&&!epoch(validationEpochUtc01)){post('status',{ready:false,status:{...pendingStatus(),cacheTimings:{...cacheTimings},reason:'waiting-normal-supervisor-epoch'}});return false;}
-  const info=fs.statSync(config.manifestPath,{bigint:true}),stamp=[info.dev,info.ino,info.size,info.mtimeNs,info.ctimeNs].join(':');
-  if(world&&stamp===manifestStamp){phase01('refresh-done');return true;}
-  if(automatic&&waitingStamp===stamp+'|'+validationEpochUtc01)return false;
-  if(info.size<=0||info.size>67108864n)throw Error('Bounded known installed scene manifest required');
-  phase01('manifest-read');const readAt=performance.now(),bytes=fs.readFileSync(config.manifestPath);cacheTimings.manifestReadCallMilliseconds+=performance.now()-readAt;cacheTimings.manifestReadBytes+=bytes.byteLength;
-  phase01('manifest-parse');const parseAt=performance.now(),manifest=JSON.parse(bytes.toString('utf8').replace(/^\uFEFF/,'')),admitted=manifest.ResolvedCatalogSHA256;cacheTimings.manifestParseMilliseconds+=performance.now()-parseAt;cacheTimings.manifestLoads++;cacheTimings.manifestReadMilliseconds+=performance.now()-readAt;
-  if(manifest.Schema!==1||!hex(admitted)||(config.expectedGameSHA256!==undefined&&manifest.InputBinding?.GameExecutableSHA256!==config.expectedGameSHA256)||(!automatic&&admitted!==config.catalogSHA256))throw Error('Installed scene manifest game/catalogue identity');
-  if(automatic&&(!epoch(validationEpochUtc01)||manifest.ValidationEpochUtc01!==validationEpochUtc01)){
-   if(world){world.close();world=null;catalogSHA256=null;bindingEpoch++;manifestStamp=null;}
-   waitingStamp=stamp+'|'+validationEpochUtc01;post('status',{ready:false,status:{...pendingStatus(),cacheTimings:{...cacheTimings},reason:'waiting-current-archive-validation'}});return false;
-  }
-  const changed=catalogSHA256!==admitted;
-  phase01('world-reload');
-  const indexAt=performance.now();
-  if(changed||world===null){world?.close();world=null;catalogSHA256=admitted;bindingEpoch++;world=new InstalledStaticWorld01({...config,catalogSHA256,...(automatic?{requiredValidationEpochUtc01:validationEpochUtc01}:{})});}
-  else world.reload();
-  cacheTimings.catalogueAndIndexMilliseconds+=performance.now()-indexAt;cacheTimings.maximumRefreshMilliseconds=Math.max(cacheTimings.maximumRefreshMilliseconds,performance.now()-began);
-  manifestStamp=stamp;waitingStamp=null;checkConsumerProof01();phase01('refresh-done');post(changed?'ready':'status',{ready:true,status:worldStatus()});return true;
- }catch(error){
-  if(automatic&&error.code==='ENOENT'){
-   if(world){world.close();world=null;catalogSHA256=null;bindingEpoch++;manifestStamp=null;}
-   post('status',{ready:false,status:pendingStatus()});return false;
-  }
-  throw error;
- }
+ if(closing01||failed)return false;
+ if(automatic&&!epoch(validationEpochUtc01)){post('status',{ready:false,status:{...pendingStatus(),reason:'waiting-normal-supervisor-epoch'}});return false;}
+ let stamp;try{stamp=stamp01();}catch(e){if(automatic&&e.code==='ENOENT'){if(world){world.close();world=null;catalogSHA256=null;bindingEpoch++;checkConsumerProof01();}post('status',{ready:false,status:pendingStatus()});return false;}throw e;}
+ if(stamp===manifestStamp&&world)return true;if(world&&metadataBusy01&&stamp===metadataTarget01&&cacheTimings.metadataProofCurrent01===true)return true;
+ if(!metadataBusy01&&waitingStamp!==stamp+'|'+validationEpochUtc01){metadataBusy01=true;cacheTimings.metadataStartedAt01=performance.now();metadataTarget01=stamp;metadataStage01=null;cacheTimings.metadataProofCurrent01=false;cacheTimings.metadataPreparing01=true;metadataTimeout01=setTimeout(()=>fail(Error('Bounded metadata preparation timeout'),'metadata-preparation'),8000);if(world)post('status',{ready:true,status:worldStatus()});metadataWorker01.postMessage({type:'prepare',serial:++metadataSerial01,epoch:automatic?validationEpochUtc01:null,activeIds:consumerProof01?.selectionProof01.map(e=>e.resourceId)??[],consumerRequestId:consumerProof01?.consumerRequestId??null});}
+ // No new scene can use an unvalidated changed publication. An existing
+ // consumer keeps only its original finite lease; no refresh extends it.
+ return false;
+}
+function startMetadata01(){
+ metadataWorker01=new Worker(new URL('./metadata-preparer-worker01.mjs',import.meta.url),{workerData:{config},resourceLimits:{maxOldGenerationSizeMb:512,maxYoungGenerationSizeMb:32,stackSizeMb:8}});
+ metadataWorker01.on('error',e=>{if(!closing01)fail(e,'metadata-preparation');});
+ metadataWorker01.on('exit',code=>{if(!closing01&&!failed)fail(Error('Metadata preparer exited '+code),'metadata-preparation');});
+ metadataWorker01.on('message',m=>{if(closing01||failed||m.serial!==metadataSerial01)return;try{
+  if(m.type==='failed')throw Error(m.reason);
+  if(m.type==='waiting'){clearTimeout(metadataTimeout01);metadataBusy01=false;cacheTimings.metadataPreparing01=false;waitingStamp=metadataTarget01+'|'+validationEpochUtc01;if(world){world.close();world=null;catalogSHA256=null;bindingEpoch++;checkConsumerProof01();}post('status',{ready:false,status:pendingStatus()});return;}
+  if(m.type==='proof-current'){const fresh=stamp01()===metadataTarget01;cacheTimings.metadataProofCurrent01=fresh&&m.current===true;cacheTimings.metadataProofCheckMilliseconds01=m.proofMilliseconds;if(fresh&&!m.activeCurrent&&consumerProof01&&m.consumerRequestId===consumerProof01.consumerRequestId)post('consumer-proof-status',{consumerRequestId:m.consumerRequestId,proofCurrent:false});if(world)post('status',{ready:cacheTimings.metadataProofCurrent01,status:worldStatus()});return;} if(m.type==='begin'){metadataStage01=createMetadataStage01();cacheTimings.metadataPreparationMilliseconds01=m.preparationMilliseconds;return;}
+  if(m.type==='packet'){const began=performance.now();metadataStage01.accept(m.packet);cacheTimings.maximumMetadataPacketMilliseconds01=Math.max(cacheTimings.maximumMetadataPacketMilliseconds01??0,performance.now()-began);setImmediate(()=>{if(!closing01&&!failed)metadataWorker01.postMessage({type:'next',serial:m.serial});});return;}
+  if(m.type!=='complete')throw Error('Metadata preparation protocol');
+  clearTimeout(metadataTimeout01);metadataBusy01=false;cacheTimings.metadataPreparing01=false;const stats=metadataStage01.stats(),snapshot=metadataStage01.finish(m.digest);metadataStage01=null;
+  if(stamp01()!==metadataTarget01){cacheTimings.supersededSnapshots01=(cacheTimings.supersededSnapshots01??0)+1;refresh();return;}
+  const began=performance.now(),changed=catalogSHA256!==snapshot.catalogSHA256;
+  if(changed||!world){world?.close();catalogSHA256=snapshot.catalogSHA256;bindingEpoch++;world=new InstalledStaticWorld01({...config,catalogSHA256,requiredValidationEpochUtc01:automatic?validationEpochUtc01:null,preparedMetadata01:snapshot});}
+  else world.installMetadata01(snapshot);
+  metadataWorker01.postMessage({type:'installed',serial:m.serial});cacheTimings.metadataProofCurrent01=true;cacheTimings.metadataInstalledAt01=performance.now();metadataVersion01++;manifestStamp=metadataTarget01;waitingStamp=null;cacheTimings.manifestLoads++;cacheTimings.metadataInstallationMilliseconds01=performance.now()-began;cacheTimings.maximumMetadataInstallationMilliseconds01=Math.max(cacheTimings.maximumMetadataInstallationMilliseconds01??0,cacheTimings.metadataInstallationMilliseconds01);cacheTimings.metadataStaging01=stats;checkConsumerProof01();post(changed?'ready':'status',{ready:true,status:worldStatus()});
+ }catch(e){fail(e,'metadata-installation');}});
 }
 function schedulePoll(){if(failed)return;poll=setTimeout(()=>{try{phase01('poll-start');refresh();phase01('poll-done');schedulePoll();}catch(error){fail(error,'cache-refresh');}},1000);}
 try{
  if(schema!==1||!/^[a-f0-9]{32}$/.test(session)||(automatic&&!hex(config.expectedGameSHA256)))throw Error('Bound installed scene worker identity required');
  if(parentClock01?.kind!==clock01.kind||parentClock01.processId!==clock01.processId||parentClock01.timeOrigin!==clock01.timeOrigin)throw Error('Verified shared installed worker performance clock required');
  if(config.initialObservationPath)try{initialPriority=createInitialWorldObservationWriter01({outputPath:config.initialObservationPath,session,gameSHA256:config.expectedGameSHA256});}catch(error){initialPriorityFailure=reason(error);}
- refresh();schedulePoll();
+ startMetadata01();refresh();schedulePoll();
  parentPort.on('message',message=>{
   if(failed)return;
   try{
    if(message?.schema!==1||message.session!==session||(!automatic&&message.catalogSHA256!==config.catalogSHA256))throw Error('Installed scene command identity');
-   if(message.type==='close'){phase01('close');clearTimeout(poll);world?.close();world=null;post('closed');parentPort.close();return;}
+   if(message.type==='close'){closing01=true;clearTimeout(metadataTimeout01);phase01('close');clearTimeout(poll);world?.close();world=null;metadataStage01=null;void metadataWorker01.terminate().then(()=>{post('closed');parentPort.close();});return;}
    if(message.type==='consumer-proof'){
     if(message.bindingEpoch!==bindingEpoch||message.catalogSHA256!==catalogSHA256)return;
     if(!Number.isSafeInteger(message.consumerRequestId)||message.consumerRequestId<1||!Array.isArray(message.selectionProof01)||message.selectionProof01.length<1||message.selectionProof01.length>16||!message.selectionProof01.every(e=>typeof e.resourceId==='string'&&e.resourceId.length<=512&&hex(e.indexSHA256)&&hex(e.receiptSHA256)))throw Error('Bounded actual consumer source-proof watch');

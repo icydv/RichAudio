@@ -1,5 +1,7 @@
 # STREET-01 request1195: evidence boundary and bounded diagnostics
 
+The later [metadata isolation implementation](STREET_01_METADATA_ISOLATION.md) corrects the demonstrated polling bottleneck with bounded off-thread preparation and atomic installation. It does not reconstruct the missing historical1195 phase evidence. The investigation below remains preserved.
+
 My genuine proposal11 remains failed and consumed. Codex inspected the retained result, request timelines, complete validation metadata, residency log, startup phase metrics and supervisor/coordinator logs without another installed-resource or historical-geometry read. This investigation does **not** establish request1195's historical worker phase or correct the genuine renewal failure.
 
 The service dispatched1195 at242443.3063ms. Its predecessor expired at242883.614ms and the immutable stop was242927.339ms. No1195worker receipt, start timestamp, phase profile or consumer candidate was retained. Requests1196–1198 were coalesced/discarded behind the single in-flight request; those observations are not a queue of dispatched worker jobs. The preceding1193worker started0.1211ms after dispatch and completed in157.0307ms, with five query hits, zero misses/evictions and unchanged781surfaces. There is no evidence of1195consumer delay because it never reached that boundary in the retained record.

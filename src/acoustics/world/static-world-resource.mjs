@@ -20,7 +20,7 @@ export function collisionProjection(catalog,hash){
  }
  return normalized(catalog.TargetCollisionEvidence?.Hash)===hash?catalog.TargetCollisionEvidence:null;
 }
-export function classifyStaticWorldResource(index,catalog,receipt,pins,{potentialOnly=false}={}){
+export function classifyStaticWorldResource(index,catalog,receipt,pins,{potentialOnly=false,projection01=null}={}){
  const unresolved=reason=>({state:'unresolved',reason,coordinateSpace:'resource-root',offlineCoordinateFrameVerified:false,worldPlacementVerified:false,runtimeActivation:'unverified'});
  if(!pins||!['indexSHA256','catalogSHA256','receiptSHA256'].every(k=>digest(pins[k])))return unresolved('pinned-evidence-digests-required');
  if(index?.kind!=='RichAudioCollisionMesh'||index.coordinateSpace!=='resource-root'||index.placement!=='unresolved-static-vs-archetype-local'||!digest(index.source?.sha256)||!bounds(index.bounds))return unresolved('resource-root-export-required');
@@ -28,7 +28,7 @@ export function classifyStaticWorldResource(index,catalog,receipt,pins,{potentia
  if(receipt?.Schema!==1||receipt.ArchiveUnchanged!==true||receipt.ArchiveVerification!=='sha256-before-after'||!digest(receipt.BeforeSHA256)||normalized(receipt.BeforeSHA256)!==normalized(receipt.AfterSHA256))return unresolved('archive-content-integrity-proof-required');
  if(normalized(receipt.SourceSHA256)!==normalized(index.source.sha256)||normalized(receipt.Entry)!==normalized(index.source.entry)||normalized(receipt.Archive)!==normalized(index.source.archive)||!normalized(index.source.entry).startsWith(normalized(index.source.archive)+'/'))return unresolved('export-receipt-source-mismatch');
  if(!digest(catalog.InputBinding?.CodeWalkerCoreSHA256)||normalized(catalog.InputBinding.CodeWalkerCoreSHA256)!==normalized(receipt.ParserSHA256))return unresolved('parser-binding-mismatch');
- const expectedHash=collisionNameHash(path.posix.basename(normalized(index.source.entry),'.ybn')),projection=collisionProjection(catalog,expectedHash);
+ const expectedHash=collisionNameHash(path.posix.basename(normalized(index.source.entry),'.ybn')),projection=projection01??collisionProjection(catalog,expectedHash);
  if(!projection||projection.ProjectionSchemaGaps!==0||!Number.isSafeInteger(projection.ManifestFilesVisited)||projection.ManifestFilesVisited<1||!Number.isSafeInteger(projection.CacheFilesVisited)||projection.CacheFilesVisited<1)return unresolved('manifest-cache-projection-incomplete');
  if(!Array.isArray(projection.InteriorBoundsMembership)||!Array.isArray(projection.MapGroupMembership)||!Array.isArray(projection.BoundsStoreItems)||!Array.isArray(projection.SelectedYbn))return unresolved('projection-arrays-required');
  if(projection.InteriorBoundsMembership.length)return unresolved('interior-local-space-placement-required');
