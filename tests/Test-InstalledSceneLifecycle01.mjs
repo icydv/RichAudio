@@ -87,3 +87,14 @@ test('unexpected owned worker closure fails pending work without an automatic re
   const closed=await service.close();assert.equal(closed.workerJoined,true);assert.equal(closed.controlClosureUnknown,false);assert.equal(service.stats.workersStarted,1);
  }finally{await service.close();f.close();}
 });
+
+test('closing retains an authenticated late profile without adopting geometry or changing the cancelled outcome',async()=>{
+ const f=installedSceneFixture01(),bindings=[],service=new InstalledSceneService01({config:f.config,session,onScene:(_scene,r)=>bindings.push(r)});
+ try{
+  service.bindConsumer01({invalidateInstalledScene01(){}});
+  assert.equal(service.workerProgressSnapshot01(),null,'No shared diagnostic allocation by default');await until(()=>service.ready||service.failed);const receive=receive01(service);let held;service.worker.on('message',m=>{if(m.type==='scene')held=m;else receive(m);});
+  const original=service.updateWindow(observation());await until(()=>held||service.failed);assert.equal(service.failed,false,service.failure);const closing=service.close(),stopAt=service.readinessSnapshot01().stopIntentAt;
+  receive({...held,clock01:{...held.clock01,timeOrigin:held.clock01.timeOrigin+1}});let record=service.snapshot().sceneDeliveryDiagnostics01.recent.find(r=>r.requestId===original.requestId);assert.equal(record.postStopDiagnosticRejected01,true);assert.equal(record.workerProfile01,undefined);
+  receive(held);assert.equal((await closing).workerJoined,true);record=service.snapshot().sceneDeliveryDiagnostics01.recent.find(r=>r.requestId===original.requestId);assert.equal(record.outcome,'cancelled');assert(record.workerProfile01);assert.equal(record.requestedAt,original.requestedAt);assert.equal(record.expiresAt,original.expiresAt);assert.equal(record.postStopDiagnostic01.applicationAllowed,false);assert(record.postStopDiagnostic01.receivedAt>=stopAt);assert.equal(service.readinessSnapshot01().stopIntentAt,stopAt);assert.equal(bindings.length,0);assert.equal(service.stats.publications,0);assert.equal(service.readinessSnapshot01().counters.applications,0);
+ }finally{await service.close();f.close();}
+});

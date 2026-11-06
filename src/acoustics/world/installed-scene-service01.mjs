@@ -6,6 +6,7 @@ import path from 'node:path';
 import {bindInstalledStaticSceneWorker01,installedStaticSceneMetadata01} from './installed-static-scene01.mjs';
 import {requireWorld,vector,freeze} from './contracts.mjs';
 import {InstalledSceneReadinessPolicy01,sceneReadinessScope01,sceneReadinessRequestClass01,sceneReadinessMode01,sceneReadinessLimits01} from './scene-readiness-policy01.mjs';
+import {createSceneWorkerProgress01,snapshotSceneWorkerProgress01} from './scene-worker-progress01.mjs';
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x),interval=500;
 const epoch=x=>typeof x==='string'&&x.length<=40&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,7})?Z$/.test(x)&&Number.isFinite(Date.parse(x));
 const reason=e=>String(e?.message??e).replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,240);
@@ -29,8 +30,10 @@ function residency01(value){
  visit(value);let previous=0;for(const event of value.events){requireWorld(Number.isSafeInteger(event.sequence)&&event.sequence>previous,'ordered cache diagnostic events');previous=event.sequence;}return structuredClone(value);
 }
 export class InstalledSceneService01 {
+ #workerProgress01=null;#closingRequest01=null;
  #consumer01=null;#receipts01=new WeakMap();#readiness01=new InstalledSceneReadinessPolicy01();#expiryTimer01=null;#lastConsumerAt01=-Infinity;#consumerWorkloadKey01='default';#consumerWorkloadRevision01=0;
- constructor({config,session,onScene=()=>{},onStatus=()=>{}}={}){
+ constructor({config,session,onScene=()=>{},onStatus=()=>{},phaseDiagnostics01=false}={}){
+  requireWorld(typeof phaseDiagnostics01==='boolean','explicit optional worker phase diagnostics');if(phaseDiagnostics01)this.#workerProgress01=createSceneWorkerProgress01();
   requireWorld(config&&typeof config.manifestPath==='string'&&typeof config.catalogPath==='string'&&(hex(config.catalogSHA256)||config.catalogSHA256==null&&hex(config.expectedGameSHA256))&&(config.expectedGameSHA256===undefined||hex(config.expectedGameSHA256))&&/^[a-f0-9]{32}$/.test(session)&&typeof onScene==='function'&&typeof onStatus==='function','bound installed scene service configuration');
   const maximumResidentResources=config.maximumResidentResources??8;
   requireWorld(Number.isInteger(maximumResidentResources)&&maximumResidentResources>=1&&maximumResidentResources<=16,'bounded installed scene resident resources');
@@ -43,7 +46,7 @@ export class InstalledSceneService01 {
   let joined;this.exitPromise=new Promise(resolve=>joined=resolve);this.joined=joined;
   this.#emit();
   try{
-   this.worker=new Worker(new URL('./installed-scene-worker01.mjs',import.meta.url),{workerData:{schema:1,config:this.config,session,parentClock01:this.clock01},resourceLimits:{maxOldGenerationSizeMb:512,maxYoungGenerationSizeMb:64,stackSizeMb:8}});this.stats.workersStarted++;this.worker.unref();
+   this.worker=new Worker(new URL('./installed-scene-worker01.mjs',import.meta.url),{workerData:{schema:1,config:this.config,session,parentClock01:this.clock01,progressBuffer01:this.#workerProgress01},resourceLimits:{maxOldGenerationSizeMb:512,maxYoungGenerationSizeMb:64,stackSizeMb:8}});this.stats.workersStarted++;this.worker.unref();
    this.adopter=bindInstalledStaticSceneWorker01(this.worker,{session});
    this.worker.on('message',m=>this.#message(m));this.worker.on('error',error=>this.#fail('worker-error: '+reason(error)));
    this.worker.on('exit',code=>{this.exited=true;this.exitCode=code;this.stats.workersJoined++;clearTimeout(this.operationTimer);this.operationTimer=null;this.joined(code);if(!this.closed&&!this.failed)this.#fail('worker-exited-without-close');this.#emit();});
@@ -109,7 +112,7 @@ export class InstalledSceneService01 {
   try{this.worker.postMessage({schema:1,type:'window',session:this.session,catalogSHA256:this.catalogBinding,requestId:pending.requestId,requestedAt:pending.requestedAt,expiresAt:pending.expiresAt,dispatchedAt:now,request:pending.request});}catch(error){this.#fail('worker-command-failed: '+reason(error));}
  }
  #message(message){
-  if(this.closed||this.failed)return;
+  if(this.closed){this.#retainClosingProfile01(message);return;}if(this.failed)return;
   const receivedAt=performance.now();let processingDiagnostic=null;
   try{
    requireWorld(message?.schema===1&&message.session===this.session&&Number.isSafeInteger(message.bindingEpoch)&&(message.bindingEpoch>=this.bindingEpoch||message.type==='delivery-timing')&&(message.catalogSHA256===null||hex(message.catalogSHA256))&&(this.config.catalogSHA256===undefined||message.catalogSHA256===this.config.catalogSHA256||message.type==='failed'&&message.catalogSHA256===null),'installed scene worker message identity');
@@ -158,9 +161,17 @@ export class InstalledSceneService01 {
    this.#schedule();const callbackAt=performance.now();this.onScene(scene,receipt);const callbackMs=performance.now()-callbackAt;diagnostic.publicationCallbackMilliseconds=callbackMs;this.stats.maximumPublicationCallbackMs=Math.max(this.stats.maximumPublicationCallbackMs,callbackMs);this.stats.publications++;this.stats.firstPublishedAt01??=admittedAt;if(profile.activeSurfaces>0)this.stats.firstPublishedNonemptyAt01??=admittedAt;this.#emit();this.#schedule();
   }catch(error){this.#finish(processingDiagnostic,'result-rejected');this.#fail('worker-result-rejected: '+reason(error));}
  }
+ #retainClosingProfile01(message){
+  const active=this.#closingRequest01;if(!active||this.exited||!['scene','expired','static-prepared','not-ready'].includes(message?.type)||message.requestId!==active.requestId)return;
+  try{
+   const receivedAt=performance.now();requireWorld(message.schema===1&&message.session===this.session&&message.bindingEpoch===this.bindingEpoch&&message.catalogSHA256===this.catalogBinding&&message.clock01?.kind===this.clock01.kind&&message.clock01.processId===this.clock01.processId&&message.clock01.timeOrigin===this.clock01.timeOrigin&&Number.isFinite(message.sentAt01)&&message.sentAt01<=receivedAt,'owned closing worker diagnostic identity');
+   this.#profile(active,message,receivedAt);active.diagnostic01.postStopDiagnostic01={type:message.type,receivedAt,sentAt:message.sentAt01,applicationAllowed:false};this.#closingRequest01=null;
+  }catch{active.diagnostic01.postStopDiagnosticRejected01=true;}
+ }
+ workerProgressSnapshot01(){return snapshotSceneWorkerProgress01(this.#workerProgress01);}
  close({budgetMilliseconds=2000}={}){
   requireWorld(Number.isFinite(budgetMilliseconds)&&budgetMilliseconds>=100&&budgetMilliseconds<=10000,'bounded installed scene close');if(this.closePromise)return this.closePromise;
-  this.beginStop01(performance.now(),'service-close');this.closed=true;this.state='stopping';this.#finish(this.active?.diagnostic01,'cancelled');this.#finish(this.pending?.diagnostic01,'cancelled');this.pending=null;this.active=null;this.priorityPending=false;clearTimeout(this.dispatchTimer);clearTimeout(this.operationTimer);this.dispatchTimer=this.operationTimer=null;this.#emit();
+  this.beginStop01(performance.now(),'service-close');this.#closingRequest01=this.active;this.closed=true;this.state='stopping';this.#finish(this.active?.diagnostic01,'cancelled');this.#finish(this.pending?.diagnostic01,'cancelled');this.pending=null;this.active=null;this.priorityPending=false;clearTimeout(this.dispatchTimer);clearTimeout(this.operationTimer);this.dispatchTimer=this.operationTimer=null;this.#emit();
   this.adopter?.close();
   this.closePromise=(async()=>{
    const began=performance.now();let timer;
@@ -168,7 +179,7 @@ export class InstalledSceneService01 {
    if(this.worker&&!this.exited)try{this.worker.postMessage({schema:1,type:'close',session:this.session,catalogSHA256:this.catalogBinding});}catch{}
    let joined=this.exited||await wait(Math.min(500,budgetMilliseconds/2));
    if(!joined&&this.worker){void this.worker.terminate().catch(()=>{});joined=await wait(Math.max(1,budgetMilliseconds-(performance.now()-began)));}
-   this.state=joined?'stopped':'stopped-closure-unknown';this.#readiness01.stopped(performance.now());this.#emit();return {closed:true,workerJoined:joined,workerExitCode:this.exitCode,elapsedMilliseconds:performance.now()-began,controlClosureUnknown:!joined,archiveDecode:false};
+   this.#closingRequest01=null;this.state=joined?'stopped':'stopped-closure-unknown';this.#readiness01.stopped(performance.now());this.#emit();return {closed:true,workerJoined:joined,workerExitCode:this.exitCode,elapsedMilliseconds:performance.now()-began,controlClosureUnknown:!joined,archiveDecode:false};
   })();return this.closePromise;
  }
 }

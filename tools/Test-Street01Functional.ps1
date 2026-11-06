@@ -17,7 +17,7 @@ $nodeFiles=@(
  'tests/Test-StartupServiceStreet01.mjs','tests/Test-StartupService01Review.mjs',
  'tests/Test-IndexedWorldGeometry01.mjs','tests/Test-InstalledStaticSceneStreet01.mjs',
  'tests/Test-InstalledSceneService01.mjs','tests/Test-InstalledSceneAdmission01.mjs',
- 'tests/Test-InstalledSceneLifecycle01.mjs','tests/Test-InstalledStaticReuse01.mjs','tests/Test-ResponsiveScene01.mjs',
+ 'tests/Test-InstalledSceneLifecycle01.mjs','tests/Test-SceneWorkerProgress01.mjs','tests/Test-InstalledStaticReuse01.mjs','tests/Test-ResponsiveScene01.mjs',
  'tests/Test-SceneReadinessPolicy01.mjs','tests/Test-SceneReadinessService01.mjs','tests/Test-ConsumerReadiness01.mjs',
  'tests/Test-SoundMapSceneDemand01.mjs','tests/Test-GameplaySoundMapDemand01.mjs',
  'tests/Test-NormalReadinessCacheFailure01.mjs','tests/Test-CacheResidencyTimeline01.mjs','tests/Test-CacheResidencyLog01.mjs','tests/Test-DeepFreezeReuse01.mjs',

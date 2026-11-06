@@ -99,6 +99,8 @@ My code has passed the offline gates needed to consider **one separate, narrowly
 
 ## Focused CI classification before the next proposal
 
+The later [request1195 evidence investigation](STREET_01_REQUEST1195.md) records proposal11's genuine failure, the limits of retained evidence and the narrow diagnostic-retention correction. It does not claim a genuine continuity repair.
+
 For checkpoint `69728b2`, STREET-01 original-only validation and the F10 sidebar workflow passed. General offline run `42252282511`, Node 24 job `128010224294`, failed the acceleration test's `invalidResults >= 1` assertion after CPU parity, CPU fallback, zero GPU applications and dropped-result checks passed. The old loop did not label that assertion with its corruption case, dispatch count or timing, so the exact hosted iteration and elapsed time cannot be recovered from that log.
 
 Codex reproduced all four malformed cases (generation, mask, type and completion proof) with the unchanged backend. Each dispatched once and incremented invalid-results while returning exact CPU geometry. A separate controlled preparation delay reproduced the failed assertion for each case: the unchanged 10 ms test deadline expired before dispatch, yielding zero dispatches, one dropped attempt, one deadline miss and zero invalid results. This is correct deadline fallback: no malformed result was produced to reject. In the controlled clock, the remaining-budget check was 11 ms after start and the rejection receipt was 22 ms after start; these are injected correctness values, not measured performance. A dispatched late completion separately produced deadline fallback at 20 ms with no GPU application.
