@@ -12,11 +12,11 @@ Describe the change and why it matters. State what was actually verified, not ju
 
 ## Public development progress
 
-For **each completed milestone or significant verified event**, I will update the **Development progress** section at the **bottom of README.md** in the same PR:
+For **each completed milestone or significant verified event**, I will update the [development progress log](../docs/DEVELOPMENT_PROGRESS.md) in the same PR and keep the concise [README summary](../README.md#development-progress) current:
 
-- [ ] I've updated the README progress section with a concise public-facing result, date, evidence link, limitations and next step.
-- [ ] This is not a significant progress event, or the milestone is still ongoing. I've explained why the README summary does not need updating below.
+- [ ] I've updated the development progress log with a public-facing result, date, evidence link, limitations and next step, and adjusted the short README summary if needed.
+- [ ] This is not a significant progress event, or the milestone is still ongoing. I've explained why the progress log and README summary do not need updating below.
 
-**Reason if no README update:**
+**Reason if no progress update:**
 
-<!-- This checklist is a maintainership reminder, not an automatic updater. Do not claim an open or untested milestone is complete. If the PR is stacked and README changes are made on a parallel branch, reconcile the final summary when merging. -->
+<!-- This checklist is a maintainership reminder, not an automatic updater. Do not claim an open or untested milestone is complete. If the PR is stacked and progress changes are made on a parallel branch, reconcile the log and README summary when merging. -->
