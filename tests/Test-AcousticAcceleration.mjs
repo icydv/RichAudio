@@ -3,6 +3,7 @@
 // correctness is exercised separately by Test-AcousticGpuDevice.mjs.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {performance} from 'node:perf_hooks';
 import {AcousticAcceleration} from '../src/acoustics/streaming/acoustic-backend.mjs';
 import {createTile,coordinateSpace,timeUnit,querySegment} from '../src/acoustics/research/local-geometry.mjs';
 
@@ -68,13 +69,37 @@ test('GPU backend keeps native-origin localization separate from exact CPU refin
   assert.ok(request.surfaces.flatMap(s=>[...s.center,...s.min,...s.max]).every(x=>Math.abs(x)<=64));
   assert.equal(backend.diagnostics().activeAcceleration,'gpu');assert.equal(backend.diagnostics().gpuResultsApplied,1);backend.close();
 });
-test('wrong-generation, malformed, unproved and late GPU results fall back to complete CPU geometry',async()=>{
-  for(const corruption of ['generation','mask','type','proof','late']){
+for(const corruption of ['generation','mask','type','proof'])test('dispatched '+corruption+' GPU corruption is rejected with complete CPU geometry',async t=>{
     const client=new ProtocolFixtureClient(),backend=new AcousticAcceleration({mode:'gpu',deadlineMs:10,clientFactory:()=>client});await backend.ready();client.corruption=corruption;
+    // Result validation is a correctness test, independent of host scheduling.
+    // Mock only this test's performance clock; production deadlines stay intact.
+    t.mock.method(performance,'now',()=>100);
+    try{
     const f=fixture();parity(await backend.query(f.tile,f.segments,{generation:8}),reference(f.tile,f.segments));
     const d=backend.diagnostics();assert.equal(d.activeAcceleration,'cpu',corruption);assert.ok(d.fallbackReason,corruption);assert.equal(d.gpuResultsApplied,0,corruption);
-    assert.ok(d.droppedResults>=1,corruption);if(corruption==='late')assert.ok(d.deadlineMisses>=1);else assert.ok(d.invalidResults>=1);backend.close();
-  }
+    assert.equal(client.acousticCalls,1);assert.equal(d.droppedResults,1);assert.equal(d.invalidResults,1);assert.equal(d.deadlineMisses,0);
+    assert.match(d.fallbackReason,corruption==='mask'?/mask outside finite scene/:/context or completion mismatch/);
+    t.diagnostic(JSON.stringify({corruption,dispatchCalls:client.acousticCalls,deadlineMs:client.calls[0].deadlineMs,reason:d.fallbackReason,rejected:d.lastRejectedGpuAttempt}));
+    }finally{backend.close();}
+});
+
+test('pre-dispatch preparation deadline falls back without claiming an invalid result',async t=>{
+  const client=new ProtocolFixtureClient(),backend=new AcousticAcceleration({mode:'gpu',deadlineMs:10,clientFactory:()=>client});await backend.ready();client.corruption='generation';const f=fixture();
+  let clock=100;t.mock.method(performance,'now',()=>{const at=clock;clock+=11;return at;});
+  try{parity(await backend.query(f.tile,f.segments,{generation:8}),reference(f.tile,f.segments));const d=backend.diagnostics();
+    assert.equal(client.acousticCalls,0);assert.equal(d.activeAcceleration,'cpu');assert.equal(d.gpuResultsApplied,0);assert.equal(d.droppedResults,1);assert.equal(d.invalidResults,0);assert.equal(d.deadlineMisses,1);assert.match(d.fallbackReason,/deadline exceeded/);assert(d.lastRejectedGpuAttempt.wallMs>=10);
+    t.diagnostic(JSON.stringify({dispatchCalls:client.acousticCalls,reason:d.fallbackReason,rejected:d.lastRejectedGpuAttempt}));
+  }finally{backend.close();}
+});
+
+test('late dispatched GPU completion falls back to complete CPU geometry',async t=>{
+  const client=new ProtocolFixtureClient(),backend=new AcousticAcceleration({mode:'gpu',deadlineMs:10,clientFactory:()=>client});await backend.ready();const f=fixture();
+  let clock=100;t.mock.method(performance,'now',()=>clock);
+  const dispatch=client.dispatch.bind(client);client.dispatch=async request=>{const result=await dispatch(request);clock+=20;return result;};
+  try{parity(await backend.query(f.tile,f.segments,{generation:8}),reference(f.tile,f.segments));const d=backend.diagnostics();
+    assert.equal(client.acousticCalls,1);assert.equal(d.activeAcceleration,'cpu');assert.equal(d.gpuResultsApplied,0);assert.equal(d.droppedResults,1);assert.equal(d.invalidResults,0);assert.equal(d.deadlineMisses,1);assert.match(d.fallbackReason,/deadline exceeded/);assert.equal(d.lastRejectedGpuAttempt.wallMs,20);
+    t.diagnostic(JSON.stringify({dispatchCalls:client.acousticCalls,deadlineMs:client.calls[0].deadlineMs,reason:d.fallbackReason,rejected:d.lastRejectedGpuAttempt}));
+  }finally{backend.close();}
 });
 test('one occupied GPU slot causes a bounded CPU route rather than queueing additional work',async()=>{
   const client=new ProtocolFixtureClient(),backend=new AcousticAcceleration({mode:'gpu',deadlineMs:10,clientFactory:()=>client});await backend.ready();
