@@ -18,6 +18,8 @@ $nodeFiles=@(
  'tests/Test-IndexedWorldGeometry01.mjs','tests/Test-InstalledStaticSceneStreet01.mjs',
  'tests/Test-InstalledSceneService01.mjs','tests/Test-InstalledSceneAdmission01.mjs',
  'tests/Test-InstalledSceneLifecycle01.mjs','tests/Test-InstalledStaticReuse01.mjs','tests/Test-ResponsiveScene01.mjs',
+ 'tests/Test-NormalReadinessCacheFailure01.mjs','tests/Test-CacheResidencyTimeline01.mjs','tests/Test-CacheResidencyLog01.mjs','tests/Test-DeepFreezeReuse01.mjs',
+ 'tests/Test-CachePressure01.mjs','tests/Test-CachePressureConsumer01.mjs','tests/Test-StaticPreparationLifecycle01.mjs',
  'tests/Test-PreparedInstalledTransfer01.mjs','tests/Test-AnalyticPrimitives01.mjs',
  'tests/Test-AnalyticCollisionCache01.mjs','tests/Test-InstalledCollision.mjs',
  'tests/Test-AnalyticCollisionProgress01.mjs',

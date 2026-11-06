@@ -5,6 +5,9 @@ export const timeUnit='monotonic-ms';
 export const limits=Object.freeze({surfaces:128,missingRegions:32,openings:8,tileSide:256,coordinate:100000,epsilon:1e-8});
 const E=limits.epsilon;
 const validatedTiles=new WeakSet();
+// Only objects recursively frozen here may bypass a later traversal. A caller's
+// shallow Object.freeze, accessor or changing Proxy value is not such proof.
+const deeplyFrozenValues01=new WeakSet();
 // Product worksets opt into more finite supports while research fixtures keep
 // their original limit. The index is derived, private state of the same tile;
 // it is not another cache or a source of geometry/coverage authority.
@@ -35,7 +38,15 @@ const identifier=s=>{if(typeof s!=='string'||!/^[A-Za-z0-9_.:-]{1,80}$/.test(s))
 function confidence(n){if(!Number.isFinite(n)||n<0||n>1)throw Error('invalid confidence');return n;}
 function box(b){if(!b)throw Error('missing bounds');const min=vector(b.min),max=vector(b.max);if(min.some((v,i)=>max[i]<=v||max[i]-v>limits.tileSide))throw Error('invalid bounded region');return {min,max};}
 export const inBox=(p,b)=>p.every((x,i)=>x>=b.min[i]-E&&x<=b.max[i]+E);
-function freeze(x){if(x&&typeof x==='object'){for(const v of Object.values(x))freeze(v);Object.freeze(x);}return x;}
+function freeze(x){
+  if(x&&typeof x==='object'&&!deeplyFrozenValues01.has(x)){
+    let stable=true;const keys=Object.keys(x),values=[];
+    for(const key of keys){const descriptor=Object.getOwnPropertyDescriptor(x,key),value=x[key];values.push(value);freeze(value);if(!descriptor||!('value'in descriptor)||descriptor.value!==value||value&&typeof value==='object'&&!deeplyFrozenValues01.has(value))stable=false;}
+    Object.freeze(x);const finalKeys=Object.keys(x);
+    if(stable&&finalKeys.length===keys.length&&keys.every((key,i)=>{const d=Object.getOwnPropertyDescriptor(x,key);return finalKeys[i]===key&&d&&('value'in d)&&d.value===values[i]&&!(d.value&&typeof d.value==='object'&&!deeplyFrozenValues01.has(d.value));}))deeplyFrozenValues01.add(x);
+  }
+  return x;
+}
 function surface(s,bounds){
   if(!s||s.coordinateSpace!==coordinateSpace)throw Error('explicit surface coordinate space required');
   const center=vector(s.center),normal=vector(s.normal),u=vector(s.u);

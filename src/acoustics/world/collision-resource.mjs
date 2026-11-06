@@ -31,13 +31,32 @@ export function loadCollisionResource(indexPath,{expectedSHA256,profile01=null}=
   analyticIndex={schema:1,kind:'RichAudioCollisionMesh',cellSize:analytic.cellSize,cells:analytic.cells,overflowChunks:analytic.overflowChunks,chunks:analytic.primitives.map((primitive,id)=>({id,bounds:primitive.bounds}))};
  }
  const directory=path.dirname(absolute);
+ function queryPrepared01(query,{maxChunks=16,maxTriangles=131072,maximumAnalyticErrorMetres=.05,maximumAnalyticPrimitives=128,nativeBounds=null,profile01:queryProfile01=profile01,components,owner}={}){
+  queryProfile01=profile01Sink(queryProfile01);if(!components||typeof owner!=='string')throw Error('owned immutable component cache required');
+  if(!Number.isSafeInteger(maxChunks)||maxChunks<1||maxChunks>256||!Number.isSafeInteger(maxTriangles)||maxTriangles<1||maxTriangles>meshLimits.triangles)throw Error('query resource limits');
+  const ids=queryChunkIds(index,query),nativeTriangleRecords=ids.reduce((n,id)=>n+chunks[id].count,0);if(ids.length>maxChunks||nativeTriangleRecords>maxTriangles)throw Error('query candidate limit');
+  const handles=[];for(const id of ids){const chunk=chunks[id],file=path.join(directory,chunk.file),info=fs.lstatSync(file);if(!info.isFile()||info.isSymbolicLink()||info.size!==chunk.bytes)throw Error('chunk byte size/type');handles.push(components.native(owner,chunk,read01(file,queryProfile01),queryProfile01));}
+  let triangleRecords=nativeTriangleRecords;const represented=new Set(),analyticUnknown=[],analytics={available:analytic?.primitives.length??0,candidates:0,approximated:0,unknown:0,triangles:0,maximumErrorMetres:0,representation:'optional-compact-affine-analytic01'};
+  if(analyticIndex){
+   if(!Number.isInteger(maximumAnalyticPrimitives)||maximumAnalyticPrimitives<1||maximumAnalyticPrimitives>1024||!Number.isFinite(maximumAnalyticErrorMetres)||maximumAnalyticErrorMetres<.001||maximumAnalyticErrorMetres>.25||nativeBounds!==null&&!validBounds(nativeBounds))throw Error('bounded local analytic controls');
+   const candidates=queryChunkIds(analyticIndex,query);analytics.candidates=candidates.length;
+   for(let n=0;n<candidates.length;n++){
+    const p=analytic.primitives[candidates[n]],key=p.node+':'+p.polygon+':'+p.sourceFamily,remaining=Math.min(2048,maxTriangles-triangleRecords),outside=nativeBounds?Math.max(0,...p.bounds.min.map((v,i)=>nativeBounds.min[i]-v),...p.bounds.max.map((v,i)=>v-nativeBounds.max[i])):0;
+    const prepared=n>=maximumAnalyticPrimitives||remaining<8||outside>.001?{handle:null,metadata:{state:'unknown',reason:outside>.001?'analytic-outside-native-cache-bounds':'analytic-local-capacity',bounds:p.bounds}}:components.analytic(owner,p,{maximumErrorMetres:maximumAnalyticErrorMetres,maximumTriangles:remaining},queryProfile01),approximation=prepared.metadata;
+    if(approximation.state==='approximated-analytic'){handles.push(prepared.handle);triangleRecords+=approximation.triangleCount;represented.add(key);analytics.approximated++;analytics.triangles+=approximation.triangleCount;analytics.maximumErrorMetres=Math.max(analytics.maximumErrorMetres,approximation.maximumErrorMetres);}
+    else{analytics.unknown++;analyticUnknown.push({family:p.sourceFamily,node:p.node,polygon:p.polygon,bounds:p.bounds,basis:'analytic-envelope-transformed',reason:approximation.reason});}
+   }
+  }
+  const unknownRegions=queryUnknownRegions(index,query).filter(region=>!represented.has(region.compactAnalyticPrimitive01??'')),known=new Set(unknownRegions.map(r=>r.node+':'+r.polygon+':'+r.family));for(const region of analyticUnknown)if(!known.has(region.node+':'+region.polygon+':'+region.family))unknownRegions.push(region);
+  const references=handles.flatMap(handle=>components.select(handle,query));return {coordinateSpace:index.coordinateSpace,placement:index.placement,coverage:index.coverage,worldPlacementVerified:false,candidateChunks:ids,references,triangleRecords,nativeTriangleRecords,unknownRegions,analytic:analytics};
+ }
  return {index,indexSHA256,indexIntegrity:expectedSHA256===undefined?'unbound-private-index':'expected-sha256-verified',verifyIntegrity(){
   // The converter validated every coordinate before publishing these exact
   // digest-bound bytes. Warm-cache integrity does not need to allocate every
   // triangle object again. Actual spatial queries still decode/validate them.
   let bytes=0;for(const chunk of chunks){const file=path.join(directory,chunk.file),info=fs.lstatSync(file);if(!info.isFile()||info.isSymbolicLink()||info.size!==chunk.bytes)throw Error('chunk byte size/type');const data=read01(file,profile01);if(data.length!==chunk.bytes||data.length<24||data.toString('ascii',0,8)!=='RACMESH1'||data.readUInt32LE(8)!==1||data.readUInt32LE(12)!==96||data.readUInt32LE(16)!==chunk.count||data.readUInt32LE(20)!==0||hash01(data,profile01)!==chunk.sha256)throw Error('chunk integrity');bytes+=data.length;}
   return {state:'all-chunk-bytes-sha256-verified',chunks:chunks.length,bytes,triangleObjectsDecoded:0,coordinateValidation:'retained-exact-converter-artifact; revalidated-by-active-query'};
- },query(query,{maxChunks=16,maxTriangles=131072,maximumAnalyticErrorMetres=.05,maximumAnalyticPrimitives=128,nativeBounds=null,profile01:queryProfile01=profile01}={}){
+ },queryPrepared:queryPrepared01,query(query,{maxChunks=16,maxTriangles=131072,maximumAnalyticErrorMetres=.05,maximumAnalyticPrimitives=128,nativeBounds=null,profile01:queryProfile01=profile01}={}){
   queryProfile01=profile01Sink(queryProfile01);
   if(!Number.isSafeInteger(maxChunks)||maxChunks<1||maxChunks>256||!Number.isSafeInteger(maxTriangles)||maxTriangles<1||maxTriangles>meshLimits.triangles)throw Error('query resource limits');
   const ids=queryChunkIds(index,query);if(ids.length>maxChunks||ids.reduce((s,id)=>s+chunks[id].count,0)>maxTriangles)throw Error('query candidate limit');

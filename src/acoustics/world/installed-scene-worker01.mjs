@@ -22,7 +22,8 @@ function worldStatus(){const status=world.status();return {...status,cacheTiming
 function post(type,extra={},transfer=[]){const began=performance.now();parentPort.postMessage({schema:1,type,session,catalogSHA256,bindingEpoch,validationEpochUtc01,clock01,sentAt01:began,...extra},transfer);return performance.now()-began;}
 function finishProfile(profile){const cpuStart=profileThreadCpu01.get(profile);profile.workerThreadCpuAvailable=!!cpuStart;if(cpuStart){const cpu=process.threadCpuUsage(cpuStart);profile.workerThreadUserMicroseconds=cpu.user;profile.workerThreadKernelMicroseconds=cpu.system;}profile.finishedAt=performance.now();return {workerProfile01:profile,workerPreparationMilliseconds:profile.finishedAt-profile.startedAt};}
 function internalStatus(profile){const began=performance.now(),status=worldStatus(),computed=Number.isFinite(profile.windowCompletedAt);profile.statusMilliseconds+=performance.now()-began;profile.computedForRequest=computed;profile.activeSurfaces=computed?status.lastWindow?.activeSurfaces??0:0;profile.qualifiedResourceCount=computed?status.localReadiness?.qualifiedResources??0:0;profile.genuineResourceVerified=computed&&status.genuineResourceVerified===true;profile.localReadinessState=computed?status.localReadiness?.state??'unknown':'not-computed-for-observation';return status;}
-function expired(message,profile,phase){profile.expiryPhase=phase;const status=internalStatus(profile),postMs=post('expired',{requestId:message.requestId,status,...finishProfile(profile)});post('delivery-timing',{requestId:message.requestId,postMessageMilliseconds:postMs});}
+function residencyEvidence01(profile){const at=performance.now(),cacheResidency01=world.cacheResidencyTimeline01();profile.cacheDiagnosticsMilliseconds=performance.now()-at;return {cacheResidency01};}
+function expired(message,profile,phase){profile.expiryPhase=phase;const status=internalStatus(profile),postMs=post('expired',{requestId:message.requestId,status,...residencyEvidence01(profile),...finishProfile(profile)});post('delivery-timing',{requestId:message.requestId,postMessageMilliseconds:postMs});}
 function fail(error,phase,requestId=null){if(failed)return;failed=true;clearTimeout(poll);post('failed',{reason:reason(error),phase,requestId});world?.close();world=null;parentPort.close();}
 function refresh(){
  const began=performance.now();
@@ -71,7 +72,7 @@ try{
    }
    if(message.type!=='window'||!Number.isSafeInteger(message.requestId)||message.requestId<=lastRequest)throw Error('Ordered installed scene window required');
    lastRequest=message.requestId;
-   const began=performance.now(),profile=startProfileCpu01({schema:1,startedAt:began,refreshMilliseconds:0,windowMilliseconds:0,encodeMilliseconds:0,transferPreparationMilliseconds:0,soundMapPreparationMilliseconds:0,statusMilliseconds:0});
+   const began=performance.now(),profile=startProfileCpu01({schema:1,startedAt:began,refreshMilliseconds:0,staticPreparationMilliseconds:0,windowMilliseconds:0,encodeMilliseconds:0,transferPreparationMilliseconds:0,soundMapPreparationMilliseconds:0,statusMilliseconds:0});
    if(!Number.isFinite(message.requestedAt)||message.requestedAt<0||!Number.isFinite(message.dispatchedAt)||message.dispatchedAt<message.requestedAt||message.dispatchedAt>began||!Number.isFinite(message.request?.durationMs)||message.request.durationMs<=0||message.request.durationMs>1000||message.expiresAt!==message.requestedAt+message.request.durationMs)throw Error('Original bounded installed scene observation lifetime required');
    // Expired observations never become new observations. A preparation already
    // underway may populate immutable caches, but only a distinct fresh request
@@ -85,7 +86,12 @@ try{
    profile.refreshManifestOperations01=operationDelta01({readCallMilliseconds:cacheTimings.manifestReadCallMilliseconds,logicalReadBytes:cacheTimings.manifestReadBytes,decodeParseMilliseconds:cacheTimings.manifestParseMilliseconds},previousManifest);
    if(!ready){post('not-ready',{requestId:message.requestId,status:pendingStatus(),...finishProfile(profile)});return;}
    if(performance.now()>=message.expiresAt){expired(message,profile,'refresh');return;}
-   const windowAt=performance.now(),scene=world.window({...message.request,session});profile.windowCompletedAt=performance.now();profile.windowMilliseconds=profile.windowCompletedAt-windowAt;
+   // Immutable resource/chunk/primitive preparation has no observation header.
+   // It may finish after this request's lease, but cannot publish that old pose.
+   const request={...message.request,session},staticAt=performance.now(),staticWorkset=world.prepareStaticWorkset01(request);profile.staticPreparationMilliseconds=performance.now()-staticAt;
+   profile.staticPreparation=staticWorkset.profile;profile.staticWorksetHeavyWork=staticWorkset.heavyWork;
+   if(performance.now()>=message.expiresAt){world.discardPreparedSelection01(staticWorkset.preparedSelection01);profile.expiryPhase='static-preparation';const status=internalStatus(profile),postMs=post('static-prepared',{requestId:message.requestId,status,...residencyEvidence01(profile),...finishProfile(profile)});post('delivery-timing',{requestId:message.requestId,postMessageMilliseconds:postMs});return;}
+   const windowAt=performance.now(),scene=world.window({...request,preparedSelection01:staticWorkset.preparedSelection01});profile.windowCompletedAt=performance.now();profile.windowMilliseconds=profile.windowCompletedAt-windowAt;
    profile.world=world.lastWindowProfile01??{};
    if(performance.now()>=message.expiresAt){expired(message,profile,'world-window');return;}
    const encodeAt=performance.now(),packet=encodeInstalledStaticScene01(scene);profile.encodeMilliseconds=performance.now()-encodeAt;
@@ -95,7 +101,7 @@ try{
    const soundMapAt=performance.now(),preparedSoundMapGeometry=prepareInstalledSoundMapGeometry01(preparedScene.scene,{requestId:message.requestId,bindingEpoch,packetDigest:packet.packetDigest});profile.soundMapPreparationMilliseconds=performance.now()-soundMapAt;
    if(performance.now()>=message.expiresAt){expired(message,profile,'soundmap-preparation');return;}
    const status=internalStatus(profile),memory=process.memoryUsage();
-   const postMs=post('scene',{requestId:message.requestId,packetDigest:packet.packetDigest,preparedScene,preparedSoundMapGeometry,status:{...status,genuineResourceVerified:packet.metadata.genuineResourceVerified===true&&packet.metadata.activeSurfaces>0},...finishProfile(profile),memory:{heapUsed:memory.heapUsed,external:memory.external,arrayBuffers:memory.arrayBuffers}},[preparedSoundMapGeometry.bodyBytes.buffer]);
+   const postMs=post('scene',{requestId:message.requestId,packetDigest:packet.packetDigest,preparedScene,preparedSoundMapGeometry,status:{...status,genuineResourceVerified:packet.metadata.genuineResourceVerified===true&&packet.metadata.activeSurfaces>0},...residencyEvidence01(profile),...finishProfile(profile),memory:{heapUsed:memory.heapUsed,external:memory.external,arrayBuffers:memory.arrayBuffers}},[preparedSoundMapGeometry.bodyBytes.buffer]);
    post('delivery-timing',{requestId:message.requestId,postMessageMilliseconds:postMs});
   }catch(error){fail(error,'window',message?.requestId??null);}
  });

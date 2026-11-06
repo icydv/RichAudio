@@ -24,6 +24,9 @@ export const bounds = Object.freeze({
 const scenes = new WeakSet(),
   tracks = new WeakSet(),
   sources = new WeakSet();
+// This is traversal provenance, not geometry/material authority. External
+// shallow-frozen values still take the full recursive path.
+const deeplyFrozenValues01 = new WeakSet();
 export const validated = Object.freeze({
   scene: (x) => scenes.has(x),
   track: (x) => tracks.has(x),
@@ -40,9 +43,20 @@ export const requireValue = (ok, message) => {
   if (!ok) throw Error(message);
 };
 export const freeze = (x) => {
-  if (x && typeof x === "object") {
-    for (const v of Object.values(x)) freeze(v);
+  if (x && typeof x === "object" && !deeplyFrozenValues01.has(x)) {
+    let stable = true;const keys=Object.keys(x),values=[];
+    for (const key of keys) {
+      const descriptor = Object.getOwnPropertyDescriptor(x, key), value = x[key];
+      values.push(value);
+      freeze(value);
+      if (!descriptor || !("value" in descriptor) || descriptor.value !== value ||
+          value && typeof value === "object" && !deeplyFrozenValues01.has(value)) stable = false;
+    }
     Object.freeze(x);
+    // Freezing a Proxy child may change its parent's still-writable graph.
+    // Memoize only the graph that actually became frozen, not our old snapshot.
+    const finalKeys=Object.keys(x);
+    if (stable&&finalKeys.length===keys.length&&keys.every((key,i)=>{const d=Object.getOwnPropertyDescriptor(x,key);return finalKeys[i]===key&&d&&('value'in d)&&d.value===values[i]&&!(d.value&&typeof d.value==='object'&&!deeplyFrozenValues01.has(d.value));})) deeplyFrozenValues01.add(x);
   }
   return x;
 };
