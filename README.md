@@ -1,3 +1,5 @@
+![RichAudio](docs/assets/richaudio-banner.png)
+
 # RichAudio
 
 ## MAJOR MILESTONE — I Heard RichAudio's First Live Bati Audio (1 November 2026)
