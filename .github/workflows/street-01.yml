@@ -49,6 +49,7 @@ jobs:
           path: |
             .local/street01/functional-*/logs/*.log
             .local/street01/functional-*/receipt.json
+            .local/street01-cache-pressure01/ci-lifecycle-*/result.json
             .local/street01/cold-npc-failure-*/*.json
             .local/street01/initial-preparation-offer-*/build.log
             .local/street01/initial-preparation-offer-*/attempt.json

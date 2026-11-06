@@ -15,7 +15,7 @@ const takeReceiver=service=>{const receive=service.worker.listeners('message').a
 
 test('expired static preparation retains reusable geometry but only a separate fresh observation publishes; cancellation and restart stay isolated',async()=>{
  const scratch=path.resolve('.local/street01-cache-pressure01/lifecycle-original'),root=path.join(scratch,randomUUID()),fixture=createCachePressure01(root),published=[];
- let service,second;
+ let service,second,restartTimer,error=null,passed=false;
  try{
   service=new InstalledSceneService01({config:{...fixture,privateRoot:root},session,onScene:(scene,receipt)=>published.push({scene,receipt})});
   await until(()=>service.ready||service.failed);assert.equal(service.failed,false,service.failure);
@@ -30,9 +30,18 @@ test('expired static preparation retains reusable geometry but only a separate f
   const accepted=published[0];assert.equal(accepted.scene.tile.surfaces.length,781);assert.equal(accepted.receipt.requestId,fresh.requestId);assert.equal(accepted.receipt.requestedAt,fresh.requestedAt);assert.equal(accepted.receipt.expiresAt,fresh.expiresAt);assert.equal(accepted.receipt.generation,2);assert(accepted.receipt.admittedAt<fresh.expiresAt);
   const diagnostic=service.snapshot().sceneDeliveryDiagnostics01.recent.at(-1);assert.equal(diagnostic.workerProfile01.staticPreparation.operations01.chunkDecodeCalls,0);assert.equal(diagnostic.workerProfile01.staticPreparation.operations01.analyticTessellationCalls,0);
   const closed=await service.close();assert.equal(closed.workerJoined,true);receive(prepared);assert.equal(published.length,1);assert.equal(service.stats.workersStarted,1);
-  const restarted=[];second=new InstalledSceneService01({config:{...fixture,privateRoot:root},session,onScene:(scene,receipt)=>restarted.push({scene,receipt})});second.updateWindow(observation(3));await until(()=>restarted.length||second.failed);assert.equal(second.failed,false,second.failure);assert.notEqual(second.worker,service.worker);assert.equal(restarted[0].receipt.generation,3);assert.equal(restarted[0].scene.tile.surfaces.length,781);
-  const restartProfile=second.snapshot().sceneDeliveryDiagnostics01.recent.at(-1).workerProfile01;assert(restartProfile.staticPreparation.operations01.chunkDecodeCalls>0,'new worker cannot inherit private component buffers');
- }finally{if(second)assert.equal((await second.close()).workerJoined,true);if(service)assert.equal((await service.close()).workerJoined,true);assert(root.startsWith(scratch+path.sep));fs.rmSync(root,{recursive:true,force:true});}
+  const restarted=[];second=new InstalledSceneService01({config:{...fixture,privateRoot:root},session,onScene:(scene,receipt)=>restarted.push({scene,receipt})});
+  // A cold restart can legitimately finish after its first observation expires.
+  // Supply independent fresh observations, as gameplay does, without retrying
+  // or renewing any old request. The one worker and original leases remain.
+  const updateRestart=()=>{if(!second.failed&&!second.closed)second.updateWindow(observation(3));};updateRestart();restartTimer=setInterval(updateRestart,200);
+  await until(()=>restarted.length||second.failed);clearInterval(restartTimer);assert.equal(second.failed,false,second.failure);assert.notEqual(second.worker,service.worker);assert.equal(restarted[0].receipt.generation,3);assert.equal(restarted[0].scene.tile.surfaces.length,781);assert.equal(second.stats.workersStarted,1);
+  const restartProfiles=second.snapshot().sceneDeliveryDiagnostics01.recent.map(x=>x.workerProfile01).filter(Boolean);assert(restartProfiles.some(x=>x.staticPreparation?.operations01.chunkDecodeCalls>0),'new worker cannot inherit private component buffers, even if its cold observation expires');passed=true;
+ }catch(e){error=String(e?.stack??e);throw e;}finally{
+  clearInterval(restartTimer);const secondClosure=await second?.close(),firstClosure=await service?.close(),diagnostics=path.join(path.dirname(scratch),'ci-lifecycle-'+randomUUID());fs.mkdirSync(diagnostics,{recursive:true});
+  fs.writeFileSync(path.join(diagnostics,'result.json'),JSON.stringify({schema:1,kind:'OriginalStaticPreparationLifecycle01',passed:passed&&firstClosure?.workerJoined===true&&secondClosure?.workerJoined===true,error,originalAuthoredDataOnly:true,first:service?.snapshot(),restart:second?.snapshot(),firstClosure,secondClosure},null,2),{flag:'wx'});
+  if(second)assert.equal(secondClosure.workerJoined,true);if(service)assert.equal(firstClosure.workerJoined,true);assert(root.startsWith(scratch+path.sep));fs.rmSync(root,{recursive:true,force:true});
+ }
 });
 
 test('a geometry-bearing cache diagnostic fails closed before publication',async()=>{
