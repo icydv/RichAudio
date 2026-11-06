@@ -135,7 +135,12 @@ export class InstalledSceneService01 {
     if(!wasReady&&this.ready&&this.#consumer01)this.#metadataResumeUrgent01=true;this.state=this.active?'loading-cached-regions':this.ready?'idle':'preparing/indexing';this.#emit();this.#schedule();return;
    }
    if(message.type==='not-ready'){
-    requireWorld(this.active&&message.requestId===this.active.requestId,'matching pending installed scene cache request');processingDiagnostic=this.active.diagnostic01;this.#profile(this.active,message,receivedAt);clearTimeout(this.operationTimer);this.operationTimer=null;const active=this.active;this.active=null;this.ready=false;this.baseStatus=message.status;this.state='preparing/indexing';this.stats.cacheNotReadyResults++;this.#finish(active.diagnostic01,'cache-not-ready',receivedAt);this.#emit();return;
+    requireWorld(this.active&&message.requestId===this.active.requestId,'matching pending installed scene cache request');processingDiagnostic=this.active.diagnostic01;this.#profile(this.active,message,receivedAt);clearTimeout(this.operationTimer);this.operationTimer=null;const active=this.active;this.active=null;this.ready=false;this.baseStatus=message.status;this.state='preparing/indexing';this.stats.cacheNotReadyResults++;this.#finish(active.diagnostic01,'cache-not-ready',receivedAt);
+    // Metadata preparation did not consume the observation. Keep only the
+    // latest still-fresh one, with unchanged acquisition and expiry times.
+    // A new transport ID preserves the worker's strict command ordering.
+    if(!this.pending&&active.expiresAt>receivedAt&&active.request.generation===this.latestGeneration){this.pending={...active,requestId:++this.serial};delete this.pending.dispatchedAt;this.pending.diagnostic01=this.#record(this.pending);}
+    this.#emit();return;
    }
    requireWorld((message.type==='scene'||message.type==='expired'||message.type==='static-prepared')&&this.ready&&this.active&&message.requestId===this.active.requestId,'matching installed scene worker request');
    const diagnostic=this.active.diagnostic01;processingDiagnostic=diagnostic;const profile=this.#profile(this.active,message,receivedAt);

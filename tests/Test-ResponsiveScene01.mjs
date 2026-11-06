@@ -50,6 +50,9 @@ test('representative moving original worker scene reaches actual consumer cold, 
  try{
   service=new InstalledSceneService01({config:{manifestPath:f.manifestPath,catalogPath:f.catalogPath,expectedGameSHA256:f.expectedGameSHA256,privateRoot:f.root,maximumResidentResources:4},session,onScene:(scene,receipt)=>{engine.queueInstalledStaticScene01(scene,receipt);const accepted=engine.applyPendingInstalledStaticScene01();assert.equal(accepted,true);assert.ok(performance.now()<receipt.expiresAt);assert.equal(scene.tile.createdAt,receipt.geometryTimeMs);assert.equal(scene.tile.validUntil,receipt.geometryTimeMs+1000);acceptances.push({requestId:receipt.requestId,generation:receipt.generation,surfaces:scene.tile.surfaces.length,headroom:receipt.expiresAt-performance.now()});},onStatus:s=>{snapshots.push(s);assert.equal(typeof s.worker.inFlight,'boolean');assert.equal(typeof s.worker.pendingLatest,'boolean');}});
   assert.equal(service.bindPreparationEpoch01(responsiveEpoch01),true);
+  // Metadata now prepares asynchronously. Bound startup separately so it
+  // cannot consume the moving-observation population's fixed eight seconds.
+  const startupDeadline=performance.now()+5000;while(!service.ready&&!service.failed&&performance.now()<startupDeadline)await sleep(10);assert.equal(service.failed,false,service.failure);assert.equal(service.ready,true,'bounded asynchronous metadata startup');
   const began=performance.now();
   for(let sequence=0;sequence<40;sequence++){
    const due=began+sequence*200,delay=due-performance.now();if(delay>0)await sleep(delay);assert.equal(service.failed,false,service.failure);

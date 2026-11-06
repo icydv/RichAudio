@@ -43,7 +43,7 @@ test('normal first launch waits for known cache paths then follows changed catal
   f.publish();await delay(100);assert.equal(service.ready,false);assert.equal(service.bindPreparationEpoch01('invented'),false);assert.equal(service.bindPreparationEpoch01(epoch),true);await delay(100);assert.equal(service.ready,false,'historical manifest cannot precede current archive validation');
   const first=f.publish(1,{validationEpochUtc01:epoch});await until(()=>service.ready||service.failed);assert.equal(service.failed,false,service.failure);service.updateWindow(request());await until(()=>scenes.length===1||service.failed);
   assert.equal(scenes[0].binding.catalogSHA256,first.catalogSHA256);
-  const changed=f.publish(2,{validationEpochUtc01:epoch});service.updateWindow(request());await until(()=>scenes.length===2||service.failed);assert.equal(service.failed,false,service.failure);assert.equal(scenes[1].binding.catalogSHA256,changed.catalogSHA256);assert.ok(scenes[1].binding.bindingEpoch>scenes[0].binding.bindingEpoch);assert.equal(service.stats.workersStarted,1);
+  const changed=f.publish(2,{validationEpochUtc01:epoch});service.updateWindow(request());await until(()=>service.catalogBinding===changed.catalogSHA256&&service.ready||service.failed);if(scenes.length<2)service.updateWindow(request());await until(()=>scenes.length>=2||service.failed);assert.equal(service.failed,false,service.failure);assert.equal(scenes[1].binding.catalogSHA256,changed.catalogSHA256);assert.ok(scenes[1].binding.bindingEpoch>scenes[0].binding.bindingEpoch);assert.equal(service.stats.workersStarted,1);
  }finally{await service.close();f.close();}
 });
 
@@ -53,9 +53,16 @@ test('normal cache rows require the current archive proof and a supervisor epoch
  try{
   await delay(50);assert.equal(service.ready,false,'existing files supply no current validation authority');assert.equal(service.bindPreparationEpoch01(epoch),true);await until(()=>service.ready||service.failed);assert.equal(service.failed,false,service.failure);
   service.updateWindow(request());await until(()=>scenes.length===1||service.failed);assert.equal(service.failed,false,service.failure);assert.equal(installedStaticSceneMetadata01(scenes[0]).activeSurfaces,0,'stale row is an unknown gap');
-  f.publish(1,{validationEpochUtc01:epoch});service.updateWindow(request());await until(()=>scenes.length===2||service.failed);assert.equal(service.failed,false,service.failure);assert.equal(installedStaticSceneMetadata01(scenes[1]).activeSurfaces,2);
+  const reads=service.snapshot().cacheTimings.manifestLoads;f.publish(1,{validationEpochUtc01:epoch});service.updateWindow(request());await until(()=>service.snapshot().cacheTimings.manifestLoads>reads&&service.ready&&!service.snapshot().cacheTimings.metadataPreparing01||service.failed);if(scenes.length<2)service.updateWindow(request());await until(()=>scenes.length>=2||service.failed);assert.equal(service.failed,false,service.failure);assert.equal(installedStaticSceneMetadata01(scenes[1]).activeSurfaces,2);
   assert.equal(service.bindPreparationEpoch01('2026-11-05T13:54:26.2639009Z'),false);assert.equal(service.failed,true);assert.match(service.failure,/changed-normal-preparation-epoch/);
  }finally{await service.close();f.close();}
+});
+
+test('metadata preparation retains one pending observation without retimestamping its lease',async()=>{
+ const f=installedSceneFixture01(),scenes=[],service=new InstalledSceneService01({config:{manifestPath:f.manifestPath,catalogPath:f.catalogPath,expectedGameSHA256:f.gameSHA256},session,onScene:(scene,binding)=>scenes.push({scene,binding})});
+ try{f.publish(1,{validationEpochUtc01:epoch});service.bindPreparationEpoch01(epoch);await until(()=>service.ready||service.failed);assert.equal(service.failed,false,service.failure);
+  f.publish(2,{validationEpochUtc01:epoch});const original=service.updateWindow(request());await until(()=>scenes.length||service.failed);assert.equal(service.failed,false,service.failure);assert.equal(service.stats.cacheNotReadyResults,1);assert.equal(scenes.length,1);assert.ok(scenes[0].binding.requestId>original.requestId);assert.equal(scenes[0].binding.requestedAt,original.requestedAt);assert.equal(scenes[0].binding.expiresAt,original.expiresAt);assert.equal(scenes[0].scene.tile.createdAt,100);assert.equal(service.stats.pendingExpired,0);
+ }finally{assert.equal((await service.close()).workerJoined,true);f.close();}
 });
 
 test('wrong game binding fails explicitly without worker restart',async()=>{

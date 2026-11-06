@@ -12,6 +12,7 @@ parentPort.on('message',m=>{try{
  if(m.type!=='prepare'||iterator)throw Error('One metadata preparation at a time');serial=m.serial;const began=performance.now();
  for(let at=path.resolve(config.manifestPath);;at=path.dirname(at)){if(fs.lstatSync(at).isSymbolicLink())throw Error('Linked metadata input');if(path.dirname(at)===at)break;}const stat=fs.statSync(config.manifestPath);if(stat.size<=0||stat.size>67108864)throw Error('Bounded manifest');const manifest=JSON.parse(fs.readFileSync(config.manifestPath,'utf8').replace(/^\uFEFF/,''));
  const sha=manifest.ResolvedCatalogSHA256;if(!/^[a-f0-9]{64}$/.test(sha??'')||config.catalogSHA256&&sha!==config.catalogSHA256||config.expectedGameSHA256&&manifest.InputBinding?.GameExecutableSHA256!==config.expectedGameSHA256)throw Error('Metadata game/catalogue identity');
+ parentPort.postMessage({type:'manifest-read',serial,milliseconds:performance.now()-began,bytes:stat.size});
  if(m.epoch&&manifest.ValidationEpochUtc01!==m.epoch){parentPort.postMessage({type:'waiting',serial});return;}
  const sameHeader=manifest.Schema===1&&Array.isArray(manifest.Resources)&&!!installed&&sha===installed.catalogSHA256&&manifest.ValidationEpochUtc01===installed.manifest.ValidationEpochUtc01&&manifest.InputFingerprint===installed.manifest.InputFingerprint&&digest(manifest.InputBinding)===digest(installed.manifest.InputBinding);
  const byId=new Map();for(const row of manifest.Resources??[]){if(byId.has(row.Id))throw Error('Unique metadata resource IDs required');byId.set(row.Id,row);}
