@@ -1,5 +1,7 @@
 # STREET-01: persistent geometry under representative cache pressure
 
+This is my retained component-cache repair checkpoint. Proposal10 subsequently reached the actual consumer but failed after activation with a lease gap; its approval is consumed. The [activation and refresh correction](STREET_01_ACTIVATION_REFRESH.md) reconstructs that result and records the later production-readiness work. The earlier measurements below remain preserved.
+
 My genuine installed-cache readiness remains **unqualified**. Proposal08 is consumed and closed. Codex developed this repair using retained measurement metadata and entirely original arithmetic geometry; no original installation, vendor bootstrap or historical geometry was opened during this work. My cache, old proposals, failed observations and passive candidate remain preserved.
 
 ## Failure and diagnosis

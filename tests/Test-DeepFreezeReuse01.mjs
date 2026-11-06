@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {freeze,acousticScene,material} from '../src/acoustics/engine/contracts.mjs';
-import {createTile,coordinateSpace,timeUnit,querySegment} from '../src/acoustics/research/local-geometry.mjs';
+import {createTile,coordinateSpace,timeUnit,querySegment,isDeeplyFrozenTileSnapshot01,adoptSourceBoundTileTransfer01} from '../src/acoustics/research/local-geometry.mjs';
 
 test('recursive-freeze reuse never trusts an external shallow freeze or loses partially shared children',()=>{
  const shared={coordinates:[1,2,3]},outer=Object.freeze({shared});
@@ -39,4 +39,15 @@ test('validated finite geometry stays deeply immutable and material checks still
  assert.equal(querySegment(tile,[0,-1,0],[0,1,0]).hits[0].id,'original-wall');
  assert.throws(()=>material({reflection:[1.1,0,0],transmission:[0,0,0],basis:'authored-assumption',reference:'bad'}),/energy coefficients/);
  assert.throws(()=>acousticScene(tile,{'original-wall':{reflection:[.9,.9,.9],transmission:[.2,0,0],basis:'authored-assumption',reference:'bad'}}),/energy budget/);
+});
+
+test('scene traversal reuses only the exact privately deep-frozen tile graph, never a shallow/adopted clone',()=>{
+ const input={schemaVersion:1,id:'shared-proof-tile',coordinateSpace,timeUnit,bounds:{min:[-4,-4,-4],max:[4,4,4]},listenerAnchor:[0,-1,0],coverage:'complete-synthetic',surfaces:[{id:'proof-wall',coordinateSpace,center:[0,0,0],normal:[0,1,0],u:[1,0,0],half:[1,1],motion:'static',reflectiveSide:'both',provenance:{kind:'synthetic',reference:'original-proof-only'},confidence:1,version:1,observedAt:0,validUntil:1000}],missingRegions:[],version:1,createdAt:0,validUntil:1000,build:'original',session:'original',interior:'outside',dynamicEpoch:0};
+ const tile=createTile(input),nodes=new Set();function collect(value){if(value&&typeof value==='object'&&!nodes.has(value)){nodes.add(value);for(const child of Object.values(value))collect(child);}}collect(tile);
+ assert.equal(isDeeplyFrozenTileSnapshot01(tile),true);assert.equal(isDeeplyFrozenTileSnapshot01(new Proxy(tile,{})),false);assert.equal(isDeeplyFrozenTileSnapshot01(Object.freeze({...tile})),false);
+ let tileDescriptorReads=0;const descriptor=Object.getOwnPropertyDescriptor;Object.getOwnPropertyDescriptor=(object,key)=>{if(nodes.has(object))tileDescriptorReads++;return descriptor(object,key);};let scene;
+ try{scene=acousticScene(tile,{'proof-wall':{reflection:[.5,.4,.3],transmission:[0,0,0],basis:'authored-assumption',reference:'original'}});}finally{Object.getOwnPropertyDescriptor=descriptor;}
+ assert.equal(tileDescriptorReads,0,'The already-proven graph is not recursively walked again');assert.equal(scene.tile,tile);assert(Object.isFrozen(scene.materials['proof-wall'].reflection));
+ const clone=Object.freeze(structuredClone(tile));adoptSourceBoundTileTransfer01(clone,{schema:1,kind:'RichAudioPreparedFiniteTileIndex01',observationKey:clone.observationKey,surfaceCount:clone.surfaces.length,index:null});assert.equal(isDeeplyFrozenTileSnapshot01(clone),false,'An adoption/header identity is not local recursive-freeze proof');assert.equal(Object.isFrozen(clone.surfaces),false);freeze(clone);assert(Object.isFrozen(clone.surfaces[0].corners[0]));assert.equal(isDeeplyFrozenTileSnapshot01(clone),false);
+ assert.throws(()=>acousticScene(tile,{'proof-wall':{reflection:[1.1,0,0],transmission:[0,0,0],basis:'authored-assumption',reference:'invalid'}}),/energy coefficients/,'Private freeze proof never skips acoustic material validation');
 });

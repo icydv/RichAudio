@@ -35,6 +35,7 @@ function geometrySnapshot(simulation,generation,streamId,{bodyOnly=false}={}){
 }
 
 const preparedScenes=new WeakMap(),hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x);
+export function installedSoundMapGeometryState01(scene){return scene?.observationModel?.kind==='conditional-installed-static-model'?(preparedScenes.has(scene)?'prepared':'pending-prepared-geometry'):'not-installed-scene';}
 // Called only on the persistent installed-scene worker, before it publishes the
 // same scene packet. Mapping, freezing and JSON encoding stay off the producer.
 export function prepareInstalledSoundMapGeometry01(scene,{requestId,bindingEpoch,packetDigest}={}){
@@ -108,8 +109,11 @@ export class SoundMapTelemetry {
       const prepared=scene&&preparedScenes.get(scene);let g=null;
       if(prepared){const header=freeze({schemaVersion:1,generation,streamId:this.streamId,sessionId:simulation.session??'uninitialised',listenerSessionId:simulation.session});
         g=freeze({...header,geometryProfile:INSTALLED_GEOMETRY_PROFILE,geometryKey:scene.geometryKey,surfaceCount:scene.tile.surfaces.length,transportEncoding:'prepared-static-json-utf8-v1'});rememberPreparedGeometryEncoding(g,{header,bodyBytes:prepared.bodyBytes});this.stats.maximumGeometryBytes=Math.max(this.stats.maximumGeometryBytes,prepared.bodyBytes.length+bytes(header)-1);this.stats.preparedGeometryPublications++;this.stats.maximumWorkerGeometryPreparationMs=Math.max(this.stats.maximumWorkerGeometryPreparationMs,prepared.preparationMilliseconds??0);
-      }else if(scene?.observationModel?.kind==='conditional-installed-static-model'&&scene.tile.surfaces.length>SOUND_MAP_WIRE.compactSurfaces){
-        this.stats.unpreparedGeometry++;this.geometryOmission={reason:'prepared-geometry-required',actualBytes:null,maximumBytes:SOUND_MAP_WIRE.installedGeometryBytes,actualSurfaces:scene.tile.surfaces.length,maximumSurfaces:SOUND_MAP_WIRE.installedSurfaces,profile:INSTALLED_GEOMETRY_PROFILE};generation=null;
+      }else if(scene?.observationModel?.kind==='conditional-installed-static-model'){
+        // Opening a viewer during an audio-only scene waits for the next
+        // worker-prepared packet, including for small installed worksets.
+        // Never reconstruct installed geometry on the producer as a fallback.
+        this.stats.unpreparedGeometry++;this.geometryOmission={reason:'prepared-geometry-required',state:'pending',actualBytes:null,maximumBytes:SOUND_MAP_WIRE.installedGeometryBytes,actualSurfaces:scene.tile.surfaces.length,maximumSurfaces:SOUND_MAP_WIRE.installedSurfaces,profile:INSTALLED_GEOMETRY_PROFILE};generation=null;
       }else if(scene?.tile&&scene.observationModel?.kind!=='conditional-installed-static-model'&&scene.tile.surfaces.length>SOUND_MAP_WIRE.compactSurfaces){
         this.stats.oversizeGeometry++;this.geometryOmission={reason:'geometry-surface-budget',actualBytes:null,maximumBytes:SOUND_MAP_WIRE.compactGeometryBytes,actualSurfaces:scene.tile.surfaces.length,maximumSurfaces:SOUND_MAP_WIRE.compactSurfaces,profile:'compact'};generation=null;
       }else g=scene?.tile?geometrySnapshot(simulation,generation,this.streamId):null;

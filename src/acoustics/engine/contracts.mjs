@@ -9,6 +9,7 @@ import {
   cross,
   dot,
   isValidatedTileSnapshot01,
+  isDeeplyFrozenTileSnapshot01,
 } from "../research/local-geometry.mjs";
 export const bounds = Object.freeze({
   sources: 16,
@@ -44,6 +45,10 @@ export const requireValue = (ok, message) => {
 };
 export const freeze = (x) => {
   if (x && typeof x === "object" && !deeplyFrozenValues01.has(x)) {
+    // createTile already proved this exact complete graph deeply immutable.
+    // Reuse that private proof; a header/adoption brand or Object.freeze alone
+    // cannot take this path. Scene/material validation still runs in full.
+    if(isDeeplyFrozenTileSnapshot01(x)){deeplyFrozenValues01.add(x);return x;}
     let stable = true;const keys=Object.keys(x),values=[];
     for (const key of keys) {
       const descriptor = Object.getOwnPropertyDescriptor(x, key), value = x[key];

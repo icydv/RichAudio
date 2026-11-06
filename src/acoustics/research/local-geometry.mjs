@@ -8,6 +8,9 @@ const validatedTiles=new WeakSet();
 // Only objects recursively frozen here may bypass a later traversal. A caller's
 // shallow Object.freeze, accessor or changing Proxy value is not such proof.
 const deeplyFrozenValues01=new WeakSet();
+// Read-only traversal proof, not a geometry constructor or transfer authority.
+// A cloned/adopted/shallow-frozen tile does not own this local proof.
+export const isDeeplyFrozenTileSnapshot01=tile=>validatedTiles.has(tile)&&deeplyFrozenValues01.has(tile);
 // Product worksets opt into more finite supports while research fixtures keep
 // their original limit. The index is derived, private state of the same tile;
 // it is not another cache or a source of geometry/coverage authority.

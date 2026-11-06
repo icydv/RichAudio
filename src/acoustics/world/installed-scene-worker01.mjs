@@ -12,6 +12,7 @@ const clock01=Object.freeze({kind:'node-process-performance',processId:process.p
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x),automatic=config?.catalogSHA256==null;
 let initialPriority=null,initialPriorityFailure=null;
 let validationEpochUtc01=null;
+let consumerProof01=null;
 const cacheTimings={manifestLoads:0,manifestReadMilliseconds:0,manifestReadCallMilliseconds:0,manifestReadBytes:0,manifestParseMilliseconds:0,catalogueAndIndexMilliseconds:0,maximumRefreshMilliseconds:0};
 const profileThreadCpu01=new WeakMap();
 function startProfileCpu01(profile){if(typeof process.threadCpuUsage==='function')profileThreadCpu01.set(profile,process.threadCpuUsage());return profile;}
@@ -25,6 +26,11 @@ function internalStatus(profile){const began=performance.now(),status=worldStatu
 function residencyEvidence01(profile){const at=performance.now(),cacheResidency01=world.cacheResidencyTimeline01();profile.cacheDiagnosticsMilliseconds=performance.now()-at;return {cacheResidency01};}
 function expired(message,profile,phase){profile.expiryPhase=phase;const status=internalStatus(profile),postMs=post('expired',{requestId:message.requestId,status,...residencyEvidence01(profile),...finishProfile(profile)});post('delivery-timing',{requestId:message.requestId,postMessageMilliseconds:postMs});}
 function fail(error,phase,requestId=null){if(failed)return;failed=true;clearTimeout(poll);post('failed',{reason:reason(error),phase,requestId});world?.close();world=null;parentPort.close();}
+function checkConsumerProof01(){
+ if(!consumerProof01)return;const {consumerRequestId,selectionProof01}=consumerProof01,manifest=world?.manifest,required=validationEpochUtc01??manifest?.ValidationEpochUtc01;
+ const proofCurrent=!!world&&selectionProof01.every(e=>{const entry=world.rows.find(x=>x.row.Id===e.resourceId),row=entry?.row,result=row?.Result;return row?.Status==='imported-exterior-incomplete-surfaces'&&result?.IndexSHA256===e.indexSHA256&&result.ReceiptSHA256===e.receiptSHA256&&(!required||manifest.ValidationEpochUtc01===required&&row.ArchiveValidation01?.EpochUtc===required&&row.ArchiveValidation01.Source==='current-archive-sha256'&&row.ArchiveValidation01.ArchiveSHA256===result.ArchiveSHA256);});
+ if(consumerProof01.lastVerdict!==proofCurrent){consumerProof01.lastVerdict=proofCurrent;post('consumer-proof-status',{consumerRequestId,proofCurrent});}
+}
 function refresh(){
  const began=performance.now();
  try{
@@ -45,7 +51,7 @@ function refresh(){
   if(changed||world===null){world?.close();world=null;catalogSHA256=admitted;bindingEpoch++;world=new InstalledStaticWorld01({...config,catalogSHA256,...(automatic?{requiredValidationEpochUtc01:validationEpochUtc01}:{})});}
   else world.reload();
   cacheTimings.catalogueAndIndexMilliseconds+=performance.now()-indexAt;cacheTimings.maximumRefreshMilliseconds=Math.max(cacheTimings.maximumRefreshMilliseconds,performance.now()-began);
-  manifestStamp=stamp;waitingStamp=null;post(changed?'ready':'status',{ready:true,status:worldStatus()});return true;
+  manifestStamp=stamp;waitingStamp=null;checkConsumerProof01();post(changed?'ready':'status',{ready:true,status:worldStatus()});return true;
  }catch(error){
   if(automatic&&error.code==='ENOENT'){
    if(world){world.close();world=null;catalogSHA256=null;bindingEpoch++;manifestStamp=null;}
@@ -65,6 +71,12 @@ try{
   try{
    if(message?.schema!==1||message.session!==session||(!automatic&&message.catalogSHA256!==config.catalogSHA256))throw Error('Installed scene command identity');
    if(message.type==='close'){clearTimeout(poll);world?.close();world=null;post('closed');parentPort.close();return;}
+   if(message.type==='consumer-proof'){
+    if(message.bindingEpoch!==bindingEpoch||message.catalogSHA256!==catalogSHA256)return;
+    if(!Number.isSafeInteger(message.consumerRequestId)||message.consumerRequestId<1||!Array.isArray(message.selectionProof01)||message.selectionProof01.length<1||message.selectionProof01.length>16||!message.selectionProof01.every(e=>typeof e.resourceId==='string'&&e.resourceId.length<=512&&hex(e.indexSHA256)&&hex(e.receiptSHA256)))throw Error('Bounded actual consumer source-proof watch');
+    if(consumerProof01&&message.consumerRequestId<consumerProof01.consumerRequestId)return;
+    consumerProof01={consumerRequestId:message.consumerRequestId,selectionProof01:message.selectionProof01,lastVerdict:null};checkConsumerProof01();return;
+   }
    if(message.type==='initial-observation'){post('initial-observation-result',{result:initialPriority?initialPriority.write(message.record):{accepted:false,reason:initialPriorityFailure??'priority-output-not-configured'}});return;}
    if(message.type==='preparation-epoch'){
     if(!automatic||!epoch(message.validationEpochUtc01)||validationEpochUtc01!==null&&validationEpochUtc01!==message.validationEpochUtc01)throw Error('Immutable normal preparation epoch required');
@@ -74,6 +86,7 @@ try{
    lastRequest=message.requestId;
    const began=performance.now(),profile=startProfileCpu01({schema:1,startedAt:began,refreshMilliseconds:0,staticPreparationMilliseconds:0,windowMilliseconds:0,encodeMilliseconds:0,transferPreparationMilliseconds:0,soundMapPreparationMilliseconds:0,statusMilliseconds:0});
    if(!Number.isFinite(message.requestedAt)||message.requestedAt<0||!Number.isFinite(message.dispatchedAt)||message.dispatchedAt<message.requestedAt||message.dispatchedAt>began||!Number.isFinite(message.request?.durationMs)||message.request.durationMs<=0||message.request.durationMs>1000||message.expiresAt!==message.requestedAt+message.request.durationMs)throw Error('Original bounded installed scene observation lifetime required');
+   if(message.request.prepareSoundMapGeometry01!==undefined&&typeof message.request.prepareSoundMapGeometry01!=='boolean')throw Error('Explicit bounded SoundMap geometry demand required');
    // Expired observations never become new observations. A preparation already
    // underway may populate immutable caches, but only a distinct fresh request
    // can query those caches and publish a current pose-bound scene.
@@ -98,10 +111,10 @@ try{
    if(performance.now()>=message.expiresAt){expired(message,profile,'encode');return;}
    const transferAt=performance.now(),preparedScene=prepareInstalledStaticSceneTransfer01(packet,{...message.request,session,catalogSHA256});profile.transferPreparationMilliseconds=performance.now()-transferAt;profile.transfer=preparedScene.profile01??{};
    if(performance.now()>=message.expiresAt){expired(message,profile,'transfer-preparation');return;}
-   const soundMapAt=performance.now(),preparedSoundMapGeometry=prepareInstalledSoundMapGeometry01(preparedScene.scene,{requestId:message.requestId,bindingEpoch,packetDigest:packet.packetDigest});profile.soundMapPreparationMilliseconds=performance.now()-soundMapAt;
+   const soundMapGeometryRequested01=message.request.prepareSoundMapGeometry01!==false;profile.soundMapGeometryRequested01=soundMapGeometryRequested01;profile.soundMapGeometryStatus01=soundMapGeometryRequested01?'prepared':'not-requested';let preparedSoundMapGeometry=null;if(soundMapGeometryRequested01){const soundMapAt=performance.now();preparedSoundMapGeometry=prepareInstalledSoundMapGeometry01(preparedScene.scene,{requestId:message.requestId,bindingEpoch,packetDigest:packet.packetDigest});profile.soundMapPreparationMilliseconds=performance.now()-soundMapAt;}
    if(performance.now()>=message.expiresAt){expired(message,profile,'soundmap-preparation');return;}
    const status=internalStatus(profile),memory=process.memoryUsage();
-   const postMs=post('scene',{requestId:message.requestId,packetDigest:packet.packetDigest,preparedScene,preparedSoundMapGeometry,status:{...status,genuineResourceVerified:packet.metadata.genuineResourceVerified===true&&packet.metadata.activeSurfaces>0},...residencyEvidence01(profile),...finishProfile(profile),memory:{heapUsed:memory.heapUsed,external:memory.external,arrayBuffers:memory.arrayBuffers}},[preparedSoundMapGeometry.bodyBytes.buffer]);
+   const postMs=post('scene',{requestId:message.requestId,packetDigest:packet.packetDigest,preparedScene,preparedSoundMapGeometry,soundMapGeometryRequested01,status:{...status,genuineResourceVerified:packet.metadata.genuineResourceVerified===true&&packet.metadata.activeSurfaces>0},...residencyEvidence01(profile),...finishProfile(profile),memory:{heapUsed:memory.heapUsed,external:memory.external,arrayBuffers:memory.arrayBuffers}},preparedSoundMapGeometry?[preparedSoundMapGeometry.bodyBytes.buffer]:[]);
    post('delivery-timing',{requestId:message.requestId,postMessageMilliseconds:postMs});
   }catch(error){fail(error,'window',message?.requestId??null);}
  });

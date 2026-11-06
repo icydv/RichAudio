@@ -4,8 +4,9 @@ import fs from 'node:fs';import path from 'node:path';import os from 'node:os';
 import {identity,sha256} from '../../src/acoustics/world/collision-mesh.mjs';
 import {exportCollision} from '../../src/acoustics/world/convert-collision.mjs';
 import {collisionNameHash} from '../../src/acoustics/world/static-world-resource.mjs';
-export function installedSceneFixture01({write=true}={}){
- const root=fs.mkdtempSync(path.join(os.tmpdir(),'richaudio-installed-scene01-')),gameSHA256='a'.repeat(64),coreSHA256='b'.repeat(64),sourceSHA256='c'.repeat(64),stem='original_scene01',hash=collisionNameHash(stem);
+export function installedSceneFixture01({write=true,parentRoot=null}={}){
+ const parent=path.resolve(parentRoot??os.tmpdir());if(parentRoot&&!parent.split(path.sep).includes('.local'))throw Error('Explicit original fixture parent must be private');fs.mkdirSync(parent,{recursive:true});
+ const root=fs.mkdtempSync(path.join(parent,'richaudio-installed-scene01-')),gameSHA256='a'.repeat(64),coreSHA256='b'.repeat(64),sourceSHA256='c'.repeat(64),stem='original_scene01',hash=collisionNameHash(stem);
  const catalogPath=path.join(root,'catalog.json'),manifestPath=path.join(root,'manifest.json'),receiptPath=path.join(root,'receipt.json'),input=path.join(root,'original.json');
  const raw={schema:1,kind:'CodeWalkerYbnMesh',source:{archive:'authored.rpf',entry:'authored.rpf/'+stem+'.ybn',sha256:sourceSHA256,coordinateSpace:'resource-root',placement:'unresolved-static-vs-archetype-local'},nodes:[{id:'n0',parent:null,type:'BoundGeometry',transform:identity,center:[0,0,0],vertices:[[-3,4,0],[3,4,0],[3,4,4],[-3,4,4]],polygons:[{family:'Triangle',indices:[0,1,2],materialSlot:0},{family:'Triangle',indices:[0,2,3],materialSlot:0}],materials:[{type:7,data1:7,data2:0}]}]};
  let exported=null,current=null;
@@ -19,5 +20,5 @@ export function installedSceneFixture01({write=true}={}){
   const pending=manifestPath+'.pending';fs.writeFileSync(pending,JSON.stringify(manifest));fs.renameSync(pending,manifestPath);current={manifestPath,catalogPath,catalogSHA256};return current;
  }
  if(write)publish();
- return {root,gameSHA256,catalogPath,manifestPath,publish,get config(){return current;},close(){const absolute=path.resolve(root);if(path.dirname(absolute)!==path.resolve(os.tmpdir())||!/^richaudio-installed-scene01-[^\\/]+$/.test(path.basename(absolute)))throw Error('Owned original fixture cleanup boundary');fs.rmSync(absolute,{recursive:true,force:true});}};
+ return {root,gameSHA256,catalogPath,manifestPath,publish,get config(){return current;},close(){const absolute=path.resolve(root);if(path.dirname(absolute)!==parent||!/^richaudio-installed-scene01-[^\\/]+$/.test(path.basename(absolute)))throw Error('Owned original fixture cleanup boundary');fs.rmSync(absolute,{recursive:true,force:true});}};
 }

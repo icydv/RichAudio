@@ -14,11 +14,11 @@ const measurement=fs.readFileSync(new URL('../tools/Measure-NormalWorldReadiness
 const predicates=[...measurement.matchAll(/localReadinessQualified=([^;\r\n]+);/g)];
 assert.equal(predicates.length,1);
 const predicate=new vm.Script('Boolean('+predicates[0][1]+')');
-const prefix=measurement.match(/onScene:\(scene,receipt\)=>\{([^\r\n]*?)cost\.scenePublications\+\+;/)?.[1];
+const prefix=measurement.match(/onScene:\(scene,receipt\)=>\{([\s\S]*?)cost\.scenePublications\+\+;/)?.[1];
 assert(prefix,'actual consumer callback guard must precede publication accounting');
 assert(measurement.indexOf(prefix)<measurement.indexOf('engine.queueInstalledStaticScene01(scene,receipt)'));
 const guard=new vm.Script(prefix+'reachedConsumerQueue=true;');
-const eligible=()=>({requiredCacheQueryFailures01:0,diagnosticWriteFailure01:null,service:{failed:false},cost:{consumerAcceptances:1},terminalConsumer01:{clockVerified:true,fresh:true,activeSceneMatches:true},consumerLeaseGaps01:{count:0},audioActivity01:{bankResolutions:0,sourceCreations:0,renderCalls:0,pipelineProcessCalls:0,rendererProcessCalls:0},retainedLocalProof:true,invalidatedSource:false,publications:{failedPublications:0},broaderPreparationCompleted:true,controlledBudget:false,processReceipt:{ControlJoined:true},closure:{workerJoined:true},forced:false,sourcePinsUnchanged:true});
+const eligible=()=>({requiredCacheQueryFailures01:0,diagnosticWriteFailure01:null,service:{failed:false},cost:{consumerAcceptances:1},engine:{installedSceneDiagnostics01:{renewals:10}},minimumRenewals01:10,terminalConsumer01:{clockVerified:true,fresh:true,activeSceneMatches:true,environmentalReadiness01:{state:'active',renewalQualified:true}},consumerLeaseGaps01:{count:0},audioActivity01:{bankResolutions:0,sourceCreations:0,renderCalls:0,pipelineProcessCalls:0,rendererProcessCalls:0},retainedLocalProof:true,invalidatedSource:false,publications:{failedPublications:0},broaderPreparationCompleted:true,controlledBudget:false,processReceipt:{ControlJoined:true},closure:{workerJoined:true},forced:false,sourcePinsUnchanged:true});
 
 for(const failure of ['cold-corruption','cold-missing'])test('actual qualification rejects a nonempty partial model after '+failure,()=>{
  const scratch=path.resolve('.local/street01-cache-pressure01/qualification-original'),root=path.join(scratch,randomUUID()),fixture=createCachePressure01(root);let world;
