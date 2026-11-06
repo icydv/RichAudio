@@ -4,7 +4,7 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 const text=fs.readFileSync(new URL('../tools/Measure-NormalWorldReadiness01.mjs',import.meta.url),'utf8'),matches=[...text.matchAll(/localReadinessQualified=([^;\r\n]+);/g)];
 assert.equal(matches.length,1,'one actual local qualification predicate');
 const predicate=new vm.Script('Boolean('+matches[0][1]+')');
-const state=()=>({service:{failed:false},cost:{consumerAcceptances:1},terminalConsumer01:{clockVerified:true,fresh:true,activeSceneMatches:true},consumerLeaseGaps01:{count:0},retainedLocalProof:true,invalidatedSource:false,publications:{failedPublications:0},broaderPreparationCompleted:true,controlledBudget:false,processReceipt:{ControlJoined:true},closure:{workerJoined:true},forced:false,sourcePinsUnchanged:true});
+const state=()=>({service:{failed:false},cost:{consumerAcceptances:1},terminalConsumer01:{clockVerified:true,fresh:true,activeSceneMatches:true},consumerLeaseGaps01:{count:0},audioActivity01:{bankResolutions:0,sourceCreations:0,renderCalls:0,pipelineProcessCalls:0,rendererProcessCalls:0},retainedLocalProof:true,invalidatedSource:false,publications:{failedPublications:0},broaderPreparationCompleted:true,controlledBudget:false,processReceipt:{ControlJoined:true},closure:{workerJoined:true},forced:false,sourcePinsUnchanged:true});
 test('actual local verdict retains first acceptance but rejects later reader/consumer failure and revoked proof',()=>{
  const evaluate=s=>predicate.runInNewContext(s);assert.equal(evaluate(state()),true);
  for(const patch of [{service:{failed:true}},{retainedLocalProof:false},{invalidatedSource:true},{publications:{failedPublications:1}},{processReceipt:{ControlJoined:false}},{closure:{workerJoined:false}},{sourcePinsUnchanged:false}])assert.equal(evaluate({...state(),...patch}),false);
@@ -13,6 +13,7 @@ test('actual local verdict retains first acceptance but rejects later reader/con
  const terminal=state().terminalConsumer01;
  for(const patch of [{fresh:false},{activeSceneMatches:false},{clockVerified:false}])assert.equal(evaluate({...state(),terminalConsumer01:{...terminal,...patch}}),false,'early acceptance with retained proof cannot qualify an expired, replaced or unbound terminal consumer');
  assert.equal(evaluate({...state(),consumerLeaseGaps01:{count:1}}),false,'a recovered publication cannot erase an earlier post-acceptance lease gap');
+ for(const key of Object.keys(state().audioActivity01))assert.equal(evaluate({...state(),audioActivity01:{...state().audioActivity01,[key]:1}}),false,'a blocked PCM attempt cannot qualify');
 });
 test('terminal rejection propagates through the actual harness exit status despite successful cleanup',()=>{
  const exit=text.match(/if\(!finalPassed01[^\r\n]+process\.exitCode=1;/)?.[0];assert(exit,'actual harness must propagate the final verdict');
