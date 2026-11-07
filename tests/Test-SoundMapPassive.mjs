@@ -12,6 +12,14 @@ const repo=fileURLToPath(new URL('../',import.meta.url));
 const sample=(time=1000,sequence=0)=>({schemaVersion:1,kind:'passive-listener',streamId:'a'.repeat(32),sessionId:'b'.repeat(32),sequence,observedAtUnixMs:time,sampleAgeMs:0,coordinateSpace:'gta-native-unscaled',units:'native-unverified',listener:{position:[0,1,2],forward:[0,1,0],up:[0,0,1],velocity:null,valid:true,reason:'injected-fixture',generation:1}});
 const temp=()=>fs.mkdtempSync(path.join(os.tmpdir(),'RichAudio Passive-'));
 const clean=root=>{assert.equal(path.dirname(root),os.tmpdir());assert.ok(path.basename(root).startsWith('RichAudio Passive-'));fs.rmSync(root,{recursive:true});};
+function copyPassiveService(root){
+ fs.cpSync(path.join(repo,'tools','soundmap'),path.join(root,'tools','soundmap'),{recursive:true});
+ // The passive payload carries the one pure contract, rather than any engine
+ // modules or a fork of its limits. Normal product/provider packages already
+ // include this member in their recursive acoustics-MJS source closure.
+ const relative=path.join('src','acoustics','streaming','soundmap-wire.mjs'),target=path.join(root,relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(repo,relative),target);
+ assert.deepEqual(fs.readdirSync(path.dirname(target)),['soundmap-wire.mjs']);assert.deepEqual(fs.readFileSync(target),fs.readFileSync(path.join(repo,relative)));
+}
 test('passive lease preserves original age, ordering, identity and invalid state',()=>{
  let now=1000;const feed=new PassiveListener(()=>now);assert.ok(feed.accept(sample()).accepted);now=1400;assert.equal(feed.snapshot().ageMs,400);
  assert.equal(feed.accept(sample(1000,1)).accepted,true);assert.equal(feed.snapshot().ageMs,400,'same old observation never retimestamped');now=1501;assert.equal(feed.status().available,false);
@@ -33,7 +41,7 @@ test('actual local service keeps passive identity and recording separate, owner 
  }finally{await service.close();clean(root);}
 });
 test('actual C# mailbox automatically starts and gracefully stops owned service after simulated Story ready, without host', {skip:process.platform!=='win32'}, async()=>{
- const root=temp();fs.cpSync(path.join(repo,'tools','soundmap'),path.join(root,'tools','soundmap'),{recursive:true});
+ const root=temp();copyPassiveService(root);
  const server=net.createServer();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=server.address().port;await new Promise(resolve=>server.close(resolve));
  const child=spawn(path.join(repo,'build','passive-soundmap','RichAudio.Passive.Tests.exe'),[root,process.execPath,String(port)],{windowsHide:true});let output='';child.stdout.on('data',b=>output+=b);child.stderr.on('data',b=>output+=b);
  const exit=new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',code=>resolve(code));});
@@ -54,7 +62,7 @@ test('controlled host transport failure leaves explicit recording failure and in
 });
 
 test('actual native passive bridge reconnects after owned service exits without stopping an external replacement',{skip:process.platform!=='win32'},async()=>{
- const root=temp();fs.cpSync(path.join(repo,'tools','soundmap'),path.join(root,'tools','soundmap'),{recursive:true});
+ const root=temp();copyPassiveService(root);
  const probe=net.createServer();await new Promise(resolve=>probe.listen(0,'127.0.0.1',resolve));const port=probe.address().port;await new Promise(resolve=>probe.close(resolve));
  const child=spawn(path.join(repo,'build','passive-soundmap','RichAudio.Passive.Tests.exe'),[root,process.execPath,String(port)],{windowsHide:true});let output='',replacement;
  child.stdout.on('data',b=>output+=b);child.stderr.on('data',b=>output+=b);const exit=new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',resolve);});

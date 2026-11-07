@@ -1,4 +1,5 @@
 // Browser-only presentation of copied solver evidence. No ray tracing, game calls or audio.
+import {SOUND_MAP_WIRE,geometryWireBudget} from './wire-limits.mjs';
 export const MODEL_SPACE = 'research-rh-z-up-metres-v1';
 export const LIMITS = Object.freeze({ surfaces:128, paths:256, sources:32, cachedGenerations:4,
   contextBytes:4*1024*1024, contextTiles:64, contextVertices:8192, contextFaces:8192, visibleContextTiles:8 });
@@ -75,7 +76,8 @@ export function checkGeometry(g) {
   fail(g?.schemaVersion===1&&typeof g.generation==='string'&&g.generation.length<=512&&ident(g.sessionId),'Unsupported geometry identity');
   fail(g.streamId===undefined||ident(g.streamId),'Unsupported geometry stream identity');
   fail(g.coordinateSpace===MODEL_SPACE,'Unrecognised engine coordinate space');
-  fail(Array.isArray(g.surfaces)&&g.surfaces.length<=LIMITS.surfaces,'Surface budget exceeded');
+  const budget=geometryWireBudget(g);fail(Array.isArray(g.surfaces)&&g.surfaces.length<=budget.surfaces,'Surface budget exceeded');
+  fail(new TextEncoder().encode(JSON.stringify(g)).byteLength<=budget.bytes,'Geometry byte budget exceeded');
   for(const s of g.surfaces){
     fail(ident(s.id)&&Array.isArray(s.vertices)&&s.vertices.length>=3&&s.vertices.length<=16&&s.vertices.every(isPoint),'Invalid finite surface footprint');
     fail(s.openings===undefined||(Array.isArray(s.openings)&&s.openings.length<=8&&s.openings.every(o=>Array.isArray(o.vertices)&&o.vertices.length===4&&o.vertices.every(isPoint))),'Invalid surface opening');
@@ -98,7 +100,7 @@ export function checkFrame(f) {
 
 export class VisualState {
   constructor(){this.reset();this.dropped=0;this.rejected=0;}
-  reset(){this.frame=null;this.geometry=null;this.geometries=new Map();this.sessionId=null;this.streamId=null;this.receivedAt=null;this.replaySampleAgeMs=0;this.mode='live';}
+  reset(){this.frame=null;this.geometry=null;this.geometries=new Map();this.geometrySizes=new Map();this.geometryCacheBytes=0;this.sessionId=null;this.streamId=null;this.receivedAt=null;this.replaySampleAgeMs=0;this.mode='live';}
   ingest(envelope,now,{wallNow=Date.now(),requestElapsedMs=0}={}){
     const mode=envelope?.mode==='replay'?'replay':'live';
     if(!envelope?.frame){this.reset();this.mode=mode;return false;}
@@ -115,8 +117,9 @@ export class VisualState {
       fail((geometry.streamId??geometry.sessionId)===streamId,'Geometry belongs to a different worker stream');
       const old=this.geometries.get(geometry.generation);
       fail(!old||JSON.stringify(old)===JSON.stringify(geometry),'Immutable geometry generation was modified');
-      this.geometries.set(geometry.generation,geometry);
-      while(this.geometries.size>LIMITS.cachedGenerations)this.geometries.delete(this.geometries.keys().next().value);
+      this.geometryCacheBytes-=this.geometrySizes.get(geometry.generation)??0;const geometryBytes=new TextEncoder().encode(JSON.stringify(geometry)).byteLength;
+      this.geometries.set(geometry.generation,geometry);this.geometrySizes.set(geometry.generation,geometryBytes);this.geometryCacheBytes+=geometryBytes;
+      while(this.geometries.size>LIMITS.cachedGenerations||this.geometryCacheBytes>SOUND_MAP_WIRE.viewerGeometryCacheBytes){const oldest=this.geometries.keys().next().value;this.geometries.delete(oldest);this.geometryCacheBytes-=this.geometrySizes.get(oldest);this.geometrySizes.delete(oldest);}
     }
     if(mode==='live'&&this.frame&&frame.sequence<=this.frame.sequence)return false;
     if(mode==='live'&&this.frame)this.dropped+=Math.max(0,frame.sequence-this.frame.sequence-1);

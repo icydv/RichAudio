@@ -10,6 +10,42 @@ using System.Web.Script.Serialization;
 
 namespace RichAudio.Beacon.Windows
 {
+    // Called by the existing preference worker, including while audio is off.
+    // A persistent cache count is not a fresh observation of world activation.
+    internal static class WorldWarmupMenuStatus01
+    {
+        internal static string Merge(string root,string hostJson)
+        {
+            try{
+                string path=AcousticSettingsStore.PrivatePath(root,Path.Combine(".local","plugin-world-warmup","geometry","summary.json"));
+                var json=new JavaScriptSerializer{MaxJsonLength=16384,RecursionLimit=20};
+                object raw,coverageStates=null;long complete=0,eligible=0,declared=0;bool summaryAvailable=File.Exists(path),running=false;
+                if(summaryAvailable){var summary=json.DeserializeObject(AcousticSettingsStore.ReadBounded(path,16384)) as Dictionary<string,object>;
+                    if(summary==null||!summary.TryGetValue("Schema",out raw)||!Equals(raw,1))return hostJson;
+                    complete=Count(summary,"ProcessedResources");eligible=Count(summary,"EligibleExteriorCount");declared=Count(summary,"SelectedYbnCount");summary.TryGetValue("CoverageStates01",out coverageStates);}
+                if(complete>eligible||eligible>declared)return hostJson;
+                string heartbeat=AcousticSettingsStore.PrivatePath(root,Path.Combine(".local","plugin-world-warmup","supervisor-status.json"));
+                if(File.Exists(heartbeat))try{var pulse=json.DeserializeObject(AcousticSettingsStore.ReadBounded(heartbeat,4096)) as Dictionary<string,object>;DateTime at;
+                    if(pulse!=null&&pulse.TryGetValue("Schema",out raw)&&Equals(raw,1)&&pulse.TryGetValue("RecordedUtc",out raw)&&raw is string&&DateTime.TryParse((string)raw,CultureInfo.InvariantCulture,DateTimeStyles.RoundtripKind,out at)&&
+                        (DateTime.UtcNow-at.ToUniversalTime()).TotalSeconds>=-1&&(DateTime.UtcNow-at.ToUniversalTime()).TotalSeconds<=3&&pulse.TryGetValue("Running",out raw)&&Equals(raw,true))running=true;
+                }catch(IOException){}catch(ArgumentException){}
+                if(!summaryAvailable&&!running)return hostJson;
+                var world=new Dictionary<string,object>{{"stage",running?"preparing / validating cache":"partial / cached geometry"},{"installedWorldVerified",false},{"genuineResourceVerified",complete>0},
+                    {"preparation",new Dictionary<string,object>{{"completedEligibleTiles",complete},{"eligibleTiles",eligible},{"totalTiles",declared}}}};
+                if(coverageStates!=null)world["coverageStates"]=coverageStates;
+                Dictionary<string,object> wrapper=null;try{if(hostJson!=null)wrapper=json.DeserializeObject(hostJson) as Dictionary<string,object>;}catch{}
+                DateTime recorded;bool fresh=wrapper!=null&&wrapper.TryGetValue("recordedAtUtc",out raw)&&raw is string&&DateTime.TryParse((string)raw,CultureInfo.InvariantCulture,DateTimeStyles.RoundtripKind,out recorded)&&
+                    (DateTime.UtcNow-recorded.ToUniversalTime()).TotalSeconds>=-1&&(DateTime.UtcNow-recorded.ToUniversalTime()).TotalSeconds<=3;
+                var state=fresh&&wrapper.TryGetValue("status",out raw)?raw as Dictionary<string,object>:null;
+                if(state==null){state=new Dictionary<string,object>{{"reason","Audio host unavailable; cached world coverage is partial"}};
+                    wrapper=new Dictionary<string,object>{{"schemaVersion",1},{"hostState","stopped"},{"recordedAtUtc",DateTime.UtcNow.ToString("o")},{"status",state}};}
+                // A running scene worker has more specific, current progress.
+                if(!state.ContainsKey("acousticWorld"))state["acousticWorld"]=world;
+                string merged=json.Serialize(wrapper);return merged.Length<=16384?merged:hostJson;
+            }catch{return hostJson;}
+        }
+        static long Count(Dictionary<string,object> row,string key){object raw;if(!row.TryGetValue(key,out raw)||!(raw is int||raw is long))throw new InvalidDataException("Cache count required");long n=Convert.ToInt64(raw,CultureInfo.InvariantCulture);if(n<0||n>262144)throw new InvalidDataException("Cache count bound");return n;}
+    }
     public sealed class InGameSettingsLink
     {
         public readonly string WorkspaceRoot,SettingsPath,ToggleKey;
@@ -181,6 +217,7 @@ namespace RichAudio.Beacon.Windows
                         long saved=existed?settings.Revision:0;
                         stage="host-status";string status=null,target=AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,AcousticSettingsStore.StatusPath(link.SettingsPath));
                         if(File.Exists(target))try{status=AcousticSettingsStore.ReadBounded(target,16384);}catch(IOException){}catch(ArgumentException){}
+                        status=WorldWarmupMenuStatus01.Merge(link.WorkspaceRoot,status);
                         Interlocked.Exchange(ref snapshot,new InGameSettingsSnapshot(settings,status,failure,true,link.ToggleKey,link.ControllerEnabled,saved,Volatile.Read(ref pending)!=null,false,null,new MenuDiagnostic("preferences",existed?"loaded":"defaults-unsaved")));
                         if(command!=null)Interlocked.Exchange(ref operationInFlight,0);
                     }

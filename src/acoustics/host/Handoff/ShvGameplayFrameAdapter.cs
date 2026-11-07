@@ -128,7 +128,8 @@ namespace RichAudio.Beacon.Handoff
                     long observed=start+(end-start)/2;
                     var vehicle=new GameplayVehicle{Id=peer.Context.VehicleId,Generation=peer.Context.Generation,
                         ObservationTicks=observed,Model=H.BatiModel,Context="player",Position=peer.Position,Velocity=peer.Velocity,
-                        Forward=peer.Forward,Up=peer.Up,OperatingPoint=candidate.OperatingPoint,Running=true,Valid=true};
+                        Forward=peer.Forward,Up=peer.Up,OperatingPoint=candidate.OperatingPoint,Running=true,Valid=true,
+                        RiderAttached=true}; // This scope requires the same current player driver.
                     var output=new GameplayFrame{Session=session,Listener=current,Vehicles=new[]{vehicle},ValidThroughTicks=candidate.ValidThroughHostTicks};
                     GameplayWire.Validate(output,session);
                     // Validation and cloning take time too; expiry is checked at

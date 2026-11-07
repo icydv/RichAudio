@@ -55,6 +55,7 @@ namespace RichAudio.AcousticGpu {
         [UnmanagedFunctionPointer(CallingConvention.StdCall)] internal delegate void SetShader(IntPtr self,IntPtr shader,IntPtr classes,uint count);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)] internal delegate void Dispatch(IntPtr self,uint x,uint y,uint z);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)] internal delegate void Copy(IntPtr self,IntPtr destination,IntPtr source);
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)] internal delegate void CopyRegion(IntPtr self,IntPtr destination,uint destinationSubresource,uint x,uint y,uint z,IntPtr source,uint sourceSubresource,IntPtr box);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)] internal delegate void QueryAction(IntPtr self,IntPtr query);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)] internal delegate int GetData(IntPtr self,IntPtr query,IntPtr data,uint size,uint flags);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)] internal delegate int Map(IntPtr self,IntPtr resource,uint subresource,uint type,uint flags,out Mapped mapped);
@@ -65,13 +66,13 @@ namespace RichAudio.AcousticGpu {
     }
     internal sealed class Device:IDisposable {
         private static readonly Process Self=Process.GetCurrentProcess();
-        internal const int Segments=4096,Surfaces=128;
-        internal const long OwnedBytes=Segments*32+Surfaces*64+Segments*16*2+16;
+        internal const int Segments=4096,SurfacePage=128,Surfaces=4096,SurfacePages=Surfaces/SurfacePage;
+        internal const long OwnedBytes=Segments*32+Surfaces*64+Segments*SurfacePages*16*2+16;
         private IntPtr factory,adapter,device,dxgiDevice2,context,shader,segmentBuffer,surfaceBuffer,outputBuffer,staging,constant,segmentView,surfaceView,outputView;
         private readonly EventWaitHandle completed=new EventWaitHandle(false,EventResetMode.ManualReset);
         private IntPtr eventQuery,disjoint;private readonly IntPtr[] timestamps=new IntPtr[4];private readonly IntPtr scratch=Marshal.AllocHGlobal(64);
         private Native.Update update;private Native.SetViews setSrvs,setConstants;private Native.SetUavs setUavs;private Native.SetShader setShader;
-        private Native.Dispatch dispatch;private Native.Copy copy;private Native.QueryAction begin,end;private Native.GetData getData;private Native.Map map;private Native.Unmap unmap;private Native.Flush flush;
+        private Native.Dispatch dispatch;private Native.CopyRegion copy;private Native.QueryAction begin,end;private Native.GetData getData;private Native.Map map;private Native.Unmap unmap;private Native.Flush flush;
         private Native.EnqueueEvent enqueueEvent;
         internal readonly Dictionary<string,object> Capability=new Dictionary<string,object>();
         private int dispatchCount;private object sampledVideoMemory;private long sampledWorkingSet;
@@ -95,6 +96,7 @@ namespace RichAudio.AcousticGpu {
             Capability["dedicatedVideoBytes"]=best.DedicatedVideo.ToUInt64();Capability["ownedBufferBytes"]=OwnedBytes;
             Capability["usesHardwareRayTracing"]=false;Capability["rayTracingCapability"]="not-probed";Capability["rayTracingBackend"]="not-implemented";
             Capability["maximumSegments"]=Segments;Capability["maximumSurfaces"]=Surfaces;Capability["marginMetres"]=.005;Capability["completionWait"]="DXGI-device-event";
+            Capability["visibilityProtocol"]=2;Capability["legacyVisibilityProtocol"]=1;Capability["surfacePageSize"]=SurfacePage;Capability["maximumSurfacePages"]=SurfacePages;Capability["maskLayout"]="segment-page-uint4-v2";
             IntPtr code=IntPtr.Zero,error=IntPtr.Zero;
             try{string text;using(var source=new StreamReader(Assembly.GetExecutingAssembly().GetManifestResourceStream("RichAudio.FiniteCull")))text=source.ReadToEnd();
                 byte[] bytes=Encoding.UTF8.GetBytes(text);int hr=Native.D3DCompile(bytes,(UIntPtr)bytes.Length,"RichAudioFiniteCull",IntPtr.Zero,IntPtr.Zero,"main","cs_5_0",2048|32768,0,out code,out error);
@@ -102,13 +104,13 @@ namespace RichAudio.AcousticGpu {
                 Native.Check(Native.Method<Native.CreateShader>(device,18)(device,pointer,length,IntPtr.Zero,out shader),"CreateComputeShader");
             }finally{Native.Release(ref code);Native.Release(ref error);}
             segmentBuffer=Buffer(Segments*32,8,0,0x40,32);surfaceBuffer=Buffer(Surfaces*64,8,0,0x40,64);
-            outputBuffer=Buffer(Segments*16,0x80,0,0x40,16);staging=Buffer(Segments*16,0,0x20000,0,0,3);constant=Buffer(16,4,0,0,0);
+            outputBuffer=Buffer(Segments*SurfacePages*16,0x80,0,0x40,16);staging=Buffer(Segments*SurfacePages*16,0,0x20000,0,0,3);constant=Buffer(16,4,0,0,0);
             var srv=new Native.SrvDesc{Dimension=1,Count=Segments};Native.Check(Native.Method<Native.CreateSrv>(device,7)(device,segmentBuffer,ref srv,out segmentView),"CreateSegmentSRV");
             srv.Count=Surfaces;Native.Check(Native.Method<Native.CreateSrv>(device,7)(device,surfaceBuffer,ref srv,out surfaceView),"CreateSurfaceSRV");
-            var uav=new Native.UavDesc{Dimension=1,Count=Segments};Native.Check(Native.Method<Native.CreateUav>(device,8)(device,outputBuffer,ref uav,out outputView),"CreateOutputUAV");
+            var uav=new Native.UavDesc{Dimension=1,Count=Segments*SurfacePages};Native.Check(Native.Method<Native.CreateUav>(device,8)(device,outputBuffer,ref uav,out outputView),"CreateOutputUAV");
             eventQuery=Query(0);disjoint=Query(3);for(int i=0;i<4;i++)timestamps[i]=Query(2);
             update=Native.Method<Native.Update>(context,48);setSrvs=Native.Method<Native.SetViews>(context,67);setUavs=Native.Method<Native.SetUavs>(context,68);setConstants=Native.Method<Native.SetViews>(context,71);
-            setShader=Native.Method<Native.SetShader>(context,69);dispatch=Native.Method<Native.Dispatch>(context,41);copy=Native.Method<Native.Copy>(context,47);
+            setShader=Native.Method<Native.SetShader>(context,69);dispatch=Native.Method<Native.Dispatch>(context,41);copy=Native.Method<Native.CopyRegion>(context,46);
             begin=Native.Method<Native.QueryAction>(context,27);end=Native.Method<Native.QueryAction>(context,28);getData=Native.Method<Native.GetData>(context,29);
             map=Native.Method<Native.Map>(context,14);unmap=Native.Method<Native.Unmap>(context,15);flush=Native.Method<Native.Flush>(context,111);
             setShader(context,shader,IntPtr.Zero,0);setSrvs(context,0,2,new[]{segmentView,surfaceView});setUavs(context,0,1,new[]{outputView},IntPtr.Zero);setConstants(context,0,1,new[]{constant});
@@ -129,10 +131,16 @@ namespace RichAudio.AcousticGpu {
         }finally{handle.Free();}}
         internal byte[] Execute(byte[] segments,byte[] surfaces,int segmentCount,int surfaceCount,double deadline,out Dictionary<string,object> metrics){
             var wall=Stopwatch.StartNew();TimeSpan cpuStart=Self.TotalProcessorTime;
+            int pages=(surfaceCount+SurfacePage-1)/SurfacePage,maskBytes=segmentCount*pages*16;
             var constants=new byte[16];System.Buffer.BlockCopy(BitConverter.GetBytes(surfaceCount),0,constants,0,4);System.Buffer.BlockCopy(BitConverter.GetBytes(segmentCount),0,constants,4,4);System.Buffer.BlockCopy(BitConverter.GetBytes(.005f),0,constants,8,4);
+            System.Buffer.BlockCopy(BitConverter.GetBytes(pages),0,constants,12,4);
             begin(context,disjoint);end(context,timestamps[0]);double uploadAt=wall.Elapsed.TotalMilliseconds;
             Upload(segmentBuffer,segments,segmentCount*32);Upload(surfaceBuffer,surfaces,surfaceCount*64);Upload(constant,constants,16);double uploadCpu=wall.Elapsed.TotalMilliseconds-uploadAt;
-            end(context,timestamps[1]);dispatch(context,(uint)segmentCount,1,1);end(context,timestamps[2]);copy(context,staging,outputBuffer);end(context,timestamps[3]);end(context,disjoint);end(context,eventQuery);
+            end(context,timestamps[1]);dispatch(context,(uint)segmentCount,(uint)pages,1);end(context,timestamps[2]);
+            // One combined active-prefix readback, never one completion wait
+            // per page and never a maximum-capacity copy for a small request.
+            for(int i=0;i<3;i++)Marshal.WriteInt32(scratch,i*4,0);Marshal.WriteInt32(scratch,12,maskBytes);Marshal.WriteInt32(scratch,16,1);Marshal.WriteInt32(scratch,20,1);
+            copy(context,staging,0,0,0,0,outputBuffer,0,scratch);end(context,timestamps[3]);end(context,disjoint);end(context,eventQuery);
             // DXGI flushes and signals only after prior commands complete. This
             // bounded wait is in the owned helper, never the audio callback.
             completed.Reset();Native.Check(enqueueEvent(dxgiDevice2,completed.SafeWaitHandle.DangerousGetHandle()),"Enqueue GPU completion event");
@@ -142,13 +150,14 @@ namespace RichAudio.AcousticGpu {
             Native.Check(code,"GPU completion");double waited=wall.Elapsed.TotalMilliseconds-submit;
             if(wall.Elapsed.TotalMilliseconds>deadline)throw new TimeoutException("GPU completion deadline");
             Native.Mapped mapped;double readAt=wall.Elapsed.TotalMilliseconds;Native.Check(map(context,staging,0,1,0x100000,out mapped),"ReadbackMap");
-            byte[] output=new byte[segmentCount*16];try{Marshal.Copy(mapped.Data,output,0,output.Length);}finally{unmap(context,staging,0);}
+            byte[] output=new byte[maskBytes];try{Marshal.Copy(mapped.Data,output,0,output.Length);}finally{unmap(context,staging,0);}
             double readMs=wall.Elapsed.TotalMilliseconds-readAt;bool validTiming=getData(context,disjoint,scratch,16,1)==0;
             ulong frequency=validTiming?(ulong)Marshal.ReadInt64(scratch):0;bool nonDisjoint=validTiming&&frequency>0&&Marshal.ReadInt32(scratch,8)==0;
             var ticks=new ulong[4];if(nonDisjoint&&frequency>0)for(int i=0;i<4;i++){if(getData(context,timestamps[i],scratch,8,1)!=0){nonDisjoint=false;break;}ticks[i]=(ulong)Marshal.ReadInt64(scratch);}
             double total=wall.Elapsed.TotalMilliseconds;
             if((dispatchCount++&31)==0){Self.Refresh();sampledVideoMemory=MemoryUsage();sampledWorkingSet=Self.WorkingSet64;}
             metrics=new Dictionary<string,object>{{"device",Capability["device"]},{"hardware",true},{"completedDispatch",true},{"segments",segmentCount},{"surfacePairs",segmentCount*surfaceCount},
+                {"surfaceCount",surfaceCount},{"surfacePages",pages},{"maskWordsPerSegment",pages*4},{"maskLayout","segment-page-uint4-v2"},{"readbackCount",1},{"readbackBytes",maskBytes},
                 {"submitMs",submit},{"uploadCpuMs",uploadCpu},{"completionWaitMs",waited},{"readbackMs",readMs},{"totalMs",total},
                 {"helperCpuMs",(Self.TotalProcessorTime-cpuStart).TotalMilliseconds},{"helperCumulativeCpuMs",Self.TotalProcessorTime.TotalMilliseconds},{"gpuTimingValid",nonDisjoint},
                 {"gpuUploadMs",nonDisjoint?(object)((ticks[1]-ticks[0])*1000.0/frequency):null},{"gpuExecutionMs",nonDisjoint?(object)((ticks[2]-ticks[1])*1000.0/frequency):null},
@@ -166,8 +175,8 @@ namespace RichAudio.AcousticGpu {
         private static byte[] Read(Stream stream,int count,bool allowEnd=false,byte[] reuse=null){var bytes=reuse??new byte[count];int at=0;while(at<count){int n=stream.Read(bytes,at,count-at);if(n==0){if(at==0&&allowEnd)return null;throw new EndOfStreamException();}at+=n;}return bytes;}
         private static void U32(byte[] bytes,int at,uint value){System.Buffer.BlockCopy(BitConverter.GetBytes(value),0,bytes,at,4);}
         private static void Initial(Stream stdout,Dictionary<string,object> value){byte[] json=Encoding.UTF8.GetBytes(Json.Serialize(value));stdout.Write(BitConverter.GetBytes(json.Length),0,4);stdout.Write(json,0,json.Length);stdout.Flush();}
-        private static void Response(Stream stream,uint id,uint generation,uint status,byte[] masks,Dictionary<string,object> metrics){byte[] json=Encoding.UTF8.GetBytes(Json.Serialize(metrics));if(json.Length>8192)throw new InvalidDataException("metric size");
-            var header=new byte[32];U32(header,0,OutputMagic);U32(header,4,1);U32(header,8,id);U32(header,12,generation);U32(header,16,status);U32(header,20,(uint)masks.Length);U32(header,24,(uint)json.Length);
+        private static void Response(Stream stream,uint id,uint generation,uint status,byte[] masks,Dictionary<string,object> metrics,uint protocol){byte[] json=Encoding.UTF8.GetBytes(Json.Serialize(metrics));if(json.Length>8192)throw new InvalidDataException("metric size");
+            var header=new byte[32];U32(header,0,OutputMagic);U32(header,4,protocol);U32(header,8,id);U32(header,12,generation);U32(header,16,status);U32(header,20,(uint)masks.Length);U32(header,24,(uint)json.Length);
             stream.Write(header,0,32);stream.Write(json,0,json.Length);stream.Write(masks,0,masks.Length);stream.Flush();}
         private static void Validate(byte[] bytes,int stride,bool surface,int count){for(int at=0;at<count;at+=stride){for(int k=0;k<stride;k+=4){float v=BitConverter.ToSingle(bytes,at+k);if(float.IsNaN(v)||float.IsInfinity(v)||Math.Abs(v)>512)throw new InvalidDataException("local finite bounds");}
             if(surface){double norm=0;for(int k=0;k<3;k++){float n=BitConverter.ToSingle(bytes,at+16+k*4);norm+=n*n;if(BitConverter.ToSingle(bytes,at+32+k*4)>BitConverter.ToSingle(bytes,at+48+k*4))throw new InvalidDataException("surface bounds");}if(norm<.99||norm>1.01)throw new InvalidDataException("surface normal");}}}
@@ -178,12 +187,13 @@ namespace RichAudio.AcousticGpu {
             var segmentInput=new byte[Device.Segments*32];var surfaceInput=new byte[Device.Surfaces*64];
             for(int request=0;request<20000&&life.Elapsed.TotalMinutes<20;request++){
                 byte[] header=Read(input,32,true);if(header==null)break;uint id=BitConverter.ToUInt32(header,8),generation=BitConverter.ToUInt32(header,12);
+                uint protocol=BitConverter.ToUInt32(header,4);
                 int n=checked((int)BitConverter.ToUInt32(header,16)),s=checked((int)BitConverter.ToUInt32(header,20));float deadline=BitConverter.ToSingle(header,24);
-                if(BitConverter.ToUInt32(header,0)!=InputMagic||BitConverter.ToUInt32(header,4)!=1||id<=previous||n<1||n>Device.Segments||s<1||s>Device.Surfaces||!(!float.IsNaN(deadline)&&deadline>=1&&deadline<=100)||BitConverter.ToUInt32(header,28)!=0)throw new InvalidDataException("request bounds/order");previous=id;
+                if(BitConverter.ToUInt32(header,0)!=InputMagic||(protocol!=1&&protocol!=2)||id<=previous||n<1||n>Device.Segments||s<1||s>Device.Surfaces||(protocol==1&&s>Device.SurfacePage)||!(!float.IsNaN(deadline)&&deadline>=1&&deadline<=100)||BitConverter.ToUInt32(header,28)!=0)throw new InvalidDataException("request bounds/order");previous=id;
                 byte[] segments=Read(input,n*32,false,segmentInput),surfaces=Read(input,s*64,false,surfaceInput);Validate(segments,32,false,n*32);Validate(surfaces,64,true,s*64);
-                try{Dictionary<string,object> metrics;byte[] masks=device.Execute(segments,surfaces,n,s,deadline,out metrics);Response(output,id,generation,0,masks,metrics);}
-                catch(TimeoutException){Response(output,id,generation,1,new byte[0],new Dictionary<string,object>{{"reason","GPU deadline exceeded"},{"completedDispatch",false}});return 0;}
-                catch(Exception e){Response(output,id,generation,3,new byte[0],new Dictionary<string,object>{{"reason",e.GetType().Name+":"+e.HResult.ToString("X8")},{"completedDispatch",false}});return 1;}
+                try{Dictionary<string,object> metrics;byte[] masks=device.Execute(segments,surfaces,n,s,deadline,out metrics);Response(output,id,generation,0,masks,metrics,protocol);}
+                catch(TimeoutException){Response(output,id,generation,1,new byte[0],new Dictionary<string,object>{{"reason","GPU deadline exceeded"},{"completedDispatch",false}},protocol);return 0;}
+                catch(Exception e){Response(output,id,generation,3,new byte[0],new Dictionary<string,object>{{"reason",e.GetType().Name+":"+e.HResult.ToString("X8")},{"completedDispatch",false}},protocol);return 1;}
             }return 0;
         }catch(Exception e){Console.Error.WriteLine("Acoustic GPU helper: "+e.GetType().Name+":"+e.HResult.ToString("X8"));return 1;}finally{if(device!=null)device.Dispose();}}
     }

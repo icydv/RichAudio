@@ -5,6 +5,27 @@ export const timeUnit='monotonic-ms';
 export const limits=Object.freeze({surfaces:128,missingRegions:32,openings:8,tileSide:256,coordinate:100000,epsilon:1e-8});
 const E=limits.epsilon;
 const validatedTiles=new WeakSet();
+// Only objects recursively frozen here may bypass a later traversal. A caller's
+// shallow Object.freeze, accessor or changing Proxy value is not such proof.
+const deeplyFrozenValues01=new WeakSet();
+// Read-only traversal proof, not a geometry constructor or transfer authority.
+// A cloned/adopted/shallow-frozen tile does not own this local proof.
+export const isDeeplyFrozenTileSnapshot01=tile=>validatedTiles.has(tile)&&deeplyFrozenValues01.has(tile);
+// Product worksets opt into more finite supports while research fixtures keep
+// their original limit. The index is derived, private state of the same tile;
+// it is not another cache or a source of geometry/coverage authority.
+export const maximumIndexedSurfaces=16384;
+const surfaceIndicesByTile=new WeakMap();
+// Source-bound worker transfer only. Ordinary supplied geometry must continue
+// through createTile; these helpers preserve a worker-validated exact snapshot
+// and its already-derived conservative index across structured clone.
+export const isValidatedTileSnapshot01=tile=>validatedTiles.has(tile);
+export function preparedTileIndexTransfer01(tile){requireTile(tile);return {schema:1,kind:'RichAudioPreparedFiniteTileIndex01',observationKey:tile.observationKey,surfaceCount:tile.surfaces.length,index:surfaceIndicesByTile.get(tile)??null};}
+export function adoptSourceBoundTileTransfer01(tile,prepared){
+ if(!Object.isFrozen(tile)||prepared?.schema!==1||prepared.kind!=='RichAudioPreparedFiniteTileIndex01'||prepared.observationKey!==tile.observationKey||prepared.surfaceCount!==tile.surfaces.length||!Array.isArray(tile.surfaces)||tile.surfaces.length>maximumIndexedSurfaces||((tile.surfaces.length>limits.surfaces)!==(prepared.index!==null)))throw Error('source-bound finite tile/index transfer header');
+ if(prepared.index!==null){if(!Object.isFrozen(prepared.index)||!Array.isArray(prepared.index.min)||prepared.index.min.length!==3||!Array.isArray(prepared.index.max)||prepared.index.max.length!==3)throw Error('source-bound prepared conservative index');surfaceIndicesByTile.set(tile,prepared.index);}
+ validatedTiles.add(tile);return tile;
+}
 function requireTile(tile){if(!validatedTiles.has(tile))throw Error('validated immutable tile snapshot required');}
 export function vector(v){if(!Array.isArray(v)||v.length!==3||v.some(x=>!Number.isFinite(x)||Math.abs(x)>limits.coordinate))throw Error('invalid finite metre vector');return [...v];}
 export const add=(a,b)=>a.map((x,i)=>x+b[i]);
@@ -20,7 +41,15 @@ const identifier=s=>{if(typeof s!=='string'||!/^[A-Za-z0-9_.:-]{1,80}$/.test(s))
 function confidence(n){if(!Number.isFinite(n)||n<0||n>1)throw Error('invalid confidence');return n;}
 function box(b){if(!b)throw Error('missing bounds');const min=vector(b.min),max=vector(b.max);if(min.some((v,i)=>max[i]<=v||max[i]-v>limits.tileSide))throw Error('invalid bounded region');return {min,max};}
 export const inBox=(p,b)=>p.every((x,i)=>x>=b.min[i]-E&&x<=b.max[i]+E);
-function freeze(x){if(x&&typeof x==='object'){for(const v of Object.values(x))freeze(v);Object.freeze(x);}return x;}
+function freeze(x){
+  if(x&&typeof x==='object'&&!deeplyFrozenValues01.has(x)){
+    let stable=true;const keys=Object.keys(x),values=[];
+    for(const key of keys){const descriptor=Object.getOwnPropertyDescriptor(x,key),value=x[key];values.push(value);freeze(value);if(!descriptor||!('value'in descriptor)||descriptor.value!==value||value&&typeof value==='object'&&!deeplyFrozenValues01.has(value))stable=false;}
+    Object.freeze(x);const finalKeys=Object.keys(x);
+    if(stable&&finalKeys.length===keys.length&&keys.every((key,i)=>{const d=Object.getOwnPropertyDescriptor(x,key);return finalKeys[i]===key&&d&&('value'in d)&&d.value===values[i]&&!(d.value&&typeof d.value==='object'&&!deeplyFrozenValues01.has(d.value));}))deeplyFrozenValues01.add(x);
+  }
+  return x;
+}
 function surface(s,bounds){
   if(!s||s.coordinateSpace!==coordinateSpace)throw Error('explicit surface coordinate space required');
   const center=vector(s.center),normal=vector(s.normal),u=vector(s.u);
@@ -49,13 +78,14 @@ function surface(s,bounds){
   const materialValue={observedId:material.observedId,observedConfidence:material.observedConfidence,acoustic:material.acoustic?{energyReflection:material.acoustic.energyReflection,confidence:material.acoustic.confidence,kind:material.acoustic.kind,reason:material.acoustic.reason}:null};
   return {id:identifier(s.id),coordinateSpace,center,normal,u,v,half,corners,...(footprint?{footprint}:{}),motion:s.motion,reflectiveSide:s.reflectiveSide,provenance:{kind:s.provenance.kind,reference:identifier(s.provenance.reference)},confidence:s.confidence===null?null:confidence(s.confidence),material:materialValue,version:s.version,observedAt,validUntil,openings:holes};
 }
-export function createTile(input){
+export function createTile(input,{maximumSurfaces=limits.surfaces}={}){
+  if(!Number.isInteger(maximumSurfaces)||maximumSurfaces<1||maximumSurfaces>maximumIndexedSurfaces)throw Error('bounded finite workset limit');
   if(!input||input.schemaVersion!==1||input.coordinateSpace!==coordinateSpace||input.timeUnit!==timeUnit||!['complete-synthetic','partial'].includes(input.coverage))throw Error('unsupported tile schema, coordinates, time units or coverage');
   const bounds=box(input.bounds),anchor=vector(input.listenerAnchor);if(!inBox(anchor,bounds))throw Error('listener anchor outside tile');
-  if(!Array.isArray(input.surfaces)||input.surfaces.length>limits.surfaces)throw Error('surface limit');
+  if(!Array.isArray(input.surfaces)||input.surfaces.length>maximumSurfaces)throw Error('surface limit');
   const surfaces=input.surfaces.map(s=>surface(s,bounds)).sort((a,b)=>a.id.localeCompare(b.id,'en'));
   if(new Set(surfaces.map(s=>s.id)).size!==surfaces.length)throw Error('duplicate surface observation');
-  const geometricKeys=new Set();for(const s of surfaces){const k=JSON.stringify(s.corners.map(p=>p.join(',')).sort());if(geometricKeys.has(k))throw Error('duplicate coincident surface');geometricKeys.add(k);}
+  const geometricKeys=new Set();for(const s of surfaces){const support=s.footprint?s.footprint.map(([x,y])=>add(s.center,add(scale(s.u,x),scale(s.v,y)))):s.corners;const k=JSON.stringify(support.map(p=>p.join(',')).sort());if(geometricKeys.has(k))throw Error('duplicate coincident surface');geometricKeys.add(k);}
   const missing=input.missingRegions??[];if(!Array.isArray(missing)||missing.length>limits.missingRegions)throw Error('missing region limit');
   const missingRegions=missing.map(m=>{const b=box(m.bounds);if(!inBox(b.min,bounds)||!inBox(b.max,bounds))throw Error('unknown region outside tile');return {id:identifier(m.id),bounds:b,reason:identifier(m.reason)};}).sort((a,b)=>a.id.localeCompare(b.id,'en'));
   if(new Set(missingRegions.map(m=>m.id)).size!==missingRegions.length)throw Error('duplicate unknown region');
@@ -63,7 +93,8 @@ export function createTile(input){
   if(surfaces.some(s=>s.observedAt>createdAt||s.validUntil>validUntil))throw Error('surface lifetime outside tile snapshot');
   if(input.coverage==='complete-synthetic'&&surfaces.some(s=>s.provenance.kind!=='synthetic'))throw Error('observations cannot declare complete world coverage');
   const tile={schemaVersion:1,id:identifier(input.id),coordinateSpace,timeUnit,bounds,listenerAnchor:anchor,coverage:input.coverage,surfaces,missingRegions,version:input.version,createdAt,validUntil,build:identifier(input.build),session:identifier(input.session),interior:identifier(input.interior),dynamicEpoch:input.dynamicEpoch};
-  tile.observationKey=createHash('sha256').update(JSON.stringify(tile)).digest('hex');validatedTiles.add(tile);return freeze(tile);
+  tile.observationKey=createHash('sha256').update(JSON.stringify(tile)).digest('hex');validatedTiles.add(tile);
+  if(surfaces.length>limits.surfaces)surfaceIndicesByTile.set(tile,buildSurfaceIndex(surfaces));return freeze(tile);
 }
 export function cacheStatus(tile,c){
   requireTile(tile);if(!c)throw Error('cache context required');const reasons=[],now=finite(c.now,'query time'),listener=vector(c.listener),movement=finite(c.maxListenerMove,'reuse distance');
@@ -75,9 +106,18 @@ export function cacheStatus(tile,c){
 }
 export function onPatch(s,p){const d=sub(p,s.center),u=dot(d,s.u),v=dot(d,s.v);return Math.abs(dot(d,s.normal))<=E&&Math.abs(u)<=s.half[0]+E&&Math.abs(v)<=s.half[1]+E&&(!s.footprint||s.footprint.every((a,i)=>{const b=s.footprint[(i+1)%s.footprint.length];return (b[0]-a[0])*(v-a[1])-(b[1]-a[1])*(u-a[0])>=-E;}))&&!s.openings.some(h=>u>=h.min[0]-E&&u<=h.max[0]+E&&v>=h.min[1]-E&&v<=h.max[1]+E);}
 function hitsBox(a,b,box){let lo=0,hi=1;const d=sub(b,a);for(let i=0;i<3;i++){if(Math.abs(d[i])<E){if(a[i]<box.min[i]||a[i]>box.max[i])return false;}else {let x=(box.min[i]-a[i])/d[i],y=(box.max[i]-a[i])/d[i];if(x>y)[x,y]=[y,x];lo=Math.max(lo,x);hi=Math.min(hi,y);if(lo>hi)return false;}}return true;}
+function buildSurfaceIndex(surfaces){
+  // This padding conservatively covers the existing finite-patch/segment
+  // tolerances, including contacts just beyond an endpoint (t within epsilon).
+  const pad=1e-5,entries=surfaces.map((s,index)=>({index,min:[0,1,2].map(i=>Math.min(...s.corners.map(p=>p[i]))-pad),max:[0,1,2].map(i=>Math.max(...s.corners.map(p=>p[i]))+pad)}));
+  function node(rows){const min=[0,1,2].map(i=>Math.min(...rows.map(r=>r.min[i]))),max=[0,1,2].map(i=>Math.max(...rows.map(r=>r.max[i])));
+    if(rows.length<=16)return {min,max,entries:rows};const widths=max.map((x,i)=>x-min[i]),axis=widths.indexOf(Math.max(...widths));rows.sort((a,b)=>(a.min[axis]+a.max[axis])-(b.min[axis]+b.max[axis])||a.index-b.index);const middle=rows.length>>>1;return {min,max,left:node(rows.slice(0,middle)),right:node(rows.slice(middle))};}
+  return node(entries);
+}
+function indexedSurfaceCandidates(tile,a,b){const root=surfaceIndicesByTile.get(tile);if(!root)return tile.surfaces;const found=[],pending=[root];while(pending.length){const n=pending.pop();if(!hitsBox(a,b,n))continue;if(n.entries){for(const e of n.entries)if(hitsBox(a,b,e))found.push(e.index);}else{pending.push(n.left,n.right);}}found.sort((x,y)=>x-y);return found.map(i=>tile.surfaces[i]);}
 export function querySegment(tile,start,end,{reflectorId=null,surfaceIndices=null}={}){
   requireTile(tile);const a=vector(start),b=vector(end);if(!inBox(a,tile.bounds)||!inBox(b,tile.bounds)||length(sub(b,a))<=E)throw Error('segment extent');
-  let selected=tile.surfaces;
+  let selected=surfaceIndices===null?indexedSurfaceCandidates(tile,a,b):tile.surfaces;
   if(surfaceIndices!==null){if(!Array.isArray(surfaceIndices)||surfaceIndices.length>tile.surfaces.length||surfaceIndices.some((n,i)=>!Number.isSafeInteger(n)||n<0||n>=tile.surfaces.length||(i>0&&n<=surfaceIndices[i-1])))throw Error('invalid conservative surface indices');selected=surfaceIndices.map(i=>tile.surfaces[i]);}
   const hits=[],ambiguous=[];let surfaceTests=0;
   for(const s of selected){surfaceTests++;const d0=dot(sub(a,s.center),s.normal),d1=dot(sub(b,s.center),s.normal),den=d0-d1;

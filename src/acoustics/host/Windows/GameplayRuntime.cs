@@ -6,9 +6,23 @@ namespace RichAudio.Beacon.Windows {
   [DataMember(Name="packageRoot",IsRequired=true)]public string PackageRoot;
   [DataMember(Name="manifestSha256",IsRequired=true)]public string ManifestSha256;
  }
+ // Windows metadata queries can return the 1601 sentinel during File.Replace.
+ // Reuse only the existing publication's remaining lifetime, never query time.
+ internal sealed class BatiHostStatusWatch01 {
+  long expires;DateTime lastPublication;
+  internal void Observe(bool exists,DateTime modifiedUtc,DateTime observedUtc,long observedQpc,long frequency){
+   if(!exists||modifiedUtc<=DateTime.FromFileTimeUtc(0)||modifiedUtc>observedUtc||modifiedUtc<=lastPublication)return;
+   lastPublication=modifiedUtc;
+   double remaining=5-(observedUtc-modifiedUtc).TotalSeconds;
+   expires=remaining<=0?observedQpc:observedQpc+(long)(remaining*frequency);
+  }
+  internal bool Expired(long now,long started,long frequency){return now-started>frequency*10&&(expires==0||now>=expires);}
+ }
+
  public sealed class GameplayRuntime {
   readonly ManualResetEvent wake=new ManualResetEvent(false);readonly bool fixture,batiDemo,recordingAuthorized,loopbackAuthorized;volatile bool stopping,story,demoFaulted;Thread thread;Process host;OwnedProcessJob job;GameplayPublisher publisher;PlayableConfiguration configuration;AcousticSettings settings;
   readonly object batiGate=new object();bool batiEnabled,batiRetired;GameplayFrame batiFrame;long batiValidThrough;
+  BatiHostStatusWatch01 batiStatusWatch=new BatiHostStatusWatch01();
   readonly string session;readonly Queue<long> faults=new Queue<long>();volatile string state="not-started";int attempts,livePid;long nextAttempt,hostStarted;Mutex lease;bool leaseOwned;
   public GameplayRuntime(bool deviceFreeFixture=false,string sessionId=null,bool batiDemoProfile=false,bool recordingAllowed=false,bool loopbackAllowed=false){
    if(sessionId!=null&&!System.Text.RegularExpressions.Regex.IsMatch(sessionId,"\\A[a-f0-9]{32}\\z"))throw new ArgumentException("owned gameplay session");
@@ -73,19 +87,40 @@ namespace RichAudio.Beacon.Windows {
       if(host.HasExited)throw new IOException("Bati gameplay host exited");
       state="Bati experimental additive; GTA stock audio retained";
       string statusFile=Path.Combine(c.Root,".local","gameplay",session,"host.json");
-      if(Stopwatch.GetTimestamp()-hostStarted>Stopwatch.Frequency*10&&(!File.Exists(statusFile)||DateTime.UtcNow-File.GetLastWriteTimeUtc(statusFile)>TimeSpan.FromSeconds(5)))throw new TimeoutException("Bati host status stopped");
+      bool exists=File.Exists(statusFile);DateTime modified=exists?File.GetLastWriteTimeUtc(statusFile):DateTime.MinValue,observed=DateTime.UtcNow;long observedQpc=Stopwatch.GetTimestamp();
+      batiStatusWatch.Observe(exists,modified,observed,observedQpc,Stopwatch.Frequency);
+      if(batiStatusWatch.Expired(observedQpc,hostStarted,Stopwatch.Frequency)){var error=new TimeoutException("Bati host status stopped");error.Data["probeExists"]=exists;error.Data["probeUtc"]=observed.ToString("o");error.Data["probeLastWriteUtc"]=modified.ToString("o");throw error;}
       if(BatiGateCurrent(out frame)&&frame.Listener.Sequence>publishedSequence){publisher.Publish(frame);publishedSequence=frame.Listener.Sequence;}
      }
-    }catch(ThreadAbortException){throw;}catch(Exception e){demoFaulted=true;StopHost();state="GTA stock fallback: Bati playback "+e.GetType().Name+"; no automatic retry";var s=Settings;if(s!=null)PublishFallback(c,s,state);}
+    }catch(ThreadAbortException){throw;}catch(Exception e){RetainBatiFault(c,e);demoFaulted=true;StopHost();state="GTA stock fallback: Bati playback "+e.GetType().Name+"; no automatic retry";var s=Settings;if(s!=null)PublishFallback(c,s,state);}
     wake.WaitOne(20);wake.Reset();
    }
+  }
+  // Preserve the first fault before StopHost replaces the running status.
+  // One private bounded receipt; no endpoint, retries or progress authority.
+  bool batiFaultRetained;
+  static string BoundedFaultText(string text,int maximum){return text==null?null:text.Substring(0,Math.Min(text.Length,maximum));}
+  void RetainBatiFault(PlayableConfiguration c,Exception error){
+   if(batiFaultRetained)return;batiFaultRetained=true;
+   try{
+    string directory=Path.Combine(c.Root,".local","gameplay",session);Directory.CreateDirectory(directory);
+    string statusFile=Path.Combine(directory,"host.json");bool exists=File.Exists(statusFile);DateTime now=DateTime.UtcNow;
+    var row=new Dictionary<string,object>{{"schema",1},{"session",session},{"observedUtc",now.ToString("o")},{"observedQpc",Stopwatch.GetTimestamp()},
+     {"exceptionType",error.GetType().FullName},{"message",BoundedFaultText(error.Message,1024)},{"stack",BoundedFaultText(error.StackTrace,4096)},
+     {"hostPid",HostPid},{"hostAgeMs",(Stopwatch.GetTimestamp()-hostStarted)*1000d/Stopwatch.Frequency},{"statusExists",exists},
+     {"statusLastWriteUtc",exists?File.GetLastWriteTimeUtc(statusFile).ToString("o"):null},{"statusAgeMs",exists?(object)(now-File.GetLastWriteTimeUtc(statusFile)).TotalMilliseconds:null}};
+    foreach(string key in new[]{"probeExists","probeUtc","probeLastWriteUtc"})if(error.Data.Contains(key))row[key]=error.Data[key];
+    try{if(exists&&new FileInfo(statusFile).Length<=32768){var status=new System.Web.Script.Serialization.JavaScriptSerializer{MaxJsonLength=32768}.DeserializeObject(File.ReadAllText(statusFile))as Dictionary<string,object>;if(status!=null){var progress=new Dictionary<string,object>();foreach(string key in new[]{"hostState","ownerPid","hostPid","nodePid","receivedBlocks","receivedSnapshots","consumedFrames","underflowFrames","failure","failureDetail","audioError"}){object value;if(status.TryGetValue(key,out value))progress[key]=value is string?BoundedFaultText((string)value,1024):value;}row["statusBeforeStop"]=progress;}}}catch(Exception statusError){row["statusReadError"]=statusError.GetType().Name;}
+    string text=new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(row);if(Encoding.UTF8.GetByteCount(text)>16384)return;
+    using(var file=new FileStream(Path.Combine(directory,"runtime-first-fault.json"),FileMode.CreateNew,FileAccess.Write,FileShare.Read)){byte[] bytes=new UTF8Encoding(false).GetBytes(text);file.Write(bytes,0,bytes.Length);file.Flush(true);}
+   }catch(Exception){} // Diagnostics cannot replace the original fault.
   }
   void Fault(){faults.Enqueue(Stopwatch.GetTimestamp());nextAttempt=Stopwatch.GetTimestamp()+Stopwatch.Frequency*(1L<<Math.Min(4,faults.Count));}
   void StartHost(PlayableConfiguration c,string manifestSha){
    string folder=Path.Combine(c.Root,".local","owned");Directory.CreateDirectory(folder);string permit=Path.Combine(folder,"start-"+Guid.NewGuid().ToString("N"));
    int pid=Process.GetCurrentProcess().Id;long start=Process.GetCurrentProcess().StartTime.ToUniversalTime().Ticks;string pipe="RichAudio.Playable01."+pid+"."+session;
    job=new OwnedProcessJob(1536);host=new Process{StartInfo=new ProcessStartInfo{FileName=PlayableConfiguration.Inside(c.Root,"runtime/RichAudio.Acoustics.Host.exe"),Arguments=(fixture?"--gameplay-fixture ":"--gameplay ")+Q(c.Manifest)+" "+manifestSha+" "+pid+" "+start+" "+session+" "+pipe+" "+Q(permit),WorkingDirectory=c.Root,UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true}};
-   host.Start();job.Assign(host);hostStarted=Stopwatch.GetTimestamp();Interlocked.Increment(ref attempts);Interlocked.Exchange(ref livePid,host.Id);
+   host.Start();job.Assign(host);hostStarted=Stopwatch.GetTimestamp();batiStatusWatch=new BatiHostStatusWatch01();Interlocked.Increment(ref attempts);Interlocked.Exchange(ref livePid,host.Id);
    if(batiDemo){
     GameplayFrame fresh;if(!BatiGateCurrent(out fresh))throw new InvalidDataException("accepted Bati expired before host permit");
     string text=new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(new{schema=1,profile="PLAYABLE-13",session=session,playbackAllowed=true,recordingAllowed=recordingAuthorized,loopbackAllowed=loopbackAuthorized,fixtureOnly=fixture});
@@ -95,7 +130,7 @@ namespace RichAudio.Beacon.Windows {
    }else File.WriteAllText(permit,"owned gameplay job");
    publisher.Configure(pipe,host.Id);state="automatic host starting";
   }
-  void StopHost(){var p=host;host=null;if(publisher!=null)publisher.Configure(null,0);if(p!=null){try{if(!p.HasExited){byte[] b=Encoding.UTF8.GetBytes("stop\n");var op=p.StandardInput.BaseStream.BeginWrite(b,0,b.Length,null,null);using(var wait=op.AsyncWaitHandle)if(wait.WaitOne(200))p.StandardInput.BaseStream.EndWrite(op);p.WaitForExit(batiDemo?6000:1500);}}catch(Exception){}finally{if(job!=null){job.Dispose();job=null;}try{if(!p.HasExited)p.Kill();p.WaitForExit(1000);}catch(Exception){}p.Dispose();}}else if(job!=null){job.Dispose();job=null;}Interlocked.Exchange(ref livePid,0);}
+  void StopHost(){var p=host;host=null;if(publisher!=null)publisher.Configure(null,0);if(p!=null){try{if(!p.HasExited){byte[] b=Encoding.UTF8.GetBytes("stop\n");try{PipeDeadline.Write(p.StandardInput.BaseStream,b,200,"host stop write deadline");}catch(TimeoutException){}p.WaitForExit(batiDemo?6000:1500);}}catch(Exception){}finally{if(job!=null){job.Dispose();job=null;}try{if(!p.HasExited)p.Kill();p.WaitForExit(1000);}catch(Exception){}p.Dispose();}}else if(job!=null){job.Dispose();job=null;}Interlocked.Exchange(ref livePid,0);}
   static void PublishFallback(PlayableConfiguration c,AcousticSettings s,string reason){
    var j=new System.Web.Script.Serialization.JavaScriptSerializer();string text=j.Serialize(new{schemaVersion=1,hostState="stopped",recordedAtUtc=DateTime.UtcNow.ToString("o"),status=new{integrationMode="stock-fallback",nativeReplacement=false,reason}});
    AcousticSettingsStore.WriteAtomic(c.Root,AcousticSettingsStore.StatusPath(AcousticSettingsStore.DefaultPath(c.Root)),text,16384);

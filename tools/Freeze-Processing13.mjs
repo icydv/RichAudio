@@ -10,7 +10,7 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const git=promisify(execFile),sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const check=(ok,reason)=>{if(!ok)throw Error(reason);};
 export const processingParent13='85646ec65f2f88f0eb935374a79260a75e96b728';
-const helpers=['tools/Profile-Processing13.mjs','tools/Owned-Processing13.mjs','tools/Freeze-Processing13.mjs','tools/Summarize-Processing13.mjs','tools/Processing-Continuity13.mjs','tools/Profile-Processing09.mjs','tools/Profile-AcousticBudget042.mjs','tests/fixtures/Processing13.mjs','tests/fixtures/Processing10.mjs','tests/fixtures/Processing09.mjs','tests/fixtures/AcousticBudget042.mjs'];
+const helpers=['tools/Profile-Processing13.mjs','tools/Processing-RolesStreet01.mjs','tools/Owned-Processing13.mjs','tools/Freeze-Processing13.mjs','tools/Summarize-Processing13.mjs','tools/Processing-Continuity13.mjs','tools/Profile-Processing09.mjs','tools/Profile-AcousticBudget042.mjs','tests/fixtures/Processing13.mjs','tests/fixtures/Processing10.mjs','tests/fixtures/Processing09.mjs','tests/fixtures/AcousticBudget042.mjs'];
 export async function captureProcessingWorkingClosure13(){
  const selected=[];
  async function visit(relative){const info=await fs.lstat(path.join(root,relative));check(info.isDirectory()&&!info.isSymbolicLink(),'owned working source directory required');for(const e of await fs.readdir(path.join(root,relative),{withFileTypes:true})){

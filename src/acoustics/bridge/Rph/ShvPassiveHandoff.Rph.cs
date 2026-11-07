@@ -196,6 +196,14 @@ namespace RichAudio.Beacon.Rph
                             // No rejected camera frame reaches the wire or audio.
                             accepted=composition.AcceptedCount;
                             if(!publishListener)continue;
+#if SHV_PLAYABLE_13
+                            // Rider-local airflow requires an observed vehicle camera.
+                            // Unknown camera mode withholds it; exterior flow remains spatial.
+                            bool vehicleView=false;
+                            try{vehicleView=Rage.Native.NativeFunction.CallByName<bool>("IS_GAMEPLAY_CAM_RENDERING")&&Rage.Native.NativeFunction.CallByName<bool>("IS_FOLLOW_VEHICLE_CAM_ACTIVE");}
+                            catch(ThreadAbortException){throw;}catch{vehicleView=false;}
+                            frame.Vehicles[0].RiderViewAttached=vehicleView;
+#endif
 #else
                             Need(adapter.TryCreate(current,peer,Listener(module.SessionId),out frame,out lineage,out adaptationReason),adaptationReason);
 #endif

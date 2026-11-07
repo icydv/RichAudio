@@ -80,7 +80,7 @@ namespace RichAudio.Beacon.Transport
                 {
                     using(var pipe=new NamedPipeServerStream(name,strict?PipeDirection.InOut:PipeDirection.In,1,PipeTransmissionMode.Byte,PipeOptions.Asynchronous,4096,4096,CurrentUserSecurity()))
                     {
-                        active=pipe;if(stopping)break;var connect=pipe.BeginWaitForConnection(null,null);using(var ready=connect.AsyncWaitHandle){if(!ready.WaitOne(30000))throw new TimeoutException("connection deadline");pipe.EndWaitForConnection(connect);}long connectedAt=Stopwatch.GetTimestamp();Interlocked.Increment(ref connections);FirstFrame.ConnectionMs=elapsed.Elapsed.TotalMilliseconds;var validator=new StateValidator();long previousGaps=0;
+                        active=pipe;if(stopping)break;PipeDeadline.WaitForConnection(pipe,30000,"connection deadline");long connectedAt=Stopwatch.GetTimestamp();Interlocked.Increment(ref connections);FirstFrame.ConnectionMs=elapsed.Elapsed.TotalMilliseconds;var validator=new StateValidator();long previousGaps=0;
                         uint peer; if(!GetNamedPipeClientProcessId(pipe.SafePipeHandle,out peer))throw new IOException("Pipe peer identity unavailable");PeerProcessId=peer;
                         while(!stopping)
                         {

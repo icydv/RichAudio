@@ -1,8 +1,23 @@
-using System;using System.Collections.Generic;using System.Diagnostics;
+using System;using System.Collections.Generic;using System.Diagnostics;using System.Threading;
 namespace RichAudio.Beacon.Windows {
+ // A scheduled fake callback consumes one chunk. A delayed test thread is not
+ // a hardware device that consumed an arbitrary backlog while it was asleep.
+ // Defer missed periods explicitly; never issue an unbounded catch-up burst.
+ internal sealed class GameplayFixtureCadence01 {
+  long origin,deferred,maximumLate;readonly long period;int delayed;
+  internal GameplayFixtureCadence01(long start,long frequency){origin=start;period=frequency/50;}
+  internal long Due(long callback){return origin+callback*period;}
+  internal long Begin(long callback,long now){long due=Due(callback),late=Math.Max(0,now-due);if(late>maximumLate)Interlocked.Exchange(ref maximumLate,late);if(late>=period){origin+=late;Interlocked.Add(ref deferred,late);Interlocked.Increment(ref delayed);}return due;}
+  internal object Snapshot(){return new{callbackFrames=960,nominalPeriodMilliseconds=20,deferredCallbacks=Thread.VolatileRead(ref delayed),deferredQpcTicks=Interlocked.Read(ref deferred),maximumLatenessQpcTicks=Interlocked.Read(ref maximumLate),scope="Device-free scheduled callbacks only; deferred wall time is not rendered audio or hardware underrun qualification"};}
+ }
  // Device-free sink measurements only. Never instantiated on the WASAPI route.
  // Bounded metadata, no PCM copy/WAV/endpoint, no lock on a real audio callback.
  internal sealed class GameplayFixtureLatency {
+  struct Progress01 {internal string phase;internal long sequence,first,last,aux;internal int buffered,amount;internal double nodeMs;}
+  readonly Progress01[] recent01=new Progress01[128];int cursor01,count01;bool frozen01;long firstUnderflowQpc01,firstUnderflowFrame01,sourceLease01,sourceObservation01;bool stopIntent01;
+  internal void Progress(string phase,long sequence,long first,long last,int buffered,int amount,long aux=0,double nodeMs=0){lock(gate){if(frozen01)return;recent01[cursor01]=new Progress01{phase=phase,sequence=sequence,first=first,last=last,buffered=buffered,amount=amount,aux=aux,nodeMs=nodeMs};cursor01=(cursor01+1)%recent01.Length;count01=Math.Min(count01+1,recent01.Length);}}
+  internal void Callback01(long sequence,long due,long before,long after,int requested,int supplied,int bufferedBefore,int bufferedAfter,bool underflow,long frame,bool stopping,long lease,long observation){lock(gate){Progress("callback",sequence,due,before,bufferedBefore,supplied,after);if(underflow&&!frozen01){firstUnderflowQpc01=before;firstUnderflowFrame01=frame;stopIntent01=stopping;sourceLease01=lease;sourceObservation01=observation;frozen01=true;}}}
+  internal object FirstUnderflow01(){lock(gate){if(!frozen01)return null;var rows=new List<object>();for(int i=0;i<count01;i++){var e=recent01[(cursor01-count01+i+recent01.Length)%recent01.Length];rows.Add(new{phase=e.phase,sequence=e.sequence,firstQpc=e.first,lastQpc=e.last,bufferedFrames=e.buffered,amount=e.amount,aux=e.aux,nodeMilliseconds=e.nodeMs});}return new{schema=1,clock="host-Stopwatch-QPC",frequency=Stopwatch.Frequency,firstUnderflowQpc=firstUnderflowQpc01,firstUnderflowFrame=firstUnderflowFrame01,shutdownRequested=stopIntent01,sourceLeaseQpc=sourceLease01,lastSnapshotQpc=sourceObservation01,eventLimit=recent01.Length,events=rows,nodeClockScope="Node milliseconds are not subtracted from host QPC; associate by producer block sequence"};}}
   const int Capacity=12000;readonly long[] admission=new long[Capacity],submission=new long[Capacity],older=new long[Capacity],newer=new long[Capacity];readonly object gate=new object();int omitted,mappingCount;double mappingMinimum=Double.PositiveInfinity,mappingMaximum=Double.NegativeInfinity;long steadyAt,firstAdmission,firstSubmission,firstSubmissionFrame;object firstPoseMapping;
   internal void EnterSteady(long ticks){lock(gate){if(steadyAt==0)steadyAt=ticks;}}
   int Index(long frame){return frame>=0&&frame/512<Capacity?(int)(frame/512):-1;}

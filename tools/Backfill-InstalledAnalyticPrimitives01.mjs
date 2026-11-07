@@ -1,0 +1,11 @@
+// Private derived-data upgrade; never opens archives or runs CodeWalker/GTA.
+import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
+import {backfillAnalyticManifest01} from '../src/acoustics/world/analytic-backfill01.mjs';
+import {sha256} from '../src/acoustics/world/collision-mesh.mjs';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),args=process.argv.slice(2),options={};for(let n=0;n<args.length;n+=2){if(!args[n]?.startsWith('--')||args[n+1]===undefined)throw Error('Named analytic backfill arguments required');options[args[n].slice(2)]=args[n+1];}
+const allowed=path.resolve(options['cache-root']??path.join(root,'.local/street01-installed')),manifestPath=path.resolve(options.manifest??''),output=path.resolve(options.output??'');
+if(!allowed.startsWith(path.join(root,'.local')+path.sep)||!manifestPath.startsWith(allowed+path.sep)||!output.startsWith(allowed+path.sep)||fs.existsSync(output))throw Error('Fresh output inside known private derived-cache root required');
+const bytes=fs.readFileSync(manifestPath);if(bytes.length>67108864)throw Error('Bounded source manifest');const manifest=JSON.parse(bytes.toString('utf8')),manifestSHA256=sha256(bytes);fs.mkdirSync(output,{recursive:true});
+const atomic=(file,value)=>{const pending=file+'.pending';fs.writeFileSync(pending,JSON.stringify(value));fs.renameSync(pending,file);};
+const result=await backfillAnalyticManifest01({manifest,allowedRoot:allowed,maximumResources:Number(options['maximum-resources']??262144),maximumMilliseconds:1000*Number(options['maximum-seconds']??900),maximumNewBytes:Number(options['maximum-new-bytes']??536870912),onProgress:({summary,manifest})=>{atomic(path.join(output,'manifest.json'),manifest);atomic(path.join(output,'progress.json'),summary);}});
+atomic(path.join(output,'result.json'),{schema:1,kind:'RichAudioRetainedNormalizedAnalyticUpgrade01',sourceManifestPath:manifestPath,sourceManifestSHA256:manifestSHA256,...result.summary,manifestPath:path.join(output,'manifest.json'),manifestSHA256:sha256(fs.readFileSync(path.join(output,'manifest.json'))),records:result.records,gameFilesRead:false,archiveDecoded:false,gameLaunched:false,endpointOpened:false,actualWorldComplete:false});console.log(JSON.stringify({output,...result.summary}));

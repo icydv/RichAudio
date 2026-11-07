@@ -6,15 +6,16 @@ struct Surface { float4 center; float4 normal; float4 lo; float4 hi; };
 StructuredBuffer<Segment> segments : register(t0);
 StructuredBuffer<Surface> surfaces : register(t1);
 RWStructuredBuffer<uint4> result : register(u0);
-cbuffer Counts : register(b0) { uint surfaceCount; uint segmentCount; float margin; uint unused; };
+cbuffer Counts : register(b0) { uint surfaceCount; uint segmentCount; float margin; uint surfacePages; };
 groupshared uint masks[4];
 [numthreads(128,1,1)]
 void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex) {
     if (lane < 4) masks[lane] = 0;
     GroupMemoryBarrierWithGroupSync();
-    if (group.x < segmentCount && lane < surfaceCount) {
+    uint globalSurface = group.y * 128 + lane;
+    if (group.x < segmentCount && globalSurface < surfaceCount) {
         Segment ray = segments[group.x];
-        Surface patch = surfaces[lane];
+        Surface patch = surfaces[globalSurface];
         bool possible = all(max(ray.a.xyz,ray.b.xyz) >= patch.lo.xyz-margin)
                      && all(min(ray.a.xyz,ray.b.xyz) <= patch.hi.xyz+margin);
         float da = dot(ray.a.xyz-patch.center.xyz,patch.normal.xyz);
@@ -23,5 +24,5 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex) {
         if (possible) InterlockedOr(masks[lane>>5],1u<<(lane&31));
     }
     GroupMemoryBarrierWithGroupSync();
-    if (lane == 0 && group.x < segmentCount) result[group.x] = uint4(masks[0],masks[1],masks[2],masks[3]);
+    if (lane == 0 && group.x < segmentCount) result[group.x * surfacePages + group.y] = uint4(masks[0],masks[1],masks[2],masks[3]);
 }

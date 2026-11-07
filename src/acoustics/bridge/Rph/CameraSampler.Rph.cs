@@ -31,6 +31,9 @@ namespace RichAudio.Beacon.Rph
         }
         CameraObservation previous;
         long sequence,generation=1;
+        // Normal-product scope changes retain ordered listener identity while
+        // requiring a fresh independent pose. Closed SHV profiles do not call it.
+        internal void Invalidate(){previous=null;generation++;}
         static bool Vector(double[] v,double bound)
         {if(v==null||v.Length!=3)return false;foreach(double x in v)if(!Protocol.Finite(x)||Math.Abs(x)>bound)return false;return true;}
         static double Dot(double[] a,double[] b){double sum=0;for(int i=0;i<3;i++)sum+=a[i]*b[i];return sum;}
