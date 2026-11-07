@@ -22,17 +22,6 @@ namespace RichAudio {
   public static void Main(){ Game.Console.Print("RichAudio profile probe idle. Manual Story Mode experiment only."); }
   public static void OnUnload(){if(!Cleanup())Game.Console.Print("RichAudio probe retirement unresolved.");}
 
-  [ConsoleCommand(Name="RichAudioReadVehicleHorn",Description="Read the selected Story Mode vehicle horn discriminator. No profile is assigned.")]
-  public static void ReadVehicleHorn(){
-   var player=Game.LocalPlayer.Character;
-   var vehicle=player!=null&&player.IsValid()?player.CurrentVehicle:null;
-   if(vehicle==null||!vehicle.IsValid()){Game.Console.Print("RichAudio probe has no selected vehicle.");return;}
-   string lifetime=Identity(vehicle);uint model=vehicle.Model.Hash;
-   uint horn=NativeFunction.CallByName<uint>("GET_VEHICLE_DEFAULT_HORN",vehicle);
-   if(!vehicle.IsValid()||Identity(vehicle)!=lifetime||vehicle.Model.Hash!=model)return;
-   Game.Console.Print("RichAudio model="+model.ToString("X8")+"; horn="+horn.ToString("X8")+"; loaded RPH assembly="+typeof(Vehicle).Assembly.GetName().Version);
-  }
-
   static string Identity(Vehicle v) {
    var h=v.Handle;
    return h.Value.ToString("X8")+":"+h.Index.ToString("X")+":"+h.Counter.ToString("X2")+":"+v.MemoryAddress.ToInt64().ToString("X");

@@ -22,6 +22,7 @@ namespace Rage {
  public static class Game {
   public static readonly Player LocalPlayer=new Player();
   public static bool IsLoading,IsPaused;
+  public static void LogTrivial(string line){}
   public static class Console {public static string Last;public static void Print(string line){Last=line;}}
  }
  public static class GameFiber {
@@ -48,9 +49,9 @@ namespace Rage.Native {
    }
   }
   public static T CallByName<T>(string name,params object[] args){
-   if(name=="NETWORK_IS_SESSION_ACTIVE")return (T)(object)false;
+   if(name=="NETWORK_IS_SESSION_ACTIVE"||name=="NETWORK_IS_SESSION_STARTED"||name=="NETWORK_IS_GAME_IN_PROGRESS")return (T)(object)false;
    if(name=="GET_PED_IN_VEHICLE_SEAT")return (T)(object)0;
-   if(name=="GET_VEHICLE_DEFAULT_HORN")return (T)(object)((Rage.Vehicle)args[0]).Horn;
+   if(name=="GET_VEHICLE_DEFAULT_HORN")return (T)(object)(args[0] is int?Rage.Vehicle.Created[(int)args[0]-1]:(Rage.Vehicle)args[0]).Horn;
    throw new Exception("Unexpected native");
   }
  }
@@ -66,8 +67,8 @@ public static class TestPrivateProfileProbe01 {
  public static int Main(){
   var donor=new Rage.Vehicle(new Rage.Model("bati"),new Rage.Vector3());
   Rage.Game.LocalPlayer.Character=new Rage.Ped{CurrentVehicle=donor};
-  RichAudio.ProfileProbe.ReadVehicleHorn();
-  Check(Rage.Game.Console.Last.Contains("horn=00000007")&&Rage.Native.NativeFunction.Targets.Count==0,"Read-only discriminator");
+  RichAudio.ReadVehicleHornCommand.ReadVehicleHorn();
+  Check(Rage.Game.Console.Last.Contains("raw=00000007,00000007,00000007")&&Rage.Native.NativeFunction.Targets.Count==0,"Read-only discriminator");
   Reset();
   Run();
   var profiles=Rage.Native.NativeFunction.Profiles;

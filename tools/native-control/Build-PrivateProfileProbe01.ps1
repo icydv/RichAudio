@@ -10,5 +10,5 @@ $sdk=(Resolve-Path -LiteralPath $SdkPath).Path
 if((Get-FileHash -LiteralPath $sdk).Hash-ne'5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0'){throw 'Exact private RPH SDK required'}
 [IO.Directory]::CreateDirectory($out)|Out-Null
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-& $compiler /nologo /target:library /platform:x64 /langversion:5 /warnaserror+ /r:Microsoft.CSharp.dll ('/r:'+$sdk) ('/out:'+(Join-Path $out 'RichAudio.ProfileProbe.dll')) (Join-Path $PSScriptRoot 'ProfileProbe.Rph.cs')
+& $compiler /nologo /target:library /platform:x64 /langversion:5 /warnaserror+ /r:Microsoft.CSharp.dll ('/r:'+$sdk) ('/out:'+(Join-Path $out 'RichAudio.ProfileProbe.dll')) (Join-Path $PSScriptRoot 'ProfileProbe.Rph.cs') (Join-Path $PSScriptRoot 'ReadVehicleHorn.Rph.cs')
 if($LASTEXITCODE){throw 'Profile probe compile failed'}

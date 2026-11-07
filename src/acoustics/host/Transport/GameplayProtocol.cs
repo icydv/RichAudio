@@ -25,6 +25,15 @@ namespace RichAudio.Beacon.Transport {
   [DataMember(Name="origin",IsRequired=true)]public double[] Origin;
   [DataMember(Name="observationTicks",IsRequired=true)]public long ObservationTicks;
  }
+ // Observation evidence only. The scene consumes GameplayInterior separately.
+ [DataContract] public sealed class CameraInteriorReadback {
+  [DataMember(Name="proxy")]public int? Proxy;
+  [DataMember(Name="ready")]public bool? Ready;
+  [DataMember(Name="archetype")]public uint? Archetype;
+  [DataMember(Name="origin")]public double[] Origin;
+  [DataMember(Name="sampleTicks")]public long SampleTicks;
+  [DataMember(Name="outcome")]public string Outcome;
+ }
  [DataContract] public sealed class GameplayFrame {
   [DataMember(Name="version",IsRequired=true)]public int Version=1;
   [DataMember(Name="session",IsRequired=true)]public string Session;
@@ -37,6 +46,7 @@ namespace RichAudio.Beacon.Transport {
   // observation timestamp nor runtime map-activation evidence.
   [DataMember(Name="worldPreparationStartedUtc",EmitDefaultValue=false)]public string WorldPreparationStartedUtc;
   [DataMember(Name="cameraInterior01",EmitDefaultValue=false)]public GameplayInterior CameraInterior01;
+  [DataMember(Name="cameraInteriorReadback",EmitDefaultValue=false)]public CameraInteriorReadback CameraInteriorReadback;
  }
  public static class GameplayWire {
   public const int MaximumBytes=32768;
@@ -66,8 +76,12 @@ namespace RichAudio.Beacon.Transport {
   public static byte[] Encode(GameplayFrame f,string session){Validate(f,session);using(var m=new MemoryStream()){new DataContractJsonSerializer(typeof(GameplayFrame)).WriteObject(m,f);Protocol.Check(m.Length<=MaximumBytes,"gameplay packet size");return m.ToArray();}}
   public static GameplayFrame Decode(byte[] b,string session){Protocol.Check(b!=null&&b.Length>0&&b.Length<=MaximumBytes,"gameplay packet size");new UTF8Encoding(false,true).GetString(b);using(var m=new MemoryStream(b)){var f=(GameplayFrame)new DataContractJsonSerializer(typeof(GameplayFrame)).ReadObject(m);Validate(f,session);return f;}}
   public static NamedPipeServerStream Server(string name){return new NamedPipeServerStream(name,PipeDirection.InOut,1,PipeTransmissionMode.Byte,PipeOptions.Asynchronous,MaximumBytes,MaximumBytes,Security());}
-  public static byte[] Read(PipeStream p){var h=ReadExact(p,4);int n=BitConverter.ToInt32(h,0);Protocol.Check(n>0&&n<=MaximumBytes,"gameplay frame length");return ReadExact(p,n);}
-  static byte[] ReadExact(PipeStream p,int n){var b=new byte[n];int at=0;while(at<n){int got=PipeDeadline.Read(p,b,at,n-at,1000,"gameplay transport stalled");if(got==0)throw new EndOfStreamException();at+=got;}return b;}
+  public static byte[] Read(PipeStream p){return Read(p,1000);}
+  public static byte[] Read(PipeStream p,int idleMilliseconds){
+   Protocol.Check(idleMilliseconds>=1000&&idleMilliseconds<=30000,"bounded gameplay idle wait");
+   var h=ReadExact(p,4,idleMilliseconds);int n=BitConverter.ToInt32(h,0);Protocol.Check(n>0&&n<=MaximumBytes,"gameplay frame length");return ReadExact(p,n,1000);
+  }
+  static byte[] ReadExact(PipeStream p,int n,int firstWaitMs){var b=new byte[n];int at=0;while(at<n){int got=PipeDeadline.Read(p,b,at,n-at,at==0?firstWaitMs:1000,"gameplay transport stalled");if(got==0)throw new EndOfStreamException();at+=got;}return b;}
   public static void Write(PipeStream p,byte[] b){var frame=new byte[b.Length+4];Buffer.BlockCopy(BitConverter.GetBytes(b.Length),0,frame,0,4);Buffer.BlockCopy(b,0,frame,4,b.Length);TransportStop.Write(p,frame);}
  }
  public sealed class GameplayPublisher:IDisposable {
@@ -79,7 +93,7 @@ namespace RichAudio.Beacon.Transport {
   void Run(){while(!stop){wake.WaitOne(50);if(stop)break;var f=Interlocked.Exchange(ref latest,null);if(f==null)continue;
    try{string name;int pid;lock(gate){name=endpoint;pid=expectedPid;}if(name==null||pid<=0)continue;
     if((Stopwatch.GetTimestamp()-f.Listener.ObservationTicks)*1000d/Stopwatch.Frequency>250||f.ValidThroughTicks!=0&&Stopwatch.GetTimestamp()>f.ValidThroughTicks){Expired++;continue;}
-    NamedPipeClientStream p;lock(gate)p=pipe;if(p==null){p=new NamedPipeClientStream(".",name,PipeDirection.InOut,PipeOptions.Asynchronous);p.Connect(150);GameplayWire.Peer(p,pid,false);lock(gate){if(name!=endpoint){p.Dispose();continue;}pipe=p;}}
+    NamedPipeClientStream p;lock(gate)p=pipe;if(p==null){p=new NamedPipeClientStream(".",name,PipeDirection.InOut,PipeOptions.Asynchronous);bool kept=false;try{p.Connect(150);GameplayWire.Peer(p,pid,false);lock(gate){if(stop||name!=endpoint||pid!=expectedPid)continue;pipe=p;kept=true;}}finally{if(!kept)p.Dispose();}}
     var b=GameplayWire.Encode(f,session);if((Stopwatch.GetTimestamp()-f.Listener.ObservationTicks)*1000d/Stopwatch.Frequency>250||f.ValidThroughTicks!=0&&Stopwatch.GetTimestamp()>f.ValidThroughTicks){Expired++;continue;}
     GameplayWire.Write(p,b);TransportStop.Ack(p,TransportStop.Accepted);Sent++;
    }catch(ThreadAbortException){throw;}catch{Failures++;lock(gate){var p=pipe;pipe=null;if(p!=null)p.Dispose();}wake.WaitOne(200);}

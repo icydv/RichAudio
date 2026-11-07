@@ -89,6 +89,38 @@ namespace RichAudio.Beacon.Rph
     internal static class CameraSampler
     {
         private static CameraObservation cached;
+        internal static GameplayInterior ObserveInterior(ListenerState listener)
+        {
+            CameraInteriorReadback ignored;
+            return ObserveInterior(listener,out ignored);
+        }
+
+        // Shared native call and admissibility checks. Raw evidence is never used to activate a scene.
+        internal static GameplayInterior ObserveInterior(ListenerState listener,out CameraInteriorReadback raw)
+        {
+            raw=new CameraInteriorReadback{Outcome="unavailable"};
+            var p=listener.Position;
+            try {
+                int proxy=NativeFunction.CallByName<int>("GET_INTERIOR_FROM_COLLISION",(float)p[0],(float)p[1],(float)p[2]);
+                raw.Proxy=proxy;
+                if(proxy<=0){raw.Outcome="no-proxy";return null;}
+                raw.Ready=NativeFunction.CallByName<bool>("IS_INTERIOR_READY",proxy);
+                if(raw.Ready!=true){raw.Outcome="not-ready";return null;}
+                Vector3 origin;uint archetype;
+                NativeFunction.Natives.x252BDC06B73FA6EA(proxy,out origin,out archetype);
+                raw.Archetype=archetype;
+                var position=new[]{(double)origin.X,origin.Y,origin.Z};
+                foreach(double x in position)if(!Protocol.Finite(x)||Math.Abs(x)>100000){raw.Outcome="invalid-origin";return null;}
+                raw.Origin=position;
+                raw.SampleTicks=Stopwatch.GetTimestamp();
+                if(archetype==0||Math.Abs((decimal)raw.SampleTicks-listener.ObservationTicks)>Stopwatch.Frequency/20m){raw.Outcome="invalid-archetype-or-age";return null;}
+                raw.Outcome="observed";
+                return new GameplayInterior{Proxy=proxy,Archetype=archetype,Origin=position,ObservationTicks=raw.SampleTicks};
+            }catch(System.Threading.ThreadAbortException){throw;}
+            catch(Exception e){raw.Outcome="getter-error:"+e.GetType().Name;return null;}
+            finally{if(raw.Outcome!="observed")raw.SampleTicks=Stopwatch.GetTimestamp();}
+        }
+
         internal static bool StoryReady()
         {
             if(Game.IsLoading||NativeFunction.CallByName<bool>("NETWORK_IS_SESSION_STARTED")||NativeFunction.CallByName<bool>("NETWORK_IS_GAME_IN_PROGRESS"))return false;

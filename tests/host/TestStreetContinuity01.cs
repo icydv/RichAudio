@@ -134,7 +134,7 @@ internal static class TestStreetContinuity01 {
   });
   Test("camera interior proxy and exact placement anchor reach the wire from Capture",delegate{
    Rage.Native.NativeFunction.InteriorReady=true;
-   var sampler=typeof(PlayableEntry).GetMethod("ObserveCameraInterior01",BindingFlags.NonPublic|BindingFlags.Static);
+   var sampler=typeof(CameraSampler).GetMethod("ObserveInterior",BindingFlags.NonPublic|BindingFlags.Static,null,new[]{typeof(ListenerState)},null);
    sampler.Invoke(null,new object[]{new ListenerState{Position=new[]{104d,0d,1d},ObservationTicks=Stopwatch.GetTimestamp()}});
    Capture(runtime,104);
    var frame=runtime.Frames[runtime.Frames.Count-1];
