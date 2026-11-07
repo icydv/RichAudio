@@ -35,6 +35,7 @@ const instances=interiorInstanceIdentities01(catalog);
 const out=fs.openSync(result,'wx');
 const record=x=>fs.writeSync(out,JSON.stringify(x)+'\n');
 let service,engine,buffer='',at=0,frames=0,matches=0,clockErrors=0,lastSceneKey=null,lastBinding=null;
+let lastCompletedRequest=0,lastConsumerOutcome=null,lastSequence=-1;
 let stop=false;
 const interrupt=()=>{stop=true;};
 process.on('SIGINT',interrupt);process.on('SIGTERM',interrupt);
@@ -47,13 +48,19 @@ try{
     const key=JSON.stringify(proofs);
     if(key!==lastSceneKey){lastSceneKey=key;record({type:'worker-publication',generation:receipt.generation,proofs,activeSurfaces:scene.tile.surfaces.length});}
     if(scene.tile.surfaces.length)engine.queueInstalledStaticScene01(scene,receipt);
+   },onStatus:status=>{
+    for(const row of status.sceneDeliveryDiagnostics01.recent){
+     if(row.requestId<=lastCompletedRequest||row.completedAt===undefined||row.outcome==='coalesced-before-dispatch')continue;
+     lastCompletedRequest=row.requestId;
+     record({type:'worker-result',...row});
+    }
    }});
   engine=new StockGameplay({registry:{resolve:forbidden,createSource:forbidden},session,now:()=>performance.now(),continuityPolicy:'camera-source-01'});
   engine.bindInstalledSceneService01(service);
   if(!service.bindPreparationEpoch01(epoch))throw Error('scene epoch rejected');
  }
  record({type:'start',session,sourceProof:manifest?(plan.authoredRehearsal?'authored-rehearsal; not a live source proof':'selected-cache-proofs-bound'):'not-current; raw and match only'});
- let lastMatch,lastSeq=-1,lastAgeError;
+ let lastMatch,lastAgeError;
  while(!stop&&performance.now()<deadline){
   if(service?.failed)throw Error(service.failure);
   if(fs.existsSync(capture)){
@@ -68,8 +75,8 @@ try{
   for(const line of rows){
    if(performance.now()>=deadline)break;
    const row=JSON.parse(line),f=row.frame,l=f.listener,r=f.cameraInteriorReadback;
-   if(f.session!==session||l.session!==session||l.sequence<=lastSeq||f.vehicles.length!==0||!r)throw Error('unexpected observation session');
-   lastSeq=l.sequence;
+   if(f.session!==session||l.session!==session||l.sequence<=lastSequence||f.vehicles.length!==0||!r)throw Error('unexpected observation session');
+   lastSequence=l.sequence;
    frames++;
    const sample=r.outcome==='observed'&&r.ready===true?{proxy:r.proxy,archetype:r.archetype,origin:r.origin,observationTicks:r.sampleTicks}:null;
    const scope={session,generation:l.generation,catalogSHA256:plan.catalogSHA256,epoch:epoch??'retained-match-only'};
@@ -102,6 +109,10 @@ try{
   if(engine){
    engine.applyPendingInstalledStaticScene01();
    engine.tickInstalledScene01();
+   const outcomes=engine.installedSceneDiagnostics01.recent;
+   for(let i=outcomes.lastIndexOf(lastConsumerOutcome)+1;i<outcomes.length;i++)
+    record({type:'consumer-outcome',...outcomes[i]});
+   lastConsumerOutcome=outcomes.at(-1)??null;
    const b=engine.staticSceneBinding;
    const state=b?.interiorGeometryActivation??null;
    const evidence=b?engine.pipeline.simulation.scene.observationModel.evidence.filter(e=>e.interiorInstanceId):[];
@@ -109,7 +120,7 @@ try{
    if(bindingKey!==lastBinding){
     lastBinding=bindingKey;
     const panel=evidence.length?engine.pipeline.simulation.scene.tile.surfaces[0]:null;
-    record({type:'consumer-binding',activation:state,binding:b??null,evidence,
+    record({type:'consumer-binding',at:performance.now(),sequence:lastSequence,activation:state,binding:b??null,evidence,
      samplePanel:panel?{id:panel.id,center:panel.center,materialId:panel.materialId}:null});
    }
   }
@@ -121,6 +132,8 @@ try{
   if(engine)engine.beginStopInstalledScene01(performance.now(),'observation-stop');
   const closure=await service?.close();
   await engine?.close();
+  if(engine)record({type:'consumer-summary',consumer:engine.installedSceneDiagnostics01,
+   readiness:service.readinessSnapshot01(),worker:service.snapshot().worker});
   record({type:'end',frames,matches,clockErrors,partialLine:buffer.length!==0,workerJoined:closure?.workerJoined??null});
  }finally{fs.closeSync(out);}
 }

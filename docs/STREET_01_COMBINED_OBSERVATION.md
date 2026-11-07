@@ -84,3 +84,48 @@ that source or starts the product supervisor. The uploaded result names the
 failed fixture but does not contain the failed assertion. I am keeping the
 failure open. The loading, pipe closure, bankless worker join and disposable
 restoration checks establish their own narrower evidence.
+
+## Manual session and admission replay
+
+My manual session recorded 1,179 fresh GTA camera frames and 236 matches
+to the selected Michael's-house placement. The worker published 3,326
+surfaces with the selected archive proof. The consumer binding stayed
+empty. The live log did not include individual consumer decisions, so
+Codex replayed the capture with one constant QPC translation across
+listener, proxy and receiver timestamps. It kept the original age,
+movement, generation changes and interval between each frame.
+
+The instrumented pre-fix replay produced seven nonempty worker results.
+The service discarded two at the generation or proxy-identity boundary.
+The consumer queued the other five without coalescing. Three arrived
+after the camera had changed readiness class. Two reached the warm
+evidence gate with fewer than the three distinct same-scope samples
+required. At application the five had 221–398 ms left. Warm worker
+preparation took 469–600 ms for those candidates, so that workload
+could not establish a successor forecast within the remaining lease.
+The replay had no consumer clock rejection or observed proof mismatch.
+
+For a uniquely matched interior, the worker now clips to a bounded
+proxy-relative workset that contains the observed camera and source
+positions. It reuses the exact selection and conservative tile index
+only after querying the current proof-bound components and checking
+their identities and bytes. Reflection selection still uses the actual
+poses. The original observation supplies the lifetime of each new
+scene, and StockGameplay still requires warm evidence and a viable
+renewal forecast before first admission. The replay applied 1,321
+transformed surfaces in a four-native-unit half-width workset and
+renewed it 20 times before the exterior no-proxy frame withdrew it.
+That smaller adaptive workset leaves the surrounding coverage unknown.
+Stopping the same capture inside instead triggered ordinary lease
+expiry. The catalogue denominator remains 10,663.
+
+My Tailgater horn sample returned `022894E9` three times within one
+invocation. That matches a child in the retained DAT54 list referenced
+by the DAT151 Horns field `3C47573A`. Blista remains unsampled. The
+ownership fixture rejects a horn reading or a projected model profile
+as an exact restoration baseline. Codex also checked the typed Bati
+granular dependencies. Engine uses DAT10 synth `1932E476` and preset
+`FC25DA99`. Exhaust uses `4022A088` and `25A6B55C`. The modular idle
+route uses synth `DF6D8836` and has a zero preset reference. Audible
+contribution, private profile registration, exact effective baseline
+restoration and recovery outside the controller remain unverified.

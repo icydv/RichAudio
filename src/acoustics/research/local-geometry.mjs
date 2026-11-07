@@ -96,6 +96,29 @@ export function createTile(input,{maximumSurfaces=limits.surfaces}={}){
   tile.observationKey=createHash('sha256').update(JSON.stringify(tile)).digest('hex');validatedTiles.add(tile);
   if(surfaces.length>limits.surfaces)surfaceIndicesByTile.set(tile,buildSurfaceIndex(surfaces));return freeze(tile);
 }
+// Reuse the checked supports and conservative index of a locally validated
+// installed tile. The caller supplies the current request's own finite lease.
+export function retimeInstalledStaticTile01(tile,createdAt,validUntil){
+  requireTile(tile);
+  if(!isDeeplyFrozenTileSnapshot01(tile)||tile.build!=='installed-static-collision01'||
+     tile.coverage!=='partial'||!(finite(validUntil,'tile expiry')>finite(createdAt,'creation time'))||
+     tile.surfaces.some(s=>s.motion!=='static'||s.provenance.kind!=='derived'||s.observedAt!==tile.createdAt||s.validUntil!==tile.validUntil))
+    throw Error('validated fixed installed supports and a finite request horizon required');
+  const surfaces=tile.surfaces.map(s=>{
+    const result=Object.freeze({...s,observedAt:createdAt,validUntil});
+    deeplyFrozenValues01.add(result);
+    return result;
+  });
+  Object.freeze(surfaces);deeplyFrozenValues01.add(surfaces);
+  const {observationKey,...header}=tile;
+  const result={...header,surfaces,createdAt,validUntil};
+  result.observationKey=createHash('sha256').update(JSON.stringify(result)).digest('hex');
+  validatedTiles.add(result);
+  const index=surfaceIndicesByTile.get(tile);
+  if(index)surfaceIndicesByTile.set(result,index);
+  Object.freeze(result);deeplyFrozenValues01.add(result);
+  return result;
+}
 export function cacheStatus(tile,c){
   requireTile(tile);if(!c)throw Error('cache context required');const reasons=[],now=finite(c.now,'query time'),listener=vector(c.listener),movement=finite(c.maxListenerMove,'reuse distance');
   for(const key of ['id','observationKey','coordinateSpace','timeUnit','build','session','interior','version','dynamicEpoch'])if(tile[key]!==c[key])reasons.push(key+'_changed');

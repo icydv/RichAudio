@@ -1,11 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
 import {setTimeout as wait} from 'node:timers/promises';
 import {createHash} from 'node:crypto';
 import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';
 import {airflowFrameStreet01} from './fixtures/AirflowStreet01.mjs';
 import {InstalledSceneService01} from '../src/acoustics/world/installed-scene-service01.mjs';
+import {InstalledStaticWorld01} from '../src/acoustics/world/installed-static-scene01.mjs';
 import {bindCameraInterior01,matchInteriorInstance01} from '../src/acoustics/world/interior-activation01.mjs';
 import {publishWarmupManifest01} from '../src/acoustics/world/world-warmup.mjs';
 import {installedSceneFixture01} from './fixtures/InstalledSceneService01.mjs';
@@ -60,9 +62,9 @@ test('owned scene worker admits the rotated interior only for the exact camera p
    }});
   assert.equal(service.bindPreparationEpoch01(epoch),true);
   await until(()=>service.ready||service.failed);
-  const request=async(cameraInterior01,generation=1)=>{
+  const request=async(cameraInterior01,generation=1,anchored=false)=>{
    const count=scenes.length;
-   service.updateWindow({listener:[25,10,5],sources:[[24,9,5]],generation,geometryTimeMs:performance.now(),
+   service.updateWindow({listener:[25,10,5],sources:anchored?[]:[[24,9,5]],generation,geometryTimeMs:performance.now(),
     radius:8,maximumSurfaces:128,prepareSoundMapGeometry01:false,cameraInterior01});
    await until(()=>service.failed||scenes.length>count);
    assert.equal(service.failed,false,service.failure);
@@ -99,11 +101,40 @@ test('owned scene worker admits the rotated interior only for the exact camera p
   assert.equal(engine.staticSceneBinding?.interiorGeometryActivation,'camera-proxy-matched-selected-instance; portals-unknown');
   service.withdrawCameraInterior01();
   assert.equal(engine.staticSceneBinding,null,'camera proxy loss revokes applied interior without waiting for the old expiry');
+  const first=await request(observation,3,true),second=await request(observation,3,true);
+  assert.equal(first.scene.tile.surfaces.length,2);
+  assert.equal(second.receipt.lifecycle01.workerProfile01.staticPreparation.reusedAnchoredSelection01,true);
+  assert.notEqual(first.scene.geometryKey,second.scene.geometryKey);
+  assert(second.scene.tile.surfaces.every(s=>s.validUntil===second.scene.tile.validUntil));
+  const indexPath=row.PotentialResult.IndexPath;
+  const chunk=path.join(path.dirname(indexPath),read(indexPath).chunks[0].file);
+  const bytes=fs.readFileSync(chunk),changed=Buffer.from(bytes),stat=fs.statSync(chunk);
+  changed[changed.length-1]^=1;
+  fs.writeFileSync(chunk,changed);
+  fs.utimesSync(chunk,stat.atime,stat.mtime);
+  assert.equal((await request(observation,3,true)).scene.tile.surfaces.length,0,'reuse cannot mask same-size chunk corruption');
+  fs.writeFileSync(chunk,bytes);
   const before=service.snapshot().cacheTimings.metadataInstalledAt01;
   delete row.ArchiveValidation01;
   publishWarmupManifest01(f.manifestPath,manifest);
   await until(()=>service.failed||service.snapshot().cacheTimings?.metadataInstalledAt01>before);
   assert.equal((await request(observation,3)).scene.tile.surfaces.length,0);
+  assert.equal((await service.close()).workerJoined,true);service=null;
+  // A matching proxy does not grant authority to the same resource when its
+  // catalogue declares a conditional group, even with current archive proof.
+  catalog.TargetCollisionEvidence.MapGroupMembership=[{BoundsHash:row.Hash,DataGroupName:'authored-conditional'}];
+  fs.writeFileSync(f.catalogPath,JSON.stringify(catalog));
+  manifest.ResolvedCatalogSHA256=digest(f.catalogPath);
+  row.ArchiveValidation01={EpochUtc:epoch,ArchiveSHA256:row.PotentialResult.ArchiveSHA256,Source:'current-archive-sha256'};
+  publishWarmupManifest01(f.manifestPath,manifest);
+  const world=new InstalledStaticWorld01({manifestPath:f.manifestPath,catalogPath:f.catalogPath,
+   catalogSHA256:manifest.ResolvedCatalogSHA256,requiredValidationEpochUtc01:epoch});
+  try{
+   const blocked=world.window({listener:[25,10,5],session,generation:3,radius:8,
+    interiorActivation01:{...observation,session,generation:3,catalogSHA256:manifest.ResolvedCatalogSHA256}});
+   assert.equal(blocked.tile.surfaces.length,0);
+   assert(blocked.tile.missingRegions.length>0,'conditional geometry remains unknown');
+  }finally{world.close();}
  } finally {
   if(service)assert.equal((await service.close()).workerJoined,true);
   await engine?.close();

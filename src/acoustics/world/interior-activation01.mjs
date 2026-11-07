@@ -21,6 +21,15 @@ export function interiorObservationKey01(sample){
  return identity(sample)?digest([sample.proxy,sample.archetype,sample.origin]):null;
 }
 
+// Stable workset coordinates inside a single observed proxy. This selects a
+// bounded region only. The worker still resolves the exact catalogue instance.
+export function interiorWorksetAnchor01(sample,listener,sources,radius){
+ if(!identity(sample))return null;
+ const cell=Math.min(8,radius/2);
+ const anchor=sample.origin.map((v,i)=>v+cell*(Math.floor((listener[i]-v)/cell)+.5));
+ return [listener,...sources].every(p=>p.every((v,i)=>Math.abs(v-anchor[i])<=cell/2))?anchor:null;
+}
+
 export function matchInteriorInstance01(instances,sample,{session,generation,catalogSHA256,epoch}){
  if(!identity(sample)||sample.session!==session||sample.generation!==generation||
     sample.catalogSHA256!==catalogSHA256||!epoch||sample.epoch!==epoch)return null;
