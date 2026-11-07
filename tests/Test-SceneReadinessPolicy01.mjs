@@ -16,3 +16,16 @@ test('an over-bound or own-expiring in-flight successor cannot qualify first act
 test('active qualification is recomputed from actual feasibility after outcomes, observation and dispatch boundaries',()=>{const p=trained(),first=ticket(4,1500);p.candidate(first,1700);const context={lastDispatch:1500,pending:{requestId:5,request:{generation:1},expiresAt:3000},active:null};assert.equal(p.evaluate(first,1701,context).permitted,true);p.outcome(first,{completedAt:1702,applicationAt:1701,queueMilliseconds:1,applicationMilliseconds:1,applied:true});assert.equal(p.summary().renewalQualified,true);p.refresh01(1800,{lastDispatch:1500,pending:null,active:{requestId:5,request:{generation:1},expiresAt:3000,dispatchedAt:1500}});assert.equal(p.summary().renewalQualified,false);assert.equal(p.summary().renewalReason,'inflight-completion-exceeded-measured-bound');p.tick(1801);assert.equal(p.summary().counters.validityGaps,0);assert.equal(p.summary().state,'active');});
 test('a repeated workload key cannot borrow an in-flight successor from its prior revision',()=>{const p=trained(),current=ticket(4,1500);current.consumerWorkloadKey='A';current.consumerWorkloadRevision=2;p.candidate(current,1700);const active={requestId:5,request:{generation:1},consumerWorkloadKey:'A',consumerWorkloadRevision:0,expiresAt:3000,dispatchedAt:1600},decision=p.evaluate(current,1701,{lastDispatch:1600,pending:null,active});assert.equal(decision.permitted,false);assert.equal(decision.reason,'incompatible-inflight-workload');p.outcome(current,{completedAt:1702,applicationAt:1701,queueMilliseconds:1,applicationMilliseconds:1,applied:true});assert.equal(p.summary().active.consumerWorkloadRevision,2);assert.equal(p.summary().renewalQualified,false);});
 test('an explicit discard freezes known wait without a completed outcome or application',()=>{const p=trained(),queued=ticket(4,1500);p.candidate(queued,1700);p.discard(queued,1730,'coalesced-before-application');assert.equal(p.envelope().consumerQueueMaximum,30);p.refresh01(2300);assert.equal(p.envelope().consumerQueueMaximum,30);assert.equal(p.envelope().samples,3);assert.equal(p.summary().counters.warmSamples,3);assert.equal(p.summary().counters.applications,0);assert.equal(p.summary().counters.discardedCandidates,1);assert.equal(p.evaluate(queued,2301,{lastDispatch:1500,pending:null,active:null}).reason,'consumer-candidate-discarded');});
+
+test('background proof cost brings dispatch forward only within the existing cadence',()=>{
+  const policy=trained(), first=ticket(4,1500);
+  policy.outcome(first,{completedAt:1702,queueMilliseconds:1,applicationMilliseconds:1,applied:true});
+  const before=policy.dispatchAt(1702,1500,null);
+  policy.metadataProofCost01(500,true);
+  const earlier=policy.dispatchAt(1702,1500,null);
+  assert(earlier<before);
+  assert(earlier>=1750);
+  assert.equal(policy.active.expiresAt,2500);
+  policy.metadataProofCost01(0,false);
+  assert.equal(policy.dispatchAt(1702,1500,null),before);
+});

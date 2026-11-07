@@ -5,6 +5,7 @@ import {sha256} from './collision-mesh.mjs';
 import {collisionProjection,loadStaticWorldResource,classifyPotentialCollisionResource01} from './static-world-resource.mjs';
 import {loadCollisionResource} from './collision-resource.mjs';
 import {atomicWriteJson01} from './atomic-publication01.mjs';
+import {sceneAuthorityView01} from './prepared-world-metadata01.mjs';
 import {analyticPrimitiveRevision01} from './analytic-primitives01.mjs';
 import {resourcePreparationStates01,geometryQueueCounts01,worldCoverageStates01,readInitialWorldPriority01,orderWorldPreparationQueue01,localWorldPreparationIds01} from './world-state-completion01.mjs';
 import {worldGeometryDecoderSHA25601,resourceDependencyFingerprint01,compatibleLegacyStreet01Plan,compatiblePriorDecoderResource01} from './world-cache-identity01.mjs';
@@ -19,7 +20,26 @@ const norm=v=>v.replaceAll('\\','/').toLowerCase();
 function readJson(filename,expected){const info=fs.statSync(filename);if(info.size>67108864)throw Error('warmup input byte limit');const bytes=fs.readFileSync(filename);if(expected&&sha256(bytes)!==expected.toLowerCase())throw Error('warmup input integrity');return JSON.parse(bytes.toString('utf8').replace(/^\uFEFF/,''));}
 const publicationMetrics01={attempts:0,publishedFiles:0,identicalFiles:0,publishedBytes:0,serializedCandidateBytes:0,failedPublications:0,invalidatedCachedResourceRows:0};
 function publishJson01(filename,value){publicationMetrics01.attempts++;try{const r=atomicWriteJson01(filename,value);publicationMetrics01.serializedCandidateBytes+=r.bytes;publicationMetrics01[r.published?'publishedFiles':'identicalFiles']++;if(r.published)publicationMetrics01.publishedBytes+=r.bytes;return r;}catch(e){publicationMetrics01.failedPublications++;throw e;}}
-function atomic(filename,value){const published=publishJson01(filename,value);if(path.basename(filename)==='manifest.json'&&Array.isArray(value.Resources))publishJson01(path.join(path.dirname(filename),'driver-plan01.json'),{Schema:1,ManifestSHA256:published.sha256,ResolvedCatalogSHA256:value.ResolvedCatalogSHA256,InputBinding:value.InputBinding,ValidationEpochUtc01:value.ValidationEpochUtc01??null,Resources:value.Resources.map(r=>({Id:r.Id,Hash:r.Hash,EntryPath:r.EntryPath,PhysicalArchive:r.PhysicalArchive,Eligibility:r.Eligibility,GeometryEligibility:r.GeometryEligibility,Status:r.Status,PotentialStatus:r.PotentialStatus??null,AnalyticUpgradeNeeded01:!!(r.Result??r.RejectedResult)&&(r.Result??r.RejectedResult).Classification?.AnalyticBackfillNeeded01!==false&&(r.Result??r.RejectedResult).AnalyticExtensionRevision01!==analyticPrimitiveRevision01,ResultArchiveSHA256:(r.Result??r.PotentialResult??r.RejectedResult)?.ArchiveSHA256??null}))});return published;}
+function atomic(filename,value){
+ if(path.basename(filename)!=='manifest.json'||!Array.isArray(value.Resources))return publishJson01(filename,value);
+ return publishWarmupManifest01(filename,value);
+}
+export function publishWarmupManifest01(filename,value){
+ const authority=sceneAuthorityView01(value),authoritySHA256=sha256(Buffer.from(JSON.stringify(authority)));
+ // Put the proof-view digest first so the reader can check it against the
+ // exact published manifest bytes before materializing the large JSON graph.
+ const {SceneAuthoritySHA25601:previousAuthority,...body}=value;
+ const published=publishJson01(filename,{SceneAuthoritySHA25601:authoritySHA256,...body});
+ publishJson01(path.join(path.dirname(filename),'driver-plan01.json'),{
+  Schema:1,ManifestSHA256:published.sha256,ResolvedCatalogSHA256:value.ResolvedCatalogSHA256,InputBinding:value.InputBinding,
+  ValidationEpochUtc01:value.ValidationEpochUtc01??null,SceneAuthority01:authority,
+  Resources:value.Resources.map(r=>({Id:r.Id,Hash:r.Hash,EntryPath:r.EntryPath,PhysicalArchive:r.PhysicalArchive,
+   Eligibility:r.Eligibility,GeometryEligibility:r.GeometryEligibility,Status:r.Status,PotentialStatus:r.PotentialStatus??null,
+   AnalyticUpgradeNeeded01:!!(r.Result??r.RejectedResult)&&(r.Result??r.RejectedResult).Classification?.AnalyticBackfillNeeded01!==false&&(r.Result??r.RejectedResult).AnalyticExtensionRevision01!==analyticPrimitiveRevision01,
+   ResultArchiveSHA256:(r.Result??r.PotentialResult??r.RejectedResult)?.ArchiveSHA256??null})),
+ });
+ return published;
+}
 function relativeEntry(value){if(typeof value!=='string'||value.length>8192||value.includes(':')||value.startsWith('/')||value.startsWith('\\')||value.replaceAll('\\','/').split('/').includes('..'))throw Error('bounded game-relative collision entry');return value.replaceAll('\\','/');}
 export function physicalArchive(gameRoot,entry,exists=p=>fs.existsSync(p)&&fs.statSync(p).isFile()){
  const relative=relativeEntry(entry),pieces=relative.split('/');for(let i=0;i<pieces.length;i++)if(/\.rpf$/i.test(pieces[i])){const candidate=pieces.slice(0,i+1).join('/');if(exists(path.join(gameRoot,candidate)))return candidate;}return null;

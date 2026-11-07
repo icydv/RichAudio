@@ -41,7 +41,12 @@ function refresh(){
  if(automatic&&!epoch(validationEpochUtc01)){post('status',{ready:false,status:{...pendingStatus(),reason:'waiting-normal-supervisor-epoch'}});return false;}
  let stamp;try{stamp=stamp01();}catch(e){if(automatic&&e.code==='ENOENT'){if(world){world.close();world=null;catalogSHA256=null;bindingEpoch++;checkConsumerProof01();}post('status',{ready:false,status:pendingStatus()});return false;}throw e;}
  if(stamp===manifestStamp&&world)return true;if(world&&metadataBusy01&&stamp===metadataTarget01&&cacheTimings.metadataProofCurrent01===true)return true;
- if(!metadataBusy01&&waitingStamp!==stamp+'|'+validationEpochUtc01){metadataBusy01=true;cacheTimings.metadataStartedAt01=performance.now();metadataTarget01=stamp;metadataStage01=null;cacheTimings.metadataProofCurrent01=false;cacheTimings.metadataPreparing01=true;metadataTimeout01=setTimeout(()=>fail(Error('Bounded metadata preparation timeout'),'metadata-preparation'),8000);if(world)post('status',{ready:true,status:worldStatus()});metadataWorker01.postMessage({type:'prepare',serial:++metadataSerial01,epoch:automatic?validationEpochUtc01:null,activeIds:consumerProof01?.selectionProof01.map(e=>e.resourceId)??[],consumerRequestId:consumerProof01?.consumerRequestId??null});}
+ // A superseded transfer must not delay proof of the latest publication.
+ // Wait for an in-progress parse to reach its first staging boundary so there
+ // is still only one preparation in flight plus one latest observed stamp.
+ const superseded=metadataBusy01&&metadataStage01!==null&&stamp!==metadataTarget01;
+ if(superseded){clearTimeout(metadataTimeout01);cacheTimings.supersededSnapshots01=(cacheTimings.supersededSnapshots01??0)+1;}
+ if((!metadataBusy01||superseded)&&waitingStamp!==stamp+'|'+validationEpochUtc01){metadataBusy01=true;cacheTimings.metadataStartedAt01=performance.now();metadataTarget01=stamp;metadataStage01=null;cacheTimings.metadataProofCurrent01=false;cacheTimings.metadataPreparing01=true;metadataTimeout01=setTimeout(()=>fail(Error('Bounded metadata preparation timeout'),'metadata-preparation'),8000);if(world)post('status',{ready:false,status:worldStatus()});metadataWorker01.postMessage({type:'prepare',serial:++metadataSerial01,epoch:automatic?validationEpochUtc01:null,activeIds:consumerProof01?.selectionProof01.map(e=>e.resourceId)??[],consumerRequestId:consumerProof01?.consumerRequestId??null});}
  // No new scene can use an unvalidated changed publication. An existing
  // consumer keeps only its original finite lease; no refresh extends it.
  return false;
@@ -54,8 +59,8 @@ function startMetadata01(){
   if(m.type==='failed')throw Error(m.reason);
   if(m.type==='manifest-read'){cacheTimings.manifestLoads++;cacheTimings.metadataReadMilliseconds01=m.milliseconds;cacheTimings.metadataReadBytes01=m.bytes;return;}
   if(m.type==='waiting'){clearTimeout(metadataTimeout01);metadataBusy01=false;cacheTimings.metadataPreparing01=false;waitingStamp=metadataTarget01+'|'+validationEpochUtc01;if(world){world.close();world=null;catalogSHA256=null;bindingEpoch++;checkConsumerProof01();}post('status',{ready:false,status:pendingStatus()});return;}
-  if(m.type==='proof-current'){const fresh=stamp01()===metadataTarget01;cacheTimings.metadataProofCurrent01=fresh&&m.current===true;cacheTimings.metadataProofCheckMilliseconds01=m.proofMilliseconds;if(fresh&&!m.activeCurrent&&consumerProof01&&m.consumerRequestId===consumerProof01.consumerRequestId)post('consumer-proof-status',{consumerRequestId:m.consumerRequestId,proofCurrent:false});if(world)post('status',{ready:cacheTimings.metadataProofCurrent01,status:worldStatus()});return;} if(m.type==='begin'){metadataStage01=createMetadataStage01();cacheTimings.metadataPreparationMilliseconds01=m.preparationMilliseconds;return;}
-  if(m.type==='packet'){const began=performance.now();metadataStage01.accept(m.packet);cacheTimings.maximumMetadataPacketMilliseconds01=Math.max(cacheTimings.maximumMetadataPacketMilliseconds01??0,performance.now()-began);setImmediate(()=>{if(!closing01&&!failed)metadataWorker01.postMessage({type:'next',serial:m.serial});});return;}
+  if(m.type==='proof-current'){const fresh=stamp01()===metadataTarget01;cacheTimings.metadataProofCurrent01=fresh&&m.current===true;cacheTimings.metadataProofCheckMilliseconds01=m.proofMilliseconds;cacheTimings.metadataProofBasis01=m.proofBasis01;if(fresh&&!m.activeCurrent&&consumerProof01&&m.consumerRequestId===consumerProof01.consumerRequestId)post('consumer-proof-status',{consumerRequestId:m.consumerRequestId,proofCurrent:false});if(world)post('status',{ready:cacheTimings.metadataProofCurrent01,status:worldStatus()});return;} if(m.type==='begin'){metadataStage01=createMetadataStage01();cacheTimings.metadataPreparationMilliseconds01=m.preparationMilliseconds;refresh();return;}
+  if(m.type==='packet'){const began=performance.now();metadataStage01.accept(m.packet);cacheTimings.maximumMetadataPacketMilliseconds01=Math.max(cacheTimings.maximumMetadataPacketMilliseconds01??0,performance.now()-began);setImmediate(()=>{if(!closing01&&!failed&&m.serial===metadataSerial01)metadataWorker01.postMessage({type:'next',serial:m.serial});});return;}
   if(m.type!=='complete')throw Error('Metadata preparation protocol');
   clearTimeout(metadataTimeout01);metadataBusy01=false;cacheTimings.metadataPreparing01=false;const stats=metadataStage01.stats(),snapshot=metadataStage01.finish(m.digest);metadataStage01=null;
   if(stamp01()!==metadataTarget01){cacheTimings.supersededSnapshots01=(cacheTimings.supersededSnapshots01??0)+1;refresh();return;}
@@ -65,7 +70,16 @@ function startMetadata01(){
   metadataWorker01.postMessage({type:'installed',serial:m.serial});cacheTimings.metadataProofCurrent01=true;cacheTimings.metadataInstalledAt01=performance.now();metadataVersion01++;manifestStamp=metadataTarget01;waitingStamp=null;cacheTimings.metadataInstallationMilliseconds01=performance.now()-began;cacheTimings.maximumMetadataInstallationMilliseconds01=Math.max(cacheTimings.maximumMetadataInstallationMilliseconds01??0,cacheTimings.metadataInstallationMilliseconds01);cacheTimings.metadataStaging01=stats;checkConsumerProof01();post(changed?'ready':'status',{ready:true,status:worldStatus()});
  }catch(e){fail(e,'metadata-installation');}});
 }
-function schedulePoll(){if(failed)return;poll=setTimeout(()=>{try{phase01('poll-start');refresh();phase01('poll-done');schedulePoll();}catch(error){fail(error,'cache-refresh');}},1000);}
+function schedulePoll(){
+ if(failed||closing01)return;
+ // Observe publication changes ahead of the next acoustic dispatch. An
+ // unchanged stamp costs only a stat, while reading and proving new metadata
+ // remains on the preparer. Preserve the idle startup poll when no world exists.
+ poll=setTimeout(()=>{
+  try{phase01('poll-start');refresh();phase01('poll-done');schedulePoll();}
+  catch(error){fail(error,'cache-refresh');}
+ },world?100:1000);
+}
 try{
  if(schema!==1||!/^[a-f0-9]{32}$/.test(session)||(automatic&&!hex(config.expectedGameSHA256)))throw Error('Bound installed scene worker identity required');
  if(parentClock01?.kind!==clock01.kind||parentClock01.processId!==clock01.processId||parentClock01.timeOrigin!==clock01.timeOrigin)throw Error('Verified shared installed worker performance clock required');

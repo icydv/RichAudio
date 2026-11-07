@@ -1,5 +1,6 @@
 // Only snapshots received on the owned preparer's channel acquire authority.
 import {createHash} from 'node:crypto';
+import {digest} from './contracts.mjs';
 const prepared=new WeakSet();
 export const isPreparedWorldMetadata01=value=>prepared.has(value);
 export function createMetadataStage01(){
@@ -19,4 +20,16 @@ export function* metadataOperations01(root){
  function* visit(value,depth=0){if(depth>64)throw Error('Metadata depth bound');const id=serial++;seen.set(value,id);yield ['node',id,Array.isArray(value)?'array':'object'];
   for(const [key,child]of Object.entries(value)){let encoded=child;if(child&&typeof child==='object'){if(!seen.has(child))yield* visit(child,depth+1);encoded={ref:seen.get(child)};}if(typeof encoded==='string'&&Buffer.byteLength(encoded)>16384)throw Error('Metadata scalar bound');yield ['set',id,key,encoded];}yield ['seal',id];
  }yield* visit(root);
+}
+
+export const sceneAuthorityBinding01=manifest=>digest([
+ manifest.ResolvedCatalogSHA256,manifest.ValidationEpochUtc01??null,manifest.InputFingerprint,manifest.InputBinding,
+]);
+export const sceneRowAuthority01=row=>digest([row.Id,row.Hash,row.Status,row.Eligibility,row.Result??null,row.ArchiveValidation01??null]);
+export function sceneAuthorityView01(manifest){
+ return {
+  binding:sceneAuthorityBinding01(manifest),
+  rows:manifest.Resources.filter(row=>row.Status==='imported-exterior-incomplete-surfaces')
+   .map(row=>[row.Id,sceneRowAuthority01(row)]),
+ };
 }

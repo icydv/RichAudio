@@ -130,6 +130,9 @@ export class InstalledSceneService01 {
    if(this.config.catalogSHA256===undefined&&(message.type==='scene'||message.type==='expired'||message.type==='static-prepared'||message.type==='ready'||message.ready===true))requireWorld(epoch(this.validationEpochUtc01)&&message.validationEpochUtc01===this.validationEpochUtc01,'current normal archive-validation epoch');
    if(message.type==='ready'||message.type==='status'){
     this.#metadataVersion01=message.metadataVersion01??0;const wasReady=this.ready;if(message.bindingEpoch!==this.bindingEpoch||message.catalogSHA256!==this.catalogBinding){this.cacheResidencyDiagnostics01=null;if(this.#readiness01.active)this.invalidateConsumer01('catalogue-or-epoch-changed',receivedAt);}this.bindingEpoch=message.bindingEpoch;this.catalogBinding=message.catalogSHA256;this.baseStatus=message.status;this.ready=message.ready===true||message.type==='ready';
+    const metadata=message.status?.cacheTimings,geometry=message.status?.coverageStates?.geometry;
+    this.#readiness01.metadataProofCost01(metadata?.metadataProofCheckMilliseconds01,metadata?.metadataPreparing01===true||geometry?.pending>geometry?.failed);
+    if(wasReady&&!this.ready){clearTimeout(this.dispatchTimer);this.dispatchTimer=null;}
     if(this.ready)this.stats.firstReadyAt01??=receivedAt;
     if(!wasReady&&!this.active){clearTimeout(this.operationTimer);this.operationTimer=null;}
     if(!wasReady&&this.ready&&this.#consumer01)this.#metadataResumeUrgent01=true;this.state=this.active?'loading-cached-regions':this.ready?'idle':'preparing/indexing';this.#emit();this.#schedule();return;
