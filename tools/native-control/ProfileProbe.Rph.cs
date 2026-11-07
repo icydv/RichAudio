@@ -27,7 +27,31 @@ namespace RichAudio {
   }
   static volatile Recovery recovery;
 
-  public static void Main(){ Game.Console.Print("RichAudio profile probe idle. Manual Story Mode experiment only."); }
+  public static void Main(){
+   try{
+    var request=ProfileProbeInput.Open();
+    var session=ObservationSession.Open();
+    WaitForOperator(request,session);
+   }catch(System.Threading.ThreadAbortException){throw;}
+   catch(Exception error){Game.LogTrivial("RichAudio profile probe refused: "+error.Message);}
+  }
+  internal static void WaitForOperator(ProfileProbeRequest request,ObservationSession session){
+   var keys=new ObservationKeys();
+   Game.LogTrivial("RichAudio profile probe controls ready. Ctrl+Shift+Backslash starts the sealed test once.");
+   while(session.Before(session.ArmBy)&&session.Before(session.StopBy-5000)){
+    var action=keys.Poll(ObservationKeys.Foreground()&&!Game.IsLoading&&!Game.IsPaused&&!Game.Console.IsOpen);
+    if(action==ObservationAction.Stop)return;
+    if(action==ObservationAction.Start){
+     Game.LogTrivial("RichAudio profile probe manual Start received.");
+     Run(request.ProfileA,request.MarkerA,request.ProfileB,request.MarkerB,request.X,request.Y,request.Z,request.Mode);
+     // Keep the entry fiber alive until the separately scheduled guard has
+     // finished. Ending Main cannot be the mechanism that kills the guard.
+     while(running&&session.Before(session.StopBy))GameFiber.Sleep(20);
+     return;
+    }
+    GameFiber.Sleep(20);
+   }
+  }
   public static void OnUnload(){recovery=null;if(!Cleanup())Game.Console.Print("RichAudio probe retirement unresolved.");}
 
   static string Identity(Vehicle v) {
@@ -108,8 +132,7 @@ namespace RichAudio {
    }
   }
 
-  [ConsoleCommand(Name="RichAudioProbeProfiles",Description="Run the separately approved private A/B profile test on two disposable Batis.")]
-  public static void Run(string profileA,string markerA,string profileB,string markerB,float x,float y,float z,string mode){
+  internal static void Run(string profileA,string markerA,string profileB,string markerB,float x,float y,float z,string mode){
    uint a,b=0;bool resolveOnly=mode=="resolve-a";
    if(used||running||Game.IsLoading||Game.IsPaused||NativeFunction.CallByName<bool>("NETWORK_IS_SESSION_ACTIVE")||
     (!resolveOnly&&mode!="normal"&&mode!="controller-exit")||

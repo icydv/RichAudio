@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
+using System.IO;
+using System.Security.Cryptography;
+using System.Windows.Forms;
 
 namespace Rage {
  public struct Vector3 {public Vector3(float x,float y,float z){}}
@@ -23,8 +26,10 @@ namespace Rage {
  public static class Game {
   public static readonly Player LocalPlayer=new Player();
   public static bool IsLoading,IsPaused;
+  public static readonly HashSet<Keys> Pressed=new HashSet<Keys>();
+  public static bool IsKeyDownRightNow(Keys key){return Pressed.Contains(key);}
   public static void LogTrivial(string line){}
-  public static class Console {public static string Last;public static void Print(string line){Last=line;}}
+  public static class Console {public static string Last;public static bool IsOpen{get{return false;}}public static void Print(string line){Last=line;}}
  }
  public static class GameFiber {
   public static Action OnSleep;
@@ -35,6 +40,10 @@ namespace Rage {
   }
  }
  public sealed class GameFiberHandle {}
+}
+namespace RichAudio {
+ internal static class ObservationBuild {internal static string SessionDirectory;}
+ internal static class ProfileProbeBuild {internal static string RequestSHA256;}
 }
 namespace Rage.Attributes {
  public sealed class PluginAttribute:Attribute {
@@ -97,6 +106,25 @@ public static class TestPrivateProfileProbe01 {
   Reset();
   RichAudio.ProfileProbe.Run("ra_probe_fixture_a","0000000b",null,null,1,2,3,"resolve-a");
   Check(profiles.Count==1&&Rage.Vehicle.Created.TrueForAll(v=>!v.Exists)&&Rage.Vehicle.Created[1].Horn==7,"A-only resolution leaves the control unmodified and requires no B evidence");
+  Reset();
+  string privateRoot=Path.Combine(Path.GetTempPath(),"RichAudio-profile-"+Guid.NewGuid().ToString("N"));
+  Directory.CreateDirectory(privateRoot);
+  RichAudio.ObservationBuild.SessionDirectory=privateRoot;
+  var now=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+  File.WriteAllText(Path.Combine(privateRoot,"observation-schedule.json"),"{\"Session\":\""+Guid.NewGuid().ToString("N")+"\",\"ArmByUtcMs\":"+(now+20000)+",\"StopByUtcMs\":"+(now+30000)+"}");
+  string request=Path.Combine(privateRoot,"profile-request.json");
+  File.WriteAllText(request,"{\"ProfileA\":\"ra_probe_fixture_a\",\"MarkerA\":\"0000000b\",\"Mode\":\"resolve-a\",\"X\":1,\"Y\":2,\"Z\":3}");
+  using(var sha=SHA256.Create())RichAudio.ProfileProbeBuild.RequestSHA256=BitConverter.ToString(sha.ComputeHash(File.ReadAllBytes(request))).Replace("-","");
+  AppDomain.CurrentDomain.SetData("RichAudio.AuthoredForeground",true);
+  Action press=delegate{Rage.Game.Pressed.Add(Keys.LControlKey);Rage.Game.Pressed.Add(Keys.LShiftKey);Rage.Game.Pressed.Add(Keys.OemPipe);};
+  press();int polls=0;
+  Rage.GameFiber.OnSleep=delegate{
+   polls++;
+   if(polls<=2){Check(profiles.Count==0,"Held startup key does not assign");Rage.Game.Pressed.Clear();if(polls==2)press();}
+  };
+  RichAudio.ProfileProbe.Main();
+  Check(profiles.Count==1&&File.Exists(Path.Combine(privateRoot,"observation-owner.json")),"Actual entry dispatched one fresh key edge");
+  RichAudio.ProfileProbe.Main();Check(profiles.Count==1,"Consumed session rejects duplicate activation");
   Check(donor.Exists&&donor.Horn==7,"Existing selected vehicle was never assigned or deleted");
   System.Console.WriteLine("PASS standalone marker capability adapter with authored RPH calls");
   return 0;
