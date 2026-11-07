@@ -63,10 +63,10 @@ namespace RichAudio.Beacon.Windows {
       bool requested=story&&s.RichAudioEnabled&&s.IntegrationMode=="experimental-additive";
       if(!requested){StopHost();state=story?"GTA stock fallback":"waiting for offline Story Mode";PublishFallback(c,s,state);}
       else if(host==null){long now=Stopwatch.GetTimestamp();while(faults.Count>0&&now-faults.Peek()>Stopwatch.Frequency*600)faults.Dequeue();
-       if(faults.Count>=3){state="GTA stock fallback: recovery budget exhausted";PublishFallback(c,s,state);}
+       if(c.DiscardEnvironmentalOutput&&attempts>0||faults.Count>=3){state="GTA stock fallback: recovery budget exhausted";PublishFallback(c,s,state);}
        else if(now>=nextAttempt)StartHost(c,p.ManifestSha256);
       }else if(host.HasExited){StopHost();Fault();state="GTA stock fallback: host exited";}
-      else{state="experimental additive: GTA engine remains";string statusFile=Path.Combine(c.Root,".local","gameplay",session,"host.json");if(Stopwatch.GetTimestamp()-hostStarted>Stopwatch.Frequency*10&&(!File.Exists(statusFile)||DateTime.UtcNow-File.GetLastWriteTimeUtc(statusFile)>TimeSpan.FromSeconds(5)))throw new TimeoutException("host status stopped");}
+      else{state=c.DiscardEnvironmentalOutput?"environment observation: no RichAudio endpoint":"experimental additive: GTA engine remains";string statusFile=Path.Combine(c.Root,".local","gameplay",session,"host.json");if(Stopwatch.GetTimestamp()-hostStarted>Stopwatch.Frequency*10&&(!File.Exists(statusFile)||DateTime.UtcNow-File.GetLastWriteTimeUtc(statusFile)>TimeSpan.FromSeconds(5)))throw new TimeoutException("host status stopped");}
      }catch(ThreadAbortException){throw;}catch(Exception e){StopHost();Fault();state="GTA stock fallback: "+e.GetType().Name;var s=Settings;if(s!=null)PublishFallback(c,s,state);}
      wake.WaitOne(200);wake.Reset();
     }

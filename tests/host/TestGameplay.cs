@@ -4,12 +4,13 @@
 using System;using System.Collections.Generic;using System.Diagnostics;using System.IO;using System.IO.Pipes;using System.Threading;using System.Web.Script.Serialization;using RichAudio.Beacon.Transport;using RichAudio.Beacon.Windows;
 internal static class TestGameplay {
  static GameplayRuntime runtime;static long sequence,generation=1;static bool wasPaused;static readonly JavaScriptSerializer Json=new JavaScriptSerializer();static string root;static int checks;static readonly List<int> owned=new List<int>();
+ static bool environmentFixture;
  static void Check(bool x,string why){checks++;if(!x)throw new Exception(why);}
  static Dictionary<string,object> Read(string f){try{return Json.DeserializeObject(File.ReadAllText(f)) as Dictionary<string,object>;}catch(IOException){return null;}}
  static Dictionary<string,object> Evidence(){return Read(Path.Combine(root,".local","gameplay",runtime.Session,"host.json"));}
  static double Number(Dictionary<string,object>d,string k){object v;return d!=null&&d.TryGetValue(k,out v)&&v!=null?Convert.ToDouble(v):0;}
  static Dictionary<string,object> Worker(){var d=Evidence();return d!=null&&d.ContainsKey("worker")?d["worker"]as Dictionary<string,object>:null;}
- static void Feed(int count,bool pause=false,bool valid=true){if(pause!=wasPaused){generation++;wasPaused=pause;}long now=Stopwatch.GetTimestamp();var vehicles=new List<GameplayVehicle>();for(int i=0;i<count;i++)vehicles.Add(new GameplayVehicle{Id="actual-component-fixture-"+i,Generation=(int)(sequence/160)+1,ObservationTicks=now,Model=i==0?0xf9300cc5u:0xa774b5a6u,Context=i==0?"npc":"player",Position=new[]{2d+i*4,3d,0d},Velocity=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},OperatingPoint=.1+.7*(.5+.5*Math.Sin(sequence*.02)),Running=true,Valid=true});
+ static void Feed(int count,bool pause=false,bool valid=true){if(pause!=wasPaused){generation++;wasPaused=pause;}long now=Stopwatch.GetTimestamp();var vehicles=new List<GameplayVehicle>();for(int i=0;i<count;i++)vehicles.Add(new GameplayVehicle{Id="actual-component-fixture-"+i,Generation=(int)(sequence/160)+1,ObservationTicks=now,Model=i==0?0xf9300cc5u:0xa774b5a6u,Context=i==0&&!environmentFixture?"npc":"player",Position=new[]{2d+i*4,3d,0d},Velocity=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},OperatingPoint=.1+.7*(.5+.5*Math.Sin(sequence*.02)),Running=true,Valid=true});
   runtime.Publish(new GameplayFrame{Session=runtime.Session,Listener=new ListenerState{Version=1,Session=runtime.Session,Generation=generation,Sequence=sequence++,ObservationTicks=now,ClockFrequency=Stopwatch.Frequency,GameTimeMs=(long)(sequence*50),Position=new[]{0d,0d,1d},Velocity=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},ListenerKind="camera",VelocityKind="estimated-camera-difference",Paused=pause,Valid=valid,Reason=valid?"valid":"not-ready",Coordinates="gta-native-unscaled",Units="native-unverified",SourceId=null},Vehicles=vehicles.ToArray()});
  }
  static void Until(Func<bool> condition,int milliseconds,int count=1,bool pause=false){var clock=Stopwatch.StartNew();while(!condition()){if(clock.ElapsedMilliseconds>milliseconds)throw new TimeoutException(runtime.State+"; "+(Evidence()==null?"no host status":Json.Serialize(Evidence())));Feed(count,pause);Thread.Sleep(50);}}
@@ -51,9 +52,25 @@ internal static class TestGameplay {
   }
  }
  public static int Main(string[]args){
-  try{RingTests();PipeTimeoutTests();if(args.Length==1&&args[0]=="--ring-only"){Console.WriteLine("PASS "+checks+" exact PCM reserve / native callback / retained starvation guard / real pipe timeout checks; no endpoint");return 0;}root=Path.GetFullPath(args[0]);var c=PlayableConfiguration.Load(Path.Combine(root,"playable.json"));Settings(1);string pointer=Path.Combine(root,".local","fixture-pointer.json");Directory.CreateDirectory(Path.GetDirectoryName(pointer));File.WriteAllText(pointer,Json.Serialize(new{schema=1,packageRoot=root,manifestSha256=PlayableConfiguration.Digest(c.Manifest)}));
-   runtime=new GameplayRuntime(true);runtime.Start(pointer,c.GameExecutable,args[1]);Until(()=>runtime.Configuration!=null,5000,0);Thread.Sleep(250);Check(runtime.Attempts==0,"no host before Story readiness");runtime.SetStoryReady(true);
+  try{RingTests();PipeTimeoutTests();if(args.Length==1&&args[0]=="--ring-only"){Console.WriteLine("PASS "+checks+" exact PCM reserve / native callback / retained starvation guard / real pipe timeout checks; no endpoint");return 0;}root=Path.GetFullPath(args[0]);var c=PlayableConfiguration.Load(Path.Combine(root,"playable.json"));environmentFixture=c.DiscardEnvironmentalOutput;Settings(1);string pointer=Path.Combine(root,".local","fixture-pointer.json");Directory.CreateDirectory(Path.GetDirectoryName(pointer));File.WriteAllText(pointer,Json.Serialize(new{schema=1,packageRoot=root,manifestSha256=PlayableConfiguration.Digest(c.Manifest)}));
+   runtime=new GameplayRuntime(!environmentFixture);runtime.Start(pointer,c.GameExecutable,args[1]);Until(()=>runtime.Configuration!=null,5000,0);Thread.Sleep(250);Check(runtime.Attempts==0,"no host before Story readiness");runtime.SetStoryReady(true);
    Until(()=>runtime.HostPid>0,5000);owned.Add(runtime.HostPid);Until(()=>Number(Worker(),"activeSources")>=1&&Number(Evidence(),"peak")>0,15000);owned.Add((int)Number(Evidence(),"nodePid"));Check(!(bool)Evidence()["endpointOpened"],"device-free route");Check(Number(Evidence(),"receivedSnapshots")>0,"real secured pipe snapshots");
+   if(environmentFixture){
+    var beforeObservation=Evidence();
+    Check(!(bool)beforeObservation["fixture"]&&(string)beforeObservation["outputSink"]=="environment-observation"&&beforeObservation["outputMetrics"]==null,"normal owner and immutable observation sink have no endpoint");
+    Check(Number(beforeObservation,"underflowFrames")==0,"device-free observation ring reports underflows");
+    Settings(2,true,.4);Until(()=>Number(Worker(),"outputLevel")==.4,3000);
+    Check(!(bool)Evidence()["endpointOpened"]&&Evidence()["outputMetrics"]==null,"settings cannot open the endpoint");
+    int failedHost=runtime.HostPid;using(var process=Process.GetProcessById(failedHost))process.Kill();
+    Until(()=>runtime.HostPid==0,5000,0);For(1000);
+    Check(runtime.Attempts==1,"observation host loss never relaunches");
+    runtime.RequestStop();Check(runtime.Join(6000),"observation supervisor joined");
+    foreach(int pid in owned)Check(!Alive(pid),"observation host and producer exited");
+    string result=Json.Serialize(new{passed=true,checks=checks,endpointOpened=false,attempts=runtime.Attempts,observation=beforeObservation});
+    File.WriteAllText(Path.Combine(root,".local","observation-fixture-result.json"),result);
+    Console.WriteLine("PASS "+checks+" device-free normal observation-chain assertions");
+    return 0;
+   }
    Until(()=>Number(Worker(),"activeSources")==2,4000,2);Check(Number(Worker(),"activeSources")==2,"two independent stock sources");Until(()=>Number(Worker(),"retired")>=1,3000,1);Check(Number(Worker(),"retired")>=1,"missing identity retires");
    Settings(2,true,.4);Until(()=>Number(Worker(),"outputLevel")==.4,3000);Check(Number(Worker(),"outputLevel")==.4,"settings applied through real producer");
    // Pause/resume both change listener generation, matching the RPH adapter.

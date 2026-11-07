@@ -177,3 +177,85 @@ changed neighbour. The authored test covers this handoff. The guard still
 depends on the same RPH AppDomain and game scheduler. My arbitrary
 effective-profile readback, real marker mounting and resolution, recovery
 after plugin unload, and component isolation remain unqualified.
+
+## Environmental path qualification
+
+The retained foyer replay exercised my normal producer and transformed
+interior geometry with the previously captured camera passage and authored
+engine and exhaust motion. The selected workset admitted 4,096 surfaces,
+applied 28 replacements without a lease gap, and withdrew the interior on
+exit. The source and its grain history continued through scene changes after
+the earlier capture gap and reacquisition.
+
+The producer withheld 1,467 direct decisions with a known intersection
+and overlapping uncertainty. It retained its existing conditional direct
+fallback for sampled paths that crossed unknown coverage without a known hit.
+The first sampled workset had 12 finite reflector candidates. Across 19
+failed emitter/candidate paths, the legs had both known intersections and
+unresolved coverage. The replay selected zero foyer reflections. A separate
+retained-pose audit found no intersection with the 131 capacity omissions.
+The relevant uncertainty came from portal volumes and five exterior
+resources awaiting current proof. The retained rows identify those exterior
+resources in `update/update.rpf`, `x64l.rpf` and
+`update/x64/dlcpacks/mpchristmas3/dlc.rpf`. Current proof and a supported
+portal/door observation are separate requirements.
+
+The worker preserves individual uncertainty bounds within its index budget
+and conservatively groups overflow. It tests distinct finite planes first
+within the existing reflection budget and checks both legs at actual source
+and listener poses. Nearby exterior poses can reuse the proof-bound workset
+while all positions fit one spatial cell. The original scene validity
+and geometry limits still apply.
+
+A second replay used retained exterior geometry and authored motion from
+a retained exterior pose. It admitted 2,329 surfaces at first application,
+applied 12 replacements with zero validity gaps and selected 969 reflection
+paths across the run. Sampled direct paths qualified in the conditional
+static model. One exhaust reflection from source
+`[1475.979, -2718.698, 17.680]` to listener
+`[1475.960, -2717.439, 18.504]` travelled 5.223 native units, had an
+arrival direction of `[-0.824, 0.396, -0.406]`, and took 15.23 ms under
+the assumed one-metre scale. It retained native material ID 9 and applied
+authored low, mid and high band factors of 0.0662, 0.0575 and 0.0389.
+The camera and source movement changed the path solutions. My 10,663-resource
+denominator, unverified material calibration, conditional groups and
+collision layers, unobserved portals and unsupported shapes remain visible.
+
+## Complete render timing and normal observation
+
+The old 16.76 ms maximum predates stage receipts. In the instrumented
+pre-fix replay, block 7 took 12.02 ms with 9.50 ms in source and control.
+Block 2546 took 10.96 ms with 9.22 ms in propagation. Codex removed the
+per-block reflector settings reset, moved a bounded pair of untouched
+voices into prepared startup, and warmed the normal CPU control code with
+discarded authored samples. The real source clock and the PCM queue begin
+at their original positions.
+
+In the final repeats the foyer peaked at 10.91 ms with one hard miss and
+three blocks above 8 ms. The missed block was sequence 2619 and spent
+9.72 ms in source and control, 0.86 ms in propagation, 0.20 ms in
+admission and 0.13 ms in PCM and bookkeeping. The exterior peaked at
+10.41 ms with zero hard misses and one block above 8 ms. A preceding pair
+also completed at 10.57 and 9.77 ms with zero hard misses. The producer
+still needs headroom under the game workload.
+
+My normal STREET-01 host can use an immutable device-free observation
+sink. The same owned host, Node producer, RA07 and ring feed a clocked
+discard consumer. Settings cannot open WASAPI and a failed observation
+host cannot restart in that supervisor session. The authored harness
+exercised the normal owner check and recorded zero ring underflows and
+zero endpoint opens. It peaked at 8.99 ms with zero hard misses and one
+headroom miss. This measures the isolated host path using authored PCM.
+The separate normal live package, exact installed read scope and
+transaction still need review. Listening is a separate phase.
+
+The standalone marker probe now takes the same foreground key chords
+that dispatched in my combined observation. A hash-pinned request, absolute
+cutoff and atomic session claim bind one Start. An unbound build is disarmed.
+The fixture exercises the actual plugin entry and rejects a held chord,
+duplicate activation and a recycled vehicle lifetime. The first live
+capability experiment would use marker A only on a disposable Bati and
+observe a disposable same-model neighbour. A/B/A and controller-loss
+recovery would be separate qualification. The watchdog remains limited
+to a live RPH AppDomain. Arbitrary baseline restoration, live private
+registration and selective engine/exhaust suppression remain open.

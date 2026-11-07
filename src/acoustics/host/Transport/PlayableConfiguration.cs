@@ -11,6 +11,8 @@ namespace RichAudio.Beacon.Transport {
   [DataMember(Name="demoProfile",EmitDefaultValue=false)]public string DemoProfile;
   [DataMember(Name="latencyProfile",EmitDefaultValue=false)]public string LatencyProfile;
   [DataMember(Name="continuityPolicy",EmitDefaultValue=false)]public string ContinuityPolicy;
+  [DataMember(Name="outputSink",EmitDefaultValue=false)]public string OutputSink;
+  internal bool DiscardEnvironmentalOutput {get{return OutputSink=="environment-observation";}}
   [DataMember(Name="bindings",IsRequired=true)]public PlayableBinding[] Bindings;
   [DataMember(Name="eligible",IsRequired=true)]public PlayableModel[] Eligible;
   [DataMember(Name="playerManifest",IsRequired=true)]public string PlayerManifest;
@@ -21,6 +23,8 @@ namespace RichAudio.Beacon.Transport {
   [DataMember(Name="catalogSha256",IsRequired=true)]public string CatalogSha256;
   public string Root,Manifest;
   internal static void ValidateStreetLatencySelection01(PlayableConfiguration c){
+   if(c.OutputSink!=null&&(!c.DiscardEnvironmentalOutput||c.LatencyProfile!="street-01"||c.DemoProfile!=null))
+    throw new InvalidDataException("Environmental observation sink requires the normal STREET-01 package");
    if(c.LatencyProfile!="street-01")return;
    if(c.DemoProfile!=null||c.ContinuityPolicy!=null&&c.ContinuityPolicy!="camera-source-01"||c.Eligible==null||c.Eligible.Length<1||c.Eligible.Length>2)throw new InvalidDataException("STREET-01 latency requires a normal Bati-only package and camera-source-01 continuity");
    int player=0;var contexts=new HashSet<string>();foreach(var model in c.Eligible){if(model==null||model.Model!=0xF9300CC5||(model.Context!="player"&&model.Context!="npc")||!contexts.Add(model.Context))throw new InvalidDataException("STREET-01 Bati context binding");if(model.Context=="player")player++;}if(player!=1)throw new InvalidDataException("STREET-01 requires the exact Bati player bank");
