@@ -66,6 +66,41 @@ function unknownRegions01(regions,box){
  if(clipped.length>32){const tail=clipped.splice(31);clipped.push({min:[0,1,2].map(i=>Math.min(...tail.map(b=>b.min[i]))),max:[0,1,2].map(i=>Math.max(...tail.map(b=>b.max[i])))});}
  return clipped.map((bounds,i)=>({id:'installed01-unknown:'+i,bounds,reason:'unsupported-or-unprepared-static-geometry'}));
 }
+// Index known and withheld regions. Horizontal cells bound fan-out, and
+// selection still tests the original three-dimensional bounds.
+const worldCellSize01=256;
+function worldCellKeys01(box){
+ const [x,y]=box.min.map(v=>Math.floor(v/worldCellSize01));
+ const [right,top]=box.max.map(v=>Math.floor(v/worldCellSize01));
+ if(![x,y,right,top].every(Number.isSafeInteger)||right<x||top<y||(right-x+1)*(top-y+1)>32)return null;
+ const keys=[];
+ for(let i=x;i<=right;i++)for(let j=y;j<=top;j++)keys.push(i+','+j);
+ return keys;
+}
+function worldSpatialIndex01(rows){
+ const cells=Object.create(null),overflow=[];let references=0;
+ for(const [index,entry] of rows.entries()){
+  const keys=new Set();
+  let broad=false;
+  for(const bounds of entry.bounds?[entry.bounds]:entry.interiorBounds){
+   const local=worldCellKeys01(bounds);
+   if(!local){broad=true;break;}
+   for(const key of local)keys.add(key);
+   if(keys.size>32){broad=true;break;}
+  }
+  if(broad||references+keys.size>262144){overflow.push(index);continue;}
+  references+=keys.size;
+  for(const key of keys)(cells[key]??=[]).push(index);
+ }
+ return {cells,overflow};
+}
+function windowRows01(rows,index,box){
+ const keys=worldCellKeys01(box);
+ if(!index||!keys)return rows;
+ const candidates=new Set(index.overflow);
+ for(const key of keys)for(const id of index.cells[key]??[])candidates.add(id);
+ return [...candidates].sort((a,b)=>a-b).map(id=>rows[id]);
+}
 export class InstalledStaticWorld01 {
  #pendingSelection01=null;#selectionRevision01=0;
  constructor({manifestPath,catalogPath,catalogSHA256,maximumResidentResources=8,privateRoot=null,requiredValidationEpochUtc01=null,manifestInput01=null,preparedMetadata01=null}={}){
@@ -74,16 +109,49 @@ export class InstalledStaticWorld01 {
  #privateInput(file){const absolute=path.resolve(file);requireWorld(absolute.startsWith(this.privateRoot+path.sep),'installed derived-cache path escaped its private root');for(let at=absolute;;){const stat=fs.lstatSync(at);requireWorld(!stat.isSymbolicLink(),'linked installed derived-cache input refused');const parent=path.dirname(at);if(parent===at)break;at=parent;}return absolute;}
  reload(manifestInput01=null){this.#pendingSelection01=null;this.#selectionRevision01++;this.#privateInput(this.manifestPath);const manifest=manifestInput01??json(this.manifestPath,undefined,this.operations01);requireWorld(manifest.Schema===1&&manifest.ResolvedCatalogSHA256===this.catalogSHA256&&manifest.InputBinding?.GameExecutableSHA256===this.catalog.InputBinding.GameExecutableSHA256&&manifest.InputBinding?.CodeWalkerCoreSHA256===this.catalog.InputBinding.CodeWalkerCoreSHA256&&Array.isArray(manifest.Resources)&&manifest.Resources.length<=262144,'same installed catalogue/game/parser cache binding');const reloadBinding=digest([this.catalogSHA256,this.requiredValidationEpochUtc01,manifest.ValidationEpochUtc01??null,manifest.InputFingerprint,manifest.InputBinding]);if(this.reloadBinding01!==reloadBinding){this.#clearQueryViews01('world-binding-change');this.staticComponents01.clear('world-binding-change');this.resident.clear();this.reloadBinding01=reloadBinding;}this.manifest=manifest;this.rows=manifest.Resources.map(originalRow=>{const proof=originalRow.ArchiveValidation01,result=originalRow.Result??originalRow.PotentialResult,valid=!this.requiredValidationEpochUtc01||manifest.ValidationEpochUtc01===this.requiredValidationEpochUtc01&&proof?.EpochUtc===this.requiredValidationEpochUtc01&&proof.Source==='current-archive-sha256'&&hex(proof.ArchiveSHA256)&&proof.ArchiveSHA256===result?.ArchiveSHA256;const row=valid?originalRow:{...originalRow,Status:originalRow.Status==='imported-exterior-incomplete-surfaces'?'cache-awaiting-current-startup-validation':originalRow.Status,PotentialStatus:originalRow.PotentialStatus==='imported-resource-root-incomplete-surfaces'?'cache-awaiting-current-startup-validation':originalRow.PotentialStatus};const p=this.projectionByHash.get(row.Hash?.toLowerCase());const b=p?.BoundsStoreItems?.length===1?p.BoundsStoreItems[0]:null;const interior=this.interiorByHash.get(row.Hash?.toLowerCase());return {row,validationState:this.requiredValidationEpochUtc01===null?'pinned-offline-model':valid?'validated-current-source':'awaiting-current-source-validation',bounds:interior?null:resourceQueryBounds01(row,b),interiorBounds:interior?.placements.map(p=>p.bounds)??[],layer:b?Number(b.Layer):null};});const heldIndexPaths=new Set([...this.resident.values()].map(r=>r.indexPath01)),liveKeys=new Set(this.rows.filter(r=>heldIndexPaths.has(r.row.Result?.IndexPath)&&r.row.Status==='imported-exterior-incomplete-surfaces'&&r.row.Result).map(r=>this.#resourceKey01(r.row)));for(const [key]of this.resident)if(!liveKeys.has(key)){const invalidationReason=this.#ownerInvalidationReason01(key);this.resident.delete(key);this.staticComponents01.clearOwner(key,invalidationReason);for(const [viewKey,view]of this.queryViews01)if(view.resourceKey===key)this.#dropQueryView01(viewKey,invalidationReason,true);}const ready=this.rows.filter(r=>r.row.Status==='imported-exterior-incomplete-surfaces').length,eligible=this.manifest.Resources.filter(r=>r.Eligibility==='eligible-exterior').length;this.globalStatus01=freeze({ready,eligible,coverageStates:worldCoverageStates01({...this.manifest,Resources:this.rows.map(r=>r.row)}),unlocalizedCoverageResources:this.rows.filter(r=>!r.bounds&&!r.interiorBounds.length).length,higherLayerResources:this.rows.filter(r=>[1,2].includes(r.layer)).length});return this.status();}
  sourceProofRow01(id){return this.rowsByOwner01?this.rowsByOwner01[digest(id)]:this.rows.find(e=>e.row.Id===id);}
- exportMetadata01(){const rowsByOwner01=Object.create(null),ownerKeys01=Object.create(null);for(const entry of this.rows){const id=digest(entry.row.Id);rowsByOwner01[id]=entry;if(entry.row.Status==='imported-exterior-incomplete-surfaces'&&entry.row.Result)ownerKeys01[id]=this.#resourceKey01(entry.row);}const projections01=Object.create(null);for(const [hash,projection]of this.projectionByHash)projections01[hash]=projection;return {projections01,catalog:this.catalog,manifest:this.manifest,rows:this.rows,rowsByOwner01,ownerKeys01,globalStatus01:this.globalStatus01,reloadBinding01:this.reloadBinding01,catalogSHA256:this.catalogSHA256,requiredValidationEpochUtc01:this.requiredValidationEpochUtc01};}
+ exportMetadata01(){
+  // Transfer only the fields used to query, load and attest a scene.
+  // The full input still drives coverage accounting on the preparer.
+  const rowsByOwner01=Object.create(null),ownerKeys01=Object.create(null),projections01=Object.create(null);
+  const rows=this.rows.map(entry=>{
+   const {Id,Hash,Status,Eligibility,Result,ArchiveValidation01}=entry.row;
+   const row={Id,Hash,Status,Eligibility};
+   if(Result){
+    const {IndexPath,IndexSHA256,ReceiptPath,ReceiptSHA256,ArchiveSHA256}=Result;
+    row.Result={IndexPath,IndexSHA256,ReceiptPath,ReceiptSHA256};
+    if(ArchiveSHA256!==undefined)row.Result.ArchiveSHA256=ArchiveSHA256;
+   }
+   if(ArchiveValidation01!==undefined)row.ArchiveValidation01=ArchiveValidation01;
+   const compact={...entry,row},id=digest(Id);
+   rowsByOwner01[id]=compact;
+   if(Status==='imported-exterior-incomplete-surfaces'&&Result){
+    ownerKeys01[id]=this.#resourceKey01(row);
+    const hash=Hash?.toLowerCase(),projection=this.projectionByHash.get(hash);
+    if(projection)projections01[hash]={
+     ...projection,
+     SelectedYbn:projection.SelectedYbn?.map(({Kind,Hash,Path})=>({Kind,Hash,Path})),
+    };
+   }
+   return compact;
+  });
+  const {Schema,Stage,ParserErrorCount,InputBinding,SelectedDlc,Gen9SelectorAvailable}=this.catalog;
+  const catalog={Schema,Stage,ParserErrorCount,InputBinding};
+  if(SelectedDlc!==undefined)catalog.SelectedDlc=SelectedDlc;
+  if(Gen9SelectorAvailable!==undefined)catalog.Gen9SelectorAvailable=Gen9SelectorAvailable;
+  const manifest={InputBinding:this.manifest.InputBinding,InputFingerprint:this.manifest.InputFingerprint};
+  if(this.manifest.ValidationEpochUtc01!==undefined)manifest.ValidationEpochUtc01=this.manifest.ValidationEpochUtc01;
+  return {projections01,catalog,manifest,rows,rowsByOwner01,ownerKeys01,spatialIndex01:worldSpatialIndex01(rows),globalStatus01:this.globalStatus01,
+   reloadBinding01:this.reloadBinding01,catalogSHA256:this.catalogSHA256,requiredValidationEpochUtc01:this.requiredValidationEpochUtc01};
+ }
  installMetadata01(snapshot){
   requireWorld(isPreparedWorldMetadata01(snapshot)&&snapshot.catalogSHA256===this.catalogSHA256&&snapshot.requiredValidationEpochUtc01===this.requiredValidationEpochUtc01&&snapshot.manifest.InputBinding.GameExecutableSHA256===this.catalog.InputBinding.GameExecutableSHA256&&snapshot.manifest.InputBinding.CodeWalkerCoreSHA256===this.catalog.InputBinding.CodeWalkerCoreSHA256,'Exact prepared metadata binding');
   this.#pendingSelection01=null;this.#selectionRevision01++;if(this.reloadBinding01!==snapshot.reloadBinding01){this.#clearQueryViews01('world-binding-change');this.staticComponents01.clear('world-binding-change');this.resident.clear();}
-  this.reloadBinding01=snapshot.reloadBinding01;this.catalog=snapshot.catalog;this.preparedProjections01=snapshot.projections01;this.manifest=snapshot.manifest;this.rows=snapshot.rows;this.rowsByOwner01=snapshot.rowsByOwner01;this.globalStatus01=snapshot.globalStatus01;
+  this.reloadBinding01=snapshot.reloadBinding01;this.catalog=snapshot.catalog;this.preparedProjections01=snapshot.projections01;this.manifest=snapshot.manifest;this.rows=snapshot.rows;this.spatialIndex01=snapshot.spatialIndex01;this.rowsByOwner01=snapshot.rowsByOwner01;this.globalStatus01=snapshot.globalStatus01;
   // The resident set is capped at16. No full resource scan at installation.
   for(const [key,held]of this.resident){const entry=snapshot.rowsByOwner01[held.logicalId01];if(!entry||entry.row.Status!=='imported-exterior-incomplete-surfaces'||!entry.row.Result||snapshot.ownerKeys01[held.logicalId01]!==key){this.resident.delete(key);this.staticComponents01.clearOwner(key,'prepared-source-binding-invalidated');for(const [viewKey,view]of this.queryViews01)if(view.resourceKey===key)this.#dropQueryView01(viewKey,'prepared-source-binding-invalidated',true);}}
   return this.status();
  }
- status(){const {ready,eligible}=this.globalStatus01;return freeze({stage:ready===eligible&&eligible>0?'partial/unsupported':'partial/missing-regions',installedWorldVerified:false,genuineResourceVerified:ready>0,runtimeActivationVerified:false,preparation:{completedEligibleTiles:ready,eligibleTiles:eligible,totalTiles:this.manifest.Resources.length},actualWorldCoverage:'selected-static-collision-model-with-explicit-gaps',coverageStates:this.globalStatus01.coverageStates,validationEpoch:{required:this.requiredValidationEpochUtc01,headerMatches:this.requiredValidationEpochUtc01===null||this.manifest.ValidationEpochUtc01===this.requiredValidationEpochUtc01},residentResources:this.resident.size,residentResourceLimit:this.maximumResidentResources,resourceLoads:this.loads,resourceLoadMilliseconds:this.resourceLoadMilliseconds,unlocalizedCoverageResources:this.globalStatus01.unlocalizedCoverageResources,queryFailures:this.failures,lastWindow:this.last});}
+ status(){const {ready,eligible}=this.globalStatus01;return freeze({stage:ready===eligible&&eligible>0?'partial/unsupported':'partial/missing-regions',installedWorldVerified:false,genuineResourceVerified:ready>0,runtimeActivationVerified:false,preparation:{completedEligibleTiles:ready,eligibleTiles:eligible,totalTiles:this.rows.length},actualWorldCoverage:'selected-static-collision-model-with-explicit-gaps',coverageStates:this.globalStatus01.coverageStates,validationEpoch:{required:this.requiredValidationEpochUtc01,headerMatches:this.requiredValidationEpochUtc01===null||this.manifest.ValidationEpochUtc01===this.requiredValidationEpochUtc01},residentResources:this.resident.size,residentResourceLimit:this.maximumResidentResources,resourceLoads:this.loads,resourceLoadMilliseconds:this.resourceLoadMilliseconds,unlocalizedCoverageResources:this.globalStatus01.unlocalizedCoverageResources,queryFailures:this.failures,lastWindow:this.last});}
  #resourceKey01(row){return digest([row.Result.IndexPath,row.Result.IndexSHA256,row.Result.ReceiptPath,row.Result.ReceiptSHA256,this.catalogSHA256,row.Result.ArchiveSHA256??null,this.requiredValidationEpochUtc01,row.ArchiveValidation01??null]);}
  #ownerInvalidationReason01(key){const held=this.resident.get(key);if(!held)return 'owner-binding-invalidated';const current=this.rows.find(r=>digest(r.row.Id)===held.logicalId01);if(!current)return 'owner-resource-removed-invalidated';if(current.validationState==='awaiting-current-source-validation')return 'current-proof-invalidated';if(!current.row.Result)return 'owner-result-withdrawn-invalidated';const next=resourceAuditBinding01(current.row);for(const field of ['index','receipt','archive','proof'])if(next[field]!==held.auditBinding01[field])return 'owner-'+field+'-identity-invalidated';return 'owner-binding-invalidated';}
  #resource(row){const began=performance.now();this.#privateInput(row.Result.IndexPath);this.#privateInput(row.Result.ReceiptPath);const key=this.#resourceKey01(row);if(this.resident.has(key)){const held=this.resident.get(key);this.resident.delete(key);this.resident.set(key,held);return held;}const mesh=loadCollisionResource(row.Result.IndexPath,{expectedSHA256:row.Result.IndexSHA256,profile01:this.operations01}),receipt=json(row.Result.ReceiptPath,row.Result.ReceiptSHA256,this.operations01),classification=measured01(this.operations01,'resourceClassificationMs',()=>classifyStaticWorldResource(mesh.index,this.catalog,receipt,{indexSHA256:row.Result.IndexSHA256,catalogSHA256:this.catalogSHA256,receiptSHA256:row.Result.ReceiptSHA256},{projection01:this.preparedProjections01?(this.preparedProjections01[row.Hash?.toLowerCase()]??false):null})),resource={key,logicalId01:digest(row.Id),auditBinding01:resourceAuditBinding01(row),classification,resource:mesh,indexPath01:row.Result.IndexPath,analyticIndex01:mesh.index.analyticPrimitives01?{schema:1,kind:'RichAudioCollisionMesh',cellSize:mesh.index.analyticPrimitives01.cellSize,cells:mesh.index.analyticPrimitives01.cells,overflowChunks:mesh.index.analyticPrimitives01.overflowChunks,chunks:mesh.index.analyticPrimitives01.primitives.map((p,id)=>({id,bounds:p.bounds}))}:null};resource.query=(box,limits)=>this.#queryResource01(resource,box,limits);if(this.requiredValidationEpochUtc01||row.Result.ArchiveSHA256!==undefined)requireWorld(hex(row.Result.ArchiveSHA256)&&row.Result.ArchiveSHA256===receipt.AfterSHA256,'manifest archive receipt mismatch');requireWorld(resource.classification.state==='codewalker-exterior-static-model','only unconditional exterior static model may enter active window');for(const chunk of mesh.index.chunks)this.#privateInput(path.join(path.dirname(row.Result.IndexPath),chunk.file));this.resident.set(key,resource);while(this.resident.size>this.maximumResidentResources){const evicted=this.resident.keys().next().value;this.resident.delete(evicted);this.staticComponents01.clearOwner(evicted,'owner-residency-limit');for(const [viewKey,view]of this.queryViews01)if(view.resourceKey===evicted)this.#dropQueryView01(viewKey,'owner-residency-limit',true);}this.staticComponents01.activateOwner(key);this.loads++;this.resourceLoadMilliseconds+=performance.now()-began;return resource;}
@@ -129,7 +197,7 @@ export class InstalledStaticWorld01 {
  }
  profile01(){const components=this.staticComponents01.profile();return freeze({...this.profileTotals01,operations01:{...this.operations01},cacheDiagnostics01:{...this.cacheAuditTotals01},staticComponents01:components,residentResources:this.resident.size,queryViews:this.queryViews01.size,queryViewBytes:this.queryViewBytes01,aggregateRetainedGeometryBytes:components.accountedBytes+this.queryViewBytes01,maximumQueryViews:queryViewLimits01.views,maximumQueryViewBytes:queryViewLimits01.bytes,lastWindow:this.lastWindowProfile01});}
  #selectWindow01({listener,sources,radius,requestedRadius,maximumSurfaces,maximumResources,capacityProbe=false}){
-  const began=performance.now(),lookupBegan=performance.now(),box={min:listener.map(v=>v-radius),max:listener.map(v=>v+radius)},region={min:listener.map(v=>v-128),max:listener.map(v=>v+128)},defaultExcluded=this.rows.filter(r=>r.bounds&&[1,2].includes(r.layer)&&touch(r.bounds,box)),candidates=this.rows.filter(r=>r.bounds&&![1,2].includes(r.layer)&&touch(r.bounds,box)),eligible=candidates.filter(({row})=>row.Status==='imported-exterior-incomplete-surfaces'&&row.Result),selected=eligible.slice(0,maximumResources),triangles=[],unknown=[],possibleInteriorBounds=[...new Map(this.rows.flatMap(r=>r.interiorBounds).filter(b=>touch(b,box)).map(b=>[digest(b),b])).values()],missingBounds=[...possibleInteriorBounds,...[...candidates.filter(({row})=>row.Status!=='imported-exterior-incomplete-surfaces'),...eligible.slice(maximumResources)].map(r=>r.bounds)];let geometryUnknown=0,successfulResources=0;const analytic={available:0,candidates:0,approximated:0,unknown:0,triangles:0,maximumErrorMetres:0,representation:'inscribed-affine-native-primitive-triangle-approximation',physicalMetreCalibration:'unverified-1-native-unit-per-metre-assumption'};
+  const began=performance.now(),lookupBegan=performance.now(),box={min:listener.map(v=>v-radius),max:listener.map(v=>v+radius)},region={min:listener.map(v=>v-128),max:listener.map(v=>v+128)},nearbyRows=windowRows01(this.rows,this.spatialIndex01,box),defaultExcluded=nearbyRows.filter(r=>r.bounds&&[1,2].includes(r.layer)&&touch(r.bounds,box)),candidates=nearbyRows.filter(r=>r.bounds&&![1,2].includes(r.layer)&&touch(r.bounds,box)),eligible=candidates.filter(({row})=>row.Status==='imported-exterior-incomplete-surfaces'&&row.Result),selected=eligible.slice(0,maximumResources),triangles=[],unknown=[],possibleInteriorBounds=[...new Map(nearbyRows.flatMap(r=>r.interiorBounds).filter(b=>touch(b,box)).map(b=>[digest(b),b])).values()],missingBounds=[...possibleInteriorBounds,...[...candidates.filter(({row})=>row.Status!=='imported-exterior-incomplete-surfaces'),...eligible.slice(maximumResources)].map(r=>r.bounds)];let geometryUnknown=0,successfulResources=0;const analytic={available:0,candidates:0,approximated:0,unknown:0,triangles:0,maximumErrorMetres:0,representation:'inscribed-affine-native-primitive-triangle-approximation',physicalMetreCalibration:'unverified-1-native-unit-per-metre-assumption'};
   this.activeProfile01.candidateLookupMs+=performance.now()-lookupBegan;
   for(const {row}of selected)try{const loadBegan=performance.now(),resource=this.#resource(row);this.activeProfile01.resourceLoadMs+=performance.now()-loadBegan;const queryBegan=performance.now(),view=resource.query(box,{maxChunks:16,maxTriangles:131072});this.activeProfile01.resourceQueryMs+=performance.now()-queryBegan;const selectionBegan=performance.now();successfulResources++;if(view.analytic){for(const key of ['available','candidates','approximated','unknown','triangles'])analytic[key]+=view.analytic[key]??0;analytic.maximumErrorMetres=Math.max(analytic.maximumErrorMetres,view.analytic.maximumErrorMetres??0);}geometryUnknown+=view.unknownRegions.length;missingBounds.push(...view.unknownRegions.map(r=>r.bounds));for(const reference of view.references){const identity=this.staticComponents01.identity(reference);triangles.push({reference,resource:row.Id,distance:this.staticComponents01.distance(reference,listener),node:identity.node,polygon:identity.polygon});}this.activeProfile01.triangleSelectionMs+=performance.now()-selectionBegan;}catch(error){this.failures++;unknown.push(String(error.message).slice(0,160));missingBounds.push(this.rows.find(r=>r.row.Id===row.Id)?.bounds??null);}
   const panelBegan=performance.now();triangles.sort((a,b)=>a.distance-b.distance||a.resource.localeCompare(b.resource)||a.node-b.node||a.polygon-b.polygon);const surfaces=[],materials={},keys=new Set();let omitted=0,witness=null;
