@@ -7,14 +7,16 @@ const exactSource = node => node?.SourceBinding?.State === 'exact-rel-metadata-b
 const recordHash = value => typeof value === 'string' && /^(?:0x)?[a-f0-9]{8}$/i.test(value) ? value.toLowerCase().replace(/^0x/, '') : null;
 const vehicleType = 'Dat151Vehicle';
 const granularType = 'Dat151VehicleEngineGranular';
-const routes = [
+const acceleration = [
   { field: 'EngineAccel', type: 'Dat54GranularSound' },
   { field: 'ExhaustAccel', type: 'Dat54EnvironmentSound' },
 ];
+const conventional = ['EngineIdleLoop','ExhaustIdleLoop','EngineLow','EngineHigh','ExhaustLow','ExhaustHigh','RevsOff']
+  .map(field=>({field,type:'Dat54SimpleSound'}));
 
 // The projection can discriminate shared-record edits from field-level redirects.
 // The result grants no registration, runtime control or restoration authority.
-export function compareBatiAccelerationRedirect01(graph) {
+export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
   if (graph?.Kind !== 'RichAudioBatiAudioDependencyGraph01' ||
       !Array.isArray(graph.Nodes) || graph.Nodes.length > 256 ||
       !Array.isArray(graph.Edges) || graph.Edges.length > 4096 ||
@@ -51,16 +53,30 @@ export function compareBatiAccelerationRedirect01(graph) {
   const vehicle = root('VehicleAudioRecord', vehicleType);
   const granular = root('GranularRecord', granularType);
   const vehicleRoute = exactEdge(vehicle, 'EngineGranular', granular);
-  const selectedRoutes = routes.map(({field, type}) =>
-    exactEdge(granular, field, root('Sounds.' + field, type)));
-  const privateVehicle = Symbol('private vehicle'), privateGranular = Symbol('private granular');
-  const privateSounds = new Map(selectedRoutes.map(edge => [edge, Symbol(edge.Field)]));
-  const redirect = (edges, replacements) => edges.map(edge =>
-    replacements.has(edge) ? {...edge, Targets:[replacements.get(edge)]} : edge);
-  const variant = new Map(outgoing);
-  variant.set(privateVehicle, redirect(outgoing.get(vehicle), new Map([[vehicleRoute, privateGranular]])));
-  variant.set(privateGranular, redirect(outgoing.get(granular), privateSounds));
-  for (const [edge, id] of privateSounds) variant.set(id, outgoing.get(edge.Targets[0]) ?? []);
+  const engine=continuous?root('EngineRecord','Dat151VehicleEngine'):null;
+  const scopes=[{parent:granular,edge:vehicleRoute,routes:continuous?[...acceleration,{field:'IdleSub',type:'Dat54ModularSynthSound'}]:acceleration}];
+  if(engine)scopes.push({parent:engine,edge:exactEdge(vehicle,'Engine',engine),routes:conventional});
+  const vehicleEdges=new Map(),soundEdges=new Map(),privateParents=[];
+  const privateVehicle=Symbol('private vehicle');
+  const redirect=(edges,replacements)=>edges.map(edge=>
+    replacements.has(edge)?{...edge,Targets:[replacements.get(edge)]}:edge);
+  const variant=new Map(outgoing);
+  for(const {parent,edge:parentEdge,routes} of scopes){
+    const privateParent=Symbol(parentEdge.Field),redirects=new Map();
+    vehicleEdges.set(parentEdge,privateParent);
+    privateParents.push({privateParent,routes});
+    for(const {field,type} of routes){
+      const targetId=acceleration.some(route=>route.field===field)?root('Sounds.'+field,type):outgoing.get(parent)?.find(edge=>edge.Field===field)?.Targets[0];
+      const target=nodes.get(targetId);
+      if(!exactSource(target)||target.Record?.ParserType!==type)throw Error('Missing or unbound typed audio root: '+field);
+      const edge=exactEdge(parent,field,targetId),privateSound=Symbol(field);
+      redirects.set(edge,privateSound);
+      soundEdges.set(edge,{privateSound,privateParent});
+      variant.set(privateSound,outgoing.get(targetId)??[]);
+    }
+    variant.set(privateParent,redirect(outgoing.get(parent),redirects));
+  }
+  variant.set(privateVehicle,redirect(outgoing.get(vehicle),vehicleEdges));
 
   const reachable = (entry, adjacency) => {
     const seen = new Set();
@@ -76,23 +92,30 @@ export function compareBatiAccelerationRedirect01(graph) {
   const stockVehicle = reachable(outgoing.get(vehicle), outgoing);
   const neighbor = reachable(variant.get(vehicle), variant);
   const otherRoutes = [
-    ...variant.get(privateVehicle).filter(edge => edge.Field !== 'EngineGranular'),
-    ...variant.get(privateGranular).filter(edge => !selectedRoutes.some(route => route.Field === edge.Field)),
+    ...variant.get(privateVehicle).filter(edge=>!scopes.some(scope=>scope.edge.Field===edge.Field)),
+    ...privateParents.flatMap(({privateParent,routes})=>variant.get(privateParent)
+      .filter(edge=>!routes.some(route=>route.field===edge.Field))),
   ];
   const preserved = reachable(otherRoutes, variant);
-  const proof = [...privateSounds].map(([edge, privateId]) => ({
+  const proof = [...soundEdges].map(([edge,{privateSound:privateId,privateParent}]) => ({
     field:edge.Field,
     originalRecordReachableThroughRetainedFields:preserved.has(edge.Targets[0]),
     retainedInboundReferences:graph.Edges.filter(candidate =>
       candidate !== edge && candidate.Targets.includes(edge.Targets[0])).map(candidate => candidate.Field).sort(),
-    selectedFieldResolvesToPrivateRecord:variant.get(privateGranular)
+    selectedFieldResolvesToPrivateRecord:variant.get(privateParent)
       .some(candidate => candidate.Field === edge.Field && candidate.Targets[0] === privateId),
     privateRecordReachableThroughRetainedFields:preserved.has(privateId),
     privateRecordReachableFromNeighbor:neighbor.has(privateId),
   }));
   return {
     scope:'projected REL references only',
-    privateRecordCount:2+privateSounds.size,
+    privateRecordCount:1+scopes.length+soundEdges.size,
+    ...(continuous?{
+      continuousScope:'conventional idle/low/high/revs-off; player granular acceleration/idle synth',
+      unredirectedSubmixReferences:[...outgoing.get(granular),...outgoing.get(engine)]
+        .filter(edge=>/Submix/.test(edge.Field)&&edge.Targets.length>0)
+        .map(edge=>({field:edge.Field,targetTypes:edge.Targets.map(id=>nodes.get(id)?.Record?.ParserType??'unretained')})),
+    }:{}),
     sameModelNeighborGraphUnchanged:stockVehicle.size === neighbor.size &&
       [...stockVehicle].every(id => neighbor.has(id)),
     routeComparisons:proof,
@@ -107,7 +130,8 @@ export function compareBatiAccelerationRedirect01(graph) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
-  if (process.argv.length !== 3) throw Error('Supply one retained project-private resolved catalogue');
+  const continuous=process.argv[3]==='--continuous';
+  if(process.argv.length!==(continuous?4:3))throw Error('Supply one retained project-private resolved catalogue and optional --continuous');
   const projectPrivate = realpathSync(fileURLToPath(new URL('../.local/', import.meta.url)));
   const filename = realpathSync(process.argv[2]);
   if (!filename.startsWith(projectPrivate + path.sep) || !statSync(filename).isFile() ||
@@ -115,6 +139,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   const catalogue = JSON.parse(readFileSync(filename, 'utf8').replace(/^\uFEFF/, ''));
   const vehicles = catalogue.Vehicles?.filter(vehicle => vehicle.Model === 'bati') ?? [];
   if (vehicles.length !== 1) throw Error('Exactly one Bati projection required');
-  const result = compareBatiAccelerationRedirect01(vehicles[0].AudioDependencyGraph01);
+  const result = compareBatiAccelerationRedirect01(vehicles[0].AudioDependencyGraph01,{continuous});
   process.stdout.write(JSON.stringify(result, null, 2) + '\n');
 }
