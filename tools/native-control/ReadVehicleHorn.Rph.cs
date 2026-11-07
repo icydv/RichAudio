@@ -11,7 +11,9 @@ namespace RichAudio {
   #if COMBINED_OBSERVATION
   internal static string Session;
 #endif
+#if !COMBINED_OBSERVATION
   [ConsoleCommand(Name="RichAudioReadVehicleHorn",Description="Read the current Story Mode vehicle horn discriminator three times without sounding it.")]
+#endif
   public static void ReadVehicleHorn(){
 #if COMBINED_OBSERVATION
    string session=Session??"standalone";
@@ -30,6 +32,11 @@ namespace RichAudio {
     var vehicle=!object.ReferenceEquals(player,null)&&player.IsValid()?player.CurrentVehicle:null;
     if(object.ReferenceEquals(vehicle,null)||!vehicle.IsValid()){Report(prefix+"result=no-selected-vehicle");return;}
     string lifetime=Identity(vehicle);uint model=vehicle.Model.Hash;
+#if COMBINED_OBSERVATION
+    if(model!=0xc3ddfdceu&&model!=0xeb70965fu){
+     Report(prefix+"vehicle="+lifetime+"; model="+model.ToString("X8")+"; result=not-approved-donor");return;
+    }
+#endif
     var hashes=new string[3];
     var raw=new uint[hashes.Length];
     for(int i=0;i<raw.Length;i++){

@@ -15,16 +15,28 @@ Write-Output $out
 $csc=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
 $fake=Join-Path $out 'RagePluginHook.dll'
 $loader=Join-Path $out 'Rehearsal.exe'
-& $csc /nologo /target:library /platform:x64 /warnaserror+ ('/out:'+$fake) (Join-Path $repo 'tests/host/CombinedObservationFixtureRph.cs')
+& $csc /nologo /target:library /platform:x64 /warnaserror+ /r:System.Windows.Forms.dll ('/out:'+$fake) (Join-Path $repo 'tests/host/CombinedObservationFixtureRph.cs')
 if($LASTEXITCODE){throw 'Authored runtime ABI build failed'}
 if([Reflection.AssemblyName]::GetAssemblyName($fake).FullName-cne[Reflection.AssemblyName]::GetAssemblyName($sdk).FullName){throw 'RPH ABI fixture binding differs'}
 & $csc /nologo /platform:x64 /warnaserror+ ('/r:'+$fake) ('/out:'+$loader) (Join-Path $repo 'tests/host/TestCombinedObservationLoad01.cs')
 if($LASTEXITCODE){throw 'Loading harness build failed'}
 & $loader discover $dll $sdk
 if($LASTEXITCODE){throw 'Candidate type discovery failed'}
-& $loader exercise $dll $receiver (Join-Path $out 'capture.jsonl')
-if($LASTEXITCODE){throw 'Candidate entry point rehearsal failed'}
-& $loader cutoff $dll $receiver (Join-Path $out 'cutoff.jsonl')
-if($LASTEXITCODE){throw 'Candidate observation cutoff rehearsal failed'}
+$authored=Join-Path $out 'authored-focus/candidate'
+& (Join-Path $PSScriptRoot 'native-control/Build-CombinedObservation01.ps1') -SdkPath $sdk -Output $authored -AuthoredFocus
+$authoredDll=Join-Path $authored 'RichAudio.CombinedObservation.dll'
+$authoredRoot=Split-Path -Parent $authored
+$checks=@()
+foreach($mode in @('exercise','cutoff','receiver-loss','unload','arm-cutoff')){
+ $case=Join-Path $out $mode
+ [IO.Directory]::CreateDirectory($case)|Out-Null
+ & $loader $mode $authoredDll $receiver (Join-Path $case 'capture.jsonl') $authoredRoot
+ if($LASTEXITCODE){throw "Candidate input rehearsal failed: $mode"}
+ foreach($name in @('observation-schedule.json','observation-binding.json','observation-owner.json')){
+  $source=Join-Path $authoredRoot $name
+  if(Test-Path -LiteralPath $source){Move-Item -LiteralPath $source -Destination $case}
+ }
+ $checks+=$mode
+}
 foreach($pin in $pins){if((Get-FileHash -LiteralPath $pin.Path).Hash-cne$pin.Hash){throw 'Rehearsal inputs changed'}}
-[ordered]@{authoredRuntime=$true;gameLaunched=$false;payloads=$pins;frames=Get-FileHash -LiteralPath (Join-Path $out 'capture.jsonl');cutoffFrames=Get-FileHash -LiteralPath (Join-Path $out 'cutoff.jsonl')}|ConvertTo-Json -Depth 4|Set-Content -LiteralPath (Join-Path $out 'result.json') -Encoding utf8NoBOM
+[ordered]@{authoredRuntime=$true;authoredForegroundOnly=$true;gameLaunched=$false;payloads=$pins;authoredCandidate=Get-FileHash -LiteralPath $authoredDll;checks=$checks;frames=Get-FileHash -LiteralPath (Join-Path $out 'exercise/capture.jsonl');cutoffFrames=Get-FileHash -LiteralPath (Join-Path $out 'cutoff/capture.jsonl')}|ConvertTo-Json -Depth 4|Set-Content -LiteralPath (Join-Path $out 'result.json') -Encoding utf8NoBOM

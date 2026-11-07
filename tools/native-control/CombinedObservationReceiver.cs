@@ -12,10 +12,12 @@ internal static class CombinedObservationReceiver {
   Guid session;
   int peer;
   long armByUtcMs,stopByUtcMs;
-  if(args.Length!=5||!Guid.TryParseExact(args[0],"N",out session)||session==Guid.Empty||args[0]!=session.ToString("N")||!Int32.TryParse(args[1],out peer)||peer<=0||
+  long gameCreation;
+  if(args.Length!=6||!Guid.TryParseExact(args[0],"N",out session)||session==Guid.Empty||args[0]!=session.ToString("N")||!Int32.TryParse(args[1],out peer)||peer<=0||
    !Int64.TryParse(args[3],NumberStyles.None,CultureInfo.InvariantCulture,out armByUtcMs)||
-   !Int64.TryParse(args[4],NumberStyles.None,CultureInfo.InvariantCulture,out stopByUtcMs)){
-   Console.Error.WriteLine("Usage: RichAudio.ObservationReceiver.exe <session N-format> <GTA PID> <fresh capture.jsonl> <arm cutoff UTC epoch ms> <observation cutoff UTC epoch ms>");return 2;
+   !Int64.TryParse(args[4],NumberStyles.None,CultureInfo.InvariantCulture,out stopByUtcMs)||
+   !Int64.TryParse(args[5],NumberStyles.None,CultureInfo.InvariantCulture,out gameCreation)||gameCreation<=0){
+   Console.Error.WriteLine("Usage: RichAudio.ObservationReceiver.exe <session N-format> <GTA PID> <fresh capture.jsonl> <arm cutoff UTC epoch ms> <observation cutoff UTC epoch ms> <GTA creation FILETIME>");return 2;
   }
   long now=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
   long remaining=armByUtcMs-now,stopAfter=stopByUtcMs-now;
@@ -29,9 +31,9 @@ internal static class CombinedObservationReceiver {
     // Pin the process lifetime while the PID is in use; no external process is owned or terminated here.
     ownedCapture=true;
     GC.KeepAlive(process.Handle);
-    if(process.HasExited)return 2;
+    if(process.HasExited||process.StartTime.ToUniversalTime().ToFileTimeUtc()!=gameCreation)throw new InvalidDataException("GTA process lifetime mismatch");
     var connect=pipe.BeginWaitForConnection(null,null);
-    Console.WriteLine("Ready: RichAudioObserveStart "+args[0]+" "+Process.GetCurrentProcess().Id);
+    Console.WriteLine("Receiver ready: session="+args[0]+"; receiverPid="+Process.GetCurrentProcess().Id);
     while(true){
      long waitMs=remaining-awaitingArm.ElapsedMilliseconds;
      if(process.HasExited)throw new EndOfStreamException("GTA exited before observation");

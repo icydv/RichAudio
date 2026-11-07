@@ -5,13 +5,10 @@ unique match to a selected placement, and actual admission by the bankless
 production consumer. The same session will measure whether two existing
 donor vehicles produce stable and distinct default-horn readbacks.
 
-Codex built a standalone RPH plugin. At startup it passes the exact start,
-stop, status, and horn methods to RPH's public
-[`Game.AddConsoleCommands(MethodInfo[])`](https://docs.ragepluginhook.net/html/M_Rage_Game_AddConsoleCommands_1.htm)
-overload and reports entry, the registration attempt, and the return from
-that call separately. The normal RichAudio
-entry point, audio host, decoder, menu, and profile mutations are outside the
-build. The manually armed sampler uses the production camera tracker and
+Codex built a standalone RPH plugin that yields in its entry fiber while
+waiting for the process-bound receiver and manual input. The normal
+RichAudio entry point, audio host, decoder, menu, and profile mutations are
+outside the build. The manually armed sampler uses the production camera tracker and
 interior getter. The same-user, PID-checked gameplay pipe retains the
 session, camera generation, original timestamps and raw readback, including
 not-ready and no-proxy results. The readback is separate from the scene
@@ -19,25 +16,32 @@ activation field. A brief console pause does not extend the original lease.
 The horn command logs three raw values and verifies the current vehicle
 identity and model between reads.
 
-The previous live DLL used the parameterless registration call. RPH logged
-the plugin load and the entry message before rejecting the start command as
-unknown. The retained log shows no intervening unload and records the
-command name only. The working Bati controls used public attributed static
-methods while their bounded handoff was active. This difference does not
-establish that returning from entry removed the command. The explicit
-registration call and command exposure still need a real-host check.
+The previous live candidate completed its explicit RPH registration call,
+then RPH rejected Status and Start. Its retained log records a second
+plugin initialization and entry in the same game process after those
+rejections. This was a second activation. The retained startup snapshot
+contains one automatic load, and the coordinator records one launcher
+invocation. The initiating action for the second load is unresolved. The
+attempt stopped without camera or donor observations.
 
-The receiver generates the complete command with the session token and its
-own decimal PID: `RichAudioObserveStart <session-token> <receiver-PID>`.
-The receiver and bankless consumer share absolute arm and observation
-cutoffs. The receiver starts its four-minute budget after authenticating the
-connection and caps it at the observation cutoff. Before handoff, Codex
-provides the complete command and route instructions. In the same live
-session, check F4 completion or command help for the start command if the
-running host exposes it. If no such listing is available, run
-`RichAudioObserveStatus` and require its handler acknowledgement before
-arming. The start handler acknowledgement, receiver connection and first
-fresh frame are separate evidence.
+The session schedule and receiver binding live in the sealed private
+directory. An atomic ownership marker keeps the approval single-use across
+AppDomains and after the first input loop exits. The receiver verifies the
+game process lifetime and the plugin verifies the receiver lifetime. Their
+pipe still authenticates the peer PID. The receiver starts its four-minute
+budget on authenticated connection and caps it at the original observation
+cutoff.
+
+In the foreground game, close F4 and pause menus and release the chord keys.
+Press **Ctrl+Shift+Backslash** once to start, **Ctrl+Backslash** once per donor
+reading, and **Shift+Backslash** to stop. Use the keyboard's Backslash key
+position. The retained keyboard review found no Backslash binding in the
+reviewed TrainerV or saved GTA overrides and identifies the F4 and F10
+controls. Codex provides the keys and route before handoff. Input-loop
+readiness, manual Start received, authenticated connection, and first
+fresh frame are separate evidence. Idle checks cover the foreground owner,
+loading, pause, console state, and key states. Story Mode native checks
+and camera and donor sampling start only after the manual Start action.
 
 The separate consumer reports raw evidence and placement matching even
 without current source proof. For admission, the reviewed proof stage hashes
@@ -59,11 +63,13 @@ restored only after verified process closure. I do not need a private REL
 mount, a loader configuration edit, a trainer spawn, a horn press, game-audio
 capture, a profile assignment or a live mute for this observation.
 
-The disposable rehearsal exercises full type discovery before initialization.
-The authored RPH stand-in dispatches the exact receiver-generated command
-through the registry populated by the candidate and removes that registry's
-entries on unload. The rehearsal exercises delayed start, first frame, horn
-readback and stop over the real Windows pipe. The separate retained-data rehearsal
+The disposable rehearsal exercises full type discovery of the production
+candidate. The same lifecycle and key dispatch are compiled for the
+authored RPH input and foreground fixture and use the production Windows
+receiver. The rehearsal covers held keys, focus and console transitions,
+delayed start, duplicate contexts, first frame, donor readback, stop,
+unload, receiver loss, and cutoffs. Real RPH keyboard behaviour needs live
+verification. The separate retained-data rehearsal
 drives the worker and consumer with authored input. Neither qualifies live
 GTA binding, activation, or the donor hashes. Distinct, stable, nonzero
 donor readbacks would support a later private marker test. Its A/B/A

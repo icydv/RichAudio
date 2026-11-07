@@ -1,8 +1,7 @@
 // Authored RPH ABI stand-in. The exact candidate is compiled against the retained SDK, never this file.
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Reflection;
+using System.Windows.Forms;
 using System.Threading;
 namespace Rage {
  public struct Vector3 {public float X,Y,Z;}
@@ -17,48 +16,25 @@ namespace Rage {
  public sealed class Vehicle:Entity {}
  public sealed class Player {public Ped Character{get;set;}}
  public sealed class GameConsole {
-  public string Last;
-  public readonly List<string> Lines=new List<string>();
-  public void Print(string s){Last=s;Lines.Add(s);System.Console.WriteLine(s);}
+  public volatile bool Open;
+  public bool IsOpen{get{return Open;}}
+  public void Print(string s){System.Console.WriteLine(s);}
  }
  public static class Game {
-  public static bool IsLoading{get;set;} public static bool IsPaused{get;set;}
+  public static bool IsLoading{get;set;}
+  static volatile bool paused;
+  public static bool IsPaused{get{return paused;}set{paused=value;}}
   public static Player LocalPlayer{get;set;}
   public static GameConsole Console{get;private set;}
-  public static string LastLog;
-  static readonly Dictionary<string,MethodInfo> commands=new Dictionary<string,MethodInfo>(StringComparer.OrdinalIgnoreCase);
-  // This fixture models only the public signatures exercised by this candidate.
-  public static void AddConsoleCommands(params MethodInfo[] methods){
-   foreach(var method in methods){
-    var command=(Attributes.ConsoleCommandAttribute)Attribute.GetCustomAttribute(method,typeof(Attributes.ConsoleCommandAttribute));
-    var parameters=method.GetParameters();
-    bool supported=parameters.Length==0||parameters.Length==2&&parameters[0].ParameterType==typeof(string)&&parameters[1].ParameterType==typeof(int);
-    if(command==null||String.IsNullOrEmpty(command.Name)||!method.IsPublic||!method.IsStatic||method.ContainsGenericParameters||
-       method.ReturnType!=typeof(void)||!supported)throw new ArgumentException("Unsupported console method: "+method.Name);
-    commands.Add(command.Name,method);
-   }
+  public static volatile int AuthoredKeys;
+  static readonly List<string> log=new List<string>();
+  public static bool IsKeyDownRightNow(Keys key){
+   int flag=key==Keys.OemPipe?1:key==Keys.LControlKey?2:key==Keys.LShiftKey?4:0;
+   return (AuthoredKeys&flag)!=0;
   }
-  public static int CommandCount{get{return commands.Count;}}
-  public static void Dispatch(string line){
-   var tokens=line.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries);
-   MethodInfo method;
-   if(tokens.Length==0||!commands.TryGetValue(tokens[0],out method))throw new InvalidOperationException("Unknown command");
-   var parameters=method.GetParameters();
-   if(tokens.Length!=parameters.Length+1)throw new ArgumentException("Console argument count");
-   if(parameters.Length==0){method.Invoke(null,null);return;}
-   int pid;
-   if(!Int32.TryParse(tokens[2],NumberStyles.Integer,CultureInfo.InvariantCulture,out pid))throw new ArgumentException("Console integer argument");
-   method.Invoke(null,new object[]{tokens[1],pid});
-  }
-  public static void UnloadPlugin(Assembly owner,Action exit){
-   try{exit();}
-   finally{
-    var names=new List<string>();
-    foreach(var entry in commands)if(entry.Value.DeclaringType.Assembly==owner)names.Add(entry.Key);
-    foreach(var name in names)commands.Remove(name);
-   }
-  }
-  public static void LogTrivial(string line){LastLog=line;}
+  public static void LogTrivial(string line){lock(log)log.Add(line);}
+  public static bool ContainsLog(string text){return LogCount(text)>0;}
+  public static int LogCount(string text){lock(log)return log.FindAll(line=>line.Contains(text)).Count;}
   static Game(){Console=new GameConsole();}
  }
  public sealed class GameFiber {
@@ -71,7 +47,7 @@ namespace Rage.Attributes {
  public sealed class PluginAttribute:Attribute {
   public PluginAttribute(string name){}
   public string Author{get;set;} public string Description{get;set;} public string EntryPoint{get;set;}
-  public string ExitPoint{get;set;} public bool PrefersSingleInstance{get;set;}
+  public string ExitPoint{get;set;} public bool PrefersSingleInstance{get;set;}public bool ShouldTickInPauseMenu{get;set;}
  }
  public sealed class ConsoleCommandAttribute:Attribute {public string Name{get;set;}public string Description{get;set;}}
 }
