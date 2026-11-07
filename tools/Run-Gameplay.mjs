@@ -56,6 +56,7 @@ if(!config.demoProfile&&config.acousticWorld!==false){
   if(worldAdmissionRows<2400&&process.stderr.writableLength<16384){log({type:'installed-world-producer-admission',requestId:receipt.requestId,validationMs:receipt.validationMs,elapsedSinceRequestMs:receipt.admissionMs,workerPreparationMs:receipt.workerPreparationMilliseconds,prepareSoundMapGeometry01:receipt.prepareSoundMapGeometry01,soundMapPreparationMilliseconds:receipt.lifecycle01.workerProfile01?.soundMapPreparationMilliseconds??null,scope:'validation is on producer; worker preparation is concurrent, not additive audio latency'});worldAdmissionRows++;}else worldAdmissionRowsOmitted++;
   // An observed live snapshot remains authoritative until its own lease ends.
   if(engine.pipeline.simulation.scene.observationModel?.kind==='conditional-observed-model'&&engine.sceneExpiry>performance.now())return;
+  if(!scene.tile.surfaces.length)return;
   engine.queueInstalledStaticScene01(scene,receipt);
  }});
  engine.bindInstalledSceneService01(installedScenes);
@@ -74,7 +75,10 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality,
   soundMapDemand01:soundMapDemandStatus01(),
   listenerState:d.listenerState,selectedPaths:d.selectedPaths,reflectionPathsSelected:engine.pipeline.lastControl?.paths.filter(p=>p.order>0).length??0,
   directUnknownFallbackPaths:engine.pipeline.lastControl?.paths.filter(p=>p.coverageFallback==='conditional-direct-unknown-coverage').length??0,
-  installedScene:d.installedGeometry?{activeSurfaces:d.installedGeometry.activeSurfaces,selectedResources:d.installedGeometry.selectedResources,omittedSurfaces:d.installedGeometry.omittedSurfaces,requestedRadius:d.installedGeometry.requestedRadius,activeRadius:d.installedGeometry.activeRadius,worksetLimited:d.installedGeometry.worksetLimited,coverage:d.installedGeometry.coverage,sourceCatalogueSHA256:d.installedGeometry.sourceCatalogueSHA256,runtimeActivationVerified:false}:null,
+  installedScene:d.installedGeometry?{activeSurfaces:d.installedGeometry.activeSurfaces,surroundingSurfaces:d.installedGeometry.surroundingSurfaces01,selectedResources:d.installedGeometry.selectedResources,omittedSurfaces:d.installedGeometry.omittedSurfaces,requestedRadius:d.installedGeometry.requestedRadius,activeRadius:d.installedGeometry.activeRadius,worksetLimited:d.installedGeometry.worksetLimited,coverage:d.installedGeometry.coverage,sourceCatalogueSHA256:d.installedGeometry.sourceCatalogueSHA256,runtimeActivationVerified:false}:null,
+  installedPropagation:{directBlocks:d.pipeline.simulation.installedDirectBlocks01,
+   directWithheldWithKnownHit:d.pipeline.simulation.installedDirectKnownHitUnknown01,
+   selectedReflections:d.pipeline.simulation.installedReflectedPaths01},
   outputPeak:d.outputPeak,sourceStates:d.sourceStates,stageCounters:d.stageCounters,
   fallbackReason:d.geometry==='conditional-direct-unobserved-space-assumed-clear'?'Additive; conditional direct sound without collision coverage':b.fallbackReason,
   controlDelayMs:latencyProfile.controlDelayMs,propagationLimitSeconds:2,arrivals:d.arrivals,retired:d.retired,latencyRows,latencyRowsOmitted,...(latencyProfile.id==='baseline'?{}:{latencyProfile:latencyProfile.id,producerCreditBlocks:latencyProfile.producerCreditBlocks})}});
@@ -94,7 +98,7 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
      installedScenes.bindPreparationEpoch01(m.frame.worldPreparationStartedUtc);
      const sources=m.frame.vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-s.position[i])<=128)).slice(0,2).map(v=>v.position);
      installedScenes.observeInitial01({sequence:s.sequence,generation:s.generation,geometryTimeMs:now,sourceAgeMs:age,listener:s.position,sources});
-     if(!installedScenes.failed)installedScenes.updateWindow({listener:s.position,sources,generation:s.generation,geometryTimeMs:now,durationMs:1000,cameraInterior01:bindCameraInterior01(m.frame,age,remaining),maximumSurfaces:4096,prepareSoundMapGeometry01:soundMapRequired01(),engine:{order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1')}});
+     if(!installedScenes.failed)installedScenes.updateWindow({listener:s.position,sources:engine.installedCurrentSourcePositions01(m.frame),generation:s.generation,geometryTimeMs:now,durationMs:1000,cameraInterior01:bindCameraInterior01(m.frame,age,remaining),surroundingWorkset01:true,maximumSurfaces:4096,prepareSoundMapGeometry01:soundMapRequired01(),engine:{order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1')}});
     }
    }
   }

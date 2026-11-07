@@ -128,7 +128,19 @@ export class StockGameplay {
   if(key!==this.installedConsumerWorkloadKey01){this.installedConsumerWorkloadKey01=key;this.#installedSceneService01.updateConsumerWorkload01?.(key,this.now());}
  }
  installedWindowContains01(scene,position){const radius=scene.observationModel?.workset?.activeRadius,anchor=scene.tile.listenerAnchor;return inBox(position,scene.tile.bounds)&&Number.isFinite(radius)&&position.every((v,i)=>Math.abs(v-anchor[i])<=radius);}
- installedCurrentSourcePositions01(frame){return frame.vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-frame.listener.position[i])<=128)).slice(0,2).map(v=>v.position);}
+ stockEmitterPosition01(vehicle,role,model){
+  if(role==='aero')return vehicle.position.map((x,i)=>x+vehicle.up[i]*.7);
+  const placement=this.profiles?.emitters?.[model],engine=role==='engine';
+  const offset=engine?(placement?.engineOffset??.35):(placement?.exhaustOffset??-.75);
+  return vehicle.position.map((x,i)=>x+vehicle.forward[i]*offset+vehicle.up[i]*(engine?.65:.3));
+ }
+ installedCurrentSourcePositions01(frame){
+  return frame.vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-frame.listener.position[i])<=128)).slice(0,2).flatMap(v=>{
+   const model=this.profiles?.emitters?this.registry.resolve(v.model,v.context).bank?.model:undefined;
+   const roles=this.settings.airflowEnabled&&v.model===0xf9300cc5?['engine','exhaust','aero']:['engine','exhaust'];
+   return roles.map(role=>this.stockEmitterPosition01(v,role,model));
+  }).filter(p=>p.every((x,i)=>Math.abs(x-frame.listener.position[i])<=128));
+ }
  recordInstalledSceneDiagnostic01(record){const recent=this.installedSceneDiagnostics01.recent;recent.push(record);if(recent.length>64)recent.shift();}
  discardInstalledCandidate01(pending,reason,at=this.now()){
   const postStop=this.#installedSceneStopped01||this.#installedSceneService01?.readinessSnapshot01().stopIntentAt!=null;
@@ -342,13 +354,13 @@ export class StockGameplay {
    if(!s.source||!this.sample.state&&(!independentSource||!selected.some(item=>item.identity===s.identity)))continue;const v=s.vehicle;s.source.renderInto({operatingPoint:v.operatingPoint,load:v.lift ? .05 : .9,lift:v.lift,running:v.running},this.inputs[ids[0]],this.inputs[ids[1]]);
    this.stageCounters.sourcePlaybackBlocks++;observePcmBlock(this.inputs[ids[0]],this.stageCounters.engine);observePcmBlock(this.inputs[ids[1]],this.stageCounters.exhaust);
    const profile=this.profiles?.profiles?.[s.source.vehicle.model];
-   for(const [i,role]of ['engine','exhaust'].entries()){const placement=this.profiles?.emitters?.[s.source.vehicle.model],offset=role==='engine'?(placement?.engineOffset??.35):(placement?.exhaustOffset??-.75);
-    sources.push({id:ids[i],generation:s.generation,position:v.position.map((x,k)=>x+v.forward[k]*offset+v.up[k]*(i ? .3 : .65)),velocity:v.velocity,
+   for(const [i,role]of ['engine','exhaust'].entries()){
+    sources.push({id:ids[i],generation:s.generation,position:this.stockEmitterPosition01(v,role,s.source.vehicle.model),velocity:v.velocity,
      forward:v.forward.map(x=>i?-x:x),up:v.up,directivity:profile?.directivity?.[role]??(i?.65:.1),valid:true,emitting:true});}
    if(v.model===0xf9300cc5){const at=this.now(),flow=s.airflow.renderInto({velocity:v.velocity,enabled:this.settings.airflowEnabled,level:this.settings.airflowLevel,riderAttached:v.riderAttached===true,riderViewAttached:v.riderViewAttached===true&&!!this.sample.state,valid:!!this.sample.state},this.inputs[aeroId],...s.local);
     this.airflowState.maximumSynthesisMs=Math.max(this.airflowState.maximumSynthesisMs,this.now()-at);this.airflowState.riderActive||=flow.riderActive;
     for(let c=0;c<2;c++)for(let i=0;i<BLOCK;i++)this.localAirflow[c][i]+=s.local[c][i];
-    if(this.settings.airflowEnabled){sources.push({id:aeroId,generation:s.generation,position:v.position.map((x,k)=>x+v.up[k]*.7),velocity:v.velocity,forward:v.forward,up:v.up,directivity:.15,valid:true,emitting:flow.exteriorActive});this.airflowState.exteriorSources++;}
+    if(this.settings.airflowEnabled){sources.push({id:aeroId,generation:s.generation,position:this.stockEmitterPosition01(v,'aero'),velocity:v.velocity,forward:v.forward,up:v.up,directivity:.15,valid:true,emitting:flow.exteriorActive});this.airflowState.exteriorSources++;}
    }
   }
   this.stats.maximumActive=Math.max(this.stats.maximumActive,selected.length);
@@ -360,7 +372,9 @@ export class StockGameplay {
   for(let i=0;i<BLOCK;i++){if(release.remaining){release.remaining--;for(let c=0;c<2;c++)this.localAirflow[c][i]+=release.from[c]*release.remaining/960;}}
   release.last[0]=this.localAirflow[0][BLOCK-1];release.last[1]=this.localAirflow[1][BLOCK-1];this.airflowState.localResidualReleaseFrames=release.remaining;
   const currentScene=this.pipeline.simulation.scene,installed=this.staticSceneBinding?.mode==='installed-static-conditional-partial';
-  if(currentScene!==this.direct&&(installed?(!this.installedWindowContains01(currentScene,listener.position)||sources.some(s=>!this.installedWindowContains01(currentScene,s.position))):(!inBox(listener.position,currentScene.tile.bounds)||sources.some(s=>!inBox(s.position,currentScene.tile.bounds))))){if(installed&&this.#installedSceneService01)this.#installedSceneService01.invalidateConsumer01('outside-active-workset',this.now());else{this.pipeline.replaceScene(this.direct);this.staticSceneBinding=null;this.stats.geometryFallbacks++;}}
+  // A warming playout has no rendered pose. The placeholder origin must not
+  // revoke a workset already qualified against the real control observation.
+  if(this.sample.state&&currentScene!==this.direct&&(installed?(!this.installedWindowContains01(currentScene,listener.position)||sources.some(s=>!this.installedWindowContains01(currentScene,s.position))):(!inBox(listener.position,currentScene.tile.bounds)||sources.some(s=>!inBox(s.position,currentScene.tile.bounds))))){if(installed&&this.#installedSceneService01)this.#installedSceneService01.invalidateConsumer01('outside-active-workset',this.now());else{this.pipeline.replaceScene(this.direct);this.staticSceneBinding=null;this.stats.geometryFallbacks++;}}
   this.pipeline.simulation.setProcessingSettings({pathBudget:this.pipeline.renderer.maxPathsPerSource,maxReflectors:16,earlyReflections:this.settings.reflections});
   this.telemetry?.begin(this.pipeline.simulation,this.now());
   const installedBefore=this.staticSceneBinding?.mode==='installed-static-conditional-partial';this.installedRenderPreparing01=true;

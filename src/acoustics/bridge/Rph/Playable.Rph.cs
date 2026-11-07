@@ -75,6 +75,11 @@ namespace RichAudio.Beacon.Rph {
    // A measured camera cut is consumed privately, never interpolated through.
    // Existing vehicle observations can continue on the next independent pose.
    if(!decision.Publish){Diagnostic(decision.Classification);return;}
+   // The proxy belongs to the camera sample. Acquire it before discovery and
+   // vehicle enumeration can spend the remainder of the observation budget.
+   string epoch=InstalledWorldWarmup.StartedUtc;
+   var cameraInterior=!decision.Listener.Paused&&epoch!=null&&Stopwatch.GetTimestamp()-began<Stopwatch.Frequency*.008
+    ?CameraSampler.ObserveInterior(decision.Listener):null;
    InstalledWorldWarmup.OfferInitial01(r.Session,decision.Listener);
    bool vehicleView=false;
    try{vehicleView=Rage.Native.NativeFunction.CallByName<bool>("IS_GAMEPLAY_CAM_RENDERING")&&Rage.Native.NativeFunction.CallByName<bool>("IS_FOLLOW_VEHICLE_CAM_ACTIVE");}
@@ -107,11 +112,9 @@ namespace RichAudio.Beacon.Rph {
      observations.Add(new GameplayVehicle{Id="vehicle-"+t.Identity,Generation=t.Generation,Model=model,Context=context,ObservationTicks=at,Position=position,Velocity=vel,Forward=forward,Up=up,Running=running,OperatingPoint=ratio,Valid=true,RiderAttached=riderAttached,RiderViewAttached=riderAttached&&vehicleView});
     }catch(ThreadAbortException){throw;}catch(Exception e){sourceGetterFailures++;lastReason="source-getter-failed:"+stage+":"+e.GetType().Name;tracked.Remove(t);}
    }
-   string epoch=InstalledWorldWarmup.StartedUtc;
    double elapsed=(Stopwatch.GetTimestamp()-began)*1000d/Stopwatch.Frequency;r.MaximumObservationMs=Math.Max(r.MaximumObservationMs,elapsed);bool valid=elapsed<=10;
    if(!valid){slowBatches++;lastReason="slow-observation-batch";}else if(observations.Count>0)lastReason="observed-vehicles:"+observations.Count;publishedVehicles+=valid?observations.Count:0;
    var listener=decision.Listener;listener.Valid=valid;listener.Reason=valid?"valid":"slow-observation";
-   var cameraInterior=valid&&!listener.Paused&&epoch!=null&&elapsed<8?CameraSampler.ObserveInterior(listener):null;
    r.Publish(new GameplayFrame{Session=r.Session,Listener=listener,Vehicles=valid?observations.ToArray():new GameplayVehicle[0],WorldPreparationStartedUtc=epoch,CameraInterior01=valid?cameraInterior:null});
    Diagnostic(lastReason);
   }

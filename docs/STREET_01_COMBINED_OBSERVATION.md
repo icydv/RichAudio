@@ -129,3 +129,51 @@ granular dependencies. Engine uses DAT10 synth `1932E476` and preset
 route uses synth `DF6D8836` and has a zero preset reference. Audible
 contribution, private profile registration, exact effective baseline
 restoration and recovery outside the controller remain unverified.
+
+## Normal gameplay producer
+
+My normal bridge reads the camera proxy before vehicle enumeration spends
+the camera observation budget. The full observation still has to meet the
+existing deadline. The normal producer requests the offset engine, exhaust
+and enabled exterior airflow positions used by StockGameplay. During
+playout warm-up an absent pose supplies no reason to revoke the installed
+scene. The latest real observation, the consumer lease and the next
+rendered pose retain their own checks.
+
+Codex tested the actual normal producer with the retained camera passage,
+original procedural vehicle audio and authored moving vehicle poses. Its
+eight-native-unit interior workset retained 4,096 surfaces, including 2,981
+whose centres were outside the four-unit near box. The 131 omitted surfaces
+remained unknown. It applied 31 replacements without a lease gap in that
+run. A prior capture gap retired the source. After reacquisition, admission
+and exterior withdrawal kept the same source and continued its grain
+history. The genuine geometry produced 1,675 direct-path decisions with
+known hits and overlapping uncertainty. Those paths stayed withheld. It
+produced no qualified reflection for the chosen foyer route. A separate
+original-wall control produced finite reflections and blocked the direct
+path when the moving camera crossed the wall.
+
+The larger selection uses the existing 4,096-surface cap and prioritises
+surfaces intersecting the near box. The eight-unit workset applies only
+when the camera and its emitters fit. The ordinary adaptive path still
+handles wider source separation and exteriors. The wider cache selection
+does not alter the geometry proof, original lease or audio block contract.
+The replay recorded one complete-render hard miss and three blocks above
+the eight-millisecond headroom target. These are device-free producer
+measurements. I still need an exact normal-product package, current
+source proofs and gameplay timing before qualifying an audible comparison.
+
+## Private marker follow-up
+
+My private marker builder can now emit one record for a resolution-only
+test. Tailgater's observed child hash supplies a candidate discriminator
+for marker A without a Blista reading. The standalone probe uses only
+disposable vehicles. For the separate two-marker test it establishes
+its own marker A before assigning B. An RPH fiber outside the command
+controller can restore that known marker on the same empty vehicle
+lifetime and retire both probe vehicles when the command exits with B
+active. It refuses a changed pool identity, an unexpected marker or a
+changed neighbour. The authored test covers this handoff. The guard still
+depends on the same RPH AppDomain and game scheduler. My arbitrary
+effective-profile readback, real marker mounting and resolution, recovery
+after plugin unload, and component isolation remain unqualified.

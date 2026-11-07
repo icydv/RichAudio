@@ -81,6 +81,9 @@ export class CausalSimulation {
       prunedPaths: 0,
       maximumAgeSeconds: 0,
       sceneReplacements: 0,
+      installedDirectBlocks01: 0,
+      installedDirectKnownHitUnknown01: 0,
+      installedReflectedPaths01: 0,
     };
   }
   replaceScene(scene, { preserveIdenticalReflectors = false } = {}) {
@@ -300,10 +303,15 @@ export class CausalSimulation {
     requireValue(frame.scene===this.scene&&frame.geometryEpoch===this.geometryEpoch,'out-of-generation prepared acoustic frame');
     this.completedPrepareSequence=frame.prepareSequence;
     let availablePaths=0;
+    const installed=frame.scene.observationModel?.kind==='conditional-installed-static-model';
     for(const {id,track,plans} of sources){
       const eligible=[];
       for(const {plan,candidate,offset,count} of plans){
         const p=finishPath(plan,queries?queries.slice(offset,offset+count):null,this.stats);
+        if(installed&&candidate.surfaces.length===0&&p.status==='blocked-no-modelled-path')
+          this.stats.installedDirectBlocks01++;
+        if(installed&&candidate.surfaces.length===0&&p.status==='unknown'&&p.hits?.length)
+          this.stats.installedDirectKnownHitUnknown01++;
         const visual=frame.soundMap?{sourceId:id,plan,candidate,result:p,reason:p.status,identity:null}:null;
         if(visual)frame.soundMap.candidates.push(visual);
         if (
@@ -368,7 +376,9 @@ export class CausalSimulation {
         0,
         eligible.length - budget,
       );
-      paths.push(...eligible.slice(0,budget));
+      const chosen=eligible.slice(0,budget);
+      paths.push(...chosen);
+      if(installed)for(const p of chosen)if(p.order>0)this.stats.installedReflectedPaths01++;
     }
     // Old path-rate records are bounded independently from telemetry lifetime.
     for (const [id, p] of this.previous)

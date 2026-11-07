@@ -60,6 +60,38 @@ test('late old-region candidate cannot reactivate after movement; unselected tra
  }finally{await c.close();}
 });
 
+test('the applied installed scene renders reflection and obstruction for a moving camera and source',{timeout:12000},async()=>{
+ const fixture=installedSceneFixture01(),run=await originalAirflowEngineStreet01({enabled:false}),engine=run.engine;
+ engine.now=()=>performance.now();
+ const service=new InstalledSceneService01({config:fixture.config,session:budgetSession042,
+  onScene:(scene,receipt)=>{if(scene.tile.surfaces.length)engine.queueInstalledStaticScene01(scene,receipt);}});
+ engine.bindInstalledSceneService01(service);
+ const began=performance.now(),stats=engine.pipeline.simulation.stats;
+ try{
+  for(let block=0;block<455;block++){
+   const due=began+block*512/48;
+   while(performance.now()<due)await wait(Math.max(1,Math.floor(due-performance.now())));
+   if(block%4===0){
+    const t=block*512/48000,frame=airflowFrameStreet01(block,t,{speed:0});
+    frame.listener.position=[0,Math.min(6,Math.max(0,(t-2.6)*7)),1];
+    frame.vehicles[0].position=[-.8+Math.sin(t)/4,0,1];
+    frame.vehicles[0].velocity=[Math.cos(t)/4,0,0];
+    engine.accept(frame,0,200);
+    service.updateWindow({listener:frame.listener.position,sources:engine.installedCurrentSourcePositions01(frame),
+     generation:1,geometryTimeMs:performance.now(),engine:{...engine.direct.config,order:2},prepareSoundMapGeometry01:false});
+   }
+   await engine.render();
+  }
+  assert(stats.installedReflectedPaths01>0,'real finite reflection from the authored wall');
+  assert(stats.installedDirectBlocks01>0,'the moved camera puts the authored wall between source and listener');
+  assert.equal(engine.stats.arrivals,1);
+  assert.equal(engine.stats.retired,0);
+  assert(engine.installedSceneDiagnostics01.renewals>0);
+ }finally{
+  await run.close();assert.equal((await service.close()).workerJoined,true);fixture.close();
+ }
+});
+
 test('withheld candidate records a complete transaction overrun as rejection, never normal preparation',{timeout:4000},async()=>{
  const fixture=installedSceneFixture01(),engine=new StockGameplay({registry:{resolve(){throw Error('No bank');},createSource(){throw Error('No PCM source');}},session:budgetSession042});let measured=null,error=null;
  const frame=airflowFrameStreet01(0,0,{speed:0});frame.listener.position=[0,0,1];frame.vehicles[0].position=[-1,0,1];engine.accept(frame,0,200);

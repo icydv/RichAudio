@@ -10,14 +10,16 @@ export function sceneReadinessRequestClass01(request){
  const cell=Math.max(1,Math.min(4,request.radius/2)),spatial=p=>p.map(v=>Math.floor(v/cell));
  const interior=interiorObservationKey01(request.interiorActivation01);
  const anchor=request.engine?.higherOrderPaths?.length?null:
-  interiorWorksetAnchor01(request.interiorActivation01,request.listener,request.sources,request.radius);
+  interiorWorksetAnchor01(request.interiorActivation01,request.listener,request.sources,request.radius,request.surroundingWorkset01);
+ const surrounding=anchor&&request.surroundingWorkset01;
  return digest({generation:request.generation,visualGeometryRequested:request.prepareSoundMapGeometry01!==false,
   settings:request.engine,radius:request.radius,maximumSurfaces:request.maximumSurfaces,adaptive:request.adaptiveRadius,
-  interior,anchor,listener:anchor??spatial(request.listener),sources:request.sources.map(spatial)});
+  interior,anchor,listener:anchor??spatial(request.listener),
+  sources:surrounding?request.sources.length:request.sources.map(spatial)});
 }
 export function sceneReadinessScope01({receipt,request,metadata,evidence,profile,worksetAnchor,consumerWorkloadKey='default',consumerWorkloadRevision=0}){
  const cell=Math.max(1,Math.min(4,(metadata.activeRadius??request.radius)/2)),spatial=p=>p.map(v=>Math.floor(v/cell));
- return digest({consumerWorkloadKey,consumerWorkloadRevision,visualGeometryRequested:request.prepareSoundMapGeometry01!==false,catalogue:receipt.catalogSHA256,epoch:receipt.bindingEpoch,generation:receipt.generation,settings:request.engine,radius:request.radius,maximumSurfaces:request.maximumSurfaces,adaptive:request.adaptiveRadius,spatial:{cell,listener:metadata.interiorWorksetAnchored01?worksetAnchor:spatial(request.listener),sources:request.sources.map(spatial)},evidence,work:{activeRadius:metadata.activeRadius,surfaces:metadata.activeSurfaces,triangles:metadata.trianglesQueried,selected:metadata.selectedResources,omitted:metadata.omittedSurfaces,missing:metadata.missingRegions},mode:sceneReadinessMode01(profile)});
+ return digest({consumerWorkloadKey,consumerWorkloadRevision,visualGeometryRequested:request.prepareSoundMapGeometry01!==false,catalogue:receipt.catalogSHA256,epoch:receipt.bindingEpoch,generation:receipt.generation,settings:request.engine,radius:request.radius,maximumSurfaces:request.maximumSurfaces,adaptive:request.adaptiveRadius,spatial:{cell,listener:metadata.interiorWorksetAnchored01?worksetAnchor:spatial(request.listener),sources:metadata.surroundingWorkset01?request.sources.length:request.sources.map(spatial)},evidence,work:{activeRadius:metadata.activeRadius,surfaces:metadata.activeSurfaces,triangles:metadata.trianglesQueried,selected:metadata.selectedResources,omitted:metadata.omittedSurfaces,missing:metadata.missingRegions},mode:sceneReadinessMode01(profile)});
 }
 export class InstalledSceneReadinessPolicy01 {
  constructor(){this.state='preparing';this.active=null;this.model=null;this.events=[];this.serial=0;this.intervals=[];this.dispatchLateness=[];this.metadataProofMilliseconds01=0;this.admissions01=[];this.latestObservationAt=null;this.latestGeneration=null;this.stopAt=null;this.firstExpiredAt=null;this.maximumGapMilliseconds=0;this.gapStartedAt=null;this.lastCandidateLatency=0;this.lastMode=null;this.provisional01=null;this.context01={active:null,pending:null,lastDispatch:-Infinity};this.boundaryAt01=0;this.totals={validatedCandidates:0,warmSamples:0,withheldCandidates:0,discardedCandidates:0,applications:0,firstActivations:0,replacements:0,validityGaps:0,scopeInvalidations:0,applicationOverruns:0,postStopResults:0};}

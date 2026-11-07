@@ -72,7 +72,13 @@ internal static class TestStreetContinuity01 {
  static int Main(){try{
   var player=new Rage.Ped{Handle=new Rage.PoolHandle{Value=0x102,Index=1,Counter=2},MemoryAddress=new IntPtr(100)};
   var vehicle=new Rage.Vehicle{Handle=new Rage.PoolHandle{Value=0x304,Index=3,Counter=4},MemoryAddress=new IntPtr(200),Driver=player};player.CurrentVehicle=vehicle;Rage.Game.LocalPlayer.Character=player;Rage.World.Entities=new Rage.Entity[]{vehicle};var runtime=new GameplayRuntime();
-  Capture(runtime);var initial=Only(runtime);
+  // The first real adapter invocation may spend its 10 ms budget on JIT.
+  // Keep that rejected frame and require fresh evidence on a later tick.
+  for(int attempt=0;attempt<3;attempt++){
+   Capture(runtime);
+   if(runtime.Frames.Count>0&&runtime.Frames[runtime.Frames.Count-1].Listener.Valid)break;
+  }
+  var initial=Only(runtime);
   Test("dismount preserves real running source identity and original bank context",delegate{
    Check(initial.RiderAttached==true&&initial.RiderViewAttached==true,"mounted driver in normal vehicle view");
    player.CurrentVehicle=null;vehicle.Driver=null;Capture(runtime);var dismounted=Only(runtime);
