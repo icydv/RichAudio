@@ -7,9 +7,10 @@ param(
  [Parameter(Mandatory)][ValidatePattern('^[a-f0-9]{64}$')][string]$BaselineSHA256,
  [Parameter(Mandatory)][string]$BaselineRecord,
  [Parameter(Mandatory)][ValidatePattern('^[a-fA-F0-9]{8}$')][string]$HornListA,
- [Parameter(Mandatory)][ValidatePattern('^[a-fA-F0-9]{8}$')][string]$HornListB,
+ [ValidatePattern('^[a-fA-F0-9]{8}$')][string]$HornListB,
  [Parameter(Mandatory)][ValidatePattern('^[a-fA-F0-9]{8}$')][string]$MarkerA,
- [Parameter(Mandatory)][ValidatePattern('^[a-fA-F0-9]{8}$')][string]$MarkerB,
+ [ValidatePattern('^[a-fA-F0-9]{8}$')][string]$MarkerB,
+ [switch]$ResolveOnly,
  [Parameter(Mandatory)][string]$CodeWalkerCore,
  [Parameter(Mandatory)][ValidatePattern('^[a-f0-9]{64}$')][string]$CoreSHA256,
  [Parameter(Mandatory)][string]$Output
@@ -32,9 +33,10 @@ $baseline=Get-Item -LiteralPath $inputFile
 if($baseline.PSIsContainer-or$baseline.Length-gt64MB-or
  (Get-FileHash -LiteralPath $inputFile).Hash.ToLowerInvariant()-cne$BaselineSHA256-or
  (Get-FileHash -LiteralPath $CodeWalkerCore).Hash.ToLowerInvariant()-cne$CoreSHA256){throw 'Exact bounded base XML and CodeWalker Core pins required'}
-if($HornListA-ieq$HornListB-or$HornListA-eq'00000000'-or$HornListB-eq'00000000'-or
-   $MarkerA-ieq$MarkerB-or$MarkerA-eq'00000000'-or$MarkerB-eq'00000000'){
- throw 'Two distinct sound-list links and two distinct expected horn readbacks required'
+if($HornListA-eq'00000000'-or$MarkerA-eq'00000000'-or
+   ($ResolveOnly-and($HornListB-or$MarkerB))-or
+   (!$ResolveOnly-and(!$HornListB-or!$MarkerB-or$HornListA-ieq$HornListB-or$HornListB-eq'00000000'-or$MarkerA-ieq$MarkerB-or$MarkerB-eq'00000000'))){
+ throw 'One nonzero A pair for resolution, or two distinct nonzero pairs for restoration, required'
 }
 $settings=[Xml.XmlReaderSettings]::new();$settings.DtdProcessing=[Xml.DtdProcessing]::Prohibit;$settings.MaxCharactersInDocument=64MB
 $reader=[Xml.XmlReader]::Create($inputFile,$settings)
@@ -43,13 +45,14 @@ $originals=@($doc.SelectNodes('/Dat151/Items/Item[@type="Vehicle"]')|Where-Objec
 if($originals.Count-ne1){throw 'One exact DAT151 Vehicle record required'}
 $original=$originals[0];$horn=$original.SelectSingleNode('Horns')
 if(!$horn-or$horn.InnerText-ieq('hash_'+$HornListA)-or$horn.InnerText-ieq('hash_'+$HornListB)){throw 'Baseline and marker horn links must be distinguishable'}
-$nonce=[Guid]::NewGuid().ToString('N');$profiles=@('ra_probe_'+$nonce+'_a','ra_probe_'+$nonce+'_b')
+$nonce=[Guid]::NewGuid().ToString('N');$profiles=@('ra_probe_'+$nonce+'_a')
+$markers=@($MarkerA.ToLowerInvariant())
+$lists=@($HornListA.ToLowerInvariant())
+if(!$ResolveOnly){$profiles+=('ra_probe_'+$nonce+'_b');$markers+=$MarkerB.ToLowerInvariant();$lists+=$HornListB.ToLowerInvariant()}
 [xml]$variant=$doc.OuterXml
 $items=$variant.SelectSingleNode('/Dat151/Items')
 $items.RemoveAll()
-$markers=@($MarkerA.ToLowerInvariant(),$MarkerB.ToLowerInvariant())
-$lists=@($HornListA.ToLowerInvariant(),$HornListB.ToLowerInvariant())
-for($i=0;$i-lt2;$i++){
+for($i=0;$i-lt$profiles.Count;$i++){
  $copy=$variant.ImportNode($original,$true)
  $copy.SelectSingleNode('Name').InnerText=$profiles[$i]
  $copy.SelectSingleNode('Horns').InnerText='hash_'+$lists[$i]
@@ -74,5 +77,5 @@ $device='dlc_raprobe_'+$nonce.Substring(0,8)
  profileB=$profiles[1];hornListB=$lists[1];expectedMarkerB=$markers[1]
  relSHA256=(Get-FileHash -LiteralPath $file).Hash.ToLowerInvariant();device=$device
  registrationVerified=$false;requiresMatchingMountedSoundReferences=$true;existingVehicleMutationAllowed=$false
- enabled=$false;scope='Disposable Bati marker capability only. No suppression or playback.'
+ enabled=$false;resolutionOnly=[bool]$ResolveOnly;scope='Disposable Bati marker capability only. No suppression or playback.'
 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $out 'probe-manifest.json') -Encoding utf8

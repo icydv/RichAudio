@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Rage;
@@ -18,9 +19,16 @@ namespace RichAudio {
   }
   static Owned target, control;
   static bool running, used;
+  sealed class Recovery {
+   internal Owned Target, Control;
+   internal string Baseline;
+   internal uint MarkerA, MarkerB, Neighbour;
+   internal long Deadline;
+  }
+  static volatile Recovery recovery;
 
   public static void Main(){ Game.Console.Print("RichAudio profile probe idle. Manual Story Mode experiment only."); }
-  public static void OnUnload(){if(!Cleanup())Game.Console.Print("RichAudio probe retirement unresolved.");}
+  public static void OnUnload(){recovery=null;if(!Cleanup())Game.Console.Print("RichAudio probe retirement unresolved.");}
 
   static string Identity(Vehicle v) {
    var h=v.Handle;
@@ -48,8 +56,8 @@ namespace RichAudio {
    return v;
   }
   static uint Horn(Owned item){return NativeFunction.CallByName<uint>("GET_VEHICLE_DEFAULT_HORN",Parked(item));}
-  static void Assign(string profile){
-   NativeFunction.Natives.x4F0C413926060B38(Parked(target),profile);
+  static void Assign(Owned item,string profile){
+   NativeFunction.Natives.x4F0C413926060B38(Parked(item),profile);
   }
   static void Expect(uint horn, uint neighbour){
    GameFiber.Sleep(250);
@@ -64,7 +72,7 @@ namespace RichAudio {
     return retired;
    }
    try{
-    Vehicle v=Empty(item);
+    Vehicle v=Parked(item);
     v.Delete();
     bool retired=!Owns(item);
     if(retired)item=null;
@@ -76,17 +84,43 @@ namespace RichAudio {
    return a&&b;
   }
 
+  // The known baseline is the probe's own explicitly assigned marker A.
+  // Horn readback discriminates the markers. It cannot name an arbitrary
+  // existing effective profile or grant authority to change one.
+  static void Restore(Recovery lease) {
+   uint current=Horn(lease.Target);
+   if(Horn(lease.Control)!=lease.Neighbour||(current!=lease.MarkerA&&current!=lease.MarkerB))
+    throw new InvalidOperationException("Known probe state or neighbour lost");
+   if(current==lease.MarkerB){Assign(lease.Target,lease.Baseline);GameFiber.Sleep(250);}
+   if(Horn(lease.Target)!=lease.MarkerA||Horn(lease.Control)!=lease.Neighbour)
+    throw new InvalidOperationException("Known marker A did not return");
+  }
+  static void Watch(Recovery lease) {
+   while(recovery==lease&&Stopwatch.GetTimestamp()<lease.Deadline)GameFiber.Sleep(20);
+   if(recovery!=lease)return;
+   bool restored=false;
+   try{Restore(lease);restored=true;}
+   catch(System.Threading.ThreadAbortException){throw;}
+   catch(Exception error){Game.Console.Print("RichAudio probe recovery inconclusive: "+error.Message);}
+   finally{
+    bool retired=Cleanup();recovery=null;running=false;
+    Game.Console.Print("RichAudio probe watchdog: marker A restored="+restored+"; both probe lifetimes retired="+retired);
+   }
+  }
+
   [ConsoleCommand(Name="RichAudioProbeProfiles",Description="Run the separately approved private A/B profile test on two disposable Batis.")]
-  public static void Run(string profileA,string markerA,string profileB,string markerB,float x,float y,float z){
-   uint a,b;
+  public static void Run(string profileA,string markerA,string profileB,string markerB,float x,float y,float z,string mode){
+   uint a,b=0;bool resolveOnly=mode=="resolve-a";
    if(used||running||Game.IsLoading||Game.IsPaused||NativeFunction.CallByName<bool>("NETWORK_IS_SESSION_ACTIVE")||
-    !Regex.IsMatch(profileA??"",@"\Ara_probe_[a-z0-9_]{8,48}\z")||!Regex.IsMatch(profileB??"",@"\Ara_probe_[a-z0-9_]{8,48}\z")||
-    profileA==profileB||!uint.TryParse(markerA,NumberStyles.AllowHexSpecifier,CultureInfo.InvariantCulture,out a)||
-    !uint.TryParse(markerB,NumberStyles.AllowHexSpecifier,CultureInfo.InvariantCulture,out b)||a==0||b==0||a==b||
+    (!resolveOnly&&mode!="normal"&&mode!="controller-exit")||
+    !Regex.IsMatch(profileA??"",@"\Ara_probe_[a-z0-9_]{8,48}\z")||
+    !uint.TryParse(markerA,NumberStyles.AllowHexSpecifier,CultureInfo.InvariantCulture,out a)||a==0||
+    (!resolveOnly&&(!Regex.IsMatch(profileB??"",@"\Ara_probe_[a-z0-9_]{8,48}\z")||profileA==profileB||
+     !uint.TryParse(markerB,NumberStyles.AllowHexSpecifier,CultureInfo.InvariantCulture,out b)||b==0||a==b))||
     !(Math.Abs(x)<10000&&Math.Abs(y)<10000&&Math.Abs(z)<10000)){
     Game.Console.Print("RichAudio profile probe refused.");return;
    }
-   running=true;used=true;bool matched=false;
+   running=true;used=true;bool matched=false,handedOff=false;
    try{
     target=Spawn(new Vector3(x,y,z));
     control=Spawn(new Vector3(x+5,y,z));
@@ -94,15 +128,27 @@ namespace RichAudio {
     uint original=Horn(target), neighbour=Horn(control);
     if(original==0||neighbour==0||original==a||original==b||neighbour==a||neighbour==b)
      throw new InvalidOperationException("Marker collides with unmodified readback");
-    Assign(profileA);Expect(a,neighbour);
-    Assign(profileB);Expect(b,neighbour);
-    Assign(profileA);Expect(a,neighbour);
-    matched=true;
+    Assign(target,profileA);Expect(a,neighbour);
+    if(resolveOnly){matched=true;return;}
+    var lease=new Recovery{Target=target,Control=control,Baseline=profileA,MarkerA=a,MarkerB=b,Neighbour=neighbour,
+     Deadline=Stopwatch.GetTimestamp()+2*Stopwatch.Frequency};
+    recovery=lease;
+    GameFiber.StartNew(delegate{Watch(lease);},"RichAudio private marker recovery");
+    if(recovery!=lease||Stopwatch.GetTimestamp()>=lease.Deadline)throw new InvalidOperationException("Controller lease expired before B");
+    handedOff=true;
+    Assign(target,profileB);Expect(b,neighbour);
+    if(mode=="controller-exit")return;
+    if(recovery!=lease||Stopwatch.GetTimestamp()+Stopwatch.Frequency/2>=lease.Deadline)throw new InvalidOperationException("Controller restoration reserve expired");
+    Restore(lease);
+    matched=true;handedOff=false;
    }catch(System.Threading.ThreadAbortException){throw;}
    catch(Exception error){Game.Console.Print("RichAudio profile probe inconclusive: "+error.Message);}
    finally{
-    bool retired=Cleanup();running=false;
-    Game.Console.Print("RichAudio marker A/B/A matched="+matched+"; both probe lifetimes retired="+retired);
+    if(!handedOff){
+     recovery=null;
+     bool retired=Cleanup();running=false;
+     Game.Console.Print("RichAudio marker "+mode+" matched="+matched+"; both probe lifetimes retired="+retired);
+    }
    }
   }
  }
