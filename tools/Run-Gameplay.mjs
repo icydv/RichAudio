@@ -2,8 +2,8 @@ import {bindCameraInterior01} from '../src/acoustics/world/interior-activation01
 // Continuous owned producer. Separate authored startup JIT PCM is discarded.
 // Playback uses verified stock banks; no WASAPI, game API or archive decode.
 import fs from 'node:fs';import path from 'node:path';import readline from 'node:readline';import {performance} from 'node:perf_hooks';
-import {loadStockCatalogAssets,loadStockNpcAssets} from '../src/acoustics/vehicle/stock-source.mjs';
-import {prepareStockSourcesForStartup10} from '../src/acoustics/vehicle/stock-source-preparation10.mjs';
+import {loadStockCatalogAssets,loadStockNpcAssets,StockVehicleSource,prepareStockSource10} from '../src/acoustics/vehicle/stock-source.mjs';
+import {authoredStartupBank10,prepareStockSourcesForStartup10} from '../src/acoustics/vehicle/stock-source-preparation10.mjs';
 import {loadInstalledStockRegistry} from '../src/acoustics/vehicle/installed-stock-registry.mjs';
 import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';
 import {resolveLatencyProfile,validateStreetLatencySelection01} from '../src/acoustics/vehicle/latency-profile.mjs';
@@ -20,14 +20,41 @@ validateStreetLatencySelection01(config);
 const inside=relative=>{const p=path.resolve(root,relative);if(!p.startsWith(root+path.sep))throw Error('package path escaped');return p;};
 const assets=loadStockCatalogAssets(inside(config.playerManifest),{sustainAtlasFile:inside(config.atlas)}),npcAssets=loadStockNpcAssets(inside(config.npcManifest));
 const registry=loadInstalledStockRegistry({catalogFile:inside(config.catalog),catalogSha256:config.catalogSha256,assets,npcAssets}),profiles=JSON.parse(fs.readFileSync(inside(config.profiles),'utf8'));
-// Prepare pure bank data before the host releases telemetry or output startup.
-// Actual sources are first constructed by the unchanged eligibility selection.
+// Prepare pure bank data and bounded untouched voices before host readiness.
+// The normal eligibility selection still controls when any voice is acquired.
 const sourceStartupPreparation10=prepareStockSourcesForStartup10(registry,config.eligible);
 // Normal product camera changes retain independently observed vehicle history.
 // Explicit immutable policy selections and closed demonstration profiles retain
 // their declared behavior; source expiry and listener-cut rejection still apply.
 const continuityPolicy=config.continuityPolicy??(config.demoProfile?'baseline':'camera-source-01');
+async function warmNormalControl01(){
+ const bank=authoredStartupBank10(),plan=prepareStockSource10(bank),began=performance.now();
+ let now=0;
+ const fixture=new StockGameplay({registry:{resolve:()=>({status:'available',bank}),
+  createSource:()=>new StockVehicleSource(bank,{preparation10:plan})},session,now:()=>now,
+  latencyProfile:latencyProfile.id,continuityPolicy,latencyDiagnostics:true});
+ fixture.setSettings({...fixture.settings,acceleration:'cpu'});
+ try{
+  for(let i=0;i<24;i++){
+   now=i*512/48;
+   if(i%4===0){
+    const observationTicks=Math.round(now*10000);
+    fixture.accept({version:1,session,listener:{version:1,session,sequence:i,generation:1,observationTicks,
+     clockFrequency:10000000,gameTimeMs:Math.round(now),position:[0,0,1],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],
+     valid:true,paused:false,reason:'valid',coordinates:'gta-native-unscaled',units:'native-unverified',listenerKind:'camera',velocityKind:'unavailable',sourceId:null},
+     vehicles:[{id:'authored-warmup',model:0xf9300cc5,context:'player',generation:1,observationTicks,
+      position:[1,1,1],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],operatingPoint:.5,valid:true,running:true}]},0);
+   }
+   await fixture.render();
+  }
+  return {authoredBlocks:24,authoredSourceBlocks:fixture.stageCounters.sourcePlaybackBlocks,
+   actualSourceFramesAdvanced:0,pcmQueueFramesAdded:0,milliseconds:performance.now()-began};
+ }finally{await fixture.close();}
+}
+const normalControlWarmup=latencyProfile.id==='street-01'?await warmNormalControl01():null;
 const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true,latencyProfile:latencyProfile.id,continuityPolicy}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
+const startupVoices=latencyProfile.id==='street-01'&&!sourceStartupPreparation10.unpreparedBanks.length?engine.prepareStartupVoices01(config.eligible):0;
+engine.pipeline.simulation.captureInstalledPaths01=config.acousticPathEvidence01===true;
 let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,pendingSettings=null,pendingGeometry=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
 let viewer=false,viewerClient=null,soundMapRecordingRequest01=false,soundMapBackgroundRequest01=false;engine.telemetry=new SoundMapTelemetry();
 const soundMapRequired01=()=>viewer||soundMapRecordingRequest01||soundMapBackgroundRequest01;
@@ -76,9 +103,10 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality,
   listenerState:d.listenerState,selectedPaths:d.selectedPaths,reflectionPathsSelected:engine.pipeline.lastControl?.paths.filter(p=>p.order>0).length??0,
   directUnknownFallbackPaths:engine.pipeline.lastControl?.paths.filter(p=>p.coverageFallback==='conditional-direct-unknown-coverage').length??0,
   installedScene:d.installedGeometry?{activeSurfaces:d.installedGeometry.activeSurfaces,surroundingSurfaces:d.installedGeometry.surroundingSurfaces01,selectedResources:d.installedGeometry.selectedResources,omittedSurfaces:d.installedGeometry.omittedSurfaces,requestedRadius:d.installedGeometry.requestedRadius,activeRadius:d.installedGeometry.activeRadius,worksetLimited:d.installedGeometry.worksetLimited,coverage:d.installedGeometry.coverage,sourceCatalogueSHA256:d.installedGeometry.sourceCatalogueSHA256,runtimeActivationVerified:false}:null,
-  installedPropagation:{directBlocks:d.pipeline.simulation.installedDirectBlocks01,
-   directWithheldWithKnownHit:d.pipeline.simulation.installedDirectKnownHitUnknown01,
-   selectedReflections:d.pipeline.simulation.installedReflectedPaths01},
+  installedPropagation:{...engine.pipeline.simulation.installedPropagation01,
+   ...(config.acousticPathEvidence01===true&&d.installedGeometry?{paths:engine.pipeline.simulation.lastInstalledPaths01??null,
+    reflectionSearch:d.installedGeometry.reflectionSearch01,uncertainty:d.installedGeometry.uncertaintyByReason01,
+    unpreparedExterior:d.installedGeometry.unpreparedExterior01}:{} )},
   outputPeak:d.outputPeak,sourceStates:d.sourceStates,stageCounters:d.stageCounters,
   fallbackReason:d.geometry==='conditional-direct-unobserved-space-assumed-clear'?'Additive; conditional direct sound without collision coverage':b.fallbackReason,
   controlDelayMs:latencyProfile.controlDelayMs,propagationLimitSeconds:2,arrivals:d.arrivals,retired:d.retired,latencyRows,latencyRowsOmitted,...(latencyProfile.id==='baseline'?{}:{latencyProfile:latencyProfile.id,producerCreditBlocks:latencyProfile.producerCreditBlocks})}});
@@ -105,7 +133,7 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
   if(pendingGeometry){const value=pendingGeometry;pendingGeometry=null;try{geometry(value);}catch(e){log({type:'geometry-rejected',reason:e.message});}}
   const channels=await engine.render();if(stopped)return;
   credits--;encodeVehicleRa07(...channels,sequence,packet);sequence=(sequence+1)>>>0;
-  if(engine.lastCompleteRenderMs>8){if(processingOverrunRows<2400&&process.stderr.writableLength<16384){log({type:'complete-render-overrun',sequence:(sequence-1)>>>0,producerFrameStart:((sequence-1)>>>0)*512,completeRenderMs:engine.lastCompleteRenderMs,hardDeadlineMs:512/48,headroomTargetMs:8,hardMiss:engine.lastCompleteRenderMs>512/48,geometryModel:engine.pipeline.simulation.scene.observationModel?.kind??'conditional-direct'});processingOverrunRows++;}else processingOverrunRowsOmitted++;}
+  if(engine.lastCompleteRenderMs>8){if(processingOverrunRows<2400&&process.stderr.writableLength<16384){log({type:'complete-render-overrun',sequence:(sequence-1)>>>0,producerFrameStart:((sequence-1)>>>0)*512,completeRenderMs:engine.lastCompleteRenderMs,hardDeadlineMs:512/48,headroomTargetMs:8,hardMiss:engine.lastCompleteRenderMs>512/48,geometryModel:engine.pipeline.simulation.scene.observationModel?.kind??'conditional-direct',stages:engine.lastRenderStages01});processingOverrunRows++;}else processingOverrunRowsOmitted++;}
   if(viewerClient&&engine.visual?.soundMapFrame)try{viewerClient.offer(engine.visual.soundMapFrame,engine.visual.soundMapGeometry);}catch{}
   await new Promise((resolve,reject)=>process.stdout.write(packet,e=>e?reject(e):resolve()));
   if(engine.lastTiming){
@@ -138,4 +166,4 @@ input.on('line',line=>{try{if(line.length>131072)throw Error('producer command s
  }catch(e){finish(e);}});
 input.on('close',()=>{if(!stopped)finish();});process.on('SIGTERM',()=>finish());process.on('SIGINT',()=>finish());
 const timer=setInterval(()=>{if(!stopped)status();},500);timer.unref();
-log({type:'gameplay-ready',featureProfile:'STREET-01-main',...sourceStartupPreparation10,mode:'experimental-additive',nativeSuppression:false,airflowImplemented:true,airflowEnabled:engine.settings.airflowEnabled,installedWorldQualified:false});
+log({type:'gameplay-ready',featureProfile:'STREET-01-main',...sourceStartupPreparation10,startupVoices,normalControlWarmup,mode:'experimental-additive',nativeSuppression:false,airflowImplemented:true,airflowEnabled:engine.settings.airflowEnabled,installedWorldQualified:false});

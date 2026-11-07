@@ -32,6 +32,12 @@ export function interiorWorksetAnchor01(sample,listener,sources,radius,surroundi
  return [listener,...sources].every(p=>p.every((v,i)=>Math.abs(v-anchor[i])<=reach))?anchor:null;
 }
 
+export function exteriorWorksetAnchor01(listener,sources,radius){
+ if(radius<4)return null;
+ const anchor=listener.map(v=>4*Math.floor(v/4)+2);
+ return sources.every(p=>p.every((v,i)=>Math.abs(v-anchor[i])<=2))?anchor:null;
+}
+
 export function matchInteriorInstance01(instances,sample,{session,generation,catalogSHA256,epoch}){
  if(!identity(sample)||sample.session!==session||sample.generation!==generation||
     sample.catalogSHA256!==catalogSHA256||!epoch||sample.epoch!==epoch)return null;

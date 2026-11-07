@@ -13,13 +13,23 @@ import {budgetFrame042} from '../tests/fixtures/AcousticBudget042.mjs';
 
 const source=path.resolve('.local/combined-observation-manual-01');
 const read=file=>JSON.parse(fs.readFileSync(file,'utf8').replace(/^\uFEFF/,''));
-const plan=read(path.join(source,'world-proof/consumer-plan.json'));
+const exterior=process.argv[2]==='--exterior';
+const exteriorRoot=path.resolve('.local/world-native-integration-01/current-world/operational');
+const reference=exterior?read('.local/street01-installed/reflections-02/result.json'):null;
+const plan=exterior?{validatedManifestPath:path.join(exteriorRoot,'geometry/manifest.json'),
+ catalogPath:path.join(exteriorRoot,'resolved/resolved-catalog.json')}:read(path.join(source,'world-proof/consumer-plan.json'));
 const manifest=read(plan.validatedManifestPath),epoch=manifest.ValidationEpochUtc01;
+const catalogSHA256=plan.catalogSHA256??manifest.ResolvedCatalogSHA256;
 const capture=path.join(source,'capture.jsonl');
-assert(fs.statSync(capture).size<=8*1024*1024);
-const frames=fs.readFileSync(capture,'utf8').trim().split('\n').map(JSON.parse)
- .filter(r=>r.frame.listener.sequence<=625);
-const folder=fs.mkdtempSync(path.resolve('.local/normal-interior-replay-'));
+if(!exterior)assert(fs.statSync(capture).size<=8*1024*1024);
+const frames=exterior?Array.from({length:161},(_,i)=>{
+ const t=i/20,dx=Math.min(.3,Math.max(0,(t-3)*.1)),f=budgetFrame042(i,t);
+ f.listener.position=reference.listener.map((v,j)=>v+(j===0?dx:0));
+ f.listener.velocity=[t>3&&t<6?.1:0,0,0];
+ f.cameraInteriorReadback={ready:false};
+ return {receivedTicks:f.listener.observationTicks,sourceAgeMs:1,frame:f};
+}):fs.readFileSync(capture,'utf8').trim().split('\n').map(JSON.parse).filter(r=>r.frame.listener.sequence<=625);
+const folder=fs.mkdtempSync(path.resolve(exterior?'.local/normal-exterior-replay-':'.local/normal-interior-replay-'));
 console.log(folder);
 const cacheRoot=path.resolve('.local');
 const pkg=writeOriginalGameplayPackageStreet01(folder,{latencyProfile:'street-01',gameHash:manifest.InputBinding.GameExecutableSHA256,
@@ -27,11 +37,11 @@ const pkg=writeOriginalGameplayPackageStreet01(folder,{latencyProfile:'street-01
   catalogPath:path.relative(cacheRoot,plan.catalogPath)}});
 // STREET-01 source and timing contract, with the explicit retained-cache
 // reader binding already supported by the normal producer.
-fs.writeFileSync(pkg.manifest,JSON.stringify({...pkg.config,featureProfile:'STREET-01',continuityPolicy:'camera-source-01'}));
+fs.writeFileSync(pkg.manifest,JSON.stringify({...pkg.config,featureProfile:'STREET-01',continuityPolicy:'camera-source-01',acousticPathEvidence01:true}));
 const session=frames[0].frame.session;
 const child=spawn(process.execPath,['tools/Run-Gameplay.mjs','--manifest',pkg.manifest,'--session',session],{stdio:['pipe','pipe','pipe']});
 const exited=once(child,'exit'),lines=readline.createInterface({input:child.stderr});
-const statuses=[],admissions=[],errors=[];
+const statuses=[],admissions=[],overruns=[],errors=[];
 let ready=false,closed=false,pcmBytes=0,maximumPacketGap=0,lastPacketAt=null,creditsSent=0,creditTimer=null;
 child.stdin.on('error',error=>errors.push(error.message));
 child.stdout.on('data',b=>{pcmBytes+=b.length;if(pcmBytes%4112===0){const at=performance.now();if(lastPacketAt!==null)maximumPacketGap=Math.max(maximumPacketGap,at-lastPacketAt);lastPacketAt=at;}});
@@ -40,11 +50,12 @@ lines.on('line',line=>{
  if(row.type==='gameplay-ready')ready=true;
  if(row.type==='gameplay-status')statuses.push(row.status);
  if(row.type==='installed-world-producer-admission')admissions.push(row);
+ if(row.type==='complete-render-overrun')overruns.push(row);
  if(row.type==='gameplay-error')errors.push(row.code);
  if(row.type==='installed-world-worker-closed')closed=row.workerJoined;
 });
 const send=row=>child.stdin.write(JSON.stringify(row)+'\n');
-const [x,y,z]=frames.find(r=>r.frame.cameraInteriorReadback.ready).frame.cameraInteriorReadback.origin;
+const [x,y,z]=exterior?reference.source:frames.find(r=>r.frame.cameraInteriorReadback.ready).frame.cameraInteriorReadback.origin;
 try{
  const timeout=performance.now()+8000;
  while(!ready){assert(child.exitCode===null&&performance.now()<timeout,errors.join(' '));await wait(10);}
@@ -67,8 +78,8 @@ try{
   delete f.cameraInteriorReadback;
   const authored=budgetFrame042(l.sequence,t).vehicles[0];
   // An authored path on the other side of a represented foyer boundary.
-  authored.position=[x-6+.7*Math.sin(t/2),y+.5+1.2*Math.cos(t/2),z+1.35];
-  authored.velocity=[.35*Math.cos(t/2),-.6*Math.sin(t/2),0];
+  authored.position=exterior?[x+(l.position[0]-reference.listener[0]),y-.35,z-.65]:[x-6+.7*Math.sin(t/2),y+.5+1.2*Math.cos(t/2),z+1.35];
+  authored.velocity=exterior?l.velocity:[.35*Math.cos(t/2),-.6*Math.sin(t/2),0];
   authored.observationTicks=l.observationTicks;
   f.vehicles=[authored];
   send({type:'snapshot',ageMs:row.sourceAgeMs+Math.max(0,performance.now()-due),frame:f});
@@ -78,14 +89,21 @@ try{
  assert.equal((await exited)[0],0,errors.join(' '));
 }finally{
  clearInterval(creditTimer);if(child.exitCode===null&&child.signalCode===null)child.kill();
- fs.writeFileSync(path.join(folder,'result.json'),JSON.stringify({statuses,admissions,errors,closed,pcmBlocks:pcmBytes/4112,maximumPacketGap},null,2)+'\n');
+ fs.writeFileSync(path.join(folder,'result.json'),JSON.stringify({statuses,admissions,overruns,errors,closed,pcmBlocks:pcmBytes/4112,maximumPacketGap},null,2)+'\n');
 }
-const active=statuses.filter(s=>s.installedScene?.surroundingSurfaces>0&&s.activeSources>0);
+const active=statuses.filter(s=>s.activeSources>0&&(exterior?s.installedScene?.activeSurfaces>0:s.installedScene?.surroundingSurfaces>0));
 assert(active.length>0,'normal producer must admit a surrounding workset and render an authored source');
-assert(active.every(s=>s.installedScene.sourceCatalogueSHA256===plan.catalogSHA256));
+assert(active.every(s=>s.installedScene.sourceCatalogueSHA256===catalogSHA256));
 assert(active.some(s=>s.acousticWorld.environmentalReadiness01.counters.replacements>=2));
 const final=statuses.at(-1);
 assert.equal(final.acousticWorld.environmentalReadiness01.counters.validityGaps,0);
+if(exterior){
+ const reflected=active.flatMap(s=>s.installedPropagation.paths?.reflected??[]);
+ assert(reflected.length>0&&final.installedPropagation.selectedReflections>0,'retained exterior geometry must render a finite reflection');
+ assert(reflected.every(p=>p.distance>0&&p.delay>0&&p.materialBasis?.[0]?.kind==='reflection'));
+ assert.equal(closed,true);
+ console.log(JSON.stringify({reflected:final.installedPropagation.selectedReflections,sample:reflected.at(-1),maximumPacketGap}));
+}else{
 assert.equal(final.installedScene,null);
 const postExit=statuses.slice(statuses.indexOf(active.at(-1))+1).find(s=>!s.installedScene&&s.activeSources>0);
 assert(postExit,'observe the same source after exterior withdrawal');
@@ -97,3 +115,4 @@ assert(final.installedPropagation.directBlocks+final.installedPropagation.direct
 assert.equal(closed,true);
 console.log(JSON.stringify({radius:active[0].installedScene.activeRadius,surfaces:active[0].installedScene.activeSurfaces,
  surrounding:active[0].installedScene.surroundingSurfaces,propagation:final.installedPropagation,maximumPacketGap}));
+}

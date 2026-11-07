@@ -11,9 +11,9 @@ import {loadCollisionResource,createCollisionResourceProfile01} from './collisio
 import {InstalledStaticComponents01} from './static-component-cache01.mjs';
 import {worldCoverageStates01} from './world-state-completion01.mjs';
 import {resolveInteriorCollisionPlacements01,interiorInstanceIdentities01} from './interior-placements-completion01.mjs';
-import {interiorObservationKey01,interiorWorksetAnchor01,surroundingInteriorHalfWidth01,matchInteriorInstance01,inverseInteriorTransform01,transformInteriorBounds01} from './interior-activation01.mjs';
+import {interiorObservationKey01,interiorWorksetAnchor01,exteriorWorksetAnchor01,surroundingInteriorHalfWidth01,matchInteriorInstance01,inverseInteriorTransform01,transformInteriorBounds01} from './interior-activation01.mjs';
 import {sha256,triangleNormal,queryChunkIds,queryUnknownRegions} from './collision-mesh.mjs';
-import {createTile,coordinateSpace,cross,dot,sub,inBox,onPatch,querySegment,preparedTileIndexTransfer01,adoptSourceBoundTileTransfer01,retimeInstalledStaticTile01} from '../research/local-geometry.mjs';
+import {createTile,coordinateSpace,cross,dot,sub,inBox,onPatch,querySegment,preparedTileIndexTransfer01,adoptSourceBoundTileTransfer01,retimeInstalledStaticTile01,maximumInstalledUnknownRegions01} from '../research/local-geometry.mjs';
 import {acousticScene,adoptSourceBoundAcousticScene01} from '../engine/contracts.mjs';
 import {prepareGpuGeometry01,adoptSourceBoundGpuGeometry01} from '../gpu/geometry.mjs';
 import {digest,freeze,requireWorld,vector} from './contracts.mjs';
@@ -49,15 +49,54 @@ const resourceAuditBinding01=row=>{
  const result=sceneSource01(row);
  return {index:digest([result.IndexPath,result.IndexSHA256]),receipt:digest([result.ReceiptPath,result.ReceiptSHA256]),archive:result.ArchiveSHA256??null,proof:digest(row.ArchiveValidation01??null)};
 };
-function finiteReflectorIds01(tile,sources,listener){
+function finiteReflectors01(tile,sources,listener){
  const candidates=[];
- for(const s of tile.surfaces){let distance=Infinity;for(const source of sources.length?sources:[listener]){const a=dot(sub(source,s.center),s.normal),b=dot(sub(listener,s.center),s.normal);if(a*b<=1e-8)continue;const image=source.map((v,i)=>v-2*a*s.normal[i]),delta=sub(listener,image),den=dot(delta,s.normal);if(Math.abs(den)<1e-8)continue;const t=dot(sub(s.center,image),s.normal)/den;if(t<=0||t>=1)continue;const hit=image.map((v,i)=>v+delta[i]*t);if(!onPatch(s,hit))continue;distance=Math.min(distance,Math.hypot(...sub(source,hit))+Math.hypot(...sub(listener,hit)));}
-  if(Number.isFinite(distance)){const sign=s.normal.find(v=>Math.abs(v)>.001)<0?-1:1,plane=s.normal.map(v=>Math.round(v*sign*50)).join(',')+':'+Math.round(dot(s.center,s.normal)*sign*10);candidates.push({s,distance,plane});}}
- candidates.sort((a,b)=>a.distance-b.distance||a.s.id.localeCompare(b.s.id));const feasible=[];
- // Exact finite visibility is tested only for a bounded candidate shortlist.
- // Ranking groups planes; no surfaces are merged or replaced with walls.
- for(const c of candidates.slice(0,128)){for(const source of sources.length?sources:[listener]){const a=dot(sub(source,c.s.center),c.s.normal);if(a*dot(sub(listener,c.s.center),c.s.normal)<=1e-8)continue;const image=source.map((v,i)=>v-2*a*c.s.normal[i]),delta=sub(listener,image),den=dot(delta,c.s.normal);if(Math.abs(den)<1e-8)continue;const t=dot(sub(c.s.center,image),c.s.normal)/den,hit=image.map((v,i)=>v+delta[i]*t);if(t<=0||t>=1||!onPatch(c.s,hit))continue;const left=querySegment(tile,source,hit,{reflectorId:c.s.id}),right=querySegment(tile,hit,listener,{reflectorId:c.s.id});if(!left.hits.length&&!right.hits.length&&!left.unknown.length&&!right.unknown.length&&!left.ambiguous.length&&!right.ambiguous.length){feasible.push(c);break;}}}
- const seen=new Set(),selected=[];for(const c of feasible)if(!seen.has(c.plane)&&selected.length<16){seen.add(c.plane);selected.push(c.s.id);}for(const c of feasible)if(selected.length<16&&!selected.includes(c.s.id))selected.push(c.s.id);return selected;
+ for(const surface of tile.surfaces){
+  const paths=[];
+  for(const source of sources.length?sources:[listener]){
+   const a=dot(sub(source,surface.center),surface.normal),b=dot(sub(listener,surface.center),surface.normal);
+   if(a*b<=1e-8)continue;
+   const image=source.map((v,i)=>v-2*a*surface.normal[i]),delta=sub(listener,image),den=dot(delta,surface.normal);
+   if(Math.abs(den)<1e-8)continue;
+   const t=dot(sub(surface.center,image),surface.normal)/den;
+   if(t<=0||t>=1)continue;
+   const hit=image.map((v,i)=>v+delta[i]*t);
+   if(!onPatch(surface,hit))continue;
+   paths.push({source,hit,distance:Math.hypot(...sub(source,hit))+Math.hypot(...sub(listener,hit))});
+  }
+  if(!paths.length)continue;
+  const sign=surface.normal.find(v=>Math.abs(v)>.001)<0?-1:1;
+  const plane=surface.normal.map(v=>Math.round(v*sign*50)).join(',')+':'+Math.round(dot(surface.center,surface.normal)*sign*10);
+  candidates.push({id:surface.id,plane,paths,distance:Math.min(...paths.map(p=>p.distance))});
+ }
+ candidates.sort((a,b)=>a.distance-b.distance||a.id.localeCompare(b.id));
+ // A densely triangulated wall must not use the whole visibility budget
+ // before other finite planes are tested. Plane grouping only orders tests.
+ const planes=new Set(),distinct=[],remaining=[];
+ for(const candidate of candidates){
+  (planes.has(candidate.plane)?remaining:distinct).push(candidate);
+  planes.add(candidate.plane);
+ }
+ const shortlist=distinct.concat(remaining).slice(0,128),ids=[],selectedPlanes=new Set(),other=[];
+ const report={finiteCandidates:candidates.length,testedCandidates:shortlist.length,knownHit:0,ambiguous:0,unknown:0,qualified:0,unknownByReason:{}};
+ const reasons=new Map(tile.missingRegions.map(r=>[r.id,r.reason]));
+ for(const candidate of shortlist){
+  for(const {source,hit} of candidate.paths){
+   if(Math.hypot(...sub(source,hit))<=1e-8||Math.hypot(...sub(hit,listener))<=1e-8)continue;
+   const left=querySegment(tile,source,hit,{reflectorId:candidate.id}),right=querySegment(tile,hit,listener,{reflectorId:candidate.id});
+   const unknown=new Set([...left.unknown,...right.unknown].map(id=>reasons.get(id)));
+   if(unknown.size){report.unknown++;for(const reason of unknown)report.unknownByReason[reason]=(report.unknownByReason[reason]??0)+1;}
+   const hitKnown=left.hits.length>0||right.hits.length>0,ambiguous=left.ambiguous.length>0||right.ambiguous.length>0;
+   if(hitKnown)report.knownHit++;
+   if(ambiguous)report.ambiguous++;
+   if(unknown.size||hitKnown||ambiguous)continue;
+   report.qualified++;
+   if(!selectedPlanes.has(candidate.plane)){ids.push(candidate.id);selectedPlanes.add(candidate.plane);}
+   else other.push(candidate.id);
+   break;
+  }
+ }
+ return {ids:ids.concat(other).slice(0,16),report};
 }
 function resourceQueryBounds01(row,b){
  if(!b)return null;const native={min:b.Min,max:b.Max},c=row.Result?.Classification,q=c?.queryBounds;
@@ -65,21 +104,28 @@ function resourceQueryBounds01(row,b){
  return {min:native.min.map((v,i)=>Math.min(v,q.min[i])),max:native.max.map((v,i)=>Math.max(v,q.max[i]))};
 }
 function unknownRegions01(regions,box,nearBox=null){
- regions=regions.map(b=>b?{min:b.min.map((v,i)=>b.max[i]-v<.002?v-.001:v),max:b.max.map((v,i)=>v-b.min[i]<.002?v+.001:v)}:null);
- const clipped=regions.map(b=>b&&touch(b,box)?{min:b.min.map((v,i)=>Math.max(v,box.min[i])),max:b.max.map((v,i)=>Math.min(v,box.max[i]))}:b===null?box:null).filter(b=>b&&b.min.every((v,i)=>b.max[i]>v));
- if(clipped.length>32&&nearBox){
-  // Keep conservatively merged omissions local to their side of the near
-  // field, so distant omissions do not become one box through the listener.
-  const groups=new Map();
-  for(const bounds of clipped){
-   const key=bounds.min.map((v,i)=>{const centre=(v+bounds.max[i])/2;return centre<nearBox.min[i]?-1:centre>nearBox.max[i]?1:0;}).join(',');
+ const clipped=[];
+ for(const {bounds,reason} of regions){
+  const padded=bounds?{min:bounds.min.map((v,i)=>bounds.max[i]-v<.002?v-.001:v),max:bounds.max.map((v,i)=>v-bounds.min[i]<.002?v+.001:v)}:box;
+  if(!touch(padded,box))continue;
+  const min=padded.min.map((v,i)=>Math.max(v,box.min[i])),max=padded.max.map((v,i)=>Math.min(v,box.max[i]));
+  if(min.every((v,i)=>max[i]>v))clipped.push({bounds:{min,max},reason});
+ }
+ if(clipped.length>maximumInstalledUnknownRegions01){
+  // Keep exact regions where possible. Only overflow is merged, within a
+  // bounded 3-D partition. A union is conservative and remains labelled.
+  const groups=new Map(),pivot=nearBox??box;
+  for(const region of clipped.splice(maximumInstalledUnknownRegions01-27)){
+   const {bounds,reason}=region;
+   const key=bounds.min.map((v,i)=>{const c=(v+bounds.max[i])/2;return c<pivot.min[i]?-1:c>pivot.max[i]?1:0;}).join(',');
    const held=groups.get(key);
-   if(!held){groups.set(key,bounds);continue;}
-   for(let i=0;i<3;i++){held.min[i]=Math.min(held.min[i],bounds.min[i]);held.max[i]=Math.max(held.max[i],bounds.max[i]);}
+   if(!held){groups.set(key,region);continue;}
+   if(held.reason!==reason)held.reason='merged-uncertainty';
+   for(let i=0;i<3;i++){held.bounds.min[i]=Math.min(held.bounds.min[i],bounds.min[i]);held.bounds.max[i]=Math.max(held.bounds.max[i],bounds.max[i]);}
   }
-  clipped.splice(0,clipped.length,...groups.values());
- }else if(clipped.length>32){const tail=clipped.splice(31);clipped.push({min:[0,1,2].map(i=>Math.min(...tail.map(b=>b.min[i]))),max:[0,1,2].map(i=>Math.max(...tail.map(b=>b.max[i])))});}
- return clipped.map((bounds,i)=>({id:'installed01-unknown:'+i,bounds,reason:'unsupported-or-unprepared-static-geometry'}));
+  clipped.push(...groups.values());
+ }
+ return clipped.map((region,i)=>({id:'installed01-unknown:'+i,...region}));
 }
 // Index known and withheld regions. Horizontal cells bound fan-out, and
 // selection still tests the original three-dimensional bounds.
@@ -262,8 +308,10 @@ export class InstalledStaticWorld01 {
  #startPreparationProfile01(){this.activeProfile01={candidateLookupMs:0,resourceLoadMs:0,resourceQueryMs:0,triangleSelectionMs:0,panelConstructionMs:0,tileValidationIndexMs:0,reflectionSelectionMs:0,acousticSceneMs:0,queryViewHits:0,queryViewMisses:0,queryViewEvictions:0,panelTemplateHits:0,panelTemplateMisses:0,clippedPanels:0,capacityProbePasses:0,materializedPasses:0,consumedPreparedSelection01:0};this.activeAdaptivePasses01=[];return {operations:{...this.operations01},components:this.staticComponents01.profile()};}
  #finishPreparationProfile01(began,before,attempts,activeSurfaces){const components=this.staticComponents01.profile(),profile=freeze({...this.activeProfile01,operations01:Object.fromEntries(Object.entries(this.operations01).map(([key,value])=>[key,value-before.operations[key]])),staticComponents01:components,staticComponentDelta01:Object.fromEntries(Object.entries(components).map(([key,value])=>[key,Math.max(0,value-before.components[key])])),totalMs:performance.now()-began,adaptiveAttempts:attempts,activeSurfaces});this.lastAdaptivePasses01=freeze([...this.activeAdaptivePasses01]);this.activeProfile01=null;return profile;}
  #selectionOptions01(options={}){let {listener,sources=[],radius=32,maximumSurfaces=2048,maximumResources=16,adaptiveRadius=true,surroundingWorkset01=false,interiorActivation01,session,generation}=options;listener=vector(listener);sources=sources.map(vector);requireWorld(sources.length<=6&&Number.isFinite(radius)&&radius>=1&&radius<=32&&Number.isInteger(maximumSurfaces)&&maximumSurfaces>=1&&maximumSurfaces<=4096&&Number.isInteger(maximumResources)&&maximumResources>=1&&maximumResources<=16&&typeof adaptiveRadius==='boolean','bounded installed static selection');const sourceDistance=Math.max(0,...sources.map(p=>Math.hypot(...sub(p,listener)))),minimumRadius=Math.min(radius,Math.max(Math.min(4,radius),sourceDistance));requireWorld(sources.every(p=>p.every((v,i)=>Math.abs(v-listener[i])<=128)),'source outside installed static active scene');const instance=matchInteriorInstance01(this.interiorIdentities01,interiorActivation01,{session,generation,catalogSHA256:this.catalogSHA256,epoch:this.requiredValidationEpochUtc01});
- const anchor=instance&&!options.engine?.higherOrderPaths?.length?interiorWorksetAnchor01(interiorActivation01,listener,sources,radius,surroundingWorkset01):null;
- return {listener,sources,anchor,surrounding:!!anchor&&surroundingWorkset01,radius,maximumSurfaces,maximumResources,adaptiveRadius,requestedRadius:radius,minimumRadius,instance,interiorKey:instance?interiorObservationKey01(interiorActivation01):null};}
+ const anchor=options.engine?.higherOrderPaths?.length?null:instance?
+  interiorWorksetAnchor01(interiorActivation01,listener,sources,radius,surroundingWorkset01):
+  surroundingWorkset01&&!interiorActivation01?exteriorWorksetAnchor01(listener,sources,radius):null;
+ return {listener,sources,anchor,surrounding:!!anchor&&!!instance&&surroundingWorkset01,radius,maximumSurfaces,maximumResources,adaptiveRadius,requestedRadius:radius,minimumRadius,instance,interiorKey:instance?interiorObservationKey01(interiorActivation01):null};}
  #anchoredSelections01=new Map();
  #anchoredTiles01=new WeakMap();
  #selectAdaptive01(selection,explicitPaths=false,materialize=()=>{}){
@@ -272,7 +320,7 @@ export class InstalledStaticWorld01 {
   while(true){
    selected=this.#selectWindow01({...selection,listener:anchor??selection.listener,radius,stableAnchor:anchor!==null,capacityProbe:!selection.surrounding&&selection.adaptiveRadius&&radius>selection.minimumRadius&&!explicitPaths});
    selected.pose=selection.listener;
-   selected.interiorWorksetAnchored01=anchor!==null;
+   selected.worksetAnchored01=anchor!==null;
    attempts++;materialize(selected);
    if(selection.surrounding||!selection.adaptiveRadius||!selected.capacity||radius<=selection.minimumRadius)break;
    radius=Math.max(selection.minimumRadius,radius/2);
@@ -290,7 +338,7 @@ export class InstalledStaticWorld01 {
   const explicitPaths=Array.isArray(engine?.higherOrderPaths)&&engine.higherOrderPaths.length>0;
   if(options.preparedSelection01!==undefined&&options.preparedSelection01!==null){requireWorld(pending&&pending.token===options.preparedSelection01&&pending.requestBinding===this.#requestBinding01(options,selection)&&pending.revision===this.#selectionRevision01&&pending.componentRevision===this.staticComponents01.revision01()&&!explicitPaths,'same original request and current source-bound one-shot selection required');({selected,attempts,radius}=pending);this.activeAdaptivePasses01=[...pending.adaptivePasses];this.activeProfile01.consumedPreparedSelection01=1;}
   else ({selected,attempts,radius}=this.#selectAdaptive01(selection,explicitPaths,explicitPaths?s=>{scene=this.#materializeWindow01(s,{session,generation,geometryTimeMs,durationMs,engine});}:undefined));
-  if(!explicitPaths)scene=this.#materializeWindow01(selected,{session,generation,geometryTimeMs,durationMs,engine});const metadata=freeze({...scenes.get(scene),requestedRadius:selection.requestedRadius,activeRadius:radius,interiorWorksetAnchored01:selected.interiorWorksetAnchored01,surroundingWorkset01:selected.surrounding===true,surroundingSurfaces01:selected.nearBox?selected.surfaces.filter(p=>!inBox(p.center,selected.nearBox)).length:0,worksetLimited:radius<selection.requestedRadius,adaptiveAttempts:attempts,preparationMilliseconds:performance.now()-began});scenes.set(scene,metadata);this.last=metadata;this.lastWindowProfile01=this.#finishPreparationProfile01(began,before,attempts,scene.tile.surfaces.length);this.profileTotals01.windows++;return scene;
+  if(!explicitPaths)scene=this.#materializeWindow01(selected,{session,generation,geometryTimeMs,durationMs,engine});const metadata=freeze({...scenes.get(scene),requestedRadius:selection.requestedRadius,activeRadius:radius,worksetAnchored01:selected.worksetAnchored01,interiorWorksetAnchored01:selected.worksetAnchored01&&!!selection.instance,surroundingWorkset01:selected.surrounding===true,surroundingSurfaces01:selected.nearBox?selected.surfaces.filter(p=>!inBox(p.center,selected.nearBox)).length:0,worksetLimited:radius<selection.requestedRadius,adaptiveAttempts:attempts,preparationMilliseconds:performance.now()-began});scenes.set(scene,metadata);this.last=metadata;this.lastWindowProfile01=this.#finishPreparationProfile01(began,before,attempts,scene.tile.surfaces.length);this.profileTotals01.windows++;return scene;
  }
  profile01(){const components=this.staticComponents01.profile();return freeze({...this.profileTotals01,operations01:{...this.operations01},cacheDiagnostics01:{...this.cacheAuditTotals01},staticComponents01:components,residentResources:this.resident.size,queryViews:this.queryViews01.size,queryViewBytes:this.queryViewBytes01,aggregateRetainedGeometryBytes:components.accountedBytes+this.queryViewBytes01,maximumQueryViews:queryViewLimits01.views,maximumQueryViewBytes:queryViewLimits01.bytes,lastWindow:this.lastWindowProfile01});}
  #selectWindow01({listener,sources,radius,requestedRadius,maximumSurfaces,maximumResources,instance,interiorKey,surrounding=false,stableAnchor=false,capacityProbe=false}){
@@ -308,19 +356,21 @@ export class InstalledStaticWorld01 {
   const unresolvedInteriorBounds=[...new Map(nearbyRows.flatMap(entry=>entry.interiorBounds
    .filter(p=>selectedInteriors.get(entry.row)!==p.id).map(p=>p.bounds))
    .filter(b=>touch(b,box)).map(b=>[digest(b),b])).values()];
-  const missingBounds=[...unresolvedInteriorBounds,
-   ...interiors.filter(e=>!selected.includes(e)).map(e=>e.bounds),
-   ...[...new Map(selected.flatMap(e=>e.placement?.portalBounds??[]).map(b=>[digest(b),b])).values()],
-   ...candidates.filter(({row})=>!sceneSource01(row)).map(e=>e.bounds),...eligible.slice(maximumResources).map(e=>e.bounds)];
+  const regions=(bounds,reason)=>bounds.map(bounds=>({bounds,reason}));
+  const missingBounds=[...regions(unresolvedInteriorBounds,'unresolved-interior-activation'),
+   ...regions(interiors.filter(e=>!selected.includes(e)).map(e=>e.bounds),'interior-source-unprepared'),
+   ...regions([...new Map(selected.flatMap(e=>e.placement?.portalBounds??[]).map(b=>[digest(b),b])).values()],'unknown-portal-state'),
+   ...regions(candidates.filter(({row})=>!sceneSource01(row)).map(e=>e.bounds),'exterior-source-unprepared'),
+   ...regions(eligible.slice(maximumResources).map(e=>e.bounds),'resource-capacity')];
   const views=[];
   let geometryUnknown=0,successfulResources=0;
   const analytic={available:0,candidates:0,approximated:0,unknown:0,triangles:0,maximumErrorMetres:0,representation:'inscribed-affine-native-primitive-triangle-approximation',physicalMetreCalibration:'unverified-1-native-unit-per-metre-assumption'};
   this.activeProfile01.candidateLookupMs+=performance.now()-lookupBegan;
-  for(const {row,placement,bounds}of selected)try{const loadBegan=performance.now(),resource=this.#resource(row,placement);this.activeProfile01.resourceLoadMs+=performance.now()-loadBegan;const queryBegan=performance.now(),view=resource.query(placement?transformInteriorBounds01(box,placement.inverse):box,{maxChunks:16,maxTriangles:131072});this.activeProfile01.resourceQueryMs+=performance.now()-queryBegan;const selectionBegan=performance.now();successfulResources++;if(view.analytic){for(const key of ['available','candidates','approximated','unknown','triangles'])analytic[key]+=view.analytic[key]??0;analytic.maximumErrorMetres=Math.max(analytic.maximumErrorMetres,view.analytic.maximumErrorMetres??0);}geometryUnknown+=view.unknownRegions.length;missingBounds.push(...view.unknownRegions.map(r=>placement?transformInteriorBounds01(r.bounds,placement.matrix):r.bounds));views.push({row,placement,view,bounds});this.activeProfile01.triangleSelectionMs+=performance.now()-selectionBegan;}catch(error){this.failures++;unknown.push(String(error.message).slice(0,160));missingBounds.push(bounds??null);}
+  for(const {row,placement,bounds}of selected)try{const loadBegan=performance.now(),resource=this.#resource(row,placement);this.activeProfile01.resourceLoadMs+=performance.now()-loadBegan;const queryBegan=performance.now(),view=resource.query(placement?transformInteriorBounds01(box,placement.inverse):box,{maxChunks:16,maxTriangles:131072});this.activeProfile01.resourceQueryMs+=performance.now()-queryBegan;const selectionBegan=performance.now();successfulResources++;if(view.analytic){for(const key of ['available','candidates','approximated','unknown','triangles'])analytic[key]+=view.analytic[key]??0;analytic.maximumErrorMetres=Math.max(analytic.maximumErrorMetres,view.analytic.maximumErrorMetres??0);}geometryUnknown+=view.unknownRegions.length;missingBounds.push(...view.unknownRegions.map(r=>({bounds:placement?transformInteriorBounds01(r.bounds,placement.matrix):r.bounds,reason:'unsupported-'+r.family})));views.push({row,placement,view,bounds});this.activeProfile01.triangleSelectionMs+=performance.now()-selectionBegan;}catch(error){this.failures++;unknown.push(String(error.message).slice(0,160));missingBounds.push({bounds:bounds??null,reason:'resource-query-failed'});}
   // Query inputs above have been verified for this request, including native
   // chunk bytes. Identical component identities and clip box produce the
   // same selection. Never reuse a failed query or its missing-region result.
-  const shapeKey=stableAnchor&&!unknown.length?digest([this.#selectionRevision01,box,requestedRadius,maximumSurfaces,maximumResources,capacityProbe,surrounding,interiorKey,views.map(({row,placement,view})=>[row.Id,placement?.key,view.references.map(r=>[r.componentId,r.recordIndex]),view.unknownRegions,view.analytic])]):null;
+  const shapeKey=stableAnchor&&!unknown.length?digest([this.#selectionRevision01,box,requestedRadius,maximumSurfaces,maximumResources,capacityProbe,surrounding,interiorKey,views.map(({row,placement,view})=>[row.Id,placement?.key??null,view.references.map(r=>[r.componentId,r.recordIndex]),view.unknownRegions,view.analytic??null])]):null;
   const held=shapeKey&&this.#anchoredSelections01.get(shapeKey);
   if(held){
    this.#anchoredSelections01.delete(shapeKey);this.#anchoredSelections01.set(shapeKey,held);
@@ -336,10 +386,10 @@ export class InstalledStaticWorld01 {
    if(touch(bounds,box))triangles.push({triangle,resource:resourceId,near:nearBox&&touch(bounds,nearBox),
     distance:Math.min(...triangle.positions.map(p=>Math.hypot(...sub(p,listener)))),node:identity.node,polygon:identity.polygon});
   }else triangles.push({reference,resource:row.Id,near:nearBox&&touch(this.staticComponents01.bounds(reference),nearBox),distance:this.staticComponents01.distance(reference,listener),node:identity.node,polygon:identity.polygon});}
-  }catch(error){this.failures++;unknown.push(String(error.message).slice(0,160));missingBounds.push(bounds??null);}
+  }catch(error){this.failures++;unknown.push(String(error.message).slice(0,160));missingBounds.push({bounds:bounds??null,reason:'resource-query-failed'});}
   this.activeProfile01.triangleSelectionMs+=performance.now()-triangleBegan;
   const panelBegan=performance.now();triangles.sort((a,b)=>(surrounding?Number(b.near)-Number(a.near):0)||a.distance-b.distance||a.resource.localeCompare(b.resource)||a.node-b.node||a.polygon-b.polygon);const surfaces=[],materials={},keys=new Set();let omitted=0,witness=null;
-  for(const {reference,resource,triangle:placed}of triangles){const triangle=placed??this.staticComponents01.triangle(reference,resource),id=triangleId01(resource,triangle),preparedPanel=panel(triangle,box,id,undefined,undefined,this.activeProfile01);if(!preparedPanel)continue;const {surface,key}=preparedPanel;if(keys.has(key))continue;keys.add(key);if(surfaces.length>=maximumSurfaces){omitted++;if(capacityProbe){witness='valid-unique-surface-overflow';break;}missingBounds.push(triangleShape01(triangle).bounds);continue;}surfaces.push(surface);materials[id]={reflection:[.64,.49,.25],transmission:[0,0,0],basis:'authored-assumption',reference:'installed01-unmeasured-native-material'};}
+  for(const {reference,resource,triangle:placed}of triangles){const triangle=placed??this.staticComponents01.triangle(reference,resource),id=triangleId01(resource,triangle),preparedPanel=panel(triangle,box,id,undefined,undefined,this.activeProfile01);if(!preparedPanel)continue;const {surface,key}=preparedPanel;if(keys.has(key))continue;keys.add(key);if(surfaces.length>=maximumSurfaces){omitted++;if(capacityProbe){witness='valid-unique-surface-overflow';break;}missingBounds.push({bounds:triangleShape01(triangle).bounds,reason:'surface-capacity'});continue;}surfaces.push(surface);materials[id]={reflection:[.64,.49,.25],transmission:[0,0,0],basis:'authored-assumption',reference:'installed01-unmeasured-native-material'};}
   this.activeProfile01.panelConstructionMs+=performance.now()-panelBegan;const capacity=omitted>0||eligible.length>selected.length||unknown.some(s=>/query candidate limit/.test(s));if(capacityProbe&&capacity)this.activeProfile01.capacityProbePasses++;this.activeAdaptivePasses01.push({radius,selectedResources:selected.length,queriedTriangles:triangles.length,supportedSurfaces:surfaces.length,omittedSurfaces:omitted,omittedCountIsLowerBound:!!witness,capacity,witness:witness??(eligible.length>selected.length?'resource-capacity':unknown.some(s=>/query candidate limit/.test(s))?'query-candidate-limit':null),selectionMilliseconds:performance.now()-began});
   const selection={listener,sources,radius,requestedRadius,maximumSurfaces,box,nearBox,region,defaultExcluded,candidates,eligible,selected,interiorKey,possibleInteriorBounds,unresolvedInteriorBounds,missingBounds,geometryUnknown,successfulResources,analytic,unknown,surrounding,surfaces,materials,omitted,trianglesQueried:triangles.length,capacity};
   if(shapeKey&&!unknown.length){
@@ -353,8 +403,8 @@ export class InstalledStaticWorld01 {
   return selection;
  }
  #materializeWindow01(s,{session,generation,geometryTimeMs,durationMs,engine}){
-  const began=performance.now(),{listener,sources,radius,requestedRadius,region,box,candidates,eligible,selected,possibleInteriorBounds,unresolvedInteriorBounds,missingBounds,geometryUnknown,successfulResources,analytic,unknown,omitted,materials,defaultExcluded,interiorKey}=s,worldDigest=this.manifest.InputFingerprint,tileBegan=performance.now(),held=s.interiorWorksetAnchored01?this.#anchoredTiles01.get(s.surfaces):null,tile=held&&held.session===session&&held.version===generation?retimeInstalledStaticTile01(held,geometryTimeMs,geometryTimeMs+durationMs):createTile({schemaVersion:1,id:'installed01:'+worldDigest.slice(0,32),coordinateSpace,timeUnit:'monotonic-ms',bounds:region,listenerAnchor:listener,coverage:'partial',surfaces:s.surfaces.map(surface=>({...surface,observedAt:geometryTimeMs,validUntil:geometryTimeMs+durationMs})),missingRegions:unknownRegions01(missingBounds,box,s.nearBox),version:generation,createdAt:geometryTimeMs,validUntil:geometryTimeMs+durationMs,build:'installed-static-collision01',session,interior:selected.some(e=>e.placement)?'camera-proxy-bound-interior':'static-exterior-runtime-unverified',dynamicEpoch:generation},{maximumSurfaces:s.maximumSurfaces});if(s.interiorWorksetAnchored01&&(!held||held.session!==session||held.version!==generation))this.#anchoredTiles01.set(s.surfaces,tile);const surfaces=tile.surfaces;this.activeProfile01.tileValidationIndexMs+=performance.now()-tileBegan;const reflectionBegan=performance.now(),reflectionSurfaceIds=finiteReflectorIds01(tile,sources,s.pose??listener);this.activeProfile01.reflectionSelectionMs+=performance.now()-reflectionBegan;const sceneBegan=performance.now(),model={kind:'conditional-installed-static-model',mode:'installed-static-model',staticGeometryOnly:true,analyticGeometry:analytic,runtimeActivationVerified:false,installedWorldVerified:false,sourceCatalogueSHA256:this.catalogSHA256,reflectionSurfaceIds,workset:{requestedRadius,activeRadius:radius,worksetLimited:radius<requestedRadius,maximumSurfaces:s.maximumSurfaces,outsideActiveWindow:'unknown-static-coverage',selectionBasis:s.surrounding?'bounded-near-first-with-surroundings; omitted-geometry-stays-unknown':'bounded-adaptive-local-capacity; omitted-geometry-stays-unknown'},collisionLayerSelection:{activeSoftwareModelLayers:[0],excludedSoftwareModelLayers:[1,2],actualGtaActivation:'unverified',basis:'CodeWalker-Space-default-CollisionLayers-true-false-false',source:'CodeWalker-485d56bec00262ed7fa472261cce7bbc6202b96e-Space.cs',nearbyExcludedResources:defaultExcluded.length,globallyUnqualifiedHigherLayerResources:this.globalStatus01.higherLayerResources},calibration:{originNative:[0,0,0],axes:[[1,0,0],[0,1,0],[0,0,1]],reference:'installed-static01-explicit-unit-assumption',basis:'declared-demonstration-scale',metresPerNativeUnit:1,physicalCalibration:'unverified',nativeSpace:'gta-native-units-unverified'},visibilityAssumption:'unobserved-space-assumed-clear',motionAssumption:'static-during-snapshot',evidence:selected.map(({row,placement})=>{const result=sceneSource01(row);return {resourceId:row.Id,indexSHA256:result.IndexSHA256,receiptSHA256:result.ReceiptSHA256,nativeCoordinateBasis:placement?'selected-YMAP-interior-transform':'layer-zero-exterior-cache-model-identity',runtimeActivation:'unverified',...(placement?{interiorInstanceId:placement.id,interiorKey}:{})};}),timing:'static-installation-model-not-live-observation'},scene=acousticScene(tile,materials,{...engine,observationModel:model});this.activeProfile01.acousticSceneMs+=performance.now()-sceneBegan;this.activeProfile01.materializedPasses++;
-  const currentValidationPending=candidates.filter(r=>r.row.Eligibility==='eligible-exterior'&&r.row.Result&&r.validationState==='awaiting-current-source-validation').length,geometryPending=candidates.filter(r=>r.row.Eligibility==='eligible-exterior'&&!r.row.Result).length,activationWithheld=candidates.filter(r=>r.row.Eligibility!=='eligible-exterior').length+unresolvedInteriorBounds.length,firstBlocker=surfaces.length?null:currentValidationPending?'local-current-validation-pending':geometryPending?'local-cache-unprepared':unknown.length?'local-cache-rejected':activationWithheld||defaultExcluded.length?'placement-or-activation-withheld':omitted||eligible.length>selected.length?'local-workset-capacity':successfulResources?'no-supported-surfaces-in-window':'no-catalogued-exterior-in-window',localReadiness={state:surfaces.length?'usable-conditional-static-scene':'waiting-or-empty',firstBlocker,currentValidationPending,geometryPending,activationWithheld,queryFailures:unknown.length,capacityOmissions:omitted+Math.max(0,eligible.length-selected.length),qualifiedResources:successfulResources,activeSurfaces:surfaces.length,runtimeActivationVerified:false},metadata=freeze({kind:'RichAudioInstalledStaticScene01',worldDigest,session,generation,geometryTimeMs,durationMs,sourceCatalogueSHA256:this.catalogSHA256,localReadiness,candidateResources:candidates.length,possibleInteriorInstanceBounds:possibleInteriorBounds.length,interiorGeometryActivation:selected.some(e=>e.placement)?'camera-proxy-matched-selected-instance; portals-unknown':'unobserved; metadata-bounds-remain-unknown-volumes',softwareModelExcludedHigherLayerResources:defaultExcluded.length,globallyUnqualifiedHigherLayerResources:this.globalStatus01.higherLayerResources,selectedResources:selected.length,successfulResources,unpreparedResources:candidates.length-eligible.length,omittedResources:Math.max(0,eligible.length-selected.length),trianglesQueried:s.trianglesQueried,activeSurfaces:surfaces.length,reflectionCandidates:model.reflectionSurfaceIds.length,missingRegions:tile.missingRegions.length,omissionEnvelopePaddingNativeUnits:.001,omittedSurfaces:omitted,unsupportedPrimitiveRegions:geometryUnknown,analyticGeometry:analytic,failures:unknown,preparationMilliseconds:performance.now()-began,coordinateBasis:'explicit1-native-unit-per-metre; physical-calibration-unverified',materialBasis:'uniform-authored-passive-assumption; native-material-identifiers-retained',coverage:'partial',installedWorldVerified:false,genuineResourceVerified:successfulResources>0,runtimeActivationVerified:false,pcmQueueFramesAdded:0});scenes.set(scene,metadata);return scene;
+  const began=performance.now(),{listener,sources,radius,requestedRadius,region,box,candidates,eligible,selected,possibleInteriorBounds,unresolvedInteriorBounds,missingBounds,geometryUnknown,successfulResources,analytic,unknown,omitted,materials,defaultExcluded,interiorKey}=s,worldDigest=this.manifest.InputFingerprint,tileBegan=performance.now(),held=s.worksetAnchored01?this.#anchoredTiles01.get(s.surfaces):null,tile=held&&held.session===session&&held.version===generation?retimeInstalledStaticTile01(held,geometryTimeMs,geometryTimeMs+durationMs):createTile({schemaVersion:1,id:'installed01:'+worldDigest.slice(0,32),coordinateSpace,timeUnit:'monotonic-ms',bounds:region,listenerAnchor:listener,coverage:'partial',surfaces:s.surfaces.map(surface=>({...surface,observedAt:geometryTimeMs,validUntil:geometryTimeMs+durationMs})),missingRegions:unknownRegions01(missingBounds,box,s.nearBox),version:generation,createdAt:geometryTimeMs,validUntil:geometryTimeMs+durationMs,build:'installed-static-collision01',session,interior:selected.some(e=>e.placement)?'camera-proxy-bound-interior':'static-exterior-runtime-unverified',dynamicEpoch:generation},{maximumSurfaces:s.maximumSurfaces,maximumMissingRegions:maximumInstalledUnknownRegions01});if(s.worksetAnchored01&&(!held||held.session!==session||held.version!==generation))this.#anchoredTiles01.set(s.surfaces,tile);const surfaces=tile.surfaces;this.activeProfile01.tileValidationIndexMs+=performance.now()-tileBegan;const reflectionBegan=performance.now(),{ids:reflectionSurfaceIds,report:reflectionSearch01}=finiteReflectors01(tile,sources,s.pose??listener);this.activeProfile01.reflectionSelectionMs+=performance.now()-reflectionBegan;const sceneBegan=performance.now(),model={kind:'conditional-installed-static-model',mode:'installed-static-model',staticGeometryOnly:true,analyticGeometry:analytic,runtimeActivationVerified:false,installedWorldVerified:false,sourceCatalogueSHA256:this.catalogSHA256,reflectionSurfaceIds,workset:{requestedRadius,activeRadius:radius,worksetLimited:radius<requestedRadius,maximumSurfaces:s.maximumSurfaces,outsideActiveWindow:'unknown-static-coverage',selectionBasis:s.surrounding?'bounded-near-first-with-surroundings; omitted-geometry-stays-unknown':'bounded-adaptive-local-capacity; omitted-geometry-stays-unknown'},collisionLayerSelection:{activeSoftwareModelLayers:[0],excludedSoftwareModelLayers:[1,2],actualGtaActivation:'unverified',basis:'CodeWalker-Space-default-CollisionLayers-true-false-false',source:'CodeWalker-485d56bec00262ed7fa472261cce7bbc6202b96e-Space.cs',nearbyExcludedResources:defaultExcluded.length,globallyUnqualifiedHigherLayerResources:this.globalStatus01.higherLayerResources},calibration:{originNative:[0,0,0],axes:[[1,0,0],[0,1,0],[0,0,1]],reference:'installed-static01-explicit-unit-assumption',basis:'declared-demonstration-scale',metresPerNativeUnit:1,physicalCalibration:'unverified',nativeSpace:'gta-native-units-unverified'},visibilityAssumption:'unobserved-space-assumed-clear',motionAssumption:'static-during-snapshot',evidence:selected.map(({row,placement})=>{const result=sceneSource01(row);return {resourceId:row.Id,indexSHA256:result.IndexSHA256,receiptSHA256:result.ReceiptSHA256,nativeCoordinateBasis:placement?'selected-YMAP-interior-transform':'layer-zero-exterior-cache-model-identity',runtimeActivation:'unverified',...(placement?{interiorInstanceId:placement.id,interiorKey}:{})};}),timing:'static-installation-model-not-live-observation'},scene=acousticScene(tile,materials,{...engine,observationModel:model});this.activeProfile01.acousticSceneMs+=performance.now()-sceneBegan;this.activeProfile01.materializedPasses++;
+  const currentValidationPending=candidates.filter(r=>r.row.Eligibility==='eligible-exterior'&&r.row.Result&&r.validationState==='awaiting-current-source-validation').length,geometryPending=candidates.filter(r=>r.row.Eligibility==='eligible-exterior'&&!r.row.Result).length,activationWithheld=candidates.filter(r=>r.row.Eligibility!=='eligible-exterior').length+unresolvedInteriorBounds.length,firstBlocker=surfaces.length?null:currentValidationPending?'local-current-validation-pending':geometryPending?'local-cache-unprepared':unknown.length?'local-cache-rejected':activationWithheld||defaultExcluded.length?'placement-or-activation-withheld':omitted||eligible.length>selected.length?'local-workset-capacity':successfulResources?'no-supported-surfaces-in-window':'no-catalogued-exterior-in-window',localReadiness={state:surfaces.length?'usable-conditional-static-scene':'waiting-or-empty',firstBlocker,currentValidationPending,geometryPending,activationWithheld,queryFailures:unknown.length,capacityOmissions:omitted+Math.max(0,eligible.length-selected.length),qualifiedResources:successfulResources,activeSurfaces:surfaces.length,runtimeActivationVerified:false},metadata=freeze({kind:'RichAudioInstalledStaticScene01',worldDigest,session,generation,geometryTimeMs,durationMs,sourceCatalogueSHA256:this.catalogSHA256,localReadiness,candidateResources:candidates.length,possibleInteriorInstanceBounds:possibleInteriorBounds.length,interiorGeometryActivation:selected.some(e=>e.placement)?'camera-proxy-matched-selected-instance; portals-unknown':'unobserved; metadata-bounds-remain-unknown-volumes',softwareModelExcludedHigherLayerResources:defaultExcluded.length,globallyUnqualifiedHigherLayerResources:this.globalStatus01.higherLayerResources,selectedResources:selected.length,successfulResources,unpreparedResources:candidates.length-eligible.length,omittedResources:Math.max(0,eligible.length-selected.length),trianglesQueried:s.trianglesQueried,activeSurfaces:surfaces.length,reflectionCandidates:model.reflectionSurfaceIds.length,reflectionSearch01,missingRegions:tile.missingRegions.length,unpreparedExterior01:candidates.filter(e=>!sceneSource01(e.row)).slice(0,16).map(e=>({resourceId:e.row.Id,archive:e.row.PhysicalArchive??null,validation:e.validationState})),uncertaintyByReason01:tile.missingRegions.reduce((counts,r)=>(counts[r.reason]=(counts[r.reason]??0)+1,counts),{}),omissionEnvelopePaddingNativeUnits:.001,omittedSurfaces:omitted,unsupportedPrimitiveRegions:geometryUnknown,analyticGeometry:analytic,failures:unknown,preparationMilliseconds:performance.now()-began,coordinateBasis:'explicit1-native-unit-per-metre; physical-calibration-unverified',materialBasis:'uniform-authored-passive-assumption; native-material-identifiers-retained',coverage:'partial',installedWorldVerified:false,genuineResourceVerified:successfulResources>0,runtimeActivationVerified:false,pcmQueueFramesAdded:0});scenes.set(scene,metadata);return scene;
  }
 
  close(){this.#pendingSelection01=null;this.#selectionRevision01++;this.#anchoredSelections01.clear();this.#clearQueryViews01('world-close');this.staticComponents01.clear('world-close');this.resident.clear();}
@@ -376,7 +426,7 @@ function validateInstalledPacket01(packet,{catalogSHA256,session,generation,geom
  return {tile,metadata,model};
 }
 export function decodeInstalledStaticScene01(packet,expected={}){
- const {tile,metadata,model}=validateInstalledPacket01(packet,expected),scene=acousticScene(createTile(tile,{maximumSurfaces:Math.max(128,tile.surfaces.length)}),packet.materials,{...packet.engine,observationModel:model});scenes.set(scene,freeze(structuredClone(metadata)));return scene;
+ const {tile,metadata,model}=validateInstalledPacket01(packet,expected),scene=acousticScene(createTile(tile,{maximumSurfaces:Math.max(128,tile.surfaces.length),maximumMissingRegions:maximumInstalledUnknownRegions01}),packet.materials,{...packet.engine,observationModel:model});scenes.set(scene,freeze(structuredClone(metadata)));return scene;
 }
 
 // The exact immutable packet emitted by the installed factory retains its full

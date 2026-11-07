@@ -40,6 +40,8 @@ function state(s) {
   };
 }
 export class CausalSimulation {
+  #installedPropagation01={directBlocks:0,directWithheldWithKnownHit:0,selectedReflections:0};
+  get installedPropagation01(){return {...this.#installedPropagation01};}
   constructor(
     scene,
     { staleAfter = 0.25, extrapolationLimit = 0.05, historySeconds = 2.5, allowMissingScene = false } = {},
@@ -81,9 +83,6 @@ export class CausalSimulation {
       prunedPaths: 0,
       maximumAgeSeconds: 0,
       sceneReplacements: 0,
-      installedDirectBlocks01: 0,
-      installedDirectKnownHitUnknown01: 0,
-      installedReflectedPaths01: 0,
     };
   }
   replaceScene(scene, { preserveIdenticalReflectors = false } = {}) {
@@ -304,14 +303,26 @@ export class CausalSimulation {
     this.completedPrepareSequence=frame.prepareSequence;
     let availablePaths=0;
     const installed=frame.scene.observationModel?.kind==='conditional-installed-static-model';
+    const evidence=installed&&this.captureInstalledPaths01&&Math.round(now*FS/512)%16===0?{
+      frame:Math.round(now*FS),session:frame.scene.tile.session,generation:frame.scene.tile.version,
+      observationKey:frame.scene.tile.observationKey,direct:[],reflected:[]}:null;
+    const reasons=evidence?new Map(frame.scene.tile.missingRegions.map(r=>[r.id,r.reason])):null;
+    const evidenceMaterialBasis=evidence?basis=>basis?.map(m=>({...m,
+      observedMaterialId:frame.scene.tile.surfaces.find(s=>s.id===m.surface)?.material.observedId??null}))??null:null;
     for(const {id,track,plans} of sources){
       const eligible=[];
       for(const {plan,candidate,offset,count} of plans){
         const p=finishPath(plan,queries?queries.slice(offset,offset+count):null,this.stats);
+        if(evidence&&candidate.surfaces.length===0&&evidence.direct.length<6){
+          evidence.direct.push({sourceId:id,status:p.status,visibility:p.visibility??null,
+           source:plan.state?.position??null,listener:plan.listener?.position??null,distance:p.distance??null,delay:p.delay??null,
+           arrivalDirection:p.arrivalDirection??null,bands:p.bands??null,materialBasis:evidenceMaterialBasis(p.materialBasis),
+           knownHits:p.hits?.length??0,uncertainty:[...new Set(p.unmappedRegions?.map(key=>reasons.get(key))??[])]});
+        }
         if(installed&&candidate.surfaces.length===0&&p.status==='blocked-no-modelled-path')
-          this.stats.installedDirectBlocks01++;
+          this.#installedPropagation01.directBlocks++;
         if(installed&&candidate.surfaces.length===0&&p.status==='unknown'&&p.hits?.length)
-          this.stats.installedDirectKnownHitUnknown01++;
+          this.#installedPropagation01.directWithheldWithKnownHit++;
         const visual=frame.soundMap?{sourceId:id,plan,candidate,result:p,reason:p.status,identity:null}:null;
         if(visual)frame.soundMap.candidates.push(visual);
         if (
@@ -356,6 +367,8 @@ export class CausalSimulation {
           pan: p.pan,
           arrivalDirection: p.arrivalDirection,
           ...(this.scene.directPath||this.scene.observationModel?{arrivalOrigin:p.points.at(-1)??plan.state.position}:{}),
+          ...(evidence&&p.order?{diagnosticReflection:{source:plan.state.position,listener:plan.listener.position,
+            materialBasis:evidenceMaterialBasis(p.materialBasis)}}:{}),
           distance: p.distance,
           delay: p.delay,
           order: p.order,
@@ -377,13 +390,17 @@ export class CausalSimulation {
         eligible.length - budget,
       );
       const chosen=eligible.slice(0,budget);
+      if(evidence)for(const p of chosen)if(p.order&&evidence.reflected.length<6)evidence.reflected.push({
+       sourceId:id,distance:p.distance,delay:p.delay,arrivalDirection:p.arrivalDirection,arrivalOrigin:p.arrivalOrigin,
+       bands:p.bands,...p.diagnosticReflection});
       paths.push(...chosen);
-      if(installed)for(const p of chosen)if(p.order>0)this.stats.installedReflectedPaths01++;
+      if(installed)for(const p of chosen)if(p.order>0)this.#installedPropagation01.selectedReflections++;
     }
     // Old path-rate records are bounded independently from telemetry lifetime.
     for (const [id, p] of this.previous)
       if (now - p.time > this.historySeconds) this.previous.delete(id);
     this.availablePaths=availablePaths;
+    if(evidence)this.lastInstalledPaths01=evidence;
     return {
       frame: Math.round(now * FS),
       paths,

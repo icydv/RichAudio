@@ -131,7 +131,8 @@ export function finishPathGeometry(plan,queries=null,stats={queries:0,surfaceTes
   // reflection/clearance authority, and never bypasses a represented wall or
   // ambiguous contact. Every reflected leg still fails on an unknown region.
   const unknownDirectFallback=uncertain&&!surfaces.length&&!hits.length&&!ambiguousContact&&unmappedRegions.size>0&&scene.observationModel?.kind==='conditional-installed-static-model';
-  if (uncertain&&!unknownDirectFallback) return { status: "unknown", distance, hits };
+  if (uncertain&&!unknownDirectFallback) return { status: "unknown", distance, hits,
+    ...(scene.observationModel?.kind==='conditional-installed-static-model'?{ambiguousContact,unmappedRegions:[...unmappedRegions]}:{}) };
   if (hits.length && surfaces.length)
     return { status: "blocked-reflection", distance, hits };
   return {

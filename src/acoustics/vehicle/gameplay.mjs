@@ -61,6 +61,26 @@ export class StockGameplay {
   // metadata only; it does not participate in source selection or DSP.
   this.latencyDiagnostics=latencyDiagnostics;this.lastTiming=null;this.captureTiming=false;this.latencyBrackets=[];
   this.sourcePreparation05=sourcePreparationPolicy==='explicit-control05'?new StockSourcePreparation05({now:()=>this.now(),candidates:()=>this.sourceCandidates05(),createSource:(model,context,options)=>this.registry.createSource(model,context,options)}):null;
+  this.startupVoices01=new Map();
+  this.updatePipelineQuality01();
+ }
+ updatePipelineQuality01(){
+  const settings=this.pipeline.simulation.processingSettings;
+  if(this.pipeline.quality===this.quality.active&&settings?.maxReflectors===16&&settings.earlyReflections===this.settings.reflections)return;
+  this.pipeline.setQuality(this.quality.active,{maxReflectors:16,earlyReflections:this.settings.reflections});
+ }
+ stockSourceOptions01(bank){
+  const profile=this.profiles?.profiles?.[bank.model];
+  return {sourceGain:profile?.sourceGain??1,...(profile?.pressureSharesByState?{pressureSharesByState:profile.pressureSharesByState}:{})};
+ }
+ prepareStartupVoices01(eligible){
+  if(this.lastFrame!==-1||this.pipeline.renderer.frame!==0||this.startupVoices01.size||eligible.length>2)
+   throw Error('one bounded normal startup voice preparation');
+  for(const {model,context} of eligible){
+   const {bank}=this.registry.resolve(model,context);
+   this.startupVoices01.set(model+':'+context,this.registry.createSource(model,context,this.stockSourceOptions01(bank)));
+  }
+  return this.startupVoices01.size;
  }
  // Explicit startup/control work. No accept/render caller starts preparation.
  prepareSources05(options={}){if(!this.sourcePreparation05)throw Error('Opt-in explicit-control05 source preparation required');return this.sourcePreparation05.prepare(options);}
@@ -105,7 +125,7 @@ export class StockGameplay {
   if(!['auto','performance','balanced','quality','max'].includes(s.quality)||!['auto','cpu','gpu'].includes(s.acceleration)||typeof s.enabled!=='boolean'||!Number.isFinite(s.volume)||s.volume<0||s.volume>1||typeof s.reflections!=='boolean'||!['stock-fallback','experimental-additive'].includes(s.mode))throw Error('gameplay settings');
   const airflowEnabled=s.airflowEnabled??false,airflowLevel=s.airflowLevel??.35;
   if(typeof airflowEnabled!=='boolean'||!Number.isFinite(airflowLevel)||airflowLevel<0||airflowLevel>1)throw Error('bounded airflow settings');
-  this.settings={...s,airflowEnabled,airflowLevel};this.quality.select(s.quality);this.pipeline.setQuality(this.quality.active);this.pipeline.setAcceleration(s.acceleration);
+  this.settings={...s,airflowEnabled,airflowLevel};this.quality.select(s.quality);this.updatePipelineQuality01();this.pipeline.setAcceleration(s.acceleration);
   this.pipeline.renderer.setOutputPreferences({richAudioEnabled:s.enabled&&s.mode==='experimental-additive',outputLevel:s.volume});
   this.updateInstalledConsumerWorkload01();
  }
@@ -319,6 +339,7 @@ export class StockGameplay {
   try{
   const start=this.now(),time=this.pipeline.renderer.frame/FS;this.sample=this.playout.sample(time,this.now());
   this.applyPendingInstalledStaticScene01();
+  const afterAdmission=this.now();
   this.captureTiming=this.latencyDiagnostics&&this.stats.blocks%8===0;this.lastTiming=null;if(this.captureTiming)this.latencyBrackets=[];
   if(this.pipeline.simulation.scene!==this.direct&&this.now()>=this.sceneExpiry){this.pipeline.replaceScene(this.direct);this.staticSceneBinding=null;this.stats.geometryFallbacks++;}
   const listener=this.sample.state??{position:[0,0,0],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],valid:false,generation:this.lastGeneration||1};
@@ -344,9 +365,10 @@ export class StockGameplay {
    this.lifecycle.scopeRetirements++;this.lifecycle.lastRetirements.push({reason,sourceFrame:s.source?.frame??null,lastQualifiedRunning:s.vehicle?.running??null,engineShutdownInferred:false});if(this.lifecycle.lastRetirements.length>MAX)this.lifecycle.lastRetirements.shift();
    s.identity=null;s.source=null;s.vehicle=null;s.airflow=null;this.stats.retired++;
   }
-  for(const item of selected){let slot=this.slots.find(s=>s.identity===item.identity);if(!slot){slot=this.slots.find(s=>!s.identity);slot.identity=item.identity;slot.generation++;const profile=this.profiles?.profiles?.[item.resolved.bank.model];
-    const sourceOptions={sourceGain:profile?.sourceGain??1,...(profile?.pressureSharesByState?{pressureSharesByState:profile.pressureSharesByState}:{})};
-    slot.source=this.sourcePreparation05?.take({identity:item.identity,session:this.session,bank:item.resolved.bank,options:sourceOptions})??this.registry.createSource(item.v.model,item.v.context,sourceOptions);slot.airflow=new AirflowSourceStreet01({seed:airflowSeedStreet01(this.session+':'+item.identity)});this.stats.arrivals++;this.stageCounters.sourceCreations++;}
+  for(const item of selected){let slot=this.slots.find(s=>s.identity===item.identity);if(!slot){slot=this.slots.find(s=>!s.identity);slot.identity=item.identity;slot.generation++;
+    const sourceOptions=this.stockSourceOptions01(item.resolved.bank),startupKey=item.v.model+':'+item.v.context;
+    const startupVoice=this.startupVoices01.get(startupKey);this.startupVoices01.delete(startupKey);
+    slot.source=startupVoice??this.sourcePreparation05?.take({identity:item.identity,session:this.session,bank:item.resolved.bank,options:sourceOptions})??this.registry.createSource(item.v.model,item.v.context,sourceOptions);slot.airflow=new AirflowSourceStreet01({seed:airflowSeedStreet01(this.session+':'+item.identity)});this.stats.arrivals++;this.stageCounters.sourceCreations++;}
    slot.vehicle=item.v;slot.score=item.score;
   }
   for(const c of this.localAirflow)c.fill(0);this.airflowState.riderActive=false;this.airflowState.exteriorSources=0;
@@ -375,13 +397,14 @@ export class StockGameplay {
   // A warming playout has no rendered pose. The placeholder origin must not
   // revoke a workset already qualified against the real control observation.
   if(this.sample.state&&currentScene!==this.direct&&(installed?(!this.installedWindowContains01(currentScene,listener.position)||sources.some(s=>!this.installedWindowContains01(currentScene,s.position))):(!inBox(listener.position,currentScene.tile.bounds)||sources.some(s=>!inBox(s.position,currentScene.tile.bounds))))){if(installed&&this.#installedSceneService01)this.#installedSceneService01.invalidateConsumer01('outside-active-workset',this.now());else{this.pipeline.replaceScene(this.direct);this.staticSceneBinding=null;this.stats.geometryFallbacks++;}}
-  this.pipeline.simulation.setProcessingSettings({pathBudget:this.pipeline.renderer.maxPathsPerSource,maxReflectors:16,earlyReflections:this.settings.reflections});
   this.telemetry?.begin(this.pipeline.simulation,this.now());
+  const beforePrepare=this.now();
   const installedBefore=this.staticSceneBinding?.mode==='installed-static-conditional-partial';this.installedRenderPreparing01=true;
   try{await this.pipeline.prepare({time,session:this.session,generation:listener.generation,listener,sources},this.pipeline.simulation.scene===this.direct?{}:{geometryTimeMs:this.geometryAnchor.observationMs+this.now()-this.geometryAnchor.at},()=>{this.tickInstalledScene01();return !this.#installedSceneStopped01&&!this.installedFallbackPending01&&(!installedBefore||this.staticSceneBinding?.mode==='installed-static-conditional-partial');});}finally{this.installedRenderPreparing01=false;}
   this.tickInstalledScene01();if(this.#installedSceneStopped01)return [this.left,this.right];
   if(installedBefore&&this.pipeline.simulation.scene===this.direct)await this.pipeline.prepareObserved(time,{},()=>!this.#installedSceneStopped01);
   if(this.#installedSceneStopped01)return [this.left,this.right];
+  const beforePcm=this.now();
   if(this.pipeline.lastControl.paths.length>0)this.stageCounters.acousticPathBlocks++;
   const before=this.pipeline.renderer.stats.limited;this.pipeline.process(this.inputs,this.left,this.right,BLOCK,null,null,this.settings.airflowEnabled?this.localAirflow:null);
   observePcmBlock(this.left,this.stageCounters.stereo,this.right);
@@ -389,7 +412,7 @@ export class StockGameplay {
   const elapsed=this.now()-start;this.stats.blocks++;this.stats.maximumProcessingMs=Math.max(this.stats.maximumProcessingMs,elapsed);
   if(this.telemetry)try{this.visual=this.telemetry.publish(this.pipeline.simulation,this.pipeline.lastControl,{workerMs:elapsed});}catch{this.visual=null;}
   this.quality.observe({processingMs:elapsed,availablePaths:this.pipeline.lastControl.paths.length,activeBackend:this.pipeline.backend.diagnostics().activeAcceleration??'cpu'});
-  this.pipeline.setQuality(this.quality.active);
+  this.updatePipelineQuality01();
   if(elapsed>BLOCK/FS*1000){this.stats.deadlineMisses++;this.consecutiveMisses++;this.lastGood=this.now();if(this.consecutiveMisses>=5&&this.activeLimit>1){this.activeLimit=1;this.stats.sourceBudgetReductions++;}}
   else{this.consecutiveMisses=0;if(this.now()-this.lastGood>5000)this.activeLimit=MAX;}
   if(this.captureTiming){const selectedIds=new Set(selected.map(s=>s.v.id));this.lastTiming={producerFrameStart:Math.round(time*FS),frames:BLOCK,
@@ -399,6 +422,10 @@ export class StockGameplay {
   // Retain a second complete method interval, including optional telemetry and
   // quality bookkeeping. It encloses the core interval; do not add them.
   this.lastCompleteRenderMs=this.now()-start;
+  this.lastRenderStages01=this.lastCompleteRenderMs>8?{admissionMs:afterAdmission-start,
+   sourceAndControlMs:beforePrepare-afterAdmission,propagationMs:beforePcm-beforePrepare,
+   pcmMs:elapsed-(beforePcm-start),bookkeepingMs:this.lastCompleteRenderMs-elapsed,
+   firstSourceBlock:this.stageCounters.sourcePlaybackBlocks===1}:null;
   this.stats.maximumCompleteRenderMs=Math.max(this.stats.maximumCompleteRenderMs??0,this.lastCompleteRenderMs);
   if(this.lastCompleteRenderMs>8)this.stats.completeRenderHeadroomMisses=(this.stats.completeRenderHeadroomMisses??0)+1;
   if(this.lastCompleteRenderMs>BLOCK/FS*1000)this.stats.completeRenderHardMisses=(this.stats.completeRenderHardMisses??0)+1;

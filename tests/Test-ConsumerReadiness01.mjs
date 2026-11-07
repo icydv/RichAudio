@@ -66,7 +66,7 @@ test('the applied installed scene renders reflection and obstruction for a movin
  const service=new InstalledSceneService01({config:fixture.config,session:budgetSession042,
   onScene:(scene,receipt)=>{if(scene.tile.surfaces.length)engine.queueInstalledStaticScene01(scene,receipt);}});
  engine.bindInstalledSceneService01(service);
- const began=performance.now(),stats=engine.pipeline.simulation.stats;
+ const began=performance.now();
  try{
   for(let block=0;block<455;block++){
    const due=began+block*512/48;
@@ -82,8 +82,9 @@ test('the applied installed scene renders reflection and obstruction for a movin
    }
    await engine.render();
   }
-  assert(stats.installedReflectedPaths01>0,'real finite reflection from the authored wall');
-  assert(stats.installedDirectBlocks01>0,'the moved camera puts the authored wall between source and listener');
+  const paths=engine.pipeline.simulation.installedPropagation01;
+  assert(paths.selectedReflections>0,'real finite reflection from the authored wall');
+  assert(paths.directBlocks>0,'the moved camera puts the authored wall between source and listener');
   assert.equal(engine.stats.arrivals,1);
   assert.equal(engine.stats.retired,0);
   assert(engine.installedSceneDiagnostics01.renewals>0);

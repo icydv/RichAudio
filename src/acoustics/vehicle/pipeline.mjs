@@ -28,11 +28,12 @@ export class VehicleAcousticPipeline {
     this.lastControl = null;
     if(controlFilter!==null&&typeof controlFilter!=='function')throw Error('control filter required');this.controlFilter=controlFilter;
   }
-  setQuality(quality) {
+  setQuality(quality,{maxReflectors=qualityReflectors[quality],earlyReflections=true}={}) {
     if (!(quality in qualityPresets)) throw Error('explicit acoustic quality required');
     this.quality = quality;
-    this.simulation.setProcessingSettings({ pathBudget: qualityPresets[quality], maxReflectors: qualityReflectors[quality] });
-    this.renderer.setPathBudget(qualityPresets[quality]);
+    const pathBudget=qualityPresets[quality];
+    this.simulation.setProcessingSettings({pathBudget,maxReflectors,earlyReflections});
+    this.renderer.setPathBudget(pathBudget);
   }
   setAcceleration(mode) { this.backend.setMode(mode); }
   replaceScene(scene, options) { this.simulation.replaceScene(scene, options); }
