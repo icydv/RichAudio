@@ -1,5 +1,8 @@
 // Authored RPH ABI stand-in. The exact candidate is compiled against the retained SDK, never this file.
 using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Reflection;
 using System.Threading;
 namespace Rage {
  public struct Vector3 {public float X,Y,Z;}
@@ -13,14 +16,48 @@ namespace Rage {
  public sealed class Ped:Entity {public Vehicle CurrentVehicle{get;set;}}
  public sealed class Vehicle:Entity {}
  public sealed class Player {public Ped Character{get;set;}}
- public sealed class GameConsole {public string Last;public void Print(string s){Last=s;System.Console.WriteLine(s);}}
+ public sealed class GameConsole {
+  public string Last;
+  public readonly List<string> Lines=new List<string>();
+  public void Print(string s){Last=s;Lines.Add(s);System.Console.WriteLine(s);}
+ }
  public static class Game {
   public static bool IsLoading{get;set;} public static bool IsPaused{get;set;}
   public static Player LocalPlayer{get;set;}
   public static GameConsole Console{get;private set;}
-  public static int Registrations;
   public static string LastLog;
-  public static void AddConsoleCommands(){Registrations++;}
+  static readonly Dictionary<string,MethodInfo> commands=new Dictionary<string,MethodInfo>(StringComparer.OrdinalIgnoreCase);
+  // This fixture models only the public signatures exercised by this candidate.
+  public static void AddConsoleCommands(params MethodInfo[] methods){
+   foreach(var method in methods){
+    var command=(Attributes.ConsoleCommandAttribute)Attribute.GetCustomAttribute(method,typeof(Attributes.ConsoleCommandAttribute));
+    var parameters=method.GetParameters();
+    bool supported=parameters.Length==0||parameters.Length==2&&parameters[0].ParameterType==typeof(string)&&parameters[1].ParameterType==typeof(int);
+    if(command==null||String.IsNullOrEmpty(command.Name)||!method.IsPublic||!method.IsStatic||method.ContainsGenericParameters||
+       method.ReturnType!=typeof(void)||!supported)throw new ArgumentException("Unsupported console method: "+method.Name);
+    commands.Add(command.Name,method);
+   }
+  }
+  public static int CommandCount{get{return commands.Count;}}
+  public static void Dispatch(string line){
+   var tokens=line.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries);
+   MethodInfo method;
+   if(tokens.Length==0||!commands.TryGetValue(tokens[0],out method))throw new InvalidOperationException("Unknown command");
+   var parameters=method.GetParameters();
+   if(tokens.Length!=parameters.Length+1)throw new ArgumentException("Console argument count");
+   if(parameters.Length==0){method.Invoke(null,null);return;}
+   int pid;
+   if(!Int32.TryParse(tokens[2],NumberStyles.Integer,CultureInfo.InvariantCulture,out pid))throw new ArgumentException("Console integer argument");
+   method.Invoke(null,new object[]{tokens[1],pid});
+  }
+  public static void UnloadPlugin(Assembly owner,Action exit){
+   try{exit();}
+   finally{
+    var names=new List<string>();
+    foreach(var entry in commands)if(entry.Value.DeclaringType.Assembly==owner)names.Add(entry.Key);
+    foreach(var name in names)commands.Remove(name);
+   }
+  }
   public static void LogTrivial(string line){LastLog=line;}
   static Game(){Console=new GameConsole();}
  }

@@ -17,12 +17,13 @@ function pinned(filename,hash){
  return JSON.parse(b.toString('utf8').replace(/^\uFEFF/,''));
 }
 
-const [planPath,capture,session,result,armByUtcMs]=process.argv.slice(2);
-if(!result||!capture||!/^[a-f0-9]{32}$/.test(session??'')||!/^\d+$/.test(armByUtcMs??''))
- throw Error('Usage: node Observe-CombinedWorld01.mjs plan.json capture.jsonl session result.jsonl <session arm cutoff UTC epoch ms>');
-const remainingToArmMs=Number(armByUtcMs)-Date.now();
-if(!Number.isSafeInteger(remainingToArmMs)||remainingToArmMs<=0||remainingToArmMs>25*60_000)throw Error('Invalid session arm cutoff');
-const armCutoff=performance.now()+remainingToArmMs;
+const [planPath,capture,session,result,armByUtcMs,stopByUtcMs]=process.argv.slice(2);
+if(!result||!capture||!/^[a-f0-9]{32}$/.test(session??'')||!/^\d+$/.test(armByUtcMs??'')||!/^\d+$/.test(stopByUtcMs??''))
+ throw Error('Usage: node Observe-CombinedWorld01.mjs plan.json capture.jsonl session result.jsonl <arm cutoff UTC epoch ms> <observation cutoff UTC epoch ms>');
+const startUtc=Date.now(),remainingToArmMs=Number(armByUtcMs)-startUtc,remainingToStopMs=Number(stopByUtcMs)-startUtc;
+if(!Number.isSafeInteger(remainingToArmMs)||!Number.isSafeInteger(remainingToStopMs)||
+ remainingToArmMs<=0||remainingToStopMs<=remainingToArmMs||remainingToStopMs>25*60_000)throw Error('Invalid session cutoffs');
+const start=performance.now(),armCutoff=start+remainingToArmMs,deadline=start+remainingToStopMs;
 const plan=JSON.parse(fs.readFileSync(planPath,'utf8').replace(/^\uFEFF/,''));
 const catalog=pinned(plan.catalogPath,plan.catalogSHA256);
 const manifest=plan.validatedManifestPath?pinned(plan.validatedManifestPath,plan.validatedManifestSHA256):null;
@@ -34,7 +35,6 @@ const instances=interiorInstanceIdentities01(catalog);
 const out=fs.openSync(result,'wx');
 const record=x=>fs.writeSync(out,JSON.stringify(x)+'\n');
 let service,engine,buffer='',at=0,frames=0,matches=0,clockErrors=0,lastSceneKey=null,lastBinding=null;
-let deadline=armCutoff+5*60_000;
 let stop=false;
 const interrupt=()=>{stop=true;};
 process.on('SIGINT',interrupt);process.on('SIGTERM',interrupt);
@@ -66,10 +66,11 @@ try{
   }
   const rows=buffer.split('\n');buffer=rows.pop();
   for(const line of rows){
+   if(performance.now()>=deadline)break;
    const row=JSON.parse(line),f=row.frame,l=f.listener,r=f.cameraInteriorReadback;
    if(f.session!==session||l.session!==session||l.sequence<=lastSeq||f.vehicles.length!==0||!r)throw Error('unexpected observation session');
    lastSeq=l.sequence;
-   if(frames++===0)deadline=Math.min(deadline,performance.now()+5*60_000);
+   frames++;
    const sample=r.outcome==='observed'&&r.ready===true?{proxy:r.proxy,archetype:r.archetype,origin:r.origin,observationTicks:r.sampleTicks}:null;
    const scope={session,generation:l.generation,catalogSHA256:plan.catalogSHA256,epoch:epoch??'retained-match-only'};
    const matched=matchInteriorInstance01(instances,sample&&{...scope,...sample},scope);

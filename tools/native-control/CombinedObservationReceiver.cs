@@ -4,19 +4,22 @@ using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Text;
+using System.Threading;
 using RichAudio.Beacon.Transport;
 
 internal static class CombinedObservationReceiver {
  static int Main(string[] args){
   Guid session;
   int peer;
-  long armByUtcMs;
-  if(args.Length!=4||!Guid.TryParseExact(args[0],"N",out session)||session==Guid.Empty||args[0]!=session.ToString("N")||!Int32.TryParse(args[1],out peer)||peer<=0||
-   !Int64.TryParse(args[3],NumberStyles.None,CultureInfo.InvariantCulture,out armByUtcMs)){
-   Console.Error.WriteLine("Usage: RichAudio.ObservationReceiver.exe <session N-format> <GTA PID> <fresh capture.jsonl> <session arm cutoff UTC epoch ms>");return 2;
+  long armByUtcMs,stopByUtcMs;
+  if(args.Length!=5||!Guid.TryParseExact(args[0],"N",out session)||session==Guid.Empty||args[0]!=session.ToString("N")||!Int32.TryParse(args[1],out peer)||peer<=0||
+   !Int64.TryParse(args[3],NumberStyles.None,CultureInfo.InvariantCulture,out armByUtcMs)||
+   !Int64.TryParse(args[4],NumberStyles.None,CultureInfo.InvariantCulture,out stopByUtcMs)){
+   Console.Error.WriteLine("Usage: RichAudio.ObservationReceiver.exe <session N-format> <GTA PID> <fresh capture.jsonl> <arm cutoff UTC epoch ms> <observation cutoff UTC epoch ms>");return 2;
   }
-  long remaining=armByUtcMs-DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-  if(remaining<=0||remaining>25*60*1000){Console.Error.WriteLine("Invalid session arm cutoff");return 2;}
+  long now=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+  long remaining=armByUtcMs-now,stopAfter=stopByUtcMs-now;
+  if(remaining<=0||stopAfter<=remaining||stopAfter>25*60*1000){Console.Error.WriteLine("Invalid session cutoffs");return 2;}
   var awaitingArm=Stopwatch.StartNew();
   int count=0;bool ownedCapture=false;
   try {
@@ -37,11 +40,22 @@ internal static class CombinedObservationReceiver {
     }
     pipe.EndWaitForConnection(connect);
     GameplayWire.Peer(pipe,peer,true);
+    Console.WriteLine("Receiver connected: session="+session.ToString("N")+"; gamePid="+peer);
+    long budget=Math.Min(4*60*1000,stopAfter-awaitingArm.ElapsedMilliseconds);
+    if(budget<=0)throw new TimeoutException("session observation cutoff");
     var start=Stopwatch.StartNew();
+    bool firstFresh=false;
     long lastSequence=-1,lastTicks=-1,lastGeneration=0;
-    while(start.Elapsed.TotalMinutes<4.5&&count<5500&&!process.HasExited){
+    // Closing the pipe at the deadline also interrupts a partial read.
+    using(var cutoff=new Timer(_=>pipe.Dispose(),null,(int)budget,Timeout.Infinite))
+    while(start.ElapsedMilliseconds<budget&&count<5500&&!process.HasExited){
      byte[] bytes;
-     try{bytes=GameplayWire.Read(pipe,15000);}catch(EndOfStreamException){break;}
+     try{bytes=GameplayWire.Read(pipe,15000);}
+     catch(EndOfStreamException){break;}
+     catch(TimeoutException){if(start.ElapsedMilliseconds<budget)throw;break;}
+     catch(ObjectDisposedException){if(start.ElapsedMilliseconds<budget)throw;break;}
+     catch(IOException){if(start.ElapsedMilliseconds<budget)throw;break;}
+     if(start.ElapsedMilliseconds>=budget)break;
      var frame=GameplayWire.Decode(bytes,args[0]);
      long received=Stopwatch.GetTimestamp();
      double age=((decimal)received-frame.Listener.ObservationTicks)>0?
@@ -53,7 +67,13 @@ internal static class CombinedObservationReceiver {
      log.WriteLine("{\"receivedTicks\":"+received.ToString(CultureInfo.InvariantCulture)+",\"sourceAgeMs\":"+age.ToString("R",CultureInfo.InvariantCulture)+
       ",\"fresh\":"+(fresh?"true":"false")+",\"frame\":"+Encoding.UTF8.GetString(bytes)+"}");
      log.Flush();count++;
-     TransportStop.Write(pipe,new[]{TransportStop.Accepted});
+     if(fresh&&!firstFresh){
+      firstFresh=true;
+      Console.WriteLine("First valid camera frame received: session="+session.ToString("N")+"; sequence="+lastSequence);
+     }
+     try{TransportStop.Write(pipe,new[]{TransportStop.Accepted});}
+     catch(ObjectDisposedException){if(start.ElapsedMilliseconds<budget)throw;break;}
+     catch(IOException){if(start.ElapsedMilliseconds<budget)throw;break;}
     }
    }
    Console.WriteLine("Closed; frames="+count);

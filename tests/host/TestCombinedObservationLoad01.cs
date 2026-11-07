@@ -40,39 +40,61 @@ internal static class TestCombinedObservationLoad01 {
   var clock=Stopwatch.StartNew();while(!done()&&clock.ElapsedMilliseconds<6000)Thread.Sleep(15);Check(done(),reason);
  }
  static string Read(string p){if(!File.Exists(p))return "";using(var f=new FileStream(p,FileMode.Open,FileAccess.Read,FileShare.ReadWrite))using(var r=new StreamReader(f))return r.ReadToEnd();}
+ static void ExpectUnknown(string command){
+  try{Rage.Game.Dispatch(command);}
+  catch(InvalidOperationException e){if(e.Message=="Unknown command")return;throw;}
+  throw new Exception("Expected unknown command: "+command);
+ }
  static int Main(string[] args){
   try{
    var dll=Path.GetFullPath(args[1]);
    if(args[0]=="discover"){Discover(dll,Path.GetFullPath(args[2]));return 0;}
-   return Exercise(dll,Path.GetFullPath(args[2]),Path.GetFullPath(args[3]));
+   return Exercise(dll,Path.GetFullPath(args[2]),Path.GetFullPath(args[3]),args[0]=="cutoff");
   }catch(Exception e){Console.Error.WriteLine(e);return 1;}
  }
  [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
- static int Exercise(string dll,string receiver,string capture){
+ static int Exercise(string dll,string receiver,string capture,bool verifyCutoff){
   var a=Assembly.LoadFrom(dll);
-  var types=a.GetTypes();
   DiscoverMembers(a);
   var attr=(Rage.Attributes.PluginAttribute)a.GetCustomAttributes(typeof(Rage.Attributes.PluginAttribute),false).Single();
-  var commands=types.SelectMany(t=>t.GetMethods(BindingFlags.Public|BindingFlags.Static|BindingFlags.DeclaredOnly))
-   .Select(m=>new{Method=m,Command=(Rage.Attributes.ConsoleCommandAttribute)m.GetCustomAttributes(typeof(Rage.Attributes.ConsoleCommandAttribute),false).SingleOrDefault()})
-   .Where(x=>x.Command!=null).ToDictionary(x=>x.Command.Name,x=>x.Method);
-  Check(commands.Count==3,"only three commands");
+  ExpectUnknown("RichAudioObserveStatus");
   Invoke(a,attr.EntryPoint);
-  Check(Rage.Game.Registrations==1,"explicit console registration");
+  Check(Rage.Game.CommandCount==4,"exact explicit command set");
+  Rage.Game.Dispatch("richaudioobservestatus");
+  Check(Rage.Game.LastLog.Contains("status handler entered"),"read-only command exposure acknowledgement");
   Check(Rage.Native.NativeFunction.Calls==0&&Rage.GameFiber.Last==null,"idle entry point must do no native work or start a fiber");
   var v=new Rage.Vehicle{Model=new Rage.Model{Hash=0xf9300cc5},Handle=new Rage.PoolHandle{Value=4,Index=5,Counter=6},MemoryAddress=(IntPtr)7};
   Rage.Game.LocalPlayer=new Rage.Player{Character=new Rage.Ped{CurrentVehicle=v}};
-  commands["RichAudioReadVehicleHorn"].Invoke(null,null);
+  Rage.Game.Dispatch("RichAudioReadVehicleHorn");
   Check(Rage.Native.NativeFunction.HornCalls==0,"unarmed horn command");
   string session=Guid.NewGuid().ToString("N");
-  long armByUtcMs=DateTimeOffset.UtcNow.AddMinutes(2).ToUnixTimeMilliseconds();
-  using(var child=Process.Start(new ProcessStartInfo(receiver,session+" "+Process.GetCurrentProcess().Id+" \""+capture+"\" "+armByUtcMs){
+  long now=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+  long armByUtcMs=now+(verifyCutoff?5000:120000);
+  long stopByUtcMs=armByUtcMs+(verifyCutoff?1000:240000);
+  using(var child=Process.Start(new ProcessStartInfo(receiver,session+" "+Process.GetCurrentProcess().Id+" \""+capture+"\" "+armByUtcMs+" "+stopByUtcMs){
    UseShellExecute=false,RedirectStandardOutput=true,CreateNoWindow=true})){
    try{
     var line=child.StandardOutput.ReadLineAsync();
-    Check(line.Wait(6000)&&line.Result.StartsWith("Ready:"),"receiver start");
-    commands["RichAudioObserveStart"].Invoke(null,new object[]{session,child.Id});
+    Check(line.Wait(6000)&&line.Result=="Ready: RichAudioObserveStart "+session+" "+child.Id,"exact full operator command");
+    if(!verifyCutoff){
+     Thread.Sleep(32000);
+     Check(!child.HasExited&&Read(capture).Length==0,"receiver remains available past the former arm window");
+    }
+    Rage.Game.Dispatch(line.Result.Substring("Ready: ".Length));
+    Check(Rage.Game.Console.Lines.Exists(s=>s.Contains("start handler entered; session="+session+"; receiverPid="+child.Id)),"manual start handler acknowledgement");
     WaitFor(()=>Read(capture).Contains("\"outcome\":\"no-proxy\""),"exterior packet");
+    var connected=child.StandardOutput.ReadLineAsync();
+    Check(connected.Wait(2000)&&connected.Result.Contains("Receiver connected:"),"authenticated receiver connection evidence");
+    var firstFrame=child.StandardOutput.ReadLineAsync();
+    Check(firstFrame.Wait(2000)&&firstFrame.Result.Contains("First valid camera frame received:"),"first fresh camera frame evidence");
+    if(verifyCutoff){
+     Check(child.WaitForExit(8000)&&child.ExitCode==0&&File.Exists(capture+".closed"),"connected receiver closed at shared observation cutoff");
+     Check(Rage.GameFiber.Last.Join(3000),"sampling fiber retired when receiver closed at cutoff");
+     Rage.Game.UnloadPlugin(a,()=>Invoke(a,attr.ExitPoint,false));
+     ExpectUnknown(line.Result.Substring("Ready: ".Length));
+     Console.WriteLine("PASS connected receiver closed at shared observation cutoff.");
+     return 0;
+    }
     Rage.Game.IsPaused=true;
     Thread.Sleep(1350);
     Check(!child.HasExited,"pipe remains available during a paused console interval");
@@ -83,17 +105,18 @@ internal static class TestCombinedObservationLoad01 {
     WaitFor(()=>Read(capture).Contains("\"archetype\":43794"),"interior native and wire readback");
     Rage.Native.NativeFunction.Proxy=0;
     WaitFor(()=>Read(capture).Split('\n').Count(l=>l.Contains("\"outcome\":\"no-proxy\""))>=2,"return to exterior");
-    commands["RichAudioReadVehicleHorn"].Invoke(null,null);
+    Rage.Game.Dispatch("RichAudioReadVehicleHorn");
     Check(Rage.Game.Console.Last.Contains("vehicle=00000004:5:06:7")&&Rage.Game.Console.Last.Contains("raw=00000007,00000007,00000007"),"repeated reads tied to vehicle");
     Rage.Native.NativeFunction.AlternateHorn=true;
-    commands["RichAudioReadVehicleHorn"].Invoke(null,null);
+    Rage.Game.Dispatch("RichAudioReadVehicleHorn");
     Check(Rage.Game.Console.Last.Contains("result=inconsistent")&&Rage.Game.LastLog==Rage.Game.Console.Last,"differing hashes retained in the RPH log");
-    commands["RichAudioObserveStop"].Invoke(null,null);
+    Rage.Game.Dispatch("RichAudioObserveStop");
     Check(Rage.GameFiber.Last.Join(3000),"sampling fiber retired");
     Check(child.WaitForExit(3500)&&child.ExitCode==0&&File.Exists(capture+".closed"),"receiver closed after publisher stop");
-    Invoke(a,attr.ExitPoint,false);
-    commands["RichAudioObserveStart"].Invoke(null,new object[]{session,child.Id});
-    Check(Rage.Game.Console.Last.Contains("arm rejected"),"no replay or restart after unload");
+    Rage.Game.UnloadPlugin(a,()=>Invoke(a,attr.ExitPoint,false));
+    ExpectUnknown(line.Result.Substring("Ready: ".Length));
+    ExpectUnknown("RichAudioObserveStatus");
+    Check(Rage.Game.CommandCount==0,"unload removed the complete registered command set");
    }finally{if(!child.HasExited){child.Kill();child.WaitForExit(3500);}}
   }
   Console.WriteLine("PASS exact candidate startup, commands, real named pipe, shutdown, and exit with authored native calls.");

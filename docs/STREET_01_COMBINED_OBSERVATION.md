@@ -5,8 +5,11 @@ unique match to a selected placement, and actual admission by the bankless
 production consumer. The same session will measure whether two existing
 donor vehicles produce stable and distinct default-horn readbacks.
 
-Codex built a standalone RPH plugin. At startup it registers the start, stop
-and horn commands, prints an idle line, and returns. The normal RichAudio
+Codex built a standalone RPH plugin. At startup it passes the exact start,
+stop, status, and horn methods to RPH's public
+[`Game.AddConsoleCommands(MethodInfo[])`](https://docs.ragepluginhook.net/html/M_Rage_Game_AddConsoleCommands_1.htm)
+overload and reports entry, the registration attempt, and the return from
+that call separately. The normal RichAudio
 entry point, audio host, decoder, menu, and profile mutations are outside the
 build. The manually armed sampler uses the production camera tracker and
 interior getter. The same-user, PID-checked gameplay pipe retains the
@@ -16,11 +19,25 @@ activation field. A brief console pause does not extend the original lease.
 The horn command logs three raw values and verifies the current vehicle
 identity and model between reads.
 
-The receiver and bankless consumer take the same absolute arm cutoff from
-the session schedule. The operator can read and enter the F4 command any
-time before that cutoff. The receiver starts its observation budget on
-connection. A future live attempt must confirm that RAGE Plugin Hook
-recognizes the console command as part of readiness.
+The previous live DLL used the parameterless registration call. RPH logged
+the plugin load and the entry message before rejecting the start command as
+unknown. The retained log shows no intervening unload and records the
+command name only. The working Bati controls used public attributed static
+methods while their bounded handoff was active. This difference does not
+establish that returning from entry removed the command. The explicit
+registration call and command exposure still need a real-host check.
+
+The receiver generates the complete command with the session token and its
+own decimal PID: `RichAudioObserveStart <session-token> <receiver-PID>`.
+The receiver and bankless consumer share absolute arm and observation
+cutoffs. The receiver starts its four-minute budget after authenticating the
+connection and caps it at the observation cutoff. Before handoff, Codex
+provides the complete command and route instructions. In the same live
+session, check F4 completion or command help for the start command if the
+running host exposes it. If no such listing is available, run
+`RichAudioObserveStatus` and require its handler acknowledgement before
+arming. The start handler acknowledgement, receiver connection and first
+fresh frame are separate evidence.
 
 The separate consumer reports raw evidence and placement matching even
 without current source proof. For admission, the reviewed proof stage hashes
@@ -42,9 +59,11 @@ restored only after verified process closure. I do not need a private REL
 mount, a loader configuration edit, a trainer spawn, a horn press, game-audio
 capture, a profile assignment or a live mute for this observation.
 
-The disposable rehearsal exercises full type discovery before initialization
-and runs the exact candidate startup, commands and exit with an authored RPH
-stand-in and the real Windows pipe. The separate retained-data rehearsal
+The disposable rehearsal exercises full type discovery before initialization.
+The authored RPH stand-in dispatches the exact receiver-generated command
+through the registry populated by the candidate and removes that registry's
+entries on unload. The rehearsal exercises delayed start, first frame, horn
+readback and stop over the real Windows pipe. The separate retained-data rehearsal
 drives the worker and consumer with authored input. Neither qualifies live
 GTA binding, activation, or the donor hashes. Distinct, stable, nonzero
 donor readbacks would support a later private marker test. Its A/B/A

@@ -17,7 +17,8 @@ fs.writeFileSync(path.join(out,'fixture-only.json'),JSON.stringify({authoredCame
 const staged=path.join(out,'fixture-plan.json'),capture=path.join(out,'capture.jsonl'),result=path.join(out,'out.jsonl'),session=randomBytes(16).toString('hex');
 fs.writeFileSync(staged,JSON.stringify({...prepared,authoredRehearsal:true}));
 console.log(out);
-const child=spawn(process.execPath,['tools/native-control/Observe-CombinedWorld01.mjs',staged,capture,session,result,String(Date.now()+120_000)],{stdio:'inherit'});
+const now=Date.now();
+const child=spawn(process.execPath,['tools/native-control/Observe-CombinedWorld01.mjs',staged,capture,session,result,String(now+120_000),String(now+240_000)],{stdio:'inherit'});
 const exit=once(child,'exit');
 let seq=0;
 async function phase(inward,count){

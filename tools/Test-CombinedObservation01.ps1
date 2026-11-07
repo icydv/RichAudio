@@ -24,5 +24,7 @@ if($LASTEXITCODE){throw 'Loading harness build failed'}
 if($LASTEXITCODE){throw 'Candidate type discovery failed'}
 & $loader exercise $dll $receiver (Join-Path $out 'capture.jsonl')
 if($LASTEXITCODE){throw 'Candidate entry point rehearsal failed'}
+& $loader cutoff $dll $receiver (Join-Path $out 'cutoff.jsonl')
+if($LASTEXITCODE){throw 'Candidate observation cutoff rehearsal failed'}
 foreach($pin in $pins){if((Get-FileHash -LiteralPath $pin.Path).Hash-cne$pin.Hash){throw 'Rehearsal inputs changed'}}
-[ordered]@{authoredRuntime=$true;gameLaunched=$false;payloads=$pins;frames=Get-FileHash -LiteralPath (Join-Path $out 'capture.jsonl')}|ConvertTo-Json -Depth 4|Set-Content -LiteralPath (Join-Path $out 'result.json') -Encoding utf8NoBOM
+[ordered]@{authoredRuntime=$true;gameLaunched=$false;payloads=$pins;frames=Get-FileHash -LiteralPath (Join-Path $out 'capture.jsonl');cutoffFrames=Get-FileHash -LiteralPath (Join-Path $out 'cutoff.jsonl')}|ConvertTo-Json -Depth 4|Set-Content -LiteralPath (Join-Path $out 'result.json') -Encoding utf8NoBOM
