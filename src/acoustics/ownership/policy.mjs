@@ -54,7 +54,7 @@ export class OfflineOwnershipPolicy {
       takeoverComponents.every(c => certificate.components.includes(c)) && requiredEvidence.every(k => certificate[k] === true);
     if (!validCertificate) { this.reason = 'unverified-native-capability'; return false; }
     if (replacementHealthy !== true || this.eligible !== true || this.observed < 0 || frame - this.observed >= this.ttl ||
-      !baseline || baseline.known !== true || typeof baseline.profile !== 'string' || !baseline.profile ||
+      baseline?.kind !== 'authored-exact-profile' || baseline.known !== true || typeof baseline.profile !== 'string' || !baseline.profile ||
       baseline.identityKey !== identityKey(this.identity)) { this.reason = 'replacement-or-baseline-unavailable'; return false; }
     this.baseline = frozen(baseline); this.expires = frame + this.ttl; this.move('Prepared'); return true;
   }

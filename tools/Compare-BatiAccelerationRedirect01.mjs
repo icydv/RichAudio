@@ -54,6 +54,28 @@ export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
   const granular = root('GranularRecord', granularType);
   const vehicleRoute = exactEdge(vehicle, 'EngineGranular', granular);
   const engine=continuous?root('EngineRecord','Dat151VehicleEngine'):null;
+  const granularDependencies=[];
+  if(continuous){
+    const resolved=(parent,field,type)=>{
+      const id=outgoing.get(parent)?.find(edge=>edge.Field===field)?.Targets[0],node=nodes.get(id);
+      if(!exactSource(node)||node.Record.ParserType!==type)throw Error('Missing or unbound typed audio root: '+field);
+      return exactEdge(parent,field,id);
+    };
+    for(const role of ['Engine','Exhaust']){
+      const synth=resolved(granular,role+'Submix','Dat10Synth');
+      const preset=resolved(granular,role+'SubmixPreset','Dat10SynthPreset');
+      granularDependencies.push({route:role.toLowerCase()+'-submix',synth:synth.Hash,preset:preset.Hash});
+    }
+    const idle=resolved(granular,'IdleSub','Dat54ModularSynthSound').Targets[0];
+    const synth=resolved(idle,'SynthSound','Dat10Synth');
+    const preset=(outgoing.get(idle)??[]).filter(edge=>edge.Field==='SynthPreset');
+    if(preset.length!==1)throw Error('Exactly one modular idle synth preset field required');
+    const presetHash=recordHash(preset[0].Hash);
+    if(presetHash==='00000000'){
+      if(preset[0].Targets.length!==0||preset[0].Resolution!=='zero-reference-not-proof-of-silence')throw Error('Invalid zero idle preset reference');
+    }else resolved(idle,'SynthPreset','Dat10SynthPreset');
+    granularDependencies.push({route:'granular-idle',synth:synth.Hash,preset:presetHash==='00000000'?null:preset[0].Hash});
+  }
   const scopes=[{parent:granular,edge:vehicleRoute,routes:continuous?[...acceleration,{field:'IdleSub',type:'Dat54ModularSynthSound'}]:acceleration}];
   if(engine)scopes.push({parent:engine,edge:exactEdge(vehicle,'Engine',engine),routes:conventional});
   const vehicleEdges=new Map(),soundEdges=new Map(),privateParents=[];
@@ -112,6 +134,8 @@ export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
     privateRecordCount:1+scopes.length+soundEdges.size,
     ...(continuous?{
       continuousScope:'conventional idle/low/high/revs-off; player granular acceleration/idle synth',
+      granularDependencies,
+      granularSynthesisAudibleContributionVerified:false,
       unredirectedSubmixReferences:[...outgoing.get(granular),...outgoing.get(engine)]
         .filter(edge=>/Submix/.test(edge.Field)&&edge.Targets.length>0)
         .map(edge=>({field:edge.Field,targetTypes:edge.Targets.map(id=>nodes.get(id)?.Record?.ParserType??'unretained')})),

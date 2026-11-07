@@ -56,3 +56,29 @@ test('a missing source binding, ambiguous edge or inconsistent hash blocks the r
     assert.throws(()=>compareBatiAccelerationRedirect01(graph),error);
   }
 });
+
+test('continuous attribution checks the three synth routes and treats the zero idle preset as unresolved',()=>{
+  const graph=authoredProjection();
+  const add=(id,type,from,field)=>{
+    const hash=(graph.Nodes.length+1).toString(16).padStart(8,'0');
+    graph.Nodes.push({Id:id,Record:{ParserType:type,Hash:hash},SourceBinding:graph.Nodes[0].SourceBinding});
+    graph.Edges.push({From:from,Field:field,Hash:'0x'+hash,Targets:[id],Resolution:'unique-public-audio-record'});
+    return '0x'+hash;
+  };
+  add('conventional','Dat151VehicleEngine','vehicle','Engine');
+  graph.Roots.push({Label:'EngineRecord',NodeId:'conventional',State:'resolved-metadata-root'});
+  for(const field of ['EngineIdleLoop','ExhaustIdleLoop','EngineLow','EngineHigh','ExhaustLow','ExhaustHigh','RevsOff'])
+    add(field,'Dat54SimpleSound','conventional',field);
+  add('idle','Dat54ModularSynthSound','granular','IdleSub');
+  const idleSynth=add('idle-synth','Dat10Synth','idle','SynthSound');
+  graph.Edges.push({From:'idle',Field:'SynthPreset',Hash:'0x00000000',Targets:[],Resolution:'zero-reference-not-proof-of-silence'});
+  const expected=['Engine','Exhaust'].map(role=>({route:role.toLowerCase()+'-submix',
+    synth:add(role+'-synth','Dat10Synth','granular',role+'Submix'),
+    preset:add(role+'-preset','Dat10SynthPreset','granular',role+'SubmixPreset')}));
+  expected.push({route:'granular-idle',synth:idleSynth,preset:null});
+  const result=compareBatiAccelerationRedirect01(graph,{continuous:true});
+  assert.deepEqual(result.granularDependencies,expected);
+  assert.equal(result.granularSynthesisAudibleContributionVerified,false);
+  graph.Nodes.find(n=>n.Id==='Exhaust-preset').Record.ParserType='Dat10Synth';
+  assert.throws(()=>compareBatiAccelerationRedirect01(graph,{continuous:true}),/ExhaustSubmixPreset/);
+});
