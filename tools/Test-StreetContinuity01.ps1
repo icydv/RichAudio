@@ -9,7 +9,7 @@ $sources=@(Get-ChildItem -LiteralPath (Join-Path $repo 'src/acoustics/host/Trans
 $sources+=@('src/acoustics/bridge/Rph/Playable.Rph.cs','src/acoustics/bridge/Rph/CameraSampler.Rph.cs','tests/host/TestStreetContinuity01.cs')|ForEach-Object{Join-Path $repo $_}
 $pins=@($sources|ForEach-Object{[ordered]@{path=$_;sha256=(Get-FileHash -LiteralPath $_).Hash.ToLowerInvariant()}})
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe';$binary=Join-Path $output 'RichAudio.StreetContinuity01.Tests.exe'
-$log=@(& $compiler /nologo /optimize+ /warnaserror+ /langversion:5 /platform:x64 /r:System.Runtime.Serialization.dll /main:TestStreetContinuity01 ('/out:'+$binary) @sources 2>&1)
+$log=@(& $compiler /nologo /optimize+ /warnaserror+ /langversion:5 /platform:x64 /r:System.Runtime.Serialization.dll /r:Microsoft.CSharp.dll /main:TestStreetContinuity01 ('/out:'+$binary) @sources 2>&1)
 $log|Set-Content -LiteralPath (Join-Path $output 'build.log') -Encoding utf8
 if($LASTEXITCODE-ne0){throw ('Actual product capture fixture compilation failed: '+($log-join[Environment]::NewLine))}
 $raw=@(& $binary);if($LASTEXITCODE-ne0-or$raw.Count-ne1){throw ('Product continuity fixture failed; retained '+$output)}

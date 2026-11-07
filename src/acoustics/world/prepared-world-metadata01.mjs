@@ -25,11 +25,17 @@ export function* metadataOperations01(root){
 export const sceneAuthorityBinding01=manifest=>digest([
  manifest.ResolvedCatalogSHA256,manifest.ValidationEpochUtc01??null,manifest.InputFingerprint,manifest.InputBinding,
 ]);
-export const sceneRowAuthority01=row=>digest([row.Id,row.Hash,row.Status,row.Eligibility,row.Result??null,row.ArchiveValidation01??null]);
+export function sceneSource01(row){
+ if(row?.Status==='imported-exterior-incomplete-surfaces')return row.Result??null;
+ if(row?.Eligibility==='deferred-interior-local'&&row.PotentialStatus==='imported-resource-root-incomplete-surfaces')
+  return row.PotentialResult??null;
+ return null;
+}
+export const sceneRowAuthority01=row=>digest([row.Id,row.Hash,row.Status,row.Eligibility,sceneSource01(row),row.PotentialStatus??null,row.ArchiveValidation01??null]);
 export function sceneAuthorityView01(manifest){
  return {
-  binding:sceneAuthorityBinding01(manifest),
-  rows:manifest.Resources.filter(row=>row.Status==='imported-exterior-incomplete-surfaces')
+  schema:2,binding:sceneAuthorityBinding01(manifest),
+  rows:manifest.Resources.filter(sceneSource01)
    .map(row=>[row.Id,sceneRowAuthority01(row)]),
  };
 }

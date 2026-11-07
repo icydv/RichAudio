@@ -121,8 +121,8 @@ try{
    if($RequireCachedGeometry){throw 'Cached-geometry qualification requires an analytic cache upgrade; no historical cache was written.'}
    if($incremental){$upgradeIds=@($plan.Resources|Where-Object{$_.PhysicalArchive-eq$archive-and($_.Id-notin$localIds-or$_.AnalyticUpgradeNeeded01)}|ForEach-Object Id);Json $selectionPath $upgradeIds}
    RunNode (@('upgrade-analytic',$manifestPath,(Join-Path $repo '.local'),$catalog,$ResolvedCatalogSHA256,[string]$localAnalyticBudget,$archive,$beforeHash)+$upgradeSelection) 'upgrading-revalidated-local-analytic-models'
+   $plan=Read-DriverPlan01
   }
-  $plan=Read-DriverPlan01
   $remaining=$MaximumResources-$processedThisRun
   $ranks=@{};for($qi=0;$qi -lt $queue.Resources.Count;$qi++){$ranks[$queue.Resources[$qi].Id]=$qi}
   $pending=@($plan.Resources|Where-Object { $_.PhysicalArchive -eq $archive -and ($_.Status -eq 'pending-exterior-import' -or $_.PotentialStatus -eq 'pending-import') }|Sort-Object {$ranks[$_.Id]}|Select-Object -First ([Math]::Min(256,$remaining)))

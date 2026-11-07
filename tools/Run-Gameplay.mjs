@@ -1,3 +1,4 @@
+import {bindCameraInterior01} from '../src/acoustics/world/interior-activation01.mjs';
 // Continuous owned producer. Separate authored startup JIT PCM is discarded.
 // Playback uses verified stock banks; no WASAPI, game API or archive decode.
 import fs from 'node:fs';import path from 'node:path';import readline from 'node:readline';import {performance} from 'node:perf_hooks';
@@ -88,11 +89,12 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
    const age=Math.max(m.ageMs,(clock.ticks+(now-clock.at)*clock.frequency/1000-s.observationTicks)*1000/clock.frequency);
    const remaining=m.validForMs===undefined?null:m.validForMs-(now-m.receivedAt);
    if(age<=250&&(remaining===null||remaining>0)){engine.accept(m.frame,age,remaining);lastFrame={frame:m.frame,age,at:now,receivedAt:m.receivedAt,hostWriteBeforeQpc:m.hostWriteBeforeQpc??null,hostQpcFrequency:m.hostQpcFrequency??null};
+    if(installedScenes&&!installedScenes.failed&&!installedScenes.closed&&(!s.valid||s.paused))installedScenes.withdrawCameraInterior01(now);
     if(installedScenes&&!installedScenes.failed&&!installedScenes.closed&&s.valid&&!s.paused){
      installedScenes.bindPreparationEpoch01(m.frame.worldPreparationStartedUtc);
      const sources=m.frame.vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-s.position[i])<=128)).slice(0,2).map(v=>v.position);
      installedScenes.observeInitial01({sequence:s.sequence,generation:s.generation,geometryTimeMs:now,sourceAgeMs:age,listener:s.position,sources});
-     if(!installedScenes.failed)installedScenes.updateWindow({listener:s.position,sources,generation:s.generation,geometryTimeMs:now,durationMs:1000,maximumSurfaces:4096,prepareSoundMapGeometry01:soundMapRequired01(),engine:{order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1')}});
+     if(!installedScenes.failed)installedScenes.updateWindow({listener:s.position,sources,generation:s.generation,geometryTimeMs:now,durationMs:1000,cameraInterior01:bindCameraInterior01(m.frame,age,remaining),maximumSurfaces:4096,prepareSoundMapGeometry01:soundMapRequired01(),engine:{order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1')}});
     }
    }
   }

@@ -25,3 +25,9 @@ export function resolveInteriorCollisionPlacements01(catalog,resourceHash,member
  }
  return {state:placements.length?'metadata-interior-instances-resolved':'interior-local-unplaced',placements,unresolved,reason:placements.length?null:!data.metadataPresent?'selected-YMAP-YTYP-placement-metadata-not-retained':!archetypes.length?'exact-YTYP-physics-dictionary-binding-not-resolved':'manifest-parent-or-selected-instance-unresolved',runtimeActivation:'unobserved',portalsCarveAcousticOpenings:false};
 }
+
+export function interiorInstanceIdentities01(catalog){
+ return Object.fromEntries([...index(catalog).instances].map(([hash,instances])=>[hash,
+  instances.filter(i=>typeof i.InstanceId==='string'&&Array.isArray(i.Matrix)&&i.Matrix.length===16&&vec(i.Matrix.slice(12,15)))
+   .map(i=>({id:i.InstanceId,origin:i.Matrix.slice(12,15)}))]));
+}

@@ -16,6 +16,7 @@ namespace Rage {
 }
 namespace Rage.Attributes {public sealed class ConsoleCommandAttribute:Attribute {public string Name,Description;}}
 namespace Rage.Native {public static class NativeFunction {
+ public static dynamic Natives {get{return null;}}
  public static bool RejectCamera;public static double CameraX;public static int CameraCalls;
  public static T CallByName<T>(string name,params object[] args){
   if(name=="IS_GAMEPLAY_CAM_RENDERING"||name=="IS_FOLLOW_VEHICLE_CAM_ACTIVE")return (T)(object)true;

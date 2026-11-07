@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import {sha256} from './collision-mesh.mjs';
-import {collisionProjection,loadStaticWorldResource,classifyPotentialCollisionResource01} from './static-world-resource.mjs';
+import {collisionProjection,classifyStaticWorldResource,classifyPotentialCollisionResource01,readPinnedResolvedCatalogue01} from './static-world-resource.mjs';
 import {loadCollisionResource} from './collision-resource.mjs';
 import {atomicWriteJson01} from './atomic-publication01.mjs';
 import {sceneAuthorityView01} from './prepared-world-metadata01.mjs';
@@ -65,18 +65,29 @@ export function buildWarmupPlan(catalog,catalogSHA256,{gameRoot,previous,exists,
 export function warmupSummary(plan,state){const eligible=plan.Resources.filter(r=>r.Eligibility==='eligible-exterior'),processed=eligible.filter(r=>r.Status==='imported-exterior-incomplete-surfaces');return {Schema:1,State:state??(processed.length===eligible.length&&eligible.length?'selected-exterior-imported-with-explicit-gaps':'partial-with-pending-work'),InputBinding:plan.InputBinding,InputFingerprint:plan.InputFingerprint,ResolvedCatalogSHA256:plan.ResolvedCatalogSHA256,Scope:plan.Scope,ValidationEpochUtc01:plan.ValidationEpochUtc01??null,ValidationEpochComplete01:!!plan.ValidationEpochUtc01&&plan.Resources.every(r=>r.ArchiveValidation01?.EpochUtc===plan.ValidationEpochUtc01),GeometryQueue:geometryQueueCounts01(plan),CoverageStates01:worldCoverageStates01(plan),SelectedYbnCount:plan.Resources.length,EligibleExteriorCount:eligible.length,ProcessedResources:processed.length,PendingResources:eligible.length-processed.length,BlockedResources:plan.Resources.length-eligible.length,FailedResources:eligible.filter(r=>r.Status==='deferred-resource-import-failed').length,UnattemptedResources:eligible.filter(r=>!['imported-exterior-incomplete-surfaces','deferred-resource-import-failed'].includes(r.Status)).length,AllSelectedExteriorAttempted:eligible.length>0&&eligible.every(r=>['imported-exterior-incomplete-surfaces','deferred-resource-import-failed'].includes(r.Status)),CacheRevalidationPending:eligible.filter(r=>r.Status==='cache-awaiting-archive-revalidation').length,AllSelectedExteriorImported:eligible.length>0&&processed.length===eligible.length,AcousticWorldComplete:false,RuntimeReplacementImplemented:false,WorldPlacementVerified:false,GameWrites:false,EndpointOpened:false};}
 function refreshPreparationStates01(plan,catalog,affected=null){const byEntry=new Map(catalog.Resources.filter(r=>r.Kind==='ybn').map(r=>[norm(r.Path),r]));for(const row of plan.Resources)if(!affected||affected.has(row.Id))row.PreparationStates01=resourcePreparationStates01(catalog,byEntry.get(norm(row.EntryPath)),row);return plan;}
 function checkedPotentialResult01(row,catalog,catalogSHA256){const result=row.PotentialResult,resource=loadCollisionResource(result.IndexPath,{expectedSHA256:result.IndexSHA256}),receipt=readJson(result.ReceiptPath,result.ReceiptSHA256),classification=classifyPotentialCollisionResource01(resource.index,catalog,receipt,{indexSHA256:result.IndexSHA256,catalogSHA256,receiptSHA256:result.ReceiptSHA256});if(classification.state!=='codewalker-potential-resource-model')throw Error('potential source classification failed: '+classification.reason);return {...classification,artifactIntegrity:resource.verifyIntegrity().state};}
-function checkedResult(row,catalogPath,catalogSHA256){const result=row.Result,world=loadStaticWorldResource({indexPath:result.IndexPath,catalogPath,receiptPath:result.ReceiptPath,indexSHA256:result.IndexSHA256,catalogSHA256,receiptSHA256:result.ReceiptSHA256});if(world.classification.state!=='codewalker-exterior-static-model')throw Error('resource classification failed: '+world.classification.reason);const integrity=world.resource.verifyIntegrity();return {...world.classification,artifactIntegrity:integrity.state,integrityBytes:integrity.bytes,AnalyticBackfillNeeded01:world.resource.index.analyticPrimitives01?.revision!==analyticPrimitiveRevision01&&['Sphere','Capsule','Cylinder'].some(f=>world.resource.index.unsupported?.[f]>0)};}
+function checkedResult(row,catalog,catalogSHA256){
+ const result=row.Result,resource=loadCollisionResource(result.IndexPath,{expectedSHA256:result.IndexSHA256}),
+  receipt=readJson(result.ReceiptPath,result.ReceiptSHA256),
+  classification=classifyStaticWorldResource(resource.index,catalog,receipt,{
+   indexSHA256:result.IndexSHA256,catalogSHA256,receiptSHA256:result.ReceiptSHA256,
+  });
+ if(classification.state!=='codewalker-exterior-static-model')throw Error('resource classification failed: '+classification.reason);
+ const integrity=resource.verifyIntegrity();
+ return {...classification,artifactIntegrity:integrity.state,integrityBytes:integrity.bytes,
+  AnalyticBackfillNeeded01:resource.index.analyticPrimitives01?.revision!==analyticPrimitiveRevision01&&
+   ['Sphere','Capsule','Cylinder'].some(f=>resource.index.unsupported?.[f]>0)};
+}
 export function revalidateArchive(plan,archive,archiveSHA256,catalogPath,catalogSHA256,validationEpochUtc01=null,selectionIds=null){
  if(!digest(archiveSHA256))throw Error('archive digest required');
+ const catalog=readPinnedResolvedCatalogue01(catalogPath,catalogSHA256);
  const allowed=new Set(plan.Resources.filter(r=>r.PhysicalArchive===archive).map(r=>r.Id)),selected=selectionIds===null?null:new Set(selectionIds);if(selected&&(!Array.isArray(selectionIds)||selected.size!==selectionIds.length||!selectionIds.length||selectionIds.length>262144||selectionIds.some(id=>typeof id!=='string'||!allowed.has(id))))throw Error('exact archive resource selection required');
  const affected=plan.Resources.filter(r=>r.PhysicalArchive===archive&&(!selected||selected.has(r.Id))),hadCached=new Set(affected.filter(r=>r.Result||r.PotentialResult).map(r=>r.Id));
  for(const row of affected.filter(r=>r.Eligibility==='eligible-exterior')){
   const candidate=row.Result??row.RejectedResult;
   if(!candidate){if(row.FailureArchiveSHA256&&norm(row.FailureArchiveSHA256)===norm(archiveSHA256))row.Status='deferred-resource-import-failed';else{row.Status='pending-exterior-import';row.FailureArchiveSHA256=null;}continue;}
-  try{if(norm(candidate.ArchiveSHA256)!==norm(archiveSHA256))throw Error('archive changed');const classification=checkedResult({...row,Result:candidate},catalogPath,catalogSHA256);row.Result={...candidate,Classification:classification};row.RejectedResult=null;row.Status='imported-exterior-incomplete-surfaces';row.Failure=null;row.FailureArchiveSHA256=null;}
+  try{if(norm(candidate.ArchiveSHA256)!==norm(archiveSHA256))throw Error('archive changed');const classification=checkedResult({...row,Result:candidate},catalog,catalogSHA256);row.Result={...candidate,Classification:classification};row.RejectedResult=null;row.Status='imported-exterior-incomplete-surfaces';row.Failure=null;row.FailureArchiveSHA256=null;}
   catch(error){row.Result=null;if(String(error.message).startsWith('resource classification failed:')){row.RejectedResult=candidate;row.Status='deferred-resource-import-failed';row.Failure=String(error.message).slice(0,2048);row.FailureArchiveSHA256=archiveSHA256;}else{row.RejectedResult=null;row.Status='pending-exterior-import';row.FailureArchiveSHA256=null;}}
  }
- const catalog=readJson(catalogPath,catalogSHA256);
  for(const row of affected.filter(r=>r.GeometryEligibility==='eligible-resource-root'&&r.Eligibility!=='eligible-exterior')){
   const candidate=row.PotentialResult;
   if(!candidate){row.PotentialStatus=row.PotentialFailureArchiveSHA256===archiveSHA256?'failed-resource-import':'pending-import';continue;}
@@ -93,7 +104,7 @@ export function requalifyDerivedArtifacts01(plan,catalogPath,catalogSHA256){
 }
 export function acceptBatch(plan,batch,catalogPath,catalogSHA256){
  if(batch?.Schema!==1||batch.ArchiveUnchanged!==true||!Array.isArray(batch.Resources))throw Error('qualified archive batch required');
- const catalog=readJson(catalogPath,catalogSHA256),byEntry=new Map(plan.Resources.map(r=>[norm(r.EntryPath),r]));
+ const catalog=readPinnedResolvedCatalogue01(catalogPath,catalogSHA256),byEntry=new Map(plan.Resources.map(r=>[norm(r.EntryPath),r]));
  for(const item of batch.Resources){
   const row=byEntry.get(norm(item.Entry));if(!row||(row.Eligibility!=='eligible-exterior'&&row.GeometryEligibility!=='eligible-resource-root'))throw Error('batch entry outside eligible plan');
   const receipt=readJson(item.ReceiptPath),indexPath=receipt.Result?.index,indexSHA256=receipt.Result?.indexSHA256;if(!digest(indexSHA256))throw Error('batch index digest missing');
@@ -102,7 +113,7 @@ export function acceptBatch(plan,batch,catalogPath,catalogSHA256){
    row.PotentialResult=result;try{row.PotentialResult.Classification=checkedPotentialResult01(row,catalog,catalogSHA256);row.PotentialStatus='imported-resource-root-incomplete-surfaces';row.PotentialFailure=null;row.PotentialFailureArchiveSHA256=null;}
    catch(error){row.PotentialResult=null;row.PotentialStatus='failed-resource-import';row.PotentialFailure=String(error.message).slice(0,2048);row.PotentialFailureArchiveSHA256=batch.AfterSHA256;}continue;
   }
-  row.Result=result;try{row.Result.Classification=checkedResult(row,catalogPath,catalogSHA256);row.Status='imported-exterior-incomplete-surfaces';row.Failure=null;row.FailureArchiveSHA256=null;}
+  row.Result=result;try{row.Result.Classification=checkedResult(row,catalog,catalogSHA256);row.Status='imported-exterior-incomplete-surfaces';row.Failure=null;row.FailureArchiveSHA256=null;}
   catch(error){row.RejectedResult=row.Result;row.Result=null;row.Status='deferred-resource-import-failed';row.Failure=String(error.message).slice(0,2048);row.FailureArchiveSHA256=batch.AfterSHA256;}
  }
  for(const failure of batch.Failures??[]){const row=byEntry.get(norm(failure.Entry));if(!row||(row.Eligibility!=='eligible-exterior'&&row.GeometryEligibility!=='eligible-resource-root'))throw Error('failed batch entry outside eligible plan');if(row.Eligibility==='eligible-exterior'){row.Result=null;row.Status='deferred-resource-import-failed';row.Failure=String(failure.Error).slice(0,2048);row.FailureArchiveSHA256=batch.AfterSHA256;}else{row.PotentialResult=null;row.PotentialStatus='failed-resource-import';row.PotentialFailure=String(failure.Error).slice(0,2048);row.PotentialFailureArchiveSHA256=batch.AfterSHA256;}}

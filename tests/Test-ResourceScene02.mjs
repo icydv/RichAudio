@@ -20,7 +20,7 @@ test('unsupported maps, unverified collision links, missing resources/materials 
  const f=originalResourceFixture02();assert.equal(createExplicitResourceScene02({...f,resources:[]}).state,'unqualified-resource-set');assert.equal(createExplicitResourceScene02({...f,bindings:[]}).state,'unqualified-placement');assert.equal(createExplicitResourceScene02({...f,materialTable:{}}).state,'unqualified-material');
  const mlo=structuredClone(f);mlo.resources[0].normalized.data.unsupportedEntities=1;assert.throws(()=>createExplicitResourceScene02(mlo),/MLO/);
  const unsupported=structuredClone(f);unsupported.resources[2].normalized.data.nodes[0].unsupportedBound=true;unsupported.resources[2].normalized.data.nodes[0].declaredBounds={min:[-1,-1,-1],max:[1,1,1]};assert.throws(()=>createExplicitResourceScene02(unsupported),/unknown/);
- const live=structuredClone(f);live.resources[0].normalized.sourceAuthority='separately-authorized-explicit-resource';assert.throws(()=>createExplicitResourceScene02(live),/only original/);
+ const live=structuredClone(f);live.resources[0].normalized.sourceAuthority='separately-authorized-explicit-resource';assert.throws(()=>createExplicitResourceScene02(live),/explicit parser resource identity and authority/);
 });
 test('a component-identified collision gets genuine reflection timing from the resource triangle in the existing renderer',async()=>{
  const f=collisionFixture02('high-energy',{seconds:.8}),raw=structuredClone(f.events[0]);raw.contact.position=[2,3,1];f.events=[createAuthoredCollisionEvent(raw,f.context)];f.listener.position=[2,2,1];

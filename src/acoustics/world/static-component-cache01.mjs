@@ -1,7 +1,7 @@
 // Internal storage for the existing installed-world reader. No independent
 // mapping, source authority, observations or scene leases live in this cache.
 import {performance} from 'node:perf_hooks';
-import {decodeChunk,encodeChunk,triangleNormal,sha256} from './collision-mesh.mjs';
+import {decodeChunk,encodeChunk,transformPoint,triangleNormal,sha256} from './collision-mesh.mjs';
 import {tessellateAnalyticPrimitive01} from './analytic-primitives01.mjs';
 import {digest,freeze,requireWorld} from './contracts.mjs';
 const limits01=Object.freeze({bytes:64*1024*1024,descriptorReserveBytes:8*512,componentOverhead:4096,boxedRecordBytes:4096});
@@ -51,9 +51,10 @@ export class InstalledStaticComponents01 {
  distance(ref,point){const held=this.#references.get(ref);requireWorld(held,'owned static triangle reference');const {bytes}=held.entry.data,at=24+held.index*96;let best=Infinity;for(let vertex=0;vertex<3;vertex++)best=Math.min(best,Math.hypot(...[0,1,2].map(axis=>bytes.readDoubleLE(at+vertex*24+axis*8)-point[axis])));return best;}
  identity(ref){const held=this.#references.get(ref);requireWorld(held,'owned static triangle reference');const at=24+held.index*96;return {node:held.entry.data.bytes.readUInt32LE(at+76),polygon:held.entry.data.bytes.readUInt32LE(at+80)};}
  bounds(ref){const held=this.#references.get(ref);requireWorld(held,'owned static triangle reference');const at=held.index*6,b=held.entry.data.bounds;return {min:[b[at],b[at+1],b[at+2]],max:[b[at+3],b[at+4],b[at+5]]};}
- triangle(ref,resourceId){
-  const held=this.#references.get(ref);requireWorld(held,'owned static triangle reference');const key=digest([held.key,'boxed-static-record',held.index,resourceId]),active=held.entry.ownerToken.active&&this.#owners.get(held.entry.owner)===held.entry.ownerToken,cached=active?this.#touch(key):null;if(cached){this.#totals.recordHits++;return cached.data;}
-  this.#totals.recordMisses++;this.#miss(key,held.entry.owner,'boxed-record-and-panel-template');const {bytes,metadata}=held.entry.data,at=24+held.index*96,positions=[0,1,2].map(v=>[0,1,2].map(axis=>bytes.readDoubleLE(at+v*24+axis*8))),record={positions,normal:triangleNormal(positions)};for(const [i,name]of ['materialType','node','polygon','data1','data2','materialSlot'].entries())record[name]=bytes.readUInt32LE(at+72+i*4);
+ triangle(ref,resourceId,placement=null){
+  const held=this.#references.get(ref);requireWorld(held,'owned static triangle reference');const key=digest([held.key,'boxed-static-record',held.index,resourceId,...(placement?[placement.key]:[])]),active=held.entry.ownerToken.active&&this.#owners.get(held.entry.owner)===held.entry.ownerToken,cached=active?this.#touch(key):null;if(cached){this.#totals.recordHits++;return cached.data;}
+  this.#totals.recordMisses++;this.#miss(key,held.entry.owner,'boxed-record-and-panel-template');const {bytes,metadata}=held.entry.data,at=24+held.index*96,local=[0,1,2].map(v=>[0,1,2].map(axis=>bytes.readDoubleLE(at+v*24+axis*8))),
+   positions=placement?local.map(v=>transformPoint(v,placement.matrix)):local,record={positions,normal:triangleNormal(positions)};for(const [i,name]of ['materialType','node','polygon','data1','data2','materialSlot'].entries())record[name]=bytes.readUInt32LE(at+72+i*4);
   if(metadata?.state==='approximated-analytic'){record.primitiveFamily=metadata.family;record.analyticFace=held.index;record.approximationErrorMetres=metadata.maximumErrorMetres;}
   freeze(record);if(active)this.#admit(key,{owner:held.entry.owner,ownerToken:held.entry.ownerToken,kind:'boxed-record-and-panel-template',data:record,charge:limits01.boxedRecordBytes});return record;
  }

@@ -1,3 +1,4 @@
+import {sceneSource01} from './prepared-world-metadata01.mjs';
 // Persistent derived-cache reader. This worker never opens a game archive,
 // invokes CodeWalker, acquires telemetry or produces PCM.
 import {parentPort,workerData} from 'node:worker_threads';
@@ -32,7 +33,7 @@ function expired(message,profile,phase){profile.expiryPhase=phase;const status=i
 function fail(error,phase,requestId=null){if(failed)return;failed=true;clearTimeout(poll);post('failed',{reason:reason(error),phase,requestId});world?.close();world=null;closing01=true;clearTimeout(metadataTimeout01);void metadataWorker01?.terminate().finally(()=>parentPort.close());}
 function checkConsumerProof01(){
  if(!consumerProof01)return;const {consumerRequestId,selectionProof01}=consumerProof01,manifest=world?.manifest,required=validationEpochUtc01??manifest?.ValidationEpochUtc01;
- const proofCurrent=!!world&&selectionProof01.every(e=>{const entry=world.sourceProofRow01(e.resourceId),row=entry?.row,result=row?.Result;return row?.Status==='imported-exterior-incomplete-surfaces'&&result?.IndexSHA256===e.indexSHA256&&result.ReceiptSHA256===e.receiptSHA256&&(!required||manifest.ValidationEpochUtc01===required&&row.ArchiveValidation01?.EpochUtc===required&&row.ArchiveValidation01.Source==='current-archive-sha256'&&row.ArchiveValidation01.ArchiveSHA256===result.ArchiveSHA256);});
+ const proofCurrent=!!world&&selectionProof01.every(e=>{const entry=world.sourceProofRow01(e.resourceId),row=entry?.row,result=sceneSource01(row);return result?.IndexSHA256===e.indexSHA256&&result.ReceiptSHA256===e.receiptSHA256&&(!required||manifest.ValidationEpochUtc01===required&&row.ArchiveValidation01?.EpochUtc===required&&row.ArchiveValidation01.Source==='current-archive-sha256'&&row.ArchiveValidation01.ArchiveSHA256===result.ArchiveSHA256);});
  if(consumerProof01.lastVerdict!==proofCurrent){consumerProof01.lastVerdict=proofCurrent;post('consumer-proof-status',{consumerRequestId,proofCurrent});}
 }
 function stamp01(){const i=fs.statSync(config.manifestPath,{bigint:true});if(i.size<=0||i.size>67108864n)throw Error('Bounded metadata manifest');return [i.dev,i.ino,i.size,i.mtimeNs,i.ctimeNs].join(':');}

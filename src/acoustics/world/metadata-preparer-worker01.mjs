@@ -1,7 +1,7 @@
 // One reusable metadata-only thread; never reads geometry chunks or audio.
 import {parentPort,workerData} from 'node:worker_threads';import fs from 'node:fs';
 import {createHash} from 'node:crypto';import path from 'node:path';
-import {InstalledStaticWorld01} from './installed-static-scene01.mjs';import {metadataOperations01,sceneAuthorityBinding01,sceneRowAuthority01} from './prepared-world-metadata01.mjs';
+import {InstalledStaticWorld01} from './installed-static-scene01.mjs';import {metadataOperations01,sceneAuthorityBinding01,sceneRowAuthority01,sceneSource01} from './prepared-world-metadata01.mjs';
 const {config}=workerData;let iterator=null,buffered=null,serial=0,hash=null,installed=null,candidate=null;
 const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
 function readAuthorityView(bytes){
@@ -14,7 +14,7 @@ function readAuthorityView(bytes){
   const raw=fs.readFileSync(file);
   if(raw.length>16777216)return null;
   const driver=JSON.parse(raw),view=driver.SceneAuthority01;
-  if(driver.Schema!==1||!Array.isArray(view?.rows)||view.rows.length>262144||
+  if(driver.Schema!==1||view?.schema!==2||!Array.isArray(view.rows)||view.rows.length>262144||
      expected!==sha256(JSON.stringify(view))||driver.ManifestSHA256!==sha256(bytes))return null;
   const rows=new Map(view.rows);
   return rows.size===view.rows.length?{binding:view.binding,rows}:null;
@@ -56,7 +56,7 @@ parentPort.on('message',m=>{try{
  else if(fast.binding!==binding||[...fast.rows].some(([id,authority])=>authority!==readAuthority(id)))throw Error('Driver proof view does not match parsed manifest');
  const world=new InstalledStaticWorld01({...config,catalogSHA256:sha,requiredValidationEpochUtc01:m.epoch??null,manifestInput01:manifest});
  const snapshot=world.exportMetadata01();
- candidate={binding,authority:new Map(world.rows.filter(({row})=>row.Status==='imported-exterior-incomplete-surfaces').map(({row})=>[row.Id,readAuthority(row.Id)]))};
+ candidate={binding,authority:new Map(world.rows.filter(({row})=>sceneSource01(row)).map(({row})=>[row.Id,readAuthority(row.Id)]))};
  world.close();
  parentPort.postMessage({type:'begin',serial,preparationMilliseconds:performance.now()-began});
  hash=createHash('sha256');iterator=metadataOperations01(snapshot);sendNext();

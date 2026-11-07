@@ -25,9 +25,19 @@ namespace Rage {
 }
 namespace Rage.Attributes {public sealed class ConsoleCommandAttribute:Attribute {public string Name,Description;}}
 namespace Rage.Native {public static class NativeFunction {
+ public static dynamic Natives {get{return new InteriorCalls();}}
+ public static bool InteriorReady;
+ public sealed class InteriorCalls {
+  public void x252BDC06B73FA6EA(int proxy,out Rage.Vector3 origin,out uint name){
+   if(proxy!=71)throw new InvalidOperationException("Unexpected proxy");
+   origin=new Rage.Vector3(25,10,4);name=0x12345678u;
+  }
+ }
  public static bool GameplayCamera=true,VehicleCamera=true;
  public static double CameraX;public static uint CameraGameTime;
  public static T CallByName<T>(string name,params object[] args){
+  if(name=="GET_INTERIOR_FROM_COLLISION")return (T)(object)(InteriorReady?71:0);
+  if(name=="IS_INTERIOR_READY")return (T)(object)InteriorReady;
   if(name=="IS_GAMEPLAY_CAM_RENDERING")return (T)(object)GameplayCamera;
   if(name=="IS_FOLLOW_VEHICLE_CAM_ACTIVE")return (T)(object)VehicleCamera;
   if(name=="GET_FINAL_RENDERED_CAM_COORD")return (T)(object)new Rage.Vector3((float)CameraX,0,1);
@@ -121,6 +131,22 @@ internal static class TestStreetContinuity01 {
    Check(decoded.WorldPreparationStartedUtc==f.WorldPreparationStartedUtc&&decoded.Listener.ObservationTicks==sampled,"exact epoch and original sample clock survive codec");
    f.WorldPreparationStartedUtc="invented";bool rejected=false;try{GameplayWire.Encode(f,runtime.Session);}catch(Exception){rejected=true;}Check(rejected,"invalid epoch cannot qualify normal cache");
    f.WorldPreparationStartedUtc=null;decoded=GameplayWire.Decode(GameplayWire.Encode(f,runtime.Session),runtime.Session);Check(decoded.WorldPreparationStartedUtc==null,"old packets omit epoch and retain limited world status");
+  });
+  Test("camera interior proxy and exact placement anchor reach the wire from Capture",delegate{
+   Rage.Native.NativeFunction.InteriorReady=true;
+   var sampler=typeof(PlayableEntry).GetMethod("ObserveCameraInterior01",BindingFlags.NonPublic|BindingFlags.Static);
+   sampler.Invoke(null,new object[]{new ListenerState{Position=new[]{104d,0d,1d},ObservationTicks=Stopwatch.GetTimestamp()}});
+   Capture(runtime,104);
+   var frame=runtime.Frames[runtime.Frames.Count-1];
+   var decoded=GameplayWire.Decode(GameplayWire.Encode(frame,runtime.Session),runtime.Session);
+   Check(decoded.CameraInterior01!=null&&decoded.CameraInterior01.Proxy==71&&decoded.CameraInterior01.Archetype==0x12345678u&&
+    decoded.CameraInterior01.Origin[0]==25,"camera proxy, archetype and origin survive the actual wire");
+   Check(decoded.CameraInterior01.ObservationTicks==frame.CameraInterior01.ObservationTicks,"proxy sample clock is retained");
+   decoded.CameraInterior01.ObservationTicks-=Stopwatch.Frequency;
+   bool stale=false;try{GameplayWire.Encode(decoded,runtime.Session);}catch{stale=true;}
+   Check(stale,"stale proxy cannot qualify an otherwise valid frame");
+   Rage.Native.NativeFunction.InteriorReady=false;Capture(runtime,104);
+   Check(runtime.Frames[runtime.Frames.Count-1].CameraInterior01==null,"lost proxy yields unknown");
   });
   Test("listener invalidation preserves monotonic identity without interpolating old poses",delegate{
    var tracker=new CameraListenerTracker();long now=Stopwatch.GetTimestamp();var first=tracker.Observe(runtime.Session,new CameraObservation{Before=now,After=now,Observed=now,Position=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d}});
