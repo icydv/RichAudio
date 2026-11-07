@@ -14,8 +14,21 @@ $sources+=@('GeometryObservation.cs','SurfaceAcquisition.cs','DiagnosticTile.cs'
 $test=Join-Path $out 'RuntimeHealth.exe'
 & $compiler /nologo /target:exe /optimize+ /warnaserror+ /unsafe+ /langversion:5 /platform:x64 /define:STATE_TRANSPORT,GEOMETRY_LIVE /r:System.Web.Extensions.dll /r:System.Runtime.Serialization.dll /main:TestBatiRuntimeHealth01 ('/out:'+$test) @sources (Join-Path $repo 'tests/host/TestBatiRuntimeHealth01.cs');if($LASTEXITCODE){throw 'Health fixture compilation failed'}
 $contract=Join-Path $out 'StatusWatch.Tests.exe'
-& $compiler /nologo /target:exe /main:TestBatiHostStatusWatch01 ('/out:'+$contract) @sources (Join-Path $repo 'tests/host/TestBatiHostStatusWatch01.cs');if($LASTEXITCODE){throw 'Status contract compilation failed'}
+& $compiler /nologo /target:exe /optimize+ /warnaserror+ /unsafe+ /langversion:5 /platform:x64 /define:STATE_TRANSPORT,GEOMETRY_LIVE /r:System.Web.Extensions.dll /r:System.Runtime.Serialization.dll /main:TestBatiHostStatusWatch01 ('/out:'+$contract) @sources (Join-Path $repo 'tests/host/TestBatiHostStatusWatch01.cs');if($LASTEXITCODE){throw 'Status contract compilation failed'}
 & $contract $out;if($LASTEXITCODE){throw 'Status lifetime/race contract failed'}
+$cadence=Join-Path $out 'Cadence.Tests.exe'
+& $compiler /nologo /target:exe /optimize+ /warnaserror+ /unsafe+ /langversion:5 /platform:x64 /define:STATE_TRANSPORT,GEOMETRY_LIVE /r:System.Web.Extensions.dll /r:System.Runtime.Serialization.dll /main:TestGameplayFixtureCadence01 ('/out:'+$cadence) @sources (Join-Path $repo 'tests/host/TestGameplayFixtureCadence01.cs');if($LASTEXITCODE){throw 'Cadence build failed'}
+& $cadence;if($LASTEXITCODE){throw 'Cadence regression failed'}
+# Reproduce the credit-return dependency with the same bounded 120ms main-loop
+# publication stall used for before/after evidence. No production delay exists.
+$slowSource=Join-Path $out 'GameplayHost.SlowStatus.cs';$productionHost=Join-Path $repo 'src/acoustics/host/Windows/GameplayHost.cs'
+$slowText=[IO.File]::ReadAllText($productionHost);$publish='PublishStatus("running");';if(!$slowText.Contains($publish)){throw 'Status control point changed'}
+[IO.File]::WriteAllText($slowSource,$slowText.Replace($publish,'if(clock.ElapsedMilliseconds>=2000&&clock.ElapsedMilliseconds<2500)Thread.Sleep(120);PublishStatus("running");'))
+$slowHost=Join-Path $out 'Host.SlowStatus.exe';$slowSources=@($sources|Where-Object{[IO.Path]::GetFileName($_)-cne'GameplayHost.cs'})+@($slowSource)
+& $compiler /nologo /target:exe /optimize+ /warnaserror+ /unsafe+ /langversion:5 /platform:x64 /define:STATE_TRANSPORT,GEOMETRY_LIVE /r:System.Web.Extensions.dll /r:System.Runtime.Serialization.dll /main:RichAudio.Beacon.Windows.HostProgram ('/out:'+$slowHost) @slowSources;if($LASTEXITCODE){throw 'Slow publication regression build failed'}
+$slowPackage=Join-Path $out 'slow-status-package'
+& node (Join-Path $repo 'tests/fixtures/BatiRuntimePackage01.mjs') $slowPackage $slowHost $game;if($LASTEXITCODE){throw 'Slow publication package failed'}
+& $test $slowPackage (Join-Path $out 'slow-status.json') 20;if($LASTEXITCODE){throw 'Credit return during slow publication failed; no duration retry'}
 $package=Join-Path $out 'package'
 & node (Join-Path $repo 'tests/fixtures/BatiRuntimePackage01.mjs') $package (Join-Path $out 'host/RichAudio.Acoustics.Host.exe') $game;if($LASTEXITCODE){throw 'Authored package failed'}
 & $test $package (Join-Path $out 'duration.json') $DurationSeconds;$durationExit=$LASTEXITCODE

@@ -43,3 +43,5 @@ The real chain tests use the production loaders and JavaScript producer with aut
 Only the affected plugin and host were rebuilt under `.local/playable-15/runtime-timeout-components02`. The previous package, proposals and genuine evidence remain unchanged. A future deployment would need new source pins, plugin/host hashes, package-manifest and pointer/lease bindings, plus fresh approval; no new deployment scope has been issued while the duration criterion is failing. Newer unrelated working-tree changes were preserved.
 
 The reproducible original-only runner is `tools/Test-BatiRuntimeHealth01.ps1`; its default duration is 90 seconds. It retains duration failure and separately runs dead-producer and withheld-publication controls, without automatic retry. The task's raw evidence remains under `.local/playable-15/runtime-timeout01`.
+
+The subsequent [first-underflow correction](PLAYABLE_FIRST_UNDERFLOW01.md) preserves these failed populations, identifies the credit-return dependency and device-free catch-up error, and records a successful corrected 90.240-second authored run. The blocked decision above belongs to this earlier checkpoint.
