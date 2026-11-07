@@ -10,9 +10,14 @@ internal static class CombinedObservationReceiver {
  static int Main(string[] args){
   Guid session;
   int peer;
-  if(args.Length!=3||!Guid.TryParseExact(args[0],"N",out session)||session==Guid.Empty||args[0]!=session.ToString("N")||!Int32.TryParse(args[1],out peer)||peer<=0){
-   Console.Error.WriteLine("Usage: RichAudio.ObservationReceiver.exe <session N-format> <GTA PID> <fresh capture.jsonl>");return 2;
+  long armByUtcMs;
+  if(args.Length!=4||!Guid.TryParseExact(args[0],"N",out session)||session==Guid.Empty||args[0]!=session.ToString("N")||!Int32.TryParse(args[1],out peer)||peer<=0||
+   !Int64.TryParse(args[3],NumberStyles.None,CultureInfo.InvariantCulture,out armByUtcMs)){
+   Console.Error.WriteLine("Usage: RichAudio.ObservationReceiver.exe <session N-format> <GTA PID> <fresh capture.jsonl> <session arm cutoff UTC epoch ms>");return 2;
   }
+  long remaining=armByUtcMs-DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+  if(remaining<=0||remaining>25*60*1000){Console.Error.WriteLine("Invalid session arm cutoff");return 2;}
+  var awaitingArm=Stopwatch.StartNew();
   int count=0;bool ownedCapture=false;
   try {
    using(var process=Process.GetProcessById(peer))
@@ -22,12 +27,17 @@ internal static class CombinedObservationReceiver {
     ownedCapture=true;
     GC.KeepAlive(process.Handle);
     if(process.HasExited)return 2;
-    var start=Stopwatch.StartNew();
     var connect=pipe.BeginWaitForConnection(null,null);
     Console.WriteLine("Ready: RichAudioObserveStart "+args[0]+" "+Process.GetCurrentProcess().Id);
-    if(!connect.AsyncWaitHandle.WaitOne(30000))throw new TimeoutException("arm deadline");
+    while(true){
+     long waitMs=remaining-awaitingArm.ElapsedMilliseconds;
+     if(process.HasExited)throw new EndOfStreamException("GTA exited before observation");
+     if(waitMs<=0)throw new TimeoutException("session arm cutoff");
+     if(connect.AsyncWaitHandle.WaitOne((int)Math.Min(250,waitMs)))break;
+    }
     pipe.EndWaitForConnection(connect);
     GameplayWire.Peer(pipe,peer,true);
+    var start=Stopwatch.StartNew();
     long lastSequence=-1,lastTicks=-1,lastGeneration=0;
     while(start.Elapsed.TotalMinutes<4.5&&count<5500&&!process.HasExited){
      byte[] bytes;

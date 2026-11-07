@@ -16,6 +16,12 @@ activation field. A brief console pause does not extend the original lease.
 The horn command logs three raw values and verifies the current vehicle
 identity and model between reads.
 
+The receiver and bankless consumer take the same absolute arm cutoff from
+the session schedule. The operator can read and enter the F4 command any
+time before that cutoff. The receiver starts its observation budget on
+connection. A future live attempt must confirm that RAGE Plugin Hook
+recognizes the console command as part of readiness.
+
 The separate consumer reports raw evidence and placement matching even
 without current source proof. For admission, the reviewed proof stage hashes
 the two selected source archives and revalidates one retained collision

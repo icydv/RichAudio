@@ -17,8 +17,12 @@ function pinned(filename,hash){
  return JSON.parse(b.toString('utf8').replace(/^\uFEFF/,''));
 }
 
-const [planPath,capture,session,result]=process.argv.slice(2);
-if(!result||!capture||!/^[a-f0-9]{32}$/.test(session??''))throw Error('Usage: node Observe-CombinedWorld01.mjs plan.json capture.jsonl session result.jsonl');
+const [planPath,capture,session,result,armByUtcMs]=process.argv.slice(2);
+if(!result||!capture||!/^[a-f0-9]{32}$/.test(session??'')||!/^\d+$/.test(armByUtcMs??''))
+ throw Error('Usage: node Observe-CombinedWorld01.mjs plan.json capture.jsonl session result.jsonl <session arm cutoff UTC epoch ms>');
+const remainingToArmMs=Number(armByUtcMs)-Date.now();
+if(!Number.isSafeInteger(remainingToArmMs)||remainingToArmMs<=0||remainingToArmMs>25*60_000)throw Error('Invalid session arm cutoff');
+const armCutoff=performance.now()+remainingToArmMs;
 const plan=JSON.parse(fs.readFileSync(planPath,'utf8').replace(/^\uFEFF/,''));
 const catalog=pinned(plan.catalogPath,plan.catalogSHA256);
 const manifest=plan.validatedManifestPath?pinned(plan.validatedManifestPath,plan.validatedManifestSHA256):null;
@@ -30,7 +34,7 @@ const instances=interiorInstanceIdentities01(catalog);
 const out=fs.openSync(result,'wx');
 const record=x=>fs.writeSync(out,JSON.stringify(x)+'\n');
 let service,engine,buffer='',at=0,frames=0,matches=0,clockErrors=0,lastSceneKey=null,lastBinding=null;
-const deadline=performance.now()+5*60_000;
+let deadline=armCutoff+5*60_000;
 let stop=false;
 const interrupt=()=>{stop=true;};
 process.on('SIGINT',interrupt);process.on('SIGTERM',interrupt);
@@ -49,7 +53,7 @@ try{
   if(!service.bindPreparationEpoch01(epoch))throw Error('scene epoch rejected');
  }
  record({type:'start',session,sourceProof:manifest?(plan.authoredRehearsal?'authored-rehearsal; not a live source proof':'selected-cache-proofs-bound'):'not-current; raw and match only'});
- const started=performance.now();let lastFrameAt=null,lastMatch,lastSeq=-1,lastAgeError;
+ let lastMatch,lastSeq=-1,lastAgeError;
  while(!stop&&performance.now()<deadline){
   if(service?.failed)throw Error(service.failure);
   if(fs.existsSync(capture)){
@@ -64,7 +68,8 @@ try{
   for(const line of rows){
    const row=JSON.parse(line),f=row.frame,l=f.listener,r=f.cameraInteriorReadback;
    if(f.session!==session||l.session!==session||l.sequence<=lastSeq||f.vehicles.length!==0||!r)throw Error('unexpected observation session');
-   lastSeq=l.sequence;frames++;lastFrameAt=performance.now();
+   lastSeq=l.sequence;
+   if(frames++===0)deadline=Math.min(deadline,performance.now()+5*60_000);
    const sample=r.outcome==='observed'&&r.ready===true?{proxy:r.proxy,archetype:r.archetype,origin:r.origin,observationTicks:r.sampleTicks}:null;
    const scope={session,generation:l.generation,catalogSHA256:plan.catalogSHA256,epoch:epoch??'retained-match-only'};
    const matched=matchInteriorInstance01(instances,sample&&{...scope,...sample},scope);
@@ -107,7 +112,7 @@ try{
      samplePanel:panel?{id:panel.id,center:panel.center,materialId:panel.materialId}:null});
    }
   }
-  if(fs.existsSync(capture+'.closed')&&fs.statSync(capture).size===at||lastFrameAt===null&&performance.now()-started>60_000)break;
+  if(fs.existsSync(capture+'.closed')&&fs.statSync(capture).size===at||frames===0&&performance.now()>=armCutoff+30_000)break;
   await wait(20);
  }
 }finally{

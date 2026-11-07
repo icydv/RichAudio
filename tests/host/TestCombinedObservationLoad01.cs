@@ -65,7 +65,8 @@ internal static class TestCombinedObservationLoad01 {
   commands["RichAudioReadVehicleHorn"].Invoke(null,null);
   Check(Rage.Native.NativeFunction.HornCalls==0,"unarmed horn command");
   string session=Guid.NewGuid().ToString("N");
-  using(var child=Process.Start(new ProcessStartInfo(receiver,session+" "+Process.GetCurrentProcess().Id+" \""+capture+"\""){
+  long armByUtcMs=DateTimeOffset.UtcNow.AddMinutes(2).ToUnixTimeMilliseconds();
+  using(var child=Process.Start(new ProcessStartInfo(receiver,session+" "+Process.GetCurrentProcess().Id+" \""+capture+"\" "+armByUtcMs){
    UseShellExecute=false,RedirectStandardOutput=true,CreateNoWindow=true})){
    try{
     var line=child.StandardOutput.ReadLineAsync();
