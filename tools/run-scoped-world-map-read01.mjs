@@ -33,7 +33,8 @@ const proposal=path.resolve(proposalArg);
 check(proposal.toLowerCase().startsWith(local.toLowerCase()),'private reviewed proposal');
 const seal=json(read(path.join(proposal,'review-seal.json'),sealPin,64*1024));
 check(seal.schema===1&&seal.approvedForExecution===false&&seal.scope.sha256===scopePin&&
- /^[a-f0-9]{40}$/.test(seal.sourceCommit),'review scope identity');
+ /^[a-f0-9]{40}$/.test(seal.sourceCommit)&&seal.oneUse===true&&seal.mode==='metadata-only-no-new-runtime-proof'&&
+ seal.maxSeconds===900&&seal.maximumOwnedProcesses===3&&seal.maximumMemoryMiB===3072,'review scope identity');
 const pinned=(name,max)=>read(path.resolve(proposal,seal[name].file),seal[name].sha256,max);
 const scope=json(pinned('scope',64*1024));
 const plan=json(pinned('plan',16*1024*1024));
@@ -44,7 +45,7 @@ check(approvedPaths.length===123&&new Set(approvedPaths).size===123&&scope.archi
  scope.gameExecutableSHA256===plan.executableSHA256&&scope.codeWalkerCoreSHA256===plan.parserSHA256,'approved map plan differs');
 check(previous.length===123&&previous.every((r,i)=>r.relative===approvedPaths[i]),'prior proof ordering differs');
 check(seal.core.sha256===scope.codeWalkerCoreSHA256&&path.dirname(seal.reader.file)===path.dirname(seal.core.file),'exact reader dependency location');
-for(const item of ['reader','core','sharpDx','sharpDxMathematics','procedure','audit','runner','coordinator','launcher'])pinned(item);
+for(const item of ['reader','core','sharpDx','sharpDxMathematics','procedure','audit','runner','coordinator','catalogPaths','launcher'])pinned(item);
 pinned('node',128*1024*1024);
 check(sha(fs.readFileSync(import.meta.filename))===seal.runner.sha256&&
  sha(fs.readFileSync(process.execPath))===seal.node.sha256,'running coordinator inputs differ');

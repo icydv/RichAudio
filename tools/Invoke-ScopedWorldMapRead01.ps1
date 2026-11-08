@@ -43,9 +43,11 @@ $null=Get-ReviewFile 'runner'
 $runner=Join-Path $PSScriptRoot 'run-scoped-world-map-read01.mjs'
 if((Get-ByteHash (Read-PlainBytes $runner 1048576)) -ne $seal.runner.sha256){throw 'Running child pin changed'}
 $coordinator=Get-ReviewFile 'coordinator'
+$catalogPaths=Get-ReviewFile 'catalogPaths'
 $selfHash=Get-ByteHash (Read-PlainBytes $PSCommandPath 65536)
 if($selfHash -ne $seal.launcher.sha256){throw 'Running launcher pin changed'}
-Import-Module (New-Module -Name ScopedWorldMapCoordinator01 -ScriptBlock ([ScriptBlock]::Create([IO.File]::ReadAllText($coordinator)))) -Force
+Import-Module (New-Module -Name ScopedWorldMapCatalogPaths01 -ScriptBlock ([ScriptBlock]::Create([IO.File]::ReadAllText($catalogPaths)))) -Global -Force
+Import-Module (New-Module -Name ScopedWorldMapCoordinator01 -ScriptBlock ([ScriptBlock]::Create([IO.File]::ReadAllText($coordinator)))) -Global -Force
 $winPS=Join-Path ([Environment]::SystemDirectory) 'WindowsPowerShell\v1.0\powershell.exe'
 $verify=$PSCmdlet.ParameterSetName -eq 'Verify'
 $output=Join-Path $proposalPath $(if($verify){'verify-'+[Guid]::NewGuid().ToString('N')}else{'execution-01'})
