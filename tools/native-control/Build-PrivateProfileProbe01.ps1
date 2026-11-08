@@ -1,6 +1,6 @@
 # Standalone probe only. The normal plugin build never includes this source.
 #requires -Version 7.0
-param([Parameter(Mandatory)][string]$SdkPath,[Parameter(Mandatory)][string]$Output,[ValidatePattern('^[a-fA-F0-9]{64}$')][string]$RequestSHA256='')
+param([Parameter(Mandatory)][string]$SdkPath,[Parameter(Mandatory)][string]$Output,[ValidatePattern('^[a-fA-F0-9]{64}$')][string]$RequestSHA256='',[switch]$ResolveOnly)
 $ErrorActionPreference='Stop'
 $root=Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) '.local'
 $out=[IO.Path]::GetFullPath($Output)
@@ -19,5 +19,6 @@ namespace RichAudio {
 }
 "@ | Set-Content -LiteralPath $policy -Encoding utf8NoBOM
 $sources=@('ProfileProbe.Rph.cs','ProfileProbeInput.cs','ObservationKeys.Rph.cs','ObservationSession.cs')|ForEach-Object{Join-Path $PSScriptRoot $_}
-& $compiler /nologo /target:library /platform:x64 /langversion:5 /warnaserror+ /r:Microsoft.CSharp.dll /r:System.Windows.Forms.dll /r:System.Runtime.Serialization.dll ('/r:'+$sdk) ('/out:'+(Join-Path $out 'RichAudio.ProfileProbe.dll')) $policy @sources
+$defines=@(if($ResolveOnly){'/define:PRIVATE_MARKER_A_ONLY'})
+& $compiler /nologo /target:library /platform:x64 /langversion:5 /warnaserror+ @defines /r:Microsoft.CSharp.dll /r:System.Windows.Forms.dll /r:System.Runtime.Serialization.dll ('/r:'+$sdk) ('/out:'+(Join-Path $out 'RichAudio.ProfileProbe.dll')) $policy @sources
 if($LASTEXITCODE){throw 'Profile probe compile failed'}

@@ -134,6 +134,9 @@ namespace RichAudio {
 
   internal static void Run(string profileA,string markerA,string profileB,string markerB,float x,float y,float z,string mode){
    uint a,b=0;bool resolveOnly=mode=="resolve-a";
+#if PRIVATE_MARKER_A_ONLY
+   if(!resolveOnly||profileB!=null||markerB!=null)throw new InvalidOperationException("marker-A-only build");
+#endif
    if(used||running||Game.IsLoading||Game.IsPaused||NativeFunction.CallByName<bool>("NETWORK_IS_SESSION_ACTIVE")||
     (!resolveOnly&&mode!="normal"&&mode!="controller-exit")||
     !Regex.IsMatch(profileA??"",@"\Ara_probe_[a-z0-9_]{8,48}\z")||
@@ -149,10 +152,22 @@ namespace RichAudio {
     control=Spawn(new Vector3(x+5,y,z));
     if(target.Identity==control.Identity)throw new InvalidOperationException("Probe lifetimes overlap");
     uint original=Horn(target), neighbour=Horn(control);
+    if(resolveOnly)Game.LogTrivial(String.Format(CultureInfo.InvariantCulture,
+     "RichAudio marker A before: target={0}, model=F9300CC5, horn={1:X8}; neighbour={2}, model=F9300CC5, horn={3:X8}",
+     target.Identity,original,control.Identity,neighbour));
     if(original==0||neighbour==0||original==a||original==b||neighbour==a||neighbour==b)
      throw new InvalidOperationException("Marker collides with unmodified readback");
-    Assign(target,profileA);Expect(a,neighbour);
-    if(resolveOnly){matched=true;return;}
+    Assign(target,profileA);
+    if(resolveOnly){
+     GameFiber.Sleep(250);
+     uint actual=Horn(target),neighbourAfter=Horn(control);
+     Game.LogTrivial(String.Format(CultureInfo.InvariantCulture,
+      "RichAudio marker A after: target={0}, horn={1:X8}; neighbour={2}, horn={3:X8}; expected={4:X8}",
+      target.Identity,actual,control.Identity,neighbourAfter,a));
+     if(actual!=a||neighbourAfter!=neighbour)throw new InvalidOperationException("Marker getter did not discriminate target and neighbour");
+     matched=true;return;
+    }
+    Expect(a,neighbour);
     var lease=new Recovery{Target=target,Control=control,Baseline=profileA,MarkerA=a,MarkerB=b,Neighbour=neighbour,
      Deadline=Stopwatch.GetTimestamp()+2*Stopwatch.Frequency};
     recovery=lease;
@@ -170,7 +185,7 @@ namespace RichAudio {
     if(!handedOff){
      recovery=null;
      bool retired=Cleanup();running=false;
-     Game.Console.Print("RichAudio marker "+mode+" matched="+matched+"; both probe lifetimes retired="+retired);
+     Game.LogTrivial("RichAudio marker "+mode+" matched="+matched+"; both probe lifetimes retired="+retired);
     }
    }
   }
