@@ -108,7 +108,8 @@ export async function runProcessingWorkload13(input={}, {runtimeAtGate=null}={})
   const runtimeAfter=await hashExecutedNode13();check(runtimeBefore.sha256===runtimeAfter.sha256,'render Node binary changed during workload');
   return {schema:2,kind:'RichAudioOriginalProcessingWorkload13',config,implementation:snapshot.manifest.implementation,runtime:{node:process.version,execSha256:runtimeBefore.sha256,executable:{atHeldGate:runtimeAtGate,before:runtimeBefore,after:runtimeAfter,stable:true},platform:process.platform,arch:process.arch,availableParallelism:os.availableParallelism(),logicalCpus:os.cpus().length},snapshot:{name:config.snapshot,manifestSha256:snapshot.manifestSha256,files:snapshot.manifest.files},
    summary:{all:summarizeDurations13(records.map(r=>r.renderMs)),cold:summarizeDurations13(records.slice(0,config.coldBlocks).map(r=>r.renderMs)),later:summarizeDurations13(records.slice(config.coldBlocks).map(r=>r.renderMs))},records,outsideRender,gcEvents,droppedGcEvents,cpuSampling,
-   instrumentation:{enabled:config.instrumented,cpuKind:config.instrumented?cpuKind:null,cpuCountersQuantizedOnWindows:true,inspector:config.instrumented,gcObserver:config.instrumented,heapReads:config.instrumented,phaseWrappers:config.instrumented,commonWallTimer:true},
+   instrumentation:{enabled:config.instrumented,cpuKind:config.instrumented?cpuKind:null,cpuCountersQuantizedOnWindows:true,inspector:config.instrumented,gcObserver:config.instrumented,heapReads:config.instrumented,phaseWrappers:config.instrumented,commonWallTimer:true,
+    launch:{execArgv:[...process.execArgv],bytecodeRetention:process.execArgv.includes('--no-flush-bytecode'),normalHostStartup:false,preparedExactInitialMatches:false}},
    continuity:{drySha256:dry.digest('hex'),stereoSha256:stereo.digest('hex'),blocks:pcmBlocks,rendererFrames:instance.pipeline.renderer.frame,sourceRows,pathRows,sourceConstructions:sourceSerial,sourceCreations:diagnostics.stageCounters.sourceCreations,sourceCursorContinuous,rendererHistoryStable,historyAffectedFrames:diagnostics.pipeline.history.affectedFrames,limiterEvents:diagnostics.pipeline.renderer.limited,nonzeroBlocks:diagnostics.stageCounters.stereo.nonzeroBlocks},comparisonContract:processingRoleContractStreet01,roleAudio:roleCapture.finish(),roleDiagnostics:{outsideRenderTimer:true,totalMs:roleCaptureMs,maximumBlockMs:maximumRoleCaptureMs,framesAdded:0},observationSequence,lifecycle:diagnostics.lifecycle,beforeRender,settings,sceneWorkers:runtime?{...runtime.stats}:null,maxRssBytes,
    limits:{blockFrames:512,sampleRate:48000,blockBudgetMs:processingBudgetMs13,pcmQueueFramesAdded:0,actualSourceWarmFrames:0,sourcePreparationCpuIsolation:false,commonBookkeepingOutsideRenderTimer:true,burstWithDeterministicObservationTime:true,osSchedulerTrace:false,deviceUnderflowMeasured:false,endpointUnderflows:null,endpointOpened:false,installedResourcesRead:false,privateBanksRead:false}};
  }finally{recorder=null;observer?.disconnect();sampler?.close();await instance?.close();if(runtime)await runtime.close();}
@@ -137,26 +138,29 @@ export async function runProcessingTrial13(input,{affinity='normal',contention=0
  const executedParentHelpers=['tools/Profile-Processing13.mjs','tools/Owned-Processing13.mjs','tools/Freeze-Processing13.mjs'];
  const verifyParent=async()=>{for(const member of executedParentHelpers)check(sha(await fs.readFile(path.join(root,member)))===closure.manifest.files.find(f=>f.path===member)?.sha256,'executed parent harness differs from frozen closure: '+member);};
  await verifyParent();
- const owned=[],contenders=[];let render,result=null,failure=null;const started=performance.now();
+ const owned=[],contenders=[];let render,result=null,failure=null,failureCode=null;const started=performance.now();
  try{
   render=startOwnedProcessing13(script,'render',config);owned.push(render);
   const qualified=await qualifyOwnedAffinity13(render,{mode:affinity});
   for(let i=0;i<contention;i++){
    const contender=startOwnedProcessing13(script,'contender',{}, {failStop:failStop&&i===0});owned.push(contender);contenders.push(contender);
-   await qualifyOwnedAffinity13(contender,{mode:affinity,mask:qualified.actualMask});await contender.go();await waitOwnedMessage13(contender,'contender-active');
+   await qualifyOwnedAffinity13(contender,{mode:affinity,mask:qualified.actualMask});
+  }
+  for(const [i,contender] of contenders.entries()){
+   await contender.go();await waitOwnedMessage13(contender,'contender-active');
    if(failAfterContenderReady===i+1)throw Error('injected owned contender startup failure');
   }
   await render.go();await render.done;
   try{result=JSON.parse(render.record.stdout);check(result.kind==='RichAudioOriginalProcessingWorkload13'&&JSON.stringify(result.config)===JSON.stringify(config),'exact child workload identity required');check(result.snapshot?.manifestSha256===closure.manifestSha256&&result.snapshot.name===config.snapshot&&result.implementation===closure.manifest.implementation,'child result differs from authorized frozen closure');check(result.runtime.execSha256===parentRuntimeBefore.sha256&&result.runtime.node===parentRuntimeBefore.node&&result.runtime.executable.stable,'matched qualified parent/child Node bytes required');}catch(error){failure=error.message;}
   if(!qualifyOwnedCompletion13(render.record,{render:true}))failure??='owned render completion qualification failed';
- }catch(error){failure??=error.message;}
+ }catch(error){failure??=error.message;failureCode=error.code??null;}
  finally{await Promise.all(owned.filter(o=>!o.record.joined).map(o=>o.stop()));}
  const workers=owned.map(o=>{const {stdout,...record}=o.record;return {...record,unparsedStdout:o===render&&!result?stdout:undefined};});
  const contendersQualified=contenders.length===contention&&contenders.every(c=>qualifyOwnedCompletion13(c.record));
  if(!contendersQualified)failure??='owned contender completion qualification failed';
  try{await verifyParent();}catch(error){failure??=error.message;}
  let parentRuntimeAfter=null;try{parentRuntimeAfter=await hashExecutedNode13();check(parentRuntimeBefore.sha256===parentRuntimeAfter.sha256,'parent Node binary changed during trial');}catch(error){failure??=error.message;}
- return {config,affinity,contention,childWallMs:performance.now()-started,result,failure,workers,parentRuntime:{before:parentRuntimeBefore,after:parentRuntimeAfter,stable:parentRuntimeAfter?.sha256===parentRuntimeBefore.sha256},allChildrenJoined:workers.every(w=>w.joined),contentionQualified:contendersQualified,closureManifestSha256:closure.manifestSha256};
+ return {config,affinity,contention,childWallMs:performance.now()-started,result,failure,failureCode,workers,parentRuntime:{before:parentRuntimeBefore,after:parentRuntimeAfter,stable:parentRuntimeAfter?.sha256===parentRuntimeBefore.sha256},allChildrenJoined:workers.every(w=>w.joined),contentionQualified:contendersQualified,closureManifestSha256:closure.manifestSha256};
 }
 
 export async function profileProcessing13({snapshots=[],selectedPreparations=['authored-jit'],instrumentation=[false,true],affinities=['normal','restricted4'],contentionCounts=[0,2],repetitions=2,topologies=['plain','texture'],scenes=['direct','walls'],profile='fixed-cpu-balanced'}={}, {trialRunner=runProcessingTrial13}={}){
@@ -170,7 +174,7 @@ export async function profileProcessing13({snapshots=[],selectedPreparations=['a
   const config=processingOptions13({snapshot,preparation,instrumented,profile,scene,blocks:topology==='texture'?192:144,lifecycle:topology==='texture',texture:topology==='texture'});let trial;
   try{trial=await trialRunner(config,{affinity,contention});}catch(error){trial={config,affinity,contention,result:null,failure:error.message,workers:[],allChildrenJoined:true,contentionQualified:false};}
   trials.push({repetition,topology,...trial});process.stderr.write(JSON.stringify({progress:trials.length,requestedTrials,repetition,snapshot,preparation,instrumented,affinity,contention,topology,failure:trial.failure,summary:trial.result?.summary.all})+'\n');
-  if(trial.failure){terminalFailure={trial:trials.length-1,reason:trial.failure,automaticRetry:false,remainingTrialsStarted:false};break outer;}
+  if(trial.failure){terminalFailure={trial:trials.length-1,reason:trial.failure,...(trial.failureCode?{code:trial.failureCode}:{}),automaticRetry:false,remainingTrialsStarted:false};break outer;}
  }
  let runtimeAfter=null,runtimeFailure=null;try{runtimeAfter=await hashExecutedNode13();}catch(error){runtimeFailure=error.message;}
  const runtimeStable=runtimeBefore.sha256===runtimeAfter?.sha256;

@@ -112,6 +112,11 @@ test('owned scene worker admits the rotated interior only for the exact camera p
   await until(()=>{context=viewer.snapshot(viewFrame({...observation,durationMs:200}));
    return context.generation!==originalGeneration&&context.tiles?.some(t=>t.surfaces.length===2);});
   assert(viewer.reader.stats.minimumDispatchIntervalMs<500,'short interior leases use the independent viewer cadence');
+  for(const change of [{proxy:72},{archetype:0xfedcba98},{origin:[25.5,10,4]}]){
+   assert.deepEqual(viewer.snapshot(viewFrame({...observation,...change,durationMs:200})).tiles,[],
+    'an independently changed native field immediately withdraws the prior surrounding workset');
+   await until(()=>viewer.snapshot(viewFrame({...observation,durationMs:200})).tiles?.some(t=>t.surfaces.length===2));
+  }
   assert.deepEqual(viewer.snapshot(viewFrame(null)).tiles,[],'proxy loss withdraws the viewer-only geometry immediately');
   await viewer.close();viewer=null;
   publishWarmupManifest01(f.manifestPath,{...manifest,UnrelatedProgress:1});

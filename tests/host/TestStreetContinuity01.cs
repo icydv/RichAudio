@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Diagnostics;
+using System.IO.Pipes;
 using System.Reflection;
 using System.Threading;
 using RichAudio.Beacon.Rph;
@@ -15,7 +16,8 @@ namespace Rage {
  public class Entity {public PoolHandle Handle;public IntPtr MemoryAddress;public bool Exists=true,IsDead;public bool IsValid(){return Exists;}}
  public sealed class Model {public uint Hash=0xf9300cc5u;}
  public sealed class Ped:Entity {public Vehicle CurrentVehicle;}
- public sealed class Vehicle:Entity {public Ped Driver;public Model Model=new Model();public bool IsEngineOn=true;public double EngineRevolutionsRatio=.5;
+ public sealed class Vehicle:Entity {public Ped Driver;public Model Model=new Model();public bool IsEngineOn=true;double ratio=.5;public int RatioReadDelayMs;
+  public double EngineRevolutionsRatio{get{if(RatioReadDelayMs>0)Thread.Sleep(RatioReadDelayMs);return ratio;}set{ratio=value;}}
   public Vector3 Position=new Vector3(0,10,0),Velocity=new Vector3(0,0,0),ForwardVector=new Vector3(0,1,0),UpVector=new Vector3(0,0,1);}
  public sealed class Player {public Ped Character;}
  public static class Game {public static bool IsLoading,IsPaused;public static Player LocalPlayer=new Player();public static class Console {public static void Print(string value){}}}
@@ -27,16 +29,19 @@ namespace Rage.Attributes {public sealed class ConsoleCommandAttribute:Attribute
 namespace Rage.Native {public static class NativeFunction {
  public static dynamic Natives {get{return new InteriorCalls();}}
  public static bool InteriorReady;
+ public static int InteriorProxy=71;
+ public static uint InteriorArchetype=0x12345678u;
+ public static Rage.Vector3 InteriorOrigin=new Rage.Vector3(25,10,4);
  public sealed class InteriorCalls {
   public void x252BDC06B73FA6EA(int proxy,out Rage.Vector3 origin,out uint name){
-   if(proxy!=71)throw new InvalidOperationException("Unexpected proxy");
-   origin=new Rage.Vector3(25,10,4);name=0x12345678u;
+   if(proxy!=InteriorProxy)throw new InvalidOperationException("Unexpected proxy");
+   origin=InteriorOrigin;name=InteriorArchetype;
   }
  }
  public static bool GameplayCamera=true,VehicleCamera=true;
  public static double CameraX;public static uint CameraGameTime;
  public static T CallByName<T>(string name,params object[] args){
-  if(name=="GET_INTERIOR_FROM_COLLISION")return (T)(object)(InteriorReady?71:0);
+  if(name=="GET_INTERIOR_FROM_COLLISION")return (T)(object)(InteriorReady?InteriorProxy:0);
   if(name=="IS_INTERIOR_READY")return (T)(object)InteriorReady;
   if(name=="IS_GAMEPLAY_CAM_RENDERING")return (T)(object)GameplayCamera;
   if(name=="IS_FOLLOW_VEHICLE_CAM_ACTIVE")return (T)(object)VehicleCamera;
@@ -69,6 +74,16 @@ internal static class TestStreetContinuity01 {
   typeof(PlayableEntry).GetMethod("Capture",BindingFlags.NonPublic|BindingFlags.Static).Invoke(null,new object[]{runtime});
  }
  static GameplayVehicle Only(GameplayRuntime r){var f=r.Frames[r.Frames.Count-1];Check(f.Listener.Valid&&f.Vehicles.Length==1,"one fresh genuine adapter observation");return f.Vehicles[0];}
+ static GameplayFrame CameraWire(GameplayRuntime runtime){
+  string endpoint="RichAudio.CameraFixture."+Guid.NewGuid().ToString("N");
+  using(var server=GameplayWire.Server(endpoint))
+  using(var client=new NamedPipeClientStream(".",endpoint,PipeDirection.InOut,PipeOptions.Asynchronous)){
+   var accept=server.BeginWaitForConnection(null,null);
+   client.Connect(1000);server.EndWaitForConnection(accept);
+   GameplayWire.Write(client,GameplayWire.Encode(runtime.Frames[runtime.Frames.Count-1],runtime.Session));
+   return GameplayWire.Decode(GameplayWire.Read(server),runtime.Session);
+  }
+ }
  static int Main(){try{
   var player=new Rage.Ped{Handle=new Rage.PoolHandle{Value=0x102,Index=1,Counter=2},MemoryAddress=new IntPtr(100)};
   var vehicle=new Rage.Vehicle{Handle=new Rage.PoolHandle{Value=0x304,Index=3,Counter=4},MemoryAddress=new IntPtr(200),Driver=player};player.CurrentVehicle=vehicle;Rage.Game.LocalPlayer.Character=player;Rage.World.Entities=new Rage.Entity[]{vehicle};var runtime=new GameplayRuntime();
@@ -76,7 +91,7 @@ internal static class TestStreetContinuity01 {
   // Keep that rejected frame and require fresh evidence on a later tick.
   for(int attempt=0;attempt<3;attempt++){
    Capture(runtime);
-   if(runtime.Frames.Count>0&&runtime.Frames[runtime.Frames.Count-1].Listener.Valid)break;
+   if(runtime.Frames.Count>0&&runtime.Frames[runtime.Frames.Count-1].Listener.Valid&&runtime.Frames[runtime.Frames.Count-1].Vehicles.Length==1)break;
   }
   var initial=Only(runtime);
   Test("dismount preserves real running source identity and original bank context",delegate{
@@ -144,15 +159,39 @@ internal static class TestStreetContinuity01 {
    sampler.Invoke(null,new object[]{new ListenerState{Position=new[]{104d,0d,1d},ObservationTicks=Stopwatch.GetTimestamp()}});
    Capture(runtime,104);
    var frame=runtime.Frames[runtime.Frames.Count-1];
-   var decoded=GameplayWire.Decode(GameplayWire.Encode(frame,runtime.Session),runtime.Session);
+   var decoded=CameraWire(runtime);
    Check(decoded.CameraInterior01!=null&&decoded.CameraInterior01.Proxy==71&&decoded.CameraInterior01.Archetype==0x12345678u&&
     decoded.CameraInterior01.Origin[0]==25,"camera proxy, archetype and origin survive the actual wire");
    Check(decoded.CameraInterior01.ObservationTicks==frame.CameraInterior01.ObservationTicks,"proxy sample clock is retained");
+   vehicle.RatioReadDelayMs=18;
+   try{Capture(runtime,104);}finally{vehicle.RatioReadDelayMs=0;}
+   var renewed=CameraWire(runtime);
+   Check(renewed.Listener.Valid&&renewed.Vehicles.Length==0&&renewed.CameraInterior01!=null,
+    "slow vehicle sampling cannot erase a qualified camera observation");
+   Check(renewed.Listener.Generation==decoded.Listener.Generation&&renewed.Listener.Sequence>decoded.Listener.Sequence&&
+    renewed.CameraInterior01.ObservationTicks>decoded.CameraInterior01.ObservationTicks&&renewed.CameraInterior01.Proxy==71&&
+    renewed.CameraInterior01.Archetype==0x12345678u&&renewed.CameraInterior01.Origin[0]==25&&
+    renewed.CameraInterior01.Origin[1]==10&&renewed.CameraInterior01.Origin[2]==4,"fresh interior renewal preserves original identity and clock");
    decoded.CameraInterior01.ObservationTicks-=Stopwatch.Frequency;
    bool stale=false;try{GameplayWire.Encode(decoded,runtime.Session);}catch{stale=true;}
    Check(stale,"stale proxy cannot qualify an otherwise valid frame");
+   Rage.Native.NativeFunction.InteriorProxy=72;
+   Rage.Native.NativeFunction.InteriorArchetype=0xfedcba98u;
+   Rage.Native.NativeFunction.InteriorOrigin=new Rage.Vector3(-25.5f,10.25f,4.125f);
+   Capture(runtime,104);
+   var changed=CameraWire(runtime);
+   Check(changed.CameraInterior01!=null&&changed.CameraInterior01.Proxy==72&&changed.CameraInterior01.Archetype==0xfedcba98u&&
+    changed.CameraInterior01.Origin[0]==-25.5&&changed.CameraInterior01.Origin[1]==10.25&&changed.CameraInterior01.Origin[2]==4.125&&
+    changed.Listener.Generation==renewed.Listener.Generation&&changed.Listener.Sequence>renewed.Listener.Sequence,"changed native fields survive the actual wire");
    Rage.Native.NativeFunction.InteriorReady=false;Capture(runtime,104);
-   Check(runtime.Frames[runtime.Frames.Count-1].CameraInterior01==null,"lost proxy yields unknown");
+   var exterior=CameraWire(runtime);
+   Check(exterior.CameraInterior01==null,"lost proxy yields unknown");
+   int count=runtime.Frames.Count;Capture(runtime,999);
+   Check(runtime.Frames.Count==count,"camera cut publishes no borrowed interior identity");
+   Capture(runtime,999);
+   var afterCut=CameraWire(runtime);
+   Check(afterCut.Listener.Generation>exterior.Listener.Generation&&afterCut.Listener.Sequence>exterior.Listener.Sequence&&
+    afterCut.CameraInterior01==null,"new camera generation carries only its own exterior evidence");
   });
   Test("listener invalidation preserves monotonic identity without interpolating old poses",delegate{
    var tracker=new CameraListenerTracker();long now=Stopwatch.GetTimestamp();var first=tracker.Observe(runtime.Session,new CameraObservation{Before=now,After=now,Observed=now,Position=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d}});

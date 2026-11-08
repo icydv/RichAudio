@@ -10,6 +10,7 @@ const local=path.join(repo,'.local')+path.sep;
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const shaPattern=/^[a-f0-9]{64}$/;
 const scopePin='131f3f9c00f450640b44df74f19a6e20940ca3f5f32018d60a4e74c3f90f846c';
+const narrowScopePin='cc2851d66eb4d04e5f080e40c238d9c88c0a9c9a249c0ba0202c27ee5dacc466';
 const reject=message=>{throw Error(message);};
 const check=(ok,message)=>{if(!ok)reject(message);};
 const under=(file,root)=>file.toLowerCase().startsWith(root.toLowerCase()+path.sep);
@@ -32,19 +33,40 @@ check(['--verify-only','--owned-installed'].includes(mode)&&proposalArg&&shaPatt
 const proposal=path.resolve(proposalArg);
 check(proposal.toLowerCase().startsWith(local.toLowerCase()),'private reviewed proposal');
 const seal=json(read(path.join(proposal,'review-seal.json'),sealPin,64*1024));
-check(seal.schema===1&&seal.approvedForExecution===false&&seal.scope.sha256===scopePin&&
- /^[a-f0-9]{40}$/.test(seal.sourceCommit)&&seal.oneUse===true&&seal.mode==='metadata-only-no-new-runtime-proof'&&
+const narrow=seal.mode==='exact-members-no-new-runtime-proof';
+check(seal.schema===1&&seal.approvedForExecution===false&&seal.scope.sha256===(narrow?narrowScopePin:scopePin)&&
+ /^[a-f0-9]{40}$/.test(seal.sourceCommit)&&seal.oneUse===true&&(narrow||seal.mode==='metadata-only-no-new-runtime-proof')&&
  seal.maxSeconds===900&&seal.maximumOwnedProcesses===3&&seal.maximumMemoryMiB===3072,'review scope identity');
 const pinned=(name,max)=>read(path.resolve(proposal,seal[name].file),seal[name].sha256,max);
 const scope=json(pinned('scope',64*1024));
 const plan=json(pinned('plan',16*1024*1024));
 const previous=json(pinned('priorArchiveIdentities',4*1024*1024));
-const approvedPaths=scope.archives.map(r=>r.relative);
-check(approvedPaths.length===123&&new Set(approvedPaths).size===123&&scope.archives.filter(r=>r.collision>0).length===53&&
- scope.archives.reduce((n,r)=>n+r.collision,0)===10663&&JSON.stringify(approvedPaths)===JSON.stringify(plan.archives)&&
- scope.gameExecutableSHA256===plan.executableSHA256&&scope.codeWalkerCoreSHA256===plan.parserSHA256,'approved map plan differs');
-check(previous.length===123&&previous.every((r,i)=>r.relative===approvedPaths[i]),'prior proof ordering differs');
-check(seal.core.sha256===scope.codeWalkerCoreSHA256&&path.dirname(seal.reader.file)===path.dirname(seal.core.file),'exact reader dependency location');
+const approvedPaths=(narrow?scope.archivePopulation:scope.archives).map(r=>r.relative),basis=narrow?scope.basis:scope;
+check(approvedPaths.length===(narrow?18:123)&&new Set(approvedPaths).size===approvedPaths.length&&
+ (narrow||scope.archives.filter(r=>r.collision>0).length===53&&scope.archives.reduce((n,r)=>n+r.collision,0)===10663)&&
+ JSON.stringify(approvedPaths)===JSON.stringify(plan.archives)&&basis.gameExecutableSHA256===plan.executableSHA256&&
+ basis.codeWalkerCoreSHA256===plan.parserSHA256,'approved map plan differs');
+if(narrow){
+ const selected=scope.allowedMembers,branches=new Set(),pins={};
+ check(selected.length===118&&selected.filter(r=>r.kind==='ymf').length===9&&selected.filter(r=>r.kind==='ytyp').length===109&&
+  JSON.stringify(selected.map(r=>r.member))===JSON.stringify(plan.selected)&&new Set(plan.selected).size===118,'exact metadata member population differs');
+ const parent=member=>member.slice(0,member.lastIndexOf('.rpf/')+4);
+ for(const row of selected){
+  check(row.member.endsWith('.'+row.kind)&&row.archive===row.member.slice(0,row.member.indexOf('.rpf/')+4)&&
+   approvedPaths.includes(row.archive)&&parent(row.member)===row.table,'exact member ancestry');
+  for(let table=row.table;table!==row.archive;table=parent(table)){
+   check(table.includes('.rpf/')&&table.startsWith(row.archive+'/'),'exact nested ancestor');
+   branches.add(table);
+  }
+  const retained=row.retainedSHA256??row.previousReviewPin;
+  if(retained){check(shaPattern.test(retained)&&(!row.previousReviewPin||row.previousReviewPin===retained),'retained member pin differs');pins[row.member]=retained;}
+ }
+ check(JSON.stringify([...branches].sort())===JSON.stringify(plan.branches)&&
+  JSON.stringify(pins)===JSON.stringify(plan.memberPins)&&seal.bootstrap?.file==='GTA5_Enhanced.exe'&&
+  seal.bootstrap.sha256===basis.gameExecutableSHA256,'narrow ancestor, digest or initializer scope differs');
+}
+check(previous.length===approvedPaths.length&&previous.every((r,i)=>r.relative===approvedPaths[i]),'prior proof ordering differs');
+check(seal.core.sha256===basis.codeWalkerCoreSHA256&&path.dirname(seal.reader.file)===path.dirname(seal.core.file),'exact reader dependency location');
 for(const item of ['reader','core','sharpDx','sharpDxMathematics','procedure','audit','runner','coordinator','catalogPaths','launcher'])pinned(item);
 pinned('node',128*1024*1024);
 check(sha(fs.readFileSync(import.meta.filename))===seal.runner.sha256&&
@@ -53,14 +75,14 @@ const target=new Set([...plan.selected,...plan.branches].map(p=>p.slice(0,p.inde
 check([...target].every(p=>approvedPaths.includes(p)),'selected member outside reviewed archives');
 if(mode==='--verify-only'){
  console.log(JSON.stringify({source:seal.sourceCommit,archiveInventory:approvedPaths.length,affectedPhysicalArchives:target.size,
-  selectedMembers:plan.selected.length,branches:plan.branches.length,protectedReads:0,sealSHA256:sealPin}));
+  selectedMembers:plan.selected.length,branches:plan.branches.length,initializerRequired:narrow,protectedReads:0,sealSHA256:sealPin}));
  process.exit(0);
 }
 const output=path.resolve(outputArg??'');
 check(under(output,proposal)&&plain(output)===output,'fresh owned private result');
 const claimPath=path.join(output,'claim.json'),claim=JSON.parse(fs.readFileSync(plain(claimPath),'utf8'));
 check(claim.attempts===1&&claim.reviewSealSHA256===sealPin&&claim.sourceCommit===seal.sourceCommit&&
- claim.mode==='metadata-only-no-new-runtime-proof'&&shaPattern.test(claim.authorizationSHA256),'one-use approved owned claim required');
+ claim.mode===seal.mode&&shaPattern.test(claim.authorizationSHA256),'one-use approved owned claim required');
 read(path.join(output,'authorization.txt'),claim.authorizationSHA256,64*1024);
 const readStarted=path.join(output,'protected-read-started.json');
 fs.writeFileSync(readStarted,JSON.stringify({reviewSealSHA256:sealPin,utc:new Date().toISOString()})+'\n',{flag:'wx'});
@@ -94,7 +116,7 @@ for(const {rel,file} of files){
 fs.writeFileSync(path.join(output,'archive-identity-check.json'),JSON.stringify(before,null,2)+'\n',{flag:'wx'});
 check(before.every(r=>r.same),'protected archive identity changed; review exact affected hashes before proceeding');
 const reader=path.resolve(proposal,seal.reader.file);
-const readPass=spawnSync(reader,['--installed',installation,output,path.resolve(proposal,seal.plan.file),seal.plan.sha256],
+const readPass=spawnSync(reader,[narrow?'--installed-narrow':'--installed',installation,output,path.resolve(proposal,seal.plan.file),seal.plan.sha256],
  {cwd:proposal,encoding:'utf8',windowsHide:true,timeout:900000,maxBuffer:262144});
 fs.writeFileSync(path.join(output,'reader-terminal.json'),JSON.stringify({status:readPass.status,signal:readPass.signal,
  error:readPass.error?.message??null,stderr:readPass.stderr})+'\n',{flag:'wx'});

@@ -3,6 +3,7 @@
 import {SourcePreparationBudgetError10} from './source-preparation-budget10.mjs';
 const FS=48000;
 const stateAlpha=1-Math.exp(-1/(FS*.01));
+const intervalRate=(sampleRate,intervals,p)=>sampleRate/((1-p.w)*intervals[p.a].length+p.w*intervals[p.b].length);
 const check=(ok,message)=>{if(!ok)throw Error(message);};
 const smooth=x=>x*x*(3-2*x);
 const matchSamples=64;
@@ -53,8 +54,8 @@ export function prepareStockGrain10(asset,{regions=null,texture=true,maximumByte
  const requiredBytes=arrayBytes+selected.length*128+8*(intervalSignature.length+featureSignature.length+JSON.stringify(intervals).length+JSON.stringify(features).length);
  if(requiredBytes>maximumBytes)throw new SourcePreparationBudgetError10('bytes',maximumBytes);
  let timeline=null;
- if(textureEnabled){const mapping={asset,intervals,pair:StockGrainVoice.prototype.pair},rateAt=StockGrainVoice.prototype.rateAt;
-  timeline=new Float64Array(asset.frames+1);for(let i=0;i<asset.frames;i++)timeline[i+1]=timeline[i]+rateAt.call(mapping,(i+.5)/(asset.frames-1))/asset.sampleRate;}
+ if(textureEnabled){const mapping={asset,intervals,pair:StockGrainVoice.prototype.pair},pair={a:0,b:0,w:0,target:0};
+  timeline=new Float64Array(asset.frames+1);for(let i=0;i<asset.frames;i++)timeline[i+1]=timeline[i]+intervalRate(asset.sampleRate,intervals,mapping.pair((i+.5)/(asset.frames-1),pair))/asset.sampleRate;}
  const token=Object.freeze({kind:'RichAudioStockGrainPreparation10',bytes:requiredBytes,textureEnabled,sourceFramesAdvanced:0});
  preparations10.set(token,{binding:binding10(asset,regions),texture:Boolean(texture),samples,intervals:frozenCopy10(intervals),features:frozenCopy10(features),timeline,
   snapshot:Buffer.from(bytes10(samples)),intervalSignature,featureSignature});
@@ -107,7 +108,10 @@ export class StockGrainVoice {
   #prepareInitialMatch=false;
   #reusedInitialMatch=false;
   #nextPair={a:0,b:0,w:0,target:0};
+  #ratePair={a:0,b:0,w:0,target:0};
   #nextOutput={value:0,energy:0};
+  #firstCycle={value:0,energy:0};
+  #secondCycle={value:0,energy:0};
   constructor(asset,{regions=null,texture=true,preparation10=null}={}){
     const prepared=preparation10===null?null:preparations10.get(preparation10);
     if(preparation10!==null)validateStockGrainPreparation10(asset,{regions,texture,preparation10});
@@ -157,14 +161,16 @@ export class StockGrainVoice {
     this.lastPair=undefined;this.current=undefined;this.lastRate=undefined;this.pendingBoundary=undefined;
     if(prepared?.timeline)this.#sourceTimeline=prepared.timeline;
     this.#preparation=prepared??null;
-    this.ratePair={a:0,b:0,w:0,target:0};
     if(this.textureEnabled)this.#timeline();
   }
   pair(u,result={a:0,b:0,w:0,target:0}){
     const target=u*(this.asset.frames-1),r=this.intervals;let low=0,high=r.length-1;
     result.target=target;
-    if(target<=r[0].centre||target>=r[high].centre){
-      result.a=result.b=target<=r[0].centre?0:high;
+    if(target<=r[0].centre){
+      result.a=result.b=0;
+      result.w=0;
+    }else if(target>=r.at(-1).centre){
+      result.a=result.b=r.length-1;
       result.w=0;
     }else{
       while(low<high){const mid=(low+high)>>1;if(r[mid].centre<target)low=mid+1;else high=mid;}
@@ -184,16 +190,20 @@ export class StockGrainVoice {
     const f=position-k;
     return this.samples[k]*(1-f)+this.samples[next]*f;
   }
-  cycle(r){
+  cycle(r,output={value:0,energy:0}){
     const position=this.phase*r.length,p=Math.min(r.start+position,r.end-1e-9),k=Math.floor(p);
     // Interpolation at the final sample stays on this periodic span. Reading
     // the next state/file endpoint here would inject a boundary click.
     let first;
     if(k+1>=r.end){const w=(p-k)/(r.end-k);first=(1-w)*this.read(k)+w*this.read(r.start);}
     else first=this.read(p);
-    if(!r.seam||position<=r.length-r.seam)return {value:first,energy:first*first};
-    const second=this.read(r.start+position-r.length),w=smooth((position-(r.length-r.seam))/r.seam);
-    return {value:(1-w)*first+w*second,energy:(1-w)*first*first+w*second*second};
+    if(!r.seam||position<=r.length-r.seam){
+      output.value=first;output.energy=first*first;
+    }else{
+      const second=this.read(r.start+position-r.length),w=smooth((position-(r.length-r.seam))/r.seam);
+      output.value=(1-w)*first+w*second;output.energy=(1-w)*first*first+w*second*second;
+    }
+    return output;
   }
   random(){this.textureSeed=(Math.imul(1664525,this.textureSeed)+1013904223)>>>0;return this.textureSeed/4294967296;}
   pool(p){
@@ -225,22 +235,15 @@ export class StockGrainVoice {
     runs.sort((a,b)=>distance(a)-distance(b));
     const run=runs[0]??[p.a,p.a];if(!runs.length)runs.push(run);
     check(!f[run[0]].transientRisk,'no safe compatible sustain material at requested state');
-    const allowed=new Set(),endByInterval=new Uint32Array(r.length);
-    for(const [first,last] of runs){
-      for(let i=first;i<=last;i++)allowed.add(i);
-      let end=last+1;
-      for(let i=last;i>=first;i--){
-        if(i<last&&r[i].end!==r[i+1].start)end=i+1;
-        endByInterval[i]=end;
-      }
-    }
+    const allowed=new Set();
+    for(const [first,last] of runs)for(let i=first;i<=last;i++)allowed.add(i);
     const count=allowed.size,t=this.stats.texture;
     t.minimumPoolCycles=Math.min(t.minimumPoolCycles??count,count);t.maximumPoolCycles=Math.max(t.maximumPoolCycles,count);
-    return {lo:Math.min(...allowed),hi:Math.max(...allowed),runs,allowed,endByInterval,count,start:Math.max(run[0],Math.min(run[1],p.a)),runEnd:run[1],period,anchor:p.a};
+    return {lo:Math.min(...allowed),hi:Math.max(...allowed),runs,allowed,count,start:Math.max(run[0],Math.min(run[1],p.a)),runEnd:run[1],period,anchor:p.a};
   }
   // Metadata intervals define a source-time coordinate, not independent loops.
   // Within a contiguous run this reads original chronology without any blend.
-  rateAt(u){const p=this.pair(u,this.ratePair);return this.asset.sampleRate/((1-p.w)*this.intervals[p.a].length+p.w*this.intervals[p.b].length);}
+  rateAt(u){const p=this.pair(u,this.#ratePair);return intervalRate(this.asset.sampleRate,this.intervals,p);}
   advanceHead(head,rate){
     const i=Math.floor(head.q),r=this.intervals[i],position=r.start+(head.q-i)*r.length,timeline=this.#timeline();
     let k=Math.floor(position);
@@ -285,8 +288,10 @@ export class StockGrainVoice {
     return this.read(position);
   }
   available(q,plan){
-    const end=plan.endByInterval[Math.floor(q)];
-    return end?end-q:0;
+    const i=Math.floor(q);let last=i;
+    if(!plan.allowed.has(i))return 0;
+    while(last+1<this.intervals.length&&plan.allowed.has(last+1)&&this.intervals[last].end===this.intervals[last+1].start)last++;
+    return last+1-q;
   }
   prepareInitialMatch01(){
     check(this.frame===0,'initial waveform preparation requires an untouched disposable voice');
@@ -299,20 +304,24 @@ export class StockGrainVoice {
     const longestRun=Math.max(...plan.runs.map(([a,b])=>b-a+1));
     const horizon=Math.min(1,longestRun/2,(reference.voice.intervals.length-reference.q)*.99),n=matchSamples;
     check(horizon>0,'outgoing source continuation must remain bounded');
+    const previous=reference.voice,sameVoice=previous===this;
+    const canReuse=!sameVoice&&this.#preparation&&previous.#preparation&&
+      !this.frame&&!previous.frame&&!this.stats.reads&&!previous.stats.reads&&plan.runs.length<=16;
+    const referenceSamples=()=>Float64Array.from({length:n},(_,k)=>previous.sampleHead(reference.q+horizon*k/n));
+    // Keep the reference reads ahead of rate and RNG work on the ordinary
+    // search, including failure and custom reader behavior.
+    const targetBeforeMatch=canReuse?null:referenceSamples();
     const minimumRoom=Math.min(.5,Math.max(.000001,4*this.rateAt(this.state??.5)/FS));
     const requiredRoom=Math.max(horizon,minimumRoom);
     // The reference and plan stay fixed throughout this synchronous search.
     // Reuse their room while retaining candidate order and every PCM score.
-    const sameVoice=reference.voice===this,selfRoom=sameVoice&&longestRun>=3?
+    const selfRoom=sameVoice&&longestRun>=3?
       Math.min(this.available(reference.q,plan)+.5,longestRun*.75):0;
     // For virgin cross-mode readers, the complete search is a function of
     // these exact inputs. Preparation uses disposable voices and copies the
     // resulting coordinates, RNG and read diagnostics into the live search
     // only when its inputs match. Reacquisition or a different plan searches
     // normally. Nothing here advances either reader.
-    const previous=reference.voice;
-    const canReuse=!sameVoice&&this.#preparation&&previous.#preparation&&
-      !this.frame&&!previous.frame&&!this.stats.reads&&!previous.stats.reads&&plan.runs.length<=16;
     let byReference=null,key=null;
     if(canReuse){
       let byIncoming=initialMatches.get(this.#preparation);
@@ -330,7 +339,7 @@ export class StockGrainVoice {
         }
       }
     }
-    const target=Float64Array.from({length:n},(_,k)=>previous.sampleHead(reference.q+horizon*k/n));
+    const target=targetBeforeMatch??referenceSamples();
     // Scores are consumed immediately by this search. Retain scalar results
     // instead of a result per probe and a copy of each improved best.
     let correlation=0;
@@ -433,7 +442,7 @@ export class StockGrainVoice {
     check(Number.isFinite(rate)&&rate>0&&rate<=FS/8,'bounded source interval clock');
     this.lastRate=rate;
     if(this.textureEnabled){const x=this.continuous(p,rate,this.#nextOutput);value=x.value;energy=x.energy;}
-    else{const x=this.cycle(a),y=p.a===p.b?x:this.cycle(b);value=(1-p.w)*x.value+p.w*y.value;energy=(1-p.w)*x.energy+p.w*y.energy;}
+    else{const x=this.cycle(a,this.#firstCycle),y=p.a===p.b?x:this.cycle(b,this.#secondCycle);value=(1-p.w)*x.value+p.w*y.value;energy=(1-p.w)*x.energy+p.w*y.energy;}
     if(this.pendingBoundary)this.maximumBoundaryStep=Math.max(this.maximumBoundaryStep,Math.abs(value-this.previous));
     this.stats.minimumIntervalRateHz=Math.min(this.stats.minimumIntervalRateHz,rate);this.stats.maximumIntervalRateHz=Math.max(this.stats.maximumIntervalRateHz,rate);
     this.stats.minimumSelectedInterval=Math.min(this.stats.minimumSelectedInterval??p.a,p.a);

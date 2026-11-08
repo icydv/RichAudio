@@ -64,7 +64,7 @@ if(!$verify){
 [IO.Directory]::CreateDirectory($output)|Out-Null
 if(!$verify){
     $claim=[ordered]@{attempts=1;reviewSealSHA256=$sealPin;sourceCommit=$seal.sourceCommit;
-        mode='metadata-only-no-new-runtime-proof';authorizationSHA256=$approvedPin;createdUtc=[DateTime]::UtcNow.ToString('o')}
+        mode=$seal.mode;authorizationSHA256=$approvedPin;createdUtc=[DateTime]::UtcNow.ToString('o')}
     $claimBytes=[Text.Encoding]::UTF8.GetBytes(($claim|ConvertTo-Json -Compress))
     $claimFile=[IO.File]::Open((Join-Path $output 'claim.json'),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None)
     try{$claimFile.Write($claimBytes,0,$claimBytes.Length)}finally{$claimFile.Dispose()}

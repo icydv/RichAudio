@@ -56,10 +56,17 @@ export async function qualifyOwnedAffinity13(owned,{mode='normal',mask=null}={})
  const script=`$ErrorActionPreference='Stop';$p=[Diagnostics.Process]::GetProcessById(${owned.record.pid});$start=$p.StartTime.ToUniversalTime();$expected=[DateTimeOffset]::FromUnixTimeMilliseconds(${Math.round(ready.timeOrigin)}).UtcDateTime;if([Math]::Abs(($start-$expected).TotalMilliseconds)-gt2000){throw 'Owned PID start-time qualification failed'};$ticks=$start.Ticks;$before=$p.ProcessorAffinity.ToInt64();if($before-le0){throw 'Unsupported processor-group affinity'};$target=$before;${mask!==null?`$target=[Int64]::Parse('${mask}');`:(mode!=='normal'?`$remaining=$before;$target=[Int64]0;for($i=0;$i-lt${mode==='restricted4'?4:1};$i++){if($remaining-eq0){throw 'Requested restricted logical CPUs unavailable'};$bit=$remaining-band(-$remaining);$target=$target-bor$bit;$remaining=$remaining-bxor$bit;}`:'')}$p.Refresh();if($p.StartTime.ToUniversalTime().Ticks-ne$ticks){throw 'Owned PID start-time changed'};${mode!=='normal'||mask!==null?'$p.ProcessorAffinity=[IntPtr]::new($target);':''}$p.Refresh();$after=$p.ProcessorAffinity.ToInt64();if($after-ne$target){throw 'Owned affinity readback differs'};[ordered]@{pid=$p.Id;startUtc=$start.ToString('o');startTicks=$ticks.ToString();beforeMask=$before.ToString();requestedMask=$target.ToString();actualMask=$after.ToString();changed=($before-ne$after);startTimeQualified=$true;processorGroupLimitation='Current Windows process processor group only'}|ConvertTo-Json -Compress`;
  const executable=path.join(process.env.SystemRoot??'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe');
  const result=await new Promise((resolve,reject)=>{
+  const started=performance.now();
   const helper=spawn(executable,['-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(script,'utf16le').toString('base64')],{env:cleanEnvironment(),windowsHide:true,stdio:['ignore','pipe','pipe']});
   let stdout='',stderr='',failure=null;const timer=setTimeout(()=>{failure='affinity helper deadline';helper.kill();},5000);
   helper.stdout.on('data',data=>{stdout+=data;if(stdout.length>8192){failure='affinity helper output bound';helper.kill();}});helper.stderr.on('data',data=>{stderr+=data;if(stderr.length>8192){failure='affinity helper output bound';helper.kill();}});
-  helper.once('error',error=>failure=error.message);helper.once('close',(code,signal)=>{clearTimeout(timer);owned.record.affinityHelper={pid:helper.pid,joined:true,exitCode:code,signal,stderr};if(failure||code!==0)reject(Error(failure??stderr??'affinity helper failure'));else{try{resolve(JSON.parse(stdout));}catch(error){reject(error);}}});
+  helper.once('error',error=>failure=error.message);helper.once('close',(code,signal)=>{
+   clearTimeout(timer);
+   const timedOut=failure==='affinity helper deadline';
+   owned.record.affinityHelper={pid:helper.pid,joined:true,exitCode:code,signal,stderr,elapsedMs:performance.now()-started,timedOut,stdoutBytes:Buffer.byteLength(stdout),phase:'before-render-start'};
+   if(failure||code!==0)reject(Object.assign(Error(failure??(stderr||'affinity helper failure')),{code:timedOut?'AFFINITY_HELPER_TIMEOUT':'AFFINITY_HELPER_FAILED'}));
+   else{try{resolve(JSON.parse(stdout));}catch(error){reject(error);}}
+  });
  });
  check(!owned.record.joined&&result.pid===owned.record.pid&&result.startTimeQualified&&result.actualMask===result.requestedMask,'held owned affinity identity/readback required');
  owned.record.affinity={mode,...result,appliedAfterNodeStartup:true,heldAtApplicationIpcGate:true,equivalenceScope:'Logical CPU count only; no equivalence to hosted CPU model, SMT, physical cores, V8 thread pools or startup topology.'};return owned.record.affinity;

@@ -27,6 +27,8 @@ static class ScopedMapReader01 {
  const int EntryBytes=16, DirectoryMarker=0x7fffff00;
  const uint Open=0x4e45504f, Aes=0x0ffffff9, Ng=0x0fefffff, ExtendedSize=0xffffff;
  static int Blocked;
+ static bool Narrow;
+ static Dictionary<string,object> MemberPins;
  static int ManifestProjectionRows;
  [StructLayout(LayoutKind.Sequential)]
  struct FileIdentity {
@@ -51,6 +53,7 @@ static class ScopedMapReader01 {
  static void Block(string path,string reason){
   Blocked++;
   Emit(new{kind="blocked",archive=ActiveArchive,path,reason});
+  if(Narrow)throw new InvalidDataException(reason);
  }
  static string Normalize(string value){return value.Replace('\\','/').ToLowerInvariant();}
  static bool Audio(string value){return Regex.IsMatch(value,@"(^|/)(audio|sfx)(/|$)")||value.EndsWith(".awc")||value.EndsWith(".rel");}
@@ -241,9 +244,9 @@ static class ScopedMapReader01 {
    bool config=key.EndsWith("/setup2.xml")||key.EndsWith("/content.xml")||key.EndsWith("/dlclist.xml");
    try{
     if(!branch&&!selected){
-     if(MapMember(key))Emit(new{kind="unplanned-map-member",archive=ActiveArchive,path=key,extendedSize,
+     if(!Narrow&&MapMember(key))Emit(new{kind="unplanned-map-member",archive=ActiveArchive,path=key,extendedSize,
       shortNameHash="0x"+JenkHash.GenHash(item.GetShortNameLower()).ToString("x8")});
-     else if(extendedSize)Emit(new{kind="unselected-extended-resource",archive=ActiveArchive,path=key});
+     else if(!Narrow&&extendedSize)Emit(new{kind="unselected-extended-resource",archive=ActiveArchive,path=key});
      continue;
     }
     var binary=item as RpfBinaryFileEntry;
@@ -265,6 +268,8 @@ static class ScopedMapReader01 {
     }
     Need(config||key.EndsWith(".ymf")||key.EndsWith(".ymap")||key.EndsWith(".ytyp")||key.EndsWith("cache_y.dat"),"unsupported selected map member type");
     var payload=Payload(f,rpf,item,start,length,memberEnd);var sha=Hash(payload);
+    object expected;
+    if(Narrow&&MemberPins.TryGetValue(key,out expected))Need(sha==(string)expected,"retained member digest differs");
     if(config)XmlRecord(key,payload,sha);
     else{
      MetadataRecord(key,item,payload,sha,start,length);
@@ -307,7 +312,8 @@ static class ScopedMapReader01 {
  static string[] Strings(object value){return ((IEnumerable)value).Cast<object>().Select(v=>(string)v).ToArray();}
  static int Main(string[] args){
   try{
-   Need(args.Length==5&&(args[0]=="--installed"||args[0]=="--fixture"),"exact runner inputs");
+   Need(args.Length==5&&(args[0]=="--installed"||args[0]=="--installed-narrow"||args[0]=="--fixture"),"exact runner inputs");
+   Narrow=args[0]=="--installed-narrow";
    Root=Path.GetFullPath(args[1]).TrimEnd('\\');Output=Path.GetFullPath(args[2]);
    bool fixture=args[0]=="--fixture";
    Need(!fixture||Root.IndexOf("\\.local\\",StringComparison.OrdinalIgnoreCase)>=0,"fixture root must be private");
@@ -317,10 +323,16 @@ static class ScopedMapReader01 {
    var planBytes=File.ReadAllBytes(args[3]);Need(planBytes.Length<=16*1024*1024&&Hash(planBytes)==args[4],"exact read plan pin");
    var plan=Json.Deserialize<Dictionary<string,object>>(Encoding.UTF8.GetString(planBytes));
    var physical=Strings(plan["archives"]);
-   Need(physical.Length==(fixture?1:123),"exact physical population");
+   Need(physical.Length==(fixture?1:Narrow?18:123),"exact physical population");
    foreach(string a in physical)Need(Regex.IsMatch(a,@"^[a-z0-9_.-]+(?:/[a-z0-9_.-]+)*\.rpf$")&&!Audio(a)&&!a.Split('/').Any(p=>p=="."||p==".."||p.EndsWith("."))&&Physical.Add(a),"invalid physical scope");
    Need(Hash(File.ReadAllBytes(typeof(RpfFile).Assembly.Location))==(string)plan["parserSHA256"],"loaded parser pin differs");
    var selected=Strings(plan["selected"]);var nested=Strings(plan["branches"]);
+   if(Narrow){
+    Need(selected.Length==118&&selected.Count(p=>p.EndsWith(".ymf",StringComparison.Ordinal))==9&&
+      selected.Count(p=>p.EndsWith(".ytyp",StringComparison.Ordinal))==109,"exact narrow metadata population");
+    MemberPins=(Dictionary<string,object>)plan["memberPins"];
+    Need(MemberPins.All(p=>selected.Contains(p.Key)&&p.Value is string&&Regex.IsMatch((string)p.Value,@"\A[a-f0-9]{64}\z")),"invalid retained member pins");
+   }
    var branchSet=new HashSet<string>(nested,StringComparer.Ordinal);
    Need(branchSet.Count==nested.Length&&selected.Distinct(StringComparer.Ordinal).Count()==selected.Length,"duplicate selected map paths");
    foreach(string member in selected.Concat(nested)){

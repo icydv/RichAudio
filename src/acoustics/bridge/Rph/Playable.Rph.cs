@@ -112,10 +112,11 @@ namespace RichAudio.Beacon.Rph {
      observations.Add(new GameplayVehicle{Id="vehicle-"+t.Identity,Generation=t.Generation,Model=model,Context=context,ObservationTicks=at,Position=position,Velocity=vel,Forward=forward,Up=up,Running=running,OperatingPoint=ratio,Valid=true,RiderAttached=riderAttached,RiderViewAttached=riderAttached&&vehicleView});
     }catch(ThreadAbortException){throw;}catch(Exception e){sourceGetterFailures++;lastReason="source-getter-failed:"+stage+":"+e.GetType().Name;tracked.Remove(t);}
    }
-   double elapsed=(Stopwatch.GetTimestamp()-began)*1000d/Stopwatch.Frequency;r.MaximumObservationMs=Math.Max(r.MaximumObservationMs,elapsed);bool valid=elapsed<=10;
-   if(!valid){slowBatches++;lastReason="slow-observation-batch";}else if(observations.Count>0)lastReason="observed-vehicles:"+observations.Count;publishedVehicles+=valid?observations.Count:0;
-   var listener=decision.Listener;listener.Valid=valid;listener.Reason=valid?"valid":"slow-observation";
-   r.Publish(new GameplayFrame{Session=r.Session,Listener=listener,Vehicles=valid?observations.ToArray():new GameplayVehicle[0],WorldPreparationStartedUtc=epoch,CameraInterior01=valid?cameraInterior:null});
+   double elapsed=(Stopwatch.GetTimestamp()-began)*1000d/Stopwatch.Frequency;r.MaximumObservationMs=Math.Max(r.MaximumObservationMs,elapsed);bool vehiclesInBudget=elapsed<=10;
+   if(!vehiclesInBudget){slowBatches++;lastReason="slow-observation-batch";}else if(observations.Count>0)lastReason="observed-vehicles:"+observations.Count;publishedVehicles+=vehiclesInBudget?observations.Count:0;
+   // The tracker and native proxy read already qualified the independent
+   // camera sample. A slow vehicle batch cannot revoke that sample or renew it.
+   r.Publish(new GameplayFrame{Session=r.Session,Listener=decision.Listener,Vehicles=vehiclesInBudget?observations.ToArray():new GameplayVehicle[0],WorldPreparationStartedUtc=epoch,CameraInterior01=cameraInterior});
    Diagnostic(lastReason);
   }
 #endif
