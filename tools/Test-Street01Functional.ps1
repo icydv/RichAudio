@@ -47,6 +47,7 @@ $scripts=@(
  @{name='persisted-settings-handoff';file='tools/Test-AcousticSettingsHandoff.ps1';arguments=@()},
  @{name='sidebar-input-status-animation';file='tools/Test-InGameMenu.ps1';arguments=@('-Output',(Join-Path $out 'original-menu-previews'))},
  @{name='recording-menu-bridge';file='tools/Test-SoundMapMenu.ps1';arguments=@()},
+ @{name='passive-map-bridge';file='tools/Test-PassiveSoundMap.ps1';arguments=@()},
  @{name='production-capture-fake-backend';file='tools/Test-GameplayRecording13.ps1';arguments=@()},
  @{name='supported-initializer-original-api';file='tests/Test-CodeWalkerInitialization01.ps1';arguments=@()},
  @{name='normal-generated-sidecar-supervisor';file='tests/Test-WorldWarmupStartup.ps1';arguments=@()},

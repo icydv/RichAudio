@@ -40,6 +40,9 @@ function Install-Phase1Qualification01 {
 }
 
 function Get-QualificationTargets01([string]$Kind,[string]$Pack){
+ if($Kind -ceq 'soundmap-view' -and !$Pack){
+  return @('Plugins/RichAudio.dll','Plugins/RichAudio.Menu.json')
+ }
  if($Kind -ceq 'phase1'){
   return @('Plugins/RichAudio.dll','Plugins/RichAudio.Playable.json','Plugins/RichAudio.Menu.json','Plugins/RichAudio.WorldWarmup.json')
  }

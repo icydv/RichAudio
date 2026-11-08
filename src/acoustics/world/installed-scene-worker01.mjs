@@ -4,6 +4,7 @@ import {sceneSource01} from './prepared-world-metadata01.mjs';
 import {parentPort,workerData} from 'node:worker_threads';
 import fs from 'node:fs';
 import {Worker} from 'node:worker_threads';
+import {PerformanceObserver} from 'node:perf_hooks';
 import {createMetadataStage01} from './prepared-world-metadata01.mjs';
 import {InstalledStaticWorld01,encodeInstalledStaticScene01,prepareInstalledStaticSceneTransfer01} from './installed-static-scene01.mjs';
 import {prepareInstalledSoundMapGeometry01} from '../streaming/soundmap-telemetry.mjs';
@@ -13,6 +14,15 @@ const reason=e=>String(e?.message??e).replace(/[\u0000-\u001f\u007f]/g,' ').slic
 let world=null,failed=false,lastRequest=0,catalogSHA256=null,bindingEpoch=0,poll=null,manifestStamp=null,waitingStamp=null;
 const {schema,config,session,parentClock01,progressBuffer01}=workerData??{};
 let progressRequest01=0;const phase01=name=>{if(progressBuffer01)recordSceneWorkerProgress01(progressBuffer01,name,progressRequest01);};
+// GC events are delivered later than the pause. Record the original interval
+// so it can be compared with the shared-clock dispatch and worker boundaries.
+const gcObserver01=progressBuffer01?new PerformanceObserver(list=>{
+ for(const entry of list.getEntries()){
+  recordSceneWorkerProgress01(progressBuffer01,'gc-start',0,entry.startTime);
+  recordSceneWorkerProgress01(progressBuffer01,'gc-end',0,entry.startTime+entry.duration);
+ }
+}):null;
+gcObserver01?.observe({entryTypes:['gc']});
 const clock01=Object.freeze({kind:'node-process-performance',processId:process.pid,timeOrigin:performance.timeOrigin});
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x),automatic=config?.catalogSHA256==null;
 let initialPriority=null,initialPriorityFailure=null;
@@ -56,7 +66,7 @@ function startMetadata01(){
  metadataWorker01=new Worker(new URL('./metadata-preparer-worker01.mjs',import.meta.url),{workerData:{config},resourceLimits:{maxOldGenerationSizeMb:512,maxYoungGenerationSizeMb:32,stackSizeMb:8}});
  metadataWorker01.on('error',e=>{if(!closing01)fail(e,'metadata-preparation');});
  metadataWorker01.on('exit',code=>{if(!closing01&&!failed)fail(Error('Metadata preparer exited '+code),'metadata-preparation');});
- metadataWorker01.on('message',m=>{if(closing01||failed||m.serial!==metadataSerial01)return;try{
+ metadataWorker01.on('message',m=>{if(closing01||failed||m.serial!==metadataSerial01)return;phase01('metadata-message-start');try{
   if(m.type==='failed')throw Error(m.reason);
   if(m.type==='manifest-read'){cacheTimings.manifestLoads++;cacheTimings.metadataReadMilliseconds01=m.milliseconds;cacheTimings.metadataReadBytes01=m.bytes;return;}
   if(m.type==='waiting'){clearTimeout(metadataTimeout01);metadataBusy01=false;cacheTimings.metadataPreparing01=false;waitingStamp=metadataTarget01+'|'+validationEpochUtc01;if(world){world.close();world=null;catalogSHA256=null;bindingEpoch++;checkConsumerProof01();}post('status',{ready:false,status:pendingStatus()});return;}
@@ -69,7 +79,7 @@ function startMetadata01(){
   if(changed||!world){world?.close();catalogSHA256=snapshot.catalogSHA256;bindingEpoch++;world=new InstalledStaticWorld01({...config,catalogSHA256,requiredValidationEpochUtc01:automatic?validationEpochUtc01:null,preparedMetadata01:snapshot});}
   else world.installMetadata01(snapshot);
   metadataWorker01.postMessage({type:'installed',serial:m.serial});cacheTimings.metadataProofCurrent01=true;cacheTimings.metadataInstalledAt01=performance.now();metadataVersion01++;manifestStamp=metadataTarget01;waitingStamp=null;cacheTimings.metadataInstallationMilliseconds01=performance.now()-began;cacheTimings.maximumMetadataInstallationMilliseconds01=Math.max(cacheTimings.maximumMetadataInstallationMilliseconds01??0,cacheTimings.metadataInstallationMilliseconds01);cacheTimings.metadataStaging01=stats;checkConsumerProof01();post(changed?'ready':'status',{ready:true,status:worldStatus()});
- }catch(e){fail(e,'metadata-installation');}});
+ }catch(e){fail(e,'metadata-installation');}finally{phase01('metadata-message-done');}});
 }
 function schedulePoll(){
  if(failed||closing01)return;
@@ -90,12 +100,12 @@ try{
   if(failed)return;
   try{
    if(message?.schema!==1||message.session!==session||(!automatic&&message.catalogSHA256!==config.catalogSHA256))throw Error('Installed scene command identity');
-   if(message.type==='close'){closing01=true;clearTimeout(metadataTimeout01);phase01('close');clearTimeout(poll);world?.close();world=null;metadataStage01=null;void metadataWorker01.terminate().then(()=>{post('closed');parentPort.close();});return;}
+   if(message.type==='close'){closing01=true;clearTimeout(metadataTimeout01);phase01('close');gcObserver01?.disconnect();clearTimeout(poll);world?.close();world=null;metadataStage01=null;void metadataWorker01.terminate().then(()=>{post('closed');parentPort.close();});return;}
    if(message.type==='consumer-proof'){
     if(message.bindingEpoch!==bindingEpoch||message.catalogSHA256!==catalogSHA256)return;
     if(!Number.isSafeInteger(message.consumerRequestId)||message.consumerRequestId<1||!Array.isArray(message.selectionProof01)||message.selectionProof01.length<1||message.selectionProof01.length>16||!message.selectionProof01.every(e=>typeof e.resourceId==='string'&&e.resourceId.length<=512&&hex(e.indexSHA256)&&hex(e.receiptSHA256)))throw Error('Bounded actual consumer source-proof watch');
     if(consumerProof01&&message.consumerRequestId<consumerProof01.consumerRequestId)return;
-    consumerProof01={consumerRequestId:message.consumerRequestId,selectionProof01:message.selectionProof01,lastVerdict:null};checkConsumerProof01();return;
+    phase01('consumer-proof-start');consumerProof01={consumerRequestId:message.consumerRequestId,selectionProof01:message.selectionProof01,lastVerdict:null};checkConsumerProof01();phase01('consumer-proof-done');return;
    }
    if(message.type==='initial-observation'){post('initial-observation-result',{result:initialPriority?initialPriority.write(message.record):{accepted:false,reason:initialPriorityFailure??'priority-output-not-configured'}});return;}
    if(message.type==='preparation-epoch'){

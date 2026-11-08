@@ -264,7 +264,8 @@ export class InstalledContextState01 {
   static key(frame){
     const c=frame?.worldContext01;
     if(!c||!frame.listener?.valid||!isPoint(c.position))return null;
-    const scope=[c.generation,...c.position.map(v=>Math.floor(v/16)),...(c.interiorKey?[c.interiorKey]:[])].join(':');
+    const scope=[c.generation,...c.position.map(v=>Math.floor(v/16)),...(c.interiorKey?[c.interiorKey]:[]),
+      ...(c.contextRevision===undefined?[]:[c.contextRevision])].join(':');
     return [frame.sessionId,frame.streamId,c.catalogue,c.epoch,scope].join(':');
   }
   ingest(value,frame,now,roundTripMs){

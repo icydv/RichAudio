@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'playable/QualificationTransaction01.ps1')
 $root=Join-Path (Split-Path -Parent $PSScriptRoot) ('.local/qualification-transaction-fixture-'+[guid]::NewGuid().ToString('N'))
 $null=[IO.Directory]::CreateDirectory($root)
-foreach($kind in @('phase1','marker-a')){
+foreach($kind in @('phase1','marker-a','soundmap-view')){
  $pack=if($kind -ceq 'marker-a'){'raprobe_0123abcd'}else{''}
  $fixture=Join-Path $root $kind
  $game=Join-Path $fixture 'disposable-install'
@@ -49,4 +49,4 @@ foreach($kind in @('phase1','marker-a')){
  if(!(Test-Path -LiteralPath (Join-Path $tx 'independent-baseline.json'))){throw 'Missing independent baseline evidence'}
  if($pack -and (Test-Path -LiteralPath (Join-Path $game 'mods'))){throw 'Owned temporary overlay directories remain'}
 }
-Write-Output "PASS both exact qualification transactions, closure refusal and independent rollback. $root"
+Write-Output "PASS exact qualification transactions, closure refusal and independent rollback. $root"
