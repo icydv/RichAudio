@@ -150,7 +150,11 @@ export class StockVehicleSource {
     // Refill in the original order so source history and floating-point sums
     // stay exact without allocating mode arrays for every emitted sample.
     const entering=[],previousWeights=new Array(this.weights.length),addresses=[.5,0,0];
-    const idleRates=stockRoles.map(role=>this.voices[role].idle.rateAt(.5));
+    const fixedRates=stockRoles.map(role=>this.modes.map((mode,index)=>{
+      const voice=this.voices[role][mode];
+      return index===0||voice.intervals.length===1&&voice.rateAt===StockGrainVoice.prototype.rateAt?
+        voice.rateAt(.5):null;
+    }));
     for(let i=0;i<frames;i++){
       this.position+=a*(control.operatingPoint-this.position);this.envelope+=e*((control.running?1:0)-this.envelope);
       entering.length=0;for(let m=0;m<this.weights.length;m++)previousWeights[m]=this.weights[m];
@@ -166,9 +170,9 @@ export class StockVehicleSource {
       for(let roleIndex=0;roleIndex<2;roleIndex++){
         const role=stockRoles[roleIndex],output=roleIndex?exhaust:engine;
         const voices=this.voices[role];
-        let weightedRate=this.weights[0]*idleRates[roleIndex];
+        let weightedRate=this.weights[0]*fixedRates[roleIndex][0];
         for(let m=1;m<this.weights.length;m++){
-          if(this.weights[m]>0)weightedRate+=this.weights[m]*voices[this.modes[m]].rateAt(addresses[m]);
+          if(this.weights[m]>0)weightedRate+=this.weights[m]*(fixedRates[roleIndex][m]??voices[this.modes[m]].rateAt(addresses[m]));
         }
         const rate=weightedRate/weightTotal,transition=this.stats.transitions.roles[role];
         transition.minimumCommonRateHz=Math.min(transition.minimumCommonRateHz,rate);

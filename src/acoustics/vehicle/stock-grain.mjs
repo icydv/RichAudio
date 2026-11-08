@@ -108,6 +108,7 @@ export class StockGrainVoice {
   #prepareInitialMatch=false;
   #reusedInitialMatch=false;
   #nextPair={a:0,b:0,w:0,target:0};
+  #singlePair={a:0,b:0,w:0};
   #ratePair={a:0,b:0,w:0,target:0};
   #nextOutput={value:0,energy:0};
   #firstCycle={value:0,energy:0};
@@ -429,7 +430,11 @@ export class StockGrainVoice {
     const starting=this.state===null;
     if(starting)this.state=u;
     else this.state+=stateAlpha*(u-this.state);
-    const p=this.pair(this.state,this.#nextPair),a=this.intervals[p.a],b=this.intervals[p.b];
+    // Once a single-span reader has established its initial phase, its
+    // smoothed address cannot select another interval or alter interpolation.
+    const p=!starting&&this.intervals.length===1&&this.pair===StockGrainVoice.prototype.pair?
+      this.#singlePair:this.pair(this.state,this.#nextPair);
+    const a=this.intervals[p.a],b=this.intervals[p.b];
     if(starting){
       // Keep each recording's own source-time phase. No imposed common
       // oscillator/phase lock between distinct engine and exhaust recordings.

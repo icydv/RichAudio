@@ -38,7 +38,7 @@ check(seal.schema===1&&seal.approvedForExecution===false&&seal.scope.sha256===(n
  /^[a-f0-9]{40}$/.test(seal.sourceCommit)&&seal.oneUse===true&&(narrow||seal.mode==='metadata-only-no-new-runtime-proof')&&
  seal.maxSeconds===900&&seal.maximumOwnedProcesses===3&&seal.maximumMemoryMiB===3072,'review scope identity');
 const pinned=(name,max)=>read(path.resolve(proposal,seal[name].file),seal[name].sha256,max);
-const scope=json(pinned('scope',64*1024));
+const scope=json(pinned('scope',(narrow?80:64)*1024));
 const plan=json(pinned('plan',16*1024*1024));
 const previous=json(pinned('priorArchiveIdentities',4*1024*1024));
 const approvedPaths=(narrow?scope.archivePopulation:scope.archives).map(r=>r.relative),basis=narrow?scope.basis:scope;
