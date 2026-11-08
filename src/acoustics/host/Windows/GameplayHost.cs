@@ -10,11 +10,14 @@ namespace RichAudio.Beacon.Windows {
   readonly object sync=new object();JavaScriptSerializer Json {get{return new JavaScriptSerializer{MaxJsonLength=65536,RecursionLimit=24};}}
   PlayableConfiguration config;string session,pipeName;int ownerId;long ownerStart;AcousticSettings settings;WasapiOutput audio;Thread writer,reader,diagnostics,receiver,sink;bool fixture;long fixtureCallbacks;string directory;int childId;
   bool demo;long admittedLease;GameplayRecording recording;GameplayDemoPermit demoPermit;string recordingFailure,recordingDirectory;object lastRecordingMetrics;readonly GameplayShutdownFade shutdownFade=new GameplayShutdownFade();
+  string stopReason;object producerIdentity;bool drainProducer;
   long fixtureTrailingSilentFrames;double fixtureLastPeak,fixtureLastSumSquares;
   public static int Run(string[] args){var host=new GameplayHost();return host.Execute(args);}
   static string Q(string s){if(s.IndexOf('"')>=0)throw new ArgumentException("quoted path");return "\""+s+"\"";}
   bool OwnerAlive(){try{using(var p=Process.GetProcessById(ownerId))return !p.HasExited&&p.StartTime.ToUniversalTime().Ticks==ownerStart;}catch(ArgumentException){return false;}}
   void Fail(Exception e){failure=e.GetType().Name;failureDetail=e.Message;stop=true;wake.Set();}
+  void RequestShutdown(string reason){Interlocked.CompareExchange(ref stopReason,reason,null);shutdownRequested=true;wake.Set();}
+  void Record(string stage,string reason,object detail){if(config!=null&&config.DiscardEnvironmentalOutput)GameplayLifecycle01.Record(directory,"host",session,stage,reason,detail);}
   int Execute(string[] args){
    if(args.Length!=8)return 2;fixture=args[0]=="--gameplay-fixture";if(fixture)fixtureLatency=new GameplayFixtureLatency();int code=1;
    try{
@@ -26,16 +29,20 @@ namespace RichAudio.Beacon.Windows {
     if(!OwnerAlive())throw new InvalidOperationException("owner ended");if(!fixture){using(var p=Process.GetProcessById(ownerId))if(!String.Equals(p.MainModule.FileName,config.GameExecutable,StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("game owner differs");}
     demo=config.DemoProfile=="PLAYABLE-13";if(demo)demoPermit=GameplayDemoPermit.Load(permit,session,fixture);
     directory=Path.Combine(config.Root,".local","gameplay",session);Directory.CreateDirectory(directory);
+    using(var self=Process.GetCurrentProcess())Record("host-started","owner-permit-verified",new{host=GameplayLifecycle01.Identity(self),ownerPid=ownerId,ownerStartUtcTicks=ownerStart});
     string settingFile=AcousticSettingsStore.DefaultPath(config.Root);settings=AcousticSettingsStore.Load(config.Root,settingFile);
     if(!fixture&&(!settings.RichAudioEnabled||settings.IntegrationMode!="experimental-additive"))throw new InvalidOperationException("stock fallback selected");
     nodeJob=new OwnedProcessJob(1024);
     child=new Process{StartInfo=new ProcessStartInfo{FileName=PlayableConfiguration.Inside(config.Root,"runtime/node.exe"),Arguments=Q(PlayableConfiguration.Inside(config.Root,"tools/Run-Gameplay.mjs"))+" --manifest "+Q(config.Manifest)+" --session "+session,WorkingDirectory=config.Root,UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true}};child.Start();childId=child.Id;nodeJob.Assign(child);
+    drainProducer=config.DiscardEnvironmentalOutput;producerIdentity=GameplayLifecycle01.Identity(child);
+    Record("producer-started","assigned-to-owned-job",producerIdentity);
     writer=new Thread(WriteControls){IsBackground=true,Name="RichAudio gameplay control"};reader=new Thread(ReadPcm){IsBackground=true,Name="RichAudio RA07 reader"};diagnostics=new Thread(ReadDiagnostics){IsBackground=true};receiver=new Thread(Receive){IsBackground=true,Name="RichAudio gameplay pipe"};
     writer.Start();reader.Start();diagnostics.Start();receiver.Start();lastPcmTicks=lastSnapshotTicks=Stopwatch.GetTimestamp();
     // Preparation finishes before either output sink starts. The demo lease
     // and worker share the existing five-second startup allowance.
     var startup=Stopwatch.StartNew();while(!workerReady){
-     if(shutdownRequested||stop||readerEnded||!OwnerAlive()||child.HasExited||startup.ElapsedMilliseconds>=5000)throw new InvalidOperationException("producer preparation unavailable before output startup");wake.WaitOne(10);}
+     if(!OwnerAlive())RequestShutdown("owner-lost");else if(readerEnded||child.HasExited)RequestShutdown("producer-ended");
+      if(shutdownRequested||stop||startup.ElapsedMilliseconds>=5000)throw new InvalidOperationException("producer preparation unavailable before output startup");wake.WaitOne(10);}
     if(demo){while(Interlocked.Read(ref admittedLease)<=Stopwatch.GetTimestamp()){
       if(shutdownRequested||stop||!OwnerAlive()||child.HasExited||startup.ElapsedMilliseconds>=5000)throw new InvalidOperationException("fresh accepted Bati snapshot unavailable before output startup");wake.WaitOne(10);}
      recording=GameplayRecording.TryStart(config.Root,demoPermit,out recordingFailure);
@@ -45,34 +52,70 @@ namespace RichAudio.Beacon.Windows {
     if(shutdownRequested||stop||readerEnded||!OwnerAlive()||child.HasExited||startup.ElapsedMilliseconds>=5000)throw new InvalidOperationException("producer preparation ended before output startup");
     if(fixture||config.DiscardEnvironmentalOutput){sink=new Thread(ConsumeDeviceFree){IsBackground=true};sink.Start();}
     else{audio=new WasapiOutput(ring,-1,true);audio.Volume=1;audio.Muted=false;if(recording!=null)audio.OwnedRecorder=recording.Tap;audio.Start();if(!audio.Ready.WaitOne(5000)||audio.Error!=null)throw new InvalidOperationException("playback endpoint unavailable");if(recording!=null)recording.StartLoopback(audio.SelectedEndpointId);}
-    var command=new Thread(delegate(){try{while(!stop){string s=Console.ReadLine();if(s==null||s=="stop"){shutdownRequested=true;wake.Set();break;}}}catch(IOException){}}){IsBackground=true};command.Start();
+    var command=new Thread(ReadOwnerCommands){IsBackground=true};command.Start();
     long lastSettings=0,lastStatus=0,fadeAt=-1,lastGeometry=0;DateTime geometryModified=DateTime.MinValue;var clock=Stopwatch.StartNew();
     while(!stop){
-     if(!OwnerAlive()){stop=true;break;}if(child.HasExited||readerEnded)throw new IOException("producer ended"+(workerFailure==null?"":": "+workerFailure));if(audio!=null&&audio.Error!=null)throw new IOException("endpoint stopped: "+audio.Error);
-     if((Stopwatch.GetTimestamp()-Interlocked.Read(ref lastPcmTicks))*1000d/Stopwatch.Frequency>5000)throw new TimeoutException("producer stopped progressing");
+     if(!OwnerAlive()){RequestShutdown("owner-lost");stop=true;break;}
+      if(child.HasExited||readerEnded){RequestShutdown("producer-ended");throw new IOException("producer ended"+(workerFailure==null?"":": "+workerFailure));}if(audio!=null&&audio.Error!=null)throw new IOException("endpoint stopped: "+audio.Error);
+     if((Stopwatch.GetTimestamp()-Interlocked.Read(ref lastPcmTicks))*1000d/Stopwatch.Frequency>5000){RequestShutdown("producer-progress-timeout");throw new TimeoutException("producer stopped progressing");}
      if(demo&&Interlocked.Read(ref admittedLease)<=Stopwatch.GetTimestamp()){shutdownRequested=true;wake.Set();}
      // A paused/background GTA fiber may stop supplying observations. The
      // producer's independent250ms freshness guard retires/mutes sources;
      // keep the healthy owned host ready for the next genuine observation.
 
-     if(clock.ElapsedMilliseconds-lastSettings>=200){lastSettings=clock.ElapsedMilliseconds;if(fixtureLatency!=null)fixtureLatency.Progress("settings-start",-1,Stopwatch.GetTimestamp(),0,ring.BufferedFrames,0);var s=AcousticSettingsStore.Load(config.Root,settingFile);if(fixtureLatency!=null)fixtureLatency.Progress("settings-done",-1,Stopwatch.GetTimestamp(),0,ring.BufferedFrames,0);lock(sync)settings=s;wake.Set();if(!s.RichAudioEnabled||s.IntegrationMode!="experimental-additive")shutdownRequested=true;}
+     if(clock.ElapsedMilliseconds-lastSettings>=200){lastSettings=clock.ElapsedMilliseconds;if(fixtureLatency!=null)fixtureLatency.Progress("settings-start",-1,Stopwatch.GetTimestamp(),0,ring.BufferedFrames,0);var s=AcousticSettingsStore.Load(config.Root,settingFile);if(fixtureLatency!=null)fixtureLatency.Progress("settings-done",-1,Stopwatch.GetTimestamp(),0,ring.BufferedFrames,0);lock(sync)settings=s;wake.Set();if(!s.RichAudioEnabled||s.IntegrationMode!="experimental-additive")RequestShutdown("settings-stock-fallback");}
      if(shutdownRequested&&fadeAt<0){fadeAt=clock.ElapsedMilliseconds;shutdownFade.Begin(fadeAt,Interlocked.Read(ref ring.ConsumedFrames),ring.BufferedFrames);if(recording!=null)recording.Event("output-fade-request",Stopwatch.GetTimestamp(),new{bufferedFrames=ring.BufferedFrames,minimumMilliseconds=GameplayShutdownFade.MinimumMilliseconds,maximumMilliseconds=GameplayShutdownFade.MaximumMilliseconds});wake.Set();}
      if(fadeAt>=0&&(demo?shutdownFade.Complete(clock.ElapsedMilliseconds,Interlocked.Read(ref ring.ConsumedFrames)):clock.ElapsedMilliseconds-fadeAt>=120)){stop=true;break;}
      if(recording!=null&&!recording.Accepting){if(audio!=null)audio.OwnedRecorder=null;recordingFailure=recording.Snapshot.Reason??recording.Failure;recording.Dispose();lastRecordingMetrics=recording.Metrics();recording=null;}
      if(clock.ElapsedMilliseconds-lastGeometry>=200){lastGeometry=clock.ElapsedMilliseconds;string file=Path.Combine(config.Root,".local","qualified-geometry.json");if(File.Exists(file)&&File.GetLastWriteTimeUtc(file)!=geometryModified){geometryModified=File.GetLastWriteTimeUtc(file);try{string value=AcousticSettingsStore.ReadBounded(file,131072);lock(sync)pendingGeometry=value;wake.Set();}catch(IOException){}}}
-     if(clock.ElapsedMilliseconds-lastStatus>=500){lastStatus=clock.ElapsedMilliseconds;if(fixtureLatency!=null)fixtureLatency.Progress("status-start",-1,Stopwatch.GetTimestamp(),0,ring.BufferedFrames,0);PublishStatus("running");if(fixtureLatency!=null)fixtureLatency.Progress("status-done",-1,Stopwatch.GetTimestamp(),0,ring.BufferedFrames,0);}
+     if(clock.ElapsedMilliseconds-lastStatus>=500){lastStatus=clock.ElapsedMilliseconds;if(fixtureLatency!=null)fixtureLatency.Progress("status-start",-1,Stopwatch.GetTimestamp(),0,ring.BufferedFrames,0);try{PublishStatus("running");}catch(IOException e){int nativeCode=e.HResult&0xffff;if(!config.DiscardEnvironmentalOutput||(nativeCode!=32&&nativeCode!=33))throw;}
+      if(fixtureLatency!=null)fixtureLatency.Progress("status-done",-1,Stopwatch.GetTimestamp(),0,ring.BufferedFrames,0);}
      Thread.Sleep(2);
     }
     code=0;
    }catch(Exception e){failure=e.GetType().Name;failureDetail=e.Message;Console.Error.WriteLine("RichAudio gameplay stock fallback: "+failure+": "+failureDetail);}
    finally{
+    Record("host-stop",stopReason??(failure==null?"host-ended":"host-fault"),new{failure,failureDetail,workerFailure,producer=producerIdentity,lastPcmQpc=Interlocked.Read(ref lastPcmTicks),lastSnapshotQpc=Interlocked.Read(ref lastSnapshotTicks),receivedBlocks=Interlocked.Read(ref received),consumedFrames=ring==null?0:Interlocked.Read(ref ring.ConsumedFrames)});
     stop=true;wake.Set();if(pipe!=null)try{pipe.Dispose();}catch(IOException){}if(audio!=null){try{audio.Dispose();}catch(Exception e){failure=failure??e.GetType().Name;code=1;}}
     if(recording!=null){try{recording.Event("host-audio-stopped",Stopwatch.GetTimestamp(),new{underflowFrames=ring.UnderflowFrames,consumedFrames=ring.ConsumedFrames,fadeReserveConsumed=shutdownFade.FullyConsumed(ring.ConsumedFrames)});recording.Dispose();}catch(Exception e){recordingFailure=e.GetType().Name;}}
-    if(nodeJob!=null)nodeJob.Dispose();if(child!=null){try{if(!child.HasExited)child.Kill();child.WaitForExit(2000);}catch(Exception){}child.Dispose();}
+    CloseProducer();
     foreach(var t in new[]{writer,reader,diagnostics,receiver,sink})if(t!=null&&t.IsAlive&&!t.Join(1500)){failure="cleanup-timeout";code=1;}
-    if(config!=null&&directory!=null)try{if(fixtureLatency!=null){var first=fixtureLatency.FirstUnderflow01();if(first!=null)File.WriteAllText(Path.Combine(directory,"first-underflow.json"),Json.Serialize(first),new UTF8Encoding(false));}PublishStatus("stopped");}catch(Exception){code=1;}
+    if(config!=null&&directory!=null)try{if(fixtureLatency!=null){var first=fixtureLatency.FirstUnderflow01();if(first!=null)File.WriteAllText(Path.Combine(directory,"first-underflow.json"),Json.Serialize(first),new UTF8Encoding(false));}PublishStatus("stopped");}catch(Exception e){Record("terminal-status-fault",e.GetType().Name,e.Message);code=1;}
+    Record("host-closed",stopReason??(failure==null?"host-ended":"host-fault"),new{exitCode=failure==null?code:1,failure,failureDetail});
    }
    return failure==null?code:1;
+  }
+  void ReadOwnerCommands(){
+   // The redirected .NET writer may emit a UTF-8 preamble. Use the same
+   // wire encoding as the owner and allow the reader to consume that preamble.
+   try{using(var input=new StreamReader(Console.OpenStandardInput(),new UTF8Encoding(false,true),true,128)){
+    while(!stop){string line=input.ReadLine();if(line==null||line=="stop"){RequestShutdown(line==null?"owner-control-pipe-closed":"owner-stop-command");break;}}
+   }}catch(IOException){if(!stop)RequestShutdown("owner-control-pipe-fault");}
+   catch(DecoderFallbackException){if(!stop)RequestShutdown("owner-control-pipe-invalid-encoding");}
+  }
+  void CloseProducer(){
+   bool exited=false;int? exitCode=null;
+   if(child!=null&&drainProducer){
+    try{
+     if(!child.HasExited&&(writer==null||writer.Join(300))){
+      Record("producer-stop-requested","host-stop",producerIdentity);
+      PipeDeadline.Write(child.StandardInput.BaseStream,Encoding.UTF8.GetBytes("{\"type\":\"stop\"}\n"),200,"producer stop write deadline");
+      child.StandardInput.Close();
+      child.WaitForExit(1500);
+     }
+     exited=child.HasExited;
+    }catch(Exception e){Record("producer-stop-signal-failed",e.GetType().Name,e.Message);}
+    if(!exited)try{exited=child.HasExited;}catch(Exception){}
+    if(!exited){Record("forced-containment-close","producer-exit-not-confirmed-before-job-close",producerIdentity);failure=failure??"producer-stop-timeout";}
+   }
+   if(nodeJob!=null){var closed=nodeJob.CloseContainment();Record("containment-closed","producer-job",new{closed.Attempted,closed.Succeeded,closed.NativeError});}
+   if(child!=null){
+    try{if(!child.HasExited)child.Kill();exited=child.WaitForExit(2000);if(exited)exitCode=child.ExitCode;}catch(Exception){}
+    if(drainProducer&&diagnostics!=null)diagnostics.Join(300);
+    if(drainProducer&&exitCode!=0)failure=failure??"producer-exit-unverified-or-nonzero";
+    Record("producer-exit-observed","owned-child",new{producer=producerIdentity,exited,exitCode});
+    child.Dispose();
+   }
   }
   string pendingGeometry;
   internal static string SettingsCommand(AcousticSettings current,bool shutdown){return new JavaScriptSerializer{MaxJsonLength=65536,RecursionLimit=24}.Serialize(new{type="settings",quality=current.Quality,acceleration=current.Acceleration,enabled=current.RichAudioEnabled&&!shutdown,volume=current.OutputLevel,reflections=current.EarlyReflections,mode=current.IntegrationMode,soundMapVisible=current.SoundMapVisible,airflowEnabled=current.AirflowEnabled,airflowLevel=current.AirflowLevel});}
@@ -85,9 +128,11 @@ namespace RichAudio.Beacon.Windows {
    child.StandardInput.Flush();
   }}catch(Exception e){if(!stop)Fail(e);}}
   void ReadPcm(){try{var h=new byte[16];var payload=new byte[4096];var samples=new float[1024];uint sequence=0;
-   while(!stop){long readBefore=Stopwatch.GetTimestamp();if(!BlockProtocol.ReadExact(child.StandardOutput.BaseStream,h,16))break;uint blockSequence=sequence;int n=BlockProtocol.ValidateHeader(h,sequence++);if(n!=512)throw new InvalidDataException("gameplay block size");if(!BlockProtocol.ReadExact(child.StandardOutput.BaseStream,payload,n*8))throw new EndOfStreamException();long readAfter=Stopwatch.GetTimestamp();Buffer.BlockCopy(payload,0,samples,0,n*8);while(!stop&&!ring.TryWrite(samples,n))Thread.Sleep(1);long admitted=Stopwatch.GetTimestamp();if(fixtureLatency!=null){fixtureLatency.Admission((long)blockSequence*512,admitted);fixtureLatency.Progress("admission",blockSequence,readBefore,readAfter,ring.BufferedFrames,n,admitted);}Interlocked.Increment(ref received);Interlocked.Exchange(ref lastPcmTicks,admitted);var capture=recording;if(!stop&&capture!=null&&blockSequence%8==0&&Interlocked.Read(ref pcmTimingRows)<1500){if(capture.Event("host-producer-block",admitted,new{sequence=blockSequence,producerFrameStart=(long)blockSequence*512,frames=n,readBeforeQpc=readBefore,payloadReadAfterQpc=readAfter,ringAdmittedAfterQpc=admitted,qpcFrequency=Stopwatch.Frequency,bufferedFramesAfterConcurrentSnapshot=ring.BufferedFrames,ringCapacityFrames=PcmRing.Slots*PcmRing.MaximumFrames}))Interlocked.Increment(ref pcmTimingRows);}}
+   while(!stop||drainProducer){long readBefore=Stopwatch.GetTimestamp();if(!BlockProtocol.ReadExact(child.StandardOutput.BaseStream,h,16))break;uint blockSequence=sequence;int n=BlockProtocol.ValidateHeader(h,sequence++);if(n!=512)throw new InvalidDataException("gameplay block size");if(!BlockProtocol.ReadExact(child.StandardOutput.BaseStream,payload,n*8))throw new EndOfStreamException();if(stop)continue;long readAfter=Stopwatch.GetTimestamp();Buffer.BlockCopy(payload,0,samples,0,n*8);while(!stop&&!ring.TryWrite(samples,n))Thread.Sleep(1);long admitted=Stopwatch.GetTimestamp();if(fixtureLatency!=null){fixtureLatency.Admission((long)blockSequence*512,admitted);fixtureLatency.Progress("admission",blockSequence,readBefore,readAfter,ring.BufferedFrames,n,admitted);}Interlocked.Increment(ref received);Interlocked.Exchange(ref lastPcmTicks,admitted);var capture=recording;if(!stop&&capture!=null&&blockSequence%8==0&&Interlocked.Read(ref pcmTimingRows)<1500){if(capture.Event("host-producer-block",admitted,new{sequence=blockSequence,producerFrameStart=(long)blockSequence*512,frames=n,readBeforeQpc=readBefore,payloadReadAfterQpc=readAfter,ringAdmittedAfterQpc=admitted,qpcFrequency=Stopwatch.Frequency,bufferedFramesAfterConcurrentSnapshot=ring.BufferedFrames,ringCapacityFrames=PcmRing.Slots*PcmRing.MaximumFrames}))Interlocked.Increment(ref pcmTimingRows);}}
   }catch(Exception e){if(!stop)Fail(e);}finally{readerEnded=true;ring.EndOfStream=true;}}
-  void ReadDiagnostics(){try{string line;while(!stop&&(line=child.StandardError.ReadLine())!=null){long receivedAt=Stopwatch.GetTimestamp();if(line.Length>32768)throw new InvalidDataException("producer diagnostic size");lock(sync){var d=Json.DeserializeObject(line)as Dictionary<string,object>;object type;if(d!=null&&d.TryGetValue("type",out type)){if((string)type=="gameplay-status"){workerStatus=line;if(latencyProfile.Id!="baseline"&&!creditWindow.SourcePrepared&&PreparedSource(d)){preparedSourceAtQpc=receivedAt;creditWindow.SourcePrepared=true;}}if((string)type=="gameplay-error"){object code;workerFailure=d.TryGetValue("code",out code)?Convert.ToString(code):"unspecified worker failure";}if((string)type=="gameplay-ready"){workerReady=true;wake.Set();}if((string)type=="producer-block-timing"){if(fixtureLatency!=null){fixtureLatency.Producer(d,receivedAt);object nodeDone;if(d.TryGetValue("stdoutCompletedNodeMs",out nodeDone))fixtureLatency.Progress("node-output",Convert.ToInt64(d["producerFrameStart"])/512,receivedAt,0,ring.BufferedFrames,512,0,Convert.ToDouble(nodeDone));}var capture=recording;if(capture!=null&&line.Length<=1900&&Interlocked.Read(ref producerTimingRows)<1500){if(capture.Event("producer-block-timing",receivedAt,d))Interlocked.Increment(ref producerTimingRows);else Interlocked.Increment(ref producerTimingRowsRejected);}else Interlocked.Increment(ref producerTimingRowsRejected);}}}}}catch(Exception e){if(!stop)Fail(e);}}
+  void ReadDiagnostics(){try{string line;while((!stop||drainProducer)&&(line=child.StandardError.ReadLine())!=null){long receivedAt=Stopwatch.GetTimestamp();if(line.Length>32768)throw new InvalidDataException("producer diagnostic size");lock(sync){var d=Json.DeserializeObject(line)as Dictionary<string,object>;object type;if(d!=null&&d.TryGetValue("type",out type)){
+    string kind=(string)type;if(kind=="producer-terminal"||kind=="installed-world-worker-closed"||kind=="installed-world-worker-close-failed"||kind=="gameplay-error")Record("producer-evidence",kind,d);
+    if((string)type=="gameplay-status"){workerStatus=line;if(latencyProfile.Id!="baseline"&&!creditWindow.SourcePrepared&&PreparedSource(d)){preparedSourceAtQpc=receivedAt;creditWindow.SourcePrepared=true;}}if((string)type=="gameplay-error"){object code;workerFailure=d.TryGetValue("code",out code)?Convert.ToString(code):"unspecified worker failure";}if((string)type=="gameplay-ready"){workerReady=true;wake.Set();}if((string)type=="producer-block-timing"){if(fixtureLatency!=null){fixtureLatency.Producer(d,receivedAt);object nodeDone;if(d.TryGetValue("stdoutCompletedNodeMs",out nodeDone))fixtureLatency.Progress("node-output",Convert.ToInt64(d["producerFrameStart"])/512,receivedAt,0,ring.BufferedFrames,512,0,Convert.ToDouble(nodeDone));}var capture=recording;if(capture!=null&&line.Length<=1900&&Interlocked.Read(ref producerTimingRows)<1500){if(capture.Event("producer-block-timing",receivedAt,d))Interlocked.Increment(ref producerTimingRows);else Interlocked.Increment(ref producerTimingRowsRejected);}else Interlocked.Increment(ref producerTimingRowsRejected);}}}}}catch(Exception e){if(!stop)Fail(e);}}
   static bool PreparedSource(Dictionary<string,object> row){object raw;var status=row.TryGetValue("status",out raw)?raw as Dictionary<string,object>:null;var stages=status!=null&&status.TryGetValue("stageCounters",out raw)?raw as Dictionary<string,object>:null;if(stages==null)return false;foreach(string key in new[]{"engine","exhaust","stereo"}){var stage=stages.TryGetValue(key,out raw)?raw as Dictionary<string,object>:null;if(stage==null||!stage.TryGetValue("nonzeroBlocks",out raw)||Convert.ToInt64(raw)<=0)return false;}return true;}
   void Receive(){try{var validator=new StateValidator();while(!stop){pipe=GameplayWire.Server(pipeName);pipe.WaitForConnection();GameplayWire.Peer(pipe,ownerId,true);
    try{while(!stop){byte[] b=GameplayWire.Read(pipe);var f=GameplayWire.Decode(b,session);double age=(Stopwatch.GetTimestamp()-f.Listener.ObservationTicks)*1000d/Stopwatch.Frequency;

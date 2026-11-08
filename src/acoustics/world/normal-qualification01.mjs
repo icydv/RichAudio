@@ -37,10 +37,15 @@ export function normalQualification01(config,root,session,{now=Date.now}={}){
  if(manifest.ValidationEpochUtc01!==proof.proofEpochUtc||manifest.ResolvedCatalogSHA256!==proof.catalogSha256||
     manifest.InputBinding?.GameExecutableSHA256!==config.gameSha256||manifest.Resources?.length!==10663)
   throw Error('retained qualification publication identity');
+ const anchor=config.qualificationAnchor01;
+ if(anchor!==undefined&&(!Array.isArray(anchor.position)||anchor.position.length!==3||!anchor.position.every(Number.isFinite)||
+    !Number.isFinite(anchor.radius)||anchor.radius<=0||anchor.radius>20||
+    !manifest.Resources.some(row=>row.Id===anchor.resourceId&&row.Eligibility==='eligible-exterior'&&row.Result)))
+  throw Error('qualification anchor must bind a prepared exterior resource');
  let launchEpoch=null;
  const monotonicStop=performance.now()+until-at;
  return {
-  epoch:proof.proofEpochUtc, stopBy:until,
+  epoch:proof.proofEpochUtc, stopBy:until, anchor,
   acceptLaunch(value){
    const observed=utc(value),nowUtc=now();
    if(!Number.isFinite(observed)||observed<started||observed>nowUtc+250||nowUtc>=until||performance.now()>=monotonicStop||

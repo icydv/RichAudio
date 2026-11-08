@@ -8,6 +8,17 @@ internal static class TestGameplay {
  static void Check(bool x,string why){checks++;if(!x)throw new Exception(why);}
  static Dictionary<string,object> Read(string f){try{return Json.DeserializeObject(File.ReadAllText(f)) as Dictionary<string,object>;}catch(IOException){return null;}}
  static Dictionary<string,object> Evidence(){return Read(Path.Combine(root,".local","gameplay",runtime.Session,"host.json"));}
+ static bool Lifecycle(string owner,string stage,string reason){
+  string file=Path.Combine(root,".local","gameplay",runtime.Session,owner+"-lifecycle.jsonl");
+  using(var stream=new FileStream(file,FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete))
+  using(var input=new StreamReader(stream)){
+   string line;while((line=input.ReadLine())!=null){
+    var row=(Dictionary<string,object>)Json.DeserializeObject(line);
+    if((string)row["stage"]==stage&&(reason==null||(string)row["reason"]==reason))return true;
+   }
+  }
+  return false;
+ }
  static double Number(Dictionary<string,object>d,string k){object v;return d!=null&&d.TryGetValue(k,out v)&&v!=null?Convert.ToDouble(v):0;}
  static Dictionary<string,object> Worker(){var d=Evidence();return d!=null&&d.ContainsKey("worker")?d["worker"]as Dictionary<string,object>:null;}
  static void Feed(int count,bool pause=false,bool valid=true){if(pause!=wasPaused){generation++;wasPaused=pause;}long now=Stopwatch.GetTimestamp();var vehicles=new List<GameplayVehicle>();for(int i=0;i<count;i++)vehicles.Add(new GameplayVehicle{Id="actual-component-fixture-"+i,Generation=(int)(sequence/160)+1,ObservationTicks=now,Model=i==0?0xf9300cc5u:0xa774b5a6u,Context=i==0&&!environmentFixture?"npc":"player",Position=new[]{2d+i*4,3d,0d},Velocity=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},OperatingPoint=.1+.7*(.5+.5*Math.Sin(sequence*.02)),Running=true,Valid=true});
@@ -54,21 +65,40 @@ internal static class TestGameplay {
  public static int Main(string[]args){
   try{RingTests();PipeTimeoutTests();if(args.Length==1&&args[0]=="--ring-only"){Console.WriteLine("PASS "+checks+" exact PCM reserve / native callback / retained starvation guard / real pipe timeout checks; no endpoint");return 0;}root=Path.GetFullPath(args[0]);var c=PlayableConfiguration.Load(Path.Combine(root,"playable.json"));environmentFixture=c.DiscardEnvironmentalOutput;Settings(1);string pointer=Path.Combine(root,".local","fixture-pointer.json");Directory.CreateDirectory(Path.GetDirectoryName(pointer));File.WriteAllText(pointer,Json.Serialize(new{schema=1,packageRoot=root,manifestSha256=PlayableConfiguration.Digest(c.Manifest)}));
    runtime=new GameplayRuntime(!environmentFixture);runtime.Start(pointer,c.GameExecutable,args[1]);Until(()=>runtime.Configuration!=null,5000,0);Thread.Sleep(250);Check(runtime.Attempts==0,"no host before Story readiness");runtime.SetStoryReady(true);
-   Until(()=>runtime.HostPid>0,5000);owned.Add(runtime.HostPid);Until(()=>Number(Worker(),"activeSources")>=1&&Number(Evidence(),"peak")>0,15000);owned.Add((int)Number(Evidence(),"nodePid"));Check(!(bool)Evidence()["endpointOpened"],"device-free route");Check(Number(Evidence(),"receivedSnapshots")>0,"real secured pipe snapshots");
+   Until(()=>runtime.HostPid>0,5000);owned.Add(runtime.HostPid);
+   if(environmentFixture){
+    Until(()=>Number(Evidence(),"consumedFrames")>0,12000,0);double consumed=Number(Evidence(),"consumedFrames");
+    string status=Path.Combine(root,".local","gameplay",runtime.Session,"host.json");
+    // A reader without FILE_SHARE_DELETE can overlap atomic replacement.
+    using(var read=new FileStream(status,FileMode.Open,FileAccess.Read,FileShare.ReadWrite))For(900,0);
+    For(5500,0);
+    Check(runtime.HostPid==owned[0]&&runtime.Attempts==1&&Number(Worker(),"activeSources")==0&&Number(Evidence(),"consumedFrames")>consumed,"normal discard host progresses with no source and survives temporary status contention");
+   }
+   Until(()=>Number(Worker(),"activeSources")>=1&&Number(Evidence(),"peak")>0,15000);owned.Add((int)Number(Evidence(),"nodePid"));Check(!(bool)Evidence()["endpointOpened"],"device-free route");Check(Number(Evidence(),"receivedSnapshots")>0,"real secured pipe snapshots");
    if(environmentFixture){
     var beforeObservation=Evidence();
     Check(!(bool)beforeObservation["fixture"]&&(string)beforeObservation["outputSink"]=="environment-observation"&&beforeObservation["outputMetrics"]==null,"normal owner and immutable observation sink have no endpoint");
     Check(Number(beforeObservation,"underflowFrames")==0,"device-free observation ring reports underflows");
     Settings(2,true,.4);Until(()=>Number(Worker(),"outputLevel")==.4,3000);
     Check(!(bool)Evidence()["endpointOpened"]&&Evidence()["outputMetrics"]==null,"settings cannot open the endpoint");
-    bool disable=args.Length==3&&args[2]=="--disable";
+    string mode=args.Length==3?args[2]:"--kill-host";
+    bool disable=mode=="--disable",graceful=mode=="--graceful";
     int failedHost=runtime.HostPid;
-    if(disable)Settings(3,false);else using(var process=Process.GetProcessById(failedHost))process.Kill();
+    if(disable)Settings(3,false);
+    else if(graceful)runtime.RequestStop("fixture-coordinator-stop");
+    else using(var process=Process.GetProcessById(mode=="--kill-producer"?owned[1]:failedHost))process.Kill();
     Until(()=>runtime.HostPid==0,5000,0);For(1000);
     if(disable){Settings(4);For(1000);}
     Check(runtime.Attempts==1,"disabled or failed observation host never relaunches");
     runtime.RequestStop();Check(runtime.Join(6000),"observation supervisor joined");
     foreach(int pid in owned)Check(!Alive(pid),"observation host and producer exited");
+    Check(Lifecycle("runtime","host-exit-observed",null),"supervisor retained independently observed host exit");
+    if(disable||graceful){
+     Check(Lifecycle("host","producer-stop-requested","host-stop"),"host requested graceful Node closure before Job disposal");
+     Check(Lifecycle("host","producer-exit-observed","owned-child")&&!Lifecycle("host","forced-containment-close",null),"host confirmed producer exited without force");
+     Check(Lifecycle("runtime","host-stop-observed",disable?"settings-stock-fallback":"fixture-coordinator-stop"),"supervisor preserved distinct stop reason");
+    }else if(mode=="--kill-producer")Check(Lifecycle("host","producer-exit-observed","owned-child"),"host preserved abrupt producer exit");
+    else Check(Lifecycle("runtime","host-stop-observed","host-exited")&&!Lifecycle("host","host-closed",null),"abrupt host exit remains distinguishable from graceful closure");
     string result=Json.Serialize(new{passed=true,checks=checks,endpointOpened=false,attempts=runtime.Attempts,disabled=disable,observation=beforeObservation});
     File.WriteAllText(Path.Combine(root,".local",disable?"observation-disable-fixture-result.json":"observation-fixture-result.json"),result);
     Console.WriteLine("PASS "+checks+" device-free normal observation-chain assertions");

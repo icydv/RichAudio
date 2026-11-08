@@ -55,6 +55,7 @@ if(fixtureScope){
  fs.mkdirSync(path.join(folder,'.local/gameplay',session),{recursive:true});
  config.outputSink='environment-observation';
  config.retainedQualification01={proofEpochUtc:testEpoch,stopByUtc:new Date(Date.now()+120_000).toISOString(),manifestSha256:published.sha256,catalogSha256:fixtureScope.catalogSHA256};
+ if(exterior)config.qualificationAnchor01={position:[1475.960,-2717.439,18.504],radius:10,resourceId:'9c81f577241cd8290752e4c5'};
  config.acousticWorld={manifestPath:'world/manifest.json',catalogPath:'world/catalog.json',derivedCacheRoot:cacheRoot};
  config.bindings=[{file:'world/manifest.json',sha256:published.sha256},{file:'world/catalog.json',sha256:fixtureScope.catalogSHA256}];
 }
@@ -101,6 +102,7 @@ try{
   authored.position=exterior?[x+(l.position[0]-reference.listener[0]),y-.35,z-.65]:[x-6+.7*Math.sin(t/2),y+.5+1.2*Math.cos(t/2),z+1.35];
   authored.velocity=exterior?l.velocity:[.35*Math.cos(t/2),-.6*Math.sin(t/2),0];
   authored.observationTicks=l.observationTicks;
+  if(exterior)authored.riderAttached=true;
   f.vehicles=[authored];
   send({type:'snapshot',ageMs:row.sourceAgeMs+Math.max(0,performance.now()-due),frame:f});
  }
@@ -124,6 +126,7 @@ if(fixtureScope){
  assert(evidence.some(row=>row.type==='source-proof'&&row.proofEpoch===config.retainedQualification01.proofEpochUtc&&row.resources.length));
  assert(evidence.some(row=>row.type==='normal-gameplay-observation'&&row.frame.worldPreparationStartedUtc===bridgeEpoch));
  assert(evidence.some(row=>row.type==='installed-world-worker-closed'&&row.workerJoined));
+ if(exterior)assert(evidence.filter(row=>row.type==='phase1-measurement-ready').length===1,'the exact proof-qualified exterior with an active player source opens measurement once');
 }
 assert.equal(final.acousticWorld.environmentalReadiness01.counters.validityGaps,0);
 if(exterior){

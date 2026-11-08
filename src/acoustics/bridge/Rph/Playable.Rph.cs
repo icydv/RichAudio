@@ -50,7 +50,7 @@ namespace RichAudio.Beacon.Rph {
      else if(r.Configuration!=null&&r.Settings!=null){try{Capture(r);}catch(ThreadAbortException){throw;}catch(Exception e){sourceGetterFailures++;Diagnostic("capture-failed:"+stage+":"+e.GetType().Name);tracked.Clear();listenerTracker.Invalidate();}}
      GameFiber.Sleep(50);
     }
-   }catch(ThreadAbortException){throw;}catch(Exception e){Game.Console.Print("RichAudio stock fallback: "+e.GetType().Name);}
+   }catch(ThreadAbortException){throw;}catch(Exception e){var r=runtime;if(r!=null)r.RequestStop("rph-entry-fault:"+e.GetType().Name);Game.Console.Print("RichAudio stock fallback: "+e.GetType().Name);}
    finally{OnUnload();}
 #endif
   }
@@ -131,7 +131,7 @@ namespace RichAudio.Beacon.Rph {
 #if SHV_HANDOFF_09
    ShvPassiveHandoffEntry.Stop();
 #else
-   stopping=true;var r=runtime;runtime=null;if(r!=null){r.RequestStop();ThreadPool.QueueUserWorkItem(delegate{r.Join(5000);});}InstalledWorldWarmup.Stop();PassiveListener.Stop();InGameMenu.Stop();tracked.Clear();
+   stopping=true;var r=runtime;runtime=null;if(r!=null){r.RequestStop("rph-plugin-unload");ThreadPool.QueueUserWorkItem(delegate{r.Join(5000);});}InstalledWorldWarmup.Stop();PassiveListener.Stop();InGameMenu.Stop();tracked.Clear();
 #endif
   }
  }
