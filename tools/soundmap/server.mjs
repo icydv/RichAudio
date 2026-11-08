@@ -11,7 +11,7 @@ const ui=path.join(path.dirname(fileURLToPath(import.meta.url)),'ui');
 const wireContract=fileURLToPath(new URL('../../src/acoustics/streaming/soundmap-wire.mjs',import.meta.url));
 const equal=(a,b)=>typeof a==='string'&&a.length===b.length&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 async function body(req,limit){const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>limit)throw Error('Request byte bound');chunks.push(chunk);}return Buffer.concat(chunks);}
-export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.now,ownerId=null,installedContext=null,viewOnly=false,viewOnlyMap=false,onClosed=()=>{}}={}) {
+export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.now,ownerId=null,installedContext=null,viewOnly=false,viewOnlyMap=false,worldAtlas=null,sourceReceipt=null,onClosed=()=>{}}={}) {
   if(!Number.isInteger(port)||port<0||port>65535)throw Error('Port bound');
   const privateRoot=privateDirectory(root),token=randomBytes(32).toString('hex'),recorder=new SessionRecorder(privateRoot,{now});
   if(ownerId!==null&&(typeof ownerId!=='string'||!/^[a-f0-9]{32}$/.test(ownerId)))throw Error('Owner identity bound');
@@ -19,7 +19,15 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
   // opt-in cache adapter only after trusted local code publishes one.
   if(viewOnlyMap&&(!viewOnly||!ownerId||!installedContext))throw Error('View-only map requires an owned service and bound context');
   const contextModule=installedContext?await import('./installed-world-context01.mjs'):null;
-  const worldContext=contextModule?new contextModule.InstalledWorldContext01(installedContext,{viewOnlyMap}):null;
+  if(sourceReceipt&&(!viewOnlyMap||!contextModule?.isBoundMapProofReceipt01(sourceReceipt,installedContext,ownerId)))throw Error('Verified owned atlas source receipt required');
+  // The sealed camera-only entry point must name its exact atlas explicitly.
+  // Ordinary SoundMap startup uses the prepared workspace atlas, if present.
+  // Minimal passive packages omit the installed-world modules altogether.
+  const atlasPointer=!viewOnlyMap&&fs.lstatSync(path.resolve(root,'.local','soundmap','world-atlas.json'),{throwIfNoEntry:false});
+  const atlasModule=worldAtlas||atlasPointer?await import('./world-atlas01.mjs'):null;
+  const atlasConfig=worldAtlas??(atlasPointer?await atlasModule.configuredWorldAtlas01(root):null);
+  const atlas=atlasConfig?await atlasModule.openWorldAtlas01({...atlasConfig,installedContext,sourceReceipt,now}):null;
+  const worldContext=contextModule&&!atlas?new contextModule.InstalledWorldContext01(installedContext,{viewOnlyMap}):null;
   const passive=new PassiveListener(now,{viewOnlyMap});
   const passiveContext=sample=>viewOnlyMap?contextModule.passiveWorldContext01(sample,installedContext,now()):null;
   let cacheFeed=null,cacheLoading=null,cacheEpoch=0,cacheRevision=0,cacheReason='not-supplied',requestClose;
@@ -34,7 +42,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
   let frame=null,receivedAt=0,sessionId=null,streamId=null,sequence=-1,replay=null,lastHost=null,stopping=null;
   const geometry=new Map(),geometrySizes=new Map(),stats={accepted:0,droppedUpdates:0,invalidUpdates:0,sessionChanges:0,geometryCacheEvictions:0};let geometryCacheBytes=0;
   let boundPort;
-  const status=()=>({viewOnly,viewOnlyMap,connected:!!frame&&now()-receivedAt<=1500,sessionId,streamId,ageMs:frame?now()-receivedAt:null,...stats,geometryCacheBytes,geometryCacheMaximumBytes:SOUND_MAP_WIRE.serviceGeometryCacheBytes,geometryCacheCount:geometry.size,
+  const status=()=>({viewOnly,viewOnlyMap,worldAtlas:atlas?.status()??null,connected:!!frame&&now()-receivedAt<=1500,sessionId,streamId,ageMs:frame?now()-receivedAt:null,...stats,geometryCacheBytes,geometryCacheMaximumBytes:SOUND_MAP_WIRE.serviceGeometryCacheBytes,geometryCacheCount:geometry.size,
     passive:passive.status(),cacheWorld:cacheWorld.status(),recording:recorder.status(),replay:replay?{id:replay.id,durationMs:replay.durationMs}:null,
     audio:{hostConnected:!!lastHost&&now()-lastHost.receivedAt<1500,host:lastHost?.info??null}});
   const server=http.createServer(async(req,res)=>{
@@ -47,7 +55,8 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
       if(req.headers.host!=='127.0.0.1:'+boundPort||req.headers.origin&&req.headers.origin!==origin||route.startsWith('/api/')&&req.headers['sec-fetch-site']==='cross-site'){send({error:'Same-origin localhost only'},403);return;}
       if(route==='/api/session'&&req.method==='GET'){send({token});return;}
       if(route.startsWith('/api/')&&!equal(req.headers['x-richaudio-token'],token)){send({error:'Session capability required'},403);return;}
-      if(viewOnlyMap&&route.startsWith('/api/')&&!['GET /api/status','GET /api/frame','GET /api/world-context','POST /api/passive','POST /api/service/stop'].includes(req.method+' '+route)){send({error:'Map qualification accepts camera observations only'},403);return;}
+      if((viewOnlyMap||viewOnly&&atlas)&&route.startsWith('/api/')&&!['GET /api/status','GET /api/frame','GET /api/world-context','POST /api/passive','POST /api/service/stop'].includes(req.method+' '+route)&&
+       !(atlas&&req.method==='GET'&&['/api/atlas/index','/api/atlas/page','/api/atlas/coverage'].includes(route))){send({error:'Map qualification accepts camera observations only'},403);return;}
       if(viewOnly&&req.method==='POST'&&(route.startsWith('/api/record/')||route.startsWith('/api/host/'))){send({error:'SoundMap is view only'},403);return;}
       let value=null;
       if(req.method==='POST'&&route!=='/api/host/pcm'){
@@ -58,9 +67,20 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
       else if(route==='/api/frame'&&req.method==='GET'){
         const g=frame?geometry.get(frame.geometryGeneration):null;
         const camera=passive.snapshot(),mapContext=passiveContext(camera);
-        send({mode:'live',frame,passive:camera,mapContext,cacheWorld:cacheWorld.snapshot(url.searchParams.get('cacheWorldGeneration')??''),geometry:g&&url.searchParams.get('geometryGeneration')!==g.generation?g:null,status:status()});
+        send({mode:'live',frame,passive:camera,mapContext,atlasContext:atlas?.context(viewOnlyMap?mapContext:frame)??null,cacheWorld:cacheWorld.snapshot(url.searchParams.get('cacheWorldGeneration')??''),geometry:g&&url.searchParams.get('geometryGeneration')!==g.generation?g:null,status:status()});
       }else if(route==='/api/world-context'&&req.method==='GET'){
-        send(worldContext?.snapshot(viewOnlyMap?passiveContext(passive.snapshot()):frame,url.searchParams.get('generation'))??{state:'context-not-configured',tiles:[]});
+        const sample=viewOnlyMap?passiveContext(passive.snapshot()):frame;
+        send(atlas?.context(sample)??worldContext?.snapshot(sample,url.searchParams.get('generation'))??{state:'context-not-configured',tiles:[]});
+      }else if(atlas&&req.method==='GET'&&route==='/api/atlas/index'){
+        res.setHeader('Content-Type','application/json');res.end(atlas.index);
+      }else if(atlas&&req.method==='GET'&&route==='/api/atlas/page'){
+        const result=await atlas.mesh(url.searchParams.get('name'));
+        if(!result.bytes){send({error:result.error},result.code);return;}
+        res.setHeader('Content-Type','application/octet-stream');res.setHeader('Content-Length',result.bytes.length);res.end(result.bytes);
+      }else if(atlas&&req.method==='GET'&&route==='/api/atlas/coverage'){
+        const value=atlas.coverage(url.searchParams.get('tile'));
+        if(!value){send({error:'No located retained geometry in this atlas cell'},404);return;}
+        send(value);
       }else if(route==='/api/cache-world'&&req.method==='GET'){
         send(cacheWorld.snapshot(url.searchParams.get('generation')??''));
       }else if(route==='/api/passive'&&req.method==='POST'){
@@ -156,7 +176,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
   const close=()=>closing??=(async()=>{
     cacheWorld.clear('service-shutdown');clearInterval(tick);recorder.stop('service-shutdown');
     const [contextClosure]=await Promise.all([worldContext?.close(),new Promise(resolve=>server.close(resolve))]);
-    const terminal={contextClosure:contextClosure??null,acceptedCameraSamples:passive.accepted,rendererFrames:stats.accepted};
+    const terminal={contextClosure:contextClosure??(atlas?{workerJoined:true,closedWorkers:0}:null),worldAtlas:atlas?.status()??null,acceptedCameraSamples:passive.accepted,rendererFrames:stats.accepted};
     onClosed(terminal);
     return terminal;
   })();
@@ -164,7 +184,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
   return {server,descriptor,recorder,status,privateRoot,cacheWorld,close};
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
-  let root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..'),port=17833,ownerId=null,installedContext=null,viewOnly=false,viewOnlyMap=false,mapStopAt=null,mapProofReceipt=null,mapProofSHA256=null;
+  let root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..'),port=17833,ownerId=null,installedContext=null,viewOnly=false,viewOnlyMap=false,mapStopAt=null,mapProofReceipt=null,mapProofSHA256=null,atlasFile=null,atlasSHA256=null,sourceReceipt=null;
   for(let i=2;i<process.argv.length;i++){
     const option=process.argv[i];
     if(option==='--view-only'){viewOnly=true;continue;}
@@ -178,16 +198,19 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
     else if(option==='--map-stop-utc-ms')mapStopAt=Number(value);
     else if(option==='--map-proof-receipt')mapProofReceipt=value;
     else if(option==='--map-proof-sha256')mapProofSHA256=value;
+    else if(option==='--world-atlas')atlasFile=value;
+    else if(option==='--world-atlas-sha256')atlasSHA256=value;
     else throw Error('Unknown SoundMap option');
   }
   const mapBudget=mapStopAt-Date.now();
   if(viewOnlyMap){
     if(!Number.isSafeInteger(mapStopAt)||mapBudget<=0||mapBudget>25*60*1000||!mapProofReceipt||!mapProofSHA256)throw Error('Bounded view-only map cutoff and source receipt required');
     const {verifyMapProofReceipt01}=await import('./installed-world-context01.mjs');
-    verifyMapProofReceipt01(mapProofReceipt,mapProofSHA256,installedContext,ownerId,mapStopAt);
+    sourceReceipt=verifyMapProofReceipt01(mapProofReceipt,mapProofSHA256,installedContext,ownerId,mapStopAt);
   }else if(mapStopAt!==null||mapProofReceipt!==null||mapProofSHA256!==null)throw Error('Map qualification arguments require camera-only mode');
   const cutoff=performance.now()+mapBudget;
-  const service=await startSoundMap({root,port,ownerId,installedContext,viewOnly,viewOnlyMap,onClosed:terminal=>{
+  if(Boolean(atlasFile)!==Boolean(atlasSHA256))throw Error('Specify both the private atlas and its SHA-256');
+  const service=await startSoundMap({root,port,ownerId,installedContext,viewOnly,viewOnlyMap,worldAtlas:atlasFile?{file:atlasFile,sha256:atlasSHA256}:null,sourceReceipt,onClosed:terminal=>{
     if(viewOnlyMap){
       if(terminal.contextClosure?.workerJoined!==true)process.exitCode=1;
       console.log(JSON.stringify({kind:'soundmap-view-only-terminal',...terminal}));

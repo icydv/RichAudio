@@ -150,10 +150,10 @@ export class VisualState {
 }
 
 // Orthographic 3D camera; Z is up in the existing acoustic model, not screen Y.
-export function project(point,{target=[0,0,0],yaw=-.7,pitch=.7,scale=20,width=800,height=600,topDown=false}={}){
+export function project(point,{target=[0,0,0],yaw=-.7,pitch=.7,scale=20,width=800,height=600,topDown=false,northUpAtlas=false}={}){
   const [x,y,z]=point.map((n,i)=>n-target[i]),s=Math.sin(yaw),c=Math.cos(yaw);
   const right=c*x+s*y,front=-s*x+c*y,p=topDown?Math.PI/2:pitch;
-  return {x:width/2+right*scale,y:height/2+(front*Math.sin(p)-z*Math.cos(p))*scale,
+  return {x:width/2+right*scale,y:height/2+(topDown&&northUpAtlas?-1:1)*(front*Math.sin(p)-z*Math.cos(p))*scale,
     depth:front*Math.cos(p)+z*Math.sin(p)};
 }
 export function pathStyle(path){
@@ -163,6 +163,13 @@ export function pathStyle(path){
   if(path.propagation==='obstructed')return {color:'#ffabb0',dash:[12,4],label:'Selected obstructed / transmission'};
   return path.order===0?{color:'#63e8d3',dash:[],label:'Selected direct'}:
     path.order===1?{color:'#ffbc80',dash:[],label:'Selected first reflection'}:{color:'#c6adff',dash:[],label:'Selected second reflection'};
+}
+export function alignsWithWorldAtlas01(frame,identity){
+  if(!identity?.catalogSHA256||frame?.worldContext01?.catalogue!==identity.catalogSHA256)return false;
+  if(frame.coordinateSpace==='gta-native-unscaled')return true;
+  const c=frame.calibration;
+  return frame.coordinateSpace===MODEL_SPACE&&c?.metresPerNativeUnit===1&&
+    JSON.stringify(c.originNative)==='[0,0,0]'&&JSON.stringify(c.axes)==='[[1,0,0],[0,1,0],[0,0,1]]';
 }
 
 function calibrationKey(c){

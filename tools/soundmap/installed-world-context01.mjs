@@ -13,6 +13,7 @@ const point=value=>Array.isArray(value)&&value.length===3&&value.every(n=>Number
 const offsets=[[0,0],[24,0],[-24,0],[0,24],[0,-24]];
 const interiorIntervalMs=150,exteriorIntervalMs=500;
 const epoch=value=>typeof value==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,7})?Z$/.test(value)&&Number.isFinite(Date.parse(value));
+const verifiedReceipts=new WeakSet();
 
 function privateContextJson(file){
  const location=path.resolve(file);
@@ -40,6 +41,21 @@ export function verifyMapProofReceipt01(file,sha256,config,ownerId,stopAt,now=Da
     r.proofEpoch!==config.proofEpoch||r.archiveCount!==123||r.matchingArchiveIdentities!==123||r.archiveContentBytesRead!==0||
     r.gameExecutableSHA256!==config.expectedGameSHA256||!Number.isSafeInteger(r.checkedAt)||now-r.checkedAt<0||now-r.checkedAt>120000)
   throw Error('Fresh bound map identity receipt required');
+ const bound=Object.freeze({proofEpoch:r.proofEpoch,checkedAt:r.checkedAt,stopAt:r.stopAt,archiveCount:r.archiveCount,ownerId,configSHA256:config.configSHA256});
+ verifiedReceipts.add(bound);return bound;
+}
+export const isBoundMapProofReceipt01=(r,c,owner)=>verifiedReceipts.has(r)&&r.ownerId===owner&&r.configSHA256===c?.configSHA256;
+
+export function contextFailure01(s,lastBinding=null,exitCode=null){
+ const worker=s?.worker,metadata=s?.cacheTimings,recent=s?.sceneDeliveryDiagnostics01?.recent;
+ const reason=worker?.failure??null;
+ const kind=/chunk integrity|index integrity|receipt integrity|enoent|eacces|derived-cache path/i.test(reason??'')?'cache-access-or-integrity':
+  reason?.includes('timeout')?'timeout':reason?.startsWith('worker-result-rejected:')?'transport-or-result-validation':worker?.failed?'worker-termination-or-execution':null;
+ const state=worker?.failed?(kind==='cache-access-or-integrity'?'context-cache-unavailable':kind==='transport-or-result-validation'?'context-worker-result-rejected':kind==='timeout'?'context-worker-timeout':'context-worker-failed'):
+  metadata?.metadataProofCurrent01===false?'source-proof-unavailable':null;
+ return {state,kind:kind??(state?'metadata-source-proof':null),reason,phase:reason?.split(':')[0]??worker?.state??null,metadataProofCurrent:metadata?.metadataProofCurrent01??null,
+  lastBinding,request:recent?.at(-1)??null,cacheStatus:s?.stage??null,cacheTimings:metadata??null,workerExited:worker?.workerExited??false,exitCode,
+  nodeRssMiB:Math.round(process.memoryUsage.rss()/1048576)};
 }
 
 // This is a camera/context envelope, never an acoustic frame.
@@ -65,6 +81,7 @@ export class InstalledWorldContext01 {
   if(reader){
    this.closing=reader.close().then(result=>{
     this.closedWorkers=(this.closedWorkers??0)+1;
+    this.lastExitCode=result.workerExitCode??null;
     this.closureUnknown=this.closureUnknown||result.workerJoined!==true;
    }).finally(()=>{this.closing=null;});
   }
@@ -92,7 +109,8 @@ export class InstalledWorldContext01 {
      !Number.isFinite(transportAge)||transportAge<0||!Number.isFinite(age)||age>=500||!Number.isSafeInteger(context.generation)||context.generation<=0||
      context.catalogue!==this.config.catalogSHA256||!epoch(context.epoch)){
    this.scope=null;this.tiles.clear();this.requests.clear();
-   return {state:'awaiting-current-camera-and-proof',tiles:[]};
+   const diagnostic=contextFailure01(this.workerStatus,this.lastBinding,this.reader?.exitCode);
+   return {state:'awaiting-current-camera-and-proof',tiles:[],diagnostic:diagnostic.state?diagnostic:undefined};
   }
   const key=[context.ownerSession,frame.streamId,context.epoch].join(':');
   if(this.key!==key){
@@ -100,7 +118,11 @@ export class InstalledWorldContext01 {
    if(this.closing)return {state:'changing-session',tiles:[]};
    const {catalogSHA256,proofEpoch,configSHA256,...config}=this.config;
    const reader=new InstalledSceneService01({config:{...config,expectedCatalogSHA256:catalogSHA256},session:context.ownerSession,unmanagedIntervalMs01:interiorIntervalMs,onScene:(scene,receipt)=>this.#scene(scene,receipt,reader),
-    onStatus:s=>{if(s.worker.failed||s.cacheTimings?.metadataProofCurrent01===false){this.tiles.clear();this.requests.clear();}}});
+    onStatus:s=>{
+     if(s.cacheTimings?.metadataProofCurrent01===true)this.lastBinding={catalogue:s.worker.catalogSHA256,epoch:context.epoch,bindingEpoch:s.worker.bindingEpoch};
+     this.workerStatus=s;
+     if(s.worker.failed||s.cacheTimings?.metadataProofCurrent01===false){this.tiles.clear();this.requests.clear();}
+    }});
    this.reader=reader;this.key=key;reader.bindPreparationEpoch01(context.epoch);
   }
   const interior=context.interior,interiorKey=interiorObservationKey01(interior),remaining=interior?.durationMs-transportAge;
@@ -126,13 +148,15 @@ export class InstalledWorldContext01 {
   }
   const current=[...this.tiles.values()].filter(t=>t.expiresAt>now);
   const generation=current.map(t=>t.payload.id).join(':');
-  return {state:reader.failed?'source-proof-unavailable':current.some(t=>t.payload.surfaces.length)?'verified-context':current.length?'context-coverage-unknown':this.tiles.size?'context-expired':'waiting-for-current-cache',
+  const diagnostic=contextFailure01(this.workerStatus,this.lastBinding,reader.exitCode);
+  return {state:diagnostic.state??(current.some(t=>t.payload.surfaces.length)?'verified-context':current.length?'context-coverage-unknown':this.tiles.size?'context-expired':'waiting-for-current-cache'),
+   diagnostic:diagnostic.state?diagnostic:undefined,
    authority:'verified-collision-context-only',rendererAdmission:false,interiorOutcome:context.interiorOutcome??null,
    sessionId:frame.sessionId,streamId:frame.streamId,catalogue:context.catalogue,epoch:context.epoch,scope,listenerGeneration:context.generation,generation,
    remainingMs:current.length?Math.min(...current.map(t=>t.expiresAt-now)):0,tiles:generation!==known?current.map(t=>t.payload):null};
  }
  async close(){
   this.closed=true;this.#retire();await this.closing;
-  return {workerJoined:!this.closureUnknown,closedWorkers:this.closedWorkers??0};
+  return {workerJoined:!this.closureUnknown,closedWorkers:this.closedWorkers??0,diagnostic:contextFailure01(this.workerStatus,this.lastBinding,this.lastExitCode)};
  }
 }
