@@ -1,7 +1,8 @@
-import {VisualState,PassiveState,presentation,DisplayCadence,RateMeter,TELEMETRY_POLL_FPS,ReplayClock,project,pathStyle,parseVisualContext,visibleContext,clampFps,isPoint,LIMITS,CachedWorldState041,cachedWorldPresentation041} from './model.mjs';
+import {VisualState,PassiveState,presentation,DisplayCadence,RateMeter,TELEMETRY_POLL_FPS,ReplayClock,project,pathStyle,parseVisualContext,visibleContext,clampFps,isPoint,LIMITS,CachedWorldState041,cachedWorldPresentation041,InstalledContextState01} from './model.mjs';
 const $=id=>document.getElementById(id),state=new VisualState(),passive=new PassiveState(),replay=new ReplayClock(),cacheWorld=new CachedWorldState041();
 const displayCadence=new DisplayCadence(20),displayRate=new RateMeter(),solverRate=new RateMeter(),passiveRate=new RateMeter();
 const canvas=$('scene'),ctx=canvas.getContext('2d'),camera={target:[0,0,0],yaw:-.7,pitch:.65,scale:13,topDown:false,width:800,height:600};
+const installedContext=new InstalledContextState01();
 let token=null,serviceStatus={},isReplay=false,viewPaused=false,follow=true,fps=20,connected=false,context=null;
 let lastMetadataAt=-Infinity,noticeUntil=0,lastReplayRequest=-1,pendingSeek=true,requestEpoch=0,lastCoordinateKey=null;
 let geometryCompiled=null,geometryFaces=[],contextFaces=[],contextBoxes=[],contextSelectionKey='',lastDrawMs=0,paintMs=0;
@@ -49,6 +50,7 @@ function compileContext(view){
   contextFaces=selected.tiles.flatMap(t=>t.faces.map(f=>({vertices:f.map(i=>t.vertices[i]),openings:[],normal:null,context:true})));
   if(context)safeText($('context-status'),`${selected.reason} · ${selected.tiles.length} visible tiles`);
 }
+function unknownColor(region){return /activation|portal/.test(region.reason??'')?'#e99d68':'#e4cc80';}
 function draw(now){
   const start=performance.now(),bounds=canvas.getBoundingClientRect(),dpr=Math.min(3,devicePixelRatio||1);
   if(canvas.width!==Math.round(bounds.width*dpr)||canvas.height!==Math.round(bounds.height*dpr)){canvas.width=Math.round(bounds.width*dpr);canvas.height=Math.round(bounds.height*dpr);}
@@ -58,18 +60,26 @@ function draw(now){
   if(follow&&view.listener?.valid&&isPoint(view.listener.position))camera.target=[...view.listener.position];
   grid();compileGeometry(g);compileContext(view);for(const box of contextBoxes)wireBox(box.bounds,box.unknown?'#efc46c':'#95b9df',[7,5]);
   const cachedFaces=cached.visible?cached.tiles.flatMap(tile=>tile.surfaces.map(surface=>({...surface,context:false,cached:true,expired:['expired-fixture','future-fixture','expired-static-native','future-static-native'].includes(tile.state)}))):[];
-  const faces=[...contextFaces,...cachedFaces,...geometryFaces].map(face=>({...face,depth:face.vertices.reduce((n,p)=>n+project(p,camera).depth,0)/face.vertices.length})).sort((a,b)=>a.depth-b.depth);
+  const admittedIds=new Set(geometryFaces.map(face=>face.id));
+  const installedTiles=view.kind==='acoustic'?installedContext.visible(f,now):[];
+  const surrounding=new Map();
+  for(const tile of installedTiles){
+    wireBox(tile.bounds,'#6eafba',[5,7]);
+    for(const region of tile.missingRegions)if(isPoint(region.bounds?.min)&&isPoint(region.bounds?.max))wireBox(region.bounds,unknownColor(region),[3,7]);
+    for(const surface of tile.surfaces)if(!admittedIds.has(surface.id))surrounding.set(surface.id,{...surface,openings:[],context:true,installedContext:true});
+  }
+  const faces=[...contextFaces,...cachedFaces,...surrounding.values(),...geometryFaces].map(face=>({...face,depth:face.vertices.reduce((n,p)=>n+project(p,camera).depth,0)/face.vertices.length})).sort((a,b)=>a.depth-b.depth);
   for(const face of faces){
     // Openings can overlap a convex footprint edge. Clip to the actual footprint
     // before using even-odd holes so no exterior part of a hole becomes a face.
     ctx.save();ctx.beginPath();facePath(face.vertices);ctx.clip();
     ctx.beginPath();facePath(face.vertices);for(const opening of face.openings)facePath(opening.vertices);
     const shade=face.normal?Math.round(43+16*Math.abs(face.normal[2]||0)):35;
-    ctx.fillStyle=face.context?'#18212f':face.cached?'#1d3545':health.expired?'#242b38':`rgb(${shade},${shade+7},${shade+16})`;
+    ctx.fillStyle=face.installedContext?'#172e35':face.context?'#18212f':face.cached?'#1d3545':health.expired?'#242b38':`rgb(${shade},${shade+7},${shade+16})`;
     ctx.fill('evenodd');ctx.restore();
     // Stroke outside the clipped fill so the full 2.2 CSS-pixel outline survives
     // at high DPI and along a finite support edge. Holes stay clipped inside it.
-    ctx.beginPath();facePath(face.vertices);ctx.lineWidth=face.context?1.8:2.2;ctx.strokeStyle=face.context?'#97a8c2':face.cached?'#8fcbe8':health.expired?'#b0bed2':'#f5f7fc';ctx.setLineDash(face.context?[7,5]:face.expired||health.expired?[5,5]:view.kind==='replay'?[12,3]:[]);ctx.stroke();ctx.setLineDash([]);
+    ctx.beginPath();facePath(face.vertices);ctx.lineWidth=face.context?1.8:2.2;ctx.strokeStyle=face.installedContext?'#78b7bf':face.context?'#97a8c2':face.cached?'#8fcbe8':health.expired?'#b0bed2':'#f5f7fc';ctx.setLineDash(face.context?[7,5]:face.expired||health.expired?[5,5]:view.kind==='replay'?[12,3]:[]);ctx.stroke();ctx.setLineDash([]);
     if(face.openings.length){ctx.save();ctx.beginPath();facePath(face.vertices);ctx.clip();ctx.beginPath();for(const opening of face.openings)facePath(opening.vertices);ctx.stroke();ctx.restore();}
   }
   if(cached.visible){
@@ -81,7 +91,7 @@ function draw(now){
     }
   }
   // Missing-region wire boxes are evidence, never an invented city boundary.
-  for(const r of g?.missingRegions||[]){if(!isPoint(r.bounds?.min)||!isPoint(r.bounds?.max))continue;const [lo,hi]=[r.bounds.min,r.bounds.max];const a=[[lo[0],lo[1],lo[2]],[hi[0],lo[1],lo[2]],[hi[0],hi[1],lo[2]],[lo[0],hi[1],lo[2]]];line([...a,a[0]],'#e4cc80',2,[7,5]);}
+  for(const r of g?.missingRegions||[]){if(!isPoint(r.bounds?.min)||!isPoint(r.bounds?.max))continue;const [lo,hi]=[r.bounds.min,r.bounds.max];const a=[[lo[0],lo[1],lo[2]],[hi[0],lo[1],lo[2]],[hi[0],hi[1],lo[2]],[lo[0],hi[1],lo[2]]];line([...a,a[0]],unknownColor(r),2,[7,5]);}
   ctx.globalAlpha=health.expired?.7:1;
   for(const p of f?.paths||[]){if(!$('show-rejected').checked&&p.status!=='selected')continue;const style=pathStyle(p);if(!p.vertices)continue;const selected=p.status==='selected',dash=health.expired?[4,6]:view.kind==='replay'&&selected?[13,3]:style.dash;line(p.vertices,selected?'#0a0e14':style.color,selected?5.6:1.6,dash);if(selected)line(p.vertices,style.color,3.2,dash);for(const point of p.points||[])dot(point,style.color,selected?4.5:2.5);}
   ctx.globalAlpha=1;
@@ -105,6 +115,10 @@ function metadata(now){
   const coverage=g?`${g.surfaces.length} finite surfaces · ${g.coverage}. `:'No accepted geometry. ';
   safeText($('knowledge'),isCached?'Original authored cache fixtures only. Tile and room boxes are bounds, not invented walls. Unsupported, unprepared and outside space remain unknown. Runtime doors and activation are unavailable.':isPassive?'Passive camera telemetry only. Acoustic processing is inactive. The reference grid is not world geometry.':conditional?'Listener-only conditional direct path. Unobserved space is assumed clear for the owned beacon; this is not verified unobstructed geometry.':coverage+(h.expired?'Geometry unavailable or expired at this moment. ':'')+'Unobserved space remains unknown.');
   if(inspectionOnly)safeText($('knowledge'),'Unqualified XML inspection only. Source identity and placement remain unverified; no acoustic surfaces or solver paths are authorized. Outside coverage is unknown.');
+  const surroundingTiles=view.kind==='acoustic'?installedContext.visible(f,now):[];
+  if(f?.worldContext01&&!isReplay&&!context)safeText($('context-status'),surroundingTiles.some(tile=>tile.surfaces.length)?
+    `Teal · verified surrounding collision (visual only) · ${surroundingTiles.length} worksets. Dashed amber · missing or unsupported. Dashed orange · activation or portal unknown.`:
+    `Surrounding collision · ${installedContext.status.replaceAll('-',' ')}`);
   const packet=cacheWorld.packet;
   safeText($('cache-world-status'),packet?`${packet.tiles.length} declared tiles · ${packet.tiles.reduce((n,t)=>n+t.surfaces.length,0)} finite collision surfaces · ${packet.interiors.length} interior fixtures. ${cached.visible?cached.reason:'Inspection hidden.'} Installed-world compatibility remains unqualified.`:'No qualified cache snapshot supplied. The reference grid is not a building map.');
   safeText($('cache-world-identities'),cached.visible?cached.tiles.flatMap(t=>t.buildingBindings.slice(0,4).map(b=>`${t.tileId}: archetype ${b.archetypeHash} → ${b.collisionResourceId}`)).slice(0,16).join(' · '):'');
@@ -138,6 +152,7 @@ function metadata(now){
   if((f?.paths.length||0)>64){const p=document.createElement('p');p.className='muted';safeText(p,'First 64 path details shown; bounded canvas includes the remaining paths.');$('paths').append(p);}
 }
 function recordingStatus(){
+  if(serviceStatus.viewOnly){$('record-start').disabled=$('record-stop').disabled=true;safeText($('record-status'),'View only · recording disabled');return;}
   const r=serviceStatus.recording,active=r&&['recording','starting','stopping'].includes(r.state);
   $('record-start').disabled=!!active||isReplay;$('record-stop').disabled=!active||r?.state==='stopping';
   safeText($('record-status'),r?`${r.state} · ${time(r.durationMs)} · ${format((r.bytes||0)/1048576)} MiB${r.terminationReason?' · '+r.terminationReason:''}`:'Not recording');
@@ -169,6 +184,18 @@ async function telemetryLoop(){
   // Never derive this interval from the display target. 60 FPS displays copied
   // observations; it does not request extra collision, solver or DSP work.
   setTimeout(telemetryLoop,Math.max(1,1000/TELEMETRY_POLL_FPS-(performance.now()-now)));
+}
+async function installedContextLoop(){
+  if(!isReplay&&!viewPaused&&!document.hidden&&state.frame?.worldContext01){
+    const frame=state.frame,start=performance.now();
+    try{
+      const response=await api('/api/world-context?generation='+encodeURIComponent(installedContext.generation));
+      if(InstalledContextState01.key(frame)===InstalledContextState01.key(state.frame)){
+        const now=performance.now();installedContext.ingest(response,state.frame,now,now-start);
+      }
+    }catch{installedContext.clear();}
+  }else installedContext.clear();
+  setTimeout(installedContextLoop,400);
 }
 function animationLoop(now){
   requestAnimationFrame(animationLoop);
@@ -230,4 +257,4 @@ canvas.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-dra
   else {camera.yaw+=dx*.008;camera.pitch=Math.max(.15,Math.min(1.5,camera.pitch+dy*.005));}});
 canvas.addEventListener('wheel',e=>{e.preventDefault();camera.scale=Math.max(2,Math.min(80,camera.scale*Math.exp(-e.deltaY*.001)));},{passive:false});
 document.addEventListener('visibilitychange',()=>{replay.lastNow=null;pendingSeek=true;displayCadence.reset();displayRate.reset();});
-refreshRecordings().catch(()=>{});statusLoop();telemetryLoop().catch(error=>notice(error.message,true));requestAnimationFrame(animationLoop);
+refreshRecordings().catch(()=>{});statusLoop();telemetryLoop().catch(error=>notice(error.message,true));installedContextLoop();requestAnimationFrame(animationLoop);

@@ -51,7 +51,7 @@ namespace RichAudio.Beacon.Windows {public sealed class GameplayRuntime {
  public object Settings=new object();public PlayableConfiguration Configuration=new PlayableConfiguration{Eligible=new[]{new PlayableModel{Model=0xf9300cc5u,Context="player"},new PlayableModel{Model=0xf9300cc5u,Context="npc"}}};
  public readonly List<GameplayFrame> Frames=new List<GameplayFrame>();
  public void Publish(GameplayFrame frame){GameplayWire.Validate(frame,Session);Frames.Add(frame);}
- public void Start(string pointer,string game,string runtime){}public void SetStoryReady(bool value){}public void RequestStop(){}public bool Join(int milliseconds){return true;}
+ public void Start(string pointer,string game,string runtime){}public void SetStoryReady(bool value){}public void RequestStop(string reason="owner-stop"){}public bool Join(int milliseconds){return true;}
 }}
 namespace RichAudio.Beacon.Rph {
  internal static class InGameMenu {internal static void Start(){}internal static void Stop(){}}

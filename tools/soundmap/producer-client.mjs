@@ -13,16 +13,17 @@ export function readServiceConfiguration(filename){
 }
 export class SoundMapClient {
   constructor(filename){this.busy=false;this.closed=false;this.geometry=null;this.sentGeometry=null;this.events=[];this.currentEvent=null;this.stats={offered:0,sent:0,sentFrames:0,sentEvents:0,dropped:0,errors:0,droppedEvents:0,byteBudgetRejected:0};
-    const config=readServiceConfiguration(filename);this.worker=new Worker(new URL('./producer-network-worker.mjs',import.meta.url),{workerData:{...config,filename}});
-    this.worker.on('message',m=>{this.busy=false;if(m.ok){this.stats.sent++;this.stats[this.currentEvent?'sentEvents':'sentFrames']++;}else{this.stats.errors++;if(m.byteBudgetRejected)this.stats.byteBudgetRejected++;this.sentGeometry=null;if(this.currentEvent)this.stats.droppedEvents++;}this.currentEvent=null;this.drainEvents();});
-    this.worker.on('error',()=>{this.busy=false;this.closed=true;this.stats.errors++;});this.worker.unref();
+    this.worker=new Worker(new URL('./producer-network-worker.mjs',import.meta.url),{workerData:{filename}});
+    this.worker.on('message',m=>{this.busy=false;if(m.geometryNeeded)this.sentGeometry=null;if(m.ok){this.stats.sent++;this.stats[this.currentEvent?'sentEvents':'sentFrames']++;}else{this.stats.errors++;if(m.byteBudgetRejected)this.stats.byteBudgetRejected++;this.sentGeometry=null;if(this.currentEvent)this.stats.droppedEvents++;}this.currentEvent=null;this.drainEvents();});
+    this.worker.on('error',()=>{this.busy=false;this.closed=true;this.stats.errors++;});
+    this.worker.on('exit',()=>{this.busy=false;this.closed=true;});this.worker.unref();
   }
   offer(frame,geometry){
     if(geometry)this.geometry=geometry;if(!frame)return false;this.stats.offered++;
     if(this.busy||this.closed){this.stats.dropped++;return false;}this.busy=true;
     const g=this.geometry?.generation===frame.geometryGeneration&&this.sentGeometry!==frame.geometryGeneration?this.geometry:null;
     const encoding=preparedGeometryEncoding(g),body={frame:{...frame,transport:{...this.stats}},geometry:encoding?null:g};
-    if(encoding){const bodyBytes=encoding.bodyBytes.slice();this.worker.postMessage({route:'/api/telemetry',body,preparedGeometry:{header:encoding.header,bodyBytes}},[bodyBytes.buffer]);}
+    if(encoding){this.worker.postMessage({route:'/api/telemetry',body,preparedGeometry:encoding});}
     else this.worker.postMessage({route:'/api/telemetry',body});if(g)this.sentGeometry=g.generation;return true;
   }
   drainEvents(){if(this.busy||this.closed||!this.events.length)return;this.busy=true;this.currentEvent=this.events.shift();this.worker.postMessage({route:'/api/producer/event',body:{...this.currentEvent,transport:{...this.stats}}});}

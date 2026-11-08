@@ -11,12 +11,13 @@ const ui=path.join(path.dirname(fileURLToPath(import.meta.url)),'ui');
 const wireContract=fileURLToPath(new URL('../../src/acoustics/streaming/soundmap-wire.mjs',import.meta.url));
 const equal=(a,b)=>typeof a==='string'&&a.length===b.length&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 async function body(req,limit){const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>limit)throw Error('Request byte bound');chunks.push(chunk);}return Buffer.concat(chunks);}
-export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.now,ownerId=null}={}) {
+export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.now,ownerId=null,installedContext=null,viewOnly=false}={}) {
   if(!Number.isInteger(port)||port<0||port>65535)throw Error('Port bound');
   const privateRoot=privateDirectory(root),token=randomBytes(32).toString('hex'),recorder=new SessionRecorder(privateRoot,{now});
   if(ownerId!==null&&(typeof ownerId!=='string'||!/^[a-f0-9]{32}$/.test(ownerId)))throw Error('Owner identity bound');
   // Passive presentation needs only the pure shared wire contract. Load the
   // opt-in cache adapter only after trusted local code publishes one.
+  const worldContext=installedContext?new (await import('./installed-world-context01.mjs')).InstalledWorldContext01(installedContext):null;
   const passive=new PassiveListener(now);let cacheFeed=null,cacheLoading=null,cacheEpoch=0,cacheRevision=0,cacheReason='not-supplied',requestClose;
   const emptyCacheStatus=()=>({available:false,generation:null,revision:cacheRevision,reason:cacheReason,clockQualified:true,ageMs:null,geometryTimeMs:null,authority:'original-authored-fixture-only',installedWorldVerified:false,viewerCanPublishAcoustics:false});
   const cacheWorld={
@@ -29,7 +30,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
   let frame=null,receivedAt=0,sessionId=null,streamId=null,sequence=-1,replay=null,lastHost=null,stopping=null;
   const geometry=new Map(),geometrySizes=new Map(),stats={accepted:0,droppedUpdates:0,invalidUpdates:0,sessionChanges:0,geometryCacheEvictions:0};let geometryCacheBytes=0;
   let boundPort;
-  const status=()=>({connected:!!frame&&now()-receivedAt<=1500,sessionId,streamId,ageMs:frame?now()-receivedAt:null,...stats,geometryCacheBytes,geometryCacheMaximumBytes:SOUND_MAP_WIRE.serviceGeometryCacheBytes,geometryCacheCount:geometry.size,
+  const status=()=>({viewOnly,connected:!!frame&&now()-receivedAt<=1500,sessionId,streamId,ageMs:frame?now()-receivedAt:null,...stats,geometryCacheBytes,geometryCacheMaximumBytes:SOUND_MAP_WIRE.serviceGeometryCacheBytes,geometryCacheCount:geometry.size,
     passive:passive.status(),cacheWorld:cacheWorld.status(),recording:recorder.status(),replay:replay?{id:replay.id,durationMs:replay.durationMs}:null,
     audio:{hostConnected:!!lastHost&&now()-lastHost.receivedAt<1500,host:lastHost?.info??null}});
   const server=http.createServer(async(req,res)=>{
@@ -42,6 +43,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
       if(req.headers.host!=='127.0.0.1:'+boundPort||req.headers.origin&&req.headers.origin!==origin||route.startsWith('/api/')&&req.headers['sec-fetch-site']==='cross-site'){send({error:'Same-origin localhost only'},403);return;}
       if(route==='/api/session'&&req.method==='GET'){send({token});return;}
       if(route.startsWith('/api/')&&!equal(req.headers['x-richaudio-token'],token)){send({error:'Session capability required'},403);return;}
+      if(viewOnly&&req.method==='POST'&&(route.startsWith('/api/record/')||route.startsWith('/api/host/'))){send({error:'SoundMap is view only'},403);return;}
       let value=null;
       if(req.method==='POST'&&route!=='/api/host/pcm'){
         if(!String(req.headers['content-type']).startsWith('application/json'))throw Error('JSON content type required');
@@ -51,6 +53,8 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
       else if(route==='/api/frame'&&req.method==='GET'){
         const g=frame?geometry.get(frame.geometryGeneration):null;
         send({mode:'live',frame,passive:passive.snapshot(),cacheWorld:cacheWorld.snapshot(url.searchParams.get('cacheWorldGeneration')??''),geometry:g&&url.searchParams.get('geometryGeneration')!==g.generation?g:null,status:status()});
+      }else if(route==='/api/world-context'&&req.method==='GET'){
+        send(worldContext?.snapshot(frame,url.searchParams.get('generation'))??{state:'context-not-configured',tiles:[]});
       }else if(route==='/api/cache-world'&&req.method==='GET'){
         send(cacheWorld.snapshot(url.searchParams.get('generation')??''));
       }else if(route==='/api/passive'&&req.method==='POST'){
@@ -84,7 +88,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
         frame=f;sequence=f.sequence;receivedAt=now();stats.accepted++;
         recorder.frame(f,g??geometry.get(f.geometryGeneration),receivedAt);
         if(f.diagnostics?.audioDeadlineFailures||f.diagnostics?.missingHistorySinceLastSample||(f.performance?.workerTotalMs??0)>512/48)recorder.event('diagnostic',{performance:f.performance,diagnostics:f.diagnostics,audioFrame:f.audioFrame});
-        send({accepted:true});
+        send({accepted:true,geometryNeeded:typeof f.geometryGeneration==='string'&&!geometry.has(f.geometryGeneration)});
       }else if(route==='/api/producer/event'&&req.method==='POST'){recorder.event(value.type??'producer-event',value);send({accepted:true});}
       else if(route==='/api/record/start'&&req.method==='POST'){
         const recording=recorder.start(value);stopping=null;
@@ -143,13 +147,23 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
   const temporary=path.join(privateRoot,'service-'+randomBytes(8).toString('hex')+'.tmp');fs.writeFileSync(temporary,JSON.stringify(descriptor),{flag:'wx'});fs.renameSync(temporary,descriptorFile);
   const tick=setInterval(()=>{recorder.tick();if(stopping&&now()-stopping.at>1500){recorder.event('audio-tail-unconfirmed',{reason:'host-flush-timeout'});recorder.stop('host-flush-timeout');stopping=null;}},100);tick.unref();
   let closing=null;
-  const close=()=>closing??=(async()=>{cacheWorld.clear('service-shutdown');clearInterval(tick);recorder.stop('service-shutdown');await new Promise(resolve=>server.close(resolve));})();
+  const close=()=>closing??=(async()=>{cacheWorld.clear('service-shutdown');clearInterval(tick);recorder.stop('service-shutdown');await Promise.all([worldContext?.close(),new Promise(resolve=>server.close(resolve))]);})();
   requestClose=close;
   return {server,descriptor,recorder,status,privateRoot,cacheWorld,close};
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
-  let root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..'),port=17833,ownerId=null;
-  for(let i=2;i<process.argv.length;i+=2){if(process.argv[i]==='--root')root=path.resolve(process.argv[i+1]);else if(process.argv[i]==='--port')port=Number(process.argv[i+1]);else if(process.argv[i]==='--owner')ownerId=process.argv[i+1];else throw Error('Unknown SoundMap option');}
-  const service=await startSoundMap({root,port,ownerId});console.log('SoundMap '+service.descriptor.url+' (private configuration: .local/soundmap/service.json)');
+  let root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..'),port=17833,ownerId=null,installedContext=null,viewOnly=false;
+  for(let i=2;i<process.argv.length;i++){
+    const option=process.argv[i];
+    if(option==='--view-only'){viewOnly=true;continue;}
+    const value=process.argv[++i];
+    if(!value)throw Error('Missing SoundMap option value');
+    if(option==='--root')root=path.resolve(value);
+    else if(option==='--port')port=Number(value);
+    else if(option==='--installed-context')installedContext=(await import('./installed-world-context01.mjs')).installedContextConfig01(value);
+    else if(option==='--owner')ownerId=value;
+    else throw Error('Unknown SoundMap option');
+  }
+  const service=await startSoundMap({root,port,ownerId,installedContext,viewOnly});console.log('SoundMap '+service.descriptor.url+' (private configuration: .local/soundmap/service.json)');
   const close=()=>service.close().then(()=>process.exit(0));process.on('SIGINT',close);process.on('SIGTERM',close);
 }

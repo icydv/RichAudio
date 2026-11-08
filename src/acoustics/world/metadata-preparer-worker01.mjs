@@ -42,7 +42,7 @@ parentPort.on('message',m=>{try{
  const fast=installed?readAuthorityView(bytes):null;
  if(fast)postProof(m,began,fast.binding,id=>fast.rows.get(id),'manifest-bound-driver-view');
  const manifest=JSON.parse(bytes.toString('utf8').replace(/^\uFEFF/,''));
- const sha=manifest.ResolvedCatalogSHA256;if(!/^[a-f0-9]{64}$/.test(sha??'')||config.catalogSHA256&&sha!==config.catalogSHA256||config.expectedGameSHA256&&manifest.InputBinding?.GameExecutableSHA256!==config.expectedGameSHA256)throw Error('Metadata game/catalogue identity');
+ const sha=manifest.ResolvedCatalogSHA256;if(!/^[a-f0-9]{64}$/.test(sha??'')||config.catalogSHA256&&sha!==config.catalogSHA256||config.expectedCatalogSHA256&&sha!==config.expectedCatalogSHA256||config.expectedGameSHA256&&manifest.InputBinding?.GameExecutableSHA256!==config.expectedGameSHA256)throw Error('Metadata game/catalogue identity');
  parentPort.postMessage({type:'manifest-read',serial,milliseconds:performance.now()-began,bytes:bytes.length});
  if(m.epoch&&manifest.ValidationEpochUtc01!==m.epoch){parentPort.postMessage({type:'waiting',serial});return;}
  const binding=sceneAuthorityBinding01(manifest);

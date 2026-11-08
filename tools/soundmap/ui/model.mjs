@@ -257,3 +257,30 @@ export function cachedWorldPresentation041(cache,base,now,{enabled=false}={}){
     reason:aligned?'Cached acoustic geometry · exact declared model alignment':'Cached acoustic inspection · live poses and paths hidden without exact model alignment',
     badges:[packet.authority==='reviewed-static-native08'?'Reviewed native static geometry · derived coverage':'Original authored fixtures','Installed world unqualified','Runtime activation unknown','Unprepared/outside coverage unknown']};
 }
+
+export class InstalledContextState01 {
+  constructor(){this.clear();}
+  clear(){this.key=null;this.generation='';this.tiles=[];this.validUntil=-Infinity;this.status='awaiting-current-camera-and-proof';}
+  static key(frame){
+    const c=frame?.worldContext01;
+    return c&&frame.listener?.valid&&isPoint(c.position)?[frame.sessionId,frame.streamId,c.catalogue,c.epoch,[c.generation,...c.position.map(v=>Math.floor(v/16))].join(':')].join(':'):null;
+  }
+  ingest(value,frame,now,roundTripMs){
+    const key=InstalledContextState01.key(frame);
+    if(!key||!value||[value.sessionId,value.streamId,value.catalogue,value.epoch,value.scope].join(':')!==key||
+       !finite(value.remainingMs)||value.remainingMs<=0||value.remainingMs>1000){
+      this.clear();this.status=value?.state??this.status;return;
+    }
+    if(value.tiles!==null){
+      fail(Array.isArray(value.tiles)&&value.tiles.length<=5,'Bounded surrounding context');
+      for(const tile of value.tiles){
+        fail(ident(tile.id)&&isPoint(tile.bounds?.min)&&isPoint(tile.bounds?.max)&&Array.isArray(tile.surfaces)&&tile.surfaces.length<=512&&Array.isArray(tile.missingRegions)&&tile.missingRegions.length<=256,'Bounded installed context tile');
+        for(const s of tile.surfaces)fail(ident(s.id)&&Array.isArray(s.vertices)&&s.vertices.length>=3&&s.vertices.length<=16&&s.vertices.every(isPoint),'Bounded installed context surface');
+      }
+      this.tiles=value.tiles;
+    }else if(this.key!==key||this.generation!==value.generation){this.clear();return;}
+    this.key=key;this.generation=value.generation;this.status=value.state;
+    this.validUntil=now+Math.max(0,value.remainingMs-roundTripMs);
+  }
+  visible(frame,now){return this.key===InstalledContextState01.key(frame)&&now<this.validUntil?this.tiles:[];}
+}

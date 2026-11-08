@@ -27,7 +27,7 @@ namespace Rage.Native {public static class NativeFunction {
 namespace RichAudio.Beacon.Windows {public sealed class GameplayRuntime {
  public string Session="0123456789abcdef0123456789abcdef",State="stock-fallback";public int HostPid,Attempts;public double MaximumObservationMs;public object Settings=new object();
  public PlayableConfiguration Configuration=new PlayableConfiguration{Eligible=new[]{new PlayableModel{Model=0xF9300CC5,Context="player"}}};public readonly List<GameplayFrame> Frames=new List<GameplayFrame>();
- public void Publish(GameplayFrame frame){GameplayWire.Validate(frame,Session);Frames.Add(frame);}public void Start(string a,string b,string c){}public void SetStoryReady(bool b){}public void RequestStop(){}public bool Join(int milliseconds){return true;}
+ public void Publish(GameplayFrame frame){GameplayWire.Validate(frame,Session);Frames.Add(frame);}public void Start(string a,string b,string c){}public void SetStoryReady(bool b){}public void RequestStop(string reason="owner-stop"){}public bool Join(int milliseconds){return true;}
 }}
 namespace RichAudio.Beacon.Rph {internal static class InGameMenu{internal static void Start(){}internal static void Stop(){}}internal static class PassiveListener{internal static void Start(){}internal static void Stop(){}}}
 internal static class TestInitialPreparationOffer01 {

@@ -360,7 +360,8 @@ export class InstalledStaticWorld01 {
   const missingBounds=[...regions(unresolvedInteriorBounds,'unresolved-interior-activation'),
    ...regions(interiors.filter(e=>!selected.includes(e)).map(e=>e.bounds),'interior-source-unprepared'),
    ...regions([...new Map(selected.flatMap(e=>e.placement?.portalBounds??[]).map(b=>[digest(b),b])).values()],'unknown-portal-state'),
-   ...regions(candidates.filter(({row})=>!sceneSource01(row)).map(e=>e.bounds),'exterior-source-unprepared'),
+   ...regions(defaultExcluded.map(e=>e.bounds),'collision-layer-activation-unknown'),
+   ...candidates.filter(({row})=>!sceneSource01(row)).map(({row,bounds})=>({bounds,reason:row.Eligibility==='deferred-conditional-mapgroup'?'conditional-mapgroup-activation-unknown':'exterior-source-unprepared'})),
    ...regions(eligible.slice(maximumResources).map(e=>e.bounds),'resource-capacity')];
   const views=[];
   let geometryUnknown=0,successfulResources=0;

@@ -92,8 +92,10 @@ if(!config.demoProfile&&config.acousticWorld!==false){
  const derivedCacheRoot=c.derivedCacheRoot===undefined?undefined:path.resolve(c.derivedCacheRoot);
  if(c.derivedCacheRoot!==undefined&&(!path.isAbsolute(c.derivedCacheRoot)||!derivedCacheRoot.split(path.sep).includes('.local')))throw Error('explicit private derived-world cache root');
  const worldInside=relative=>{if(typeof relative!=='string'||path.isAbsolute(relative))throw Error('relative installed cache metadata path');const p=path.resolve(privateCacheRoot,relative);if(!p.startsWith(privateCacheRoot+path.sep))throw Error('installed cache metadata escaped');return p;};
+ // Match the bounded query's maximum resource count so a repeated dense
+ // workset can warm instead of evicting its own sources on every scan.
  const worldConfig={manifestPath:worldInside(c.manifestPath??worldRoot+'/geometry/manifest.json'),catalogPath:worldInside(c.catalogPath??worldRoot+'/resolved/resolved-catalog.json'),expectedGameSHA256:config.gameSha256,
-  ...(!qualification&&c.catalogSHA256?{catalogSHA256:c.catalogSHA256}:{}),...(derivedCacheRoot?{privateRoot:derivedCacheRoot}:{}),...(!qualification&&(c.initialObservationPath!==undefined||c.privateCacheRoot===undefined)?{initialObservationPath:worldInside(c.initialObservationPath??worldRoot+'/geometry/initial-observation01.json')}:{ }),maximumResidentResources:8};
+  ...(c.catalogSHA256?{expectedCatalogSHA256:c.catalogSHA256}:{}),...(derivedCacheRoot?{privateRoot:derivedCacheRoot}:{}),...(!qualification&&(c.initialObservationPath!==undefined||c.privateCacheRoot===undefined)?{initialObservationPath:worldInside(c.initialObservationPath??worldRoot+'/geometry/initial-observation01.json')}:{ }),maximumResidentResources:16};
  installedScenes=new InstalledSceneService01({config:worldConfig,session,onStatus:s=>{
   worldStatus={stage:s.stage,installedWorldVerified:false,genuineResourceVerified:s.genuineResourceVerified===true,preparation:s.preparation??{completedEligibleTiles:0,eligibleTiles:0,totalTiles:0},
    reason:s.reason??s.failure??s.worker?.failure??null,residentResources:s.residentResources??0,resourceLoads:s.resourceLoads??0,controller:s.worker??s.controller??null,coverageStates:s.coverageStates??null,initialPreparationPriority:s.initialPreparationPriority??null,localReadiness:s.localReadiness??null,cacheTimings:s.cacheTimings??null};
@@ -135,7 +137,7 @@ function checkMeasurementReadiness(d){
 function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality,readiness=d.environmentalReadiness01;
  checkMeasurementReadiness(d);
  const consumerWorldStage=readiness.state==='active'?(readiness.renewalQualified?'active-conditional-local-scene':'active-local-scene-renewal-at-risk'):readiness.state==='lost'?'local-scene-continuity-lost':['stopping','stopped'].includes(readiness.state)?readiness.state:readiness.managed?'preparing-local-scene':worldStatus.stage;
- try{if(soundMapRequired01()&&!viewerClient&&fs.existsSync(path.join(root,'.local/soundmap/service.json')))viewerClient=new SoundMapClient(path.join(root,'.local/soundmap/service.json'));if(!soundMapRequired01()&&viewerClient){viewerClient.close().catch(()=>{});viewerClient=null;}}catch{}
+ try{if(soundMapRequired01()&&(!viewerClient||viewerClient.closed))viewerClient=new SoundMapClient(path.join(root,'.local/soundmap/service.json'));if(!soundMapRequired01()&&viewerClient){viewerClient.close().catch(()=>{});viewerClient=null;}}catch{}
  log({type:'gameplay-status',status:{featureProfile:'STREET-01-main',requestedQuality:q.requestedQuality,activeQuality:q.activeQuality,pathBudget:engine.pipeline.renderer.maxPathsPerSource,
   requestedAcceleration:b.requestedAcceleration,activeAcceleration:b.activeAcceleration,gpuDevice:b.gpuDevice,gpuCapability:b.gpuResultsApplied>0?'hardware-directcompute':'unestablished',gpuResultsApplied:b.gpuResultsApplied??b.totals?.gpuResultsApplied??0,
   droppedResults:b.droppedResults??b.totals?.droppedResults??0,qualityDeadlineMisses:d.deadlineMisses,activeSources:d.active,activeVehicles:d.active,activeEmitters:d.active*2+(d.airflow?.exteriorSources??0),sourceBudget:d.activeLimit,
@@ -191,12 +193,19 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
   evidence?.record({type:'complete-render-block',sequence:(sequence-1)>>>0,completeRenderMs:engine.lastCompleteRenderMs,
    stages:engine.lastRenderStages01});
   if(engine.lastCompleteRenderMs>8){if(processingOverrunRows<2400&&process.stderr.writableLength<16384){log({type:'complete-render-overrun',sequence:(sequence-1)>>>0,producerFrameStart:((sequence-1)>>>0)*512,completeRenderMs:engine.lastCompleteRenderMs,hardDeadlineMs:512/48,headroomTargetMs:8,hardMiss:engine.lastCompleteRenderMs>512/48,geometryModel:engine.pipeline.simulation.scene.observationModel?.kind??'conditional-direct',stages:engine.lastRenderStages01});processingOverrunRows++;}else processingOverrunRowsOmitted++;}
-  if(viewerClient&&engine.visual?.soundMapFrame)try{viewerClient.offer(engine.visual.soundMapFrame,engine.visual.soundMapGeometry);}catch{}
+  const visual=viewerClient&&engine.visual;
   const outputSequence=(sequence-1)>>>0;
   const outputAt=traceDelivery?performance.now():0;
   if(traceDelivery)delivery('w',outputSequence,outputAt,0,engine.lastCompleteRenderMs);
   await new Promise((resolve,reject)=>process.stdout.write(packet,e=>e?reject(e):resolve()));
   if(traceDelivery)delivery('d',outputSequence,performance.now(),outputAt);
+  if(visual?.soundMapFrame&&viewerClient)try{
+   const frame=visual.soundMapFrame,listener=lastFrame?.frame.listener;
+   const epoch=installedScenes?.validationEpochUtc01,catalogue=installedScenes?.catalogBinding;
+   const ageMs=lastFrame?lastFrame.age+performance.now()-lastFrame.at:Infinity;
+   const worldContext01=epoch&&catalogue&&listener?.valid&&!listener.paused&&ageMs<=250?{epoch,catalogue,ownerSession:session,generation:listener.generation,position:listener.position,ageMs}:null;
+   viewerClient.offer({...frame,worldContext01},visual.soundMapGeometry);
+  }catch{}
   if(engine.lastTiming){
    // The host's existing bounded diagnostic writer receives this on its stderr
    // worker. stdout completion is pipe completion, never endpoint submission.
