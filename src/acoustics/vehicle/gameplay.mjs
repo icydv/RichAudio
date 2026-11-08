@@ -80,11 +80,16 @@ export class StockGameplay {
   for(const {model,context} of eligible){
    const {bank}=this.registry.resolve(model,context);
    const options=this.stockSourceOptions01(bank);
-   // Match the prepared bank's actual grain/feature layout before credits
-   // begin. These isolated voices never join gameplay or the PCM queue.
+   // Exercise fresh role registrations on the prepared bank before credits
+   // begin. Continuing one voice exercises steady synthesis, but skips the
+   // first engine and exhaust waveform searches on each new source lifetime.
    for(const lift of [false,true]){
-    const disposable=this.registry.createSource(model,context,options);
-    for(let i=0;i<12;i++)disposable.renderInto({operatingPoint:.35+i*.04,load:lift?.05:.9,lift,running:true},engine,exhaust);
+    for(const operatingPoint of [.5,.12,.3,.75,.5,.16,.4,.85]){
+     const disposable=this.registry.createSource(model,context,options);
+     disposable.prepareInitialMatches01();
+     const control={operatingPoint,load:lift?.05:.9,lift,running:true};
+     for(let block=0;block<3;block++)disposable.renderInto(control,engine,exhaust);
+    }
    }
    this.startupVoices01.set(model+':'+context,this.registry.createSource(model,context,options));
   }
@@ -383,13 +388,16 @@ export class StockGameplay {
    slot.vehicle=item.v;slot.score=item.score;
   }
   const afterSelection=this.captureCompleteRenderStages01?this.now():0;
-  let stockSynthesisMs=0;
+  let stockSynthesisMs=0,stockInitialMatchReuses=0;
   for(const c of this.localAirflow)c.fill(0);this.airflowState.riderActive=false;this.airflowState.exteriorSources=0;
   const sources=[];for(const s of this.slots){const ids=['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`),aeroId=`stock:slot${s.index}:aero`;for(const id of [...ids,aeroId])this.inputs[id].fill(0);
    if(!s.source||!this.sample.state&&(!independentSource||!selected.some(item=>item.identity===s.identity)))continue;const v=s.vehicle;
    const stockStart=this.captureCompleteRenderStages01?this.now():0;
    s.source.renderInto({operatingPoint:v.operatingPoint,load:v.lift ? .05 : .9,lift:v.lift,running:v.running},this.inputs[ids[0]],this.inputs[ids[1]]);
-   if(this.captureCompleteRenderStages01)stockSynthesisMs+=this.now()-stockStart;
+   if(this.captureCompleteRenderStages01){
+    stockSynthesisMs+=this.now()-stockStart;
+    if(sourceBlocksBefore===0)stockInitialMatchReuses+=s.source.initialMatchReuses01?.()??0;
+   }
    this.stageCounters.sourcePlaybackBlocks++;observePcmBlock(this.inputs[ids[0]],this.stageCounters.engine);observePcmBlock(this.inputs[ids[1]],this.stageCounters.exhaust);
    const profile=this.profiles?.profiles?.[s.source.vehicle.model];
    for(const [i,role]of ['engine','exhaust'].entries()){
@@ -442,7 +450,7 @@ export class StockGameplay {
   this.lastRenderStages01=this.captureCompleteRenderStages01||this.lastCompleteRenderMs>8?{admissionMs:afterAdmission-start,
    sourceAndControlMs:beforePrepare-afterAdmission,propagationMs:beforePcm-beforePrepare,
    pcmMs:elapsed-(beforePcm-start),bookkeepingMs:this.lastCompleteRenderMs-elapsed,
-   ...(this.captureCompleteRenderStages01?{sourceSelectionMs:afterSelection-afterAdmission,stockSynthesisMs}:{}),
+   ...(this.captureCompleteRenderStages01?{sourceSelectionMs:afterSelection-afterAdmission,stockSynthesisMs,stockInitialMatchReuses}:{}),
    firstSourceBlock:sourceBlocksBefore===0&&this.stageCounters.sourcePlaybackBlocks>0}:null;
   this.stats.maximumCompleteRenderMs=Math.max(this.stats.maximumCompleteRenderMs??0,this.lastCompleteRenderMs);
   if(this.lastCompleteRenderMs>8)this.stats.completeRenderHeadroomMisses=(this.stats.completeRenderHeadroomMisses??0)+1;

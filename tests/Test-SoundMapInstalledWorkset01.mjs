@@ -6,9 +6,25 @@ import {acousticScene} from '../src/acoustics/engine/contracts.mjs';
 import {CausalSimulation,StreamingRenderer} from '../src/acoustics/streaming/causal.mjs';
 import {SoundMapTelemetry,soundMapLimits,prepareInstalledSoundMapGeometry01,registerPreparedSoundMapGeometry01} from '../src/acoustics/streaming/soundmap-telemetry.mjs';
 import {SOUND_MAP_WIRE,preparedGeometryEncoding} from '../tools/soundmap/ui/wire-limits.mjs';
-import {VisualState,checkGeometry} from '../tools/soundmap/ui/model.mjs';
+import {InstalledContextState01,VisualState,checkGeometry} from '../tools/soundmap/ui/model.mjs';
 import {startSoundMap} from '../tools/soundmap/server.mjs';import {SoundMapClient} from '../tools/soundmap/producer-client.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url)),serializedBytes=x=>Buffer.byteLength(JSON.stringify(x));
+test('surrounding context reports exact admitted-ID overlap, unknown regions and expiry',()=>{
+ const view=new InstalledContextState01(),frame={sessionId:'session',streamId:'stream',listener:{valid:true},
+  worldContext01:{generation:1,position:[0,0,0],catalogue:'catalogue',epoch:'epoch',interiorKey:'interior'}};
+ const support=id=>({id,vertices:[[0,0,0],[1,0,0],[1,1,0]]});
+ const tile={id:'tile',bounds:{min:[0,0,0],max:[1,1,1]},surfaces:[support('admitted'),support('context')],
+  missingRegions:[{reason:'unknown-portal-state'},{reason:'surface-capacity'}]};
+ const packet={sessionId:'session',streamId:'stream',catalogue:'catalogue',epoch:'epoch',scope:'1:0:0:0:interior',
+  generation:'tile',remainingMs:100,tiles:[tile],state:'verified-context'};
+ view.ingest(packet,frame,10,5);
+ assert.deepEqual(view.explanation(frame,{surfaces:[support('admitted')]},20),{worksets:1,admitted:1,contextOnly:1,
+  state:'verified-context',unknownReasons:['surface-capacity','unknown-portal-state']});
+ assert.equal(view.explanation(frame,null,105).state,'expired-context');
+ const outside={...frame,worldContext01:{...frame.worldContext01,interiorKey:null}};
+ assert.equal(view.explanation(outside,null,20).contextOnly,0);
+ assert.equal(view.explanation(outside,null,20).state,'changing-camera-context');
+});
 function originalScene({installedProfile=true,padding=0}={}){
  const surfaces=Array.from({length:4096},(_,i)=>({id:'original-contract01:'+i,coordinateSpace,center:[(i%64-31.5)*3,(Math.floor(i/64)-31.5)*3,0],normal:[0,0,1],u:[1,0,0],half:[1,1],motion:'static',reflectiveSide:'both',provenance:{kind:'synthetic',reference:'original-workset01-contract-only'},confidence:1,version:1,observedAt:0,validUntil:60000}));
  const tile=createTile({schemaVersion:1,id:'original-large-workset01',coordinateSpace,timeUnit:'monotonic-ms',bounds:{min:[-128,-128,-8],max:[128,128,8]},listenerAnchor:[5,0,1],coverage:installedProfile?'partial':'complete-synthetic',surfaces,missingRegions:[],version:1,createdAt:0,validUntil:60000,build:'original-contract01-not-native',session:'original-workset01',interior:'original-fixture',dynamicEpoch:1},{maximumSurfaces:4096});

@@ -1,0 +1,47 @@
+import assert from 'node:assert/strict';
+import {associateConditionalBound01,indexConditionalManifests01,replayEffectiveYtyp01,verifyPlacementArchetype01}
+ from '../src/acoustics/world/effective-world-identity01.mjs';
+
+const h=n=>'0x'+n.toString(16).padStart(8,'0'),sha=n=>String(n).repeat(64);
+const a='x64a.rpf/metadata.rpf/same.ytyp',b='x64b.rpf/metadata.rpf/other.ytyp',c='x64c.rpf/same.ytyp';
+const project=(member,digest,name,definitions)=>({member,sha256:sha(digest),nameHash:h(name),definitions:definitions.map(hash=>({hash:h(hash)}))});
+const sources=[project(a,1,16,[0,1,2]),project(b,2,16,[2,3]),project(c,3,32,[3,3,4])];
+const visits=sources.map(({member,sha256},archiveOrdinal)=>({member,sha256,archiveOrdinal,entryOrdinal:0}));
+const input={expectedMembers:[a,b,c],projections:[sources[2],sources[0],sources[1]],traversal:visits,completePopulation:true};
+const result=replayEffectiveYtyp01(input),forHash=(rows,n)=>rows.find(row=>row.hash===h(n));
+assert.equal(forHash(result.files,16).winner.member,b);
+assert.equal(forHash(result.files,32).winner.member,c);
+assert.equal(forHash(result.archetypes,0),undefined);
+assert.equal(forHash(result.archetypes,1).winner.member,a);
+assert.deepEqual(forHash(result.archetypes,2).overwriteHistory.map(row=>row.member),[a,b]);
+assert.deepEqual(forHash(result.archetypes,3).overwriteHistory.map(row=>[row.member,row.ordinal]),[[b,1],[c,0],[c,1]]);
+assert.equal(verifyPlacementArchetype01(forHash(result.archetypes,1),{member:a,sha256:sha(1),ordinal:1}),'same-effective-definition');
+assert.equal(verifyPlacementArchetype01(forHash(result.archetypes,3),{member:c,sha256:sha(3),ordinal:0}),'placement-requalification-required');
+const partial=replayEffectiveYtyp01({...input,projections:sources.slice(0,2)});
+assert.deepEqual(partial.missingMembers,[c]);
+assert.equal(forHash(partial.archetypes,1).winner,null);
+assert.equal(verifyPlacementArchetype01(forHash(partial.archetypes,1),{}),'effective-archetype-unverified');
+assert.equal(forHash(replayEffectiveYtyp01({...input,traversal:null}).archetypes,2).state,'observed-order-unresolved');
+assert.equal(forHash(replayEffectiveYtyp01({...input,completePopulation:false}).files,16).winner,null);
+assert.throws(()=>replayEffectiveYtyp01({...input,traversal:[{...visits[0],sha256:sha(4)}]}),/bound CodeWalker traversal/);
+assert.throws(()=>replayEffectiveYtyp01({...input,traversal:[visits[0],{...visits[1],archiveOrdinal:0}]}),/bound CodeWalker traversal/);
+
+const ya='x64a.rpf/metadata.rpf/_manifest.ymf',yb='x64b.rpf/metadata.rpf/_manifest.ymf';
+const complete=(path,n)=>({kind:'ymf-projection',representation:'pso-membership-projection',path,sha256:sha(n)});
+const group=(path,n,id,bounds)=>({kind:'ymf-mapgroup',path,sha256:sha(n),groupHash:h(id),bounds:bounds.map(h)});
+const active=new Set(['x64a.rpf/metadata.rpf','x64b.rpf/metadata.rpf']);
+const rows=[complete(ya,1),complete(yb,2),group(ya,1,4,[5]),group(yb,2,4,[5]),group(yb,3,9,[11])];
+const index=indexConditionalManifests01(rows,active),keys={groupHash:h(4),boundsHash:h(5)};
+const test=(query,state,using=index)=>assert.equal(associateConditionalBound01(using,{...keys,...query}).state,state);
+test({},'group-ambiguous');
+test({expectedPath:ya,expectedSHA256:sha(1)},'source-bound');
+test({expectedPath:ya,expectedSHA256:sha(2)},'manifest-identity-mismatch');
+test({groupHash:h(9)},'native-key-mismatch');
+test({groupHash:h(9),boundsHash:h(11)},'source-manifest-unidentified');
+test({groupHash:null},'native-key-unavailable');
+test({effectiveSelection:'inactive'},'resource-inactive');
+test({effectiveSelection:'superseded'},'resource-superseded');
+test({},'source-bound',indexConditionalManifests01(rows,new Set(['x64a.rpf/metadata.rpf'])));
+test({expectedPath:ya},'expected-manifest-unavailable',indexConditionalManifests01([],active));
+assert.throws(()=>indexConditionalManifests01([...rows,complete(ya,1)],active),/Duplicate completed/);
+console.log('Effective world identity fixtures passed');

@@ -2,8 +2,11 @@
 // rate evidence, not recovered crank RPM or a claim of GTA's native algorithm.
 import {SourcePreparationBudgetError10} from './source-preparation-budget10.mjs';
 const FS=48000;
+const stateAlpha=1-Math.exp(-1/(FS*.01));
 const check=(ok,message)=>{if(!ok)throw Error(message);};
 const smooth=x=>x*x*(3-2*x);
+const matchSamples=64;
+const initialMatches=new WeakMap();
 const sourceTimelines=new WeakMap();
 // Prepared data contains no reader, random state, phase, clock or emitted PCM.
 // Tokens bind the exact loaded asset/options; changing assets requires a new plan.
@@ -100,6 +103,11 @@ function idleLoop(samples,rate){
 
 export class StockGrainVoice {
   #sourceTimeline=null;
+  #preparation=null;
+  #prepareInitialMatch=false;
+  #reusedInitialMatch=false;
+  #nextPair={a:0,b:0,w:0,target:0};
+  #nextOutput={value:0,energy:0};
   constructor(asset,{regions=null,texture=true,preparation10=null}={}){
     const prepared=preparation10===null?null:preparations10.get(preparation10);
     if(preparation10!==null)validateStockGrainPreparation10(asset,{regions,texture,preparation10});
@@ -148,16 +156,23 @@ export class StockGrainVoice {
     this.head=undefined;this.join=undefined;this.texturePlan=undefined;this.lastPlanAnchor=undefined;
     this.lastPair=undefined;this.current=undefined;this.lastRate=undefined;this.pendingBoundary=undefined;
     if(prepared?.timeline)this.#sourceTimeline=prepared.timeline;
+    this.#preparation=prepared??null;
+    this.ratePair={a:0,b:0,w:0,target:0};
     if(this.textureEnabled)this.#timeline();
   }
-  pair(u){
+  pair(u,result={a:0,b:0,w:0,target:0}){
     const target=u*(this.asset.frames-1),r=this.intervals;let low=0,high=r.length-1;
-    if(target<=r[0].centre)return {a:0,b:0,w:0,target};
-    if(target>=r.at(-1).centre)return {a:r.length-1,b:r.length-1,w:0,target};
-    while(low<high){const mid=(low+high)>>1;if(r[mid].centre<target)low=mid+1;else high=mid;}
-    const b=low,a=Math.max(0,b-1);
-    const w=a===b?0:Math.max(0,Math.min(1,(target-r[a].centre)/(r[b].centre-r[a].centre)));
-    return {a,b,w,target};
+    result.target=target;
+    if(target<=r[0].centre||target>=r[high].centre){
+      result.a=result.b=target<=r[0].centre?0:high;
+      result.w=0;
+    }else{
+      while(low<high){const mid=(low+high)>>1;if(r[mid].centre<target)low=mid+1;else high=mid;}
+      const b=low,a=Math.max(0,b-1);
+      result.a=a;result.b=b;
+      result.w=a===b?0:Math.max(0,Math.min(1,(target-r[a].centre)/(r[b].centre-r[a].centre)));
+    }
+    return result;
   }
   read(position){
     if(position<0||position>=this.samples.length){this.stats.sourceBoundViolations++;throw Error('source phase read escaped original PCM');}
@@ -210,17 +225,27 @@ export class StockGrainVoice {
     runs.sort((a,b)=>distance(a)-distance(b));
     const run=runs[0]??[p.a,p.a];if(!runs.length)runs.push(run);
     check(!f[run[0]].transientRisk,'no safe compatible sustain material at requested state');
-    const allowed=new Set(runs.flatMap(([a,b])=>Array.from({length:b-a+1},(_,i)=>a+i))),count=allowed.size,t=this.stats.texture;
+    const allowed=new Set(),endByInterval=new Uint32Array(r.length);
+    for(const [first,last] of runs){
+      for(let i=first;i<=last;i++)allowed.add(i);
+      let end=last+1;
+      for(let i=last;i>=first;i--){
+        if(i<last&&r[i].end!==r[i+1].start)end=i+1;
+        endByInterval[i]=end;
+      }
+    }
+    const count=allowed.size,t=this.stats.texture;
     t.minimumPoolCycles=Math.min(t.minimumPoolCycles??count,count);t.maximumPoolCycles=Math.max(t.maximumPoolCycles,count);
-    return {lo:Math.min(...allowed),hi:Math.max(...allowed),runs,allowed,count,start:Math.max(run[0],Math.min(run[1],p.a)),runEnd:run[1],period,anchor:p.a};
+    return {lo:Math.min(...allowed),hi:Math.max(...allowed),runs,allowed,endByInterval,count,start:Math.max(run[0],Math.min(run[1],p.a)),runEnd:run[1],period,anchor:p.a};
   }
   // Metadata intervals define a source-time coordinate, not independent loops.
   // Within a contiguous run this reads original chronology without any blend.
-  rateAt(u){const p=this.pair(u);return this.asset.sampleRate/((1-p.w)*this.intervals[p.a].length+p.w*this.intervals[p.b].length);}
+  rateAt(u){const p=this.pair(u,this.ratePair);return this.asset.sampleRate/((1-p.w)*this.intervals[p.a].length+p.w*this.intervals[p.b].length);}
   advanceHead(head,rate){
     const i=Math.floor(head.q),r=this.intervals[i],position=r.start+(head.q-i)*r.length,timeline=this.#timeline();
-    const target=this.coordinate(head.q)+rate/FS;
-    let k=Math.floor(position);while(k+1<timeline.length&&timeline[k+1]<=target)k++;
+    let k=Math.floor(position);
+    const fraction=position-k,target=(1-fraction)*timeline[k]+fraction*timeline[k+1]+rate/FS;
+    while(k+1<timeline.length&&timeline[k+1]<=target)k++;
     check(k+1<timeline.length,'source-time advance escaped finite continuation');
     const next=k+(target-timeline[k])/(timeline[k+1]-timeline[k]),step=next-position;
     if(head.lastStep!==undefined)this.stats.texture.maximumReaderStepChange=Math.max(this.stats.texture.maximumReaderStepChange??0,Math.abs(step-head.lastStep));
@@ -260,30 +285,59 @@ export class StockGrainVoice {
     return this.read(position);
   }
   available(q,plan){
-    const i=Math.floor(q);let last=i;
-    if(!plan.allowed.has(i))return 0;
-    while(last+1<this.intervals.length&&plan.allowed.has(last+1)&&this.intervals[last].end===this.intervals[last+1].start)last++;
-    return last+1-q;
+    const end=plan.endByInterval[Math.floor(q)];
+    return end?end-q:0;
   }
+  prepareInitialMatch01(){
+    check(this.frame===0,'initial waveform preparation requires an untouched disposable voice');
+    this.#prepareInitialMatch=true;
+  }
+  get reusedInitialMatch01(){return this.#reusedInitialMatch;}
   matchHead(reference,plan){
     const possible=[...plan.allowed].filter(i=>this.available(i,plan)>=2);
     const list=possible.length?possible:[...plan.allowed];check(list.length,'safe source continuation required');
     const longestRun=Math.max(...plan.runs.map(([a,b])=>b-a+1));
-    const horizon=Math.min(1,longestRun/2,(reference.voice.intervals.length-reference.q)*.99),n=64;
+    const horizon=Math.min(1,longestRun/2,(reference.voice.intervals.length-reference.q)*.99),n=matchSamples;
     check(horizon>0,'outgoing source continuation must remain bounded');
-    const target=Float64Array.from({length:n},(_,k)=>reference.voice.sampleHead(reference.q+horizon*k/n));
     const minimumRoom=Math.min(.5,Math.max(.000001,4*this.rateAt(this.state??.5)/FS));
+    const requiredRoom=Math.max(horizon,minimumRoom);
     // The reference and plan stay fixed throughout this synchronous search.
     // Reuse their room while retaining candidate order and every PCM score.
     const sameVoice=reference.voice===this,selfRoom=sameVoice&&longestRun>=3?
       Math.min(this.available(reference.q,plan)+.5,longestRun*.75):0;
+    // For virgin cross-mode readers, the complete search is a function of
+    // these exact inputs. Preparation uses disposable voices and copies the
+    // resulting coordinates, RNG and read diagnostics into the live search
+    // only when its inputs match. Reacquisition or a different plan searches
+    // normally. Nothing here advances either reader.
+    const previous=reference.voice;
+    const canReuse=!sameVoice&&this.#preparation&&previous.#preparation&&
+      !this.frame&&!previous.frame&&!this.stats.reads&&!previous.stats.reads&&plan.runs.length<=16;
+    let byReference=null,key=null;
+    if(canReuse){
+      let byIncoming=initialMatches.get(this.#preparation);
+      if(!byIncoming&&this.#prepareInitialMatch)initialMatches.set(this.#preparation,byIncoming=new WeakMap());
+      byReference=byIncoming?.get(previous.#preparation);
+      if(byIncoming&&!byReference&&this.#prepareInitialMatch)byIncoming.set(previous.#preparation,byReference=new Map());
+      if(byReference){
+        key=JSON.stringify([reference.q,horizon,requiredRoom,this.textureSeed,plan.runs]);
+        const cached=byReference.get(key);
+        if(cached){
+          for(const [voice,reads] of [[previous,cached.referenceReads],[this,cached.candidateReads]])Object.assign(voice.stats,reads);
+          this.textureSeed=cached.seed;
+          this.#reusedInitialMatch=true;
+          return this.finishMatch(cached.q,cached.correlation);
+        }
+      }
+    }
+    const target=Float64Array.from({length:n},(_,k)=>previous.sampleHead(reference.q+horizon*k/n));
     // Scores are consumed immediately by this search. Retain scalar results
     // instead of a result per probe and a copy of each improved best.
     let correlation=0;
     const score=q=>{let diff=0,energy=0,xy=0,xx=0,yy=0;
       if(q<0||q+horizon>this.intervals.length){correlation=0;return Infinity;}
       const room=this.available(q,plan);
-      if(room<Math.max(horizon,minimumRoom)){correlation=0;return Infinity;}
+      if(room<requiredRoom){correlation=0;return Infinity;}
       if(sameVoice&&longestRun>=3&&room<selfRoom){correlation=0;return Infinity;}
       if(sameVoice&&longestRun>=8&&room<longestRun*.5){correlation=0;return Infinity;}
       for(let k=0;k<n;k++){const x=target[k],y=this.sampleHead(q+horizon*k/n);diff+=(x-y)**2;energy+=x*x+y*y;xy+=x*y;xx+=x*x;yy+=y*y;}
@@ -301,9 +355,16 @@ export class StockGrainVoice {
     }
     for(const step of [1/256,1/2048]){const centre=bestQ;for(let k=-8;k<=8;k++){const q=centre+k*step,error=score(q);if(error<bestError){bestQ=q;bestError=error;bestCorrelation=correlation;}}}
     check(Number.isFinite(bestError),'no bounded waveform continuation');
-    this.stats.texture.minimumSpliceCorrelation=Math.min(this.stats.texture.minimumSpliceCorrelation??1,bestCorrelation);
-    if(bestCorrelation<.8)this.stats.texture.lowCoherenceSplices=(this.stats.texture.lowCoherenceSplices??0)+1;
-    return {q:bestQ,correlation:bestCorrelation};
+    if(byReference&&this.#prepareInitialMatch&&byReference.size<16){
+      const reads=({reads,minimumReadFrame,maximumReadFrame})=>({reads,minimumReadFrame,maximumReadFrame});
+      byReference.set(key,{q:bestQ,correlation:bestCorrelation,seed:this.textureSeed,referenceReads:reads(previous.stats),candidateReads:reads(this.stats)});
+    }
+    return this.finishMatch(bestQ,bestCorrelation);
+  }
+  finishMatch(q,correlation){
+    this.stats.texture.minimumSpliceCorrelation=Math.min(this.stats.texture.minimumSpliceCorrelation??1,correlation);
+    if(correlation<.8)this.stats.texture.lowCoherenceSplices=(this.stats.texture.lowCoherenceSplices??0)+1;
+    return {q,correlation};
   }
   alignTo(reference,u,rateHz){
     if(!this.textureEnabled||!reference.textureEnabled)return false;
@@ -317,7 +378,7 @@ export class StockGrainVoice {
     this.stats.texture.modeRegistrations=(this.stats.texture.modeRegistrations??0)+1;
     return true;
   }
-  continuous(p,rate){
+  continuous(p,rate,output={value:0,energy:0}){
     if(!this.texturePlan||p.a!==this.lastPlanAnchor){this.texturePlan=this.pool(p);this.lastPlanAnchor=p.a;}
     const plan=this.texturePlan,delta=rate/FS;
     if(plan.count<2){
@@ -326,7 +387,9 @@ export class StockGrainVoice {
       this.stats.texture.insufficientMaterialFrames++;this.head=null;this.join=null;
       const ia=this.features[p.a].transientRisk?plan.start:p.a,ib=this.features[p.b].transientRisk?plan.start:p.b;
       const a=this.cycle(this.intervals[ia]),b=this.cycle(this.intervals[ib]);
-      return {value:(1-p.w)*a.value+p.w*b.value,energy:(1-p.w)*a.energy+p.w*b.energy};
+      output.value=(1-p.w)*a.value+p.w*b.value;
+      output.energy=(1-p.w)*a.energy+p.w*b.energy;
+      return output;
     }
     if(!this.head){this.head=this.sourceHead(p);if(!plan.allowed.has(Math.floor(this.head.q)))this.head={q:plan.start+this.phase};}
     const reserve=Math.min(1,Math.max(.25,rate*.025));
@@ -350,24 +413,26 @@ export class StockGrainVoice {
     if(this.head===outgoing)this.advanceHead(outgoing,rate);
     this.stats.texture.cyclesAdvanced=this.clockCycles;
     if(plan.count<4)this.stats.texture.insufficientMaterialFrames++;
-    return {value,energy};
+    output.value=value;output.energy=energy;return output;
   }
   next(u,externalRateHz=null){
     check(Number.isFinite(u)&&u>=0&&u<=1,'normalized authored source position required');
-    if(this.state===null){this.state=u;const p=this.pair(u),r=this.intervals[p.a];
+    const starting=this.state===null;
+    if(starting)this.state=u;
+    else this.state+=stateAlpha*(u-this.state);
+    const p=this.pair(this.state,this.#nextPair),a=this.intervals[p.a],b=this.intervals[p.b];
+    if(starting){
       // Keep each recording's own source-time phase. No imposed common
       // oscillator/phase lock between distinct engine and exhaust recordings.
-      this.phase=((p.target-r.start)/r.length%1+1)%1;
-    }else this.state+=(1-Math.exp(-1/(FS*.01)))*(u-this.state);
-    const p=this.pair(this.state),a=this.intervals[p.a],b=this.intervals[p.b];
+      this.phase=((p.target-a.start)/a.length%1+1)%1;
+    }
     if(this.lastPair!==undefined&&this.lastPair!==p.a)this.stats.stateSwitches++;
     this.lastPair=p.a;this.current=a;
     let value,energy;
-    const period=(1-p.w)*a.length+p.w*b.length;
-    const rate=externalRateHz??this.asset.sampleRate/period;
+    const rate=externalRateHz??this.asset.sampleRate/((1-p.w)*a.length+p.w*b.length);
     check(Number.isFinite(rate)&&rate>0&&rate<=FS/8,'bounded source interval clock');
     this.lastRate=rate;
-    if(this.textureEnabled){const x=this.continuous(p,rate);value=x.value;energy=x.energy;}
+    if(this.textureEnabled){const x=this.continuous(p,rate,this.#nextOutput);value=x.value;energy=x.energy;}
     else{const x=this.cycle(a),y=p.a===p.b?x:this.cycle(b);value=(1-p.w)*x.value+p.w*y.value;energy=(1-p.w)*x.energy+p.w*y.energy;}
     if(this.pendingBoundary)this.maximumBoundaryStep=Math.max(this.maximumBoundaryStep,Math.abs(value-this.previous));
     this.stats.minimumIntervalRateHz=Math.min(this.stats.minimumIntervalRateHz,rate);this.stats.maximumIntervalRateHz=Math.max(this.stats.maximumIntervalRateHz,rate);

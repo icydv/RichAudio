@@ -285,4 +285,15 @@ export class InstalledContextState01 {
     this.validUntil=now+Math.max(0,value.remainingMs-roundTripMs);
   }
   visible(frame,now){return this.key===InstalledContextState01.key(frame)&&now<this.validUntil?this.tiles:[];}
+  explanation(frame,geometry,now){
+    const current=this.key===InstalledContextState01.key(frame),tiles=this.visible(frame,now);
+    const admitted=new Set((geometry?.surfaces??[]).map(s=>s.id)),contextOnly=new Set(),unknownReasons=new Set();
+    for(const tile of tiles){
+      for(const surface of tile.surfaces)if(!admitted.has(surface.id))contextOnly.add(surface.id);
+      for(const region of tile.missingRegions)if(typeof region.reason==='string')unknownReasons.add(region.reason);
+    }
+    const state=this.tiles.length?(current?(now>=this.validUntil?'expired-context':this.status):'changing-camera-context'):this.status;
+    return {worksets:tiles.length,admitted:admitted.size,contextOnly:contextOnly.size,state,
+      unknownReasons:[...unknownReasons].sort()};
+  }
 }

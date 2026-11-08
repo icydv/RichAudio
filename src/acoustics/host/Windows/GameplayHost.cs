@@ -34,7 +34,12 @@ namespace RichAudio.Beacon.Windows {
     string settingFile=AcousticSettingsStore.DefaultPath(config.Root);settings=AcousticSettingsStore.Load(config.Root,settingFile);
     if(!fixture&&(!settings.RichAudioEnabled||settings.IntegrationMode!="experimental-additive"))throw new InvalidOperationException("stock fallback selected");
     nodeJob=new OwnedProcessJob(1024);
-    child=new Process{StartInfo=new ProcessStartInfo{FileName=PlayableConfiguration.Inside(config.Root,"runtime/node.exe"),Arguments=Q(PlayableConfiguration.Inside(config.Root,"tools/Run-Gameplay.mjs"))+" --manifest "+Q(config.Manifest)+" --session "+session,WorkingDirectory=config.Root,UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true}};
+    string producerArgs=Q(PlayableConfiguration.Inside(config.Root,"tools/Run-Gameplay.mjs"))+" --manifest "+Q(config.Manifest)+" --session "+session;
+    // Keep startup-warmed synthesis bytecode through camera-only traversal and
+    // its garbage collections. The package binds the Node runtime and the
+    // owned job keeps the existing producer memory limit.
+    if(latencyProfile.Id=="street-01")producerArgs="--no-flush-bytecode "+producerArgs;
+    child=new Process{StartInfo=new ProcessStartInfo{FileName=PlayableConfiguration.Inside(config.Root,"runtime/node.exe"),Arguments=producerArgs,WorkingDirectory=config.Root,UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true}};
     if(delivery!=null)child.StartInfo.EnvironmentVariables["RICHAUDIO_DISCARD_DELIVERY_TRACE01"]="1";
     child.Start();childId=child.Id;nodeJob.Assign(child);
     drainProducer=config.DiscardEnvironmentalOutput;producerIdentity=GameplayLifecycle01.Identity(child);

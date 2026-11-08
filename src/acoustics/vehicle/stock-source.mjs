@@ -126,6 +126,14 @@ export class StockVehicleSource {
       ...(prepared?{preparation10:prepared.entries.find(e=>e.role===role&&e.mode===mode).preparation10}:{})})]));
     if(this.npc)this.stats.transitionPolicy='authored: follow operating point through accel PCM on lift; blend to recorded idle below .28; no decel voice or native scheduling claim';
   }
+  prepareInitialMatches01(){
+    for(const role of stockRoles)for(const mode of this.modes)this.voices[role][mode].prepareInitialMatch01();
+  }
+  initialMatchReuses01(){
+    let total=0;
+    for(const role of stockRoles)for(const mode of this.modes)if(this.voices[role][mode].reusedInitialMatch01)total++;
+    return total;
+  }
   renderInto(control,engine,exhaust,frames=engine.length){
     check(Number.isFinite(control.operatingPoint)&&control.operatingPoint>=0&&control.operatingPoint<=1&&
       Number.isFinite(control.load)&&control.load>=0&&control.load<=1&&typeof control.running==='boolean'&&
@@ -141,7 +149,8 @@ export class StockVehicleSource {
     // Call-local scratch never escapes into a voice or survives this render.
     // Refill in the original order so source history and floating-point sums
     // stay exact without allocating mode arrays for every emitted sample.
-    const entering=[],previousWeights=new Array(this.weights.length),addresses=[.5,0,0],rates=new Array(this.modes.length);
+    const entering=[],previousWeights=new Array(this.weights.length),addresses=[.5,0,0];
+    const idleRates=stockRoles.map(role=>this.voices[role].idle.rateAt(.5));
     for(let i=0;i<frames;i++){
       this.position+=a*(control.operatingPoint-this.position);this.envelope+=e*((control.running?1:0)-this.envelope);
       entering.length=0;for(let m=0;m<this.weights.length;m++)previousWeights[m]=this.weights[m];
@@ -157,8 +166,10 @@ export class StockVehicleSource {
       for(let roleIndex=0;roleIndex<2;roleIndex++){
         const role=stockRoles[roleIndex],output=roleIndex?exhaust:engine;
         const voices=this.voices[role];
-        for(let m=0;m<this.modes.length;m++)rates[m]=voices[this.modes[m]].rateAt(addresses[m]);
-        let weightedRate=0;for(let m=0;m<this.weights.length;m++)weightedRate+=this.weights[m]*rates[m];
+        let weightedRate=this.weights[0]*idleRates[roleIndex];
+        for(let m=1;m<this.weights.length;m++){
+          if(this.weights[m]>0)weightedRate+=this.weights[m]*voices[this.modes[m]].rateAt(addresses[m]);
+        }
         const rate=weightedRate/weightTotal,transition=this.stats.transitions.roles[role];
         transition.minimumCommonRateHz=Math.min(transition.minimumCommonRateHz,rate);
         transition.maximumCommonRateHz=Math.max(transition.maximumCommonRateHz,rate);

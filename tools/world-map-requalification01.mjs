@@ -6,6 +6,7 @@ import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {collisionNameHash,collisionProjection} from '../src/acoustics/world/static-world-resource.mjs';
 import {resolveInteriorCollisionPlacements01} from '../src/acoustics/world/interior-placements-completion01.mjs';
+import {associateConditionalBound01,indexConditionalManifests01,replayEffectiveYtyp01} from '../src/acoustics/world/effective-world-identity01.mjs';
 
 const normalize=value=>value.replaceAll('\\','/').toLowerCase();
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -26,7 +27,7 @@ export function effectiveMapSelection01(candidates){
  return top[0].state==='verified'?{state:'effective-verified',path:top[0].path}:{state:'winning-source-unverified',path:top[0].path};
 }
 
-export function buildMapRequalification01({scope,plan,catalog,census,previous,requalified=[]}){
+export function buildMapRequalification01({scope,plan,catalog,census,previous,requalified=[],ytpProjections=[],ytpTraversal=null}){
  const tables=new Set(previous.filter(r=>r.kind==='table').map(r=>r.path));
  const blocked=new Map(previous.filter(r=>r.kind==='blocked').map(r=>[r.path,r]));
  const newRows=new Map(requalified.filter(r=>['metadata','selected-ybn-entry','configuration','blocked'].includes(r.kind)).map(r=>[r.path,r]));
@@ -84,8 +85,8 @@ export function buildMapRequalification01({scope,plan,catalog,census,previous,re
   for(const candidate of new Set(alternativesObserved)){
    const candidateMount=retainedMountOrder.get(nestedTable(candidate));
    const patch=patchTargets.get(candidate);
-   const reason=patch?.size===1&&patch.has(member)?'exact-retained-patch':
-    ['ymap','ybn'].includes(resource.Kind)&&winnerMount!==undefined?
+   const reason=resource.Kind==='ytyp'?null:patch?.size===1&&patch.has(member)?'exact-retained-patch':
+    winnerMount!==undefined?
      candidateMount===undefined?'outside-retained-active-map':candidateMount<winnerMount?'earlier-retained-active-mount':null:null;
    if(reason)resolvedContenders.push({path:candidate,reason,winnerMount,candidateMount:candidateMount??null});
    else competing.push(candidate);
@@ -126,6 +127,9 @@ export function buildMapRequalification01({scope,plan,catalog,census,previous,re
  const guarded={...catalog,InteriorPlacementMetadata01:{...retained,
   Archetypes:retained.Archetypes.filter(r=>valid(r.SourceYtyp,r.SourceSHA256)),Instances:retained.Instances.filter(r=>valid(r.SourceYmap,r.SourceSHA256))}};
  const byPath=new Map(mapResources.map(r=>[normalize(r.Path),r]));
+ const activeManifests=indexConditionalManifests01(requalified.filter(row=>
+  newRows.get(row.path)?.kind==='metadata'&&newRows.get(row.path).sha256===row.sha256&&
+  (!seen.has(row.path)||seen.get(row.path).sha256===row.sha256)),new Set(retainedMountOrder.keys()));
  const ymfCompleted=new Map(requalified.filter(r=>r.kind==='ymf-projection'&&r.representation==='pso-membership-projection').map(r=>[r.path,r.sha256]));
  const ymfRelationships=new Map();
  for(const row of requalified.filter(r=>['ymf-mapgroup','ymf-interior'].includes(r.kind)&&ymfCompleted.get(r.path)===r.sha256)){
@@ -139,11 +143,13 @@ export function buildMapRequalification01({scope,plan,catalog,census,previous,re
   const identity=byPath.get(normalize(r.entry)),projection=identity?collisionProjection(catalog,identity.Hash.toLowerCase()):null;
   return {resourceId:r.id,entry:r.entry,resourceHash:identity?.Hash??null,currentEffectiveSelectionVerified:false,runtimeState:'unknown',
    requirements:(projection?.MapGroupMembership??[]).map(group=>{
-    const matches=ymfRelationships.get(['ymf-mapgroup',group.BoundsHash,group.GroupHash??metadataHash(group.Name)].join(':'))??[];
-    const manifest=typeof group.Manifest==='string'?normalize(group.Manifest):matches.length===1?matches[0].path:null;
-    return {manifest,observedManifestSHA256:newRows.get(manifest)?.sha256??seen.get(manifest)?.sha256??null,
+    const expectedPath=typeof group.Manifest==='string'?normalize(group.Manifest):null;
+    const association=associateConditionalBound01(activeManifests,{expectedPath,expectedSHA256:plan.pins[expectedPath]??null,
+     groupHash:group.GroupHash??metadataHash(group.Name),boundsHash:group.BoundsHash});
+    const manifest=association.source?.path??null;
+    return {manifest,observedManifestSHA256:association.source?.sha256??null,sourceAssociation:association.state,
      group:group.Name,dataGroup:group.DataGroupName,boundsHash:group.BoundsHash,retainedHours:group.HoursOnOff,retainedWeather:group.WeatherTypes,
-     exactManifestCandidates:matches,
+     exactManifestCandidates:association.candidates,
      requiredObservation:manifest?'effective manifest group and exact bound active collision variant in the same game session':'source manifest identity required before runtime association'};
    })};
  });
@@ -170,7 +176,20 @@ export function buildMapRequalification01({scope,plan,catalog,census,previous,re
    placementAndActivationRequalificationRequired:true,runtimeProofPublished:false}));
  const retainedContenderResolutions=members.filter(row=>row.resolvedContenders.length)
   .map(row=>({member:row.member,alternatives:row.resolvedContenders}));
+ const disputedYtyp=members.filter(row=>row.kind==='ytyp'&&row.competingUnplannedCandidates.length);
+ const checkedYtyp=ytpProjections.filter(row=>{
+  const observed=newRows.get(row.member),old=seen.get(row.member),pin=plan.pins[row.member];
+  return row.member.endsWith('.ytyp')&&identify(row.member).physicalArchive&&observed?.kind==='metadata'&&observed.sha256===row.sha256&&
+   (!old||old.sha256===row.sha256)&&(!pin||pin===row.sha256);
+ });
+ const ytpAudit=replayEffectiveYtyp01({
+  expectedMembers:[...new Set(disputedYtyp.flatMap(row=>[row.member,...row.competingUnplannedCandidates]).concat(checkedYtyp.map(row=>row.member)))],
+  projections:checkedYtyp,traversal:ytpTraversal
+ });
+ const historicalYtypFileWinners=disputedYtyp.map(row=>({nameHash:row.resourceHash,member:row.member,sha256:row.observedPayloadSHA256,
+  contenders:row.competingUnplannedCandidates}));
  return {schema:1,affectedTables,missing,unreadPins,setupGaps,placements,conditionalRequirements,authorityChanges,retainedContenderResolutions,
+  effectiveYtyp:{historicalFileWinners:historicalYtypFileWinners,...ytpAudit},
   summary:{catalogueYbn:census.length,coverage:counts(members,r=>r.kind+'/'+r.currentState),gapsByCause:counts(missing,r=>r.currentState),
    pinsUnverified:unreadPins.length,unresolvedPlacements:placements.length,previouslyObservedYmf:knownYmf.length,
    conditionalManifestSourceMissing:conditionalRequirements.filter(r=>r.requirements.some(g=>!g.manifest)).length,
@@ -182,21 +201,24 @@ export function buildMapRequalification01({scope,plan,catalog,census,previous,re
 }
 
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
- const [base,catalogFile,output,newMetadata]=process.argv.slice(2).map(p=>path.resolve(p));
- if(![base,catalogFile,output,...(newMetadata?[newMetadata]:[])].every(p=>p?.split(path.sep).includes('.local')))throw Error('Private receipt inputs and output required');
+ const [base,catalogFile,output,newMetadata,ytpEvidence]=process.argv.slice(2).map(p=>path.resolve(p));
+ if(![base,catalogFile,output,...[newMetadata,ytpEvidence].filter(Boolean)].every(p=>p?.split(path.sep).includes('.local')))throw Error('Private receipt inputs and output required');
  const read=f=>JSON.parse(fs.readFileSync(f,'utf8').replace(/^\uFEFF/,''));
  const sourceScope=path.join(base,'source-scope-map-only.json'),catalog=read(catalogFile),scope=read(sourceScope);
  const prior=path.join(base,'approved-corrected-preparation-02'),receipt=read(path.join(prior,'execution-inputs.json'));
  const planFile=path.join(base,'corrected-reader-02/read-plan.json');
  for(const [file,expected] of [[sourceScope,receipt.scopeSHA256],[catalogFile,scope.catalogueSHA256],[planFile,receipt.metadataPlanSHA256]])
   if(sha(fs.readFileSync(file))!==expected)throw Error('Prior receipt binding differs');
- const lines=file=>{
+ const boundedText=file=>{
   const info=fs.lstatSync(file);
   if(!info.isFile()||info.nlink!==1||info.size>128*1024*1024||fs.realpathSync.native(file).toLowerCase()!==file.toLowerCase())throw Error('Bounded private metadata receipt required');
-  return fs.readFileSync(file,'utf8').trim().split('\n').map(JSON.parse);
+  return fs.readFileSync(file,'utf8').trim();
  };
+ const lines=file=>boundedText(file).split('\n').map(JSON.parse);
+ const evidence=ytpEvidence?JSON.parse(boundedText(ytpEvidence)):null;
  const result=buildMapRequalification01({scope,plan:read(planFile),catalog,census:read(path.join(prior,'resource-census.json')),
-  previous:lines(path.join(prior,'metadata.jsonl')),requalified:newMetadata?lines(newMetadata):[]});
+  previous:lines(path.join(prior,'metadata.jsonl')),requalified:newMetadata?lines(newMetadata):[],
+  ytpProjections:evidence?.rows?.filter(row=>row.state==='projected'&&row.nameHash)??[],ytpTraversal:evidence?.traversal??null});
  fs.mkdirSync(output);
  fs.writeFileSync(path.join(output,'dependency-audit.json'),JSON.stringify(result,null,2)+'\n',{flag:'wx'});
  const candidate=Buffer.from(JSON.stringify(result.readPlan));
