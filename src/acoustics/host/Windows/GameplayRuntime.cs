@@ -4,6 +4,7 @@ namespace RichAudio.Beacon.Windows {
  // Separate journals in the two existing owners. Flush each rare lifecycle
  // event before releasing containment. Status and PCM paths never write here.
  internal static class GameplayLifecycle01 {
+  static readonly object journalGate=new object();
   internal static object Identity(Process process){
    if(process==null)return null;
    try{return new{pid=process.Id,creationUtc=process.StartTime.ToUniversalTime().ToString("o")};}
@@ -15,7 +16,7 @@ namespace RichAudio.Beacon.Windows {
     Directory.CreateDirectory(directory);
     string path=Path.Combine(directory,owner+"-lifecycle.jsonl");PlayableConfiguration.NoLinks(path);
     byte[] row=Encoding.UTF8.GetBytes(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(new{schema=1,session,utc=DateTime.UtcNow.ToString("o"),qpc=Stopwatch.GetTimestamp(),frequency=Stopwatch.Frequency,stage,reason,detail})+"\n");
-    using(var file=new FileStream(path,FileMode.Append,FileAccess.Write,FileShare.Read|FileShare.Delete)){
+    lock(journalGate)using(var file=new FileStream(path,FileMode.Append,FileAccess.Write,FileShare.Read|FileShare.Delete)){
      if(row.Length<=16384&&file.Length+row.Length<=262144){file.Write(row,0,row.Length);file.Flush(true);}
     }
    }catch(Exception){} // Observability must never obstruct containment cleanup.
