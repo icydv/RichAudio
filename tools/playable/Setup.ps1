@@ -15,7 +15,8 @@ function Safe-Path([string]$root,[string]$relative){
 }
 function Write-Json([string]$file,$value){$parent=Split-Path -Parent $file;[IO.Directory]::CreateDirectory($parent)|Out-Null;$s=$value|ConvertTo-Json -Depth 20;[IO.File]::WriteAllText($file,$s,(New-Object Text.UTF8Encoding($false)))}
 function Invoke-InstallTransaction([string]$gameRoot,[string]$installRoot,$plans,$rollback,[string]$receiptPath,$receipt,
- [scriptblock]$copyPayload={param($from,$to) Copy-Item -LiteralPath $from -Destination $to -Force}){
+ [scriptblock]$copyPayload={param($from,$to) Copy-Item -LiteralPath $from -Destination $to -Force},
+ [scriptblock]$assertRollbackAllowed={},[scriptblock]$targetChanged={param($path) $true}){
  $written=@()
  try{
   foreach($p in $plans){$to=Safe-Path $gameRoot $p.relative;[IO.Directory]::CreateDirectory((Split-Path -Parent $to))|Out-Null;$written+=$p.relative;& $copyPayload $p.source $to}
@@ -23,7 +24,8 @@ function Invoke-InstallTransaction([string]$gameRoot,[string]$installRoot,$plans
  }catch{
   $cause=$_;$receipt.complete=$false;$failures=@()
   foreach($relative in $written){
-   try{$f=@($rollback|Where-Object relative -EQ $relative);if($f.Count -ne 1){throw 'Ambiguous rollback target'};$f=$f[0];$to=Safe-Path $gameRoot $relative
+   try{$to=Safe-Path $gameRoot $relative;if(!(& $targetChanged $to)){continue};& $assertRollbackAllowed
+    $f=@($rollback|Where-Object relative -EQ $relative);if($f.Count -ne 1){throw 'Ambiguous rollback target'};$f=$f[0]
     if($f.backup){$backup=Safe-Path $installRoot $f.backup;if((Digest $backup) -ne $f.sha256){throw 'Rollback backup changed'};Copy-Item -LiteralPath $backup -Destination $to -Force}
     elseif(Test-Path -LiteralPath $to){Remove-Item -LiteralPath $to}
    }catch{$failures+=('restore '+$relative)}
@@ -35,7 +37,7 @@ function Invoke-InstallTransaction([string]$gameRoot,[string]$installRoot,$plans
    elseif(Test-Path -LiteralPath $to){throw 'New target remains'}
   }catch{$failures+=('verify '+$f.relative)}}
   if($failures.Count){try{Write-Json $receiptPath $receipt}catch{};throw ('Installation failed; rollback incomplete. Receipt and backups retained for review: '+($failures -join ', '))}
-  Remove-Item -LiteralPath $receiptPath
+  if(Test-Path -LiteralPath $receiptPath){Remove-Item -LiteralPath $receiptPath}
   throw $cause
  }
 }

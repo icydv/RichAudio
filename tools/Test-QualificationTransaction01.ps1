@@ -34,9 +34,11 @@ foreach($kind in @('phase1','marker-a')){
  $tx=Join-Path $fixture 'transaction'
  $args01=@{GameRoot=$game;Transaction=$tx;Kind=$kind;Pack=$pack;Plan=$plan;ProcessClosure={$true}}
  $rejected=$false
- try{Install-Qualification01 @args01 -AssertBaseline {$false}}catch{$rejected=$true}
- if(!$rejected -or (Test-Path -LiteralPath $tx)){throw 'Changed baseline acquired a transaction'}
- Install-Qualification01 @args01 -AssertBaseline $originalCheck
+ try{
+  Install-Qualification01 -GameRoot $game -Transaction (Join-Path $fixture 'refused-transaction') -Kind $kind -Pack $pack -Plan $plan -ProcessClosure {$true} -AcquireBaseline {$false} -RevalidateBaseline $originalCheck
+ }catch{$rejected=$true}
+ if(!$rejected -or !(& $originalCheck)){throw 'Changed baseline was staged'}
+ Install-Qualification01 @args01 -AcquireBaseline $originalCheck -RevalidateBaseline $originalCheck
  foreach($p in $plan){if((Digest (Safe-Path $game $p.relative)) -cne $p.sha256){throw 'Staged fixture mismatch'}}
  $rejected=$false
  try{
