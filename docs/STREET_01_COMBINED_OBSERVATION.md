@@ -259,3 +259,54 @@ observe a disposable same-model neighbour. A/B/A and controller-loss
 recovery would be separate qualification. The watchdog remains limited
 to a live RPH AppDomain. Arbitrary baseline restoration, live private
 registration and selective engine/exhaust suppression remain open.
+
+## Qualification package and marker A mount
+
+Codex reused my pinned normal bridge and host. The bridge assembly declares
+one RPH entry and one unload method. It embeds the transport and references
+the existing RPH API and Windows framework. My normal producer now accepts
+an independently pinned current proof publication that predates bridge
+startup. It binds the observed launch timestamp separately and preserves
+the camera sample and its expiry. The qualification is single use. Its
+private log retains raw frames, candidate proof, consumer decisions,
+source history, qualified paths, stage timing for every rendered block,
+and worker closure. The existing clocked sink discards the rendered PCM.
+
+The read scope uses one catalogue and three archive hashes for the
+observed exterior and the selected foyer. It preserves all 10,663
+catalogue entries and limits current scene authority to the reviewed
+resources. The five neighbouring exterior rows remain explicit gaps.
+The preparation does not start the full installation warmup or decode
+archives. The full private package still needs six previously pinned Bati
+player Float32 bodies and fresh installation and proof receipts. Codex
+verified both exact transaction target sets and independent rollback in
+disposable installs, including an absent marker overlay and refusal
+while process closure was uncertain.
+
+The proof-path foyer replay applied 30 replacements with zero validity
+gaps. Its maximum was 10.39 ms, with zero hard misses and five blocks above
+8 ms. The worst block spent 8.68 ms in propagation. Another steady block
+spent 8.80 ms in stock synthesis and 0.07 ms selecting sources. Codex
+removed redundant local mixing when airflow is disabled and kept its
+existing history and release behaviour. Focused PCM and grain-history
+checks passed. The historical missed block and the early failed rehearsal
+are retained. The replay gives no timing margin for a gameplay claim.
+
+For marker A, the private pack contains only the pinned DAT151 record,
+an authored setup file and an authored content file. The latter declares
+the unique device's REL as AUDIO_GAMEDATA and enables it through the
+startup change set. The pack and the one-entry DLC-list edit round-trip
+through CodeWalker on private files. My retained ASI fingerprint matches
+the separately supplied OpenRPF binary. The retained inventory had no
+mods overlay. A current inventory and a verified complete compatible
+update archive shadow are still required. A tiny archive containing
+only the DLC list would shadow other update contents and is outside
+the candidate.
+
+The standalone A-only build refuses a B request. It retains the target and
+neighbour pool identities, their raw before and after marker values,
+and cleanup. The requested experiment changes one empty disposable Bati
+once and verifies both lifetimes are retired. It needs a separately
+approved mount, parked placement and request pin. My normal environmental
+qualification contains no marker payload. Neither qualification has
+been launched.

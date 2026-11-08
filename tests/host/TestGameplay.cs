@@ -61,13 +61,16 @@ internal static class TestGameplay {
     Check(Number(beforeObservation,"underflowFrames")==0,"device-free observation ring reports underflows");
     Settings(2,true,.4);Until(()=>Number(Worker(),"outputLevel")==.4,3000);
     Check(!(bool)Evidence()["endpointOpened"]&&Evidence()["outputMetrics"]==null,"settings cannot open the endpoint");
-    int failedHost=runtime.HostPid;using(var process=Process.GetProcessById(failedHost))process.Kill();
+    bool disable=args.Length==3&&args[2]=="--disable";
+    int failedHost=runtime.HostPid;
+    if(disable)Settings(3,false);else using(var process=Process.GetProcessById(failedHost))process.Kill();
     Until(()=>runtime.HostPid==0,5000,0);For(1000);
-    Check(runtime.Attempts==1,"observation host loss never relaunches");
+    if(disable){Settings(4);For(1000);}
+    Check(runtime.Attempts==1,"disabled or failed observation host never relaunches");
     runtime.RequestStop();Check(runtime.Join(6000),"observation supervisor joined");
     foreach(int pid in owned)Check(!Alive(pid),"observation host and producer exited");
-    string result=Json.Serialize(new{passed=true,checks=checks,endpointOpened=false,attempts=runtime.Attempts,observation=beforeObservation});
-    File.WriteAllText(Path.Combine(root,".local","observation-fixture-result.json"),result);
+    string result=Json.Serialize(new{passed=true,checks=checks,endpointOpened=false,attempts=runtime.Attempts,disabled=disable,observation=beforeObservation});
+    File.WriteAllText(Path.Combine(root,".local",disable?"observation-disable-fixture-result.json":"observation-fixture-result.json"),result);
     Console.WriteLine("PASS "+checks+" device-free normal observation-chain assertions");
     return 0;
    }

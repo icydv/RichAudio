@@ -7,13 +7,16 @@ import path from 'node:path';
 import readline from 'node:readline';
 import {spawn} from 'node:child_process';
 import {once} from 'node:events';
+import {createHash} from 'node:crypto';
 import {setTimeout as wait} from 'node:timers/promises';
 import {writeOriginalGameplayPackageStreet01} from '../tests/fixtures/StreetGameplayPackage01.mjs';
 import {budgetFrame042} from '../tests/fixtures/AcousticBudget042.mjs';
+import {publishNormalProof01} from './Prepare-NormalObservationProof01.mjs';
 
 const source=path.resolve('.local/combined-observation-manual-01');
 const read=file=>JSON.parse(fs.readFileSync(file,'utf8').replace(/^\uFEFF/,''));
-const exterior=process.argv[2]==='--exterior';
+const exterior=process.argv.includes('--exterior'),scopeIndex=process.argv.indexOf('--qualification-fixture');
+const fixtureScope=scopeIndex<0?null:read(process.argv[scopeIndex+1]);
 const exteriorRoot=path.resolve('.local/world-native-integration-01/current-world/operational');
 const reference=exterior?read('.local/street01-installed/reflections-02/result.json'):null;
 const plan=exterior?{validatedManifestPath:path.join(exteriorRoot,'geometry/manifest.json'),
@@ -37,8 +40,25 @@ const pkg=writeOriginalGameplayPackageStreet01(folder,{latencyProfile:'street-01
   catalogPath:path.relative(cacheRoot,plan.catalogPath)}});
 // STREET-01 source and timing contract, with the explicit retained-cache
 // reader binding already supported by the normal producer.
-fs.writeFileSync(pkg.manifest,JSON.stringify({...pkg.config,featureProfile:'STREET-01',continuityPolicy:'camera-source-01',acousticPathEvidence01:true}));
 const session=frames[0].frame.session;
+const config={...pkg.config,featureProfile:'STREET-01',continuityPolicy:'camera-source-01',acousticPathEvidence01:true};
+let bridgeEpoch=epoch;
+if(fixtureScope){
+ const world=path.join(folder,'world'),derived=read(fixtureScope.retainedManifestPath),catalog=read(fixtureScope.catalogPath);
+ fs.mkdirSync(world);
+ // The fixture authors a new clock relationship using known historical
+ // digests. It never opens an installed file or emits a live approval.
+ const testEpoch=new Date().toISOString();
+ const published=publishNormalProof01(fixtureScope,derived,catalog,fixtureScope.archives,world,testEpoch);
+ bridgeEpoch=new Date().toISOString().replace(/(\.\d{3})Z$/,'$10000Z');
+ fs.copyFileSync(fixtureScope.catalogPath,path.join(world,'catalog.json'),fs.constants.COPYFILE_EXCL);
+ fs.mkdirSync(path.join(folder,'.local/gameplay',session),{recursive:true});
+ config.outputSink='environment-observation';
+ config.retainedQualification01={proofEpochUtc:testEpoch,stopByUtc:new Date(Date.now()+120_000).toISOString(),manifestSha256:published.sha256,catalogSha256:fixtureScope.catalogSHA256};
+ config.acousticWorld={manifestPath:'world/manifest.json',catalogPath:'world/catalog.json',derivedCacheRoot:cacheRoot};
+ config.bindings=[{file:'world/manifest.json',sha256:published.sha256},{file:'world/catalog.json',sha256:fixtureScope.catalogSHA256}];
+}
+fs.writeFileSync(pkg.manifest,JSON.stringify(config));
 const child=spawn(process.execPath,['tools/Run-Gameplay.mjs','--manifest',pkg.manifest,'--session',session],{stdio:['pipe','pipe','pipe']});
 const exited=once(child,'exit'),lines=readline.createInterface({input:child.stderr});
 const statuses=[],admissions=[],overruns=[],errors=[];
@@ -73,7 +93,7 @@ try{
   while(performance.now()<due)await wait(Math.max(1,Math.floor(due-performance.now())));
   assert(child.exitCode===null,errors.join(' '));
   const f=structuredClone(row.frame),r=f.cameraInteriorReadback,l=f.listener,t=elapsed/1000;
-  f.worldPreparationStartedUtc=epoch;
+  f.worldPreparationStartedUtc=bridgeEpoch;
   if(r.ready)f.cameraInterior01={proxy:r.proxy,archetype:r.archetype,origin:r.origin,observationTicks:r.sampleTicks};
   delete f.cameraInteriorReadback;
   const authored=budgetFrame042(l.sequence,t).vehicles[0];
@@ -93,9 +113,18 @@ try{
 }
 const active=statuses.filter(s=>s.activeSources>0&&(exterior?s.installedScene?.activeSurfaces>0:s.installedScene?.surroundingSurfaces>0));
 assert(active.length>0,'normal producer must admit a surrounding workset and render an authored source');
-assert(active.every(s=>s.installedScene.sourceCatalogueSHA256===catalogSHA256));
+assert(active.every(s=>s.installedScene.sourceCatalogueSHA256===(fixtureScope?.catalogSHA256??catalogSHA256)));
 assert(active.some(s=>s.acousticWorld.environmentalReadiness01.counters.replacements>=2));
 const final=statuses.at(-1);
+if(fixtureScope){
+ const evidence=fs.readFileSync(path.join(folder,'.local/gameplay',session,'environment-evidence.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
+ const timing=evidence.filter(row=>row.type==='complete-render-block');
+ assert.equal(timing.length,pcmBytes/4112);
+ assert(timing.every(row=>Number.isFinite(row.stages.stockSynthesisMs)&&Number.isFinite(row.stages.sourceSelectionMs)));
+ assert(evidence.some(row=>row.type==='source-proof'&&row.proofEpoch===config.retainedQualification01.proofEpochUtc&&row.resources.length));
+ assert(evidence.some(row=>row.type==='normal-gameplay-observation'&&row.frame.worldPreparationStartedUtc===bridgeEpoch));
+ assert(evidence.some(row=>row.type==='installed-world-worker-closed'&&row.workerJoined));
+}
 assert.equal(final.acousticWorld.environmentalReadiness01.counters.validityGaps,0);
 if(exterior){
  const reflected=active.flatMap(s=>s.installedPropagation.paths?.reflected??[]);

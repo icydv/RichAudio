@@ -12,13 +12,17 @@ import {observationCoordinates,observedAcousticScene} from '../src/acoustics/eng
 import {vehicleDistanceSceneOptions} from '../src/acoustics/vehicle/distance-presentation.mjs';
 import {SoundMapTelemetry,installedSoundMapGeometryState01} from '../src/acoustics/streaming/soundmap-telemetry.mjs';import {SoundMapClient} from './soundmap/producer-client.mjs';
 import {InstalledSceneService01} from '../src/acoustics/world/installed-scene-service01.mjs';
+import {normalQualification01,openNormalQualificationEvidence01} from '../src/acoustics/world/normal-qualification01.mjs';
 const args=process.argv.slice(2);if(args.length!==4||args[0]!=='--manifest'||args[2]!=='--session')throw Error('owned manifest/session required');
 const manifest=path.resolve(args[1]),root=path.dirname(manifest),config=JSON.parse(fs.readFileSync(manifest,'utf8')),session=args[3];
 const latencyProfile=resolveLatencyProfile(config.latencyProfile);
 if(latencyProfile.id==='low-latency-01'&&(config.demoProfile!=='PLAYABLE-13'||config.eligible?.length!==1||config.eligible[0].model!==0xf9300cc5||config.eligible[0].context!=='player'))throw Error('LOW-LATENCY-01 requires the Bati-player demonstration package');
 validateStreetLatencySelection01(config);
+const qualification=normalQualification01(config,root,session);
 const inside=relative=>{const p=path.resolve(root,relative);if(!p.startsWith(root+path.sep))throw Error('package path escaped');return p;};
-const assets=loadStockCatalogAssets(inside(config.playerManifest),{sustainAtlasFile:inside(config.atlas)}),npcAssets=loadStockNpcAssets(inside(config.npcManifest));
+const assets=loadStockCatalogAssets(inside(config.playerManifest),{sustainAtlasFile:inside(config.atlas)});
+const playerOnlyQualification=qualification&&!config.eligible.some(e=>e.context==='npc');
+const npcAssets=playerOnlyQualification?null:loadStockNpcAssets(inside(config.npcManifest));
 const registry=loadInstalledStockRegistry({catalogFile:inside(config.catalog),catalogSha256:config.catalogSha256,assets,npcAssets}),profiles=JSON.parse(fs.readFileSync(inside(config.profiles),'utf8'));
 // Prepare pure bank data and bounded untouched voices before host readiness.
 // The normal eligibility selection still controls when any voice is acquired.
@@ -55,11 +59,17 @@ const normalControlWarmup=latencyProfile.id==='street-01'?await warmNormalContro
 const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true,latencyProfile:latencyProfile.id,continuityPolicy}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
 const startupVoices=latencyProfile.id==='street-01'&&!sourceStartupPreparation10.unpreparedBanks.length?engine.prepareStartupVoices01(config.eligible):0;
 engine.pipeline.simulation.captureInstalledPaths01=config.acousticPathEvidence01===true;
+engine.captureCompleteRenderStages01=qualification!==null;
 let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,pendingSettings=null,pendingGeometry=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
 let viewer=false,viewerClient=null,soundMapRecordingRequest01=false,soundMapBackgroundRequest01=false;engine.telemetry=new SoundMapTelemetry();
 const soundMapRequired01=()=>viewer||soundMapRecordingRequest01||soundMapBackgroundRequest01;
 const soundMapDemandStatus01=()=>({viewer,recordingRequested:soundMapRecordingRequest01,backgroundRequested:soundMapBackgroundRequest01,required:soundMapRequired01(),geometry:soundMapRequired01()?installedSoundMapGeometryState01(engine.pipeline.simulation.scene):'not-requested',recordingStartedByProducer:false});
-const packet=Buffer.alloc(4112),log=v=>process.stderr.write(JSON.stringify(v)+'\n');
+const evidence=qualification?openNormalQualificationEvidence01(root,session,error=>{process.exitCode=1;setImmediate(()=>finish(error));}):null;
+if(evidence)engine.onInstalledSceneDiagnostic01=record=>evidence.record({type:'consumer-scene-decision',...record});
+const packet=Buffer.alloc(4112),log=v=>{
+ evidence?.record(v);
+ process.stderr.write(JSON.stringify(v)+'\n');
+};
 let installedScenes=null,worldStatus={stage:'partial/unsupported',installedWorldVerified:false,genuineResourceVerified:false,reason:config.demoProfile?'closed-demonstration-profile':'world-cache-not-prepared',preparation:{completedEligibleTiles:0,eligibleTiles:0,totalTiles:0}};
 let processingOverrunRows=0,processingOverrunRowsOmitted=0,worldAdmissionRows=0,worldAdmissionRowsOmitted=0;
 // The normal plugin's existing warmup supervisor owns discovery/decoding. This
@@ -75,12 +85,14 @@ if(!config.demoProfile&&config.acousticWorld!==false){
  if(c.derivedCacheRoot!==undefined&&(!path.isAbsolute(c.derivedCacheRoot)||!derivedCacheRoot.split(path.sep).includes('.local')))throw Error('explicit private derived-world cache root');
  const worldInside=relative=>{if(typeof relative!=='string'||path.isAbsolute(relative))throw Error('relative installed cache metadata path');const p=path.resolve(privateCacheRoot,relative);if(!p.startsWith(privateCacheRoot+path.sep))throw Error('installed cache metadata escaped');return p;};
  const worldConfig={manifestPath:worldInside(c.manifestPath??worldRoot+'/geometry/manifest.json'),catalogPath:worldInside(c.catalogPath??worldRoot+'/resolved/resolved-catalog.json'),expectedGameSHA256:config.gameSha256,
-  ...(c.catalogSHA256?{catalogSHA256:c.catalogSHA256}:{}),...(derivedCacheRoot?{privateRoot:derivedCacheRoot}:{}),...((c.initialObservationPath!==undefined||c.privateCacheRoot===undefined)?{initialObservationPath:worldInside(c.initialObservationPath??worldRoot+'/geometry/initial-observation01.json')}:{ }),maximumResidentResources:8};
+  ...(!qualification&&c.catalogSHA256?{catalogSHA256:c.catalogSHA256}:{}),...(derivedCacheRoot?{privateRoot:derivedCacheRoot}:{}),...(!qualification&&(c.initialObservationPath!==undefined||c.privateCacheRoot===undefined)?{initialObservationPath:worldInside(c.initialObservationPath??worldRoot+'/geometry/initial-observation01.json')}:{ }),maximumResidentResources:8};
  installedScenes=new InstalledSceneService01({config:worldConfig,session,onStatus:s=>{
   worldStatus={stage:s.stage,installedWorldVerified:false,genuineResourceVerified:s.genuineResourceVerified===true,preparation:s.preparation??{completedEligibleTiles:0,eligibleTiles:0,totalTiles:0},
    reason:s.reason??s.failure??s.worker?.failure??null,residentResources:s.residentResources??0,resourceLoads:s.resourceLoads??0,controller:s.worker??s.controller??null,coverageStates:s.coverageStates??null,initialPreparationPriority:s.initialPreparationPriority??null,localReadiness:s.localReadiness??null,cacheTimings:s.cacheTimings??null};
  },onScene:(scene,receipt)=>{
   if(worldAdmissionRows<2400&&process.stderr.writableLength<16384){log({type:'installed-world-producer-admission',requestId:receipt.requestId,validationMs:receipt.validationMs,elapsedSinceRequestMs:receipt.admissionMs,workerPreparationMs:receipt.workerPreparationMilliseconds,prepareSoundMapGeometry01:receipt.prepareSoundMapGeometry01,soundMapPreparationMilliseconds:receipt.lifecycle01.workerProfile01?.soundMapPreparationMilliseconds??null,scope:'validation is on producer; worker preparation is concurrent, not additive audio latency'});worldAdmissionRows++;}else worldAdmissionRowsOmitted++;
+  evidence?.record({type:'source-proof',requestId:receipt.requestId,observationKey:scene.tile.observationKey,
+   catalogue:receipt.catalogSHA256,proofEpoch:qualification.epoch,surfaces:scene.tile.surfaces.length,resources:scene.observationModel.evidence});
   // An observed live snapshot remains authoritative until its own lease ends.
   if(engine.pipeline.simulation.scene.observationModel?.kind==='conditional-observed-model'&&engine.sceneExpiry>performance.now())return;
   if(!scene.tile.surfaces.length)return;
@@ -111,7 +123,13 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality,
   fallbackReason:d.geometry==='conditional-direct-unobserved-space-assumed-clear'?'Additive; conditional direct sound without collision coverage':b.fallbackReason,
   controlDelayMs:latencyProfile.controlDelayMs,propagationLimitSeconds:2,arrivals:d.arrivals,retired:d.retired,latencyRows,latencyRowsOmitted,...(latencyProfile.id==='baseline'?{}:{latencyProfile:latencyProfile.id,producerCreditBlocks:latencyProfile.producerCreditBlocks})}});
 }
-function finish(error){if(stopped)return;const stopAt=performance.now();stopped=true;engine.beginStopInstalledScene01(stopAt,error?'producer-error':'stop-intent');engine.close();if(installedScenes){void installedScenes.close().then(r=>{log({type:'installed-world-worker-closed',stopAt,...r});if(!r.workerJoined)process.exitCode=1;},e=>{log({type:'installed-world-worker-close-failed',stopAt,reason:e.message});process.exitCode=1;});installedScenes=null;}if(viewerClient){viewerClient.close().catch(()=>{});viewerClient=null;}viewer=false;soundMapRecordingRequest01=false;soundMapBackgroundRequest01=false;status();if(error){log({type:'gameplay-error',code:error.message});process.exitCode=1;}input.close();process.stdin.pause();}
+function finish(error){if(stopped)return;const stopAt=performance.now();stopped=true;engine.beginStopInstalledScene01(stopAt,error?'producer-error':'stop-intent');engine.close();
+ const world=installedScenes;installedScenes=null;
+ if(viewerClient){viewerClient.close().catch(()=>{});viewerClient=null;}viewer=false;soundMapRecordingRequest01=false;soundMapBackgroundRequest01=false;status();if(error){log({type:'gameplay-error',code:error.message});process.exitCode=1;}input.close();process.stdin.pause();
+ void (async()=>{try{if(world){const r=await world.close();log({type:'installed-world-worker-closed',stopAt,...r});if(!r.workerJoined)process.exitCode=1;}}
+ catch(e){log({type:'installed-world-worker-close-failed',stopAt,reason:e.message});process.exitCode=1;}
+ finally{evidence?.close();}})();
+}
 async function pump(){if(busy||stopped||credits<=0)return;busy=true;
  try{
   if(pendingSettings){const settings=pendingSettings;pendingSettings=null;engine.setSettings(settings);}
@@ -120,19 +138,24 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
    if(s.clockFrequency!==clock.frequency)throw Error('producer observation clock changed');
    const age=Math.max(m.ageMs,(clock.ticks+(now-clock.at)*clock.frequency/1000-s.observationTicks)*1000/clock.frequency);
    const remaining=m.validForMs===undefined?null:m.validForMs-(now-m.receivedAt);
-   if(age<=250&&(remaining===null||remaining>0)){engine.accept(m.frame,age,remaining);lastFrame={frame:m.frame,age,at:now,receivedAt:m.receivedAt,hostWriteBeforeQpc:m.hostWriteBeforeQpc??null,hostQpcFrequency:m.hostQpcFrequency??null};
+   if(age<=250&&(remaining===null||remaining>0)){
+    const proofEpoch=qualification?qualification.acceptLaunch(m.frame.worldPreparationStartedUtc):m.frame.worldPreparationStartedUtc;
+    engine.accept(m.frame,age,remaining);lastFrame={frame:m.frame,age,at:now,receivedAt:m.receivedAt,hostWriteBeforeQpc:m.hostWriteBeforeQpc??null,hostQpcFrequency:m.hostQpcFrequency??null};
+    evidence?.record({type:'normal-gameplay-observation',at:now,ageMs:age,validForMs:remaining,frame:m.frame});
     if(installedScenes&&!installedScenes.failed&&!installedScenes.closed&&(!s.valid||s.paused))installedScenes.withdrawCameraInterior01(now);
     if(installedScenes&&!installedScenes.failed&&!installedScenes.closed&&s.valid&&!s.paused){
-     installedScenes.bindPreparationEpoch01(m.frame.worldPreparationStartedUtc);
+     installedScenes.bindPreparationEpoch01(proofEpoch);
      const sources=m.frame.vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-s.position[i])<=128)).slice(0,2).map(v=>v.position);
      installedScenes.observeInitial01({sequence:s.sequence,generation:s.generation,geometryTimeMs:now,sourceAgeMs:age,listener:s.position,sources});
-     if(!installedScenes.failed)installedScenes.updateWindow({listener:s.position,sources:engine.installedCurrentSourcePositions01(m.frame),generation:s.generation,geometryTimeMs:now,durationMs:1000,cameraInterior01:bindCameraInterior01(m.frame,age,remaining),surroundingWorkset01:true,maximumSurfaces:4096,prepareSoundMapGeometry01:soundMapRequired01(),engine:{order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1')}});
+     if(!installedScenes.failed)installedScenes.updateWindow({listener:s.position,sources:engine.installedCurrentSourcePositions01(m.frame),generation:s.generation,geometryTimeMs:now,durationMs:1000,cameraInterior01:bindCameraInterior01(m.frame,age,remaining,proofEpoch),surroundingWorkset01:true,maximumSurfaces:4096,prepareSoundMapGeometry01:soundMapRequired01(),engine:{order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1')}});
     }
    }
   }
   if(pendingGeometry){const value=pendingGeometry;pendingGeometry=null;try{geometry(value);}catch(e){log({type:'geometry-rejected',reason:e.message});}}
   const channels=await engine.render();if(stopped)return;
   credits--;encodeVehicleRa07(...channels,sequence,packet);sequence=(sequence+1)>>>0;
+  evidence?.record({type:'complete-render-block',sequence:(sequence-1)>>>0,completeRenderMs:engine.lastCompleteRenderMs,
+   stages:engine.lastRenderStages01});
   if(engine.lastCompleteRenderMs>8){if(processingOverrunRows<2400&&process.stderr.writableLength<16384){log({type:'complete-render-overrun',sequence:(sequence-1)>>>0,producerFrameStart:((sequence-1)>>>0)*512,completeRenderMs:engine.lastCompleteRenderMs,hardDeadlineMs:512/48,headroomTargetMs:8,hardMiss:engine.lastCompleteRenderMs>512/48,geometryModel:engine.pipeline.simulation.scene.observationModel?.kind??'conditional-direct',stages:engine.lastRenderStages01});processingOverrunRows++;}else processingOverrunRowsOmitted++;}
   if(viewerClient&&engine.visual?.soundMapFrame)try{viewerClient.offer(engine.visual.soundMapFrame,engine.visual.soundMapGeometry);}catch{}
   await new Promise((resolve,reject)=>process.stdout.write(packet,e=>e?reject(e):resolve()));
@@ -161,9 +184,10 @@ input.on('line',line=>{try{if(line.length>131072)throw Error('producer command s
  if(m.type==='credit'){const cap=latencyProfile.startupBlocks;if(!Number.isInteger(m.blocks)||m.blocks<1||m.blocks>cap||credits+m.blocks>cap)throw Error('bounded PCM credits');credits+=m.blocks;}
  else if(m.type==='settings'){const previousDemand01=(viewer?1:0)|(soundMapRecordingRequest01?2:0)|(soundMapBackgroundRequest01?4:0);for(const key of ['soundMapVisible','soundMapRecording','soundMapBackgroundTelemetry'])if(m[key]!==undefined&&typeof m[key]!=='boolean')throw Error('Boolean SoundMap demand required');pendingSettings={quality:m.quality,acceleration:m.acceleration,enabled:m.enabled,volume:m.volume,reflections:m.reflections,mode:m.mode,airflowEnabled:m.airflowEnabled,airflowLevel:m.airflowLevel};if(m.soundMapVisible!==undefined)viewer=m.soundMapVisible;if(m.soundMapRecording!==undefined)soundMapRecordingRequest01=m.soundMapRecording;if(m.soundMapBackgroundTelemetry!==undefined)soundMapBackgroundRequest01=m.soundMapBackgroundTelemetry;engine.telemetry.enabled=soundMapRequired01();engine.updateInstalledConsumerWorkload01();if(previousDemand01!==((viewer?1:0)|(soundMapRecordingRequest01?2:0)|(soundMapBackgroundRequest01?4:0))&&process.stderr.writableLength<16384)log({type:'soundmap-demand-changed',...soundMapDemandStatus01()});}
  else if(m.type==='snapshot'){if(!Array.isArray(m.frame?.vehicles)||m.frame.vehicles.some(v=>v.valid&&!allowed.has(v.model+':'+v.context))||m.validForMs!==undefined&&(!Number.isFinite(m.validForMs)||m.validForMs<=0||m.validForMs>252))throw Error('unprepared source identity or expiry');pendingSnapshot={...m,receivedAt:performance.now()};}
- else if(m.type==='geometry'){pendingGeometry=m.value;}
+ else if(m.type==='geometry'){if(!qualification)pendingGeometry=m.value;}
  else if(m.type==='stop'){finish();return;}else throw Error('producer command');pump();
  }catch(e){finish(e);}});
 input.on('close',()=>{if(!stopped)finish();});process.on('SIGTERM',()=>finish());process.on('SIGINT',()=>finish());
 const timer=setInterval(()=>{if(!stopped)status();},500);timer.unref();
+if(qualification)setTimeout(()=>finish(Error('normal qualification cutoff reached')),Math.max(1,qualification.stopBy-Date.now())).unref();
 log({type:'gameplay-ready',featureProfile:'STREET-01-main',...sourceStartupPreparation10,startupVoices,normalControlWarmup,mode:'experimental-additive',nativeSuppression:false,airflowImplemented:true,airflowEnabled:engine.settings.airflowEnabled,installedWorldQualified:false});

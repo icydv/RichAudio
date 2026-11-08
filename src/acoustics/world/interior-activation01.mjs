@@ -5,7 +5,7 @@ const position = p => Array.isArray(p) && p.length === 3 && p.every(v => Number.
 const identity = s => s && Number.isInteger(s.proxy) && s.proxy > 0 && s.proxy <= 0x7fffffff &&
   Number.isInteger(s.archetype) && s.archetype > 0 && s.archetype <= 0xffffffff && position(s.origin);
 
-export function bindCameraInterior01(frame, sourceAgeMs, remainingMs) {
+export function bindCameraInterior01(frame, sourceAgeMs, remainingMs, proofEpoch=frame.worldPreparationStartedUtc) {
  const sample=frame.cameraInterior01, listener=frame.listener;
  if(!identity(sample)||!listener.valid||listener.paused||!Number.isSafeInteger(sample.observationTicks)||
     !Number.isSafeInteger(listener.observationTicks)||!Number.isFinite(listener.clockFrequency)||listener.clockFrequency<=0)return null;
@@ -14,7 +14,7 @@ export function bindCameraInterior01(frame, sourceAgeMs, remainingMs) {
  // A later getter does not extend the camera's original observation lease.
  const durationMs=Math.min(1000-sourceAgeMs+Math.min(0,offsetMs),remainingMs??1000);
  if(!(durationMs>0&&durationMs<=1000))return null;
- return {proxy:sample.proxy,archetype:sample.archetype,origin:[...sample.origin],durationMs,epoch:frame.worldPreparationStartedUtc};
+ return {proxy:sample.proxy,archetype:sample.archetype,origin:[...sample.origin],durationMs,epoch:proofEpoch};
 }
 
 export function interiorObservationKey01(sample){

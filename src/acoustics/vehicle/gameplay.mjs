@@ -161,7 +161,10 @@ export class StockGameplay {
    return roles.map(role=>this.stockEmitterPosition01(v,role,model));
   }).filter(p=>p.every((x,i)=>Math.abs(x-frame.listener.position[i])<=128));
  }
- recordInstalledSceneDiagnostic01(record){const recent=this.installedSceneDiagnostics01.recent;recent.push(record);if(recent.length>64)recent.shift();}
+ recordInstalledSceneDiagnostic01(record){
+  const recent=this.installedSceneDiagnostics01.recent;recent.push(record);if(recent.length>64)recent.shift();
+  this.onInstalledSceneDiagnostic01?.(record);
+ }
  discardInstalledCandidate01(pending,reason,at=this.now()){
   const postStop=this.#installedSceneStopped01||this.#installedSceneService01?.readinessSnapshot01().stopIntentAt!=null;
   this.#installedSceneService01?.discardConsumerCandidate01(pending.originalReceipt,at,reason);
@@ -371,9 +374,14 @@ export class StockGameplay {
     slot.source=startupVoice??this.sourcePreparation05?.take({identity:item.identity,session:this.session,bank:item.resolved.bank,options:sourceOptions})??this.registry.createSource(item.v.model,item.v.context,sourceOptions);slot.airflow=new AirflowSourceStreet01({seed:airflowSeedStreet01(this.session+':'+item.identity)});this.stats.arrivals++;this.stageCounters.sourceCreations++;}
    slot.vehicle=item.v;slot.score=item.score;
   }
+  const afterSelection=this.captureCompleteRenderStages01?this.now():0;
+  let stockSynthesisMs=0;
   for(const c of this.localAirflow)c.fill(0);this.airflowState.riderActive=false;this.airflowState.exteriorSources=0;
   const sources=[];for(const s of this.slots){const ids=['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`),aeroId=`stock:slot${s.index}:aero`;for(const id of [...ids,aeroId])this.inputs[id].fill(0);
-   if(!s.source||!this.sample.state&&(!independentSource||!selected.some(item=>item.identity===s.identity)))continue;const v=s.vehicle;s.source.renderInto({operatingPoint:v.operatingPoint,load:v.lift ? .05 : .9,lift:v.lift,running:v.running},this.inputs[ids[0]],this.inputs[ids[1]]);
+   if(!s.source||!this.sample.state&&(!independentSource||!selected.some(item=>item.identity===s.identity)))continue;const v=s.vehicle;
+   const stockStart=this.captureCompleteRenderStages01?this.now():0;
+   s.source.renderInto({operatingPoint:v.operatingPoint,load:v.lift ? .05 : .9,lift:v.lift,running:v.running},this.inputs[ids[0]],this.inputs[ids[1]]);
+   if(this.captureCompleteRenderStages01)stockSynthesisMs+=this.now()-stockStart;
    this.stageCounters.sourcePlaybackBlocks++;observePcmBlock(this.inputs[ids[0]],this.stageCounters.engine);observePcmBlock(this.inputs[ids[1]],this.stageCounters.exhaust);
    const profile=this.profiles?.profiles?.[s.source.vehicle.model];
    for(const [i,role]of ['engine','exhaust'].entries()){
@@ -381,7 +389,7 @@ export class StockGameplay {
      forward:v.forward.map(x=>i?-x:x),up:v.up,directivity:profile?.directivity?.[role]??(i?.65:.1),valid:true,emitting:true});}
    if(v.model===0xf9300cc5){const at=this.now(),flow=s.airflow.renderInto({velocity:v.velocity,enabled:this.settings.airflowEnabled,level:this.settings.airflowLevel,riderAttached:v.riderAttached===true,riderViewAttached:v.riderViewAttached===true&&!!this.sample.state,valid:!!this.sample.state},this.inputs[aeroId],...s.local);
     this.airflowState.maximumSynthesisMs=Math.max(this.airflowState.maximumSynthesisMs,this.now()-at);this.airflowState.riderActive||=flow.riderActive;
-    for(let c=0;c<2;c++)for(let i=0;i<BLOCK;i++)this.localAirflow[c][i]+=s.local[c][i];
+    if(this.settings.airflowEnabled)for(let c=0;c<2;c++)for(let i=0;i<BLOCK;i++)this.localAirflow[c][i]+=s.local[c][i];
     if(this.settings.airflowEnabled){sources.push({id:aeroId,generation:s.generation,position:this.stockEmitterPosition01(v,'aero'),velocity:v.velocity,forward:v.forward,up:v.up,directivity:.15,valid:true,emitting:flow.exteriorActive});this.airflowState.exteriorSources++;}
    }
   }
@@ -389,9 +397,10 @@ export class StockGameplay {
   // Loss of a source/listener cannot chop the last local pressure sample. A
   // finite residual release uses only the last mixed sample, not a fabricated
   // motion/wind observation, and ends within 960 frames without another queue.
-  const release=this.localAirflowRelease,localPresent=this.localAirflow.some(channel=>channel.some(x=>x!==0));
-  if(this.settings.airflowEnabled&&!localPresent&&!release.remaining&&release.last.some(x=>x!==0)){release.remaining=960;release.from=[...release.last];}
-  for(let i=0;i<BLOCK;i++){if(release.remaining){release.remaining--;for(let c=0;c<2;c++)this.localAirflow[c][i]+=release.from[c]*release.remaining/960;}}
+  const release=this.localAirflowRelease;
+  if(this.settings.airflowEnabled&&!release.remaining&&release.last.some(x=>x!==0)&&
+     !this.localAirflow.some(channel=>channel.some(x=>x!==0))){release.remaining=960;release.from=[...release.last];}
+  for(let i=0;i<BLOCK&&release.remaining;i++){release.remaining--;for(let c=0;c<2;c++)this.localAirflow[c][i]+=release.from[c]*release.remaining/960;}
   release.last[0]=this.localAirflow[0][BLOCK-1];release.last[1]=this.localAirflow[1][BLOCK-1];this.airflowState.localResidualReleaseFrames=release.remaining;
   const currentScene=this.pipeline.simulation.scene,installed=this.staticSceneBinding?.mode==='installed-static-conditional-partial';
   // A warming playout has no rendered pose. The placeholder origin must not
@@ -422,9 +431,10 @@ export class StockGameplay {
   // Retain a second complete method interval, including optional telemetry and
   // quality bookkeeping. It encloses the core interval; do not add them.
   this.lastCompleteRenderMs=this.now()-start;
-  this.lastRenderStages01=this.lastCompleteRenderMs>8?{admissionMs:afterAdmission-start,
+  this.lastRenderStages01=this.captureCompleteRenderStages01||this.lastCompleteRenderMs>8?{admissionMs:afterAdmission-start,
    sourceAndControlMs:beforePrepare-afterAdmission,propagationMs:beforePcm-beforePrepare,
    pcmMs:elapsed-(beforePcm-start),bookkeepingMs:this.lastCompleteRenderMs-elapsed,
+   ...(this.captureCompleteRenderStages01?{sourceSelectionMs:afterSelection-afterAdmission,stockSynthesisMs}:{}),
    firstSourceBlock:this.stageCounters.sourcePlaybackBlocks===1}:null;
   this.stats.maximumCompleteRenderMs=Math.max(this.stats.maximumCompleteRenderMs??0,this.lastCompleteRenderMs);
   if(this.lastCompleteRenderMs>8)this.stats.completeRenderHeadroomMisses=(this.stats.completeRenderHeadroomMisses??0)+1;
