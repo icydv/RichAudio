@@ -4,7 +4,7 @@
 using System;using System.Collections.Generic;using System.Diagnostics;using System.IO;using System.IO.Pipes;using System.Threading;using System.Web.Script.Serialization;using RichAudio.Beacon.Transport;using RichAudio.Beacon.Windows;
 internal static class TestGameplay {
  static GameplayRuntime runtime;static long sequence,generation=1;static bool wasPaused;static readonly JavaScriptSerializer Json=new JavaScriptSerializer();static string root;static int checks;static readonly List<int> owned=new List<int>();
- static bool environmentFixture;
+ static bool environmentFixture,deliveryFixture;
  static void Check(bool x,string why){checks++;if(!x)throw new Exception(why);}
  static Dictionary<string,object> Read(string f){try{return Json.DeserializeObject(File.ReadAllText(f)) as Dictionary<string,object>;}catch(IOException){return null;}}
  static Dictionary<string,object> Evidence(){return Read(Path.Combine(root,".local","gameplay",runtime.Session,"host.json"));}
@@ -21,8 +21,8 @@ internal static class TestGameplay {
  }
  static double Number(Dictionary<string,object>d,string k){object v;return d!=null&&d.TryGetValue(k,out v)&&v!=null?Convert.ToDouble(v):0;}
  static Dictionary<string,object> Worker(){var d=Evidence();return d!=null&&d.ContainsKey("worker")?d["worker"]as Dictionary<string,object>:null;}
- static void Feed(int count,bool pause=false,bool valid=true){if(pause!=wasPaused){generation++;wasPaused=pause;}long now=Stopwatch.GetTimestamp();var vehicles=new List<GameplayVehicle>();for(int i=0;i<count;i++)vehicles.Add(new GameplayVehicle{Id="actual-component-fixture-"+i,Generation=(int)(sequence/160)+1,ObservationTicks=now,Model=i==0?0xf9300cc5u:0xa774b5a6u,Context=i==0&&!environmentFixture?"npc":"player",Position=new[]{2d+i*4,3d,0d},Velocity=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},OperatingPoint=.1+.7*(.5+.5*Math.Sin(sequence*.02)),Running=true,Valid=true});
-  runtime.Publish(new GameplayFrame{Session=runtime.Session,Listener=new ListenerState{Version=1,Session=runtime.Session,Generation=generation,Sequence=sequence++,ObservationTicks=now,ClockFrequency=Stopwatch.Frequency,GameTimeMs=(long)(sequence*50),Position=new[]{0d,0d,1d},Velocity=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},ListenerKind="camera",VelocityKind="estimated-camera-difference",Paused=pause,Valid=valid,Reason=valid?"valid":"not-ready",Coordinates="gta-native-unscaled",Units="native-unverified",SourceId=null},Vehicles=vehicles.ToArray()});
+ static void Feed(int count,bool pause=false,bool valid=true){if(pause!=wasPaused){generation++;wasPaused=pause;}long now=Stopwatch.GetTimestamp();var vehicles=new List<GameplayVehicle>();for(int i=0;i<count;i++)vehicles.Add(new GameplayVehicle{Id="actual-component-fixture-"+i,Generation=deliveryFixture?1:(int)(sequence/160)+1,ObservationTicks=now,Model=i==0?0xf9300cc5u:0xa774b5a6u,Context=i==0&&!environmentFixture?"npc":"player",Position=deliveryFixture?new[]{1d,-3d,1.3}:new[]{2d+i*4,3d,0d},Velocity=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},OperatingPoint=.1+.7*(.5+.5*Math.Sin(sequence*.02)),Running=true,Valid=true,RiderAttached=deliveryFixture});
+  runtime.Publish(new GameplayFrame{Session=runtime.Session,Listener=new ListenerState{Version=1,Session=runtime.Session,Generation=generation,Sequence=sequence++,ObservationTicks=now,ClockFrequency=Stopwatch.Frequency,GameTimeMs=(long)(sequence*50),Position=deliveryFixture?new[]{0d,-3d,1.6}:new[]{0d,0d,1d},Velocity=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},ListenerKind="camera",VelocityKind="estimated-camera-difference",Paused=pause,Valid=valid,Reason=valid?"valid":"not-ready",Coordinates="gta-native-unscaled",Units="native-unverified",SourceId=null},Vehicles=vehicles.ToArray()});
  }
  static void Until(Func<bool> condition,int milliseconds,int count=1,bool pause=false){var clock=Stopwatch.StartNew();while(!condition()){if(clock.ElapsedMilliseconds>milliseconds)throw new TimeoutException(runtime.State+"; "+(Evidence()==null?"no host status":Json.Serialize(Evidence())));Feed(count,pause);Thread.Sleep(50);}}
  static void For(int milliseconds,int count=1,bool pause=false,bool valid=true){var clock=Stopwatch.StartNew();while(clock.ElapsedMilliseconds<milliseconds){Feed(count,pause,valid);Thread.Sleep(50);}}
@@ -62,10 +62,52 @@ internal static class TestGameplay {
    var connection=server.BeginWaitForConnection(null,null);client.Connect(1000);server.EndWaitForConnection(connection);GameplayWire.Write(client,new byte[]{7,8,9});var b=GameplayWire.Read(server);Check(b.Length==3&&b[0]==7&&b[1]==8&&b[2]==9,"a new genuine pipe preserves exact framing after timeout cancellation");
   }
  }
+ static int DeliveryCase(string mode){
+  Check(environmentFixture,"delivery fixture requires the actual discard-only profile");
+  Until(()=>Number(Evidence(),"consumedFrames")>0,12000,0);
+  owned.Add((int)Number(Evidence(),"nodePid"));For(2500,0);
+  Check(Number(Worker(),"activeSources")==0&&Number(Evidence(),"underflowFrames")==0,"source-free delivery remains continuous");
+  Until(()=>Number(Evidence(),"startupCreditsRetired")==2&&Number(Worker(),"activeSources")>0,4000);
+  Check(Number(Evidence(),"steadyProducerCreditBlocks")==6,"steady credits use the existing six-block window");
+  bool fault=mode=="--delivery-fault";
+  if(fault)Until(()=>runtime.HostPid==0,12000);
+  else{
+   For(6500);var live=Evidence();
+   Check(runtime.HostPid==owned[0]&&Number(live,"underflowFrames")==0,"sustained authored Bati playback has zero underflow");
+   var world=Worker()["acousticWorld"] as Dictionary<string,object>;
+   var readiness=world["environmentalReadiness01"] as Dictionary<string,object>;
+   var counters=readiness["counters"] as Dictionary<string,object>;
+   Check(Number(counters,"firstActivations")>0&&Number(counters,"replacements")>0,"actual worker produced nonempty consumer updates under load");
+   Check(Number(Worker(),"arrivals")==1&&Number(Worker(),"retired")==0,"single source lifetime survives scene updates");
+  }
+  runtime.RequestStop("authored-delivery-test-complete");Check(runtime.Join(6000),"delivery fixture owner closed");
+  foreach(int pid in owned)Check(!Alive(pid),"owned delivery process closed");
+  var final=Evidence();
+  Check(!(bool)final["endpointOpened"]&&runtime.Attempts==1,"device-free sink and one launch");
+  if(mode=="--delivery-baseline"){
+   Check(Number(final,"underflowFrames")==0,"uninstrumented comparator preserves continuous delivery");
+   Console.WriteLine("PASS "+checks+" device-free comparator assertions");
+   return 0;
+  }
+  string directory=Path.Combine(root,".local","gameplay",runtime.Session);
+  string receipt=Path.Combine(directory,fault?"first-underflow.json":"delivery-timing.json");
+  var trace=new JavaScriptSerializer{MaxJsonLength=1048576}.DeserializeObject(File.ReadAllText(receipt)) as Dictionary<string,object>;
+  Check(Number(trace,"schema")==2&&Number(trace,"retiredCredits")==2,"independent receipt binds the measured steady credit window");
+  Check((Number(final,"underflowFrames")>0)==fault,"a real underflow faults and never resumes");
+  if(fault){
+   Check(Number(trace,"firstUnderflowQpc")>0&&Number(trace,"firstUnderflowFrame")==Number(final,"firstUnderflowFrame"),"exact first underflow matches host ring");
+   var sink=(object[])trace["sink"];var last=(Dictionary<string,object>)sink[sink.Length-1];
+   Check((string)last["Phase"]=="sink-delivery"&&Number(last,"Amount")==Number(final,"underflowFrames"),"frozen missing frames agree with fatal callback");
+   Check(Lifecycle("host","host-closed","host-fault"),"underflow exits as a host fault");
+  }
+  Console.WriteLine("PASS "+checks+" device-free delivery assertions "+receipt);
+  return 0;
+ }
  public static int Main(string[]args){
-  try{RingTests();PipeTimeoutTests();if(args.Length==1&&args[0]=="--ring-only"){Console.WriteLine("PASS "+checks+" exact PCM reserve / native callback / retained starvation guard / real pipe timeout checks; no endpoint");return 0;}root=Path.GetFullPath(args[0]);var c=PlayableConfiguration.Load(Path.Combine(root,"playable.json"));environmentFixture=c.DiscardEnvironmentalOutput;Settings(1);string pointer=Path.Combine(root,".local","fixture-pointer.json");Directory.CreateDirectory(Path.GetDirectoryName(pointer));File.WriteAllText(pointer,Json.Serialize(new{schema=1,packageRoot=root,manifestSha256=PlayableConfiguration.Digest(c.Manifest)}));
+  try{RingTests();PipeTimeoutTests();if(args.Length==1&&args[0]=="--ring-only"){Console.WriteLine("PASS "+checks+" exact PCM reserve / native callback / retained starvation guard / real pipe timeout checks; no endpoint");return 0;}root=Path.GetFullPath(args[0]);var c=PlayableConfiguration.Load(Path.Combine(root,"playable.json"));environmentFixture=c.DiscardEnvironmentalOutput;deliveryFixture=args.Length==3&&args[2].StartsWith("--delivery-",StringComparison.Ordinal);Settings(1);string pointer=Path.Combine(root,".local","fixture-pointer.json");Directory.CreateDirectory(Path.GetDirectoryName(pointer));File.WriteAllText(pointer,Json.Serialize(new{schema=1,packageRoot=root,manifestSha256=PlayableConfiguration.Digest(c.Manifest)}));
    runtime=new GameplayRuntime(!environmentFixture);runtime.Start(pointer,c.GameExecutable,args[1]);Until(()=>runtime.Configuration!=null,5000,0);Thread.Sleep(250);Check(runtime.Attempts==0,"no host before Story readiness");runtime.SetStoryReady(true);
    Until(()=>runtime.HostPid>0,5000);owned.Add(runtime.HostPid);
+   if(deliveryFixture)return DeliveryCase(args[2]);
    if(environmentFixture){
     Until(()=>Number(Evidence(),"consumedFrames")>0,12000,0);double consumed=Number(Evidence(),"consumedFrames");
     string status=Path.Combine(root,".local","gameplay",runtime.Session,"host.json");

@@ -32,6 +32,7 @@ namespace RichAudio.Beacon.Windows
         // Both real and device-free sinks enforce this same fatal integrity
         // boundary. Underflow is never silently resumed or accepted by a test.
         public void RequireContinuousProducer(){if(Interlocked.Read(ref UnderflowFrames)!=0)throw new InvalidOperationException("Producer starvation: stopped to prevent renderer/device clock drift; no automatic resume");}
+        internal int PendingCredits { get { return Volatile.Read(ref credits); } }
         public int TakeCredits() { return Interlocked.Exchange(ref credits, 0); }
         public bool TryWrite(float[] samples, int frames)
         {

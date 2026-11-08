@@ -1,5 +1,79 @@
 using System;using System.Collections.Generic;using System.Diagnostics;using System.Threading;
 namespace RichAudio.Beacon.Windows {
+ // One preallocated circular lane per writer. Publication is single-writer,
+ // with no lock, allocation, pipe or disk access on the discard callback.
+ // Receipts are assembled off the callback after shutdown joins.
+ internal sealed class GameplayDeliveryTrace01 {
+  internal struct Event {
+   public string Phase;
+   public long Qpc,Sequence,StartQpc,EndQpc;
+   public int Before,After,Amount,Aux;
+   public double NodeMs,NodeStartMs,NodeRenderMs;
+  }
+  internal sealed class Lane {
+   readonly GameplayDeliveryTrace01 owner;
+   readonly Event[] rows=new Event[256];
+   int written;
+   internal Lane(GameplayDeliveryTrace01 owner){this.owner=owner;}
+   internal void Add(Event e){if(Interlocked.Read(ref owner.faultQpc)!=0)return;int n=written;rows[n%rows.Length]=e;Volatile.Write(ref written,n+1);}
+   internal Event[] Snapshot(long cutoff){
+    int end=Volatile.Read(ref written);var result=new List<Event>(rows.Length);
+    for(int i=Math.Max(0,end-rows.Length);i<end;i++){Event e=rows[i%rows.Length];if(e.Qpc!=0&&(cutoff==0||e.Qpc<=cutoff))result.Add(e);}
+    return result.ToArray();
+   }
+  }
+  internal readonly Lane Control,Pcm,Producer,Sink,Supervisor,Worker;
+  long faultQpc,faultCallbackStartQpc,firstUnderflowFrame=-1,lastAdmission,lastPayload,lastDelivery,admissionGap,payloadGap,callbackLate,sinkDeliveryGap;
+  double lastNodeOutput,nodeOutputGap,nodeWriteMax,nodeRenderMax;int nodeDrops,nodeMalformed,faultPendingCredits;
+  internal GameplayDeliveryTrace01(){Control=new Lane(this);Pcm=new Lane(this);Producer=new Lane(this);Sink=new Lane(this);Supervisor=new Lane(this);Worker=new Lane(this);}
+  internal static Event Row(string phase,long sequence,long qpc,long start=0,long end=0,int before=0,int after=0,int amount=0,int aux=0){
+   return new Event{Phase=phase,Sequence=sequence,Qpc=qpc,StartQpc=start,EndQpc=end,Before=before,After=after,Amount=amount,Aux=aux};
+  }
+  static void Gap(ref long last,ref long maximum,long now){if(last!=0)maximum=Math.Max(maximum,now-last);last=now;}
+  internal void Payload(long seq,long before,long after,int depth){
+   if(Interlocked.Read(ref faultQpc)!=0)return;
+   Gap(ref lastPayload,ref payloadGap,after);Pcm.Add(Row("pcm-payload-read",seq,after,before,after,depth));
+  }
+  internal void Admit(long seq,long before,long after,int depth,int frames){
+   if(Interlocked.Read(ref faultQpc)!=0)return;
+   Gap(ref lastAdmission,ref admissionGap,after);Pcm.Add(Row("pcm-admitted",seq,after,before,after,0,depth,frames));
+  }
+  internal void Callback(long number,long due,long start,long end,int requested,int supplied,int missing,int before,int after,long first,long deliveredFrame,int pendingCredits){
+   if(Interlocked.Read(ref faultQpc)!=0)return;
+   callbackLate=Math.Max(callbackLate,start-due);
+   // Consecutive blocks can first appear in the same callback. Measure
+   // distinct callback start times that deliver a new producer block.
+   if(supplied>0&&(deliveredFrame+511)/512<=(deliveredFrame+supplied-1)/512)Gap(ref lastDelivery,ref sinkDeliveryGap,start);
+   // StartQpc is due time for this event, Qpc is actual start.
+   Sink.Add(Row("sink-callback",number,start,due,end,before,after,requested,supplied));
+   // Frames and producer sequence are separate from callback numbering.
+   Sink.Add(Row("sink-delivery",deliveredFrame/512,start,0,0,0,0,missing,(int)(deliveredFrame%512)));
+   if(missing>0){firstUnderflowFrame=first;faultCallbackStartQpc=start;faultPendingCredits=pendingCredits;Interlocked.Exchange(ref faultQpc,end);}
+  }
+  internal void Node(Event e,int dropped){
+   if(Interlocked.Read(ref faultQpc)!=0)return;
+   nodeDrops=Math.Max(nodeDrops,dropped);
+   if(e.Phase=="stdout-attempt")nodeRenderMax=Math.Max(nodeRenderMax,e.NodeRenderMs);
+   if(e.Phase=="stdout-complete"){
+    if(lastNodeOutput!=0)nodeOutputGap=Math.Max(nodeOutputGap,e.NodeMs-lastNodeOutput);
+    lastNodeOutput=e.NodeMs;nodeWriteMax=Math.Max(nodeWriteMax,e.NodeMs-e.NodeStartMs);
+   }
+   Producer.Add(e);
+  }
+  internal void InvalidNodeRow(){if(Interlocked.Read(ref faultQpc)==0)nodeMalformed++;}
+  static double Ms(long qpc){return qpc*1000d/Stopwatch.Frequency;}
+  internal bool Underflow{get{return Interlocked.Read(ref faultQpc)!=0;}}
+  internal object Snapshot(string session,int hostPid,int producerPid,int startup,int steady,long admitted,long consumed,long issued,int retired,bool prepared){
+   long stop=Interlocked.Read(ref faultQpc);
+   return new{schema=2,session,hostPid,producerPid,frequency=Stopwatch.Frequency,firstUnderflowQpc=stop==0?(long?)null:faultCallbackStartQpc,freezeQpc=stop==0?(long?)null:stop,firstUnderflowFrame,
+    clockScope="Host event QPC and Node performance milliseconds are independent. Join blocks by sequence and credit batches by credit ID.",
+    fieldScope="Credit rows carry batch ID in Sequence; sink-callback Amount/Aux are requested/supplied, sink-delivery Amount/Aux are missing/offset. Before/After are ring frames unless the credit phase supplies credit counts.",
+    startupWindow=startup,steadyWindow=steady,admittedBlocks=admitted,consumedFrames=consumed,issuedCredits=issued,retiredCredits=retired,sourcePrepared=prepared,
+    pendingReturnedCreditsAtFault=stop==0?(int?)null:faultPendingCredits,
+    maxima=new{completeRenderMs=nodeRenderMax,stdoutCompletionDurationMs=nodeWriteMax,stdoutCompletionIntervalMs=nodeOutputGap,hostPayloadIntervalMs=Ms(payloadGap),ringAdmissionIntervalMs=Ms(admissionGap),sinkCallbackLatenessMs=Ms(callbackLate),endToEndBlockDeliveryIntervalMs=Ms(sinkDeliveryGap),producerDiagnosticRowsDropped=nodeDrops,producerDiagnosticRowsMalformed=nodeMalformed},
+    control=Control.Snapshot(stop),pcm=Pcm.Snapshot(stop),producer=Producer.Snapshot(stop),sink=Sink.Snapshot(stop),supervisor=Supervisor.Snapshot(stop),worker=Worker.Snapshot(stop)};
+  }
+ }
  // A scheduled fake callback consumes one chunk. A delayed test thread is not
  // a hardware device that consumed an arbitrary backlog while it was asleep.
  // Defer missed periods explicitly; never issue an unbounded catch-up burst.

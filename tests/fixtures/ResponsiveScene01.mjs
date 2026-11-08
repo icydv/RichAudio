@@ -8,7 +8,7 @@ import {identity} from '../../src/acoustics/world/collision-mesh.mjs';
 const sha=x=>createHash('sha256').update(typeof x==='string'||Buffer.isBuffer(x)?x:JSON.stringify(x)).digest('hex');
 export const responsiveEpoch01='2026-11-05T00:00:00.000Z';
 export const responsiveResourceCount01=10663;
-export function createResponsiveScene01(root,{analytic=false}={}){
+export function createResponsiveScene01(root,{analytic=false,gameSHA256}={}){
  fs.mkdirSync(root,{recursive:true});
  const write=(name,value)=>{const p=path.join(root,name);fs.writeFileSync(p,JSON.stringify(value));return p;};
  const pin=sha('original responsive game/parser binding'),archiveSHA=sha('original authored archive bytes'),resources=[],rows=[],bounds={};
@@ -38,9 +38,9 @@ export function createResponsiveScene01(root,{analytic=false}={}){
   }
   rows.push(row);
  }
- const catalog={Schema:1,Stage:'codewalker-resolved-installation-model',ParserErrorCount:0,InputBinding:{GameExecutableSHA256:pin,CodeWalkerCoreSHA256:pin},SelectedDlc:'original',Gen9SelectorAvailable:true,ModsFolderResolutionEnabled:false,Resources:resources,CollisionPlacementIndex:{IndexComplete:true,ManifestFilesVisited:1,CacheFilesVisited:1,ProjectionSchemaGaps:0,InteriorBoundsMembershipByHash:{},MapGroupMembershipByHash:{},BoundsStoreItemsByHash:bounds}},catalogPath=write('catalog.json',catalog),catalogSHA256=sha(fs.readFileSync(catalogPath));
+ const catalog={Schema:1,Stage:'codewalker-resolved-installation-model',ParserErrorCount:0,InputBinding:{GameExecutableSHA256:gameSHA256??pin,CodeWalkerCoreSHA256:pin},SelectedDlc:'original',Gen9SelectorAvailable:true,ModsFolderResolutionEnabled:false,Resources:resources,CollisionPlacementIndex:{IndexComplete:true,ManifestFilesVisited:1,CacheFilesVisited:1,ProjectionSchemaGaps:0,InteriorBoundsMembershipByHash:{},MapGroupMembershipByHash:{},BoundsStoreItemsByHash:bounds}},catalogPath=write('catalog.json',catalog),catalogSHA256=sha(fs.readFileSync(catalogPath));
  const manifest={Schema:1,ResolvedCatalogSHA256:catalogSHA256,InputFingerprint:sha({kind:'entirely-original-responsive-scene01',analytic,resources:resources.length,triangles:781}),InputBinding:catalog.InputBinding,ValidationEpochUtc01:responsiveEpoch01,Resources:rows},manifestPath=write('manifest.json',manifest);
- const descriptor={schema:1,kind:'EntirelyOriginalResponsiveScene01',root,catalogPath,catalogSHA256,manifestPath,expectedGameSHA256:pin,validationEpochUtc01:responsiveEpoch01,resources:rows.length,nearbyTriangleSurfaces:781,analytic,generatedFromInstalledData:false,sourceArchiveAccess:false};write('fixture.json',descriptor);return descriptor;
+ const descriptor={schema:1,kind:'EntirelyOriginalResponsiveScene01',root,catalogPath,catalogSHA256,manifestPath,expectedGameSHA256:catalog.InputBinding.GameExecutableSHA256,validationEpochUtc01:responsiveEpoch01,resources:rows.length,nearbyTriangleSurfaces:781,analytic,generatedFromInstalledData:false,sourceArchiveAccess:false};write('fixture.json',descriptor);return descriptor;
 }
 export function responsivePose01(sequence){
  // Repeated region, ordinary smooth movement over a selection boundary, then

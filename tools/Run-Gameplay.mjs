@@ -62,6 +62,13 @@ const startupVoices=latencyProfile.id==='street-01'&&!sourceStartupPreparation10
 engine.pipeline.simulation.captureInstalledPaths01=config.acousticPathEvidence01===true;
 engine.captureCompleteRenderStages01=qualification!==null;
 let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,pendingSettings=null,pendingGeometry=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
+const traceDelivery=config.outputSink==='environment-observation'&&process.env.RICHAUDIO_DISCARD_DELIVERY_TRACE01==='1';
+let deliveryDrops=0;
+function delivery(phase,id,at,began=0,render=0){
+ if(process.stderr.writableLength>=4096){deliveryDrops++;return;}
+ // A short best-effort record. Never await diagnostic backpressure.
+ process.stderr.write(`delivery01|${phase}|${id}|${at}|${began}|${render}|${credits}|${deliveryDrops}\n`);
+}
 let viewer=false,viewerClient=null,soundMapRecordingRequest01=false,soundMapBackgroundRequest01=false;engine.telemetry=new SoundMapTelemetry();
 const soundMapRequired01=()=>viewer||soundMapRecordingRequest01||soundMapBackgroundRequest01;
 const soundMapDemandStatus01=()=>({viewer,recordingRequested:soundMapRecordingRequest01,backgroundRequested:soundMapBackgroundRequest01,required:soundMapRequired01(),geometry:soundMapRequired01()?installedSoundMapGeometryState01(engine.pipeline.simulation.scene):'not-requested',recordingStartedByProducer:false});
@@ -92,7 +99,7 @@ if(!config.demoProfile&&config.acousticWorld!==false){
    reason:s.reason??s.failure??s.worker?.failure??null,residentResources:s.residentResources??0,resourceLoads:s.resourceLoads??0,controller:s.worker??s.controller??null,coverageStates:s.coverageStates??null,initialPreparationPriority:s.initialPreparationPriority??null,localReadiness:s.localReadiness??null,cacheTimings:s.cacheTimings??null};
   if(qualification&&s.worker?.failed&&!stopped)setImmediate(()=>finish(Error(s.worker.failure??'installed world worker failed'),'world-worker-fault'));
  },onScene:(scene,receipt)=>{
-  if(worldAdmissionRows<2400&&process.stderr.writableLength<16384){log({type:'installed-world-producer-admission',requestId:receipt.requestId,validationMs:receipt.validationMs,elapsedSinceRequestMs:receipt.admissionMs,workerPreparationMs:receipt.workerPreparationMilliseconds,prepareSoundMapGeometry01:receipt.prepareSoundMapGeometry01,soundMapPreparationMilliseconds:receipt.lifecycle01.workerProfile01?.soundMapPreparationMilliseconds??null,scope:'validation is on producer; worker preparation is concurrent, not additive audio latency'});worldAdmissionRows++;}else worldAdmissionRowsOmitted++;
+  if(worldAdmissionRows<2400&&process.stderr.writableLength<16384){log({type:'installed-world-producer-admission',requestId:receipt.requestId,nodeAtMs:traceDelivery?performance.now():undefined,validationMs:receipt.validationMs,elapsedSinceRequestMs:receipt.admissionMs,workerPreparationMs:receipt.workerPreparationMilliseconds,prepareSoundMapGeometry01:receipt.prepareSoundMapGeometry01,soundMapPreparationMilliseconds:receipt.lifecycle01.workerProfile01?.soundMapPreparationMilliseconds??null,scope:'validation is on producer; worker preparation is concurrent, not additive audio latency'});worldAdmissionRows++;}else worldAdmissionRowsOmitted++;
   evidence?.record({type:'source-proof',requestId:receipt.requestId,observationKey:scene.tile.observationKey,listenerAnchor:scene.tile.listenerAnchor,
    localReadiness:installedStaticSceneMetadata01(scene).localReadiness,
    catalogue:receipt.catalogSHA256,proofEpoch:qualification.epoch,surfaces:scene.tile.surfaces.length,resources:scene.observationModel.evidence});
@@ -158,6 +165,7 @@ function finish(error,reason=error?'producer-fault':'graceful-stop'){if(stopped)
 }
 async function pump(){if(busy||stopped||credits<=0)return;busy=true;
  try{
+  if(traceDelivery)delivery('b',sequence,performance.now());
   if(pendingSettings){const settings=pendingSettings;pendingSettings=null;engine.setSettings(settings);}
   if(pendingSnapshot){const m=pendingSnapshot;pendingSnapshot=null;const now=performance.now(),s=m.frame.listener;
    if(!clock)clock={ticks:s.observationTicks+m.ageMs*s.clockFrequency/1000,at:now,frequency:s.clockFrequency};
@@ -184,7 +192,11 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
    stages:engine.lastRenderStages01});
   if(engine.lastCompleteRenderMs>8){if(processingOverrunRows<2400&&process.stderr.writableLength<16384){log({type:'complete-render-overrun',sequence:(sequence-1)>>>0,producerFrameStart:((sequence-1)>>>0)*512,completeRenderMs:engine.lastCompleteRenderMs,hardDeadlineMs:512/48,headroomTargetMs:8,hardMiss:engine.lastCompleteRenderMs>512/48,geometryModel:engine.pipeline.simulation.scene.observationModel?.kind??'conditional-direct',stages:engine.lastRenderStages01});processingOverrunRows++;}else processingOverrunRowsOmitted++;}
   if(viewerClient&&engine.visual?.soundMapFrame)try{viewerClient.offer(engine.visual.soundMapFrame,engine.visual.soundMapGeometry);}catch{}
+  const outputSequence=(sequence-1)>>>0;
+  const outputAt=traceDelivery?performance.now():0;
+  if(traceDelivery)delivery('w',outputSequence,outputAt,0,engine.lastCompleteRenderMs);
   await new Promise((resolve,reject)=>process.stdout.write(packet,e=>e?reject(e):resolve()));
+  if(traceDelivery)delivery('d',outputSequence,performance.now(),outputAt);
   if(engine.lastTiming){
    // The host's existing bounded diagnostic writer receives this on its stderr
    // worker. stdout completion is pipe completion, never endpoint submission.
@@ -207,7 +219,9 @@ function geometry(message){
 }
 const input=readline.createInterface({input:process.stdin,terminal:false});
 input.on('line',line=>{try{if(line.length>131072)throw Error('producer command size');const m=JSON.parse(line);
- if(m.type==='credit'){const cap=latencyProfile.startupBlocks;if(!Number.isInteger(m.blocks)||m.blocks<1||m.blocks>cap||credits+m.blocks>cap)throw Error('bounded PCM credits');credits+=m.blocks;}
+ if(m.type==='credit'){const cap=latencyProfile.startupBlocks;if(!Number.isInteger(m.blocks)||m.blocks<1||m.blocks>cap||credits+m.blocks>cap)throw Error('bounded PCM credits');credits+=m.blocks;
+  if(traceDelivery&&Number.isSafeInteger(m.deliveryId))delivery('c',m.deliveryId,performance.now());
+ }
  else if(m.type==='settings'){const previousDemand01=(viewer?1:0)|(soundMapRecordingRequest01?2:0)|(soundMapBackgroundRequest01?4:0);for(const key of ['soundMapVisible','soundMapRecording','soundMapBackgroundTelemetry'])if(m[key]!==undefined&&typeof m[key]!=='boolean')throw Error('Boolean SoundMap demand required');pendingSettings={quality:m.quality,acceleration:m.acceleration,enabled:m.enabled,volume:m.volume,reflections:m.reflections,mode:m.mode,airflowEnabled:m.airflowEnabled,airflowLevel:m.airflowLevel};if(m.soundMapVisible!==undefined)viewer=m.soundMapVisible;if(m.soundMapRecording!==undefined)soundMapRecordingRequest01=m.soundMapRecording;if(m.soundMapBackgroundTelemetry!==undefined)soundMapBackgroundRequest01=m.soundMapBackgroundTelemetry;engine.telemetry.enabled=soundMapRequired01();engine.updateInstalledConsumerWorkload01();if(previousDemand01!==((viewer?1:0)|(soundMapRecordingRequest01?2:0)|(soundMapBackgroundRequest01?4:0))&&process.stderr.writableLength<16384)log({type:'soundmap-demand-changed',...soundMapDemandStatus01()});}
  else if(m.type==='snapshot'){if(!Array.isArray(m.frame?.vehicles)||m.frame.vehicles.some(v=>v.valid&&!allowed.has(v.model+':'+v.context))||m.validForMs!==undefined&&(!Number.isFinite(m.validForMs)||m.validForMs<=0||m.validForMs>252))throw Error('unprepared source identity or expiry');pendingSnapshot={...m,receivedAt:performance.now()};}
  else if(m.type==='geometry'){if(!qualification)pendingGeometry=m.value;}
