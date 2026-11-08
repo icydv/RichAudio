@@ -116,9 +116,17 @@ function metadata(now){
   safeText($('knowledge'),isCached?'Original authored cache fixtures only. Tile and room boxes are bounds, not invented walls. Unsupported, unprepared and outside space remain unknown. Runtime doors and activation are unavailable.':isPassive?'Passive camera telemetry only. Acoustic processing is inactive. The reference grid is not world geometry.':conditional?'Listener-only conditional direct path. Unobserved space is assumed clear for the owned beacon; this is not verified unobstructed geometry.':coverage+(h.expired?'Geometry unavailable or expired at this moment. ':'')+'Unobserved space remains unknown.');
   if(inspectionOnly)safeText($('knowledge'),'Unqualified XML inspection only. Source identity and placement remain unverified; no acoustic surfaces or solver paths are authorized. Outside coverage is unknown.');
   const surroundingTiles=view.kind==='acoustic'?installedContext.visible(f,now):[];
-  if(f?.worldContext01&&!isReplay&&!context)safeText($('context-status'),surroundingTiles.some(tile=>tile.surfaces.length)?
-    `Teal · verified surrounding collision (visual only) · ${surroundingTiles.length} worksets. Dashed amber · missing or unsupported. Dashed orange · activation or portal unknown.`:
-    `Surrounding collision · ${installedContext.status.replaceAll('-',' ')}`);
+  if(f?.worldContext01&&!isReplay&&!context){
+    const decision=f.worldContext01.rendererDecision01;
+    const expired=Number.isFinite(decision?.remainingMs)&&Number.isFinite(h.ageMs)&&h.ageMs>=decision.remainingMs;
+    const renderer=!h.expired&&decision&&['admitted','expired','withheld','prepared'].includes(decision.state)?
+      expired?' Renderer · expired.':
+        ` Renderer · ${decision.state}${typeof decision.scope==='string'?` · ${decision.scope.slice(0,40)}`:''}${typeof decision.reason==='string'?` · ${decision.reason.slice(0,160).replaceAll('-',' ')}`:''}.`:'';
+    const surroundings=surroundingTiles.some(tile=>tile.surfaces.length)?
+      `Teal · verified surrounding collision (visual only) · ${surroundingTiles.length} worksets. Dashed amber · missing or unsupported. Dashed orange · activation or portal unknown.`:
+      `Surrounding collision · ${installedContext.status.replaceAll('-',' ')}.`;
+    safeText($('context-status'),surroundings+renderer);
+  }
   const packet=cacheWorld.packet;
   safeText($('cache-world-status'),packet?`${packet.tiles.length} declared tiles · ${packet.tiles.reduce((n,t)=>n+t.surfaces.length,0)} finite collision surfaces · ${packet.interiors.length} interior fixtures. ${cached.visible?cached.reason:'Inspection hidden.'} Installed-world compatibility remains unqualified.`:'No qualified cache snapshot supplied. The reference grid is not a building map.');
   safeText($('cache-world-identities'),cached.visible?cached.tiles.flatMap(t=>t.buildingBindings.slice(0,4).map(b=>`${t.tileId}: archetype ${b.archetypeHash} → ${b.collisionResourceId}`)).slice(0,16).join(' · '):'');

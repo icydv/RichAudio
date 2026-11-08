@@ -24,9 +24,9 @@ export function interiorObservationKey01(sample){
 export const surroundingInteriorHalfWidth01=8;
 // Stable workset coordinates inside a single observed proxy. This selects a
 // bounded region only. The worker still resolves the exact catalogue instance.
-export function interiorWorksetAnchor01(sample,listener,sources,radius,surrounding=false){
+export function interiorWorksetAnchor01(sample,listener,sources,radius,surrounding=false,local=false){
  if(!identity(sample))return null;
- const cell=Math.min(8,radius/2);
+ const cell=Math.min(local?2:8,radius/2);
  const anchor=sample.origin.map((v,i)=>v+cell*(Math.floor((listener[i]-v)/cell)+.5));
  const reach=surrounding?Math.min(radius,surroundingInteriorHalfWidth01):cell/2;
  return [listener,...sources].every(p=>p.every((v,i)=>Math.abs(v-anchor[i])<=reach))?anchor:null;

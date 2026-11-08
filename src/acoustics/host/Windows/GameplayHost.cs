@@ -181,6 +181,9 @@ namespace RichAudio.Beacon.Windows {
    if(delivery!=null&&line.StartsWith("delivery01|",StringComparison.Ordinal)){ReadDelivery(line,receivedAt);continue;}
    lock(sync){var d=Json.DeserializeObject(line)as Dictionary<string,object>;object type;if(d!=null&&d.TryGetValue("type",out type)){
     string kind=(string)type;
+    object hardMiss;
+    if(delivery!=null&&kind=="complete-render-overrun"&&d.TryGetValue("hardMiss",out hardMiss)&&true.Equals(hardMiss))
+     delivery.HardRenderMiss(receivedAt,d);
     if(delivery!=null&&kind=="installed-world-producer-admission"){
      var row=GameplayDeliveryTrace01.Row("worker-publication",Convert.ToInt64(d["requestId"]),receivedAt);
      row.NodeMs=d.ContainsKey("nodeAtMs")?Convert.ToDouble(d["nodeAtMs"]):0;

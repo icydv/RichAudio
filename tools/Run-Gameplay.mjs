@@ -73,7 +73,11 @@ let viewer=false,viewerClient=null,soundMapRecordingRequest01=false,soundMapBack
 const soundMapRequired01=()=>viewer||soundMapRecordingRequest01||soundMapBackgroundRequest01;
 const soundMapDemandStatus01=()=>({viewer,recordingRequested:soundMapRecordingRequest01,backgroundRequested:soundMapBackgroundRequest01,required:soundMapRequired01(),geometry:soundMapRequired01()?installedSoundMapGeometryState01(engine.pipeline.simulation.scene):'not-requested',recordingStartedByProducer:false});
 const evidence=qualification?openNormalQualificationEvidence01(root,session,error=>{process.exitCode=1;setImmediate(()=>finish(error));}):null;
-if(evidence)engine.onInstalledSceneDiagnostic01=record=>evidence.record({type:'consumer-scene-decision',...record});
+let latestSceneDecision01=null,latestPreparedScene01=null;
+engine.onInstalledSceneDiagnostic01=record=>{
+ evidence?.record({type:'consumer-scene-decision',...record});
+ if(record.requestId===latestPreparedScene01?.requestId)latestSceneDecision01={requestId:record.requestId,reason:record.reason};
+};
 const packet=Buffer.alloc(4112),log=v=>{
  evidence?.record(v);
  process.stderr.write(JSON.stringify(v)+'\n');
@@ -101,7 +105,15 @@ if(!config.demoProfile&&config.acousticWorld!==false){
    reason:s.reason??s.failure??s.worker?.failure??null,residentResources:s.residentResources??0,resourceLoads:s.resourceLoads??0,controller:s.worker??s.controller??null,coverageStates:s.coverageStates??null,initialPreparationPriority:s.initialPreparationPriority??null,localReadiness:s.localReadiness??null,cacheTimings:s.cacheTimings??null};
   if(qualification&&s.worker?.failed&&!stopped)setImmediate(()=>finish(Error(s.worker.failure??'installed world worker failed'),'world-worker-fault'));
  },onScene:(scene,receipt)=>{
-  if(worldAdmissionRows<2400&&process.stderr.writableLength<16384){log({type:'installed-world-producer-admission',requestId:receipt.requestId,nodeAtMs:traceDelivery?performance.now():undefined,validationMs:receipt.validationMs,elapsedSinceRequestMs:receipt.admissionMs,workerPreparationMs:receipt.workerPreparationMilliseconds,prepareSoundMapGeometry01:receipt.prepareSoundMapGeometry01,soundMapPreparationMilliseconds:receipt.lifecycle01.workerProfile01?.soundMapPreparationMilliseconds??null,scope:'validation is on producer; worker preparation is concurrent, not additive audio latency'});worldAdmissionRows++;}else worldAdmissionRowsOmitted++;
+  const metadata=installedStaticSceneMetadata01(scene),profile=receipt.lifecycle01.workerProfile01;
+  latestPreparedScene01={requestId:receipt.requestId,generation:receipt.generation,epoch:installedScenes.validationEpochUtc01,catalogue:receipt.catalogSHA256,
+   interiorKey:receipt.cameraInteriorKey01,expiresAt:receipt.expiresAt,
+   surfaces:metadata.activeSurfaces,reason:metadata.localReadiness.firstBlocker==='placement-or-activation-withheld'?
+    ['conditional-mapgroup-activation-unknown','collision-layer-activation-unknown','unresolved-interior-activation'].find(r=>metadata.uncertaintyByReason01[r]>0)??metadata.localReadiness.firstBlocker:
+    metadata.localReadiness.firstBlocker};
+  if(worldAdmissionRows<2400&&process.stderr.writableLength<16384){log({type:'installed-world-producer-admission',requestId:receipt.requestId,nodeAtMs:traceDelivery?performance.now():undefined,validationMs:receipt.validationMs,elapsedSinceRequestMs:receipt.admissionMs,workerPreparationMs:receipt.workerPreparationMilliseconds,prepareSoundMapGeometry01:receipt.prepareSoundMapGeometry01,soundMapPreparationMilliseconds:profile?.soundMapPreparationMilliseconds??null,scope:'validation is on producer; worker preparation is concurrent, not additive audio latency',
+   ...(config.acousticPathEvidence01===true?{generation:receipt.generation,localReadiness:metadata.localReadiness,interiorSurfaceCount:metadata.interiorSurfaceCount01,uncertainty:metadata.uncertaintyByReason01,resources:scene.observationModel.evidence,
+    stages:{staticMs:profile.staticPreparationMilliseconds,queryMs:profile.staticPreparation?.resourceQueryMs,windowMs:profile.windowMilliseconds,encodeMs:profile.encodeMilliseconds,transferMs:profile.transferPreparationMilliseconds,transportMs:receipt.lifecycle01.workerTransportMilliseconds}}:{})});worldAdmissionRows++;}else worldAdmissionRowsOmitted++;
   evidence?.record({type:'source-proof',requestId:receipt.requestId,observationKey:scene.tile.observationKey,listenerAnchor:scene.tile.listenerAnchor,
    localReadiness:installedStaticSceneMetadata01(scene).localReadiness,
    catalogue:receipt.catalogSHA256,proofEpoch:qualification.epoch,surfaces:scene.tile.surfaces.length,resources:scene.observationModel.evidence});
@@ -183,7 +195,8 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
      installedScenes.bindPreparationEpoch01(proofEpoch);
      const sources=m.frame.vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-s.position[i])<=128)).slice(0,2).map(v=>v.position);
      installedScenes.observeInitial01({sequence:s.sequence,generation:s.generation,geometryTimeMs:now,sourceAgeMs:age,listener:s.position,sources});
-     if(!installedScenes.failed)installedScenes.updateWindow({listener:s.position,sources:engine.installedCurrentSourcePositions01(m.frame),generation:s.generation,geometryTimeMs:now,durationMs:1000,cameraInterior01:bindCameraInterior01(m.frame,age,remaining,proofEpoch),surroundingWorkset01:true,maximumSurfaces:4096,prepareSoundMapGeometry01:soundMapRequired01(),engine:{order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1')}});
+     const cameraInterior01=bindCameraInterior01(m.frame,age,remaining,proofEpoch);
+     if(!installedScenes.failed)installedScenes.updateWindow({listener:s.position,sources:engine.installedCurrentSourcePositions01(m.frame),generation:s.generation,geometryTimeMs:now,durationMs:1000,cameraInterior01,surroundingWorkset01:true,maximumSurfaces:4096,localSurfaceTarget01:cameraInterior01?.durationMs<=250?192:640,prepareSoundMapGeometry01:soundMapRequired01(),engine:{order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1')}});
     }
    }
   }
@@ -206,8 +219,21 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
    const remainingMs=lastFrame?.validUntil==null?null:lastFrame.validUntil-now;
    const current=epoch&&catalogue&&listener?.valid&&!listener.paused&&ageMs<=250&&(remainingMs===null||remainingMs>0);
    const interior=current?bindCameraInterior01(lastFrame.frame,ageMs,remainingMs,epoch):null;
+   const interiorKey=interiorObservationKey01(interior);
+   const candidate=latestPreparedScene01,decision=latestSceneDecision01;
+   const matching=candidate&&candidate.epoch===epoch&&candidate.catalogue===catalogue&&candidate.generation===listener?.generation&&candidate.interiorKey===interiorKey;
+   const active=installedScenes?.readinessSnapshot01().active;
+   const appliedScene=engine.pipeline.simulation.scene;
+   const rendererInstalled=appliedScene.observationModel?.kind==='conditional-installed-static-model';
+   const appliedInterior=rendererInstalled&&installedStaticSceneMetadata01(appliedScene).interiorSurfaceCount01>0?
+    appliedScene.observationModel.evidence.find(e=>e.interiorKey)?.interiorKey??null:null;
+   const rendererDecision01=rendererInstalled&&active&&active.expiresAt>now&&active.generation===listener?.generation&&(!appliedInterior||appliedInterior===interiorKey)?
+    {state:'admitted',reason:null,scope:appliedInterior?'camera-bound interior':'exterior',remainingMs:active.expiresAt-now}:
+    matching?candidate.expiresAt<=now?{state:'expired',reason:'prepared-scene-lease-ended'}:
+    !candidate.surfaces?{state:'withheld',reason:candidate.reason??'no-supported-surfaces-in-window',remainingMs:candidate.expiresAt-now}:
+    {state:'prepared',reason:decision?.requestId===candidate.requestId?decision.reason:'awaiting-consumer-decision',remainingMs:candidate.expiresAt-now}:null;
    const worldContext01=current?{epoch,catalogue,ownerSession:session,generation:listener.generation,position:listener.position,ageMs,
-    interior,interiorKey:interiorObservationKey01(interior)}:null;
+    interior,interiorKey,rendererDecision01}:null;
    viewerClient.offer({...frame,worldContext01},visual.soundMapGeometry);
   }catch{}
   if(engine.lastTiming){

@@ -9,7 +9,8 @@ import {airflowFrameStreet01} from './fixtures/AirflowStreet01.mjs';
 import {InstalledSceneService01} from '../src/acoustics/world/installed-scene-service01.mjs';
 import {InstalledStaticWorld01} from '../src/acoustics/world/installed-static-scene01.mjs';
 import {InstalledWorldContext01} from '../tools/soundmap/installed-world-context01.mjs';
-import {bindCameraInterior01,interiorObservationKey01,matchInteriorInstance01} from '../src/acoustics/world/interior-activation01.mjs';
+import {bindCameraInterior01,interiorObservationKey01,inverseInteriorTransform01,matchInteriorInstance01} from '../src/acoustics/world/interior-activation01.mjs';
+import {resolveInteriorCollisionPlacements01} from '../src/acoustics/world/interior-placements-completion01.mjs';
 import {publishWarmupManifest01} from '../src/acoustics/world/world-warmup.mjs';
 import {installedSceneFixture01} from './fixtures/InstalledSceneService01.mjs';
 
@@ -33,6 +34,23 @@ test('camera lease and proxy matching refuse stale, ambiguous, and foreign obser
  assert.equal(matchInteriorInstance01(instances,{...sample,epoch:'unbound'},scope),null);
  instances['0x12345678'].push({id:'ambiguous',origin:[25.01,10,4]});
  assert.equal(matchInteriorInstance01(instances,sample,scope),null);
+});
+
+test('selected-source placement transforms stay separate from rigid acoustic admission and duplicate bindings',()=>{
+ const ytyp='original.rpf/rooms.ytyp',ymap='original.rpf/instances.ymap',pin='b'.repeat(64);
+ const resource='0x12345678',archetype='0x23456789',memberships=[{BoundsHash:resource,InteriorName:archetype}];
+ const room={ArchetypeHash:archetype,PhysicsDictionaryHash:resource,SourceYtyp:ytyp,SourceSHA256:pin,
+  LocalMin:[0,0,0],LocalMax:[1,1,1],Rooms:[],Portals:[]};
+ const child={InstanceId:'source#instance:1',ArchetypeHash:archetype,SourceYmap:ymap,SourceSHA256:pin,
+  Matrix:[0,2,0,0,-3,0,0,0,0,0,1,0,10,20,30,1]};
+ const make=(archetypes,instances)=>({Resources:[{Path:ytyp,Kind:'ytyp'},{Path:ymap,Kind:'ymap'}],
+  InteriorPlacementMetadata01:{Schema:1,Kind:'RichAudioInstalledMloPlacementMetadata01',Archetypes:archetypes,Instances:instances,
+   YtypSourceBindings:[{Path:ytyp,SHA256:pin}],YmapSourceBindings:[{Path:ymap,SHA256:pin}]}});
+ const placed=resolveInteriorCollisionPlacements01(make([room],[child]),resource,memberships);
+ assert.deepEqual(placed.placements[0].bounds,{min:[7,20,30],max:[10,22,31]});
+ assert.equal(inverseInteriorTransform01(child.Matrix),null);
+ assert.equal(resolveInteriorCollisionPlacements01(make([room,{...room}],[child]),resource,memberships).reason,'ambiguous-selected-YTYP-archetype');
+ assert.equal(resolveInteriorCollisionPlacements01(make([room],[child,{...child}]),resource,memberships).placements.length,0);
 });
 
 test('owned scene worker admits the rotated interior only for the exact camera proxy observation',async()=>{

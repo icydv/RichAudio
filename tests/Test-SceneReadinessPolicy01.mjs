@@ -1,6 +1,6 @@
 // Deterministic scheduling correctness, not measured processing performance.
 import test from 'node:test';import assert from 'node:assert/strict';
-import {InstalledSceneReadinessPolicy01,sceneReadinessLimits01,sceneReadinessMode01} from '../src/acoustics/world/scene-readiness-policy01.mjs';
+import {InstalledSceneReadinessPolicy01,sceneDispatchCadence01,sceneReadinessLimits01,sceneReadinessMode01} from '../src/acoustics/world/scene-readiness-policy01.mjs';
 const profile={staticPreparation:{staticComponentDelta01:{nativeMisses:0,analyticMisses:0},panelTemplateMisses:2,panelTemplateHits:8700},refreshManifestOperations01:{logicalReadBytes:0}};
 function ticket(id,requestedAt,{scope='a',generation=1,expiresAt=requestedAt+1000,dispatchedAt=requestedAt,admittedAt=dispatchedAt+200,warm=true}={}){return {receipt:{requestId:id,requestedAt,expiresAt,admittedAt,generation,bindingEpoch:1,catalogSHA256:'c'.repeat(64)},dispatchedAt,scopeId:scope,warm,profile,sampled:false};}
 function trained(){const p=new InstalledSceneReadinessPolicy01();for(let at=0;at<=1600;at+=200)p.observation(at,1);for(let i=0;i<3;i++){const t=ticket(i+1,i*500);p.candidate(t,t.receipt.admittedAt);p.outcome(t,{completedAt:t.receipt.admittedAt+2,queueMilliseconds:1,applicationMilliseconds:1,applied:false,reason:'collecting-warm-evidence'});}return p;}
@@ -28,4 +28,17 @@ test('background proof cost brings dispatch forward only within the existing cad
   assert.equal(policy.active.expiresAt,2500);
   policy.metadataProofCost01(0,false);
   assert.equal(policy.dispatchAt(1702,1500,null),before);
+});
+
+test('only a camera-interior request with a short original lease uses the faster cadence',()=>{
+ const policy=new InstalledSceneReadinessPolicy01();
+ const interiorActivation01={proxy:7},durationMs=245;
+ const cadence01=sceneDispatchCadence01({interiorActivation01,durationMs});
+ assert.equal(policy.dispatchAt(100,100,{cadence01}),210);
+ assert(policy.dispatchAt(100,100,{cadence01},345)>=165);
+ assert.equal(sceneDispatchCadence01({durationMs}).minimum,250);
+ assert.equal(sceneDispatchCadence01({interiorActivation01,durationMs:500}).minimum,250);
+ const expired=ticket(1,100,{expiresAt:345,admittedAt:300});
+ expired.cadence01=cadence01;
+ assert.equal(policy.evaluate(expired,345,{lastDispatch:100,active:null,pending:null}).reason,'expired-before-activation');
 });

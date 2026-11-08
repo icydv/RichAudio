@@ -313,13 +313,15 @@ try {
     function Add-HashRow($Dictionary,[uint32]$HashValue,$Row){$hashKey=('0x{0:x8}' -f $HashValue);if(!$Dictionary.ContainsKey($hashKey)){$Dictionary[$hashKey]=New-Object Collections.Generic.List[object]};$Dictionary[$hashKey].Add($Row)}
     foreach($manifest in $cache.AllManifests){
         if(!$manifest.PSObject.Properties['Interiors'] -or !$manifest.PSObject.Properties['MapDataGroups']){$projectionGaps++;continue}
+        $manifestEntry=if($manifest.PSObject.Properties['FileEntry']){$manifest.FileEntry}else{$manifest.RpfFileEntry}
+        $manifestPath=Entry-Path $manifestEntry
         foreach($interior in $manifest.Interiors){
             if(!$interior.PSObject.Properties['Bounds']){$projectionGaps++;continue}
-            foreach($bound in $interior.Bounds){$h=Hash-Value $bound;Add-HashRow $interiorByHash $h ([pscustomobject]@{Manifest=Entry-Path $manifest.RpfFileEntry;InteriorName=[string]$interior.Interior.Name;BoundsHash=('0x{0:x8}' -f $h)})}
+            foreach($bound in $interior.Bounds){$h=Hash-Value $bound;Add-HashRow $interiorByHash $h ([pscustomobject]@{Manifest=$manifestPath;InteriorName=[string]$interior.Interior.Name;InteriorNameHash=('0x{0:x8}' -f (Hash-Value $interior.Interior.Name));BoundsHash=('0x{0:x8}' -f $h)})}
         }
         foreach($group in $manifest.MapDataGroups){
             if(!$group.PSObject.Properties['Bounds']){$projectionGaps++;continue}
-            foreach($bound in $group.Bounds){$h=Hash-Value $bound;Add-HashRow $mapByHash $h ([pscustomobject]@{Manifest=Entry-Path $manifest.RpfFileEntry;DataGroupName=[string]$group.DataGroup.Name;Name=[string]$group.Name;BoundsHash=('0x{0:x8}' -f $h);HoursOnOff=[string]$group.DataGroup.HoursOnOff;WeatherTypes=@($group.WeatherTypes|ForEach-Object{[string]$_})})}
+            foreach($bound in $group.Bounds){$h=Hash-Value $bound;Add-HashRow $mapByHash $h ([pscustomobject]@{Manifest=$manifestPath;DataGroupName=[string]$group.DataGroup.Name;Name=[string]$group.Name;GroupHash=('0x{0:x8}' -f (Hash-Value $group.Name));BoundsHash=('0x{0:x8}' -f $h);HoursOnOff=[string]$group.DataGroup.HoursOnOff;WeatherTypes=@($group.WeatherTypes|ForEach-Object{[string]$_})})}
         }
     }
     foreach($cacheFile in $cache.AllCacheFiles){
