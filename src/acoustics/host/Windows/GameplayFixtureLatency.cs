@@ -25,7 +25,7 @@ namespace RichAudio.Beacon.Windows {
   internal readonly Lane Control,Pcm,Producer,Sink,Supervisor,Worker;
   long faultQpc,faultCallbackStartQpc,firstUnderflowFrame=-1,lastAdmission,lastPayload,lastDelivery,admissionGap,payloadGap,callbackLate,sinkDeliveryGap;
   double lastNodeOutput,nodeOutputGap,nodeWriteMax,nodeRenderMax;int nodeDrops,nodeMalformed,faultPendingCredits;
-  object firstHardRenderMiss;
+  object firstHardRenderMiss,firstSourceRender;
   internal GameplayDeliveryTrace01(){Control=new Lane(this);Pcm=new Lane(this);Producer=new Lane(this);Sink=new Lane(this);Supervisor=new Lane(this);Worker=new Lane(this);}
   internal static Event Row(string phase,long sequence,long qpc,long start=0,long end=0,int before=0,int after=0,int amount=0,int aux=0){
    return new Event{Phase=phase,Sequence=sequence,Qpc=qpc,StartQpc=start,EndQpc=end,Before=before,After=after,Amount=amount,Aux=aux};
@@ -66,6 +66,10 @@ namespace RichAudio.Beacon.Windows {
    if(firstHardRenderMiss==null&&Interlocked.Read(ref faultQpc)==0)
     firstHardRenderMiss=new{receivedQpc,producer=row};
   }
+  internal void FirstSourceRender(long receivedQpc,Dictionary<string,object> row){
+   if(firstSourceRender==null&&Interlocked.Read(ref faultQpc)==0)
+    firstSourceRender=new{receivedQpc,producer=row};
+  }
   static double Ms(long qpc){return qpc*1000d/Stopwatch.Frequency;}
   internal bool Underflow{get{return Interlocked.Read(ref faultQpc)!=0;}}
   internal object Snapshot(string session,int hostPid,int producerPid,int startup,int steady,long admitted,long consumed,long issued,int retired,bool prepared){
@@ -74,7 +78,7 @@ namespace RichAudio.Beacon.Windows {
     clockScope="Host event QPC and Node performance milliseconds are independent. Join blocks by sequence and credit batches by credit ID.",
     fieldScope="Credit rows carry batch ID in Sequence; sink-callback Amount/Aux are requested/supplied, sink-delivery Amount/Aux are missing/offset. Before/After are ring frames unless the credit phase supplies credit counts.",
     startupWindow=startup,steadyWindow=steady,admittedBlocks=admitted,consumedFrames=consumed,issuedCredits=issued,retiredCredits=retired,sourcePrepared=prepared,
-    pendingReturnedCreditsAtFault=stop==0?(int?)null:faultPendingCredits,firstHardRenderMiss,
+    pendingReturnedCreditsAtFault=stop==0?(int?)null:faultPendingCredits,firstHardRenderMiss,firstSourceRender,
     maxima=new{completeRenderMs=nodeRenderMax,stdoutCompletionDurationMs=nodeWriteMax,stdoutCompletionIntervalMs=nodeOutputGap,hostPayloadIntervalMs=Ms(payloadGap),ringAdmissionIntervalMs=Ms(admissionGap),sinkCallbackLatenessMs=Ms(callbackLate),endToEndBlockDeliveryIntervalMs=Ms(sinkDeliveryGap),producerDiagnosticRowsDropped=nodeDrops,producerDiagnosticRowsMalformed=nodeMalformed},
     control=Control.Snapshot(stop),pcm=Pcm.Snapshot(stop),producer=Producer.Snapshot(stop),sink=Sink.Snapshot(stop),supervisor=Supervisor.Snapshot(stop),worker=Worker.Snapshot(stop)};
   }

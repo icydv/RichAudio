@@ -76,9 +76,17 @@ export class StockGameplay {
  prepareStartupVoices01(eligible){
   if(this.lastFrame!==-1||this.pipeline.renderer.frame!==0||this.startupVoices01.size||eligible.length>2)
    throw Error('one bounded normal startup voice preparation');
+  const engine=new Float32Array(BLOCK),exhaust=new Float32Array(BLOCK);
   for(const {model,context} of eligible){
    const {bank}=this.registry.resolve(model,context);
-   this.startupVoices01.set(model+':'+context,this.registry.createSource(model,context,this.stockSourceOptions01(bank)));
+   const options=this.stockSourceOptions01(bank);
+   // Match the prepared bank's actual grain/feature layout before credits
+   // begin. These isolated voices never join gameplay or the PCM queue.
+   for(const lift of [false,true]){
+    const disposable=this.registry.createSource(model,context,options);
+    for(let i=0;i<12;i++)disposable.renderInto({operatingPoint:.35+i*.04,load:lift?.05:.9,lift,running:true},engine,exhaust);
+   }
+   this.startupVoices01.set(model+':'+context,this.registry.createSource(model,context,options));
   }
   return this.startupVoices01.size;
  }
@@ -340,7 +348,7 @@ export class StockGameplay {
   const preparation=this.sourcePreparation05;
   if(preparation){if(preparation.rendering)throw Error('One opt-in gameplay render at a time');preparation.rendering=true;}
   try{
-  const start=this.now(),time=this.pipeline.renderer.frame/FS;this.sample=this.playout.sample(time,this.now());
+  const start=this.now(),time=this.pipeline.renderer.frame/FS,sourceBlocksBefore=this.stageCounters.sourcePlaybackBlocks;this.sample=this.playout.sample(time,this.now());
   this.applyPendingInstalledStaticScene01();
   const afterAdmission=this.now();
   this.captureTiming=this.latencyDiagnostics&&this.stats.blocks%8===0;this.lastTiming=null;if(this.captureTiming)this.latencyBrackets=[];
@@ -435,7 +443,7 @@ export class StockGameplay {
    sourceAndControlMs:beforePrepare-afterAdmission,propagationMs:beforePcm-beforePrepare,
    pcmMs:elapsed-(beforePcm-start),bookkeepingMs:this.lastCompleteRenderMs-elapsed,
    ...(this.captureCompleteRenderStages01?{sourceSelectionMs:afterSelection-afterAdmission,stockSynthesisMs}:{}),
-   firstSourceBlock:this.stageCounters.sourcePlaybackBlocks===1}:null;
+   firstSourceBlock:sourceBlocksBefore===0&&this.stageCounters.sourcePlaybackBlocks>0}:null;
   this.stats.maximumCompleteRenderMs=Math.max(this.stats.maximumCompleteRenderMs??0,this.lastCompleteRenderMs);
   if(this.lastCompleteRenderMs>8)this.stats.completeRenderHeadroomMisses=(this.stats.completeRenderHeadroomMisses??0)+1;
   if(this.lastCompleteRenderMs>BLOCK/FS*1000)this.stats.completeRenderHardMisses=(this.stats.completeRenderHardMisses??0)+1;

@@ -60,9 +60,9 @@ const normalControlWarmup=latencyProfile.id==='street-01'?await warmNormalContro
 const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true,latencyProfile:latencyProfile.id,continuityPolicy}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
 const startupVoices=latencyProfile.id==='street-01'&&!sourceStartupPreparation10.unpreparedBanks.length?engine.prepareStartupVoices01(config.eligible):0;
 engine.pipeline.simulation.captureInstalledPaths01=config.acousticPathEvidence01===true;
-engine.captureCompleteRenderStages01=qualification!==null;
 let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,pendingSettings=null,pendingGeometry=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
 const traceDelivery=config.outputSink==='environment-observation'&&process.env.RICHAUDIO_DISCARD_DELIVERY_TRACE01==='1';
+engine.captureCompleteRenderStages01=qualification!==null||traceDelivery;
 let deliveryDrops=0;
 function delivery(phase,id,at,began=0,render=0){
  if(process.stderr.writableLength>=4096){deliveryDrops++;return;}
@@ -205,6 +205,8 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
   credits--;encodeVehicleRa07(...channels,sequence,packet);sequence=(sequence+1)>>>0;
   evidence?.record({type:'complete-render-block',sequence:(sequence-1)>>>0,completeRenderMs:engine.lastCompleteRenderMs,
    stages:engine.lastRenderStages01});
+  if(traceDelivery&&engine.lastRenderStages01?.firstSourceBlock)
+   log({type:'first-source-render',sequence:(sequence-1)>>>0,completeRenderMs:engine.lastCompleteRenderMs,stages:engine.lastRenderStages01});
   if(engine.lastCompleteRenderMs>8){if(processingOverrunRows<2400&&process.stderr.writableLength<16384){log({type:'complete-render-overrun',sequence:(sequence-1)>>>0,producerFrameStart:((sequence-1)>>>0)*512,completeRenderMs:engine.lastCompleteRenderMs,hardDeadlineMs:512/48,headroomTargetMs:8,hardMiss:engine.lastCompleteRenderMs>512/48,geometryModel:engine.pipeline.simulation.scene.observationModel?.kind??'conditional-direct',stages:engine.lastRenderStages01});processingOverrunRows++;}else processingOverrunRowsOmitted++;}
   const visual=viewerClient&&engine.visual;
   const outputSequence=(sequence-1)>>>0;

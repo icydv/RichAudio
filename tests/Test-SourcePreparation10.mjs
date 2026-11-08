@@ -148,6 +148,16 @@ test('installed registry prepares only exact requested verified banks before fra
   const prepared=registry.createSource(0xf9300cc5,'player');assert.equal(prepared.frame,0);assert.equal(reference.frame,0);
   const a=[new Float32Array(512),new Float32Array(512)],b=[new Float32Array(512),new Float32Array(512)],control={operatingPoint:.5,load:.9,running:true};
   for(let block=0;block<16;block++){reference.renderInto(control,...a);prepared.renderInto(control,...b);assert.deepEqual(b,a);}
+  const gameplay=new StockGameplay({registry,session:budgetSession042});
+  try{
+   assert.equal(gameplay.prepareStartupVoices01([{model:0xf9300cc5,context:'player'}]),1);
+   const ready=gameplay.startupVoices01.get(0xf9300cc5+':player'),untouched=registry.createSource(0xf9300cc5,'player');
+   assert.equal(gameplay.pipeline.renderer.frame,0);
+   assert.equal(ready.frame,0);
+   assert.equal(ready.stats.frames,0);
+   untouched.renderInto(control,...a);ready.renderInto(control,...b);
+   assert.deepEqual(b,a);
+  }finally{gameplay.close();}
   assert.throws(()=>registry.prepareSource10(0,'player'),/unavailable/);
  }finally{const resolved=path.resolve(folder);assert(resolved.startsWith(path.resolve(root)+path.sep));fs.rmSync(resolved,{recursive:true});}
 });

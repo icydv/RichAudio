@@ -31,8 +31,18 @@ export function buildMapRequalification01({scope,plan,catalog,census,previous,re
  const blocked=new Map(previous.filter(r=>r.kind==='blocked').map(r=>[r.path,r]));
  const newRows=new Map(requalified.filter(r=>['metadata','selected-ybn-entry','configuration','blocked'].includes(r.kind)).map(r=>[r.path,r]));
  const seen=new Map(previous.filter(r=>['metadata','selected-ybn-entry','configuration'].includes(r.kind)).map(r=>[r.path,r]));
- const orderRows=previous.filter(r=>r.kind==='configuration'&&r.path.endsWith('/setup2.xml'));
+ const orderRows=[...previous,...requalified].filter(r=>r.kind==='configuration'&&r.path.endsWith('/setup2.xml'));
  const exactSetups=new Map(orderRows.map(r=>[setupPack(r.path),r]));
+ const patchTargets=new Map();
+ for(const {Original,Replacement} of catalog.PatchedPaths??[]){
+  const key=normalize(Original),target=normalize(Replacement);
+  if(!patchTargets.has(key))patchTargets.set(key,new Set());
+  patchTargets.get(key).add(target);
+ }
+ // CodeWalker's YBN and YMAP dictionaries assign by short-name hash in
+ // ActiveMapRpfFiles enumeration order. The pinned catalogue preserves that
+ // order. YTYP uses a different global parsed-archetype dictionary.
+ const retainedMountOrder=new Map((catalog.ActiveMapArchives??[]).map(({Archive},index)=>[normalize(Archive),index]));
  const listed=previous.find(r=>r.kind==='configuration'&&r.path.endsWith('/dlclist.xml')&&r.sha256===catalog.DlcListSHA256);
  const groups=new Map();
  const unplanned=new Map();
@@ -65,13 +75,28 @@ export function buildMapRequalification01({scope,plan,catalog,census,previous,re
    !physicalArchive||!planMembers.has(member)?'outside-reviewed-member-scope':
    failedTable?'enclosing-table-unread':tables.has(table)?'unobserved-in-read-table':'enclosing-table-unqualified';
   const alternatives=resource?groups.get(exactKey(resource.Kind,resource.Hash))??[]:[];
-  const competing=resource?unplanned.get(exactKey(resource.Kind,resource.Hash))??[]:[];
+  // A member already in the retained selected catalogue can appear in the
+  // table-only inventory when this particular pass did not select its bytes.
+  // Its identical path is evidence about the same member, not an override.
+  const alternativesObserved=resource?(unplanned.get(exactKey(resource.Kind,resource.Hash))??[]).filter(candidate=>candidate!==member):[];
+  const winnerMount=retainedMountOrder.get(table);
+  const resolvedContenders=[],competing=[];
+  for(const candidate of new Set(alternativesObserved)){
+   const candidateMount=retainedMountOrder.get(nestedTable(candidate));
+   const patch=patchTargets.get(candidate);
+   const reason=patch?.size===1&&patch.has(member)?'exact-retained-patch':
+    ['ymap','ybn'].includes(resource.Kind)&&winnerMount!==undefined?
+     candidateMount===undefined?'outside-retained-active-map':candidateMount<winnerMount?'earlier-retained-active-mount':null:null;
+   if(reason)resolvedContenders.push({path:candidate,reason,winnerMount,candidateMount:candidateMount??null});
+   else competing.push(candidate);
+  }
   return {member,kind:resource?.Kind??member.split('.').at(-1),resourceHash:resource?.Hash??null,
    physicalArchive,nestedTable:table,retainedMemberIdentity:resource?.Path??member,retainedPayloadSHA256:pin,
    retainedWinningSelection:resource?.ResolutionBasis??null,observedPayloadSHA256:renewed?.sha256??observation?.sha256??null,
    retainedDlcOrder:setup?.order==null?null:{setup:setup.path,major:Number(setup.order),minor:Number(setup.minorOrder??0)},
    exactRetainedCandidates:[...alternatives].sort(),currentState,failedTable:failedTable||null,
    candidatePrecedence:effectiveMapSelection01([...alternatives,...competing].map(path=>({path,rank:null}))).state,
+   resolvedContenders,
    competingUnplannedCandidates:[...new Set(competing)].sort(),
    failure:renewed?.reason??blocked.get(failedTable)?.reason??null,
    effectiveSelectionReverified:false};
@@ -141,11 +166,16 @@ export function buildMapRequalification01({scope,plan,catalog,census,previous,re
   row.currentState==='absent-in-rechecked-table'||row.currentState==='requalification-blocked'||
   row.currentState==='member-reobserved'&&!seen.has(row.member)).map(row=>({member:row.member,resourceHash:row.resourceHash,
    change:row.competingUnplannedCandidates.length?'possible-override-precedence-unverified':row.currentState,
+   competingPaths:row.competingUnplannedCandidates,
    placementAndActivationRequalificationRequired:true,runtimeProofPublished:false}));
- return {schema:1,affectedTables,missing,unreadPins,setupGaps,placements,conditionalRequirements,authorityChanges,
+ const retainedContenderResolutions=members.filter(row=>row.resolvedContenders.length)
+  .map(row=>({member:row.member,alternatives:row.resolvedContenders}));
+ return {schema:1,affectedTables,missing,unreadPins,setupGaps,placements,conditionalRequirements,authorityChanges,retainedContenderResolutions,
   summary:{catalogueYbn:census.length,coverage:counts(members,r=>r.kind+'/'+r.currentState),gapsByCause:counts(missing,r=>r.currentState),
    pinsUnverified:unreadPins.length,unresolvedPlacements:placements.length,previouslyObservedYmf:knownYmf.length,
    conditionalManifestSourceMissing:conditionalRequirements.filter(r=>r.requirements.some(g=>!g.manifest)).length,
+   selectedMembersWithRetainedContenderResolution:retainedContenderResolutions.length,
+   selectedMembersWithUnresolvedContenders:members.filter(r=>r.competingUnplannedCandidates.length).length,
    effectiveMapVerified:false,AcousticWorldComplete:false},
   readPlan:{archives:scope.archives.map(a=>a.relative),branches:[...branches].sort(),selected:[...selected].sort(),
    parserSHA256:scope.codeWalkerCoreSHA256,executableSHA256:scope.gameExecutableSHA256}};
