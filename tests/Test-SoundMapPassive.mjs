@@ -46,7 +46,7 @@ test('view-only map binds passive interior identity and original expiry without 
  assert.equal(feed.accept({...sample(now,2),sessionId:'c'.repeat(32),interiorReadback}).reason,'single-use-camera-identity');
 });
 test('camera-only source proof is one-use, pinned and stops on archive identity drift',()=>{
- const root=temp(),attempt=path.join(root,'.local','attempt');
+ const tempRoot=temp(),root=fs.realpathSync.native(tempRoot),attempt=path.join(root,'.local','attempt');
  fs.mkdirSync(attempt,{recursive:true});
  const sha=value=>createHash('sha256').update(value).digest('hex');
  const pin=(name,value)=>{const file=path.join(attempt,name),bytes=JSON.stringify(value);fs.writeFileSync(file,bytes);return [file,sha(bytes)];};
@@ -61,7 +61,9 @@ test('camera-only source proof is one-use, pinned and stops on archive identity 
   });
   const configSHA256='a'.repeat(64),scope=pin('scope.json',{schema:1,kind:'soundmap-retained-source-continuity',approved:false,
    gameRoot:root,proofEpoch,configSHA256,gameExecutableSHA256,gameExecutableBytes:game.length,archives});
-  assert.deepEqual(JSON.parse(call('verify',...scope).stdout),{archives:123,protectedPathsAccessed:0,archiveContentBytesRead:0});
+  const verified=call('verify',...scope);
+  assert.equal(verified.status,0,verified.stderr||verified.error?.message);
+  assert.deepEqual(JSON.parse(verified.stdout),{archives:123,protectedPathsAccessed:0,archiveContentBytesRead:0});
   const startAt=Date.now(),stopAt=startAt+10000,ownerId='b'.repeat(32);
   const approval=pin('approval.json',{schema:1,kind:'soundmap-one-use-source-approval',approved:true,scopeSHA256:scope[1],startAt,stopAt,ownerId});
   const result=call('confirm',...scope,...approval);
@@ -73,7 +75,7 @@ test('camera-only source proof is one-use, pinned and stops on archive identity 
   fs.appendFileSync(path.join(root,archives[0].relative),'drift');
   const changed=call('postcheck',...scope,...approval);
   assert.notEqual(changed.status,0);assert.match(changed.stderr,/archive identity differs/);
- }finally{clean(root);}
+ }finally{clean(tempRoot);}
 });
 test('actual C# view-only camera mailbox drives the service and browser context without a host',{skip:process.platform!=='win32'},async()=>{
  const fixture=installedSceneFixture01({parentRoot:path.join(repo,'.local','soundmap-tests')});
