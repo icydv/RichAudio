@@ -3,11 +3,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {performance} from 'node:perf_hooks';
+import {interiorObservationKey01} from '../../src/acoustics/world/interior-activation01.mjs';
 import {InstalledSceneService01} from '../../src/acoustics/world/installed-scene-service01.mjs';
 
 const hex=(value,count)=>typeof value==='string'&&value.length===count&&/^[a-f0-9]+$/.test(value);
 const point=value=>Array.isArray(value)&&value.length===3&&value.every(n=>Number.isFinite(n)&&Math.abs(n)<1e6);
 const offsets=[[0,0],[24,0],[-24,0],[0,24],[0,-24]];
+const interiorIntervalMs=150,exteriorIntervalMs=500;
 
 export function installedContextConfig01(file){
  const location=path.resolve(file);
@@ -42,9 +44,9 @@ export class InstalledWorldContext01 {
  }
  snapshot(frame,known){
   const context=frame?.worldContext01;
-  const age=Date.now()-(frame?.producedAtUnixMs??0)+(context?.ageMs??0);
+  const transportAge=Date.now()-(frame?.producedAtUnixMs??0),age=transportAge+(context?.ageMs??0);
   if(this.closed||!frame?.listener?.valid||!hex(context?.ownerSession,32)||typeof frame.sessionId!=='string'||!new RegExp('^'+context.ownerSession+'(?::[0-9]+)?$').test(frame.sessionId)||!point(context?.position)||!Number.isFinite(context?.ageMs)||context.ageMs<0||context.ageMs>250||
-     !Number.isFinite(age)||age<0||age>500||!Number.isSafeInteger(context.generation)||context.generation<=0||
+     !Number.isFinite(transportAge)||transportAge<0||!Number.isFinite(age)||age>500||!Number.isSafeInteger(context.generation)||context.generation<=0||
      context.catalogue!==this.config.catalogSHA256||typeof context.epoch!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,7})?Z$/.test(context.epoch)||!Number.isFinite(Date.parse(context.epoch)))
    return {state:'awaiting-current-camera-and-proof',tiles:[]};
   const key=[context.ownerSession,frame.streamId,context.epoch].join(':');
@@ -52,19 +54,27 @@ export class InstalledWorldContext01 {
    this.#retire();
    if(this.closing)return {state:'changing-session',tiles:[]};
    const {catalogSHA256,...config}=this.config;
-   const reader=new InstalledSceneService01({config:{...config,expectedCatalogSHA256:catalogSHA256},session:context.ownerSession,onScene:(scene,receipt)=>this.#scene(scene,receipt,reader),
+   const reader=new InstalledSceneService01({config:{...config,expectedCatalogSHA256:catalogSHA256},session:context.ownerSession,unmanagedIntervalMs01:interiorIntervalMs,onScene:(scene,receipt)=>this.#scene(scene,receipt,reader),
     onStatus:s=>{if(s.cacheTimings?.metadataProofCurrent01===false){this.tiles.clear();this.requests.clear();}}});
    this.reader=reader;this.key=key;reader.bindPreparationEpoch01(context.epoch);
   }
-  const [x,y,z]=context.position,scope=[context.generation,...context.position.map(v=>Math.floor(v/16))].join(':');
+  const interior=context.interior,interiorKey=interiorObservationKey01(interior),remaining=interior?.durationMs-transportAge;
+  const cameraInterior01=interiorKey&&interiorKey===context.interiorKey&&interior.epoch===context.epoch&&
+   Number.isFinite(interior.durationMs)&&interior.durationMs<=1000&&remaining>0
+   ?{...interior,durationMs:remaining}:null;
+  const [x,y,z]=context.position,scope=[context.generation,...context.position.map(v=>Math.floor(v/16)),
+   ...(cameraInterior01?[interiorKey]:[])].join(':');
   if(this.scope!==scope){this.scope=scope;this.offset=0;this.tiles.clear();this.requests.clear();this.lastRequest=null;}
   const now=performance.now(),reader=this.reader;
-  if(reader.ready&&!reader.closed&&!reader.failed&&(this.lastRequest==null||now-this.lastRequest>=500)){
-   const offset=this.offset++%offsets.length,[dx,dy]=offsets[offset];
+  const interval=cameraInterior01?interiorIntervalMs:exteriorIntervalMs;
+  if(reader.ready&&!reader.closed&&!reader.failed&&(this.lastRequest==null||now-this.lastRequest>=interval)){
+   // A proxy only identifies the interior at the observed camera, not at a neighbouring tile.
+   const offset=cameraInterior01?0:this.offset++%offsets.length,[dx,dy]=offsets[offset];
    this.lastRequest=now;
    if(reader.latestGeneration!==null&&context.generation<reader.latestGeneration)return {state:'stale-camera-generation',tiles:[]};
    const request=reader.updateWindow({listener:[x+dx,y+dy,z],generation:context.generation,geometryTimeMs:now,
-    durationMs:Math.min(1000-age,1000),radius:24,maximumSurfaces:512,prepareSoundMapGeometry01:false});
+    durationMs:Math.min(1000-age,cameraInterior01?.durationMs??1000),radius:24,maximumSurfaces:512,
+    cameraInterior01,prepareSoundMapGeometry01:false});
    for(const [id,row] of this.requests)if(row.expiresAt<=now)this.requests.delete(id);
    this.requests.set(request.requestId,{offset,scope,expiresAt:request.expiresAt});
   }

@@ -1,4 +1,4 @@
-import {bindCameraInterior01} from '../src/acoustics/world/interior-activation01.mjs';
+import {bindCameraInterior01,interiorObservationKey01} from '../src/acoustics/world/interior-activation01.mjs';
 // Continuous owned producer. Separate authored startup JIT PCM is discarded.
 // Playback uses verified stock banks; no WASAPI, game API or archive decode.
 import fs from 'node:fs';import path from 'node:path';import readline from 'node:readline';import {performance} from 'node:perf_hooks';
@@ -202,8 +202,12 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
   if(visual?.soundMapFrame&&viewerClient)try{
    const frame=visual.soundMapFrame,listener=lastFrame?.frame.listener;
    const epoch=installedScenes?.validationEpochUtc01,catalogue=installedScenes?.catalogBinding;
-   const ageMs=lastFrame?lastFrame.age+performance.now()-lastFrame.at:Infinity;
-   const worldContext01=epoch&&catalogue&&listener?.valid&&!listener.paused&&ageMs<=250?{epoch,catalogue,ownerSession:session,generation:listener.generation,position:listener.position,ageMs}:null;
+   const now=performance.now(),ageMs=lastFrame?lastFrame.age+now-lastFrame.at:Infinity;
+   const remainingMs=lastFrame?.validUntil==null?null:lastFrame.validUntil-now;
+   const current=epoch&&catalogue&&listener?.valid&&!listener.paused&&ageMs<=250&&(remainingMs===null||remainingMs>0);
+   const interior=current?bindCameraInterior01(lastFrame.frame,ageMs,remainingMs,epoch):null;
+   const worldContext01=current?{epoch,catalogue,ownerSession:session,generation:listener.generation,position:listener.position,ageMs,
+    interior,interiorKey:interiorObservationKey01(interior)}:null;
    viewerClient.offer({...frame,worldContext01},visual.soundMapGeometry);
   }catch{}
   if(engine.lastTiming){

@@ -195,7 +195,7 @@ async function installedContextLoop(){
       }
     }catch{installedContext.clear();}
   }else installedContext.clear();
-  setTimeout(installedContextLoop,400);
+  setTimeout(installedContextLoop,state.frame?.worldContext01?.interiorKey?100:400);
 }
 function animationLoop(now){
   requestAnimationFrame(animationLoop);

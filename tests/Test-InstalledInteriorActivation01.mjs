@@ -8,7 +8,8 @@ import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';
 import {airflowFrameStreet01} from './fixtures/AirflowStreet01.mjs';
 import {InstalledSceneService01} from '../src/acoustics/world/installed-scene-service01.mjs';
 import {InstalledStaticWorld01} from '../src/acoustics/world/installed-static-scene01.mjs';
-import {bindCameraInterior01,matchInteriorInstance01} from '../src/acoustics/world/interior-activation01.mjs';
+import {InstalledWorldContext01} from '../tools/soundmap/installed-world-context01.mjs';
+import {bindCameraInterior01,interiorObservationKey01,matchInteriorInstance01} from '../src/acoustics/world/interior-activation01.mjs';
 import {publishWarmupManifest01} from '../src/acoustics/world/world-warmup.mjs';
 import {installedSceneFixture01} from './fixtures/InstalledSceneService01.mjs';
 
@@ -35,7 +36,7 @@ test('camera lease and proxy matching refuse stale, ambiguous, and foreign obser
 });
 
 test('owned scene worker admits the rotated interior only for the exact camera proxy observation',async()=>{
- const f=installedSceneFixture01();let service,engine;
+ const f=installedSceneFixture01();let service,engine,viewer;
  try {
   f.publish(1,{validationEpochUtc01:epoch});
   const catalog=read(f.catalogPath),manifest=read(f.manifestPath),row=manifest.Resources[0];
@@ -79,6 +80,22 @@ test('owned scene worker admits the rotated interior only for the exact camera p
   assert(active.scene.tile.surfaces.every(s=>Math.abs(s.center[0]-21)<1e-8),'rotation and translation applied');
   assert(active.scene.tile.missingRegions.some(r=>r.bounds.min[0]<24&&r.bounds.max[0]>24),'portal retains bounded unknown geometry');
   assert.equal(active.scene.observationModel.runtimeActivationVerified,false);
+  viewer=new InstalledWorldContext01({manifestPath:f.manifestPath,catalogPath:f.catalogPath,
+   expectedGameSHA256:f.gameSHA256,catalogSHA256:manifest.ResolvedCatalogSHA256});
+  const viewFrame=interior=>({sessionId:session+':1',streamId:'original-viewer',producedAtUnixMs:Date.now(),
+   listener:{valid:true,position:[25,10,5]},worldContext01:{epoch,catalogue:manifest.ResolvedCatalogSHA256,
+    ownerSession:session,generation:1,position:[25,10,5],ageMs:10,interior,interiorKey:interiorObservationKey01(interior)}});
+  let context;
+  await until(()=>{context=viewer.snapshot(viewFrame({...observation,durationMs:200}));return context.tiles?.some(t=>t.surfaces.length===2);});
+  assert(context.remainingMs<=200,'viewer-only geometry keeps the shorter incoming lease');
+  assert(context.tiles.flatMap(t=>t.surfaces).every(s=>s.vertices.every(p=>Math.abs(p[0]-21)<1e-8)));
+  assert(context.tiles.some(t=>t.missingRegions.some(r=>r.reason==='unknown-portal-state')));
+  const originalGeneration=context.generation;
+  await until(()=>{context=viewer.snapshot(viewFrame({...observation,durationMs:200}));
+   return context.generation!==originalGeneration&&context.tiles?.some(t=>t.surfaces.length===2);});
+  assert(viewer.reader.stats.minimumDispatchIntervalMs<500,'short interior leases use the independent viewer cadence');
+  assert.deepEqual(viewer.snapshot(viewFrame(null)).tiles,[],'proxy loss withdraws the viewer-only geometry immediately');
+  await viewer.close();viewer=null;
   publishWarmupManifest01(f.manifestPath,{...manifest,UnrelatedProgress:1});
   assert.equal((await request(observation)).scene.tile.surfaces.length,2);
   assert.equal((await request(null,2)).scene.tile.surfaces.length,0);
@@ -137,6 +154,7 @@ test('owned scene worker admits the rotated interior only for the exact camera p
   }finally{world.close();}
  } finally {
   if(service)assert.equal((await service.close()).workerJoined,true);
+  await viewer?.close();
   await engine?.close();
   f.close();
  }

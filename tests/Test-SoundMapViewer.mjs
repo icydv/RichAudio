@@ -92,6 +92,7 @@ test('installed surrounding geometry keeps its own expiry and never follows a ch
  assert.deepEqual(context.visible(f,199),[tile]);
  assert.deepEqual(context.visible(f,200),[]);
  assert.deepEqual(context.visible({...f,streamId:'worker-two'},110),[]);
+ assert.deepEqual(context.visible({...f,worldContext01:{...f.worldContext01,interiorKey:'entered-proxy'}},110),[]);
  assert.deepEqual(context.visible({...f,worldContext01:{...f.worldContext01,position:[17,0,0]}},110),[]);
  const changed={...f,worldContext01:{...f.worldContext01,epoch:'source-proof-two'}};
  context.ingest({...result,tiles:null},changed,120,0);

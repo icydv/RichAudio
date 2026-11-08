@@ -263,7 +263,9 @@ export class InstalledContextState01 {
   clear(){this.key=null;this.generation='';this.tiles=[];this.validUntil=-Infinity;this.status='awaiting-current-camera-and-proof';}
   static key(frame){
     const c=frame?.worldContext01;
-    return c&&frame.listener?.valid&&isPoint(c.position)?[frame.sessionId,frame.streamId,c.catalogue,c.epoch,[c.generation,...c.position.map(v=>Math.floor(v/16))].join(':')].join(':'):null;
+    if(!c||!frame.listener?.valid||!isPoint(c.position))return null;
+    const scope=[c.generation,...c.position.map(v=>Math.floor(v/16)),...(c.interiorKey?[c.interiorKey]:[])].join(':');
+    return [frame.sessionId,frame.streamId,c.catalogue,c.epoch,scope].join(':');
   }
   ingest(value,frame,now,roundTripMs){
     const key=InstalledContextState01.key(frame);
