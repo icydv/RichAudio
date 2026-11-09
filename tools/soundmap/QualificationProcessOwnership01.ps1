@@ -159,7 +159,22 @@ function Get-SoundMapOwnedStagingProcesses01($Directory,$Intent,$Seal,$Package,[
   }
   $profileIds=@(Get-SoundMapProfileProcesses01 $Directory | ForEach-Object id)
   if(@($profileIds | Where-Object {$_ -notin $members}).Count){throw 'Unrelated browser claims the SoundMap profile'}
+  $console=Join-Path ([Environment]::SystemDirectory) 'conhost.exe'
+  if($Seal.consoleHost -ine $console){throw 'SoundMap system console pin differs'}
+  $consoleParents=@{}
+  $browserIds=@()
   foreach($row in $rows.Values | Where-Object {$_.id -notin @($worker.id,$nodeRow.id)}){
+   if($row.path -ieq $console){
+    $creator=$rows[$row.parent]
+    if($row.parent -notin @($worker.id,$nodeRow.id,$browserRoot.id) -or
+       [long]$creator.creation -gt [long]$row.creation -or $consoleParents.ContainsKey($row.parent) -or
+       $row.args.Count -lt 2 -or $row.args.Count -gt 3 -or $row.args[1] -notmatch '^0x[0-9a-f]+$' -or
+       ($row.args.Count -eq 3 -and $row.args[2] -cne '-ForceV1')){
+     throw "SoundMap console host ancestry or command line differs for $($row.id)"
+    }
+    $consoleParents.Add($row.parent,$row.id)
+    continue
+   }
    if($row.path -ine $Seal.browser){throw "Unexpected SoundMap job member $($row.id) at $($row.path)"}
    if($profileArg -cnotin $row.args){
     $reported=@($row.args | Where-Object {$_ -like '--type=*' -or $_ -like '--user-data-dir=*'}) -join ', '
@@ -173,12 +188,13 @@ function Get-SoundMapOwnedStagingProcesses01($Directory,$Intent,$Seal,$Package,[
     }
     $ancestor=$prior
    }
+   $browserIds+=$row.id
   }
   if((($members | Sort-Object) -join ',') -cne (($job.Members() | Sort-Object) -join ',') -or $supervisor.HasExited -or $controller.HasExited){
    throw 'SoundMap job changed during inspection'
   }
   [pscustomobject]@{ownerId=$Intent.ownerId;supervisorId=$parent.id;workerId=$worker.id;serviceId=$nodeRow.id;
-   browserRootId=$browserRoot.id;browserIds=@($members | Where-Object {$_ -notin @($worker.id,$nodeRow.id)} | Sort-Object);
+   browserRootId=$browserRoot.id;browserIds=@($browserIds | Sort-Object);consoleIds=@($consoleParents.Values | Sort-Object);
    members=@($rows.Values | ForEach-Object {[pscustomobject]$_} | Select-Object id,creation,path,parent | Sort-Object id)}
  }finally{
   if($job){$job.Dispose()}
