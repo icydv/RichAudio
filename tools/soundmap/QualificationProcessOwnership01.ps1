@@ -61,14 +61,15 @@ function Get-SoundMapProfileProcesses01($Directory){
  $profile=Join-Path $Directory 'browser-profile'
  Get-CimInstance Win32_Process -Filter "Name='chrome.exe' OR Name='msedge.exe'" -ErrorAction Stop |
   Where-Object { $_.CommandLine -like ('*'+$profile+'*') } |
-  Select-Object @{n='id';e={[int]$_.ProcessId}},Name
+  Select-Object @{n='id';e={[int]$_.ProcessId}},Name,ProcessId,CreationDate,ExecutablePath,CommandLine
 }
 
 function Assert-SoundMapProcessLifetime01($Row,$ExpectedCreation){
  if(!$Row.CreationDate -or !$Row.ExecutablePath -or !$Row.CommandLine){
   throw [TimeoutException]::new("SoundMap process identity is unavailable for $($Row.Name) PID $($Row.ProcessId) (creation=$([bool]$Row.CreationDate), image=$([bool]$Row.ExecutablePath), command=$([bool]$Row.CommandLine))")
  }
- $p=Get-Process -Id $Row.ProcessId -ErrorAction Stop
+ $p=Get-Process -Id $Row.ProcessId -ErrorAction SilentlyContinue
+ if(!$p){throw [TimeoutException]::new("SoundMap process disappeared during inspection: $($Row.ProcessId)")}
  try{
   $started=$p.StartTime.ToUniversalTime()
   if($p.HasExited -or $p.Path -ine $Row.ExecutablePath -or
@@ -88,14 +89,32 @@ function Test-SoundMapArguments01($Actual,$Expected){
  return $true
 }
 
-function Get-SoundMapOwnedStagingProcesses01($Directory,$Intent,$Seal,$Package,[switch]$Fixture){
+function Get-SoundMapOwnedViewerProcesses01($Directory,$Intent,$Seal,$Package,[switch]$Fixture){
  for($attempt=0;;$attempt++){
-  try{return Read-SoundMapOwnedJobSnapshot01 $Directory $Intent $Seal $Package -Fixture:$Fixture}
+  try{
+   $snapshot=Read-SoundMapOwnedJobSnapshot01 $Directory $Intent $Seal $Package -Fixture:$Fixture
+   $snapshot | Add-Member -NotePropertyName snapshotRetries -NotePropertyValue $attempt
+   return $snapshot
+  }
   catch [TimeoutException]{
    if($attempt -ge 2){throw}
    Start-Sleep -Milliseconds 200
   }
  }
+}
+
+# A profile claimant absent from the first snapshot must be verified directly
+# against the live job. New members force a fresh complete snapshot.
+function Assert-SoundMapProfilePopulation01($Job,$Members,$ProfileRows){
+ $churn=$false
+ foreach($row in $ProfileRows | Where-Object {$_.id -notin $Members}){
+  $process=Assert-SoundMapProcessLifetime01 $row $null
+  try{
+   if(!$Job.Contains($process)){throw 'Unrelated browser claims the SoundMap profile'}
+   $churn=$true
+  }finally{$process.Dispose()}
+ }
+ if($churn){throw [TimeoutException]::new('New owned SoundMap browser requires a fresh job snapshot')}
 }
 
 function Read-SoundMapOwnedJobSnapshot01($Directory,$Intent,$Seal,$Package,[switch]$Fixture){
@@ -165,12 +184,11 @@ function Read-SoundMapOwnedJobSnapshot01($Directory,$Intent,$Seal,$Package,[swit
    '--map-source-sha256',$scopeHash,'--world-atlas',$config.atlas,'--world-atlas-sha256',$config.atlasSHA256)
   $profileArg='--user-data-dir='+$profile
   $browserArgs=@(('--app=http://127.0.0.1:'+$config.port),$profileArg,'--no-first-run','--no-default-browser-check','--window-size=1440,1000')
-  if($Fixture){$browserArgs+=@('--headless=new','--disable-background-networking')}
+  if($Fixture){$browserArgs+=@('--headless=new','--remote-debugging-port=0','--disable-background-networking')}
   if(!(Test-SoundMapArguments01 $nodeRow.args $nodeArgs) -or !(Test-SoundMapArguments01 $browserRoot.args $browserArgs)){
    throw 'SoundMap job root command line differs'
   }
-  $profileIds=@(Get-SoundMapProfileProcesses01 $Directory | ForEach-Object id)
-  if(@($profileIds | Where-Object {$_ -notin $members}).Count){throw 'Unrelated browser claims the SoundMap profile'}
+  Assert-SoundMapProfilePopulation01 $job $members @(Get-SoundMapProfileProcesses01 $Directory)
   $console=Join-Path ([Environment]::SystemDirectory) 'conhost.exe'
   if($Seal.consoleHost -ine $console){throw 'SoundMap system console pin differs'}
   $consoleParents=@{}
@@ -216,6 +234,15 @@ function Read-SoundMapOwnedJobSnapshot01($Directory,$Intent,$Seal,$Package,[swit
 }
 
 function Assert-SoundMapOwnedJobClosed01($Directory,$Intent){
+ $dispatch=Join-Path $Directory 'viewer-start-intent.json'
+ if(!(Test-Path -LiteralPath $dispatch)){
+  foreach($name in 'supervisor-process.json','job-ownership.json','service-claim.json','service-process.json','viewer-process.json','supervision.json','overview-before-launch.json'){
+   if(Test-Path -LiteralPath (Join-Path $Directory $name)){throw 'SoundMap viewer dispatch evidence is inconsistent'}
+  }
+  return
+ }
+ $start=Read-SoundMapOwnershipReceipt01 $Directory 'viewer-start-intent.json'
+ if($start.ownerId -cne $Intent.ownerId -or $start.sealSHA256 -cne $Intent.sealSHA256){throw 'SoundMap viewer dispatch identity differs'}
  $joined=Read-SoundMapOwnershipReceipt01 $Directory 'supervision.json'
  $binding=Read-SoundMapOwnershipReceipt01 $Directory 'job-ownership.json'
  $parent=Read-SoundMapOwnershipReceipt01 $Directory 'supervisor-process.json'
@@ -224,15 +251,22 @@ function Assert-SoundMapOwnedJobClosed01($Directory,$Intent){
     $joined.supervisorCreation -cne $parent.creation -or $joined.workerId -ne $binding.workerId -or
     $joined.workerCreation -cne $binding.workerCreation -or $binding.ownerId -cne $Intent.ownerId -or
     $binding.sealSHA256 -cne $Intent.sealSHA256){throw 'Owned SoundMap closure unavailable'}
- $service=Read-SoundMapOwnershipReceipt01 $Directory 'service-process.json'
- $viewer=Read-SoundMapOwnershipReceipt01 $Directory 'viewer-process.json'
- $snapshots=@(Read-SoundMapOwnershipReceipt01 $Directory 'staging-closure.json')
  $known=@(
    @{id=$parent.id;creation=$parent.creation},
-   @{id=$binding.workerId;creation=$binding.workerCreation},
-   @{id=$service.id;creation=$service.creationFileTime},
-   @{id=$viewer.id;creation=$viewer.creation}
-  )+@($snapshots | ForEach-Object {$_.owned.members})
+   @{id=$binding.workerId;creation=$binding.workerCreation}
+ )
+ # A joined job can fail before either child is started. Retain every lifetime
+ # that did become observable, including snapshots before launch refusal.
+ foreach($name in 'service-process.json','viewer-process.json','viewer-owned.json','launch-closure.json','launch-closure-blocked.json'){
+  if(!(Test-Path -LiteralPath (Join-Path $Directory $name))){continue}
+  $receipt=Read-SoundMapOwnershipReceipt01 $Directory $name
+  switch($name){
+   'service-process.json' {$known+=@{id=$receipt.id;creation=$receipt.creationFileTime}}
+   'viewer-process.json' {$known+=@{id=$receipt.id;creation=$receipt.creation}}
+   'viewer-owned.json' {$known+=@($receipt.members)}
+   default {$known+=@($receipt | ForEach-Object {$_.owned.members})}
+  }
+ }
  foreach($identity in $known){
   $p=Get-Process -Id $identity.id -ErrorAction SilentlyContinue
   if($p){try{
