@@ -110,7 +110,7 @@ export class AtlasRenderer01{
   this.canvas=canvas;this.getIndex=getIndex;this.getPage=getPage;this.initAt=performance.now();
   this.stats={overviewTriangles:0,overviewPages:0,visibleTriangles:0,visibleTiles:0,visibleDetailedTiles:0,drawCalls:0,
    uploads:0,uploadMs:0,evictions:0,hits:0,misses:0,fetchFailures:0,detailBytes:0,overviewBytes:0,pendingUploadBytes:0,peakPendingUploadBytes:0,
-   gpuMs:null,drawCpuMs:null,startupMs:null,overviewCompleteMs:null,budgetLimitedTiles:0};
+   gpuMs:null,drawCpuMs:null,startupMs:null,overviewCompleteMs:null,budgetLimitedTiles:0,coveredCells:0,visibleDetailFallback:0};
   this.groups=new Map();this.overview=new Map();this.failures=new Map();this.uploadQueue=[];this.gpuQueries=[];
   this.loading=0;this.reserved=0;this.clock=0;this.generation=0;this.mode=0;
   canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();this.clear('WebGL context lost');});
@@ -238,10 +238,11 @@ export class AtlasRenderer01{
   gl.useProgram(this.program);gl.uniform3fv(u.target,v.target);
   gl.uniform3fv(u.right,v.right.map(n=>n/v.x));gl.uniform3fv(u.up,v.up.map(n=>n/v.y));gl.uniform3fv(u.near,v.near.map(n=>n/v.depth));gl.uniform1i(u.mode,this.mode);
   const query=this.measureGPU();
-  let triangles=0,tiles=0,detail=0,calls=0;
+  let triangles=0,tiles=0,detail=0,calls=0,fallback=0;
   const heldKeys=new Set();
   for(const t of plan.visibleTiles){
    const requested=plan.wants.get(t.id)??0,group=[requested,...(requested===2?[1]:[])].map(lod=>this.groups.get(groupKey(t,lod))).find(g=>g&&!g.loading);
+   if(requested&&group?.lod!==requested)fallback++;
    if(group){
     if(group.everDrawn&&!this.lastHeldKeys?.has(group.key))this.stats.hits++;
     group.everDrawn=true;group.used=this.clock;heldKeys.add(group.key);detail++;
@@ -251,7 +252,8 @@ export class AtlasRenderer01{
   }
   if(query){gl.endQuery(this.timer.TIME_ELAPSED_EXT);this.gpuQueries.push(query);}
   this.lastHeldKeys=heldKeys;
-  Object.assign(this.stats,{visibleTriangles:triangles,visibleTiles:tiles,visibleDetailedTiles:detail,drawCalls:calls,drawCpuMs:performance.now()-began});
+  Object.assign(this.stats,{visibleTriangles:triangles,visibleTiles:tiles,visibleDetailedTiles:detail,drawCalls:calls,drawCpuMs:performance.now()-began,
+   coveredCells:plan.visibleTiles.length,visibleDetailFallback:fallback});
  }
  snapshot(){return {...this.stats,error:this.error??null,lastDetailError:[...this.failures.values()].at(-1)??null,detailBudget,loading:this.loading,reservedBytes:this.reserved};}
 }

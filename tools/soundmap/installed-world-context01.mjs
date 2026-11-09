@@ -36,12 +36,15 @@ export function installedContextConfig01(file){
 export function verifyMapProofReceipt01(file,sha256,config,ownerId,stopAt,now=Date.now()){
  const receipt=privateContextJson(file);
  const r=receipt.json;
+ const operatorControlled=stopAt===null;
  if(!hex(sha256,64)||receipt.sha256!==sha256||r.schema!==1||r.kind!=='soundmap-current-source-identity'||
     !hex(ownerId,32)||r.ownerId!==ownerId||r.stopAt!==stopAt||r.configSHA256!==config?.configSHA256||
+    (operatorControlled?(r.policy!=='operator-controlled'||!hex(r.scopeSHA256,64)||!r.gameExecutableIdentity):r.policy!==undefined)||
     r.proofEpoch!==config.proofEpoch||r.archiveCount!==123||r.matchingArchiveIdentities!==123||r.archiveContentBytesRead!==0||
     r.gameExecutableSHA256!==config.expectedGameSHA256||!Number.isSafeInteger(r.checkedAt)||now-r.checkedAt<0||now-r.checkedAt>120000)
   throw Error('Fresh bound map identity receipt required');
- const bound=Object.freeze({proofEpoch:r.proofEpoch,checkedAt:r.checkedAt,stopAt:r.stopAt,archiveCount:r.archiveCount,ownerId,configSHA256:config.configSHA256});
+ const bound=Object.freeze({proofEpoch:r.proofEpoch,checkedAt:r.checkedAt,stopAt:r.stopAt,archiveCount:r.archiveCount,ownerId,configSHA256:config.configSHA256,
+  operatorControlled,scopeSHA256:r.scopeSHA256,gameExecutableIdentity:r.gameExecutableIdentity?Object.freeze({...r.gameExecutableIdentity}):null});
  verifiedReceipts.add(bound);return bound;
 }
 export const isBoundMapProofReceipt01=(r,c,owner)=>verifiedReceipts.has(r)&&r.ownerId===owner&&r.configSHA256===c?.configSHA256;

@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
+import {pathToFileURL} from 'node:url';
 
 const hex=(value,length)=>typeof value==='string'&&value.length===length&&/^[a-f0-9]+$/.test(value);
 const need=(value,message)=>{if(!value)throw Error(message);};
@@ -65,6 +66,7 @@ function checkGameExecutable(scope){
    sameIdentity(before,identity(fs.lstatSync(unlinked(file),{bigint:true}))),'Game executable changed during hashing');
   need(hash.digest('hex')===scope.gameExecutableSHA256,'Game executable SHA-256 differs');
  }finally{fs.closeSync(fd);}
+ return before;
 }
 
 function checkArchives(scope){
@@ -75,6 +77,18 @@ function checkArchives(scope){
  }
 }
 
+export function sourceMonitor01(scopePath,scopeSHA256,receipt){
+ const scope=mapIdentityScope01(readPinned(scopePath,scopeSHA256,256*1024));
+ need(receipt?.operatorControlled===true&&receipt.scopeSHA256===scopeSHA256&&receipt.gameExecutableIdentity&&
+  scope.configSHA256===receipt.configSHA256&&scope.proofEpoch===receipt.proofEpoch,'Exact operator session source monitor binding required');
+ return ()=>{
+  checkArchives(scope);
+  const exe=unlinked(path.join(scope.gameRoot,'GTA5_Enhanced.exe'));
+  need(sameIdentity(receipt.gameExecutableIdentity,identity(fs.lstatSync(exe,{bigint:true}))),'Game executable identity changed since preflight');
+ };
+}
+
+if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
 const [mode,scopePath,scopeSHA256,approvalPath,approvalSHA256]=process.argv.slice(2);
 need((mode==='verify'&&process.argv.length===5)||(['confirm','postcheck'].includes(mode)&&process.argv.length===7),'Explicit map source verification mode required');
 const scope=mapIdentityScope01(readPinned(scopePath,scopeSHA256,256*1024));
@@ -82,30 +96,42 @@ if(mode==='verify'){
  console.log(JSON.stringify({archives:scope.archives.length,protectedPathsAccessed:0,archiveContentBytesRead:0}));
 }else{
  const approval=readPinned(approvalPath,approvalSHA256,4096),started=Date.now();
+ const operatorControlled=approval?.policy==='operator-controlled'&&approval.stopAt===null;
  need(approval?.schema===1&&approval.kind==='soundmap-one-use-source-approval'&&approval.approved===true&&
   approval.scopeSHA256===scopeSHA256&&hex(approval.ownerId,32)&&Number.isSafeInteger(approval.startAt)&&
-  Number.isSafeInteger(approval.stopAt)&&approval.startAt<=started&&started<approval.stopAt&&
-  approval.stopAt-approval.startAt<=25*60*1000,'Fresh one-use source approval required');
+  approval.startAt<=started&&(operatorControlled?(mode==='postcheck'||started-approval.startAt<480000):
+   approval.policy===undefined&&Number.isSafeInteger(approval.stopAt)&&started<approval.stopAt&&
+   approval.stopAt-approval.startAt<=25*60*1000),'Fresh one-use source approval required');
  const attempt=unlinked(path.dirname(approvalPath));
  need(attempt.split(path.sep).includes('.local'),'Private attempt directory required');
  const claim=path.join(attempt,'source-continuity-claim.json');
+ let executableIdentity;
  if(mode==='confirm'){
   fs.writeFileSync(claim,JSON.stringify({scopeSHA256,approvalSHA256,started}),{flag:'wx'});
-  checkArchives(scope);checkGameExecutable(scope);
+  checkArchives(scope);executableIdentity=checkGameExecutable(scope);
  }else{
   const original=JSON.parse(fs.readFileSync(unlinked(claim),'utf8'));
   need(original.scopeSHA256===scopeSHA256&&original.approvalSHA256===approvalSHA256&&
    fs.existsSync(path.join(attempt,'current-source-identity.json')),'Successful matching preflight required');
   fs.writeFileSync(path.join(attempt,'source-continuity-postcheck-claim.json'),JSON.stringify({scopeSHA256,approvalSHA256,started}),{flag:'wx'});
+  if(operatorControlled){
+   const proof=JSON.parse(fs.readFileSync(unlinked(path.join(attempt,'current-source-identity.json')),'utf8'));
+   need(proof.approvalSHA256===approvalSHA256&&proof.ownerId===approval.ownerId&&proof.policy==='operator-controlled','Original operator source proof differs');
+   executableIdentity=proof.gameExecutableIdentity;
+   const exe=unlinked(path.join(scope.gameRoot,'GTA5_Enhanced.exe'));
+   need(executableIdentity&&sameIdentity(executableIdentity,identity(fs.lstatSync(exe,{bigint:true}))),'Game executable identity changed since preflight');
+  }
  }
  checkArchives(scope);
  const checkedAt=Date.now();
- need(checkedAt<approval.stopAt,'Map source check exceeded its session deadline');
+ need(operatorControlled||checkedAt<approval.stopAt,'Map source check exceeded its session deadline');
  const receipt={schema:1,kind:'soundmap-current-source-identity',ownerId:approval.ownerId,stopAt:approval.stopAt,
   configSHA256:scope.configSHA256,proofEpoch:scope.proofEpoch,scopeSHA256,approvalSHA256,checkedAt,
-  archiveCount:123,matchingArchiveIdentities:123,archiveContentBytesRead:0,gameExecutableSHA256:scope.gameExecutableSHA256};
+  archiveCount:123,matchingArchiveIdentities:123,archiveContentBytesRead:0,gameExecutableSHA256:scope.gameExecutableSHA256,
+  ...(operatorControlled?{policy:'operator-controlled',gameExecutableIdentity:executableIdentity}:{})};
  const file=path.join(attempt,mode==='confirm'?'current-source-identity.json':'final-source-identity.json');
  const bytes=Buffer.from(JSON.stringify(receipt));
  fs.writeFileSync(file,bytes,{flag:'wx'});
  console.log(JSON.stringify({file,sha256:digest(bytes)}));
+}
 }

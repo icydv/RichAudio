@@ -38,7 +38,7 @@ async function readPinned(file,sha,maximum,exact){
  }finally{await fd.close();}
 }
 
-export async function openWorldAtlas01({file,sha256,installedContext=null,sourceReceipt=null,now=Date.now}){
+export async function openWorldAtlas01({file,sha256,installedContext=null,sourceReceipt=null,sourceHealth=null,now=Date.now}){
  const started=performance.now(),absolute=path.resolve(file);
  requireAtlas(path.basename(absolute)==='atlas.json'&&protectedRoot(absolute)&&hex(sha256),'Exact private atlas and manifest SHA-256 required');
  const root=path.dirname(absolute),bytes=await readPinned(absolute,sha256,32*1048576),a=JSON.parse(bytes);
@@ -96,8 +96,9 @@ export async function openWorldAtlas01({file,sha256,installedContext=null,source
  const io={inFlight:0,reads:0,servedBytes:0,failures:0,maximumReadMs:0,lastFailure:null};
  function proof(){
   if(!sourceReceipt)return {state:'retained-source-proof-only',live:false,epoch:a.identity.proofEpoch};
-  return {state:now()<sourceReceipt.stopAt?'session-archive-identities-matched':'session-source-receipt-expired',
-   live:now()<sourceReceipt.stopAt,epoch:a.identity.proofEpoch,checkedAt:sourceReceipt.checkedAt,stopAt:sourceReceipt.stopAt,
+  const health=sourceHealth?.(),live=sourceReceipt.operatorControlled?health?.live===true:now()<sourceReceipt.stopAt;
+  return {state:live?'session-archive-identities-matched':sourceReceipt.operatorControlled?'session-source-continuity-unavailable':'session-source-receipt-expired',
+   live,epoch:a.identity.proofEpoch,checkedAt:health?.checkedAt??sourceReceipt.checkedAt,stopAt:sourceReceipt.stopAt,reason:health?.reason??null,
    archiveIdentities:sourceReceipt.archiveCount,archiveContentBytesRead:0};
  }
  const startupMs=performance.now()-started;

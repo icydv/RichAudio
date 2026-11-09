@@ -22,7 +22,7 @@ The ordinary SoundMap launcher finds the atlas when `.local/soundmap/world-atlas
 node tools/soundmap/server.mjs --root . --port 17833 --view-only --world-atlas PATH_TO_ATLAS_JSON --world-atlas-sha256 EXACT_SHA256
 ```
 
-Open the printed loopback address. This starts the existing viewer in read-only mode and does not start a game, a vehicle host or an audio device. The `--view-only-map` qualification entry point instead requires an explicit atlas identity, its existing authenticated source receipt, matching catalogue and game bindings, and the original shared session cutoff. A fresh live qualification must pin the new atlas and launcher; earlier proposals do not carry over.
+Open the printed loopback address. This starts the existing viewer in read-only mode and does not start a game, a vehicle host or an audio device. The `--view-only-map` qualification entry point requires an explicit atlas identity, an authenticated source receipt and matching catalogue and game bindings. Timed proposals retain their existing cutoff. An operator-controlled proposal uses a distinct, single-use receipt with no elapsed cutoff. I can keep exploring until I choose **End test** or quit GTA. The owned service checks the exact retained filesystem identities during the session and withdraws live authority on drift. These checks and the original camera lease do not expire the exploration session or delete static geometry. Earlier approvals do not carry over.
 
 ## Viewer and authority
 

@@ -10,6 +10,8 @@ let lastMetadataAt=-Infinity,noticeUntil=0,lastReplayRequest=-1,pendingSeek=true
 let geometryCompiled=null,geometryFaces=[],contextFaces=[],contextBoxes=[],contextSelectionKey='',lastDrawMs=0,paintMs=0;
 let replayAudioInfo=null,audioObjectUrl=null;
 let atlas=null,atlasShown=true,atlasPoseInitialised=false,atlasFirstFollow=true,atlasResumeView=null,atlasLive=null,atlasInspection=null,atlasInspectionCell=null,atlasInspectAt=0,serviceHeardAt=-Infinity;
+const operatorFrames={frames:0,emptyCoveredFrames:0,detailFallbackFrames:0,frameIntervalMs:null,maximumFrameIntervalMs:null};
+let operatorLastDraw=null,operatorLastPublish=-Infinity,operatorSending=false;
 const player=$('replay-audio');
 const format=n=>Number.isFinite(n)?n.toFixed(2):'unavailable';
 const time=n=>{const ms=Math.max(0,Math.round(n||0));return `${String(Math.floor(ms/60000)).padStart(2,'0')}:${String(Math.floor(ms/1000)%60).padStart(2,'0')}.${String(ms%1000).padStart(3,'0')}`;};
@@ -175,6 +177,23 @@ function draw(now){
   // Fixed-scale axes indicate the model basis only.
   ctx.font='11px Segoe UI';ctx.fillStyle='#b0bed2';ctx.fillText('Z ↑  ·  X / Y reference plane',camera.width-174,camera.height-20);
   paintMs=performance.now()-start;lastDrawMs=now;
+  if(usingAtlas&&serviceStatus.operatorMap){
+    const s=atlas.snapshot();
+    if(operatorLastDraw!==null){
+      operatorFrames.frameIntervalMs=now-operatorLastDraw;
+      operatorFrames.maximumFrameIntervalMs=Math.max(operatorFrames.maximumFrameIntervalMs??0,operatorFrames.frameIntervalMs);
+    }
+    operatorLastDraw=now;operatorFrames.frames++;
+    if(s.coveredCells&&!s.visibleTriangles)operatorFrames.emptyCoveredFrames++;
+    if(s.visibleDetailFallback)operatorFrames.detailFallbackFrames++;
+    if(!operatorSending&&now-operatorLastPublish>=1000){
+      operatorLastPublish=now;operatorSending=true;
+      void api('/api/atlas/metrics',{schema:1,...operatorFrames,paintMs,gpuDrawMs:s.gpuMs,cameraAgeMs:Number.isFinite(health.ageMs)?health.ageMs:null,viewerFault:s.error?.slice(0,240)??null,
+        overviewReadyMs:s.overviewCompleteMs,drawSubmitMs:s.drawCpuMs,visibleTriangles:s.visibleTriangles,visibleCells:s.visibleTiles,detailedCells:s.visibleDetailedTiles,
+        overviewPages:s.overviewPages,uploads:s.uploads,cacheHits:s.hits,cacheMisses:s.misses,evictions:s.evictions,detailFailures:s.fetchFailures,
+        bufferBytes:s.overviewBytes+s.detailBytes+s.reservedBytes}).catch(()=>{}).finally(()=>{operatorSending=false;});
+    }
+  }
 }
 function metric(label,value){const term=document.createElement('dt'),definition=document.createElement('dd');safeText(term,label);safeText(definition,value);$('metrics').append(term,definition);}
 function metadata(now){
@@ -277,6 +296,11 @@ function metadata(now){
   if((f?.paths.length||0)>64){const p=document.createElement('p');p.className='muted';safeText(p,'First 64 path details shown; bounded canvas includes the remaining paths.');$('paths').append(p);}
 }
 function recordingStatus(){
+  if(serviceStatus.operatorMap){
+    $('operator-stop').hidden=false;$('popout').hidden=true;
+    $('operator-stop').disabled=serviceStatus.operatorMap.stopRequestedAt!==null;
+    if(serviceStatus.operatorMap.stopRequestedAt!==null)safeText($('operator-stop'),'Quit GTA normally');
+  }
   if(serviceStatus.viewOnlyMap||serviceStatus.viewOnly&&serviceStatus.worldAtlas){
     document.querySelector('footer').hidden=true;
     if(serviceStatus.worldAtlas)document.body.classList.add('atlas-view-only');
@@ -380,6 +404,10 @@ bind('isometric',()=>{camera.topDown=false;$('isometric').classList.add('active'
 bind('topdown',()=>{camera.topDown=true;$('topdown').classList.add('active');$('isometric').classList.remove('active');});
 bind('follow',()=>{follow=!follow;if(follow&&atlas&&camera.scale<.14)atlasFirstFollow=true;$('follow').classList.toggle('active',follow);});
 bind('atlas-overview',atlasOverview);
+bind('operator-stop',async()=>{
+  await api('/api/operator/stop',{end:true});$('operator-stop').disabled=true;
+  safeText($('operator-stop'),'Quit GTA normally');notice('Exit GTA normally when ready. The launcher will verify process closure before restoring the original files.');
+});
 bind('atlas-toggle',()=>{
   atlasShown=!atlasShown;atlasPoseInitialised=false;atlasFirstFollow=true;lastCoordinateKey=null;
   safeText($('atlas-toggle'),atlasShown?'Solver view':'World atlas');
@@ -402,5 +430,5 @@ canvas.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-dra
   if(e.shiftKey){follow=false;$('follow').classList.remove('active');const c=Math.cos(camera.yaw),s=Math.sin(camera.yaw),v=dy*(camera.topDown&&camera.northUpAtlas?-1:1)/(camera.scale*Math.max(.2,Math.sin(camera.topDown?Math.PI/2:camera.pitch)));camera.target[0]-=dx*c/camera.scale-v*s;camera.target[1]-=dx*s/camera.scale+v*c;}
   else {camera.yaw+=dx*.008;camera.pitch=Math.max(.15,Math.min(1.5,camera.pitch+dy*.005));}});
 canvas.addEventListener('wheel',e=>{e.preventDefault();if(atlas){atlasPoseInitialised=true;atlasFirstFollow=false;}camera.scale=Math.max(atlas?.index?.bounds?Math.min(.01,camera.width/(atlas.index.bounds.max[0]-atlas.index.bounds.min[0]+1)*.5):2,Math.min(80,camera.scale*Math.exp(-e.deltaY*.001)));},{passive:false});
-document.addEventListener('visibilitychange',()=>{replay.lastNow=null;pendingSeek=true;displayCadence.reset();displayRate.reset();});
+document.addEventListener('visibilitychange',()=>{replay.lastNow=null;operatorLastDraw=null;pendingSeek=true;displayCadence.reset();displayRate.reset();});
 refreshRecordings().catch(()=>{});statusLoop();telemetryLoop().catch(error=>notice(error.message,true));installedContextLoop();requestAnimationFrame(animationLoop);

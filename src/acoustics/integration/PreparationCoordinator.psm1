@@ -136,9 +136,11 @@ function Invoke-PreparationProcess {
           [Parameter(Mandatory=$true)][string]$StageOutput,
           [Parameter(Mandatory=$true)][string]$CancellationPath,
           [ValidateRange(0.1,3600)][double]$MaximumSeconds=300,
+          [switch]$OperatorControlled,
           [ValidateRange(256,4096)][int]$MaximumMemoryMiB=3072,
           [ValidateRange(2,16)][int]$MaximumOwnedProcesses=8)
     if($PSVersionTable.PSEdition -ne 'Core'){throw 'Run the preparation coordinator with installed PowerShell 7'}
+    if($OperatorControlled -and $PSBoundParameters.ContainsKey('MaximumSeconds')){throw 'Operator control cannot be combined with an elapsed deadline'}
     $folder=Assert-CatalogPrivatePath $PrivateRoot (Join-Path $StageOutput 'placeholder')
     [IO.Directory]::CreateDirectory($StageOutput)|Out-Null
     $cancel=Assert-CatalogPrivatePath $PrivateRoot $CancellationPath
@@ -166,7 +168,7 @@ function Invoke-PreparationProcess {
         $stopAt=$null
         while(!$process.HasExited){
             if(!$state -or $state -eq 'failed'){
-                if([IO.File]::Exists($cancel)){$state='cancelled'}elseif($watch.Elapsed.TotalSeconds -ge $MaximumSeconds){$state='deadline'}else{Start-Sleep -Milliseconds 100;$process.Refresh();continue}
+                if([IO.File]::Exists($cancel)){$state='cancelled'}elseif(!$OperatorControlled -and $watch.Elapsed.TotalSeconds -ge $MaximumSeconds){$state='deadline'}else{Start-Sleep -Milliseconds 100;$process.Refresh();continue}
                 [IO.File]::WriteAllText($stageCancel,'coordinator:'+[Guid]::NewGuid().ToString('N'))
                 $stopAt=$watch.Elapsed.TotalSeconds
             }
@@ -183,7 +185,7 @@ function Invoke-PreparationProcess {
         if($process){if(!$assigned -and !$process.HasExited){$process.Kill($true)};if(!$process.HasExited){$process.WaitForExit(2000)|Out-Null};$process.Dispose()}
     }
     if(!$controlJoined){$state='closure-unknown'}
-    return [pscustomobject]@{State=$state;Completed=($state -eq 'complete' -and $controlJoined);ExitCode=$exitCode;ElapsedSeconds=[Math]::Round($watch.Elapsed.TotalSeconds,3);MaximumSeconds=$MaximumSeconds;CleanupGraceSeconds=2;ClosureJoinMilliseconds=2000;ControlJoined=$controlJoined;UnknownClosure=(!$controlJoined);MaximumOwnedProcesses=$MaximumOwnedProcesses;JobMemoryMiB=$MaximumMemoryMiB;PeakJobMemoryBytes=$peakJobMemoryBytes;WorkMetrics01=$workMetrics;Supervision='owned-Windows-job-kill-on-close-monotonic-deadline-and-observed-empty-job'}
+    return [pscustomobject]@{State=$state;Completed=($state -eq 'complete' -and $controlJoined);ExitCode=$exitCode;ElapsedSeconds=[Math]::Round($watch.Elapsed.TotalSeconds,3);MaximumSeconds=$(if(!$OperatorControlled){$MaximumSeconds});CleanupGraceSeconds=2;ClosureJoinMilliseconds=2000;ControlJoined=$controlJoined;UnknownClosure=(!$controlJoined);MaximumOwnedProcesses=$MaximumOwnedProcesses;JobMemoryMiB=$MaximumMemoryMiB;PeakJobMemoryBytes=$peakJobMemoryBytes;WorkMetrics01=$workMetrics;Supervision=$(if($OperatorControlled){'owned-Windows-job-kill-on-close-operator-stop-and-observed-empty-job'}else{'owned-Windows-job-kill-on-close-monotonic-deadline-and-observed-empty-job'})}
 }
 
 Export-ModuleMember -Function Get-PreparationHash,Get-PreparationFingerprint,ConvertTo-PreparationLiteral,Get-PreparationField,Test-PreparationReceipt,Get-InstalledPreparationReadiness,Invoke-PreparationProcess

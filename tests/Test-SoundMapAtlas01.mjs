@@ -6,6 +6,7 @@ import path from 'node:path';
 import {buildSoundMapAtlas01} from '../tools/soundmap/build-atlas01.mjs';
 import {openWorldAtlas01} from '../tools/soundmap/world-atlas01.mjs';
 import {contextFailure01} from '../tools/soundmap/installed-world-context01.mjs';
+import {createOperatorMap01} from '../tools/soundmap/operator-map01.mjs';
 import {decodeAtlasPage01,planAtlasView01} from '../tools/soundmap/ui/atlas-renderer01.mjs';
 import {alignsWithWorldAtlas01,MODEL_SPACE,project} from '../tools/soundmap/ui/model.mjs';
 import {encodeChunk,identity,sha256} from '../src/acoustics/world/collision-mesh.mjs';
@@ -93,4 +94,15 @@ test('legacy context failure distinguishes a worker exit, integrity fault and me
  assert.equal(contextFailure01({worker:{failed:true,failure:'worker-exited-without-close'}}).state,'context-worker-failed');
  assert.equal(contextFailure01({worker:{failed:true,failure:'worker-window-timeout'}}).state,'context-worker-timeout');
  assert.equal(contextFailure01({cacheTimings:{metadataProofCurrent01:false}}).state,'source-proof-unavailable');
+});
+
+test('the operator session has no elapsed cutoff and an explicit stop does not expire or replay',()=>{
+ let now=1000;
+ const session=createOperatorMap01(()=>now);
+ now+=3*60*60*1000;
+ assert.deepEqual(session.status(),{policy:'operator-controlled',stopRequestedAt:null,metrics:null,discarded:0});
+ assert.equal(session.accept({schema:1,gpuDrawMs:-1}),false);
+ assert.equal(session.stop(),now);
+ const first=now;now+=300000;
+ assert.equal(session.stop(),first);
 });

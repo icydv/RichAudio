@@ -10,7 +10,7 @@ function validInteriorReadback(sample,vector){
   return outcome!=='observed'||proxy>0&&ready===true&&archetype>0&&vector(origin)&&origin.every(n=>Math.abs(n)<=100000)&&Math.abs(offsetMs)<=50;
 }
 export class PassiveListener {
-  constructor(now=Date.now,{viewOnlyMap=false}={}){this.now=now;this.viewOnlyMap=viewOnlyMap;this.frame=null;this.receivedAt=0;this.accepted=0;this.dropped=0;this.sessionChanges=0;this.session=null;this.sequence=-1;this.observed=-1;this.generation=-1;this.contextRevision=0;this.contextScope=null;}
+  constructor(now=Date.now,{viewOnlyMap=false}={}){this.now=now;this.viewOnlyMap=viewOnlyMap;this.frame=null;this.receivedAt=0;this.accepted=0;this.dropped=0;this.sessionChanges=0;this.identityViolations=0;this.session=null;this.sequence=-1;this.observed=-1;this.generation=-1;this.contextRevision=0;this.contextScope=null;}
   accept(f){
     const fail=reason=>{this.dropped++;return {accepted:false,reason};};
     const vector=v=>Array.isArray(v)&&v.length===3&&v.every(x=>typeof x==='number'&&Number.isFinite(x)&&Math.abs(x)<=1e7);
@@ -26,7 +26,7 @@ export class PassiveListener {
     const identity=f.streamId+':'+f.sessionId;
     if(Math.abs(Math.hypot(...f.listener.forward)-1)>.01||Math.abs(Math.hypot(...f.listener.up)-1)>.01||Math.abs(f.listener.forward.reduce((n,x,i)=>n+x*f.listener.up[i],0))>.01)return fail('invalid-basis');
     if(this.session!==null&&identity!==this.session){
-      if(this.viewOnlyMap)return fail('single-use-camera-identity');
+      if(this.viewOnlyMap){this.identityViolations++;return fail('single-use-camera-identity');}
       if(this.age()<=PASSIVE_LEASE_MS)return fail('identity-change');
       this.sequence=-1;this.observed=-1;this.generation=-1;this.sessionChanges++;
     }
@@ -46,5 +46,5 @@ export class PassiveListener {
   }
   age(){return this.frame?this.initialAge+Math.max(0,this.now()-this.receivedAt):null;}
   snapshot(){return this.frame?{...this.frame,ageMs:this.age(),...(this.viewOnlyMap?{contextRevision:this.contextRevision}:{})}:null;}
-  status(){return {available:!!this.frame&&this.frame.listener.valid&&this.age()<=PASSIVE_LEASE_MS,ageMs:this.age(),receivedAt:this.receivedAt||null,accepted:this.accepted,dropped:this.dropped,sessionChanges:this.sessionChanges,streamId:this.frame?.streamId??null,sessionId:this.frame?.sessionId??null};}
+  status(){return {available:!!this.frame&&this.frame.listener.valid&&this.age()<=PASSIVE_LEASE_MS,ageMs:this.age(),receivedAt:this.receivedAt||null,accepted:this.accepted,dropped:this.dropped,sessionChanges:this.sessionChanges,identityViolations:this.identityViolations,streamId:this.frame?.streamId??null,sessionId:this.frame?.sessionId??null};}
 }
