@@ -55,8 +55,9 @@ function Get-QualificationTargets01([string]$Kind,[string]$Pack){
 function Install-Qualification01 {
  param([string]$GameRoot,[string]$Transaction,[string]$Kind,[string]$Pack,[object[]]$Plan,
   [Parameter(Mandatory)][scriptblock]$ProcessClosure,[Parameter(Mandatory)][scriptblock]$AcquireBaseline,
-  [Parameter(Mandatory)][scriptblock]$RevalidateBaseline)
+  [Parameter(Mandatory)][scriptblock]$RevalidateBaseline,[scriptblock]$RollbackProcessClosure)
  $ErrorActionPreference='Stop'
+ $rollbackClosure=if($RollbackProcessClosure){$RollbackProcessClosure}else{$ProcessClosure}
  $allowed=@(Get-QualificationTargets01 $Kind $Pack)
  if($Plan.Count -ne $allowed.Count -or @($Plan.relative|Sort-Object -Unique).Count -ne $allowed.Count -or
     @($Plan.relative|Where-Object {$_ -cnotin $allowed}).Count){throw 'Exact qualification target population required'}
@@ -111,6 +112,7 @@ function Install-Qualification01 {
   }
   $copy={
    param($from,$to)
+   if($RollbackProcessClosure){Assert-Menu02Closure $ProcessClosure}
    try{
     Copy-Item -LiteralPath $from -Destination $to -Force -ErrorAction Stop
     [void]$changed.Add($to)
@@ -130,7 +132,7 @@ function Install-Qualification01 {
    }
   }
   Invoke-InstallTransaction $GameRoot $Transaction $Plan $rollback $setup @{complete=$false;files=$changes} `
-   $copy {Assert-Menu02Closure $ProcessClosure} {param($target) $changed.Contains($target)}
+   $copy {Assert-Menu02Closure $rollbackClosure} {param($target) $changed.Contains($target)}
   foreach($c in $changes){
    $found=Get-Menu02RestoreFileState $c.target
    if($found.sha256 -cne $c.proposedSha256 -or $found.bytes -ne $c.proposedBytes -or
@@ -145,11 +147,11 @@ function Install-Qualification01 {
   try{
    if($result.restorationRequired){
     $restore=@{Changes=$changes;AllowedRoot=$GameRoot;AllowedTargets=@($changes.target);BackupRoot=$backupRoot
-     ReceiptPath=(Join-Path $Transaction 'staging-failure-restoration.json');AssertProcessClosure=$ProcessClosure}
+     ReceiptPath=(Join-Path $Transaction 'staging-failure-restoration.json');AssertProcessClosure=$rollbackClosure}
     $null=Invoke-Menu02Restoration @restore
     Remove-QualificationDirectories01 $created
    }
-   Assert-Menu02Closure $ProcessClosure
+   Assert-Menu02Closure $(if($result.restorationRequired){$rollbackClosure}else{$ProcessClosure})
    $result.independentBaselineVerified=((& $RevalidateBaseline) -ceq $true)
   }catch{$result.verificationError=$_.Exception.Message}
   Write-QualificationNewJson01 (Join-Path $Transaction 'staging-failure.json') $result

@@ -116,6 +116,7 @@ namespace RichAudio.Preparation {
    finally { Marshal.FreeHGlobal(data); }
   }
   public void Assign(Process process){if(!AssignProcessToJobObject(handle,process.Handle))throw new Win32Exception();}
+  public long HandleValue { get { return handle.ToInt64(); } }
   public ulong PeakMemoryBytes(){int size=Marshal.SizeOf(typeof(Extended));IntPtr data=Marshal.AllocHGlobal(size);try{if(!QueryInformationJobObject(handle,9,data,(uint)size,IntPtr.Zero))throw new Win32Exception();return ((Extended)Marshal.PtrToStructure(data,typeof(Extended))).PeakJobMemory.ToUInt64();}finally{Marshal.FreeHGlobal(data);}}
   public ulong[] WorkMetrics(){int size=Marshal.SizeOf(typeof(AccountingIo));IntPtr data=Marshal.AllocHGlobal(size);try{if(!QueryInformationJobObject(handle,8,data,(uint)size,IntPtr.Zero))throw new Win32Exception();var value=(AccountingIo)Marshal.PtrToStructure(data,typeof(AccountingIo));return new[]{(ulong)value.Basic.User,(ulong)value.Basic.Kernel,value.Io.ReadBytes,value.Io.WriteBytes,value.Io.ReadOps,value.Io.WriteOps};}finally{Marshal.FreeHGlobal(data);}}
   public bool TerminateAndJoin(int milliseconds){
@@ -137,10 +138,12 @@ function Invoke-PreparationProcess {
           [Parameter(Mandatory=$true)][string]$CancellationPath,
           [ValidateRange(0.1,3600)][double]$MaximumSeconds=300,
           [switch]$OperatorControlled,
+          [scriptblock]$OnOwnedJobReady,
           [ValidateRange(256,4096)][int]$MaximumMemoryMiB=3072,
           [ValidateRange(2,16)][int]$MaximumOwnedProcesses=8)
     if($PSVersionTable.PSEdition -ne 'Core'){throw 'Run the preparation coordinator with installed PowerShell 7'}
     if($OperatorControlled -and $PSBoundParameters.ContainsKey('MaximumSeconds')){throw 'Operator control cannot be combined with an elapsed deadline'}
+    if($OnOwnedJobReady -and !$OperatorControlled){throw 'Live job binding requires operator control'}
     $folder=Assert-CatalogPrivatePath $PrivateRoot (Join-Path $StageOutput 'placeholder')
     [IO.Directory]::CreateDirectory($StageOutput)|Out-Null
     $cancel=Assert-CatalogPrivatePath $PrivateRoot $CancellationPath
@@ -164,6 +167,7 @@ function Invoke-PreparationProcess {
         $process=Start-Process -FilePath $Executable -ArgumentList @('-NoProfile','-NonInteractive','-EncodedCommand',$encoded) -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
         $job.Assign($process)
         $assigned=$true
+        if($OnOwnedJobReady){& $OnOwnedJobReady $job.HandleValue $process | Out-Null}
         [IO.File]::WriteAllText($permit,'assigned-to-owned-job')
         $stopAt=$null
         while(!$process.HasExited){
