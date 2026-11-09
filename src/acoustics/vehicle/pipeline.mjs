@@ -28,18 +28,25 @@ export class VehicleAcousticPipeline {
     this.lastControl = null;
     if(controlFilter!==null&&typeof controlFilter!=='function')throw Error('control filter required');this.controlFilter=controlFilter;
   }
-  setQuality(quality) {
+  setQuality(quality,{maxReflectors=qualityReflectors[quality],earlyReflections=true}={}) {
     if (!(quality in qualityPresets)) throw Error('explicit acoustic quality required');
     this.quality = quality;
-    this.simulation.setProcessingSettings({ pathBudget: qualityPresets[quality], maxReflectors: qualityReflectors[quality] });
-    this.renderer.setPathBudget(qualityPresets[quality]);
+    const pathBudget=qualityPresets[quality];
+    this.simulation.setProcessingSettings({pathBudget,maxReflectors,earlyReflections});
+    this.renderer.setPathBudget(pathBudget);
   }
   setAcceleration(mode) { this.backend.setMode(mode); }
   replaceScene(scene, options) { this.simulation.replaceScene(scene, options); }
   // Called on the source/control worker. GPU preparation is never in process().
-  async prepare(snapshot, options = {}) {
+  async prepare(snapshot, options = {}, acceptControl = () => true) {
     this.simulation.observe(snapshot);
-    let control = await this.simulation.updateAccelerated(snapshot.time, options, this.backend);
+    return this.prepareObserved(snapshot.time, options, acceptControl);
+  }
+  // Re-evaluate geometry for the already observed block after an asynchronous
+  // invalidation. Do not append another source observation or advance grains.
+  async prepareObserved(time, options = {}, acceptControl = () => true) {
+    let control = await this.simulation.updateAccelerated(time, options, this.backend);
+    if (!acceptControl()) return false;
     if(this.controlFilter)control=this.controlFilter(control,this.renderer);
     this.renderer.accept(control);
     if (this.directRenderer) this.directRenderer.accept({ ...control, paths: control.paths.filter(p => p.order === 0) });
@@ -47,12 +54,12 @@ export class VehicleAcousticPipeline {
     return control;
   }
   // Existing bounded synchronous PCM renderer: caller supplies all buffers.
-  process(inputs, left, right, frames = left.length, directLeft = null, directRight = null) {
+  process(inputs, left, right, frames = left.length, directLeft = null, directRight = null, localStereo = null) {
     if (this.directRenderer && (!(directLeft instanceof Float32Array) || !(directRight instanceof Float32Array) ||
       directLeft.length < frames || directRight.length < frames || directLeft === directRight ||
       directLeft === left || directLeft === right || directRight === left || directRight === right))
       throw Error('independent caller-owned direct-stem buffers required');
-    this.renderer.process(inputs, left, right, frames);
+    this.renderer.process(inputs, left, right, frames, localStereo);
     if (this.directRenderer) {
       this.directRenderer.process(inputs, directLeft, directRight, frames);
     }

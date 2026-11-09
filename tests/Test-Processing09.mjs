@@ -38,7 +38,7 @@ test('V8 sample anchors retain clock uncertainty and refuse invented per-phase C
 test('diagnostic wrappers preserve every original default Bati PCM block and production history',async()=>{
  const config={blocks:36,coldBlocks:8,profile:'constructor-defaults'};
  const reference=await runProcessingWorkload09({...config,variant:'reference-direct'}),instrumented=await runProcessingWorkload09({...config,variant:'instrumented-direct'});
- assert.deepEqual(reference.settings,{quality:'auto',acceleration:'auto',enabled:true,volume:1,reflections:true,mode:'experimental-additive'});
+ assert.deepEqual(reference.settings,{quality:'auto',acceleration:'auto',enabled:true,volume:1,reflections:true,mode:'experimental-additive',airflowEnabled:false,airflowLevel:.35});
  assert.deepEqual(compareProcessingPcm09(reference,instrumented),{dryBitIdentical:true,stereoBitIdentical:true,everyBlockBitIdentical:true,framesIdentical:true,sourceCursorIdentical:true,continuous:true});
  assert.equal(reference.records.every(r=>r.spans.length===1),true);assert.equal(instrumented.records.length,36);
  assert.equal(instrumented.summary.cold.calls,8);assert.equal(instrumented.summary.later.calls,28);

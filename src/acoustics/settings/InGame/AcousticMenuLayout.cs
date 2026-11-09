@@ -15,7 +15,7 @@ namespace RichAudio.Settings.InGame
             "Enables or stops the installed automatic Story Mode audio. GTA's original sounds remain active in experimental additive mode. No manual host command is needed.",
             "Scales RichAudio's owned output from 0 to 100% of the reviewed profile. It cannot boost above that profile; loudness is not a substitute for acoustic realism.",
             "Includes or removes valid first- and second-order reflection paths. Old contributions fade through the existing renderer; source history and direct sound remain intact.",
-            "Doppler follows the causal propagation cursor. Independent Doppler bypass is not implemented; this read-only control cannot pretend to turn it off.",
+            "Enter/click toggles airflow; Left/Right adjusts its restrained level. Rider turbulence needs an attached riding view; exterior rush follows the vehicle through propagation. Still air is assumed. Doppler remains on.",
             "Shows a compact, noninteractive overlay with fresh host/backend information. Unavailable or stale state is labelled unavailable rather than inferred from your selection.",
             "Shows or hides the optional SoundMap viewer. Gameplay audio works independently of the viewer. Its local service remains owned by RichAudio.",
             "Stock fallback uses only GTA audio. Experimental additive plays verified RichAudio sources alongside GTA engine audio. Selective native replacement is unavailable; no horns, tyres or other GTA sounds are muted.",
@@ -118,6 +118,7 @@ namespace RichAudio.Settings.InGame
                 p.Text("Quality / backend unavailable",39,155,19,TextColor,true);
                 p.Wrap(status.Detail,39,186,525,13,Muted,2);
             }
+            if(!String.IsNullOrEmpty(status.WorldDetail))p.Wrap(status.WorldDetail,39,218,532,10,Muted,1);
 
             p.Text("ACOUSTICS",30,237,12,GoldLight,true);
             p.Text("* 32 / 64: higher processing cost",347,237,11,Warning);
@@ -156,7 +157,7 @@ namespace RichAudio.Settings.InGame
             p.Rect(328+(float)(239*Pending.OutputLevel),506,7,16,SelectedIndex==3?GoldLight:TextColor);
             p.Hit(HitRegionKind.Level,3,-1,331,502,239,27);
             Row(p,4,537,40,"Early Reflections",Pending.EarlyReflections?"On":"Off");
-            Row(p,5,578,40,"Doppler","On (fixed)",true);
+            Row(p,5,578,40,"Airflow",Pending.AirflowEnabled?((int)Math.Round(Pending.AirflowLevel*100)).ToString(CultureInfo.InvariantCulture)+"%":"Off");
             Row(p,6,619,40,"Diagnostics Overlay",Pending.DiagnosticsOverlay?"On":"Off");
             Row(p,7,660,40,"SoundMap viewer",Pending.SoundMapVisible?"Visible":"Hidden");
             Row(p,8,701,40,"Audio integration",Pending.IntegrationMode=="experimental-additive"?"Additive (experimental)":"GTA stock fallback");

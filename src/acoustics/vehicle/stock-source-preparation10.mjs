@@ -43,18 +43,7 @@ const jitResults10=new Map();
 export function warmStockSourceJit10({npc=false,voiceTextures=Array(npc?4:6).fill(false)}={}){
  check(typeof npc==='boolean'&&Array.isArray(voiceTextures)&&voiceTextures.length===(npc?4:6)&&Array.from({length:voiceTextures.length},(_,i)=>voiceTextures[i]).every(x=>typeof x==='boolean'),'bounded authored source JIT topology required');
  const key=Number(npc)+':'+voiceTextures.map(Number).join(''),previous=jitResults10.get(key);if(previous)return {...previous,reused:true};
- const frames=8192,intervals=Array.from({length:32},(_,i)=>({startFrame:i*256,endFrame:(i+1)*256}));
- let index=0;
- const bank={model:'bati',...(npc?{audioContext:'npc'}:{}),layers:Object.fromEntries(['engine','exhaust'].map(role=>[role,Object.fromEntries(['idle','accel','decel'].map(mode=>{
-  // The existing analytical verification seam includes decel even for NPC;
-  // StockVehicleSource correctly ignores that authored extra state.
-  const extra=npc&&mode==='decel',textured=!extra&&voiceTextures[index++],phase=(role==='engine'?0:.23)+['idle','accel','decel'].indexOf(mode)*.17;
-  // Unequal nonperiodic recordings exercise full registration score searches.
-  // Identical short periodic warm data can exit at the first exact-phase score
-  // and leave the expensive search inner loops cold for actual recordings.
-  const samples=Float32Array.from({length:frames},(_,i)=>.043*Math.sin(i*.113+phase)+.021*Math.cos(i*.031+phase*.7));
-  return [mode,{frames,sampleRate:24000,samples,nativePeak:.064,...(textured?{intervals}:{})}];
- }))]))};
+ const bank=authoredStartupBank10(npc,voiceTextures);
  const preparation10=prepareStockSource10(bank),source=new StockVehicleSource(bank,{preparation10}),engine=new Float32Array(512),exhaust=new Float32Array(512);
  for(let block=0;block<32;block++)source.renderInto({operatingPoint:.12+(block%12)*.06,load:block%8<4?.8:.1,lift:block%8>=4,running:block<28},engine,exhaust);
  // A mature voice alone does not exercise a new reader's untouched-to-active
@@ -66,4 +55,15 @@ export function warmStockSourceJit10({npc=false,voiceTextures=Array(npc?4:6).fil
  }
  const result=Object.freeze({kind:'authored-throwaway-main-isolate-source-jit10',topology:key,authoredFrames:24576,authoredSources:9,actualSourceFramesAdvanced:0,pcmQueueFramesAdded:0,reused:false});
  jitResults10.set(key,result);return {...result};
+}
+
+export function authoredStartupBank10(npc=false,voiceTextures=Array(npc?4:6).fill(false)){
+ const frames=8192,intervals=Array.from({length:32},(_,i)=>({startFrame:i*256,endFrame:(i+1)*256}));
+ let index=0;
+ return {model:'bati',...(npc?{audioContext:'npc'}:{}),layers:Object.fromEntries(['engine','exhaust'].map(role=>[role,Object.fromEntries(['idle','accel','decel'].map(mode=>{
+  const extra=npc&&mode==='decel',textured=!extra&&voiceTextures[index++],phase=(role==='engine'?0:.23)+['idle','accel','decel'].indexOf(mode)*.17;
+  // Unequal nonperiodic inputs exercise the full grain registration search.
+  const samples=Float32Array.from({length:frames},(_,i)=>.043*Math.sin(i*.113+phase)+.021*Math.cos(i*.031+phase*.7));
+  return [mode,{frames,sampleRate:24000,samples,nativePeak:.064,...(textured?{intervals}:{})}];
+ }))]))};
 }

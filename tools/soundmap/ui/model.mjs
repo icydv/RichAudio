@@ -1,4 +1,5 @@
 // Browser-only presentation of copied solver evidence. No ray tracing, game calls or audio.
+import {SOUND_MAP_WIRE,geometryWireBudget} from './wire-limits.mjs';
 export const MODEL_SPACE = 'research-rh-z-up-metres-v1';
 export const LIMITS = Object.freeze({ surfaces:128, paths:256, sources:32, cachedGenerations:4,
   contextBytes:4*1024*1024, contextTiles:64, contextVertices:8192, contextFaces:8192, visibleContextTiles:8 });
@@ -75,7 +76,8 @@ export function checkGeometry(g) {
   fail(g?.schemaVersion===1&&typeof g.generation==='string'&&g.generation.length<=512&&ident(g.sessionId),'Unsupported geometry identity');
   fail(g.streamId===undefined||ident(g.streamId),'Unsupported geometry stream identity');
   fail(g.coordinateSpace===MODEL_SPACE,'Unrecognised engine coordinate space');
-  fail(Array.isArray(g.surfaces)&&g.surfaces.length<=LIMITS.surfaces,'Surface budget exceeded');
+  const budget=geometryWireBudget(g);fail(Array.isArray(g.surfaces)&&g.surfaces.length<=budget.surfaces,'Surface budget exceeded');
+  fail(new TextEncoder().encode(JSON.stringify(g)).byteLength<=budget.bytes,'Geometry byte budget exceeded');
   for(const s of g.surfaces){
     fail(ident(s.id)&&Array.isArray(s.vertices)&&s.vertices.length>=3&&s.vertices.length<=16&&s.vertices.every(isPoint),'Invalid finite surface footprint');
     fail(s.openings===undefined||(Array.isArray(s.openings)&&s.openings.length<=8&&s.openings.every(o=>Array.isArray(o.vertices)&&o.vertices.length===4&&o.vertices.every(isPoint))),'Invalid surface opening');
@@ -98,7 +100,7 @@ export function checkFrame(f) {
 
 export class VisualState {
   constructor(){this.reset();this.dropped=0;this.rejected=0;}
-  reset(){this.frame=null;this.geometry=null;this.geometries=new Map();this.sessionId=null;this.streamId=null;this.receivedAt=null;this.replaySampleAgeMs=0;this.mode='live';}
+  reset(){this.frame=null;this.geometry=null;this.geometries=new Map();this.geometrySizes=new Map();this.geometryCacheBytes=0;this.sessionId=null;this.streamId=null;this.receivedAt=null;this.replaySampleAgeMs=0;this.mode='live';}
   ingest(envelope,now,{wallNow=Date.now(),requestElapsedMs=0}={}){
     const mode=envelope?.mode==='replay'?'replay':'live';
     if(!envelope?.frame){this.reset();this.mode=mode;return false;}
@@ -115,8 +117,9 @@ export class VisualState {
       fail((geometry.streamId??geometry.sessionId)===streamId,'Geometry belongs to a different worker stream');
       const old=this.geometries.get(geometry.generation);
       fail(!old||JSON.stringify(old)===JSON.stringify(geometry),'Immutable geometry generation was modified');
-      this.geometries.set(geometry.generation,geometry);
-      while(this.geometries.size>LIMITS.cachedGenerations)this.geometries.delete(this.geometries.keys().next().value);
+      this.geometryCacheBytes-=this.geometrySizes.get(geometry.generation)??0;const geometryBytes=new TextEncoder().encode(JSON.stringify(geometry)).byteLength;
+      this.geometries.set(geometry.generation,geometry);this.geometrySizes.set(geometry.generation,geometryBytes);this.geometryCacheBytes+=geometryBytes;
+      while(this.geometries.size>LIMITS.cachedGenerations||this.geometryCacheBytes>SOUND_MAP_WIRE.viewerGeometryCacheBytes){const oldest=this.geometries.keys().next().value;this.geometries.delete(oldest);this.geometryCacheBytes-=this.geometrySizes.get(oldest);this.geometrySizes.delete(oldest);}
     }
     if(mode==='live'&&this.frame&&frame.sequence<=this.frame.sequence)return false;
     if(mode==='live'&&this.frame)this.dropped+=Math.max(0,frame.sequence-this.frame.sequence-1);
@@ -147,10 +150,10 @@ export class VisualState {
 }
 
 // Orthographic 3D camera; Z is up in the existing acoustic model, not screen Y.
-export function project(point,{target=[0,0,0],yaw=-.7,pitch=.7,scale=20,width=800,height=600,topDown=false}={}){
+export function project(point,{target=[0,0,0],yaw=-.7,pitch=.7,scale=20,width=800,height=600,topDown=false,northUpAtlas=false}={}){
   const [x,y,z]=point.map((n,i)=>n-target[i]),s=Math.sin(yaw),c=Math.cos(yaw);
   const right=c*x+s*y,front=-s*x+c*y,p=topDown?Math.PI/2:pitch;
-  return {x:width/2+right*scale,y:height/2+(front*Math.sin(p)-z*Math.cos(p))*scale,
+  return {x:width/2+right*scale,y:height/2+(topDown&&northUpAtlas?-1:1)*(front*Math.sin(p)-z*Math.cos(p))*scale,
     depth:front*Math.cos(p)+z*Math.sin(p)};
 }
 export function pathStyle(path){
@@ -160,6 +163,13 @@ export function pathStyle(path){
   if(path.propagation==='obstructed')return {color:'#ffabb0',dash:[12,4],label:'Selected obstructed / transmission'};
   return path.order===0?{color:'#63e8d3',dash:[],label:'Selected direct'}:
     path.order===1?{color:'#ffbc80',dash:[],label:'Selected first reflection'}:{color:'#c6adff',dash:[],label:'Selected second reflection'};
+}
+export function alignsWithWorldAtlas01(frame,identity){
+  if(!identity?.catalogSHA256||frame?.worldContext01?.catalogue!==identity.catalogSHA256)return false;
+  if(frame.coordinateSpace==='gta-native-unscaled')return true;
+  const c=frame.calibration;
+  return frame.coordinateSpace===MODEL_SPACE&&c?.metresPerNativeUnit===1&&
+    JSON.stringify(c.originNative)==='[0,0,0]'&&JSON.stringify(c.axes)==='[[1,0,0],[0,1,0],[0,0,1]]';
 }
 
 function calibrationKey(c){
@@ -253,4 +263,45 @@ export function cachedWorldPresentation041(cache,base,now,{enabled=false}={}){
     target:tiles[0]?.bounds.min.map((v,i)=>(v+tiles[0].bounds.max[i])/2)??[0,0,0],geometryTimeMs:clock,
     reason:aligned?'Cached acoustic geometry · exact declared model alignment':'Cached acoustic inspection · live poses and paths hidden without exact model alignment',
     badges:[packet.authority==='reviewed-static-native08'?'Reviewed native static geometry · derived coverage':'Original authored fixtures','Installed world unqualified','Runtime activation unknown','Unprepared/outside coverage unknown']};
+}
+
+export class InstalledContextState01 {
+  constructor(){this.clear();}
+  clear(){this.key=null;this.generation='';this.tiles=[];this.validUntil=-Infinity;this.status='awaiting-current-camera-and-proof';}
+  static key(frame){
+    const c=frame?.worldContext01;
+    if(!c||!frame.listener?.valid||!isPoint(c.position))return null;
+    const scope=[c.generation,...c.position.map(v=>Math.floor(v/16)),...(c.interiorKey?[c.interiorKey]:[]),
+      ...(c.contextRevision===undefined?[]:[c.contextRevision])].join(':');
+    return [frame.sessionId,frame.streamId,c.catalogue,c.epoch,scope].join(':');
+  }
+  ingest(value,frame,now,roundTripMs){
+    const key=InstalledContextState01.key(frame);
+    if(!key||!value||[value.sessionId,value.streamId,value.catalogue,value.epoch,value.scope].join(':')!==key||
+       !finite(value.remainingMs)||value.remainingMs<=0||value.remainingMs>1000){
+      this.clear();this.status=value?.state??this.status;return;
+    }
+    if(value.tiles!==null){
+      fail(Array.isArray(value.tiles)&&value.tiles.length<=5,'Bounded surrounding context');
+      for(const tile of value.tiles){
+        fail(ident(tile.id)&&isPoint(tile.bounds?.min)&&isPoint(tile.bounds?.max)&&Array.isArray(tile.surfaces)&&tile.surfaces.length<=512&&Array.isArray(tile.missingRegions)&&tile.missingRegions.length<=256,'Bounded installed context tile');
+        for(const s of tile.surfaces)fail(ident(s.id)&&Array.isArray(s.vertices)&&s.vertices.length>=3&&s.vertices.length<=16&&s.vertices.every(isPoint),'Bounded installed context surface');
+      }
+      this.tiles=value.tiles;
+    }else if(this.key!==key||this.generation!==value.generation){this.clear();return;}
+    this.key=key;this.generation=value.generation;this.status=value.state;
+    this.validUntil=now+Math.max(0,value.remainingMs-roundTripMs);
+  }
+  visible(frame,now){return this.key===InstalledContextState01.key(frame)&&now<this.validUntil?this.tiles:[];}
+  explanation(frame,geometry,now){
+    const current=this.key===InstalledContextState01.key(frame),tiles=this.visible(frame,now);
+    const admitted=new Set((geometry?.surfaces??[]).map(s=>s.id)),contextOnly=new Set(),unknownReasons=new Set();
+    for(const tile of tiles){
+      for(const surface of tile.surfaces)if(!admitted.has(surface.id))contextOnly.add(surface.id);
+      for(const region of tile.missingRegions)if(typeof region.reason==='string')unknownReasons.add(region.reason);
+    }
+    const state=this.tiles.length?(current?(now>=this.validUntil?'expired-context':this.status):'changing-camera-context'):this.status;
+    return {worksets:tiles.length,admitted:admitted.size,contextOnly:contextOnly.size,state,
+      unknownReasons:[...unknownReasons].sort()};
+  }
 }

@@ -1,0 +1,593 @@
+{
+  "schema": 1,
+  "kind": "Street01OriginalPressureEvidence05",
+  "createdUtc": "2026-11-06T10:33:24.506Z",
+  "scope": {
+    "entirelyOriginalAuthoredControl": true,
+    "installedGameDataRead": false,
+    "historicalGeometryRead": false,
+    "installedWorldQualification": false,
+    "liveGameplayQualification": false,
+    "wholeWorldReady": false,
+    "pcmRendered": false,
+    "audioEndpointOpened": false
+  },
+  "verdict": {
+    "covered781SurfacePressureContinuityQualified": true,
+    "dense3600SurfaceNeighborContinuityQualified": false,
+    "continuousCrossingCoverageQualified": false,
+    "terminalFreshNonemptyConsumer": true,
+    "remainingLimitations": [
+      "Dense supported neighbor scenes retain same-generation lease gaps; this is a CPU/continuity limitation, separate from unsupported crossing coverage.",
+      "Two observed authored crossing poses have exact baseline/candidate no-support parity and remain unqualified.",
+      "Only a new separately approved genuine-cache qualification can establish installed local readiness."
+    ]
+  },
+  "bindings": {
+    "baselineCommit": "4b3315eac97e696f5c86f37febd51e56e9a146f3",
+    "baselineSourceBundleSHA256": "ac18eb3be56d3bf15e7295399201deb5cca4260514b4d272725db988f7634d6a",
+    "candidateSourceBundleSHA256": "7c535d3663ef069389047a67ad149bd84d07245ce17621d57add7dc013c28526",
+    "benchmarkBundleSHA256": "a0666feb02f244ba2eec9c92b407fe605aed1d92c1b98124def84069cf269a89",
+    "frozenControlSourceBundleSHA256": "ac18eb3be56d3bf15e7295399201deb5cca4260514b4d272725db988f7634d6a",
+    "controlHelperBundleSHA256": "76fbea5f13943b565e34f6bd56864e4199e80fc3b0de82653e8542a0bef7191d",
+    "originalDatasetBundleSHA256": "0bc1ba2d01302743e52018e0638dcbb50346b001b79f37c08e17c02e7b83b131",
+    "cadenceInputSequenceSHA256": "318ad77cb95e3ee0cefd406f912b5a8170286590d03908af785904aebe5d3c3e",
+    "sourceStable": true,
+    "controlSourceStable": true,
+    "helpersStable": true,
+    "benchmarkStable": true,
+    "datasetStable": true
+  },
+  "fixture": {
+    "catalogueRows": 10663,
+    "originResidentResources": 3,
+    "routePreparedResources": 5,
+    "originAdaptiveRadii": [
+      32,
+      16,
+      8
+    ],
+    "originQueriesPerWindow": 5,
+    "originNativeChunkRecordSumAcrossQueries": 34867,
+    "originChunkReadBytes": 3347352,
+    "baselineTessellationsPerOriginWindow": 53,
+    "finalAnalyticCandidates": 3,
+    "finalAnalyticTriangles": 2436,
+    "finalQueriedTriangles": 789,
+    "finalFiniteSurfaces": 781,
+    "hypothesisLimitation": "Native per-query identities and entry sizes were not recorded. This arithmetic original construction reproduces the mechanism class, not exact native geometry or an exact native capacity proof. Retained native final analytic count2448 differs from authored2436.",
+    "geometryQualityReduced": false,
+    "originalCacheBytesRewritten": false,
+    "authoredDirectTriangleRecordCounts": [
+      8192,
+      8192,
+      2099
+    ]
+  },
+  "unchangedSettings": {
+    "freshnessHorizonMilliseconds": 1000,
+    "observationCadenceMilliseconds": 200,
+    "minimumWorkerDispatchMilliseconds": 500,
+    "requestedRadius": 32,
+    "maximumSurfaces": 4096,
+    "residentResources": 8,
+    "queryDescriptors": 8,
+    "aggregateRetainedGeometryBudgetBytes": 67108864,
+    "boxedRecordAndTemplateChargeBytes": 4096,
+    "observations": 220,
+    "perResourceQueryMaximumTriangles": 131072
+  },
+  "equality": {
+    "pairedDirectPoses": 18,
+    "allFiniteSurfaceFieldsExceptObservationTimesEqual": true,
+    "materialsEqual": true,
+    "reflectionIdsEqual": true,
+    "clearBlockedGrazingPathsEqual": true,
+    "sourceProvenanceAndCompletenessEqual": true,
+    "pairedNoSupportPoses": [
+      56,
+      57,
+      62,
+      63
+    ]
+  },
+  "cadence": {
+    "acceptedNonempty": 85,
+    "consumerRejected": 0,
+    "expiredWorkerResults": 0,
+    "expiredBeforeAdoption": 0,
+    "expiredDuringAdoption": 0,
+    "generationDiscards": 0,
+    "emptyPublications": 2,
+    "observedNoSupportPoses": [
+      56,
+      62
+    ],
+    "dispatched": 87,
+    "coalesced": 133,
+    "firstConsumerAgeMilliseconds": 607.059,
+    "coldStaticPreparationMilliseconds": 369.918,
+    "allConsumerAges": {
+      "count": 85,
+      "p95Milliseconds": 606.545,
+      "maximumMilliseconds": 695.646
+    },
+    "phases": {
+      "stable-pressure": {
+        "acceptedNonempty": 10,
+        "rejected": 0,
+        "emptyPublications": 0,
+        "p95ConsumerAgeMilliseconds": 412.938,
+        "maximumConsumerAgeMilliseconds": 607.059,
+        "surfaceCounts": [
+          781
+        ],
+        "sameGenerationFreshnessGapsMilliseconds": []
+      },
+      "smooth-pressure": {
+        "acceptedNonempty": 10,
+        "rejected": 0,
+        "emptyPublications": 0,
+        "p95ConsumerAgeMilliseconds": 356.137,
+        "maximumConsumerAgeMilliseconds": 385.209,
+        "surfaceCounts": [
+          781
+        ],
+        "sameGenerationFreshnessGapsMilliseconds": []
+      },
+      "neighbor-crossing": {
+        "acceptedNonempty": 5,
+        "rejected": 0,
+        "emptyPublications": 2,
+        "p95ConsumerAgeMilliseconds": 390.138,
+        "maximumConsumerAgeMilliseconds": 695.646,
+        "surfaceCounts": [
+          774,
+          297,
+          4096,
+          1548,
+          1800
+        ],
+        "sameGenerationFreshnessGapsMilliseconds": [
+          690.616,
+          534.176
+        ]
+      },
+      "neighbor-generation": {
+        "acceptedNonempty": 6,
+        "rejected": 0,
+        "emptyPublications": 0,
+        "p95ConsumerAgeMilliseconds": 646.528,
+        "maximumConsumerAgeMilliseconds": 651.223,
+        "surfaceCounts": [
+          3600
+        ],
+        "sameGenerationFreshnessGapsMilliseconds": [
+          8.917,
+          110.86,
+          18.023,
+          111.809,
+          51.27
+        ]
+      },
+      "return-generation": {
+        "acceptedNonempty": 6,
+        "rejected": 0,
+        "emptyPublications": 0,
+        "p95ConsumerAgeMilliseconds": 335.747,
+        "maximumConsumerAgeMilliseconds": 342.791,
+        "surfaceCounts": [
+          781
+        ],
+        "sameGenerationFreshnessGapsMilliseconds": []
+      },
+      "long-return-pressure": {
+        "acceptedNonempty": 48,
+        "rejected": 0,
+        "emptyPublications": 0,
+        "p95ConsumerAgeMilliseconds": 378.076,
+        "maximumConsumerAgeMilliseconds": 647.179,
+        "surfaceCounts": [
+          781
+        ],
+        "sameGenerationFreshnessGapsMilliseconds": []
+      }
+    },
+    "terminalFreshnessRemainingMilliseconds": 346.623,
+    "denseNeighborSameGenerationFreshnessGapsMilliseconds": [
+      8.917,
+      110.86,
+      18.023,
+      111.809,
+      51.27
+    ],
+    "maximumSimultaneousActiveAndPendingSlots": 1
+  },
+  "lastPressureRequest": {
+    "requestId": 220,
+    "requestToConsumerMilliseconds": 647.179,
+    "queueMilliseconds": 465.908,
+    "staticPreparationMilliseconds": 76.976,
+    "windowMaterializationMilliseconds": 53.446,
+    "combinedStaticSelectionAndMaterializationMilliseconds": 130.422,
+    "encodeMilliseconds": 14.805,
+    "transferPreparationMilliseconds": 6.872,
+    "soundMapGeometryPreparationMilliseconds": 12.829,
+    "completeWorkerMilliseconds": 165.82,
+    "workerRoundTripMilliseconds": 178.383,
+    "adoptionMilliseconds": 2.23,
+    "consumerApplicationMilliseconds": 0.592,
+    "verifiedLogicalReadBytes": 3347352,
+    "verifiedLogicalReadCalls": 5,
+    "materializationLogicalReadBytes": 0,
+    "chunkDecodeCalls": 0,
+    "analyticTessellationCalls": 0,
+    "consumedPreparedSelection": 1,
+    "componentAccountedBytes": 59693576,
+    "componentByteEvictions": 0
+  },
+  "directStableSequence3": {
+    "baseline": {
+      "totalMilliseconds": 1085.609,
+      "panelConstructionMilliseconds": 509.471,
+      "tileValidationIndexMilliseconds": 209.855,
+      "acousticSceneMilliseconds": 46.38,
+      "queryViewHits": 0,
+      "queryViewMisses": 5,
+      "queryViewEvictions": 4,
+      "chunkDecodeCalls": 5,
+      "analyticTessellationCalls": 53
+    },
+    "candidate": {
+      "totalMilliseconds": 127.709,
+      "panelConstructionMilliseconds": 38.71,
+      "tileValidationIndexMilliseconds": 28.797,
+      "acousticSceneMilliseconds": 21.454,
+      "queryViewHits": 5,
+      "queryViewMisses": 0,
+      "queryViewEvictions": 0,
+      "chunkDecodeCalls": 0,
+      "analyticTessellationCalls": 0
+    }
+  },
+  "denseNeighborRegression": {
+    "coldSequence70": {
+      "baseline": {
+        "totalMilliseconds": 217.34,
+        "panelConstructionMilliseconds": 16.7,
+        "tileValidationIndexMilliseconds": 129.575,
+        "acousticSceneMilliseconds": 38.328,
+        "queryViewHits": 5,
+        "queryViewMisses": 0,
+        "queryViewEvictions": 0,
+        "chunkDecodeCalls": 0,
+        "analyticTessellationCalls": 0
+      },
+      "candidate": {
+        "totalMilliseconds": 313.112,
+        "panelConstructionMilliseconds": 99.283,
+        "tileValidationIndexMilliseconds": 121.256,
+        "acousticSceneMilliseconds": 70.558,
+        "queryViewHits": 5,
+        "queryViewMisses": 0,
+        "queryViewEvictions": 0,
+        "chunkDecodeCalls": 0,
+        "analyticTessellationCalls": 0
+      },
+      "definition": "First supported3600-face neighbor scene in the fixed16-pose sequence; preceding broad queries already warmed native resources, so this is not fully cold source IO."
+    },
+    "warmSequence80": {
+      "baseline": {
+        "totalMilliseconds": 283.382,
+        "panelConstructionMilliseconds": 13.795,
+        "tileValidationIndexMilliseconds": 199.395,
+        "acousticSceneMilliseconds": 41.456,
+        "queryViewHits": 5,
+        "queryViewMisses": 0,
+        "queryViewEvictions": 0,
+        "chunkDecodeCalls": 0,
+        "analyticTessellationCalls": 0
+      },
+      "candidate": {
+        "totalMilliseconds": 249.582,
+        "panelConstructionMilliseconds": 24.762,
+        "tileValidationIndexMilliseconds": 122.039,
+        "acousticSceneMilliseconds": 78.675,
+        "queryViewHits": 5,
+        "queryViewMisses": 0,
+        "queryViewEvictions": 0,
+        "chunkDecodeCalls": 0,
+        "analyticTessellationCalls": 0
+      }
+    },
+    "actualWorkerPreparation": {
+      "count": 6,
+      "p95Milliseconds": 412.671,
+      "maximumMilliseconds": 418.208
+    },
+    "actualCompleteRequestToConsumer": {
+      "count": 6,
+      "p95Milliseconds": 646.528,
+      "maximumMilliseconds": 651.223
+    },
+    "continuityQualified": false
+  },
+  "costs": {
+    "baseline": {
+      "durationMilliseconds": 45109.929,
+      "processCpuUserMilliseconds": 64016,
+      "processCpuSystemMilliseconds": 1266,
+      "sampledAggregateProcessRssMaximumBytes": 444141568,
+      "nodeResourceUsageMaximumRssReportedKilobytes": 436000,
+      "closure": {
+        "closed": true,
+        "workerJoined": true,
+        "workerExitCode": 0,
+        "controlClosureUnknown": false,
+        "milliseconds": 11.844
+      },
+      "outerNodeCommandExited": true
+    },
+    "candidate": {
+      "durationMilliseconds": 44540.641,
+      "processCpuUserMilliseconds": 26797,
+      "processCpuSystemMilliseconds": 797,
+      "sampledAggregateProcessRssMaximumBytes": 470331392,
+      "nodeResourceUsageMaximumRssReportedKilobytes": 474796,
+      "closure": {
+        "closed": true,
+        "workerJoined": true,
+        "workerExitCode": 0,
+        "controlClosureUnknown": false,
+        "milliseconds": 21.922
+      },
+      "outerNodeCommandExited": true
+    },
+    "ioInterpretation": "Unique worker request profiles recovered from retained status histories cover all40 baseline and87 candidate dispatches, including expired baseline results. These are request-stage logical reads, excluding worker initialization and benchmark pin hashing. Candidate total IO rises because it services more of the same220 observations; warm origin verification remains one3347352-byte/5-read set per dispatched request.",
+    "dispatchedRequestStageLogicalIo": {
+      "baseline": {
+        "profiledRequests": 40,
+        "dispatchedRequests": 40,
+        "completeDispatchedRequestCoverage": true,
+        "requestStageLogicalReadBytes": 123877831,
+        "requestStageLogicalReadCalls": 213,
+        "separatelyReportedRefreshManifestBytes": 0,
+        "chunkDecodeCalls": 170,
+        "analyticTessellationCalls": 1757,
+        "includesUnpublishedExpiredRequests": true,
+        "includesInitializationReads": false,
+        "includesBenchmarkSourceOrDatasetPinReads": false
+      },
+      "candidate": {
+        "profiledRequests": 87,
+        "dispatchedRequests": 87,
+        "completeDispatchedRequestCoverage": true,
+        "requestStageLogicalReadBytes": 282767839,
+        "requestStageLogicalReadCalls": 454,
+        "separatelyReportedRefreshManifestBytes": 0,
+        "chunkDecodeCalls": 5,
+        "analyticTessellationCalls": 28,
+        "includesUnpublishedExpiredRequests": true,
+        "includesInitializationReads": false,
+        "includesBenchmarkSourceOrDatasetPinReads": false
+      }
+    }
+  },
+  "tests": {
+    "command": [
+      "node",
+      "--test",
+      "--test-concurrency=1",
+      "tests/Test-CachePressure01.mjs",
+      "tests/Test-CachePressureConsumer01.mjs"
+    ],
+    "passed": 3,
+    "failed": 0,
+    "durationMilliseconds": 1735.5506,
+    "controlledClockOnlyForConsumerNegatives": true,
+    "cadenceUsesRealSharedVerifiedClock": true
+  },
+  "commands": {
+    "baselineDirect": [
+      "node",
+      "tests/Profile-CachePressure01.mjs",
+      "--source-root",
+      ".local/street01-cache-pressure01/baseline",
+      "--control-root",
+      ".local/street01-cache-pressure01/baseline",
+      "--fixture-root",
+      ".local/street01-cache-pressure01/original-v3",
+      "--output",
+      ".local/street01-cache-pressure01/baseline-direct-final04.json",
+      "--direct"
+    ],
+    "baselineGaps": [
+      "node",
+      "tests/Profile-CachePressure01.mjs",
+      "--source-root",
+      ".local/street01-cache-pressure01/baseline",
+      "--control-root",
+      ".local/street01-cache-pressure01/baseline",
+      "--fixture-root",
+      ".local/street01-cache-pressure01/original-v3",
+      "--output",
+      ".local/street01-cache-pressure01/baseline-gap-direct-final04.json",
+      "--direct",
+      "--sequences",
+      "56,62"
+    ],
+    "baselineCadence": [
+      "node",
+      "tests/Profile-CachePressure01.mjs",
+      "--source-root",
+      ".local/street01-cache-pressure01/baseline",
+      "--control-root",
+      ".local/street01-cache-pressure01/baseline",
+      "--fixture-root",
+      ".local/street01-cache-pressure01/original-v3",
+      "--output",
+      ".local/street01-cache-pressure01/baseline-cadence-final04.json"
+    ],
+    "candidateDirect": [
+      "node",
+      "tests/Profile-CachePressure01.mjs",
+      "--source-root",
+      ".",
+      "--control-root",
+      ".local/street01-cache-pressure01/baseline",
+      "--fixture-root",
+      ".local/street01-cache-pressure01/original-v3",
+      "--output",
+      ".local/street01-cache-pressure01/candidate-direct-final05.json",
+      "--direct"
+    ],
+    "candidateGaps": [
+      "node",
+      "tests/Profile-CachePressure01.mjs",
+      "--source-root",
+      ".",
+      "--control-root",
+      ".local/street01-cache-pressure01/baseline",
+      "--fixture-root",
+      ".local/street01-cache-pressure01/original-v3",
+      "--output",
+      ".local/street01-cache-pressure01/candidate-gap-direct-final05.json",
+      "--direct",
+      "--sequences",
+      "56,62"
+    ],
+    "candidateCadence": [
+      "node",
+      "tests/Profile-CachePressure01.mjs",
+      "--source-root",
+      ".",
+      "--control-root",
+      ".local/street01-cache-pressure01/baseline",
+      "--fixture-root",
+      ".local/street01-cache-pressure01/original-v3",
+      "--output",
+      ".local/street01-cache-pressure01/candidate-cadence-final05.json"
+    ],
+    "directComparison": [
+      "node",
+      "tests/Compare-CachePressure01.mjs",
+      ".local/street01-cache-pressure01/baseline-direct-final04.json",
+      ".local/street01-cache-pressure01/candidate-direct-final05.json",
+      ".local/street01-cache-pressure01/direct-comparison-final05.json"
+    ],
+    "gapComparison": [
+      "node",
+      "tests/Compare-CachePressure01.mjs",
+      ".local/street01-cache-pressure01/baseline-gap-direct-final04.json",
+      ".local/street01-cache-pressure01/candidate-gap-direct-final05.json",
+      ".local/street01-cache-pressure01/gap-direct-comparison-final05.json"
+    ],
+    "cadenceComparison": [
+      "node",
+      "tests/Compare-CachePressure01.mjs",
+      ".local/street01-cache-pressure01/baseline-cadence-final04.json",
+      ".local/street01-cache-pressure01/candidate-cadence-final05.json",
+      ".local/street01-cache-pressure01/cadence-comparison-final05-reviewed-gaps.json",
+      ".local/street01-cache-pressure01/direct-comparison-final05.json",
+      ".local/street01-cache-pressure01/gap-direct-comparison-final05.json"
+    ]
+  },
+  "rawEvidence": [
+    {
+      "report": "baseline-direct-final04.json",
+      "sha256": "e8ed91cdf296937b9f942f6822d4000ad1ee516334a3466ea33014f2bf36be15"
+    },
+    {
+      "report": "baseline-gap-direct-final04.json",
+      "sha256": "461f0b6d9f2cb0886beeca9212be541e61bf86d0b00362464c7cd01e66505a96"
+    },
+    {
+      "report": "baseline-cadence-final04.json",
+      "sha256": "9c440e6428a9c8d9febd24c85545603a91bca4736d97b70498cd8f4611f8db6a"
+    },
+    {
+      "report": "candidate-direct-final05.json",
+      "sha256": "1d9e4863ba630bbf1e052adbd26f031b94d65e114f084b0083304331f25f2515"
+    },
+    {
+      "report": "candidate-gap-direct-final05.json",
+      "sha256": "099adbdda0eea47621be20a6c893be7cdc9d807a73a50ef995a13590d03721c8"
+    },
+    {
+      "report": "candidate-cadence-final05.json",
+      "sha256": "2463182082594a70a908342d4ae6739c30e5ab362376fc44fc6f6c6ed8d9c52a"
+    },
+    {
+      "report": "direct-comparison-final05.json",
+      "sha256": "ce3756cd80ff70599eac52b1392f7ca041e1db18e68199998825246d5f6fab7b"
+    },
+    {
+      "report": "gap-direct-comparison-final05.json",
+      "sha256": "7163b5c11f1a3a7d717abaa9d4b6fca9cdd06892a57127ad16fba3041efe4a18"
+    },
+    {
+      "report": "cadence-comparison-final05.json",
+      "sha256": "2a15720324eb95c529fc7c5dd6d43d56d9cc6991ea72cbce84f93d0c02755394"
+    },
+    {
+      "report": "cadence-comparison-final05-reviewed-gaps.json",
+      "sha256": "0bf65a938ad000e27630948a395b8156d2b4b8fc64fcc718bff17ee42c1fc27e"
+    }
+  ],
+  "preservedRejectedResults": [
+    {
+      "report": "candidate-direct-final03.json",
+      "reason": "Pairing rejected strict raw helper CRLF/LF identity difference; final04/05 use the exact frozen helper root rather than relaxed hashes.",
+      "sha256": "f347f8cc738fc0217d034925aeaabd222f6888e15d97452774e0948605faf76e"
+    },
+    {
+      "report": "cadence-comparison-final04-continuity-recheck.json",
+      "reason": "Early stable-pressure gap13.6816ms fails the stricter uninterrupted covered-pressure gate.",
+      "sha256": "6350120f0aa786fbfd37feb1497e82688408db1704e633cb0e23225e6dba3a6f"
+    },
+    {
+      "report": "cadence-comparison-final05.json",
+      "reason": "Comparator originally overrestricted no-support metadata to no-catalogued resources; exact paired pose56 legitimately has a catalogued resource but no surfaces. Corrected predicate retains exact full metadata SHA parity; raw performance run unchanged.",
+      "sha256": "2a15720324eb95c529fc7c5dd6d43d56d9cc6991ea72cbce84f93d0c02755394"
+    }
+  ],
+  "baselineCadence": {
+    "acceptedNonempty": 6,
+    "consumerRejected": 0,
+    "expiredWorkerResults": 33,
+    "terminalFresh": false,
+    "phases": {
+      "stable-pressure": {
+        "acceptedNonempty": 0,
+        "p95ConsumerAgeMilliseconds": null,
+        "maximumConsumerAgeMilliseconds": null
+      },
+      "smooth-pressure": {
+        "acceptedNonempty": 0,
+        "p95ConsumerAgeMilliseconds": null,
+        "maximumConsumerAgeMilliseconds": null
+      },
+      "neighbor-crossing": {
+        "acceptedNonempty": 1,
+        "p95ConsumerAgeMilliseconds": 969.777,
+        "maximumConsumerAgeMilliseconds": 969.777
+      },
+      "neighbor-generation": {
+        "acceptedNonempty": 5,
+        "p95ConsumerAgeMilliseconds": 511.688,
+        "maximumConsumerAgeMilliseconds": 620.213
+      },
+      "return-generation": {
+        "acceptedNonempty": 0,
+        "p95ConsumerAgeMilliseconds": null,
+        "maximumConsumerAgeMilliseconds": null
+      },
+      "long-return-pressure": {
+        "acceptedNonempty": 0,
+        "p95ConsumerAgeMilliseconds": null,
+        "maximumConsumerAgeMilliseconds": null
+      }
+    }
+  },
+  "baselineOnlyViewAdmissionTriangleLimit": 32768
+}

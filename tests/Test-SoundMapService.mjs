@@ -4,12 +4,29 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import http from 'node:http';
+import {spawn} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import {startSoundMap} from '../tools/soundmap/server.mjs';
 import {SessionRecorder,replayFrame} from '../tools/soundmap/recorder.mjs';
 import {SoundMapClient,readServiceConfiguration} from '../tools/soundmap/producer-client.mjs';
 
 const fixture=()=>({frame:{schemaVersion:1,sessionId:'synthetic-test',sequence:1,audioFrame:512,producedAtUnixMs:1000,arrivalTimeSeconds:.0106667,observationTimeSeconds:.001,geometryTimeMs:100,geometryGeneration:'g1',paths:[{id:'actual-solver-path',status:'selected',vertices:[[0,0,0],[1,0,0]],delay:.003}],sources:[],listener:{position:[1,0,0]},settings:{quality:'balanced'}},geometry:{schemaVersion:1,generation:'g1',sessionId:'synthetic-test',surfaces:[],validUntil:123,clockDomain:'publisher-monotonic-ms'}});
 const temp=()=>fs.mkdtempSync(path.join(os.tmpdir(),'RichAudioSoundMap-'));
+
+test('served browser model evaluates against the exact single core wire contract without filesystem routes',async()=>{
+ const root=temp(),service=await startSoundMap({root,port:0});let child;
+ try{
+  const response=await fetch(service.descriptor.url+'/wire-limits.mjs');assert.equal(response.status,200);assert.match(response.headers.get('content-type'),/javascript/);
+  assert.equal(await response.text(),fs.readFileSync(new URL('../src/acoustics/streaming/soundmap-wire.mjs',import.meta.url),'utf8'));
+  assert.equal((await fetch(service.descriptor.url+'/src/acoustics/streaming/soundmap-wire.mjs')).status,404,'one explicit public module route cannot expose the source tree');
+  const result=await new Promise((resolve,reject)=>{
+   child=spawn(process.execPath,['--experimental-vm-modules',fileURLToPath(new URL('./fixtures/SoundMapBrowserWire01.mjs',import.meta.url)),service.descriptor.url],{windowsHide:true,stdio:['ignore','pipe','pipe']});let stdout='',stderr='';
+   const timeout=setTimeout(()=>{child.kill();reject(Error('Bounded browser module test timed out'));},8000);
+   child.stdout.on('data',b=>stdout+=b);child.stderr.on('data',b=>stderr+=b);child.once('error',error=>{clearTimeout(timeout);reject(error);});child.once('exit',code=>{clearTimeout(timeout);try{assert.equal(code,0,stderr);assert.ok(stdout.length<8192&&stderr.length<8192);resolve(JSON.parse(stdout));}catch(error){reject(error);}});
+  });
+  assert.equal(result.browserModulesEvaluated,true);assert.deepEqual(result.requests,['/model.mjs','/wire-limits.mjs']);assert.equal(result.nodeGlobalsProvided,false);
+ }finally{if(child&&child.exitCode===null)child.kill();await service.close();clean(root);}
+});
 test('recording manifest and timeline retain conditional-clear assumption and actual geometry transition',()=>{
  const root=temp();try{const recorder=new SessionRecorder(root),{id}=recorder.start();
  const value=fixture();value.frame.geometryGeneration=null;

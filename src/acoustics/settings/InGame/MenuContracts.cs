@@ -13,30 +13,33 @@ namespace RichAudio.Settings.InGame
     {
         public readonly string Quality, Acceleration;
         public readonly bool Enabled, EarlyReflections, DiagnosticsOverlay;
-        public readonly double OutputLevel;
+        public readonly double OutputLevel,AirflowLevel;
+        public readonly bool AirflowEnabled;
         public readonly string IntegrationMode,MenuToggleKey;public readonly bool SoundMapVisible;
         public static readonly string[] MenuToggleKeys={"F6","F7","F9","F10","F11"};
         public static readonly string[] Qualities={"auto","performance","balanced","quality","max"};
         public static readonly string[] Accelerations={"auto","cpu","gpu"};
         public static MenuPreferences Defaults {get{return new MenuPreferences("auto","auto");}}
         public MenuPreferences(string quality,string acceleration,bool enabled=true,double outputLevel=1,
-            bool earlyReflections=true,bool diagnosticsOverlay=false,string integrationMode="stock-fallback",bool soundMapVisible=false,string menuToggleKey="F10")
+            bool earlyReflections=true,bool diagnosticsOverlay=false,string integrationMode="stock-fallback",bool soundMapVisible=false,string menuToggleKey="F10",bool airflowEnabled=false,double airflowLevel=.35)
         {
             if(Array.IndexOf(Qualities,quality)<0||Array.IndexOf(Accelerations,acceleration)<0||
                 Double.IsNaN(outputLevel)||Double.IsInfinity(outputLevel)||outputLevel<0||outputLevel>1)
                 throw new ArgumentException("Validated menu preferences required");
+            if(Double.IsNaN(airflowLevel)||Double.IsInfinity(airflowLevel)||airflowLevel<0||airflowLevel>1)throw new ArgumentException("Validated airflow level required");
+            AirflowEnabled=airflowEnabled;AirflowLevel=airflowLevel;
             Quality=quality;Acceleration=acceleration;Enabled=enabled;OutputLevel=outputLevel;
             EarlyReflections=earlyReflections;DiagnosticsOverlay=diagnosticsOverlay;
             if(integrationMode!="stock-fallback"&&integrationMode!="experimental-additive")throw new ArgumentException("Unverified integration mode");IntegrationMode=integrationMode;SoundMapVisible=soundMapVisible;
             MenuToggleKey=Array.IndexOf(MenuToggleKeys,menuToggleKey)>=0?menuToggleKey:"F10";
         }
         public MenuPreferences With(string quality=null,string acceleration=null,bool? enabled=null,double? outputLevel=null,
-            bool? earlyReflections=null,bool? diagnosticsOverlay=null,string integrationMode=null,bool? soundMapVisible=null,string menuToggleKey=null)
+            bool? earlyReflections=null,bool? diagnosticsOverlay=null,string integrationMode=null,bool? soundMapVisible=null,string menuToggleKey=null,bool? airflowEnabled=null,double? airflowLevel=null)
         {return new MenuPreferences(quality??Quality,acceleration??Acceleration,enabled??Enabled,outputLevel??OutputLevel,
-            earlyReflections??EarlyReflections,diagnosticsOverlay??DiagnosticsOverlay,integrationMode??IntegrationMode,soundMapVisible??SoundMapVisible,menuToggleKey??MenuToggleKey);}
+            earlyReflections??EarlyReflections,diagnosticsOverlay??DiagnosticsOverlay,integrationMode??IntegrationMode,soundMapVisible??SoundMapVisible,menuToggleKey??MenuToggleKey,airflowEnabled??AirflowEnabled,airflowLevel??AirflowLevel);}
         public bool Same(MenuPreferences other)
         {return other!=null&&Quality==other.Quality&&Acceleration==other.Acceleration&&Enabled==other.Enabled&&
-                OutputLevel==other.OutputLevel&&EarlyReflections==other.EarlyReflections&&DiagnosticsOverlay==other.DiagnosticsOverlay&&IntegrationMode==other.IntegrationMode&&SoundMapVisible==other.SoundMapVisible&&MenuToggleKey==other.MenuToggleKey;}
+                OutputLevel==other.OutputLevel&&EarlyReflections==other.EarlyReflections&&DiagnosticsOverlay==other.DiagnosticsOverlay&&IntegrationMode==other.IntegrationMode&&SoundMapVisible==other.SoundMapVisible&&MenuToggleKey==other.MenuToggleKey&&AirflowEnabled==other.AirflowEnabled&&AirflowLevel==other.AirflowLevel;}
     }
 
     public sealed class MenuStatus
@@ -47,22 +50,26 @@ namespace RichAudio.Settings.InGame
         public readonly long GpuResultsApplied;
         public readonly bool? ActiveOutputEnabled,ActiveEarlyReflections;
         public readonly double? ActiveOutputLevel;
+        public readonly string WorldDetail;
         private static string Bounded(string value,int length)
         {if(String.IsNullOrEmpty(value))return "";value=value.Replace('\r',' ').Replace('\n',' ');return value.Length>length?value.Substring(0,length):value;}
         private MenuStatus(bool available,string requestedQuality,string activeQuality,string requestedAcceleration,
             string activeAcceleration,string device,string fallbackReason,int pathBudget,long gpuResultsApplied,string detail,
-            bool? outputEnabled=null,double? outputLevel=null,bool? earlyReflections=null,bool stockAudioActive=false)
+            bool? outputEnabled=null,double? outputLevel=null,bool? earlyReflections=null,bool stockAudioActive=false,string worldDetail=null)
         {
             Available=available;StockAudioActive=stockAudioActive;RequestedQuality=Bounded(requestedQuality,24);ActiveQuality=Bounded(activeQuality,24);
             RequestedAcceleration=Bounded(requestedAcceleration,12);ActiveAcceleration=Bounded(activeAcceleration,12);
             Device=Bounded(device,128);FallbackReason=Bounded(fallbackReason,180);PathBudget=pathBudget;
             GpuResultsApplied=gpuResultsApplied;Detail=Bounded(detail,260);
             ActiveOutputEnabled=outputEnabled;ActiveOutputLevel=outputLevel;ActiveEarlyReflections=earlyReflections;
+            WorldDetail=Bounded(worldDetail,150);
         }
         public static MenuStatus Unavailable(string reason)
         {return new MenuStatus(false,"","","","","","",0,0,String.IsNullOrEmpty(reason)?"Host status unavailable":reason);}
         public static MenuStatus StockFallback()
         {return new MenuStatus(false,"","","","","","",0,0,"RichAudio processing is stopped. GTA keeps its original vehicle sounds.",stockAudioActive:true);}
+        public MenuStatus WithWorldDetail(string detail)
+        {return new MenuStatus(Available,RequestedQuality,ActiveQuality,RequestedAcceleration,ActiveAcceleration,Device,FallbackReason,PathBudget,GpuResultsApplied,Detail,ActiveOutputEnabled,ActiveOutputLevel,ActiveEarlyReflections,StockAudioActive,detail);}
         public static MenuStatus Measured(string requestedQuality,string activeQuality,string requestedAcceleration,string activeAcceleration,
             string device,string fallbackReason,int pathBudget,long gpuResultsApplied,string detail,
             bool? outputEnabled=null,double? outputLevel=null,bool? earlyReflections=null)

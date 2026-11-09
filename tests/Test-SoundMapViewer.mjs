@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {VisualState,PassiveState,presentation,DisplayCadence,RateMeter,TELEMETRY_POLL_FPS,DISPLAY_RATES,ReplayClock,project,pathStyle,parseVisualContext,visibleContext,clampFps} from '../tools/soundmap/ui/model.mjs';
+import {VisualState,PassiveState,presentation,DisplayCadence,RateMeter,TELEMETRY_POLL_FPS,DISPLAY_RATES,ReplayClock,project,pathStyle,parseVisualContext,visibleContext,clampFps,InstalledContextState01} from '../tools/soundmap/ui/model.mjs';
 import {observationCoordinates,modelPoint} from '../src/acoustics/engine/observed-geometry.mjs';
 const calibration={originNative:[100,200,3],axes:[[0,1,0],[-1,0,0],[0,0,1]],metresPerNativeUnit:2,basis:'declared-demonstration-scale',reference:'original-test-transform',physicalCalibration:'unverified'};
 const geometry=(generation='g1',sessionId='s1')=>({schemaVersion:1,generation,sessionId,coordinateSpace:'research-rh-z-up-metres-v1',calibration,createdAt:1000,validUntil:1500,coverage:'partial',surfaces:[{id:'finite-wall',vertices:[[0,0,0],[2,0,0],[2,0,2],[0,0,2]],openings:[]}],missingRegions:[]});
@@ -80,4 +80,21 @@ test('slow displays and long pauses skip missed frame slots rather than burst or
   assert(d.due(20000));assert.equal(d.due(20000),false);assert.equal(d.due(20001),false);
   d.setRate(15);assert(d.due(21000));assert.equal(d.due(21020),false);assert(d.due(21070));
   const rate=new RateMeter();for(let i=0;i<1000;i++)rate.mark(i);assert(rate.times.length<=256);assert.equal(rate.rate(5000),0);
+});
+
+test('installed surrounding geometry keeps its own expiry and never follows a changed camera scope',()=>{
+ const context=new InstalledContextState01();
+ const f={...frame(),streamId:'worker-one',worldContext01:{catalogue:'a'.repeat(64),epoch:'source-proof-one',generation:1,position:[0,0,0]}};
+ const tile={id:'view-tile',bounds:{min:[-2,-2,-2],max:[2,2,2]},surfaces:geometry().surfaces,missingRegions:[]};
+ const result={sessionId:f.sessionId,streamId:f.streamId,catalogue:f.worldContext01.catalogue,epoch:f.worldContext01.epoch,
+   scope:'1:0:0:0',generation:'1',remainingMs:120,tiles:[tile]};
+ context.ingest(result,f,100,20);
+ assert.deepEqual(context.visible(f,199),[tile]);
+ assert.deepEqual(context.visible(f,200),[]);
+ assert.deepEqual(context.visible({...f,streamId:'worker-two'},110),[]);
+ assert.deepEqual(context.visible({...f,worldContext01:{...f.worldContext01,interiorKey:'entered-proxy'}},110),[]);
+ assert.deepEqual(context.visible({...f,worldContext01:{...f.worldContext01,position:[17,0,0]}},110),[]);
+ const changed={...f,worldContext01:{...f.worldContext01,epoch:'source-proof-two'}};
+ context.ingest({...result,tiles:null},changed,120,0);
+ assert.deepEqual(context.visible(changed,120),[]);
 });

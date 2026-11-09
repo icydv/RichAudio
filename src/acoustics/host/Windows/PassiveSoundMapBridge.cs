@@ -17,16 +17,22 @@ namespace RichAudio.Beacon.Windows
         public double[] Position,Forward,Up,Velocity;
         public bool Valid;
         public string Reason;
+        public string InteriorOutcome;
+        public int? InteriorProxy;
+        public bool? InteriorReady;
+        public uint? InteriorArchetype;
+        public double[] InteriorOrigin;
+        public double? InteriorOffsetMs;
     }
     public sealed class PassiveSoundMapBridge:IDisposable
     {
         private readonly string pointer,session=Guid.NewGuid().ToString("N"),stream=Guid.NewGuid().ToString("N"),owner=Guid.NewGuid().ToString("N");
         private readonly AutoResetEvent wake=new AutoResetEvent(false);
         private Thread thread;private PassiveCameraSample latest;private int stopped,started,storyReady;
-        private InGameSettingsLink link;private Process service,window;private string url,token;private bool attempted;private readonly bool useVisibility;private OwnedProcessJob job;
+        private InGameSettingsLink link;private Process service,window;private string url,token;private bool attempted;private readonly bool useVisibility,viewOnlyMap;private OwnedProcessJob job;
         private volatile string diagnostic="loading";private int sampleHz=20,enabled;private long accepted,expired;
         public string Diagnostic{get{return diagnostic;}}public int SampleHz{get{return Volatile.Read(ref sampleHz);}}public bool Enabled{get{return Volatile.Read(ref enabled)!=0;}}
-        public PassiveSoundMapBridge(string sidecar,bool useSavedVisibility=false){pointer=sidecar;useVisibility=useSavedVisibility;}
+        public PassiveSoundMapBridge(string sidecar,bool useSavedVisibility=false,bool viewOnlyMap=false){pointer=sidecar;useVisibility=useSavedVisibility;this.viewOnlyMap=viewOnlyMap;}
         public void Start(){if(Interlocked.Exchange(ref started,1)!=0)throw new InvalidOperationException("Passive feed cannot restart");thread=new Thread(Run){IsBackground=true,Name="RichAudio passive camera transport"};thread.Start();}
         public void SetStoryReady(bool value){Volatile.Write(ref storyReady,value?1:0);Signal();}
         public void Publish(PassiveCameraSample sample){if(sample!=null&&Volatile.Read(ref stopped)==0){Interlocked.Exchange(ref latest,sample);Signal();}}
@@ -51,7 +57,10 @@ namespace RichAudio.Beacon.Windows
                 string expected="http://127.0.0.1:"+link.SoundMap.Port;
                 if(d==null||!d.ContainsKey("url")||!d.ContainsKey("token")||!String.Equals(d["url"] as string,expected,StringComparison.Ordinal)||!(d["token"] is string)||!System.Text.RegularExpressions.Regex.IsMatch((string)d["token"],"\\A[a-f0-9]{64}\\z"))return false;
                 if(requireOwner&&(!d.ContainsKey("ownerId")||!String.Equals(d["ownerId"] as string,owner,StringComparison.Ordinal)))return false;
-                url=expected;token=(string)d["token"];Request("/api/status",null);return true;
+                url=expected;token=(string)d["token"];
+                var status=Request("/api/status",null) as Dictionary<string,object>;
+                if(viewOnlyMap&&(status==null||!status.ContainsKey("viewOnlyMap")||!Object.Equals(status["viewOnlyMap"],true)))throw new InvalidDataException("Owned view-only map service required");
+                return true;
             }catch{url=null;token=null;return false;}
         }
         private static string Quote(string value){if(value.IndexOf('"')>=0||value.EndsWith("\\",StringComparison.Ordinal))throw new InvalidDataException("Process argument");return "\""+value+"\"";}
@@ -59,7 +68,7 @@ namespace RichAudio.Beacon.Windows
         {
             if(attempted)return;attempted=true;
             if(!Connect(false)){
-                if(!link.SoundMap.AutoStartService){diagnostic="service-unavailable";return;}
+                if(viewOnlyMap||!link.SoundMap.AutoStartService){diagnostic="service-unavailable";return;}
                 string script=Path.Combine(link.WorkspaceRoot,"tools","soundmap","server.mjs");
                 // PrivatePath verifies reparse containment; service code remains in the reviewed workspace.
                 AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,".local/soundmap/service.json");
@@ -87,18 +96,29 @@ namespace RichAudio.Beacon.Windows
             try{
                 link=InGameSettingsLink.Load(pointer);Volatile.Write(ref sampleHz,link.SoundMap.SampleHz);
                 if(!link.SoundMap.Enabled){diagnostic="disabled";return;}
+                if(viewOnlyMap&&(link.ControllerEnabled||link.SoundMap.AutoStartService))throw new InvalidDataException("Map qualification requires externally owned service and disabled controller");
                 Volatile.Write(ref enabled,1);
                 diagnostic="waiting-story-mode";
                 long reconnectAt=0;
                 while(Volatile.Read(ref stopped)==0){
                     if(useVisibility&&!AcousticSettingsStore.Load(link.WorkspaceRoot,link.SettingsPath).SoundMapVisible){if(attempted)CloseOwned();diagnostic="hidden";attempted=false;url=null;token=null;wake.WaitOne(200);continue;}
                     if(Volatile.Read(ref storyReady)!=0)EnsureService();
-                    if(attempted&&url==null&&Stopwatch.GetTimestamp()>=reconnectAt){Connect(false);reconnectAt=Stopwatch.GetTimestamp()+Stopwatch.Frequency;}
+                    if(viewOnlyMap&&attempted&&url==null)break;
+                    if(!viewOnlyMap&&attempted&&url==null&&Stopwatch.GetTimestamp()>=reconnectAt){Connect(false);reconnectAt=Stopwatch.GetTimestamp()+Stopwatch.Frequency;}
                     var sample=Interlocked.Exchange(ref latest,null);
                     if(sample!=null&&url!=null&&token!=null&&attempted){
                         double age=(Stopwatch.GetTimestamp()-sample.ObservationTicks)*1000.0/Stopwatch.Frequency;
                         if(age>=0&&age<=500){try{
-                            var result=Request("/api/passive",new{schemaVersion=1,kind="passive-listener",streamId=stream,sessionId=session,sequence=sample.Sequence,observedAtUnixMs=sample.ObservedAtUnixMs,sampleAgeMs=age,coordinateSpace="gta-native-unscaled",units="native-unverified",listener=new{position=sample.Position,forward=sample.Forward,up=sample.Up,velocity=sample.Velocity,valid=sample.Valid,reason=sample.Reason,generation=sample.Generation}}) as Dictionary<string,object>;
+                            var payload=new Dictionary<string,object>{
+                                {"schemaVersion",1},{"kind","passive-listener"},{"streamId",stream},{"sessionId",session},
+                                {"sequence",sample.Sequence},{"observedAtUnixMs",sample.ObservedAtUnixMs},{"sampleAgeMs",age},
+                                {"coordinateSpace","gta-native-unscaled"},{"units","native-unverified"},
+                                {"listener",new{position=sample.Position,forward=sample.Forward,up=sample.Up,velocity=sample.Velocity,valid=sample.Valid,reason=sample.Reason,generation=sample.Generation}}
+                            };
+                            if(viewOnlyMap&&sample.InteriorOutcome!=null)payload.Add("interiorReadback",new{
+                                outcome=sample.InteriorOutcome,proxy=sample.InteriorProxy,ready=sample.InteriorReady,
+                                archetype=sample.InteriorArchetype,origin=sample.InteriorOrigin,offsetMs=sample.InteriorOffsetMs});
+                            var result=Request("/api/passive",payload) as Dictionary<string,object>;
                             bool ok=result!=null&&result.ContainsKey("accepted")&&Object.Equals(result["accepted"],true);if(ok)accepted++;
                             diagnostic=ok?"tracking-passive-native":"passive-rejected";
                         }catch{diagnostic="passive-service-disconnected";url=null;token=null;}}
@@ -108,6 +128,7 @@ namespace RichAudio.Beacon.Windows
                 }
             }catch(Exception e){diagnostic="passive-failed-"+e.GetType().Name;}
             finally{
+                Volatile.Write(ref enabled,0);
                 // Only the dedicated process/window and capability-owned service are stopped.
                 bool serviceOwned=service!=null,windowOwned=window!=null;CloseOwned();
                 if(link!=null&&link.SoundMap.Enabled)try{string result=AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,".local/soundmap/passive-result.json");InGameSettingsLink.LocalFile(result);Directory.CreateDirectory(Path.GetDirectoryName(result));File.WriteAllText(result,new JavaScriptSerializer().Serialize(new{schemaVersion=1,kind="passive-listener",diagnostic=diagnostic,accepted=accepted,expired=expired,serviceOwned=serviceOwned,windowOwned=windowOwned,audioOpened=false,sensingStarted=false,stopped=true}));}catch{diagnostic="passive-result-write-failed";}

@@ -8,7 +8,7 @@ import {isResourceInventory04} from './resource-inventory04.mjs';
 import {createSceneTileContext03} from './scene-union03.mjs';
 import {acousticScene} from '../engine/contracts.mjs';
 import {createTile} from '../research/local-geometry.mjs';
-import {fields,freeze,digest,identifier,requireWorld} from './contracts.mjs';
+import {fields,freeze,digest,identifier,requireWorld,vector} from './contracts.mjs';
 const coordinators=new WeakSet(),hex=v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v),abortGetter=Object.getOwnPropertyDescriptor(AbortSignal.prototype,'aborted').get;
 const completed=status=>status==='prepared'||status==='cached',key=(pageId,tileId)=>pageId+'\n'+tileId;
 const reason=e=>String(e?.message??e??'unknown').replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,240);
@@ -63,20 +63,27 @@ export class StartupAcousticCoordinator06 {
  }
  async #page(descriptor,control={}){const value=await this.#control('page-provider',ctx=>this.pageProvider(descriptor.pageId,ctx),control);this.stats.pageLoads++;requireWorld(value&&isResourceInventory04(value.inventory)&&value.inventory.inventoryDigest===descriptor.inventoryDigest&&value.inventory.build===this.catalogue.build&&value.inventory.tilePlans.length===descriptor.tiles.length&&descriptor.tiles.every(t=>value.inventory.tilePlans.some(p=>p.tileId===t.tileId&&p.planDigest===t.planDigest)),'exact qualified startup page identity');return value;}
  async #store(pageId,control={}){const store=await this.#control('store-provider',ctx=>this.storeForPage(pageId,ctx),control);requireWorld(store&&typeof store.load==='function'&&typeof store.publish==='function','existing bounded resource tile store/router required');return store;}
- async run({signal,budgetMilliseconds=60000,tileBudgetMilliseconds=5000,checkpointEveryPages=8,controlOperationMilliseconds=5000}={}){
+ async run({signal,budgetMilliseconds=60000,tileBudgetMilliseconds=5000,checkpointEveryPages=8,controlOperationMilliseconds=5000,maximumTiles=startupLimits06.tiles,resume=false,priorityAnchor=null,persistAtEnd=true}={}){
   requireWorld(!this.closed&&!this.running&&!this.queries.size&&!this.boundaryFailure&&Number.isFinite(budgetMilliseconds)&&budgetMilliseconds>=1&&budgetMilliseconds<=3600000&&Number.isFinite(tileBudgetMilliseconds)&&tileBudgetMilliseconds>=1&&tileBudgetMilliseconds<=10000&&Number.isFinite(controlOperationMilliseconds)&&controlOperationMilliseconds>=1&&controlOperationMilliseconds<=10000&&Number.isInteger(checkpointEveryPages)&&checkpointEveryPages>=1&&checkpointEveryPages<=32,'one bounded startup preparation');signalAborted(signal);this.controlMilliseconds=controlOperationMilliseconds;
+  requireWorld(typeof resume==='boolean'&&typeof persistAtEnd==='boolean'&&Number.isInteger(maximumTiles)&&maximumTiles>=1&&maximumTiles<=startupLimits06.tiles,'bounded startup continuation work');if(priorityAnchor!==null)priorityAnchor=vector(priorityAnchor);
   const controller=new AbortController();this.controller=controller;const abort=()=>controller.abort();if(signal)EventTarget.prototype.addEventListener.call(signal,'abort',abort,{once:true});if(signalAborted(signal))abort();
   const deadline=performance.now()+budgetMilliseconds,timer=setTimeout(()=>controller.abort(),budgetMilliseconds);let finish;const active={done:new Promise(r=>finish=r)};this.running=active;this.terminal='not-ready';this.checkpointError=null;
-  for(const r of this.records.values())if(r.eligible){r.status='pending';r.reason=null;r.artifactDigest=null;r.geometryCoverage='unverified';r.geometryUnknownCount=null;r.geometryMissingRegions=[];}
+  if(!resume)for(const r of this.records.values())if(r.eligible){r.status='pending';r.reason=null;r.artifactDigest=null;r.geometryCoverage='unverified';r.geometryUnknownCount=null;r.geometryMissingRegions=[];}
   const stopped=()=>this.closed||controller.signal.aborted||performance.now()>=deadline||!!this.boundaryFailure;
+  let attemptedTiles=0;
+  const remaining=()=>[...this.records.values()].some(r=>r.eligible&&r.status==='pending');
+  // Prioritise the initial surroundings, then visit every declared tile without
+  // requiring player travel. Preserve page locality and deterministic ties.
+  const distance=t=>priorityAnchor===null?0:Math.hypot(...priorityAnchor.map((v,i)=>Math.max(t.bounds.min[i]-v,0,v-t.bounds.max[i])));
+  const pages=this.catalogue.pages.map((page,index)=>({page,index,distance:Math.min(...page.tiles.map(distance))})).sort((a,b)=>a.distance-b.distance||a.index-b.index).map(({page})=>page);
   try{
    this.#emit(this.catalogue.discovery.sealed?'checking-cache':'discovering-resources');await this.#restore({deadline});
    let pagesSinceCheckpoint=0;
-   for(const descriptor of this.catalogue.pages){
-    if(stopped())break;let page,store;
+   for(const descriptor of pages){
+    if(stopped()||attemptedTiles>=maximumTiles)break;if(resume&&descriptor.tiles.every(t=>!t.eligible||this.records.get(key(descriptor.pageId,t.tileId)).status!=='pending'))continue;let page,store;
     try{page=await this.#page(descriptor,{deadline});if(stopped())break;store=await this.#store(descriptor.pageId,{deadline});}catch(error){for(const t of descriptor.tiles){const r=this.records.get(key(descriptor.pageId,t.tileId));if(r.eligible){r.status='failed';r.reason='page-unavailable: '+reason(error);}}this.#emit();continue;}
-    for(const t of descriptor.tiles){
-     if(stopped())break;const record=this.records.get(key(descriptor.pageId,t.tileId));if(!record.eligible)continue;const plan=page.inventory.tilePlans.find(p=>p.tileId===t.tileId);
+    for(const t of [...descriptor.tiles].sort((a,b)=>distance(a)-distance(b))){
+     if(stopped()||attemptedTiles>=maximumTiles)break;const record=this.records.get(key(descriptor.pageId,t.tileId));if(!record.eligible||resume&&record.status!=='pending')continue;attemptedTiles++;const plan=page.inventory.tilePlans.find(p=>p.tileId===t.tileId);
      try{
       this.#emit('checking-cache');const expected=this.artifacts.get(plan.planDigest);
       if(expected){const cached=await this.#control('cache-load',ctx=>store.load(plan,{tileDigest:expected,...ctx}),{deadline});if(stopped())break;if(cached.tile){this.#geometry(record,cached.tile);record.status='cached';record.artifactDigest=expected;this.stats.cacheHits++;this.#emit('verifying-cache');continue;}}
@@ -93,14 +100,16 @@ export class StartupAcousticCoordinator06 {
    }
    // A trusted expected artifact is a derivation binding, not proof the file
    // still exists. Only verified loads/builds above count toward completion.
-   if(!this.checkpointError&&!this.boundaryFailure)await this.#persist({final:true});
+   if(persistAtEnd&&!this.checkpointError&&!this.boundaryFailure)await this.#persist({final:true});
    const state=this.snapshot({includeTiles:false});
    if(stopped()){this.terminal=!this.closed&&performance.now()>=deadline?'budget-exceeded':this.closed||controller.signal.aborted?'cancelled':'partial';this.#emit(this.boundaryFailure?'control-closure-unknown':this.terminal);}
-   else if(state.eligibleComplete&&this.catalogue.discovery.sealed&&!state.failedTiles&&!state.unsupportedTiles&&!state.geometryUnknownTiles&&!state.unknownRegions.length&&!this.checkpointError){this.terminal='ready-supported-subset';this.#emit('ready');}
+    else if(remaining()&&attemptedTiles>=maximumTiles&&!this.checkpointError){this.terminal='more-work';this.#emit('building-missing-regions');}
+    else if(state.eligibleComplete&&this.catalogue.discovery.sealed&&!state.failedTiles&&!state.unsupportedTiles&&!state.geometryUnknownTiles&&!state.unknownRegions.length&&!this.checkpointError){this.terminal='ready-supported-subset';this.#emit('ready');}
    else{this.terminal='partial';this.#emit('partial-ready');}
    return this.snapshot();
   }finally{clearTimeout(timer);if(signal)EventTarget.prototype.removeEventListener.call(signal,'abort',abort);if(this.running===active)this.running=null;this.controller=null;finish();}
  }
+ async checkpointProgress(){requireWorld(!this.running&&!this.closed&&!this.boundaryFailure,'idle joined startup checkpoint');return this.#persist({final:true});}
  continuePartially(){requireWorld(!this.running&&!this.closed,'idle explicit continue-partially selection');this.partialSelected=true;this.terminal='partial';return this.snapshot();}
  async loadPrepared({pageId,tileId,engine={order:2,airDbPerMetre:[0,0,0]},budgetMilliseconds=5000}={}){
   requireWorld(!this.closed&&!this.running&&!this.queries.size&&!this.boundaryFailure&&Number.isFinite(budgetMilliseconds)&&budgetMilliseconds>=1&&budgetMilliseconds<=10000,'one idle bounded prepared runtime cache query');identifier(pageId);identifier(tileId);

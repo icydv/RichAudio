@@ -26,7 +26,7 @@ $truncated='{"Schema":1,"Fingerprint":"bound","Value":'
 [IO.File]::WriteAllText($broken,$truncated)
 Assert ($null -eq (Read-CatalogCacheJson $private $broken -ExpectedFingerprint 'bound')) 'Truncated cache must return missing'
 Assert (![IO.File]::Exists($broken)) 'Corrupt cache must leave its original lookup path'
-$quarantine=@(Get-ChildItem -LiteralPath (Split-Path $broken -Parent) -File -Filter 'broken.json.invalid-*.json')
+$quarantine=@(Get-ChildItem -LiteralPath (Split-Path $broken -Parent) -File -Filter '.invalid-*.json')
 Assert ($quarantine.Count -eq 1 -and [IO.File]::ReadAllText($quarantine[0].FullName) -eq $truncated) 'Quarantine must preserve corrupt bytes beside the cache'
 [void](Write-CatalogAtomicJson $private $broken ([ordered]@{Schema=1;Fingerprint='bound';Value='rebuilt'}))
 Assert ((Read-CatalogCacheJson $private $broken -ExpectedFingerprint 'bound').Value -eq 'rebuilt') 'A quarantined cache must be rebuildable'

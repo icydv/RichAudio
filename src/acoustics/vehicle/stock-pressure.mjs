@@ -17,10 +17,10 @@ export function stockExteriorPressureGains(sourceIds) {
     throw Error('distinct stock engine/exhaust source identities required');
   const roles = new Map();
   for (const id of sourceIds) {
-    const match = typeof id === 'string' && /^stock:([a-zA-Z0-9_:-]{1,64}):(engine|exhaust)$/.exec(id);
+    const match = typeof id === 'string' && /^stock:([a-zA-Z0-9_:-]{1,64}):(engine|exhaust|aero)$/.exec(id);
     if (!match) throw Error('explicit stock role required for pressure calibration');
     const [, model, role] = match;
-    const present = roles.get(model) ?? new Set(); present.add(role); roles.set(model, present);
+    const present = roles.get(model) ?? new Set(); if(role!=='aero')present.add(role); roles.set(model, present);
   }
   if ([...roles.values()].some(present => present.size !== 2))
     throw Error('paired engine/exhaust required for accepted exterior balance');

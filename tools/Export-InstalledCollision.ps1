@@ -42,7 +42,11 @@ if(!(Test-Path -LiteralPath $netstandard)){$netstandard=Join-Path ([Runtime.Inte
 if(!(Test-Path -LiteralPath $netstandard)){throw '.NET Framework netstandard facade is required for the existing parser.'}
 $references=@((Join-Path $cw 'CodeWalker.Core.dll'),(Join-Path $cw 'SharpDX.dll'),(Join-Path $cw 'SharpDX.Mathematics.dll'),'System.Web.Extensions.dll',$netstandard)
 Add-Type -Path (Join-Path $repo 'src\acoustics\world\CodeWalkerCollisionAdapter.cs') -ReferencedAssemblies $references
-if ($LoadKeys) {[CodeWalker.GameFiles.GTA5Keys]::LoadFromPath($game,$null)}
+if ($LoadKeys) {
+    $initHelper=Join-Path $repo 'src\acoustics\startup\CodeWalkerInitialization01.psm1'
+    Import-Module (New-Module -Name RichAudioCodeWalkerInitialization01 -ScriptBlock ([ScriptBlock]::Create([IO.File]::ReadAllText($initHelper)))) -Force
+    $initialization=Initialize-InstalledCodeWalker01 -GameRoot $game
+}
 function ByteHash([byte[]]$Bytes) {$h=[Security.Cryptography.SHA256]::Create();try {([BitConverter]::ToString($h.ComputeHash($Bytes))).Replace('-','').ToLowerInvariant()}finally{$h.Dispose()}}
 function FileHash([string]$Path){$stream=[IO.File]::OpenRead($Path);$h=[Security.Cryptography.SHA256]::Create();try{([BitConverter]::ToString($h.ComputeHash($stream))).Replace('-','').ToLowerInvariant()}finally{$h.Dispose();$stream.Dispose()}}
 function WritePrivateJson([string]$Path,$Value){$temp=$Path+'.pending';[IO.File]::WriteAllText($temp,($Value|ConvertTo-Json -Depth 16 -Compress),(New-Object Text.UTF8Encoding($false)));if([IO.File]::Exists($Path)){[IO.File]::Replace($temp,$Path,[NullString]::Value)}else{[IO.File]::Move($temp,$Path)}}

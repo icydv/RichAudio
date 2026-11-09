@@ -1,7 +1,8 @@
 # One-time interactive private installer. Does not launch GTA or open audio.
 [CmdletBinding()]
 param([ValidateSet('Install','Uninstall','Validate')][string]$Mode='Validate',[string]$RphPackage='',
- [switch]$Upgrade,[string]$PreviousReviewFile='',[switch]$AcceptExperimentalAdditive,[switch]$FunctionsOnly)
+ [switch]$Upgrade,[string]$PreviousReviewFile='',[switch]$AcceptExperimentalAdditive,[switch]$FunctionsOnly,
+ [string]$CodeWalkerRoot='',[string]$PowerShellPath='')
 $ErrorActionPreference='Stop'
 $candidate=[IO.Path]::GetFullPath($PSScriptRoot)
 function Read-Json([string]$p){Get-Content -LiteralPath $p -Raw|ConvertFrom-Json}
@@ -14,7 +15,8 @@ function Safe-Path([string]$root,[string]$relative){
 }
 function Write-Json([string]$file,$value){$parent=Split-Path -Parent $file;[IO.Directory]::CreateDirectory($parent)|Out-Null;$s=$value|ConvertTo-Json -Depth 20;[IO.File]::WriteAllText($file,$s,(New-Object Text.UTF8Encoding($false)))}
 function Invoke-InstallTransaction([string]$gameRoot,[string]$installRoot,$plans,$rollback,[string]$receiptPath,$receipt,
- [scriptblock]$copyPayload={param($from,$to) Copy-Item -LiteralPath $from -Destination $to -Force}){
+ [scriptblock]$copyPayload={param($from,$to) Copy-Item -LiteralPath $from -Destination $to -Force},
+ [scriptblock]$assertRollbackAllowed={},[scriptblock]$targetChanged={param($path) $true}){
  $written=@()
  try{
   foreach($p in $plans){$to=Safe-Path $gameRoot $p.relative;[IO.Directory]::CreateDirectory((Split-Path -Parent $to))|Out-Null;$written+=$p.relative;& $copyPayload $p.source $to}
@@ -22,7 +24,8 @@ function Invoke-InstallTransaction([string]$gameRoot,[string]$installRoot,$plans
  }catch{
   $cause=$_;$receipt.complete=$false;$failures=@()
   foreach($relative in $written){
-   try{$f=@($rollback|Where-Object relative -EQ $relative);if($f.Count -ne 1){throw 'Ambiguous rollback target'};$f=$f[0];$to=Safe-Path $gameRoot $relative
+   try{$to=Safe-Path $gameRoot $relative;if(!(& $targetChanged $to)){continue};& $assertRollbackAllowed
+    $f=@($rollback|Where-Object relative -EQ $relative);if($f.Count -ne 1){throw 'Ambiguous rollback target'};$f=$f[0]
     if($f.backup){$backup=Safe-Path $installRoot $f.backup;if((Digest $backup) -ne $f.sha256){throw 'Rollback backup changed'};Copy-Item -LiteralPath $backup -Destination $to -Force}
     elseif(Test-Path -LiteralPath $to){Remove-Item -LiteralPath $to}
    }catch{$failures+=('restore '+$relative)}
@@ -34,7 +37,7 @@ function Invoke-InstallTransaction([string]$gameRoot,[string]$installRoot,$plans
    elseif(Test-Path -LiteralPath $to){throw 'New target remains'}
   }catch{$failures+=('verify '+$f.relative)}}
   if($failures.Count){try{Write-Json $receiptPath $receipt}catch{};throw ('Installation failed; rollback incomplete. Receipt and backups retained for review: '+($failures -join ', '))}
-  Remove-Item -LiteralPath $receiptPath
+  if(Test-Path -LiteralPath $receiptPath){Remove-Item -LiteralPath $receiptPath}
   throw $cause
  }
 }
@@ -69,8 +72,15 @@ function Get-ReviewedPrevious([string]$gameRoot,[string]$cacheParent,$review){
  }
  return [pscustomobject]@{root=$oldRoot;receipt=$r;receiptFile=$oldReceipt;review=$review}
 }
-if($FunctionsOnly){return}
+function Import-StreetWorldFunctions01 {
+ $helper=Join-Path $candidate 'tools/playable/WorldPreparation01.psm1'
+ if(!(Test-Path -LiteralPath $helper)){$helper=Join-Path $candidate 'WorldPreparation01.psm1'}
+ if(!(Test-Path -LiteralPath $helper)){throw 'Bound STREET-01 preparation helper missing'}
+ Import-Module $helper -Force -Global
+}
+if($FunctionsOnly){$helper=Join-Path $candidate 'WorldPreparation01.psm1';if(Test-Path -LiteralPath $helper){Import-StreetWorldFunctions01};return}
 $manifestFile=Join-Path $candidate 'playable.json';$m=Read-Json $manifestFile;$manifestSha=Digest $manifestFile
+$street=$m.featureProfile-ceq'STREET-01'
 if($m.schema -ne 1 -or $m.gameVersion -ne '1.0.1158.16' -or $m.rphVersion -ne '1.132.1428.17748' -or $m.gameSha256 -ne 'b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea'){throw 'Unsupported prepared build'}
 $game=[IO.Path]::GetDirectoryName($m.gameExecutable);$gameExe=Safe-Path $game 'GTA5_Enhanced.exe'
 $install=[IO.Path]::GetFullPath((Join-Path $env:LOCALAPPDATA ('RichAudio\Playable01-'+$manifestSha.Substring(0,12))))
@@ -83,6 +93,7 @@ if($Mode -eq 'Uninstall'){
  $r.uninstalled=$true;Write-Json $receiptFile $r;Write-Output 'RichAudio removed. Original game/loader files restored. Private cache retained.';exit
 }
 foreach($b in $m.bindings){$file=Safe-Path $candidate $b.file;if((Digest $file) -ne $b.sha256){throw ('Prepared payload changed: '+$b.file)}}
+if($street){if(@($m.bindings|Where-Object file -CEQ 'tools/playable/WorldPreparation01.psm1').Count-ne1){throw 'Bound STREET-01 helper required'};Import-StreetWorldFunctions01;$worldPreparation=Assert-StreetWorldManifest01 $m}
 if((Digest $gameExe) -ne $m.gameSha256 -or [Diagnostics.FileVersionInfo]::GetVersionInfo($gameExe).FileVersion -ne $m.gameVersion){throw 'Installed GTA build differs; normal GTA audio remains untouched'}
 $prerequisite=Read-Json (Join-Path $candidate 'rph-prerequisite.json')
 $previous=$null
@@ -93,17 +104,29 @@ foreach($b in $prerequisite.files){$p=Safe-Path $game $b.file;if((Test-Path -Lit
  $exception=@();if($previous){$exception=@($previous.review.preserveDependencies|Where-Object relative -EQ $b.file)}
  if(@($exception).Count -eq 1){$preserved+=@{relative=$b.file;sha256=(Digest $p)};continue};$missing+=$b
 }
-if($Mode -eq 'Validate'){[ordered]@{schema=1;manifestSha256=$manifestSha;payloadVerified=$true;gameVerified=$true;rphFilesNeeded=$missing.Count;preservedDependencies=$preserved;upgrade=[bool]$Upgrade;installRoot=$install;nativeReplacement=$false;endpointOpened=$false;installed=$false}|ConvertTo-Json -Depth 10;exit}
+if($street){
+ if($CodeWalkerRoot){$null=Get-StreetCodeWalkerDependency01 $worldPreparation $CodeWalkerRoot}
+ if(!$PowerShellPath){$pwsh=Get-Command pwsh.exe -ErrorAction SilentlyContinue;if($pwsh){$PowerShellPath=$pwsh.Source}}
+ if($PowerShellPath){$null=Get-StreetPowerShellDependency01 $PowerShellPath}
+}
+if($Mode -eq 'Validate'){[ordered]@{schema=1;manifestSha256=$manifestSha;payloadVerified=$true;gameVerified=$true;rphFilesNeeded=$missing.Count;preservedDependencies=$preserved;upgrade=[bool]$Upgrade;installRoot=$install;featureProfile=$m.featureProfile;worldPreparationAutomatic=$street;codeWalkerFolderNeeded=($street-and!$CodeWalkerRoot);powerShell7Needed=($street-and!$PowerShellPath);nativeReplacement=$false;endpointOpened=$false;installed=$false}|ConvertTo-Json -Depth 10;exit}
 if(Get-Process -Name GTA5_Enhanced,RAGEPluginHook -ErrorAction SilentlyContinue){throw 'Exit GTA and RAGE Plugin Hook first'}
 if(Test-Path -LiteralPath $receiptFile){throw 'This candidate already has an installation receipt. Uninstall it before reinstalling'}
 if(!$AcceptExperimentalAdditive){Add-Type -AssemblyName System.Windows.Forms
- $answer=[Windows.Forms.MessageBox]::Show('Install the RichAudio supervised validation candidate? This enables EXPERIMENTAL ADDITIVE playback: GTA engine audio remains audible. Native replacement and complete city geometry are not established. No game is launched by setup.','RichAudio one-time setup','YesNo','Warning')
+ $message=if($street){'Install the RichAudio STREET-01 development candidate with automatic private world preparation? Audio remains disabled with GTA stock fallback until explicitly selected in F10. Native replacement and complete installed coverage are not established. Setup launches no game.'}else{'Install the RichAudio supervised validation candidate? This enables EXPERIMENTAL ADDITIVE playback: GTA engine audio remains audible. Native replacement and complete city geometry are not established. No game is launched by setup.'}
+ $answer=[Windows.Forms.MessageBox]::Show($message,'RichAudio one-time setup','YesNo','Warning')
  if($answer -ne 'Yes'){Write-Output 'Cancelled; nothing installed.';exit}}
 if($missing.Count -gt 0){
  if(!$RphPackage){Add-Type -AssemblyName System.Windows.Forms;$dialog=New-Object Windows.Forms.FolderBrowserDialog;$dialog.Description='Select your authentic extracted RPH 1.132.1428.17748 package (not included with RichAudio)';if($dialog.ShowDialog() -ne 'OK'){throw 'Authentic RPH prerequisite not selected'};$RphPackage=$dialog.SelectedPath}
  $RphPackage=[IO.Path]::GetFullPath($RphPackage)
  foreach($b in $prerequisite.files){$p=Safe-Path $RphPackage $b.file;if(!(Test-Path -LiteralPath $p) -or (Digest $p) -ne $b.sha256){throw 'Separately obtained RPH package does not match reviewed runtime'}}
  foreach($b in $missing){$p=Safe-Path $game $b.file;if(Test-Path -LiteralPath $p){throw ('Conflicting loader dependency, unchanged: '+$b.file)}}
+}
+if($street){
+ if(!$CodeWalkerRoot){Add-Type -AssemblyName System.Windows.Forms;$dialog=New-Object Windows.Forms.FolderBrowserDialog;$dialog.Description='Select the separately obtained unmodified CodeWalker.Core.dll and required SharpDX DLL folder (software only; not included)';if($dialog.ShowDialog()-ne'OK'){throw 'Required world preparation dependency not selected'};$CodeWalkerRoot=$dialog.SelectedPath}
+ $null=Get-StreetCodeWalkerDependency01 $worldPreparation $CodeWalkerRoot
+ if(!$PowerShellPath){Add-Type -AssemblyName System.Windows.Forms;$dialog=New-Object Windows.Forms.OpenFileDialog;$dialog.Filter='Installed PowerShell 7 host (pwsh.exe)|pwsh.exe';$dialog.Title='Locate your installed PowerShell 7 pwsh.exe';if($dialog.ShowDialog()-ne'OK'){throw 'Installed PowerShell 7 host not selected'};$PowerShellPath=$dialog.FileName}
+ $null=Get-StreetPowerShellDependency01 $PowerShellPath
 }
 # A versioned private cache is populated once. Launches verify and reuse it.
 [IO.Directory]::CreateDirectory($install)|Out-Null
@@ -112,13 +135,15 @@ Copy-Item -LiteralPath $manifestFile -Destination (Join-Path $install 'playable.
 $settings=Safe-Path $install '.local/acoustic-settings.json'
 [IO.Directory]::CreateDirectory((Split-Path -Parent $settings))|Out-Null
 if($previous -and (Test-Path -LiteralPath (Safe-Path $previous.root '.local/acoustic-settings.json'))){Copy-Item -LiteralPath (Safe-Path $previous.root '.local/acoustic-settings.json') -Destination $settings -Force}
-if(!(Test-Path -LiteralPath $settings)){Write-Json $settings ([ordered]@{schemaVersion=1;revision=1;acousticQuality='auto';acousticAcceleration='auto';richAudioEnabled=$true;outputLevel=1;earlyReflections=$true;diagnosticsOverlay=$false;integrationMode='experimental-additive';soundMapVisible=$false;menuToggleKey='F10'})}
+if(!(Test-Path -LiteralPath $settings)){Write-Json $settings ([ordered]@{schemaVersion=1;revision=1;acousticQuality='auto';acousticAcceleration='auto';richAudioEnabled=(!$street);outputLevel=1;earlyReflections=$true;diagnosticsOverlay=$false;integrationMode=$(if($street){'stock-fallback'}else{'experimental-additive'});soundMapVisible=$false;menuToggleKey='F10'})}
+if($street){$saved=Read-Json $settings;$saved.richAudioEnabled=$false;$saved.integrationMode='stock-fallback';$saved.revision=[long]$saved.revision+1;if($saved.PSObject.Properties['airflowEnabled']){$saved.airflowEnabled=$false}else{$saved|Add-Member -NotePropertyName airflowEnabled -NotePropertyValue $false};Write-Json $settings $saved}
 $pointer=Safe-Path $install '.local/install-payload/RichAudio.Playable.json';Write-Json $pointer ([ordered]@{schema=1;packageRoot=$install;manifestSha256=$manifestSha})
 $menu=Safe-Path $install '.local/install-payload/RichAudio.Menu.json';Write-Json $menu ([ordered]@{schemaVersion=1;workspaceRoot=$install;settingsPath='.local/acoustic-settings.json';toggleKey='F10';controllerEnabled=$true;soundMap=[ordered]@{enabled=$true;autoStartService=$true;openWindow=$true;sampleHz=20;port=17833;nodeExecutable=(Join-Path $install 'runtime/node.exe')}})
 $startup=Safe-Path $game 'startup.rphs';$old=if(Test-Path -LiteralPath $startup){[IO.File]::ReadAllText($startup)}else{''}
 $startupContent=Get-StartupContent $old ([bool]$Upgrade)
 $startupPayload=Safe-Path $install '.local/install-payload/startup.rphs';[IO.File]::WriteAllText($startupPayload,$startupContent.installed,(New-Object Text.UTF8Encoding($false)))
 $plans=@(@{relative='Plugins/RichAudio.dll';source=(Join-Path $install 'plugin/RichAudio.dll')},@{relative='Plugins/RichAudio.Playable.json';source=$pointer},@{relative='Plugins/RichAudio.Menu.json';source=$menu},@{relative='startup.rphs';source=$startupPayload})
+if($street){$worldConfig=New-StreetWorldWarmupConfiguration01 $m $install $game $CodeWalkerRoot $PowerShellPath;$worldPayload=Safe-Path $install '.local/install-payload/RichAudio.WorldWarmup.json';Write-Json $worldPayload $worldConfig;$plans+=@{relative='Plugins/RichAudio.WorldWarmup.json';source=$worldPayload}}
 foreach($b in $missing){$plans+=@{relative=$b.file;source=(Safe-Path $RphPackage $b.file)}}
 if($previous){$previous=Get-ReviewedPrevious $game (Join-Path $env:LOCALAPPDATA 'RichAudio') (Read-Json $PreviousReviewFile)}
 $files=@();$rollback=@();$index=0
