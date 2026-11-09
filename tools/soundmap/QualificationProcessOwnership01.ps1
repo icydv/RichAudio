@@ -65,7 +65,9 @@ function Get-SoundMapProfileProcesses01($Directory){
 }
 
 function Assert-SoundMapProcessLifetime01($Row,$ExpectedCreation){
- if(!$Row.CreationDate -or !$Row.ExecutablePath -or !$Row.CommandLine){throw 'SoundMap process identity is unavailable'}
+ if(!$Row.CreationDate -or !$Row.ExecutablePath -or !$Row.CommandLine){
+  throw [TimeoutException]::new("SoundMap process identity is unavailable for $($Row.Name) PID $($Row.ProcessId) (creation=$([bool]$Row.CreationDate), image=$([bool]$Row.ExecutablePath), command=$([bool]$Row.CommandLine))")
+ }
  $p=Get-Process -Id $Row.ProcessId -ErrorAction Stop
  try{
   $started=$p.StartTime.ToUniversalTime()
@@ -87,6 +89,16 @@ function Test-SoundMapArguments01($Actual,$Expected){
 }
 
 function Get-SoundMapOwnedStagingProcesses01($Directory,$Intent,$Seal,$Package,[switch]$Fixture){
+ for($attempt=0;;$attempt++){
+  try{return Read-SoundMapOwnedJobSnapshot01 $Directory $Intent $Seal $Package -Fixture:$Fixture}
+  catch [TimeoutException]{
+   if($attempt -ge 2){throw}
+   Start-Sleep -Milliseconds 200
+  }
+ }
+}
+
+function Read-SoundMapOwnedJobSnapshot01($Directory,$Intent,$Seal,$Package,[switch]$Fixture){
  Initialize-SoundMapOwnership01
  $binding=Read-SoundMapOwnershipReceipt01 $Directory 'job-ownership.json'
  $parent=Read-SoundMapOwnershipReceipt01 $Directory 'supervisor-process.json'
@@ -140,7 +152,7 @@ function Get-SoundMapOwnedStagingProcesses01($Directory,$Intent,$Seal,$Package,[
      args=[RichAudio.SoundMap.JobQuery]::Arguments($row.CommandLine)}
    }finally{$process.Dispose()}
   }
-  if($rows.Count -ne $members.Count){throw 'SoundMap job member disappeared during inspection'}
+  if($rows.Count -ne $members.Count){throw [TimeoutException]::new('SoundMap job member disappeared during inspection')}
   $worker=$rows[[int]$binding.workerId];$nodeRow=$rows[[int]$service.id];$browserRoot=$rows[[int]$browser.id]
   if($worker.path -ine $shell -or $worker.parent -ne $parent.id -or
      $nodeRow.path -ine $node -or $nodeRow.parent -ne $worker.id -or $browserRoot.parent -ne $worker.id){
@@ -191,7 +203,7 @@ function Get-SoundMapOwnedStagingProcesses01($Directory,$Intent,$Seal,$Package,[
    $browserIds+=$row.id
   }
   if((($members | Sort-Object) -join ',') -cne (($job.Members() | Sort-Object) -join ',') -or $supervisor.HasExited -or $controller.HasExited){
-   throw 'SoundMap job changed during inspection'
+   throw [TimeoutException]::new('SoundMap job changed during inspection')
   }
   [pscustomobject]@{ownerId=$Intent.ownerId;supervisorId=$parent.id;workerId=$worker.id;serviceId=$nodeRow.id;
    browserRootId=$browserRoot.id;browserIds=@($browserIds | Sort-Object);consoleIds=@($consoleParents.Values | Sort-Object);
