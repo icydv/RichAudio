@@ -56,7 +56,7 @@ export function prepareStockGrain10(asset,{regions=null,texture=true,maximumByte
  if(requiredBytes>maximumBytes)throw new SourcePreparationBudgetError10('bytes',maximumBytes);
  let timeline=null;
  if(textureEnabled){const mapping={asset,intervals,pair:StockGrainVoice.prototype.pair},pair={a:0,b:0,w:0,target:0};
-  timeline=new Float64Array(asset.frames+1);for(let i=0;i<asset.frames;i++)timeline[i+1]=timeline[i]+intervalRate(asset.sampleRate,intervals,mapping.pair((i+.5)/(asset.frames-1),pair))/asset.sampleRate;}
+  timeline=new Float64Array(asset.frames+1);for(let i=0;i<asset.frames;i++)timeline[i+1]=timeline[i]+intervalRate(asset.sampleRate,intervals,mapping.pair((i+.5)/(asset.frames-1),pair,true))/asset.sampleRate;}
  const token=Object.freeze({kind:'RichAudioStockGrainPreparation10',bytes:requiredBytes,textureEnabled,sourceFramesAdvanced:0});
  preparations10.set(token,{binding:binding10(asset,regions),texture:Boolean(texture),samples,intervals:frozenCopy10(intervals),features:frozenCopy10(features),timeline,
   snapshot:Buffer.from(bytes10(samples)),intervalSignature,featureSignature});
@@ -165,7 +165,7 @@ export class StockGrainVoice {
     this.#preparation=prepared??null;
     if(this.textureEnabled)this.#timeline();
   }
-  pair(u,result={a:0,b:0,w:0,target:0}){
+  pair(u,result={a:0,b:0,w:0,target:0},preparedScratch=false){
     const target=u*(this.asset.frames-1),r=this.intervals;let low=0,high=r.length-1;
     result.target=target;
     if(target<=r[0].centre){
@@ -175,8 +175,15 @@ export class StockGrainVoice {
       result.a=result.b=r.length-1;
       result.w=0;
     }else{
-      while(low<high){const mid=(low+high)>>1;if(r[mid].centre<target)low=mid+1;else high=mid;}
-      const b=low,a=Math.max(0,b-1);
+      // The smoothed playback address normally stays in its previous
+      // bracket. Check the same lower-bound inequalities as the search
+      // before reusing it, including exact centre ties.
+      let b=preparedScratch?result.b:0;
+      if(b<=0||b>=r.length||!(target>r[b-1].centre&&target<=r[b].centre)){
+        while(low<high){const mid=(low+high)>>1;if(r[mid].centre<target)low=mid+1;else high=mid;}
+        b=low;
+      }
+      const a=Math.max(0,b-1);
       result.a=a;result.b=b;
       result.w=a===b?0:Math.max(0,Math.min(1,(target-r[a].centre)/(r[b].centre-r[a].centre)));
     }
@@ -257,7 +264,7 @@ export class StockGrainVoice {
   }
   // Metadata intervals define a source-time coordinate, not independent loops.
   // Within a contiguous run this reads original chronology without any blend.
-  rateAt(u){const p=this.pair(u,this.#ratePair);return intervalRate(this.asset.sampleRate,this.intervals,p);}
+  rateAt(u){const p=this.pair(u,this.#ratePair,this.#preparation!==null);return intervalRate(this.asset.sampleRate,this.intervals,p);}
   advanceHead(head,rate){
     const i=Math.floor(head.q),r=this.intervals[i],position=r.start+(head.q-i)*r.length,timeline=this.#timeline();
     let k=Math.floor(position);
@@ -397,6 +404,7 @@ export class StockGrainVoice {
     if(reference.state===null)reference.state=.5;
     if(!reference.head)reference.head=reference.sourceHead(reference.pair(reference.state));
     this.state=u;const plan=this.pool(this.pair(u));
+    if(this.#preparation)this.#indexPlaybackPlan(plan);
     this.head=this.matchHead({voice:reference,q:reference.head.q},plan);this.join=null;
     // Only the previously inaudible reader is registered. No reference reset,
     // no engine/exhaust phase lock, and no added oscillator or pitch jitter.
@@ -452,7 +460,7 @@ export class StockGrainVoice {
     // Once a single-span reader has established its initial phase, its
     // smoothed address cannot select another interval or alter interpolation.
     const p=!starting&&this.intervals.length===1&&this.pair===StockGrainVoice.prototype.pair?
-      this.#singlePair:this.pair(this.state,this.#nextPair);
+      this.#singlePair:this.pair(this.state,this.#nextPair,this.#preparation!==null);
     const a=this.intervals[p.a],b=this.intervals[p.b];
     if(starting){
       // Keep each recording's own source-time phase. No imposed common

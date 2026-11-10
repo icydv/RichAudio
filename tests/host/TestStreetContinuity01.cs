@@ -127,7 +127,10 @@ internal static class TestStreetContinuity01 {
   });
   Test("a real rejected-evidence gap over 250 ms retains pool ownership but keeps the original generation boundary",delegate{
    vehicle.EngineRevolutionsRatio=Double.NaN;Capture(runtime,101);
-   Thread.Sleep(260);Capture(runtime,101);vehicle.EngineRevolutionsRatio=.6;Capture(runtime,101);var recovered=Only(runtime);
+   int count=runtime.Frames.Count;
+   Thread.Sleep(260);Capture(runtime,101);
+   Check(runtime.Frames.Count==count,"camera gap publishes no frame before an independent observation");
+   vehicle.EngineRevolutionsRatio=.6;Capture(runtime,101);var recovered=Only(runtime);
    Check(recovered.Id==initial.Id&&recovered.Context==initial.Context,"long operating-state gap does not manufacture a new pool acquisition");
    Check(recovered.Generation==initial.Generation+1,"original gap boundary remains required after unrefreshed invalid evidence");
    initial=recovered;
@@ -159,11 +162,15 @@ internal static class TestStreetContinuity01 {
    Rage.Native.NativeFunction.InteriorReady=true;
    var sampler=typeof(CameraSampler).GetMethod("ObserveInterior",BindingFlags.NonPublic|BindingFlags.Static,null,new[]{typeof(ListenerState)},null);
    sampler.Invoke(null,new object[]{new ListenerState{Position=new[]{104d,0d,1d},ObservationTicks=Stopwatch.GetTimestamp()}});
+   // The codec and native binder are exercised by separate fixture episodes.
+   // Their setup time is not a continuous camera interval.
+   var tracker=(CameraListenerTracker)typeof(PlayableEntry).GetField("listenerTracker",BindingFlags.NonPublic|BindingFlags.Static).GetValue(null);
+   tracker.Invalidate();
    int queries=Rage.Native.NativeFunction.InteriorQueries,reads=Rage.Native.NativeFunction.InteriorMetadataReads,beforeCaptureCount=runtime.Frames.Count;
    Capture(runtime,104);
    var frame=runtime.Frames[runtime.Frames.Count-1];
    var decoded=CameraWire(runtime);
-   Check(decoded.CameraInterior01!=null&&decoded.CameraInterior01.Proxy==71&&decoded.CameraInterior01.Archetype==0x12345678u&&
+   Check(runtime.Frames.Count==beforeCaptureCount+1&&decoded.CameraInterior01!=null&&decoded.CameraInterior01.Proxy==71&&decoded.CameraInterior01.Archetype==0x12345678u&&
     decoded.CameraInterior01.Origin[0]==25,"camera proxy, archetype and origin survive the actual wire"+
     " | frames added="+(runtime.Frames.Count-beforeCaptureCount)+" proxy queries="+(Rage.Native.NativeFunction.InteriorQueries-queries)+
     " metadata reads="+(Rage.Native.NativeFunction.InteriorMetadataReads-reads)+" raw proxy="+(frame.CameraInterior01==null?"absent":frame.CameraInterior01.Proxy.ToString())+
