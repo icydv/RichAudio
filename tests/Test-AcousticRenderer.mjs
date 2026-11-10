@@ -61,6 +61,19 @@ function output(f, duration = 0.5, options = {}) {
 }
 const energy = (x) => x.reduce((s, v) => s + v * v, 0);
 
+test("a finite back-face bounce never enters the visibility batch", () => {
+  const source = [-3, 0, 1], listener = [3, 0, 1];
+  const wall = patch("wall", [0, 6, 2], [0, 1, 0], [1, 0, 0], [8, 2]);
+  const { scene } = setup({ surfaces: [wall], position: source, listenerPosition: listener });
+  const stats = { queries: 0, surfaceTests: 0 };
+  assert.deepEqual(pathGeometry(scene, source, listener, scene.tile.surfaces, stats), { status: "wrong-reflecting-side" });
+  assert.deepEqual(stats, { queries: 0, surfaceTests: 0 });
+  const direct = pathGeometry(scene, source, listener, [], stats);
+  assert.equal(direct.status, "clear");
+  assert.equal(direct.distance, 6);
+  assert.equal(stats.queries, 1);
+});
+
 test("Surface expiry and unknown co-located regions cannot bypass visibility", () => {
   const i = sceneInput();
   i.validUntil = 10000;

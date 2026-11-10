@@ -71,12 +71,28 @@ test('adding or reordering sibling components cannot change an existing componen
  single.renderInto(x);mixed.renderInto(y);assert.deepEqual(x[componentSourceId(a)],y[componentSourceId(a)]);
 });
 test('original horn and tyre source history is deterministic across block boundaries and does not reset on repeated state',()=>{
- for(const component of ['horn','tyre-rolling','tyre-slip']){
-  const a=new OriginalComponentSource(component,{seed:123}),b=new OriginalComponentSource(component,{seed:123}),s=componentFixtureState(component,0);
+ for(const component of ['horn','tyre-rolling','tyre-slip','transmission','brake']){
+  const a=new OriginalComponentSource(component,{seed:123}),b=new OriginalComponentSource(component,{seed:123}),s=componentFixtureState(component,48000);
   a.setState(s);b.setState(s);const expected=output(a,4096),actual=new Float32Array(4096);
   for(let at=0;at<actual.length;at+=128){const block=new Float32Array(128);b.setState(s);b.renderInto(block);actual.set(block,at);}
   assert.deepEqual(actual,expected,component);assert.equal(b.frame,4096);assert.ok(expected.some(x=>x!==0));assert.ok(expected.every(x=>Math.abs(x)<=componentLimits.dryPeak));
  }
+});
+test('gear mesh follows shaft speed and tooth count; unloaded brakes and disengaged gears generate no sound',()=>{
+ const make=(id,state,frames=24000)=>{const source=new OriginalComponentSource(id,{seed:11});source.setState(state);return output(source,frames);};
+ const gear={engaged:true,shaftRps:20,pinionTeeth:25,meshLoadNm:100};
+ const mesh=make('transmission',gear);
+ const brake={rotorSlidingSpeedMps:18,padNormalForceN:4000,frictionCoefficient:.4,modeHz:2800};
+ const powerAt=(signal,hz)=>{let real=0,imaginary=0;for(let i=12000;i<signal.length;i++){const phase=2*Math.PI*hz*i/48000;real+=signal[i]*Math.cos(phase);imaginary+=signal[i]*Math.sin(phase);}return real**2+imaginary**2;};
+ assert.ok(powerAt(mesh,500)>100*powerAt(mesh,750));
+ const faster=make('transmission',{...gear,shaftRps:30});
+ assert.ok(powerAt(faster,750)>100*powerAt(faster,500));
+ assert.ok(make('transmission',{...gear,engaged:false}).every(x=>x===0));
+ assert.ok(make('brake',{...brake,padNormalForceN:0}).every(x=>x===0));
+ const braking=make('brake',brake);
+ assert.ok(powerAt(braking,2800)>100*powerAt(braking,2100));
+ assert.throws(()=>make('transmission',{gear:2}));
+ assert.throws(()=>make('brake',{vehicleSpeedMps:18}));
 });
 test('validated slip and contact load are required; high speed alone generates no squeal',()=>{
  const steady={...contact(),longitudinalSpeedMps:40,wheelSurfaceSpeedMps:40,lateralSpeedMps:0};

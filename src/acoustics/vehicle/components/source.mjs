@@ -3,7 +3,8 @@
 import {componentLimits,requireComponent,freezeComponent} from './contracts.mjs';
 const FS=48000,TAU=2*Math.PI;
 const number=(x,lo,hi)=>Number.isFinite(x)&&x>=lo&&x<=hi;
-export const implementedOriginalComponents=Object.freeze(['horn','tyre-rolling','tyre-slip','mechanical-clunk']);
+export const implementedOriginalComponents=Object.freeze(['horn','tyre-rolling','tyre-slip','mechanical-clunk','transmission','brake']);
+const mechanicalEnvelope=1-Math.exp(-1/(FS*.012));
 const surfaces=Object.freeze({asphalt:{low:.18,upper:.52,rolling:.7},gravel:{low:.08,upper:.72,rolling:1},
  grass:{low:.03,upper:.24,rolling:.5},sand:{low:.035,upper:.38,rolling:.65},wet:{low:.12,upper:.68,rolling:.8},puddle:{low:.025,upper:.3,rolling:.9}});
 export function validateOriginalComponentState(component,input) {
@@ -15,6 +16,18 @@ export function validateOriginalComponentState(component,input) {
  if(component==='mechanical-clunk') {
   requireComponent(Object.keys(input).every(k=>k==='event'),'Mechanical state accepts explicit event only');
   return freezeComponent({event:input.event?{...input.event}:null});
+ }
+ if(component==='transmission'){
+  requireComponent(Object.keys(input).length===4&&typeof input.engaged==='boolean'&&number(input.shaftRps,0,200)&&
+   Number.isInteger(input.pinionTeeth)&&number(input.pinionTeeth,8,60)&&number(input.meshLoadNm,0,2000),
+   'Explicit gear engagement, shaft speed, pinion tooth count and mesh load required');
+  return freezeComponent({...input});
+ }
+ if(component==='brake'){
+  requireComponent(Object.keys(input).length===4&&number(input.rotorSlidingSpeedMps,0,100)&&number(input.padNormalForceN,0,200000)&&
+   number(input.frictionCoefficient,0,1.5)&&number(input.modeHz,200,8000),
+   'Explicit rotor sliding speed, pad load, friction and structural mode required');
+  return freezeComponent({...input});
  }
  const keys=['longitudinalSpeedMps','wheelSurfaceSpeedMps','lateralSpeedMps','normalForceN','frictionCoefficient','wheelRadiusM','surface'];
  requireComponent(Object.keys(input).length===keys.length&&keys.every(k=>Object.hasOwn(input,k))&&
@@ -64,6 +77,17 @@ export class OriginalComponentSource {
   let slip=0,rotation=0,amount=0,material=null;
   if(qualified&&kind.startsWith('tyre-')) {const model=tyreContactModel(s);slip=model.slipSpeedMps;rotation=Math.abs(s.wheelSurfaceSpeedMps)/(TAU*s.wheelRadiusM);
    amount=s.normalForceN===0?0:kind==='tyre-slip'?Math.min(1,model.frictionPowerProxyWatts/40000):Math.min(1,Math.abs(s.longitudinalSpeedMps)/30);material=surfaces[s.surface];}
+  let meshHz=0,meshHarmonic=0,modeHz=0;
+  if(qualified&&kind==='transmission'){
+   rotation=s.shaftRps;
+   meshHz=s.shaftRps*s.pinionTeeth;
+   meshHarmonic=Math.max(0,Math.min(1,(FS*.5-2*meshHz)/2000));
+   amount=s.engaged?Math.min(1,s.meshLoadNm/120)*Math.min(1,meshHz/150):0;
+  }else if(qualified&&kind==='brake'){
+   modeHz=s.modeHz;
+   const frictionWorkRate=s.rotorSlidingSpeedMps*s.padNormalForceN*s.frictionCoefficient;
+   amount=Math.min(1,Math.sqrt(frictionWorkRate/24000));
+  }
   for(let i=0;i<frames;i++) {
    let sample=0;const frame=this.frame+i;
    if(kind==='horn') {const target=qualified&&s.active?s.level:0;this.envelope+=(1-Math.exp(-1/(FS*(target>this.envelope ? .004 : .015))))*(target-this.envelope);
@@ -75,6 +99,21 @@ export class OriginalComponentSource {
     this.envelope+=(1-Math.exp(-1/(FS*.012)))*((qualified?amount:0)-this.envelope);
     if(qualified)sample=kind==='tyre-slip'?peak*this.envelope*(.65*Math.sin(TAU*this.secondaryPhase)+.175*(this.upper-this.low)):
      peak*this.envelope*material.rolling*(.65*this.low+.25*this.upper+.1*Math.sin(TAU*this.phase*7));
+   } else if(kind==='transmission'){
+    this.envelope+=mechanicalEnvelope*(amount-this.envelope);
+    this.phase=(this.phase+meshHz/FS)%1;
+    this.secondaryPhase=(this.secondaryPhase+rotation/FS)%1;
+    // Tooth engagement sets the carrier. Shaft rotation modulates its load.
+    // Fade the second harmonic before Nyquist, leaving the carrier continuous.
+    if(qualified&&meshHz>0)sample=peak*this.envelope*(.85+.15*Math.sin(TAU*this.secondaryPhase))*
+     (.78*Math.sin(TAU*this.phase)+.22*meshHarmonic*Math.sin(TAU*this.phase*2));
+   } else if(kind==='brake'){
+    const noise=this.noise();
+    this.low+=.08*(noise-this.low);
+    this.upper+=.34*(noise-this.upper);
+    this.envelope+=mechanicalEnvelope*(amount-this.envelope);
+    this.phase=(this.phase+modeHz/FS)%1;
+    if(qualified)sample=peak*this.envelope*(.33*(this.upper-this.low)+.3*Math.sin(TAU*this.phase));
    } else {
     for(const v of this.voices)if(v.active){const age=frame-v.start;if(age>=4800){v.active=false;continue;}if(age<0)continue;
      if(qualified){const t=age/FS,attack=Math.min(1,age/48);sample+=peak/componentLimits.mechanicalVoices*v.strength*attack*Math.exp(-t/.016)*(.75*Math.sin(TAU*v.frequency*t)+.25*Math.sin(TAU*v.frequency*2.71*t));}}

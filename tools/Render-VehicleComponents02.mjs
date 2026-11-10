@@ -14,12 +14,24 @@ const output=path.resolve(args[1]??path.join(root,'.local','acoustic-world-02','
 if(!output.startsWith(path.join(root,'.local','acoustic-world-02')+path.sep)||fs.existsSync(output))throw Error('Fresh private acoustic-world-02 output required');
 for(let at=path.dirname(output);;at=path.dirname(at)){if(fs.existsSync(at)&&fs.lstatSync(at).isSymbolicLink())throw Error('Linked outputs refused');if(path.dirname(at)===at)break;}
 fs.mkdirSync(output,{recursive:true});const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
-const sourcePins=modulePins(root,['tools/Render-VehicleComponents02.mjs']),measurements=[],nodeSha256=sha(fs.readFileSync(process.execPath));
-for(const environment of ['direct','canyon','tunnel'])for(const components of [['horn'],['tyre-rolling'],['tyre-slip'],['mechanical-clunk'],['horn','tyre-rolling','tyre-slip','mechanical-clunk']]){
- const {channels,measurement}=await renderVehicleComponentsFixture({environment,components,seconds:2});const name=environment+'-'+components.join('_'),bytes=encodeVehicleWav(channels);
+const sourcePins=modulePins(root,['tools/Render-VehicleComponents02.mjs']),measurements=[],dryReferences=new Map(),nodeSha256=sha(fs.readFileSync(process.execPath));
+const completeFixture=['horn','tyre-rolling','tyre-slip','mechanical-clunk','transmission','brake'];
+for(const environment of ['direct','road','canyon','corner','tunnel'])for(const components of
+  ['road','corner'].includes(environment)?[completeFixture]:[...completeFixture.map(x=>[x]),completeFixture]){
+ const {channels,dryStems,measurement}=await renderVehicleComponentsFixture({environment,components,seconds:2,retainDry:environment==='direct'&&components===completeFixture});
+ const group=components.join('_'),name=environment+'-'+group,bytes=encodeVehicleWav(channels);
+ if(environment==='direct')dryReferences.set(group,measurement.drySha256);
+ else if(dryReferences.get(group)!==measurement.drySha256)throw Error('Environment changed the dry component PCM');
+ if(dryStems)for(const [component,pcm] of Object.entries(dryStems)){
+  const stem=encodeVehicleWav([pcm,pcm]);fs.writeFileSync(path.join(output,'dry-'+component+'.wav'),stem,{flag:'wx'});
+ }
  fs.writeFileSync(path.join(output,name+'.wav'),bytes,{flag:'wx'});fs.writeFileSync(path.join(output,name+'.json'),JSON.stringify(measurement,null,2)+'\n',{flag:'wx'});
  measurements.push({...measurement,wavFile:name+'.wav',wavSha256:sha(bytes)});
 }
+const twoVehicle=await renderVehicleComponentsFixture({environment:'canyon',components:['horn','tyre-rolling','transmission'],twoVehicles:true});
+const twoVehicleWave=encodeVehicleWav(twoVehicle.channels);
+fs.writeFileSync(path.join(output,'canyon-two-vehicles.wav'),twoVehicleWave,{flag:'wx'});
+measurements.push({...twoVehicle.measurement,wavFile:'canyon-two-vehicles.wav',wavSha256:sha(twoVehicleWave)});
 const identity={...fixtureComponentIdentity('mechanical-clunk'),session:transientFixtureSession};
 const preparedMechanical=createPreparedMechanicalComponent({identity,capability:createAuthoredComponentCapability({session:identity.session,maximumFrame:20000}),
  scene:transientFixtureScene('wall'),sceneId:'wall',sourcePose:transientFixturePoses.source,listenerPose:transientFixturePoses.listener});

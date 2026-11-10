@@ -84,19 +84,31 @@ export function preparePathGeometry(scene,source,listener,surfaces) {
     end = p;
   }
   const vertices = [source, ...points, listener];
-  if(vertices.some((p,i)=>i>0&&length(sub(p,vertices[i-1]))<=E))return {status:'degenerate'};
-  return {status:'prepared-geometry',scene,surfaces,source,listener,vertices,points,conditional};
+  let distance = 0;
+  for (let i = 1; i < vertices.length; i++) {
+    const leg = length(sub(vertices[i], vertices[i - 1]));
+    if (leg <= E) return { status: "degenerate" };
+    distance += leg;
+  }
+  // A bounce must stay on one side of its plane. Reject impossible paths
+  // before querying the tile or putting their legs in the GPU visibility batch.
+  for (let i = 0; i < surfaces.length; i++) {
+    const s = surfaces[i],
+      a = dot(sub(vertices[i], s.center), s.normal),
+      b = dot(sub(vertices[i + 2], s.center), s.normal);
+    if (a * b <= E || (s.reflectiveSide === "front" && (a <= E || b <= E)))
+      return { status: "wrong-reflecting-side" };
+  }
+  return {status:'prepared-geometry',scene,surfaces,source,listener,vertices,points,conditional,distance};
 }
 export function finishPathGeometry(plan,queries=null,stats={queries:0,surfaceTests:0}) {
   if(plan.status!=='prepared-geometry')return plan;
-  const {scene,surfaces,source,listener,vertices,points,conditional}=plan,tile=scene.tile;
-  let distance = 0;
+  const {scene,surfaces,source,listener,vertices,points,conditional,distance}=plan,tile=scene.tile;
   const hits = [];
   let uncertain = false,ambiguousContact=false;const unmappedRegions=new Set();
   for (let i = 0; i < vertices.length - 1; i++) {
     const a = vertices[i],
       b = vertices[i + 1];
-    if (length(sub(b, a)) <= E) return { status: "degenerate" };
     const q = queries ? queries[i] : querySegment(tile, a, b);
     stats.queries++;
     stats.surfaceTests += q.surfaceTests;
@@ -117,14 +129,6 @@ export function finishPathGeometry(plan,queries=null,stats={queries:0,surfaceTes
       (tile.coverage !== "complete-synthetic" && !conditional)
     )
       uncertain = true;
-    distance += length(sub(b, a));
-  }
-  for (let i = 0; i < surfaces.length; i++) {
-    const s = surfaces[i],
-      a = dot(sub(vertices[i], s.center), s.normal),
-      b = dot(sub(vertices[i + 2], s.center), s.normal);
-    if (a * b <= E || (s.reflectiveSide === "front" && (a <= E || b <= E)))
-      return { status: "wrong-reflecting-side" };
   }
   // Limited operation through an unmapped static region retains the existing
   // conditional direct source, explicitly labelled as such. It grants no
