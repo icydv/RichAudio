@@ -27,7 +27,10 @@ function authoredProjection(){
 }
 
 test('private field redirects keep retained engine and exhaust aliases on the original records',()=>{
-  const input=authoredProjection(), before=structuredClone(input);
+  const input=authoredProjection();
+  input.ReferenceClosureComplete=true;
+  input.TraversalCompleteWithinPublicProjection=true;
+  const before=structuredClone(input);
   const result=compareBatiAccelerationRedirect01(input);
   assert.deepEqual(input,before);
   assert.equal(result.privateRecordCount,4);
@@ -42,6 +45,7 @@ test('private field redirects keep retained engine and exhaust aliases on the or
   assert.equal(result.effectiveBaselineReadBack,false);
   assert.equal(result.runtimeAssignmentEnabled,false);
   assert.equal(result.selectiveSuppressionVerified,false);
+  assert.equal(result.unresolvedProjection.referenceClosureComplete,true);
 });
 
 test('a missing source binding, ambiguous edge or inconsistent hash blocks the redirect experiment',()=>{
@@ -76,9 +80,44 @@ test('continuous attribution checks the three synth routes and treats the zero i
     synth:add(role+'-synth','Dat10Synth','granular',role+'Submix'),
     preset:add(role+'-preset','Dat10SynthPreset','granular',role+'SubmixPreset')}));
   expected.push({route:'granular-idle',synth:idleSynth,preset:null});
+  const horn=add('horn','Dat54SoundHashList','vehicle','Horns');
+  const shared=add('category','Dat22Category','engine','Header.Category');
+  const link=(From,Field,Hash,Targets,Resolution='unique-public-audio-record')=>
+    graph.Edges.push({From,Field,Hash,Targets,Resolution,Namespace:'audio-record-candidate'});
+  link('horn','Header.Category',shared,['category']);
+  link('granular','Unk40',horn,['horn']);
+  const unrelated=add('speech','Dat4SpeechData','horn','SpeechChoice');
+  link('engine','AudioContainers[0]',unrelated,['speech']);
+  link('idle','Header.Category',shared,['category','speech'],'multiple-dictionary-matches-no-selection-inferred');
+  // Older projections could mark closure complete despite a multi-match.
+  graph.ReferenceClosureComplete=true;
+  graph.TraversalCompleteWithinPublicProjection=true;
+  const before=structuredClone(graph);
   const result=compareBatiAccelerationRedirect01(graph,{continuous:true});
+  assert.deepEqual(graph,before);
   assert.deepEqual(result.granularDependencies,expected);
   assert.equal(result.granularSynthesisAudibleContributionVerified,false);
+  assert.equal(result.unresolvedProjection.referenceClosureComplete,false);
+  const route=name=>result.continuousBoundary.routes.find(row=>row.route===name);
+  const engine=route('EngineGranular.EngineAccel');
+  const stock=engine.sharedRecords.find(record=>record.type==='Dat54GranularSound');
+  assert(stock.retainedWitnesses.some(witness=>witness.route==='EngineGranular.EngineAccelNPC' &&
+    witness.fields.join('.')==='EngineAccelNPC.ParentSound'));
+  assert(engine.sharedRecords.some(record=>record.type==='Dat22Category' &&
+    record.retainedWitnesses.some(witness=>witness.route==='Horns')));
+  assert(!engine.sharedRecords.some(record=>record.type==='Dat4SpeechData'));
+  assert.deepEqual(result.reclassifiedWaveContainers,[{
+    field:'AudioContainers[0]',hash:unrelated.slice(2),priorTargetTypes:['Dat4SpeechData'],
+  }]);
+  assert(engine.boundaries.some(boundary=>boundary.state==='external-wave-reference'));
+  const idle=route('EngineGranular.IdleSub');
+  assert(idle.boundaries.some(boundary=>boundary.state==='multiple-dictionary-matches-no-selection-inferred'));
+  assert(!idle.sharedRecords.some(record=>record.type==='Dat22Category'));
+  assert.deepEqual(result.continuousBoundary.unclassifiedRetainedFields,['EngineGranular.Unk40']);
+  assert.deepEqual(result.continuousBoundary.retainedRootAliases,[{
+    type:'Dat54SoundHashList',hash:horn.slice(2),routes:['Horns','EngineGranular.Unk40'],
+  }]);
+  assert.equal(route('EngineGranular.EngineSubmix').kind,'parallel-synth-dependency');
   graph.Nodes.find(n=>n.Id==='Exhaust-preset').Record.ParserType='Dat10Synth';
   assert.throws(()=>compareBatiAccelerationRedirect01(graph,{continuous:true}),/ExhaustSubmixPreset/);
 });

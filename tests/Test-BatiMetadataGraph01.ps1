@@ -10,7 +10,8 @@ namespace CodeWalker.GameFiles {
  public sealed class OriginalMetadataEntry01 {public string Path="authored.rpf/audio/original.dat151.rel";public OriginalMetadataOwner01 File;}
  public sealed class OriginalMetadataRel01 {public OriginalMetadataEntry01 RpfFileEntry;}
  public sealed class OriginalHeader01 {public MetaHash Category;public float Gain=0.25f;}
- public sealed class OriginalAudioRecord01 {public MetaHash NameHash;public OriginalMetadataRel01 Rel;public MetaHash Engine;public MetaHash[] Links;public OriginalHeader01 Header;public byte[] Opaque;public bool ThrowOnRead;public float Volume{get{return 0.75f;}}public uint Broken{get{if(ThrowOnRead)throw new Exception("original getter refusal");return 17;}}}
+ public class RelSound {public MetaHash[] AudioContainers{get;set;}}
+ public sealed class OriginalAudioRecord01 : RelSound {public MetaHash NameHash;public OriginalMetadataRel01 Rel;public MetaHash Engine;public MetaHash[] Links;public OriginalHeader01 Header;public byte[] Opaque;public bool ThrowOnRead;public float Volume{get{return 0.75f;}}public uint Broken{get{if(ThrowOnRead)throw new Exception("original getter refusal");return 17;}}}
 }
 '@
 $module=Join-Path $repo 'src/acoustics/startup/InstalledCatalog.psm1';Import-Module $module -Force
@@ -29,6 +30,7 @@ function Root($record){return [pscustomobject]@{Label='VehicleAudioRecord';Domai
 $game=Dictionary;$sounds=Dictionary;$categories=Dictionary
 $one=Record 1 2;$two=Record 2 1;$three=Record 3;$otherThree=Record 3;$four=Record 4
 $one.Header=New-Object CodeWalker.GameFiles.OriginalHeader01;$one.Header.Category=New-Object CodeWalker.GameFiles.MetaHash(3)
+$one.AudioContainers=[CodeWalker.GameFiles.MetaHash[]]@((New-Object CodeWalker.GameFiles.MetaHash(3)))
 $one.Links=[CodeWalker.GameFiles.MetaHash[]]@((New-Object CodeWalker.GameFiles.MetaHash(4)),(New-Object CodeWalker.GameFiles.MetaHash(0)),(New-Object CodeWalker.GameFiles.MetaHash(99)))
 $one.Opaque=[byte[]]@(1,2,3);$two.ThrowOnRead=$true
 foreach($record in @($one,$two,$four)){$game.Add($record.NameHash,$record)};$sounds.Add($three.NameHash,$three);$categories.Add($otherThree.NameHash,$otherThree)
@@ -36,6 +38,7 @@ $cache=[pscustomobject]@{AudioGameDict=$game;AudioSoundsDict=$sounds;AudioCatego
 $graph=Audio-DependencyGraph01 $cache @((Root $one))
 Check ($graph.Nodes.Count-eq5) 'Transitive cycle and multiple public dictionaries must retain each distinct record once'
 Check (@($graph.Edges|Where-Object{$_.Field-eq'Header.Category'-and$_.Targets.Count-eq2}).Count-eq1) 'Nested typed MetaHash property retains ambiguity instead of picking a dictionary'
+Check (@($graph.Edges|Where-Object{$_.Field-eq'AudioContainers[0]'-and$_.Hash-eq'0x00000003'-and$_.Resolution-eq'container-or-stream-not-audio-record-lookup'-and$_.Targets.Count-eq0}).Count-eq1) 'An AWC path hash that collides with REL records must stay an external dependency'
 Check (@($graph.Edges|Where-Object{$_.Field-eq'Links[0]'-and$_.Hash-eq'0x00000004'}).Count-eq1) 'Typed native hash arrays retain element identity'
 Check (@($graph.Edges|Where-Object Resolution -EQ 'zero-reference-not-proof-of-silence').Count-gt0) 'Zero reference is not silently interpreted as missing audio'
 Check (@($graph.Edges|Where-Object{$_.Hash-eq'0x00000063'-and$_.Resolution-eq'unresolved-public-audio-reference'}).Count-eq1) 'Unknown nonzero dependencies stay unresolved'
@@ -44,6 +47,11 @@ Check (!$graph.TraversalCompleteWithinPublicProjection-and$graph.ProjectionGapCo
 Check ($owner.Reads-eq1-and$graph.SourceBindingsComplete-and$graph.SourceMetadataFiles-eq1) 'All records share one exact metadata source hash read'
 Check (@($graph.Nodes[0].TypedScalars|Where-Object{$_.Field-eq'Volume'-and$_.DeclaredType-eq'System.Single'-and$_.RawValue-eq'0.75'}).Count-eq1) 'Scalar getter is read on its record and retains native type and uninterpreted value'
 Check (!$graph.PcmDecoded-and!$graph.NativeProfileAssignmentObserved-and!$graph.RuntimeSelectionObserved) 'Metadata never acquires native selection or playback authority'
+$one.Links=$null;$one.Opaque=$null;$two.ThrowOnRead=$false
+$ambiguity=Audio-DependencyGraph01 $cache @((Root $one))
+Check ($ambiguity.TraversalCompleteWithinPublicProjection-and$ambiguity.UnresolvedNonzeroReferences-eq0-and$ambiguity.AmbiguousNonzeroReferences-eq1-and!$ambiguity.ReferenceClosureComplete) 'Dictionary ambiguity alone prevents a complete REL dependency closure'
+$missing=Audio-DependencyGraph01 $cache @((Root $null))
+Check ($missing.UnresolvedRoots-eq1-and!$missing.ReferenceClosureComplete) 'An unresolved root prevents a complete REL dependency closure'
 $chain=Dictionary;for($i=1;$i-le12;$i++){$r=Record $i ($i+1);$chain.Add($r.NameHash,$r)}
 $bounded=Audio-DependencyGraph01 ([pscustomobject]@{AudioGameDict=$chain}) @((Root $chain[(New-Object CodeWalker.GameFiles.MetaHash(1))]))
 Check ($bounded.Nodes.Count-eq9-and$bounded.DepthOmitted-gt0-and!$bounded.ReferenceClosureComplete) 'Graph depth eight is a real bound with retained omitted dependencies'

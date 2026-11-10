@@ -152,7 +152,10 @@ function Audio-ProjectValue01($Value,[string]$Path,[int]$Depth,$Projection,$Ance
     if($Projection.Members -ge 512){$Projection.Gaps.Add('member-budget:'+ $Path);return};$Projection.Members++
     $type=$Value.GetType();$name=$type.FullName
     if($name -eq 'CodeWalker.GameFiles.MetaHash'){
-        $namespace=if($Path -match '(^|\.)(Channel[0-9]+)\.(ContainerName|FileName)$'){'awc-container-or-stream'}else{'audio-record-candidate'}
+        # RelSound.AudioContainers holds wave-container paths. A hash match in
+        # any REL dictionary (including speech) does not resolve that path.
+        $waveContainer=$Path -match '^AudioContainers\[[0-9]+\]$' -and $Ancestors[0] -is [CodeWalker.GameFiles.RelSound]
+        $namespace=if($waveContainer -or $Path -match '(^|\.)(Channel[0-9]+)\.(ContainerName|FileName)$'){'awc-container-or-stream'}else{'audio-record-candidate'}
         $Projection.References.Add([pscustomobject]@{Field=$Path;DeclaredType=$name;Hash=('0x{0:x8}' -f [uint32]$Value.Hash);Namespace=$namespace});return
     }
     if($type.IsEnum){$underlying=[Enum]::GetUnderlyingType($type);$raw=[Convert]::ChangeType($Value,$underlying,[Globalization.CultureInfo]::InvariantCulture);$Projection.Scalars.Add([pscustomobject]@{Field=$Path;DeclaredType=$name;Kind='enum';RawDecimal=[Convert]::ToString($raw,[Globalization.CultureInfo]::InvariantCulture);Name=[string]$Value});return}
@@ -213,7 +216,10 @@ function Audio-DependencyGraph01($Cache,$Roots){
         }
     }
     $projectionGaps=@($nodes|ForEach-Object ProjectionGaps);$unbound=@($nodes|Where-Object{$_.SourceBinding.State -ne 'exact-rel-metadata-bytes-sha256'}).Count;$unresolved=@($edges|Where-Object Resolution -EQ 'unresolved-public-audio-reference').Count
-    return [pscustomobject]@{Schema=1;Kind='RichAudioBatiAudioDependencyGraph01';Roots=$rootRows.ToArray();Nodes=$nodes.ToArray();Edges=$edges.ToArray();PublicDictionaries=@($dictionaries|ForEach-Object Name);LookupGaps=$lookupGaps.ToArray();MaximumDepth=8;MaximumRecords=256;MaximumEdges=4096;DepthOmitted=$depthOmitted;RecordsOmitted=$recordOmitted;EdgesOmitted=$edgeOmitted;ProjectionGapCount=$projectionGaps.Count;UnresolvedNonzeroReferences=$unresolved;ReferenceClosureComplete=($unresolved -eq 0 -and $depthOmitted -eq 0 -and $recordOmitted -eq 0 -and $edgeOmitted -eq 0);UnboundSourceNodes=$unbound;SourceBindingsComplete=($unbound -eq 0);SourceMetadataFiles=$state.Sources.Count;SourceMetadataBytes=$state.SourceBytes;TraversalCompleteWithinPublicProjection=($depthOmitted -eq 0 -and $recordOmitted -eq 0 -and $edgeOmitted -eq 0 -and $projectionGaps.Count -eq 0 -and $lookupGaps.Count -eq 0);PcmDecoded=$false;NativeProfileAssignmentObserved=$false;RuntimeSelectionObserved=$false;Scope='typed-public-record-metadata; no interpretation of zero/common references as silence or absence'}
+    $ambiguous=@($edges|Where-Object Resolution -EQ 'multiple-dictionary-matches-no-selection-inferred').Count
+    $unresolvedRoots=@($rootRows|Where-Object State -EQ 'unresolved-root').Count
+    $boundedTraversal=($depthOmitted -eq 0 -and $recordOmitted -eq 0 -and $edgeOmitted -eq 0 -and $projectionGaps.Count -eq 0 -and $lookupGaps.Count -eq 0)
+    return [pscustomobject]@{Schema=1;Kind='RichAudioBatiAudioDependencyGraph01';Roots=$rootRows.ToArray();Nodes=$nodes.ToArray();Edges=$edges.ToArray();PublicDictionaries=@($dictionaries|ForEach-Object Name);LookupGaps=$lookupGaps.ToArray();MaximumDepth=8;MaximumRecords=256;MaximumEdges=4096;DepthOmitted=$depthOmitted;RecordsOmitted=$recordOmitted;EdgesOmitted=$edgeOmitted;ProjectionGapCount=$projectionGaps.Count;UnresolvedNonzeroReferences=$unresolved;AmbiguousNonzeroReferences=$ambiguous;UnresolvedRoots=$unresolvedRoots;ReferenceClosureComplete=($boundedTraversal -and $unresolved -eq 0 -and $ambiguous -eq 0 -and $unresolvedRoots -eq 0);UnboundSourceNodes=$unbound;SourceBindingsComplete=($unbound -eq 0);SourceMetadataFiles=$state.Sources.Count;SourceMetadataBytes=$state.SourceBytes;TraversalCompleteWithinPublicProjection=$boundedTraversal;PcmDecoded=$false;NativeProfileAssignmentObserved=$false;RuntimeSelectionObserved=$false;Scope='typed-public-record-metadata; no interpretation of zero/common references as silence or absence'}
 }
 function Vector-Value($Value){if($null -eq $Value){return $null};return @([double]$Value.X,[double]$Value.Y,[double]$Value.Z)}
 try {

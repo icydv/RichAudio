@@ -1,6 +1,7 @@
 import { readFileSync, realpathSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createHash } from 'node:crypto';
 
 const exactSource = node => node?.SourceBinding?.State === 'exact-rel-metadata-bytes-sha256' &&
   /^[a-f0-9]{64}$/.test(node.SourceBinding.SHA256);
@@ -14,6 +15,78 @@ const acceleration = [
 const conventional = ['EngineIdleLoop','ExhaustIdleLoop','EngineLow','EngineHigh','ExhaustLow','ExhaustHigh','RevsOff']
   .map(field=>({field,type:'Dat54SimpleSound'}));
 
+function traceRecords(entry, nodes, outgoing) {
+  const paths = new Map();
+  const boundaries = [];
+  const queue = [{edge:entry, fields:[entry.Field]}];
+  for (let i = 0; i < queue.length; i++) {
+    const {edge, fields} = queue[i];
+    const hash = recordHash(edge.Hash);
+    const node = nodes.get(edge.Targets[0]);
+    if (hash === '00000000' && edge.Resolution === 'zero-reference-not-proof-of-silence' && !edge.Targets.length) continue;
+    if (edge.Namespace === 'awc-container-or-stream') {
+      boundaries.push({fields, hash, state:'external-wave-reference'});
+      continue;
+    }
+    if (edge.Resolution !== 'unique-public-audio-record' || edge.Targets.length !== 1 ||
+        !hash || hash === '00000000' || !exactSource(node) || recordHash(node.Record?.Hash) !== hash) {
+      boundaries.push({fields, hash, state:edge.Resolution === 'unique-public-audio-record' ?
+        'target-omitted-unbound-or-mismatched' : edge.Resolution});
+      continue;
+    }
+    if (paths.has(node.Id)) continue;
+    paths.set(node.Id, fields);
+    for (const gap of node.ProjectionGaps ?? []) boundaries.push({fields, state:gap});
+    for (const child of outgoing.get(node.Id) ?? []) queue.push({edge:child, fields:[...fields, child.Field]});
+  }
+  return {paths, boundaries};
+}
+
+function continuousBoundary(nodes, outgoing, vehicle, scopes, granular) {
+  const candidates = [], retained = [];
+  for (const scope of [{parent:vehicle, routes:scopes.map(({edge})=>({field:edge.Field}))}, ...scopes]) {
+    const prefix = scope.edge ? scope.edge.Field + '.' : '';
+    for (const edge of outgoing.get(scope.parent) ?? []) {
+      const row = {route:prefix + edge.Field, edge};
+      if (scope.routes.some(({field})=>field === edge.Field)) {
+        if (scope.parent !== vehicle) candidates.push({...row, kind:'continuous-candidate'});
+      } else if (scope.parent === granular && /^(Engine|Exhaust)Submix(Preset)?$/.test(edge.Field)) {
+        candidates.push({...row, kind:'parallel-synth-dependency'});
+      } else {
+        retained.push(row);
+      }
+    }
+  }
+  const retainedByRecord = new Map();
+  const unclassifiedRetainedFields = [];
+  for (const {route, edge} of retained) {
+    if (/(^|\.)Unk[0-9]+$/.test(route) && recordHash(edge.Hash) !== '00000000') unclassifiedRetainedFields.push(route);
+    for (const [id, fields] of traceRecords(edge, nodes, outgoing).paths) {
+      if (!retainedByRecord.has(id)) retainedByRecord.set(id, []);
+      retainedByRecord.get(id).push({route, fields});
+    }
+  }
+  return {
+    scope:'retained typed projection; paths are reference witnesses, not audible routing',
+    unclassifiedRetainedFields,
+    retainedRootAliases:[...retainedByRecord].flatMap(([id, witnesses])=>{
+      const routes = witnesses.filter(({fields})=>fields.length === 1).map(({route})=>route);
+      const {ParserType,Hash} = nodes.get(id).Record;
+      return routes.length > 1 ? [{type:ParserType, hash:recordHash(Hash), routes}] : [];
+    }),
+    routes:candidates.map(({route, edge, kind})=>{
+      const {paths,boundaries} = traceRecords(edge, nodes, outgoing);
+      return {route, kind, hash:recordHash(edge.Hash), reachableRecords:paths.size,
+        sharedRecords:[...paths].filter(([id])=>retainedByRecord.has(id)).map(([id,fields])=>({
+          type:nodes.get(id).Record.ParserType, hash:recordHash(nodes.get(id).Record.Hash),
+          fields, retainedWitnesses:retainedByRecord.get(id),
+        })),
+        boundaries,
+      };
+    }),
+  };
+}
+
 // The projection can discriminate shared-record edits from field-level redirects.
 // The result grants no registration, runtime control or restoration authority.
 export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
@@ -25,12 +98,23 @@ export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
   }
   const nodes = new Map(graph.Nodes.map(node => [node.Id, node]));
   const outgoing = new Map();
+  const reclassifiedWaveContainers = [];
   for (const edge of graph.Edges) {
     if (!nodes.has(edge.From) || !Array.isArray(edge.Targets) || edge.Targets.length > 16) {
       throw Error('Malformed audio reference projection');
     }
     if (!outgoing.has(edge.From)) outgoing.set(edge.From, []);
-    outgoing.get(edge.From).push(edge);
+    // Historical projections predate classification of RelSound.AudioContainers.
+    // Leave the retained artifact intact and exclude the false REL links here.
+    const oldContainer = continuous && /^Dat54/.test(nodes.get(edge.From).Record?.ParserType) &&
+      /^AudioContainers\[[0-9]+\]$/.test(edge.Field) && edge.Namespace === 'audio-record-candidate' &&
+      recordHash(edge.Hash) !== '00000000';
+    if (oldContainer) reclassifiedWaveContainers.push({
+      field:edge.Field, hash:recordHash(edge.Hash),
+      priorTargetTypes:edge.Targets.map(id=>nodes.get(id)?.Record?.ParserType ?? 'omitted'),
+    });
+    outgoing.get(edge.From).push(oldContainer ? {...edge, Namespace:'awc-container-or-stream',
+      Resolution:'container-or-stream-not-audio-record-lookup', Targets:[]} : edge);
   }
   if (nodes.size !== graph.Nodes.length) throw Error('Duplicate projected record identity');
   const root = (label, type) => {
@@ -119,10 +203,21 @@ export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
       .filter(edge=>!routes.some(route=>route.field===edge.Field))),
   ];
   const preserved = reachable(otherRoutes, variant);
+  const retainedEdges = [...outgoing.values()].flat();
+  const referenceClosureComplete = graph.ReferenceClosureComplete === true &&
+    graph.TraversalCompleteWithinPublicProjection === true &&
+    graph.Roots.every(row=>row.State === 'resolved-metadata-root' && nodes.has(row.NodeId)) &&
+    retainedEdges.every(edge=>{
+      const hash = recordHash(edge.Hash);
+      if (edge.Targets.length === 0) return hash === '00000000' && edge.Resolution === 'zero-reference-not-proof-of-silence' ||
+        hash && edge.Namespace === 'awc-container-or-stream' && edge.Resolution === 'container-or-stream-not-audio-record-lookup';
+      return edge.Resolution === 'unique-public-audio-record' && edge.Targets.length === 1 &&
+        hash && hash !== '00000000' && recordHash(nodes.get(edge.Targets[0])?.Record?.Hash) === hash;
+    });
   const proof = [...soundEdges].map(([edge,{privateSound:privateId,privateParent}]) => ({
     field:edge.Field,
     originalRecordReachableThroughRetainedFields:preserved.has(edge.Targets[0]),
-    retainedInboundReferences:graph.Edges.filter(candidate =>
+    retainedInboundReferences:retainedEdges.filter(candidate =>
       candidate !== edge && candidate.Targets.includes(edge.Targets[0])).map(candidate => candidate.Field).sort(),
     selectedFieldResolvesToPrivateRecord:variant.get(privateParent)
       .some(candidate => candidate.Field === edge.Field && candidate.Targets[0] === privateId),
@@ -135,6 +230,8 @@ export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
     ...(continuous?{
       continuousScope:'conventional idle/low/high/revs-off; player granular acceleration/idle synth',
       granularDependencies,
+      continuousBoundary:continuousBoundary(nodes, outgoing, vehicle, scopes, granular),
+      reclassifiedWaveContainers,
       granularSynthesisAudibleContributionVerified:false,
       unredirectedSubmixReferences:[...outgoing.get(granular),...outgoing.get(engine)]
         .filter(edge=>/Submix/.test(edge.Field)&&edge.Targets.length>0)
@@ -144,7 +241,7 @@ export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
       [...stockVehicle].every(id => neighbor.has(id)),
     routeComparisons:proof,
     unresolvedProjection:{
-      referenceClosureComplete:graph.ReferenceClosureComplete === true,
+      referenceClosureComplete,
       traversalComplete:graph.TraversalCompleteWithinPublicProjection === true,
     },
     effectiveBaselineReadBack:false,
@@ -160,9 +257,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   const filename = realpathSync(process.argv[2]);
   if (!filename.startsWith(projectPrivate + path.sep) || !statSync(filename).isFile() ||
       statSync(filename).size > 64 * 1024 * 1024) throw Error('Bounded project-private retained input required');
-  const catalogue = JSON.parse(readFileSync(filename, 'utf8').replace(/^\uFEFF/, ''));
+  const bytes = readFileSync(filename);
+  const catalogue = JSON.parse(bytes.toString('utf8').replace(/^\uFEFF/, ''));
   const vehicles = catalogue.Vehicles?.filter(vehicle => vehicle.Model === 'bati') ?? [];
   if (vehicles.length !== 1) throw Error('Exactly one Bati projection required');
   const result = compareBatiAccelerationRedirect01(vehicles[0].AudioDependencyGraph01,{continuous});
-  process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+  process.stdout.write(JSON.stringify({...result, retainedCatalogueSha256:createHash('sha256').update(bytes).digest('hex')}, null, 2) + '\n');
 }
