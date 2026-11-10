@@ -187,6 +187,33 @@ test('a virtual vehicle becomes relevant without resetting a continuing emitter'
  }finally{await g.close();}
 });
 
+test('late first observations retain their time while a reordered vehicle cannot replay control',async()=>{
+ const e=engine(true),g=e.g;
+ try{
+  for(let b=0;b<20;b++)await step(e,b,[['a']]);
+  const a=slot(g,'a').source;
+  e.at(20*512/48);
+  const late=frame(20,[['a'],['b',2]]);
+  late.vehicles[1].observationTicks-=280000;
+  g.accept(late,30,200);
+  assert.equal(g.snapshots.at(-1).vehiclesById.get('b').observationTicks,late.vehicles[1].observationTicks);
+  await g.render();
+  for(let b=21;b<39;b++)await step(e,b,[['a'],['b',2]]);
+  assert(slot(g,'b'));
+  const reordered=frame(39,[['a'],['b',2]]);
+  reordered.vehicles[1].observationTicks-=300000;
+  e.at(39*512/48);
+  g.accept(reordered,0,200);
+  assert.equal(g.snapshots.at(-1).vehiclesById.get('b').valid,false);
+  await g.render();
+  assert.equal(slot(g,'a').source,a);
+  assert.equal(slot(g,'b'),undefined);
+  for(let b=40;b<52;b++)await step(e,b,[['a'],['b',1]]);
+  assert.equal(slot(g,'b'),undefined);
+  assert.equal(g.lifecycle.observedNotRunning,0);
+ }finally{await g.close();}
+});
+
 test('one unchanged voice matches the pinned starting implementation',async t=>{
  const frozen=process.env.RICHAUDIO_FLEET_BASELINE02;
  if(!frozen){t.skip('set RICHAUDIO_FLEET_BASELINE02 to the exact baseline source snapshot');return;}

@@ -141,6 +141,11 @@ export class StockGameplay {
     snapshot.vehiclesById=new Map();
     for(const v of copy.vehicles){
      const old=previousSnapshot?.vehiclesById.get(v.id);
+     // A newly acquired vehicle may arrive late. A repeat or rollback of
+     // already consumed source evidence cannot become a new acquisition.
+     const trusted=old?.valid?old:this.snapshots.findLast(s=>s.vehiclesById.get(v.id)?.valid)?.vehiclesById.get(v.id);
+     if(v.valid&&trusted&&(v.generation<trusted.generation||
+       v.generation===trusted.generation&&v.observationTicks<=trusted.observationTicks))v.valid=false;
      const continuous=sameVehicle01(old,v)&&this.now()<previousSnapshot.wallExpires&&v.observationTicks>=old.observationTicks&&
       v.observationTicks-old.observationTicks<=state.clockFrequency/4;
      v.acquisition01=continuous?old.acquisition01:++this.fleetAcquisition;
@@ -150,7 +155,7 @@ export class StockGameplay {
    this.snapshots.push(snapshot);while(this.snapshots.length>64)this.snapshots.shift();
    this.lastFrame=state.sequence;this.lastGeneration=state.generation;this.stats.acceptedFrames++;this.tickInstalledScene01();
    if(this.staticSceneBinding?.mode==='installed-static-conditional-partial'&&(!this.installedWindowContains01(this.pipeline.simulation.scene,state.position)||this.installedCurrentSourcePositions01(frame).some(p=>!this.installedWindowContains01(this.pipeline.simulation.scene,p))))this.#installedSceneService01?.invalidateConsumer01?.('outside-active-workset',this.now());
-   for(const v of frame.vehicles)if(v.valid){this.stageCounters.validVehicleObservations++;if(v.running)this.stageCounters.runningVehicleObservations++;else this.lifecycle.observedNotRunning++;}
+   for(const v of copy.vehicles)if(v.valid){this.stageCounters.validVehicleObservations++;if(v.running)this.stageCounters.runningVehicleObservations++;else this.lifecycle.observedNotRunning++;}
    this.sourcePreparation05?.observe(frame.vehicles.filter(v=>v.valid).map(stockSourceIdentity05));
   }catch(e){this.stats.rejectedFrames++;throw e;}
  }
@@ -188,10 +193,11 @@ export class StockGameplay {
   return vehicle.position.map((x,i)=>x+vehicle.forward[i]*offset+vehicle.up[i]*(engine?.65:.3));
  }
  installedCurrentSourcePositions01(frame){
-  const nearby=frame.vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-frame.listener.position[i])<=128));
+  const latest=this.snapshots.at(-1)?.frame;
+  const vehicles=this.catalogueFleet?(latest?.listener.sequence===frame.listener.sequence?latest.vehicles:[]):frame.vehicles;
+  const nearby=vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-frame.listener.position[i])<=128));
   const selected=this.catalogueFleet?nearby.flatMap(v=>{
-   const observed=this.snapshots.at(-1)?.vehiclesById.get(v.id);
-   const item=this.vehicleCandidate01(sameVehicle01(observed,v)?observed:v,frame.listener,true,this.registry.resolve(v.model,v.context));
+   const item=this.vehicleCandidate01(v,frame.listener,true,this.registry.resolve(v.model,v.context));
    return item?[item]:[];
   }).sort((a,b)=>b.score-a.score).slice(0,this.voiceLimit).map(item=>item.v):nearby.slice(0,2);
   return selected.flatMap(v=>{
