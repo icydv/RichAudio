@@ -29,11 +29,13 @@ namespace Rage.Attributes {public sealed class ConsoleCommandAttribute:Attribute
 namespace Rage.Native {public static class NativeFunction {
  public static dynamic Natives {get{return new InteriorCalls();}}
  public static bool InteriorReady;
+ public static int InteriorQueries,InteriorMetadataReads;
  public static int InteriorProxy=71;
  public static uint InteriorArchetype=0x12345678u;
  public static Rage.Vector3 InteriorOrigin=new Rage.Vector3(25,10,4);
  public sealed class InteriorCalls {
   public void x252BDC06B73FA6EA(int proxy,out Rage.Vector3 origin,out uint name){
+   InteriorMetadataReads++;
    if(proxy!=InteriorProxy)throw new InvalidOperationException("Unexpected proxy");
    origin=InteriorOrigin;name=InteriorArchetype;
   }
@@ -41,7 +43,7 @@ namespace Rage.Native {public static class NativeFunction {
  public static bool GameplayCamera=true,VehicleCamera=true;
  public static double CameraX;public static uint CameraGameTime;
  public static T CallByName<T>(string name,params object[] args){
-  if(name=="GET_INTERIOR_FROM_COLLISION")return (T)(object)(InteriorReady?InteriorProxy:0);
+  if(name=="GET_INTERIOR_FROM_COLLISION"){InteriorQueries++;return (T)(object)(InteriorReady?InteriorProxy:0);}
   if(name=="IS_INTERIOR_READY")return (T)(object)InteriorReady;
   if(name=="IS_GAMEPLAY_CAM_RENDERING")return (T)(object)GameplayCamera;
   if(name=="IS_FOLLOW_VEHICLE_CAM_ACTIVE")return (T)(object)VehicleCamera;
@@ -157,11 +159,16 @@ internal static class TestStreetContinuity01 {
    Rage.Native.NativeFunction.InteriorReady=true;
    var sampler=typeof(CameraSampler).GetMethod("ObserveInterior",BindingFlags.NonPublic|BindingFlags.Static,null,new[]{typeof(ListenerState)},null);
    sampler.Invoke(null,new object[]{new ListenerState{Position=new[]{104d,0d,1d},ObservationTicks=Stopwatch.GetTimestamp()}});
+   int queries=Rage.Native.NativeFunction.InteriorQueries,reads=Rage.Native.NativeFunction.InteriorMetadataReads,beforeCaptureCount=runtime.Frames.Count;
    Capture(runtime,104);
    var frame=runtime.Frames[runtime.Frames.Count-1];
    var decoded=CameraWire(runtime);
    Check(decoded.CameraInterior01!=null&&decoded.CameraInterior01.Proxy==71&&decoded.CameraInterior01.Archetype==0x12345678u&&
-    decoded.CameraInterior01.Origin[0]==25,"camera proxy, archetype and origin survive the actual wire");
+    decoded.CameraInterior01.Origin[0]==25,"camera proxy, archetype and origin survive the actual wire"+
+    " | frames added="+(runtime.Frames.Count-beforeCaptureCount)+" proxy queries="+(Rage.Native.NativeFunction.InteriorQueries-queries)+
+    " metadata reads="+(Rage.Native.NativeFunction.InteriorMetadataReads-reads)+" raw proxy="+(frame.CameraInterior01==null?"absent":frame.CameraInterior01.Proxy.ToString())+
+    " decoded proxy="+(decoded.CameraInterior01==null?"absent":decoded.CameraInterior01.Proxy.ToString())+" listener sequence="+frame.Listener.Sequence+
+    " listener paused="+frame.Listener.Paused+" preparation epoch present="+(frame.WorldPreparationStartedUtc!=null));
    Check(decoded.CameraInterior01.ObservationTicks==frame.CameraInterior01.ObservationTicks,"proxy sample clock is retained");
    vehicle.RatioReadDelayMs=18;
    try{Capture(runtime,104);}finally{vehicle.RatioReadDelayMs=0;}

@@ -13,7 +13,9 @@ namespace RichAudio.Beacon.Transport {
   [DataMember(Name="continuityPolicy",EmitDefaultValue=false)]public string ContinuityPolicy;
   [DataMember(Name="vehicleSourcePolicy",EmitDefaultValue=false)]public string VehicleSourcePolicy;
   public bool CatalogueFleet {get{return VehicleSourcePolicy=="catalogue-fleet-01";}}
-  public int MaximumVehicleObservations {get{return CatalogueFleet?GameplayWire.MaximumVehicles:8;}}
+  // Match the fleet wire ceiling while keeping manifest validation usable
+  // by the standalone configuration and credit-window tooling.
+  public int MaximumVehicleObservations {get{return CatalogueFleet?32:8;}}
   [DataMember(Name="outputSink",EmitDefaultValue=false)]public string OutputSink;
   internal bool DiscardEnvironmentalOutput {get{return OutputSink=="environment-observation";}}
   [DataMember(Name="bindings",IsRequired=true)]public PlayableBinding[] Bindings;
