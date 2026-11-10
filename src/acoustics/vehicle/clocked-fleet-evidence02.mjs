@@ -31,6 +31,7 @@ export class ClockedFleetEvidence02 {
   this.creditRead=0;
   this.creditWrite=0;
   this.misses=[];
+  this.worst=null;
   this.maxRss=process.memoryUsage.rss();
   this.excerpt=Buffer.alloc(375*frames*8);
   this.excerptBytes=0;
@@ -65,8 +66,14 @@ export class ClockedFleetEvidence02 {
   this.nonzero[index]=Number(nonzero);
   this.pathCount[index]=engine.pipeline.lastControl.paths.length;
   if(index%128===0)this.maxRss=Math.max(this.maxRss,process.memoryUsage.rss());
-  if(engine.lastCompleteRenderMs>deadline&&this.misses.length<256)this.misses.push({index,at:performance.now(),population,nonzero,
-   active:engine.slots.filter(s=>s.source).length,paths:this.pathCount[index],completeRenderMs:engine.lastCompleteRenderMs,stages});
+  const slow=engine.lastCompleteRenderMs>deadline&&this.misses.length<256;
+  const worst=!this.worst||engine.lastCompleteRenderMs>this.worst.completeRenderMs;
+  if(slow||worst){
+   const row={index,at:performance.now(),population,nonzero,active:engine.slots.filter(s=>s.source).length,
+    paths:this.pathCount[index],completeRenderMs:engine.lastCompleteRenderMs,stages,tail:engine.lastTailLatency04??null};
+   if(slow)this.misses.push(row);
+   if(worst)this.worst=row;
+  }
   if(this.excerptBytes<this.excerpt.length&&(this.excerptBytes>0||nonzero&&engine.slots.filter(s=>s.source).length>=2)){
    packet.copy(this.excerpt,this.excerptBytes,16);
    this.excerptBytes+=frames*8;
@@ -87,10 +94,14 @@ export class ClockedFleetEvidence02 {
    stages:Object.fromEntries(fields.map(f=>[f,summary(indices.map(i=>this.data[f][i]))]))
   }]));
   const all=Array.from(this.data.completeRenderMs.subarray(0,this.blocks)),pcm=this.excerpt.subarray(0,this.excerptBytes);
+  const withGc=row=>{if(!row)return null;
+   const start=row.tail?.renderStartedAt??row.at-row.completeRenderMs,end=start+row.completeRenderMs;
+   return {...row,gcOverlapMs:this.gcIntervals.reduce((ms,g)=>ms+Math.max(0,Math.min(end,g.startTime+g.duration)-Math.max(start,g.startTime)),0)};
+  };
   const output={schema:1,scope:'authored inputs through normal clocked discard producer',node:process.version,reason,error:error?.message??null,
    deadlineMs:deadline,blocks:this.blocks,overflowBlocks:this.excess,nonzeroBlocks:this.nonzero.reduce((a,b)=>a+b,0),
-   processingMs:summary(all),hardMisses:all.filter(ms=>ms>deadline).length,byPopulation,missSamples:this.misses.map(row=>({...row,
-    gcOverlapMs:this.gcIntervals.reduce((ms,g)=>ms+Math.max(0,Math.min(row.at,g.startTime+g.duration)-Math.max(row.at-row.completeRenderMs,g.startTime)),0)})),
+   processingMs:summary(all),hardMisses:all.filter(ms=>ms>deadline).length,byPopulation,
+   missSamples:this.misses.map(withGc),worst:withGc(this.worst),gcIntervalsOmitted:Math.max(0,this.gc.count-this.gcIntervals.length),
    lifecycleMs:performance.now()-this.began,preCreditMs:this.readyAt-this.began,preparation:this.preparation,
    creditHighWater:this.creditHighWater,maxSampledRssBytes:this.maxRss,cpu:process.cpuUsage(),gc:this.gc,
    excerptFrames:pcm.length/8,excerptSha256:pcm.length?createHash('sha256').update(pcm).digest('hex'):null};

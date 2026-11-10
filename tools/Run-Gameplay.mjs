@@ -15,6 +15,7 @@ import {InstalledSceneService01} from '../src/acoustics/world/installed-scene-se
 import {installedStaticSceneMetadata01} from '../src/acoustics/world/installed-static-scene01.mjs';
 import {normalQualification01,openNormalQualificationEvidence01} from '../src/acoustics/world/normal-qualification01.mjs';
 import {ClockedFleetEvidence02} from '../src/acoustics/vehicle/clocked-fleet-evidence02.mjs';
+import {enableStockGrainTiming04} from '../src/acoustics/vehicle/stock-grain.mjs';
 const args=process.argv.slice(2);if(args.length!==4||args[0]!=='--manifest'||args[2]!=='--session')throw Error('owned manifest/session required');
 const manifest=path.resolve(args[1]),root=path.dirname(manifest),config=JSON.parse(fs.readFileSync(manifest,'utf8')),session=args[3];
 const latencyProfile=resolveLatencyProfile(config.latencyProfile);
@@ -69,6 +70,7 @@ engine.pipeline.simulation.captureInstalledPaths01=config.acousticPathEvidence01
 let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,pendingSettings=null,pendingGeometry=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
 const traceDelivery=config.outputSink==='environment-observation'&&process.env.RICHAUDIO_DISCARD_DELIVERY_TRACE01==='1';
 engine.captureCompleteRenderStages01=qualification!==null||traceDelivery||clockedEvidence!==null;
+if(clockedEvidence&&process.env.RICHAUDIO_CLOCKED_TAIL04==='1')engine.tailLatency04=enableStockGrainTiming04();
 let deliveryDrops=0;
 function delivery(phase,id,at,began=0,render=0){
  if(process.stderr.writableLength>=4096){deliveryDrops++;return;}

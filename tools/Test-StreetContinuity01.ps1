@@ -12,7 +12,11 @@ $compiler=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe';$
 $log=@(& $compiler /nologo /optimize+ /warnaserror+ /langversion:5 /platform:x64 /r:System.Runtime.Serialization.dll /r:Microsoft.CSharp.dll /main:TestStreetContinuity01 ('/out:'+$binary) @sources 2>&1)
 $log|Set-Content -LiteralPath (Join-Path $output 'build.log') -Encoding utf8
 if($LASTEXITCODE-ne0){throw ('Actual product capture fixture compilation failed: '+($log-join[Environment]::NewLine))}
-$raw=@(& $binary);if($LASTEXITCODE-ne0-or$raw.Count-ne1){throw ('Product continuity fixture failed; retained '+$output)}
+$raw=@(& $binary 2>&1);$code=$LASTEXITCODE
+if($code-ne0-or$raw.Count-ne1){
+ $raw|Set-Content -LiteralPath (Join-Path $output 'capture-failure.log') -Encoding utf8
+ throw ('Product continuity fixture failed; retained '+$output+[Environment]::NewLine+($raw-join[Environment]::NewLine))
+}
 $result=$raw[0]|ConvertFrom-Json
 if(!$result.passed-or$result.gameLaunched-or$result.endpointOpened-or$result.nativeMuting){throw 'Unexpected fixture boundary.'}
 foreach($pin in $pins){if((Get-FileHash -LiteralPath $pin.path).Hash.ToLowerInvariant()-cne$pin.sha256){throw 'Source changed while fixture ran.'}}

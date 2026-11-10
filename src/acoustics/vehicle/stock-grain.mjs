@@ -10,6 +10,12 @@ const matchSamples=64;
 const initialMatches=new WeakMap();
 const sourceTimelines=new WeakMap();
 const contiguousEndByPlan=new WeakMap();
+// The standalone discard producer owns at most one render at a time.
+// Leave the probe disabled for normal playback and other consumers.
+let matchTiming04=null;
+export function enableStockGrainTiming04(){
+  return matchTiming04??={count:0,ms:0};
+}
 // Prepared data contains no reader, random state, phase, clock or emitted PCM.
 // Tokens bind the exact loaded asset/options; changing assets requires a new plan.
 const preparations10=new WeakMap();
@@ -364,17 +370,21 @@ export class StockGrainVoice {
       }
     }
     const target=targetBeforeMatch??referenceSamples();
+    // The reference side of correlation is invariant across candidates.
+    // Keep the combined energy sum in its original interleaved order.
+    let referenceEnergy=0;
+    for(let k=0;k<n;k++)referenceEnergy+=target[k]*target[k];
     // Scores are consumed immediately by this search. Retain scalar results
     // instead of a result per probe and a copy of each improved best.
     let correlation=0;
-    const score=q=>{let diff=0,energy=0,xy=0,xx=0,yy=0;
+    const score=q=>{let diff=0,energy=0,xy=0,yy=0;
       if(q<0||q+horizon>this.intervals.length){correlation=0;return Infinity;}
       const room=this.available(q,plan);
       if(room<requiredRoom){correlation=0;return Infinity;}
       if(sameVoice&&longestRun>=3&&room<selfRoom){correlation=0;return Infinity;}
       if(sameVoice&&longestRun>=8&&room<longestRun*.5){correlation=0;return Infinity;}
-      for(let k=0;k<n;k++){const x=target[k],y=this.sampleHead(q+horizon*k/n);diff+=(x-y)**2;energy+=x*x+y*y;xy+=x*y;xx+=x*x;yy+=y*y;}
-      const error=diff/Math.max(energy,1e-20);correlation=xy/Math.sqrt(Math.max(xx*yy,1e-30));return error;};
+      for(let k=0;k<n;k++){const x=target[k],y=this.sampleHead(q+horizon*k/n);diff+=(x-y)**2;energy+=x*x+y*y;xy+=x*y;yy+=y*y;}
+      const error=diff/Math.max(energy,1e-20);correlation=xy/Math.sqrt(Math.max(referenceEnergy*yy,1e-30));return error;};
     // First test the existing phase: identical periodic inputs need no shift.
     let bestQ=null,bestError=Infinity,bestCorrelation=0;const phase=((reference.q%1)+1)%1;
     const candidates=[];for(let k=0;k<Math.min(12,list.length);k++){
@@ -394,6 +404,12 @@ export class StockGrainVoice {
     }
     return this.finishMatch(bestQ,bestCorrelation);
   }
+  #matchForPlayback(reference,plan){
+    if(!matchTiming04)return this.matchHead(reference,plan);
+    const started=performance.now();
+    try{return this.matchHead(reference,plan);}
+    finally{matchTiming04.count++;matchTiming04.ms+=performance.now()-started;}
+  }
   finishMatch(q,correlation){
     this.stats.texture.minimumSpliceCorrelation=Math.min(this.stats.texture.minimumSpliceCorrelation??1,correlation);
     if(correlation<.8)this.stats.texture.lowCoherenceSplices=(this.stats.texture.lowCoherenceSplices??0)+1;
@@ -405,7 +421,7 @@ export class StockGrainVoice {
     if(!reference.head)reference.head=reference.sourceHead(reference.pair(reference.state));
     this.state=u;const plan=this.pool(this.pair(u));
     if(this.#preparation)this.#indexPlaybackPlan(plan);
-    this.head=this.matchHead({voice:reference,q:reference.head.q},plan);this.join=null;
+    this.head=this.#matchForPlayback({voice:reference,q:reference.head.q},plan);this.join=null;
     // Only the previously inaudible reader is registered. No reference reset,
     // no engine/exhaust phase lock, and no added oscillator or pitch jitter.
     this.phase=reference.phase;this.texturePlan=plan;this.lastPlanAnchor=plan.anchor;
@@ -431,7 +447,7 @@ export class StockGrainVoice {
     if(!this.head){this.head=this.sourceHead(p);if(!plan.allowed.has(Math.floor(this.head.q)))this.head={q:plan.start+this.phase};}
     const reserve=Math.min(1,Math.max(.25,rate*.025));
     if(!this.join&&this.clockRoom(this.head.q,plan)<reserve+delta){
-      const incoming=this.matchHead({voice:this,q:this.head.q},plan);
+      const incoming=this.#matchForPlayback({voice:this,q:this.head.q},plan);
       let safeEnd=Math.floor(this.head.q)+1;
       while(safeEnd<this.intervals.length&&!this.features[safeEnd].transientRisk&&this.intervals[safeEnd-1].end===this.intervals[safeEnd].start)safeEnd++;
       const compatibleRoom=this.clockRoom(this.head.q,plan);

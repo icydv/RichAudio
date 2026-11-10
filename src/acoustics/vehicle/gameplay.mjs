@@ -405,6 +405,10 @@ export class StockGameplay {
   const preparation=this.sourcePreparation05;
   if(preparation){if(preparation.rendering)throw Error('One opt-in gameplay render at a time');preparation.rendering=true;}
   try{
+  const tail=this.tailLatency04,threadCpu=tail&&process.threadCpuUsage;
+  const cpuStart=threadCpu?threadCpu():null,arrivalsBefore=tail?this.stats.arrivals:0;
+  const sceneBefore=tail?this.pipeline.simulation.scene:null;
+  const matchCount=tail?.count??0,matchMs=tail?.ms??0;
   const start=this.now(),time=this.pipeline.renderer.frame/FS,sourceBlocksBefore=this.stageCounters.sourcePlaybackBlocks;this.sample=this.playout.sample(time,this.now());
   this.applyPendingInstalledStaticScene01();
   const afterAdmission=this.now();
@@ -440,6 +444,7 @@ export class StockGameplay {
    slot.vehicle=item.v;slot.score=item.score;
   }
   const afterSelection=this.captureCompleteRenderStages01?this.now():0;
+  const sourceCpuStart=threadCpu?threadCpu():null;
   let stockSynthesisMs=0,stockInitialMatchReuses=0;
   for(const c of this.localAirflow)c.fill(0);this.airflowState.riderActive=false;this.airflowState.exteriorSources=0;
   const sources=[];for(const s of this.slots){const ids=['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`),aeroId=`stock:slot${s.index}:aero`;for(const id of [...ids,aeroId])this.inputs[id].fill(0);
@@ -476,6 +481,7 @@ export class StockGameplay {
   if(this.sample.state&&currentScene!==this.direct&&(installed?(!this.installedWindowContains01(currentScene,listener.position)||sources.some(s=>!this.installedWindowContains01(currentScene,s.position))):(!inBox(listener.position,currentScene.tile.bounds)||sources.some(s=>!inBox(s.position,currentScene.tile.bounds))))){if(installed&&this.#installedSceneService01)this.#installedSceneService01.invalidateConsumer01('outside-active-workset',this.now());else{this.pipeline.replaceScene(this.direct);this.staticSceneBinding=null;this.stats.geometryFallbacks++;}}
   this.telemetry?.begin(this.pipeline.simulation,this.now());
   const beforePrepare=this.now();
+  const sourceCpu=sourceCpuStart?threadCpu(sourceCpuStart):null;
   const installedBefore=this.staticSceneBinding?.mode==='installed-static-conditional-partial';this.installedRenderPreparing01=true;
   try{await this.pipeline.prepare({time,session:this.session,generation:listener.generation,listener,sources},this.pipeline.simulation.scene===this.direct?{}:{geometryTimeMs:this.geometryAnchor.observationMs+this.now()-this.geometryAnchor.at},()=>{this.tickInstalledScene01();return !this.#installedSceneStopped01&&!this.installedFallbackPending01&&(!installedBefore||this.staticSceneBinding?.mode==='installed-static-conditional-partial');});}finally{this.installedRenderPreparing01=false;}
   this.tickInstalledScene01();if(this.#installedSceneStopped01)return [this.left,this.right];
@@ -484,6 +490,7 @@ export class StockGameplay {
   const beforePcm=this.now();
   if(this.pipeline.lastControl.paths.length>0)this.stageCounters.acousticPathBlocks++;
   const before=this.pipeline.renderer.stats.limited;this.pipeline.process(this.inputs,this.left,this.right,BLOCK,null,null,this.settings.airflowEnabled?this.localAirflow:null);
+  const mixedAt=tail?this.now():0;
   observePcmBlock(this.left,this.stageCounters.stereo,this.right);
   if(this.pipeline.renderer.stats.limited!==before){this.stats.clippingFaults++;throw Error('headroom invariant failed; stock fallback required');}
   const elapsed=this.now()-start;this.stats.blocks++;this.stats.maximumProcessingMs=Math.max(this.stats.maximumProcessingMs,elapsed);
@@ -499,6 +506,13 @@ export class StockGameplay {
   // Retain a second complete method interval, including optional telemetry and
   // quality bookkeeping. It encloses the core interval; do not add them.
   this.lastCompleteRenderMs=this.now()-start;
+  if(tail){
+   const cpu=cpuStart?threadCpu(cpuStart):null;
+   this.lastTailLatency04={renderStartedAt:start,threadCpuMs:cpu?(cpu.user+cpu.system)/1000:null,
+    sourceThreadCpuMs:sourceCpu?(sourceCpu.user+sourceCpu.system)/1000:null,mixMs:mixedAt-beforePcm,
+    grainMatches:tail.count-matchCount,grainMatchMs:tail.ms-matchMs,sourceArrivals:this.stats.arrivals-arrivalsBefore,
+    sceneChanged:sceneBefore!==this.pipeline.simulation.scene};
+  }
   this.lastRenderStages01=this.captureCompleteRenderStages01||this.lastCompleteRenderMs>8?{admissionMs:afterAdmission-start,
    sourceAndControlMs:beforePrepare-afterAdmission,propagationMs:beforePcm-beforePrepare,
    pcmMs:elapsed-(beforePcm-start),bookkeepingMs:this.lastCompleteRenderMs-elapsed,

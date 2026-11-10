@@ -69,12 +69,14 @@ internal static class TestStreetContinuity01 {
  static int assertions;static readonly List<string> cases=new List<string>();
  static void Check(bool yes,string why){assertions++;if(!yes)throw new Exception(why);}
  static void Test(string name,Action action){action();cases.Add(name);}
- static void Capture(GameplayRuntime runtime,double cameraX=0){
+ static long Capture(GameplayRuntime runtime,double cameraX=0){
   Thread.Sleep(60);long now=Stopwatch.GetTimestamp();
   Rage.Native.NativeFunction.CameraX=cameraX;Rage.Native.NativeFunction.CameraGameTime=(uint)(now/Stopwatch.Frequency);
   typeof(CameraSampler).GetField("cached",BindingFlags.NonPublic|BindingFlags.Static).SetValue(null,new CameraObservation{Before=now,After=now,Observed=now,GameTime=(uint)(now/Stopwatch.Frequency),Position=new[]{cameraX,0d,1d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d}});
   typeof(PlayableEntry).GetMethod("Capture",BindingFlags.NonPublic|BindingFlags.Static).Invoke(null,new object[]{runtime});
+  return now;
  }
+ static string CaptureReason(){return (string)typeof(PlayableEntry).GetField("lastReason",BindingFlags.NonPublic|BindingFlags.Static).GetValue(null);}
  static GameplayVehicle Only(GameplayRuntime r){var f=r.Frames[r.Frames.Count-1];Check(f.Listener.Valid&&f.Vehicles.Length==1,"one fresh genuine adapter observation");return f.Vehicles[0];}
  static GameplayFrame CameraWire(GameplayRuntime runtime){
   string endpoint="RichAudio.CameraFixture."+Guid.NewGuid().ToString("N");
@@ -119,10 +121,19 @@ internal static class TestStreetContinuity01 {
    Check(recovered.Id==initial.Id&&recovered.Context==initial.Context&&recovered.Generation==initial.Generation&&recovered.Running,"short rejection preserves original identity, bank latch and genuine running getter");
   });
   Test("camera cut consumes discarded pose and recovers independently without source restart",delegate{
-   int count=runtime.Frames.Count;Capture(runtime,100);Check(runtime.Frames.Count==count,"cut frame is never published");
-   Capture(runtime,101);var after=Only(runtime);var listener=runtime.Frames[runtime.Frames.Count-1].Listener;
+   int count=runtime.Frames.Count;var before=runtime.Frames[count-1].Listener;
+   long cut=Capture(runtime,100);string cutReason=CaptureReason();
+   Check(runtime.Frames.Count==count&&cutReason=="listener-position-discontinuity",
+    "cut frame is privately consumed | reason="+cutReason+" prior ticks="+before.ObservationTicks+" cut ticks="+cut);
+   long fresh=Capture(runtime,101);string freshReason=CaptureReason();
+   Check(runtime.Frames.Count==count+1,"post-cut capture publishes a new frame | reason="+freshReason+" cut ticks="+cut+" fresh ticks="+fresh);
+   var after=Only(runtime);var listener=runtime.Frames[runtime.Frames.Count-1].Listener;
+   double dt=(fresh-cut)/(double)Stopwatch.Frequency,expected=1/dt;
    Check(after.Id==initial.Id&&after.Generation==initial.Generation,"camera boundary preserves source operating/grain lifetime");
-   Check(listener.Generation==2&&listener.Velocity[0]>0&&listener.Velocity[0]<100,"new spatial generation uses fresh post-cut measured difference");
+   Check(listener.Generation==before.Generation+1&&listener.Sequence==before.Sequence+2&&listener.ObservationTicks==fresh&&
+    dt>=.001&&dt<=.25&&expected<=100&&Math.Abs(listener.Velocity[0]-expected)<1e-9&&listener.VelocityKind=="estimated-camera-difference",
+    "new spatial generation uses fresh post-cut measured difference | prior generation="+before.Generation+" fresh generation="+listener.Generation+
+    " prior sequence="+before.Sequence+" fresh sequence="+listener.Sequence+" cut ticks="+cut+" fresh ticks="+fresh+" velocity="+listener.Velocity[0]+" expected="+expected);
    Check(listener.Units=="native-unverified","native coordinate uncertainty is preserved");
   });
   Test("a real rejected-evidence gap over 250 ms retains pool ownership but keeps the original generation boundary",delegate{

@@ -838,6 +838,8 @@ export class StreamingRenderer {
       }
       let l = 0,
         r = 0;
+      const controlAge = frame - this.controlFrame;
+      let recordControlAge = controlAge > this.stats.maximumControlAgeFrames;
       const slotCount = this.activeSlotIndices ? this.activeSlotCount : this.slots.length;
       for (let p = 0; p < slotCount; p++) {
         const slot = this.slots[this.activeSlotIndices ? this.activeSlotIndices[p] : p];
@@ -845,11 +847,11 @@ export class StreamingRenderer {
         // These existing typed arrays are stable throughout this synchronous
         // sample step. Cache their references without changing operation order.
         const gain = slot.gain, target = slot.target;
-        const controlAge = frame - this.controlFrame;
-        this.stats.maximumControlAgeFrames = Math.max(
-          this.stats.maximumControlAgeFrames,
-          controlAge,
-        );
+        // Every active path sees the same control age at this frame.
+        if (recordControlAge) {
+          this.stats.maximumControlAgeFrames = controlAge;
+          recordControlAge = false;
+        }
         if (controlAge > FS * 0.15 && !slot.releaseLeft) {
           slot.target.fill(0);
           slot.releaseLeft = 960;
@@ -904,6 +906,8 @@ export class StreamingRenderer {
           f = slot.cursor - k,
           s = slot.source,
           lowBand = s.bands[0], midBand = s.bands[1], highBand = s.bands[2];
+        const firstAt = k >= 0 ? k % this.historyFrames : -1;
+        const nextAt = firstAt + 1 === this.historyFrames ? 0 : firstAt + 1;
         let x = 0;
         for (let tap = 0; tap < 2; tap++) {
           const index = k + tap,
@@ -916,7 +920,7 @@ export class StreamingRenderer {
             }
             continue;
           }
-          const at = index % this.historyFrames;
+          const at = tap ? nextAt : firstAt;
           if (s.frames[at] !== index || s.generations[at] !== slot.generation) {
             this.stats.missingHistory++;
             if (diag) {
