@@ -9,6 +9,7 @@ const smooth=x=>x*x*(3-2*x);
 const matchSamples=64;
 const initialMatches=new WeakMap();
 const sourceTimelines=new WeakMap();
+const contiguousEndByPlan=new WeakMap();
 // Prepared data contains no reader, random state, phase, clock or emitted PCM.
 // Tokens bind the exact loaded asset/options; changing assets requires a new plan.
 const preparations10=new WeakMap();
@@ -242,6 +243,18 @@ export class StockGrainVoice {
     t.minimumPoolCycles=Math.min(t.minimumPoolCycles??count,count);t.maximumPoolCycles=Math.max(t.maximumPoolCycles,count);
     return {lo:Math.min(...allowed),hi:Math.max(...allowed),runs,allowed,count,start:Math.max(run[0],Math.min(run[1],p.a)),runEnd:run[1],period,anchor:p.a};
   }
+  #indexPlaybackPlan(plan){
+    const r=this.intervals;
+    // Precompute the endpoint of each compatible native run. clockRoom and
+    // waveform matching ask the same question repeatedly within this plan.
+    // Adjacent indices with a gap in the underlying PCM remain separate.
+    const end=new Uint32Array(r.length);
+    for(const [first,last] of plan.runs){
+      end[last]=last+1;
+      for(let i=last-1;i>=first;i--)end[i]=r[i].end===r[i+1].start?end[i+1]:i+1;
+    }
+    contiguousEndByPlan.set(plan,{end,intervals:r,allowed:plan.allowed,runs:plan.runs});
+  }
   // Metadata intervals define a source-time coordinate, not independent loops.
   // Within a contiguous run this reads original chronology without any blend.
   rateAt(u){const p=this.pair(u,this.#ratePair);return intervalRate(this.asset.sampleRate,this.intervals,p);}
@@ -289,7 +302,10 @@ export class StockGrainVoice {
     return this.read(position);
   }
   available(q,plan){
-    const i=Math.floor(q);let last=i;
+    const i=Math.floor(q),indexed=contiguousEndByPlan.get(plan);
+    if(indexed&&indexed.intervals===this.intervals&&indexed.allowed===plan.allowed&&indexed.runs===plan.runs)
+      return indexed.end[i]?indexed.end[i]-q:0;
+    let last=i;
     if(!plan.allowed.has(i))return 0;
     while(last+1<this.intervals.length&&plan.allowed.has(last+1)&&this.intervals[last].end===this.intervals[last+1].start)last++;
     return last+1-q;
@@ -389,7 +405,10 @@ export class StockGrainVoice {
     return true;
   }
   continuous(p,rate,output={value:0,energy:0}){
-    if(!this.texturePlan||p.a!==this.lastPlanAnchor){this.texturePlan=this.pool(p);this.lastPlanAnchor=p.a;}
+    if(!this.texturePlan||p.a!==this.lastPlanAnchor){
+      this.texturePlan=this.pool(p);this.lastPlanAnchor=p.a;
+      if(this.#preparation)this.#indexPlaybackPlan(this.texturePlan);
+    }
     const plan=this.texturePlan,delta=rate/FS;
     if(plan.count<2){
       // Sparse support cannot supply a multi-cycle chronological continuation.

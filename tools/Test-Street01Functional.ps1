@@ -29,7 +29,7 @@ $nodeFiles=@(
  'tests/Test-SoundMapInstalledWorkset01.mjs','tests/Test-SoundMapTelemetry.mjs',
  'tests/Test-SoundMapService.mjs','tests/Test-SoundMapViewer.mjs','tests/Test-SoundMapProducer.mjs','tests/Test-SoundMapAtlas01.mjs',
  'tests/Test-AcousticWorld01Continuity.mjs','tests/Test-SourcePressureCalibration.mjs',
- 'tests/Test-StockPressureSelection.mjs','tests/Test-VehiclePipeline.mjs',
+ 'tests/Test-StockPressureSelection.mjs','tests/Test-VehiclePipeline.mjs','tests/Test-ClockedFleet02.mjs',
  'tests/Test-ProcessingRolesStreet01.mjs','tests/Test-ProcessingRoleIntegrationStreet01.mjs',
  'tests/Test-InitialWorldPriority01.mjs','tests/Test-AcousticGpuPages01.mjs',
  'tests/Test-AtomicPublication01.mjs',

@@ -6,7 +6,8 @@ internal static class TestGameplay {
  static GameplayRuntime runtime;static long sequence,generation=1;static bool wasPaused;static readonly JavaScriptSerializer Json=new JavaScriptSerializer();static string root;static int checks;static readonly List<int> owned=new List<int>();
  static bool environmentFixture,deliveryFixture,deliveryViewerFixture;
  static void Check(bool x,string why){checks++;if(!x)throw new Exception(why);}
- static Dictionary<string,object> Read(string f){try{return Json.DeserializeObject(File.ReadAllText(f)) as Dictionary<string,object>;}catch(IOException){return null;}}
+ static Dictionary<string,object> Read(string f){try{using(var s=new FileStream(f,FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete))
+  using(var r=new StreamReader(s))return Json.DeserializeObject(r.ReadToEnd()) as Dictionary<string,object>;}catch(IOException){return null;}}
  static Dictionary<string,object> Evidence(){return Read(Path.Combine(root,".local","gameplay",runtime.Session,"host.json"));}
  static bool Lifecycle(string owner,string stage,string reason){
   string file=Path.Combine(root,".local","gameplay",runtime.Session,owner+"-lifecycle.jsonl");
@@ -103,10 +104,97 @@ internal static class TestGameplay {
   Console.WriteLine("PASS "+checks+" device-free delivery assertions "+receipt);
   return 0;
  }
+ static void FleetFrame(double time,int population,bool legacy){
+  long now=Stopwatch.GetTimestamp();double x=8*(1-Math.Cos(time*.28)),vx=8*.28*Math.Sin(time*.28);
+  var vehicles=new List<GameplayVehicle>();
+  for(int i=0;i<population;i++){
+   if(i==1&&time>=18&&time<19)continue;
+   double speed=i==0?0:.5+i*.04,phase=time*speed+i,offset=i==0?0:Math.Sin(phase)*.6;
+   double px=i==0?1:x+1+i*.4+offset,py=i%2==0?-3:2;
+   vehicles.Add(new GameplayVehicle{Id="authored-fleet-"+i,Generation=i==1&&time>=19?2:1,ObservationTicks=now,
+    Model=i>=22?0xA0010055u:i%3==2?0xA774B5A6u:0xF9300CC5u,Context=legacy||i%3==2?"player":"npc",
+    Position=new[]{px,py,1.3},Velocity=new[]{i==0?0:vx+.6*speed*Math.Cos(phase),0,0},
+    Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},OperatingPoint=.08+.7*(.5+.5*Math.Sin(time*(.45+i*.1)+i)),
+    Running=true,Valid=true});
+  }
+  var frame=new GameplayFrame{Session=runtime.Session,ValidThroughTicks=now+Stopwatch.Frequency/4,
+   WorldPreparationStartedUtc=Environment.GetEnvironmentVariable("RICHAUDIO_AUTHORED_WORLD_EPOCH01"),
+   Listener=new ListenerState{Version=1,Session=runtime.Session,Generation=generation,Sequence=sequence++,ObservationTicks=now,
+    ClockFrequency=Stopwatch.Frequency,GameTimeMs=sequence*50,Position=new[]{x,-3,1.6},Velocity=new[]{vx,0,0},
+    Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},ListenerKind="camera",VelocityKind="estimated-camera-difference",
+    Valid=true,Reason="valid",Coordinates="gta-native-unscaled",Units="native-unverified"},Vehicles=vehicles.ToArray()};
+  if(time<.01)GameplayWire.Decode(GameplayWire.Encode(frame,runtime.Session),runtime.Session);
+  runtime.Publish(frame);
+ }
+ static int FleetBenchmark(int blocks,int limit,bool legacy){
+  Check(environmentFixture&&blocks>=256&&blocks<=13440&&limit>=1&&limit<=25,"bounded normal discard fleet benchmark");
+  Until(()=>Number(Evidence(),"consumedFrames")>0,12000,0);
+  var initial=Evidence();int pid=(int)Number(initial,"nodePid");owned.Add(pid);
+  double startBlocks=Number(initial,"receivedBlocks"),startFrames=Number(initial,"consumedFrames");
+  var run=Stopwatch.StartNew();var samples=new List<object>();
+  int nextSample=0;string reason="workload-complete";
+  do{
+   double time=run.Elapsed.TotalSeconds;
+   int n=time<1?1:time<3?2:time<6?3:time<9?5:time<12?10:25;
+   FleetFrame(time,Math.Min(limit,n),legacy);
+   if(run.ElapsedMilliseconds>=nextSample){
+    var host=Evidence();var worker=host!=null&&host.ContainsKey("worker")?host["worker"]as Dictionary<string,object>:null;
+    samples.Add(new{seconds=time,requestedPopulation=Math.Min(limit,n),receivedBlocks=Number(host,"receivedBlocks"),
+     consumedFrames=Number(host,"consumedFrames"),active=Number(worker,"activeSources"),paths=Number(worker,"selectedPaths"),
+     reflections=Number(worker,"reflectionPathsSelected"),arrivals=Number(worker,"arrivals"),retired=Number(worker,"retired"),
+     sourceStates=Value(worker,"sourceStates"),population=Value(worker,"fleetPopulation"),world=Value(worker,"installedScene"),
+     readiness=Value(Value(worker,"acousticWorld")as Dictionary<string,object>,"environmentalReadiness01"),
+     underflowFrames=Number(host,"underflowFrames"),bufferedFrames=Number(host,"bufferedFrames")});
+    if(Number(host,"underflowFrames")>0||runtime.HostPid==0){reason="host-ended-before-workload-complete";break;}
+    if(Number(host,"receivedBlocks")-startBlocks>=blocks)break;
+    if(time>blocks*512.0/48000+12){reason="workload-progress-timeout";break;}
+    nextSample+=500;
+   }
+   Thread.Sleep(40);
+  }while(true);
+  double seconds=run.Elapsed.TotalSeconds;
+  runtime.RequestStop("authored-fleet-"+reason);bool joined=runtime.Join(6000);
+  var final=Evidence();bool closed=joined&&owned.TrueForAll(p=>p>0&&!Alive(p));
+  string receipt=Path.Combine(root,".local","fleet-driver.json");
+  using(var output=new StreamWriter(new FileStream(receipt,FileMode.CreateNew)))
+   output.Write(new JavaScriptSerializer{MaxJsonLength=8388608}.Serialize(new{schema=1,session=runtime.Session,
+    reason,requestedBlocks=blocks,requestedPopulation=limit,seconds,startBlocks,startFrames,closed,attempts=runtime.Attempts,initial,final,samples}));
+  Console.WriteLine(receipt);
+  return closed&&runtime.Attempts==1&&final!=null&&false.Equals(Value(final,"endpointOpened"))?0:1;
+ }
+ static object Value(Dictionary<string,object> d,string key){object value;return d!=null&&d.TryGetValue(key,out value)?value:null;}
+ static int OwnFleet(string[] args){
+  int blocks=int.Parse(args[3]),population=int.Parse(args[4]);
+  Check(blocks>=256&&blocks<=13440&&population>=1&&population<=25,"owned benchmark bounds");
+  string self=Process.GetCurrentProcess().MainModule.FileName;
+  string package=Path.GetFullPath(args[1]),identity=Path.GetFullPath(args[2]);
+  Check(package.IndexOf('"')<0&&identity.IndexOf('"')<0,"literal fixture paths");
+  using(var job=new OwnedProcessJob(4096))using(var child=job.StartOwned(self,"\""+package+"\" \""+identity+"\" --fleet-"+blocks+"-"+population,package)){
+   var deadline=Stopwatch.StartNew();double limit=blocks*512.0/48+45000;
+   while(!child.WaitForExit(1000))if(deadline.ElapsedMilliseconds>=limit){
+    Console.Error.WriteLine("Owned fleet driver timed out");return 2;
+   }
+   var exit=child.CaptureExitStatus();
+   if(exit.State!=OwnedProcessState.Exited||!exit.ExitCode.HasValue)return 2;
+   string error=Path.Combine(package,".local","fleet-driver-error.txt");
+   if(exit.ExitCode.Value!=0&&File.Exists(error))Console.Error.WriteLine(File.ReadAllText(error));
+   return unchecked((int)exit.ExitCode.Value);
+  }
+ }
  public static int Main(string[]args){
-  try{RingTests();PipeTimeoutTests();if(args.Length==1&&args[0]=="--ring-only"){Console.WriteLine("PASS "+checks+" exact PCM reserve / native callback / retained starvation guard / real pipe timeout checks; no endpoint");return 0;}root=Path.GetFullPath(args[0]);var c=PlayableConfiguration.Load(Path.Combine(root,"playable.json"));environmentFixture=c.DiscardEnvironmentalOutput;deliveryFixture=args.Length==3&&args[2].StartsWith("--delivery-",StringComparison.Ordinal);deliveryViewerFixture=deliveryFixture&&args[2]=="--delivery-world-viewer";Settings(1);string pointer=Path.Combine(root,".local","fixture-pointer.json");Directory.CreateDirectory(Path.GetDirectoryName(pointer));File.WriteAllText(pointer,Json.Serialize(new{schema=1,packageRoot=root,manifestSha256=PlayableConfiguration.Digest(c.Manifest)}));
+  try{
+   if(args.Length==5&&args[0]=="--own-fleet")return OwnFleet(args);
+   bool fleet=args.Length==3&&args[2].StartsWith("--fleet-",StringComparison.Ordinal);
+   if(!fleet){RingTests();PipeTimeoutTests();}
+   if(args.Length==1&&args[0]=="--ring-only"){Console.WriteLine("PASS "+checks+" exact PCM reserve / native callback / retained starvation guard / real pipe timeout checks; no endpoint");return 0;}
+   root=Path.GetFullPath(args[0]);string manifest=Path.Combine(root,"playable.json");var raw=fleet?Read(manifest):null;
+   if(fleet)Check(root.IndexOf(Path.DirectorySeparatorChar+".local"+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase)>=0&&
+    String.Equals(Value(raw,"gameExecutable")as string,Process.GetCurrentProcess().MainModule.FileName,StringComparison.OrdinalIgnoreCase)&&
+    "environment-observation".Equals(Value(raw,"outputSink")),"private authored self-owner and discard sink required before package verification");
+   var c=PlayableConfiguration.Load(manifest);environmentFixture=c.DiscardEnvironmentalOutput;deliveryFixture=fleet||args.Length==3&&args[2].StartsWith("--delivery-",StringComparison.Ordinal);deliveryViewerFixture=deliveryFixture&&args[2]=="--delivery-world-viewer";Settings(1);string pointer=Path.Combine(root,".local","fixture-pointer.json");Directory.CreateDirectory(Path.GetDirectoryName(pointer));File.WriteAllText(pointer,Json.Serialize(new{schema=1,packageRoot=root,manifestSha256=PlayableConfiguration.Digest(c.Manifest)}));
    runtime=new GameplayRuntime(!environmentFixture);runtime.Start(pointer,c.GameExecutable,args[1]);Until(()=>runtime.Configuration!=null,5000,0);Thread.Sleep(250);Check(runtime.Attempts==0,"no host before Story readiness");runtime.SetStoryReady(true);
-   Until(()=>runtime.HostPid>0,5000);owned.Add(runtime.HostPid);
+   Until(()=>runtime.HostPid>0,5000,fleet?0:1);owned.Add(runtime.HostPid);
+   if(fleet){var parts=args[2].Substring("--fleet-".Length).Split('-');return FleetBenchmark(int.Parse(parts[0]),int.Parse(parts[1]),!raw.ContainsKey("vehicleSourcePolicy"));}
    if(deliveryFixture)return DeliveryCase(args[2]);
    if(environmentFixture){
     Until(()=>Number(Evidence(),"consumedFrames")>0,12000,0);double consumed=Number(Evidence(),"consumedFrames");
@@ -175,7 +263,12 @@ internal static class TestGameplay {
    int crash=runtime.HostPid;using(var p=Process.GetProcessById(crash))p.Kill();Until(()=>runtime.HostPid!=0&&runtime.HostPid!=crash,10000);owned.Add(runtime.HostPid);Until(()=>Number(Evidence(),"peak")>0,10000);
    owned.Add((int)Number(Evidence(),"nodePid"));int last=runtime.HostPid;runtime.RequestStop();Check(runtime.Join(6000),"supervisor stopped");Check(!Alive(last),"no owned host after unload");foreach(int id in owned)if(id>0)Check(!Alive(id),"old hosts and Node children remain dead");
    string report=Json.Serialize(new{schema=1,checks=checks,actualComponents=true,gameGetters="injected; live unverified",endpointOpened=false,automaticStart=true,independentSources=2,recoveryAttempts=runtime.Attempts,cleanup=true,snapshotGap=new{milliseconds=7200,hostRestarted=false,expiredSources=Number(quietWorker,"activeSources"),expiredPaths=Number(quietWorker,"selectedPaths"),silentNativeFrames=Number(quietLater,"consumedFrames")-quietFrames,outputEnergyDelta=Number(quietLater,"sumSquares")-quietEnergy,resumedActualPcm=true},measurement=before});File.WriteAllText(Path.Combine(root,".local","gameplay-fixture-result.json"),report);Console.WriteLine(report);return 0;
-  }catch(Exception e){Console.Error.WriteLine(e.ToString());return 1;}finally{if(runtime!=null){runtime.RequestStop();runtime.Join(6000);}}
+  }catch(Exception e){
+   Console.Error.WriteLine(e.ToString());
+   if(runtime!=null&&args.Length==3&&args[2].StartsWith("--fleet-",StringComparison.Ordinal))
+    using(var output=new StreamWriter(new FileStream(Path.Combine(root,".local","fleet-driver-error.txt"),FileMode.CreateNew)))output.Write(e.ToString());
+   return 1;
+  }finally{if(runtime!=null){runtime.RequestStop();runtime.Join(6000);}}
  }
  static bool Alive(int id){try{using(var p=Process.GetProcessById(id))return !p.HasExited;}catch(ArgumentException){return false;}}
 }

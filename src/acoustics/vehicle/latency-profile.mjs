@@ -14,6 +14,12 @@ export function resolveLatencyProfile(name='baseline'){
 // Separate explicit product selection. This does not widen the sealed
 // LOW-LATENCY-01 demonstration contract or change any existing manifest.
 export function validateStreetLatencySelection01(configuration){
+ if(configuration?.vehicleSourcePolicy!=null){
+  if(configuration.vehicleSourcePolicy!=='catalogue-fleet-01'||configuration.latencyProfile!=='street-01'||configuration.demoProfile!=null||
+    configuration.continuityPolicy!=='camera-source-01'||!Array.isArray(configuration.eligible)||configuration.eligible.length!==0)
+   throw Error('Catalogue fleet requires normal STREET-01 continuity and no model allowlist');
+  return;
+ }
  if(configuration?.latencyProfile!=='street-01')return;
  const eligible=configuration.eligible;
  if(configuration.demoProfile!=null||configuration.continuityPolicy!=null&&configuration.continuityPolicy!=='camera-source-01'||!Array.isArray(eligible)||eligible.length<1||eligible.length>2||eligible.some(v=>v?.model!==0xf9300cc5||!['player','npc'].includes(v.context))||eligible.filter(v=>v.context==='player').length!==1||new Set(eligible.map(v=>v.context)).size!==eligible.length)throw Error('STREET-01 latency requires a normal Bati-only package and camera-source-01 continuity');

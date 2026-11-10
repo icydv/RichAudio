@@ -65,7 +65,8 @@ namespace RichAudio.Beacon.Rph {
    stage="offer.identity";
    string identity=VehicleIdentity(v);var old=tracked.Find(t=>t.Identity.StartsWith(identity+":",StringComparison.Ordinal));
    if(old!=null){old.Vehicle=v;return;}
-   double dist=Distance(V(v.Position),camera);if(tracked.Count>=4){tracked.Sort((a,b)=>a.Distance.CompareTo(b.Distance));if(dist>=tracked[3].Distance/1.3)return;tracked.RemoveAt(3);}
+   int limit=r.Configuration.CatalogueFleet?r.Configuration.MaximumVehicleObservations:4;
+   double dist=Distance(V(v.Position),camera);if(tracked.Count>=limit){tracked.Sort((a,b)=>a.Distance.CompareTo(b.Distance));if(dist>=tracked[limit-1].Distance/1.3)return;tracked.RemoveAt(limit-1);}
    tracked.Add(new Tracked{Vehicle=v,Identity=identity+":"+(++instance),Model=model,Context=context,Distance=dist});
   }
   static void Capture(GameplayRuntime r){
@@ -88,7 +89,7 @@ namespace RichAudio.Beacon.Rph {
    stage="capture.player-current-vehicle";Offer(player.CurrentVehicle,player,r,camera.Position,true);
    if(Stopwatch.GetTimestamp()>=nextDiscovery){discovered=World.GetEntities(new Vector3((float)camera.Position[0],(float)camera.Position[1],(float)camera.Position[2]),600,GetEntitiesFlags.ConsiderCars|GetEntitiesFlags.ConsiderBikes);cursor=0;nextDiscovery=Stopwatch.GetTimestamp()+Stopwatch.Frequency;}
    for(int n=0;n<8&&cursor<discovered.Length&&Stopwatch.GetTimestamp()-began<Stopwatch.Frequency*.004;n++)Offer(discovered[cursor++] as Vehicle,player,r,camera.Position);
-   var observations=new List<GameplayVehicle>(4);
+   var observations=new List<GameplayVehicle>(r.Configuration.CatalogueFleet?tracked.Count:4);
    foreach(var t in tracked.ToArray()){
     if(Stopwatch.GetTimestamp()-began>Stopwatch.Frequency*.01)break;
     try{

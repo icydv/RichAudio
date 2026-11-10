@@ -50,12 +50,13 @@ namespace RichAudio.Beacon.Transport {
  }
  public static class GameplayWire {
   public const int MaximumBytes=32768;
+  public const int MaximumVehicles=32;
   [DllImport("kernel32.dll",SetLastError=true)]static extern bool GetNamedPipeClientProcessId(Microsoft.Win32.SafeHandles.SafePipeHandle pipe,out uint pid);
   [DllImport("kernel32.dll",SetLastError=true)]static extern bool GetNamedPipeServerProcessId(Microsoft.Win32.SafeHandles.SafePipeHandle pipe,out uint pid);
   public static void Peer(PipeStream pipe,int expected,bool server){uint pid;bool ok=server?GetNamedPipeClientProcessId(pipe.SafePipeHandle,out pid):GetNamedPipeServerProcessId(pipe.SafePipeHandle,out pid);Protocol.Check(ok&&pid==(uint)expected,"owned gameplay peer PID");}
   public static PipeSecurity Security(){var sid=WindowsIdentity.GetCurrent().User;var s=new PipeSecurity();s.SetAccessRuleProtection(true,false);s.SetOwner(sid);s.AddAccessRule(new PipeAccessRule(sid,PipeAccessRights.FullControl,AccessControlType.Allow));return s;}
   public static void Validate(GameplayFrame f,string session){
-   Protocol.Check(f!=null&&f.Version==1&&f.Session==session,"gameplay session");Protocol.Validate(f.Listener);Protocol.Check(f.Listener.Session==session&&f.Vehicles!=null&&f.Vehicles.Length<=8,"gameplay frame budget");
+   Protocol.Check(f!=null&&f.Version==1&&f.Session==session,"gameplay session");Protocol.Validate(f.Listener);Protocol.Check(f.Listener.Session==session&&f.Vehicles!=null&&f.Vehicles.Length<=MaximumVehicles,"gameplay frame budget");
    Protocol.Check(f.ValidThroughTicks==0||f.ValidThroughTicks>=f.Listener.ObservationTicks&&(decimal)f.ValidThroughTicks-f.Listener.ObservationTicks<=Stopwatch.Frequency/4m,"gameplay original source expiry");
    if(f.WorldPreparationStartedUtc!=null){DateTimeOffset epoch;Protocol.Check(f.WorldPreparationStartedUtc.Length<=40&&f.WorldPreparationStartedUtc.EndsWith("Z",StringComparison.Ordinal)&&DateTimeOffset.TryParse(f.WorldPreparationStartedUtc,System.Globalization.CultureInfo.InvariantCulture,System.Globalization.DateTimeStyles.RoundtripKind,out epoch),"world preparation epoch");}
    var interior=f.CameraInterior01;

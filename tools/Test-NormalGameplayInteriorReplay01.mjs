@@ -15,8 +15,11 @@ import {publishNormalProof01} from './Prepare-NormalObservationProof01.mjs';
 
 const source=path.resolve('.local/combined-observation-manual-01');
 const read=file=>JSON.parse(fs.readFileSync(file,'utf8').replace(/^\uFEFF/,''));
-const exterior=process.argv.includes('--exterior'),scopeIndex=process.argv.indexOf('--qualification-fixture');
+const exterior=process.argv.includes('--exterior'),fleet=process.argv.includes('--fleet'),scopeIndex=process.argv.indexOf('--qualification-fixture');
+const expectLayerWithheld=process.argv.includes('--expect-layer-withheld');
 const fixtureScope=scopeIndex<0?null:read(process.argv[scopeIndex+1]);
+assert(!fleet||!fixtureScope,'fleet replay does not change the sealed Phase 1 fixture');
+assert(!expectLayerWithheld||exterior&&fleet,'the layer-withheld control belongs to the authored fleet exterior replay');
 const exteriorRoot=path.resolve('.local/world-native-integration-01/current-world/operational');
 const reference=exterior?read('.local/street01-installed/reflections-02/result.json'):null;
 const plan=exterior?{validatedManifestPath:path.join(exteriorRoot,'geometry/manifest.json'),
@@ -25,7 +28,7 @@ const manifest=read(plan.validatedManifestPath),epoch=manifest.ValidationEpochUt
 const catalogSHA256=plan.catalogSHA256??manifest.ResolvedCatalogSHA256;
 const capture=path.join(source,'capture.jsonl');
 if(!exterior)assert(fs.statSync(capture).size<=8*1024*1024);
-const frames=exterior?Array.from({length:161},(_,i)=>{
+const frames=exterior?Array.from({length:fleet?321:161},(_,i)=>{
  const t=i/20,dx=Math.min(.3,Math.max(0,(t-3)*.1)),f=budgetFrame042(i,t);
  f.listener.position=reference.listener.map((v,j)=>v+(j===0?dx:0));
  f.listener.velocity=[t>3&&t<6?.1:0,0,0];
@@ -35,13 +38,14 @@ const frames=exterior?Array.from({length:161},(_,i)=>{
 const folder=fs.mkdtempSync(path.resolve(exterior?'.local/normal-exterior-replay-':'.local/normal-interior-replay-'));
 console.log(folder);
 const cacheRoot=path.resolve('.local');
-const pkg=writeOriginalGameplayPackageStreet01(folder,{latencyProfile:'street-01',gameHash:manifest.InputBinding.GameExecutableSHA256,
+const pkg=writeOriginalGameplayPackageStreet01(folder,{latencyProfile:'street-01',gameHash:manifest.InputBinding.GameExecutableSHA256,fleet,
  acousticWorld:{privateCacheRoot:cacheRoot,derivedCacheRoot:cacheRoot,manifestPath:path.relative(cacheRoot,plan.validatedManifestPath),
   catalogPath:path.relative(cacheRoot,plan.catalogPath)}});
 // STREET-01 source and timing contract, with the explicit retained-cache
 // reader binding already supported by the normal producer.
 const session=frames[0].frame.session;
 const config={...pkg.config,featureProfile:'STREET-01',continuityPolicy:'camera-source-01',acousticPathEvidence01:true};
+if(fleet)Object.assign(config,{vehicleSourcePolicy:'catalogue-fleet-01',eligible:[]});
 let bridgeEpoch=epoch;
 if(fixtureScope){
  const world=path.join(folder,'world'),derived=read(fixtureScope.retainedManifestPath),catalog=read(fixtureScope.catalogPath);
@@ -104,6 +108,8 @@ try{
   authored.observationTicks=l.observationTicks;
   if(exterior)authored.riderAttached=true;
   f.vehicles=[authored];
+  if(fleet&&elapsed>=1000)f.vehicles.push({...authored,id:'authored-late-second',model:0xa774b5a6,riderAttached:false,
+   position:authored.position.map((n,i)=>n+(i===0?.6:0)),operatingPoint:.3+.15*Math.sin(t)});
   send({type:'snapshot',ageMs:row.sourceAgeMs+Math.max(0,performance.now()-due),frame:f});
  }
  await wait(750);
@@ -117,6 +123,15 @@ const active=statuses.filter(s=>s.activeSources>0&&(exterior?s.installedScene?.a
 assert(active.length>0,'normal producer must admit a surrounding workset and render an authored source');
 assert(active.every(s=>s.installedScene.sourceCatalogueSHA256===(fixtureScope?.catalogSHA256??catalogSHA256)));
 assert(active.some(s=>s.acousticWorld.environmentalReadiness01.counters.replacements>=2));
+if(fleet){
+ const paired=active.filter(s=>s.activeSources===2&&s.sourceStates.some(v=>v.id==='authored-late-second'&&v.sourceFrame>0));
+ assert(paired.length>=2,'both independent emitters reach the normal renderer with the retained scene applied');
+ const first=paired[0],last=paired.at(-1);
+ assert(last.acousticWorld.environmentalReadiness01.counters.replacements>first.acousticWorld.environmentalReadiness01.counters.replacements);
+ assert.equal(last.arrivals,first.arrivals);
+ assert.equal(last.retired,first.retired);
+ for(const state of first.sourceStates)assert(last.sourceStates.some(v=>v.id===state.id&&v.generation===state.generation&&v.sourceFrame>state.sourceFrame));
+}
 const final=statuses.at(-1);
 if(fixtureScope){
  const evidence=fs.readFileSync(path.join(folder,'.local/gameplay',session,'environment-evidence.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
@@ -131,10 +146,20 @@ if(fixtureScope){
 assert.equal(final.acousticWorld.environmentalReadiness01.counters.validityGaps,0);
 if(exterior){
  const reflected=active.flatMap(s=>s.installedPropagation.paths?.reflected??[]);
- assert(reflected.length>0&&final.installedPropagation.selectedReflections>0,'retained exterior geometry must render a finite reflection');
- assert(reflected.every(p=>p.distance>0&&p.delay>0&&p.materialBasis?.[0]?.kind==='reflection'));
+ if(expectLayerWithheld){
+  assert.equal(reflected.length,0);
+  assert.equal(final.installedPropagation.selectedReflections,0);
+  assert(active.some(s=>s.activeSources===2&&s.installedPropagation.reflectionSearch?.unknownByReason?.['collision-layer-activation-unknown']>0&&
+   s.installedPropagation.paths?.direct.filter(p=>p.visibility==='conditional-direct-unknown-coverage').length===4),
+   'two source lifetimes keep four independent conditional direct paths while the unknown layer withholds reflection');
+ }else{
+  assert(reflected.length>0&&final.installedPropagation.selectedReflections>0,'retained exterior geometry must render a finite reflection');
+  assert(reflected.every(p=>p.distance>0&&p.delay>0&&p.materialBasis?.[0]?.kind==='reflection'));
+ }
  assert.equal(closed,true);
- console.log(JSON.stringify({reflected:final.installedPropagation.selectedReflections,sample:reflected.at(-1),maximumPacketGap}));
+ console.log(JSON.stringify({reflected:final.installedPropagation.selectedReflections,sample:reflected.at(-1),maximumPacketGap,
+  ...(expectLayerWithheld?{maximumSurfaces:Math.max(...active.map(s=>s.installedScene.activeSurfaces)),
+   replacements:final.acousticWorld.environmentalReadiness01.counters.replacements,withheld:'collision-layer-activation-unknown'}:{})}));
 }else{
 assert.equal(final.installedScene,null);
 const postExit=statuses.slice(statuses.indexOf(active.at(-1))+1).find(s=>!s.installedScene&&s.activeSources>0);

@@ -14,6 +14,8 @@ import {AirflowSourceStreet01,airflowSeedStreet01} from './airflow-street01.mjs'
 import {isInstalledStaticScene01,installedStaticSceneMetadata01} from '../world/installed-static-scene01.mjs';
 import {registerPreparedSoundMapGeometry01} from '../streaming/soundmap-telemetry.mjs';
 const FS=48000,BLOCK=512,MAX=2,unit=v=>{const n=Math.hypot(...v);if(n<1e-8)throw Error('orientation discontinuity');return v.map(x=>x/n);};
+const sameVehicle01=(a,b)=>a?.valid&&b.valid&&a.generation===b.generation&&a.model===b.model&&a.context===b.context;
+const voiceIdentity01=v=>`${v.id}:${v.generation}:${v.model}:${v.context}`+(v.acquisition01===undefined?'':':'+v.acquisition01);
 const mix=(a,b,u)=>a.map((x,i)=>x+(b[i]-x)*u),distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
 const pcmCounters=()=>({nonzeroBlocks:0,peak:0,sumSquares:0});
 // Fixed-size diagnostics only: observe the original PCM without changing it.
@@ -25,7 +27,7 @@ export class StockGameplay {
  #installedApplicationPermit01=null;#installedSceneService01=null;#installedSceneStopped01=false;#installedStopAt01=null;
  get installedSceneService01(){return this.#installedSceneService01;}
  get installedSceneStopped01(){return this.#installedSceneStopped01;}
- constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled'}){
+ constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled',vehicleSourcePolicy=null}){
   if(!['disabled','explicit-control05'].includes(sourcePreparationPolicy))throw Error('Explicit source preparation policy required');
   if(!['baseline','camera-source-01'].includes(continuityPolicy))throw Error('Explicit vehicle continuity policy required');
   if(!['baseline','arrived-segments-50'].includes(continuousTimingPolicy))throw Error('Explicit continuous timing policy required');
@@ -35,11 +37,17 @@ export class StockGameplay {
   if(!['baseline','authored-stationary-emission-01'].includes(operatingStatePolicy)||operatingStatePolicy==='baseline'&&stationaryEmissionContract!==null)throw Error('Explicit authored stationary emission policy required');
   this.operatingEmission=operatingStatePolicy==='baseline'?null:new StationaryEmissionController(stationaryEmissionContract);
   if(this.latencyProfile.id==='street-01'&&(continuityPolicy!=='camera-source-01'||continuousTimingPolicy!=='baseline'))throw Error('STREET-01 latency requires independent camera/source continuity and its exact immutable timing');
+  if(vehicleSourcePolicy!==null&&(vehicleSourcePolicy!=='catalogue-fleet-01'||this.latencyProfile.id!=='street-01'))throw Error('Explicit normal catalogue fleet policy required');
+  this.catalogueFleet=vehicleSourcePolicy!==null;
+  // Three emitter slots per voice fit the existing sixteen-source contract.
+  this.voiceLimit=this.catalogueFleet?5:MAX;
+  this.vehicleLimit=this.catalogueFleet?32:8;
+  this.fleetPopulation=null;this.fleetAcquisition=0;
   this.registry=registry;this.profiles=profiles;this.now=now;this.session=session;this.settings={quality:'auto',acceleration:'auto',enabled:true,volume:1,reflections:true,mode:'experimental-additive',airflowEnabled:false,airflowLevel:.35};
   // Fixed common observation clock: camera-stationary calibration cannot
   // relabel time while an independently moving vehicle is producing Doppler.
   this.playout=new ListenerPlayout({anchoredClock:true,delayMs:this.controlDelayMs,preserveGenerationHistory:continuityPolicy==='camera-source-01',recoveryPolicy:continuousTimingPolicy==='arrived-segments-50'?'arrived-segments-01':'baseline'});this.snapshots=[];this.sample=null;this.quality=new AcousticQualityController({now});
-  this.slots=Array.from({length:MAX},(_,i)=>({index:i,identity:null,generation:1,source:null,vehicle:null,score:0,airflow:null,local:[new Float32Array(BLOCK),new Float32Array(BLOCK)]}));
+  this.slots=Array.from({length:this.voiceLimit},(_,i)=>({index:i,identity:null,generation:1,source:null,vehicle:null,score:0,airflow:null,local:[new Float32Array(BLOCK),new Float32Array(BLOCK)]}));
   // Existing engine/exhaust order and calibration remain unchanged. Aero has
   // its own history and enters the same finite propagation/path solver.
   this.ids=this.slots.flatMap(s=>['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`)).concat(this.slots.map(s=>`stock:slot${s.index}:aero`));
@@ -50,7 +58,7 @@ export class StockGameplay {
   this.localAirflow=[new Float32Array(BLOCK),new Float32Array(BLOCK)];
   this.localAirflowRelease={last:[0,0],remaining:0,from:[0,0]};
   this.airflowState={windBasis:'explicit-still-air-assumption',velocityBasis:'source-observed-velocity; native-unverified uses declared 1 unit/metre assumption',riderActive:false,exteriorSources:0,maximumSynthesisMs:0};
-  this.activeLimit=MAX;this.lastGood=now();this.consecutiveMisses=0;this.sceneExpiry=-Infinity;this.lastFrame=-1;this.lastGeneration=0;
+  this.activeLimit=this.voiceLimit;this.lastGood=now();this.consecutiveMisses=0;this.sceneExpiry=-Infinity;this.lastFrame=-1;this.lastGeneration=0;
   this.stats={blocks:0,acceptedFrames:0,rejectedFrames:0,unsupported:0,arrivals:0,retired:0,headroomPathsOmitted:0,deadlineMisses:0,maximumProcessingMs:0,maximumActive:0,sourceBudgetReductions:0,geometryUpdates:0,geometryFallbacks:0,clippingFaults:0};
   this.installedSceneDiagnostics01={queued:0,coalesced:0,discardedBeforeApplication:0,candidates:0,withheld:0,accepted:0,rejected:0,activations:0,renewals:0,continuityFailures:0,transactionOverruns:0,postStopDiscarded:0,maximumApplicationMilliseconds:0,stopAt:null,recent:[]};
   this.#installedSceneService01=null;this.#installedSceneStopped01=false;this.#installedApplicationPermit01=null;this.installedRenderPreparing01=false;this.installedFallbackPending01=null;
@@ -74,7 +82,7 @@ export class StockGameplay {
   return {sourceGain:profile?.sourceGain??1,...(profile?.pressureSharesByState?{pressureSharesByState:profile.pressureSharesByState}:{})};
  }
  prepareStartupVoices01(eligible){
-  if(this.lastFrame!==-1||this.pipeline.renderer.frame!==0||this.startupVoices01.size||eligible.length>2)
+  if(this.lastFrame!==-1||this.pipeline.renderer.frame!==0||this.startupVoices01.size||eligible.length>(this.catalogueFleet?8:2))
    throw Error('one bounded normal startup voice preparation');
   const engine=new Float32Array(BLOCK),exhaust=new Float32Array(BLOCK);
   for(const {model,context} of eligible){
@@ -91,7 +99,7 @@ export class StockGameplay {
      for(let block=0;block<3;block++)disposable.renderInto(control,engine,exhaust);
     }
    }
-   this.startupVoices01.set(model+':'+context,this.registry.createSource(model,context,options));
+   this.startupVoices01.set(this.catalogueFleet?bank:model+':'+context,this.registry.createSource(model,context,options));
   }
   return this.startupVoices01.size;
  }
@@ -108,7 +116,7 @@ export class StockGameplay {
  }
  accept(frame,ageMs,validForMs=null){
   try{
-   const state=frame.listener;if(frame.version!==1||frame.session!==this.session||!Array.isArray(frame.vehicles)||frame.vehicles.length>8||!Number.isFinite(ageMs)||ageMs< -2||ageMs>250||validForMs!==null&&(!Number.isFinite(validForMs)||validForMs<=0||validForMs>252))throw Error('gameplay frame');
+   const state=frame.listener;if(frame.version!==1||frame.session!==this.session||!Array.isArray(frame.vehicles)||frame.vehicles.length>this.vehicleLimit||!Number.isFinite(ageMs)||ageMs< -2||ageMs>250||validForMs!==null&&(!Number.isFinite(validForMs)||validForMs<=0||validForMs>252))throw Error('gameplay frame');
    if(state.session!==this.session||state.sequence<=this.lastFrame||state.generation<this.lastGeneration)throw Error('gameplay identity');
    const ids=new Set();for(const v of frame.vehicles){
     if(typeof v.id!=='string'||!/^[\w:-]{1,64}$/.test(v.id)||ids.has(v.id)||!Number.isInteger(v.generation)||v.generation<1||!Number.isInteger(v.model)||v.model<0||v.model>0xffffffff||!['player','npc'].includes(v.context)||typeof v.running!=='boolean'||typeof v.valid!=='boolean'||!Number.isFinite(v.operatingPoint)||v.operatingPoint<0||v.operatingPoint>1)throw Error('vehicle identity/state');
@@ -127,7 +135,19 @@ export class StockGameplay {
    // Doppler history still have an explicit generation boundary.
    const sameRepresentation=previous&&state.clockFrequency===previous.clockFrequency&&state.coordinates===previous.coordinates&&state.units===previous.units&&state.listenerKind===previous.listenerKind;
    if(this.lastGeneration&&state.generation!==this.lastGeneration&&(this.continuityPolicy==='baseline'||!sameRepresentation))this.snapshots=[];
-   this.snapshots.push({time,frame:structuredClone(frame),wallExpires:validForMs===null?Infinity:this.now()+validForMs});while(this.snapshots.length>64)this.snapshots.shift();
+   const copy=structuredClone(frame),snapshot={time,frame:copy,wallExpires:validForMs===null?Infinity:this.now()+validForMs};
+   if(this.catalogueFleet){
+    const previousSnapshot=this.snapshots.at(-1);
+    snapshot.vehiclesById=new Map();
+    for(const v of copy.vehicles){
+     const old=previousSnapshot?.vehiclesById.get(v.id);
+     const continuous=sameVehicle01(old,v)&&this.now()<previousSnapshot.wallExpires&&v.observationTicks>=old.observationTicks&&
+      v.observationTicks-old.observationTicks<=state.clockFrequency/4;
+     v.acquisition01=continuous?old.acquisition01:++this.fleetAcquisition;
+     snapshot.vehiclesById.set(v.id,v);
+    }
+   }
+   this.snapshots.push(snapshot);while(this.snapshots.length>64)this.snapshots.shift();
    this.lastFrame=state.sequence;this.lastGeneration=state.generation;this.stats.acceptedFrames++;this.tickInstalledScene01();
    if(this.staticSceneBinding?.mode==='installed-static-conditional-partial'&&(!this.installedWindowContains01(this.pipeline.simulation.scene,state.position)||this.installedCurrentSourcePositions01(frame).some(p=>!this.installedWindowContains01(this.pipeline.simulation.scene,p))))this.#installedSceneService01?.invalidateConsumer01?.('outside-active-workset',this.now());
    for(const v of frame.vehicles)if(v.valid){this.stageCounters.validVehicleObservations++;if(v.running)this.stageCounters.runningVehicleObservations++;else this.lifecycle.observedNotRunning++;}
@@ -168,7 +188,13 @@ export class StockGameplay {
   return vehicle.position.map((x,i)=>x+vehicle.forward[i]*offset+vehicle.up[i]*(engine?.65:.3));
  }
  installedCurrentSourcePositions01(frame){
-  return frame.vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-frame.listener.position[i])<=128)).slice(0,2).flatMap(v=>{
+  const nearby=frame.vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-frame.listener.position[i])<=128));
+  const selected=this.catalogueFleet?nearby.flatMap(v=>{
+   const observed=this.snapshots.at(-1)?.vehiclesById.get(v.id);
+   const item=this.vehicleCandidate01(sameVehicle01(observed,v)?observed:v,frame.listener,true,this.registry.resolve(v.model,v.context));
+   return item?[item]:[];
+  }).sort((a,b)=>b.score-a.score).slice(0,this.voiceLimit).map(item=>item.v):nearby.slice(0,2);
+  return selected.flatMap(v=>{
    const model=this.profiles?.emitters?this.registry.resolve(v.model,v.context).bank?.model:undefined;
    const roles=this.settings.airflowEnabled&&v.model===0xf9300cc5?['engine','exhaust','aero']:['engine','exhaust'];
    return roles.map(role=>this.stockEmitterPosition01(v,role,model));
@@ -289,7 +315,18 @@ export class StockGameplay {
   let a=null,b=null;for(const s of this.snapshots){if(s.time<=time)a=s;else{b=s;break;}}
   if(!a||time-a.time>.25||!a.frame.listener.valid||a.frame.listener.paused)return [];
   const result=[];for(const identity of this.snapshots.at(-1).frame.vehicles){if(!identity.valid)continue;
-   let left=null,right=null;for(const snapshot of this.snapshots){const v=snapshot.frame.vehicles.find(v=>v.id===identity.id&&v.generation===identity.generation&&v.model===identity.model&&v.context===identity.context&&v.valid);if(!v)continue;
+   let left=null,right=null;
+   if(this.catalogueFleet){
+    // Search only this contiguous acquisition. An invalid or absent sample
+    // closes its history even when a later sender reuses the same identity.
+    for(let i=this.snapshots.length-1;i>=0;i--){
+     const snapshot=this.snapshots[i],v=snapshot.vehiclesById.get(identity.id);
+     if(!v?.valid||v.acquisition01!==identity.acquisition01)break;
+     const at=snapshot.time+(v.observationTicks-snapshot.frame.listener.observationTicks)/snapshot.frame.listener.clockFrequency;
+     if(at<=time){left={time:at,v,sequence:snapshot.frame.listener.sequence};break;}
+     right={time:at,v,sequence:snapshot.frame.listener.sequence};
+    }
+   }else for(const snapshot of this.snapshots){const v=snapshot.frame.vehicles.find(v=>v.id===identity.id&&v.generation===identity.generation&&v.model===identity.model&&v.context===identity.context&&v.valid);if(!v)continue;
     const at=snapshot.time+(v.observationTicks-snapshot.frame.listener.observationTicks)/snapshot.frame.listener.clockFrequency;
     if(at<=time)left={time:at,v,sequence:snapshot.frame.listener.sequence};else{right={time:at,v,sequence:snapshot.frame.listener.sequence};break;}}
    if(!left)continue;const old=left.v,next=right?.v;a={time:left.time};b=right;
@@ -308,6 +345,15 @@ export class StockGameplay {
     running:this.continuityPolicy==='camera-source-01'?old.running:old.running&&(!next||next.running),lift:next?next.operatingPoint<old.operatingPoint-.002:false,
     riderAttached:old.riderAttached===true&&(!next||next.riderAttached===true),riderViewAttached:old.riderViewAttached===true&&(!next||next.riderViewAttached===true)});
   }return result;
+ }
+ vehicleCandidate01(v,listener,listenerQualified,resolved){
+  if(resolved.status!=='available')return null;
+  const identity=voiceIdentity01(v);
+  const prior=this.slots.some(s=>s.identity===identity);
+  if(!listenerQualified&&!prior)return null;
+  const energy=Math.max(...Object.values(resolved.bank.layers.exhaust).map(a=>a.nativePeak??0));
+  const score=(v.running?1:.01)*energy/Math.max(1,distance(v.position,listener.position))*(prior?1.5:1);
+  return {v,resolved,score,identity};
  }
  // The normal render calls this at its existing block boundary, after the
  // previous asynchronous block has completed. Offline readiness qualification
@@ -363,26 +409,26 @@ export class StockGameplay {
   let offered=this.sample.state||independentSource?this.vehiclesAt(this.sample.targetTime):[];
   const emissionOperating=this.operatingEmission?.select(this.snapshots,this.pipeline.renderer.frame,this.now());
   if(this.operatingEmission)offered=emissionOperating&&(this.sample.state||independentSource)?[emissionOperating.vehicle]:[];
-  const eligible=[];for(const spatialVehicle of offered){if(this.operatingEmission&&!emissionOperating)continue;const v=this.operatingEmission?{...spatialVehicle,operatingPoint:emissionOperating.operatingPoint,running:emissionOperating.running,lift:emissionOperating.lift}:spatialVehicle;const resolved=this.registry.resolve(v.model,v.context);if(resolved.status!=='available'){this.stats.unsupported++;continue;}
-   const prior=this.slots.find(s=>s.identity===`${v.id}:${v.generation}:${v.model}:${v.context}`);
+  const eligible=[];let unavailable=0;for(const spatialVehicle of offered){if(this.operatingEmission&&!emissionOperating)continue;const v=this.operatingEmission?{...spatialVehicle,operatingPoint:emissionOperating.operatingPoint,running:emissionOperating.running,lift:emissionOperating.lift}:spatialVehicle;
    // Do not create a new source without a qualified listener. A still-valid
    // existing source can advance its dry/grain history through a listener-only
    // gap while the unchanged renderer releases unavailable spatial paths.
-   if(!this.sample.state&&!prior)continue;
-   const energy=Math.max(...Object.values(resolved.bank.layers.exhaust).map(a=>a.nativePeak??0));
-   const score=(v.running?1:.01)*energy/Math.max(1,distance(v.position,listener.position))*(prior?1.5:1);
-   eligible.push({v,resolved,score,identity:`${v.id}:${v.generation}:${v.model}:${v.context}`});
+   const resolved=this.registry.resolve(v.model,v.context);
+   if(resolved.status!=='available'){this.stats.unsupported++;unavailable++;continue;}
+   const item=this.vehicleCandidate01(v,listener,!!this.sample.state,resolved);
+   if(item)eligible.push(item);
   }
   this.stageCounters.eligibleVehicleBlocks+=eligible.length;
   eligible.sort((a,b)=>b.score-a.score);const selected=eligible.slice(0,this.activeLimit),preserve=!this.sample.state&&(this.playout.lastState?.paused||this.continuityPolicy==='baseline'&&this.sample.mode==='warming')&&this.sample.mode!=='stale-wall-clock',keep=new Set(preserve?this.slots.map(s=>s.identity):selected.map(x=>x.identity));
+  if(this.catalogueFleet)this.fleetPopulation={discovered:this.snapshots.at(-1)?.frame.vehicles.length??0,qualified:eligible.length,unavailable,virtualized:Math.max(0,eligible.length-selected.length)};
   for(const s of this.slots)if(s.identity&&!keep.has(s.identity)){
-   const latest=this.snapshots.at(-1),current=latest?.frame.vehicles.find(v=>`${v.id}:${v.generation}:${v.model}:${v.context}`===s.identity);
-   const reason=latest&&this.now()>=latest.wallExpires?'source-expiry':!current?'source-absent-or-identity-change':!current.valid?'source-invalid':!this.sample.state&&!independentSource?'listener-unavailable':'source-pose-unavailable';
-   this.lifecycle.scopeRetirements++;this.lifecycle.lastRetirements.push({reason,sourceFrame:s.source?.frame??null,lastQualifiedRunning:s.vehicle?.running??null,engineShutdownInferred:false});if(this.lifecycle.lastRetirements.length>MAX)this.lifecycle.lastRetirements.shift();
+   const latest=this.snapshots.at(-1),current=latest?.frame.vehicles.find(v=>voiceIdentity01(v)===s.identity);
+   const reason=latest&&this.now()>=latest.wallExpires?'source-expiry':!current?'source-absent-or-identity-change':!current.valid?'source-invalid':!this.sample.state&&!independentSource?'listener-unavailable':this.catalogueFleet&&eligible.some(item=>item.identity===s.identity)?'voice-budget-virtualized':'source-pose-unavailable';
+   this.lifecycle.scopeRetirements++;this.lifecycle.lastRetirements.push({reason,sourceFrame:s.source?.frame??null,lastQualifiedRunning:s.vehicle?.running??null,engineShutdownInferred:false});if(this.lifecycle.lastRetirements.length>this.voiceLimit)this.lifecycle.lastRetirements.shift();
    s.identity=null;s.source=null;s.vehicle=null;s.airflow=null;this.stats.retired++;
   }
   for(const item of selected){let slot=this.slots.find(s=>s.identity===item.identity);if(!slot){slot=this.slots.find(s=>!s.identity);slot.identity=item.identity;slot.generation++;
-    const sourceOptions=this.stockSourceOptions01(item.resolved.bank),startupKey=item.v.model+':'+item.v.context;
+    const sourceOptions=this.stockSourceOptions01(item.resolved.bank),startupKey=this.catalogueFleet?item.resolved.bank:item.v.model+':'+item.v.context;
     const startupVoice=this.startupVoices01.get(startupKey);this.startupVoices01.delete(startupKey);
     slot.source=startupVoice??this.sourcePreparation05?.take({identity:item.identity,session:this.session,bank:item.resolved.bank,options:sourceOptions})??this.registry.createSource(item.v.model,item.v.context,sourceOptions);slot.airflow=new AirflowSourceStreet01({seed:airflowSeedStreet01(this.session+':'+item.identity)});this.stats.arrivals++;this.stageCounters.sourceCreations++;}
    slot.vehicle=item.v;slot.score=item.score;
@@ -438,12 +484,12 @@ export class StockGameplay {
   if(this.telemetry)try{this.visual=this.telemetry.publish(this.pipeline.simulation,this.pipeline.lastControl,{workerMs:elapsed});}catch{this.visual=null;}
   this.quality.observe({processingMs:elapsed,availablePaths:this.pipeline.lastControl.paths.length,activeBackend:this.pipeline.backend.diagnostics().activeAcceleration??'cpu'});
   this.updatePipelineQuality01();
-  if(elapsed>BLOCK/FS*1000){this.stats.deadlineMisses++;this.consecutiveMisses++;this.lastGood=this.now();if(this.consecutiveMisses>=5&&this.activeLimit>1){this.activeLimit=1;this.stats.sourceBudgetReductions++;}}
-  else{this.consecutiveMisses=0;if(this.now()-this.lastGood>5000)this.activeLimit=MAX;}
+  if(elapsed>BLOCK/FS*1000){this.stats.deadlineMisses++;this.consecutiveMisses++;this.lastGood=this.now();if(!this.catalogueFleet&&this.consecutiveMisses>=5&&this.activeLimit>1){this.activeLimit=1;this.stats.sourceBudgetReductions++;}}
+  else{this.consecutiveMisses=0;if(this.now()-this.lastGood>5000)this.activeLimit=this.voiceLimit;}
   if(this.captureTiming){const selectedIds=new Set(selected.map(s=>s.v.id));this.lastTiming={producerFrameStart:Math.round(time*FS),frames:BLOCK,
    nodeClockDomain:'node-performance-ms',nodeFrequency:1000,renderStartedNodeMs:start,renderCompletedNodeMs:this.now(),processingMs:elapsed,
    sourceTargetTimeSeconds:this.sample.targetTime??null,latestAcceptedSequence:this.lastFrame,controlDelayMs:this.controlDelayMs,
-   sourceBrackets:this.latencyBrackets.filter(s=>selectedIds.has(s.id)).slice(0,MAX),...(this.operatingEmission?{emissionOperatingState:this.operatingEmission.selected,sourceBracketsScope:'Spatial query history; current emission geometry separately qualified by authored stationary world contract'}:{})};}
+   sourceBrackets:this.latencyBrackets.filter(s=>selectedIds.has(s.id)).slice(0,this.voiceLimit),...(this.operatingEmission?{emissionOperatingState:this.operatingEmission.selected,sourceBracketsScope:'Spatial query history; current emission geometry separately qualified by authored stationary world contract'}:{})};}
   // Retain a second complete method interval, including optional telemetry and
   // quality bookkeeping. It encloses the core interval; do not add them.
   this.lastCompleteRenderMs=this.now()-start;
@@ -462,9 +508,9 @@ export class StockGameplay {
    airflow:{...this.airflowState,enabled:this.settings.airflowEnabled,level:this.settings.airflowLevel,material:'original-procedural',riderPropagation:'local-stereo-no-reflections-no-doppler',exteriorPropagation:'existing-causal-path-renderer-once',sourceStates:this.slots.filter(s=>s.airflow).map(s=>({identity:s.identity,frame:s.airflow.frame,...s.airflow.stats}))},
    lifecycle:{...this.lifecycle,lastRetirements:this.lifecycle.lastRetirements.map(r=>({...r}))},
    stageCounters:{...this.stageCounters,engine:{...this.stageCounters.engine},exhaust:{...this.stageCounters.exhaust},stereo:{...this.stageCounters.stereo}},
-   selectedPaths:this.pipeline.lastControl?.paths.length??0,outputPeak:this.pipeline.renderer.stats.peak,
+   selectedPaths:this.pipeline.lastControl?.paths.length??0,outputPeak:this.pipeline.renderer.stats.peak,...(this.catalogueFleet?{fleetPopulation:this.fleetPopulation}:{}),
    listenerState:this.sample?.mode??'not-observed',
-   sourceStates:this.slots.filter(s=>s.source).map(s=>({id:s.vehicle?.id,generation:s.vehicle?.generation,bank:s.source.vehicle.model,context:s.source.npc?'npc':'player',running:s.vehicle?.running??false,
+   sourceStates:this.slots.filter(s=>s.source).map(s=>({id:s.vehicle?.id,generation:s.vehicle?.generation,...(this.catalogueFleet?{model:s.vehicle?.model,renderGeneration:s.generation,effectiveProfileObserved:false}:{}),bank:s.source.vehicle.model,context:s.source.npc?'npc':'player',running:s.vehicle?.running??false,
     operatingPoint:s.vehicle?.operatingPoint??null,sourceFrame:s.source.frame,dryPeak:s.source.stats.peak,
     listenerDistance:this.sample?.state&&s.vehicle?distance(s.vehicle.position,this.sample.state.position):null})),
    geometry:this.pipeline.simulation.scene===this.direct?'conditional-direct-unobserved-space-assumed-clear':this.staticSceneBinding?.mode==='installed-static-conditional-partial'?'installed-static-conditional-partial':this.staticSceneBinding?.mode==='offline-resource-subset'?'qualified-original-resource-subset':this.staticSceneBinding?'qualified-static-authored-fixture':'qualified-observed-partial',installedGeometry:this.staticSceneBinding?.mode==='installed-static-conditional-partial'?this.staticSceneBinding:null,controlDelayMs:this.controlDelayMs,latencyProfile:this.latencyProfile.id,continuityPolicy:this.continuityPolicy,...(this.continuousTimingPolicy==='baseline'?{}:{continuousTimingPolicy:this.continuousTimingPolicy}),...(this.operatingEmission?{operatingEmission:this.operatingEmission.diagnostics()}:{}),sourceHistoryLimitSeconds:2.5,propagationLimitSeconds:2,

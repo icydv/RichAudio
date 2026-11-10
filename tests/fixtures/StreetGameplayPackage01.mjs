@@ -2,7 +2,7 @@
 // exercise the production loaders; they are never installed-world evidence.
 import fs from 'node:fs';import path from 'node:path';import {createHash} from 'node:crypto';
 const sha=x=>createHash('sha256').update(x).digest('hex');
-export function writeOriginalGameplayPackageStreet01(folder,{demoProfile=null,latencyProfile=null,gameHash='d'.repeat(64),acousticWorld}={}) {
+export function writeOriginalGameplayPackageStreet01(folder,{demoProfile=null,latencyProfile=null,gameHash='d'.repeat(64),acousticWorld,fleet=false}={}) {
  fs.mkdirSync(folder,{recursive:true});const frames=8192,sampleRate=24000,pcm=Buffer.alloc(frames*4);
  for(let i=0;i<frames;i++)pcm.writeFloatLE(.04*Math.sin(i*.07)+.015*Math.sin(i*.19),i*4);
  fs.writeFileSync(path.join(folder,'original.f32'),pcm,{flag:'wx'});
@@ -15,7 +15,31 @@ export function writeOriginalGameplayPackageStreet01(folder,{demoProfile=null,la
  const npc={model:'bati',audioContext:'npc',sourceContract:'npc-four-state-v1',provenance:{awcSha256:'b'.repeat(64),entry:'original_npc.awc',archive:'original_only.rpf'},layers:Object.fromEntries(['engine','exhaust'].map(role=>[role,Object.fromEntries(['idle','accel'].map(mode=>{const record=asset();npcStreams.push({name:role+'_'+mode,hash:npcIds[role+'_'+mode],asset:{file,sha256:pcmSha}});return [mode,record];}))]))};npc.streams=npcStreams;
  const catalogue={Schema:1,Stage:'codewalker-resolved-installation-model',ParserErrorCount:0,InputBinding:{CodeWalkerCoreSHA256:core,GameExecutableSHA256:game},Vehicles:[{ModelHash:'f9300cc5',Model:'original_authored_bati',Sounds:{EngineAccel:{ParserType:'Dat54GranularSound',ChannelLinks:links}}}]};
  const write=(name,value)=>fs.writeFileSync(path.join(folder,name),JSON.stringify(value),{flag:'wx'});
- write('player.json',{schema:1,sourceAssemblies:{CodeWalkerCoreSha256:core},vehicles:[player]});write('npc.json',{schema:1,gameExecutableSha256:game,sourceAssemblies:{CodeWalkerCoreSha256:core},vehicles:[npc]});write('analysis-intervals.json',{streams:analysis});write('atlas.json',{schema:1,streams:sustain});write('profiles.json',{});write('catalog.json',catalogue);
+ const players=[player];
+ if(fleet){
+  const second=structuredClone(player),secondPcm=Buffer.from(pcm);
+  for(let i=0;i<frames;i++)secondPcm.writeFloatLE(-pcm.readFloatLE(i*4)*.75,i*4);
+  const secondFile='original_second.f32',secondSha=sha(secondPcm);
+  fs.writeFileSync(path.join(folder,secondFile),secondPcm,{flag:'wx'});
+  second.model='original_second';
+  second.provenance={awcSha256:'e'.repeat(64),entry:'original_second.awc'};
+  for(const modes of Object.values(second.layers))for(const row of Object.values(modes))Object.assign(row,{file:secondFile,sha256:secondSha});
+  players.push(second);
+  analysis.push(...analysis.map(row=>({...row,model:second.model,file:secondFile})));
+  sustain.push(...sustain.map(row=>({...row,model:second.model,file:secondFile,sha256:secondSha,intervals:row.intervals.map(f=>({...f,rms:f.rms*.75}))})));
+  const withNpc=['engine_accel','exhaust_accel',null,null,'engine_idle','exhaust_idle'].map((name,Index)=>{
+   if(name===null)return {Index,State:'unused-channel',FullRelStreamHash:'00000000',MaskedAwcStreamId:'00000000',CandidateCount:0,Candidates:[],Stream:null,AwcSHA256:null};
+   const hash=npcIds[name];
+   return {Index,State:'verified-installed-container-and-stream',FullRelStreamHash:hash,MaskedAwcStreamId:hash,CandidateCount:1,
+    Candidates:[{Path:npc.provenance.entry,SourceArchive:npc.provenance.archive}],AwcSHA256:npc.provenance.awcSha256,
+    Stream:{StreamId:hash,Frames:frames,SampleRate:sampleRate,Codec:0}};
+  });
+  catalogue.Vehicles[0].Sounds.EngineAccelNPC={ParserType:'Dat54GranularSound',ChannelLinks:withNpc};
+  catalogue.Vehicles.push({ModelHash:'a774b5a6',Model:'original_authored_second',Sounds:{EngineAccel:{
+   ParserType:'Dat54GranularSound',ChannelLinks:links.map(link=>({...link,AwcSHA256:second.provenance.awcSha256,Candidates:[{Path:second.provenance.entry}]}))
+  }}});
+ }
+ write('player.json',{schema:1,sourceAssemblies:{CodeWalkerCoreSha256:core},vehicles:players});write('npc.json',{schema:1,gameExecutableSha256:game,sourceAssemblies:{CodeWalkerCoreSha256:core},vehicles:[npc]});write('analysis-intervals.json',{streams:analysis});write('atlas.json',{schema:1,streams:sustain});write('profiles.json',{});write('catalog.json',catalogue);
  const config={schema:1,gameSha256:game,gameVersion:'original-authored-fixture',playerManifest:'player.json',npcManifest:'npc.json',atlas:'atlas.json',profiles:'profiles.json',catalog:'catalog.json',catalogSha256:sha(fs.readFileSync(path.join(folder,'catalog.json'))),eligible:[{model:0xf9300cc5,context:'player'}],...(demoProfile?{demoProfile}:{}),...(latencyProfile?{latencyProfile}:{}),...(acousticWorld===undefined?{}:{acousticWorld})};write('playable.json',config);
  return {manifest:path.join(folder,'playable.json'),source:'original-procedural-PCM-and-authored-metadata-only',config};
 }
