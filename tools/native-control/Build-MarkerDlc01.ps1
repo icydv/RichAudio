@@ -14,6 +14,14 @@ function Assert-MarkerPrivate01([string]$File){
 }
 function Read-MarkerRpf01([string]$File){
  $p=Assert-MarkerPrivate01 $File
+ # This writer accepts a staged OPEN archive only. Reject the header
+ # before asking the codec to scan or decrypt an unsupported table.
+ $header=[IO.BinaryReader]::new([IO.File]::OpenRead($p))
+ try{
+  if($header.BaseStream.Length -lt 16 -or $header.ReadUInt32() -ne 0x52504637){throw 'RPF7 header required'}
+  $header.BaseStream.Position=12
+  if($header.ReadUInt32() -ne [uint32][CodeWalker.GameFiles.RpfEncryption]::OPEN){throw 'Exact OPEN RPF required before archive scan'}
+ }finally{$header.Dispose()}
  $rpf=[CodeWalker.GameFiles.RpfFile]::new($p,[IO.Path]::GetFileName($p))
  $rpf.ScanStructure($null,$null)
  if($rpf.LastError -or $rpf.Encryption -ne [CodeWalker.GameFiles.RpfEncryption]::OPEN){throw 'Exact OPEN RPF required'}

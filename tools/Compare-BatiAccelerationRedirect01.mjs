@@ -15,6 +15,58 @@ const acceleration = [
 const conventional = ['EngineIdleLoop','ExhaustIdleLoop','EngineLow','EngineHigh','ExhaustLow','ExhaustHigh','RevsOff']
   .map(field=>({field,type:'Dat54SimpleSound'}));
 
+// Names accepted by the planner are already lowercase ASCII.
+function privateNameHash(name) {
+  let hash = 0;
+  for (const character of name) {
+    hash += character.charCodeAt(0);
+    hash += hash << 10;
+    hash ^= hash >>> 6;
+  }
+  hash += hash << 3;
+  hash ^= hash >>> 11;
+  hash += hash << 15;
+  return (hash >>> 0).toString(16).padStart(8, '0');
+}
+
+function buildShadowPlan(namespace, root, clones, nodes, outgoing, variant) {
+  if (!/^ra_shadow_[a-f0-9]{16}$/.test(namespace)) throw Error('Invalid private shadow namespace');
+  const occupied = new Set([...nodes.values()].map(node=>recordHash(node.Record?.Hash)));
+  for (const edges of outgoing.values()) for (const edge of edges) occupied.add(recordHash(edge.Hash));
+  const names = new Map();
+  for (const [key, clone] of clones) {
+    const name = namespace + '_' + clone.role.toLowerCase();
+    const hash = privateNameHash(name);
+    if (hash === '00000000' || occupied.has(hash)) throw Error('Private audio name hash collision: ' + name);
+    occupied.add(hash);
+    names.set(key, {name,hash});
+  }
+  const records = [...clones].map(([key,{stock,role}])=>{
+    const node = nodes.get(stock), original = outgoing.get(stock) ?? [];
+    const relocations = [], preserved = [];
+    for (const [index, edge] of variant.get(key).entries()) {
+      const from = original[index], to = names.get(edge.Targets[0]);
+      if (!to) {
+        preserved.push({field:from.Field, hash:recordHash(from.Hash),
+          namespace:from.Namespace ?? null, resolution:from.Resolution});
+        continue;
+      }
+      if (from.DeclaredType !== 'CodeWalker.GameFiles.MetaHash' || from.Namespace !== 'audio-record-candidate' ||
+          !/^[A-Za-z][A-Za-z0-9]*$/.test(from.Field)) throw Error('Untyped relocation: ' + role + '.' + from.Field);
+      relocations.push({field:from.Field, from:recordHash(from.Hash), to:to.hash, privateTarget:to.name});
+    }
+    return {role, ...names.get(key), stock:{id:stock,type:node.Record.ParserType,hash:recordHash(node.Record.Hash),
+      sourceSha256:node.SourceBinding.SHA256}, relocations, preserved,
+      opaqueFields:node.ProjectionGaps ?? []};
+  });
+  return {
+    kind:'RichAudioPrivateTopology02', scope:'identity and reference relocation only',
+    root:names.get(root), records,
+    collisionCheck:'retained projection only',
+    disabled:true, globalNamespaceVerified:false, bodiesSerialized:false, suppressionQualified:false,
+  };
+}
+
 function traceRecords(entry, nodes, outgoing) {
   const paths = new Map();
   const boundaries = [];
@@ -89,7 +141,8 @@ function continuousBoundary(nodes, outgoing, vehicle, scopes, granular) {
 
 // The projection can discriminate shared-record edits from field-level redirects.
 // The result grants no registration, runtime control or restoration authority.
-export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
+export function compareBatiAccelerationRedirect01(graph,{continuous=false,shadowNamespace=null}={}) {
+  if (shadowNamespace !== null && !continuous) throw Error('Shadow plan requires continuous audio scope');
   if (graph?.Kind !== 'RichAudioBatiAudioDependencyGraph01' ||
       !Array.isArray(graph.Nodes) || graph.Nodes.length > 256 ||
       !Array.isArray(graph.Edges) || graph.Edges.length > 4096 ||
@@ -164,11 +217,13 @@ export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
   if(engine)scopes.push({parent:engine,edge:exactEdge(vehicle,'Engine',engine),routes:conventional});
   const vehicleEdges=new Map(),soundEdges=new Map(),privateParents=[];
   const privateVehicle=Symbol('private vehicle');
+  const clones = new Map([[privateVehicle,{stock:vehicle,role:'Vehicle'}]]);
   const redirect=(edges,replacements)=>edges.map(edge=>
     replacements.has(edge)?{...edge,Targets:[replacements.get(edge)]}:edge);
   const variant=new Map(outgoing);
   for(const {parent,edge:parentEdge,routes} of scopes){
     const privateParent=Symbol(parentEdge.Field),redirects=new Map();
+    clones.set(privateParent,{stock:parent,role:parentEdge.Field});
     vehicleEdges.set(parentEdge,privateParent);
     privateParents.push({privateParent,routes});
     for(const {field,type} of routes){
@@ -176,6 +231,7 @@ export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
       const target=nodes.get(targetId);
       if(!exactSource(target)||target.Record?.ParserType!==type)throw Error('Missing or unbound typed audio root: '+field);
       const edge=exactEdge(parent,field,targetId),privateSound=Symbol(field);
+      clones.set(privateSound,{stock:targetId,role:field});
       redirects.set(edge,privateSound);
       soundEdges.set(edge,{privateSound,privateParent});
       variant.set(privateSound,outgoing.get(targetId)??[]);
@@ -239,6 +295,7 @@ export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
     }:{}),
     sameModelNeighborGraphUnchanged:stockVehicle.size === neighbor.size &&
       [...stockVehicle].every(id => neighbor.has(id)),
+    ...(shadowNamespace===null?{}:{shadow:buildShadowPlan(shadowNamespace,privateVehicle,clones,nodes,outgoing,variant)}),
     routeComparisons:proof,
     unresolvedProjection:{
       referenceClosureComplete,
@@ -252,7 +309,8 @@ export function compareBatiAccelerationRedirect01(graph,{continuous=false}={}) {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   const continuous=process.argv[3]==='--continuous';
-  if(process.argv.length!==(continuous?4:3))throw Error('Supply one retained project-private resolved catalogue and optional --continuous');
+  const shadowNamespace=process.argv.length===6&&process.argv[4]==='--shadow' ? process.argv[5] : null;
+  if(process.argv.length!==(continuous?(shadowNamespace===null?4:6):3))throw Error('Supply one retained project-private resolved catalogue and optional --continuous [--shadow namespace]');
   const projectPrivate = realpathSync(fileURLToPath(new URL('../.local/', import.meta.url)));
   const filename = realpathSync(process.argv[2]);
   if (!filename.startsWith(projectPrivate + path.sep) || !statSync(filename).isFile() ||
@@ -261,6 +319,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   const catalogue = JSON.parse(bytes.toString('utf8').replace(/^\uFEFF/, ''));
   const vehicles = catalogue.Vehicles?.filter(vehicle => vehicle.Model === 'bati') ?? [];
   if (vehicles.length !== 1) throw Error('Exactly one Bati projection required');
-  const result = compareBatiAccelerationRedirect01(vehicles[0].AudioDependencyGraph01,{continuous});
+  const result = compareBatiAccelerationRedirect01(vehicles[0].AudioDependencyGraph01,{continuous,shadowNamespace});
   process.stdout.write(JSON.stringify({...result, retainedCatalogueSha256:createHash('sha256').update(bytes).digest('hex')}, null, 2) + '\n');
 }
