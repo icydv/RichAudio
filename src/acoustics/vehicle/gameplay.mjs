@@ -432,7 +432,11 @@ export class StockGameplay {
   eligible.sort((a,b)=>b.score-a.score);const selected=eligible.slice(0,this.activeLimit),preserve=!this.sample.state&&(this.playout.lastState?.paused||this.continuityPolicy==='baseline'&&this.sample.mode==='warming')&&this.sample.mode!=='stale-wall-clock',keep=new Set(preserve?this.slots.map(s=>s.identity):selected.map(x=>x.identity));
   if(this.catalogueFleet)this.fleetPopulation={discovered:this.snapshots.at(-1)?.frame.vehicles.length??0,qualified:eligible.length,unavailable,virtualized:Math.max(0,eligible.length-selected.length)};
   for(const s of this.slots)if(s.identity&&!keep.has(s.identity)){
-   const latest=this.snapshots.at(-1),current=latest?.frame.vehicles.find(v=>voiceIdentity01(v)===s.identity);
+   const latest=this.snapshots.at(-1);
+   // An invalid sample ends the acquisition but can still describe the same
+   // vehicle lifetime. Preserve that reason without reusing its source state.
+   const current=latest?.frame.vehicles.find(v=>voiceIdentity01(v)===s.identity||
+    (!v.valid&&v.id===s.vehicle?.id&&v.generation===s.vehicle.generation&&v.model===s.vehicle.model&&v.context===s.vehicle.context));
    const reason=latest&&this.now()>=latest.wallExpires?'source-expiry':!current?'source-absent-or-identity-change':!current.valid?'source-invalid':!this.sample.state&&!independentSource?'listener-unavailable':this.catalogueFleet&&eligible.some(item=>item.identity===s.identity)?'voice-budget-virtualized':'source-pose-unavailable';
    this.lifecycle.scopeRetirements++;this.lifecycle.lastRetirements.push({reason,sourceFrame:s.source?.frame??null,lastQualifiedRunning:s.vehicle?.running??null,engineShutdownInferred:false});if(this.lifecycle.lastRetirements.length>this.voiceLimit)this.lifecycle.lastRetirements.shift();
    s.identity=null;s.source=null;s.vehicle=null;s.airflow=null;this.stats.retired++;
