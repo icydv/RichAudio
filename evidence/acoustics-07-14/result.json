@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "base": "52152664b6b8f13d4e71a45a2541cefb821b5591",
+  "launch": {
+    "processExecutionEstablished": true,
+    "abnormalTerminationEstablished": true,
+    "eventId": 1026,
+    "exception": "System.IO.DirectoryNotFoundException",
+    "dependencyDirectory": "GAC_64/SlimDX",
+    "launchContextCauseEstablished": false
+  },
+  "originalHostedRun": 40791049051,
+  "exactFailedRemoteRecordsRecovered": false,
+  "originalFailedPredicate": null,
+  "originalTimingCause": null,
+  "localTransportRuns": [
+    {
+      "cases": [
+        {
+          "case": "after",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "before",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "domain-1",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "domain-2",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "domain-3",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "late",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "none-1",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "none-2",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "none-3",
+          "passed": true,
+          "failedPredicates": []
+        }
+      ]
+    },
+    {
+      "cases": [
+        {
+          "case": "after",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "before",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "domain-1",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "domain-2",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "domain-3",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "late",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "none-1",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "none-2",
+          "passed": true,
+          "failedPredicates": []
+        },
+        {
+          "case": "none-3",
+          "passed": true,
+          "failedPredicates": []
+        }
+      ]
+    }
+  ],
+  "fullOfflineSuite": "PASS",
+  "initialDiagnosticRegression": "FAIL_DUPLICATE_OUTPUT_CORRECTED_BEFORE_TRANSPORT",
+  "diagnosticFixtures": [
+    "composite-failure",
+    "missing-receiver",
+    "missing-both"
+  ],
+  "productionChanges": false,
+  "oldHostedReruns": 0,
+  "liveLaunches": 0,
+  "approvalCreated": false,
+  "acoustics079": "INCOMPLETE_FAILED_STOP_TIMING",
+  "acoustics0713": "FAILED_LAUNCH_NO_LISTENING",
+  "combinedMilestonePercent": 60
+}
