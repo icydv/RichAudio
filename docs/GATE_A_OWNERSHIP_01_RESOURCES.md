@@ -1,0 +1,75 @@
+# GATE-A-OWNERSHIP-01 — resource scope and custom audio
+
+I want selective native ownership without losing sounds that RichAudio does not yet reproduce. Codex reviewed the retained real Bati graph, existing source registry and ownership policy without changing any audio resource, sealed experiment or production algorithm. **The next useful experiment remains PRIVATE03C's original, non-silent horn contribution. No selective-suppression resource is justified by the current evidence.**
+
+PRIVATE03C's preserved outcome is `READY FOR REVIEW`, with runtime qualification `UNTESTED` and no new authorization. Its execution manifest is SHA-256 `6b3e34811ad3aac1dcfc629e22733171d6fcf70b3de9b0cf2e645bdb86732087`; its [result](C:/Users/Libby/Documents/RichAudio-SHVDNE01/.local/gate-a-shvdne-private-03c/result.json) binds the candidate and evidence. The current OpenRPF 0.3 preparation is the applicable loader context. This report does not reopen the superseded OpenRPF 0.1 investigation.
+
+There is a new execution boundary after preserving the completed milestones in commits `7ce78f8`, `d70b19f` and `ab67cb0`: PRIVATE03C inherits a [preflight check for the exact preparation Git HEAD](../tools/native-control/private-profile03b/Manage-Installation.py#L65). Its frozen receipt contains the earlier HEAD. The commits therefore cause `Preparation HEAD drift` refusal even when all sealed resource/source bytes remain preserved. The old readiness result is historical evidence, not permission to bypass this guard. A narrow, separately reviewed provenance continuation is required, retaining the same marker resources, probe and detector. That review must specify how the immutable preparation is reconciled with the descendant checkout; no execution route is admitted here. The current work reports the mismatch and supports read-only reconciliation. Codex has not edited the frozen manager, manifest, preservation receipt or authorization text to make the check pass.
+
+## What the actual Bati graph establishes
+
+The retained vehicle record `f9300cc5` references both conventional engine configuration `a46d1b50` and granular configuration `61f3bd06`. The private horn candidate preserves both. The full XML sources are retained privately; only their relationships are summarized here.
+
+| Route | Retained structure | Ownership implication |
+| --- | --- | --- |
+| Player granular `EngineAccel` | `0346a636`, a six-channel `GranularSound`: engine/exhaust acceleration, deceleration and idle | The `EngineAccel` field does **not** identify an engine-only wave source. |
+| NPC granular `EngineAccelNPC` | `d7852424`, four populated channels; `ParentSound=0346a636` | The player sound is also an NPC dependency. Editing that shared stock record would exceed a player-only change. |
+| `ExhaustAccel` and `ExhaustAccelNPC` | Both reference `411a8c83`, an `EnvironmentSound` with `ChannelID=1` | This is a shared channel route, not an independent exhaust sample container. |
+| Conventional engine | Seven `SimpleSound` references: engine/exhaust low, high and idle, plus `RevsOff` | Metadata alone does not establish when these paths run alongside or instead of granular playback. |
+| Granular engine submix | Synth `1932e476`, preset `fc25da99` | A separate synthesis dependency remains when a wave is changed. |
+| Granular exhaust submix | Synth `4022a088`, preset `25a6b55c` | A wave-only change does not establish exhaust silence. |
+| Modular idle | `IdleSub=32a73def`, referencing synth `df6d8836` | The idle wave is not the only represented idle source. |
+| Other powertrain and vehicle routes | Transmission `699d9f91`, upgraded exhaust-pop wrapper `0c2b85f2`, upgraded limiter-pop multitrack `68a35e88`, auxiliary sounds, shared categories/wrappers and opaque fields | These require separate attribution. They must not be silently included in an engine/exhaust ownership claim. |
+
+The existing 13-record/12-relocation planner already demonstrates how private copies keep the original shared aliases on their original records. Its retained analysis has four unredirected submix/preset references, 17 nonzero unclassified fields, and false traversal/closure flags. It is not a completely isolated silent graph. Signed volume values, zero reference hashes and named fallback wrappers are preserved as data; none is interpreted as a verified mute.
+
+The source evidence is:
+
+- [Actual Bati vehicle and engine records](C:/Users/Libby/Documents/RichAudio-World13/.local/street01/gate-a-profile-01b/game.dat151.rel.xml:453499), XML SHA-256 `4c94c681996251253f49be45a3f3a4697dd833f057175f95aa197c158ffdc6c9`.
+- [Actual player granular sound and adjacent NPC record](C:/Users/Libby/Documents/RichAudio-World13/.local/street01/gate-a-profile-01b/sounds.dat54.rel.xml:681071), XML SHA-256 `2a1a61e8ccbd5e6d2d58c38783c1027d05ccc65583450d7e44a11ec5761b9e8f`.
+- [Retained private-topology analysis](C:/Users/Libby/Documents/RichAudio-World13/.local/street01/native-ownership02/retained-shadow.json), SHA-256 `612ebc7cfc64d6de8eda4d02c163b5054c46b355bc1210a4be7bc26131c5d676`, bound to [resolved catalog](C:/Users/Libby/Documents/RichAudio-World13/.local/street01-installed-completion01/resolved02/resolved-catalog.json) SHA-256 `03a515a1b6bda3e9d20ef71d15dad4ddccbd82f3295e486194be6d68d81b8be2`.
+
+These are source identities and reference witnesses. They do not observe current game voices or identify a particular vehicle's effective runtime override.
+
+## Smallest powertrain hypothesis, and why it is deferred
+
+After a successful PRIVATE03C discriminator, the smallest structural powertrain hypothesis is a private Vehicle → private VehicleEngineGranular → private player GranularSound chain, redirecting only **Channel4, `engine_idle`**, to an original zero-PCM asset. It would preserve all other fields, the other five player channels, the NPC record and its existing parent, modular idle/submix synthesis, and auxiliary references. It would change one player idle-wave contribution, not silence the engine.
+
+The retained `engine_idle` stream has masked ID `1d18b9a1`, 40,350 frames, 48 kHz PCM0, nine grain records, no granular-loop records and `LoopPoint=-1`. The [retained decoded asset manifest](C:/Users/Libby/Documents/RichAudio-StockSource01/.local/stock-source-01/assets-native/manifest.json), SHA-256 `c3669e6c23971b2c66b2bc882e5ccab43e791ad8beb013316914e84d0c3f3e6b`, explicitly labels grain fields as parser data with unconfirmed playback semantics. Preserving that metadata and changing only original PCM would avoid guessing numerical gain units or using missing references as silence. It would still need actual codec/chunk preservation and native behavior verification in a new candidate.
+
+The conventional `EngineIdleLoop` leaf `7c64e0f2` is structurally simpler, but its activation on this granular Bati is also unproved. There is no evidence-based reason to prefer a silent edit to that leaf now. A missing audible contribution cannot distinguish successful selection from an inactive branch, failed resource lookup or another source masking the difference. The present marker supplies a positive source identifier that silence cannot provide.
+
+The exact missing evidence is therefore: successful authored private contribution selection on the admitted stack; active attribution of the proposed engine-idle wave to the controlled lifetime/context; preservation of the other sounds; and the behavior of the changed source while idle, transitioning and already playing. Complete engine/exhaust suppression additionally requires coverage of the other conventional, granular, NPC and synthesis paths. Codex constructed no zero-PCM resource or altered graph for this assessment.
+
+## Category evidence stays separate
+
+In this table, **resource identified** means retained metadata or source assets; **live association** means a contribution associated with the exact controlled lifetime and effective profile; **suppressible** means independently demonstrated selective native removal; **reproduced** means the named RichAudio material/implementation exists at the stated scope; and **restoration** means recovery of the prior effective native state. These columns do not imply one another.
+
+| Category | Resource identified | Exact live association | Selectively suppressible | RichAudio reproduction scope | Prior-state restoration |
+| --- | --- | --- | --- | --- | --- |
+| Engine | Conventional, granular player/NPC and secondary-synth references; genuine decoded wave banks | Not qualified for current effective native graph/components | Unverified | Existing genuine additive engine-wave source; not every native engine contribution, condition or timbre | Unverified |
+| Exhaust | Player/NPC channels, shared environment route and submix references | Not qualified | Unverified | Existing genuine additive exhaust-wave source; complete secondary/transient coverage unqualified | Unverified |
+| Horn | Four-record private branch and original finite marker, codec/graph verified | PRIVATE03C still pending; an old horn hash does not identify the whole profile | Unverified | Original identifiable marker and authored horn fixtures; no claim of complete native horn reproduction | No previous-profile claim; disposable retirement only |
+| Transmission, intake, induction, turbo | Some explicit references and shared/null/opaque routes; activation not established | Not qualified | Unverified | Authored transmission fixture exists; generic complete native coverage does not | Unverified |
+| Exhaust/limiter pops and backfire | Retained Bati pop/limiter references | Bati event occurrence and complete source association unqualified | Unverified | Existing stock-pop implementation is explicitly X80/prototipo and authored-trigger only; it does not qualify Bati pops | Unverified |
+| Tyres and road contact | The retained engine/horn graph is not complete contact-source attribution | Timely contact/slip/load source unqualified | Unverified | Authored component fixtures; no verified production takeover | Unverified |
+| Suspension, doors and collisions | Some vehicle references; no complete source/event attribution | Not qualified as exact component ownership | Unverified | Selected original mechanical/collision fixtures, not complete native equivalence | Unverified |
+| Radio, alarms, pedestrians, traffic and ambience | Outside the current narrow engine/exhaust takeover evidence | No ownership qualification supplied by this resource experiment | Unverified | Remain native in the current policy; no replacement claim here | No mutation or restoration claim |
+
+The existing [49-component registry](../src/acoustics/vehicle/components/registry.mjs) already records desired coverage, incomplete sources, `productionEnabled:false`, `permitDuplicateDirect:false` and the need to attribute embedded bank content. The [ownership policy](../src/acoustics/ownership/policy.mjs) accepts only authored fixture certificates and exact authored baselines. The [stock-event implementation](../src/acoustics/vehicle/stock-events.mjs) explicitly confines its genuine pop source to X80/prototipo. No new policy scaffold is needed to repeat these declarations, and no category is promoted by this document.
+
+## Custom sound mods and exact previous state
+
+Keeping another mod's files intact does not guarantee that its sound remains selected. A stock-derived private Bati object can bypass custom engine, horn, transmission or other references. A mod can also replace a stock-named resource; matching a familiar name or model hash does not establish stock content.
+
+The existing [installed source registry](../src/acoustics/vehicle/installed-stock-registry.mjs) already binds decoded banks to a digest-pinned installed catalog using AWC hashes, paths, stream IDs, frame counts, rates and codecs. It rejects missing, ambiguous and mismatched bank/graph inputs and avoids player-bank substitution for an unavailable NPC bank. It indexes model/context and explicitly returns `runtimeSelectionObserved:false`. It is useful file-level source matching; it is not an effective per-instance override getter, live arbitration mechanism or complete custom-graph adapter.
+
+Before a modded vehicle can be owned, I need the actual selected graph and resource/version provenance, supported typed component boundaries, the appropriate source material, and evidence that untargeted custom contributions remain selected. Unknown custom records, opaque synthesis or ambiguous precedence must remain unavailable. Private cloning would need to start from that proven effective graph, not a guessed stock model. Existing provenance checks and [registry mismatch tests](../tests/Test-InstalledStockRegistry.mjs) should be reused.
+
+Recovery separately requires an exact previous effective-profile token/identity for the same vehicle lifetime, a way to reject intervening external overrides, and a supported restoration authority that survives the relevant failure. The [pinned SHVDNE setter](https://github.com/Chiheb-Bacha/ScriptHookVDotNetEnhanced/blob/d756d479337a677cce9853b0cce63471c1fc7b7c/source/scripting_v3/GTA/Entities/Vehicles/Vehicle.cs#L166) forwards the vehicle handle and named game object; it supplies no previous-state return value or owner token. The existing [ownership fixtures](../tests/ownership/Test-PrivateShadow02.mjs) already reject recycled lifetimes and changed authored external overrides. Those fixtures do not create such an engine capability.
+
+Codex reran the existing private-shadow, stock-catalog and installed-registry regressions on Node 24.19.0: **6 + 4 + 1 tests passed, with no failures or skips**. The opt-in genuine Source05 test reconstructed each complete 10.3-second Bati, Lectro, X80/prototipo and Schafter source performance and matched its published PCM hash, covering the original 24/32/48 kHz material and the X80's authored pop event. All 37 retained input files checked before and after remained unchanged. The [new regression log](C:/Users/Libby/Documents/RichAudio-SHVDNE01/.local/gate-a-ownership-01/stock-ownership-regressions.log), SHA-256 `1bd556ba33266e7e9b57624b29067753f09e8bbd256bd58f92b4cc6d2bcf15f2`, records the full comparisons and authored process fixtures. This preserves existing PCM and policy behavior; it is not native suppression or recovery evidence.
+
+Deleting disposable test vehicles, ending the game process, restoring installed files and restoring an existing vehicle's prior effective profile remain four different operations. PRIVATE03C's normal retirement and disk recovery do not establish the last operation or independent crash recovery. My native takeover and no-doubled-playback gate remains unqualified, and the separate 10 ms observation-performance failure remains unchanged.
+
+PRIVATE03C remains the next discriminating experiment, with its existing marker resources, probe and detector preserved. The immediate work is the narrow read-only provenance reconciliation above, not a replacement experiment campaign. This report grants no installation, game launch, assignment, suppression, endpoint activation or new live authorization.
