@@ -52,8 +52,9 @@ try{
  $spawn='$child=Start-Process -FilePath '+("'"+$hostPath.Replace("'","''")+"'")+' -ArgumentList @(''-NoProfile'',''-NonInteractive'',''-EncodedCommand'','''+$childCommand+''') -WindowStyle Hidden -PassThru;[IO.File]::WriteAllText((Join-Path $OutputRoot ''child.pid''),[string]$child.Id);'
  $c=Configure 'orphan' $spawn;$w=StartWorker;Await $w @('preparation-finished-read-summary');ChildGone (Join-Path $c.OutputRoot 'child.pid')
  $c=Configure 'cancel' ($spawn+'Start-Sleep -Seconds 60');$w=StartWorker;WaitFile (Join-Path $c.OutputRoot 'child.pid');$w.Stop();Await $w @('cancelled');ChildGone (Join-Path $c.OutputRoot 'child.pid')
+ $c=Configure 'framework-abort' ($spawn+'Start-Sleep -Seconds 60');$w=StartWorker;WaitFile (Join-Path $c.OutputRoot 'child.pid');$callback=[Diagnostics.Stopwatch]::StartNew();$w.AbortAndCloseContainment();$callback.Stop();Assert ($callback.ElapsedMilliseconds-lt250) 'framework abort must not join the preparation worker';ChildGone (Join-Path $c.OutputRoot 'child.pid');Await $w @('cancelled')
  $c=Configure 'deadline' ($spawn+'Start-Sleep -Seconds 60');$w=StartWorker;Await $w @('deadline') 30;ChildGone (Join-Path $c.OutputRoot 'child.pid')
- 'Startup supervisor fixtures passed: actual generated full-world sidecar defaults, one queued worker across repeated start, exact bindings, private output, own-marker resume, manual cancellation, normal completion, orphan cleanup, cancellation and monotonic deadline. No game/RPH/audio ran.'
+ 'Startup supervisor fixtures passed: actual generated full-world sidecar defaults, one queued worker across repeated start, exact bindings, private output, own-marker resume, manual cancellation, normal completion, orphan cleanup, cancellation, framework-abort containment and monotonic deadline. No game/RPH/audio ran.'
 }finally{
  foreach($w in $workers){$w.Stop()}
  Start-Sleep -Milliseconds 2200

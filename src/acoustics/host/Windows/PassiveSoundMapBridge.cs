@@ -37,6 +37,12 @@ namespace RichAudio.Beacon.Windows
         public void SetStoryReady(bool value){Volatile.Write(ref storyReady,value?1:0);Signal();}
         public void Publish(PassiveCameraSample sample){if(sample!=null&&Volatile.Read(ref stopped)==0){Interlocked.Exchange(ref latest,sample);Signal();}}
         public void RequestStop(){Interlocked.Exchange(ref stopped,1);Signal();}
+        public void AbortAndCloseContainment(){RequestStop();var owned=Volatile.Read(ref job);if(owned!=null)owned.RequestContainmentClose();}
+        private OwnedProcessJob EnsureOwnedJob(){
+            if(Volatile.Read(ref stopped)!=0)throw new OperationCanceledException("Passive owner ended");
+            var owned=job;if(owned==null){owned=new OwnedProcessJob(1536);Volatile.Write(ref job,owned);}
+            if(Volatile.Read(ref stopped)!=0){owned.RequestContainmentClose();throw new OperationCanceledException("Passive owner ended");}return owned;
+        }
         private void Signal(){try{wake.Set();}catch(ObjectDisposedException){}}
         private object Request(string route,object payload)
         {
@@ -73,8 +79,7 @@ namespace RichAudio.Beacon.Windows
                 // PrivatePath verifies reparse containment; service code remains in the reviewed workspace.
                 AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,".local/soundmap/service.json");
                 InGameSettingsLink.LocalFile(script);if(!File.Exists(script))throw new InvalidDataException("Service script unavailable");
-                if(job==null)job=new OwnedProcessJob(1536);
-                service=job.Start(link.SoundMap.NodeExecutable,Quote(script)+" --root "+Quote(link.WorkspaceRoot)+" --port "+link.SoundMap.Port+" --owner "+owner,link.WorkspaceRoot);long at=Stopwatch.GetTimestamp();
+                service=EnsureOwnedJob().Start(link.SoundMap.NodeExecutable,Quote(script)+" --root "+Quote(link.WorkspaceRoot)+" --port "+link.SoundMap.Port+" --owner "+owner,link.WorkspaceRoot);long at=Stopwatch.GetTimestamp();
                 while(Volatile.Read(ref stopped)==0&&!service.HasExited&&(Stopwatch.GetTimestamp()-at)/(double)Stopwatch.Frequency<3){if(Connect(true))break;wake.WaitOne(50);}
                 if(!Connect(true)){diagnostic="owned-service-start-failed";return;}
             }
@@ -87,8 +92,7 @@ namespace RichAudio.Beacon.Windows
                 // A fresh per-owner profile prevents Chromium singleton handoff
                 // to an earlier window whose lifetime we do not own.
                 string profile=AcousticSettingsStore.PrivatePath(link.WorkspaceRoot,".local/soundmap/browser/"+owner+"/profile-marker");InGameSettingsLink.LocalFile(profile);Directory.CreateDirectory(Path.GetDirectoryName(profile));
-                if(job==null)job=new OwnedProcessJob(1536);
-                window=job.Start(browser,"--app="+url+" --user-data-dir="+Quote(Path.GetDirectoryName(profile))+" --no-first-run --no-default-browser-check --window-size=1280,820",link.WorkspaceRoot,true);
+                window=EnsureOwnedJob().Start(browser,"--app="+url+" --user-data-dir="+Quote(Path.GetDirectoryName(profile))+" --no-first-run --no-default-browser-check --window-size=1280,820",link.WorkspaceRoot,true);
             }
         }
         private void Run()

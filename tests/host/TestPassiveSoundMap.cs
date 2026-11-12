@@ -30,7 +30,10 @@ internal static class TestPassiveSoundMap
                     InteriorOutcome=map?"no-proxy":null,InteriorProxy=map?(int?)0:null,InteriorOffsetMs=map?(double?)0:null});Thread.Sleep(50);
             }
             if(!File.Exists(stop))throw new Exception("Passive fixture completion bound");
-            bridge.RequestStop();
+            if(args.Length>3&&args[3]=="abort"){
+                var callback=Stopwatch.StartNew();bridge.AbortAndCloseContainment();callback.Stop();
+                if(callback.ElapsedMilliseconds>=250)throw new Exception("framework abort must not wait for service cleanup");
+            }else bridge.RequestStop();
         }
         Console.WriteLine("PASS actual passive worker / original sample timestamps / owned Node service / no audio or sensing");return 0;
     }

@@ -41,7 +41,8 @@ namespace RichAudio.Beacon.Windows {
  }
 
  public sealed class GameplayRuntime {
-  readonly ManualResetEvent wake=new ManualResetEvent(false);readonly bool fixture,batiDemo,recordingAuthorized,loopbackAuthorized;volatile bool stopping,story,demoFaulted;Thread thread;Process host;OwnedProcessJob job;GameplayPublisher publisher;PlayableConfiguration configuration;AcousticSettings settings;
+  readonly ManualResetEvent wake=new ManualResetEvent(false);readonly bool fixture,batiDemo,recordingAuthorized,loopbackAuthorized;volatile bool stopping,story,demoFaulted,transportArmed,transportRetired;Thread thread;Process host;OwnedProcessJob job;GameplayPublisher publisher;PlayableConfiguration configuration;AcousticSettings settings;
+  OwnedProcessLifetime ownedHost;EventWaitHandle ownedStop;
   readonly object batiGate=new object();bool batiEnabled,batiRetired;GameplayFrame batiFrame;long batiValidThrough;
   BatiHostStatusWatch01 batiStatusWatch=new BatiHostStatusWatch01();
   readonly string session;readonly Queue<long> faults=new Queue<long>();volatile string state="not-started";int attempts,livePid;long nextAttempt,hostStarted;Mutex lease;bool leaseOwned;
@@ -53,7 +54,10 @@ namespace RichAudio.Beacon.Windows {
   }
   public string State{get{return state;}}public string Session{get{return session;}}public PlayableConfiguration Configuration{get{return Volatile.Read(ref configuration);}}public AcousticSettings Settings{get{return Volatile.Read(ref settings);}}public int HostPid{get{return Thread.VolatileRead(ref livePid);}}public int Attempts{get{return Thread.VolatileRead(ref attempts);}}
   public double MaximumObservationMs;
-  public void Start(string pointer,string gameExecutable,string runtimeAssembly){if(thread!=null)throw new InvalidOperationException("one gameplay supervisor per plugin");thread=new Thread(delegate(){Run(pointer,gameExecutable,runtimeAssembly);}){IsBackground=true,Name="RichAudio Story lifecycle"};thread.Start();}
+  public void Start(string pointer,string gameExecutable,string runtimeAssembly){Start(pointer,gameExecutable,runtimeAssembly,"rph");}
+  public void Start(string pointer,string gameExecutable,string runtimeAssembly,string integrationFramework){if(thread!=null)throw new InvalidOperationException("one gameplay supervisor per plugin");thread=new Thread(delegate(){Run(pointer,gameExecutable,runtimeAssembly,integrationFramework);}){IsBackground=true,Name="RichAudio Story lifecycle"};thread.Start();}
+  public object PublisherMetrics {get{var p=publisher;return p==null?null:p.Metrics();}}
+  public void SetTransportArmed(bool value){var c=Configuration;if(c==null||!c.TransportValidationOnly)throw new InvalidOperationException("Transport-only controller required");if(transportRetired&&value)throw new InvalidOperationException("Retired transport cannot rearm");if(!value)transportRetired=true;transportArmed=value;wake.Set();}
   public void SetStoryReady(bool value){if(story!=value){story=value;wake.Set();}}
   public void Publish(GameplayFrame frame){var p=publisher;if(p!=null&&!stopping)p.Publish(frame);}
   internal bool DemoFaulted{get{return demoFaulted;}}
@@ -65,9 +69,12 @@ namespace RichAudio.Beacon.Windows {
    lock(batiGate){frame=batiFrame;return !stopping&&!batiRetired&&batiEnabled&&frame!=null&&Stopwatch.GetTimestamp()<=batiValidThrough;}
   }
   public void RequestStop(string reason="owner-stop"){Interlocked.CompareExchange(ref stopReason,reason,null);stopping=true;story=false;wake.Set();}
+  // SHVDNE Aborted/DomainUnload can end the worker's managed domain. Close the
+  // kernel containment here; do not rely on a queued worker or join callback.
+  public void AbortAndCloseContainment(string reason){RequestStop(reason);var current=Volatile.Read(ref job);if(current!=null)current.RequestContainmentClose();}
   public bool Join(int milliseconds){return thread==null||thread.Join(milliseconds);}
   static string Q(string s){if(s.IndexOf('"')>=0)throw new InvalidDataException("path quotes");return "\""+s+"\"";}
-  void Run(string pointer,string gameExecutable,string runtimeAssembly){
+  void Run(string pointer,string gameExecutable,string runtimeAssembly,string integrationFramework){
    try{
     state="validating";PlayableConfiguration.NoLinks(pointer);if(new FileInfo(pointer).Length>4096)throw new InvalidDataException("playable pointer size");PlayablePointer p;
     using(var stream=File.OpenRead(pointer))p=(PlayablePointer)new DataContractJsonSerializer(typeof(PlayablePointer)).ReadObject(stream);
@@ -75,25 +82,25 @@ namespace RichAudio.Beacon.Windows {
     string manifest=PlayableConfiguration.Inside(Path.GetFullPath(p.PackageRoot),"playable.json");if(!String.Equals(PlayableConfiguration.Digest(manifest),p.ManifestSha256,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("playable manifest binding");
     var c=PlayableConfiguration.Load(manifest);if(!String.Equals(c.GameExecutable,Path.GetFullPath(gameExecutable),StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("reviewed game binding");
     if(batiDemo){if(c.DemoProfile!="PLAYABLE-13"||c.Eligible.Length!=1||c.Eligible[0].Model!=0xf9300cc5u||c.Eligible[0].Context!="player")throw new InvalidDataException("isolated player Bati demo package required");}
-    else if(FileVersionInfo.GetVersionInfo(runtimeAssembly).FileVersion!=c.RphVersion)throw new InvalidDataException("reviewed game/RPH runtime binding");
+    c.ValidateRuntimeAssembly(runtimeAssembly,integrationFramework);
     int pid=Process.GetCurrentProcess().Id;lease=new Mutex(false,"Local\\RichAudio.Playable01."+pid);try{leaseOwned=lease.WaitOne(0);}catch(AbandonedMutexException){leaseOwned=true;}if(!leaseOwned)throw new InvalidOperationException("another owned gameplay runtime already exists");
     Volatile.Write(ref configuration,c);publisher=new GameplayPublisher(session);publisher.Start();
-    if(c.DiscardEnvironmentalOutput){lifecycleDirectory=Path.Combine(c.Root,".local","gameplay",session);using(var owner=Process.GetCurrentProcess())Record("runtime-ready","validated-package-and-ownership",GameplayLifecycle01.Identity(owner));}
+    if(c.DiscardEnvironmentalOutput||c.TransportValidationOnly){lifecycleDirectory=Path.Combine(c.Root,".local","gameplay",session);using(var owner=Process.GetCurrentProcess())Record("runtime-ready","validated-package-and-ownership",GameplayLifecycle01.Identity(owner));}
     if(batiDemo){RunBati(c,p.ManifestSha256);return;}
     while(!stopping){
      try{
       var s=AcousticSettingsStore.Load(c.Root,AcousticSettingsStore.DefaultPath(c.Root));Volatile.Write(ref settings,s);
-      bool storyNow=story,requested=storyNow&&s.RichAudioEnabled&&s.IntegrationMode=="experimental-additive";
+      bool storyNow=story,requested=storyNow&&(c.TransportValidationOnly?transportArmed:s.RichAudioEnabled&&s.IntegrationMode=="experimental-additive");
       if(lastStory!=storyNow||lastSettingsRevision!=s.Revision||lastRequested!=requested){
        Record("supervisor-state",requested?"requested":storyNow?"settings-stock-fallback":"story-not-ready",new{storyReady=storyNow,enabled=s.RichAudioEnabled,mode=s.IntegrationMode,revision=s.Revision});
        lastStory=storyNow;lastSettingsRevision=s.Revision;lastRequested=requested;
       }
       if(!requested){StopHost(storyNow?"settings-stock-fallback":"story-not-ready");state=storyNow?"GTA stock fallback":"waiting for offline Story Mode";PublishFallback(c,s,state);}
       else if(host==null){long now=Stopwatch.GetTimestamp();while(faults.Count>0&&now-faults.Peek()>Stopwatch.Frequency*600)faults.Dequeue();
-       if(c.DiscardEnvironmentalOutput&&attempts>0||faults.Count>=3){state="GTA stock fallback: recovery budget exhausted";PublishFallback(c,s,state);}
+       if((c.DiscardEnvironmentalOutput||c.TransportValidationOnly)&&attempts>0||faults.Count>=3){state="GTA stock fallback: recovery budget exhausted";PublishFallback(c,s,state);}
        else if(now>=nextAttempt)StartHost(c,p.ManifestSha256);
       }else if(host.HasExited){StopHost("host-exited");Fault();state="GTA stock fallback: host exited";}
-      else{state=c.DiscardEnvironmentalOutput?"environment observation: no RichAudio endpoint":"experimental additive: GTA engine remains";
+      else{state=c.TransportValidationOnly?"transport-only: no producer or endpoint":c.DiscardEnvironmentalOutput?"environment observation: no RichAudio endpoint":"experimental additive: GTA engine remains";
        string statusFile=Path.Combine(c.Root,".local","gameplay",session,"host.json");bool exists=File.Exists(statusFile);
        DateTime modified=exists?File.GetLastWriteTimeUtc(statusFile):DateTime.MinValue,observed=DateTime.UtcNow;long now=Stopwatch.GetTimestamp();
        batiStatusWatch.Observe(exists,modified,observed,now,Stopwatch.Frequency);
@@ -153,8 +160,22 @@ namespace RichAudio.Beacon.Windows {
   void StartHost(PlayableConfiguration c,string manifestSha){
    string folder=Path.Combine(c.Root,".local","owned");Directory.CreateDirectory(folder);string permit=Path.Combine(folder,"start-"+Guid.NewGuid().ToString("N"));
    int pid=Process.GetCurrentProcess().Id;long start=Process.GetCurrentProcess().StartTime.ToUniversalTime().Ticks;string pipe="RichAudio.Playable01."+pid+"."+session;
-   job=new OwnedProcessJob(1536);host=new Process{StartInfo=new ProcessStartInfo{FileName=PlayableConfiguration.Inside(c.Root,"runtime/RichAudio.Acoustics.Host.exe"),Arguments=(fixture?"--gameplay-fixture ":"--gameplay ")+Q(c.Manifest)+" "+manifestSha+" "+pid+" "+start+" "+session+" "+pipe+" "+Q(permit),WorkingDirectory=c.Root,UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true}};
-   host.Start();Interlocked.Increment(ref attempts);job.Assign(host);hostStarted=Stopwatch.GetTimestamp();batiStatusWatch=new BatiHostStatusWatch01();Interlocked.Exchange(ref livePid,host.Id);
+   var containment=new OwnedProcessJob(1536);Volatile.Write(ref job,containment);
+   if(stopping){containment.RequestContainmentClose();throw new OperationCanceledException("controller stopped before launch");}
+   string executable=PlayableConfiguration.Inside(c.Root,"runtime/RichAudio.Acoustics.Host.exe"),arguments=(fixture?"--gameplay-fixture ":"--gameplay ")+Q(c.Manifest)+" "+manifestSha+" "+pid+" "+start+" "+session+" "+pipe+" "+Q(permit);
+   if(c.Shvdne){
+    ownedStop=GameplayStopSignal.Create(pid,session);
+    // Assign the suspended child before it can execute; Aborted may close the
+    // job concurrently. No startup permit is issued after cancellation.
+    ownedHost=containment.StartOwned(executable,arguments,c.Root);
+    host=Process.GetProcessById(ownedHost.Id);
+    if(host.StartTime.ToUniversalTime().Ticks!=ownedHost.StartUtcTicks)throw new InvalidOperationException("owned host identity changed");
+   }else{
+    host=new Process{StartInfo=new ProcessStartInfo{FileName=executable,Arguments=arguments,WorkingDirectory=c.Root,UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true}};
+    host.Start();containment.Assign(host);
+   }
+   Interlocked.Increment(ref attempts);if(stopping){containment.RequestContainmentClose();throw new OperationCanceledException("controller stopped during launch");}
+   hostStarted=Stopwatch.GetTimestamp();batiStatusWatch=new BatiHostStatusWatch01();Interlocked.Exchange(ref livePid,host.Id);
    Record("host-started","assigned-to-owned-job",GameplayLifecycle01.Identity(host));
    if(batiDemo){
     GameplayFrame fresh;if(!BatiGateCurrent(out fresh))throw new InvalidDataException("accepted Bati expired before host permit");
@@ -185,8 +206,9 @@ namespace RichAudio.Beacon.Windows {
     Record("host-stop-observed",reason,new{host=identity,lastStatus=LastHostState()});
     bool exited=false;int? exitCode=null;
     try{if(!p.HasExited){
-     PipeDeadline.Write(p.StandardInput.BaseStream,Encoding.UTF8.GetBytes("stop\n"),200,"host stop write deadline");
-     if(lifecycleDirectory!=null)p.StandardInput.Close();
+     if(ownedStop!=null)ownedStop.Set();
+     else{PipeDeadline.Write(p.StandardInput.BaseStream,Encoding.UTF8.GetBytes("stop\n"),200,"host stop write deadline");
+     if(lifecycleDirectory!=null)p.StandardInput.Close();}
      p.WaitForExit(batiDemo?6000:lifecycleDirectory!=null?4500:1500);
     }exited=p.HasExited;}
     catch(Exception e){Record("host-stop-signal-failed",e.GetType().Name,BoundedFaultText(e.Message,1024));}
@@ -194,10 +216,11 @@ namespace RichAudio.Beacon.Windows {
      if(!exited)try{exited=p.HasExited;}catch(Exception){}
      if(!exited)Record("forced-containment-close","host-exit-not-confirmed-before-job-close",identity);
      if(job!=null){var closed=job.CloseContainment();job=null;Record("containment-closed","host-job",new{closed.Attempted,closed.Succeeded,closed.NativeError});}
-     try{if(!p.HasExited)p.Kill();exited=p.WaitForExit(1000);if(exited)exitCode=p.ExitCode;}catch(Exception){}
+     try{if(ownedHost!=null){if(!ownedHost.WaitForExit(0)){int error;ownedHost.TryTerminate(1,out error);}exited=ownedHost.WaitForExit(1000);var status=ownedHost.CaptureExitStatus();if(status.ExitCode.HasValue)exitCode=unchecked((int)status.ExitCode.Value);}else{if(!p.HasExited)p.Kill();exited=p.WaitForExit(1000);if(exited)exitCode=p.ExitCode;}}catch(Exception){}
      Record("host-exit-observed",reason,new{host=identity,exited,exitCode});p.Dispose();
     }
    }else if(job!=null){job.Dispose();job=null;}
+   if(ownedHost!=null){ownedHost.Dispose();ownedHost=null;}if(ownedStop!=null){ownedStop.Dispose();ownedStop=null;}
    Interlocked.Exchange(ref livePid,0);
   }
   static void PublishFallback(PlayableConfiguration c,AcousticSettings s,string reason){

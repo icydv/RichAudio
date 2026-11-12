@@ -129,8 +129,11 @@ namespace RichAudio.Beacon.Transport {
   public Process Start(string executable,string arguments,string directory,bool visible=false){
    if(executable.IndexOf('"')>=0)throw new ArgumentException("executable quotes");var startup=new Startup();startup.Size=(uint)Marshal.SizeOf(typeof(Startup));startup.Flags=1;startup.Show=(ushort)(visible?1:0);Created child;
    if(!CreateProcess(executable,new System.Text.StringBuilder("\""+executable+"\" "+arguments),IntPtr.Zero,IntPtr.Zero,false,0x4|0x08000000,IntPtr.Zero,directory,ref startup,out child))throw new Win32Exception();
-   try{if(!AssignProcessToJobObject(job,child.Process)||ResumeThread(child.Thread)==UInt32.MaxValue){int error=Marshal.GetLastWin32Error();TerminateProcess(child.Process,1);throw new Win32Exception(error);}return Process.GetProcessById((int)child.Pid);}
-   finally{CloseHandle(child.Thread);CloseHandle(child.Process);}
+   bool returned=false;Process observed=null;
+   try{if(!AssignProcessToJobObject(job,child.Process))throw new Win32Exception(Marshal.GetLastWin32Error());
+    observed=Process.GetProcessById((int)child.Pid);if(observed.Handle==IntPtr.Zero)throw new InvalidOperationException("Owned child handle unavailable");
+    if(ResumeThread(child.Thread)==UInt32.MaxValue)throw new Win32Exception(Marshal.GetLastWin32Error());returned=true;return observed;}
+   finally{if(!returned){TerminateProcess(child.Process,1);if(observed!=null)observed.Dispose();}CloseHandle(child.Thread);CloseHandle(child.Process);}
   }
   public OwnedProcessLifetime StartOwned(string executable,string arguments,string directory,bool visible=false){
    if(String.IsNullOrWhiteSpace(executable)||executable.IndexOf('"')>=0||executable.IndexOf('\r')>=0||executable.IndexOf('\n')>=0)throw new ArgumentException("Literal executable required");
@@ -169,6 +172,11 @@ namespace RichAudio.Beacon.Transport {
   }
   static bool TerminateRaw(OwnedProcessKernelHandle process,out int error){bool ok=OwnedProcessNative.TerminateProcess(process,1);error=ok?0:Marshal.GetLastWin32Error();return ok;}
   public OwnedProcessCloseStatus CloseContainment(){lock(gate){job.Dispose();return job.CloseStatus;}}
+  // Unloading callbacks must not wait for a startup lock or a process. A
+  // SafeHandle close is idempotent and is deferred until any active P/Invoke
+  // has released its reference. Thus an in-flight AssignProcessToJobObject
+  // either fails closed or finishes before the kill-on-close job is released.
+  public void RequestContainmentClose(){job.Dispose();}
   public void Dispose(){CloseContainment();}
  }
 }

@@ -145,10 +145,10 @@ test('actual local service keeps passive identity and recording separate, owner 
  assert.equal((await request('/api/service/stop',{ownerId:owner})).data.stopping,true);
  }finally{await service.close();clean(root);}
 });
-test('actual C# mailbox automatically starts and gracefully stops owned service after simulated Story ready, without host', {skip:process.platform!=='win32'}, async()=>{
+for(const stopMode of ['normal','abort'])test(`actual C# mailbox automatically starts and ${stopMode} stops owned service after simulated Story ready, without host`, {skip:process.platform!=='win32'}, async()=>{
  const root=temp();copyPassiveService(root);
  const server=net.createServer();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=server.address().port;await new Promise(resolve=>server.close(resolve));
- const child=spawn(path.join(repo,'build','passive-soundmap','RichAudio.Passive.Tests.exe'),[root,process.execPath,String(port)],{windowsHide:true});let output='';child.stdout.on('data',b=>output+=b);child.stderr.on('data',b=>output+=b);
+ const child=spawn(path.join(repo,'build','passive-soundmap','RichAudio.Passive.Tests.exe'),[root,process.execPath,String(port),stopMode],{windowsHide:true});let output='';child.stdout.on('data',b=>output+=b);child.stderr.on('data',b=>output+=b);
  const exit=new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',code=>resolve(code));});
  const until=async f=>{const deadline=performance.now()+12000;while(!await f()){assert.ok(performance.now()<deadline,output||'bounded passive start');await new Promise(resolve=>setTimeout(resolve,30));}};
  try{const descriptor=path.join(root,'.local','soundmap','service.json');await until(()=>fs.existsSync(descriptor));const d=JSON.parse(fs.readFileSync(descriptor));let state;

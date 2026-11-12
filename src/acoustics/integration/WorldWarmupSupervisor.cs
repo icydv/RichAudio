@@ -83,6 +83,7 @@ namespace RichAudio.Preparation {
   string prioritySession;bool priorityAccepted;int priorityWriter,priorityAttempts;long priorityNextAttempt;
   volatile string priorityState="waiting-valid-configuration";
   int used;
+  OwnedJob activeJob;
   public string State { get { return state; } }
   public string StartedUtc { get { return workflowStartedUtc; } }
   public string InitialObservationState {get{return priorityState;}}
@@ -147,6 +148,9 @@ namespace RichAudio.Preparation {
   // No file IO or join on the game fiber. The worker cooperatively cancels,
   // then closes its owned Windows job after a bounded cleanup grace period.
   public void Stop(){stop.Set();priorityState="cancelled";}
+  // A framework unload can abort managed workers before cooperative cleanup.
+  // Closing the safe job handle needs no worker join or filesystem operation.
+  public void AbortAndCloseContainment(){Stop();var owned=Volatile.Read(ref activeJob);if(owned!=null)owned.Dispose();}
   public static string Hash(string filename) {
    using(var stream=File.OpenRead(filename))using(var sha=SHA256.Create())
     return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-","").ToLowerInvariant();
@@ -234,7 +238,9 @@ namespace RichAudio.Preparation {
      if(c.NodeExecutable!=null)start.EnvironmentVariables["PATH"]=Path.GetDirectoryName(c.NodeExecutable)+Path.PathSeparator+(start.EnvironmentVariables["PATH"]??"");
      start.EnvironmentVariables["RICHAUDIO_WORLD_BATCH_ID"]=batchId;
      start.EnvironmentVariables["RICHAUDIO_WORLD_START_UTC"]=workflowStartedUtc??DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture);
-     job=new OwnedJob((ulong)c.MaximumMemoryMiB*1024*1024);worker=Process.Start(start);job.Assign(worker);
+     job=new OwnedJob((ulong)c.MaximumMemoryMiB*1024*1024);Volatile.Write(ref activeJob,job);
+     if(stop.WaitOne(0)){job.Dispose();state="cancelled";break;}
+     worker=job.StartContained(start);
      if(stop.WaitOne(0)){state="cancelled";break;}
      File.WriteAllText(permit,"owned-startup-job");
      state="preparing";var clock=Stopwatch.StartNew();bool stopping=false;double stopAt=0;
@@ -245,7 +251,7 @@ namespace RichAudio.Preparation {
       if(stopping)Thread.Sleep(50);worker.Refresh();
      }
      bool exited=worker.HasExited;int exitCode=-1;if(exited){worker.WaitForExit();exitCode=worker.ExitCode;}
-     joined=job.TerminateAndJoin(2000);job.Dispose();job=null;
+     joined=job.TerminateAndJoin(2000);job.Dispose();job=null;Volatile.Write(ref activeJob,null);
      if(!exited)worker.WaitForExit(2000);worker.Dispose();worker=null;
      if(!joined){state="worker-closure-unverified";break;}
      if(stopping){if(state=="cancelling")state="cancelled";break;}
@@ -253,9 +259,10 @@ namespace RichAudio.Preparation {
      state=exitCode==0?"preparation-finished-read-summary":"preparation-incomplete";break;
     }
    }catch(ThreadAbortException){state="unloaded";throw;}
-   catch(Exception e){state="blocked-"+e.GetType().Name;}
+   catch(Exception e){state=stop.WaitOne(0)?"cancelled":"blocked-"+e.GetType().Name;}
    finally {
     if(job!=null){try{joined=job.TerminateAndJoin(2000);}catch(Exception){}job.Dispose();}
+    Volatile.Write(ref activeJob,null);
     if(worker!=null){try{if(!worker.HasExited)worker.Kill();worker.Dispose();}catch(Exception){}}
     if(state=="cancelling")state="cancelled";
     // Private evidence contains state only; detailed coordinator readiness lives
@@ -269,16 +276,44 @@ namespace RichAudio.Preparation {
    [StructLayout(LayoutKind.Sequential)] struct Extended {public Basic Basic;public Io Io;public UIntPtr ProcessMemory,JobMemory,PeakProcessMemory,PeakJobMemory;}
    [StructLayout(LayoutKind.Sequential)] struct Accounting {public long User,Kernel,PeriodUser,PeriodKernel;public uint PageFaults,TotalProcesses,ActiveProcesses,TerminatedProcesses;}
    [DllImport("kernel32.dll",SetLastError=true)]static extern IntPtr CreateJobObject(IntPtr attributes,string name);
-   [DllImport("kernel32.dll",SetLastError=true)]static extern bool SetInformationJobObject(IntPtr job,int type,IntPtr value,uint length);
-   [DllImport("kernel32.dll",SetLastError=true)]static extern bool AssignProcessToJobObject(IntPtr job,IntPtr process);
-   [DllImport("kernel32.dll",SetLastError=true)]static extern bool TerminateJobObject(IntPtr job,uint exitCode);
-   [DllImport("kernel32.dll",SetLastError=true)]static extern bool QueryInformationJobObject(IntPtr job,int kind,IntPtr value,uint length,IntPtr returned);
+   [DllImport("kernel32.dll",SetLastError=true)]static extern bool SetInformationJobObject(JobHandle job,int type,IntPtr value,uint length);
+   [DllImport("kernel32.dll",SetLastError=true)]static extern bool AssignProcessToJobObject(JobHandle job,IntPtr process);
+   [DllImport("kernel32.dll",SetLastError=true)]static extern bool TerminateJobObject(JobHandle job,uint exitCode);
+   [DllImport("kernel32.dll",SetLastError=true)]static extern bool QueryInformationJobObject(JobHandle job,int kind,IntPtr value,uint length,IntPtr returned);
    [DllImport("kernel32.dll")]static extern bool CloseHandle(IntPtr value);
-   IntPtr handle;
-   public OwnedJob(ulong memory){handle=CreateJobObject(IntPtr.Zero,null);if(handle==IntPtr.Zero)throw new System.ComponentModel.Win32Exception();var data=new Extended();data.Basic.Flags=0x2000|0x8|0x200;data.Basic.Processes=16;data.JobMemory=new UIntPtr(memory);int size=Marshal.SizeOf(typeof(Extended));IntPtr p=Marshal.AllocHGlobal(size);try{Marshal.StructureToPtr(data,p,false);if(!SetInformationJobObject(handle,9,p,(uint)size)){int error=Marshal.GetLastWin32Error();Dispose();throw new System.ComponentModel.Win32Exception(error);}}finally{Marshal.FreeHGlobal(p);}}
+   sealed class JobHandle:Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid {
+    internal JobHandle(IntPtr value):base(true){SetHandle(value);}protected override bool ReleaseHandle(){return CloseHandle(handle);}
+   }
+   readonly JobHandle handle;
+   [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Unicode)]struct Startup{public uint Size;public string Reserved,Desktop,Title;public uint X,Y,Width,Height,CharsX,CharsY,Fill,Flags;public ushort Show,ReservedBytes;public IntPtr ReservedData,Input,Output,Error;}
+   [StructLayout(LayoutKind.Sequential)]struct Created{public IntPtr Process,Thread;public uint Pid,Tid;}
+   [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)]static extern bool CreateProcess(string app,StringBuilder command,IntPtr pa,IntPtr ta,bool inherit,uint flags,IntPtr environment,string directory,ref Startup startup,out Created created);
+   [DllImport("kernel32.dll",SetLastError=true)]static extern uint ResumeThread(IntPtr thread);
+   [DllImport("kernel32.dll",SetLastError=true)]static extern bool TerminateProcess(IntPtr process,uint code);
+   [DllImport("kernel32.dll")]static extern uint WaitForSingleObject(IntPtr value,uint milliseconds);
+   public OwnedJob(ulong memory){handle=new JobHandle(CreateJobObject(IntPtr.Zero,null));if(handle.IsInvalid)throw new System.ComponentModel.Win32Exception();var data=new Extended();data.Basic.Flags=0x2000|0x8|0x200;data.Basic.Processes=16;data.JobMemory=new UIntPtr(memory);int size=Marshal.SizeOf(typeof(Extended));IntPtr p=Marshal.AllocHGlobal(size);try{Marshal.StructureToPtr(data,p,false);if(!SetInformationJobObject(handle,9,p,(uint)size)){int error=Marshal.GetLastWin32Error();Dispose();throw new System.ComponentModel.Win32Exception(error);}}finally{Marshal.FreeHGlobal(p);}}
+   public Process StartContained(ProcessStartInfo info){
+    if(handle.IsClosed||info.UseShellExecute||info.RedirectStandardInput||info.RedirectStandardOutput||info.RedirectStandardError)throw new InvalidOperationException("contained preparation startup");
+    if(String.IsNullOrWhiteSpace(info.FileName)||info.FileName.IndexOf('"')>=0)throw new ArgumentException("literal preparation executable");
+    var environment=new System.Collections.Generic.SortedDictionary<string,string>(StringComparer.OrdinalIgnoreCase);
+    foreach(string key in info.EnvironmentVariables.Keys)environment[key]=info.EnvironmentVariables[key];
+    var block=new StringBuilder();foreach(var pair in environment)block.Append(pair.Key).Append('=').Append(pair.Value).Append('\0');block.Append('\0');
+    IntPtr environmentBlock=Marshal.StringToHGlobalUni(block.ToString());Created child=new Created();Process observed=null;bool returned=false;
+    try{
+     var startup=new Startup{Size=(uint)Marshal.SizeOf(typeof(Startup)),Flags=1,Show=0};
+     if(!CreateProcess(info.FileName,new StringBuilder("\""+info.FileName+"\" "+info.Arguments),IntPtr.Zero,IntPtr.Zero,false,0x4|0x400|0x08000000,environmentBlock,info.WorkingDirectory,ref startup,out child))throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+     if(!AssignProcessToJobObject(handle,child.Process))throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+     observed=Process.GetProcessById((int)child.Pid);if(observed.Handle==IntPtr.Zero)throw new InvalidOperationException("preparation process handle unavailable");
+     if(ResumeThread(child.Thread)==UInt32.MaxValue)throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+     returned=true;return observed;
+    }finally{
+     if(!returned&&child.Process!=IntPtr.Zero){TerminateProcess(child.Process,1);WaitForSingleObject(child.Process,1000);if(observed!=null)observed.Dispose();}
+     if(child.Thread!=IntPtr.Zero)CloseHandle(child.Thread);if(child.Process!=IntPtr.Zero)CloseHandle(child.Process);Marshal.FreeHGlobal(environmentBlock);
+    }
+   }
    public void Assign(Process process){if(!AssignProcessToJobObject(handle,process.Handle))throw new System.ComponentModel.Win32Exception();}
    public bool TerminateAndJoin(int milliseconds){if(!TerminateJobObject(handle,1))return false;int size=Marshal.SizeOf(typeof(Accounting));IntPtr data=Marshal.AllocHGlobal(size);var clock=Stopwatch.StartNew();try{do{if(!QueryInformationJobObject(handle,1,data,(uint)size,IntPtr.Zero))return false;if(((Accounting)Marshal.PtrToStructure(data,typeof(Accounting))).ActiveProcesses==0)return true;Thread.Sleep(10);}while(clock.ElapsedMilliseconds<milliseconds);return false;}finally{Marshal.FreeHGlobal(data);}}
-   public void Dispose(){if(handle!=IntPtr.Zero){CloseHandle(handle);handle=IntPtr.Zero;}}
+   public void Dispose(){handle.Dispose();}
   }
  }
 }

@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "enabled": false,
+  "allowMemoryTelemetry": false,
+  "useEnhancedNativeTelemetry": false,
+  "hostEnabled": false,
+  "menuEnabled": true,
+  "soundMapEnabled": false,
+  "worldWarmupEnabled": false,
+  "sampleHz": 20,
+  "maximumVehicles": 16
+}

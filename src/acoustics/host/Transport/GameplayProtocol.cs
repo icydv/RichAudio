@@ -19,6 +19,25 @@ namespace RichAudio.Beacon.Transport {
   [DataMember(Name="riderAttached",EmitDefaultValue=false)]public bool? RiderAttached;
   [DataMember(Name="riderViewAttached",EmitDefaultValue=false)]public bool? RiderViewAttached;
  }
+ [DataContract] public sealed class GameplayVehicleObservation02 {
+  [DataMember(Name="id",IsRequired=true)]public string Id;
+  [DataMember(Name="generation",IsRequired=true)]public int Generation;
+  [DataMember(Name="observationTicks",IsRequired=true)]public long ObservationTicks;
+  [DataMember(Name="model",IsRequired=true)]public uint Model;
+  [DataMember(Name="context",IsRequired=true)]public string Context;
+  [DataMember(Name="position",IsRequired=true)]public double[] Position;
+  [DataMember(Name="velocity",IsRequired=true)]public double[] Velocity;
+  [DataMember(Name="forward",IsRequired=true)]public double[] Forward;
+  [DataMember(Name="up",IsRequired=true)]public double[] Up;
+  [DataMember(Name="operatingPoint")]public double? OperatingPoint;
+  [DataMember(Name="operatingPointEvidence",IsRequired=true)]public string OperatingPointEvidence;
+  [DataMember(Name="running",IsRequired=true)]public bool Running;
+  [DataMember(Name="valid",IsRequired=true)]public bool Valid;
+  // Attachment is independent of the selected acoustic bank context. Missing
+  // legacy evidence never grants the listener-local airflow layer.
+  [DataMember(Name="riderAttached",EmitDefaultValue=false)]public bool? RiderAttached;
+  [DataMember(Name="riderViewAttached",EmitDefaultValue=false)]public bool? RiderViewAttached;
+ }
  [DataContract] public sealed class GameplayInterior {
   [DataMember(Name="proxy",IsRequired=true)]public int Proxy;
   [DataMember(Name="archetype",IsRequired=true)]public uint Archetype;
@@ -39,6 +58,7 @@ namespace RichAudio.Beacon.Transport {
   [DataMember(Name="session",IsRequired=true)]public string Session;
   [DataMember(Name="listener",IsRequired=true)]public ListenerState Listener;
   [DataMember(Name="vehicles",IsRequired=true)]public GameplayVehicle[] Vehicles;
+  [DataMember(Name="vehicleObservations02",EmitDefaultValue=false)]public GameplayVehicleObservation02[] VehicleObservations02;
   // Absolute expiry in the original publisher's host-clock domain. Zero is the
   // unchanged legacy contract; accepted SHV frames carry their shorter lease.
   [DataMember(Name="validThroughTicks",EmitDefaultValue=false)]public long ValidThroughTicks;
@@ -72,6 +92,15 @@ namespace RichAudio.Beacon.Transport {
     foreach(var a in new[]{v.Position,v.Velocity,v.Forward,v.Up}){Protocol.Check(a!=null&&a.Length==3,"vehicle vector");foreach(double x in a)Protocol.Check(Protocol.Finite(x)&&Math.Abs(x)<=100000,"vehicle vector bounds");}
     double speed=Norm(v.Velocity),dot=0;for(int i=0;i<3;i++)dot+=v.Forward[i]*v.Up[i];Protocol.Check(speed<=100&&Math.Abs(Norm(v.Forward)-1)<1e-4&&Math.Abs(Norm(v.Up)-1)<1e-4&&Math.Abs(dot)<1e-4,"vehicle basis/speed");
    }
+   if(f.VehicleObservations02!=null){Protocol.Check(f.VehicleObservations02.Length<=MaximumVehicles,"diagnostic observation budget");
+   var seenObservations=new HashSet<string>();foreach(var v in f.VehicleObservations02){Protocol.Check(v!=null&&v.Valid&&v.Model!=0&&v.Id!=null&&System.Text.RegularExpressions.Regex.IsMatch(v.Id,"\\A[\\w:-]{1,64}\\z")&&seenObservations.Add(v.Id)&&v.Generation>0&&(v.Context=="player"||v.Context=="npc"),"vehicle identity/context");
+    Protocol.Check(!v.OperatingPoint.HasValue&&v.OperatingPointEvidence=="unavailable","transport mechanical signal must remain unavailable");
+    if(v.OperatingPoint.HasValue)Protocol.Check(Protocol.Finite(v.OperatingPoint.Value)&&v.OperatingPoint.Value>=0&&v.OperatingPoint.Value<=1,"observed operating ratio");
+    Protocol.Check(v.ObservationTicks>=0&&Math.Abs(v.ObservationTicks-f.Listener.ObservationTicks)<=Stopwatch.Frequency/20,"source sampling clock");
+    foreach(var a in new[]{v.Position,v.Velocity,v.Forward,v.Up}){Protocol.Check(a!=null&&a.Length==3,"vehicle vector");foreach(double x in a)Protocol.Check(Protocol.Finite(x)&&Math.Abs(x)<=100000,"vehicle vector bounds");}
+    double speed=Norm(v.Velocity),dot=0;for(int i=0;i<3;i++)dot+=v.Forward[i]*v.Up[i];Protocol.Check(speed<=100&&Math.Abs(Norm(v.Forward)-1)<1e-4&&Math.Abs(Norm(v.Up)-1)<1e-4&&Math.Abs(dot)<1e-4,"vehicle basis/speed");
+   }
+   }
   }
   static double Norm(double[] a){return Math.Sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);}
   public static byte[] Encode(GameplayFrame f,string session){Validate(f,session);using(var m=new MemoryStream()){new DataContractJsonSerializer(typeof(GameplayFrame)).WriteObject(m,f);Protocol.Check(m.Length<=MaximumBytes,"gameplay packet size");return m.ToArray();}}
@@ -87,15 +116,17 @@ namespace RichAudio.Beacon.Transport {
  }
  public sealed class GameplayPublisher:IDisposable {
   readonly object gate=new object();readonly AutoResetEvent wake=new AutoResetEvent(false);readonly string session;Thread thread;volatile bool stop;GameplayFrame latest;string endpoint;int expectedPid;NamedPipeClientStream pipe;
-  public long Sent,Expired,Failures;public GameplayPublisher(string session){this.session=session;}
+  public long Sent,Expired,Failures,Superseded,Unavailable;readonly TimingSeries02 serialization=new TimingSeries02();
+  public object Metrics(){return new{sent=Interlocked.Read(ref Sent),expired=Interlocked.Read(ref Expired),failures=Interlocked.Read(ref Failures),superseded=Interlocked.Read(ref Superseded),unavailable=Interlocked.Read(ref Unavailable),queueCapacity=1,serialization=serialization.Snapshot()};}
+  public GameplayPublisher(string session){this.session=session;}
   public void Start(){thread=new Thread(Run){IsBackground=true,Name="RichAudio gameplay latest snapshot"};thread.Start();}
   public void Configure(string name,int pid){lock(gate){endpoint=name;expectedPid=pid;var p=pipe;pipe=null;if(p!=null)p.Dispose();}wake.Set();}
-  public void Publish(GameplayFrame frame){Interlocked.Exchange(ref latest,frame);wake.Set();}
+  public void Publish(GameplayFrame frame){if(Interlocked.Exchange(ref latest,frame)!=null)Interlocked.Increment(ref Superseded);wake.Set();}
   void Run(){while(!stop){wake.WaitOne(50);if(stop)break;var f=Interlocked.Exchange(ref latest,null);if(f==null)continue;
-   try{string name;int pid;lock(gate){name=endpoint;pid=expectedPid;}if(name==null||pid<=0)continue;
+   try{string name;int pid;lock(gate){name=endpoint;pid=expectedPid;}if(name==null||pid<=0){Interlocked.Increment(ref Unavailable);continue;}
     if((Stopwatch.GetTimestamp()-f.Listener.ObservationTicks)*1000d/Stopwatch.Frequency>250||f.ValidThroughTicks!=0&&Stopwatch.GetTimestamp()>f.ValidThroughTicks){Expired++;continue;}
     NamedPipeClientStream p;lock(gate)p=pipe;if(p==null){p=new NamedPipeClientStream(".",name,PipeDirection.InOut,PipeOptions.Asynchronous);bool kept=false;try{p.Connect(150);GameplayWire.Peer(p,pid,false);lock(gate){if(stop||name!=endpoint||pid!=expectedPid)continue;pipe=p;kept=true;}}finally{if(!kept)p.Dispose();}}
-    var b=GameplayWire.Encode(f,session);if((Stopwatch.GetTimestamp()-f.Listener.ObservationTicks)*1000d/Stopwatch.Frequency>250||f.ValidThroughTicks!=0&&Stopwatch.GetTimestamp()>f.ValidThroughTicks){Expired++;continue;}
+    long encodeBegan=Stopwatch.GetTimestamp();byte[] b;try{b=GameplayWire.Encode(f,session);}finally{serialization.Add(ObservationTiming02.Ms(Stopwatch.GetTimestamp()-encodeBegan));}if((Stopwatch.GetTimestamp()-f.Listener.ObservationTicks)*1000d/Stopwatch.Frequency>250||f.ValidThroughTicks!=0&&Stopwatch.GetTimestamp()>f.ValidThroughTicks){Expired++;continue;}
     GameplayWire.Write(p,b);TransportStop.Ack(p,TransportStop.Accepted);Sent++;
    }catch(ThreadAbortException){throw;}catch{Failures++;lock(gate){var p=pipe;pipe=null;if(p!=null)p.Dispose();}wake.WaitOne(200);}
   }}

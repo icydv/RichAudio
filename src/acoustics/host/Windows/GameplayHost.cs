@@ -9,6 +9,7 @@ namespace RichAudio.Beacon.Windows {
   long supersededSnapshots,controlDeliveryRows,pcmTimingRows,producerTimingRows,producerTimingRowsRejected,preparedSourceAtQpc,steadyWindowAtQpc;GameplayFixtureLatency fixtureLatency;GameplayFixtureCadence01 fixtureCadence;
   readonly object sync=new object();JavaScriptSerializer Json {get{return new JavaScriptSerializer{MaxJsonLength=65536,RecursionLimit=24};}}
   PlayableConfiguration config;string session,pipeName;int ownerId;long ownerStart;AcousticSettings settings;WasapiOutput audio;Thread writer,reader,diagnostics,receiver,sink;bool fixture;long fixtureCallbacks;string directory;int childId;
+  readonly object transportGate=new object();readonly TransportObservationState02 transport=new TransportObservationState02();Thread ownerCommand;long transportConnections;
   bool demo;long admittedLease;GameplayRecording recording;GameplayDemoPermit demoPermit;string recordingFailure,recordingDirectory;object lastRecordingMetrics;readonly GameplayShutdownFade shutdownFade=new GameplayShutdownFade();
   GameplayDeliveryTrace01 delivery;long creditBatch,issuedCredits;
   int ringHighWaterFrames;long maximumAdmissionIntervalTicks;
@@ -19,11 +20,11 @@ namespace RichAudio.Beacon.Windows {
   bool OwnerAlive(){try{using(var p=Process.GetProcessById(ownerId))return !p.HasExited&&p.StartTime.ToUniversalTime().Ticks==ownerStart;}catch(ArgumentException){return false;}}
   void Fail(Exception e){failure=e.GetType().Name;failureDetail=e.Message;stop=true;wake.Set();}
   void RequestShutdown(string reason){Interlocked.CompareExchange(ref stopReason,reason,null);shutdownRequested=true;wake.Set();}
-  void Record(string stage,string reason,object detail){if(config!=null&&config.DiscardEnvironmentalOutput)GameplayLifecycle01.Record(directory,"host",session,stage,reason,detail);}
+  void Record(string stage,string reason,object detail){if(config!=null&&(config.DiscardEnvironmentalOutput||config.TransportValidationOnly))GameplayLifecycle01.Record(directory,"host",session,stage,reason,detail);}
   int Execute(string[] args){
    if(args.Length!=8)return 2;fixture=args[0]=="--gameplay-fixture";if(fixture)fixtureLatency=new GameplayFixtureLatency();int code=1;
    try{
-    config=PlayableConfiguration.Load(args[1]);if(config.DiscardEnvironmentalOutput)delivery=new GameplayDeliveryTrace01();latencyProfile=GameplayLatencyProfile.Resolve(config.LatencyProfile);ring=new PcmRing(latencyProfile.StartupBlocks);creditWindow=new GameplayCreditWindow(latencyProfile);credits=latencyProfile.StartupBlocks;if(!String.Equals(PlayableConfiguration.Digest(args[1]),args[2],StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("playable manifest changed");
+    config=PlayableConfiguration.Load(args[1]);if(!String.Equals(PlayableConfiguration.Digest(args[1]),args[2],StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("playable manifest changed");
     ownerId=int.Parse(args[3],CultureInfo.InvariantCulture);ownerStart=long.Parse(args[4],CultureInfo.InvariantCulture);session=args[5];pipeName=args[6];
     if(!System.Text.RegularExpressions.Regex.IsMatch(session,"\\A[a-f0-9]{32}\\z")||pipeName!="RichAudio.Playable01."+ownerId+"."+session)throw new InvalidDataException("owned gameplay endpoint");
     string permit=Path.GetFullPath(args[7]),privateRoot=Path.Combine(config.Root,".local")+Path.DirectorySeparatorChar;if(!permit.StartsWith(privateRoot,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("private startup permit");
@@ -33,6 +34,9 @@ namespace RichAudio.Beacon.Windows {
     directory=Path.Combine(config.Root,".local","gameplay",session);Directory.CreateDirectory(directory);
     using(var self=Process.GetCurrentProcess())Record("host-started","owner-permit-verified",new{host=GameplayLifecycle01.Identity(self),ownerPid=ownerId,ownerStartUtcTicks=ownerStart});
     string settingFile=AcousticSettingsStore.DefaultPath(config.Root);settings=AcousticSettingsStore.Load(config.Root,settingFile);
+    if(config.TransportValidationOnly){code=RunTransportOnly();}
+    else {
+    if(config.DiscardEnvironmentalOutput)delivery=new GameplayDeliveryTrace01();latencyProfile=GameplayLatencyProfile.Resolve(config.LatencyProfile);ring=new PcmRing(latencyProfile.StartupBlocks);creditWindow=new GameplayCreditWindow(latencyProfile);credits=latencyProfile.StartupBlocks;
     if(!fixture&&(!settings.RichAudioEnabled||settings.IntegrationMode!="experimental-additive"))throw new InvalidOperationException("stock fallback selected");
     nodeJob=new OwnedProcessJob(1024);
     string producerArgs=Q(PlayableConfiguration.Inside(config.Root,"tools/Run-Gameplay.mjs"))+" --manifest "+Q(config.Manifest)+" --session "+session;
@@ -88,13 +92,14 @@ namespace RichAudio.Beacon.Windows {
      Thread.Sleep(2);
     }
     code=0;
+    }
    }catch(Exception e){failure=e.GetType().Name;failureDetail=e.Message;Console.Error.WriteLine("RichAudio gameplay stock fallback: "+failure+": "+failureDetail);}
    finally{
     Record("host-stop",stopReason??(failure==null?"host-ended":"host-fault"),new{failure,failureDetail,workerFailure,producer=producerIdentity,lastPcmQpc=Interlocked.Read(ref lastPcmTicks),lastSnapshotQpc=Interlocked.Read(ref lastSnapshotTicks),receivedBlocks=Interlocked.Read(ref received),consumedFrames=ring==null?0:Interlocked.Read(ref ring.ConsumedFrames)});
     stop=true;wake.Set();if(pipe!=null)try{pipe.Dispose();}catch(IOException){}if(audio!=null){try{audio.Dispose();}catch(Exception e){failure=failure??e.GetType().Name;code=1;}}
     if(recording!=null){try{recording.Event("host-audio-stopped",Stopwatch.GetTimestamp(),new{underflowFrames=ring.UnderflowFrames,consumedFrames=ring.ConsumedFrames,fadeReserveConsumed=shutdownFade.FullyConsumed(ring.ConsumedFrames)});recording.Dispose();}catch(Exception e){recordingFailure=e.GetType().Name;}}
     CloseProducer();
-    foreach(var t in new[]{writer,reader,diagnostics,receiver,sink})if(t!=null&&t.IsAlive&&!t.Join(1500)){failure="cleanup-timeout";code=1;}
+    foreach(var t in new[]{writer,reader,diagnostics,receiver,sink,ownerCommand})if(t!=null&&t.IsAlive&&!t.Join(1500)){failure="cleanup-timeout";code=1;}
     if(delivery!=null&&directory!=null)try{
      var receipt=delivery.Snapshot(session,Process.GetCurrentProcess().Id,childId,latencyProfile.StartupBlocks,latencyProfile.ProducerBlocks,Interlocked.Read(ref received),Interlocked.Read(ref ring.ConsumedFrames),issuedCredits,creditWindow.Retired,creditWindow.SourcePrepared);
      string file=Path.Combine(directory,delivery.Underflow?"first-underflow.json":"delivery-timing.json");
@@ -108,7 +113,30 @@ namespace RichAudio.Beacon.Windows {
    }
    return failure==null?code:1;
   }
+  int RunTransportOnly(){
+   Record("transport-ready","no-producer-no-endpoint",new{protocol=1,extension="vehicleObservations02",queueCapacity=0});
+   receiver=new Thread(ReceiveTransportOnly){IsBackground=true,Name="RichAudio transport validation"};receiver.Start();
+   ownerCommand=new Thread(ReadOwnerCommands){IsBackground=true,Name="RichAudio normal stop event"};ownerCommand.Start();
+   while(!stop&&!shutdownRequested){if(!OwnerAlive()){RequestShutdown("owner-lost");break;}PublishTransportStatus("running");wake.WaitOne(200);}
+   stop=true;return failure==null?0:1;
+  }
+  void ReceiveTransportOnly(){try{while(!stop){pipe=GameplayWire.Server(pipeName);pipe.WaitForConnection();GameplayWire.Peer(pipe,ownerId,true);Interlocked.Increment(ref transportConnections);
+   try{while(!stop){var frame=GameplayWire.Decode(GameplayWire.Read(pipe),session);bool accepted;lock(transportGate)accepted=transport.Accept(frame,session,Stopwatch.GetTimestamp());if(accepted){Interlocked.Increment(ref frames);Interlocked.Exchange(ref lastSnapshotTicks,Stopwatch.GetTimestamp());}else Interlocked.Increment(ref expired);TransportStop.Write(pipe,new[]{TransportStop.Accepted});}}
+   catch(TimeoutException){if(!stop)Interlocked.Increment(ref expired);}
+   catch(Exception e){if(e is ThreadAbortException)throw;if(!stop){Interlocked.Increment(ref rejected);Record("transport-rejected",e.GetType().Name,e.Message);}}
+   finally{var current=pipe;pipe=null;if(current!=null)current.Dispose();}
+  }}catch(Exception e){if(!stop)Fail(e);}}
+  void PublishTransportStatus(string state){
+   object observations;lock(transportGate)observations=transport.Snapshot(Stopwatch.GetTimestamp());
+   var status=new{schema=1,hostState=state,session,publicationQpc=Stopwatch.GetTimestamp(),publicationClockFrequency=Stopwatch.Frequency,ownerPid=ownerId,ownerStartUtcTicks=ownerStart,hostPid=Process.GetCurrentProcess().Id,nodePid=0,transportValidationOnly=true,endpointOpened=false,rendererStarted=false,pcmFrames=0,nativeSuppression=false,queueCapacity=0,connections=Interlocked.Read(ref transportConnections),receivedSnapshots=Interlocked.Read(ref frames),expiredSnapshots=Interlocked.Read(ref expired),rejectedConnections=Interlocked.Read(ref rejected),observations,failure,failureDetail};
+   string path=Path.Combine(directory,"host.json"),tmp=path+".pending";File.WriteAllText(tmp,Json.Serialize(status),new UTF8Encoding(false));if(File.Exists(path))File.Replace(tmp,path,null);else File.Move(tmp,path);
+   if(state=="stopped")File.WriteAllText(Path.Combine(directory,failure==null?"last-stop.json":"last-failure.json"),Json.Serialize(status),new UTF8Encoding(false));
+  }
   void ReadOwnerCommands(){
+   if(config.Shvdne){
+    try{using(var signal=GameplayStopSignal.Open(ownerId,session))while(!stop){if(signal.WaitOne(100)){RequestShutdown("owner-stop-event");break;}}}
+    catch(Exception){if(!stop)RequestShutdown("owner-stop-event-unavailable");}return;
+   }
    // The redirected .NET writer may emit a UTF-8 preamble. Use the same
    // wire encoding as the owner and allow the reader to consume that preamble.
    try{using(var input=new StreamReader(Console.OpenStandardInput(),new UTF8Encoding(false,true),true,128)){
@@ -222,6 +250,7 @@ namespace RichAudio.Beacon.Windows {
    if(fixtureLatency!=null){fixtureLatency.Submission(before-under-end,callbackFrames,Stopwatch.GetTimestamp());fixtureLatency.Callback01(block,due,callbackBefore,Stopwatch.GetTimestamp(),callbackFrames,callbackSupplied,bufferedBefore,ring.BufferedFrames,ring.UnderflowFrames>under,ring.FirstUnderflowFrame,shutdownRequested,Interlocked.Read(ref admittedLease),Interlocked.Read(ref lastSnapshotTicks));}double peak=0,energy=0;long silent=Interlocked.Read(ref fixtureTrailingSilentFrames);for(int i=0;i<callbackFrames;i++){float l=buffer[i*2],r=buffer[i*2+1];peak=Math.Max(peak,Math.Max(Math.Abs(l),Math.Abs(r)));energy+=(double)l*l+(double)r*r;silent=l==0&&r==0?silent+1:0;}Interlocked.Exchange(ref fixtureTrailingSilentFrames,silent);Interlocked.Exchange(ref fixtureLastPeak,peak);Interlocked.Exchange(ref fixtureLastSumSquares,energy);ring.RequireContinuousProducer();Interlocked.Increment(ref fixtureCallbacks);block++;wake.Set();}
   }catch(Exception e){if(!stop)Fail(e);}}
   void PublishStatus(string state){
+   if(config.TransportValidationOnly){PublishTransportStatus(state);return;}
    AcousticSettings s;Dictionary<string,object> measured=null;lock(sync){s=settings;if(workerStatus!=null){var d=Json.DeserializeObject(workerStatus)as Dictionary<string,object>;object raw;if(d!=null&&d.TryGetValue("status",out raw))measured=raw as Dictionary<string,object>;}}
    var status=new Dictionary<string,object>{{"requestedQuality",s.Quality},{"activeQuality","performance"},{"pathBudget",12},{"requestedAcceleration",s.Acceleration},{"activeAcceleration","cpu"},{"gpuResultsApplied",0},{"qualityDeadlineMisses",0},{"droppedResults",0},{"settingsRevision",s.Revision},{"richAudioEnabled",s.RichAudioEnabled},{"outputLevel",s.OutputLevel},{"earlyReflections",s.EarlyReflections},{"integrationMode",s.IntegrationMode},{"fallbackReason","Conditional direct sound; no qualified collision coverage"}};
    if(measured!=null)foreach(var kv in measured)status[kv.Key]=kv.Value;
