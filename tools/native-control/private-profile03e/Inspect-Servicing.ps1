@@ -1,0 +1,8 @@
+param([Parameter(Mandatory=$true)][string]$Output)
+$ErrorActionPreference='Stop'
+if(Test-Path -LiteralPath $Output){throw 'Fresh servicing evidence required'}
+$os=Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+$packages=@(Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\Packages\Package_for_RollupFix*'|ForEach-Object{[ordered]@{name=$_.PSChildName;currentState=$_.CurrentState;installTimeHigh=$_.InstallTimeHigh;installTimeLow=$_.InstallTimeLow}})
+$setup=@(Get-WinEvent -FilterHashtable @{LogName='Setup';ProviderName='Microsoft-Windows-Servicing';StartTime=[datetime]'2026-11-01'} -MaxEvents 80|ForEach-Object{[ordered]@{recordId=$_.RecordId;utc=$_.TimeCreated.ToUniversalTime().ToString('o');id=$_.Id;message=$_.Message;xml=$_.ToXml()}})
+$updates=@(Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-WindowsUpdateClient/Operational';StartTime=[datetime]'2026-11-01'} -MaxEvents 100|ForEach-Object{[ordered]@{recordId=$_.RecordId;utc=$_.TimeCreated.ToUniversalTime().ToString('o');id=$_.Id;message=$_.Message;xml=$_.ToXml()}})
+[ordered]@{utc=[datetime]::UtcNow.ToString('o');os=[ordered]@{productName=$os.ProductName;displayVersion=$os.DisplayVersion;build=$os.CurrentBuildNumber;ubr=$os.UBR;buildLabEx=$os.BuildLabEx};servicingRebootPending=(Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending');updateRebootPending=(Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired');rollups=$packages;setup=$setup;windowsUpdate=$updates;scope='Read-only registry and existing event records; no update scan, repair or elevation'}|ConvertTo-Json -Depth 12|Set-Content -LiteralPath $Output -Encoding utf8NoBOM
