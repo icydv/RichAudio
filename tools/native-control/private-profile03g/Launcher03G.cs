@@ -1,0 +1,51 @@
+using System;using System.IO;using System.Text;using System.Collections;using System.Collections.Generic;using System.Diagnostics;using System.Reflection;using System.Security.Cryptography;using System.Web.Script.Serialization;using System.Runtime.InteropServices;
+
+// Compiles with the unchanged03F source for its path/identity/PE helpers. No game launch.
+public static class Launcher03G {
+ static readonly JavaScriptSerializer Json=new JavaScriptSerializer{MaxJsonLength=40*1024*1024};
+ static readonly string Repo=Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),"..",".."));
+ static readonly string Package=Path.Combine(Repo,".local","gate-a-shvdne-private-03g");
+ static readonly List<FileStream> Leases=new List<FileStream>();static readonly Dictionary<string,double> Timings=new Dictionary<string,double>();
+ [DllImport("kernel32.dll",SetLastError=true)]static extern bool GetProcessTimes(IntPtr handle,out long created,out long exited,out long kernel,out long user);
+ static object F(string name,params object[] a){return typeof(Launcher03F).GetMethod(name,BindingFlags.NonPublic|BindingFlags.Static).Invoke(null,a);}
+ static readonly byte[] HashBuffer=new byte[1024*1024];
+ static string Hash(Stream file){file.Position=0;using(var hash=new SHA256Cng()){int n;while((n=file.Read(HashBuffer,0,HashBuffer.Length))>0)hash.TransformBlock(HashBuffer,0,n,HashBuffer,0);hash.TransformFinalBlock(new byte[0],0,0);return BitConverter.ToString(hash.Hash).Replace("-","").ToLowerInvariant();}}
+ static string Hash(string path){using(var file=File.OpenRead(path))return Hash(file);}
+ static Dictionary<string,object> Read(string path){return Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(path));}
+ static Dictionary<string,object> ReadSealed(string path,string digest){F("NoLinks",path);var stream=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read);Leases.Add(stream);if(Hash(stream)!=digest)throw new InvalidDataException("SEALED_METADATA_DIGEST "+path);stream.Position=0;using(var reader=new StreamReader(stream,Encoding.UTF8,true,4096,true))return Json.Deserialize<Dictionary<string,object>>(reader.ReadToEnd());}
+ static Dictionary<string,Dictionary<string,object>> Pins(IEnumerable rows){var d=new Dictionary<string,Dictionary<string,object>>(StringComparer.OrdinalIgnoreCase);foreach(object value in rows){var p=(Dictionary<string,object>)value;string path=(string)p["path"];if(d.ContainsKey(path)&&((string)d[path]["sha256"]!=(string)p["sha256"]||Convert.ToInt64(d[path]["bytes"])!=Convert.ToInt64(p["bytes"])))throw new InvalidDataException("CONFLICTING_PIN "+path);d[path]=p;}return d;}
+ static void VerifyPin(Dictionary<string,object> pin,bool retain){string path=(string)pin["path"];F("NoLinks",path);FileStream file=null;try{file=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read,4096,FileOptions.SequentialScan);if(file.Length!=Convert.ToInt64(pin["bytes"])||Hash(file)!=(string)pin["sha256"])throw new InvalidDataException("CHANGED_PIN "+path);if(retain){Leases.Add(file);file=null;}}finally{if(file!=null)file.Dispose();}}
+ static void Timed(string name,Action action){var clock=Stopwatch.StartNew();action();Timings[name]=clock.Elapsed.TotalSeconds;}
+ static string Quote(string value){return (string)F("Quote",value);}
+ static void SaveNew(string path,object value){using(var stream=new FileStream(path,FileMode.CreateNew,FileAccess.Write,FileShare.Read))using(var writer=new StreamWriter(stream,new UTF8Encoding(false))){writer.Write(Json.Serialize(value));writer.Flush();stream.Flush(true);}}
+ public static int Main(string[] args){string leasePath=null;try{
+  var all=Stopwatch.StartNew();if(args.Length<3)throw new ArgumentException("operation --manifest-sha256 digest; offline qualification: rehearse --qualification-manifest-sha256 digest");
+  string operation=args[0],flag=args[1],digest=args[2];bool qualification=flag=="--qualification-manifest-sha256",inspection=operation=="inspect-bootstrap"&&flag=="--toolchain-sha256";
+  if(qualification&&operation!="rehearse")throw new InvalidDataException("qualification permits offline rehearsal only");
+  if(!qualification&&operation=="rehearse")throw new InvalidDataException("rehearsal requires isolated qualification mode");
+  if(!qualification&&!inspection&&flag!="--manifest-sha256"&&flag!="--approved-manifest-sha256")throw new ArgumentException("exact seal required");
+  if((operation=="install"||operation=="restore"||operation=="watch")&&flag!="--approved-manifest-sha256")throw new InvalidDataException("fresh explicit approval required");
+  string masterPath=Path.Combine(Package,qualification?"qualification-manifest.json":"execution-manifest.json"),contractPath=Path.Combine(Package,"toolchain-manifest.json"),contractDigest=digest;
+  Dictionary<string,object> master=null,tc=null;Dictionary<string,Dictionary<string,object>> critical=null,union=null;
+  Timed("parse-and-seal",delegate{
+   if(!inspection){master=ReadSealed(masterPath,digest);if((string)master["preparation"]!="GATE-A-SHVDNE-PRIVATE-03G")throw new InvalidDataException("MANIFEST_DIGEST_SCOPE");if(qualification&&!(bool)master["qualificationOnly"])throw new InvalidDataException("not an offline draft");contractDigest=(string)master["toolchainSha256"];}
+   tc=ReadSealed(contractPath,contractDigest);if((string)tc["schema"]!="Private03FStableToolchain01"||(string)tc["repository"]!=Repo)throw new InvalidDataException("TOOLCHAIN_DIGEST_SCOPE");
+   critical=Pins((IEnumerable)tc["files"]);union=Pins(master==null?(IEnumerable)tc["files"]:(IEnumerable)master["bindings"]);
+   foreach(var pair in critical){if(union.ContainsKey(pair.Key)&&((string)union[pair.Key]["sha256"]!=(string)pair.Value["sha256"]||Convert.ToInt64(union[pair.Key]["bytes"])!=Convert.ToInt64(pair.Value["bytes"])))throw new InvalidDataException("toolchain/master conflict");union[pair.Key]=pair.Value;}
+  });
+  Timed("full-union-verification-and-read-leases",delegate{foreach(var pair in union)VerifyPin(pair.Value,true);});
+  var programs=(Dictionary<string,object>)tc["programs"];var py=(Dictionary<string,object>)programs["python"];var ps=(Dictionary<string,object>)programs["powershell"];
+  foreach(string role in new[]{"python","powershell"}){var p=(Dictionary<string,object>)programs[role];string expected=Path.Combine(Repo,".local","toolchains","private03f-01",role,role=="python"?"python.exe":"pwsh.exe");if((string)p["path"]!=expected||(string)p["architecture"]!="x64"||(ushort)F("Machine",expected)!=0x8664)throw new InvalidDataException("TOOL_PATH_ARCHITECTURE");F("ProgramIdentity",p);}
+  var modules=(HashSet<string>)F("OwnModules");if(inspection){Console.WriteLine(Json.Serialize(new{modules=modules,clr=Environment.Version.ToString(),bits=IntPtr.Size*8,timings=Timings}));return 0;}
+  foreach(string module in modules)if(!critical.ContainsKey(module))throw new InvalidDataException("UNBOUND_BOOTSTRAP_MODULE "+module);
+  // ReadSealed retained the exact handles used to hash and parse both seals.
+  string nonce=Guid.NewGuid().ToString("N"),leaseRoot=Path.Combine(Package,"runtime-leases");Directory.CreateDirectory(leaseRoot);leasePath=Path.Combine(leaseRoot,nonce+".json");long created,exited,kernel,user;using(var self=Process.GetCurrentProcess()){if(!GetProcessTimes(self.Handle,out created,out exited,out kernel,out user))throw new InvalidDataException("parent lifetime unavailable");}
+  SaveNew(leasePath,new{nonce=nonce,pid=Process.GetCurrentProcess().Id,creationFileTime=created,manifestSha256=digest,toolchainSha256=contractDigest,session=(string)master["session"],bindingsVerified=((ICollection)master["bindings"]).Count,criticalFilesLocked=critical.Count,immutableFilesLocked=union.Count,shareMode="READ_ONLY_NO_WRITE_OR_DELETE",qualificationOnly=qualification,timings=Timings});
+  Leases.Add(new FileStream(leasePath,FileMode.Open,FileAccess.Read,FileShare.Read));
+  if(operation=="evidence-session")SaveNew(Path.Combine(Package,"execution-01","evidence-worker-intent.json"),new{session=(string)master["session"],manifestSha256=digest,nonce=nonce,pid=Process.GetCurrentProcess().Id,creationFileTime=created,oneUse=true});
+  var values=new List<string>{"-I","-S","-B",Path.Combine(Repo,"tools","native-control","private-profile03g","Entry03G.py"),operation,"--manifest-sha256",digest,"--toolchain-sha256",contractDigest};if(qualification)values.Add("--qualification");for(int i=3;i<args.Length;i++)values.Add(args[i]);
+  var start=new ProcessStartInfo((string)py["path"],String.Join(" ",values.ConvertAll(Quote).ToArray())){UseShellExecute=false,WorkingDirectory=Repo};var remove=new List<string>();foreach(string key in start.EnvironmentVariables.Keys){string k=key.ToUpperInvariant();if(k.StartsWith("GIT_")||k.StartsWith("DOTNET_")||k.StartsWith("COMPLUS_")||k.StartsWith("CORECLR_")||k.StartsWith("COR_PROFILER")||k.StartsWith("COR_ENABLE_PROFILING")||k.StartsWith("RA03G_")||k=="PYTHONPATH"||k=="PYTHONHOME"||k=="NODE_OPTIONS"||k=="NODE_PATH")remove.Add(key);}foreach(string key in remove)start.EnvironmentVariables.Remove(key);
+  string cache=Path.Combine(Package,"runtime-cache");Directory.CreateDirectory(cache);start.EnvironmentVariables["TEMP"]=cache;start.EnvironmentVariables["TMP"]=cache;start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"]="1";start.EnvironmentVariables["PATH"]=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows),"System32");start.EnvironmentVariables["PSModulePath"]=Path.Combine(Path.GetDirectoryName((string)ps["path"]),"Modules");start.EnvironmentVariables["PSModuleAnalysisCachePath"]=Path.Combine(cache,"PSAnalysisCache");start.EnvironmentVariables["DOTNET_ROOT"]=Path.GetDirectoryName((string)ps["path"]);start.EnvironmentVariables["DOTNET_MULTILEVEL_LOOKUP"]="0";start.EnvironmentVariables["RA03G_NONCE"]=nonce;start.EnvironmentVariables["RA03G_PARENT_PID"]=Process.GetCurrentProcess().Id.ToString();
+  using(var child=Process.Start(start)){child.WaitForExit();SaveNew(leasePath+".closed.json",new{exitCode=child.ExitCode,totalSeconds=all.Elapsed.TotalSeconds,timings=Timings,normalChildClosure=child.ExitCode==0||child.ExitCode==2||child.ExitCode==3});return child.ExitCode;}
+ }catch(Exception error){Console.Error.WriteLine("PRIVATE03G_ADMISSION_FAILED "+error);return 3;}finally{foreach(var file in Leases)file.Dispose();}}
+}
