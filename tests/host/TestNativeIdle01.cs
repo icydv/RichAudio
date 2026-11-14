@@ -53,9 +53,9 @@ public static class TestNativeIdle01
     {
         internal readonly List<Tuple<ulong, object[]>> Calls = new List<Tuple<ulong, object[]>>();
         internal readonly Dictionary<int, int> Tokens = new Dictionary<int, int> { { 123, 77 }, { 124, 78 } };
-        internal int Driver = 10, Passenger, NextHandle = 200;
+        internal int Driver = 10, Passenger, NextHandle = 200, LastVehicle, Interior;
         internal float Speed;
-        internal bool Online, Dead, Driveable = true, Belongs = true, Engine = true, ControlEngine = true, Loaded = true, DecorRegistered = true, DecorSet = true;
+        internal bool Online, Dead, InVehicle, Driveable = true, Belongs = true, Engine = true, ControlEngine = true, Loaded = true, DecorRegistered = true, DecorSet = true;
         internal uint Model = 0xF9300CC5u;
         internal Action<ulong, object[]> BeforeNative;
         internal NativeWorld() { GTA.Native.Function.Handler = Call; GTA.Game.IsPaused = false; }
@@ -81,8 +81,9 @@ public static class TestNativeIdle01
                 case GTA.Native.Hash.IS_VEHICLE_DRIVEABLE: return Driveable;
                 case GTA.Native.Hash.GET_IS_VEHICLE_ENGINE_RUNNING: return (int)args[0] == 124 ? ControlEngine : Engine;
                 case GTA.Native.Hash.GET_VEHICLE_DEFAULT_HORN: return 123u;
-                case GTA.Native.Hash.GET_VEHICLE_PED_IS_IN:
-                case GTA.Native.Hash.GET_INTERIOR_FROM_ENTITY: return 0;
+                case GTA.Native.Hash.GET_VEHICLE_PED_IS_IN: return LastVehicle;
+                case GTA.Native.Hash.IS_PED_IN_ANY_VEHICLE: return InVehicle;
+                case GTA.Native.Hash.GET_INTERIOR_FROM_ENTITY: return Interior;
                 case GTA.Native.Hash.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS: return new GTA.Math.Vector3 { X = (float)args[1], Y = (float)args[2], Z = (float)args[3] };
                 case GTA.Native.Hash.GET_ENTITY_HEADING: return 90f;
                 case GTA.Native.Hash.DECOR_IS_REGISTERED_AS_TYPE: return DecorRegistered;
@@ -250,6 +251,34 @@ public static class TestNativeIdle01
                 int atGuard = 0; api.Assign(A(), "BATI", delegate { atGuard = w.Calls.Count; return true; });
                 Check(w.Calls.Count == atGuard + 1 && w.Calls.Last().Item1 == 0x4F0C413926060B38UL, "guard is immediately before actual native dispatch");
             });
+            Test("on-foot preparation ignores a stale last vehicle", delegate {
+                var w = new NativeWorld(); w.LastVehicle = 456; var api = new IdleNativeApi(); api.Prepare();
+                Check(w.Calls.Any(x => x.Item1 == (ulong)GTA.Native.Hash.REQUEST_MODEL), "on-foot player may prepare after dismounting");
+                Check(!w.Calls.Any(x => x.Item1 == (ulong)GTA.Native.Hash.GET_VEHICLE_PED_IS_IN), "last vehicle is not used as current occupancy");
+                var occupancy = w.Calls.Single(x => x.Item1 == (ulong)GTA.Native.Hash.IS_PED_IN_ANY_VEHICLE);
+                Check((int)occupancy.Item2[0] == 10 && !(bool)occupancy.Item2[1], "current player occupancy query preserves false flag");
+                Check(!w.Calls.Any(x => x.Item1 == (ulong)GTA.Native.Hash.CREATE_VEHICLE) && !w.Assignments.Any(), "preparation does not create or assign vehicles");
+            });
+            foreach (string condition in new[] { "dead", "inVehicle", "interior" })
+            {
+                Test("spawn refusal identifies " + condition + " before model request", delegate {
+                    var w = new NativeWorld();
+                    w.Dead = condition == "dead"; w.InVehicle = condition == "inVehicle"; w.Interior = condition == "interior" ? 42 : 0;
+                    var api = new IdleNativeApi(); string message = null;
+                    try { api.Prepare(); } catch (InvalidOperationException error) { message = error.Message; }
+                    string expected = condition + (condition == "interior" ? "=42" : "=true");
+                    Check(message != null && message.Contains(expected), "rejection includes the failing predicate and value");
+                    Check(!w.Calls.Any(x => x.Item1 == (ulong)GTA.Native.Hash.REQUEST_MODEL || x.Item1 == (ulong)GTA.Native.Hash.CREATE_VEHICLE) && !w.Assignments.Any(), "unsafe preparation cannot request model, create or assign");
+                });
+            }
+            Test("actual adapter preparation failure stops the controller without retry", delegate {
+                var w = new NativeWorld(); w.InVehicle = true; var api = new IdleNativeApi();
+                var experiment = new IdleExperiment(api, delegate(string line) { }, delegate { return 1000L; }, 1000, delegate { return 91; }, delegate { return true; });
+                Refused(experiment.Spawn); w.InVehicle = false;
+                experiment.Tick(); Refused(experiment.Spawn); Refused(experiment.Arm); Refused(experiment.Apply);
+                Check(!experiment.Active && experiment.Status == "STOP: spawn preparation failed", "failure remains stopped after context recovers");
+                Check(!w.Calls.Any(x => x.Item1 == (ulong)GTA.Native.Hash.REQUEST_MODEL || x.Item1 == (ulong)GTA.Native.Hash.CREATE_VEHICLE) && !w.Assignments.Any(), "no implicit retry or audio assignment after refusal");
+            });
             Test("adapter creates only Bati with separate decorators and never assigns at spawn", delegate {
                 var w = new NativeWorld(); var api = new IdleNativeApi(); api.Prepare(); var a = api.Spawn("A", 91); var b = api.Spawn("B", 92);
                 Check(a.Handle != b.Handle && api.Matches(a) && api.Matches(b), "distinct owned lifetimes");
@@ -282,7 +311,7 @@ namespace GTA.Native
     {
         PLAYER_ID = 1, PLAYER_PED_ID, GET_IS_LOADING_SCREEN_ACTIVE, NETWORK_IS_SESSION_ACTIVE, NETWORK_IS_GAME_IN_PROGRESS,
         IS_PLAYER_SWITCH_IN_PROGRESS, DOES_ENTITY_EXIST, IS_PLAYER_PLAYING, IS_POSITION_OCCUPIED, IS_ENTITY_DEAD,
-        GET_VEHICLE_PED_IS_IN, GET_INTERIOR_FROM_ENTITY, GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS, GET_ENTITY_HEADING,
+        GET_VEHICLE_PED_IS_IN, IS_PED_IN_ANY_VEHICLE, GET_INTERIOR_FROM_ENTITY, GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS, GET_ENTITY_HEADING,
         DECOR_IS_REGISTERED_AS_TYPE, DECOR_REGISTER, REQUEST_MODEL, HAS_MODEL_LOADED, CREATE_VEHICLE,
         SET_ENTITY_AS_MISSION_ENTITY, DECOR_SET_INT, GET_ENTITY_MODEL, DOES_ENTITY_BELONG_TO_THIS_SCRIPT, DECOR_EXIST_ON,
         DECOR_GET_INT, GET_ENTITY_SPEED, GET_PED_IN_VEHICLE_SEAT, IS_VEHICLE_DRIVEABLE, GET_VEHICLE_DEFAULT_HORN,

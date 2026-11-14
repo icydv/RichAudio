@@ -39,9 +39,15 @@ namespace RichAudio.NativeSuppression01
             Context();
             if (!StoryReady) throw new InvalidOperationException("Story scope unavailable");
             int ped = Function.Call<int>(Hash.PLAYER_PED_ID);
-            if (Function.Call<bool>(Hash.IS_ENTITY_DEAD, ped) || Function.Call<int>(Hash.GET_VEHICLE_PED_IS_IN, ped, false) != 0 ||
-                Function.Call<int>(Hash.GET_INTERIOR_FROM_ENTITY, ped) != 0)
-                throw new InvalidOperationException("stand on foot in a clear flat exterior area");
+            if (Function.Call<bool>(Hash.IS_ENTITY_DEAD, ped))
+                throw new InvalidOperationException("spawn refused: player dead=true");
+            // GET_VEHICLE_PED_IS_IN can return the last vehicle after dismounting.
+            // Ask whether the ped is currently in a vehicle instead.
+            if (Function.Call<bool>(Hash.IS_PED_IN_ANY_VEHICLE, ped, false))
+                throw new InvalidOperationException("spawn refused: player inVehicle=true; stand on foot");
+            int interior = Function.Call<int>(Hash.GET_INTERIOR_FROM_ENTITY, ped);
+            if (interior != 0)
+                throw new InvalidOperationException("spawn refused: player interior=" + interior.ToString(CultureInfo.InvariantCulture) + "; clear flat exterior required");
             a = Function.Call<Vector3>(Hash.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS, ped, -5f, 8f, .5f);
             b = Function.Call<Vector3>(Hash.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS, ped, 5f, 8f, .5f);
             heading = Function.Call<float>(Hash.GET_ENTITY_HEADING, ped);
