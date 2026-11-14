@@ -183,19 +183,37 @@ public static class TestNativeIdle01
                 f.Pair(); f.Experiment.Tick(); f.Experiment.Snapshot(); Check(f.Api.Spawned == 2 && f.Api.Assigned.Count == 0, "stock baseline before manual commands");
                 Refused(f.Experiment.Spawn);
             });
-            Test("matched six-phase sequence restores the same surviving A", delegate {
+            Test("fixed diagnostic sequence restores the same surviving A", delegate {
                 var f = new Fixture(); f.Pair(); int originalA = f.Api.Live[1], originalB = f.Api.Live[2];
                 foreach (string expected in IdleExperiment.Profiles) { Check(f.Experiment.Next == expected, "next profile"); f.Step(); }
-                Check(f.Api.Assigned.Select(x => x.Item2).SequenceEqual(new[] { "ra_ns01_bati_a", "ra_ns01_bati_b", "ra_ns01_bati_c", "ra_ns01_bati_b", "ra_ns01_bati_a", "BATI" }), "fixed preservation/marker/silent/reversal sequence");
+                Check(f.Api.Assigned.Select(x => x.Item2).SequenceEqual(new[] { "ra_ns05_bati_select", "ra_ns05_bati_s1", "ra_ns05_bati_s2", "ra_ns01_bati_a", "BATI" }), "fixed selection/root/graph/bank comparison and baseline release");
                 Check(f.Api.Assigned.All(x => x.Item1 == 1) && f.Api.Live[1] == originalA && f.Api.Live[2] == originalB, "same A, untouched B");
                 Check(f.Experiment.RestoreReturned && !f.Experiment.Active && f.Api.Deleted.Count == 0, "native return distinct from vehicle deletion");
-                Refused(f.Experiment.Arm); Refused(f.Experiment.Apply); f.Experiment.Tick(); Check(f.Api.Assigned.Count == 6, "no automatic repeat");
+                Refused(f.Experiment.Arm); Refused(f.Experiment.Apply); f.Experiment.Tick(); Check(f.Api.Assigned.Count == 5, "no automatic repeat");
                 f.Experiment.Cleanup(); Check(f.Experiment.CleanupComplete && f.Api.Deleted.SequenceEqual(new[] { 1, 2 }), "explicit later cleanup");
+            });
+            Test("manual stop after each diagnostic phase releases A once and cannot advance", delegate {
+                for (int phases = 1; phases <= 4; phases++)
+                {
+                    var f = new Fixture(); f.Pair();
+                    int originalA = f.Api.Live[1], originalB = f.Api.Live[2];
+                    for (int i = 0; i < phases; i++) f.Step();
+                    f.Experiment.Tick();
+                    Check(f.Api.Assigned.Count == phases, "observation never advances a phase automatically");
+                    f.Experiment.Stop("manual diagnostic outcome; release known baseline");
+                    Check(f.Api.Assigned.Count == phases + 1 && f.Api.Assigned.Last().Item2 == "BATI" &&
+                        f.Experiment.RestoreReturned && !f.Experiment.Active, "terminal same-A release after phase " + phases);
+                    Check(f.Api.Assigned.All(x => x.Item1 == 1) && f.Api.Live[1] == originalA && f.Api.Live[2] == originalB,
+                        "neither lifetime changes and B receives no profile");
+                    Refused(f.Experiment.Arm); Refused(f.Experiment.Apply);
+                    f.Experiment.Stop("again"); f.Experiment.Tick();
+                    Check(f.Api.Assigned.Count == phases + 1, "no retry, fallback profile or later diagnostic phase");
+                }
             });
             Test("manual control setup starts only B once without advancing profiles", delegate {
                 var f = new Fixture(); f.Pair(); f.Experiment.Tick(); Check(f.Api.ControlStarts.Count == 0, "no automatic engine setup");
                 f.Experiment.StartControl();
-                Check(f.Api.ControlStarts.SequenceEqual(new[] { 2 }) && f.Api.Assigned.Count == 0 && f.Experiment.Next == "ra_ns01_bati_a", "one B start leaves audio sequence untouched");
+                Check(f.Api.ControlStarts.SequenceEqual(new[] { 2 }) && f.Api.Assigned.Count == 0 && f.Experiment.Next == "ra_ns05_bati_select", "one B start leaves audio sequence untouched");
                 Check(f.Experiment.Status.Contains("REQUEST RETURNED") && f.Experiment.Status.Contains("F8"), "return does not claim engine or acoustic success");
                 f.Step(); Check(f.Api.Assigned.Count == 1 && f.Api.ControlStarts.Count == 1, "separate manual phase controls still required");
                 Refused(f.Experiment.StartControl); f.Experiment.Tick();
@@ -269,11 +287,11 @@ public static class TestNativeIdle01
                 Check(f.Api.Assigned.Count == 1 && f.Api.Assigned[0].Item2 == "BATI" && f.Experiment.RestoreReturned, "failed journal cannot authorize private dispatch or prevent baseline release");
             });
             Test("final phase rejection does not consume a restoration that never dispatched", delegate {
-                var f = new Fixture(); f.Pair(); for (int i = 0; i < 5; i++) f.Step(); f.Experiment.Arm();
+                var f = new Fixture(); f.Pair(); for (int i = 0; i < 4; i++) f.Step(); f.Experiment.Arm();
                 f.OnLog = delegate(string line) { if (line.StartsWith("assignment-intent")) f.Healthy = false; };
                 Refused(f.Experiment.Apply);
-                Check(f.Api.Assigned.Count == 6 && f.Api.Assigned.Last().Item2 == "BATI" && f.Experiment.RestoreReturned, "one actual BATI release after final admission rejection");
-                f.Experiment.Stop("again"); Check(f.Api.Assigned.Count == 6, "no second restoration after native return");
+                Check(f.Api.Assigned.Count == 5 && f.Api.Assigned.Last().Item2 == "BATI" && f.Experiment.RestoreReturned, "one actual BATI release after final admission rejection");
+                f.Experiment.Stop("again"); Check(f.Api.Assigned.Count == 5, "no second restoration after native return");
             });
             Test("reused target handle never receives assignment or stale restoration", delegate {
                 var f = new Fixture(); f.Pair(); f.Step(); f.Api.Live[1] = 999; f.Experiment.Tick();
@@ -288,7 +306,7 @@ public static class TestNativeIdle01
             });
             Test("partial assignment exception consumes the phase and attempts baseline once", delegate {
                 var f = new Fixture(); f.Pair(); f.Api.FailPrivate = true; f.Experiment.Arm(); Refused(f.Experiment.Apply);
-                Check(f.Api.Assigned.Select(x => x.Item2).SequenceEqual(new[] { "ra_ns01_bati_a", "BATI" }) && f.Experiment.RestoreReturned, "ambiguous private dispatch gets one baseline release");
+                Check(f.Api.Assigned.Select(x => x.Item2).SequenceEqual(new[] { "ra_ns05_bati_select", "BATI" }) && f.Experiment.RestoreReturned, "ambiguous private dispatch gets one baseline release");
                 Refused(f.Experiment.Arm); f.Experiment.Stop("again"); Check(f.Api.Assigned.Count == 2, "no private retry or repeated restoration");
             });
             Test("throwing restoration never repeats or counts as restored", delegate {
@@ -334,14 +352,22 @@ public static class TestNativeIdle01
             Test("adapter sends actual profile native hash and A arguments only", delegate {
                 var w = new NativeWorld(); var api = new IdleNativeApi();
                 foreach (string profile in IdleExperiment.Profiles) api.Assign(A(), profile, delegate { return true; });
-                Check(w.Assignments.Count() == 6 && w.Assignments.All(x => x.Item2.Length == 2 && (int)x.Item2[0] == 123), "actual fixed hash with same A handle");
+                Check(w.Assignments.Count() == 5 && w.Assignments.All(x => x.Item2.Length == 2 && (int)x.Item2[0] == 123), "actual fixed hash with same A handle");
                 Check(w.Assignments.Select(x => (string)x.Item2[1]).SequenceEqual(IdleExperiment.Profiles), "fixed resource/profile arguments");
-                Refused(delegate { api.Assign(B(), "ra_ns01_bati_b", delegate { return true; }); }); Refused(delegate { api.Assign(A(), "ADDER", delegate { return true; }); });
-                Check(w.Assignments.Count() == 6, "role and whitelist block unrelated assignment");
+                Refused(delegate { api.Assign(B(), "ra_ns05_bati_select", delegate { return true; }); }); Refused(delegate { api.Assign(A(), "ADDER", delegate { return true; }); });
+                Check(w.Assignments.Count() == 5, "role and whitelist block unrelated assignment");
+            });
+            Test("adapter rejects historical marker and silent profiles before any native work", delegate {
+                var w = new NativeWorld(); var api = new IdleNativeApi();
+                foreach (string profile in new[] { "ra_ns01_bati_b", "ra_ns01_bati_c" })
+                {
+                    Refused(delegate { api.Assign(A(), profile, delegate { return true; }); });
+                    Check(w.Calls.Count == 0 && !w.Assignments.Any(), "excluded historical profile " + profile);
+                }
             });
             Test("adapter rejects stale generation, foreign owner, model and unsafe state", delegate {
                 var w = new NativeWorld(); var api = new IdleNativeApi();
-                Action apply = delegate { api.Assign(A(), "ra_ns01_bati_c", delegate { return true; }); };
+                Action apply = delegate { api.Assign(A(), "ra_ns05_bati_s2", delegate { return true; }); };
                 w.Tokens[123] = 999; Refused(apply); w.Tokens[123] = 77;
                 w.Belongs = false; Refused(apply); w.Belongs = true;
                 w.Model = 1; Refused(apply); w.Model = 0xF9300CC5u;
@@ -422,17 +448,17 @@ public static class TestNativeIdle01
             });
             Test("worker-thread native calls are rejected before dispatch", delegate {
                 var w = new NativeWorld(); var api = new IdleNativeApi(); int before = w.Calls.Count; Exception fault = null;
-                var worker = new Thread(delegate() { try { api.Assign(A(), "ra_ns01_bati_c", delegate { return true; }); } catch (Exception e) { fault = e; } }); worker.Start(); worker.Join();
+                var worker = new Thread(delegate() { try { api.Assign(A(), "ra_ns05_bati_s2", delegate { return true; }); } catch (Exception e) { fault = e; } }); worker.Start(); worker.Join();
                 Check(fault is InvalidOperationException && w.Calls.Count == before, "wrong thread never dispatches native");
             });
             Test("actual adapter evaluates last admission after native context reads", delegate {
                 var w = new NativeWorld(); var api = new IdleNativeApi(); long now = 0, deadline = 100;
                 w.BeforeNative = delegate(ulong hash, object[] args) { if (hash == (ulong)GTA.Native.Hash.IS_VEHICLE_DRIVEABLE) now = deadline; };
-                Refused(delegate { api.Assign(A(), "ra_ns01_bati_c", delegate { return now < deadline; }); });
+                Refused(delegate { api.Assign(A(), "ra_ns05_bati_s2", delegate { return now < deadline; }); });
                 Check(!w.Assignments.Any(), "expiry during native reads cannot reach setter");
                 w.BeforeNative = null; bool allowed = false;
-                Refused(delegate { api.Assign(A(), "ra_ns01_bati_c", delegate { return allowed; }); });
-                Refused(delegate { api.Assign(A(), "ra_ns01_bati_c", null); });
+                Refused(delegate { api.Assign(A(), "ra_ns05_bati_s2", delegate { return allowed; }); });
+                Refused(delegate { api.Assign(A(), "ra_ns05_bati_s2", null); });
                 Check(!w.Assignments.Any(), "revoked or missing admission cannot reach setter");
                 int atGuard = 0; api.Assign(A(), "BATI", delegate { atGuard = w.Calls.Count; return true; });
                 Check(w.Calls.Count == atGuard + 1 && w.Calls.Last().Item1 == 0x4F0C413926060B38UL, "guard is immediately before actual native dispatch");

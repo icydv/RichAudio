@@ -29,8 +29,8 @@ namespace RichAudio.NativeSuppression01
     internal sealed class IdleExperiment
     {
         internal static readonly string[] Profiles = {
-            "ra_ns01_bati_a", "ra_ns01_bati_b", "ra_ns01_bati_c",
-            "ra_ns01_bati_b", "ra_ns01_bati_a", "BATI"
+            "ra_ns05_bati_select", "ra_ns05_bati_s1", "ra_ns05_bati_s2",
+            "ra_ns01_bati_a", "BATI"
         };
         readonly IIdleApi api;
         readonly Action<string> log;
