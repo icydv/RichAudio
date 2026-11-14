@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.IO;
 using System.Threading;
 using RichAudio.NativeSuppression01;
 
@@ -53,11 +55,12 @@ public static class TestNativeIdle01
     {
         internal readonly List<Tuple<ulong, object[]>> Calls = new List<Tuple<ulong, object[]>>();
         internal readonly Dictionary<int, int> Tokens = new Dictionary<int, int> { { 123, 77 }, { 124, 78 } };
-        internal int Driver = 10, Passenger, NextHandle = 200, LastVehicle, Interior;
+        internal int Driver = 10, Passenger, NextHandle = 200, LastVehicle, Interior, ConflictingDecoratorType;
         internal float Speed;
         internal bool Online, Dead, InVehicle, Driveable = true, Belongs = true, Engine = true, ControlEngine = true, Loaded = true, DecorRegistered = true, DecorSet = true;
         internal uint Model = 0xF9300CC5u;
         internal Action<ulong, object[]> BeforeNative;
+        internal Action RegisterDecorator;
         internal NativeWorld() { GTA.Native.Function.Handler = Call; GTA.Game.IsPaused = false; }
         internal object Call(ulong hash, object[] args)
         {
@@ -86,7 +89,8 @@ public static class TestNativeIdle01
                 case GTA.Native.Hash.GET_INTERIOR_FROM_ENTITY: return Interior;
                 case GTA.Native.Hash.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS: return new GTA.Math.Vector3 { X = (float)args[1], Y = (float)args[2], Z = (float)args[3] };
                 case GTA.Native.Hash.GET_ENTITY_HEADING: return 90f;
-                case GTA.Native.Hash.DECOR_IS_REGISTERED_AS_TYPE: return DecorRegistered;
+                case GTA.Native.Hash.DECOR_IS_REGISTERED_AS_TYPE: return (int)args[1] == 3 ? DecorRegistered : (int)args[1] == ConflictingDecoratorType;
+                case GTA.Native.Hash.DECOR_REGISTER: if (RegisterDecorator != null) RegisterDecorator(); return false;
                 case GTA.Native.Hash.HAS_MODEL_LOADED: return Loaded;
                 case GTA.Native.Hash.CREATE_VEHICLE: Tokens[++NextHandle] = -1; return NextHandle;
                 case GTA.Native.Hash.DECOR_SET_INT: if (DecorSet) Tokens[(int)args[0]] = (int)args[2]; return DecorSet;
@@ -95,6 +99,53 @@ public static class TestNativeIdle01
             }
         }
         internal IEnumerable<Tuple<ulong, object[]>> Assignments { get { return Calls.Where(x => x.Item1 == 0x4F0C413926060B38UL); } }
+    }
+    sealed class DecoratorLock : IIdleDecoratorLock
+    {
+        internal bool Value = true, Available = true, IgnoreUnlock, ThrowUnlock, IgnoreRestore, ThrowRestore;
+        internal int Validations, Reads, Writes;
+        public void Validate() { Validations++; if (!Available) throw new InvalidOperationException("fixture binding unavailable"); }
+        public bool Locked
+        {
+            get { Reads++; return Value; }
+            set
+            {
+                Writes++;
+                if (value)
+                {
+                    if (ThrowRestore) throw new InvalidOperationException("fixture restore failed");
+                    if (!IgnoreRestore) Value = true;
+                }
+                else
+                {
+                    if (!IgnoreUnlock) Value = false;
+                    if (ThrowUnlock) throw new InvalidOperationException("fixture unlock failed after mutation");
+                }
+            }
+        }
+    }
+    // Authored pointer values only; no pointed-to memory is read or written.
+    sealed unsafe class PointerFixture
+    {
+        private static byte* value;
+        internal static FieldInfo Field(ulong address)
+        { value = (byte*)address; return typeof(PointerFixture).GetField("value", BindingFlags.NonPublic | BindingFlags.Static); }
+        internal static ulong Address { get { return (ulong)value; } }
+    }
+    static string PeFixture(uint flags, uint size)
+    {
+        string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "authored-pe-" + Guid.NewGuid().ToString("N") + ".bin");
+        using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write))
+        using (var writer = new BinaryWriter(stream))
+        {
+            stream.SetLength(512); writer.Write((ushort)0x5a4d); stream.Position = 0x3c; writer.Write(64);
+            stream.Position = 64; writer.Write(0x4550u); writer.Write((ushort)0x8664); writer.Write((ushort)1);
+            stream.Position = 84; writer.Write((ushort)112); stream.Position = 88; writer.Write((ushort)0x20b);
+            stream.Position = 144; writer.Write(4096u); stream.Position = 200;
+            writer.Write(new byte[] { 46, 100, 97, 116, 97, 0, 0, 0 }); writer.Write(size); writer.Write(1024u);
+            stream.Position = 236; writer.Write(flags);
+        }
+        return path;
     }
     static int checks, cases;
     static void Check(bool value, string name) { checks++; if (!value) throw new Exception(name); }
@@ -292,6 +343,77 @@ public static class TestNativeIdle01
                 var w = new NativeWorld(); w.DecorRegistered = false; var api = new IdleNativeApi(); Refused(api.Prepare);
                 Check(!w.Calls.Any(x => x.Item1 == (ulong)GTA.Native.Hash.CREATE_VEHICLE || x.Item1 == (ulong)GTA.Native.Hash.REQUEST_MODEL), "no model request or creation after ownership failure");
             });
+            foreach (bool initiallyLocked in new[] { true, false })
+            {
+                Test("decorator registration restores initial lock " + initiallyLocked, delegate {
+                    var w = new NativeWorld(); w.DecorRegistered = false; var binding = new DecoratorLock { Value = initiallyLocked };
+                    w.RegisterDecorator = delegate { Check(!binding.Value, "registration occurs while unlocked"); w.DecorRegistered = true; };
+                    string observation = null;
+                    var api = new IdleNativeApi(binding, delegate(string line) { Check(binding.Value == initiallyLocked, "journal runs after prior lock restoration"); observation = line; });
+                    api.Prepare();
+                    Check(binding.Validations == 1 && binding.Value == initiallyLocked, "binding checked and prior state restored");
+                    Check(observation != null && observation.Contains("finalInt=True") && observation.Contains("lockRestored=True"), "bounded registration observation");
+                    Check(w.Calls.Count(x => x.Item1 == (ulong)GTA.Native.Hash.DECOR_REGISTER) == 1 && w.Calls.Any(x => x.Item1 == (ulong)GTA.Native.Hash.REQUEST_MODEL), "one registration before model request");
+                });
+            }
+            Test("existing integer decorator does not inspect or change lock", delegate {
+                var w = new NativeWorld(); var binding = new DecoratorLock { Available = false }; var api = new IdleNativeApi(binding); api.Prepare();
+                Check(binding.Validations == 0 && binding.Reads == 0 && binding.Writes == 0, "already registered name needs no pointer or lock access");
+                Check(!w.Calls.Any(x => x.Item1 == (ulong)GTA.Native.Hash.DECOR_REGISTER), "existing registration not repeated");
+            });
+            foreach (int conflict in new[] { 1, 2, 4, 5 })
+            {
+                Test("conflicting decorator type " + conflict + " is refused without lock access", delegate {
+                    var w = new NativeWorld(); w.DecorRegistered = false; w.ConflictingDecoratorType = conflict; var binding = new DecoratorLock();
+                    Refused(new IdleNativeApi(binding).Prepare);
+                    Check(binding.Validations == 0 && binding.Reads == 0 && binding.Writes == 0, "conflicting type leaves global lock untouched");
+                    Check(!w.Calls.Any(x => x.Item1 == (ulong)GTA.Native.Hash.DECOR_REGISTER || x.Item1 == (ulong)GTA.Native.Hash.REQUEST_MODEL || x.Item1 == (ulong)GTA.Native.Hash.CREATE_VEHICLE) && !w.Assignments.Any(), "conflict blocks all preparation mutations");
+                });
+            }
+            foreach (string failure in new[] { "binding", "registerFalse", "registerThrow", "unlockIgnored", "unlockThrow", "restoreIgnored", "restoreThrow" })
+            {
+                Test("decorator failure " + failure + " blocks model and vehicle work", delegate {
+                    var w = new NativeWorld(); w.DecorRegistered = false; var binding = new DecoratorLock();
+                    binding.Available = failure != "binding"; binding.IgnoreUnlock = failure == "unlockIgnored"; binding.ThrowUnlock = failure == "unlockThrow";
+                    binding.IgnoreRestore = failure == "restoreIgnored"; binding.ThrowRestore = failure == "restoreThrow";
+                    w.RegisterDecorator = delegate {
+                        if (failure == "registerThrow") throw new InvalidOperationException("fixture registration failed");
+                        if (failure != "registerFalse") w.DecorRegistered = true;
+                    };
+                    Refused(new IdleNativeApi(binding).Prepare);
+                    Check(!w.Calls.Any(x => x.Item1 == (ulong)GTA.Native.Hash.REQUEST_MODEL || x.Item1 == (ulong)GTA.Native.Hash.CREATE_VEHICLE) && !w.Assignments.Any(), "failure never reaches model, creation or audio");
+                    if (failure != "restoreIgnored" && failure != "restoreThrow") Check(binding.Value, "prior locked state retained or restored despite failure");
+                    if (failure == "binding") Check(binding.Reads == 0 && binding.Writes == 0, "invalid binding blocks unsafe public lock accessor");
+                    if (failure == "unlockIgnored" || failure == "unlockThrow") Check(!w.Calls.Any(x => x.Item1 == (ulong)GTA.Native.Hash.DECOR_REGISTER), "failed unlock blocks registration");
+                });
+            }
+            Test("existing pointer must be nonnull and inside the reviewed data interval", delegate {
+                Refused(new IdleDecoratorLock(null, 100, 200).Validate);
+                foreach (ulong address in new ulong[] { 0, 99, 200, UInt64.MaxValue })
+                {
+                    var binding = new IdleDecoratorLock(PointerFixture.Field(address), 100, 200); Refused(binding.Validate);
+                    Check(PointerFixture.Address == address, "guard never changes pointer");
+                }
+                new IdleDecoratorLock(PointerFixture.Field(100), 100, 200).Validate();
+                new IdleDecoratorLock(PointerFixture.Field(199), 100, 200).Validate();
+                Check(PointerFixture.Address == 199, "valid interval endpoints accepted without dereferencing");
+            });
+            Test("disk PE guard derives only a writable nonexecuting bounded data section", delegate {
+                ulong start, end; string valid = PeFixture(0xc0000040, 512);
+                IdleDecoratorLock.ReadDataRange(valid, 10000, 4096, out start, out end);
+                Check(start == 11024 && end == 11536, "data interval derived from file and module base");
+                Refused(delegate { IdleDecoratorLock.ReadDataRange(valid, 10000, 8192, out start, out end); });
+                foreach (uint flags in new uint[] { 0x40000040, 0xe0000040 })
+                {
+                    string invalid = PeFixture(flags, 512);
+                    Refused(delegate { IdleDecoratorLock.ReadDataRange(invalid, 10000, 4096, out start, out end); });
+                }
+                foreach (uint size in new uint[] { 0, 4096 })
+                {
+                    string invalid = PeFixture(0xc0000040, size);
+                    Refused(delegate { IdleDecoratorLock.ReadDataRange(invalid, 10000, 4096, out start, out end); });
+                }
+            });
             Test("failed new token is cleaned only within the same spawn callback", delegate {
                 var w = new NativeWorld(); var api = new IdleNativeApi(); api.Prepare(); w.DecorSet = false; Refused(delegate { api.Spawn("A", 91); });
                 Check(!w.Tokens.ContainsKey(201) && !w.Assignments.Any(), "failed just-created vehicle cleaned without profile assignment");
@@ -303,7 +425,12 @@ public static class TestNativeIdle01
 }
 
 // Authored stand-ins run the actual adapter source without loading GTA or SHVDNE.
-namespace GTA { public static class Game { public static bool IsPaused { get; set; } } }
+namespace GTA {
+    public static class Game { public static bool IsPaused { get; set; } }
+    public static class DecoratorInterface {
+        public static bool IsLocked { get { throw new Exception("public SDK lock access is forbidden in authored binding tests"); } set { throw new Exception("public SDK lock access is forbidden in authored binding tests"); } }
+    }
+}
 namespace GTA.Math { public struct Vector3 { public float X, Y, Z; } }
 namespace GTA.Native
 {

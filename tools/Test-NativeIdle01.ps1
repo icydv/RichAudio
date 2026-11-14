@@ -6,9 +6,9 @@ $OutputDirectory=[IO.Path]::GetFullPath($OutputDirectory)
 if(Test-Path -LiteralPath $OutputDirectory){throw 'Use a new test output directory'}
 [IO.Directory]::CreateDirectory($OutputDirectory)|Out-Null
 $compiler='C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe'
-$sources=@('tools/native-control/native-suppression01/IdleExperiment.cs','tools/native-control/native-suppression01/IdleNativeApi.cs','tests/host/TestNativeIdle01.cs')|ForEach-Object {Join-Path $repo $_}
+$sources=@('tools/native-control/native-suppression01/IdleExperiment.cs','tools/native-control/native-suppression01/IdleNativeApi.cs','tools/native-control/native-suppression01/IdleDecoratorRegistration.cs','tests/host/TestNativeIdle01.cs')|ForEach-Object {Join-Path $repo $_}
 $binary=Join-Path $OutputDirectory 'TestNativeIdle01.exe'
-& $compiler /nologo /optimize+ /warnaserror+ /langversion:5 /platform:x64 /target:exe ('/out:'+$binary) @sources
+& $compiler /nologo /optimize+ /unsafe+ /warnaserror+ /langversion:5 /platform:x64 /target:exe ('/out:'+$binary) @sources
 if($LASTEXITCODE-ne0){throw 'Idle controller/adapter fixture compilation failed'}
 $result=& $binary
 $testExit=$LASTEXITCODE

@@ -36,7 +36,7 @@ namespace RichAudio.NativeSuppression01
             if (experiment == null)
             {
                 if (!journal.Enabled || !journal.Healthy) return;
-                experiment = new IdleExperiment(new IdleNativeApi(), journal.Append, Stopwatch.GetTimestamp, Stopwatch.Frequency,
+                experiment = new IdleExperiment(new IdleNativeApi(journal.DecoratorLock, journal.Append), journal.Append, Stopwatch.GetTimestamp, Stopwatch.Frequency,
                     delegate { return BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0) & Int32.MaxValue; }, delegate { return journal.Healthy; });
             }
             try
@@ -94,6 +94,7 @@ namespace RichAudio.NativeSuppression01
         int issued;
         internal bool Enabled { get { return enabled; } }
         internal bool Healthy { get { return healthy && !closing; } }
+        internal IdleDecoratorLock DecoratorLock { get; private set; }
         internal IdleJournal(string directory)
         {
             this.directory = directory;
@@ -127,6 +128,8 @@ namespace RichAudio.NativeSuppression01
                 if (module.FileVersionInfo.FileVersion != "1.0.1158.16" ||
                     !String.Equals(Path.GetFullPath(module.FileName), Candidate.GamePath, StringComparison.OrdinalIgnoreCase) ||
                     Digest(module.FileName) != Candidate.GameSha256 ||
+                    typeof(Script).Assembly.FullName != "ScriptHookVDotNet3, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null" ||
+                    !String.Equals(Path.GetFullPath(typeof(Script).Assembly.Location), Path.Combine(Path.GetDirectoryName(module.FileName), "ScriptHookVDotNet3.dll"), StringComparison.OrdinalIgnoreCase) ||
                     Digest(typeof(Script).Assembly.Location) != Candidate.ApiSha256 ||
                     Digest(Path.Combine(Path.GetDirectoryName(module.FileName), @"mods\update\x64\dlcpacks\ra_ns01_8b7e24c1\dlc.rpf")) != Candidate.DlcSha256)
                     return;
@@ -136,6 +139,17 @@ namespace RichAudio.NativeSuppression01
                 using (var writer = new StreamWriter(file))
                 {
                     writer.WriteLine("Native idle experiment; source=" + Candidate.SourceCommit + "; qpcFrequency=" + Stopwatch.Frequency + "; audible results UNOBSERVED; crash recovery UNQUALIFIED");
+                    try { DecoratorLock = IdleDecoratorLock.Capture(module); }
+                    catch (ThreadAbortException) { throw; }
+                    catch (Exception error)
+                    {
+                        string detail = error.GetType().Name + ":" + error.Message;
+                        detail = detail.Replace('\r', ' ').Replace('\n', ' ');
+                        if (detail.Length > 512) detail = detail.Substring(0, 512);
+                        writer.WriteLine("STARTUP REFUSED decorator binding: " + detail);
+                        writer.Flush(); file.Flush(true); return;
+                    }
+                    writer.WriteLine("Decorator binding metadata verified; fresh successful NativeMemory initialization log must be checked before F5; pointer not yet inspected");
                     writer.Flush(); file.Flush(true); healthy = true; enabled = true;
                     foreach (string line in queue.GetConsumingEnumerable()) { writer.WriteLine(line); writer.Flush(); file.Flush(true); }
                 }

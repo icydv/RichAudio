@@ -14,6 +14,10 @@ namespace RichAudio.NativeSuppression01
         const uint Bati = 0xF9300CC5;
         const string Decorator = "RA_NS01_8b7e24c1";
         readonly int thread = Thread.CurrentThread.ManagedThreadId;
+        readonly IIdleDecoratorLock decoratorLock;
+        readonly Action<string> log;
+        internal IdleNativeApi(IIdleDecoratorLock decoratorLock = null, Action<string> log = null)
+        { this.decoratorLock = decoratorLock; this.log = log ?? delegate(string line) { }; }
         Vector3 a, b;
         float heading;
         void Context() { if (Thread.CurrentThread.ManagedThreadId != thread) throw new InvalidOperationException("probe native outside script callback"); }
@@ -52,9 +56,7 @@ namespace RichAudio.NativeSuppression01
             b = Function.Call<Vector3>(Hash.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS, ped, 5f, 8f, .5f);
             heading = Function.Call<float>(Hash.GET_ENTITY_HEADING, ped);
             Space(a); Space(b);
-            if (!Function.Call<bool>(Hash.DECOR_IS_REGISTERED_AS_TYPE, Decorator, 3)) Function.Call(Hash.DECOR_REGISTER, Decorator, 3);
-            if (!Function.Call<bool>(Hash.DECOR_IS_REGISTERED_AS_TYPE, Decorator, 3))
-                throw new InvalidOperationException("ownership decorator registration unavailable; no spawn permitted");
+            IdleDecoratorRegistration.Ensure(Decorator, decoratorLock, log);
             Function.Call(Hash.REQUEST_MODEL, Bati); // Nonblocking. Readiness polled by later ticks.
         }
         public bool ModelReady { get { Context(); return Function.Call<bool>(Hash.HAS_MODEL_LOADED, Bati); } }
