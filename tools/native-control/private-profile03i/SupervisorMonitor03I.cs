@@ -60,6 +60,32 @@ namespace RichAudio.GateA.Private01.Supervision {
  }
  public static class SupervisorMonitor {
   static readonly JavaScriptSerializer Json=new JavaScriptSerializer();
+  // The retained PRIVATE03I manifest is 2,863,378 UTF-8 bytes/UTF-16 characters
+  // with three container levels. These are separate bounds, not byte counts
+  // passed to MaxJsonLength. Keep the small-message serializer unchanged.
+  const int MaximumManifestBytes=4*1024*1024,MaximumManifestCharacters=3*1024*1024,MaximumManifestDepth=8;
+  static Dictionary<string,object> ReadCandidateManifest(SupervisorConfiguration c){
+   SupervisorFiles.NoLinks(c.ExecutionManifestPath);
+   byte[] bytes;
+   using(var file=new FileStream(c.ExecutionManifestPath,FileMode.Open,FileAccess.Read,FileShare.Read)){
+    if(file.Length<1||file.Length>MaximumManifestBytes)throw new InvalidDataException("candidate manifest byte bound");
+    bytes=new byte[(int)file.Length];int offset=0;
+    while(offset<bytes.Length){int count=file.Read(bytes,offset,bytes.Length-offset);if(count==0)throw new EndOfStreamException("candidate manifest shortened");offset+=count;}
+    if(file.ReadByte()!=-1)throw new InvalidDataException("candidate manifest length changed");
+   }
+   using(var hash=SHA256.Create())if(SupervisorFiles.Hex(hash.ComputeHash(bytes))!=c.ExecutionManifestSha256)throw new InvalidDataException("candidate manifest binding required");
+   // Hash and deserialize the same retained bytes. Strict UTF-8 rejects invalid
+   // encodings; an optional UTF-8 BOM counts toward bytes but not JSON characters.
+   int start=bytes.Length>=3&&bytes[0]==0xef&&bytes[1]==0xbb&&bytes[2]==0xbf?3:0;
+   var encoding=new UTF8Encoding(false,true);
+   if(encoding.GetCharCount(bytes,start,bytes.Length-start)>MaximumManifestCharacters)throw new InvalidDataException("candidate manifest character bound");
+   string text=encoding.GetString(bytes,start,bytes.Length-start);
+   try{return new JavaScriptSerializer{MaxJsonLength=MaximumManifestCharacters,RecursionLimit=MaximumManifestDepth}.Deserialize<Dictionary<string,object>>(text);}
+   // JavaScriptSerializer can include the entire malformed input in its error.
+   // Keep candidate rejection small enough for the existing failure journal.
+   catch(ArgumentException){throw new InvalidDataException("candidate manifest JSON invalid or too deep");}
+   catch(InvalidOperationException){throw new InvalidDataException("candidate manifest JSON invalid or too deep");}
+  }
   static readonly CommandMailbox Input=new CommandMailbox();static int inputStarted;
   internal static CommandMailbox InputCommands(){if(Interlocked.Exchange(ref inputStarted,1)==0)new Thread(delegate(){try{string line;while((line=Console.ReadLine())!=null){Input.Enqueue(line.Trim());if(NoticeDelivery.Active!=null)NoticeDelivery.Active.Record("control-input-received",new{route="stdin",length=line.Length});}if(NoticeDelivery.Active!=null)NoticeDelivery.Active.Record("control-input-closed",new{route="stdin"});}catch(IOException){if(NoticeDelivery.Active!=null)NoticeDelivery.Active.Record("control-input-failed",new{route="stdin"});}}){IsBackground=true,Name="RichAudio single command reader"}.Start();return Input;}
 
@@ -70,9 +96,9 @@ namespace RichAudio.GateA.Private01.Supervision {
 #endif
    if(c==null||c.Schema!=1||c.ProcessId<=0||c.ProcessStartUtcTicks<=0||!Path.IsPathRooted(c.Executable)||!Path.IsPathRooted(c.EvidenceRoot)||(c.Mode!="offline-fixture"&&c.Mode!="candidate")||c.Mode=="candidate"&&!c.ShowUi)throw new InvalidDataException("explicit monitor configuration required");
    if(c.Mode=="candidate"){
-    if(c.FixedHardDeadlineQpc<=0||!Path.IsPathRooted(c.ExecutionManifestPath)||!System.Text.RegularExpressions.Regex.IsMatch(c.ExecutionManifestSha256??"",@"\A[a-f0-9]{64}\z")||SupervisorFiles.Hash(c.ExecutionManifestPath)!=c.ExecutionManifestSha256)throw new InvalidDataException("candidate manifest binding required");
-    var manifest=Json.Deserialize<System.Collections.Generic.Dictionary<string,object>>(File.ReadAllText(c.ExecutionManifestPath));
-    if((string)manifest["session"]!=c.Session||(string)manifest["experiment"]!="GATE-A-SHVDNE-PRIVATE-03D")throw new InvalidDataException("candidate manifest session differs");
+    if(c.FixedHardDeadlineQpc<=0||!Path.IsPathRooted(c.ExecutionManifestPath)||!System.Text.RegularExpressions.Regex.IsMatch(c.ExecutionManifestSha256??"",@"\A[a-f0-9]{64}\z"))throw new InvalidDataException("candidate manifest binding required");
+    var manifest=ReadCandidateManifest(c);object session,experiment;
+    if(manifest==null||!manifest.TryGetValue("session",out session)||!(session is string)||(string)session!=c.Session||!manifest.TryGetValue("experiment",out experiment)||!(experiment is string)||(string)experiment!="GATE-A-SHVDNE-PRIVATE-03D")throw new InvalidDataException("candidate manifest session differs");
    }
    SupervisorNames.Name(c.Session,"guard");SupervisorFiles.NoLinks(c.Executable);SupervisorFiles.NoLinks(c.EvidenceRoot);
    if(c.Restoration==null||c.Restoration.Length<1||c.Restoration.Length>256)throw new InvalidDataException("bounded explicit restoration checks required");
