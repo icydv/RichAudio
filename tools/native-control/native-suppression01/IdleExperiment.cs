@@ -17,6 +17,8 @@ namespace RichAudio.NativeSuppression01
         bool ModelReady { get; }
         Lifetime Spawn(string role, int token);
         bool Matches(Lifetime item);
+        bool CanStartControl(Lifetime target, Lifetime control);
+        void StartControl(Lifetime target, Lifetime control, Func<bool> stillAdmitted);
         bool CanSwitch(Lifetime target, Lifetime control);
         bool CanRestore(Lifetime target);
         void Assign(Lifetime item, string profile, Func<bool> stillAdmitted);
@@ -38,7 +40,7 @@ namespace RichAudio.NativeSuppression01
         readonly Func<bool> healthy;
         Lifetime a, b;
         long end, loadEnd, armEnd;
-        bool used, loading, changed, restoreAttempted, stopped, aborted;
+        bool used, loading, changed, restoreAttempted, stopped, aborted, controlStartAttempted;
         int next;
         internal string Status { get; private set; }
         internal bool RestoreReturned { get; private set; }
@@ -67,7 +69,7 @@ namespace RichAudio.NativeSuppression01
         }
         internal void Spawn()
         {
-            if (used || aborted || !healthy() || !api.StoryReady) throw new InvalidOperationException("one pair per load, healthy journal and Story Mode required");
+            if (used || stopped || aborted || !healthy() || !api.StoryReady) throw new InvalidOperationException("one pair per load, unstopped controller, healthy journal and Story Mode required");
             used = true; end = clock() + 600 * frequency; loadEnd = clock() + 5 * frequency;
             log("spawn-request; known stock experiment baseline; no arbitrary prior override recovery");
             loading = true;
@@ -111,6 +113,26 @@ namespace RichAudio.NativeSuppression01
             armEnd = clock() + 10 * frequency;
             Status = "ARMED " + Next + " - F7 within 10 seconds; F9 restore";
             log("armed phase=" + next + " requested=" + Next);
+        }
+        internal void StartControl()
+        {
+            try
+            {
+                if (!Active || !healthy() || next != 0 || changed || armEnd != 0 || controlStartAttempted || clock() >= end)
+                    throw new InvalidOperationException("one manual control start before arming the first phase only");
+                controlStartAttempted = true;
+                RequirePair();
+                if (!api.CanStartControl(a, b))
+                    throw new InvalidOperationException("A must idle with my ped driving; B must be empty, stopped and engine off");
+                log("control-start-intent handle=" + b.Handle + " token=" + b.Token + "; engine on only; no profile assignment");
+                api.StartControl(a, b, delegate {
+                    return !aborted && !stopped && healthy() && next == 0 && !changed && armEnd == 0 && clock() < end;
+                });
+                Status = "B engine start REQUEST RETURNED - F8 checks state; F6 still requires both engines running";
+                log(Status); Snapshot();
+            }
+            catch (ThreadAbortException) { throw; }
+            catch { Stop("control engine setup failed; no retry"); throw; }
         }
         internal void Apply()
         {

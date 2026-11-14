@@ -121,6 +121,25 @@ namespace RichAudio.NativeSuppression01
                 Function.Call<bool>(Hash.GET_IS_VEHICLE_ENGINE_RUNNING, target.Handle) && EmptyStoppedAndDriveable(control) &&
                 Function.Call<bool>(Hash.GET_IS_VEHICLE_ENGINE_RUNNING, control.Handle);
         }
+        public bool CanStartControl(Lifetime target, Lifetime control)
+        {
+            Context();
+            return target != null && control != null && !target.Lost && !target.Deleted && !control.Lost && !control.Deleted &&
+                target.Handle != control.Handle && target.Token != control.Token && target.Role == "A" && control.Role == "B" &&
+                StoryReady && CanRestore(target) &&
+                Function.Call<int>(Hash.GET_PED_IN_VEHICLE_SEAT, target.Handle, -1, false) == Function.Call<int>(Hash.PLAYER_PED_ID) &&
+                Function.Call<bool>(Hash.GET_IS_VEHICLE_ENGINE_RUNNING, target.Handle) && EmptyStoppedAndDriveable(control) &&
+                !Function.Call<bool>(Hash.GET_IS_VEHICLE_ENGINE_RUNNING, control.Handle);
+        }
+        public void StartControl(Lifetime target, Lifetime control, Func<bool> stillAdmitted)
+        {
+            Context();
+            if (stillAdmitted == null || !CanStartControl(target, control))
+                throw new InvalidOperationException("control start requires the exact safe pair and B engine off");
+            if (!stillAdmitted()) throw new InvalidOperationException("control start admission expired or revoked");
+            // Manual setup only. Never used to suppress A or to maintain B automatically.
+            Function.Call(Hash.SET_VEHICLE_ENGINE_ON, control.Handle, true, true, false);
+        }
         public bool CanRestore(Lifetime item)
         {
             Context();
@@ -147,10 +166,13 @@ namespace RichAudio.NativeSuppression01
             DeleteHandle(item.Handle);
             return !Exists(item);
         }
-        static void DeleteHandle(int handle)
+        static unsafe void DeleteHandle(int handle)
         {
-            using (var argument = new OutputArgument(handle)) Function.Call(Hash.DELETE_ENTITY, argument);
+            Function.Call(Hash.DELETE_ENTITY, CreateDeleteArgument(&handle));
         }
+        // Match the SDK's Entity.Delete: point to this call's integer handle.
+        // The synchronous native call finishes before that stack slot expires.
+        internal static unsafe InputArgument CreateDeleteArgument(int* handle) { return handle; }
         public void ReleaseModel() { Context(); Function.Call(Hash.SET_MODEL_AS_NO_LONGER_NEEDED, Bati); }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using RichAudio.NativeSuppression01;
 
@@ -11,11 +12,13 @@ public static class TestNativeIdle01
     sealed class Api : IIdleApi
     {
         internal int Calls, Spawned, Releases;
-        internal Action BeforeAssign;
+        internal Action BeforeAssign, BeforeControlStart;
+        internal bool ControlStartable = true, FailControlStart;
         internal bool Story = true, Loaded = true, Switchable = true, Restorable = true, FailB, FailPrivate, FailRestore;
         internal readonly Dictionary<int, int> Live = new Dictionary<int, int>();
         internal readonly List<Tuple<int, string>> Assigned = new List<Tuple<int, string>>();
         internal readonly List<int> Deleted = new List<int>();
+        internal readonly List<int> ControlStarts = new List<int>();
         public bool StoryReady { get { Calls++; return Story; } }
         public void Prepare() { Calls++; }
         public bool ModelReady { get { Calls++; return Loaded; } }
@@ -25,6 +28,14 @@ public static class TestNativeIdle01
             int handle = ++Spawned; Live.Add(handle, token); return new Lifetime { Handle = handle, Token = token, Role = role };
         }
         public bool Matches(Lifetime item) { Calls++; return Live.ContainsKey(item.Handle) && Live[item.Handle] == item.Token; }
+        public bool CanStartControl(Lifetime target, Lifetime control) { Calls++; return ControlStartable; }
+        public void StartControl(Lifetime target, Lifetime control, Func<bool> stillAdmitted)
+        {
+            Calls++; if (BeforeControlStart != null) BeforeControlStart();
+            if (!stillAdmitted()) throw new InvalidOperationException("authored final control-start rejection");
+            ControlStarts.Add(control.Handle);
+            if (FailControlStart) throw new InvalidOperationException("authored ambiguous engine start");
+        }
         public bool CanSwitch(Lifetime target, Lifetime control) { Calls++; return Switchable && Restorable; }
         public bool CanRestore(Lifetime target) { Calls++; return Restorable; }
         public void Assign(Lifetime item, string profile, Func<bool> stillAdmitted)
@@ -54,9 +65,11 @@ public static class TestNativeIdle01
     sealed class NativeWorld
     {
         internal readonly List<Tuple<ulong, object[]>> Calls = new List<Tuple<ulong, object[]>>();
+        internal readonly List<int> DeletedHandles = new List<int>();
         internal readonly Dictionary<int, int> Tokens = new Dictionary<int, int> { { 123, 77 }, { 124, 78 } };
-        internal int Driver = 10, Passenger, NextHandle = 200, LastVehicle, Interior, ConflictingDecoratorType;
-        internal float Speed;
+        internal int Driver = 10, Passenger, ControlDriver, ControlPassenger, NextHandle = 200, LastVehicle, Interior, ConflictingDecoratorType;
+        internal float Speed, ControlSpeed;
+        internal bool ControlDead, ControlDriveable = true, FailControlStart;
         internal bool Online, Dead, InVehicle, Driveable = true, Belongs = true, Engine = true, ControlEngine = true, Loaded = true, DecorRegistered = true, DecorSet = true;
         internal uint Model = 0xF9300CC5u;
         internal Action<ulong, object[]> BeforeNative;
@@ -65,7 +78,6 @@ public static class TestNativeIdle01
         internal object Call(ulong hash, object[] args)
         {
             Calls.Add(Tuple.Create(hash, args));
-            if (hash == (ulong)GTA.Native.Hash.SET_VEHICLE_ENGINE_ON) throw new Exception("Engine state setter is not audio suppression");
             if (BeforeNative != null) BeforeNative(hash, args);
             switch ((GTA.Native.Hash)hash)
             {
@@ -78,11 +90,15 @@ public static class TestNativeIdle01
                 case GTA.Native.Hash.DOES_ENTITY_BELONG_TO_THIS_SCRIPT: return Belongs;
                 case GTA.Native.Hash.DECOR_EXIST_ON: return Tokens.ContainsKey((int)args[0]);
                 case GTA.Native.Hash.DECOR_GET_INT: return Tokens[(int)args[0]];
-                case GTA.Native.Hash.GET_ENTITY_SPEED: return Speed;
-                case GTA.Native.Hash.GET_PED_IN_VEHICLE_SEAT: return (int)args[0] == 123 ? ((int)args[1] == -1 ? Driver : Passenger) : 0;
-                case GTA.Native.Hash.IS_ENTITY_DEAD: return Dead;
-                case GTA.Native.Hash.IS_VEHICLE_DRIVEABLE: return Driveable;
+                case GTA.Native.Hash.GET_ENTITY_SPEED: return (int)args[0] == 124 ? ControlSpeed : Speed;
+                case GTA.Native.Hash.GET_PED_IN_VEHICLE_SEAT: return (int)args[0] == 123 ? ((int)args[1] == -1 ? Driver : Passenger) : ((int)args[0] == 124 ? ((int)args[1] == -1 ? ControlDriver : ControlPassenger) : 0);
+                case GTA.Native.Hash.IS_ENTITY_DEAD: return (int)args[0] == 124 ? ControlDead : Dead;
+                case GTA.Native.Hash.IS_VEHICLE_DRIVEABLE: return (int)args[0] == 124 ? ControlDriveable : Driveable;
                 case GTA.Native.Hash.GET_IS_VEHICLE_ENGINE_RUNNING: return (int)args[0] == 124 ? ControlEngine : Engine;
+                case GTA.Native.Hash.SET_VEHICLE_ENGINE_ON:
+                    if (FailControlStart) throw new InvalidOperationException("authored engine start failure");
+                    if ((int)args[0] != 124) throw new Exception("Engine setup must only target B");
+                    ControlEngine = (bool)args[1]; return false;
                 case GTA.Native.Hash.GET_VEHICLE_DEFAULT_HORN: return 123u;
                 case GTA.Native.Hash.GET_VEHICLE_PED_IS_IN: return LastVehicle;
                 case GTA.Native.Hash.IS_PED_IN_ANY_VEHICLE: return InVehicle;
@@ -94,7 +110,12 @@ public static class TestNativeIdle01
                 case GTA.Native.Hash.HAS_MODEL_LOADED: return Loaded;
                 case GTA.Native.Hash.CREATE_VEHICLE: Tokens[++NextHandle] = -1; return NextHandle;
                 case GTA.Native.Hash.DECOR_SET_INT: if (DecorSet) Tokens[(int)args[0]] = (int)args[2]; return DecorSet;
-                case GTA.Native.Hash.DELETE_ENTITY: Tokens.Remove((int)((GTA.Native.OutputArgument)args[0]).Value); return false;
+                case GTA.Native.Hash.DELETE_ENTITY:
+                    var deleteArgument = (GTA.Native.InputArgument)args[0];
+                    Check(deleteArgument.Address != IntPtr.Zero, "delete receives a pointer to caller-owned handle storage");
+                    int deletedHandle = Marshal.ReadInt32(deleteArgument.Address);
+                    DeletedHandles.Add(deletedHandle); Tokens.Remove(deletedHandle);
+                    Marshal.WriteInt32(deleteArgument.Address, 0); return false;
                 default: return false;
             }
         }
@@ -170,6 +191,61 @@ public static class TestNativeIdle01
                 Check(f.Experiment.RestoreReturned && !f.Experiment.Active && f.Api.Deleted.Count == 0, "native return distinct from vehicle deletion");
                 Refused(f.Experiment.Arm); Refused(f.Experiment.Apply); f.Experiment.Tick(); Check(f.Api.Assigned.Count == 6, "no automatic repeat");
                 f.Experiment.Cleanup(); Check(f.Experiment.CleanupComplete && f.Api.Deleted.SequenceEqual(new[] { 1, 2 }), "explicit later cleanup");
+            });
+            Test("manual control setup starts only B once without advancing profiles", delegate {
+                var f = new Fixture(); f.Pair(); f.Experiment.Tick(); Check(f.Api.ControlStarts.Count == 0, "no automatic engine setup");
+                f.Experiment.StartControl();
+                Check(f.Api.ControlStarts.SequenceEqual(new[] { 2 }) && f.Api.Assigned.Count == 0 && f.Experiment.Next == "ra_ns01_bati_a", "one B start leaves audio sequence untouched");
+                Check(f.Experiment.Status.Contains("REQUEST RETURNED") && f.Experiment.Status.Contains("F8"), "return does not claim engine or acoustic success");
+                f.Step(); Check(f.Api.Assigned.Count == 1 && f.Api.ControlStarts.Count == 1, "separate manual phase controls still required");
+                Refused(f.Experiment.StartControl); f.Experiment.Tick();
+                Check(f.Api.ControlStarts.Count == 1 && !f.Experiment.Active, "no later restart");
+            });
+            Test("control setup refuses dormant armed changed expired stopped and aborted sessions", delegate {
+                foreach (string state in new[] { "dormant", "armed", "changed", "expired", "stopped", "aborted", "abortedBeforePair", "unhealthy", "unsafe", "lostA", "lostB" })
+                {
+                    var f = new Fixture();
+                    if (state != "dormant" && state != "abortedBeforePair") f.Pair();
+                    if (state == "armed") f.Experiment.Arm();
+                    if (state == "changed") f.Step();
+                    if (state == "expired") f.Now += 600000;
+                    if (state == "stopped") f.Experiment.Stop("fixture");
+                    if (state == "aborted" || state == "abortedBeforePair") f.Experiment.Abort();
+                    if (state == "unhealthy") f.Healthy = false;
+                    if (state == "unsafe") f.Api.ControlStartable = false;
+                    if (state == "lostA") f.Api.Live[1] = 999;
+                    if (state == "lostB") f.Api.Live[2] = 999;
+                    int before = f.Api.Calls;
+                    Refused(f.Experiment.StartControl);
+                    Check(f.Api.ControlStarts.Count == 0 && !f.Experiment.Active, state + " never starts B and ends progression");
+                    if (state == "aborted" || state == "abortedBeforePair") Check(f.Api.Calls == before, "no API calls after abort");
+                    if (state == "dormant" || state == "abortedBeforePair")
+                    {
+                        Refused(f.Experiment.Spawn);
+                        Check(f.Api.Calls == 0 && f.Api.Spawned == 0, "terminal setup before pair blocks later F5 before any API or model request");
+                    }
+                }
+            });
+            Test("control setup consumes throwing and finally revoked attempts", delegate {
+                foreach (string failure in new[] { "throw", "deadline", "journal", "abort" })
+                {
+                    var f = new Fixture(); f.Pair();
+                    if (failure == "throw") f.Api.FailControlStart = true;
+                    if (failure == "deadline") f.Api.BeforeControlStart = delegate { f.Now += 600000; };
+                    if (failure == "journal") f.OnLog = delegate(string line) { if (line.StartsWith("control-start-intent")) f.Healthy = false; };
+                    if (failure == "abort") f.Api.BeforeControlStart = delegate { f.Experiment.Abort(); };
+                    Refused(f.Experiment.StartControl);
+                    int attempts = f.Api.ControlStarts.Count;
+                    f.Healthy = true; f.Api.FailControlStart = false; f.Api.BeforeControlStart = null; f.OnLog = null;
+                    Refused(f.Experiment.StartControl); f.Experiment.Tick();
+                    Check(attempts == (failure == "throw" ? 1 : 0) && f.Api.ControlStarts.Count == attempts && !f.Experiment.Active, failure + " cannot retry or resume");
+                    Check(f.Api.Assigned.Count == 0, "failed setup never substitutes an audio profile");
+                }
+            });
+            Test("control setup never maintains B if its engine stops later", delegate {
+                var f = new Fixture(); f.Pair(); f.Experiment.StartControl(); f.Api.Switchable = false;
+                f.Experiment.Tick(); Refused(f.Experiment.Arm);
+                Check(f.Api.ControlStarts.Count == 1 && f.Api.Assigned.Count == 0, "engine-off control remains inadmissible without an automatic restart");
             });
             Test("arming never applies and expires without assignment", delegate {
                 var f = new Fixture(); f.Pair(); Refused(f.Experiment.Apply); f.Experiment.Arm(); Check(f.Api.Assigned.Count == 0, "manual apply remains required");
@@ -284,6 +360,65 @@ public static class TestNativeIdle01
                 w.ControlEngine = false; Check(!api.CanSwitch(A(), B()), "inactive B cannot establish engine collateral isolation"); w.ControlEngine = true;
                 w.Driver = 0; Check(!api.CanSwitch(A(), B()) && api.CanRestore(A()), "empty A restoration allowed, player branch test not admitted");
                 Refused(delegate { api.Assign(new Lifetime { Handle = 123, Token = 77, Role = "B" }, "BATI", delegate { return true; }); });
+            });
+            Test("adapter starts empty B with the exact one-shot engine arguments", delegate {
+                var w = new NativeWorld(); w.ControlEngine = false; var api = new IdleNativeApi();
+                Check(api.CanStartControl(A(), B()) && !api.CanSwitch(A(), B()), "engine-off B only admits explicit setup");
+                int atGuard = 0;
+                api.StartControl(A(), B(), delegate { atGuard = w.Calls.Count; return true; });
+                var call = w.Calls.Last();
+                Check(w.Calls.Count == atGuard + 1 && call.Item1 == 0x2497C4717C8B881EUL, "last admission immediately precedes engine setter");
+                Check(call.Item2.Length == 4 && (int)call.Item2[0] == 124 && (bool)call.Item2[1] && (bool)call.Item2[2] && !(bool)call.Item2[3], "B true true false, no A setter");
+                Check(api.CanSwitch(A(), B()) && !api.CanStartControl(A(), B()) && !w.Assignments.Any(), "independent readback admits idle only after engine reports running");
+                Refused(delegate { api.StartControl(A(), B(), delegate { return true; }); });
+                Check(w.Calls.Count(x => x.Item1 == 0x2497C4717C8B881EUL) == 1, "already running B is never set again");
+            });
+            Test("adapter blocks unsafe and stale control setup without writing either vehicle", delegate {
+                foreach (string state in new[] { "staleA", "staleB", "foreign", "model", "movingA", "movingB", "nanB", "driverA", "passengerA", "driverB", "passengerB", "deadA", "deadB", "brokenA", "brokenB", "offA", "onB", "online", "paused", "roles", "sameHandle", "sameToken", "lost", "deleted" })
+                {
+                    var w = new NativeWorld(); w.ControlEngine = false; var api = new IdleNativeApi(); var a = A(); var b = B();
+                    if (state == "staleA") w.Tokens[123] = 999;
+                    if (state == "staleB") w.Tokens[124] = 999;
+                    if (state == "foreign") w.Belongs = false;
+                    if (state == "model") w.Model = 1;
+                    if (state == "movingA") w.Speed = .15f;
+                    if (state == "movingB") w.ControlSpeed = .15f;
+                    if (state == "nanB") w.ControlSpeed = Single.NaN;
+                    if (state == "driverA") w.Driver = 99;
+                    if (state == "passengerA") w.Passenger = 99;
+                    if (state == "driverB") w.ControlDriver = 10;
+                    if (state == "passengerB") w.ControlPassenger = 99;
+                    if (state == "deadA") w.Dead = true;
+                    if (state == "deadB") w.ControlDead = true;
+                    if (state == "brokenA") w.Driveable = false;
+                    if (state == "brokenB") w.ControlDriveable = false;
+                    if (state == "offA") w.Engine = false;
+                    if (state == "onB") w.ControlEngine = true;
+                    if (state == "online") w.Online = true;
+                    if (state == "paused") GTA.Game.IsPaused = true;
+                    if (state == "roles") { a.Role = "B"; b.Role = "A"; }
+                    if (state == "sameHandle") b.Handle = a.Handle;
+                    if (state == "sameToken") b.Token = a.Token;
+                    if (state == "lost") b.Lost = true;
+                    if (state == "deleted") a.Deleted = true;
+                    Refused(delegate { api.StartControl(a, b, delegate { return true; }); });
+                    Check(!w.Calls.Any(x => x.Item1 == 0x2497C4717C8B881EUL) && !w.Assignments.Any(), state + " refuses all setters");
+                }
+                GTA.Game.IsPaused = false;
+            });
+            Test("adapter rechecks control setup context and final admission", delegate {
+                var w = new NativeWorld(); w.ControlEngine = false; var api = new IdleNativeApi();
+                Check(api.CanStartControl(A(), B()), "initial setup admission");
+                w.ControlDriver = 99;
+                Refused(delegate { api.StartControl(A(), B(), delegate { return true; }); });
+                w.ControlDriver = 0; bool admitted = true;
+                w.BeforeNative = delegate(ulong hash, object[] args) { if (hash == (ulong)GTA.Native.Hash.GET_IS_VEHICLE_ENGINE_RUNNING && (int)args[0] == 124) admitted = false; };
+                Refused(delegate { api.StartControl(A(), B(), delegate { return admitted; }); });
+                Refused(delegate { api.StartControl(A(), B(), null); });
+                Check(!w.Calls.Any(x => x.Item1 == 0x2497C4717C8B881EUL), "changed context or expired final admission never reaches setter");
+                w.BeforeNative = null; w.FailControlStart = true;
+                Refused(delegate { api.StartControl(A(), B(), delegate { return true; }); });
+                Check(w.Calls.Count(x => x.Item1 == 0x2497C4717C8B881EUL) == 1 && !w.ControlEngine, "throwing native is one recorded attempt, no success inferred");
             });
             Test("worker-thread native calls are rejected before dispatch", delegate {
                 var w = new NativeWorld(); var api = new IdleNativeApi(); int before = w.Calls.Count; Exception fault = null;
@@ -414,6 +549,15 @@ public static class TestNativeIdle01
                     Refused(delegate { IdleDecoratorLock.ReadDataRange(invalid, 10000, 4096, out start, out end); });
                 }
             });
+            Test("boxed integer output arguments are rejected before native dispatch", delegate {
+                var w = new NativeWorld(); bool rejected = false;
+                try { using (var argument = new GTA.Native.OutputArgument(1794)) { } }
+                catch (InvalidCastException) { rejected = true; }
+                Check(rejected && w.Calls.Count == 0, "fixture reproduces the real SDK object-constructor rejection");
+                w.Driver = 0; var api = new IdleNativeApi();
+                Check(api.Delete(A()), "owned empty A deletes through typed storage");
+                Check(w.DeletedHandles.SequenceEqual(new[] { 123 }), "synchronous dispatch receives the exact owned handle");
+            });
             Test("failed new token is cleaned only within the same spawn callback", delegate {
                 var w = new NativeWorld(); var api = new IdleNativeApi(); api.Prepare(); w.DecorSet = false; Refused(delegate { api.Spawn("A", 91); });
                 Check(!w.Tokens.ContainsKey(201) && !w.Assignments.Any(), "failed just-created vehicle cleaned without profile assignment");
@@ -445,7 +589,22 @@ namespace GTA.Native
         GET_IS_VEHICLE_ENGINE_RUNNING, DELETE_ENTITY, SET_MODEL_AS_NO_LONGER_NEEDED,
         SET_VEHICLE_ENGINE_ON = 0x2497C4717C8B881EUL
     }
-    public sealed class OutputArgument : IDisposable { public readonly object Value; public OutputArgument(object value) { Value = value; } public void Dispose() { } }
+    public sealed class InputArgument
+    {
+        internal readonly IntPtr Address;
+        InputArgument(IntPtr address) { Address = address; }
+        public static unsafe implicit operator InputArgument(void* address) { return new InputArgument((IntPtr)address); }
+    }
+    public sealed class OutputArgument : IDisposable
+    {
+        public readonly object Value;
+        public OutputArgument(object value)
+        {
+            if (value != null && !(value is string)) throw new InvalidCastException("Boxed primitive output argument refused like the retained SDK");
+            Value = value;
+        }
+        public void Dispose() { }
+    }
     public static class Function
     {
         public static Func<ulong, object[], object> Handler;

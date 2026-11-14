@@ -63,6 +63,7 @@ namespace RichAudio.NativeSuppression01
                     case Keys.F6: experiment.Arm(); break;
                     case Keys.F7: experiment.Apply(); break;
                     case Keys.F8: experiment.Snapshot(); break;
+                    case Keys.F11: experiment.StartControl(); break;
                 }
             }
             catch (ThreadAbortException) { throw; }
