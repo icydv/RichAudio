@@ -14,7 +14,7 @@ internal static class DisposableBridge07
             string root=Path.GetFullPath(args[0]);Directory.CreateDirectory(root);
             File.WriteAllText(Path.Combine(root,"RichAudio.NativeSuppression07.ini"),"Enabled=true");
             var bridge=new LocalBridge(root,root);var api=new TestAutomaticNative07.Api();AutomaticRun run=null;int token=500;
-            long end=Stopwatch.GetTimestamp()+20*Stopwatch.Frequency;
+            long end=Stopwatch.GetTimestamp()+90*Stopwatch.Frequency;
             while(Stopwatch.GetTimestamp()<end) {
                 if(bridge.Enabled&&run==null)run=new AutomaticRun(api,bridge,Stopwatch.GetTimestamp,Stopwatch.Frequency,()=>++token,bridge.Session);
                 if(run!=null) {

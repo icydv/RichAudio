@@ -72,6 +72,36 @@ def run(root,bridge_binary,python):
     check('disposable bridge normal exit',child.wait(2)==0);state=op.read(state_path);check('automatic exact-pair retirement through real bridge',state['Finished'] and state['Retired'])
     check('OS identity observes normal process closure',not identity.alive());identity.close()
     check('no native assignment during setup/stop fixture','native-dispatch' not in (d/'operator/journal.log').read_text())
+    # Positive conversational feedback traverses the actual client, receipt
+    # binding, parser/queue, durable journal and checked controller in a process.
+    d=root/'review-bridge';d.mkdir();child=subprocess.Popen([bridge_binary,str(d)],creationflags=flags,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE);children.append(child)
+    state_path=wait(d/'operator/state.json');state=op.read(state_path);session=state['Session'];seq=0;pulse();time.sleep(.1);state=op.read(state_path)
+    cid=op.command(d,state,'Begin','AUTOMATED conversational integration fixture; no live approval');wait(d/'operator/replies'/(cid+'.json'))
+    end=time.monotonic()+45
+    while time.monotonic()<end:
+        pulse();state=op.read(state_path)
+        if state['AwaitingReview']:break
+        time.sleep(.05)
+    check('external path reaches original B observation',state['AwaitingReview'] and state['Phase']=='B-pre')
+    plan=dict(Root=str(d),SourceCommit='AUTOMATED-DISPOSABLE-FIXTURE');plan_path=d/'operator-plan.json';op.atomic(plan_path,plan,True)
+    scope=dict(candidateName='candidate-07',sourceCommit=plan['SourceCommit'],operator=dict(plan=dict(sha256=op.sha(plan_path))));op.atomic(d/'scope.json',scope,True)
+    op.atomic(d/'transaction.json',dict(status='installed-verified',scopeSha256=op.sha(d/'scope.json')),True);op.atomic(d/'approval.json',dict(scopeSha256=op.sha(d/'scope.json'),label='AUTOMATED FIXTURE; NOT HUMAN CONSENT'),True)
+    observation=state['Observation'];receipt=d/'analysis/fixture-receipt.json';op.atomic(receipt,dict(Passed=True,kind='AUTHORED NO-LIVE-CAPTURE FIXTURE'),True)
+    evidence={k:state[k] for k in ['Session','Observation','Phase','Generation','Recording','Profile']};evidence.update(Passed=True,Receipt=str(receipt),ReceiptSha256=op.sha(receipt));op.atomic(d/'operator/evidence'/(observation+'.json'),evidence,True)
+    text=d/'ordinary-answer.txt';text.write_text('AUTOMATED listening fixture: B sounds normal. No human hearing or live consent asserted.')
+    pulse();op.review(plan_path,observation,'ControlNormal',text,True)
+    forwarded=op.read(next((d/'listening').glob('*-forwarded.json')));reply=wait(d/'operator/replies'/(forwarded['CommandId']+'.json'))
+    check('ordinary answer accepted by actual review bridge',op.read(reply)['Result']=='accepted reviewed decision')
+    end=time.monotonic()+5
+    while time.monotonic()<end:
+        pulse();state=op.read(state_path)
+        if state['Phase']=='baseline':break
+        time.sleep(.05)
+    check('review advances mechanical setup without arming early',state['Phase']=='baseline' and 'armed phase=' not in (d/'operator/journal.log').read_text())
+    pulse();state=op.read(state_path);cid=op.command(d,state,'Stop','AUTOMATED integration cleanup');wait(d/'operator/replies'/(cid+'.json'))
+    end=time.monotonic()+5
+    while child.poll() is None and time.monotonic()<end:pulse();time.sleep(.05)
+    check('review integration process retires and exits normally',child.wait(2)==0 and op.read(state_path)['Retired'])
     (root/'result.json').write_text(json.dumps(dict(schema='NativeSuppression07ExternalProcessTests',passed=True,tests=tests,bridgeBinarySha256=op.sha(bridge_binary),operatorSha256=op.sha(HERE/'Operator07.py'),processes='Actual disposable bridge and Lua frontend fixtures; no GTA/OBS',gameLaunched=False,obsLaunched=False,liveQualified=False),indent=2))
 
 if __name__=='__main__':run(*sys.argv[1:])
