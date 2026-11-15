@@ -65,7 +65,7 @@ namespace RichAudio.NativeSuppression01
             for(int attempt=0;;attempt++) {
                 if(MoveFileEx(temp,p,9))return; // REPLACE_EXISTING | WRITE_THROUGH
                 int code=Marshal.GetLastWin32Error();
-                if(attempt>=20||(code!=32&&code!=33))throw new IOException("atomic status publication refused: "+code);
+                if(attempt>=20||(code!=5&&code!=32&&code!=33)||(File.Exists(p)&&(File.GetAttributes(p)&FileAttributes.ReadOnly)!=0))throw new IOException("atomic status publication refused: "+code);
                 Thread.Sleep(5); // bounded IO worker only, never a script callback
             }
         }

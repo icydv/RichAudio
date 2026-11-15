@@ -55,7 +55,12 @@ def atomic(p,obj,exclusive=False):
     else:
         tmp=p.with_name(p.name+'.'+uuid.uuid4().hex+'.new')
         with tmp.open('xb') as f:f.write(data);f.flush();os.fsync(f.fileno())
-        os.replace(tmp,p)
+        until=time.monotonic()+.25
+        while True:
+            try:os.replace(tmp,p);break
+            except PermissionError:
+                if (p.exists() and getattr(p.stat(),'st_file_attributes',0)&1) or time.monotonic()>=until:raise
+                time.sleep(.005) # same immutable publication, never an operation resend
 def qpc():
     v=ctypes.c_longlong();assert ctypes.windll.kernel32.QueryPerformanceCounter(ctypes.byref(v));return v.value
 def frequency():
