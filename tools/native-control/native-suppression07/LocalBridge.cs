@@ -63,7 +63,12 @@ namespace RichAudio.NativeSuppression01
             string temp=p+".new";NewText(temp,json.Serialize(value));NoLinks(p);
             if(File.Exists(p))File.Replace(temp,p,null);else File.Move(temp,p);
         }
-        string ReadSmall(string p) {NoLinks(p);var f=new FileInfo(p);if(f.Length>16384)throw new IOException("oversized operator message");return File.ReadAllText(p,new UTF8Encoding(false,true));}
+        string ReadSmall(string p) {
+            for(int attempt=0;;attempt++) {
+                try {NoLinks(p);var f=new FileInfo(p);if(f.Length>16384)throw new IOException("oversized operator message");return File.ReadAllText(p,new UTF8Encoding(false,true));}
+                catch(IOException e) {int code=e.HResult&65535;if(attempt>=10||(code!=2&&code!=3&&code!=32&&code!=33))throw;Thread.Sleep(5);}
+            }
+        }
         internal static RunCommand ParseCommand(string text) {
             var j=new JavaScriptSerializer {MaxJsonLength=16384,RecursionLimit=4};
             var d=j.Deserialize<Dictionary<string,object>>(text);

@@ -11,7 +11,16 @@ def sha(p):
     with Path(p).open('rb') as f:
         for b in iter(lambda:f.read(1048576),b''):h.update(b)
     return h.hexdigest()
-def read(p):return json.loads(Path(p).read_text(encoding='utf-8-sig'))
+def read(p):
+    # ReplaceFile can briefly hide a published filename on Windows. Retry only
+    # transient opens, outside callbacks; never resend an operation or accept an
+    # older phase. Corrupt JSON and a persistently absent file still fail closed.
+    until=time.monotonic()+.25
+    while True:
+        try:return json.loads(Path(p).read_text(encoding='utf-8-sig'))
+        except (FileNotFoundError,PermissionError):
+            if time.monotonic()>=until:raise
+            time.sleep(.005)
 def private_path(p,root):
     p,root=Path(p).absolute(),Path(root).absolute()
     assert p.is_relative_to(root),'path outside fixed attempt'
