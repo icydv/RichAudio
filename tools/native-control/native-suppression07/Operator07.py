@@ -1,6 +1,7 @@
 """Finite local operator for the approved07 run. No keyboard phase controls."""
 from pathlib import Path
 import argparse,ctypes,datetime,hashlib,json,os,re,subprocess,sys,time,uuid
+from ctypes import wintypes
 sys.dont_write_bytecode=True
 HERE=Path(__file__).resolve().parent
 
@@ -11,13 +12,32 @@ def sha(p):
     with Path(p).open('rb') as f:
         for b in iter(lambda:f.read(1048576),b''):h.update(b)
     return h.hexdigest()
+def shared_bytes(p):
+    # Readers explicitly permit atomic rename/delete, as the C# and OBS writers
+    # do. CRT text-open sharing otherwise causes Windows ReplaceFile races.
+    k=ctypes.WinDLL('kernel32',use_last_error=True)
+    k.CreateFileW.argtypes=[wintypes.LPCWSTR,wintypes.DWORD,wintypes.DWORD,ctypes.c_void_p,wintypes.DWORD,wintypes.DWORD,wintypes.HANDLE];k.CreateFileW.restype=wintypes.HANDLE
+    k.CloseHandle.argtypes=[wintypes.HANDLE];k.GetFileSizeEx.argtypes=[wintypes.HANDLE,ctypes.POINTER(ctypes.c_longlong)]
+    k.ReadFile.argtypes=[wintypes.HANDLE,ctypes.c_void_p,wintypes.DWORD,ctypes.POINTER(wintypes.DWORD),ctypes.c_void_p]
+    handle=k.CreateFileW(str(Path(p).absolute()),0x80000000,7,None,3,0x80,None)
+    if handle==ctypes.c_void_p(-1).value:
+        error=ctypes.get_last_error()
+        if error in [2,3]:raise FileNotFoundError(str(p))
+        if error in [32,33]:raise PermissionError(str(p))
+        raise OSError(error,ctypes.FormatError(error))
+    try:
+        size=ctypes.c_longlong();assert k.GetFileSizeEx(handle,ctypes.byref(size)) and 0<=size.value<=4194304,'bounded JSON file'
+        buf=ctypes.create_string_buffer(size.value);count=wintypes.DWORD()
+        assert k.ReadFile(handle,buf,size.value,ctypes.byref(count),None) and count.value==size.value,'complete immutable-handle JSON read'
+        return buf.raw
+    finally:k.CloseHandle(handle)
 def read(p):
     # ReplaceFile can briefly hide a published filename on Windows. Retry only
     # transient opens, outside callbacks; never resend an operation or accept an
     # older phase. Corrupt JSON and a persistently absent file still fail closed.
     until=time.monotonic()+.25
     while True:
-        try:return json.loads(Path(p).read_text(encoding='utf-8-sig'))
+        try:return json.loads(shared_bytes(p).decode('utf-8-sig'))
         except (FileNotFoundError,PermissionError):
             if time.monotonic()>=until:raise
             time.sleep(.005)

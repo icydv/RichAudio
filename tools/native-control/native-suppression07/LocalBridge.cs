@@ -7,6 +7,7 @@ using System.IO;
 using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Principal;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Web.Script.Serialization;
@@ -61,11 +62,19 @@ namespace RichAudio.NativeSuppression01
         }
         void PublishFile(string p,object value) {
             string temp=p+".new";NewText(temp,json.Serialize(value));NoLinks(p);
-            if(File.Exists(p))File.Replace(temp,p,null);else File.Move(temp,p);
+            for(int attempt=0;;attempt++) {
+                if(MoveFileEx(temp,p,9))return; // REPLACE_EXISTING | WRITE_THROUGH
+                int code=Marshal.GetLastWin32Error();
+                if(attempt>=20||(code!=32&&code!=33))throw new IOException("atomic status publication refused: "+code);
+                Thread.Sleep(5); // bounded IO worker only, never a script callback
+            }
         }
+        [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)]
+        static extern bool MoveFileEx(string from,string to,uint flags);
         string ReadSmall(string p) {
             for(int attempt=0;;attempt++) {
-                try {NoLinks(p);var f=new FileInfo(p);if(f.Length>16384)throw new IOException("oversized operator message");return File.ReadAllText(p,new UTF8Encoding(false,true));}
+                try {NoLinks(p);using(var f=new FileStream(p,FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete)){
+                    if(f.Length>16384)throw new IOException("oversized operator message");using(var reader=new StreamReader(f,new UTF8Encoding(false,true)))return reader.ReadToEnd();}}
                 catch(IOException e) {int code=e.HResult&65535;if(attempt>=10||(code!=2&&code!=3&&code!=32&&code!=33))throw;Thread.Sleep(5);}
             }
         }
