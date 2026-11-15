@@ -70,7 +70,7 @@ $focusHash=[Security.Cryptography.SHA256]::Create()
 try{$normalizedFocus=[Convert]::ToHexString($focusHash.ComputeHash($observedFocus.bytes)).ToLowerInvariant()}finally{$focusHash.Dispose()}
 if($normalizedFocus-cne$s.focusConfiguration.preparedSha256){throw 'Unexpected unrelated configuration edits; retain state for reviewed recovery'}
 $configurationBeforeRestore=HashFile $s.focusConfiguration.path
-@{schema='NativeSuppression08ClosureConfiguration';utc=[DateTime]::UtcNow.ToString('o');path=$s.focusConfiguration.path;observedSha256=$configurationBeforeRestore;observedPauseValue=$observedFocus.value;preparedSha256=$s.focusConfiguration.preparedSha256;gameRewroteSetting=($configurationBeforeRestore-cne$s.focusConfiguration.preparedSha256);attribution='Post-closure bytes, not proof of which writer changed them';processesConfirmedClosed=$true}|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $run 'closure-configuration.json') -Encoding utf8
+@{schema='NativeSuppression08ClosureConfiguration';utc=[DateTime]::UtcNow.ToString('o');path=$s.focusConfiguration.path;observedSha256=$configurationBeforeRestore;observedPauseValue=$observedFocus.value;preparedSha256=$s.focusConfiguration.preparedSha256;observedDiffersFromPrepared=($configurationBeforeRestore-cne$s.focusConfiguration.preparedSha256);attribution='Post-closure bytes, not proof of which writer changed them';processesConfirmedClosed=$true}|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $run 'closure-configuration.json') -Encoding utf8
 $saved = Join-Path $run 'retained-runtime'
 $null = Checked $saved $run
 if (Test-Path -LiteralPath $saved) { throw 'Retained-runtime already exists; inspect the previous restoration attempt before continuing' }
