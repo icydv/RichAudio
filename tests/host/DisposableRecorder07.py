@@ -12,7 +12,7 @@ lib.lua_close.argtypes=[ctypes.c_void_p]
 def execute(code):
     if lib.luaL_loadstring(L,code.encode()) or lib.lua_pcall(L,0,0,0):raise RuntimeError(lib.lua_tolstring(L,-1,None).decode())
 fake=r'''
-local ffi=require('ffi');ffi.cdef('int QueryPerformanceCounter(long long *); int QueryPerformanceFrequency(long long *);');local k=ffi.load('kernel32')
+local ffi=require('ffi');ffi.cdef('int QueryPerformanceCounter(long long *); int QueryPerformanceFrequency(long long *); int MoveFileExA(const char *, const char *, unsigned long);');local k=ffi.load('kernel32')
 local function ns() local a=ffi.new('long long[1]');local f=ffi.new('long long[1]');k.QueryPerformanceCounter(a);k.QueryPerformanceFrequency(f);return math.floor(tonumber(a[0])*1000000000/tonumber(f[0])) end
 local active=false;local started=0
 obslua={OBS_FRONTEND_EVENT_RECORDING_STARTED=5,LOG_ERROR=100}
@@ -35,7 +35,7 @@ function o.obs_data_get_json(d)
 end
 function o.os_safe_replace(target,source,backup)
  if FIXTURE_MODE=='lost' and target:find('recorder%-reply.json$')then os.remove(source);return 0 end
- os.remove(target);local ok=os.rename(source,target);return ok and 0 or 1
+ return k.MoveFileExA(source,target,9)~=0 and 0 or 1
 end
 function o.obs_frontend_get_current_profile()return 'NativeSuppression01Live07'end
 o.obs_frontend_get_current_scene_collection=o.obs_frontend_get_current_profile
