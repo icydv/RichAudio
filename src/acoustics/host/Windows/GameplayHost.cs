@@ -232,7 +232,10 @@ namespace RichAudio.Beacon.Windows {
   }
   void ReadDiagnostics(){try{string line;while((!stop||drainProducer)&&(line=child.StandardError.ReadLine())!=null){long receivedAt=Stopwatch.GetTimestamp();if(line.Length>32768)throw new InvalidDataException("producer diagnostic size");
    if(delivery!=null&&line.StartsWith("delivery01|",StringComparison.Ordinal)){ReadDelivery(line,receivedAt);continue;}
-   lock(sync){var d=Json.DeserializeObject(line)as Dictionary<string,object>;object type;if(d!=null&&d.TryGetValue("type",out type)){
+   var d=Json.DeserializeObject(line)as Dictionary<string,object>;object type;
+   if(d==null||!d.TryGetValue("type",out type))continue;
+   if(powertrain!=null&&(string)type=="gameplay-status")RetainPowertrainSourceEvidence(d,receivedAt);
+   lock(sync){if(d!=null){
     string kind=(string)type;
     object hardMiss;
     if(delivery!=null&&kind=="complete-render-overrun"&&d.TryGetValue("hardMiss",out hardMiss)&&true.Equals(hardMiss))
@@ -245,6 +248,18 @@ namespace RichAudio.Beacon.Windows {
     }
     if(kind=="producer-terminal"||kind=="installed-world-worker-closed"||kind=="installed-world-worker-close-failed"||kind=="gameplay-error")Record("producer-evidence",kind,d);
     if((string)type=="gameplay-status"){workerStatus=line;if(latencyProfile.Id!="baseline"&&!creditWindow.SourcePrepared&&PreparedSource(d)){preparedSourceAtQpc=receivedAt;creditWindow.SourcePrepared=true;}}if((string)type=="gameplay-error"){object code;workerFailure=d.TryGetValue("code",out code)?Convert.ToString(code):"unspecified worker failure";}if((string)type=="gameplay-ready"){workerReady=true;wake.Set();}if((string)type=="producer-block-timing"){if(fixtureLatency!=null){fixtureLatency.Producer(d,receivedAt);object nodeDone;if(d.TryGetValue("stdoutCompletedNodeMs",out nodeDone))fixtureLatency.Progress("node-output",Convert.ToInt64(d["producerFrameStart"])/512,receivedAt,0,ring.BufferedFrames,512,0,Convert.ToDouble(nodeDone));}var capture=recording;if(capture!=null&&line.Length<=1900&&Interlocked.Read(ref producerTimingRows)<1500){if(capture.Event("producer-block-timing",receivedAt,d))Interlocked.Increment(ref producerTimingRows);else Interlocked.Increment(ref producerTimingRowsRejected);}else Interlocked.Increment(ref producerTimingRowsRejected);}}}}}catch(Exception e){if(!stop)Fail(e);}}
+  void RetainPowertrainSourceEvidence(Dictionary<string,object> report,long receivedAt){
+   object raw,voice,playout;
+   if(!report.TryGetValue("status",out raw))return;
+   var status=raw as Dictionary<string,object>;
+   if(status==null||!status.TryGetValue("powertrainVoiceEvidence",out voice))return;
+   status.TryGetValue("playoutTiming",out playout);
+   string file=Path.Combine(directory,"powertrain-source.json"),pending=file+".pending";
+   try{
+    File.WriteAllText(pending,Json.Serialize(new{session,receivedQpc=receivedAt,qpcFrequency=Stopwatch.Frequency,voice,playout}),new UTF8Encoding(false));
+    if(File.Exists(file))File.Replace(pending,file,null);else File.Move(pending,file);
+   }catch(IOException){ }catch(UnauthorizedAccessException){ }
+  }
   static bool PreparedSource(Dictionary<string,object> row){object raw;var status=row.TryGetValue("status",out raw)?raw as Dictionary<string,object>:null;var stages=status!=null&&status.TryGetValue("stageCounters",out raw)?raw as Dictionary<string,object>:null;if(stages==null)return false;foreach(string key in new[]{"engine","exhaust","stereo"}){var stage=stages.TryGetValue(key,out raw)?raw as Dictionary<string,object>:null;if(stage==null||!stage.TryGetValue("nonzeroBlocks",out raw)||Convert.ToInt64(raw)<=0)return false;}return true;}
   void Receive(){try{var validator=new StateValidator();while(!stop){pipe=GameplayWire.Server(pipeName);pipe.WaitForConnection();GameplayWire.Peer(pipe,ownerId,true);
    try{while(!stop){byte[] b=GameplayWire.Read(pipe);var f=GameplayWire.Decode(b,session);Protocol.Check(f.Vehicles.Length<=config.MaximumVehicleObservations,"gameplay package vehicle budget");double age=(Stopwatch.GetTimestamp()-f.Listener.ObservationTicks)*1000d/Stopwatch.Frequency;

@@ -2,7 +2,7 @@
 
 ## Playable powertrain replacement
 
-This opt-in developer mode uses the qualified `RA_RC_QUIET` pack from 3c94d0f. In that listening session the driver recognized the private audible control, heard stock ADDER return, then heard “zero engine or exhaust sound” with the quiet control while gear clunks, tyres and horn remained audible. They heard the ADDER again after the final return. The final stock horn check was unreported.
+This opt-in developer mode uses the quiet pack from 3c94d0f. In the private comparison I recognized the audible RC motor, heard the ADDER return, and heard the gears, tyres and horn with the quiet profile. I could no longer hear the engine or exhaust. Stock sound returned on the final request. I did not report a final stock horn check.
 
 The external renderer supplies a **Bati development voice on ADDER telemetry**. On the SHVDNE callback, `PowertrainFrames` reads the bound driver's ADDER and camera through `ShvdneGameSource` and `CameraListenerTracker`. The Enhanced public-native rev ratio (`0xF9DDA40BC293A61E`) drives the source operating point. It is a normalized ratio; physical crankshaft RPM and throttle-pedal position are not measured. The existing renderer infers lift from falling ratio and uses that signal for its acceleration/deceleration blend. Vehicle and listener pose, velocity, running state and timestamps keep their observed meaning. Missing, invalid or stale telemetry withholds playback.
 
@@ -18,6 +18,10 @@ The external renderer supplies a **Bati development voice on ADDER telemetry**. 
 Use `Status` for the replacement phase and reason. `Report -Text` retains the driver's words. A native return, source-backed PCM, and WASAPI submission are software evidence. The driver judges responsiveness, gaps and what comes from RichAudio during the mute comparison. If the host disappears or output progress expires after takeover, advancing SHVDNE callbacks handle withdrawal and the same-car stock return. Losing the target abandons the binding. An uncertain setter is never resent automatically. Recovery requires the surviving script and its validated target.
 
 Keep GTA running and foreground during preparation. If preparation fails before the quiet call, inspect the reason and wait for that attempt's owned host to exit before a fresh “ready” on the same stock car. Pausing or stalling callbacks during playback can expire the 250 ms input lease. `PowertrainEvidenceDirectory` identifies the attempt's transport and host records. Use underflows, discarded/stale frames, submission age and maximum callback gap to diagnose audible dropouts. Submitted-observation age measures software chronology.
+
+The owned host also retains `powertrain-source.json` beside its output status. It records sampled dry engine, dry exhaust and rendered stereo levels by output revision, plus the direct path distances in native units. Compare a low rendered level at a short path distance with the dry levels and final host peak to isolate source or propagation gain from output submission behavior.
+
+For a limiter check, hold high revs for around three seconds after the voice starts. The summary pairs ratios accepted by the producer with selected and smoothed ratios and engine/exhaust interval rates from the first high-rev window. The trace starts when an audible revision's input first reaches .85 of the normalized ratio, independent of the car's limiter. A flat input series points to the telemetry boundary at the available observation cadence. Variation lost before source selection points to interpolation. Variation lost between the selected and smoothed values points to source smoothing. If the rates vary while the expected limiter cue is still absent, check the bank and its authored events. Rendered ratios are sampled every three 512-frame blocks at 48 kHz.
 
 Build the switch and host from the same worktree, then stage an external private package in a fresh directory. `Prepare-PowertrainHost.ps1` verifies the retained SHVDNE source pins, copies the six Bati layers, and writes a manifest that binds the Windows host, Node worker, renderer code and assets.
 
@@ -35,7 +39,7 @@ For one authorized session reuse the two verified private overlay files and the 
 
 Run `Build.ps1` from PowerShell on the RichAudio development machine. It builds the SHVDNE script in `.local/audio-switch` and runs the offline checks against that DLL. Use the matching Enhanced SHVDNE runtime and verify fresh successful SDK initialization before issuing a command. Stock comparisons use just the script and runtime. The private comparison also uses the two-file OpenRPF overlay described below.
 
-Drive a running stock ADDER with its original ADDER engine audio. The operator and listener must know the vehicle's audio history. The model check alone cannot establish that history. Listen to stock idle or revs for as long as you like, then say **ready**. The operator operates the following commands through `Invoke-Switch.ps1`.
+Drive a running stock ADDER with its original ADDER engine audio. The operator and listener must know the vehicle's audio history. The model check alone cannot establish that history. Listen to stock idle or revs for as long as you like, then say **ready**. Run the following commands through `Invoke-Switch.ps1`.
 
 | Command | Effect |
 | --- | --- |
@@ -53,7 +57,7 @@ A refused command consumes no audio write. Address the displayed reason and give
 
 The retained Enhanced catalogue leaves the Voltic audio override blank. Its resolved identifier `voltic` hashes to the stock Dat151Vehicle root 0x9F4B77BE in update/update.rpf/x64/audio/config/game.dat151.rel. That root points to Dat151ElectricEngine 0x7F471776. Its Transmission reference 0x716FC17B resolves in sounds.dat54.rel through a parameter transform and multitrack to sample layers and modular synth 0x82925DF1.
 
-In the completed one-car run at e75c468, each command returned once on the same running ADDER. After VOLTIC the listener said “it sounds like the coil voltic, it doesnt sound like an adder anymore”. After ADDER the listener said “yeah it sounds like an adder again, finished”. This establishes audible stock switching and return on that car.
+In the one-car run at e75c468, both requests returned on the same running ADDER. I recognized the VOLTIC sound after the donor request and the familiar ADDER after the stock return.
 
 ## Quiet combustion candidate
 
@@ -67,7 +71,7 @@ Use stock ADDER → RCBANDITO → ADDER. The Enhanced catalogue resolves `rcband
 
 These measurements describe the named source streams. Road, tyre, collision or ambient sounds may remain. Other references, including a non-empty wrapper at vehicle field Unk63, and runtime fallback leave residual sound possible. Listen for any whine that follows throttle. Check that driving still feels normal. After “put it back”, compare idle and throttle with baseline. If a cue is hard to separate or all the listener hears is a fade, retain those words.
 
-The completed stock RC test at 558f98b displaced the familiar ADDER engine and exhaust on the same running car. The listener described the replacement as “quite loud, on par with the loudness of an engine” and reported “there is no horn”. After stock return they reported “I can hear adder noises again”. Horn recovery was untested in that run. The original cue-specific replies are retained in the session log.
+In the stock RC test at 558f98b I could no longer hear the ADDER engine or exhaust. The replacement motor was still about as loud as an engine and I heard no horn during the donor phase. I heard the ADDER again after stock return. Horn recovery was untested.
 
 ## Private audible and quiet comparison
 
@@ -96,7 +100,7 @@ From the worktree root, choose fresh output directories under `.local/audio-swit
 
 ```powershell
 $game = 'D:\Games\steamapps\common\Grand Theft Auto V Enhanced'
-$cw = 'C:\Users\Libby\Desktop\CodeWalker30_dev46'
+$cw = Join-Path ([Environment]::GetFolderPath('Desktop')) 'CodeWalker30_dev46'
 $switchTools = './tools/native-control/audio-switch'
 $output = Join-Path $PWD '.local/audio-switch'
 $resources = Join-Path $output 'private-rc-resources'

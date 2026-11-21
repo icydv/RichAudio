@@ -16,6 +16,7 @@ import {installedStaticSceneMetadata01} from '../src/acoustics/world/installed-s
 import {normalQualification01,openNormalQualificationEvidence01} from '../src/acoustics/world/normal-qualification01.mjs';
 import {ClockedFleetEvidence02} from '../src/acoustics/vehicle/clocked-fleet-evidence02.mjs';
 import {enableStockGrainTiming04} from '../src/acoustics/vehicle/stock-grain.mjs';
+import {PowertrainVoiceEvidence} from '../src/acoustics/vehicle/powertrain-voice-evidence.mjs';
 const args=process.argv.slice(2);if(args.length!==4||args[0]!=='--manifest'||args[2]!=='--session')throw Error('owned manifest/session required');
 const manifest=path.resolve(args[1]),root=path.dirname(manifest),config=JSON.parse(fs.readFileSync(manifest,'utf8')),session=args[3];
 const privatePowertrain=config.powertrainVoice==='bati-player-on-adder';
@@ -91,6 +92,7 @@ async function warmNormalControl01(){
 const normalControlWarmup=latencyProfile.id==='street-01'?await warmNormalControl01():null;
 const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true,latencyProfile:latencyProfile.id,continuityPolicy,vehicleSourcePolicy:config.vehicleSourcePolicy,privatePowertrain}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
 const startupVoices=latencyProfile.id==='street-01'&&!sourceStartupPreparation10.unpreparedBanks.length?engine.prepareStartupVoices01(startupPairs):0;
+const powertrainVoiceEvidence=privatePowertrain?new PowertrainVoiceEvidence():null;
 clockedEvidence?.ready({milliseconds:performance.now()-startupBegan,startupVoices,...sourceStartupPreparation10,normalControlWarmup});
 engine.pipeline.simulation.captureInstalledPaths01=config.acousticPathEvidence01===true;
 let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,pendingSettings=null,pendingGeometry=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
@@ -202,6 +204,7 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality,
     unpreparedExterior:d.installedGeometry.unpreparedExterior01}:{} )},
   outputPeak:d.outputPeak,sourceStates:d.sourceStates,stageCounters:d.stageCounters,...(fleet?{fleetPopulation:d.fleetPopulation,lifecycle:d.lifecycle}:{}),
   ...(privatePowertrain?{playoutTiming:engine.powertrainTiming()}:{}),
+  ...(powertrainVoiceEvidence?{powertrainVoiceEvidence:powertrainVoiceEvidence.report()}:{}),
   fallbackReason:d.geometry==='conditional-direct-unobserved-space-assumed-clear'?'Additive; conditional direct sound without collision coverage':b.fallbackReason,
   controlDelayMs:d.controlDelayMs,propagationLimitSeconds:2,arrivals:d.arrivals,retired:d.retired,latencyRows,latencyRowsOmitted,...(latencyProfile.id==='baseline'?{}:{latencyProfile:latencyProfile.id,producerCreditBlocks:latencyProfile.producerCreditBlocks})}});
 }
@@ -231,6 +234,7 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
      m.frame.vehicles[0].powertrainRevision=m.frame.powertrainRevision;
     }
     engine.accept(m.frame,age,remaining);lastFrame={frame:m.frame,age,at:now,validUntil:remaining===null?null:now+remaining,receivedAt:m.receivedAt,hostWriteBeforeQpc:m.hostWriteBeforeQpc??null,hostQpcFrequency:m.hostQpcFrequency??null};
+    powertrainVoiceEvidence?.accept(m.frame);
     evidence?.record({type:'normal-gameplay-observation',at:now,ageMs:age,validForMs:remaining,frame:m.frame});
     if(installedScenes&&!installedScenes.failed&&!installedScenes.closed&&(!s.valid||s.paused))installedScenes.withdrawCameraInterior01(now);
     if(installedScenes&&!installedScenes.failed&&!installedScenes.closed&&s.valid&&!s.paused){
@@ -247,6 +251,7 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
   const playbackBefore=engine.stageCounters.sourcePlaybackBlocks;
   const controlIngressMs=clockedEvidence?performance.now()-startedAt:0;
   const channels=await engine.render();if(stopped)return;
+  if(powertrainVoiceEvidence&&engine.stageCounters.sourcePlaybackBlocks>playbackBefore)powertrainVoiceEvidence.render(engine,channels);
   const beforeFraming=clockedEvidence?performance.now():0;
   credits--;encodeVehicleRa07(...channels,sequence,packet);sequence=(sequence+1)>>>0;
   if(config.powertrainVoice&&engine.stageCounters.stereo.nonzeroBlocks>nonzeroBefore&&engine.stageCounters.sourcePlaybackBlocks>playbackBefore){
