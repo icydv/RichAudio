@@ -2,6 +2,8 @@
 
 ## Master vision alignment — 25 October 2026
 
+**P2-02 offline follow-up:** [native audio ownership investigation](docs/P2_02_AUDIO_OWNERSHIP.md) distinguishes source access, native control and rendering. Prior real telemetry captures establish the RPH motion foundation; no native engine/exhaust ownership is established. Test-only synthetic ownership checks do not unlock Phase 3 or alter the telemetry core.
+
 The existing adapter/snapshot/worker/output separation supports the broader vision without changing the telemetry checkpoint. The three responsibilities below refine the future workers; they do not introduce an audio engine into P2-01. Current implementation is managed telemetry only. A reusable C++ acoustic core remains proposed, with no portable C++ build target yet. The [latest runtime attempt](docs/P2_01_ENHANCED_RUNTIME_ATTEMPT.md) resolved executable selection but failed before hook/plugin verification.
 
 | Responsibility | Consumes / produces | Independent future validation |
@@ -146,7 +148,7 @@ Use an SPSC queue for one producer/consumer pair, with acquire/release atomics, 
 
 ## Native coexistence state machine — gated design
 
-States: `NativeOnly -> Prepared -> RichAudioOwned -> Restoring -> NativeOnly`; failures from every state return to NativeOnly **only where restoration is proven possible**. Prepared means owned audio is buffered, source identity validated, renderer healthy, and the controlled source's known native profile can be restored. Do not enter RichAudioOwned merely because a renderer opened a device.
+States: `NativeOnly -> Prepared -> Transitioning -> RichAudioOwned -> Restoring -> NativeOnly`, with `Failed` for an uncertified handoff/recovery. Prepared material stays inaudible while native playback continues. Transitioning requires verified per-instance/component control, source generation, known baseline, actual suppression/replacement acknowledgements and a supported fail-open recovery mechanism. Do not enter RichAudioOwned merely because a renderer opened a device. Restoration needs evidence; an unacknowledged restore remains Failed, not an asserted return to native. [State entries, failures and test assumptions](docs/P2_02_AUDIO_OWNERSHIP.md#ownership-safety-specification).
 
 No clean per-source native gain or dry tap is verified. Until P2-02 proves a reversible suppression method, the state machine stops at Prepared and owned engine audio stays inaudible. A hard game/plugin crash can prevent restoration of persistent native flags even if an external renderer survives; a watchdog cannot repair the game's state without a functioning adapter. Such methods fail the fail-open requirement unless proven self-expiring or recoverable.
 

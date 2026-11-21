@@ -1,5 +1,7 @@
 # Evidence and sources
 
+25 October P2-02 follow-up: [audio ownership report](docs/P2_02_AUDIO_OWNERSHIP.md) reuses the pinned CodeWalker/Cfx source and prior Bati evidence, adding codec/granular limitations, category-specific siren controls, Windows mix boundaries and original synthetic ownership tests. No waveform or third-party implementation is redistributed; no native audio capability is promoted to live-verified.
+
 25 October RPM follow-up: [cross-framework investigation and permanent source links](docs/RPM_SOURCE_INVESTIGATION.md), [versioned reviewed-commit/capability inventory](evidence/publication/rpm-source-review.json), and [unsubmitted vendor reproduction](docs/RPH_RPM_VENDOR_REPRO.md). This refresh distinguishes memory-backed SHVDNE/IKT getters, HUD estimation, Cfx-only natives and exact-build support gaps; it includes no new live test or redistributed source/binary.
 
 Checked 24 October 2026. Local observations are primary evidence for this installation. Upstream reverse-engineering code is primary evidence for what that project implements, not an official Rockstar guarantee. Web support/version claims are time-sensitive and must be refreshed before deployment.
