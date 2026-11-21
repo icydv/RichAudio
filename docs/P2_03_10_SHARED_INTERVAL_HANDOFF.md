@@ -1,5 +1,7 @@
 # P2-03.10: shared-interval context ownership and read eligibility
 
+**Subsequent diagnostic clarification — P2-03.11:** [bounded interpolation-support semantics](P2_03_11_INTERPOLATION_ELIGIBILITY.md) distinguishes neighbouring FIR support from independent interval selection. It preserves this report's negative result for the tested per-provider interpretation. Only the initial boundary was revisited; no full trajectory retry or later handoff validation followed.
+
 26 October 2026. **NEGATIVE for the single `shared-interval-v1` contract.** My read-accurate audit stops at **output frame 0**, before any ownership transfer or accepted source event. The nominal active interval is eligible, but a neighbouring interval supplying the existing sampler's interpolation loads exceeds the candidate's per-provider 2% state limit. The original 11.143875-second handoff is **NOT REACHED**, not resolved or declared impossible in general.
 
 This milestone is diagnostic-only. I generated no stock-source or transition audio, built no transition renderer, changed no control trajectory, exempted no dependency and tried no replacement policy. The result does not invalidate my earlier listening verdicts, demonstrate missing source recordings or establish an audible defect. It identifies a limit of applying interval eligibility separately to every sampler provider.
