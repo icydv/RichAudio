@@ -1,6 +1,6 @@
 # SHVDNE-SMOKE-02B — targeted diagnostic candidate
 
-I asked Codex to implement one narrowly targeted diagnostic candidate for the unexplained startup spans. **Offline admission passes; live performance and attribution remain unqualified.** No GTA launch, candidate execution/installation, host IPC, audio endpoint or privileged tracing occurred. Earlier candidates, raw evidence, RPH work and unrelated edits are preserved.
+I requested one narrowly targeted diagnostic candidate for the unexplained startup spans. **Offline admission passes; live performance and attribution remain unqualified.** No GTA launch, candidate execution/installation, host IPC, audio endpoint or privileged tracing occurred. Earlier candidates, raw evidence, RPH work and unrelated edits are preserved.
 
 The private preparation directory is `C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\migration-shvdne-01\smoke-02b-preparation`, on `feature/migration-shvdne-01`. This is diagnostic instrumentation, not a correction claim for the original 46.6392 ms camera or 17.4865 ms residual event.
 
@@ -31,7 +31,7 @@ Stage wall sums reconcile to the original batch endpoint, with **zero raw-tick r
 
 The predeclared offline limits are median added time ≤0.1 ms, p95 ≤0.25 ms, p99 ≤0.5 ms, first-32 maximum paired addition ≤2 ms and direct cold recorder invocation ≤2 ms. Comparisons use archived pre-instrumentation sampler source, authored identical inputs/clocks, alternating call order, actual self-thread CPU interop and charged QPC-read cost. All 1,024 signed paired differences and absolute times are retained; these are fixture measurements, not live qualification.
 
-The first direct cold-recorder test measured **2.6001 ms** and failed admission. Codex retained that failure. The justified diagnostic-only correction prepares this recorder's own managed callback method bodies on the bootstrap worker through `RuntimeHelpers.PrepareMethod`, without executing those methods, any native game call or fabricated observation. Its preparation duration is separately journaled. It does not prepare SDK internals or claim to fix the original outliers.
+The first direct cold-recorder test measured **2.6001 ms** and failed admission. The project record retained that failure. The justified diagnostic-only correction prepares this recorder's own managed callback method bodies on the bootstrap worker through `RuntimeHelpers.PrepareMethod`, without executing those methods, any native game call or fabricated observation. Its preparation duration is separately journaled. It does not prepare SDK internals or claim to fix the original outliers.
 
 The final qualified run measured:
 

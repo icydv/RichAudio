@@ -6,7 +6,7 @@
 
 | Boundary | Evidence |
 | --- | --- |
-| CodeWalker | Codex built the retained Marker A pack again. The 2,048-byte OPEN archive matched SHA-256 `2494285084f2adac504ad86d489f05e609712dd3684be297b39176b5264d29e8`. The codec verified the named DLC device, private DAT151 member, `AUDIO_GAMEDATA` and the startup enable group. This is packaging and parser readback. |
+| CodeWalker | The implementation built the retained Marker A pack again. The 2,048-byte OPEN archive matched SHA-256 `2494285084f2adac504ad86d489f05e609712dd3684be297b39176b5264d29e8`. The codec verified the named DLC device, private DAT151 member, `AUDIO_GAMEDATA` and the startup enable group. This is packaging and parser readback. |
 | Enhanced archive loader | The supplied OpenRPF binary identifies as 0.1.0 and matches the retained inventory SHA-256 `57d6cc782d8608c32b5b43b74882a3ad162796e0215c58b8fcb2f7c7d9e9d3a8`. The retained receipt records no mods overlay and a base `update.rpf` with NG tag `0x0FEFFFFF`. The writer requires a complete compatible OPEN shadow before a DLC-list edit. The new boundary check rejects the observed NG header before the archive scan. The test used only its 16 retained header bytes and a disposable OPEN control. No compatible full shadow was supplied or generated. |
 | GTA V Legacy | The loader author's compatibility note distinguishes the Legacy OpenIV path and warns that Gen8 files can fail on Gen9. A Legacy profile or loader result carries no Enhanced qualification. |
 | FiveM | The resource manifest names separate metadata and wave-pack mounters for `AUDIO_GAMEDATA`, `AUDIO_SOUNDDATA`, `AUDIO_SYNTHDATA` and `AUDIO_WAVEPACK`. Those are FiveM resource-loading interfaces, separate from Story Mode RPH. |

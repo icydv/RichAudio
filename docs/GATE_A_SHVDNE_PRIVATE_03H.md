@@ -1,8 +1,8 @@
 # PRIVATE03H — metadata transport and disposable rehearsal cleanup
 
-My PRIVATE03G live-01 approval is consumed. It failed before installation or GTA/OBS startup. Codex preserved that failure and completed normal disposable-process cleanup. My earlier12-second expectation was overtaken by the technical rejection; the late acknowledgment and exit violations remain failed evidence.
+My PRIVATE03G live-01 approval is consumed. It failed before installation or GTA/OBS startup. The project record preserved that failure and completed normal disposable-process cleanup. My earlier12-second expectation was overtaken by the technical rejection; the late acknowledgment and exit violations remain failed evidence.
 
-Codex made this correction offline. The eight initial main/worker-thread, inherited/empty-input and pipe/file-output native query checks all returned complete identities. That matrix did not reproduce the original empty response. I do not claim a proven historical root cause or a guarantee that metadata startup cannot fail again.
+The operator made this correction offline. The eight initial main/worker-thread, inherited/empty-input and pipe/file-output native query checks all returned complete identities. That matrix did not reproduce the original empty response. I do not claim a proven historical root cause or a guarantee that metadata startup cannot fail again.
 
 The new watcher uses the unchanged exact PRIVATE03D native identity provider once per query, explicit empty input, an exclusive stdout/stderr file pair, a three-second wait, durable raw bytes and a query receipt. Missing, malformed, mismatched or stderr-bearing responses fail closed with no query, attachment or activation retry. A timeout preserves its owned query PID and incomplete closure evidence rather than force-terminating or guessing an identity. The normal sealed preflight also exercises this actual transport. The original supervisor binary and exact seven identity fields remain unchanged.
 

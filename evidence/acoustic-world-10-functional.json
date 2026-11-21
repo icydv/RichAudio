@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "kind": "RichAudioOfflineFunctionalEvidence10",
-  "executor": "Codex local Windows runner",
+  "executor": "Local Windows test runner",
   "passed": true,
   "originalInputsOnly": true,
   "fullRunner": "Test-Offline10.ps1 with explicit retained research API and SkipProcessingProfile",

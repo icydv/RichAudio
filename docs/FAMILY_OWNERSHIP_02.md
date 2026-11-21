@@ -1,6 +1,6 @@
 # FAMILY-OWNERSHIP-02 — Exact-build native audio binding dossier
 
-**SPECIFIC BINDING EVIDENCE MISSING.** Gate A remains blocked. My first replacement target is one Bati 801’s continuous engine and exhaust on GTA V Enhanced 1.0.1158.16 with RPH 1.132.1428.17748. Codex reviewed the public source and retained evidence from `e5bf3a9a5b8ac67b9a4f1db1d3faf498e5e00d0e` on `feature/vehicle-audio-engine`. Those versions identify the target, while the native observation interface for that combination remains unverified.
+**SPECIFIC BINDING EVIDENCE MISSING.** Gate A remains blocked. My first replacement target is one Bati 801’s continuous engine and exhaust on GTA V Enhanced 1.0.1158.16 with RPH 1.132.1428.17748. The analysis reviewed the public source and retained evidence from `e5bf3a9a5b8ac67b9a4f1db1d3faf498e5e00d0e` on `feature/vehicle-audio-engine`. Those versions identify the target, while the native observation interface for that combination remains unverified.
 
 ## Owner, sound and contribution
 
@@ -39,4 +39,4 @@ The smallest useful input is a maintainer-supplied observer/diagnostic contract 
 
 With that binding, the first separately reviewed experiment is a bounded metadata trace of two existing Batis. Compare A’s and B’s continuous engine/exhaust through idle/load changes with an observed preserved auxiliary on A. Record owner and sound generations, child provenance, creation, update, retirement, route, timestamps and clock information. Record natural allocation/virtualization transitions if observed, with absent transitions remaining inconclusive. Reject the proposed contribution point if it combines targeted audio with an inseparable auxiliary or other owner. The trace would establish only the observed attribution and routing. Even an output-preserving hook modifies runtime execution and needs separate reviewed approval.
 
-Codex created no C++ observer or live review package because the required binding is missing. The existing device-free ownership suite passed 17/17 on Node 24.19.0, including same-model and recycled identities, expiry, and persistent mute negative controls. These validate the existing authored policy and disabled production registry. No native build or runtime test was possible under the evidenced interface.
+The implementation created no C++ observer or live review package because the required binding is missing. The existing device-free ownership suite passed 17/17 on Node 24.19.0, including same-model and recycled identities, expiry, and persistent mute negative controls. These validate the existing authored policy and disabled production registry. No native build or runtime test was possible under the evidenced interface.

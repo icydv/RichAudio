@@ -1,6 +1,6 @@
 # MIGRATION-SHVDNE-01 — RPH dependency map
 
-I am making SHVDNE the primary managed integration route while retaining my working RPH adapter and historical experiments as rollback references. Codex inspected actual source at migration base `8f1900c` and added the new adapter in the isolated migration worktree. The audio engine, retained assets and existing acoustic algorithms are preserved. This inventory describes implemented replacement boundaries and the capabilities still awaiting parity; it does not declare an RPH-free live release qualified.
+I am making SHVDNE the primary managed integration route while retaining my working RPH adapter and historical experiments as rollback references. The analysis inspected actual source at migration base `8f1900c` and added the new adapter in the isolated migration worktree. The audio engine, retained assets and existing acoustic algorithms are preserved. This inventory describes implemented replacement boundaries and the capabilities still awaiting parity; it does not declare an RPH-free live release qualified.
 
 ## Production and integration boundaries
 

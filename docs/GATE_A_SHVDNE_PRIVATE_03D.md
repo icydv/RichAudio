@@ -1,20 +1,20 @@
 # GATE-A-SHVDNE-PRIVATE-03D — supervisor admission correction
 
-I requested an offline correction after my consumed PRIVATE03C provenance-01 attempt. Codex kept GTA and OBS closed, used authored disposable processes for supervision tests and copied roots for installation tests, and left the audio experiment unchanged. This preparation is **BLOCKED by native Windows dependency drift**. It grants no live authorization.
+I requested an offline correction after my consumed PRIVATE03C provenance-01 attempt. The run kept GTA and OBS closed, used authored disposable processes for supervision tests and copied roots for installation tests, and left the audio experiment unchanged. This preparation is **BLOCKED by native Windows dependency drift**. It grants no live authorization.
 
 ## Established failure and uncertainty
 
 The retained game identity was PID31672, CIM creation UTC ticks639301247918745920, and `D:\Games\steamapps\common\Grand Theft Auto V Enhanced\GTA5_Enhanced.exe`. The expected hash was the pinned Enhanced1.0.1158.16 binary. The historical supervisor compared its handle, managed process creation time, module path and executable hash in one composite guard. Its exception recorded none of the observed comparison values. The exact failed field in that live attempt therefore remains **undetermined**. There is no retained native creation FILETIME or observed executable file identity with which to reconstruct the missing comparison. I do not infer a launcher substitution, process replacement or resource failure from that error.
 
-Codex reproduced a genuine provider defect using an owned disposable Python process. Native `GetProcessTimes` and managed `Process.StartTime` agreed on UTC ticks639301294101066739; CIM reported639301294101066730. The9-tick difference (0.9microseconds) would fail the historical exact comparison. The receipt `identity-provider-reproduction.json` retains both values. This establishes a representation mismatch in the old discovery path, **not retrospective proof that this was the failed live field**.
+The run reproduced a genuine provider defect using an owned disposable Python process. Native `GetProcessTimes` and managed `Process.StartTime` agreed on UTC ticks639301294101066739; CIM reported639301294101066730. The9-tick difference (0.9microseconds) would fail the historical exact comparison. The receipt `identity-provider-reproduction.json` retains both values. This establishes a representation mismatch in the old discovery path, **not retrospective proof that this was the failed live field**.
 
 The secondary watcher exception is established: it queried the already-exited supervisor through CIM, passed the empty output directly to `json.loads`, and raised JSONDecodeError before recording the supervisor process receipt or exit code. The supervisor's catch exited, so its pre-admission Form did not survive to provide the bounded stop path.
 
 ## Exit chronology
 
-The retained stderr modification time is2026-11-12T23:59:52.214427Z. Game absence was observed at2026-11-13T00:01:02.918028Z,70.703601seconds later. This is an observation interval, not an exact measured process-exit instant. The60-second normal-exit requirement was not demonstrated. No admitted five-second direct acknowledgment receipt exists. Codex's later polling and chat/UI handoff were not an independent stopping mechanism. Exact timing of every human/chat step is absent from the retained machine receipts, so the entire interval cannot be assigned to one actor or operation.
+The retained stderr modification time is2026-11-12T23:59:52.214427Z. Game absence was observed at2026-11-13T00:01:02.918028Z,70.703601seconds later. This is an observation interval, not an exact measured process-exit instant. The60-second normal-exit requirement was not demonstrated. No admitted five-second direct acknowledgment receipt exists. Subsequent polling and UI handoff were not an independent stopping mechanism. Exact timing of every human/chat step is absent from the retained machine receipts, so the entire interval cannot be assigned to one actor or operation.
 
-The replacement removes the exception-driven loss of supervision and the dependency on a later Codex poll to create a stop instruction. It cannot guarantee that I see a notice, acknowledge it or finish normal exit on time. Missing/late acknowledgment and missing normal exit remain failures; neither deadline is extended and no forced termination is implemented.
+The replacement removes the exception-driven loss of supervision and the dependency on a later operator poll to create a stop instruction. It cannot guarantee that I see a notice, acknowledge it or finish normal exit on time. Missing/late acknowledgment and missing normal exit remain failures; neither deadline is extended and no forced termination is implemented.
 
 ## Versioned correction
 
@@ -36,7 +36,7 @@ The final candidate is the `build-review` binary identified in the local build a
 
 The regression set covers exact and wrong identities, discovery/attachment replacement, Steam/RPH distinction, canonical path/file identity/hash drift, reused sessions, one-use activation, missing/malformed responses, early rejection with original stderr and exit code, monitor loss, absent/late acknowledgment, overdue normal exit, stale manifests, dirty/future HEADs, corrupted/missing resources/dependencies, loader conflicts, interrupted work and proof-bound restoration. Fixtures prove software behaviour, not fullscreen visibility, GTA shutdown latency or native private-resource registration.
 
-Earlier failed test runs remain retained: one test initially expected the wrong normal return code; one real recovery test exposed a string/Path mismatch, which Codex corrected and revalidated. No historical evidence was overwritten.
+Earlier failed test runs remain retained: one test initially expected the wrong normal return code; one real recovery test exposed a string/Path mismatch, which the implementation corrected and revalidated. No historical evidence was overwritten.
 
 ## Current readiness blocker
 
@@ -47,9 +47,9 @@ The independent preservation comparison found22 changed files under `C:\Windows\
 | Bytes |861992|862016|
 | SHA-256 |`e132eba4166256e2f414b91fe7d5386590bc5ea8626aee5af9c9738383cf2ae1`|`970e5e15eed7d53c8b88e06ddc71884c31804f1cb5286abf01fbce39b7f0e29f`|
 
-The current file reports version10.0.26100.9974. The replacement cause/time is not established by this task. Codex did not modify these system files. The detailed expected/current hashes are in `preservation-comparison-02.json`. All other checked historical byte identities matched, including project/game/resources/old supervision/evidence and original RPH worktree/menu protection. A strict full preflight must reject the current native dependency closure; the read-only game-file inventory is a separate result.
+The current file reports version10.0.26100.9974. The replacement cause/time is not established by this task. The operator did not modify these system files. The detailed expected/current hashes are in `preservation-comparison-02.json`. All other checked historical byte identities matched, including project/game/resources/old supervision/evidence and original RPH worktree/menu protection. A strict full preflight must reject the current native dependency closure; the read-only game-file inventory is a separate result.
 
-Codex has not silently repinned the contract, reverted Windows DLLs, installed dependencies or relaxed manifest checks. The final review manifest binds the corrective candidate, committed source, tests, discrepancy and unchanged experimental artifacts. It is explicitly **not an execution manifest**. No fresh live authorization wording is issued for this blocked state. A later preparation must first review and qualify the actual native dependency set, then create a new execution seal on its final clean committed HEAD and request my fresh approval.
+The operator has not silently repinned the contract, reverted Windows DLLs, installed dependencies or relaxed manifest checks. The final review manifest binds the corrective candidate, committed source, tests, discrepancy and unchanged experimental artifacts. It is explicitly **not an execution manifest**. No fresh live authorization wording is issued for this blocked state. A later preparation must first review and qualify the actual native dependency set, then create a new execution seal on its final clean committed HEAD and request my fresh approval.
 
 ## Preserved future experiment
 

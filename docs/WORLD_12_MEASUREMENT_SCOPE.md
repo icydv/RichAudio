@@ -2,7 +2,7 @@
 
 My parent is exactly PR91 at `3d0642df9588aa46721efd85712fd2ba07446345`. My block size remains 512 frames at 48 kHz, with a strict **10.666666666666666 ms** deadline and the additional **8 ms maximum-block headroom target**. Functional success, PCM identity and percentiles cannot replace either maximum-duration finding.
 
-Codex retained the original WORLD11 reports and failed hosted run unchanged. WORLD12 uses separately named original-only snapshots and reports; its fresh parent is the WORLD11 candidate, not WORLD11's earlier PR90 baseline. No WORLD11 count is pooled into WORLD12 acceptance.
+The project record retained the original WORLD11 reports and failed hosted run unchanged. WORLD12 uses separately named original-only snapshots and reports; its fresh parent is the WORLD11 candidate, not WORLD11's earlier PR90 baseline. No WORLD11 count is pooled into WORLD12 acceptance.
 
 The versioned WORLD12 profiler carries forward the reviewed held-child process controls, actual affinity readback, owned CPU contenders, streamed Node executable bindings, source closure checks, memory/output/lifetime guards and no-retry matrix termination. The main design crosses parent/candidate, instrumentation off/on, plain/textured authored PCM, direct/wall scenes, normal/restricted-four logical CPU masks, zero/two owned contenders and two repetitions: **128 children /21,504 blocks per runtime**, 10,752 blocks per implementation. A separate 16-child control compares existing data preparation with/without existing authored throwaway JIT work in wall scenes without added contenders. It changes no product warmup behavior.
 

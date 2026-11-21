@@ -1,6 +1,6 @@
 # GATE-A-SHVDNE-PRIVATE-01 — independent supervision
 
-I require a stopping procedure that does not depend on Codex noticing another journal row or finishing its current tool call. Codex implemented and device-free tested a separate Windows monitor and a small probe IPC client. **This is offline implementation evidence, not permission to install or launch the private-profile experiment. The existing 10 ms performance classification remains FAILED.** Registration, positive marker identification and cleanup admission remain separate prerequisites.
+I require a stopping procedure that does not depend on the session operator noticing another journal row or finishing the current operation. This change introduced and device-free tested a separate Windows monitor and a small probe IPC client. **This is offline implementation evidence, not permission to install or launch the private-profile experiment. The existing 10 ms performance classification remains FAILED.** Registration, positive marker identification and cleanup admission remain separate prerequisites.
 
 ## Historical control failures remain recorded
 
@@ -8,7 +8,7 @@ The [Stage 1 execution](SHVDNE_SMOKE_01_EXECUTION_01.md) observed normal process
 
 The [Stage 2 execution](SHVDNE_SMOKE_02_EXECUTION_01.md) did not discover its early timing failure until the 00:23:12.054 journal read on 12 November. Normal process absence was observed at 00:23:46.570, inside the attempt's later observation and absolute ceilings. The gap in journal inspection is not a timely independent failure detector.
 
-The [Stage 2B execution](SHVDNE_SMOKE_02B_EXECUTION_01.md) explicitly failed deadline compliance. Its external monitor detected failure at 11:02:43.710172; the 32 records had drained by 11:02:47.660476, before the five-second deadline at 11:02:48.710172. Codex nevertheless delayed the normal quit request until approximately 11:05:29 and its confirmation until 11:05:36.8526275. The 11:03:42.624247 conservative diagnostic cutoff and begin-exit-by-45-seconds rule were also missed. I subsequently confirmed that I had quit; persisted process absence was 11:08:54.6823058. The later exit and exact disk restoration did not repair the earlier procedure failure. Those original reports and raw records are unchanged.
+The [Stage 2B execution](SHVDNE_SMOKE_02B_EXECUTION_01.md) explicitly failed deadline compliance. Its external monitor detected failure at 11:02:43.710172; the 32 records had drained by 11:02:47.660476, before the five-second deadline at 11:02:48.710172. The run nevertheless delayed the normal quit request until approximately 11:05:29 and its confirmation until 11:05:36.8526275. The 11:03:42.624247 conservative diagnostic cutoff and begin-exit-by-45-seconds rule were also missed. I subsequently confirmed that I had quit; persisted process absence was 11:08:54.6823058. The later exit and exact disk restoration did not repair the earlier procedure failure. Those original reports and raw records are unchanged.
 
 ## Implemented boundary
 
@@ -63,7 +63,7 @@ At a stop condition the monitor **sets the probe stop event first**. Its control
 For a future admitted attempt:
 
 1. I must be present and ready to use GTA's normal quit flow. The independent notice must be visible and usable before any manual private-profile activation. A process-specific monitor must attach within ten seconds of process creation; a missing or late monitor means no activation.
-2. The monitor's stop notice means immediately stop experimental actions. The probe disarms, reports stop acknowledgment and attempts only supported normal retirement of the disposable vehicles. I begin normal game exit immediately; I do not wait for Codex's next reply or more measurements.
+2. The monitor's stop notice means immediately stop experimental actions. The probe disarms, reports stop acknowledgment and attempts only supported normal retirement of the disposable vehicles. I begin normal game exit immediately; I do not wait for a subsequent response or more measurements.
 3. The notice button **“I am exiting normally”**, or console command `normal-exit-requested`, records my response. It does not close GTA and is not proof of exit.
 4. If normal quit becomes unresponsive, I use **“Normal quit is unresponsive”** or `quit-unresponsive`. The monitor keeps the stop event asserted, reports escalation and continues to observe the exact process. It does not force termination. Any force-termination action requires separate specific authorization; none is provided here.
 5. Failure to observe process exit by the fixed deadline latches a compliance failure. No further experiment phase is permitted. Monitoring may continue to disclose the still-running process and pending cleanup, but that continuation is not qualification evidence.

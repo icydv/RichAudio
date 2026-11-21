@@ -1,6 +1,6 @@
 # ACOUSTIC-WORLD-04.2: my blocked next-input proposals
 
-No private input is opened under these proposals. Codex prepared public research and offline contracts only. The earlier one-shot attempts and their consumed evidence remain preserved. This new work does not reuse an approval or reopen a capture. Both paths below lack supplied inputs and have no executable command.
+No private input is opened under these proposals. The implementation prepared public research and offline contracts only. The earlier one-shot attempts and their consumed evidence remain preserved. This new work does not reuse an approval or reopen a capture. Both paths below lack supplied inputs and have no executable command.
 
 The public templates in [config/world042](../config/world042) are planning descriptors. `null` bindings and `canExecute: false` are deliberate. Filling in a path does not grant permission or qualify a decoder. An independent reviewer must seal the exact private closure and I must explicitly approve the resulting single invocation before it runs.
 
