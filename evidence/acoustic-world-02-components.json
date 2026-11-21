@@ -1,0 +1,4662 @@
+{
+  "schema": 1,
+  "kind": "original-authored-vehicle-component-offline-validation",
+  "passed": true,
+  "sourcePins": [
+    {
+      "file": "src/acoustics/engine/contracts.mjs",
+      "sha256": "9672b34552cbe20b84f2ef3ab5d23b2cc7a12732e3663945742d7c8f21515b94"
+    },
+    {
+      "file": "src/acoustics/engine/paths.mjs",
+      "sha256": "8cd93bdd65aee69ec982f73eb12f1e834e0e82fd6dbffd99bb4bd22a9d70e92b"
+    },
+    {
+      "file": "src/acoustics/events/fixture-scenes.mjs",
+      "sha256": "e9459a74700ddf650610ad9121e08761b9204e315c22bdc64b9b9b1680c97424"
+    },
+    {
+      "file": "src/acoustics/events/prepared-path.mjs",
+      "sha256": "6749e62995f6297772d9d1aa46715c6e79d406c434690dd8b177b789a5be8017"
+    },
+    {
+      "file": "src/acoustics/gpu/client.mjs",
+      "sha256": "e7b664f38d9b5101fc9823f18c644b2a0bd8b1b31b487e423c8bf12efdccd4c1"
+    },
+    {
+      "file": "src/acoustics/research/local-geometry.mjs",
+      "sha256": "84b20261dd387e212f6c7a90c5b0ef7f94c1d42b78e5e8fa6cbeb99701a81cb7"
+    },
+    {
+      "file": "src/acoustics/streaming/acoustic-backend.mjs",
+      "sha256": "783b7f76d8ff6bb6dcc1e535d719bf1581eff97d9d2e22ee2249a78f2fe2dccf"
+    },
+    {
+      "file": "src/acoustics/streaming/acoustic-quality.mjs",
+      "sha256": "2545f7324b8999f1e6f1f9eef166912b1cd2c152884948ee198d5e704a34267c"
+    },
+    {
+      "file": "src/acoustics/streaming/causal.mjs",
+      "sha256": "d01fcd54dba17faa1048f52b99e8c9eefed1c5f31535ccaa6deadef4a8003105"
+    },
+    {
+      "file": "src/acoustics/vehicle/components/contracts.mjs",
+      "sha256": "b8ee1077471d7d48f098e58adc491b21d5a5a9ec596da100ecc610eb10103e03"
+    },
+    {
+      "file": "src/acoustics/vehicle/components/fixtures.mjs",
+      "sha256": "86ef8b49946c70536a20f126e4a8e28b0f56371004a6f31f2acb37c94ad7c718"
+    },
+    {
+      "file": "src/acoustics/vehicle/components/lifecycle.mjs",
+      "sha256": "e0e987664f3c8f4bb2352d629258fde9020a4998f0abaf4108e95f613fde03f9"
+    },
+    {
+      "file": "src/acoustics/vehicle/components/pipeline.mjs",
+      "sha256": "b1e6a070d8901295ca18cdb4169bf227f792ada289215016290f8aef0d8ed191"
+    },
+    {
+      "file": "src/acoustics/vehicle/components/prepared.mjs",
+      "sha256": "717f6c4fd32a4a5910c9a004b171c3145a9739c8bc703b67e8fe0190caee623e"
+    },
+    {
+      "file": "src/acoustics/vehicle/components/registry.mjs",
+      "sha256": "0a1cf03ed67bc6eec61da5465a38fc0edcb5a3b73f4b0a51bf13fda70347fdeb"
+    },
+    {
+      "file": "src/acoustics/vehicle/components/source.mjs",
+      "sha256": "666280b2a975b67957c3890c2b962e4e0f53803c6d30a8797f47e170cca8d8dc"
+    },
+    {
+      "file": "src/acoustics/vehicle/environment.mjs",
+      "sha256": "8ec78f17704f36432596a0da070257c023cb5a353cad316c741a58f1df1558da"
+    },
+    {
+      "file": "src/acoustics/vehicle/pipeline.mjs",
+      "sha256": "0336c5ffe72df7352596743475d1a1fba5f95f044f6ff7f009df1b3ed47af85d"
+    },
+    {
+      "file": "src/acoustics/vehicle/stock-pressure.mjs",
+      "sha256": "083aa011405305d1578b0c0c376f25ec51c83294cdd5d99bdf75dc60b35704dd"
+    },
+    {
+      "file": "tools/Render-VehicleComponents02.mjs",
+      "sha256": "3c898026c760e85bf7abd37b5ecaf22dc8945410f66c6280bdb812612ac3e267"
+    },
+    {
+      "file": "tools/latency03-source-pins.mjs",
+      "sha256": "69d0de228cf86d9545c4e73be2a87f90ded2f5cdb2d7a3a6084afcba6931d762"
+    }
+  ],
+  "node": {
+    "version": "v24.19.0",
+    "sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"
+  },
+  "privateValidationSha256": "b3e4a916521a45298ad4b2a9c0c9fe9f0e534f35d9b38bc8f6f190a8862c7c3c",
+  "scope": {
+    "componentDefinitions": 48,
+    "categories": [
+      "motorcycle",
+      "car",
+      "truck",
+      "bus",
+      "emergency",
+      "heavy-machinery",
+      "aircraft",
+      "helicopter",
+      "boat"
+    ],
+    "productionEnabled": false,
+    "nativeTelemetryUsed": false,
+    "nativeSuppression": false,
+    "endpointOpened": false,
+    "gameLaunched": false,
+    "recordingStarted": false,
+    "installedAssetsRead": false
+  },
+  "focusedTests": {
+    "command": "node --test tests/Test-VehicleComponents02.mjs",
+    "passed": 22,
+    "failed": 0,
+    "skipped": 0,
+    "testFileSha256": "02237e3f188ea76332849d93c119292429e4f4bf64944b17cb62285dcd8819ff",
+    "sourceGuardFixes": [
+      "53d4828 async prepare/render transaction latch",
+      "66d819e reject overlapping stereo output views before advancement",
+      "baa7e53 require tile and each surface to remain valid across the full prepared tail horizon"
+    ],
+    "sequentialPcmUnchangedAcrossGuardFixes": true
+  },
+  "coverage": [
+    {
+      "id": "engine",
+      "family": "powertrain",
+      "timing": "continuous",
+      "cause": "Observed running operating state",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "engine-region",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Observed running operating state",
+        "currentObservation": "qualified-running-Bati-normalised-state-only",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "existing-genuine-bati-additive",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "component-separation-and-intensity-unverified"
+        ]
+      }
+    },
+    {
+      "id": "engine-ignition",
+      "family": "powertrain",
+      "timing": "transient",
+      "cause": "Verified ignition transition",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "engine-region",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified ignition transition",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "engine-shutdown",
+      "family": "powertrain",
+      "timing": "transient",
+      "cause": "Observed engine shutdown, never driver-scope loss",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "engine-region",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Observed engine shutdown, never driver-scope loss",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "exhaust",
+      "family": "powertrain",
+      "timing": "continuous",
+      "cause": "Observed running operating state and qualified source bank",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "exhaust-outlets",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Observed running operating state and qualified source bank",
+        "currentObservation": "qualified-running-Bati-normalised-state-only",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "existing-genuine-bati-additive",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "component-separation-and-intensity-unverified"
+        ]
+      }
+    },
+    {
+      "id": "exhaust-pop",
+      "family": "powertrain",
+      "timing": "transient",
+      "cause": "Verified combustion/pressure event or explicitly authored source event",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "exhaust-outlets",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified combustion/pressure event or explicitly authored source event",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "backfire",
+      "family": "powertrain",
+      "timing": "transient",
+      "cause": "Verified combustion event; acceleration alone is insufficient",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "exhaust-outlets",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified combustion event; acceleration alone is insufficient",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "intake",
+      "family": "powertrain",
+      "timing": "continuous",
+      "cause": "Known intake assembly and supported air-flow/load model",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "intake-region",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Known intake assembly and supported air-flow/load model",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "induction",
+      "family": "powertrain",
+      "timing": "continuous",
+      "cause": "Known induction configuration and qualified operating state",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "intake-region",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Known induction configuration and qualified operating state",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "supercharger",
+      "family": "powertrain",
+      "timing": "continuous",
+      "cause": "Verified supercharger configuration and drive speed",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "supercharger-assembly",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified supercharger configuration and drive speed",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "turbo-spool",
+      "family": "powertrain",
+      "timing": "continuous",
+      "cause": "Verified turbo configuration and observed/modelled pressure and shaft state",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "turbo-assembly",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified turbo configuration and observed/modelled pressure and shaft state",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "turbo-wastegate",
+      "family": "powertrain",
+      "timing": "stateful-event",
+      "cause": "Verified pressure regulation event",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "wastegate-outlet",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified pressure regulation event",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "turbo-flutter",
+      "family": "powertrain",
+      "timing": "transient",
+      "cause": "Verified/modelled compressor pressure release or surge; not acceleration alone",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "intake-region",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified/modelled compressor pressure release or surge; not acceleration alone",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "transmission",
+      "family": "powertrain",
+      "timing": "continuous",
+      "cause": "Observed gear/load and verified transmission model",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "transmission-assembly",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Observed gear/load and verified transmission model",
+        "currentObservation": "RPH-current-gear-declaration-only-no-acoustic-transition-event",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "clutch",
+      "family": "powertrain",
+      "timing": "stateful-event",
+      "cause": "Observed engagement/slip with qualified clutch configuration",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "clutch-assembly",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Observed engagement/slip with qualified clutch configuration",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "differential",
+      "family": "powertrain",
+      "timing": "continuous",
+      "cause": "Verified differential configuration and axle loads",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "differential-assembly",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified differential configuration and axle loads",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "engine-braking",
+      "family": "powertrain",
+      "timing": "continuous",
+      "cause": "Supported driveline load/overrun evidence",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "engine-and-driveline",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Supported driveline load/overrun evidence",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "rev-limiter",
+      "family": "powertrain",
+      "timing": "stateful-event",
+      "cause": "Verified limiter state and actual configured threshold",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "engine-and-exhaust",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified limiter state and actual configured threshold",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "drivetrain-vibration",
+      "family": "powertrain",
+      "timing": "continuous",
+      "cause": "Qualified shaft speed/load and structural model",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "drivetrain-assembly",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified shaft speed/load and structural model",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "tyre-rolling",
+      "family": "road-contact",
+      "timing": "continuous",
+      "cause": "Qualified contact, speed, surface and load",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "individual-wheel-contact",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified contact, speed, surface and load",
+        "currentObservation": "RPH-last-wheel-contact-point-declaration-only-no-slip-or-load",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "original-authored-fixture",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "tyre-slip",
+      "family": "road-contact",
+      "timing": "continuous",
+      "cause": "Validated longitudinal/lateral slip and contact load; speed alone is insufficient",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "individual-wheel-contact",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Validated longitudinal/lateral slip and contact load; speed alone is insufficient",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "original-authored-fixture",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "loose-road",
+      "family": "road-contact",
+      "timing": "continuous",
+      "cause": "Qualified gravel/dirt/grass/sand contact and motion",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "individual-wheel-contact",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified gravel/dirt/grass/sand contact and motion",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "water-contact",
+      "family": "road-contact",
+      "timing": "stateful-event",
+      "cause": "Qualified wet-road/puddle contact; weather alone is insufficient",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "individual-wheel-contact",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified wet-road/puddle contact; weather alone is insufficient",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "surface-transition",
+      "family": "road-contact",
+      "timing": "transient",
+      "cause": "Verified contact-surface transition",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "individual-wheel-contact",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified contact-surface transition",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "tyre-impact",
+      "family": "road-contact",
+      "timing": "transient",
+      "cause": "Qualified wheel contact/impact event",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "individual-wheel-contact",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified wheel contact/impact event",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "suspension",
+      "family": "mechanical",
+      "timing": "stateful-event",
+      "cause": "Measured or authored suspension compression/rebound/impact",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "suspension-assembly",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Measured or authored suspension compression/rebound/impact",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "brake",
+      "family": "mechanical",
+      "timing": "continuous",
+      "cause": "Qualified brake/contact/slip state",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "brake-assembly",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified brake/contact/slip state",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "chassis-rattle",
+      "family": "mechanical",
+      "timing": "continuous",
+      "cause": "Qualified structural excitation and resonant assembly",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "chassis-region",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified structural excitation and resonant assembly",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "mechanical-clunk",
+      "family": "mechanical",
+      "timing": "transient",
+      "cause": "Verified/authored discrete assembly event",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "declared-assembly",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified/authored discrete assembly event",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "original-authored-fixture",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "door",
+      "family": "mechanical",
+      "timing": "stateful-event",
+      "cause": "Qualified door motion and closing impact",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "specific-door",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified door motion and closing impact",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "window",
+      "family": "mechanical",
+      "timing": "stateful-event",
+      "cause": "Qualified window motor/motion event",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "specific-window",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified window motor/motion event",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "roof",
+      "family": "mechanical",
+      "timing": "stateful-event",
+      "cause": "Known roof mechanism and qualified motion",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "roof-mechanism",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Known roof mechanism and qualified motion",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "cargo",
+      "family": "mechanical",
+      "timing": "stateful-event",
+      "cause": "Known movable cargo and contact excitation",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "qualified-cargo-location",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Known movable cargo and contact excitation",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "alarm",
+      "family": "signalling",
+      "timing": "stateful-event",
+      "cause": "Qualified alarm state",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "alarm-emitter",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified alarm state",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "horn",
+      "family": "signalling",
+      "timing": "continuous",
+      "cause": "Observed horn activation; poll receipt does not locate exact onset",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "horn-mount",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Observed horn activation; poll receipt does not locate exact onset",
+        "currentObservation": "IS_HORN_ACTIVE-declaration-only",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "original-authored-fixture",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "siren",
+      "family": "signalling",
+      "timing": "continuous",
+      "cause": "Qualified audible siren state/pattern; light enable alone is insufficient",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "siren-speakers",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified audible siren state/pattern; light enable alone is insufficient",
+        "currentObservation": "RPH-siren-state-and-silent-property-declarations-only",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "reverse-warning",
+      "family": "signalling",
+      "timing": "stateful-event",
+      "cause": "Verified installed warning system and activation",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "warning-emitter",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified installed warning system and activation",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "vehicle-warning",
+      "family": "signalling",
+      "timing": "stateful-event",
+      "cause": "Verified vehicle-specific warning equipment and event",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "warning-emitter",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified vehicle-specific warning equipment and event",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "collision-impact",
+      "family": "collision",
+      "timing": "transient",
+      "cause": "Qualified contact identity, point, relative motion and severity evidence",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "contact-location",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified contact identity, point, relative motion and severity evidence",
+        "currentObservation": "RPH-last-collision-position-normal-material-declarations-without-time-or-impulse",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "original-collision-fixture",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "collision-scrape",
+      "family": "collision",
+      "timing": "continuous",
+      "cause": "Qualified continuing contact and tangential motion",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "contact-location",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified continuing contact and tangential motion",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "original-collision-fixture",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "collision-resonance",
+      "family": "collision",
+      "timing": "transient",
+      "cause": "Qualified impact excitation and explicit structural material model",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "affected-structure",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified impact excitation and explicit structural material model",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "original-collision-fixture",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "glass-break",
+      "family": "collision",
+      "timing": "transient",
+      "cause": "Verified/authored glass failure and affected pane",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "specific-window",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified/authored glass failure and affected pane",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "original-collision-fixture",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "debris-impact",
+      "family": "collision",
+      "timing": "transient",
+      "cause": "Independent bounded secondary contact event",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "debris-contact-location",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Independent bounded secondary contact event",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "original-collision-fixture",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "material-impact",
+      "family": "collision",
+      "timing": "transient",
+      "cause": "Qualified metal/plastic/other material contact, unknown remains unknown",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "contact-location",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Qualified metal/plastic/other material contact, unknown remains unknown",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "rotor",
+      "family": "category-specific",
+      "timing": "continuous",
+      "cause": "Verified rotor configuration and blade/shaft operating state",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "rotor-disc",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified rotor configuration and blade/shaft operating state",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "propeller",
+      "family": "category-specific",
+      "timing": "continuous",
+      "cause": "Verified propeller configuration and operating state",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "propeller-disc",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified propeller configuration and operating state",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "jet",
+      "family": "category-specific",
+      "timing": "continuous",
+      "cause": "Verified jet configuration and exhaust/flow state",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "jet-intake-and-nozzle",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified jet configuration and exhaust/flow state",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "marine-propulsion",
+      "family": "category-specific",
+      "timing": "continuous",
+      "cause": "Verified propulsor/cavitation and water-medium assumptions",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "marine-propulsor",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Verified propulsor/cavitation and water-medium assumptions",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "finite-observation-lease-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    },
+    {
+      "id": "machinery",
+      "family": "category-specific",
+      "timing": "stateful-event",
+      "cause": "Known hydraulic/mechanical assembly and qualified state",
+      "categories": [
+        "motorcycle",
+        "car",
+        "truck",
+        "bus",
+        "emergency",
+        "heavy-machinery",
+        "aircraft",
+        "helicopter",
+        "boat"
+      ],
+      "applicability": "requires-model-specific-configuration-not-assumed-from-category",
+      "eventualOwner": "RichAudio",
+      "emission": {
+        "region": "qualified-assembly",
+        "position": "requires-explicit-qualified-component-pose",
+        "defaultOffset": null
+      },
+      "operatingState": {
+        "required": "Known hydraulic/mechanical assembly and qualified state",
+        "currentObservation": "unavailable-on-exact-stack",
+        "unavailableMustRemainUnavailable": true
+      },
+      "lifetime": "bounded-event-and-identity",
+      "timestamp": {
+        "nativeOccurrence": "unavailable",
+        "pollReceiptIsOccurrence": false
+      },
+      "intensity": {
+        "nativeSoundPower": "unavailable",
+        "modelRequiresExplicitEvidence": true
+      },
+      "acoustic": {
+        "renderer": "existing-CausalSimulation-StreamingRenderer",
+        "directivity": "explicit-authored-or-qualified-profile",
+        "physicalPropagationRequired": true,
+        "genericReverbPermitted": false
+      },
+      "replacement": {
+        "implementation": "unavailable",
+        "productionEnabled": false
+      },
+      "nativeOverlap": {
+        "currentOwner": "GTA",
+        "existence": "vehicle-profile-and-component-attribution-unverified",
+        "permitDuplicateDirect": false,
+        "embeddedBankContentMustBeAttributed": true
+      },
+      "ownership": {
+        "state": "NativeOnly",
+        "status": "BLOCKED",
+        "suppressionVerified": false,
+        "restorationVerified": false,
+        "blockers": [
+          "selective-native-suppression-unverified",
+          "native-component-attribution-unverified",
+          "independent-restoration-and-crash-recovery-unverified",
+          "exact-timely-component-source-not-qualified"
+        ]
+      }
+    }
+  ],
+  "ownershipCapabilityMatrix": [
+    {
+      "component": "engine",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "existing-genuine-bati-additive",
+      "timelySource": "qualified-running-Bati-normalised-state-only",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "engine-ignition",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "engine-shutdown",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "exhaust",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "existing-genuine-bati-additive",
+      "timelySource": "qualified-running-Bati-normalised-state-only",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "exhaust-pop",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "backfire",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "intake",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "induction",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "supercharger",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "turbo-spool",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "turbo-wastegate",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "turbo-flutter",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "transmission",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "RPH-current-gear-declaration-only-no-acoustic-transition-event",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "clutch",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "differential",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "engine-braking",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "rev-limiter",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "drivetrain-vibration",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "tyre-rolling",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "original-authored-fixture",
+      "timelySource": "RPH-last-wheel-contact-point-declaration-only-no-slip-or-load",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "tyre-slip",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "original-authored-fixture",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "loose-road",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "water-contact",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "surface-transition",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "tyre-impact",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "suspension",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "brake",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "chassis-rattle",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "mechanical-clunk",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "original-authored-fixture",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "door",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "window",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "roof",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "cargo",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "alarm",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "horn",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "original-authored-fixture",
+      "timelySource": "IS_HORN_ACTIVE-declaration-only",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "siren",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "RPH-siren-state-and-silent-property-declarations-only",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "reverse-warning",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "vehicle-warning",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "collision-impact",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "original-collision-fixture",
+      "timelySource": "RPH-last-collision-position-normal-material-declarations-without-time-or-impulse",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "collision-scrape",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "original-collision-fixture",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "collision-resonance",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "original-collision-fixture",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "glass-break",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "original-collision-fixture",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "debris-impact",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "original-collision-fixture",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "material-impact",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "rotor",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "propeller",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "jet",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "marine-propulsion",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    },
+    {
+      "component": "machinery",
+      "currentOwner": "GTA",
+      "eventualOwner": "RichAudio",
+      "replacement": "unavailable",
+      "timelySource": "unavailable-on-exact-stack",
+      "nativeOccurrenceTimestamp": "unavailable",
+      "suppression": "unverified",
+      "isolation": "unverified",
+      "restoration": "unverified",
+      "crashRecovery": "unverified",
+      "takeover": "BLOCKED",
+      "duplicateDirectPermitted": false
+    }
+  ],
+  "ownershipPremises": [
+    "replacementHealthy",
+    "timelyQualifiedSource",
+    "selectiveSuppression",
+    "noDuplicateAudio",
+    "unreplacedComponentsPreserved",
+    "exactIdentityLifecycle",
+    "independentRestorationAndCrashRecovery"
+  ],
+  "nativeControlCandidates": [
+    {
+      "component": "horn",
+      "control": "SET_HORN_ENABLED",
+      "surface": "published-GTA-native-declaration",
+      "baselineReadback": "unavailable-IS_HORN_ACTIVE-is-playing-state-not-enabled-state",
+      "independentRecovery": "unverified",
+      "productionPermitted": false
+    },
+    {
+      "component": "siren",
+      "control": "RPH-Vehicle.IsSirenSilent",
+      "surface": "reference-SDK-getter-setter-and-old-official-documentation",
+      "baselineReadback": "declared-not-exact-runtime-verified",
+      "independentRecovery": "unverified",
+      "productionPermitted": false
+    },
+    {
+      "component": "exhaust-pop",
+      "control": "ENABLE_VEHICLE_EXHAUST_POPS",
+      "surface": "published-GTA-native-declaration-narrow-event-category",
+      "baselineReadback": "unavailable",
+      "independentRecovery": "unverified",
+      "productionPermitted": false
+    },
+    {
+      "component": "engine",
+      "control": "FORCE_USE_AUDIO_GAME_OBJECT",
+      "surface": "published-vehicle-profile-substitution-declaration-not-component-mute",
+      "baselineReadback": "unavailable-active-profile-graph",
+      "independentRecovery": "unverified",
+      "productionPermitted": false
+    }
+  ],
+  "bounds": {
+    "maximumDeclaredSources": 8,
+    "mechanicalVoicesPerSource": 4,
+    "mechanicalEventsPerLifetime": 128,
+    "maximumObservationLeaseFrames": 12000,
+    "maximumAuthoredHorizonFrames": 1920000,
+    "sourceDryAbsolutePeak": 0.025,
+    "pathAbsolutePressureBudget": 0.4,
+    "fractionalReadConservativeGainFactor": 2,
+    "additionalFixedPcmQueueFrames": 0,
+    "preparedDryMaximumFrames": 8192,
+    "preparedKernelMaximumFrames": 24000
+  },
+  "measurements": [
+    {
+      "environment": "direct",
+      "components": [
+        "horn"
+      ],
+      "frames": 96256,
+      "drySha256": "fb0cf303616ccd29621a10098a093bee3d5dc50a3c48b4da7643c0308f901a56",
+      "pcmSha256": "0a41b58f5ca33a3d1b19cd3a4d1a259ebb234110d48033e83924068c1ef122dd",
+      "wavSha256": "dcf8651f7059f179ed31b331fdbbe5e5c9130972ff6d7a7e1feb4c51667abf70",
+      "peak": 0.0011785487877205014,
+      "energy": 0.027827495395416072,
+      "firstDryFrame": 12288,
+      "firstOutputFrame": 13277,
+      "authoredDryToFirstOutputMs": 20.604166666666668,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.13390000000001123,
+        "p95": 1.1665000000000134,
+        "p99": 1.881600000000006,
+        "maximum": 3.6307000000000045,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 148361216,
+      "sourceHistoryBytes": 2889728,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "direct",
+      "components": [
+        "tyre-rolling"
+      ],
+      "frames": 96256,
+      "drySha256": "624b3dc2d2ff1f5216719c48dc6bc67f5f8f005cafd581dfd86aadae139757f2",
+      "pcmSha256": "94777ee57211c9606b6ec6ff0daca1c09077d9798df49e6fc4549f157d55a4a3",
+      "wavSha256": "33d1f311e9c427d13b325a4efecae8975afc4971e532b0fc5030ce9ce939264e",
+      "peak": 0.0001395400904584676,
+      "energy": 0.00008008733116656807,
+      "firstDryFrame": 12288,
+      "firstOutputFrame": 13344,
+      "authoredDryToFirstOutputMs": 22,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.31630000000001246,
+        "p95": 0.5373000000000161,
+        "p99": 1.0903000000000134,
+        "maximum": 1.745999999999981,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 159817728,
+      "sourceHistoryBytes": 2889728,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "direct",
+      "components": [
+        "tyre-slip"
+      ],
+      "frames": 96256,
+      "drySha256": "ae8ab1acad076a741d805132b85708161754efb2bcf5cb24701eef80eab09103",
+      "pcmSha256": "9e732de8f605b2a664aea49679374f27541b17655c655a3f14227534ac046a3c",
+      "wavSha256": "01affadf8867fa01aac8aa27dcee2e2627443f1b05bde502e18c2b3cc8e176c0",
+      "peak": 0.00023241937742568552,
+      "energy": 0.001194109288254292,
+      "firstDryFrame": 12288,
+      "firstOutputFrame": 13398,
+      "authoredDryToFirstOutputMs": 23.125,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.12459999999998672,
+        "p95": 0.24589999999994916,
+        "p99": 0.4112999999999829,
+        "maximum": 0.5757000000000403,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 165011456,
+      "sourceHistoryBytes": 2889728,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "direct",
+      "components": [
+        "mechanical-clunk"
+      ],
+      "frames": 96256,
+      "drySha256": "5689bcf6250e1901f74976d59ae1c9f4a99630ff65a26b78fb7d62102383d975",
+      "pcmSha256": "8d192424af7b5f3fa2a961aecc94ca8663da916d0f1603d36b2bd2d80a88fb45",
+      "wavSha256": "68e6bc799aac1d30334000483af9f8b342d32677b763d5a88c357e70eae104a0",
+      "peak": 0.0001673299411777407,
+      "energy": 0.000006852804830352329,
+      "firstDryFrame": 20481,
+      "firstOutputFrame": 21463,
+      "authoredDryToFirstOutputMs": 20.458333333333332,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.1413000000000011,
+        "p95": 0.37599999999997635,
+        "p99": 0.9448000000000434,
+        "maximum": 1.0106999999999857,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 70017024,
+      "sourceHistoryBytes": 2889728,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "direct",
+      "components": [
+        "horn",
+        "tyre-rolling",
+        "tyre-slip",
+        "mechanical-clunk"
+      ],
+      "frames": 96256,
+      "drySha256": "338dddccddfc3276744dddb585a6ebcf01b2b6008e76218f4e03cd0310cf53f9",
+      "pcmSha256": "07fe28d83955970bfd7a9853c5bcb770c8fdf7afe827369f08a60446b9db0556",
+      "wavSha256": "e69377618c08f4e15f4d5fdc14ade7327522ee85e56539f3f442b63fd05daa97",
+      "peak": 0.001444097957573831,
+      "energy": 0.02907524927076639,
+      "firstDryFrame": 12288,
+      "firstOutputFrame": 13277,
+      "authoredDryToFirstOutputMs": 20.604166666666668,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.3178999999999519,
+        "p95": 0.48689999999999145,
+        "p99": 0.5524000000000342,
+        "maximum": 0.5771000000000299,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 87175168,
+      "sourceHistoryBytes": 11558912,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "canyon",
+      "components": [
+        "horn"
+      ],
+      "frames": 96256,
+      "drySha256": "fb0cf303616ccd29621a10098a093bee3d5dc50a3c48b4da7643c0308f901a56",
+      "pcmSha256": "57d5629210b49998a2cdab2006f95bae20b6c562a8378df2a6c0ecc16ec270f5",
+      "wavSha256": "ec3158726cbf18ce0c01b028a0075936dbc573fba51845f1762acf3170f46076",
+      "peak": 0.0014136455720290542,
+      "energy": 0.01911491985867215,
+      "firstDryFrame": 12288,
+      "firstOutputFrame": 13277,
+      "authoredDryToFirstOutputMs": 20.604166666666668,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.3994000000000142,
+        "p95": 0.5817000000000121,
+        "p99": 0.7393999999999892,
+        "maximum": 0.9698000000000206,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 93724672,
+      "sourceHistoryBytes": 2889728,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "canyon",
+      "components": [
+        "tyre-rolling"
+      ],
+      "frames": 96256,
+      "drySha256": "624b3dc2d2ff1f5216719c48dc6bc67f5f8f005cafd581dfd86aadae139757f2",
+      "pcmSha256": "df999ac7a0e1fe9a66f4c6de7e60b568b4a0dc0e314be1ea1d17ac904447fff2",
+      "wavSha256": "2d33ee1bb21bffaaa49229a519a24b308a6348fe726f1f5fc154db492ce40957",
+      "peak": 0.00021816974913235754,
+      "energy": 0.00019669861819674746,
+      "firstDryFrame": 12288,
+      "firstOutputFrame": 13344,
+      "authoredDryToFirstOutputMs": 22,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.3706999999999425,
+        "p95": 0.5151999999999362,
+        "p99": 0.6780999999999722,
+        "maximum": 0.7315000000000964,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 99680256,
+      "sourceHistoryBytes": 2889728,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "canyon",
+      "components": [
+        "tyre-slip"
+      ],
+      "frames": 96256,
+      "drySha256": "ae8ab1acad076a741d805132b85708161754efb2bcf5cb24701eef80eab09103",
+      "pcmSha256": "7b5df06a03d5407176ef5bb6acfc0642f4ab779f3c45decea2a0c33afc94c47f",
+      "wavSha256": "e882b5bf44af33dda973bca874cbbd07d1404b89b38eeed7cef17e17afbc15ea",
+      "peak": 0.0005180033040232956,
+      "energy": 0.004497621286689946,
+      "firstDryFrame": 12288,
+      "firstOutputFrame": 13398,
+      "authoredDryToFirstOutputMs": 23.125,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.3730000000000473,
+        "p95": 0.5310000000000628,
+        "p99": 0.9017000000000053,
+        "maximum": 1.9091999999999416,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 76967936,
+      "sourceHistoryBytes": 2889728,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "canyon",
+      "components": [
+        "mechanical-clunk"
+      ],
+      "frames": 96256,
+      "drySha256": "5689bcf6250e1901f74976d59ae1c9f4a99630ff65a26b78fb7d62102383d975",
+      "pcmSha256": "75d73a1147beaa0f70e90b02e4b8c78505ec0b4a352d9e9e2909d18e918c300e",
+      "wavSha256": "c1d5d5c2f47562691e90c6015496b75a6c2c4cfa75922381aef7012d1f405da9",
+      "peak": 0.00024271760776173323,
+      "energy": 0.000022360616060873433,
+      "firstDryFrame": 20481,
+      "firstOutputFrame": 21463,
+      "authoredDryToFirstOutputMs": 20.458333333333332,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.3505000000000109,
+        "p95": 0.48879999999996926,
+        "p99": 0.6118000000000166,
+        "maximum": 0.6145000000000209,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 82022400,
+      "sourceHistoryBytes": 2889728,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "canyon",
+      "components": [
+        "horn",
+        "tyre-rolling",
+        "tyre-slip",
+        "mechanical-clunk"
+      ],
+      "frames": 96256,
+      "drySha256": "338dddccddfc3276744dddb585a6ebcf01b2b6008e76218f4e03cd0310cf53f9",
+      "pcmSha256": "186ce4718ef7591a42ed58b737c5264d6b3f350868fb675ad9618d19b5b97363",
+      "wavSha256": "dd8e5de7103073359c51d307e658ed50be434b52e608b9ac6346401deaff9b01",
+      "peak": 0.0016368846409022808,
+      "energy": 0.023765480524669855,
+      "firstDryFrame": 12288,
+      "firstOutputFrame": 13277,
+      "authoredDryToFirstOutputMs": 20.604166666666668,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 1.4587999999999965,
+        "p95": 1.7386000000000195,
+        "p99": 1.8813000000000102,
+        "maximum": 3.23619999999994,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 102010880,
+      "sourceHistoryBytes": 11558912,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "tunnel",
+      "components": [
+        "horn"
+      ],
+      "frames": 96256,
+      "drySha256": "fb0cf303616ccd29621a10098a093bee3d5dc50a3c48b4da7643c0308f901a56",
+      "pcmSha256": "9a9a3681df8d76ad81d73a0a49ad81d63928fbee85084477d243c4ba082953af",
+      "wavSha256": "a790278da6c019e07fb02419b31fe4bd8491d51b6f23a0e8895e8b1ed078f282",
+      "peak": 0.0016437044832855463,
+      "energy": 0.035646889179678655,
+      "firstDryFrame": 12288,
+      "firstOutputFrame": 13277,
+      "authoredDryToFirstOutputMs": 20.604166666666668,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.5682999999999083,
+        "p95": 0.7214999999998781,
+        "p99": 0.8297000000000025,
+        "maximum": 0.871599999999944,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 107003904,
+      "sourceHistoryBytes": 2889728,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "tunnel",
+      "components": [
+        "tyre-rolling"
+      ],
+      "frames": 96256,
+      "drySha256": "624b3dc2d2ff1f5216719c48dc6bc67f5f8f005cafd581dfd86aadae139757f2",
+      "pcmSha256": "188f13164b97f3e62eaaf5372ed5ce82ba3db74fe65a4dbb9a0430fead9f3fbb",
+      "wavSha256": "af0cad4150d810c79eb021bceaf67760d03b8d7a45b21098544dee94dafd8613",
+      "peak": 0.0002395175106357783,
+      "energy": 0.0002581617830667141,
+      "firstDryFrame": 12288,
+      "firstOutputFrame": 13344,
+      "authoredDryToFirstOutputMs": 22,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.569400000000087,
+        "p95": 0.7615000000000691,
+        "p99": 0.9013999999999669,
+        "maximum": 0.9329000000000178,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 112254976,
+      "sourceHistoryBytes": 2889728,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "tunnel",
+      "components": [
+        "tyre-slip"
+      ],
+      "frames": 96256,
+      "drySha256": "ae8ab1acad076a741d805132b85708161754efb2bcf5cb24701eef80eab09103",
+      "pcmSha256": "0a232d3abead38e5dd04cf6ded531784414c449d1f0a7691093b695df794efb6",
+      "wavSha256": "ee4bed6b9e7138942a65e466fb331be0ae8a731957b2e6d7a5313e7d657511b6",
+      "peak": 0.0007069072453305125,
+      "energy": 0.007764115024661453,
+      "firstDryFrame": 12288,
+      "firstOutputFrame": 13398,
+      "authoredDryToFirstOutputMs": 23.125,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.5688999999999851,
+        "p95": 0.7243999999998323,
+        "p99": 0.9600000000000364,
+        "maximum": 1.1489000000001397,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 118206464,
+      "sourceHistoryBytes": 2889728,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "tunnel",
+      "components": [
+        "mechanical-clunk"
+      ],
+      "frames": 96256,
+      "drySha256": "5689bcf6250e1901f74976d59ae1c9f4a99630ff65a26b78fb7d62102383d975",
+      "pcmSha256": "28b5abce84026dd9b7a35132e15bb1203df66b2f7dda7b9da21c57b1f791347e",
+      "wavSha256": "03e2a2d49ac5cfff3c6c78f685909e91a766285e0e9a14ede6f53abb1a22416c",
+      "peak": 0.0002475653600413352,
+      "energy": 0.00002903019936664665,
+      "firstDryFrame": 20481,
+      "firstOutputFrame": 21463,
+      "authoredDryToFirstOutputMs": 20.458333333333332,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 0.5419999999999163,
+        "p95": 0.6986000000001695,
+        "p99": 0.8464999999998781,
+        "maximum": 0.8762000000001535,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 122908672,
+      "sourceHistoryBytes": 2889728,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    },
+    {
+      "environment": "tunnel",
+      "components": [
+        "horn",
+        "tyre-rolling",
+        "tyre-slip",
+        "mechanical-clunk"
+      ],
+      "frames": 96256,
+      "drySha256": "338dddccddfc3276744dddb585a6ebcf01b2b6008e76218f4e03cd0310cf53f9",
+      "pcmSha256": "dcd82e28a351be7b4f15fdeb8b2b0257db87e8fbdd94672e1218b5d591089b0b",
+      "wavSha256": "d998b1239b174329dda042dd89ad0f8ae3c7505ef654fb637a55a2939f88460f",
+      "peak": 0.0019119314383715391,
+      "energy": 0.04380511153495539,
+      "firstDryFrame": 12288,
+      "firstOutputFrame": 13277,
+      "authoredDryToFirstOutputMs": 20.604166666666668,
+      "workerCostsMs": {
+        "count": 188,
+        "median": 2.2611000000001695,
+        "p95": 2.727300000000014,
+        "p99": 2.915899999999965,
+        "maximum": 3.02170000000001,
+        "overBlockBudget": 0
+      },
+      "processRssSnapshotBytes": 138739712,
+      "sourceHistoryBytes": 11558912,
+      "sourceReferencesStable": true,
+      "historyAffectedFrames": 0,
+      "rendererLimitedFrames": 0,
+      "rendererCursorResets": 0,
+      "extraFixedAudioQueueFrames": 0,
+      "engineShutdownInferred": 0
+    }
+  ],
+  "preparedMechanical": {
+    "identity": {
+      "session": "abababababababababababababababab",
+      "vehicleId": "authored-vehicle",
+      "vehicleGeneration": 1,
+      "model": 0,
+      "component": "mechanical-clunk",
+      "assembly": "mechanical-clunk",
+      "componentGeneration": 1
+    },
+    "sourceId": "component:14135d328029cea46490a16cad43e1350e539eaf",
+    "sourceFrames": 4800,
+    "drySha256": "a4bdad786bde7ca7aa0e340cc7d57ddc8b589519623722af84c08aca9010454b",
+    "kernel": {
+      "version": 1,
+      "kernelId": "20c28bb814e17e19184d3f03e548c025f9b9015021d6a9890b9425ed3abe2002",
+      "session": "abababababababababababababababab",
+      "sceneId": "wall",
+      "sceneGeneration": 1,
+      "authority": "authored-fixture-only",
+      "sourcePose": {
+        "position": [
+          0,
+          3.43,
+          1
+        ],
+        "velocity": [
+          0,
+          0,
+          0
+        ],
+        "forward": [
+          0,
+          1,
+          0
+        ],
+        "up": [
+          0,
+          0,
+          1
+        ],
+        "generation": 1
+      },
+      "listenerPose": {
+        "position": [
+          0,
+          0,
+          1
+        ],
+        "velocity": [
+          0,
+          0,
+          0
+        ],
+        "forward": [
+          0,
+          1,
+          0
+        ],
+        "up": [
+          0,
+          0,
+          1
+        ],
+        "generation": 1
+      },
+      "sourcePoseKey": "{\"position\":[0,3.43,1],\"velocity\":[0,0,0],\"forward\":[0,1,0],\"up\":[0,0,1],\"generation\":1}",
+      "listenerPoseKey": "{\"position\":[0,0,1],\"velocity\":[0,0,0],\"forward\":[0,1,0],\"up\":[0,0,1],\"generation\":1}",
+      "sampleRate": 48000,
+      "channels": 2,
+      "frames": 16384,
+      "firstNonzeroFrame": 481,
+      "lastNonzeroFrame": 7901,
+      "firstSignificantFrame": 481,
+      "lastSignificantFrame": 6355,
+      "significanceThreshold": 1e-10,
+      "last256Peak": 0,
+      "tailModel": "finite-window-existing-IIR-with-measured-residual",
+      "physicalDirectDelayFrames": 480,
+      "requiredRoundingGuardFrames": 0,
+      "paths": [
+        {
+          "id": "beacon-0:direct:g4294967297",
+          "order": 0,
+          "distance": 3.43,
+          "delaySeconds": 0.01,
+          "delayFrames": 480,
+          "bands": [
+            0.29154518950437314,
+            0.29154518950437314,
+            0.29154518950437314
+          ],
+          "pan": 0
+        },
+        {
+          "id": "beacon-0:r:east:g4294967297",
+          "order": 1,
+          "distance": 10.571891978260089,
+          "delaySeconds": 0.030821842502216003,
+          "delayFrames": 1479.4484401063683,
+          "bands": [
+            0.07567235851871268,
+            0.06621331370387358,
+            0.04729522407419542
+          ],
+          "pan": 0.9459044814839084
+        }
+      ],
+      "geometry": "qualified-authored-static-fixture",
+      "immutableSceneWhileWorkerBusy": true,
+      "motionModel": "fixed-authored-source-and-listener-pose",
+      "amplitude": 0.25,
+      "masterGain": 0.7,
+      "peak": 0.0001250012865057215,
+      "energy": 0.000006982644874666689,
+      "pcmSha256": "849b7bac83fedf6d0581dcdcba72718fbfbf641917c5b9872ff5698d6a32902d",
+      "preparationMs": 29.40879999999993,
+      "pcmBytes": 131072,
+      "waveformId": "component-gear-clunk-original-02",
+      "waveformSha256": "a4bdad786bde7ca7aa0e340cc7d57ddc8b589519623722af84c08aca9010454b",
+      "waveformFrames": 4800,
+      "waveformBasis": "original-authored-source-samples",
+      "waveformScale": "dry=amplitude*waveform; uncalibrated fixture level",
+      "rendererSourceHistoryBytes": 2881152,
+      "rendererLimited": 0,
+      "kernelAffectedHistoryFrames": 0
+    },
+    "wavSha256": "ce6d8e301335fad4493bd66f07316eeb1ecdfd9b5278bf42c41978cc10461bdd",
+    "productionEnabled": false,
+    "nativeSuppression": false,
+    "extraFixedQueueFrames": 0
+  },
+  "research": {
+    "sdkSha256": "5d439745604a5fedbf8fa401520d4f296c1b6800d77e2923ba3bf9772182c7e0",
+    "sdkFileVersion": "1.124.1393.17586",
+    "targetRuntimeVersion": "1.132.1428.17748",
+    "sdkMetadataReceiptSha256": "08c5ce957779beb9e7ed9c832e8c1e75a376b8d47dfc5e0bef7a0f4bb068c599",
+    "sdkMethodBodies": "126 matched methods have RVA0; declarations only",
+    "toolSha256": "6740a3e0db84b370334c03f78c0c8b1715038430064e670147cd84cb2d64690c",
+    "cfxDeclarationCommit": "c00e0ed83d06dcba2457424ba254fbaa7a05bf7e",
+    "cfxPrimarySnapshotManifestSha256": "8b605e69e45cc9ce567493dc6c7050df63c2443059c12bf2e5e29f00665dc17e",
+    "runtimeSupportVerified": false,
+    "independentCrashRecoveryVerified": false
+  },
+  "limits": [
+    "Authored component positions and contact/load/slip inputs, not native observations",
+    "No physical sound-power calibration",
+    "Finite early reflections only; late field not enabled in this composition",
+    "No subjective/perceptual acceptance is claimed",
+    "Worker render costs are not callback cost or event-to-WASAPI timing.",
+    "RSS values are same-process snapshots, not isolated component peak memory.",
+    "All desired native component takeovers remain BLOCKED.",
+    "Declared model/category support is a coverage contract, not observed equipment.",
+    "No engine bank, calibration, game install or normal live pipeline is changed by this component composition.",
+    "Fixture PCM differences and timing do not establish perceptual realism or physical speaker latency."
+  ]
+}

@@ -1,0 +1,10 @@
+using System;using System.IO;using System.Web.Script.Serialization;using RichAudio.Experiments;
+internal static class TestLatency03Admission {
+ static int checks;static void Need(bool b,string s){checks++;if(!b)throw new Exception(s);}
+ static void Reject(Action a){bool failed=false;try{a();}catch(IOException){failed=true;}catch(InvalidDataException){failed=true;}catch(System.Collections.Generic.KeyNotFoundException){failed=true;}Need(failed,"Invalid/replayed admission must fail before any endpoint-capable code");}
+ public static int Main(string[] args){try{if(args.Length!=1||Directory.Exists(args[0]))throw new ArgumentException("Fresh original fixture output");string root=Path.GetFullPath(args[0]);Directory.CreateDirectory(Path.Combine(root,"results"));var json=new JavaScriptSerializer();string file=Path.Combine(root,"results/worker-admission.json");
+  Reject(()=>Latency03WorkerAdmission.Claim(root,"token","parent","sha",41,42));File.WriteAllText(file,json.Serialize(new{token="token",parentIdentity="parent",manifestSha256="sha",workerPid=41,workerStartUtcTicks=42L}));
+  Reject(()=>Latency03WorkerAdmission.Claim(root,"other","parent","sha",41,42));Reject(()=>Latency03WorkerAdmission.Claim(root,"token","other","sha",41,42));Reject(()=>Latency03WorkerAdmission.Claim(root,"token","parent","other",41,42));Reject(()=>Latency03WorkerAdmission.Claim(root,"token","parent","sha",99,42));Reject(()=>Latency03WorkerAdmission.Claim(root,"token","parent","sha",41,99));Need(!File.Exists(Path.Combine(root,"results/worker-claimed.json")),"Bad identities consume no valid worker claim");
+  Latency03WorkerAdmission.Claim(root,"token","parent","sha",41,42);Need(File.Exists(Path.Combine(root,"results/worker-claimed.json")),"Exact admitted lifetime claims once");Reject(()=>Latency03WorkerAdmission.Claim(root,"token","parent","sha",41,42));
+  Console.WriteLine(json.Serialize(new{passed=true,checks,scope="Pure original admission file fixtures only; no audio, COM, child launch or game references"}));return 0;}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
+}

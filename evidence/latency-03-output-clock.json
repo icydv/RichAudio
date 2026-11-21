@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "kind": "latency-03-device-free-output-and-clock-validation",
+  "passed": true,
+  "endpointOpened": false,
+  "endpointQueried": false,
+  "gameLaunched": false,
+  "recordingStarted": false,
+  "realTimingMeasured": false,
+  "sourcePins": [
+    {
+      "file": "src/acoustics/host/Windows/PcmRing.cs",
+      "sha256": "70069ca231812c26900d89c9829fe78da18b57963bf64cedbd70b1ce342c531c"
+    },
+    {
+      "file": "src/acoustics/host/Windows/PreparedTransientBus.cs",
+      "sha256": "8654797e20f6964800be0f55a625e23b6eec34a88ed9e864af608a24f52fb4e7"
+    },
+    {
+      "file": "src/acoustics/host/Windows/SharedPeriodPlan.cs",
+      "sha256": "4c2260f1cbe95ebf9d63fab1e7c5f97b68bf4e3cd5283239d4743bfa5a8abf5b"
+    },
+    {
+      "file": "src/acoustics/host/Windows/WasapiInterop.cs",
+      "sha256": "1ec3843bfff96f605e2b492d1add165719cc332aee6449773af78850764d7823"
+    },
+    {
+      "file": "src/acoustics/host/Windows/WasapiOutput.cs",
+      "sha256": "ceeef5e4c52501e9ba336294cbc80af966015779407dcf36f8741f4598540304"
+    },
+    {
+      "file": "src/acoustics/host/Windows/OwnedOutputTap.cs",
+      "sha256": "1a9e4581a225a5a440fcff942706d299b7e25d8e89eefcea9edee9b932d66af5"
+    },
+    {
+      "file": "src/acoustics/host/Windows/Latency03PresentationClock.cs",
+      "sha256": "3966747ff7647b91daf6608b6d6b632f22e9881f4eb15384d87ff2aab1936cf0"
+    },
+    {
+      "file": "src/acoustics/host/Windows/Latency03Interop.cs",
+      "sha256": "d57b9a55354e7527c0f7be3ef5e24f2829530bf5b05f61f8a6d7925cc6a33ed9"
+    },
+    {
+      "file": "src/acoustics/host/Windows/Latency03OutputSession.cs",
+      "sha256": "96a1e50e268070a9cba9d846dd1d66a3cd2f9c9c1401165bb518222dba676cc0"
+    },
+    {
+      "file": "tests/host/TestLatency03Output.cs",
+      "sha256": "e3690c16ebc0aaa4416ab268ecfae301b9bfd138f8affb1ed3c2a97d51116274"
+    },
+    {
+      "file": "tools/Test-Latency03Output.ps1",
+      "sha256": "7f5e69f858e87c257bb1cf532b5328961ed1eee58fb7b2d7a1745e26dd328398"
+    }
+  ],
+  "managedFakeAssertions": 6998,
+  "validationSha256": "74096ab562f85b134d805de1deb97788bb30aa44aa6e0ba24944b3a06b861a1f",
+  "resultSha256": "0168344f5e0ab4dec099eefaa986d54a67f05b7a5594d428b28e406c42ab24b4",
+  "primaryHeader": {
+    "repository": "microsoft/win32metadata",
+    "commit": "64ed9177fb76eb244fc9051c74b8a93fdfe20873",
+    "file": "generation/WinSDK/RecompiledIdlHeaders/um/Audioclient.h",
+    "sha256": "f0ddbd205f63352f5f1d04e429f7a168ebebfbebe5e879c36c876ac7ec520df2",
+    "url": "https://raw.githubusercontent.com/microsoft/win32metadata/64ed9177fb76eb244fc9051c74b8a93fdfe20873/generation/WinSDK/RecompiledIdlHeaders/um/Audioclient.h",
+    "endpointOpened": false
+  },
+  "clockModel": {
+    "basis": "Observed IAudioClock stream-position brackets; API model, not measured speaker output",
+    "positionUnits": "Actual position/frequency converted to48k frames",
+    "qpcUnits": "GetPosition correlated QPC is100ns; independently convert Stopwatch ticks",
+    "minimumAdvancingPositiveSamples": 2,
+    "historySamples": 128,
+    "maximumClockCallMilliseconds": 2,
+    "maximumClockAgeMilliseconds": 100,
+    "extrapolationAllowed": false,
+    "pairConsistency": "Measured call/quantization brackets, not a guessed fixed residual",
+    "eventOccurrenceRewritten": false
+  },
+  "budgets": {
+    "pendingAndLanesCombined": 128,
+    "activeVoices": 32,
+    "clockRows": 30000,
+    "submissionRows": 30000,
+    "callbackRows": 30000,
+    "additionalContinuousPcmQueueFrames": 0
+  },
+  "limits": [
+    "Managed fake clients do not prove COM/driver or endpoint behavior.",
+    "Callback IL coverage is selected application helpers, not BCL/JIT/driver certification.",
+    "No actual event-to-WASAPI or physical output latency result exists.",
+    "Unavailable allocation counters remain minus1; actual platform allocation is unverified."
+  ],
+  "futureDeviceBoundary": "Exact independently reviewed proposal and fresh explicit authorization remain required.",
+  "exceptionCleanup": {
+    "silentExceptionPacketNeverAcknowledgesEvent": true,
+    "everySuccessfulAcquireHasExactlyOneReleaseAttempt": true,
+    "interruptedPoppedDescriptorsRetireOnJoinedControlPath": true,
+    "failedFillUsesSilentRelease": true
+  }
+}
