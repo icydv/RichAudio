@@ -8,14 +8,14 @@ from tempfile import TemporaryDirectory
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 BASE = "af167ed004d9ab1568a06613f8e5f9bb8ffbec08"
-PRIVATE = REPO / ".local" / "unknown-name-adder"
+PRIVATE = REPO / ".local" / "unknown-name-adder-return"
 
 
 # Change only the experiment identity in the isolated copies of historical tools.
 def trial_labels(source):
-    for old, new in (("candidate-11", "unknown-name-adder"), ("execution-11", "unknown-name-adder-run"),
+    for old, new in (("candidate-11", "unknown-name-adder-return"), ("execution-11", "unknown-name-adder-return-run"),
                      ("NativeSuppression11", "UnknownAudioName"), ("Live11", "UnknownName"),
-                     ("Candidate11", "UnknownName"), ("candidate11", "unknown-name-adder"),
+                     ("Candidate11", "UnknownName"), ("candidate11", "unknown-name-adder-return"),
                      ("Execution11", "UnknownName"), ("Automatic11", "UnknownName"),
                      ("Preflight11", "Preflight"), ("Restoration11", "Restoration"),
                      ("Recorder11", "Recorder"), ("Operator11", "Operator")):
@@ -47,6 +47,9 @@ def materialize():
         subprocess.run(["git", "apply", "--no-index", "--whitespace=nowarn",
                         "--directory=" + stage.relative_to(REPO).as_posix(),
                         str(HERE / "adder.patch")], cwd=REPO, check=True)
+        subprocess.run(["git", "apply", "--no-index", "--whitespace=nowarn",
+                        "--directory=" + stage.relative_to(REPO).as_posix(),
+                        str(HERE / "return-site.patch")], cwd=REPO, check=True)
         if dest.exists():
             if (set(p.name for p in dest.iterdir()) != set(templates)
                     or any(not filecmp.cmp(stage / n, dest / n, shallow=False) for n in templates)):

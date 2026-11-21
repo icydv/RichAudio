@@ -279,7 +279,7 @@
 +++ b/Operator.py
 @@ -1,3 +1,3 @@
 -"""Finite local operator for the approved08 run. No keyboard phase controls."""
-+"""Finite local operator for the unknown-name-adder test. No keyboard phase controls."""
++"""Finite local operator for the unknown-name-adder-return test. No keyboard phase controls."""
  from pathlib import Path
  import argparse,ctypes,datetime,hashlib,json,os,re,subprocess,sys,time,uuid
 @@ -6,5 +6,5 @@
@@ -307,13 +307,13 @@
 @@ -2,5 +2,5 @@
  $ErrorActionPreference = 'Stop'
  $run = $PSScriptRoot
--if ($run -cne 'C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01\unknown-name-adder-run') { throw 'Run only the retained execution08 rollback copy' }
-+if ($run -cne 'C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01\unknown-name-adder-run') { throw 'Run only the retained unknown-name-adder rollback copy' }
+-if ($run -cne 'C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01\unknown-name-adder-return-run') { throw 'Run only the retained execution08 rollback copy' }
++if ($run -cne 'C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01\unknown-name-adder-return-run') { throw 'Run only the retained unknown-name-adder-return rollback copy' }
  $ledgerPath = Join-Path $run 'transaction.json'
  $t = Get-Content -LiteralPath $ledgerPath -Raw | ConvertFrom-Json
 @@ -28,7 +28,7 @@
- if ($t.schema -cne 'NativeSuppression01Execution' -or $t.candidate -cne 'unknown-name-adder' -or $t.status -cne 'installed-verified') { throw 'Full-install restore requires installed-verified; complete authorized partial rollback from the ledger instead' }
- if ($s.candidateName -cne 'unknown-name-adder' -or $s.sourceCommit -cne $t.sourceCommit -or (HashFile (Join-Path $run 'scope.json')) -cne $t.scopeSha256 -or (HashFile $PSCommandPath) -cne $s.installation.rollbackScript.sha256 -or (HashFile (Join-Path $run 'approval.json')) -cne $t.authorizationSha256) { throw 'Execution scope, authorization, or rollback identity differs' }
+ if ($t.schema -cne 'NativeSuppression01Execution' -or $t.candidate -cne 'unknown-name-adder-return' -or $t.status -cne 'installed-verified') { throw 'Full-install restore requires installed-verified; complete authorized partial rollback from the ledger instead' }
+ if ($s.candidateName -cne 'unknown-name-adder-return' -or $s.sourceCommit -cne $t.sourceCommit -or (HashFile (Join-Path $run 'scope.json')) -cne $t.scopeSha256 -or (HashFile $PSCommandPath) -cne $s.installation.rollbackScript.sha256 -or (HashFile (Join-Path $run 'approval.json')) -cne $t.authorizationSha256) { throw 'Execution scope, authorization, or rollback identity differs' }
 -$expectedGame = @('ScriptHookVDotNet.asi','ScriptHookVDotNet2.dll','ScriptHookVDotNet3.dll','MinHook.x64.dll','ScriptHookVDotNet.ini','scripts\RichAudio.UnknownAudioName.dll','scripts\RichAudio.UnknownAudioName.ini','mods\update\x64\dlcpacks\ra_ns01_8b7e24c1\dlc.rpf','mods\update\update.rpf') | ForEach-Object { Join-Path $game $_ }
 +$expectedGame = @('ScriptHookVDotNet.asi','ScriptHookVDotNet2.dll','ScriptHookVDotNet3.dll','MinHook.x64.dll','ScriptHookVDotNet.ini','scripts\RichAudio.UnknownAudioName.dll','scripts\RichAudio.UnknownAudioName.ini') | ForEach-Object { Join-Path $game $_ }
  $expectedObs = @((Join-Path $obs 'basic\profiles\NativeSuppression01UnknownName\basic.ini'),(Join-Path $obs 'basic\scenes\NativeSuppression01UnknownName.json'))

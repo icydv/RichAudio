@@ -37,7 +37,7 @@ def put(path, value):
 
 
 def relabel(value):
-    for a, b in [("execution-11", "unknown-name-adder-run"), ("Live11", "UnknownName"),
+    for a, b in [("execution-11", "unknown-name-adder-return-run"), ("Live11", "UnknownName"),
                  ("NativeSuppression11", "UnknownAudioName"), ("Recorder11.lua", "Recorder.lua")]:
         value = value.replace(a, b)
     return value
@@ -56,10 +56,30 @@ def seal(build_path, checks_dir):
     for source in build["sources"]:
         require(pin(REPO / source["path"])["sha256"] == source["sha256"], "Build input changed")
     receipts = []
-    for name in ["setup", "inspection", "installation"]:
+    previous_scope = BASE / "unknown-name-adder/scope.json"
+    require(pin(previous_scope)["sha256"] == "8dd297aa6a53bbc318aa5d2c441b59f845cf97cee014afe7c34ef575a96abaed",
+            "Original ADDER scope differs")
+    prior = read(previous_scope)
+    for name in ["setup", "inspection", "installation", "previous-setup", "previous-handoff", "handoff"]:
         path = checks_dir / name / "result.json"
         result = read(path)
         require(result["passed"], "Required fixture or inspection failed")
+        if name in ("handoff", "previous-handoff"):
+            previous = name == "previous-handoff"
+            operator = prior["operator"]["source"] if previous else pin(tools / "Operator.py")
+            fixture_name = "previous-setup" if previous else "setup"
+            fixture = checks_dir / fixture_name / "SetupFixtures11.exe"
+            require(result["operator"] == operator["sha256"] and result["compiledFixture"] == pin(fixture)["sha256"]
+                    and result["listening"] == ([] if previous else ["B-pre", "baseline"])
+                    and result["gameQuitRequests"] == int(previous) and result["assignments"] == [],
+                    "Site regression handoff differs")
+        if name == "previous-setup":
+            manifest = prior["builds"][0]
+            require(pin(manifest["path"]) == manifest, "Original ADDER build receipt differs")
+            sources = {Path(item["path"]).resolve(): item["sha256"] for item in result["artifacts"]}
+            for item in read(manifest["path"])["sources"]:
+                if Path(item["path"]).name in ("AutomaticRun.cs", "IdleExperiment.cs", "IdleNativeApi.cs", "SetupNativeApi.cs"):
+                    require(sources.get((REPO/item["path"]).resolve()) == item["sha256"], "Old runner source differs")
         if name == "inspection":
             require(result["candidateSha256"] == build["binary"]["sha256"], "Inspected DLL differs")
         if name == "installation":
@@ -74,14 +94,14 @@ def seal(build_path, checks_dir):
             "focusConfiguration focusPolicy coverageAdmission proceduralTiming lifetime registrationOperation "
             "feedbackFocus measurement runtimeFailurePolicy operations setupTransitions capture operator").split()
     scope = {key: old[key] for key in keys}
-    dest = BASE / "unknown-name-adder"
+    dest = BASE / "unknown-name-adder-return"
     run = Path(relabel(old["installation"]["executionDirectory"]))
     require(not run.exists() and not dest.exists(), "Fresh private destination required")
     catalogue = check()
     dest.mkdir()
     install = dest / "installation"
     install.mkdir()
-    scope.update(candidateName="unknown-name-adder", sourceCommit=head, implementationCommit=head,
+    scope.update(candidateName="unknown-name-adder-return", sourceCommit=head, implementationCommit=head,
                  sequence=["stock baseline", "ADDER", catalogue["name"], "ADDER"],
                  catalogue=catalogue, assignmentTarget="A only", activeLimitSeconds=600,
                  comparison="Stationary matched idle, separate physical horn, same-A release and unassigned B controls")
@@ -89,7 +109,7 @@ def seal(build_path, checks_dir):
     scope["lifetime"] = scope["lifetime"].replace("Bati", "ADDER")
     scope["runtimeFailurePolicy"] = scope["runtimeFailurePolicy"].replace("BATI", "ADDER")
     scope["operations"]["site"].update(layouts="Up to 80 nearby loaded layouts, eight headings per radius, 14m between ADDER centers.",
-        placement="Stationary on-foot return point clear, minimum 8m from both car centers, radius 4m clear car footprints. Center and four corners require pavement and ground heights within 0.15m; pair centers within 0.20m. One ground-placement request per owned ADDER.")
+        placement="First eligible on-foot position preferred. On obstruction survey grounded nearby return points 3-12m away, within the original 12s PrepareSite deadline. Both car centers at least 8m from preferred and selected points; 4m clear footprints. Recheck the 0.60m return clearance and layout before creating either car and the return point again before moving the player. Record selected and actual return positions. Center and four corners require pavement and ground heights within 0.15m; pair centers within 0.20m. One ground-placement request per owned ADDER.")
     scope["operations"]["horn"] = "At most four A-only 600ms requests, one per observation. Log active readback and physical sound separately."
     scope["setupTransitions"]["qualification"] = receipts[0]
     scope["setupTransitions"]["initialStationaryAcquisition"] = dict(requiredSeconds=10, timeoutSeconds=30, speedMpsStrictlyBelow=0.15, maximumWaitableSpeedMps=0.30, timeoutRenewed=False)
@@ -143,7 +163,7 @@ def seal(build_path, checks_dir):
         scope["builds"].append(pin(dest / src.name))
     shutil.copyfile(tools / "Preflight.ps1", dest / "Preflight.ps1")
     scope["builds"].append(pin(dest / "Preflight.ps1"))
-    scope.update(receiptPath=str(REPO / ".local/unknown-live-adder/preflight.json"),
+    scope.update(receiptPath=str(REPO / ".local/unknown-live-adder-return/preflight.json"),
                  independentVerifier=pin(tools / "Verify-Restoration.ps1"),
                  executionEntry=pin(dest / "Prepare-Session.ps1"), normalClosureEntry=pin(dest / "Close-Session.ps1"))
     print(json.dumps(put(dest / "scope.json", scope), indent=2))

@@ -1,0 +1,252 @@
+--- a/SetupNativeApi.cs
++++ b/SetupNativeApi.cs
+@@ -9,6 +9,13 @@
+     internal sealed partial class IdleNativeApi
+     {
+         int nextLayout;
++        bool havePreferred, recheckSelected;
++        Vector3 preferredReturn, selectedReturn;
++        public void RecheckSelectedSite(){recheckSelected=true;}
++        bool ReturnOccupied(Vector3 point){
++            return native.Call<bool>(Hash.IS_POSITION_OCCUPIED,point.X,point.Y,point.Z,
++                .60f,false,true,true,true,false,savedPed,false);
++        }
+         Vector3 requestedStanding;
+         readonly HashSet<SetupStep> completed=new HashSet<SetupStep>();
+         static bool IsSeat(SetupStep s){return s==SetupStep.SeatInitial||s==SetupStep.SeatBaseline;}
+@@ -67,6 +74,7 @@
+         }
+         SetupResult Site(SetupObservation s) {
+             if(s.InVehicle){
++                if(havePreferred)return Result(SetupStep.Site,s,TransitionOutcome.UNSAFE,"player-reentered-vehicle-during-survey");
+                 if(s.CurrentVehicle==0)return Result(SetupStep.Site,s,TransitionOutcome.UNSAFE,"current-vehicle-observation-invalid");
+                 if(initialExitRequested&&s.CurrentVehicle!=initialVehicle)return Result(SetupStep.Site,s,TransitionOutcome.UNSAFE,"initial-vehicle-relationship-changed");
+                 float speed=native.Call<float>(Hash.GET_ENTITY_SPEED,s.CurrentVehicle);
+@@ -76,35 +84,55 @@
+             }
+             if(s.Entering||!s.PlayerCollision||s.PlayerAir||!FiniteStopped(s.PlayerSpeed))return Result(SetupStep.Site,s,TransitionOutcome.PENDING,"loaded-on-foot-player-settling");
+             if(native.Call<int>(Hash.GET_INTERIOR_FROM_ENTITY,s.Ped)!=0)return Result(SetupStep.Site,s,TransitionOutcome.UNSAFE,"current-location-is-interior");
+-            if(siteSelected&&(s.Position-siteAnchor).Length()>.10f){if(sitePlaced)return Result(SetupStep.Site,s,TransitionOutcome.UNSAFE,"committed-local-anchor-moved");siteSelected=false;}
+-            if(!siteSelected){
+-                if(initialExitRequested)originalPosition=s.Position; // Return to the on-foot exit point.
+-                if(native.Call<bool>(Hash.IS_POSITION_OCCUPIED,originalPosition.X,originalPosition.Y,originalPosition.Z,
+-                    .60f,false,true,true,true,false,savedPed,false))
+-                    return Result(SetupStep.Site,s,TransitionOutcome.UNSAFE,"saved-return-space-occupied");
+-                // Survey one nearby layout per callback to bound collision queries.
+-                int i=nextLayout++;
+-                if(i>=80)return Result(SetupStep.Site,s,TransitionOutcome.UNSAFE,"no-clear-loaded-paved-pair");
+-                float angle=native.Call<float>(Hash.GET_ENTITY_HEADING,s.Ped)+(i%8)*45f;
+-                double r=angle*Math.PI/180;
++            if(!havePreferred){
++                preferredReturn=s.Position;
++                havePreferred=true;
++                log("preferred-return-observed point="+preferredReturn+" initialVehicle="+initialVehicle);
++            }
++            if(siteSelected && (s.Position-siteAnchor).Length()>.10f){
++                siteSelected=false;
++                return Result(SetupStep.Site,s,TransitionOutcome.PENDING,"layout="+layout+" anchor-moved");
++            }
++            if(!siteSelected || recheckSelected){
++                bool rechecking=siteSelected;
++                recheckSelected=false;
++                if(!rechecking && nextLayout>=80)return Result(SetupStep.Site,s,TransitionOutcome.UNSAFE,"exhausted "+nextLayout+" local layouts; see indexed survey decisions");
++                int i=rechecking?layout:nextLayout++;
++                float angle=rechecking?heading:native.Call<float>(Hash.GET_ENTITY_HEADING,s.Ped)+(i%8)*45f;
++                double radians=angle*Math.PI/180;
+                 float forward=14f+(i/8)*12f;
+-                Vector3 left=Offset(s.Position,-7,forward,r),right=Offset(s.Position,7,forward,r);
++                Vector3 anchor=rechecking?siteAnchor:s.Position;
++                Vector3 left=Offset(anchor,-7,forward,radians),right=Offset(anchor,7,forward,radians);
++                Vector3 point=rechecking?selectedReturn:preferredReturn;
++                string check="return-point";
+                 try {
+-                    left=FlatGround(left);right=FlatGround(right);
+-                    if(Math.Abs(left.Z-right.Z)>.20f || (left-originalPosition).Length()<8 ||
+-                        (right-originalPosition).Length()<8)throw new SlopeException("pair-height-or-return-clearance");
+-                    Space(left);Space(right);
+-                    Vector3 listener=Offset(right,0,-4,r);
++                    if(ReturnOccupied(point)){
++                        if(rechecking || i==0)throw new SpaceOccupiedException("occupied radius=0.60");
++                        // Try a grounded point near the original on-foot position, away from the cars.
++                        point=Offset(preferredReturn,0,-(3+i/8),radians);
++                        point.Z=Ground(point)+1f;
++                        if(ReturnOccupied(point))throw new SpaceOccupiedException("fallback occupied radius=0.60");
++                    }
++                    check="A footprint";left=FlatGround(left);Space(left);
++                    check="B footprint";right=FlatGround(right);Space(right);
++                    check="pair height and return clearance";
++                    if(Math.Abs(left.Z-right.Z)>.20f || (left-preferredReturn).Length()<8 ||
++                        (right-preferredReturn).Length()<8 || (left-point).Length()<8 ||
++                        (right-point).Length()<8)throw new SlopeException("pair-height-or-return-clearance");
++                    check="B listener";
++                    Vector3 listener=Offset(right,0,-4,radians);
+                     listener.Z=Ground(listener);
+                     if(!Paved(listener))throw new SlopeException("B-listener-surface");
+                     Space(listener);
+                 }catch(InvalidOperationException e){
+                     if(!(e is SlopeException || e is GroundPendingException || e is SpaceOccupiedException))throw;
+-                    return Result(SetupStep.Site,s,TransitionOutcome.PENDING,"survey-next-layout "+e.Message);
+-                }
+-                a=left;b=right;heading=angle;layout=i;siteAnchor=s.Position;siteSelected=true;
+-                log("paved-pair-selected layout="+i+" A="+a+" B="+b+" return="+originalPosition);
+-
++                    siteSelected=false;
++                    string reason="layout="+i+" check="+check+" return="+point+" A="+left+" B="+right+" reason="+e.Message;
++                    log("survey-rejected "+reason);
++                    return Result(SetupStep.Site,s,TransitionOutcome.PENDING,reason);
++                }
++                a=left;b=right;heading=angle;layout=i;siteAnchor=anchor;selectedReturn=point;siteSelected=true;
++                if(!rechecking)log("paved-pair-selected layout="+i+" A="+a+" B="+b+" preferred="+preferredReturn+" return="+selectedReturn);
+             }
+             return Result(SetupStep.Site,s,TransitionOutcome.READY,"loaded-local-location-qualified layout="+layout);
+         }
+@@ -122,7 +150,8 @@
+                 int pedMode=native.Call<int>(Hash.GET_FOLLOW_PED_CAM_VIEW_MODE),vehicleMode=native.Call<int>(Hash.GET_FOLLOW_VEHICLE_CAM_VIEW_MODE);
+                 float relativeHeading=native.Call<float>(Hash.GET_GAMEPLAY_CAM_RELATIVE_HEADING),pitch=native.Call<float>(Hash.GET_GAMEPLAY_CAM_RELATIVE_PITCH);
+                 string readback=" pedMode="+pedMode+"/"+oldPedView+" vehicleMode="+vehicleMode+"/"+oldVehicleView+" heading="+relativeHeading+"/"+oldHeading+" pitch="+pitch+"/"+oldPitch+" positionRequested="+positionReturnRequested+" original="+originalPosition;
+-                if(pedMode!=oldPedView||vehicleMode!=oldVehicleView||!FiniteAngle(relativeHeading,oldHeading)||!FiniteAngle(pitch,oldPitch)||positionReturnRequested&&(s.Position-originalPosition).Length()>.10f)return Result(step,s,TransitionOutcome.PENDING,"saved-view-or-position-readback-pending"+readback);
++                if(pedMode!=oldPedView||vehicleMode!=oldVehicleView||!FiniteAngle(relativeHeading,oldHeading)||!FiniteAngle(pitch,oldPitch)||positionReturnRequested&&(s.Position-selectedReturn).Length()>.10f)return Result(step,s,TransitionOutcome.PENDING,"saved-view-or-position-readback-pending"+readback);
++                log("return-position-readback actual="+s.Position+" preferred="+preferredReturn+" selected="+selectedReturn+" requested="+positionReturnRequested);
+                 viewSaved=false;return Result(step,s,TransitionOutcome.READY,"saved-view-readback-verified"+readback);
+             }
+             if(s.InVehicle&&target!=null&&s.CurrentVehicle==target.Handle&&s.A.Driver==savedPed){foreach(var key in issued.Keys)if(IsSeat(key))completed.Add(key);}
+@@ -196,6 +225,8 @@
+         public void RequestSetup(SetupStep step,Lifetime target,Lifetime control,Func<bool> stillAdmitted) {
+             SetupResult r=ObserveSetup(step,target,control);
+             if(r.Outcome==TransitionOutcome.READY)return;
++            // The player may already be on foot when the normal exit is rechecked.
++            if(step==SetupStep.Site && r.Outcome==TransitionOutcome.PENDING && !r.CanIssue)return;
+             if(r.Outcome!=TransitionOutcome.PENDING||!r.CanIssue)throw new InvalidOperationException("setup-command-not-admitted step="+step+" reason="+r.Reason+" command="+r.Command+" "+r.Evidence);
+             if(stillAdmitted==null||!stillAdmitted())throw new InvalidOperationException("setup-command-admission-expired step="+step+"; never issued "+r.Evidence);
+             issued.Add(step,"issued-once");log("setup-command-reserved step="+step+" "+r.Evidence);
+--- a/IdleNativeApi.cs
++++ b/IdleNativeApi.cs
+@@ -36,7 +36,7 @@
+         int savedPed, savedModel, oldPedView, oldVehicleView, startsA, stopsA, seatsA, leavesA, horns;
+         float oldHeading, oldPitch, originalHeading;
+         Vector3 originalPosition;
+-        bool viewSaved,pedLost,sitePlaced,initialExitRequested,siteSelected,viewRestoreIssued,viewRestoreUnknown,positionReturnRequested;
++        bool viewSaved,pedLost,initialExitRequested,siteSelected,viewRestoreIssued,viewRestoreUnknown,positionReturnRequested;
+         int initialVehicle,layout;
+         Vector3 siteAnchor;
+         void Context() { if (Thread.CurrentThread.ManagedThreadId != thread) throw new InvalidOperationException("probe native outside script callback"); }
+@@ -63,10 +63,6 @@
+         public void Prepare()
+         {
+             Context();
+-            SetupResult state=ObserveSetup(SetupStep.Site,null,null);
+-            if(state.Outcome!=TransitionOutcome.READY||!siteSelected)throw new InvalidOperationException("site admission changed: "+state.Reason+" "+state.Evidence);
+-            Space(a); Space(b);
+-            sitePlaced=true;
+             native.RegisterDecorator(Decorator, decoratorLock, log);
+             native.Call(Hash.REQUEST_MODEL, Adder); // Nonblocking. Readiness polled by later ticks.
+         }
+@@ -74,7 +70,10 @@
+         public Lifetime Spawn(string role, int token)
+         {
+             Context(); if (!StoryReady || !ModelReady) throw new InvalidOperationException("spawn prerequisites changed");
+-            var p = role == "A" ? a : b; Space(p);
++            if(!siteSelected)throw new InvalidOperationException("no validated pair layout");
++            var p = role == "A" ? a : b;
++            // Both footprints were just rechecked. After creating A, a conflict at B requires retirement.
++            if(role=="B")Space(p);
+             int handle;
+             try{handle=native.Call<int>(Hash.CREATE_VEHICLE,Adder,p.X,p.Y,p.Z,heading,false,false,false);}
+             catch(Exception e){creationUnknown=true;log("create-outcome-unknown role="+role+" requestedPosition="+p+" reason="+e.GetType().Name+":"+e.Message+"; no handle to reacquire, never respawn");throw;}
+@@ -242,12 +241,13 @@
+             native.Call(Hash.SET_FOLLOW_PED_CAM_VIEW_MODE,oldPedView);native.Call(Hash.SET_FOLLOW_VEHICLE_CAM_VIEW_MODE,oldVehicleView);
+             native.Call(Hash.SET_GAMEPLAY_CAM_RELATIVE_HEADING,oldHeading);native.Call(Hash.SET_GAMEPLAY_CAM_RELATIVE_PITCH,oldPitch,1f);
+             Vector3 current=native.Call<Vector3>(Hash.GET_ENTITY_COORDS,savedPed,true);
+-            if(PlayerOnFoot&&(current-originalPosition).Length()>.10f&&!native.Call<bool>(Hash.IS_POSITION_OCCUPIED,originalPosition.X,originalPosition.Y,originalPosition.Z,.45f,false,true,true,false,false,savedPed,false)) {
++            if(!siteSelected)log("no committed return placement; player remains at "+current);
++            else if(PlayerOnFoot && (current-selectedReturn).Length()>.10f && !ReturnOccupied(selectedReturn)){
+                 positionReturnRequested=true;
+-                native.Call(Hash.SET_ENTITY_COORDS_NO_OFFSET,savedPed,originalPosition.X,originalPosition.Y,originalPosition.Z,false,false,true);
++                native.Call(Hash.SET_ENTITY_COORDS_NO_OFFSET,savedPed,selectedReturn.X,selectedReturn.Y,selectedReturn.Z,false,false,true);
+                 native.Call(Hash.SET_ENTITY_HEADING,savedPed,originalHeading);
+-                log("player-original-position-return-requested "+originalPosition+"; verify later callback");
+-            } else log((current-originalPosition).Length()<=.10f?"player-original-position-already-observed":"player-position-return-unresolved; no occupied-space teleport");
++                log("player-return-requested preferred="+preferredReturn+" selected="+selectedReturn);
++            }else log((current-selectedReturn).Length()<=.10f?"player-already-at-selected-return":"selected-return-blocked; player remains at "+current);
+             log("view-restore-requests-returned; later callback must verify; per-frame input/camera clamps cease automatically");
+             }catch(Exception e){viewRestoreUnknown=true;log("view-restore-outcome-unknown "+e.GetType().Name+":"+e.Message+"; never resend");throw;}
+         }
+--- a/AutomaticRun.cs
++++ b/AutomaticRun.cs
+@@ -22,6 +22,7 @@
+     internal interface IAutomaticIdleApi : IIdleApi
+     {
+         RuntimeProgress ReadProgress();
++        void RecheckSelectedSite();
+         void SaveView(); void RestoreView(); void HoldInputs(Lifetime rider);
+         SetupResult ObserveSetup(SetupStep step,Lifetime a,Lifetime b);
+         void RequestSetup(SetupStep step,Lifetime a,Lifetime b,Func<bool> stillAdmitted);
+@@ -71,6 +72,8 @@
+         readonly IdleExperiment core;
+         readonly Dictionary<string,string> commands=new Dictionary<string,string>();
+         string stage="Dormant",phase="start",observation="",status="Awaiting local operator",recording;
++        long modelRequestedAt;
++        bool modelReady;
+         long entered,activeStart,windowStart,hornStart,lastTick,stableSince,durableBarrier;
+         Pose pose,lastPose,bPose,aPose;
+         bool terminal,finished,retired,saved,uncertain,heardHorn,hornIssued,bReviewed,phaseWindowComplete,forcedRetirement;
+@@ -182,8 +185,20 @@
+                     api.SaveView();saved=true;activeStart=now;Enter("PrepareSite");return;
+                 }
+                 if(stage=="PrepareSite") {
++                    if(!journal.Healthy || !CaptureOK(capture,false) || (priorTick!=0 && now-priorTick>2*frequency))
++                        throw new InvalidOperationException("site observation lost journal, capture or callback continuity");
++                    if(modelRequestedAt!=0 && !modelReady){
++                        if(Elapsed(modelRequestedAt)>=5)throw new InvalidOperationException("model load timeout");
++                        modelReady=api.ModelReady;
++                    }
+                     if(!Progress(SetupStep.Site,12,capture,2))return;
+-                    core.Spawn(activeStart);Enter("Spawn");return;
++                    if(modelRequestedAt==0){
++                        core.Spawn(activeStart);modelRequestedAt=now;return;
++                    }
++                    if(!modelReady)return;
++                    api.RecheckSelectedSite();
++                    if(!Progress(SetupStep.Site,12,capture))return;
++                    Enter("Spawn"); // First creation happens on this callback, after final site clearance.
+                 }
+                 if(activeStart!=0&&now-activeStart>=SessionSeconds*frequency) { EndUnresolved("absolute session limit");return; }
+                 if(priorTick!=0&&now-priorTick>2*frequency) { Stop("script callback gap; observation invalid",capture); }
+@@ -195,7 +210,6 @@
+                 }
+                 if(!journal.Healthy&&!terminal)Stop("journal unavailable",capture);
+                 if(!CaptureOK(capture,false)&&!terminal)Stop("capture stopped or lease expired",capture);
+-                if(stage=="Spawn"&&!Progress(SetupStep.Models,5,capture))return;
+                 if(!core.Stopped)core.Tick();
+                 if(core.Stopped&&!terminal) { terminal=true;NewObservation("release");Enter(core.RestoreReturned?"ReleaseObserve":!core.Changed?"Retire":"ReleasePending"); }
+                 // Final and emergency ADDER observations use the same rider controls as stock.
+--- a/IdleExperiment.cs
++++ b/IdleExperiment.cs
+@@ -40,7 +40,7 @@
+         readonly Func<int> newToken;
+         readonly Func<bool> healthy;
+         Lifetime a, b;
+-        long end, loadEnd, armEnd, releaseBy, observationStart, hornCue;
++        long end, armEnd, releaseBy, observationStart, hornCue;
+         int applied = -1;
+         bool baselineAccepted, observationPending, releaseOutcomeRecorded;
+         internal SelectionEvidence ExpectedEvidence {
+@@ -96,7 +96,7 @@
+         {
+             if (used || stopped || aborted || !healthy() || !api.StoryReady) throw new InvalidOperationException("one pair per load, unstopped controller, healthy journal and Story Mode required");
+             long start=sessionStart==0?clock():sessionStart;
+-            used = true; end = start + 600 * frequency; releaseBy = start + 525 * frequency; loadEnd = clock() + 5 * frequency;
++            used = true; end = start + 600 * frequency; releaseBy = start + 525 * frequency;
+             log("spawn-request; known stock experiment baseline; no arbitrary prior override recovery");
+             loading = true;
+             try { api.Prepare(); Status = "Loading ADDER"; }
+@@ -112,8 +112,7 @@
+             if (clock() >= releaseBy) { Stop("525 second release reserve"); return; }
+             if (loading)
+             {
+-                if (clock() >= loadEnd) { Stop("model load timeout"); return; }
+-                if (!api.ModelReady) return;
++                if (!api.ModelReady) { Stop("loaded model lost before pair creation"); return; }
+                 try
+                 {
+                     int x = newToken(), y = newToken();
