@@ -1,5 +1,10 @@
 # Phase 2 executed validation
 
+## Bounded drivetrain experiment: 25 October 2026
+
+The [completed diagnostic report](P2_01_DRIVETRAIN_VALIDATION.md) records 5,397 normal samples over 269.862 seconds at 19.995 Hz, one missed deadline and zero queue drops. The complete private sidecar contains 1,683 frames and exposes a constant finite out-of-range player scalar through confirmed revving and driving. Gear values changed from 0 through 4, with user confirmation of a natural shift; reverse/neutral semantics and wider vehicle coverage remain unverified. Both footers completed after an unrelated usage-limit interruption while capture was disabled. The installation is fully restored. This is an RPM capability limitation, not completed drivetrain certification.
+
+The complete offline suite passes 65 core telemetry assertions, 35 new drivetrain diagnostic assertions, 17 metadata-parser tests, three diagnostic-analyzer tests, 101 Phase 1 checks, nine configuration checks and eight append expectations. The new adapter compiled against the existing authentic SDK; no dependency/framework upgrade was used. [Portable measured outcome](../evidence/publication/drivetrain-result.json).
 ## First genuine telemetry smoke test: 25 October 2026
 
 One authorised DirectStorageFix/ASI-loader recovery attempt loaded RPH and the unchanged RichAudio DLL in Enhanced 1158.16 Story Mode. The closed JSONL capture contains 2,113 samples, 19.998774 Hz over 105.606473 s, zero queue drops/missed deadlines/sequence gaps and actual player/NPC observations. It is **in-game smoke-tested**, not A–E certified. Every player/driver-present NPC RPM reading failed range validation; no frame-time baseline or repeat stability result exists. The installation was restored against 32 root file hashes, 179 archive metadata records, ten archive hashes and both signed executable fingerprints. [Detailed runtime report](RPH_IO_FAILURE_INVESTIGATION.md) and [portable actual results](../evidence/publication/directstoragefix-result.json). Earlier no-live-data statements below retain their historical meaning.

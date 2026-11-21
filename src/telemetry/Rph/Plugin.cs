@@ -21,6 +21,7 @@ namespace RichAudio.Rph
         private double nextCensus,lastCensus=-1;
         private int available=-1,examined,censusInvalid,omitted;
         private bool truncated;
+        public bool CaptureDiagnostics;
         public RphSource(CaptureConfig c) {config=c;}
         private static Field<T> Read<T>(Func<T> getter,string units,string name) where T:struct {try{return Field<T>.Observed(getter(),units,"RPH "+name+"; live validation pending");}catch(Exception ex){return Field<T>.Missing(units,"getter_failed:"+ex.GetType().Name);}}
         private static Vec3 V(Vector3 v) {return new Vec3(v.X,v.Y,v.Z);}
@@ -75,8 +76,9 @@ namespace RichAudio.Rph
                     o.EngineRunning=Read(()=>v.IsEngineOn,"boolean","Vehicle.IsEngineOn");
                     o.DriverPresent=Read(()=>v.HasDriver,"boolean","Vehicle.HasDriver");
                     if(config.ReadDrivetrain) {
-                        o.RpmRatio=Read(()=>(double)v.EngineRevolutionsRatio,"ratio, not crankshaft RPM","Vehicle.EngineRevolutionsRatio");
-                        if(o.RpmRatio.Value.HasValue&&(o.RpmRatio.Value.Value<0||o.RpmRatio.Value.Value>1))o.RpmRatio=Field<double>.Missing("ratio","invalid_out_of_range_RPM_ratio");
+                        RawRpmDiagnostic raw;
+                        o.RpmRatio=RpmAcquisition.Read(()=>(double)v.EngineRevolutionsRatio,CaptureDiagnostics,out raw);o.RawRpm=raw;
+                        if(CaptureDiagnostics)o.DiagnosticOccupants=Read(()=>v.HasOccupants,"boolean","Vehicle.HasOccupants");
                         o.Gear=Read(()=>(int)v.CurrentGear,"framework gear index","Vehicle.CurrentGear");
                     } else {
                         o.RpmRatio=Field<double>.Missing("ratio","disabled_by_configuration");o.Gear=Field<int>.Missing("gear index","disabled_by_configuration");
@@ -98,6 +100,11 @@ namespace RichAudio.Rph
         private static long missedTotal;
         private static DeadlineScheduler currentScheduler;
         private static volatile string context="unlabelled";
+        private static DrivetrainDiagnosticRecorder diagnostics;
+        [ConsoleCommand(Name="RichAudioDiagnosticsStart",Description="Enable private bounded raw drivetrain sidecar if configuration allows")]
+        public static void StartDiagnostics(){if(diagnostics==null){Game.Console.Print("Raw diagnostics not allowed by configuration");return;}diagnostics.Enable(clock.Elapsed.TotalSeconds);Game.Console.Print("Private diagnostic capture requested; lifetime caps apply");}
+        [ConsoleCommand(Name="RichAudioDiagnosticsStop",Description="Disable private raw drivetrain sidecar")]
+        public static void StopDiagnostics(){if(diagnostics!=null)diagnostics.Disable();}
         [ConsoleCommand(Name="RichAudioMark",Description="Label subsequent records, e.g. urban_TestC or rural_TestD")]
         public static void Mark(string label) {context=(label??"unlabelled").Substring(0,Math.Min(128,(label??"unlabelled").Length));}
         [ConsoleCommand(Name="RichAudioStart",Description="Enable telemetry only in acknowledged Story Mode")]
@@ -105,7 +112,7 @@ namespace RichAudio.Rph
         [ConsoleCommand(Name="RichAudioStop",Description="Stop telemetry capture without changing the game")]
         public static void StopCapture() {requested=false;}
         [ConsoleCommand(Name="RichAudioStatus",Description="Show telemetry writer status")]
-        public static void Status() {Game.Console.Print("RichAudio: requested="+requested+" dropped="+(recorder==null?0:recorder.Dropped)+" writerError="+(recorder==null?"not started":recorder.Error??"none"));}
+        public static void Status() {Game.Console.Print("RichAudio: requested="+requested+" dropped="+(recorder==null?0:recorder.Dropped)+" writerError="+(recorder==null?"not started":recorder.Error??"none")+" diagnosticDropped="+(diagnostics==null?0:diagnostics.Dropped)+" diagnosticError="+(diagnostics==null?"disabled":diagnostics.Error??"none"));}
         public static void Main() {
             clock=Stopwatch.StartNew();string session=Guid.NewGuid().ToString("N");tracker=new Tracker(session);
             try {
@@ -114,10 +121,12 @@ namespace RichAudio.Rph
                 string exe=Process.GetCurrentProcess().MainModule.FileName;var version=FileVersionInfo.GetVersionInfo(exe);
                 if(!Path.GetFileName(exe).Equals("GTA5_Enhanced.exe",StringComparison.OrdinalIgnoreCase)||version.FileMajorPart!=1||version.FileMinorPart!=0||version.FileBuildPart!=1158||version.FilePrivatePart!=16)throw new NotSupportedException("Only the researched GTA5_Enhanced 1.0.1158.16 is allowed; revalidate other builds");
                 recorder=new AsyncRecorder(Path.Combine(config.OutputDirectory,"richaudio-"+session+".jsonl"),config.QueueCapacity);
+                if(config.AllowRawDrivetrainDiagnostics)diagnostics=new DrivetrainDiagnosticRecorder(Path.Combine(config.OutputDirectory,"diagnostics","drivetrain-"+session+".jsonl"),session,config.DiagnosticMaxFrames,config.DiagnosticMaxSeconds,config.DiagnosticMaxBytes,config.DiagnosticHz);
                 recorder.TryRecord(new CaptureRecord{Kind="session_start",SessionId=session,Source="RPH public SDK getters; built but unverified in game",Metadata=new SessionMetadata{TargetHz=config.SampleHz,SourceLimit=config.SourceLimit,QueueCapacity=config.QueueCapacity,CensusLimit=config.CensusLimit,AcquisitionBudgetMs=config.AcquisitionBudgetMs,ClockFrequencyHz=Stopwatch.Frequency,GameVersion=version.FileVersion,FrameworkVersion=FileVersionInfo.GetVersionInfo(typeof(Game).Assembly.Location).FileVersion,CoordinateConvention="GTA world Z-up; assumed 1 unit/metre; camera listener proxy",RuntimeValidation="not established by this build"},Detail="No LSPDFR reference; no audio/vehicle setters; source prefix selection, not a full-distance census"});
                 requested=config.CaptureEnabled;bool active=false;DeadlineScheduler scheduler=null;ITelemetrySource source=null;
                 while(!shutdown) {
                     if(recorder.Error!=null)throw new IOException("Writer failed: "+recorder.Error);
+                    if(diagnostics!=null&&diagnostics.Error!=null)throw new IOException("Diagnostic writer failed: "+diagnostics.Error);
                     bool permitted=false;
                     if(requested&&config.StoryModeAcknowledged&&!Game.IsPaused) {
                         try{permitted=!NativeFunction.CallByName<bool>("NETWORK_IS_SESSION_STARTED")&&!NativeFunction.CallByName<bool>("NETWORK_IS_GAME_IN_PROGRESS");}catch{permitted=false;}
@@ -129,7 +138,9 @@ namespace RichAudio.Rph
                     }
                     if(!active){scheduler=new DeadlineScheduler(config.SampleHz,now);currentScheduler=scheduler;source=new RphSource(config);active=true;}
                     if(scheduler.TryTake(now)) {
-                        var record=tracker.Process(source.Read(now));record.Source="RPH documented getters";record.Context=context;record.ScheduleDelayMs=scheduler.DelayMs;record.MissedDeadlines=missedTotal+scheduler.Missed;recorder.TryRecord(record);
+                        ((RphSource)source).CaptureDiagnostics=diagnostics!=null&&diagnostics.IsDue(now);
+                        var input=source.Read(now);var record=tracker.Process(input);record.Source="RPH documented getters";record.Context=context;record.ScheduleDelayMs=scheduler.DelayMs;record.MissedDeadlines=missedTotal+scheduler.Missed;recorder.TryRecord(record);
+                        if(((RphSource)source).CaptureDiagnostics){var dw=Stopwatch.StartNew();var probe=DrivetrainDiagnosticJson.From(record,input);dw.Stop();probe.PrepareMs=dw.Elapsed.TotalMilliseconds;diagnostics.TryRecord(probe);}
                     }
                     GameFiber.Sleep(Math.Max(1,Math.Min(10,(int)(scheduler.Remaining(clock.Elapsed.TotalSeconds)*1000))));
                 }
@@ -141,9 +152,10 @@ namespace RichAudio.Rph
             if(recorder==null)return;
             if(Interlocked.Exchange(ref finishing,1)==0) {
                 var end=tracker.Stop(clock.Elapsed.TotalSeconds,"plugin shutdown");end.Kind="session_end";end.MissedDeadlines=missedTotal+(currentScheduler==null?0:currentScheduler.Missed);end.Context=context;end.Detail=terminating?"forced unload: footer/drain not guaranteed":"main exit or graceful unload; inspect footer and writer status";recorder.Complete(end);
+                if(diagnostics!=null)diagnostics.Complete(clock.Elapsed.TotalSeconds);
             }
             // Never sleep in an aborted entry fiber or forceful exit callback.
-            if(mayWait) {double until=clock.Elapsed.TotalSeconds+2;while(!recorder.Finished&&clock.Elapsed.TotalSeconds<until)GameFiber.Sleep(10);}
+            if(mayWait) {double until=clock.Elapsed.TotalSeconds+2;while((!recorder.Finished||(diagnostics!=null&&!diagnostics.Finished))&&clock.Elapsed.TotalSeconds<until)GameFiber.Sleep(10);}
         }
     }
 }

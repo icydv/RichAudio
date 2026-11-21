@@ -83,6 +83,9 @@ namespace RichAudio.Telemetry
         public Field<bool> EngineRunning=Field<bool>.Missing("boolean","not_sampled");
         public Field<double> RpmRatio=Field<double>.Missing("ratio, not physical RPM","unsupported");
         public Field<int> Gear=Field<int>.Missing("framework gear index","unsupported");
+        // Adapter input only; never added to production CaptureRecord/VehicleState schema.
+        public RawRpmDiagnostic RawRpm;
+        public Field<bool> DiagnosticOccupants=Field<bool>.Missing("boolean","diagnostics_disabled");
     }
     public sealed class ObservationFrame
     {
