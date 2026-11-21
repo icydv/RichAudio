@@ -10,6 +10,17 @@ namespace RichAudio.Beacon.Tests
         private static int checks;
         private static void Check(bool value,string text){checks++;if(!value)throw new Exception(text);}
         private static void Throws(Action action,string text){bool rejected=false;try{action();}catch(ArgumentException){rejected=true;}catch(InvalidDataException){rejected=true;}catch(EndOfStreamException){rejected=true;}Check(rejected,text);}
+        static void CheckPrivatePowertrainCredits()
+        {
+            var profile = GameplayLatencyProfile.Resolve(null, true);
+            var credit = new GameplayCreditWindow(profile);
+            Check(profile.StartupBlocks == 8 && profile.ProducerBlocks == 6, "private powertrain reserve");
+            Check(credit.Return(2) == 2 && credit.Retired == 0, "cold powertrain retains startup credits");
+            credit.SourcePrepared = true;
+            Check(credit.Return(1) == 0 && credit.Return(3) == 2 && credit.Retired == 2,
+                "prepared powertrain retires only two credits");
+            Check(credit.Return(3) == 3, "steady powertrain keeps returning available credits");
+        }
         static void CheckPowertrainWithdrawal()
         {
             var gate=new PowertrainOutputGate();
@@ -157,6 +168,7 @@ namespace RichAudio.Beacon.Tests
                     Console.WriteLine("PASS: "+checks+" silent actual-device starvation assertions; no automatic restart.");return 0;
                 }
                 if(args.Length!=0)throw new ArgumentException("Unsupported test option");
+                CheckPrivatePowertrainCredits();
                 CheckPowertrainWithdrawal();
                 CheckPowertrainOutputTiming();
                 CheckPowertrainGateCauses();

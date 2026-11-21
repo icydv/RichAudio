@@ -23,3 +23,24 @@ At the complaint snapshot the cumulative stale count was 401,376. Another 788,38
 4. The output callback compares its current Windows QPC tick with that absolute deadline. A current-revision slot can therefore arrive populated and still expire before output. For expired, untagged or prior-revision data the host consumes the slot with zero gain and submits zero-valued samples in its place. Alternating real waveform and zero can interrupt the note and create abrupt edges even with a full ring. A gain revision also flushes delayed source history and resets and primes the WASAPI endpoint with silence before new-revision output is admitted.
 
 The resumed revision can inherit an **aged observation mapping**. The first qualifying audible block must still have a source stamp from the new revision. The retained counters cannot show whether a particular live block arrived late from Node or expired while waiting in the ring. They cannot distinguish those explanations by listening quality alone.
+
+## Reset and resume in the one-car path
+
+The original interpolation query advanced with the number of PCM frames the renderer produced. A WASAPI stop/reset/silent prime advances elapsed time while a boundary callback consumes no ring PCM. Changes in credit lead also change how far the renderer frame counter runs ahead. Keeping that counter as the clock for the control query can select an older observation even after the new gain revision has been acknowledged.
+
+The private control query now advances on elapsed monotonic time anchored to the accepted observation timeline. It looks back 50 ms for interpolation and caps the camera and vehicle queries separately at their respective latest arrived observations. The two acquisitions have distinct timestamps even in the same game callback. Inside an interpolation interval the block still carries the older contributing sample's tag. At an arrived endpoint it can use that genuine sample with its original deadline. The private host retains eight startup credits and retires two after source preparation. Ordinary gameplay timing, the 250 ms source lease and the endpoint reset are unchanged.
+
+The device-free fixture ran the real host and producer with retained Bati material. It offered the same authored callback schedule to both builds (50 ms intervals with 90 ms every ninth tick), changed revs while muted, and modeled one 20 ms silent prime per output boundary. The live run had no per-callback driving trace to replay. A completed baseline and corrected run each delivered 117 observations over approximately 7.65 seconds of sustained resumed playback.
+
+| 48 kHz output measurement | Tested baseline behavior | Corrected replay |
+| --- | ---: | ---: |
+| Stale frames in the sustained resume window | 232,128 | 0 |
+| Longest consecutive substitution after the first qualified resumed output | 3,840 frames (80 ms), expired in the ring | 0 frames |
+| Longest consecutive substitution including the guarded transition | 9,280 frames (193.3 ms), previous revision | 4,928 frames (102.7 ms), previous revision |
+| PCM ring underflows | 0 | 0 |
+
+The explicit endpoint prime is separate from those gate counts. Some baseline runs returned to stock early when progress expired. In the completed baseline, revision 4 block 1453 used observation 254. It was 216.871 ms old at payload receipt, spent 0.0021 ms before ring publication and 59.982 ms in the ring. At 276.855 ms it was replaced with zeros. Corrected revision 4 block 1404 used observation 247. It arrived at 94.683 ms, spent 0.0025 ms before publication and 29.184 ms in the ring, and was accepted at 123.869 ms. All these durations come from differences on the 10 MHz host QPC. They end at the output decision and do not measure speaker latency.
+
+Mute now completes when the endpoint has reset **and** a fresh muted-revision block has been submitted. A reset previously could acknowledge mute while progress still described the prior voice revision. The real-process fixture also checks that muted output stays silent, resume accepts the updated operating point with no extra GTA assignments, genuine observation expiry withdraws the voice, and release or owned-host exit results in exactly one stock return on the bound car.
+
+For a live comparison, listen through the initial transition and then drive under varying load. A sustained gap labelled `StaleOnArrival` points upstream of the host PCM reader. `StaleBeforeEnqueue` points to host admission wait; `StaleInRing` identifies frames that reached the ring in time but lost their remaining budget there. For `Untagged`, check the producer's per-phase reason to separate unavailable listener or vehicle state from already-silent stereo PCM. If the gate shows continuous, qualified, nonzero output while I still hear breakup, investigate distortion and playback downstream of the measured decision.

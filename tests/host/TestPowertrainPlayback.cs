@@ -66,6 +66,10 @@ internal sealed class TestPowertrainPlayback
     readonly List<string> assignments = new List<string>();
     readonly List<object> handoffJournal = new List<object>();
     string releaseReason;
+    long previousObservation;
+    int observationCount;
+    double minimumCallbackIntervalMs = Double.PositiveInfinity;
+    double maximumCallbackIntervalMs;
 
     Dictionary<string, object> ReadStatus()
     {
@@ -98,13 +102,35 @@ internal sealed class TestPowertrainPlayback
         handoff.Advance(Stopwatch.GetTimestamp(), vehicle, true, true, evidence);
     }
 
+    double SubmitObservation()
+    {
+        int intervalMs = observationCount != 0 && observationCount % 9 == 0 ? 90 : 50;
+        long due = previousObservation + intervalMs * Stopwatch.Frequency / 1000;
+        long now = Stopwatch.GetTimestamp();
+        while (now < due)
+        {
+            Thread.Sleep((int)Math.Ceiling((due - now) * 1000d / Stopwatch.Frequency));
+            now = Stopwatch.GetTimestamp();
+        }
+        double spacing = previousObservation == 0 ? 0 : (now - previousObservation) * 1000d / Stopwatch.Frequency;
+        if (previousObservation != 0)
+        {
+            minimumCallbackIntervalMs = Math.Min(minimumCallbackIntervalMs, spacing);
+            maximumCallbackIntervalMs = Math.Max(maximumCallbackIntervalMs, spacing);
+        }
+        previousObservation = now;
+        observationCount++;
+        link.SubmitObservation(source.PlayerVehicleHandle, vehicle);
+        return spacing;
+    }
+
     Dictionary<string, object> Drive(string stage, Func<Dictionary<string, object>, bool> verify)
     {
         var clock = Stopwatch.StartNew();
         Dictionary<string, object> row = null;
         while (clock.ElapsedMilliseconds < 12000)
         {
-            link.SubmitObservation(source.PlayerVehicleHandle, vehicle);
+            SubmitObservation();
             Advance();
             row = ReadStatus();
             var host = link.Snapshot;
@@ -121,7 +147,6 @@ internal sealed class TestPowertrainPlayback
                 }
             }
             if (host.Failure != null) throw new InvalidOperationException("Host failed during " + stage + ": " + host.Failure);
-            Thread.Sleep(50);
         }
         throw new TimeoutException("Timed out during " + stage + ". Handoff: " + handoff.Phase + ", " +
             handoff.Reason + ". Last status: " + json.Serialize(row));
@@ -131,36 +156,63 @@ internal sealed class TestPowertrainPlayback
     // counters. It did not retain individual callback arrival times or revs.
     // Use the same authored 20 Hz workload and periodic delivery stalls in
     // both builds. The adapter timestamps its actual acquisitions.
-    void DriveWindow(string stage, int durationMs, string phase, long revision)
+    bool DriveWindow(string stage, int durationMs, string phase, long revision, bool observeExpiry = false)
     {
         var clock = Stopwatch.StartNew();
         var before = ReadStatus();
         Require(before != null, "No starting status for " + stage);
-        Dictionary<string, object> after = null;
+        var after = before;
         int tick = 0;
+        bool returnedEarly = false;
+        object firstSecond = null;
+        double minimumIntervalMs = Double.PositiveInfinity, maximumIntervalMs = 0;
         while (clock.ElapsedMilliseconds < durationMs)
         {
             // Hold a ratio through several observations to exercise high-rev
             // racing before changing load. Muted tracking keeps the high ratio.
             source.RevRatio = phase == "Muted" ? 0.83 : (tick / 8) % 2 == 0 ? 0.83 : 0.35;
-            link.SubmitObservation(source.PlayerVehicleHandle, vehicle);
+            double spacing = SubmitObservation();
+            minimumIntervalMs = Math.Min(minimumIntervalMs, spacing);
+            maximumIntervalMs = Math.Max(maximumIntervalMs, spacing);
             Advance();
-            after = ReadStatus();
+            tick++;
+            var latest = ReadStatus();
+            if (latest != null && Number(latest, "appliedRevision") == revision)
+            {
+                after = latest;
+                if (firstSecond == null && clock.ElapsedMilliseconds >= 1000)
+                    firstSecond = new { elapsedMs = clock.ElapsedMilliseconds, observations = tick,
+                        deltaStaleFrames = Number(after, "stalePcmFrames") - Number(before, "stalePcmFrames"),
+                        deltaDiscardedFrames = Number(after, "discardedFrames") - Number(before, "discardedFrames"),
+                        deltaUnderflowFrames = Number(after, "underflowFrames") - Number(before, "underflowFrames"),
+                        status = after };
+            }
+            if (observeExpiry && handoff.Phase == "Releasing" && IsExpiredRelease())
+            {
+                returnedEarly = true;
+                break;
+            }
             Require(handoff.Phase == phase, stage + ": " + handoff.Phase + " " + handoff.Reason);
             Require(link.Snapshot.Failure == null, "Host failed during " + stage + ": " + link.Snapshot.Failure);
-            int intervalMs = ++tick % 9 == 0 ? 90 : 50;
-            Thread.Sleep(intervalMs);
         }
-        Require(after != null && Number(after, "appliedRevision") == revision &&
-            Number(after, "submittedFrames") > Number(before, "submittedFrames") &&
+        Require(Number(after, "appliedRevision") == revision &&
+            (returnedEarly || Number(after, "submittedFrames") > Number(before, "submittedFrames")) &&
             Number(after, "outputPeak") >= 0, "Output did not progress during " + stage);
         if (phase == "Muted") Require(Number(after, "outputPeak") == 0, "Muted interval emitted sound");
-        stages.Add(new { stage, elapsedMs = clock.ElapsedMilliseconds, observations = tick,
+        stages.Add(new { stage, intendedDurationMs = durationMs, elapsedMs = clock.ElapsedMilliseconds, observations = tick, returnedEarly,
+            minimumCallbackIntervalMs = minimumIntervalMs, maximumCallbackIntervalMs = maximumIntervalMs,
             deltaStaleFrames = Number(after, "stalePcmFrames") - Number(before, "stalePcmFrames"),
             deltaUnderflowFrames = Number(after, "underflowFrames") - Number(before, "underflowFrames"),
             deltaDiscardedFrames = Number(after, "discardedFrames") - Number(before, "discardedFrames"),
-            before, status = after });
-        Console.WriteLine("PASS " + stage + " at the authored callback cadence");
+            before, firstSecond, status = after });
+        Console.WriteLine((returnedEarly ? "OBSERVED stock-return deadline during " : "PASS ") + stage + " at the authored callback cadence");
+        return returnedEarly;
+    }
+
+    bool IsExpiredRelease()
+    {
+        return releaseReason == "host output progress expired" ||
+            (releaseReason != null && releaseReason.Contains("telemetry expired"));
     }
 
     void WaitForStock()
@@ -185,7 +237,7 @@ internal sealed class TestPowertrainPlayback
             ". Host report: " + json.Serialize(ReadStatus()));
     }
 
-    object Run(string manifestPath, string fixtureRoot, string termination)
+    object Run(string manifestPath, string fixtureRoot, string termination, bool observeExpiry = false)
     {
         var configuration = PlayableConfiguration.Load(manifestPath);
         string root = configuration.Root;
@@ -247,8 +299,7 @@ internal sealed class TestPowertrainPlayback
                 // withheld. Neither the host nor the controller may extend
                 // the age of already-rendered data to keep the voice alive.
                 WaitForStock();
-                Require(releaseReason == "host output progress expired" ||
-                    (releaseReason != null && releaseReason.Contains("telemetry expired")),
+                Require(IsExpiredRelease(),
                     "Expired telemetry did not cause withdrawal: " + releaseReason);
                 Console.WriteLine("PASS lost observation lease withdrew playback and restored stock exactly once");
             }
@@ -270,19 +321,24 @@ internal sealed class TestPowertrainPlayback
                     handoff.Phase == "Active" && Number(r, "appliedRevision") == 4 && Number(r, "outputPeak") > 0 &&
                     Math.Abs(Number(r, "submittedOperatingPoint") - 0.83) < .00001 &&
                     Number(r, "submittedObservationSequence") > Number(playing, "submittedObservationSequence"));
-                DriveWindow("resumed audible playback", 7600, "Active", 4);
-                Require(assignments.Count == 1, "Mute or resume performed a native assignment");
-                Require(handoff.Restore(Stopwatch.GetTimestamp()) == "accepted", "Stock return refused");
+                bool returnedEarly = DriveWindow("resumed audible playback", 7600, "Active", 4, observeExpiry);
+                Require(assignments.Count <= (returnedEarly ? 2 : 1), "Mute or resume performed a native assignment");
+                if (!returnedEarly)
+                    Require(handoff.Restore(Stopwatch.GetTimestamp()) == "accepted", "Stock return refused");
                 WaitForStock();
                 var withdrawn = ReadStatus();
-                Require(withdrawn != null && withdrawn["mode"].Equals("withdraw") &&
+                Require(returnedEarly ? link.Snapshot.Ended : withdrawn != null && withdrawn["mode"].Equals("withdraw") &&
                     Number(withdrawn, "appliedRevision") == 5 && Number(withdrawn, "outputPeak") == 0 &&
                     Number(withdrawn, "underflowFrames") == 0,
                     "Stale output remained after withdrawal");
+                if (!observeExpiry)
+                    Require(Number(withdrawn, "resumedSteadyLongestGapFrames") == 0,
+                        "Substituted output interrupted qualified resumed playback");
                 Console.WriteLine("PASS withdrawal retired source and reached silent output before stock return");
             }
             return new {
                 session, termination, stages, assignments, handoffJournal, evidenceDirectory = directory,
+                observationCount, minimumCallbackIntervalMs, maximumCallbackIntervalMs,
                 transportReceipt = Path.Combine(linkDirectory, "powertrain-transport.json"), finalHost = ReadStatus()
             };
         }
@@ -300,16 +356,17 @@ internal sealed class TestPowertrainPlayback
 
     static int Main(string[] args)
     {
-        if (args.Length != 2) return 2;
+        if (args.Length != 2 && (args.Length != 3 || args[2] != "--observe-baseline-expiry")) return 2;
         try
         {
             string root = Path.GetDirectoryName(args[1]);
-            var playback = new TestPowertrainPlayback().Run(args[0], root, "restore");
+            bool observeBaselineExpiry = args.Length == 3;
+            var playback = new TestPowertrainPlayback().Run(args[0], root, "restore", observeBaselineExpiry);
             var disconnect = new TestPowertrainPlayback().Run(args[0], root, "disconnect");
             var expiry = new TestPowertrainPlayback().Run(args[0], root, "expiry");
             File.WriteAllText(args[1], new JavaScriptSerializer().Serialize(new {
-                passed = true, fixture = "device-free", authoredObservations = true,
-                authoredTiming = "50 ms between observations with a 90 ms interval every ninth tick; operating ratios held at 0.83 while muted and alternated in eight-observation runs during audible windows",
+                passed = true, fixture = "device-free", authoredObservations = true, observeBaselineExpiry,
+                authoredTiming = "One shared pacing schedule requests 50 ms between acquisitions, or 90 ms every ninth interval. Actual observed spacing is recorded. Operating ratios are held at 0.83 while muted and alternated in eight-observation runs during audible windows.",
                 authoredEndpointPrime = "One 20 ms fixture callback of silence without consuming the ring for each output revision; excluded from substituted-frame counters",
                 nativeAssignmentsAreFixtureActions = true, measuredSpeakerLatency = false, playback, disconnect, expiry
             }));

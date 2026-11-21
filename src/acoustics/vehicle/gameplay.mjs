@@ -27,13 +27,17 @@ export class StockGameplay {
  #installedApplicationPermit01=null;#installedSceneService01=null;#installedSceneStopped01=false;#installedStopAt01=null;
  get installedSceneService01(){return this.#installedSceneService01;}
  get installedSceneStopped01(){return this.#installedSceneStopped01;}
- constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled',vehicleSourcePolicy=null}){
+ constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled',vehicleSourcePolicy=null,privatePowertrain=false}){
   if(!['disabled','explicit-control05'].includes(sourcePreparationPolicy))throw Error('Explicit source preparation policy required');
   if(!['baseline','camera-source-01'].includes(continuityPolicy))throw Error('Explicit vehicle continuity policy required');
   if(!['baseline','arrived-segments-50'].includes(continuousTimingPolicy))throw Error('Explicit continuous timing policy required');
   if(continuousTimingPolicy==='arrived-segments-50'&&continuityPolicy!=='camera-source-01')throw Error('Arrived-segment research requires independent camera/source continuity');
   this.continuityPolicy=continuityPolicy;this.latencyProfile=resolveLatencyProfile(latencyProfile);this.controlDelayMs=this.latencyProfile.controlDelayMs;
   this.continuousTimingPolicy=continuousTimingPolicy;if(continuousTimingPolicy==='arrived-segments-50')this.controlDelayMs=50;
+  this.privatePowertrain=privatePowertrain;
+  this.powertrainClock=null;
+  this.powertrainTimingByPhase=privatePowertrain?new Map():null;
+  if(privatePowertrain)this.controlDelayMs=50;
   if(!['baseline','authored-stationary-emission-01'].includes(operatingStatePolicy)||operatingStatePolicy==='baseline'&&stationaryEmissionContract!==null)throw Error('Explicit authored stationary emission policy required');
   this.operatingEmission=operatingStatePolicy==='baseline'?null:new StationaryEmissionController(stationaryEmissionContract);
   if(this.latencyProfile.id==='street-01'&&(continuityPolicy!=='camera-source-01'||continuousTimingPolicy!=='baseline'))throw Error('STREET-01 latency requires independent camera/source continuity and its exact immutable timing');
@@ -130,6 +134,12 @@ export class StockGameplay {
    const previous=this.playout.lastState;
    this.playout.add({type:'listener',state,receiptAgeMs:ageMs},this.pipeline.renderer.frame/FS,this.now());this.playout.delayTarget=this.controlDelayMs/1000;
    const time=this.playout.records.at(-1).time;
+   if(this.privatePowertrain&&this.powertrainClock?.listenerGeneration!==state.generation){
+    const receipt=this.playout.records.at(-1);
+    // Map the original QPC-relative observation time to its monotonic
+    // receipt clock once per camera generation. Keep the source ticks intact.
+    this.powertrainClock={listenerGeneration:state.generation,mappedTime:time+receipt.receiptAgeMs/1000,nodeMs:receipt.hostMs};
+   }
    // Vehicle observations retain their own identity/pose clock across a camera
    // cut. Only the opt-in policy keeps them; listener interpolation and spatial
    // Doppler history still have an explicit generation boundary.
@@ -316,6 +326,23 @@ export class StockGameplay {
   if(this.sample?.state)result=this.playout.presentation(result,this.sample,renderer.frame/FS,this.now()).control;
   return result;
  }
+ controlTime(renderTime,nodeMs){
+  // WASAPI stop/reset/prime emits silence without consuming renderer PCM.
+  // Keep the private selection clock following elapsed time through that gap.
+  const clock=this.powertrainClock;
+  return clock?clock.mappedTime+(nodeMs-clock.nodeMs)/1000:renderTime;
+ }
+ capPowertrainTarget(time, vehicle=false){
+  const latest=this.snapshots.at(-1);
+  if(!latest)return time;
+  // Preserve both raw observation clocks. The vehicle acquisition can
+  // follow the camera acquisition in the same callback. Cap each query at
+  // its own arrived observation without changing either lease.
+  const listener=latest.frame.listener;
+  const car=vehicle?latest.frame.vehicles[0]:null;
+  const offset=car?(car.observationTicks-listener.observationTicks)/listener.clockFrequency:0;
+  return Math.min(time,latest.time+offset);
+ }
  vehiclesAt(time){
   if(!this.snapshots.length||this.now()>=this.snapshots.at(-1).wallExpires)return [];
   let a=null,b=null;for(const s of this.snapshots){if(s.time<=time)a=s;else{b=s;break;}}
@@ -409,14 +436,20 @@ export class StockGameplay {
   const cpuStart=threadCpu?threadCpu():null,arrivalsBefore=tail?this.stats.arrivals:0;
   const sceneBefore=tail?this.pipeline.simulation.scene:null;
   const matchCount=tail?.count??0,matchMs=tail?.ms??0;
-  const start=this.now(),time=this.pipeline.renderer.frame/FS,sourceBlocksBefore=this.stageCounters.sourcePlaybackBlocks;this.sample=this.playout.sample(time,this.now());
+  const start=this.now(),time=this.pipeline.renderer.frame/FS,sourceBlocksBefore=this.stageCounters.sourcePlaybackBlocks;
+  const sampleAt=this.now();
+  const controlTime=this.controlTime(time,sampleAt);
+  const target=controlTime-this.playout.delay;
+  const listenerTime=this.privatePowertrain?this.capPowertrainTarget(target)+this.playout.delay:controlTime;
+  this.sample=listenerTime<0?{state:null,mode:'warming',targetTime:null}:this.playout.sample(listenerTime,sampleAt);
   this.applyPendingInstalledStaticScene01();
   const afterAdmission=this.now();
   this.captureTiming=this.latencyDiagnostics&&this.stats.blocks%8===0;this.lastTiming=null;if(this.captureTiming)this.latencyBrackets=[];
   if(this.pipeline.simulation.scene!==this.direct&&this.now()>=this.sceneExpiry){this.pipeline.replaceScene(this.direct);this.staticSceneBinding=null;this.stats.geometryFallbacks++;}
   const listener=this.sample.state??{position:[0,0,0],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],valid:false,generation:this.lastGeneration||1};
   const independentSource=this.continuityPolicy==='camera-source-01'&&!['missing','stale-wall-clock','clock-invalid','invalid-or-paused','invalid-interval','observation-gap'].includes(this.sample.mode);
-  let offered=this.sample.state||independentSource?this.vehiclesAt(this.sample.targetTime):[];
+  const vehicleTarget=this.privatePowertrain?this.capPowertrainTarget(target,true):this.sample.targetTime;
+  let offered=this.sample.state||independentSource?this.vehiclesAt(vehicleTarget):[];
   const emissionOperating=this.operatingEmission?.select(this.snapshots,this.pipeline.renderer.frame,this.now());
   if(this.operatingEmission)offered=emissionOperating&&(this.sample.state||independentSource)?[emissionOperating.vehicle]:[];
   const eligible=[];let unavailable=0;for(const spatialVehicle of offered){if(this.operatingEmission&&!emissionOperating)continue;const v=this.operatingEmission?{...spatialVehicle,operatingPoint:emissionOperating.operatingPoint,running:emissionOperating.running,lift:emissionOperating.lift}:spatialVehicle;
@@ -533,6 +566,39 @@ export class StockGameplay {
   if(this.lastCompleteRenderMs>BLOCK/FS*1000)this.stats.completeRenderHardMisses=(this.stats.completeRenderHardMisses??0)+1;
   return [this.left,this.right];
   }finally{if(preparation)preparation.rendering=false;}
+ }
+ powertrainPhase(){
+  const phases=this.powertrainTimingByPhase,latest=this.snapshots.at(-1)?.frame;
+  const generation=latest?.listener.generation,revision=latest?.powertrainRevision;
+  if(!phases||revision===undefined)return null;
+  const key=generation+':'+revision;
+  if(!phases.has(key)&&phases.size<12)phases.set(key,{listenerGeneration:generation,revision,untaggedBlocks:{}});
+  return phases.get(key);
+ }
+ noteUntaggedPowertrainBlock(sourceRendered){
+  const phase=this.powertrainPhase();
+  if(!phase)return;
+  const reason=sourceRendered?'zero-stereo-after-source':this.sample?.state?'no-eligible-source':'listener-'+(this.sample?.mode??'unavailable');
+  const counts=phase.untaggedBlocks;
+  counts[reason]=(counts[reason]??0)+1;
+ }
+ powertrainTiming(){
+  const phases=this.powertrainTimingByPhase,phase=this.powertrainPhase();
+  const receipt=this.playout.records.at(-1),latest=this.snapshots.at(-1)?.frame;
+  const car=latest?.vehicles[0],selected=this.slots.find(slot=>slot.source)?.vehicle;
+  if(phase&&receipt&&car&&selected&&car.powertrainRevision===selected.powertrainRevision){
+   const now=this.now();
+   // Estimate current control time from the latest receipt's own mapped
+   // observation time and reported age. Both terms below use milliseconds.
+   const estimatedControlTimeMs=receipt.time*1000+receipt.receiptAgeMs+now-receipt.hostMs;
+   const sample={nodeMs:now,producerFrames:this.pipeline.renderer.frame,
+    renderPhaseMs:this.pipeline.renderer.frame*1000/FS-estimatedControlTimeMs,
+    latestSequence:car.powertrainSequence,selectedSequence:selected.powertrainSequence,
+    selectedAgeBehindLatestMs:(car.observationTicks-selected.observationTicks)*1000/latest.listener.clockFrequency};
+   phase.first??=sample;
+   phase.last=sample;
+  }
+  return phases?[...phases.values()]:null;
  }
  diagnostics(){this.tickInstalledScene01();return {...this.stats,environmentalReadiness01:this.#installedSceneService01?.readinessSnapshot01?.()??{state:this.#installedSceneStopped01?'stopped':'unmanaged',active:false,qualified:false},installedSceneDiagnostics01:this.installedSceneDiagnostics01,active:this.slots.filter(s=>s.identity).length,activeLimit:this.activeLimit,mode:this.settings.mode,nativeReplacement:false,
    airflow:{...this.airflowState,enabled:this.settings.airflowEnabled,level:this.settings.airflowLevel,material:'original-procedural',riderPropagation:'local-stereo-no-reflections-no-doppler',exteriorPropagation:'existing-causal-path-renderer-once',sourceStates:this.slots.filter(s=>s.airflow).map(s=>({identity:s.identity,frame:s.airflow.frame,...s.airflow.stats}))},

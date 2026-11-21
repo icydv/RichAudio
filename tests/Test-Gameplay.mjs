@@ -2,6 +2,85 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';import {loadStockCatalogAssets,loadStockNpcAssets} from '../src/acoustics/vehicle/stock-source.mjs';import {loadInstalledStockRegistry} from '../src/acoustics/vehicle/installed-stock-registry.mjs';
 import {observedAcousticScene,observationCoordinates} from '../src/acoustics/engine/observed-geometry.mjs';import {observedInput,demonstrationCoordinates} from './fixtures/ObservedGeometry.mjs';
 const root=process.env.PLAYABLE01_CANDIDATE,session='b'.repeat(32),skip=!root;
+test('one-car powertrain follows elapsed control time across a silent output prime',async()=>{
+ let nodeMs=0;
+ const options={registry:{},session,now:()=>nodeMs};
+ const stock=new StockGameplay(options),privateVoice=new StockGameplay({...options,privatePowertrain:true});
+ try{
+  assert.equal(stock.playout.delay,.1);
+  assert.equal(privateVoice.playout.delay,.05);
+  assert.equal(privateVoice.latencyProfile.startupBlocks,stock.latencyProfile.startupBlocks);
+  assert.equal(privateVoice.latencyProfile.producerCreditBlocks,stock.latencyProfile.producerCreditBlocks);
+  for(let sequence=0;sequence<=5;sequence++){
+   nodeMs=sequence*50;
+   const observationTicks=(1000+nodeMs)*10000;
+   const motion={position:[0,0,0],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1]};
+   const listener={version:1,session,sequence,generation:1,observationTicks,clockFrequency:10000000,gameTimeMs:nodeMs,
+    ...motion,listenerKind:'camera',velocityKind:'estimated-camera-difference',paused:false,valid:true,reason:'valid',
+    coordinates:'gta-native-unscaled',units:'native-unverified',sourceId:null};
+   const car={id:'adder',model:0xb779a091,context:'player',generation:1,observationTicks:observationTicks+(sequence===5?20000:0),...motion,operatingPoint:.2+sequence/10,
+    running:true,valid:true,powertrainSequence:sequence,powertrainRevision:sequence<3?3:4};
+   // Endpoint silence across the gain boundaries did not advance the PCM cursor.
+   for(const e of [stock,privateVoice]){
+    e.pipeline.renderer.frame=Math.max(0,(nodeMs-65)*48);
+    e.accept({version:1,session,listener,vehicles:[car]},0,250);
+   }
+  }
+  const selected=[stock,privateVoice].map(e=>{
+   const query=e.controlTime(e.pipeline.renderer.frame/48000,nodeMs);
+   return e.vehiclesAt(e.playout.sample(query,nodeMs).targetTime)[0];
+  });
+  assert.equal(selected[0].powertrainSequence,1);
+  assert.equal(selected[0].powertrainRevision,3);
+  assert.equal(selected[1].powertrainSequence,4);
+  assert.equal(selected[1].powertrainRevision,4);
+  assert.equal(selected[1].observationTicks,12000000);
+  // A control gap leaves the last real observation available, including its
+  // original ratio and timestamps. Approaching the deadline cannot renew it.
+  nodeMs=380;
+  const gapTarget=privateVoice.controlTime(.315,nodeMs)-privateVoice.playout.delay;
+  const duringGap=privateVoice.playout.sample(privateVoice.capPowertrainTarget(gapTarget)+privateVoice.playout.delay,nodeMs);
+  assert.equal(duringGap.mode,'exact');
+  assert.equal(duringGap.targetTime,.25);
+  const held=privateVoice.vehiclesAt(privateVoice.capPowertrainTarget(gapTarget,true))[0];
+  assert.equal(held.powertrainSequence,5);
+  assert.equal(held.observationTicks,12520000);
+  assert.equal(held.operatingPoint,.7);
+  nodeMs=500;
+  const expired=privateVoice.playout.sample(privateVoice.controlTime(.435,nodeMs),nodeMs);
+  assert.equal(privateVoice.vehiclesAt(expired.targetTime).length,0);
+  // A first observation can precede sample zero after applying its receipt age.
+  // Keep preparation warmed and silent until its query is within the renderer clock.
+  privateVoice.snapshots.at(-1).time=-.07;
+  assert.ok(privateVoice.capPowertrainTarget(.435)+privateVoice.playout.delay<0);
+  const warming=await privateVoice.render();
+  assert.ok(warming.every(channel=>channel.every(sample=>sample===0)));
+  assert.equal(privateVoice.sample.mode,'warming');
+ }finally{stock.close();privateVoice.close();}
+});
+test('private control timing exposes render lag relative to the original observation clock',()=>{
+ let wall=500;
+ const e=new StockGameplay({registry:{},session,privatePowertrain:true,now:()=>wall});
+ try{
+  e.playout.records.push({time:0.48,hostMs:500,receiptAgeMs:10,state:{generation:1}});
+  e.snapshots.push({frame:{powertrainRevision:4,vehicles:[{powertrainRevision:4,powertrainSequence:10,observationTicks:4900000}],listener:{generation:1,clockFrequency:10000000}}});
+  e.slots[0].source={};e.slots[0].vehicle={powertrainRevision:4,powertrainSequence:9,observationTicks:4400000};
+  e.pipeline.renderer.frame=24000;
+  const first=e.powertrainTiming()[0];
+  assert.ok(Math.abs(first.first.renderPhaseMs-10)<1e-6);
+  assert.equal(first.first.selectedAgeBehindLatestMs,50);
+  wall+=1000;e.pipeline.renderer.frame+=47988;
+  const later=e.powertrainTiming()[0];
+  assert.ok(Math.abs(later.last.renderPhaseMs-9.75)<1e-6);
+  assert.equal(later.last.selectedSequence,9);
+  e.sample={mode:'prediction-expired',state:null};
+  e.noteUntaggedPowertrainBlock(false);
+  e.sample={mode:'interpolated',state:{}};
+  e.noteUntaggedPowertrainBlock(false);
+  e.noteUntaggedPowertrainBlock(true);
+  assert.deepEqual(e.powertrainTiming()[0].untaggedBlocks,{'listener-prediction-expired':1,'no-eligible-source':1,'zero-stereo-after-source':1});
+ }finally{e.close();}
+});
 let registry,profiles;function loaded(){if(registry)return;const m=JSON.parse(fs.readFileSync(path.join(root,'playable.json'))),assets=loadStockCatalogAssets(path.join(root,m.playerManifest),{sustainAtlasFile:path.join(root,m.atlas)}),npcAssets=loadStockNpcAssets(path.join(root,m.npcManifest));registry=loadInstalledStockRegistry({catalogFile:path.join(root,m.catalog),catalogSha256:m.catalogSha256,assets,npcAssets});profiles=JSON.parse(fs.readFileSync(path.join(root,m.profiles)));}
 function fixture(latencyDiagnostics=false){loaded();let wall=0,sequence=0,generation=1,paused=false;const engine=new StockGameplay({registry,profiles,session,now:()=>wall,latencyDiagnostics});
  const vehicle=(id='bati',context='npc',model=0xf9300cc5)=>({id,generation:1,observationTicks:Math.round((1000+wall)*10000),model,context,position:[-.3,.1,.8],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],operatingPoint:.5,running:true,valid:true});

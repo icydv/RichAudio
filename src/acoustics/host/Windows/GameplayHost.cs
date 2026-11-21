@@ -40,7 +40,7 @@ namespace RichAudio.Beacon.Windows {
     string settingFile=AcousticSettingsStore.DefaultPath(config.Root);settings=powertrain==null?AcousticSettingsStore.Load(config.Root,settingFile):new AcousticSettings("performance","cpu",1,true,.8,false,false,"experimental-additive");
     if(config.TransportValidationOnly){code=RunTransportOnly();}
     else {
-    if(config.DiscardEnvironmentalOutput)delivery=new GameplayDeliveryTrace01();latencyProfile=GameplayLatencyProfile.Resolve(config.LatencyProfile);ring=new PcmRing(latencyProfile.StartupBlocks);creditWindow=new GameplayCreditWindow(latencyProfile);credits=latencyProfile.StartupBlocks;
+    if(config.DiscardEnvironmentalOutput)delivery=new GameplayDeliveryTrace01();latencyProfile=GameplayLatencyProfile.Resolve(config.LatencyProfile,powertrain!=null);ring=new PcmRing(latencyProfile.StartupBlocks);creditWindow=new GameplayCreditWindow(latencyProfile);credits=latencyProfile.StartupBlocks;
     if(!fixture&&(!settings.RichAudioEnabled||settings.IntegrationMode!="experimental-additive"))throw new InvalidOperationException("stock fallback selected");
     nodeJob=new OwnedProcessJob(1024);
     string producerArgs=Q(PlayableConfiguration.Inside(config.Root,"tools/Run-Gameplay.mjs"))+" --manifest "+Q(config.Manifest)+" --session "+session;

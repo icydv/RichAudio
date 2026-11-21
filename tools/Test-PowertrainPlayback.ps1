@@ -2,7 +2,8 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$Manifest,
-    [Parameter(Mandatory)][string]$OutputRoot
+    [Parameter(Mandatory)][string]$OutputRoot,
+    [switch]$ObserveBaselineExpiry
 )
 
 $ErrorActionPreference = 'Stop'
@@ -46,5 +47,7 @@ if ((Get-FileHash -LiteralPath $sdk).Hash -ne '1e4d0bc4d34d05a6038fc87eede492d3d
 [IO.File]::Copy($sdk, (Join-Path $output 'ScriptHookVDotNet3.dll'))
 & $compiler /nologo /optimize+ /warnaserror+ /langversion:5 /platform:x64 /r:System.Web.Extensions.dll /r:System.Runtime.Serialization.dll /define:POWERTRAIN_FIXTURE "/r:$output\ScriptHookVDotNet3.dll" "/out:$binary" @sources
 if ($LASTEXITCODE -ne 0) { throw 'Powertrain playback fixture compilation failed' }
-& $binary $manifestPath (Join-Path $output 'result.json') 2>&1 | Tee-Object -FilePath (Join-Path $output 'fixture.log')
+$testArguments = @($manifestPath, (Join-Path $output 'result.json'))
+if ($ObserveBaselineExpiry) { $testArguments += '--observe-baseline-expiry' }
+& $binary @testArguments 2>&1 | Tee-Object -FilePath (Join-Path $output 'fixture.log')
 if ($LASTEXITCODE -ne 0) { throw 'Device-free powertrain playback fixture failed' }
