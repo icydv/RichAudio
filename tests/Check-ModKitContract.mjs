@@ -10,6 +10,8 @@ for(const c of cases){const k=c.Kit;check(c.Domain==='original-synthetic-fixture
 const nonzero=cases.find(c=>c.Name==='functional-207');check(nonzero.Kit.After.Raw>nonzero.Kit.AvailableKitCount.Raw&&nonzero.Kit.Indication==='RAW_INDEX_SEMANTICS_UNKNOWN','global raw value never compared to model count');
 check(!JSON.stringify(cases).match(/private paths|private diagnostic|ScopeNonce|Handle|Generation/),'sanitized diagnostics only');
 const adapter=fs.readFileSync('src/benchmark/Bati/BatiAdapter.Rph.cs','utf8');
-check(adapter.includes('"SET_VEHICLE_MOD_KIT",typeof(void),Bike(id),selection')&&adapter.includes('selection==0'),'explicit documented default selection and void contract');
+check(adapter.includes('CallByName<int>("SET_VEHICLE_MOD_KIT",Bike(id),selection')&&adapter.includes('selection==0'),'documented int placeholder and unchanged default selection');
 check(!adapter.includes('"GET_VEHICLE_MOD_KIT",Bike(id))==0'),'old equality absent');
 console.log(`PASS: ${n} independent mod-kit diagnostic and boundary checks; synthetic only.`);
+
+check(!adapter.includes('typeof(void)'), 'no unsupported void invocation');
