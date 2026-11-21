@@ -4,11 +4,11 @@ I want RichAudio to replace one Bati's engine and exhaust while GTA continues to
 
 ## Existing research and exact evidence boundary
 
-`docs/P2_02_AUDIO_OWNERSHIP.md` is absent from this branch. Codex recovered and read its historical version at [d7c961a](https://github.com/icydv/RichAudio/blob/d7c961a22ccbfc75d0b1cbf74079b307a49fbcc2/docs/P2_02_AUDIO_OWNERSHIP.md), alongside `ARCHITECTURE.md`, the current Bati pipeline and the existing native-audio limits in `PLAYABLE_01.md`. The original 15 ownership tests and hypothetical backend have been brought forward under `tests/Test-AudioOwnershipLegacy.mjs` and `tests/ownership/legacy/OwnershipSimulation.mjs`; only the test import path changes. The original report and closed PLAYABLE-15 approvals are untouched.
+`docs/P2_02_AUDIO_OWNERSHIP.md` is absent from this branch. The analysis recovered and read its historical version at [d7c961a](https://github.com/icydv/RichAudio/blob/d7c961a22ccbfc75d0b1cbf74079b307a49fbcc2/docs/P2_02_AUDIO_OWNERSHIP.md), alongside `ARCHITECTURE.md`, the current Bati pipeline and the existing native-audio limits in `PLAYABLE_01.md`. The original 15 ownership tests and hypothetical backend have been brought forward under `tests/Test-AudioOwnershipLegacy.mjs` and `tests/ownership/legacy/OwnershipSimulation.mjs`; only the test import path changes. The original report and closed PLAYABLE-15 approvals are untouched.
 
 The earlier finding remains: metadata access and source reconstruction do not establish per-instance native engine suppression, an automatic engine sound handle, current-profile readback or independent recovery after the controller fails. The genuine PLAYABLE-15 audio was additive. My praise for the Bati sound does not establish native replacement.
 
-Codex rechecked these primary source pins on 2 November 2026:
+The analysis rechecked these primary source pins on 2 November 2026:
 
 - Cfx's community-maintained stock-native declarations: commit `c00e0ed83d06dcba2457424ba254fbaa7a05bf7e`. They describe interfaces; they are neither Rockstar guarantees nor tests of Enhanced 1.0.1158.16/RPH 1.132.1428.17748.
 - CodeWalker REL source: commit `485d56bec00262ed7fa472261cce7bbc6202b96e`, unchanged from the earlier research pin. No parser code, game records or assets are redistributed.

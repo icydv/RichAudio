@@ -51,7 +51,7 @@ The analytic observation fixture produces four valid paths: direct, ground refle
 | `05_absorptive_surfaces.wav` | Same geometry, lower authored reflectance | Reduced and darker reflected contribution |
 | `06_open_reference.wav` / `07_obstructed.wav` | Matched source/listener; wall absent/present | Stronger loss of high frequencies and level through authored transmission |
 
-The paired open/obstructed PCM peaks were 0.024019 and 0.002740. Combined-path peak was 0.034282. Every generated stereo comparison had finite samples, no clipping and zero limiter activation. These are numerical observations; subjective listening was not performed by the agent.
+The paired open/obstructed PCM peaks were 0.024019 and 0.002740. Combined-path peak was 0.034282. Every generated stereo comparison had finite samples, no clipping and zero limiter activation. These are numerical observations; subjective listening was not performed.
 
 Original private wall and ground captures also passed the adapter and produced a direct plus first-order reflected path each. They were recorded at different times and are rendered separately, with hypothetical source/listener placements. They are not combined into a contemporaneous GTA scene. Their declared model gives roughly 11.662 ms direct and 117.200 ms reflected arrivals, a clearer discrete-echo demonstration. Those values are illustrative consequences of assumed scale and placements.
 
