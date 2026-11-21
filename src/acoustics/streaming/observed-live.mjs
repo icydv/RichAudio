@@ -140,7 +140,7 @@ export class ObservedSimulationInput {
       }
     }
   }
-  update(snapshot,anchor,now) {
+  prepareSnapshot(snapshot,anchor,now) {
     let time;
     try{
       requireValue(this.config&&anchor?.state.session===this.config.listenerSession&&
@@ -163,10 +163,36 @@ export class ObservedSimulationInput {
         emitting:snapshot.emitting,directivity:0.2}));
       this.simulation.observe({time:now,session:snapshot.session,generation:snapshot.generation,listener,sources,paused:snapshot.paused});
     }catch(error){this.stats.poseRejected++;this.clear(error.message,'unavailable-pose');}
-    const control=this.simulation.update(now,{geometryTimeMs:time?.upper});
+    return time;
+  }
+  decorate(control,time,now){
     control.geometry={...this.status,stats:{...this.stats},sourceRights:'original-generated',
       mappedListener:this.simulation.records.at(-1)?.time===now?this.simulation.records.at(-1).listener:null,
       mappedSources:this.simulation.records.at(-1)?.time===now?this.simulation.records.at(-1).sources:null,clock:time??null};
     return control;
+  }
+  update(snapshot,anchor,now){
+    const time=this.prepareSnapshot(snapshot,anchor,now);
+    return this.decorate(this.simulation.update(now,{geometryTimeMs:time?.upper}),time,now);
+  }
+  async updateAccelerated(snapshot,anchor,now,backend,refreshAnchor=()=>anchor){
+    let time=this.prepareSnapshot(snapshot,anchor,now);
+    const frame=this.simulation.prepareUpdate(now,{geometryTimeMs:time?.upper});
+    if(frame.terminal)return this.decorate(this.simulation.completeUpdate(frame),time,now);
+    const current=()=>{
+      try{
+        time=this.clock.now(refreshAnchor());
+        if(!this.feed.current({session:this.config.geometrySession,build:this.config.build,interior:this.config.interior,nowMs:time.upper})){
+          this.stats.expired++;this.clear('original observation lease expired during acoustic work','expired');return false;
+        }
+        return true;
+      }catch(error){this.stats.poseRejected++;this.clear(error.message,'unavailable-pose');return false;}
+    };
+    if(!current())return this.decorate(this.simulation.update(now,{geometryTimeMs:time?.upper}),time,now);
+    const queries=await backend.query(frame.scene.tile,frame.segments,{generation:frame.geometryEpoch});
+    if(!current())return this.decorate(this.simulation.update(now,{geometryTimeMs:time?.upper}),time,now);
+    let control=this.simulation.completeUpdate(frame,queries);
+    if(!current())control=this.simulation.update(now,{geometryTimeMs:time?.upper});
+    return this.decorate(control,time,now);
   }
 }

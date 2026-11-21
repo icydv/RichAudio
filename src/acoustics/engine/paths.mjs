@@ -10,7 +10,7 @@ import {
   querySegment,
   inBox,
 } from "../research/local-geometry.mjs";
-import { pose } from "./contracts.mjs";
+import { pose, requireValue } from "./contracts.mjs";
 const E = 1e-8;
 export const mirror = (p, s) =>
   add(p, scale(s.normal, -2 * dot(sub(p, s.center), s.normal)));
@@ -25,6 +25,11 @@ export function pathGeometry(
   surfaces,
   stats = { queries: 0, surfaceTests: 0 },
 ) {
+  return finishPathGeometry(preparePathGeometry(scene,source,listener,surfaces),null,stats);
+}
+// Prepare finite reflection vertices once, then batch visibility independently.
+// The CPU and GPU-screened routes share the exact same path and material math.
+export function preparePathGeometry(scene,source,listener,surfaces) {
   const tile = scene.tile;
   const conditional = scene.observationModel?.visibilityAssumption === 'unobserved-space-assumed-clear';
   if (!inBox(source, tile.bounds) || !inBox(listener, tile.bounds))
@@ -59,6 +64,12 @@ export function pathGeometry(
     end = p;
   }
   const vertices = [source, ...points, listener];
+  if(vertices.some((p,i)=>i>0&&length(sub(p,vertices[i-1]))<=E))return {status:'degenerate'};
+  return {status:'prepared-geometry',scene,surfaces,source,listener,vertices,points,conditional};
+}
+export function finishPathGeometry(plan,queries=null,stats={queries:0,surfaceTests:0}) {
+  if(plan.status!=='prepared-geometry')return plan;
+  const {scene,surfaces,source,listener,vertices,points,conditional}=plan,tile=scene.tile;
   let distance = 0;
   const hits = [];
   let uncertain = false;
@@ -66,7 +77,7 @@ export function pathGeometry(
     const a = vertices[i],
       b = vertices[i + 1];
     if (length(sub(b, a)) <= E) return { status: "degenerate" };
-    const q = querySegment(tile, a, b);
+    const q = queries ? queries[i] : querySegment(tile, a, b);
     stats.queries++;
     stats.surfaceTests += q.surfaceTests;
     const actual = q.hits.filter(
@@ -106,11 +117,12 @@ export function pathGeometry(
     emissionDirection: unit(sub(vertices[1], source)),
   };
 }
-export function candidatePaths(scene) {
+export function candidatePaths(scene, {maxReflectors=scene.config.maxReflectors}={}) {
+  requireValue(Number.isInteger(maxReflectors)&&maxReflectors>=1&&maxReflectors<=16,'bounded reflector candidates');
   // Stable deterministic cap by ID. No hidden change of material or invented echo when pruned.
   const s = [...scene.tile.surfaces]
       .sort((a, b) => a.id.localeCompare(b.id, "en"))
-      .slice(0, scene.config.maxReflectors),
+      .slice(0, maxReflectors),
     result = [{ id: "direct", surfaces: [] }];
   if (scene.config.order >= 1)
     for (const a of s) result.push({ id: "r:" + a.id, surfaces: [a] });
@@ -130,6 +142,10 @@ export function solvePath(
   stats = { queries: 0, surfaceTests: 0 },
   geometryTimeMs = scene.tile.createdAt + arrivalTime * 1000,
 ) {
+  return finishPath(preparePath(scene,source,listenerTrack,arrivalTime,candidate,geometryTimeMs),null,stats);
+}
+export function preparePath(scene,source,listenerTrack,arrivalTime,candidate,
+  geometryTimeMs=scene.tile.createdAt+arrivalTime*1000) {
   if (
     !Number.isFinite(arrivalTime) ||
     arrivalTime < 0 ||
@@ -159,13 +175,17 @@ export function solvePath(
   state = pose(source.track, emission);
   if (!state.valid || residual > 1e-7)
     return { status: "source-unavailable-or-retarded-time-unconverged" };
-  const g = pathGeometry(
-    scene,
-    state.position,
-    listener.position,
-    candidate.surfaces,
-    stats,
-  );
+  const geometry=preparePathGeometry(scene,state.position,listener.position,candidate.surfaces);
+  return {status:'prepared-path',scene,source,listener,arrivalTime,candidate,state,emission,residual,geometry};
+}
+export function pathSegments(plan) {
+  if(plan.status!=='prepared-path'||plan.geometry.status!=='prepared-geometry')return [];
+  return plan.geometry.vertices.slice(0,-1).map((a,i)=>({a,b:plan.geometry.vertices[i+1]}));
+}
+export function finishPath(plan,queries=null,stats={queries:0,surfaceTests:0}) {
+  if(plan.status!=='prepared-path')return plan;
+  const {scene,source,listener,arrivalTime,candidate,state,emission,residual}=plan;
+  const g=finishPathGeometry(plan.geometry,queries,stats);
   if (!["clear", "blocked"].includes(g.status)) return g;
   if (g.distance / scene.config.soundSpeed > scene.config.maxDelay)
     return { status: "delay-budget" };

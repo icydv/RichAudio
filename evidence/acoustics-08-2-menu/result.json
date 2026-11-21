@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "base": "e8c20c2877e45a3a03c59ae08493cf7c1c96d6e7",
+  "targetGta": "1.0.1158.16",
+  "targetRph": "1.132.1428.17748",
+  "sdkSHA256": "5D439745604A5FEDBF8FA401520D4F296C1B6800D77E2923BA3BF9772182C7E0",
+  "sdkCompiled": true,
+  "gameLaunched": false,
+  "audioEndpointOpened": false,
+  "interface": "Separate public-RPH-API overlay; no supported stock Settings-category extension identified",
+  "newUiDependency": false,
+  "entry": {
+    "keyboard": "F10, configurable F1-F12 except F4",
+    "console": "RichAudioSettings",
+    "controller": "LB + D-pad Right"
+  },
+  "menuChecks": {
+    "schemaVersion": 1,
+    "checks": 960,
+    "provenance": "Software preview of actual menu drawing commands and illustrative status. Not an in-game screenshot.",
+    "gameLaunched": false,
+    "audioEndpointOpened": false,
+    "visibleWindowOpened": false,
+    "drawCommands": 92,
+    "hitRegions": 21,
+    "goldArgb": "D4AF37",
+    "resolutions": [
+      "800x600",
+      "1280x720",
+      "1920x1080",
+      "3440x1440"
+    ]
+  },
+  "nodeSuite": {
+    "tests": 431,
+    "failures": 0
+  },
+  "settingsChecks": 44,
+  "bridgeChecks": 59,
+  "adapterClassifierChecks": 21,
+  "originalHostChecks": 663,
+  "transportCases": 71,
+  "actualMenuToPcm": {
+    "deviceConstructed": false,
+    "visibleWindowShown": false,
+    "changesAcknowledged": true,
+    "nativeMenuModelApplied": true,
+    "earlyReflectionsOffDirectOnly": true,
+    "mutedBlocks": 12,
+    "mutedEnergy": 0,
+    "resumedEnergy": 0.0003788162955946062,
+    "maximumAdjacentStep": 0.000025440605895710178,
+    "emittingWhileMutedBlocks": 102,
+    "sourceIdentities": 1,
+    "maximumProcessedPaths": 21,
+    "receivedBlocks": 390,
+    "peak": 0.0011162054724991322,
+    "underflowFrames": 0,
+    "rejectedBlocks": 0,
+    "error": null
+  },
+  "ownedOutputSmoothingTimeConstantMs": 20,
+  "dopplerBypass": "not implemented; read-only propagation-coupled processing",
+  "qualityAndAcceleration": "Existing real backends and 12/16/32/64 ceilings; Quality/Max experimental timing limits retained",
+  "preservation": {
+    "sealedCandidateUnchanged": true,
+    "existingDeploymentManifestUnchanged": true,
+    "historicalCombinedMilestonePercent": 60,
+    "originalCiCause": "unknown"
+  },
+  "remaining": [
+    "Actual Enhanced overlay/font and cursor behavior",
+    "Keyboard/controller conflicts and pause/unload behavior under GTA",
+    "Fresh reviewed live bindings and separate authorization; no deployment or live authorization created"
+  ]
+}

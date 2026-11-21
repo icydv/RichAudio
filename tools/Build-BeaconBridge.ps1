@@ -19,8 +19,17 @@ if(!$CoreOnly)
     $binary=Join-Path $output 'RichAudio.Beacon.Rph.dll'
     $geometry=@(Get-ChildItem (Join-Path $repo 'src\acoustics\geometry') -Filter '*.cs'|ForEach-Object FullName)
     $geometry+=@('GeometryObservation.cs','SurfaceAcquisition.cs','DiagnosticTile.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\observation\'+$_)}
-    & $compiler @base '/r:System.Web.Extensions.dll' ('/r:'+$SdkPath) ('/out:'+$binary) @transport @geometry @adapter
+    $menu=@(Get-ChildItem (Join-Path $repo 'src\acoustics\settings\InGame') -Filter '*.cs'|ForEach-Object FullName)
+    $menu+=@('AcousticSettings.cs','InGameSettingsBridge.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\host\Windows\'+$_)}
+    & $compiler @base '/r:System.Web.Extensions.dll' '/r:System.Drawing.dll' '/r:System.Windows.Forms.dll' '/r:Microsoft.CSharp.dll' ('/r:'+$SdkPath) ('/out:'+$binary) @transport @geometry @menu @adapter
     if($LASTEXITCODE -ne 0){throw 'Listener RPH adapter build failed.'}
+    # Prepared application configuration only, outside the game. A future live
+    # package must separately bind this opt-in sidecar and the changed plugin.
+    $menuConfig=Join-Path $output 'RichAudio.Menu.json'
+    if(!(Test-Path -LiteralPath $menuConfig)){
+        [ordered]@{schemaVersion=1;workspaceRoot=$repo;settingsPath='.local/acoustic-settings.json';toggleKey='F10';controllerEnabled=$true} |
+            ConvertTo-Json | Set-Content -LiteralPath $menuConfig -Encoding UTF8
+    }
     [ordered]@{schema=1;sdkSha256=$hash;sdkFileVersion=[Diagnostics.FileVersionInfo]::GetVersionInfo($SdkPath).FileVersion;pluginSha256=(Get-FileHash -LiteralPath $binary -Algorithm SHA256).Hash;targetGta='1.0.1158.16';targetRph='1.132.1428.17748';scope='compiled-only; not deployed or live validated';dependencies='Windows .NET Framework; authentic private RPH SDK'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $output 'bridge-build-receipt.json') -Encoding UTF8
 }
 Write-Output 'ACOUSTICS-07 listener bridge built locally; no game files deployed.'
