@@ -1,0 +1,693 @@
+{
+  "schemaVersion": 1,
+  "milestone": "P2-03.8",
+  "outcome": "PARTIAL",
+  "conclusion": "2: Partial improvement reproduced",
+  "parentCommit": "003f9b10f1fda4ae2de2fe02bd8bef0bc28c8ba3",
+  "classification": "Single preselected second-state outer-wrap ablation; synthetic relative state, not physical RPM or native synthesis",
+  "sourceSha256": "574DBB61C486F18848839300C9D72219957258CEEA6B1F93710EB72EF6270F2F",
+  "manifestSha256": "60C7226D1ACA1CB983F7C0CB40CADF9001B7803104959A25029BF416709A0AF5",
+  "metadataSha256": "A46E440BE76E42ABF55F37444836C3BF4B392E9CE3292A5755579DB383697288",
+  "selectionReceiptSha256": "C0A172C47D1E60D20C49505308BBC5CBFAFD7CCBF6B00F827C25E8668D1ED818",
+  "historicalState21Sha256": "3BD4C814A3EB88B5B6D6616581B9220623BA3B49515F85D7F9BBCDC3B99CC81F",
+  "selection": {
+    "rule": {
+      "version": 1,
+      "states": "integers 14 through 28, excluding 21",
+      "minimumIntervals": 3,
+      "maximumIntervals": 16,
+      "eligibility": "source state 14–28, requested-state error <=2%, both rounded event-length rates 0.95–1.05, existing interpolation/continuation margins",
+      "order": "greatest absolute distance from 21; longest consecutive run; greatest minimum state/rate margin; lower state; lower first interval index",
+      "noFallback": "Selection uses metadata only. Waveform safety is tested after selection; failure never selects another state."
+    },
+    "chosen": {
+      "state": 27,
+      "normalisedState": 0.9285714285714286,
+      "separation": 6,
+      "intervals": [
+        {
+          "index": 66,
+          "start": 97034,
+          "end": 98782,
+          "state": 27.41861725
+        },
+        {
+          "index": 67,
+          "start": 98782,
+          "end": 100544,
+          "state": 27.15200235
+        },
+        {
+          "index": 68,
+          "start": 100544,
+          "end": 102329,
+          "state": 26.83685095
+        },
+        {
+          "index": 69,
+          "start": 102329,
+          "end": 104134,
+          "state": 26.52469615
+        }
+      ],
+      "frames": 7100,
+      "seconds": 0.14791666666666667,
+      "stateRange": [
+        26.52469615,
+        27.41861725
+      ],
+      "rateRange": [
+        0.983127109111361,
+        1.015756893640968
+      ],
+      "margin": 0.002396153703703722
+    },
+    "candidateSummary": [
+      {
+        "state": 27,
+        "separation": 6,
+        "intervalCount": 4,
+        "minimumMargin": 0.002396153703703722
+      },
+      {
+        "state": 15,
+        "separation": 6,
+        "intervalCount": 3,
+        "minimumMargin": 0.002356646666666698
+      },
+      {
+        "state": 26,
+        "separation": 5,
+        "intervalCount": 4,
+        "minimumMargin": 0.0017336519230769405
+      },
+      {
+        "state": 16,
+        "separation": 5,
+        "intervalCount": 4,
+        "minimumMargin": 0.0010988906249999979
+      },
+      {
+        "state": 25,
+        "separation": 4,
+        "intervalCount": 3,
+        "minimumMargin": 0.006440446000000009
+      },
+      {
+        "state": 24,
+        "separation": 3,
+        "intervalCount": 4,
+        "minimumMargin": 0.00036354166666672724
+      },
+      {
+        "state": 23,
+        "separation": 2,
+        "intervalCount": 4,
+        "minimumMargin": 0.0007180304347826523
+      },
+      {
+        "state": 19,
+        "separation": 2,
+        "intervalCount": 3,
+        "minimumMargin": 0.005507263157894673
+      },
+      {
+        "state": 22,
+        "separation": 1,
+        "intervalCount": 7,
+        "minimumMargin": 0.0008522590909092291
+      },
+      {
+        "state": 20,
+        "separation": 1,
+        "intervalCount": 3,
+        "minimumMargin": 0.000754710000000075
+      }
+    ],
+    "noListeningInfluence": true,
+    "noFallback": true
+  },
+  "settings": {
+    "rate": 48000,
+    "frames": 240000,
+    "seconds": 5,
+    "normalisedState": 0.9285714285714286,
+    "markerState": 27,
+    "seam": 96,
+    "gain": 0.15,
+    "edge": 1200
+  },
+  "eventCount": 135,
+  "internalBoundaryCount": 101,
+  "wrapCount": 33,
+  "float": {
+    "all": {
+      "samples": 240000,
+      "changedSamples": 3168,
+      "maxAbsoluteDifference": 0.014989650960870316,
+      "rmsDifference": 0.0007920729568530539
+    },
+    "targeted": {
+      "samples": 3168,
+      "changedSamples": 3168,
+      "maxAbsoluteDifference": 0.014989650960870316,
+      "rmsDifference": 0.006894110183743912
+    },
+    "unaffected": {
+      "samples": 236832,
+      "changedSamples": 0,
+      "maxAbsoluteDifference": 0,
+      "rmsDifference": 0
+    },
+    "internalWindows": {
+      "samples": 9696,
+      "changedSamples": 0,
+      "maxAbsoluteDifference": 0,
+      "rmsDifference": 0
+    }
+  },
+  "pcm": {
+    "all": {
+      "samples": 240000,
+      "changedSamples": 3102,
+      "maxAbsoluteDifference": 0.014984130859375,
+      "rmsDifference": 0.0007919615394872744
+    },
+    "targeted": {
+      "samples": 3168,
+      "changedSamples": 3102,
+      "maxAbsoluteDifference": 0.014984130859375,
+      "rmsDifference": 0.006893140420050529
+    },
+    "unaffected": {
+      "samples": 236832,
+      "changedSamples": 0,
+      "maxAbsoluteDifference": 0,
+      "rmsDifference": 0
+    },
+    "internalWindows": {
+      "samples": 9696,
+      "changedSamples": 0,
+      "maxAbsoluteDifference": 0,
+      "rmsDifference": 0
+    },
+    "measurements": {
+      "A": {
+        "rate": 48000,
+        "channels": 1,
+        "frames": 240000,
+        "durationSeconds": 5,
+        "peak": 0.119659423828125,
+        "rms": 0.05394316971106976,
+        "dc": -0.00669241320292155,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.009002685546875,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 250
+      },
+      "B": {
+        "rate": 48000,
+        "channels": 1,
+        "frames": 240000,
+        "durationSeconds": 5,
+        "peak": 0.119659423828125,
+        "rms": 0.053952308700653956,
+        "dc": -0.006761959584554037,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.009002685546875,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 250
+      }
+    },
+    "safety": {
+      "passed": true,
+      "reasons": [],
+      "addedSpliceResidualLimit": 0.0375,
+      "pcmAllowance": 0.000030517578125,
+      "maxAddedSpliceResidualB": 0.0004145303493164581,
+      "maxDirectTargetErrorB": 0.0000151368150847625,
+      "basis": "Unchanged raw .25 mismatch scaled by gain .15; natural derivatives are not splice-error thresholds. Technical screen, not universal audibility."
+    },
+    "resolution": {
+      "meaningfulAtPcm16": true,
+      "note": "Quantisation resolution only; not perceptual acceptance"
+    }
+  },
+  "wrapWindows": [
+    {
+      "start": 7111,
+      "end": 7207
+    },
+    {
+      "start": 14222,
+      "end": 14318
+    },
+    {
+      "start": 21333,
+      "end": 21429
+    },
+    {
+      "start": 28444,
+      "end": 28540
+    },
+    {
+      "start": 35556,
+      "end": 35652
+    },
+    {
+      "start": 42667,
+      "end": 42763
+    },
+    {
+      "start": 49778,
+      "end": 49874
+    },
+    {
+      "start": 56889,
+      "end": 56985
+    },
+    {
+      "start": 64000,
+      "end": 64096
+    },
+    {
+      "start": 71111,
+      "end": 71207
+    },
+    {
+      "start": 78222,
+      "end": 78318
+    },
+    {
+      "start": 85333,
+      "end": 85429
+    },
+    {
+      "start": 92444,
+      "end": 92540
+    },
+    {
+      "start": 99556,
+      "end": 99652
+    },
+    {
+      "start": 106667,
+      "end": 106763
+    },
+    {
+      "start": 113778,
+      "end": 113874
+    },
+    {
+      "start": 120889,
+      "end": 120985
+    },
+    {
+      "start": 128000,
+      "end": 128096
+    },
+    {
+      "start": 135111,
+      "end": 135207
+    },
+    {
+      "start": 142222,
+      "end": 142318
+    },
+    {
+      "start": 149333,
+      "end": 149429
+    },
+    {
+      "start": 156444,
+      "end": 156540
+    },
+    {
+      "start": 163556,
+      "end": 163652
+    },
+    {
+      "start": 170667,
+      "end": 170763
+    },
+    {
+      "start": 177778,
+      "end": 177874
+    },
+    {
+      "start": 184889,
+      "end": 184985
+    },
+    {
+      "start": 192000,
+      "end": 192096
+    },
+    {
+      "start": 199111,
+      "end": 199207
+    },
+    {
+      "start": 206222,
+      "end": 206318
+    },
+    {
+      "start": 213333,
+      "end": 213429
+    },
+    {
+      "start": 220444,
+      "end": 220540
+    },
+    {
+      "start": 227556,
+      "end": 227652
+    },
+    {
+      "start": 234667,
+      "end": 234763
+    }
+  ],
+  "boundarySummary": {
+    "maximumInitialStep": {
+      "A": 0.0008544921875,
+      "B": 0.00128173828125
+    },
+    "maximumLocalStep": {
+      "A": 0.0054931640625,
+      "B": 0.0054931640625
+    },
+    "meanLocalRms": {
+      "A": 0.026263681342412002,
+      "B": 0.026791675982754264
+    },
+    "endpointJump": -7100,
+    "maxRawPreparationMismatch": 0.012529700544222588,
+    "wrapRawMismatchRange": [
+      0.0028442446089511093,
+      0.0028442446089511093
+    ],
+    "meanRelativeComplexSpectrumDifference": 0.03174150246248203,
+    "maxRelativeComplexSpectrumDifference": 0.03174278103328297,
+    "meanPrePostNormalisedMagnitudeChange": {
+      "A": 0.1041584077434832,
+      "B": 0.1041582263288249
+    },
+    "dominantSpectralBinHz": 105.46875,
+    "spectralCaution": "Finite-window magnitude/phase variation; not a click, combustion frequency, RPM or naturalness detector"
+  },
+  "schedulePeriod": {
+    "intervalPatternEvents": 4,
+    "roundedClockPatternEvents": 9,
+    "combinedEvents": 36,
+    "frames": 64000,
+    "seconds": 1.3333333333333333,
+    "nearPassLagFrames": 7111
+  },
+  "recurrence": {
+    "A": {
+      "exact": {
+        "trimFrames": 4800,
+        "maxLagFrames": 96000,
+        "anchorLength": 1024,
+        "anchorMatches": 3,
+        "limited": false,
+        "exactPeriods": [
+          {
+            "lagFrames": 64000,
+            "comparedSamples": 166400,
+            "differentSamples": 0,
+            "rmsDifference": 0,
+            "normalisedCorrelation": 1
+          }
+        ]
+      },
+      "scheduleLag": {
+        "lagFrames": 64000,
+        "comparedSamples": 166400,
+        "differentSamples": 0,
+        "rmsDifference": 0,
+        "normalisedCorrelation": 1
+      },
+      "nearPassLag": {
+        "lagFrames": 7111,
+        "comparedSamples": 223289,
+        "differentSamples": 47012,
+        "rmsDifference": 0.0006268973699496579,
+        "normalisedCorrelation": 0.9999329220226301
+      }
+    },
+    "B": {
+      "exact": {
+        "trimFrames": 4800,
+        "maxLagFrames": 96000,
+        "anchorLength": 1024,
+        "anchorMatches": 3,
+        "limited": false,
+        "exactPeriods": [
+          {
+            "lagFrames": 64000,
+            "comparedSamples": 166400,
+            "differentSamples": 0,
+            "rmsDifference": 0,
+            "normalisedCorrelation": 1
+          }
+        ]
+      },
+      "scheduleLag": {
+        "lagFrames": 64000,
+        "comparedSamples": 166400,
+        "differentSamples": 0,
+        "rmsDifference": 0,
+        "normalisedCorrelation": 1
+      },
+      "nearPassLag": {
+        "lagFrames": 7111,
+        "comparedSamples": 223289,
+        "differentSamples": 46984,
+        "rmsDifference": 0.0006270603510044896,
+        "normalisedCorrelation": 0.9999329106773588
+      }
+    }
+  },
+  "texture": {
+    "A": {
+      "windowFrames": 4096,
+      "windows": 32,
+      "rms": {
+        "count": 32,
+        "min": 0.05282027558339419,
+        "max": 0.05519639400306524,
+        "mean": 0.054095471052116026,
+        "median": 0.0539380212993832,
+        "cv": 0.011846584417618563
+      },
+      "centroidHz": {
+        "count": 32,
+        "min": 235.9901566119809,
+        "max": 245.79683123297804,
+        "mean": 240.88120797109738,
+        "median": 240.60367718273238,
+        "cv": 0.010601003795128213
+      },
+      "below250Fraction": {
+        "count": 32,
+        "min": 0.6082964540695102,
+        "max": 0.6369111141410057,
+        "mean": 0.6170023535214791,
+        "median": 0.6146332017642239,
+        "cv": 0.012685460131657967
+      },
+      "above1kFraction": {
+        "count": 32,
+        "min": 0.018857603704343872,
+        "max": 0.025897753774356682,
+        "mean": 0.02113971232389116,
+        "median": 0.020152423750844486,
+        "cv": 0.09239071114603382
+      },
+      "normalisedSpectralFlux": {
+        "count": 31,
+        "min": 0.015421101849131855,
+        "max": 0.032965014968324546,
+        "mean": 0.021578836219276174,
+        "median": 0.02000523983786095,
+        "cv": 0.22322175220452906
+      },
+      "caution": "Different observation lengths/state progression confound variation comparisons. These summaries are not naturalness scores."
+    },
+    "B": {
+      "windowFrames": 4096,
+      "windows": 32,
+      "rms": {
+        "count": 32,
+        "min": 0.05282027558339419,
+        "max": 0.055212243933356726,
+        "mean": 0.05410356248449458,
+        "median": 0.05394614622738646,
+        "cv": 0.011843798149627015
+      },
+      "centroidHz": {
+        "count": 32,
+        "min": 236.10956186998632,
+        "max": 245.86000260209192,
+        "mean": 240.91521516148777,
+        "median": 240.60367718273238,
+        "cv": 0.010603682482133107
+      },
+      "below250Fraction": {
+        "count": 32,
+        "min": 0.6081568830446689,
+        "max": 0.6354999239433424,
+        "mean": 0.6167081980945412,
+        "median": 0.6146332017642239,
+        "cv": 0.012113218826644623
+      },
+      "above1kFraction": {
+        "count": 32,
+        "min": 0.018857603704343872,
+        "max": 0.025890681147684686,
+        "mean": 0.021069579673324013,
+        "median": 0.02001147725422513,
+        "cv": 0.0926616563049576
+      },
+      "normalisedSpectralFlux": {
+        "count": 31,
+        "min": 0.015421101849131855,
+        "max": 0.03203186355153852,
+        "mean": 0.021443442402020573,
+        "median": 0.02000523983786095,
+        "cv": 0.21348997044543486
+      },
+      "caution": "Different observation lengths/state progression confound variation comparisons. These summaries are not naturalness scores."
+    },
+    "note": "32 fixed 4096-frame observations: envelope, spectral centroid/bands and normalised spectral flux; not a physical fundamental or naturalness test."
+  },
+  "outputs": {
+    "A_second_state_outer_blends.wav": {
+      "sha256": "90440947872CC5EE180E755A48A1D43A74CD7C70497405CEB7D8E85A99607546",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 240000,
+      "durationSeconds": 5,
+      "peak": 0.119659423828125,
+      "rms": 0.05394316971106976,
+      "dc": -0.00669241320292155,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.009002685546875,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 250
+    },
+    "B_second_state_direct_wrap.wav": {
+      "sha256": "944D59F31B453CE82C464968649ECAD2C303BAA04BC519D762047FB1195E4911",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 240000,
+      "durationSeconds": 5,
+      "peak": 0.119659423828125,
+      "rms": 0.053952308700653956,
+      "dc": -0.006761959584554037,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.009002685546875,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 250
+    }
+  },
+  "performance": {
+    "preparationMs": 45.5378,
+    "rendering": {
+      "A": {
+        "renderMs": 29.959900000000005,
+        "referenceMs": 29.9452,
+        "overwriteMs": 0.018999999999991246,
+        "actualInterpolationCalls": 243168,
+        "overwrittenSamples": 0,
+        "computedReferenceWraps": 33,
+        "signalWrapBlends": 33,
+        "note": "B computes the same reference then overwrites only wrap samples; discarded work is counted, not an optimisation."
+      },
+      "B": {
+        "renderMs": 30.330799999999996,
+        "referenceMs": 29.839399999999998,
+        "overwriteMs": 0.4919999999999902,
+        "actualInterpolationCalls": 246336,
+        "overwrittenSamples": 3168,
+        "computedReferenceWraps": 33,
+        "signalWrapBlends": 0,
+        "note": "B computes the same reference then overwrites only wrap samples; discarded work is counted, not an optimisation."
+      }
+    },
+    "cpuUserMs": 63,
+    "cpuSystemMs": 16,
+    "rssBytes": 61464576,
+    "reverseOrderRendering": {
+      "A": {
+        "renderMs": 28.20689999999999,
+        "referenceMs": 28.19470000000001,
+        "overwriteMs": 0.014099999999984902,
+        "actualInterpolationCalls": 243168,
+        "overwrittenSamples": 0,
+        "computedReferenceWraps": 33,
+        "signalWrapBlends": 33,
+        "note": "B computes the same reference then overwrites only wrap samples; discarded work is counted, not an optimisation."
+      },
+      "B": {
+        "renderMs": 30.3159,
+        "referenceMs": 29.831000000000003,
+        "overwriteMs": 0.48860000000000525,
+        "actualInterpolationCalls": 246336,
+        "overwrittenSamples": 3168,
+        "computedReferenceWraps": 33,
+        "signalWrapBlends": 0,
+        "note": "B computes the same reference then overwrites only wrap samples; discarded work is counted, not an optimisation."
+      }
+    },
+    "equivalentOutputsMatch": true,
+    "caveat": "B includes discarded reference arithmetic and overwrite work; no optimisation or real-time performance claim."
+  },
+  "listening": {
+    "comparison": "One labelled five-second A then B playback, identical gain",
+    "verdict": "B slightly more natural",
+    "followUp": "no it sounded fine",
+    "firstPerson": "I found B slightly more natural and reported no new problem in the follow-up.",
+    "limits": "I did not separately grade repetition or standalone realism; not blind or repeated listening.",
+    "outcome": "PARTIAL",
+    "conclusion": 2
+  },
+  "preservation": {
+    "priorFiles": 1990,
+    "priorLinks": 35,
+    "protectedFiles": 2272,
+    "protectedLinkTargets": 43,
+    "acceptedReferenceMatches": true,
+    "legacyRendererDefaultsUnchanged": true,
+    "noGameOrArchiveAccess": true
+  },
+  "validation": {
+    "newSyntheticTests": 19,
+    "focusedTests": 39,
+    "fullLocalSuite": "PASS",
+    "phase1BeforeDocumentation": 129,
+    "phase1AfterDocumentation": 130,
+    "hostedCi": "Verified separately on the PR; not inferred from local tests"
+  },
+  "nextDecision": "I propose one separately authorised, slow exhaust-only transition feasibility experiment between the two tested hold regions, first checking intervening eligibility and transition policy under unchanged bounds. Not implemented.",
+  "limitations": [
+    "Smaller subjective benefit than the historical state-21 observation; no controlled cross-state effect-size comparison",
+    "Not universal direct-wrap safety or native scheduling semantics",
+    "No independent repetition or standalone-realism rating",
+    "No live RPM, source suppression/ownership, real-time integration or Phase 3 advance",
+    "No source PCM, proprietary metadata blob or full event schedule published"
+  ]
+}
