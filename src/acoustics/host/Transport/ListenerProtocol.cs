@@ -112,10 +112,12 @@ namespace RichAudio.Beacon.Transport
         private string session;private long generation,sequence=-1,ticks=-1,gameTime=-1;
         public long SequenceGaps{get;private set;} public long GenerationChanges{get;private set;}
         public double LastAgeMs{get;private set;}
+        public double DecisionAgeMs{get;private set;} public string AgeClass{get;private set;}
         public void Accept(ListenerState state,long nowTicks)
         {
             Protocol.Validate(state);
             double age=(nowTicks-state.ObservationTicks)*1000.0/Stopwatch.Frequency;
+            DecisionAgeMs=age;AgeClass=age < -2 ? "future-dated" : age > 250 ? "too-old" : "within-bounds";
             Protocol.Check(age>=-2&&age<=250,"stale or future observation");
             if(session!=null){Protocol.Check(state.Session==session,"session changed without reconnect");Protocol.Check(state.Sequence>sequence&&state.ObservationTicks>ticks,"duplicate or reordered state");Protocol.Check(state.Generation>=generation,"generation rollback");Protocol.Check(state.GameTimeMs>=gameTime||state.Generation>generation,"game clock reset without generation");}
             if(sequence>=0){SequenceGaps+=state.Sequence-sequence-1;if(state.Generation>generation)GenerationChanges++;}
