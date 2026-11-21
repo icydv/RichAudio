@@ -1,0 +1,281 @@
+--- a/IdleExperiment.cs
++++ b/IdleExperiment.cs
+@@ -28,9 +28,9 @@
+         string Snapshot(Lifetime item);
+     }
+-    internal enum SelectionEvidence { None, StockBatiNormal, SelfAssignmentStable, StockAlternateDistinct, BatiReturned, PrivatePredictedSignature, GenericAudibleChange, StockLikeOnly }
++    internal enum SelectionEvidence { None, StockBatiNormal, SelfAssignmentStable, UnknownNameReviewed, BatiReturned }
+     internal sealed class IdleExperiment
+     {
+         internal static readonly string[] Profiles = {
+-            "BATI", "ADDER", "BATI", "ra_ns06_adder_select", "BATI"
++            "BATI", "ra_quiet_orchard", "BATI"
+         };
+         readonly IIdleApi api;
+@@ -43,5 +43,5 @@
+         long end, loadEnd, armEnd, releaseBy, observationStart, hornCue;
+         int applied = -1;
+-        bool baselineAccepted, observationPending, stockPositiveAccepted, releaseOutcomeRecorded;
++        bool baselineAccepted, observationPending, releaseOutcomeRecorded;
+         internal SelectionEvidence ExpectedEvidence {
+             get {
+@@ -50,7 +50,6 @@
+                 switch (applied) {
+                     case 0: return SelectionEvidence.SelfAssignmentStable;
+-                    case 1: return SelectionEvidence.StockAlternateDistinct;
+-                    case 2: case 4: return SelectionEvidence.BatiReturned;
+-                    case 3: return SelectionEvidence.PrivatePredictedSignature;
++                    case 1: return SelectionEvidence.UnknownNameReviewed;
++                    case 2: return SelectionEvidence.BatiReturned;
+                     default: return SelectionEvidence.None;
+                 }
+@@ -137,7 +136,7 @@
+         {
+             if (!Active || !healthy() || next >= Profiles.Length || clock() >= end) throw new InvalidOperationException("no next phase");
+-            if (!baselineAccepted || observationPending || (next >= 2 && !stockPositiveAccepted))
++            if (!baselineAccepted || observationPending)
+             { Stop("required independently reviewed observation missing"); throw new InvalidOperationException("observation required before progression"); }
+-            if (clock() >= releaseBy || (next != 2 && next != 4 && end - clock() < 100 * frequency))
++            if (clock() >= releaseBy || (next != 2 && end - clock() < 100 * frequency))
+             { Stop("insufficient diagnostic/release time"); throw new InvalidOperationException("timing reserve"); }
+             try { RequirePair(); if (!api.CanSwitch(a, b)) throw new InvalidOperationException("A must idle with my ped driving, B idling, empty and stopped"); }
+@@ -177,11 +176,10 @@
+             catch (ThreadAbortException) { throw; }
+             catch { Stop("apply operating context failed"); throw; }
+-            if (!baselineAccepted || observationPending || (next >= 2 && !stockPositiveAccepted))
++            if (!baselineAccepted || observationPending)
+                 throw new InvalidOperationException("required observation missing");
+-            if (clock() >= releaseBy || (next != 2 && next != 4 && end - clock() < 100 * frequency))
++            if (clock() >= releaseBy || (next != 2 && end - clock() < 100 * frequency))
+             { Stop("final phase timing reserve"); throw new InvalidOperationException("timing reserve"); }
+             applied = next;
+             string profile = Profiles[next++]; // Consume before dispatch, including a throwing void native.
+-            changed = true;
+             log("assignment-intent phase=" + (next - 1) + " handle=" + a.Handle + " token=" + a.Token + " profile=" + profile);
+             try
+@@ -189,13 +187,14 @@
+                 api.Assign(a, profile, delegate {
+                     bool admitted = !aborted && !stopped && healthy() && clock() < expiry && clock() < releaseBy &&
+-                        (applied == 2 || applied == 4 || end - clock() >= 100 * frequency);
++                        (applied == 2 || end - clock() >= 100 * frequency);
+                     // A refused final guard has not dispatched BATI; the stop
+                     // path may still perform its separately admitted release.
+-                    if (admitted && (applied == 2 || applied == 4)) restoreAttempted = true;
++                    if (admitted && (applied == 2)) restoreAttempted = true;
++                    if (admitted) changed = true;
+                     return admitted;
+                 });
+                 observationStart = clock(); hornCue = 0; observationPending = true; releaseOutcomeRecorded = false;
+-                if (applied == 2 || applied == 4) { changed = false; RestoreReturned = true; }
+-                if (applied == 4) stopped = true;
++                if (applied == 2) { changed = false; RestoreReturned = true; }
++                if (applied == 2) stopped = true;
+                 Status = "REQUEST RETURNED " + profile + " - automatic fixed observation; listening verdict pending";
+                 log(Status); Snapshot();
+@@ -239,9 +238,7 @@
+             { Stop("missing or ambiguous independent audible evidence"); throw new InvalidOperationException("wrong evidence for intended phase"); }
+             // A manual attestation, not automatic acoustic analysis or an effective-profile getter.
+-            // Generic quietness and stock similarity cannot attest a private donor reference.
+             log("reviewed-observation-accepted intended=" + (applied == -1 ? "stock baseline BATI" : Profiles[applied]) +
+                 " evidence=" + evidence + "; session/phase-bound listening and capture review; getter not gated; controller does not measure audio");
+             baselineAccepted = true; observationPending = false;
+-            if (applied == 1) stockPositiveAccepted = true;
+             if (evidence == SelectionEvidence.BatiReturned) {
+                 releaseOutcomeRecorded = true;
+@@ -277,5 +274,5 @@
+                 {
+                     api.Assign(a, "BATI", delegate { return !aborted&&clock()<end; }); changed = false; RestoreReturned = true;
+-                    applied = 4; observationStart = clock(); hornCue = 0; observationPending = true; releaseOutcomeRecorded = false;
++                    applied = 2; observationStart = clock(); hornCue = 0; observationPending = true; releaseOutcomeRecorded = false;
+                     Status = "BATI restore returned - record same surviving A before F10 cleanup";
+                 }
+--- a/IdleNativeApi.cs
++++ b/IdleNativeApi.cs
+@@ -23,6 +23,13 @@
+         readonly Dictionary<string,long> evidenceAt=new Dictionary<string,long>();
+         bool creationUnknown;public bool CreationUnknown{get{return creationUnknown;}}
+-        internal IdleNativeApi(IIdleDecoratorLock decoratorLock = null, Action<string> log = null,IIdleNativeCalls calls=null,Func<long> clock=null,long frequency=0)
+-        { this.decoratorLock=decoratorLock;this.log=log??delegate(string line){};native=calls??new IdleNativeCalls();this.clock=clock??Stopwatch.GetTimestamp;this.frequency=frequency>0?frequency:Stopwatch.Frequency; }
++        readonly Func<int,Action<string>> resolveAudioSetter;
++        static Action<string> VehicleAudioSetter(int handle)
++        {
++            Vehicle vehicle = Entity.FromHandle(handle) as Vehicle;
++            if (vehicle == null) throw new InvalidOperationException("Owned vehicle no longer available");
++            return vehicle.ForceUseAudioGameObject;
++        }
++        internal IdleNativeApi(IIdleDecoratorLock decoratorLock = null, Action<string> log = null,IIdleNativeCalls calls=null,Func<long> clock=null,long frequency=0,Func<int,Action<string>> audioSetter=null)
++        { resolveAudioSetter=audioSetter??VehicleAudioSetter;this.decoratorLock=decoratorLock;this.log=log??delegate(string line){};native=calls??new IdleNativeCalls();this.clock=clock??Stopwatch.GetTimestamp;this.frequency=frequency>0?frequency:Stopwatch.Frequency; }
+         Vector3 a, b;
+         float heading;
+@@ -151,6 +158,7 @@
+             // cross a deadline. A release has its own narrowly scoped guard.
+             log("native-dispatch-intent role=A handle=" + item.Handle + " token=" + item.Token + " native=4F0C413926060B38 requested=" + profile + "; final admission pending; effective object UNKNOWN");
+-            if (!stillAdmitted()) throw new InvalidOperationException("assignment admission expired or revoked");
+-            native.Call((Hash)0x4F0C413926060B38UL, item.Handle, profile);
++            var setAudio = resolveAudioSetter(item.Handle);
++            if (!CanRestore(item) || !stillAdmitted()) throw new InvalidOperationException("assignment admission expired or revoked");
++            setAudio(profile);
+             log("native-dispatch-returned role=A handle=" + item.Handle + " token=" + item.Token + " requested=" + profile + "; audible outcome unmeasured");
+         }
+@@ -254,5 +262,5 @@
+         public void HornA(Lifetime target) {
+             SetupObservation s=Observe(target,null);string why=VehicleProblem(s.A,false,true);
+-            if(++horns>7||!s.PlayerValid||!s.Story||!s.Coherent||why!=null||!s.InVehicle||s.CurrentVehicle!=target.Handle||s.A.Driver!=savedPed||!s.A.Engine)throw new InvalidOperationException("physical-horn-refused count="+horns+" reason="+(why??"player/engine/context")+" "+s);
++            if(++horns>4||!s.PlayerValid||!s.Story||!s.Coherent||why!=null||!s.InVehicle||s.CurrentVehicle!=target.Handle||s.A.Driver!=savedPed||!s.A.Engine)throw new InvalidOperationException("physical-horn-refused count="+horns+" reason="+(why??"player/engine/context")+" "+s);
+             log("vehicle-horn-dispatch-intent role=A handle="+target.Handle+" token="+target.Token+" durationMs=600 mode=HELDDOWN forever=false");
+             // Same vehicle-bound native and arguments as retained SDK Vehicle.SoundHorn.
+--- a/AutomaticRun.cs
++++ b/AutomaticRun.cs
+@@ -108,5 +108,5 @@
+             if(!c.CaptureReviewed||!c.ContextReviewed||String.IsNullOrEmpty(c.EvidenceSha256)||c.EvidenceSha256.Length!=64||!Expected(c.Decision)) {
+                 commands[c.Id]="accepted negative/ambiguous";
+-                if(phase=="release") { uncertain=true;FinishRelease(); } else if(phase=="B-post") { Enter("Retire"); } else Stop("listening/evidence gate failed",capture);
++                if(phase=="release"||phase=="2") { uncertain=true;FinishRelease(); } else if(phase=="B-post") { Enter("Retire"); } else Stop("listening/evidence gate failed",capture);
+                 return commands[c.Id];
+             }
+@@ -118,7 +118,6 @@
+         bool Expected(string decision) {
+             if(phase=="B-pre"||phase=="B-post")return decision=="ControlNormal";
+-            if(phase=="baseline"||phase=="0"||phase=="2"||phase=="4"||phase=="release")return decision=="Normal";
+-            if(phase=="1")return decision=="DistinctEngine";
+-            return phase=="3"&&(decision=="MatchedEngine"||decision=="DonorHorn");
++            if(phase=="baseline"||phase=="0"||phase=="2"||phase=="release")return decision=="Normal";
++            return phase=="1" && decision=="Observed";
+         }
+         bool CaptureOK(CaptureLease c,bool focus) { return RuntimeReady&&c!=null&&c.Recording==recording&&c.Ready(clock(),frequency,focus); }
+@@ -238,5 +237,5 @@
+                     bool seated=phase!="B-pre"&&phase!="B-post";
+                     if(!api.PairState(core.A,core.B,seated,seated)&&!terminal)Stop("operating state lost awaiting feedback",capture);
+-                    if(terminal&&ActiveSeconds>=ReviewReleaseBy) { uncertain=true;if(phase=="release"||phase=="4")FinishRelease();else Enter("Retire"); }
++                    if(terminal&&ActiveSeconds>=ReviewReleaseBy) { uncertain=true;if(phase=="release"||phase=="2")FinishRelease();else Enter("Retire"); }
+                     return;
+                 }
+@@ -256,5 +255,5 @@
+                     if(phase=="release") { core.ConfirmObservation(SelectionEvidence.BatiReturned);FinishRelease();return; }
+                     core.ConfirmObservation(core.ExpectedEvidence);
+-                    if(phase=="4") { FinishRelease();return; }
++                    if(phase=="2") { FinishRelease();return; }
+                     Enter("DispatchReady");return;
+                 }
+@@ -283,5 +282,5 @@
+                     // No chat, IO, wait or second model response between these calls.
+                     core.Arm();core.Apply();windowStart=core.ObservationTicks;pose=aPose;
+-                    if(phase=="4")terminal=true;
++                    if(phase=="2")terminal=true;
+                     Window("transition",0,10);Window("steady",5,10);Enter("Idle");return;
+                 }
+@@ -296,6 +295,6 @@
+                     if(hornIssued&&api.HornActive(core.A))heardHorn=true;
+                     if(Elapsed(hornStart)<10)return;
+-                    if(!heardHorn)throw new InvalidOperationException("vehicle horn-active witness absent");
+-                    journal.Write("horn-route-observed observation="+observation+" native-vehicle-horn-active=true; audible identity still requires listening");
++                    if(!heardHorn && phase!="1")throw new InvalidOperationException("vehicle horn-active witness absent");
++                    journal.Write("horn-route-observed observation="+observation+" native-vehicle-horn-active="+heardHorn+"; audible identity still requires listening");
+                     if(phase=="baseline") { core.Snapshot();windowStart=clock();Window("steady",5,10);Enter("BaselineIdle"); }
+                     else {phaseWindowComplete=true;Enter("Review");}
+--- a/LocalBridge.cs
++++ b/LocalBridge.cs
+@@ -99,5 +99,5 @@
+                         Digest(m.FileName)!=Candidate.GameSha256||typeof(GTA.Script).Assembly.FullName!="ScriptHookVDotNet3, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null"||
+                         !String.Equals(Path.GetFullPath(typeof(GTA.Script).Assembly.Location),Path.Combine(Path.GetDirectoryName(m.FileName),"ScriptHookVDotNet3.dll"),StringComparison.OrdinalIgnoreCase)||
+-                        Digest(typeof(GTA.Script).Assembly.Location)!=Candidate.ApiSha256||Digest(Path.Combine(Path.GetDirectoryName(m.FileName),@"mods\update\x64\dlcpacks\ra_ns01_8b7e24c1\dlc.rpf"))!=Candidate.DlcSha256)
++                        Digest(typeof(GTA.Script).Assembly.Location)!=Candidate.ApiSha256)
+                         throw new IOException("exact runtime identity refused");
+                     string framework=Path.Combine(Path.GetDirectoryName(m.FileName),"ScriptHookVDotNet.log");NoLinks(framework);
+--- a/Operator.py
++++ b/Operator.py
+@@ -1,3 +1,3 @@
+-"""Finite local operator for the approved08 run. No keyboard phase controls."""
++"""Finite local operator for the unknown-name test. No keyboard phase controls."""
+ from pathlib import Path
+ import argparse,ctypes,datetime,hashlib,json,os,re,subprocess,sys,time,uuid
+@@ -6,5 +6,5 @@
+ HERE=Path(__file__).resolve().parent
+
+-DECISIONS=['ControlNormal','Normal','DistinctEngine','MatchedEngine','DonorHorn','Ambiguous','Negative']
++DECISIONS=['ControlNormal','Normal','Observed','Ambiguous','Negative']
+
+ def sha(p):
+--- a/Install-UnknownName.ps1
++++ b/Install-UnknownName.ps1
+@@ -66,8 +66,8 @@
+ $null=Inside $run 'C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01'
+ if(Test-Path -LiteralPath $run){throw 'UnknownName directory already exists; approval cannot be reused'}
+-$expectedGame=@('ScriptHookVDotNet.asi','ScriptHookVDotNet2.dll','ScriptHookVDotNet3.dll','MinHook.x64.dll','ScriptHookVDotNet.ini','scripts\RichAudio.UnknownAudioName.dll','scripts\RichAudio.UnknownAudioName.ini','mods\update\x64\dlcpacks\ra_ns01_8b7e24c1\dlc.rpf','mods\update\update.rpf')|ForEach-Object{Join-Path $game $_}
++$expectedGame=@('ScriptHookVDotNet.asi','ScriptHookVDotNet2.dll','ScriptHookVDotNet3.dll','MinHook.x64.dll','ScriptHookVDotNet.ini','scripts\RichAudio.UnknownAudioName.dll','scripts\RichAudio.UnknownAudioName.ini')|ForEach-Object{Join-Path $game $_}
+ $expectedObs=@((Join-Path $obs 'basic\profiles\NativeSuppression01UnknownName\basic.ini'),(Join-Path $obs 'basic\scenes\NativeSuppression01UnknownName.json'))
+ $install=@($s.gameInstall)+@($s.capture.install)
+-if(@($s.gameInstall).Count-ne9-or@($s.capture.install).Count-ne2-or@(Compare-Object ($expectedGame+$expectedObs|Sort-Object) (@($install.destination)|Sort-Object)).Count){throw 'Installation must contain exactly the reviewed nine game and two UnknownName OBS files'}
++if(@($s.gameInstall).Count-ne7-or@($s.capture.install).Count-ne2-or@(Compare-Object ($expectedGame+$expectedObs|Sort-Object) (@($install.destination)|Sort-Object)).Count){throw 'Installation must contain exactly the reviewed seven game and two UnknownName OBS files'}
+ if($s.capture.recordingDirectory-cne(Join-Path $run 'capture')-or$s.parkAndRestore.path-cne(Join-Path $game 'TrainerV.asi')){throw 'Capture or Trainer path differs'}
+ $requiredAbsent=@($expectedGame)+@($expectedObs)+@((Join-Path $game 'scripts'),(Join-Path $game 'mods'),(Join-Path $obs 'basic\profiles\NativeSuppression01UnknownName'),(Join-Path $obs 'basic\scenes\NativeSuppression01UnknownName.json.bak'),$run)+@($s.installation.requiredAbsentDirectories)+@($s.installation.additionalRequiredAbsent)
+--- a/Restore-UnknownName.ps1
++++ b/Restore-UnknownName.ps1
+@@ -2,5 +2,5 @@
+ $ErrorActionPreference = 'Stop'
+ $run = $PSScriptRoot
+-if ($run -cne 'C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01\unknown-name-run') { throw 'Run only the retained execution08 rollback copy' }
++if ($run -cne 'C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01\unknown-name-run') { throw 'Run only the retained unknown-name rollback copy' }
+ $ledgerPath = Join-Path $run 'transaction.json'
+ $t = Get-Content -LiteralPath $ledgerPath -Raw | ConvertFrom-Json
+@@ -28,7 +28,7 @@
+ if ($t.schema -cne 'NativeSuppression01Execution' -or $t.candidate -cne 'unknown-name' -or $t.status -cne 'installed-verified') { throw 'Full-install restore requires installed-verified; complete authorized partial rollback from the ledger instead' }
+ if ($s.candidateName -cne 'unknown-name' -or $s.sourceCommit -cne $t.sourceCommit -or (HashFile (Join-Path $run 'scope.json')) -cne $t.scopeSha256 -or (HashFile $PSCommandPath) -cne $s.installation.rollbackScript.sha256 -or (HashFile (Join-Path $run 'approval.json')) -cne $t.authorizationSha256) { throw 'Execution scope, authorization, or rollback identity differs' }
+-$expectedGame = @('ScriptHookVDotNet.asi','ScriptHookVDotNet2.dll','ScriptHookVDotNet3.dll','MinHook.x64.dll','ScriptHookVDotNet.ini','scripts\RichAudio.UnknownAudioName.dll','scripts\RichAudio.UnknownAudioName.ini','mods\update\x64\dlcpacks\ra_ns01_8b7e24c1\dlc.rpf','mods\update\update.rpf') | ForEach-Object { Join-Path $game $_ }
++$expectedGame = @('ScriptHookVDotNet.asi','ScriptHookVDotNet2.dll','ScriptHookVDotNet3.dll','MinHook.x64.dll','ScriptHookVDotNet.ini','scripts\RichAudio.UnknownAudioName.dll','scripts\RichAudio.UnknownAudioName.ini') | ForEach-Object { Join-Path $game $_ }
+ $expectedObs = @((Join-Path $obs 'basic\profiles\NativeSuppression01UnknownName\basic.ini'),(Join-Path $obs 'basic\scenes\NativeSuppression01UnknownName.json'))
+-if (@($t.files).Count -ne 11 -or @(Compare-Object ($expectedGame + $expectedObs | Sort-Object) (@($t.files.destination) | Sort-Object)).Count) { throw 'Ledger installation paths differ' }
++if (@($t.files).Count -ne 9 -or @(Compare-Object ($expectedGame + $expectedObs | Sort-Object) (@($t.files.destination) | Sort-Object)).Count) { throw 'Ledger installation paths differ' }
+ foreach ($f in $t.files) {
+     $root = if ($f.destination -in $expectedGame) { $game } else { $obs }
+--- a/Test-Installation.ps1
++++ b/Test-Installation.ps1
+@@ -17,5 +17,5 @@
+  $scopePath=Join-Path $root 'scope.json';$relativeRoot=[IO.Path]::GetRelativePath($repo,$root)
+  [IO.Directory]::CreateDirectory((Join-Path $obs 'logs'))|Out-Null
+- $helperSource=Join-Path (Join-Path $PSScriptRoot '../native-suppression08') 'FocusConfiguration08.psm1';$helper=Join-Path $prepared 'FocusConfiguration08.psm1'
++ $helperSource=Join-Path (Join-Path $repo 'tools/native-control/native-suppression08') 'FocusConfiguration08.psm1';$helper=Join-Path $prepared 'FocusConfiguration08.psm1'
+  $helperText=[IO.File]::ReadAllText($helperSource).Replace('[Environment]::GetFolderPath([Environment+SpecialFolder]::MyDocuments)',("'"+$documents+"'"))
+  # Fixed Known Documents/registry roots only; no parser, state or hash guard is removed.
+@@ -35,5 +35,5 @@
+  $gameSettings=@();foreach($n in 'settings.xml','Profiles\DEADBEEF\cfg.dat','Profiles\DEADBEEF\pc_settings.bin'){$payload=if($n-ceq'settings.xml'){'<Settings><video><PauseOnFocusLoss value="'+$(if($case-in@('configuration-enabled','interrupted-setting')){'1'}else{'0'})+'" /></video><unrelated>retain this</unrelated></Settings>'}else{'fixture-original-'+$n};$gameSettings+=@(Pin (WriteFixture (Join-Path $settings $n) $payload))}
+  $logs=@();foreach($n in 'asiloader.log','ScriptHookV.log','OpenRPF.log','ScriptHookVDotNet.log'){$exists=$n-in@('asiloader.log','ScriptHookV.log');$item=@{path=(Join-Path $game $n);exists=$exists};if($exists){$item.original=Pin (WriteFixture $item.path ('fixture-original-'+$n))};$logs+=@($item)}
+- $gameNames=@('ScriptHookVDotNet.asi','ScriptHookVDotNet2.dll','ScriptHookVDotNet3.dll','MinHook.x64.dll','ScriptHookVDotNet.ini','scripts\RichAudio.UnknownAudioName.dll','scripts\RichAudio.UnknownAudioName.ini','mods\update\x64\dlcpacks\ra_ns01_8b7e24c1\dlc.rpf','mods\update\update.rpf');$installs=@();$i=0
++ $gameNames=@('ScriptHookVDotNet.asi','ScriptHookVDotNet2.dll','ScriptHookVDotNet3.dll','MinHook.x64.dll','ScriptHookVDotNet.ini','scripts\RichAudio.UnknownAudioName.dll','scripts\RichAudio.UnknownAudioName.ini');$installs=@();$i=0
+  foreach($n in $gameNames){$source=WriteFixture (Join-Path $root ('sources\game-'+$i)) ('AUTOMATED FIXTURE payload '+$i);$installs+=@{destination=(Join-Path $game $n);source=(Pin $source);requiredAbsent=$true};$i++}
+  $obsInstalls=@();foreach($n in 'basic\profiles\NativeSuppression01UnknownName\basic.ini','basic\scenes\NativeSuppression01UnknownName.json'){$source=WriteFixture (Join-Path $root ('sources\obs-'+$i)) ('AUTOMATED FIXTURE recorder '+$i);$obsInstalls+=@{destination=(Join-Path $obs $n);source=(Pin $source);requiredAbsent=$true};$i++}
+--- a/InspectAutomatic11.cs
++++ b/InspectAutomatic11.cs
+@@ -50,14 +50,19 @@
+         Type controller=a.GetType("RichAudio.NativeSuppression01.IdleExperiment"),adapter=a.GetType("RichAudio.NativeSuppression01.IdleNativeApi"),binding=a.GetType("RichAudio.NativeSuppression01.Candidate");
+         Need((string)binding.GetField("SourceCommit",F).GetRawConstantValue()==(string)build["sourceCommit"],"compiled source commit");
+-        var dlc=(Dictionary<string,object>)build["dlc"];Need((string)binding.GetField("DlcSha256",F).GetRawConstantValue()==(string)dlc["sha256"]&&Sha((string)dlc["path"])==(string)dlc["sha256"],"compiled actual DLC pin");
+-        var order=Decode(controller.TypeInitializer).Where(x=>x.op=="ldstr").Select(x=>(string)x.value).ToArray();Need(order.SequenceEqual(new[]{"BATI","ADDER","BATI","ra_ns06_adder_select","BATI"}),"compiled exact phase order and names");
++        Need(binding.GetField("DlcSha256",F)==null,"no DLC binding");
++        var order=Decode(controller.TypeInitializer).Where(x=>x.op=="ldstr").Select(x=>(string)x.value).ToArray();Need(order.SequenceEqual(new[]{"BATI","ra_quiet_orchard","BATI"}),"compiled exact phase order and names");
+         var assign=Decode(adapter.GetMethod("Assign",F));
+         var all=a.GetTypes().SelectMany(t=>t.GetMethods(F).Cast<MethodBase>().Concat(t.GetConstructors(F)).Concat(t.TypeInitializer==null?new MethodBase[0]:new[]{t.TypeInitializer})).Distinct().SelectMany(Decode).ToList();
+-        Need(all.Count(x=>x.op=="ldc.i8"&&Object.Equals(x.value,0x4F0C413926060B38L))==1,"one compiled setter location");
+-        Need(Has(assign,"GTA.Native.InputArgument::op_Implicit(System.Int32)")&&Has(assign,"GTA.Native.InputArgument::op_Implicit(System.String)"),"actual SDK int-handle and string-name argument conversions");
++        var setter=Decode(adapter.GetMethod("VehicleAudioSetter",F));
++        var sdk=Assembly.ReflectionOnlyLoadFrom(api);
++        var wrapper=Decode(sdk.GetType("GTA.Vehicle").GetMethod("ForceUseAudioGameObject",F));
++        Need(Has(setter,"GTA.Vehicle::ForceUseAudioGameObject(System.String)")&&Has(Decode(adapter.GetConstructors(F).Single()),"VehicleAudioSetter"),"production constructor binds documented per-vehicle wrapper");
++        Need(wrapper.Any(x=>x.op=="ldc.i8"&&Object.Equals(x.value,0x4F0C413926060B38L))&&Has(wrapper,"GTA.Native.Function::Call")&&Has(wrapper,"get_Handle")&&Has(wrapper,"op_Implicit(System.String)"),"pinned SDK wrapper passes vehicle handle and name to the expected native");
+         Need(Has(assign,"CanRestore")&&assign.Any(x=>x.op=="ldstr"&&Object.Equals(x.value,"fixed profile, exact owned A and safe Story context required")),"A-only whitelist and exact lifetime guard");
+-        int native=assign.FindIndex(x=>x.value is string&&((string)x.value).Contains("IIdleNativeCalls::Call"));
+         int guard=assign.FindLastIndex(x=>x.value is string&&((string)x.value).Contains("System.Func`1[[System.Boolean"));
+-        Need(guard>assign.FindIndex(x=>x.value is string&&((string)x.value).Contains("CanRestore"))&&guard<native,"final callback after native prerequisites and before setter");
++        int dispatch=assign.FindIndex(guard+1,x=>x.op=="callvirt");
++        Need(guard>0 && dispatch>guard && assign[dispatch].value.ToString().Contains("System.Action") &&
++            assign[dispatch-1].op=="ldarg.2" && assign[dispatch-2].op.StartsWith("ldloc"),
++            "final guard precedes invocation of resolved setter with requested profile");
+         var confirmation=Decode(controller.GetMethod("ConfirmObservation",F));Need(!Has(confirmation,"Snapshot")&&!Has(confirmation,"GET_VEHICLE_DEFAULT_HORN"),"no horn-getter predicate in evidence acceptance");
+         var keys=Decode(scripts[0].GetMethod("OnKey",F));Need(Has(keys,"emergencyRequested")&&!Has(keys,"Arm")&&!Has(keys,"Apply")&&!Has(keys,"ConfirmObservation")&&Has(Decode(scripts[0].GetMethod("OnTick",F)),"Stop"),"manual emergency queued into same checked callback; no keyboard phase or evidence acceptance");
+@@ -75,5 +80,5 @@
+         Need(Has(Decode(controller.GetMethod("Cleanup",F)),"record release outcome before retirement"),"compiled audible-outcome cleanup gate");
+         Need(Has(Decode(adapter.GetMethod("CreateDeleteArgument",F)),"op_Implicit(System.Void*)"),"real SDK caller-owned deletion argument conversion");
+-        Need(File.ReadAllText(Path.Combine(Path.GetDirectoryName(file),"RichAudio.NativeSuppression11.ini")).Trim()=="Enabled=false","disabled default INI");
++        Need(File.ReadAllText(Path.Combine(Path.GetDirectoryName(file),"RichAudio.UnknownAudioName.ini")).Trim()=="Enabled=false","disabled default INI");
+         Need(!AppDomain.CurrentDomain.GetAssemblies().Any(x=>x.GetName().Name==a.GetName().Name||x.GetName().Name=="ScriptHookVDotNet"),"candidate and mixed core never execution-loaded");
+         var output=new {passed=true,checks=Checks,method="Reflection-only metadata and decoded actual IL; no type initializer or candidate execution",candidateSha256=Sha(file),buildReceiptSha256=Sha(buildPath),assemblyVersion=a.GetName().Version.ToString(),phaseOrder=order,assignmentIL=assign,confirmationIL=confirmation,nativeCalls=0,gameLaunched=false,runtimeQualified=false};

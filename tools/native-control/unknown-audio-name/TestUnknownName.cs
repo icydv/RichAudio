@@ -1,0 +1,82 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using RichAudio.NativeSuppression01;
+internal static class TestUnknownName {
+    static int cases,assertions;static Fixture current;static readonly List<Fixture> fixtures=new List<Fixture>();
+    static void Check(bool b,string why){assertions++;if(!b)throw new Exception(why);}
+    internal sealed class Journal:IRunJournal {
+        internal Action<string> OnWrite;
+        internal readonly List<string> Lines=new List<string>();long seq;
+        public bool Healthy{get{return true;}}public long Write(string s){Lines.Add(s);if(OnWrite!=null)OnWrite(s);return ++seq;}public bool Durable(long s){return s<=seq;}
+    }
+    sealed class Fixture {
+        internal readonly SetupGame11 Game=new SetupGame11();internal readonly Journal Log=new Journal();
+        internal readonly IdleNativeApi Api;internal readonly AutomaticRun Run;internal CaptureLease Capture;int token=10;
+        internal bool FailLookup;
+        internal Fixture(){current=this;fixtures.Add(this);Api=new IdleNativeApi(null,s=>Log.Write(s),Game,()=>Game.Now,1000,handle=>{
+                if(FailLookup) throw new InvalidOperationException("authored failed vehicle lookup");
+                return name=>Game.Call(GTA.Native.Hash.FORCE_USE_AUDIO_GAME_OBJECT,handle,name);
+            });Run=new AutomaticRun(Api,Log,()=>Game.Now,1000,()=>++token,"authored11");Step();Step();}
+        internal void Step(double seconds=.05){Game.Advance(seconds);Capture=new CaptureLease{Session="authored11",Recording="authored-media",RecordingActive=true,Foreground=true,TimelineReady=true,StartupAdmitted=true,ObservedTicks=Game.Now};Run.Tick(Capture);}
+        internal RunCommand Command(string op="Review",string decision=null){var s=Run.State;return new RunCommand{Session=s.Session,Id=Guid.NewGuid().ToString("N"),Phase=s.Phase,Generation=s.Generation,Observation=s.Observation,Profile=s.Profile,Operation=op,Decision=decision??(s.Phase.StartsWith("B-")?"ControlNormal":s.Phase=="1"?"Observed":"Normal"),Text="AUTHORED offline response; not human perception or approval",ExpiresTicks=Game.Now+5000,CaptureReviewed=true,ContextReviewed=true,EvidenceSha256=new string('a',64)};}
+        internal void Begin(){Check(Run.Command(Command("Begin"),Capture)=="accepted start","begin actual runner");}
+        internal void Review(string decision=null){Check(Run.Command(Command("Review",decision),Capture).StartsWith("accepted"),"review actual binding");}
+        internal void Until(Func<bool> condition,double limit=620){long end=Game.Now+(long)(limit*1000);while(!condition()&&!Run.State.Finished&&Game.Now<end)Step();Check(condition(),"expected state; actual="+Run.State.Stage+" "+Run.State.Status+"\n"+string.Join("\n",Log.Lines.Skip(Math.Max(0,Log.Lines.Count-5))));}
+        internal void Stage(string s){Until(()=>Run.State.Stage==s);}
+        internal void At(string phase){Until(()=>Run.State.AwaitingReview&&Run.State.Phase==phase);}
+        internal void Finish(bool review=false){long end=Game.Now+620000;while(!Run.State.Finished&&Game.Now<end){if(review&&Run.State.AwaitingReview)Review();Step();}Check(Run.State.Finished,"bounded termination");}
+        internal void Stop(){Run.Stop("AUTHORED stop",Capture);Finish();}
+        internal bool Has(string text){return Log.Lines.Any(s=>s.Contains(text));}
+        internal void SafeRetired(){Check(Run.State.Retired&&Game.N("delete-100")==1&&Game.N("delete-101")==1,"both exact owned identities disappeared after one delete each");Check(Game.Entities.Values.All(e=>!e.Exists),"native return alone not accepted as deletion");}
+    }
+    static void Test(string name,Action action){int first=fixtures.Count;action();cases++;for(int i=first;i<fixtures.Count;i++)System.IO.File.WriteAllLines(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(typeof(TestUnknownName).Assembly.Location),"case-"+cases.ToString("D2")+"-fixture-"+i.ToString("D3")+".log"),fixtures[i].Log.Lines);Console.WriteLine("PASS "+name);}
+    public static int Main(){try{
+
+        Test("only the self assignment, unknown name and same-A release dispatch",()=>{
+            var f=new Fixture();f.Begin();f.Finish(true);
+            Check(f.Game.Profiles.SequenceEqual(new[]{"BATI","ra_quiet_orchard","BATI"}),"three A-only dispatches in order");
+            f.SafeRetired();
+        });
+        Test("setup failure before any audio write retires without release",()=>{
+            var f=new Fixture();f.Game.BNeverStarts=true;f.Begin();f.Finish();
+            Check(f.Game.Profiles.Count==0,"zero assignments including cleanup");f.SafeRetired();
+        });
+        Test("uncertain unknown-name observation releases only once",()=>{
+            var f=new Fixture();f.Begin();f.At("B-pre");f.Review();f.At("baseline");f.Review();
+            f.At("0");f.Review();f.At("1");f.Review("Ambiguous");f.Finish(true);
+            Check(f.Game.Profiles.SequenceEqual(new[]{"BATI","ra_quiet_orchard","BATI"}),"one terminal release");f.SafeRetired();
+        });
+        Test("first setter lookup fails before admission and cleanup writes no profile",()=>{
+            var f=new Fixture();f.FailLookup=true;f.Begin();f.Finish(true);
+            Check(f.Game.Profiles.Count==0&&!f.Has("restore-intent"),"no release for an untouched bike");f.SafeRetired();
+        });
+        Test("lost A after unknown name cannot receive a release",()=>{
+            var f=new Fixture();f.Begin();f.At("B-pre");f.Review();f.At("baseline");f.Review();
+            f.At("0");f.Review();f.At("1");f.Game.Entities[100].Token=999;f.Step();f.Finish(true);
+            Check(f.Game.Profiles.SequenceEqual(new[]{"BATI","ra_quiet_orchard"})&&!f.Run.State.Retired,"no writes to replaced A");
+        });
+        Test("missing horn readback on unknown name still records the physical observation",()=>{
+            var f=new Fixture();
+            f.Log.OnWrite=line=>{
+                if(line.StartsWith("horn-native-returned") && f.Game.Profiles.LastOrDefault()=="ra_quiet_orchard")
+                    f.Game.HornUntil=0;
+            };
+            f.Begin();f.Finish(true);
+            Check(f.Has("native-vehicle-horn-active=False") && f.Has("evidence=UnknownNameReviewed"),"retain absent horn readback with listening");
+            f.SafeRetired();
+        });
+        Test("adapter refuses B and a revoked final admission",()=>{
+            var f=new Fixture();f.Begin();f.At("B-pre");f.Review();f.At("baseline");
+            foreach(int handle in new[]{101,100}){
+                var item=new Lifetime{Handle=handle,Token=f.Game.Entities[handle].Token,Role=handle==100?"A":"B"};
+                bool refused=false;
+                try{f.Api.Assign(item,"ra_quiet_orchard",()=>handle!=100);}
+                catch(InvalidOperationException){refused=true;}
+                Check(refused && f.Game.Profiles.Count==0,"no setter for control or revoked admission");
+            }
+            f.Stop();f.SafeRetired();
+        });
+        Console.WriteLine("PASS cases="+cases+" assertions="+assertions+"; AUTHORED delayed responses through actual runner, native adapter and SDK InputArgument; zero GTA launches, no live sound proof");return 0;
+    }catch(Exception e){if(current!=null){System.IO.File.WriteAllLines(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(typeof(TestUnknownName).Assembly.Location),"failure-journal.txt"),current.Log.Lines);Console.Error.WriteLine("Actual stage="+current.Run.State.Stage+" profiles="+string.Join(",",current.Game.Profiles));}Console.Error.WriteLine(e);return 1;}}
+}

@@ -1,0 +1,15 @@
+{
+  "IdleExperiment.cs": "IdleExperiment.cs",
+  "IdleNativeApi.cs": "IdleNativeApi.cs",
+  "AutomaticRun.cs": "AutomaticRun.cs",
+  "LocalBridge.cs": "LocalBridge.cs",
+  "Operator.py": "Operator11.py",
+  "Recorder.lua": "Recorder11.lua",
+  "Install-UnknownName.ps1": "Install-Automatic11.ps1",
+  "Restore-UnknownName.ps1": "Restore-Automatic11.ps1",
+  "Preflight.ps1": "Preflight11.ps1",
+  "Verify-Restoration.ps1": "Verify-Restoration11.ps1",
+  "Test-Installation.ps1": "Test-Installation11.ps1",
+  "InspectAutomatic11.cs": "InspectAutomatic11.cs",
+  "Inspect.ps1": "Inspect-Automatic11.ps1"
+}

@@ -1,0 +1,49 @@
+# Unknown vehicle audio name
+
+I listen to one disposable stock Bati pair in offline Story Mode. Codex operates the experiment. The question is whether A's identifiable, running idle disappears after asking SHVDNE for a deliberately unknown audio game object. This trial uses the vehicle's ForceUseAudioGameObject(string) wrapper. In the pinned SDK it passes the handle and name to FORCE_USE_AUDIO_GAME_OBJECT (0x4F0C413926060B38). The maintainer suggested an invalid dictionary hash and mentioned reverting in an abort callback. This tests the named-object interpretation. A direct dictionary-field write, the internal lookup result and recovery through a stalled script remain untested.
+
+## Prior evidence and name choice
+
+Codex checked dispatch and return entries in the retained execution-01 through execution-11 journals. Candidate-04 requested ra_ns01_bati_a, a private object authored to resolve. Candidate-05 requested ra_ns05_bati_select, also authored to resolve. Candidate-06 dispatched BATI. An arm or a listening impression cannot establish a dispatch. Those journals contain no dispatch of an intentionally nonexistent name.
+
+CheckCatalogue.py checks the complete pinned CodeWalker resolved installation catalogue (935 vehicle rows, SHA-256 c4250395be8638b9d44df2a43da966caec99841a83f26e3131be51edca57c018). It searches the case-folded spelling, serialized numeric and hexadecimal hash values and JOAAT of its ASCII identifier tokens. The retained stock game.dat151.rel contains BATI's little-endian hash and zero occurrences of the proposed hash. The experimental name is ra_quiet_orchard, hash 0x0E73B598. This establishes absence within these inputs. Effective runtime lookup, fallback and unenumerated content remain unknown.
+
+## Startup and operation
+
+A separate exact-scope approval, presence and fresh preflight precede any installation. Use the pinned private Preflight.ps1 and installer with the subsequent approval receipt. Install only the seven listed runtime/probe files and the two temporary OBS settings files. Preserve the pause value of 0, original archive bytes, Trainer backup, ledger, original settings and logs. The mods directory must be absent. No DLC or update shadow is part of this test.
+
+Reserve one normal Steam launch of GTA V Enhanced (app 3240220) using the established offline Story configuration and installed StraightToStoryMode helper. Candidate-10 and Candidate-11 pinned the same ScriptHookV.dll (126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f). In 10, INIT: Started and Success appeared at 01:41:07, the SDK reported NativeMemory initialization in 6401 ms, and the bridge reported advancing simulation in unpaused Story. In 11 the log ended at INIT: Started at 16:15:12. The visible “CHECK FOR SCRIPT HOOK V UPDATES ?” dialog received one No selection, Windows reported it unresponsive, and normal close was requested 110.2 seconds after initialization began. Exact prompt onset, acknowledgement and reason for the stall are unknown. The successful record does not establish whether an earlier prompt was shown.
+
+If the exact update question appears, select No once to decline the check. Codex handles a responsive dialog when supported. If the dialog needs my input, I click No once. Do not repeat a selection already made. If startup stalls, stop after at most 120 seconds waiting for fresh NativeMemory success and the matching activation/state once the game process exists. Use normal close and ledger rollback. Do not change the hook, updater, launch options or files to get past a prompt. Await normal closure if Windows cannot service the close.
+
+After verifying fresh startup, start the sealed Operator.py watch with the retained operator-plan.json, exact scope hash and approval receipt. It owns background OBS, validated capture, setup, matched views, horn and feedback windows. Preserve the historical identity, focus and capture gates. Codex reviews the decoded video, sound and context, asks about the original observation, saves the answer verbatim and forwards it through Operator.py review. Never manufacture an answer or transfer one between windows. A full review can be forwarded only with its original evidence receipt.
+
+## Listening sequence
+
+| Window | What to listen to |
+| --- | --- |
+| B before | At the fixed position behind the empty B, hear its idle with A off. |
+| Stock baseline | Back on stationary A, identify its nearer idle separately from B. Listen to A's short physical horn in its own window. If the two bikes cannot be distinguished, stop. |
+| BATI self-assignment | Compare A's first transition and sustained idle with stock. Listen separately for A's horn and continuing B. A sustained change or ambiguous control ends experimental progression. |
+| ra_quiet_orchard | Compare those same cues. Record whether A stayed audible, disappeared, changed timbre, or changed only briefly. Record B and A's physical horn separately, including an absent or changed horn. |
+| BATI release | On the same surviving A, record which sounds returned or stayed the same. If the unknown cue stayed audible, there is no lost cue to claim was restored. |
+| B after | From the matched control position, with A off, compare B with its initial idle. |
+
+A is the bike occupied by the player in the A windows. B is stationary and empty about ten metres away. The recorder captures the endpoint mix. The matched listener geometry, visible seated A, exact tokens/handles, continuous operating-state checks, independently sampled B and separate A-only horn support attribution. If A cannot be distinguished at baseline or after a write, mark the result ambiguous. Each phase uses the same stationary idle cue. The controller clamps driving input and has no qualified stationary rev. Limit all conclusions to idle.
+
+Ask “On the bike the rider is sitting on, what did you hear during the idle? What about its horn, and the other bike?” For B alone ask “What did you hear from the empty bike?” Keep transition, sustained idle and horn in separate notes. A horn request, horn-active bit and default-horn getter are recorded separately from physical audibility. A missing active bit during the unknown phase remains evidence and must be qualified. Reject obscured footage, movement, masking, engine-state changes or uncertain identity.
+
+## Interpretations and stopping rules
+
+- A's identifiable sustained idle disappears with A still running, B remains audible and normal, and the same cue returns on the same A after BATI: reversible per-vehicle loss of the measured idle cue under these conditions. A surviving horn narrows the observed effect to the tested cues. An absent horn that also returns demonstrates broader audible impact.
+- A remains audible or changes only briefly: report persistence, timbre or transition in the corresponding interval. A continuous cue cannot support sustained muting.
+- B changes too, A and B cannot be separated, capture or state fails, or release is uncertain: retain the observation and report the unresolved attribution or return. Mixed loudness cannot settle it.
+- The void native return establishes only dispatch. Even reversible idle loss leaves the internal cause open. Arbitrary prior/modded profiles, loaded driving or high-RPM audio, and independent recovery after script failure are outside the result.
+
+Reserve self, unknown and release once each. B receives zero audio assignments. Emergency release substitutes for the scheduled final BATI. An untouched A requires no release. Never reissue an uncertain setter or adopt a reused handle. Preserve the existing 100-second diagnostic admission reserve, automatic stop/release at active second 450, terminal review cutoff 490, retirement reserve 540 and absolute limit 600. The core has an additional release ceiling at 525. A missing callback can prevent in-game cleanup. Log that outcome separately.
+
+After release, verify each owned vehicle's disappearance after retirement. Close GTA and OBS normally, finalize and retain the original capture, selected windows, listening replies, journal, transition trace and closure evidence privately. If the supported UI cannot confirm a final quit normally, record any unavoidable confirmation I provide. Run the retained Restore-Execution.ps1 only in its bound transaction state, then the pinned Verify-Restoration.ps1. Independently verify exact original bytes and metadata, root inventory and absence of installed files. On a partial install retain the ledger and roll back only proven changes. No second launch, recording restart, retry, extra profile, resource variant or forced termination.
+
+## Offline reproduction
+
+Use the retained Python to run Materialize.py, then CheckCatalogue.py. The small patch applies to the exact historical template commit in a private source directory. Build.ps1 compiles the probe against the pinned SDK. Test-UnknownName.ps1 uses authored engine responses with the compiled runner, controller, adapter and the real SDK argument conversions. Inspect.ps1 checks the production wrapper binding and the SDK native call in compiled IL. Test-Installation.ps1 exercises installer, preflight, rollback and independent verification on disposable directories. Seal.py takes the clean build.json and a private directory containing setup, inspection and installation results. The numbered candidates and their evidence remain at their original identities.
