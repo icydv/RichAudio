@@ -1,6 +1,6 @@
 # WORLD12 implementation and independent review
 
-Codex implemented two small production changes for my existing render path. Separate agents reviewed the source and renderer edits; neither reviewer approved their own production change. The owned-process measurement harness and fixture-only timeout diagnostics received independent review too. The [measurement scope](WORLD_12_MEASUREMENT_SCOPE.md) keeps functional, processing-deadline and headroom gates separate.
+This change introduced two small production changes for my existing render path. Separate reviews covered the source and renderer edits; neither reviewer approved their own production change. The owned-process measurement harness and fixture-only timeout diagnostics received independent review too. The [measurement scope](WORLD_12_MEASUREMENT_SCOPE.md) keeps functional, processing-deadline and headroom gates separate.
 
 ## Grain matching
 

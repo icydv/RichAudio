@@ -1,6 +1,6 @@
 # STREET-01: proposed single passive Bati telemetry session
 
-I approved candidate02 once. Its preflight stopped before deployment or launch because TrainerV exceeded the8MiB inspection allowance. That attempt is closed and consumed; it establishes no telemetry or gameplay failure. Codex has prepared candidate04 with the same binaries and session rules and a Trainer-only inspection correction. It awaits its own fresh approval; see [the preparation repair report](STREET_01_PREFLIGHT_REPAIR.md).
+I approved candidate02 once. Its preflight stopped before deployment or launch because TrainerV exceeded the8MiB inspection allowance. That attempt is closed and consumed; it establishes no telemetry or gameplay failure. The operator has prepared candidate04 with the same binaries and session rules and a Trainer-only inspection correction. It awaits its own fresh approval; see [the preparation repair report](STREET_01_PREFLIGHT_REPAIR.md).
 
 ## Exact candidate and authority
 

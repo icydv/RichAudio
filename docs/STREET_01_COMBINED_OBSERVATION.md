@@ -5,7 +5,7 @@ unique match to a selected placement, and actual admission by the bankless
 production consumer. The same session will measure whether two existing
 donor vehicles produce stable and distinct default-horn readbacks.
 
-Codex built a standalone RPH plugin that yields in its entry fiber while
+The implementation built a standalone RPH plugin that yields in its entry fiber while
 waiting for the process-bound receiver and manual input. The normal
 RichAudio entry point, audio host, decoder, menu, and profile mutations are
 outside the build. The manually armed sampler uses the production camera tracker and
@@ -37,7 +37,7 @@ Press **Ctrl+Shift+Backslash** once to start, **Ctrl+Backslash** once per donor
 reading, and **Shift+Backslash** to stop. Use the keyboard's Backslash key
 position. The retained keyboard review found no Backslash binding in the
 reviewed TrainerV or saved GTA overrides and identifies the F4 and F10
-controls. Codex provides the keys and route before handoff. Input-loop
+controls. The operator provides the keys and route before handoff. Input-loop
 readiness, manual Start received, authenticated connection, and first
 fresh frame are separate evidence. Idle checks cover the foreground owner,
 loading, pause, console state, and key states. Story Mode native checks
@@ -91,7 +91,7 @@ My manual session recorded 1,179 fresh GTA camera frames and 236 matches
 to the selected Michael's-house placement. The worker published 3,326
 surfaces with the selected archive proof. The consumer binding stayed
 empty. The live log did not include individual consumer decisions, so
-Codex replayed the capture with one constant QPC translation across
+The analysis replayed the capture with one constant QPC translation across
 listener, proxy and receiver timestamps. It kept the original age,
 movement, generation changes and interval between each frame.
 
@@ -123,7 +123,7 @@ My Tailgater horn sample returned `022894E9` three times within one
 invocation. That matches a child in the retained DAT54 list referenced
 by the DAT151 Horns field `3C47573A`. Blista remains unsampled. The
 ownership fixture rejects a horn reading or a projected model profile
-as an exact restoration baseline. Codex also checked the typed Bati
+as an exact restoration baseline. The operator also checked the typed Bati
 granular dependencies. Engine uses DAT10 synth `1932E476` and preset
 `FC25DA99`. Exhaust uses `4022A088` and `25A6B55C`. The modular idle
 route uses synth `DF6D8836` and has a zero preset reference. Audible
@@ -140,7 +140,7 @@ playout warm-up an absent pose supplies no reason to revoke the installed
 scene. The latest real observation, the consumer lease and the next
 rendered pose retain their own checks.
 
-Codex tested the actual normal producer with the retained camera passage,
+The run tested the actual normal producer with the retained camera passage,
 original procedural vehicle audio and authored moving vehicle poses. Its
 eight-native-unit interior workset retained 4,096 surfaces, including 2,981
 whose centres were outside the four-unit near box. The 131 omitted surfaces
@@ -225,7 +225,7 @@ collision layers, unobserved portals and unsupported shapes remain visible.
 
 The old 16.76 ms maximum predates stage receipts. In the instrumented
 pre-fix replay, block 7 took 12.02 ms with 9.50 ms in source and control.
-Block 2546 took 10.96 ms with 9.22 ms in propagation. Codex removed the
+Block 2546 took 10.96 ms with 9.22 ms in propagation. The implementation removed the
 per-block reflector settings reset, moved a bounded pair of untouched
 voices into prepared startup, and warmed the normal CPU control code with
 discarded authored samples. The real source clock and the PCM queue begin
@@ -262,7 +262,7 @@ registration and selective engine/exhaust suppression remain open.
 
 ## Qualification package and marker A mount
 
-Codex reused my pinned normal bridge and host. The bridge assembly declares
+The implementation reused my pinned normal bridge and host. The bridge assembly declares
 one RPH entry and one unload method. It embeds the transport and references
 the existing RPH API and Windows framework. My normal producer now accepts
 an independently pinned current proof publication that predates bridge
@@ -278,7 +278,7 @@ catalogue entries and limits current scene authority to the reviewed
 resources. The five neighbouring exterior rows remain explicit gaps.
 The preparation does not start the full installation warmup or decode
 archives. The full private package still needs six previously pinned Bati
-player Float32 bodies and fresh installation and proof receipts. Codex
+player Float32 bodies and fresh installation and proof receipts. The analysis
 verified both exact transaction target sets and independent rollback in
 disposable installs, including an absent marker overlay and refusal
 while process closure was uncertain.
@@ -286,7 +286,7 @@ while process closure was uncertain.
 The proof-path foyer replay applied 30 replacements with zero validity
 gaps. Its maximum was 10.39 ms, with zero hard misses and five blocks above
 8 ms. The worst block spent 8.68 ms in propagation. Another steady block
-spent 8.80 ms in stock synthesis and 0.07 ms selecting sources. Codex
+spent 8.80 ms in stock synthesis and 0.07 ms selecting sources. The implementation
 removed redundant local mixing when airflow is disabled and kept its
 existing history and release behaviour. Focused PCM and grain-history
 checks passed. The historical missed block and the early failed rehearsal

@@ -1,10 +1,10 @@
 # CI-RECOVERY-01: my unsent-expiry investigation and correction
 
-I required PR #80 to stay at `247e3bc0f07374c0e9cf28b9cd0f65958c3615c5`; Codex continued in a separate stacked branch. This change concerns device-free expiry fixtures and their diagnostics. **Production transport, audio generation/rendering, source freshness and all completed LATENCY-03.1 results remain unchanged.**
+I required PR #80 to stay at `247e3bc0f07374c0e9cf28b9cd0f65958c3615c5`; the operator continued in a separate stacked branch. This change concerns device-free expiry fixtures and their diagnostics. **Production transport, audio generation/rendering, source freshness and all completed LATENCY-03.1 results remain unchanged.**
 
 ## What I can establish about the original failure
 
-Codex retrieved and retained the complete decoded logs for failed [run 41517354511](https://github.com/icydv/RichAudio/actions/runs/41517354511) and passing [run 41486724046](https://github.com/icydv/RichAudio/actions/runs/41486724046). The five relevant inputs were identical between their heads: the expiry script, native fixture, `StatePipe.cs`, offline harness and workflow. The later head changed only endpoint-result documentation/evidence.
+The analysis retrieved and retained the complete decoded logs for failed [run 41517354511](https://github.com/icydv/RichAudio/actions/runs/41517354511) and passing [run 41486724046](https://github.com/icydv/RichAudio/actions/runs/41486724046). The five relevant inputs were identical between their heads: the expiry script, native fixture, `StatePipe.cs`, offline harness and workflow. The later head changed only endpoint-result documentation/evidence.
 
 The failed run passed `none-1/2/3`, then threw `Case failed; no retry: domain-1` at the combined assertion. Its receiver/sender JSON was read before that assertion but printed only afterward. No artifact was uploaded. The earlier child wait/exit checks and JSON reads had completed, but the individual connection, attempt, acceptance, rejection and outcome operands were not retained.
 
@@ -22,7 +22,7 @@ Those expired observations were correctly withheld. They were not accepted late 
 
 ## The fixture assumption reproduced independently
 
-An independent agent compiled the exact original fixture and production source blobs from `247e3bc`. Three nominal cold-AppDomain runs passed, accepting 16 frames each with zero rejections. Codex and the reviewer then used controlled device-free scheduling to distinguish codec preparation from transport behavior.
+An independent run compiled the exact original fixture and production source blobs from `247e3bc`. Three nominal cold-AppDomain runs passed, accepting 16 frames each with zero rejections. The implementation and review passes then used controlled device-free scheduling to distinguish codec preparation from transport behavior.
 
 The adverse comparison pinned only authored fixture children to one already-allowed CPU and added three normal-priority authored CPU workers for a bounded 2,200 ms. It changed no machine-wide scheduling, volume or game settings.
 
@@ -49,7 +49,7 @@ No production file changed. These limits remain byte-for-byte unchanged: **250 m
 
 ## Failure diagnostics that survive the throw
 
-Codex selectively reused the project's previously reviewed diagnostic work from `d1cfd4ac07fb46b90efd7c88fcebd05932c7bf89`, preserving this branch's newer baseline compilation exclusions and transport contracts.
+The analysis selectively reused the project's previously reviewed diagnostic work from `d1cfd4ac07fb46b90efd7c88fcebd05932c7bf89`, preserving this branch's newer baseline compilation exclusions and transport contracts.
 
 - Every case retains named failed predicates, exact sender/receiver outcomes and counters, original clock integers, expiry decisions, process exits, missing/invalid record states and cleanup failures before throwing.
 - Source transport exceptions retain their existing stage/code/type category. Fixture and wrapper exceptions additionally retain HRESULTs. Arbitrary exception messages, stacks, paths, pipe/session names and payloads are excluded from publication.
@@ -70,7 +70,7 @@ All original failed observations remain retained, including the diagnostic size-
 
 [Sanitized results and evidence hashes](../evidence/ci-recovery-01-result.json) contain the measured case outcomes and preserved-log bindings. Complete original logs, raw fixture records and review receipts remain private.
 
-Codex reverified all **78 files** in the consumed LATENCY-03.1 candidate, all **68 payloads**, all **63 protected source bindings**, and the clean original PR #80 worktree. The endpoint raw-result SHA-256 remains `ac69bacc6d7f3bd42668aec103d9110521485d53848bcd3c15edc8e274d3f0f5`; its complete supervisor receipt remains `4e87c4bcaec3af52cdbbe8ca294461fb367e5c128c79e989d1ce9b296c341aa8`. The candidate remains consumed. No endpoint, GTA/RPH, deployment, live recording, native suppression, retry of the endpoint experiment or merge occurred.
+The analysis reverified all **78 files** in the consumed LATENCY-03.1 candidate, all **68 payloads**, all **63 protected source bindings**, and the clean original PR #80 worktree. The endpoint raw-result SHA-256 remains `ac69bacc6d7f3bd42668aec103d9110521485d53848bcd3c15edc8e274d3f0f5`; its complete supervisor receipt remains `4e87c4bcaec3af52cdbbe8ca294461fb367e5c128c79e989d1ce9b296c341aa8`. The candidate remains consumed. No endpoint, GTA/RPH, deployment, live recording, native suppression, retry of the endpoint experiment or merge occurred.
 
 ## Practical blockers to actual GTA integration
 
