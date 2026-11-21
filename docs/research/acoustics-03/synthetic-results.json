@@ -1,0 +1,85 @@
+{
+  "provenance": "wholly original synthetic fixtures; no game observations",
+  "scenes": [
+    {
+      "scene": "flat",
+      "status": "candidate-inferred",
+      "validHits": 9,
+      "validMisses": 0,
+      "reasons": [],
+      "fitRms": 0,
+      "maxResidual": 0,
+      "footprintArea": 1.4504,
+      "reflectionPathNativeUnits": 4.019950248448356,
+      "arrivalSeconds": null
+    },
+    {
+      "scene": "corner",
+      "status": "rejected",
+      "validHits": 9,
+      "validMisses": 0,
+      "reasons": [
+        "normal disagreement; no surface merging"
+      ],
+      "fitRms": null,
+      "maxResidual": null,
+      "footprintArea": null,
+      "reflectionPathNativeUnits": null,
+      "arrivalSeconds": null
+    },
+    {
+      "scene": "opening",
+      "status": "rejected",
+      "validHits": 8,
+      "validMisses": 1,
+      "reasons": [
+        "missing grid support; no connected patch"
+      ],
+      "fitRms": null,
+      "maxResidual": null,
+      "footprintArea": null,
+      "reflectionPathNativeUnits": null,
+      "arrivalSeconds": null
+    },
+    {
+      "scene": "noisy",
+      "status": "candidate-inferred",
+      "validHits": 9,
+      "validMisses": 0,
+      "reasons": [],
+      "fitRms": 0.0007081971273432641,
+      "maxResidual": 0.0011111112911523977,
+      "footprintArea": 1.4504002010373105,
+      "reflectionPathNativeUnits": 4.019950248448357,
+      "arrivalSeconds": null
+    },
+    {
+      "scene": "incompatible",
+      "status": "rejected",
+      "validHits": 9,
+      "validMisses": 0,
+      "reasons": [
+        "normal disagreement; no surface merging"
+      ],
+      "fitRms": null,
+      "maxResidual": null,
+      "footprintArea": null,
+      "reflectionPathNativeUnits": null,
+      "arrivalSeconds": null
+    },
+    {
+      "scene": "insufficient",
+      "status": "rejected",
+      "validHits": 2,
+      "validMisses": 0,
+      "reasons": [
+        "incomplete acquisition; observations retained"
+      ],
+      "fitRms": null,
+      "maxResidual": null,
+      "footprintArea": null,
+      "reflectionPathNativeUnits": null,
+      "arrivalSeconds": null
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+// Wholly original synthetic observations; no GTA data or proprietary source.
+import {fixedRayPlan,planId} from '../../src/acoustics/research/surface-reconstruction.mjs';
+const object=p=>({X:p[0],Y:p[1],Z:p[2]});
+export function flatFixture(){
+ const player=[0,0,0],forward=[1,0,0],{rays}=fixedRayPlan(player,forward);
+ return {SchemaVersion:1,PlanId:planId,SessionId:'original-synthetic',GameVersion:'1.0.1158.16',FrameworkVersion:'1.132.1428.17748',CoordinateSpace:'gta-native-units-unverified',TimeUnit:'monotonic-ms',Completion:'complete',PlannedQueries:9,TraceCalls:9,StartedAtMs:0,FinishedAtMs:10,PlayerPosition:object(player),Forward:object(forward),Samples:rays.map((r,i)=>({Id:'ray-'+i,Ray:{...r,Origin:object(r.Origin),End:object(r.End)},Observation:{SchemaVersion:1,SessionId:'original-synthetic',GameVersion:'1.0.1158.16',FrameworkVersion:'1.132.1428.17748',CoordinateSpace:'gta-native-units-unverified',TimeUnit:'monotonic-ms',Origin:object(r.Origin),End:object(r.End),MaximumDistance:8,ObservedAtMs:i+1,TraceCalls:1,TraceDurationMs:.1,ConversionDurationMs:.01,FlagsName:'IntersectWorld',FlagsValue:1,IgnoredPlayerHandle:123,PlayerSpeed:0,SetupStatus:'on_foot_stationary_by_SDK_getters',Completion:'hit',ErrorClass:null,HitPosition:object([4,r.Origin[1],r.Origin[2]]),HitNormal:object([-1,0,0]),PositionStatus:'observed',NormalStatus:'observed',EntityStatus:'none_returned_static_unproven',HitEntityHandle:null,MaterialStatus:'unavailable_RPH_HitResult',ExtentStatus:'unavailable_single_hit',QueryProvenance:'original synthetic wall x=4; analytic ray intersection'}}))};
+}
+export function openingFixture(){const b=flatFixture(),o=b.Samples[4].Observation;Object.assign(o,{Completion:'miss',HitPosition:null,HitNormal:null,PositionStatus:'not_returned_miss',NormalStatus:'not_returned_miss',EntityStatus:'not_returned_miss'});return b;}
+export function cornerFixture(){const b=flatFixture();for(const s of b.Samples.filter(s=>s.Ray.Column===2)){const o=s.Observation;o.HitPosition.X=4-o.HitPosition.Y;o.HitNormal=object([-Math.SQRT1_2,-Math.SQRT1_2,0]);}return b;}
+export function noisyFixture(){const b=flatFixture();for(let i=0;i<9;i++){const o=b.Samples[i].Observation;o.HitPosition.X+=((i*7)%5-2)*.0005;const n=[-1,(i%3-1)*.0005,0],l=Math.hypot(...n);o.HitNormal=object(n.map(x=>x/l));}return b;}
+export function incompatibleFixture(){const b=flatFixture();b.Samples[8].Observation.HitPosition.X=5;return b;}
+export function insufficientFixture(){const b=flatFixture();b.Samples=b.Samples.slice(0,2);b.TraceCalls=2;b.Completion='stopped';return b;}
