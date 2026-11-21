@@ -28,7 +28,7 @@ No existing repository was present at the new development directory. No project 
 
 **VERIFIED:** folder is named `CodeWalker30_dev46`; binary versions report 1.0.0.0 / product 1.0.0 rather than a distinct dev build number. Use folder designation **and SHA-256** to identify it. `README.md` documents `CodeWalker.exe explorer` and `menu`, not a supported batch export CLI.
 
-The first `CodeWalker RPF Explorer.exe` launch through Computer Use timed out and produced no visible CodeWalker window at the follow-up. Starting installed `CodeWalker.exe explorer` subsequently succeeded. GUI opened the real installation, listed audio configs and displayed the dat151 XML. No GUI save or edit-mode action was used. A base-file warning pane appeared in UI Automation; its presence is not evidence that files were edited.
+The first `CodeWalker RPF Explorer.exe` launch timed out and produced no visible CodeWalker window at the follow-up. Starting installed `CodeWalker.exe explorer` subsequently succeeded. GUI opened the real installation, listed audio configs and displayed the dat151 XML. No GUI save or edit-mode action was used. A base-file warning pane appeared in UI Automation; its presence is not evidence that files were edited.
 
 The initial .NET Framework `Assembly.LoadFrom` call failed with `0x80131515`. Loading bytes from the existing installed assemblies succeeded. The inspection scripts use that approach without unblocking, rewriting or replacing the supplied files. SharpDX dependencies come from the supplied folder. This is not a standalone public CodeWalker SDK and must be kept version-pinned.
 
