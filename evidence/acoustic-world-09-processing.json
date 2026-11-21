@@ -2,7 +2,7 @@
   "schema": 1,
   "kind": "RichAudioProcessing09Evidence",
   "createdUtc": "2026-11-03T20:29:17.054Z",
-  "executor": "Codex",
+  "executor": "Automated offline run",
   "scope": "Device-free original analytic PCM and finite authored geometry only",
   "passed": true,
   "completed": true,
@@ -7133,7 +7133,7 @@
   ],
   "history": {
     "earlierProfile": "Before V8 sampling was added; retained unchanged.16 children,144 blocks each,18.9385-28.5935ms maxima,one overrun per child.",
-    "invocationFailure": "Initial PowerShell redirection failed before Node started because the fresh checkout had no .local directory. No test/profile measurements were produced in that attempt. Codex retained a failure note and created the directory before fresh runs."
+    "invocationFailure": "Initial PowerShell redirection failed before Node started because the fresh checkout had no .local directory. No test/profile measurements were produced in that attempt. The failure was recorded and the directory created before the next runs."
   },
   "interpretation": {
     "budgetMs": 10.666666666666666,

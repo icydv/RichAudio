@@ -1,6 +1,6 @@
 # MENU-02 recovery independent review
 
-My previous attempt remains startup-aborted and restored, with its approval consumed. A separate Codex agent reviewed the successor procedure, manifest, captured read-only observations, reports and fixture evidence. Codex found no outstanding offline procedure blocker. This is automated independent review, not live acceptance or permission to deploy.
+My previous attempt remains startup-aborted and restored, with its approval consumed. A separate review covered the successor procedure, manifest, captured read-only observations, reports and fixture evidence. The analysis found no outstanding offline procedure blocker. This is automated independent review, not live acceptance or permission to deploy.
 
 The reviewed identities are SHA-256 of the retained bytes:
 
@@ -15,11 +15,11 @@ The reviewed identities are SHA-256 of the retained bytes:
 | Private successor manifest | `4d0194bb15de6d283c8e97b9737b3d5c7122b334b71713918c3c30fb78828581` |
 | Private approval report | `175c83c956d364eee3ad9be1c978d4f55e73fe56361f6c766bea0b9b03e7ee56` |
 
-The coordinator fixtures executed retained source `c6f5a4c3fe63c620246ea0ebc7ebb772745fd860a61bd9b34dd57a718a42c0e8`. The final source removes only a terminal blank line. Codex independently compared both texts; all 2,517 semantic tokens remain identical, and format proof `dffddfe7e0d3ec04215edf1daa74d3fd55e54a4ec27ec6a2f036a736e53350ef` binds them. No logic or candidate changed and no test rerun is claimed for that formatting edit.
+The coordinator fixtures executed retained source `c6f5a4c3fe63c620246ea0ebc7ebb772745fd860a61bd9b34dd57a718a42c0e8`. The final source removes only a terminal blank line. The analysis independently compared both texts; all 2,517 semantic tokens remain identical, and format proof `dffddfe7e0d3ec04215edf1daa74d3fd55e54a4ec27ec6a2f036a736e53350ef` binds them. No logic or candidate changed and no test rerun is claimed for that formatting edit.
 
 The launcher supplies the exact executable, explicit identity-pinned working directory and unchanged empty arguments through ProcessStartInfo. It has no shell-directory dependency or fallback. Fresh bound receipts, deployed fingerprints, process closure, supervisor readiness and a consumed launch marker gate its sole Process.Start.
 
-Codex independently executed the actual restoration helper on **33 disposable cases: 33 passed, exit 0**. The identified short PowerShell child closed normally. This repeats the author's same 33-case population; it is not 66 unique tests. The source and retained evidence also cover 36 construction, 34 gate, five dangling-link, 28 synthetic-clock and eight coordinator checks, reported separately. Ten actual coordinator receipts match the nonempty external fixture-manifest hash, including their metadata and restoration-result bindings.
+The run independently executed the actual restoration helper on **33 disposable cases: 33 passed, exit 0**. The identified short PowerShell child closed normally. This repeats the author's same 33-case population; it is not 66 unique tests. The source and retained evidence also cover 36 construction, 34 gate, five dangling-link, 28 synthetic-clock and eight coordinator checks, reported separately. Ten actual coordinator receipts match the nonempty external fixture-manifest hash, including their metadata and restoration-result bindings.
 
 Independent review reproduced a helper import clearing the coordinator's manifest arguments. The corrected import preserves and checks them. The rejected first draft, its preview and incomplete seven-case evidence remain preserved and ineligible for the next attempt. Earlier timestamp-lock fixture and clock-display failures also remain distinct. No failure was relabelled as a successful live test.
 

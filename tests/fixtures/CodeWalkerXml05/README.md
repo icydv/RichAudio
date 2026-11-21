@@ -1,4 +1,4 @@
-I retain these wholly original XML fixtures to test the actual CodeWalker XML dialect. Codex generated their geometry and placement data through the pinned public CodeWalker APIs, then called the real XML exporter. They contain no installed GTA building or extracted proprietary resource.
+I retain these wholly original XML fixtures to test the actual CodeWalker XML dialect. Their geometry and placement data were generated through the pinned public CodeWalker APIs and exported using the XML exporter. They contain no installed GTA building or extracted proprietary resource.
 
 The nine groups contain 27 XML resources. The empty-map group deliberately has no selectable building. The other 24 resources exercise ordinary placement, a wall and passage, closed boxes with eight noncoplanar vertices and twelve triangles each, stored quaternions, nonuniform scale, collision centres, composite transforms and packed material identities. A wider original collision variant changes only the collision resource while retaining the same placement and archetype metadata; this is a controlled invalidation input, not proof of a real archetype bounding box.
 
