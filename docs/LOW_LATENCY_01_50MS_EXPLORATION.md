@@ -1,6 +1,6 @@
 # LOW-LATENCY-01 — why 50 ms is not qualified
 
-I asked for aggressive delay exploration without sacrificing continuity or weakening the camera/physics protections. After the 75 ms candidate and CI were complete, Codex checked a private 50 ms variant against the same retained Bati inputs. **The 50 ms variant is not qualified by this comparison. The published 75 ms profile is unchanged.**
+I asked for aggressive delay exploration without sacrificing continuity or weakening the camera/physics protections. After the 75 ms candidate and CI were complete, the operator checked a private 50 ms variant against the same retained Bati inputs. **The 50 ms variant is not qualified by this comparison. The published 75 ms profile is unchanged.**
 
 The private harness creates a fresh anchored `ListenerPlayout` with 50 ms before accepting any observation or rendering a frame. It keeps the original 50 ms forecast ceiling, source expiry, identity checks, source banks, gains and acoustic solver. It does not introduce a production profile, change a live binding or edit an approved artifact.
 
@@ -18,7 +18,7 @@ For a fair comparison, prediction counts below use the same **1,196 successfully
 
 Omission-related `prediction-expired` blocks increase from 1 to 33 in that matched prefix. Partial 50 ms processing/age distributions are not presented as full-run throughput or latency results.
 
-Codex also checked the combined camera policy, to avoid attributing the failure only to legacy camera reanchoring. With `camera-source-01` in both arms, retained 75 ms completes 3,114 blocks with one source creation; retained 50 ms hits the same listener guard at the same attempted frame and speed. The combined-policy jitter/omission arms were not run after that clear retained-input failure. No guard was relaxed, failed source resumed or listener pose fabricated.
+The operator also checked the combined camera policy, to avoid attributing the failure only to legacy camera reanchoring. With `camera-source-01` in both arms, retained 75 ms completes 3,114 blocks with one source creation; retained 50 ms hits the same listener guard at the same attempted frame and speed. The combined-policy jitter/omission arms were not run after that clear retained-input failure. No guard was relaxed, failed source resumed or listener pose fabricated.
 
 The first private harness stopped on the uncaught original exception and was preserved. A new harness recorded each arm's failure independently; a third checked the combined policy. Their receipts, sources and original package bindings remain private and hash-bound in [sanitized evidence](../evidence/low-latency-01-delay50.json). Independent review confirmed the failing entity, unchanged throw path, matched-prefix counts and both continuity-policy scopes.
 
