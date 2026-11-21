@@ -65,6 +65,7 @@ internal sealed class TestPowertrainPlayback
     PowertrainHandoff handoff;
     readonly List<string> assignments = new List<string>();
     readonly List<object> handoffJournal = new List<object>();
+    string releaseReason;
 
     Dictionary<string, object> ReadStatus()
     {
@@ -126,6 +127,42 @@ internal sealed class TestPowertrainPlayback
             handoff.Reason + ". Last status: " + json.Serialize(row));
     }
 
+    // The live journal retained native transition times and cumulative host
+    // counters. It did not retain individual callback arrival times or revs.
+    // Use the same authored 20 Hz workload and periodic delivery stalls in
+    // both builds. The adapter timestamps its actual acquisitions.
+    void DriveWindow(string stage, int durationMs, string phase, long revision)
+    {
+        var clock = Stopwatch.StartNew();
+        var before = ReadStatus();
+        Require(before != null, "No starting status for " + stage);
+        Dictionary<string, object> after = null;
+        int tick = 0;
+        while (clock.ElapsedMilliseconds < durationMs)
+        {
+            // Hold a ratio through several observations to exercise high-rev
+            // racing before changing load. Muted tracking keeps the high ratio.
+            source.RevRatio = phase == "Muted" ? 0.83 : (tick / 8) % 2 == 0 ? 0.83 : 0.35;
+            link.SubmitObservation(source.PlayerVehicleHandle, vehicle);
+            Advance();
+            after = ReadStatus();
+            Require(handoff.Phase == phase, stage + ": " + handoff.Phase + " " + handoff.Reason);
+            Require(link.Snapshot.Failure == null, "Host failed during " + stage + ": " + link.Snapshot.Failure);
+            int intervalMs = ++tick % 9 == 0 ? 90 : 50;
+            Thread.Sleep(intervalMs);
+        }
+        Require(after != null && Number(after, "appliedRevision") == revision &&
+            Number(after, "submittedFrames") > Number(before, "submittedFrames") &&
+            Number(after, "outputPeak") >= 0, "Output did not progress during " + stage);
+        if (phase == "Muted") Require(Number(after, "outputPeak") == 0, "Muted interval emitted sound");
+        stages.Add(new { stage, elapsedMs = clock.ElapsedMilliseconds, observations = tick,
+            deltaStaleFrames = Number(after, "stalePcmFrames") - Number(before, "stalePcmFrames"),
+            deltaUnderflowFrames = Number(after, "underflowFrames") - Number(before, "underflowFrames"),
+            deltaDiscardedFrames = Number(after, "discardedFrames") - Number(before, "discardedFrames"),
+            before, status = after });
+        Console.WriteLine("PASS " + stage + " at the authored callback cadence");
+    }
+
     void WaitForStock()
     {
         var clock = Stopwatch.StartNew();
@@ -148,7 +185,7 @@ internal sealed class TestPowertrainPlayback
             ". Host report: " + json.Serialize(ReadStatus()));
     }
 
-    object Run(string manifestPath, string fixtureRoot, bool disconnect)
+    object Run(string manifestPath, string fixtureRoot, string termination)
     {
         var configuration = PlayableConfiguration.Load(manifestPath);
         string root = configuration.Root;
@@ -181,7 +218,11 @@ internal sealed class TestPowertrainPlayback
                 Require(receipt.Ended || receipt.Mode == "withdraw",
                     "Stock assigned before voice withdrawal");
             assignments.Add(assignment);
-        }, (phase, reason) => handoffJournal.Add(new { phase, reason, ticks = Stopwatch.GetTimestamp() }));
+        }, (phase, reason) =>
+        {
+            if (phase == "Releasing") releaseReason = reason;
+            handoffJournal.Add(new { phase, reason, ticks = Stopwatch.GetTimestamp() });
+        });
         try
         {
             handoff.Start(vehicle, Stopwatch.GetTimestamp());
@@ -191,7 +232,7 @@ internal sealed class TestPowertrainPlayback
             var playing = Drive("real renderer readiness admitted one authored native quiet request", r =>
                 handoff.Phase == "Active" && assignments.Count == 1 && Number(r, "appliedRevision") == 2 &&
                 Number(r, "outputPeak") > 0 && Math.Abs(Number(r, "submittedOperatingPoint") - observed) < .00001);
-            if (disconnect)
+            if (termination == "disconnect")
             {
                 using (var owner = Process.GetCurrentProcess())
                 using (var stop = EventWaitHandle.OpenExisting(GameplayStopSignal.Name(owner.Id, session), EventWaitHandleRights.Modify))
@@ -200,8 +241,20 @@ internal sealed class TestPowertrainPlayback
                 Require(link.Snapshot.Failure != null, "Host exit did not reach the callback as a failure");
                 Console.WriteLine("PASS actual owned host disconnect restored stock exactly once");
             }
+            else if (termination == "expiry")
+            {
+                // Advance the exact same vehicle's handoff with observations
+                // withheld. Neither the host nor the controller may extend
+                // the age of already-rendered data to keep the voice alive.
+                WaitForStock();
+                Require(releaseReason == "host output progress expired" ||
+                    (releaseReason != null && releaseReason.Contains("telemetry expired")),
+                    "Expired telemetry did not cause withdrawal: " + releaseReason);
+                Console.WriteLine("PASS lost observation lease withdrew playback and restored stock exactly once");
+            }
             else
             {
+                DriveWindow("initial audible playback", 3800, "Active", 2);
                 Require(handoff.Mute(Stopwatch.GetTimestamp()) == "accepted", "Mute refused");
                 var muted = Drive("mute acknowledged only with silent output", r =>
                     handoff.Phase == "Muted" && Number(r, "appliedRevision") == 3 && Number(r, "outputPeak") == 0 &&
@@ -211,11 +264,13 @@ internal sealed class TestPowertrainPlayback
                     handoff.Phase == "Muted" && Number(r, "appliedRevision") == 3 && Number(r, "outputPeak") == 0 &&
                     Number(r, "submittedObservationSequence") > Number(muted, "submittedObservationSequence") &&
                     Math.Abs(Number(r, "submittedOperatingPoint") - 0.83) < .00001);
+                DriveWindow("muted tracking", 2400, "Muted", 3);
                 Require(handoff.Resume(Stopwatch.GetTimestamp()) == "accepted", "Resume refused");
                 Drive("resume submitted current rev ratio in the new output revision", r =>
                     handoff.Phase == "Active" && Number(r, "appliedRevision") == 4 && Number(r, "outputPeak") > 0 &&
                     Math.Abs(Number(r, "submittedOperatingPoint") - 0.83) < .00001 &&
                     Number(r, "submittedObservationSequence") > Number(playing, "submittedObservationSequence"));
+                DriveWindow("resumed audible playback", 7600, "Active", 4);
                 Require(assignments.Count == 1, "Mute or resume performed a native assignment");
                 Require(handoff.Restore(Stopwatch.GetTimestamp()) == "accepted", "Stock return refused");
                 WaitForStock();
@@ -227,7 +282,7 @@ internal sealed class TestPowertrainPlayback
                 Console.WriteLine("PASS withdrawal retired source and reached silent output before stock return");
             }
             return new {
-                session, disconnect, stages, assignments, handoffJournal, evidenceDirectory = directory,
+                session, termination, stages, assignments, handoffJournal, evidenceDirectory = directory,
                 transportReceipt = Path.Combine(linkDirectory, "powertrain-transport.json"), finalHost = ReadStatus()
             };
         }
@@ -249,11 +304,14 @@ internal sealed class TestPowertrainPlayback
         try
         {
             string root = Path.GetDirectoryName(args[1]);
-            var playback = new TestPowertrainPlayback().Run(args[0], root, false);
-            var disconnect = new TestPowertrainPlayback().Run(args[0], root, true);
+            var playback = new TestPowertrainPlayback().Run(args[0], root, "restore");
+            var disconnect = new TestPowertrainPlayback().Run(args[0], root, "disconnect");
+            var expiry = new TestPowertrainPlayback().Run(args[0], root, "expiry");
             File.WriteAllText(args[1], new JavaScriptSerializer().Serialize(new {
                 passed = true, fixture = "device-free", authoredObservations = true,
-                nativeAssignmentsAreFixtureActions = true, measuredSpeakerLatency = false, playback, disconnect
+                authoredTiming = "50 ms between observations with a 90 ms interval every ninth tick; operating ratios held at 0.83 while muted and alternated in eight-observation runs during audible windows",
+                authoredEndpointPrime = "One 20 ms fixture callback of silence without consuming the ring for each output revision; excluded from substituted-frame counters",
+                nativeAssignmentsAreFixtureActions = true, measuredSpeakerLatency = false, playback, disconnect, expiry
             }));
             return 0;
         }

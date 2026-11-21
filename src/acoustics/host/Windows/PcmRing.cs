@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
@@ -19,6 +20,57 @@ namespace RichAudio.Beacon.Windows
         internal PowertrainStamp Source;
         internal int Qualified, Discarded, Stale;
         internal float Peak;
+        internal bool Audible;
+        internal int OutputFrames, Substituted, StaleOnArrival, StaleBeforeEnqueue, StaleInRing;
+        internal long MaxArrivalAge, MaxEnqueueAge, MaxRingWait, MaxHostEnqueueWait;
+        internal PowertrainGap Prefix, Suffix, Longest;
+        internal PowertrainPcmTiming FirstTiming, LastTiming;
+
+        internal void Output(int frames, PowertrainGapCause cause)
+        {
+            if (cause == PowertrainGapCause.None) Suffix = new PowertrainGap();
+            else
+            {
+                if (Substituted == OutputFrames) Prefix.Add(frames, cause);
+                Suffix.Add(frames, cause);
+                if (Suffix.Frames > Longest.Frames) Longest = Suffix;
+                Substituted += frames;
+                if (cause == PowertrainGapCause.StaleOnArrival) StaleOnArrival += frames;
+                else if (cause == PowertrainGapCause.StaleBeforeEnqueue) StaleBeforeEnqueue += frames;
+                else if (cause == PowertrainGapCause.StaleInRing) StaleInRing += frames;
+            }
+            OutputFrames += frames;
+        }
+    }
+    internal struct PowertrainPcmTiming
+    {
+        internal long ObservationSequence, ObservationQpc, DeadlineQpc, PcmBlock;
+        internal long ArrivalQpc, EnqueueQpc, OutputDecisionQpc;
+        internal int SlotFrame;
+        internal string Outcome { get { return Cause.ToString(); } }
+        internal PowertrainGapCause Cause;
+        internal object Status()
+        {
+            if (ArrivalQpc == 0) return null;
+            return new { ObservationSequence, ObservationQpc, DeadlineQpc, PcmBlock, SlotFrame,
+                ArrivalQpc, EnqueueQpc, OutputDecisionQpc, Outcome };
+        }
+    }
+    [Flags]
+    internal enum PowertrainGapCause
+    {
+        None = 0, NoSlot = 1, Untagged = 2, RevisionMismatch = 4, StaleOnArrival = 8,
+        StaleBeforeEnqueue = 16, StaleInRing = 32, StaleUnmeasured = 64
+    }
+    internal struct PowertrainGap
+    {
+        internal long Frames;
+        internal PowertrainGapCause Causes;
+        internal void Add(long frames, PowertrainGapCause cause)
+        {
+            Frames += frames;
+            Causes |= cause;
+        }
     }
     // Exactly one producer and one consumer. Slot publication uses volatile ordering.
     public sealed class PcmRing
@@ -36,6 +88,7 @@ namespace RichAudio.Beacon.Windows
         public double SelectedGameplayReserveMilliseconds {get{return GameplayPrefillBlocks*MaximumFrames/48.0;}}
         private readonly float[][] data = new float[Slots][];
         private readonly PowertrainStamp[] stamps = new PowertrainStamp[Slots];
+        private readonly long[] arrivedAt = new long[Slots], enqueuedAt = new long[Slots], pcmBlocks = new long[Slots];
         private readonly int[] lengths = new int[Slots];
         private int write, read, offset, credits;
         public long UnderflowFrames, ConsumedFrames, ConsumedBlocks, EndSilenceFrames;
@@ -53,13 +106,21 @@ namespace RichAudio.Beacon.Windows
         public int TakeCredits() { return Interlocked.Exchange(ref credits, 0); }
         public bool TryWrite(float[] samples, int frames)
         { return TryWrite(samples, frames, null); }
-        internal bool TryWrite(float[] samples, int frames, PowertrainStamp stamp)
+        internal bool TryWrite(float[] samples, int frames, PowertrainStamp stamp, long arrival = 0, long block = -1)
         {
             if (samples == null || frames < 1 || frames > MaximumFrames || samples.Length < frames * 2) throw new ArgumentException("PCM block bounds");
             for (int i = 0; i < frames * 2; i++) if (float.IsNaN(samples[i]) || float.IsInfinity(samples[i]) || Math.Abs(samples[i]) > 1) throw new InvalidDataException("Invalid PCM sample");
             int cursor = Thread.VolatileRead(ref write);
             if (cursor - Thread.VolatileRead(ref read) >= Slots) return false;
-            Array.Copy(samples, 0, data[cursor % Slots], 0, frames * 2); lengths[cursor % Slots] = frames; stamps[cursor % Slots] = stamp;
+            int index = cursor % Slots;
+            Array.Copy(samples, 0, data[index], 0, frames * 2);
+            lengths[index] = frames; stamps[index] = stamp;
+            if (stamp != null)
+            {
+                arrivedAt[index] = arrival;
+                enqueuedAt[index] = arrival == 0 ? 0 : Stopwatch.GetTimestamp();
+                pcmBlocks[index] = block;
+            }
             Thread.VolatileWrite(ref write, cursor + 1); return true;
         }
         public unsafe int Fill(float* output, int frames, float gain)
@@ -70,11 +131,11 @@ namespace RichAudio.Beacon.Windows
         {return FillCore(output,frames,gain,1);}
         // Consume only one tagged slot per gain decision. Other host modes use
         // the original sample loop directly, with no per-frame revision checks.
-        internal unsafe int FillPowertrain(float* output,int frames,float gain,long revision,long now,out PowertrainSubmission submission)
+        internal unsafe int FillPowertrain(float* output,int frames,float gain,long revision,long now,out PowertrainSubmission submission,bool audible=false)
         {
             if(output==null||frames<0||frames>8192)throw new ArgumentException("Output bounds");
             int supplied=0,done=0;
-            submission=new PowertrainSubmission();
+            submission=new PowertrainSubmission { Audible=audible };
             while(done<frames){
                 int cursor=read,index=cursor%Slots;
                 bool available=cursor<Thread.VolatileRead(ref write);
@@ -82,6 +143,36 @@ namespace RichAudio.Beacon.Windows
                 int chunk=available?Math.Min(frames-done,lengths[index]-offset):frames-done;
                 bool stale=stamp!=null&&stamp.Deadline<=now;
                 bool qualified=stamp!=null&&stamp.Revision==revision&&!stale;
+                if (audible)
+                {
+                    long arrival = arrivedAt[index], enqueue = enqueuedAt[index];
+                    if (stamp != null && stamp.Revision == revision && arrival > 0 && arrival <= enqueue)
+                    {
+                        submission.MaxArrivalAge = Math.Max(submission.MaxArrivalAge, arrival - stamp.ObservedAt);
+                        submission.MaxEnqueueAge = Math.Max(submission.MaxEnqueueAge, enqueue - stamp.ObservedAt);
+                        submission.MaxHostEnqueueWait = Math.Max(submission.MaxHostEnqueueWait, enqueue - arrival);
+                        submission.MaxRingWait = Math.Max(submission.MaxRingWait, now - enqueue);
+                    }
+                    PowertrainGapCause cause;
+                    if (!available) cause = PowertrainGapCause.NoSlot;
+                    else if (stamp == null) cause = PowertrainGapCause.Untagged;
+                    else if (stamp.Revision != revision) cause = PowertrainGapCause.RevisionMismatch;
+                    else if (!stale) cause = PowertrainGapCause.None;
+                    else if (arrival <= 0) cause = PowertrainGapCause.StaleUnmeasured;
+                    else if (arrival >= stamp.Deadline) cause = PowertrainGapCause.StaleOnArrival;
+                    else if (enqueue >= stamp.Deadline) cause = PowertrainGapCause.StaleBeforeEnqueue;
+                    else cause = PowertrainGapCause.StaleInRing;
+                    if (stamp != null && stamp.Revision == revision && arrival > 0)
+                    {
+                        var timing = new PowertrainPcmTiming {
+                            ObservationSequence=stamp.Sequence, ObservationQpc=stamp.ObservedAt, DeadlineQpc=stamp.Deadline,
+                            PcmBlock=pcmBlocks[index], SlotFrame=offset, ArrivalQpc=arrival, EnqueueQpc=enqueue,
+                            OutputDecisionQpc=now, Cause=cause };
+                        if (submission.FirstTiming.ArrivalQpc == 0) submission.FirstTiming = timing;
+                        submission.LastTiming = timing;
+                    }
+                    submission.Output(chunk, cause);
+                }
                 float* target=output+done*2;
                 int taken=FillCore(target,chunk,qualified?gain:0,1);
                 if(qualified){

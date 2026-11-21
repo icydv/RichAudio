@@ -32,6 +32,44 @@ namespace RichAudio.Beacon.Tests
             frame.PowertrainRevision=4;frame.PowertrainGate="voice";
             Throws(delegate{gate.Accept(frame,now);},"withdrawal is terminal");
         }
+        static unsafe void CheckPowertrainOutputTiming()
+        {
+            var ring = new PcmRing();
+            var samples = new[]{.25f,.25f,.25f,.25f};
+            var output = new float[16];
+            var progress = new AudibleContinuity();
+            long now = System.Diagnostics.Stopwatch.GetTimestamp();
+            long second = System.Diagnostics.Stopwatch.Frequency;
+            long arrival = now - second;
+            // Two frames for each expiry boundary, followed by a wrong
+            // revision and a valid slot. Callback sizes split the stale run.
+            Check(ring.TryWrite(samples,2,new PowertrainStamp(4,1,arrival,arrival-second,.5),arrival),"expired at host arrival");
+            Check(ring.TryWrite(samples,2,new PowertrainStamp(4,2,now-second/2,arrival,.5),arrival),"expires before enqueue");
+            Check(ring.TryWrite(samples,2,new PowertrainStamp(4,3,now+second,arrival,.5),arrival),"expires in ring");
+            Check(ring.TryWrite(samples,2,new PowertrainStamp(3,4,now+3*second,arrival,.5),arrival),"old voice revision");
+            Check(ring.TryWrite(samples,2,new PowertrainStamp(4,5,now+3*second,arrival,.5),arrival),"fresh voice revision");
+            PowertrainSubmission block;
+            fixed(float* p=output)
+            {
+                ring.FillPowertrain(p,3,1,4,now+2*second,out block,true);
+                Check(block.StaleOnArrival==2&&block.StaleBeforeEnqueue==1,"expiry stage split at callback boundary");
+                Check(Array.TrueForAll(output,v=>v==0),"expired output is silent");
+                progress.Record(4,block);
+
+                ring.FillPowertrain(p,7,1,4,now+2*second,out block,true);
+                Check(block.StaleBeforeEnqueue==1&&block.StaleInRing==2&&block.Qualified==2,"in-ring expiry and fresh output distinguished");
+                Check(output[9]==0&&output[10]==.25f,"fallback transitions from zero to fresh PCM");
+                progress.Record(4,block);
+            }
+            Check(progress.Frames==10&&progress.Substituted==8&&progress.LongestFrames==8&&progress.LongestRevision==4,"contiguous gap survives callback split");
+            Check((PowertrainGapCause)progress.LongestCauses==(PowertrainGapCause.StaleOnArrival|PowertrainGapCause.StaleBeforeEnqueue|PowertrainGapCause.StaleInRing|PowertrainGapCause.RevisionMismatch),"longest gap retains every combined cause");
+            Check(progress.MaxHostEnqueueWait>=second&&progress.MaxArrivalAge>=second&&progress.MaxRingWait>0,"arrival and queue timing retained");
+            var missing = new PowertrainSubmission();
+            missing.Output(6,PowertrainGapCause.NoSlot);
+            progress.Record(4,missing);
+            progress.Record(6,missing);
+            Check(progress.LongestFrames==8,"mute and resume divide audible gaps");
+        }
         public static unsafe int Main(string[] args)
         {
             try
@@ -60,6 +98,7 @@ namespace RichAudio.Beacon.Tests
                 }
                 if(args.Length!=0)throw new ArgumentException("Unsupported test option");
                 CheckPowertrainWithdrawal();
+                CheckPowertrainOutputTiming();
                 Check(HostProgram.BeaconFrequencyArguments(95,"harmonic",false)=="","default producer invocation preserved");
                 Check(HostProgram.AuditionArguments(0,"open-road","harmonic",1,95,.22,.08f,false,false,false,false)=="","default audition disabled");
                 Check(HostProgram.AuditionArguments(12,"open-road","harmonic",1,600,.44,.20f,true,true,false,false)==" --beacon-output-trim-db 12","bounded geometry audition forwarding");

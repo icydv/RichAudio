@@ -170,7 +170,7 @@ namespace RichAudio.Beacon.Windows
                 try{Powertrain.Fill(ring,(float*)data,(int)frames,out submission);}
                 catch{Native.Check(renderer.ReleaseBuffer(frames,2));throw;}
                 Native.Check(renderer.ReleaseBuffer(frames,0));
-                SubmittedFrames+=frames;ring.RequireContinuousProducer();Powertrain.Submitted(submission);
+                SubmittedFrames+=frames;Powertrain.Submitted(submission);ring.RequireContinuousProducer();
                 return;
             }
 #endif

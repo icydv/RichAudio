@@ -61,6 +61,33 @@ namespace RichAudio.AudioSwitch
             public long underflowFrames { get; set; }
             public long discardedFrames { get; set; }
             public long stalePcmFrames { get; set; }
+            public long audibleFrames { get; set; }
+            public long audibleSubstitutedFrames { get; set; }
+            public long audibleLongestGapFrames { get; set; }
+            public string audibleLongestGapCauses { get; set; }
+            public long audibleLongestGapRevision { get; set; }
+            public long audibleStaleOnArrivalFrames { get; set; }
+            public long audibleStaleWaitingToEnqueueFrames { get; set; }
+            public long audibleStaleWaitingFrames { get; set; }
+            public double audibleMaxArrivalAgeMs { get; set; }
+            public double audibleMaxEnqueueAgeMs { get; set; }
+            public double audibleMaxHostEnqueueWaitMs { get; set; }
+            public double audibleMaxRingWaitMs { get; set; }
+            public float audibleMaxOutputPeak { get; set; }
+            public object initialAudibleChronology { get; set; }
+            public long initialAudibleLongestGapFrames { get; set; }
+            public string initialAudibleLongestGapCauses { get; set; }
+            public long resumedAudibleFrames { get; set; }
+            public long resumedAudibleSubstitutedFrames { get; set; }
+            public long resumedAudibleLongestGapFrames { get; set; }
+            public string resumedAudibleLongestGapCauses { get; set; }
+            public long resumedAudibleStaleOnArrivalFrames { get; set; }
+            public long resumedAudibleStaleWaitingToEnqueueFrames { get; set; }
+            public long resumedAudibleStaleWaitingFrames { get; set; }
+            public float resumedAudibleMaxOutputPeak { get; set; }
+            public object resumedAudibleChronology { get; set; }
+            public long resumedSteadyLongestGapFrames { get; set; }
+            public string resumedSteadyLongestGapCauses { get; set; }
             public long qpcFrequency { get; set; }
             public double maxCallbackGapMs { get; set; }
             public double maxSubmittedObservationAgeMs { get; set; }

@@ -24,6 +24,11 @@ namespace RichAudio.Beacon.Windows
         long submittedFrames, submittedObservation=-1, lastSubmitted, lastCallback, maxCallbackGap;
         long maximumObservationAge, discarded, stalePcmFrames;
         double submittedOperatingPoint, outputPeak;
+        readonly AudibleContinuity audible = new AudibleContinuity();
+        long initialVoiceRevision;
+        readonly AudibleContinuity initialAudible = new AudibleContinuity();
+        readonly AudibleContinuity resumed = new AudibleContinuity();
+        readonly AudibleContinuity resumedSteady = new AudibleContinuity();
 
         internal PowertrainOutputGate() { requested=sink=applied=initial; }
         internal Command Requested { get { return Volatile.Read(ref requested); } }
@@ -93,7 +98,7 @@ namespace RichAudio.Beacon.Windows
             long now=Stopwatch.GetTimestamp();
             bool current=sink==Requested&&!Expired(now);
             return ring.FillPowertrain(data,frames,current&&sink.Mode=="voice"?1:0,
-                current?sink.Revision:0,now,out submission);
+                current?sink.Revision:0,now,out submission,sink.Mode=="voice");
         }
         internal void Submitted(PowertrainSubmission result)
         {
@@ -103,6 +108,14 @@ namespace RichAudio.Beacon.Windows
             discarded+=result.Discarded;
             stalePcmFrames+=result.Stale;
             outputPeak=result.Peak;
+            if (result.Audible)
+            {
+                if (initialVoiceRevision == 0) initialVoiceRevision = sink.Revision;
+                audible.Record(sink.Revision, result);
+                (sink.Revision == initialVoiceRevision ? initialAudible : resumed).Record(sink.Revision, result);
+                if (sink.Revision != initialVoiceRevision && sink == Volatile.Read(ref applied))
+                    resumedSteady.Record(sink.Revision, result);
+            }
             if(result.Source==null||sink!=Requested||Expired(now)||result.Source.Revision!=sink.Revision)return;
             submittedFrames+=result.Qualified;
             submittedObservation=result.Source.Sequence;
@@ -114,15 +127,121 @@ namespace RichAudio.Beacon.Windows
         internal object Status(string session,int hostPid,bool fixture,bool endpointStarted,long underflow,string failure)
         {
             var ack=Volatile.Read(ref applied);
+            // The existing bridge reads at most 8 KiB. Keep even an arbitrary
+            // endpoint error bounded when JSON escaping increases its length.
+            if (failure != null && failure.Length > 256) failure = failure.Substring(0,256);
+            // These counts start after the output worker has completed the gain
+            // boundary. The explicit endpoint reset/silence prime is separate.
             return new {session,hostPid,fixture,endpointStarted,mode=ack.Mode,appliedRevision=ack.Revision,
                 vehicleId=id,observationSequence=Interlocked.Read(ref observation),observedQpc=Interlocked.Read(ref observedAt),
                 renderedBlocks=Interlocked.Read(ref renderedBlocks),renderedObservationSequence=Interlocked.Read(ref renderedObservation),
                 submittedObservationSequence=Interlocked.Read(ref submittedObservation),submittedFrames=Interlocked.Read(ref submittedFrames),
                 lastSubmittedQpc=Interlocked.Read(ref lastSubmitted),submittedOperatingPoint=Volatile.Read(ref submittedOperatingPoint),
                 outputPeak=Volatile.Read(ref outputPeak),discardedFrames=Interlocked.Read(ref discarded),stalePcmFrames=Interlocked.Read(ref stalePcmFrames),
+                audibleFrames = Interlocked.Read(ref audible.Frames),
+                audibleSubstitutedFrames = Interlocked.Read(ref audible.Substituted),
+                audibleLongestGapFrames = Interlocked.Read(ref audible.LongestFrames),
+                audibleLongestGapCauses = ((PowertrainGapCause)Volatile.Read(ref audible.LongestCauses)).ToString(),
+                audibleLongestGapRevision = Interlocked.Read(ref audible.LongestRevision),
+                audibleStaleOnArrivalFrames = Interlocked.Read(ref audible.StaleOnArrival),
+                audibleStaleWaitingToEnqueueFrames = Interlocked.Read(ref audible.StaleBeforeEnqueue),
+                audibleStaleWaitingFrames = Interlocked.Read(ref audible.StaleInRing),
+                audibleMaxArrivalAgeMs = Ms(ref audible.MaxArrivalAge),
+                audibleMaxEnqueueAgeMs = Ms(ref audible.MaxEnqueueAge),
+                audibleMaxHostEnqueueWaitMs = Ms(ref audible.MaxHostEnqueueWait),
+                audibleMaxRingWaitMs = Ms(ref audible.MaxRingWait),
+                audibleMaxOutputPeak = Volatile.Read(ref audible.Peak),
+                initialAudibleChronology = initialAudible.Chronology(),
+                initialAudibleLongestGapFrames = Interlocked.Read(ref initialAudible.LongestFrames),
+                initialAudibleLongestGapCauses = ((PowertrainGapCause)Volatile.Read(ref initialAudible.LongestCauses)).ToString(),
+                resumedAudibleFrames = Interlocked.Read(ref resumed.Frames),
+                resumedAudibleSubstitutedFrames = Interlocked.Read(ref resumed.Substituted),
+                resumedAudibleLongestGapFrames = Interlocked.Read(ref resumed.LongestFrames),
+                resumedAudibleLongestGapCauses = ((PowertrainGapCause)Volatile.Read(ref resumed.LongestCauses)).ToString(),
+                resumedAudibleStaleOnArrivalFrames = Interlocked.Read(ref resumed.StaleOnArrival),
+                resumedAudibleStaleWaitingToEnqueueFrames = Interlocked.Read(ref resumed.StaleBeforeEnqueue),
+                resumedAudibleStaleWaitingFrames = Interlocked.Read(ref resumed.StaleInRing),
+                resumedAudibleMaxOutputPeak = Volatile.Read(ref resumed.Peak),
+                resumedAudibleChronology = resumed.Chronology(),
+                resumedSteadyLongestGapFrames = Interlocked.Read(ref resumedSteady.LongestFrames),
+                resumedSteadyLongestGapCauses = ((PowertrainGapCause)Volatile.Read(ref resumedSteady.LongestCauses)).ToString(),
                 maxCallbackGapMs=Interlocked.Read(ref maxCallbackGap)*1000d/Stopwatch.Frequency,
                 maxSubmittedObservationAgeMs=Interlocked.Read(ref maximumObservationAge)*1000d/Stopwatch.Frequency,
                 underflowFrames=underflow,publicationQpc=Stopwatch.GetTimestamp(),qpcFrequency=Stopwatch.Frequency,failure};
+        }
+
+        static double Ms(ref long ticks) { return Interlocked.Read(ref ticks) * 1000d / Stopwatch.Frequency; }
+    }
+
+    // Single output-writer counters. An interrupted run joins the next output
+    // callback only within the same audible revision.
+    internal sealed class AudibleContinuity
+    {
+        internal long Frames, Substituted, LongestFrames, LongestRevision;
+        internal int LongestCauses;
+        internal long StaleOnArrival, StaleBeforeEnqueue, StaleInRing;
+        internal long MaxArrivalAge, MaxEnqueueAge, MaxHostEnqueueWait, MaxRingWait;
+        internal float Peak;
+        long trailingRevision;
+        PowertrainGap trailing;
+        int timingVersion;
+        long timingRevision;
+        PowertrainPcmTiming firstTiming, lastTiming;
+
+        internal void Record(long revision, PowertrainSubmission result)
+        {
+            if (revision != trailingRevision)
+            {
+                trailingRevision = revision;
+                trailing = new PowertrainGap();
+            }
+            var joined = trailing;
+            joined.Add(result.Prefix.Frames, result.Prefix.Causes);
+            var longest = joined.Frames >= result.Longest.Frames ? joined : result.Longest;
+            if (longest.Frames > LongestFrames)
+            {
+                Volatile.Write(ref LongestCauses, (int)longest.Causes);
+                Interlocked.Exchange(ref LongestRevision, revision);
+                Interlocked.Exchange(ref LongestFrames, longest.Frames);
+            }
+            trailing = result.Substituted == result.OutputFrames ? joined : result.Suffix;
+            Frames += result.OutputFrames;
+            Substituted += result.Substituted;
+            StaleOnArrival += result.StaleOnArrival;
+            StaleBeforeEnqueue += result.StaleBeforeEnqueue;
+            StaleInRing += result.StaleInRing;
+            MaxArrivalAge = Math.Max(MaxArrivalAge, result.MaxArrivalAge);
+            MaxEnqueueAge = Math.Max(MaxEnqueueAge, result.MaxEnqueueAge);
+            MaxHostEnqueueWait = Math.Max(MaxHostEnqueueWait, result.MaxHostEnqueueWait);
+            MaxRingWait = Math.Max(MaxRingWait, result.MaxRingWait);
+            Peak = Math.Max(Peak, result.Peak);
+            if (result.LastTiming.ArrivalQpc == 0) return;
+            Interlocked.Increment(ref timingVersion);
+            if (revision != timingRevision)
+            {
+                timingRevision = revision;
+                firstTiming = result.FirstTiming;
+            }
+            lastTiming = result.LastTiming;
+            Interlocked.Increment(ref timingVersion);
+        }
+
+        internal object Chronology()
+        {
+            // Read the correlated records off the output thread. Retry a
+            // concurrent publication without blocking PCM submission.
+            for (int i=0;i<3;i++)
+            {
+                int version = Volatile.Read(ref timingVersion);
+                if ((version & 1) != 0) continue;
+                long revision = timingRevision;
+                var first = firstTiming;
+                var last = lastTiming;
+                Thread.MemoryBarrier();
+                if (version == Volatile.Read(ref timingVersion))
+                    return new { revision, first=first.Status(), last=last.Status() };
+            }
+            return null;
         }
     }
 }
