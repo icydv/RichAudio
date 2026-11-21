@@ -89,7 +89,7 @@ Do not modify the existing audio callback. Feed a **qualified acoustic scene sna
 
 AW-01 and AW-02 can be independently prepared offline. AW-05 should be gated on real coordinate/scene validity and the exact camera-baseline investigation; do not rush a huge archive importer ahead of the **first real building reflection audition**.
 
-## Next Codex scope (offline only)
+## Next implementation scope (offline only)
 
 Start with a read-only current-repository inventory and the AW-01/AW-02 boundary. Inspect the latest `PLAYABLE_15_RECORDING_RECOVERY_LIVE_RESULT.md`, `src/acoustics/vehicle/gameplay.mjs`, `src/acoustics/vehicle/pipeline.mjs`, `src/acoustics/streaming/listener-playout.mjs`, `src/acoustics/research/world-cache-*.mjs`, `src/acoustics/engine/observed-geometry.mjs` and the existing native geometry relay. Produce an isolated implementation plan and start deterministic, device-free tests/adapters using **original authored fixtures**. Do not parse or redistribute private GTA assets without a separately scoped owner-approved inventory.
 

@@ -4,9 +4,9 @@
 
 ## Verified outcome
 
-The prerequisite installed successfully. All 26 approved additions were copied without overwriting any destination and their hashes verified. RPH 1.132.1428.17748 ran, displayed its first-run disclaimer and reached Settings. Its Settings window reported **Grand Theft Auto V 1.0.1013.34 Retail NOT SUPPORTED**, rather than the expected Enhanced 1.0.1158.16. The agent stopped there, used Exit without saving/starting the game, and did not retry.
+The prerequisite installed successfully. All 26 approved additions were copied without overwriting any destination and their hashes verified. RPH 1.132.1428.17748 ran, displayed its first-run disclaimer and reached Settings. Its Settings window reported **Grand Theft Auto V 1.0.1013.34 Retail NOT SUPPORTED**, rather than the expected Enhanced 1.0.1158.16. The session stopped there, used Exit without saving/starting the game, and did not retry.
 
-**GTA was not launched by the agent; RichAudio was not loaded; no live player/NPC telemetry was obtained.** Tests A–E were not run because the smoke-test prerequisite failed. No game crash was observed; game stability was not exercised. A bounded Windows Application log query found no matching RPH/GTA crash event. No telemetry JSONL file exists from this attempt.
+**GTA was not launched; RichAudio was not loaded; no live player/NPC telemetry was obtained.** Tests A–E were not run because the smoke-test prerequisite failed. No game crash was observed; game stability was not exercised. A bounded Windows Application log query found no matching RPH/GTA crash event. No telemetry JSONL file exists from this attempt.
 
 The 26 introduced files were moved back into ignored development quarantine; the introduced empty Plugins directory was removed. The approved shared Microsoft VC2010 x64 runtime remains installed. This is rollback of the game-file additions, not a claim that the shared prerequisite or every first-run application preference was reverted.
 
