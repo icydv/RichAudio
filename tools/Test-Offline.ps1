@@ -26,6 +26,7 @@ try {
     if($LASTEXITCODE-ne0){throw 'World cache and combined offline safety contracts failed.'}
     & (Join-Path $repo 'tests\Test-TrafficCalibration.ps1')
     & (Join-Path $repo 'tests\Test-BenchmarkMarkers.ps1')
+    & (Join-Path $repo 'tests\Test-BatiController.ps1')
     & (Join-Path $repo 'tests\Test-Phase1.ps1') -ReportPath (Join-Path $output 'phase1-results.json')
     & (Join-Path $PSScriptRoot 'Build-Telemetry.ps1') -CoreOnly
     $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
