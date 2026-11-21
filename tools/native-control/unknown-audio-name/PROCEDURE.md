@@ -18,6 +18,14 @@ If the exact update question appears, select No once to decline the check. Codex
 
 After verifying fresh startup, start the sealed Operator.py watch with the retained operator-plan.json, exact scope hash and approval receipt. It owns background OBS, validated capture, setup, matched views, horn and feedback windows. Preserve the historical identity, focus and capture gates. Codex reviews the decoded video, sound and context, asks about the original observation, saves the answer verbatim and forwards it through Operator.py review. Never manufacture an answer or transfer one between windows. A full review can be forwarded only with its original evidence receipt.
 
+## Acquisition and the previous live stop
+
+In the retained unknown-name-run journal, entries 69–73 show the ten-second control stability interval starting at QPC 31973867825 and failing at 31986963333 (10 MHz). Frame 4071 was coherent. A (2562) reported 0.217606142 m/s, with the player driving and its engine running. B (2818) was empty, running and at 0 m/s. The original runner immediately stopped on a failed capture, pair or pose check. The first recorded failed predicate was A's strict speed check. It short-circuited before the pose comparison. The trace cannot identify what caused the movement. Both lifetimes later disappeared. Player position return was unresolved because the saved space was occupied.
+
+The fresh runner allows 30 seconds from entry into Stability to acquire ten consecutive qualifying seconds. A speed from 0.15 through 0.30 m/s on an otherwise safe pair clears only the provisional clock. The 0.30 m/s maximum for waiting is a conservative acquisition-only bound based on the previously authored low-speed setup fixture. Faster motion stops immediately. Every admitted sample remains strictly below 0.15 m/s. The runner observes later callbacks without issuing another setup command. It selects exactly one ten-second interval only upon completion, anchored at its first clean callback. Identity, occupancy, engines, loaded contact, wheels, coherent Story state, capture, camera and session checks continue throughout. The 30-second acquisition bound is additional to the unchanged overall deadlines. Once the recording window is selected, the original fixed listening, review, resume and dispatch checks still apply.
+
+Run the fresh preflight from C:/Users/Libby/Documents/RichAudio-NativeSuppressionFixes. Create and verify the private parent directory, pass the absolute worktree path .local/unknown-live-settle/preflight.json (resolved against that worktree) and read the passing receipt back from the same absolute path before installation. Preserve previous execution and approval records.
+
 ## Listening sequence
 
 | Window | What to listen to |

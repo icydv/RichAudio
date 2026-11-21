@@ -33,6 +33,47 @@ internal static class TestUnknownName {
     static void Test(string name,Action action){int first=fixtures.Count;action();cases++;for(int i=first;i<fixtures.Count;i++)System.IO.File.WriteAllLines(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(typeof(TestUnknownName).Assembly.Location),"case-"+cases.ToString("D2")+"-fixture-"+i.ToString("D3")+".log"),fixtures[i].Log.Lines);Console.WriteLine("PASS "+name);}
     public static int Main(){try{
 
+        Test("recorded speed invalidates partial acquisition; authored clean callbacks reach review",()=>{
+            var f=new Fixture();f.Begin();f.Stage("Stability");for(int i=0;i<25;i++)f.Step();
+            f.Game.Entities[100].Speed=.217606142f;f.Game.PlayerSpeed=.217606142f;f.Step(.06);
+            Check(f.Run.State.Stage=="Stability","recorded A speed must return to acquisition");
+            f.Game.Entities[100].Speed=0;f.Game.PlayerSpeed=0;f.Step();
+            var counts=new Dictionary<string,int>(f.Game.Counts);
+            for(int i=0;i<199;i++)f.Step();
+            Check(f.Run.State.Stage=="Stability" && counts.All(k=>f.Game.N(k.Key)==k.Value)&&counts.Count==f.Game.Counts.Count&&f.Game.Profiles.Count==0,"9.95 clean seconds; no repeated setup or assignments");
+            f.Step();Check(f.Run.State.Stage=="LeaveBPre","ten uninterrupted seconds");f.At("B-pre");
+        });
+        Test("authored continuous and intermittent motion expire at original bound",()=>{
+            foreach(bool continuous in new[]{true,false}){
+                var f=new Fixture();f.Begin();f.Stage("Stability");long start=f.Game.Now;
+                for(int i=0;i<600&&f.Run.State.Stage=="Stability";i++){
+                    f.Game.Entities[101].Speed=continuous||i%100==0?.218f:0;f.Step();
+                }
+                Check(f.Has("stationary acquisition timed out")&&f.Game.Now-start==30000&&f.Game.Profiles.Count==0,"fixed 30 second timeout");
+            }
+        });
+        Test("authored conflicting B occupant stops on the first moving callback",()=>{
+            var f=new Fixture();f.Begin();f.Stage("Stability");f.Game.Entities[100].Speed=.217606142f;
+            f.Game.Entities[101].Driver=99;f.Step();Check(f.Has("B.conflicting-occupant")&&f.Run.State.Stage!="Stability"&&f.Game.Profiles.Count==0,"priority of safety");
+        });
+        Test("authored movement after window selection or at dispatch remains terminal",()=>{
+            foreach(string stage in new[]{"BWindow","DispatchReady"}){
+                var f=new Fixture();f.Begin();
+                if(stage=="DispatchReady"){f.At("B-pre");f.Review();f.At("baseline");f.Review();}
+                f.Stage(stage);f.Game.Entities[100].Speed=.217606142f;f.Step();
+                Check(f.Has("automatic-stop")&&f.Game.Profiles.Count==0,"no reselection or assignment in "+stage);
+            }
+        });
+        Test("authored unsafe speed, invalid readback and identity loss stop immediately",()=>{
+            foreach(string condition in new[]{"unsafe speed","invalid speed","changed token"}){
+                var f=new Fixture();f.Begin();f.Stage("Stability");f.Game.Entities[100].Speed=.217606142f;
+                var b=f.Game.Entities[101];
+                if(condition=="unsafe speed")b.Speed=2;
+                if(condition=="invalid speed")b.Speed=float.NaN;
+                if(condition=="changed token")b.Token++;
+                f.Step();Check(f.Run.State.Stage!="Stability"&&f.Game.Profiles.Count==0,condition+" never enters waiting");
+            }
+        });
         Test("only the self assignment, unknown name and same-A release dispatch",()=>{
             var f=new Fixture();f.Begin();f.Finish(true);
             Check(f.Game.Profiles.SequenceEqual(new[]{"BATI","ra_quiet_orchard","BATI"}),"three A-only dispatches in order");

@@ -37,7 +37,7 @@ def put(path, value):
 
 
 def relabel(value):
-    for a, b in [("execution-11", "unknown-name-run"), ("Live11", "UnknownName"),
+    for a, b in [("execution-11", "unknown-name-settle-run"), ("Live11", "UnknownName"),
                  ("NativeSuppression11", "UnknownAudioName"), ("Recorder11.lua", "Recorder.lua")]:
         value = value.replace(a, b)
     return value
@@ -74,19 +74,20 @@ def seal(build_path, checks_dir):
             "focusConfiguration focusPolicy coverageAdmission proceduralTiming lifetime registrationOperation "
             "feedbackFocus measurement runtimeFailurePolicy operations setupTransitions capture operator").split()
     scope = {key: old[key] for key in keys}
-    dest = BASE / "unknown-name"
+    dest = BASE / "unknown-name-settle"
     run = Path(relabel(old["installation"]["executionDirectory"]))
     require(not run.exists() and not dest.exists(), "Fresh private destination required")
     catalogue = check()
     dest.mkdir()
     install = dest / "installation"
     install.mkdir()
-    scope.update(candidateName="unknown-name", sourceCommit=head, implementationCommit=head,
+    scope.update(candidateName="unknown-name-settle", sourceCommit=head, implementationCommit=head,
                  sequence=["stock baseline", "BATI", catalogue["name"], "BATI"],
                  catalogue=catalogue, assignmentTarget="A only", activeLimitSeconds=600,
                  comparison="Stationary matched idle, separate physical horn, same-A release and unassigned B controls")
     scope["operations"]["horn"] = "At most four A-only 600ms requests, one per observation. Log active readback and physical sound separately."
     scope["setupTransitions"]["qualification"] = receipts[0]
+    scope["setupTransitions"]["initialStationaryAcquisition"] = dict(requiredSeconds=10, timeoutSeconds=30, speedMpsStrictlyBelow=0.15, maximumWaitableSpeedMps=0.30, timeoutRenewed=False)
     scope["procedureAddendum"] = scope["procedure"] = pin(HERE / "PROCEDURE.md")
     scope["builds"] = [pin(build_path), *receipts, pin(OLD), pin(tools / "Preflight.ps1"),
                        pin(tools / "Verify-Restoration.ps1")]
