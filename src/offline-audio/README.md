@@ -28,6 +28,12 @@ relative marker/periodicity evidence and one bounded cycle-state experiment.
 The 14–28 interior-state preview improved listening at unchanged gains; an
 exhaust-led variant was preferred. These tools do not modify this accepted
 renderer or establish native phase, physical RPM or full-range load response.
+
+[P2-03.3](../../docs/P2_03_3_RESPONSIVE_ENGINE.md) adds a separate responsive
+cycle-pair research scheduler. Controls, timing and deterministic output work;
+listening found holds and transitions artificial. The measured middle-hold
+output repeats every 0.667 seconds. It is not accepted engine synthesis or a
+replacement for the references. No presence effects or runtime integration are added.
 Actual content and all stock-derived output stay in ignored private storage.
 Public tests generate original sine/ramp material in memory or private folders.
 

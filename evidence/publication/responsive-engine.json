@@ -1,0 +1,979 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "parentPr": 16,
+  "parentCommit": "ae710742779cd61c38357c82b5d9812bf8fe65bb",
+  "mainReviewed": "e5fbd8f3502d3e28169a224caa07471e090e368f",
+  "outcome": "PARTIAL",
+  "responsivePlayback": "PARTIALLY: controls and numeric scheduling work; perceptual acceptance FAILED",
+  "nominalMapping": {
+    "normalised": [
+      0,
+      1
+    ],
+    "markerState": [
+      14,
+      28
+    ],
+    "meaning": "Source-specific metadata coordinate; not physical RPM, idle-to-redline or load",
+    "sourceFamily": "Bati-traced v_twin_2 player deceleration bank"
+  },
+  "gates": {
+    "maxSmoothstepDerivative": 0.25,
+    "maxDurationSeconds": 15,
+    "maxCycles": 512,
+    "maxSourceIndexStep": 3,
+    "sourceSpeed": [
+      0.95,
+      1.05
+    ],
+    "maxRequestedStateError": 0.02,
+    "maxPairedStateError": 0.02,
+    "joinSamples": 96,
+    "maxRawJoinMismatch": 0.25
+  },
+  "scenarios": [
+    {
+      "scenario": "A_hold",
+      "rendererVersion": 2,
+      "control": {
+        "duration": 5,
+        "points": [
+          {
+            "t": 0,
+            "state": 0.5
+          },
+          {
+            "t": 5,
+            "state": 0.5
+          }
+        ]
+      },
+      "engineScale": 0.35,
+      "outputs": {
+        "engine.wav": {
+          "sha256": "5DF2C6AC637B11EB2DCB7F061DEECA5CE18F294C93E5BB4DF7A3CB3F5CD88294",
+          "rate": 48000,
+          "channels": 1,
+          "frames": 240000,
+          "durationSeconds": 5,
+          "peak": 0.045013427734375,
+          "rms": 0.013320549830996061,
+          "dc": -0.0003725468953450521,
+          "clippedSamples": 0,
+          "allZero": false,
+          "nonfiniteSamples": 0,
+          "maxAdjacentStep": 0.02020263671875,
+          "stepsAboveHalfScale": 0,
+          "silent20msWindows": 0,
+          "windowCount": 250
+        },
+        "exhaust.wav": {
+          "sha256": "309AF886374A5255CCFC9BDB61E71837DD599C9B13FE930C60D4E6A85D230360",
+          "rate": 48000,
+          "channels": 1,
+          "frames": 240000,
+          "durationSeconds": 5,
+          "peak": 0.1195068359375,
+          "rms": 0.06658659492913399,
+          "dc": -0.0019106861114501954,
+          "clippedSamples": 0,
+          "allZero": false,
+          "nonfiniteSamples": 0,
+          "maxAdjacentStep": 0.008026123046875,
+          "stepsAboveHalfScale": 0,
+          "silent20msWindows": 0,
+          "windowCount": 250
+        },
+        "mix_exhaust_led.wav": {
+          "sha256": "D13A93CF208134F0506A92B4818A034928D185B77D6FF1A681D5F1B6EA15EB02",
+          "rate": 48000,
+          "channels": 1,
+          "frames": 240000,
+          "durationSeconds": 5,
+          "peak": 0.145263671875,
+          "rms": 0.06592540227581839,
+          "dc": -0.002283327102661133,
+          "clippedSamples": 0,
+          "allZero": false,
+          "nonfiniteSamples": 0,
+          "maxAdjacentStep": 0.019683837890625,
+          "stepsAboveHalfScale": 0,
+          "silent20msWindows": 0,
+          "windowCount": 250
+        },
+        "mix_reference_gain.wav": {
+          "sha256": "DA737DBAC50405AF1E2B1437D314FCB3AD616A3A851845C9E186C74493A4EE5B",
+          "rate": 48000,
+          "channels": 1,
+          "frames": 240000,
+          "durationSeconds": 5,
+          "peak": 0.22076416015625,
+          "rms": 0.07158812615068247,
+          "dc": -0.002975348536173503,
+          "clippedSamples": 0,
+          "allZero": false,
+          "nonfiniteSamples": 0,
+          "maxAdjacentStep": 0.056671142578125,
+          "stepsAboveHalfScale": 0,
+          "silent20msWindows": 0,
+          "windowCount": 250
+        }
+      },
+      "performance": {
+        "preparationMs": 32.7157,
+        "renderMs": [
+          74.8002,
+          73.41539999999999
+        ],
+        "cpuUserMs": 94,
+        "cpuSystemMs": 32,
+        "rssBytes": 73129984,
+        "cycles": 105,
+        "sourceLookups": 501228,
+        "estimatedInterpolationTaps": 12029472
+      },
+      "rejectedChoices": 0,
+      "fallbacks": 0,
+      "uniquePairs": 3,
+      "rms200ms": {
+        "min": 0.0653749999187286,
+        "max": 0.06675713446695439,
+        "mean": 0.06616582555678292,
+        "coefficientOfVariation": 0.007727957134866789
+      },
+      "repetition": {
+        "eventPeriod": 14,
+        "lagFrames": 32000,
+        "lagSeconds": 0.6666666666666666,
+        "comparedSamples": 198400,
+        "differentSamples": 0,
+        "rmsDifference": 0
+      },
+      "speedRange": {
+        "min": 0.9838145231846019,
+        "max": 1.0078740157480315
+      },
+      "maxJoinMismatch": 0.07751947566363925,
+      "maxSourceIndexStep": 2,
+      "maxComponentStateError": 0.00401517881198904,
+      "maxRequestedStateError": 0.01637735714285714,
+      "independentPeriodicity": [
+        {
+          "centerSeconds": 1,
+          "authoredMarkerCoordinate": 21,
+          "markerPeriodCorrelation": 0.9818733786213386,
+          "strongestCandidates": [
+            {
+              "periodSamples": 4572,
+              "relativeFrequencyHz": 10.498687664041995,
+              "correlation": 0.9832688863675281
+            },
+            {
+              "periodSamples": 1143,
+              "relativeFrequencyHz": 41.99475065616798,
+              "correlation": 0.9830863072330465
+            },
+            {
+              "periodSamples": 2286,
+              "relativeFrequencyHz": 20.99737532808399,
+              "correlation": 0.9818733786213386
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 2,
+          "authoredMarkerCoordinate": 21,
+          "markerPeriodCorrelation": 0.9799069767323041,
+          "strongestCandidates": [
+            {
+              "periodSamples": 4572,
+              "relativeFrequencyHz": 10.498687664041995,
+              "correlation": 0.9867517070740736
+            },
+            {
+              "periodSamples": 1143,
+              "relativeFrequencyHz": 41.99475065616798,
+              "correlation": 0.9817298483763698
+            },
+            {
+              "periodSamples": 2286,
+              "relativeFrequencyHz": 20.99737532808399,
+              "correlation": 0.9799069767323041
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 3,
+          "authoredMarkerCoordinate": 21,
+          "markerPeriodCorrelation": 0.9818733786213386,
+          "strongestCandidates": [
+            {
+              "periodSamples": 4572,
+              "relativeFrequencyHz": 10.498687664041995,
+              "correlation": 0.9832688863675281
+            },
+            {
+              "periodSamples": 1143,
+              "relativeFrequencyHz": 41.99475065616798,
+              "correlation": 0.9830863072330465
+            },
+            {
+              "periodSamples": 2286,
+              "relativeFrequencyHz": 20.99737532808399,
+              "correlation": 0.9818733786213386
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 4,
+          "authoredMarkerCoordinate": 21,
+          "markerPeriodCorrelation": 0.9799069767323041,
+          "strongestCandidates": [
+            {
+              "periodSamples": 4572,
+              "relativeFrequencyHz": 10.498687664041995,
+              "correlation": 0.9867517070740736
+            },
+            {
+              "periodSamples": 1143,
+              "relativeFrequencyHz": 41.99475065616798,
+              "correlation": 0.9817298483763698
+            },
+            {
+              "periodSamples": 2286,
+              "relativeFrequencyHz": 20.99737532808399,
+              "correlation": 0.9799069767323041
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        }
+      ],
+      "repeatWavHashesMatch": true
+    },
+    {
+      "scenario": "B_sweep",
+      "rendererVersion": 2,
+      "control": {
+        "duration": 12,
+        "points": [
+          {
+            "t": 0,
+            "state": 0.2
+          },
+          {
+            "t": 1,
+            "state": 0.2
+          },
+          {
+            "t": 5,
+            "state": 0.8
+          },
+          {
+            "t": 6,
+            "state": 0.8
+          },
+          {
+            "t": 10,
+            "state": 0.2
+          },
+          {
+            "t": 12,
+            "state": 0.2
+          }
+        ]
+      },
+      "engineScale": 0.35,
+      "outputs": {
+        "engine.wav": {
+          "sha256": "DBF567489E4E29B104B31BEA4E5C1C15BC896E44FF549853A5DCA0833F7CC113",
+          "rate": 48000,
+          "channels": 1,
+          "frames": 576000,
+          "durationSeconds": 12,
+          "peak": 0.058685302734375,
+          "rms": 0.013664175077819944,
+          "dc": -0.000022619088490804038,
+          "clippedSamples": 0,
+          "allZero": false,
+          "nonfiniteSamples": 0,
+          "maxAdjacentStep": 0.042083740234375,
+          "stepsAboveHalfScale": 0,
+          "silent20msWindows": 0,
+          "windowCount": 600
+        },
+        "exhaust.wav": {
+          "sha256": "045EEBC712C2AAF68CEB8318D28A58BAEDFD5119C5B8C66CA274106BDFDF911B",
+          "rate": 48000,
+          "channels": 1,
+          "frames": 576000,
+          "durationSeconds": 12,
+          "peak": 0.119537353515625,
+          "rms": 0.06757347430216779,
+          "dc": -0.0011698970794677735,
+          "clippedSamples": 0,
+          "allZero": false,
+          "nonfiniteSamples": 0,
+          "maxAdjacentStep": 0.01055908203125,
+          "stepsAboveHalfScale": 0,
+          "silent20msWindows": 0,
+          "windowCount": 600
+        },
+        "mix_exhaust_led.wav": {
+          "sha256": "62794F897A67637CA75B89A7780E03DD159ACA9F06CDC049F775C76026DCB6CE",
+          "rate": 48000,
+          "channels": 1,
+          "frames": 576000,
+          "durationSeconds": 12,
+          "peak": 0.15423583984375,
+          "rms": 0.06705773596748796,
+          "dc": -0.0011925721168518067,
+          "clippedSamples": 0,
+          "allZero": false,
+          "nonfiniteSamples": 0,
+          "maxAdjacentStep": 0.042938232421875,
+          "stepsAboveHalfScale": 0,
+          "silent20msWindows": 0,
+          "windowCount": 600
+        },
+        "mix_reference_gain.wav": {
+          "sha256": "D9D53E370FAAD6133BD3308FD0FD68270F29123B820C61DD65C36BB392A9FE88",
+          "rate": 48000,
+          "channels": 1,
+          "frames": 576000,
+          "durationSeconds": 12,
+          "peak": 0.23736572265625,
+          "rms": 0.07320161448137219,
+          "dc": -0.001234551747639974,
+          "clippedSamples": 0,
+          "allZero": false,
+          "nonfiniteSamples": 0,
+          "maxAdjacentStep": 0.121063232421875,
+          "stepsAboveHalfScale": 0,
+          "silent20msWindows": 0,
+          "windowCount": 600
+        }
+      },
+      "performance": {
+        "preparationMs": 34.2255,
+        "renderMs": [
+          159.6983,
+          164.98110000000003
+        ],
+        "cpuUserMs": 203,
+        "cpuSystemMs": 47,
+        "rssBytes": 97550336,
+        "cycles": 244,
+        "sourceLookups": 1201848,
+        "estimatedInterpolationTaps": 28844352
+      },
+      "rejectedChoices": 0,
+      "fallbacks": 0,
+      "uniquePairs": 50,
+      "rms200ms": {
+        "min": 0.05842529940232853,
+        "max": 0.07333921530125098,
+        "mean": 0.06689294871982739,
+        "coefficientOfVariation": 0.0771729660672682
+      },
+      "repetition": null,
+      "speedRange": {
+        "min": 0.9769200159172304,
+        "max": 1.0213510675533777
+      },
+      "maxJoinMismatch": 0.14646606235777776,
+      "maxSourceIndexStep": 2,
+      "maxComponentStateError": 0.008210827115449253,
+      "maxRequestedStateError": 0.019187860119047606,
+      "independentPeriodicity": [
+        {
+          "centerSeconds": 0.5,
+          "authoredMarkerCoordinate": 16.8,
+          "markerPeriodCorrelation": 0.9837658247053199,
+          "strongestCandidates": [
+            {
+              "periodSamples": 5714,
+              "relativeFrequencyHz": 8.40042002100105,
+              "correlation": 0.9885738246350453
+            },
+            {
+              "periodSamples": 1428,
+              "relativeFrequencyHz": 33.61344537815126,
+              "correlation": 0.9876544884924968
+            },
+            {
+              "periodSamples": 7144,
+              "relativeFrequencyHz": 6.718924972004479,
+              "correlation": 0.9840572011073482
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 3,
+          "authoredMarkerCoordinate": 21,
+          "markerPeriodCorrelation": 0.6386860852389507,
+          "strongestCandidates": [
+            {
+              "periodSamples": 1143,
+              "relativeFrequencyHz": 41.99475065616798,
+              "correlation": 0.8433835331994887
+            },
+            {
+              "periodSamples": 2289,
+              "relativeFrequencyHz": 20.969855832241155,
+              "correlation": 0.6393560679111209
+            },
+            {
+              "periodSamples": 3434,
+              "relativeFrequencyHz": 13.977868375072802,
+              "correlation": 0.4564879374432834
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 5.5,
+          "authoredMarkerCoordinate": 25.200000000000003,
+          "markerPeriodCorrelation": 0.9742074024158088,
+          "strongestCandidates": [
+            {
+              "periodSamples": 3809,
+              "relativeFrequencyHz": 12.60173273825151,
+              "correlation": 0.9793104637549679
+            },
+            {
+              "periodSamples": 1905,
+              "relativeFrequencyHz": 25.19685039370079,
+              "correlation": 0.9742074024158088
+            },
+            {
+              "periodSamples": 953,
+              "relativeFrequencyHz": 50.36726128016789,
+              "correlation": 0.9741209966155807
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 8,
+          "authoredMarkerCoordinate": 21,
+          "markerPeriodCorrelation": 0.6324937047274433,
+          "strongestCandidates": [
+            {
+              "periodSamples": 1138,
+              "relativeFrequencyHz": 42.1792618629174,
+              "correlation": 0.8431983070504308
+            },
+            {
+              "periodSamples": 2276,
+              "relativeFrequencyHz": 21.0896309314587,
+              "correlation": 0.6407122346789997
+            },
+            {
+              "periodSamples": 3416,
+              "relativeFrequencyHz": 14.05152224824356,
+              "correlation": 0.4547358868776955
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 11,
+          "authoredMarkerCoordinate": 16.8,
+          "markerPeriodCorrelation": 0.9860123609477296,
+          "strongestCandidates": [
+            {
+              "periodSamples": 5714,
+              "relativeFrequencyHz": 8.40042002100105,
+              "correlation": 0.992904194995351
+            },
+            {
+              "periodSamples": 1428,
+              "relativeFrequencyHz": 33.61344537815126,
+              "correlation": 0.9889315080029785
+            },
+            {
+              "periodSamples": 4285,
+              "relativeFrequencyHz": 11.201866977829638,
+              "correlation": 0.9865731849591125
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        }
+      ],
+      "repeatWavHashesMatch": true
+    },
+    {
+      "scenario": "C_steps",
+      "rendererVersion": 2,
+      "control": {
+        "duration": 14,
+        "points": [
+          {
+            "t": 0,
+            "state": 0.2
+          },
+          {
+            "t": 2,
+            "state": 0.2
+          },
+          {
+            "t": 4,
+            "state": 0.5
+          },
+          {
+            "t": 6,
+            "state": 0.5
+          },
+          {
+            "t": 8,
+            "state": 0.8
+          },
+          {
+            "t": 10,
+            "state": 0.8
+          },
+          {
+            "t": 12,
+            "state": 0.5
+          },
+          {
+            "t": 14,
+            "state": 0.5
+          }
+        ]
+      },
+      "engineScale": 0.35,
+      "outputs": {
+        "engine.wav": {
+          "sha256": "4D36A05E7CB93F360727584D9A9EB2000201F8A992327C0CBD25D3BBE09DD71C",
+          "rate": 48000,
+          "channels": 1,
+          "frames": 672000,
+          "durationSeconds": 14,
+          "peak": 0.05877685546875,
+          "rms": 0.014055063783253724,
+          "dc": -0.0001301091512044271,
+          "clippedSamples": 0,
+          "allZero": false,
+          "nonfiniteSamples": 0,
+          "maxAdjacentStep": 0.039520263671875,
+          "stepsAboveHalfScale": 0,
+          "silent20msWindows": 0,
+          "windowCount": 700
+        },
+        "exhaust.wav": {
+          "sha256": "24C69C30DFB85235BBB93B78A241C21EEAB4446ED986263EDA56D149FD83FB58",
+          "rate": 48000,
+          "channels": 1,
+          "frames": 672000,
+          "durationSeconds": 14,
+          "peak": 0.119537353515625,
+          "rms": 0.06610092073179187,
+          "dc": -0.0018475902194068545,
+          "clippedSamples": 0,
+          "allZero": false,
+          "nonfiniteSamples": 0,
+          "maxAdjacentStep": 0.010589599609375,
+          "stepsAboveHalfScale": 0,
+          "silent20msWindows": 0,
+          "windowCount": 700
+        },
+        "mix_exhaust_led.wav": {
+          "sha256": "196B38F0C3035CCDD747ABB5EFF1981FB99B1CE434B3B472CD350E4EF0ADF1D1",
+          "rate": 48000,
+          "channels": 1,
+          "frames": 672000,
+          "durationSeconds": 14,
+          "peak": 0.154205322265625,
+          "rms": 0.06588423927614236,
+          "dc": -0.001977779570079985,
+          "clippedSamples": 0,
+          "allZero": false,
+          "nonfiniteSamples": 0,
+          "maxAdjacentStep": 0.040435791015625,
+          "stepsAboveHalfScale": 0,
+          "silent20msWindows": 0,
+          "windowCount": 700
+        },
+        "mix_reference_gain.wav": {
+          "sha256": "B625D0ED7CC35111AC9B0D3542008C17A9AB8F4B90184C99719F9DFBB074D288",
+          "rate": 48000,
+          "channels": 1,
+          "frames": 672000,
+          "durationSeconds": 14,
+          "peak": 0.2371826171875,
+          "rms": 0.07304647862388179,
+          "dc": -0.0022194591703869047,
+          "clippedSamples": 0,
+          "allZero": false,
+          "nonfiniteSamples": 0,
+          "maxAdjacentStep": 0.113800048828125,
+          "stepsAboveHalfScale": 0,
+          "silent20msWindows": 0,
+          "windowCount": 700
+        }
+      },
+      "performance": {
+        "preparationMs": 32.3425,
+        "renderMs": [
+          190.7951,
+          185.2785
+        ],
+        "cpuUserMs": 250,
+        "cpuSystemMs": 31,
+        "rssBytes": 105988096,
+        "cycles": 299,
+        "sourceLookups": 1405180,
+        "estimatedInterpolationTaps": 33724320
+      },
+      "rejectedChoices": 0,
+      "fallbacks": 0,
+      "uniquePairs": 48,
+      "rms200ms": {
+        "min": 0.058219830752854855,
+        "max": 0.07318803287262031,
+        "mean": 0.06578088574128513,
+        "coefficientOfVariation": 0.06948883032425705
+      },
+      "repetition": null,
+      "speedRange": {
+        "min": 0.9798224374495561,
+        "max": 1.0213510675533777
+      },
+      "maxJoinMismatch": 0.14646606235777776,
+      "maxSourceIndexStep": 2,
+      "maxComponentStateError": 0.008210827115449253,
+      "maxRequestedStateError": 0.019187860119047606,
+      "independentPeriodicity": [
+        {
+          "centerSeconds": 1,
+          "authoredMarkerCoordinate": 16.8,
+          "markerPeriodCorrelation": 0.9822028153466414,
+          "strongestCandidates": [
+            {
+              "periodSamples": 5714,
+              "relativeFrequencyHz": 8.40042002100105,
+              "correlation": 0.9926136182800767
+            },
+            {
+              "periodSamples": 1428,
+              "relativeFrequencyHz": 33.61344537815126,
+              "correlation": 0.986875147050647
+            },
+            {
+              "periodSamples": 7143,
+              "relativeFrequencyHz": 6.719865602687946,
+              "correlation": 0.9843974635511309
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 3,
+          "authoredMarkerCoordinate": 18.9,
+          "markerPeriodCorrelation": 0.5808281315690191,
+          "strongestCandidates": [
+            {
+              "periodSamples": 1274,
+              "relativeFrequencyHz": 37.67660910518053,
+              "correlation": 0.8274341425741534
+            },
+            {
+              "periodSamples": 2552,
+              "relativeFrequencyHz": 18.808777429467085,
+              "correlation": 0.5889035285572604
+            },
+            {
+              "periodSamples": 3838,
+              "relativeFrequencyHz": 12.506513809275665,
+              "correlation": 0.39861854007994507
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 5,
+          "authoredMarkerCoordinate": 21,
+          "markerPeriodCorrelation": 0.980740994605756,
+          "strongestCandidates": [
+            {
+              "periodSamples": 1143,
+              "relativeFrequencyHz": 41.99475065616798,
+              "correlation": 0.9828454464162947
+            },
+            {
+              "periodSamples": 4572,
+              "relativeFrequencyHz": 10.498687664041995,
+              "correlation": 0.9822434263662781
+            },
+            {
+              "periodSamples": 6857,
+              "relativeFrequencyHz": 7.000145836371591,
+              "correlation": 0.9807482447188363
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 7,
+          "authoredMarkerCoordinate": 23.1,
+          "markerPeriodCorrelation": 0.6962223583932716,
+          "strongestCandidates": [
+            {
+              "periodSamples": 1044,
+              "relativeFrequencyHz": 45.97701149425287,
+              "correlation": 0.8702071016079856
+            },
+            {
+              "periodSamples": 2086,
+              "relativeFrequencyHz": 23.010546500479386,
+              "correlation": 0.7045190063267082
+            },
+            {
+              "periodSamples": 3129,
+              "relativeFrequencyHz": 15.340364333652925,
+              "correlation": 0.5327394672256163
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 9,
+          "authoredMarkerCoordinate": 25.200000000000003,
+          "markerPeriodCorrelation": 0.9762647824539983,
+          "strongestCandidates": [
+            {
+              "periodSamples": 953,
+              "relativeFrequencyHz": 50.36726128016789,
+              "correlation": 0.9764811849929984
+            },
+            {
+              "periodSamples": 1905,
+              "relativeFrequencyHz": 25.19685039370079,
+              "correlation": 0.9762647824539983
+            },
+            {
+              "periodSamples": 3810,
+              "relativeFrequencyHz": 12.598425196850394,
+              "correlation": 0.9759519262975065
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 11,
+          "authoredMarkerCoordinate": 23.1,
+          "markerPeriodCorrelation": 0.7029081882367895,
+          "strongestCandidates": [
+            {
+              "periodSamples": 1038,
+              "relativeFrequencyHz": 46.24277456647399,
+              "correlation": 0.8715801591395351
+            },
+            {
+              "periodSamples": 2076,
+              "relativeFrequencyHz": 23.121387283236995,
+              "correlation": 0.7034171875924368
+            },
+            {
+              "periodSamples": 3117,
+              "relativeFrequencyHz": 15.399422521655438,
+              "correlation": 0.5339744076945877
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        },
+        {
+          "centerSeconds": 13,
+          "authoredMarkerCoordinate": 21,
+          "markerPeriodCorrelation": 0.9819651326117222,
+          "strongestCandidates": [
+            {
+              "periodSamples": 4571,
+              "relativeFrequencyHz": 10.500984467293808,
+              "correlation": 0.986855080586224
+            },
+            {
+              "periodSamples": 1143,
+              "relativeFrequencyHz": 41.99475065616798,
+              "correlation": 0.982816177854414
+            },
+            {
+              "periodSamples": 6857,
+              "relativeFrequencyHz": 7.000145836371591,
+              "correlation": 0.9822847167310691
+            }
+          ],
+          "ambiguity": "Multiple harmonic/subharmonic peaks possible. No physical RPM or unique cycle count is assigned."
+        }
+      ],
+      "repeatWavHashesMatch": true
+    }
+  ],
+  "listening": [
+    {
+      "preview": "Initial A hold",
+      "feedback": "I found it usable, with some repetition."
+    },
+    {
+      "preview": "Revised A hold",
+      "feedback": "I found it still obviously artificial and obviously repetitive."
+    },
+    {
+      "preview": "B sweep",
+      "feedback": "I found the moving sections and hold a little artificial, though better than before."
+    },
+    {
+      "preview": "C multiple states",
+      "feedback": "I found the transitions artificial too."
+    }
+  ],
+  "unchangedGainPreviewsAuditioned": false,
+  "preferredBalanceApplied": true,
+  "physicalPresenceAchieved": false,
+  "perceptualOptimisationStopped": true,
+  "initialGuardFailure": {
+    "message": "no safe local stitch; reference retained",
+    "frame": 165228,
+    "state": 0.5978844219895509,
+    "value": 22.370381907853712,
+    "candidateIndices": [
+      32
+    ],
+    "measurements": [
+      {
+        "index": 32,
+        "components": [
+          {
+            "name": "engine",
+            "naturalAdjacentStep": 0.148319962627618,
+            "cycleClosureGap": 0.028364112878984316
+          },
+          {
+            "name": "exhaust",
+            "naturalAdjacentStep": 0.021617725350699384,
+            "cycleClosureGap": 0.00878490821411815
+          }
+        ]
+      }
+    ],
+    "initialHoldRejectedChoices": 105,
+    "initialHoldFallbacks": 76,
+    "correction": "Screen new-interval versus natural-continuation mismatch; do not screen natural adjacent-sample derivative as a splice error",
+    "initialHoldOutputs": {
+      "engine.wav": {
+        "sha256": "AE3C4540B009865F6DA9B29AB1A2B75CD47AFE2A6835D751CF8CD87924B4120C",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 240000,
+        "durationSeconds": 5,
+        "peak": 0.044891357421875,
+        "rms": 0.013208866792753201,
+        "dc": -0.0005747352600097656,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.019683837890625,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 250
+      },
+      "exhaust.wav": {
+        "sha256": "76DDFFD793D177E2E905F1B9E962849788C339230C81B52CFD909589CCA3AFC0",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 240000,
+        "durationSeconds": 5,
+        "peak": 0.119476318359375,
+        "rms": 0.0667914835776496,
+        "dc": -0.0018437437693277995,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.008026123046875,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 250
+      },
+      "mix_exhaust_led.wav": {
+        "sha256": "E45B75601F356882CCC88FE866CD59C081AF975A19D5FD83EB9CF1C448EAE6AA",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 240000,
+        "durationSeconds": 5,
+        "peak": 0.141326904296875,
+        "rms": 0.06604635317888446,
+        "dc": -0.0024184591929117837,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.01910400390625,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 250
+      },
+      "mix_reference_gain.wav": {
+        "sha256": "F82113E8F1FE69C27AFB8DD80D84ADBD95EEDAA050E9F7E7882369DC343F7430",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 240000,
+        "durationSeconds": 5,
+        "peak": 0.22076416015625,
+        "rms": 0.0714425966123568,
+        "dc": -0.003486180750528971,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.055145263671875,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 250
+      }
+    },
+    "initialCandidatesPreserved": true
+  },
+  "knownLimitation": "Middle-hold three-pair walk/rounded-cycle-length sequence repeats in fourteen events; interior PCM repeats exactly after 32000 samples. No fix or naturalness claim is implied.",
+  "preservation": {
+    "originalSourcesMatched": 12,
+    "historicalWavsMatched": 30,
+    "responsiveRepeatWavsMatched": 12,
+    "originalManifestAndMetadataMatched": true,
+    "acceptedReferenceSha256": "5F31B5CB6378A878F9B54E6531CE85F9A117B97A5915705B7A27EA35D794D77A",
+    "productionTelemetryChanged": false,
+    "acceptedRenderersChanged": false,
+    "initialHoldPreserved": true
+  },
+  "safety": {
+    "gameLaunches": 0,
+    "rphLaunches": 0,
+    "archivesAccessed": 0,
+    "gameWrites": 0,
+    "audioUploaded": false,
+    "newDependencies": 0,
+    "proprietaryContentPublished": false
+  },
+  "validation": {
+    "responsiveTests": 18,
+    "cycleTests": 12,
+    "decelerationTests": 8,
+    "stockAudioTests": 19,
+    "extractionPublicationGuards": 8,
+    "ownershipTests": 15,
+    "coreAssertions": 65,
+    "drivetrainAssertions": 35,
+    "metadataParserTests": 17,
+    "diagnosticAnalyzerTests": 3,
+    "phase1Checks": 122,
+    "configurationAssertions": 9,
+    "appendExpectations": 8
+  },
+  "nextStep": "One controlled steady-hold ablation removing the measured short recurrence with pitch/gain/material/join controls fixed; no automatic follow-up",
+  "readyForWiderOrLiveRenderer": false,
+  "phase3Ready": false,
+  "licenceSelected": false
+}

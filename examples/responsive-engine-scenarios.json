@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "classification": "Authored normalised relative state only; not live telemetry or physical RPM",
+  "perceptualStatus": "PARTIAL: responsive controls work, but holds and transitions sounded artificial; research outputs, not accepted replacements",
+  "engineScale": 0.35,
+  "scenarios": {
+    "A_hold": {"duration": 5, "points": [{"t": 0, "state": 0.5}, {"t": 5, "state": 0.5}]},
+    "B_sweep": {"duration": 12, "points": [{"t": 0, "state": 0.2}, {"t": 1, "state": 0.2}, {"t": 5, "state": 0.8}, {"t": 6, "state": 0.8}, {"t": 10, "state": 0.2}, {"t": 12, "state": 0.2}]},
+    "C_steps": {"duration": 14, "points": [{"t": 0, "state": 0.2}, {"t": 2, "state": 0.2}, {"t": 4, "state": 0.5}, {"t": 6, "state": 0.5}, {"t": 8, "state": 0.8}, {"t": 10, "state": 0.8}, {"t": 12, "state": 0.5}, {"t": 14, "state": 0.5}]}
+  }
+}
