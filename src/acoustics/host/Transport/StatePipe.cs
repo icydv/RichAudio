@@ -10,9 +10,11 @@ namespace RichAudio.Beacon.Transport
 {
     public sealed class SessionPermit {private int consumed;public bool TryConsume(){return Interlocked.CompareExchange(ref consumed,1,0)==0;}}
     public sealed class FirstFrameTiming { public long? FrameSequence; public double? CopyMs, AgeBeforeEncodeMs, EncodeMs, AgeBeforeWriteMs, WriteMs, AckMs, ConnectionMs, HeaderMs, PayloadMs, DecodeMs, DecisionAgeMs, CallbackMs; public string AgeClass; public double MinimumAgeMs=-2, MaximumAgeMs=250; public bool? ClockFrequencyAgrees; internal static double Ms(long start){return (Stopwatch.GetTimestamp()-start)*1000.0/Stopwatch.Frequency;} }
+    public sealed class ExpiredUnsentTiming { public long Sequence; public double AgeMs,EncodeMs,BeforeEncodeAgeMs; public string Stage; }
     public sealed class RejectedFrameTiming { public long FrameOrdinal; public double DecisionAgeMs; public string AgeClass; }
     public sealed class TransportResult
     {
+        public long ExpiredBeforeEncoding,ExpiredAfterEncoding; public ExpiredUnsentTiming FirstExpiredUnsent;
         public FirstFrameTiming FirstFrame; public RejectedFrameTiming OffendingFrame; public long Connection; public string Stage, Code, ExceptionType, Outcome;
         public bool HadAcceptedFrame, Terminal, AnotherAttempt; public double ElapsedMs;
     }
@@ -105,12 +107,18 @@ namespace RichAudio.Beacon.Transport
         private volatile TransportResult diagnostic;public TransportResult Diagnostic{get{return diagnostic;}}
         public readonly FirstFrameTiming FirstFrame=new FirstFrameTiming();private sealed class Publication { internal ListenerState State; internal double CopyMs; }
         public long? FirstPublishedSequence{get;private set;} public long? FirstTransmittedSequence{get;private set;}
+        public long ExpiredBeforeEncoding{get{return Interlocked.Read(ref expiredBefore);}} public long ExpiredAfterEncoding{get{return Interlocked.Read(ref expiredAfter);}}
+        private long expiredBefore,expiredAfter; public ExpiredUnsentTiming FirstExpiredUnsent{get;private set;}
+        internal static bool ExpiredUnsent(long observed,long now){return (now-observed)*1000.0/Stopwatch.Frequency>250;}
         private Publication latest;private Thread thread;private NamedPipeClientStream active;private long sent,replaced,attempts;private string error;private int stopRequested,disposed;
         public bool Finished{get{return thread==null||!thread.IsAlive;}}
         public long Sent{get{return Interlocked.Read(ref sent);}}public long Replaced{get{return Interlocked.Read(ref replaced);}}public long Attempts{get{return Interlocked.Read(ref attempts);}}public string Error{get{return error;}}
         public StatePublisher(string pipeName,int maxAttempts=1,bool strictMode=true){Protocol.Check(pipeName!=null&&System.Text.RegularExpressions.Regex.IsMatch(pipeName,"\\A[A-Za-z0-9.-]{1,100}\\z"),"pipe identity");Protocol.Check(maxAttempts>0&&maxAttempts<=8&&(!strictMode||maxAttempts==1),"reconnection budget");name=pipeName;maximumAttempts=maxAttempts;strict=strictMode;}
         public void Start(){if(thread!=null||Interlocked.CompareExchange(ref stopRequested,0,0)!=0)throw new InvalidOperationException("publisher cannot restart");thread=new Thread(Run){IsBackground=true,Name="RichAudio listener writer"};thread.Start();}
         public void Publish(ListenerState state){if(Interlocked.CompareExchange(ref stopRequested,0,0)!=0)return;long copyStart=Stopwatch.GetTimestamp();var copy=Protocol.Copy(state);double copyMs=FirstFrameTiming.Ms(copyStart);if(FirstPublishedSequence==null)FirstPublishedSequence=copy.Sequence;if(Interlocked.Exchange(ref latest,new Publication{State=copy,CopyMs=copyMs})!=null)Interlocked.Increment(ref replaced);}
+#if TRANSPORT_EXPIRY_TEST
+        internal Action BeforeEncodeTest, AfterEncodeTest; internal double BeforeDelayMs,AfterDelayMs;
+#endif
         private void Run()
         {
             while(!stopped.WaitOne(0)&&Attempts<maximumAttempts)
@@ -125,17 +133,31 @@ namespace RichAudio.Beacon.Transport
                         while(!stopped.WaitOne(10))
                         {
                             var publication=Interlocked.Exchange(ref latest,null);if(publication==null){if(strict&&idle.ElapsedMilliseconds>750)throw new TimeoutException("producer idle");continue;}idle.Restart();var state=publication.State;
-                            if((Stopwatch.GetTimestamp()-state.ObservationTicks)*1000.0/Stopwatch.Frequency>250)continue;
-                            bool first=Sent==0;if(first){FirstFrame.CopyMs=publication.CopyMs;FirstFrame.FrameSequence=state.Sequence;}long mark=Stopwatch.GetTimestamp();if(first)FirstFrame.AgeBeforeEncodeMs=(mark-state.ObservationTicks)*1000.0/Stopwatch.Frequency;stage="schema";byte[] bytes=Protocol.Frame(state);if(first){FirstFrame.EncodeMs=FirstFrameTiming.Ms(mark);FirstFrame.AgeBeforeWriteMs=(Stopwatch.GetTimestamp()-state.ObservationTicks)*1000.0/Stopwatch.Frequency;}mark=Stopwatch.GetTimestamp();stage="payload";IAsyncResult write=pipe.BeginWrite(bytes,0,bytes.Length,null,null);
+                            if(ExpiredUnsent(state.ObservationTicks,Stopwatch.GetTimestamp())){Interlocked.Increment(ref expiredBefore);continue;}
+                            bool first=Sent==0;if(first){FirstFrame.CopyMs=publication.CopyMs;FirstFrame.FrameSequence=state.Sequence;}long mark=Stopwatch.GetTimestamp();stage="schema";
+#if TRANSPORT_EXPIRY_TEST
+                            if(BeforeEncodeTest!=null){long delayStart=Stopwatch.GetTimestamp();BeforeEncodeTest();BeforeDelayMs+=FirstFrameTiming.Ms(delayStart); }
+#endif
+                            mark=Stopwatch.GetTimestamp();double ageBeforeEncode=(mark-state.ObservationTicks)*1000.0/Stopwatch.Frequency;if(first)FirstFrame.AgeBeforeEncodeMs=ageBeforeEncode;byte[] bytes=Protocol.Frame(state);double encodeMs=FirstFrameTiming.Ms(mark);
+#if TRANSPORT_EXPIRY_TEST
+                            if(AfterEncodeTest!=null){long delayStart=Stopwatch.GetTimestamp();AfterEncodeTest();AfterDelayMs+=FirstFrameTiming.Ms(delayStart);}
+#endif
+if(first){FirstFrame.EncodeMs=encodeMs;FirstFrame.AgeBeforeWriteMs=(Stopwatch.GetTimestamp()-state.ObservationTicks)*1000.0/Stopwatch.Frequency;}long beforeWrite=Stopwatch.GetTimestamp();
+                            if(ExpiredUnsent(state.ObservationTicks,beforeWrite)){
+                                Interlocked.Increment(ref expiredAfter);
+                                if(FirstExpiredUnsent==null)FirstExpiredUnsent=new ExpiredUnsentTiming{Sequence=state.Sequence,AgeMs=(beforeWrite-state.ObservationTicks)*1000.0/Stopwatch.Frequency,EncodeMs=encodeMs,BeforeEncodeAgeMs=ageBeforeEncode,Stage="after-encoding-before-write"};
+                                continue; // No bytes sent, no acknowledgement expected, no session restart.
+                            }
+                            mark=Stopwatch.GetTimestamp();stage="payload";IAsyncResult write=pipe.BeginWrite(bytes,0,bytes.Length,null,null);
                             using(var done=write.AsyncWaitHandle){if(!done.WaitOne(250)){pipe.Dispose();throw new TimeoutException("writer deadline");}pipe.EndWrite(write);}
                             if(first){FirstFrame.WriteMs=FirstFrameTiming.Ms(mark);FirstTransmittedSequence=state.Sequence;}mark=Stopwatch.GetTimestamp();if(strict){stage="callback";TransportStop.Ack(pipe,1);}if(first)FirstFrame.AckMs=FirstFrameTiming.Ms(mark);
                             Interlocked.Increment(ref sent);
                         }
                         stage="payload";if(strict){TransportStop.Write(pipe,TransportStop.Frame());stage="callback";TransportStop.Ack(pipe,3);}
-                        diagnostic=new TransportResult{FirstFrame=FirstFrame,Connection=Attempts,Stage="connection",Code="sender-stop",Outcome="deliberate-stop",Terminal=strict,HadAcceptedFrame=Sent>before,ElapsedMs=elapsed.Elapsed.TotalMilliseconds};
+                        diagnostic=new TransportResult{ExpiredBeforeEncoding=ExpiredBeforeEncoding,ExpiredAfterEncoding=ExpiredAfterEncoding,FirstExpiredUnsent=FirstExpiredUnsent,FirstFrame=FirstFrame,Connection=Attempts,Stage="connection",Code="sender-stop",Outcome="deliberate-stop",Terminal=strict,HadAcceptedFrame=Sent>before,ElapsedMs=elapsed.Elapsed.TotalMilliseconds};
                     }
                 }
-                catch(Exception e){error=TransportStop.Kind(e);diagnostic=new TransportResult{FirstFrame=FirstFrame,Connection=Attempts,Stage=stage,Code=e is TimeoutException?"deadline":"operation-failed",ExceptionType=TransportStop.Kind(e),Outcome="failed",Terminal=strict,HadAcceptedFrame=Sent>before,AnotherAttempt=!strict&&Attempts<maximumAttempts,ElapsedMs=elapsed.Elapsed.TotalMilliseconds};}
+                catch(Exception e){error=TransportStop.Kind(e);diagnostic=new TransportResult{ExpiredBeforeEncoding=ExpiredBeforeEncoding,ExpiredAfterEncoding=ExpiredAfterEncoding,FirstExpiredUnsent=FirstExpiredUnsent,FirstFrame=FirstFrame,Connection=Attempts,Stage=stage,Code=e is TimeoutException?"deadline":"operation-failed",ExceptionType=TransportStop.Kind(e),Outcome="failed",Terminal=strict,HadAcceptedFrame=Sent>before,AnotherAttempt=!strict&&Attempts<maximumAttempts,ElapsedMs=elapsed.Elapsed.TotalMilliseconds};}
                 finally{active=null;}
                 if(strict)break;
                 stopped.WaitOne(Math.Min(2000,250*(int)Attempts));
