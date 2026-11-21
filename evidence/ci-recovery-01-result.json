@@ -1,0 +1,697 @@
+{
+  "schema": 1,
+  "kind": "ci-recovery-01-offline-result",
+  "baseline": "247e3bc0f07374c0e9cf28b9cd0f65958c3615c5",
+  "scope": "Device-free diagnostic and fixture correction only; production transport and all audio implementations unchanged.",
+  "historical": {
+    "failedRun": 41517354511,
+    "failedJob": 125524189351,
+    "conclusion": "failure",
+    "exception": "Case failed; no retry: domain-1",
+    "originalFailedOperandAvailable": false,
+    "originalCauseEstablished": false,
+    "receiverSenderArtifactsAvailable": false,
+    "noFlakeClassification": true,
+    "previousPassedRun": 41486724046,
+    "previousPassedHead": "e49c3ac3838b5fb941bc09aef0b9cfbebf048a6d",
+    "previousDomainResults": [
+      {
+        "Case": "domain-1",
+        "Accepted": 14,
+        "Rejected": 0,
+        "Age": 49.2559,
+        "Outcome": "deliberate-stop",
+        "Encode": 0.1016,
+        "PreWriteAge": 27.2809,
+        "Write": 3.7076,
+        "ExpiredAfter": 1,
+        "FirstExpired": {
+          "Sequence": 0,
+          "AgeMs": 416.4256,
+          "EncodeMs": 381.5319,
+          "BeforeEncodeAgeMs": 34.8936,
+          "Stage": "after-encoding-before-write"
+        }
+      },
+      {
+        "Case": "domain-2",
+        "Accepted": 17,
+        "Rejected": 0,
+        "Age": 61.411,
+        "Outcome": "deliberate-stop",
+        "Encode": 0.1006,
+        "PreWriteAge": 39.7214,
+        "Write": 3.5761,
+        "ExpiredAfter": 1,
+        "FirstExpired": {
+          "Sequence": 0,
+          "AgeMs": 277.2377,
+          "EncodeMs": 259.4054,
+          "BeforeEncodeAgeMs": 17.8322,
+          "Stage": "after-encoding-before-write"
+        }
+      },
+      {
+        "Case": "domain-3",
+        "Accepted": 17,
+        "Rejected": 0,
+        "Age": 67.9613,
+        "Outcome": "deliberate-stop",
+        "Encode": 0.0851,
+        "PreWriteAge": 37.1112,
+        "Write": 7.0951,
+        "ExpiredAfter": 1,
+        "FirstExpired": {
+          "Sequence": 0,
+          "AgeMs": 275.3769,
+          "EncodeMs": 258.6472,
+          "BeforeEncodeAgeMs": 16.7295,
+          "Stage": "after-encoding-before-write"
+        }
+      }
+    ],
+    "rawFailedLogContainerSha256": "14452adaa0802a5a983155a47c46ca5d679b2439a2cfc06ed73f8c4c334e8d94",
+    "rawPassedLogContainerSha256": "53098524a2710cbc0a117cb1a01b8c87f66b4724ab47c6ed00f32b17b28e9466"
+  },
+  "reproducibleFinding": {
+    "classification": "Fixture success depended on cold codec work finishing before an already-running first-header deadline; demonstrated under bounded authored CPU contention. This is not a retrospective classification of the original CI failure.",
+    "productionThresholdsUnchanged": {
+      "maximumFreshAgeMs": 250,
+      "minimumFutureAgeMs": -2,
+      "firstHeaderDeadlineMs": 750,
+      "startupBudgetMs": 1000,
+      "maximumStrictAttempts": 1
+    },
+    "adverseConfiguration": {
+      "childAffinity": "one already allowed CPU; only owned fixture children affected",
+      "authoredContentionWorkers": 3,
+      "priority": "normal",
+      "boundedWorkerMilliseconds": 2200,
+      "windowsPreferencesChanged": false
+    },
+    "originalNominal": [
+      {
+        "label": "domain-a",
+        "originalPositiveOutcomePredicatesPassed": true,
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "connections": 1,
+        "attempts": 1,
+        "accepted": 16,
+        "rejected": 0,
+        "sent": 16,
+        "expiredAfter": 1,
+        "firstExpired": {
+          "Sequence": 0,
+          "AgeMs": 297.5217,
+          "EncodeMs": 276.7318,
+          "BeforeEncodeAgeMs": 20.7898,
+          "Stage": "after-encoding-before-write"
+        },
+        "receiverTerminal": {
+          "stage": "connection",
+          "code": "sender-stop",
+          "exceptionType": null,
+          "outcome": "deliberate-stop"
+        },
+        "senderTerminal": {
+          "stage": "connection",
+          "code": "sender-stop",
+          "exceptionType": null,
+          "outcome": "deliberate-stop"
+        },
+        "operands": {
+          "connectionsOne": true,
+          "attemptsOne": true,
+          "acceptedPositive": true,
+          "rejectedZero": true,
+          "receiverDeliberateStop": true,
+          "senderDeliberateStop": true
+        }
+      },
+      {
+        "label": "domain-b",
+        "originalPositiveOutcomePredicatesPassed": true,
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "connections": 1,
+        "attempts": 1,
+        "accepted": 16,
+        "rejected": 0,
+        "sent": 16,
+        "expiredAfter": 1,
+        "firstExpired": {
+          "Sequence": 0,
+          "AgeMs": 312.9658,
+          "EncodeMs": 280.4232,
+          "BeforeEncodeAgeMs": 32.5425,
+          "Stage": "after-encoding-before-write"
+        },
+        "receiverTerminal": {
+          "stage": "connection",
+          "code": "sender-stop",
+          "exceptionType": null,
+          "outcome": "deliberate-stop"
+        },
+        "senderTerminal": {
+          "stage": "connection",
+          "code": "sender-stop",
+          "exceptionType": null,
+          "outcome": "deliberate-stop"
+        },
+        "operands": {
+          "connectionsOne": true,
+          "attemptsOne": true,
+          "acceptedPositive": true,
+          "rejectedZero": true,
+          "receiverDeliberateStop": true,
+          "senderDeliberateStop": true
+        }
+      },
+      {
+        "label": "domain-c",
+        "originalPositiveOutcomePredicatesPassed": true,
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "connections": 1,
+        "attempts": 1,
+        "accepted": 16,
+        "rejected": 0,
+        "sent": 16,
+        "expiredAfter": 1,
+        "firstExpired": {
+          "Sequence": 0,
+          "AgeMs": 317.9938,
+          "EncodeMs": 295.4921,
+          "BeforeEncodeAgeMs": 22.5015,
+          "Stage": "after-encoding-before-write"
+        },
+        "receiverTerminal": {
+          "stage": "connection",
+          "code": "sender-stop",
+          "exceptionType": null,
+          "outcome": "deliberate-stop"
+        },
+        "senderTerminal": {
+          "stage": "connection",
+          "code": "sender-stop",
+          "exceptionType": null,
+          "outcome": "deliberate-stop"
+        },
+        "operands": {
+          "connectionsOne": true,
+          "attemptsOne": true,
+          "acceptedPositive": true,
+          "rejectedZero": true,
+          "receiverDeliberateStop": true,
+          "senderDeliberateStop": true
+        }
+      }
+    ],
+    "originalUnderContention": {
+      "label": "original-domain-bounded-cpu",
+      "originalPositiveOutcomePredicatesPassed": false,
+      "receiverExitCode": 0,
+      "senderExitCode": 0,
+      "connections": 1,
+      "attempts": 1,
+      "accepted": 0,
+      "rejected": 1,
+      "sent": 0,
+      "expiredAfter": 1,
+      "firstExpired": {
+        "Sequence": 4,
+        "AgeMs": 1455.1212,
+        "EncodeMs": 1369.0492,
+        "BeforeEncodeAgeMs": 86.0719,
+        "Stage": "after-encoding-before-write"
+      },
+      "receiverTerminal": {
+        "stage": "header",
+        "code": "deadline",
+        "exceptionType": "TimeoutException",
+        "outcome": "failed"
+      },
+      "senderTerminal": {
+        "stage": "payload",
+        "code": "operation-failed",
+        "exceptionType": "IOException",
+        "outcome": "failed"
+      },
+      "operands": {
+        "connectionsOne": true,
+        "attemptsOne": true,
+        "acceptedPositive": false,
+        "rejectedZero": false,
+        "receiverDeliberateStop": false,
+        "senderDeliberateStop": false
+      }
+    },
+    "matchedFixturePreparationUnderContention": {
+      "label": "prepared-domain-bounded-cpu",
+      "originalPositiveOutcomePredicatesPassed": true,
+      "receiverExitCode": 0,
+      "senderExitCode": 0,
+      "connections": 1,
+      "attempts": 1,
+      "accepted": 9,
+      "rejected": 0,
+      "sent": 9,
+      "expiredAfter": 0,
+      "firstExpired": null,
+      "receiverTerminal": {
+        "stage": "connection",
+        "code": "sender-stop",
+        "exceptionType": null,
+        "outcome": "deliberate-stop"
+      },
+      "senderTerminal": {
+        "stage": "connection",
+        "code": "sender-stop",
+        "exceptionType": null,
+        "outcome": "deliberate-stop"
+      },
+      "operands": {
+        "connectionsOne": true,
+        "attemptsOne": true,
+        "acceptedPositive": true,
+        "rejectedZero": true,
+        "receiverDeliberateStop": true,
+        "senderDeliberateStop": true
+      }
+    },
+    "currentPreparedUnderContention": {
+      "label": "reviewed-canonical-domain-bounded-cpu",
+      "originalPositiveOutcomePredicatesPassed": true,
+      "receiverExitCode": 0,
+      "senderExitCode": 0,
+      "connections": 1,
+      "attempts": 1,
+      "accepted": 20,
+      "rejected": 0,
+      "sent": 20,
+      "expiredAfter": 0,
+      "firstExpired": null,
+      "receiverTerminal": {
+        "stage": "connection",
+        "code": "sender-stop",
+        "exceptionType": null,
+        "outcome": "deliberate-stop"
+      },
+      "senderTerminal": {
+        "stage": "connection",
+        "code": "sender-stop",
+        "exceptionType": null,
+        "outcome": "deliberate-stop"
+      },
+      "operands": {
+        "connectionsOne": true,
+        "attemptsOne": true,
+        "acceptedPositive": true,
+        "rejectedZero": true,
+        "receiverDeliberateStop": true,
+        "senderDeliberateStop": true
+      }
+    },
+    "currentCausalNegativeUnderContention": {
+      "label": "reviewed-canonical-domain-late-bounded-cpu",
+      "originalPositiveOutcomePredicatesPassed": false,
+      "receiverExitCode": 0,
+      "senderExitCode": 0,
+      "connections": 1,
+      "attempts": 1,
+      "accepted": 0,
+      "rejected": 1,
+      "sent": 0,
+      "expiredAfter": 1,
+      "firstExpired": {
+        "Sequence": 0,
+        "AgeMs": 789.4888,
+        "EncodeMs": 0.0564,
+        "BeforeEncodeAgeMs": 789.0539,
+        "Stage": "after-encoding-before-write"
+      },
+      "receiverTerminal": {
+        "stage": "header",
+        "code": "deadline",
+        "exceptionType": "TimeoutException",
+        "outcome": "failed"
+      },
+      "senderTerminal": {
+        "stage": "payload",
+        "code": "operation-failed",
+        "exceptionType": "IOException",
+        "outcome": "failed"
+      },
+      "operands": {
+        "connectionsOne": true,
+        "attemptsOne": true,
+        "acceptedPositive": false,
+        "rejectedZero": false,
+        "receiverDeliberateStop": false,
+        "senderDeliberateStop": false
+      },
+      "expectedNegativeContractVerified": true
+    },
+    "independentAuditSha256": "b61df0af37c94a1b3b7586dfed88875f9ac71bf2d3ffad05d3db2822bb9eb492",
+    "independentCurrentReviewSha256": "a70a335b789ca8820bca9c3fdad9efe347d8f3fcfcbcee4472e9b8d4c65438d7",
+    "independentProjectionRequalificationSha256": "218ff0c4db836f5326cb9f82156f3bd05de736d980e0fb93abc8e0575ac0fe96"
+  },
+  "correction": {
+    "productionFilesChanged": false,
+    "fixturePreparation": "Discarded original synthetic codec round trip in each relevant AppDomain before server/publisher Start; actual observations generated afterward with unmodified QPC timestamps.",
+    "prewarmBytesPublished": false,
+    "coldHistoricalBaselinePreserved": true,
+    "causalNegative": "domain-late withholds first encoding until the receiver has actually terminated, using a bounded fixture-only named event; original terminal deadline, original expired observation and original failure outcomes are required.",
+    "freshnessRelaxed": false,
+    "assertionsRemoved": false,
+    "automaticRetry": false,
+    "diagnosticsReusedFrom": "d1cfd4ac07fb46b90efd7c88fcebd05932c7bf89, selectively ported and reviewed against this branch"
+  },
+  "diagnosticContract": {
+    "privateInputLimitBytes": 65536,
+    "publicRecordLimitBytes": 16384,
+    "originalClockIntegersPreserved": true,
+    "privateObservationRecordLimit": 32,
+    "privateEncodingCandidateLimit": 32,
+    "publishedPrefixLimitPerArray": 4,
+    "failedPredicatesNamed": true,
+    "transportOutcomeSeparateFromProcessExit": true,
+    "exceptionMessagesOrStacksPublished": false,
+    "fixtureExceptionHResultsPreserved": true,
+    "productionExceptionCategoryPreserved": true,
+    "rawPrivateRecordsRetained": true,
+    "alwaysUploadOnlySanitizedJson": true,
+    "hostedRetentionDays": 7,
+    "oversizeHardening": "Independent review reproduced a 16566-byte safe projection over the 16384-byte ceiling; final publication requires a compact failed record preserving decisive fields and explicit omissions."
+  },
+  "validation": {
+    "rootActualCases": [
+      {
+        "case": "after",
+        "passed": true,
+        "accepted": 15,
+        "rejected": 0,
+        "connections": 1,
+        "attempts": 1,
+        "sent": 15,
+        "expiredBefore": 0,
+        "expiredAfter": 1,
+        "firstExpired": {
+          "Sequence": 0,
+          "AgeMs": 371.8029,
+          "EncodeMs": 0.05,
+          "BeforeEncodeAgeMs": 20.672,
+          "Stage": "after-encoding-before-write"
+        },
+        "receiverStage": "connection",
+        "receiverOutcome": "deliberate-stop",
+        "receiverCode": "sender-stop",
+        "receiverExceptionType": null,
+        "senderOutcome": "deliberate-stop",
+        "senderCode": "sender-stop",
+        "senderExceptionType": null,
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "diagnosticSha256": "1c6a12ebb4448be26148ed5b5198f8069c2b3f7296c2647135b8c07b26f45733"
+      },
+      {
+        "case": "before",
+        "passed": true,
+        "accepted": 15,
+        "rejected": 0,
+        "connections": 1,
+        "attempts": 1,
+        "sent": 15,
+        "expiredBefore": 0,
+        "expiredAfter": 1,
+        "firstExpired": {
+          "Sequence": 0,
+          "AgeMs": 376.5004,
+          "EncodeMs": 0.0642,
+          "BeforeEncodeAgeMs": 376.1738,
+          "Stage": "after-encoding-before-write"
+        },
+        "receiverStage": "connection",
+        "receiverOutcome": "deliberate-stop",
+        "receiverCode": "sender-stop",
+        "receiverExceptionType": null,
+        "senderOutcome": "deliberate-stop",
+        "senderCode": "sender-stop",
+        "senderExceptionType": null,
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "diagnosticSha256": "758c827ed5690660c83ea1777f168a7073b8b468e11922738f6420b351f5bfa5"
+      },
+      {
+        "case": "domain-1",
+        "passed": true,
+        "accepted": 22,
+        "rejected": 0,
+        "connections": 1,
+        "attempts": 1,
+        "sent": 22,
+        "expiredBefore": 0,
+        "expiredAfter": 0,
+        "firstExpired": null,
+        "receiverStage": "connection",
+        "receiverOutcome": "deliberate-stop",
+        "receiverCode": "sender-stop",
+        "receiverExceptionType": null,
+        "senderOutcome": "deliberate-stop",
+        "senderCode": "sender-stop",
+        "senderExceptionType": null,
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "diagnosticSha256": "1e7aa233e33db0d24b75c61a002398720a81ba64eb8a1d413674b1fbde838ec7"
+      },
+      {
+        "case": "domain-2",
+        "passed": true,
+        "accepted": 22,
+        "rejected": 0,
+        "connections": 1,
+        "attempts": 1,
+        "sent": 22,
+        "expiredBefore": 0,
+        "expiredAfter": 0,
+        "firstExpired": null,
+        "receiverStage": "connection",
+        "receiverOutcome": "deliberate-stop",
+        "receiverCode": "sender-stop",
+        "receiverExceptionType": null,
+        "senderOutcome": "deliberate-stop",
+        "senderCode": "sender-stop",
+        "senderExceptionType": null,
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "diagnosticSha256": "71f503b5bf37990ec27b80d7c3c5caaa145ef905f004d9dd5c6e20c8e565877b"
+      },
+      {
+        "case": "domain-3",
+        "passed": true,
+        "accepted": 22,
+        "rejected": 0,
+        "connections": 1,
+        "attempts": 1,
+        "sent": 22,
+        "expiredBefore": 0,
+        "expiredAfter": 0,
+        "firstExpired": null,
+        "receiverStage": "connection",
+        "receiverOutcome": "deliberate-stop",
+        "receiverCode": "sender-stop",
+        "receiverExceptionType": null,
+        "senderOutcome": "deliberate-stop",
+        "senderCode": "sender-stop",
+        "senderExceptionType": null,
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "diagnosticSha256": "934a07555054715fcc95314c2bf5efd76698c799af126d67fa3e571205acaaed"
+      },
+      {
+        "case": "domain-late",
+        "passed": true,
+        "accepted": 0,
+        "rejected": 1,
+        "connections": 1,
+        "attempts": 1,
+        "sent": 0,
+        "expiredBefore": 0,
+        "expiredAfter": 1,
+        "firstExpired": {
+          "Sequence": 0,
+          "AgeMs": 775.2182,
+          "EncodeMs": 0.0587,
+          "BeforeEncodeAgeMs": 774.8968,
+          "Stage": "after-encoding-before-write"
+        },
+        "receiverStage": "header",
+        "receiverOutcome": "failed",
+        "receiverCode": "deadline",
+        "receiverExceptionType": "TimeoutException",
+        "senderOutcome": "failed",
+        "senderCode": "operation-failed",
+        "senderExceptionType": "IOException",
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "diagnosticSha256": "c387cc3ebbc8b6b98f381c6eab44fcc5e36de09dcfc1418d08ec01d5de97806f"
+      },
+      {
+        "case": "late",
+        "passed": true,
+        "accepted": 0,
+        "rejected": 1,
+        "connections": 1,
+        "attempts": 1,
+        "sent": 0,
+        "expiredBefore": 0,
+        "expiredAfter": 1,
+        "firstExpired": {
+          "Sequence": 0,
+          "AgeMs": 931.7373,
+          "EncodeMs": 0.0771,
+          "BeforeEncodeAgeMs": 931.3883,
+          "Stage": "after-encoding-before-write"
+        },
+        "receiverStage": "header",
+        "receiverOutcome": "failed",
+        "receiverCode": "deadline",
+        "receiverExceptionType": "TimeoutException",
+        "senderOutcome": "failed",
+        "senderCode": "operation-failed",
+        "senderExceptionType": "IOException",
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "diagnosticSha256": "6842f0b5211abf9dd5795d04946f091299b1d4d18699d9aa0f99973876a8ef62"
+      },
+      {
+        "case": "none-1",
+        "passed": true,
+        "accepted": 22,
+        "rejected": 0,
+        "connections": 1,
+        "attempts": 1,
+        "sent": 22,
+        "expiredBefore": 0,
+        "expiredAfter": 0,
+        "firstExpired": null,
+        "receiverStage": "connection",
+        "receiverOutcome": "deliberate-stop",
+        "receiverCode": "sender-stop",
+        "receiverExceptionType": null,
+        "senderOutcome": "deliberate-stop",
+        "senderCode": "sender-stop",
+        "senderExceptionType": null,
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "diagnosticSha256": "5927aa253de0f189f88454095ea96d9c126ace17734987ab05f946d0e867c52a"
+      },
+      {
+        "case": "none-2",
+        "passed": true,
+        "accepted": 22,
+        "rejected": 0,
+        "connections": 1,
+        "attempts": 1,
+        "sent": 22,
+        "expiredBefore": 0,
+        "expiredAfter": 0,
+        "firstExpired": null,
+        "receiverStage": "connection",
+        "receiverOutcome": "deliberate-stop",
+        "receiverCode": "sender-stop",
+        "receiverExceptionType": null,
+        "senderOutcome": "deliberate-stop",
+        "senderCode": "sender-stop",
+        "senderExceptionType": null,
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "diagnosticSha256": "210f29caf2f22c48726b37df47c17d3a8a5c668a6a4b5ff371fee3bd56c95cc9"
+      },
+      {
+        "case": "none-3",
+        "passed": true,
+        "accepted": 22,
+        "rejected": 0,
+        "connections": 1,
+        "attempts": 1,
+        "sent": 22,
+        "expiredBefore": 0,
+        "expiredAfter": 0,
+        "firstExpired": null,
+        "receiverStage": "connection",
+        "receiverOutcome": "deliberate-stop",
+        "receiverCode": "sender-stop",
+        "receiverExceptionType": null,
+        "senderOutcome": "deliberate-stop",
+        "senderCode": "sender-stop",
+        "senderExceptionType": null,
+        "receiverExitCode": 0,
+        "senderExitCode": 0,
+        "diagnosticSha256": "795bf1d46f72fb60511f5685b80d32b537c72855f8ba1b48983f0cc05d259c0a"
+      }
+    ],
+    "rootTenCasesPassed": 10,
+    "finalDiagnosticPowerShellChecks": 107,
+    "finalNativeRecordChecks": 11,
+    "independentActualCasesPassed": 10,
+    "independentDetailedAssertions": 358,
+    "controlledHistoricalPreFixBeforeAfterLatePassed": 3,
+    "diagnosticOverflowRegression": {
+      "originalSafeProjectionBytes": 16566,
+      "compactFailureBytes": 9397,
+      "originalFailedPredicatesRetained": 24,
+      "addedSizeFailurePredicate": true,
+      "maxFieldStressBytes": 15351,
+      "maxFieldStressWithBothRetentionFailuresBytes": 15550,
+      "publicByteLimit": 16384,
+      "independentProofSha256": "7220719501c0afc5723814f6b84633c5f91d858264b9e77c4503d479ea4023d9"
+    },
+    "localFullHarness": {
+      "passed": true,
+      "scope": "Complete Test-Offline.ps1 before the later oversized-diagnostic fallback hardening; final focused checks and PR CI qualify the final helper.",
+      "logSha256": "f721cf10d0eac581f23ba5937702f80601800acea026f5be5c475c6429214c84"
+    },
+    "finalFocusedAndCi": "Reported in the stacked draft PR for its exact head; a missing result is not a pass."
+  },
+  "preservedEndpoint": {
+    "schema": 1,
+    "passed": true,
+    "pr80Head": "247e3bc0f07374c0e9cf28b9cd0f65958c3615c5",
+    "pr80WorktreeClean": true,
+    "all78ConsumedCandidateFilesUnchanged": true,
+    "all68PayloadsUnchanged": true,
+    "all63ProtectedSourceBindingsUnchanged": true,
+    "candidateStillConsumed": true,
+    "rawEndpointResultSha256": "ac69bacc6d7f3bd42668aec103d9110521485d53848bcd3c15edc8e274d3f0f5",
+    "rawSupervisionSha256": "4e87c4bcaec3af52cdbbe8ca294461fb367e5c128c79e989d1ce9b296c341aa8",
+    "proposalSha256": "1f50da0effe5716467d54f10d03076dee709391003e32bf90600d4b664ae52bb",
+    "reviewSha256": "f49a908a7c58f5163a05adaefd87cac95e043f9ca73c47ef768e2ccda9ad6702",
+    "manifestSha256": "3c074154fde2c2502ffd5b996d02451dac51da1ef76513c6ae67b1c182565807",
+    "newEndpointInvocation": false,
+    "newGameLaunch": false,
+    "newRecording": false,
+    "newDeployment": false
+  },
+  "remainingBoundaries": [
+    "No verified GTA Enhanced/RPH authoritative event/timestamp/multiplicity adapter.",
+    "Selective native component suppression, original state recovery and crash-safe restoration remain blocked; components remain native-owned.",
+    "Gameplay null event bus is unchanged; GTA event transport, clock provenance, coexistence and cancellation still need integration and separate validation.",
+    "Effective installed-world mount ordering, Gen9/resource/material qualification and installation access remain unverified; no private assets scanned.",
+    "Runtime cross-tile scene unions, persistent supported-world coverage, dynamic geometry and moving source/listener tail horizons remain incomplete.",
+    "Real slip/contact/material/impulse and other vehicle component observations remain unavailable or unqualified.",
+    "Physical speaker and live throttle-to-ear latency remain unmeasured; synthetic audibility was not confirmed in the retained endpoint attempt."
+  ],
+  "noGtaLaunch": true,
+  "noEndpointAccess": true,
+  "noNewLiveRecording": true,
+  "noDeployment": true,
+  "noNativeSuppression": true,
+  "noConsumedCandidateInvocation": true,
+  "noMerge": true,
+  "developmentFailuresPreserved": [
+    "The first historical-baseline compile exposed its older FirstFrameTiming without ObservationTicks; conditional instrumentation now preserves that absence. A new output path passed the controlled baseline cases.",
+    "An independent private probe renamed the executable inconsistently with its AppDomain assembly identity; both failed probes and corrected new-path probes are retained separately. These were reviewer-harness errors, not production defects."
+  ]
+}
