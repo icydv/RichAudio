@@ -2,13 +2,13 @@
 
 The subsequent separately approved one-use endpoint attempt is documented in [my first completed real endpoint result](LATENCY_031_FIRST_ENDPOINT_RESULT.md). This document preserves the preceding offline recovery and its original evidence boundaries.
 
-I've continued my project in a separate branch stacked on PR #79 at `57178c5986b8e82403ceeb9dbf80f2ef2ceaa935`. Codex reproduced both failures from my first endpoint attempt, implemented focused corrections and prepared a fresh candidate from clean operational commit `14e23ee3ca6e2ca0c571a17deafcc6bde38e40e4`.
+I've continued my project in a separate branch stacked on PR #79 at `57178c5986b8e82403ceeb9dbf80f2ef2ceaa935`. The run reproduced both failures from my first endpoint attempt, implemented focused corrections and prepared a fresh candidate from clean operational commit `14e23ee3ca6e2ca0c571a17deafcc6bde38e40e4`.
 
 **This increment is offline. No real endpoint was queried/opened, no GTA/RPH launched, no deployment or live recording occurred, and no merge or native suppression was performed.** My previous candidate/approval remain consumed. The original raw result, missing supervisor receipt and independently passed cleanup remain preserved as historical facts. A new candidate is preparation for fresh approval, not proof that an entire real device run will now pass.
 
 ## Why the original clock rejected the retained observations
 
-Codex and an independent reviewer matched all six original clock rows to private raw result SHA-256 `3585fc93e5dcff4984046cde5fa13815cc7d72e0c7c406d3392c7292845b8a32`. The exact final pair advances 3,840 device units at 384,000 units/second: **10.0000 ms**. Its correlated QPC interval is **10.7013 ms**. The **0.7013 ms** residual exceeds the original **0.0418667 ms** budget, reproducing reason 4.
+Independent checks matched all six original clock rows to private raw result SHA-256 `3585fc93e5dcff4984046cde5fa13815cc7d72e0c7c406d3392c7292845b8a32`. The exact final pair advances 3,840 device units at 384,000 units/second: **10.0000 ms**. Its correlated QPC interval is **10.7013 ms**. The **0.7013 ms** residual exceeds the original **0.0418667 ms** budget, reproducing reason 4.
 
 The earlier model treated local query duration and position-unit quantization as a bound on agreement between device time and QPC. Microsoft documents the frequency as nominal and potentially ignoring drift/jitter against QPC; it does not promise agreement to query-resolution precision. [GetFrequency contract](https://learn.microsoft.com/en-us/windows/win32/api/audioclient/nf-audioclient-iaudioclock-getfrequency). The retained samples do not isolate hardware position granularity, timestamp latching or OS scheduling as the single cause. A shared-engine wake period is not a device-position accuracy certificate.
 

@@ -1,6 +1,6 @@
 # LATENCY-03.1: my first completed real endpoint result
 
-On 2026-11-02, I approved one endpoint-only attempt after returning to my PC and manually setting comfortable Windows and Astro A50 levels. Codex repeated the exact preflight, obtained my immediate confirmation of **Headphones — Astro A50 Game**, and invoked the copied, reviewed helper once. The run and independent cleanup verification passed. The candidate is consumed.
+On 2026-11-02, I approved one endpoint-only attempt after returning to my PC and manually setting comfortable Windows and Astro A50 levels. The run repeated the exact preflight, obtained my immediate confirmation of **Headphones — Astro A50 Game**, and invoked the copied, reviewed helper once. The run and independent cleanup verification passed. The candidate is consumed.
 
 **All 462 ordinary events reached successful WASAPI submission.** Their observation-to-submission latency was **5.1588 ms median, 9.7815 ms p95, 11.4315 ms p99 and 17.3542 ms maximum**. The intentional overload submitted 27 of 64 events and rejected 37 before onset. Zero ring underflows, measured callback allocation bytes, clock rejections or truncated submitted tails were reported.
 
@@ -10,7 +10,7 @@ The previous failed LATENCY-03 attempt and the earlier unattended/mobile stops r
 
 ## Exact preflight and execution
 
-Codex and a separate reviewer verified all 68 payload lengths/hashes, all 63 source bindings, the original Bati WAV and recording metadata, copied and original Node identities, compiler identity, sealed preparation/validation, and the exact review-bound private root. The reviewer also matched canonical source-commit blobs. The 72 original candidate files were unchanged, unconsumed and free of prior results or linked paths. Forbidden game/host/experiment and candidate-owned processes were absent.
+Separate checks verified all 68 payload lengths/hashes, all 63 source bindings, the original Bati WAV and recording metadata, copied and original Node identities, compiler identity, sealed preparation/validation, and the exact review-bound private root. The reviewer also matched canonical source-commit blobs. The 72 original candidate files were unchanged, unconsumed and free of prior results or linked paths. Forbidden game/host/experiment and candidate-owned processes were absent.
 
 The only changes after the operational source commit were documentation/evidence. [CI run 41486724046](https://github.com/icydv/RichAudio/actions/runs/41486724046) passed at the approved head. Fresh device-free `--validate` output matched the sealed validation hash exactly, with high-resolution QPC and callback allocation instrumentation available; it opened or queried no endpoint. No new operational artifact was generated or substituted.
 
@@ -122,7 +122,7 @@ The stream interval from Start-after to Stop-before was **28.0470812 seconds**; 
 
 Stop and Reset returned zero. Output, reader, producer, driver and CPU joins completed; Node and the native worker exited zero. Original-kernel-handle exit evidence, job close and process-handle close all succeeded. The supervisor receipt is complete and the outer invocation succeeded, so acceptance does not rely merely on parsing a JSON `passed` field.
 
-Codex and a separate reviewer independently verified absence of all four original PID/creation lifetimes: invocation shell, native supervisor, native worker and Node. All 68 payloads, 63 sources, original inputs, compiler/Node and sealed approval files remain unchanged. The candidate now contains exactly the original 72 files plus its consumed marker and five expected result files. All 74 files in the previous consumed LATENCY-03 candidate also remain unchanged.
+Separate checks independently verified absence of all four original PID/creation lifetimes: invocation shell, native supervisor, native worker and Node. All 68 payloads, 63 sources, original inputs, compiler/Node and sealed approval files remain unchanged. The candidate now contains exactly the original 72 files plus its consumed marker and five expected result files. All 74 files in the previous consumed LATENCY-03 candidate also remain unchanged.
 
 | Preserved evidence | SHA-256 |
 | --- | --- |
