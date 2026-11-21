@@ -4,7 +4,7 @@
 
 My next real experiment should inspect the **whole declared static-world inventory in one bounded batch**, not select one building or depend on where the player has travelled. Its question is whether an available, legitimate Enhanced-capable metadata/archive provider can enumerate the effective base/DLC/custom resource domain and establish usable dependency ownership. It is not another header/tag inspection, GUI startup or claim that a catalogue already contains triangles.
 
-The main unresolved input is a qualified headless provider or existing complete decoded metadata bundle. Reading more encrypted headers cannot supply missing private decryption capability. Codex must not extract keys from a game executable, fetch embedded key assets, launch a normal CodeWalker scan or invent a provider/path to fill that gap. The [feasibility research](ACOUSTIC_WORLD_06_FEASIBILITY.md) explains the static/hybrid route and its present limits.
+The main unresolved input is a qualified headless provider or existing complete decoded metadata bundle. Reading more encrypted headers cannot supply missing private decryption capability. The operator must not extract keys from a game executable, fetch embedded key assets, launch a normal CodeWalker scan or invent a provider/path to fill that gap. The [feasibility research](ACOUSTIC_WORLD_06_FEASIBILITY.md) explains the static/hybrid route and its present limits.
 
 ## Smallest useful experiment: one complete metadata-bundle join
 

@@ -1,10 +1,10 @@
 # ACOUSTIC-WORLD-01: qualified fixture buildings through my existing Bati renderer
 
-I now have a bounded, fixture-backed static-world increment and a matched private Bati reflection experiment. Codex implemented the new adapters and ran the device-free checks. This does not establish an installed-city acoustic map, actual GTA building placement, live reflections or improved speaker latency. My closed PLAYABLE-15 recordings and their approval artifacts remain unchanged.
+I now have a bounded, fixture-backed static-world increment and a matched private Bati reflection experiment. This change introduced the new adapters and ran the device-free checks. This does not establish an installed-city acoustic map, actual GTA building placement, live reflections or improved speaker latency. My closed PLAYABLE-15 recordings and their approval artifacts remain unchanged.
 
 ## Reused foundations and the exact new boundary
 
-The plan omitted an existing foundation that is already in this branch: `src/acoustics/world/README.md` describes the retained CodeWalker collision adapter, binary chunk/index reader, ordinary `CEntityDef` placements, pinned exterior classification and resumable installed-collision preparation. Those files and their proof gates remain intact. Codex ran the four existing authored collision/placement/classification/warmup suites. No installed importer, archive scan, vendor parser or startup hook was executed or enabled.
+The plan omitted an existing foundation that is already in this branch: `src/acoustics/world/README.md` describes the retained CodeWalker collision adapter, binary chunk/index reader, ordinary `CEntityDef` placements, pinned exterior classification and resumable installed-collision preparation. Those files and their proof gates remain intact. The validation ran the four existing authored collision/placement/classification/warmup suites. No installed importer, archive scan, vendor parser or startup hook was executed or enabled.
 
 The new `fixture-placements.mjs` reuses the existing `placements.mjs` / `collision-mesh.mjs` instance transformation and normal recomputation. It adds a deliberately narrow **original-authored fixture** resource format for finite rectangular panels, rectangular openings, ordinary positive uniform scale, unit-quaternion transforms and bounded nested fixture placements. Nested fixture placement is not a claim to decode GTA MLO transforms, portals or active entity sets. Existing ordinary GTA placement tests still exercise their separate nonuniform scale and inverse-CEntityDef quaternion conventions; the new fixture convention is explicitly authored and must not be substituted for those semantics.
 
@@ -32,7 +32,7 @@ All decode, cache IO and scene construction stay outside game fibers and PCM cal
 
 ## Matched private Bati reflection experiment
 
-Codex rendered the same four-second authored operating/pose timeline through `StockGameplay`, its existing `CausalSimulation` and `StreamingRenderer`: conditional direct baseline, qualified empty fixture, one wall across the authored street, and a narrow two-wall passage. The source was the retained private Bati banks, not an original tone or replacement synthesizer. All WAVs and detailed reports remain ignored and private.
+The run rendered the same four-second authored operating/pose timeline through `StockGameplay`, its existing `CausalSimulation` and `StreamingRenderer`: conditional direct baseline, qualified empty fixture, one wall across the authored street, and a narrow two-wall passage. The source was the retained private Bati banks, not an original tone or replacement synthesizer. All WAVs and detailed reports remain ignored and private.
 
 All four runs produced the same dry-source SHA-256 and kept one source object plus the original renderer history arrays. The qualified empty fixture's output was bit-identical to the original conditional-direct case. Wall and passage cases produced different PCM and actual finite first-order reflection paths. This establishes geometry-dependent PCM in an authored model; it does not establish perceived quality or actual building-dependent sound in GTA.
 
