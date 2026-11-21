@@ -11,6 +11,10 @@ RichAudio is my project. In public-facing README content, GitHub pull-request ti
 - Do not imply that I personally ran a tool, wrote a change or inspected evidence when Codex, CI or another executor actually did so. Say **"the test runner"**, **"Codex"**, **"CI"** or name the specific automated component for its actions.
 - Preserve technical meanings of *source owner*, *owned process*, *ownership lease*, *user account*, *operator process* and other code/API terms when they do not refer to me as the project creator.
 
+## Commit and push progress
+
+I want completed RichAudio work on GitHub as development progresses. When a working change, a verified fix or a meaningful live result is ready, commit it with a short, plain subject and push the active feature or fix branch. Verify the remote commit and link it in the handoff. Keep private game assets, recordings, binaries, backups, local evidence and secrets out of the outgoing history. Merges, tags and releases are separate decisions.
+
 ## Evidence and change control
 
 Preserve experimental results, test outcomes, timestamps, numerical measures and their uncertainties. Do not recast unverified claims as verified. Do not rewrite hash-pinned approval receipts, sealed proposals, raw logs, immutable historical commit snapshots or machine-readable evidence simply to change the narrative voice; any repinning/resealing requires a separate reviewed change. Existing historical snapshots remain valid even after a newer first-person documentation revision.
