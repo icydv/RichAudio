@@ -15,6 +15,7 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Metadata parser tests failed.'}
     & node --test tests/Test-AcousticGeometry.mjs
     if($LASTEXITCODE -ne 0){throw 'Offline acoustic geometry research tests failed.'}
+    & (Join-Path $repo 'tests\Test-GeometryObservation.ps1')
     & (Join-Path $repo 'tests\Test-Phase1.ps1') -ReportPath (Join-Path $output 'phase1-results.json')
     & (Join-Path $PSScriptRoot 'Build-Telemetry.ps1') -CoreOnly
     $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'

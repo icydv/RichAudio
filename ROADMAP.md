@@ -1,5 +1,7 @@
 # Roadmap
 
+**ACOUSTICS-02 — 26 October:** I've completed one separately approved Enhanced 1158.16 world-only observation through RPH 1.132.1428.17748. The [point/normal result](docs/ACOUSTICS_02_LIVE_GEOMETRY.md) passes independent validation and is consistent with my supervised wall target. All 27 temporary paths are removed and exact saved installation comparisons pass. Extent, acoustic material, permanent static identity and complete coordinate calibration remain unknown; no real GTA reflection or sound output is claimed. My proposed next step is separately authorised bounded multi-observation surface reconstruction. Source synthesis, P2-03.12 and Phase 3 are unchanged.
+
 **Parallel ACOUSTICS-01 — 26 October:** I've implemented and offline-tested a [bounded local geometry tile and first-order reflection prototype](docs/ACOUSTICS_01_LOCAL_GEOMETRY.md), with original open-road, urban and obstruction scenes and calculated visualisations. Actual GTA geometry acquisition remains untested, materials unknown and live audio ownership unresolved. One separately authorised exact-build world observation is the next proposed acoustic step; no live experiment, source-synthesis change, P2-03.12 trajectory audit or Phase 3 integration is started here.
 
 ## Current governing roadmap — 25 October 2026
