@@ -39,15 +39,15 @@ function state(s) {
 export class CausalSimulation {
   constructor(
     scene,
-    { staleAfter = 0.25, extrapolationLimit = 0.05, historySeconds = 2.5 } = {},
+    { staleAfter = 0.25, extrapolationLimit = 0.05, historySeconds = 2.5, allowMissingScene = false } = {},
   ) {
-    requireValue(validated.scene(scene), "validated A06 scene required");
+    requireValue(validated.scene(scene) || (allowMissingScene && scene === null), "validated A06 scene required");
     requireValue(
       extrapolationLimit >= 0 &&
         extrapolationLimit <= 0.1 &&
         staleAfter >= extrapolationLimit &&
         staleAfter <= 1 &&
-        historySeconds >= scene.config.maxDelay + 0.1 &&
+        historySeconds >= (scene?.config.maxDelay ?? 2) + 0.1 &&
         historySeconds <= 3,
       "history/age budgets",
     );
@@ -56,7 +56,8 @@ export class CausalSimulation {
     this.extrapolationLimit = extrapolationLimit;
     this.historySeconds = historySeconds;
     this.records = [];
-    this.candidates = candidatePaths(scene);
+    this.candidates = scene ? candidatePaths(scene) : [];
+    this.geometryEpoch = 0;
     this.previous = new Map();
     this.epoch = 0;
     this.session = null;
@@ -71,7 +72,18 @@ export class CausalSimulation {
       rejectedPaths: 0,
       prunedPaths: 0,
       maximumAgeSeconds: 0,
+      sceneReplacements: 0,
     };
+  }
+  replaceScene(scene) {
+    requireValue(scene === null || validated.scene(scene), 'validated replacement scene');
+    requireValue(!scene || this.historySeconds>=scene.config.maxDelay+.1,'replacement delay exceeds retained history');
+    if (scene?.geometryKey === this.scene?.geometryKey) return;
+    this.scene = scene;
+    this.candidates = scene ? candidatePaths(scene) : [];
+    this.geometryEpoch++;
+    this.previous.clear(); // Never interpret a new reflector delay as source velocity.
+    this.stats.sceneReplacements++;
   }
   observe(snapshot) {
     requireValue(
@@ -184,7 +196,7 @@ export class CausalSimulation {
       });
     return { keys, discontinuityGuard: 0.05 };
   }
-  update(now) {
+  update(now, { geometryTimeMs } = {}) {
     requireValue(Number.isFinite(now) && now >= 0, "arrival time");
     this.stats.updates++;
     const latest = this.records.at(-1),
@@ -206,7 +218,7 @@ export class CausalSimulation {
     requireValue(age >= -1e-8, "future observation rejected");
     this.stats.maximumAgeSeconds = Math.max(this.stats.maximumAgeSeconds, age);
     const listener = this.track("listener", null, now);
-    if (!listener) {
+    if (!listener || !this.scene) {
       this.stats.staleUpdates++;
       return {
         frame: Math.round(now * FS),
@@ -230,6 +242,7 @@ export class CausalSimulation {
           now,
           candidate,
           this.stats,
+          geometryTimeMs,
         );
         if (
           p.status !== "renderable" ||
@@ -242,7 +255,8 @@ export class CausalSimulation {
           this.stats.missingPast++;
           continue;
         }
-        const identity = id + ":" + candidate.id + ":g" + p.generation,
+        const identity = id + ":" + candidate.id + ":g" + p.generation +
+            (this.scene.observationModel && p.order ? ':geometry' + this.geometryEpoch : ''),
           previous = this.previous.get(identity);
         let rate =
           previous && now > previous.time
@@ -301,6 +315,7 @@ export class StreamingRenderer {
     historySeconds = 2.5,
     masterGain = 0.7,
     historyDiagnostics = false,
+    generationReleaseGuard = false,
   } = {}) {
     requireValue(
       sourceIds.length >= 1 &&
@@ -319,6 +334,7 @@ export class StreamingRenderer {
       "DSP budgets",
     );
     this.frame = 0;
+    this.generationReleaseGuard = generationReleaseGuard;
     this.historyDiagnostics = historyDiagnostics
       ? {
           beforeStart: 0,
@@ -423,6 +439,7 @@ export class StreamingRenderer {
     );
     if (s.generation !== generation) {
       s.generation = generation;
+      s.generationFrame = this.frame;
       s.low = 0;
       s.upper = 0;
     }
@@ -500,8 +517,16 @@ export class StreamingRenderer {
       slot.releaseLeft = 0;
     }
     for (const slot of this.slots)
-      if (slot.active && !slot.present && !slot.releaseLeft)
-        slot.releaseLeft = 960;
+      if (slot.active && !slot.present) {
+        if (!slot.releaseLeft) slot.releaseLeft = 960;
+        // An old-generation release may only read PCM before its generation
+        // boundary. Do not let the 20 ms tail cross into another source's tag.
+        if(this.generationReleaseGuard && slot.generation!==slot.source.generation){
+          const rate=Math.max(.25,slot.rate+(slot.correctionLeft>0?slot.correction:0));
+          slot.releaseLeft=Math.max(1,Math.min(slot.releaseLeft,
+            Math.floor((slot.source.generationFrame-slot.cursor-1)/rate)));
+        }
+      }
   }
   process(inputs, left, right, frames = left.length) {
     requireValue(

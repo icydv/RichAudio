@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "scope": "ACOUSTICS-08 actual worker and credit-paced RA07 producer",
+  "base": "7d950a7a65483c3868e957ca725744b1207ab6e9",
+  "deviceFree": true,
+  "gameLaunched": false,
+  "audioEndpointOpened": false,
+  "combinedHistoricalMilestonePercent": 60,
+  "calibration": "declared model scale only; physical GTA scale unverified",
+  "geometry": "original controlled live feed; no historical capture promotion",
+  "focusedTests": 5,
+  "deterministicRepeat": true,
+  "fixedSceneCompatibility": true,
+  "originalBeaconDefaultsPreserved": true,
+  "comparisons": [
+    {
+      "mode": "observed",
+      "pcmFloat32SHA256": "152627b59b8f21ee649644246c426a22d122fcb9d92820d2b494019ac8bb0c67",
+      "wavSHA256": "4D30B7EB747955E757B335F0D65BB35A7A947234665E2F41822978263045F535",
+      "frames": 286720,
+      "blocks": 560,
+      "peak": 0.025176454335451126,
+      "maximumAdjacentStep": 0.0004966123960912228,
+      "maximumBlockBoundaryStep": 0.00037827249616384506,
+      "nonfiniteSamples": 0,
+      "clippedSamples": 0,
+      "limiterFrames": 0,
+      "cursorResets": 0,
+      "pathOverflow": 0,
+      "unavailableWeightedHistoryFrames": 0,
+      "workerMs": {
+        "count": 560,
+        "median": 0.126700000000028,
+        "p95": 0.20529999999999404,
+        "max": 11.507499999999993
+      },
+      "dspMs": {
+        "count": 560,
+        "median": 0.06700000000000728,
+        "p95": 0.2102999999999895,
+        "max": 1.8742000000000019
+      },
+      "rendererOwnedBytes": 2881152,
+      "processRssBytes": 78860288
+    },
+    {
+      "mode": "direct-reference",
+      "pcmFloat32SHA256": "64160aa0b916159f551b9fd370b7cf6aeb967e9bb46d1521d656479eb3f176a6",
+      "wavSHA256": "529FE150CE7DB00F801E1F42E47736936B0E3D834733B0035A0AFA3649E7B3B4",
+      "frames": 286720,
+      "blocks": 560,
+      "peak": 0.016886526718735695,
+      "maximumAdjacentStep": 0.00037974672159180045,
+      "maximumBlockBoundaryStep": 0.0003795365628320724,
+      "nonfiniteSamples": 0,
+      "clippedSamples": 0,
+      "limiterFrames": 0,
+      "cursorResets": 0,
+      "pathOverflow": 0,
+      "unavailableWeightedHistoryFrames": 0,
+      "workerMs": {
+        "count": 560,
+        "median": 0.06649999999999068,
+        "p95": 0.1185000000000116,
+        "max": 3.6726000000000028
+      },
+      "dspMs": {
+        "count": 560,
+        "median": 0.036000000000001364,
+        "p95": 0.09879999999999711,
+        "max": 1.0592999999999932
+      },
+      "rendererOwnedBytes": 2881152,
+      "processRssBytes": 76210176
+    },
+    {
+      "mode": "fixed-scene",
+      "pcmFloat32SHA256": "abab8cc94f309922ce45ddd546c93f393e67a78f3d9ac75526dac0238101380f",
+      "wavSHA256": "FA49CCEBCFB48910347D158DB7A25D05CBE246E3BC6AA8A91649CD5C06806AE5",
+      "frames": 286720,
+      "blocks": 560,
+      "peak": 0.020074650645256042,
+      "maximumAdjacentStep": 0.015055706724524498,
+      "maximumBlockBoundaryStep": 0.015055706724524498,
+      "nonfiniteSamples": 0,
+      "clippedSamples": 0,
+      "limiterFrames": 0,
+      "cursorResets": 0,
+      "pathOverflow": 0,
+      "unavailableWeightedHistoryFrames": 0,
+      "workerMs": {
+        "count": 560,
+        "median": 0.06690000000000396,
+        "p95": 0.11179999999998813,
+        "max": 1.2541999999999973
+      },
+      "dspMs": {
+        "count": 560,
+        "median": 0.043000000000006366,
+        "p95": 0.13990000000001146,
+        "max": 1.4482
+      },
+      "rendererOwnedBytes": 2881152,
+      "processRssBytes": 72622080
+    }
+  ],
+  "timingLimit": "Local device-free timing snapshot; cold worker maximum exceeds one block period; no live deadline or hardware claim",
+  "subjectiveListening": "not performed",
+  "remaining": [
+    "Real RPH bounded geometry publisher",
+    "Paired clock samples and receiver relay bound",
+    "Host opt-in forwarding",
+    "Physical/material calibration",
+    "Separately authorized live verification"
+  ]
+}

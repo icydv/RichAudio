@@ -7,6 +7,8 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & node --test tests/Test-RealtimeGeometry.mjs
+    if($LASTEXITCODE -ne 0){throw 'Actual observed geometry worker/RA07 integration failed.'}
     & node --test tests/Test-ObservedGeometryAudio.mjs
     if($LASTEXITCODE -ne 0){throw 'Observed geometry to existing DSP integration failed.'}
     & node --check tools/Inspect-SteamInstall.mjs

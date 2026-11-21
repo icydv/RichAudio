@@ -29,6 +29,10 @@ export function modelDirection(contract, native) {
   requireValue(validCoordinates.has(contract), 'validated coordinate contract required');
   const n=unit(native); return unit(contract.axes.map(a=>dot(a,n)));
 }
+export function modelVelocity(contract, native) {
+  requireValue(validCoordinates.has(contract), 'validated coordinate contract required');
+  const v=vector(native);return vector(contract.axes.map(a=>dot(a,v)*contract.metresPerNativeUnit));
+}
 function regionBounds(contract, region) {
   const lo=vector(region?.minNative),hi=vector(region?.maxNative);
   requireValue(lo.every((x,i)=>hi[i]>x), 'finite native model region required');
@@ -37,16 +41,18 @@ function regionBounds(contract, region) {
 }
 
 export function observedAcousticScene({groups, coordinates, region, listenerNative, context, materialsByKind={},
-  mode='live-snapshot', replayDurationMs, visibilityAssumption, motionAssumption, engine={}} = {}) {
+  mode='live-snapshot', replayDurationMs, emptyValidUntilMs, visibilityAssumption, motionAssumption, engine={}} = {}) {
   requireValue(validCoordinates.has(coordinates), 'explicit coordinate/scale contract required');
-  requireValue(Array.isArray(groups) && groups.length>0 && groups.length<=observationLimits.groups, 'bounded observed group count');
+  requireValue(Array.isArray(groups) && groups.length<=observationLimits.groups, 'bounded observed group count');
   requireValue(visibilityAssumption==='unobserved-space-assumed-clear' && motionAssumption==='static-during-snapshot', 'explicit partial-world and snapshot-motion assumptions required');
   requireValue(['live-snapshot','historical-replay'].includes(mode), 'observation mode');
   requireValue(context && identity(context.session) && identity(context.build) && Number.isSafeInteger(context.interior) && context.interior>=0 &&
     Number.isSafeInteger(context.revision) && context.revision>0 && Number.isFinite(context.nowMs) && context.nowMs>=0, 'snapshot context/revision required');
   if(mode==='historical-replay')requireValue(Number.isFinite(replayDurationMs)&&replayDurationMs>0&&replayDurationMs<=62000,'bounded historical render lease required');
+  if(!groups.length)requireValue(mode==='live-snapshot' && Number.isFinite(emptyValidUntilMs) &&
+    emptyValidUntilMs>context.nowMs && emptyValidUntilMs<=context.nowMs+observationLimits.liveAgeMs,'explicit bounded empty-set lease required');
   const seen=new Set(), evidence=[],surfaces=[],materials={};
-  let validUntil=mode==='historical-replay'?replayDurationMs:Infinity;
+  let validUntil=mode==='historical-replay'?replayDurationMs:groups.length?Infinity:emptyValidUntilMs;
   for(const group of groups) {
     const bytes=JSON.stringify(group);
     requireValue(Buffer.byteLength(bytes)<=observationLimits.bytesPerGroup,'observation byte budget');
