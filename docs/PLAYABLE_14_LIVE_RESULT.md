@@ -41,7 +41,7 @@ The second existing-route invocation began at **19:01:53.5060563 UTC**. Its obse
 
 The coordinator held Steam Action 13 at its actual custom-arguments confirmation, dispatched **zero Continue clicks** and cancelled it. The bounded launch coordinator ended at 19:03:53.6200879 with `Exact new game process not observed; no lease or retry.` The remaining owned RPH launcher was closed through its normal **Cancel game launch and exit** control. No new Enhanced process, lease, source Open, native BEGIN or operator Start was observed. Missing native capture is **not a measured zero target-attempt counter**.
 
-The agent's copied supervisor and root review missed the same-profile stale-log case. All faulty scripts, observer states, stop request and launch traces remain retained. The observer's false fields are not used as current gameplay evidence. Ownership-verified rollback and final verification passed again; all protected files/settings and process/path absence are independently reviewed.
+The copied supervisor and root review missed the same-profile stale-log case. All faulty scripts, observer states, stop request and launch traces remain retained. The observer's false fields are not used as current gameplay evidence. Ownership-verified rollback and final verification passed again; all protected files/settings and process/path absence are independently reviewed.
 
 ## Evidence and next step
 
