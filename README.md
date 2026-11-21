@@ -42,7 +42,7 @@ We've verified vehicle movement telemetry inside GTA V Enhanced and privately de
 
 The next geometry challenge is safely maintaining a bounded local tile as the listener moves. An offline cache prototype can preserve inferred tiles between sessions without new collision queries, but live installation-aware mapping is not implemented. Reliable RPM, responsive source playback and duplicate-free control of individual native sounds remain unresolved.
 
-**There is no finished audio engine or public release yet.** We're working through the difficult parts one step at a time, and we'll share real progress rather than promise features before they work.
+We now have a **working offline acoustic renderer**: original synthetic audio travels through finite scenes with distance loss, propagation delay, material filtering, obstruction, directional reflections and Doppler. Five reproducible stereo WAV demonstrations exercise it. This is synthetic-scene audio processing, **not a playable GTA audio overhaul or public release**. [Implementation and listening instructions](docs/ACOUSTICS_06_AUDIO_PROPAGATION_ENGINE.md).
 
 ## Follow the project
 
@@ -58,7 +58,7 @@ For the technical side, see the [roadmap](ROADMAP.md), [architecture](ARCHITECTU
 
 ## Development progress
 
-*Last reviewed: 27 October 2026. These are **research results**, not features in a playable release. The linked research milestone PRs remain open and unmerged; the progress-summary process itself was merged through PR #28.*
+*Last reviewed: 28 October 2026. These are **research results**, not features in a playable release. The linked research milestone PRs remain open and unmerged; the progress-summary process itself was merged through PR #28.*
 
 - **In-game vehicle data — verified:** RichAudio has run in GTA V Enhanced Story Mode and captured vehicle/player movement data. Reliable live engine RPM remains unresolved.
 - **Vehicle sound research — offline:** We have decoded and studied original vehicle-audio sources privately, with promising fixed-state motorcycle exhaust listening experiments. A reliable full acceleration/deceleration renderer is not yet proven. [Source research milestone](https://github.com/icydv/RichAudio/pull/25).
@@ -69,8 +69,10 @@ For the technical side, see the [roadmap](ROADMAP.md), [architecture](ARCHITECTU
 - **Multi-surface visual debugger — verified in-game:** Eighteen bounded collision observations yielded separate **inferred** wall and ground patches, displayed using GTA world-space lines and an RPH text overlay. Review/hide/clear issued no extra traces. Material, physical scale, actual boundaries and audible reflections remain unverified. [ACOUSTICS-04](https://github.com/icydv/RichAudio/pull/30).
 - **Persistent acoustic-tile foundation — offline tested:** Original synthetic tiles roundtrip through bounded local storage, retain historical uncertainty and reject incompatible/corrupt data without collision scans or reconstruction. The tiny guarded cached load was slower than rebuilding the fixture; full-world mapping and startup benefits remain unproven. [Cache design](docs/INSTALLATION_AWARE_ACOUSTIC_CACHE.md).
 
-**Next research gate:** The combined manually walked geometry and traffic-free Bati benchmark remains **blocked before live readiness**. Offline safety models pass, but the intended route and reliable reversible traffic isolation are not yet verified. No new game launch, Bati spawn or automatic scanner has occurred. [ACOUSTICS-05 + BENCHMARK-01 findings](docs/ACOUSTICS_05_BENCHMARK_01.md).
+- **Acoustic PCM engine — verified offline:** Original synthetic scenes now produce stereo WAVs with direct time of flight, pressure attenuation, material losses, finite first/second-order reflections, obstruction, moving sources/listeners and measured Doppler. The full offline runner passes, including deterministic demonstration generation. No game launch, native muting or GTA audio processing occurred. [ACOUSTICS-06 results](docs/ACOUSTICS_06_AUDIO_PROPAGATION_ENGINE.md).
 
-**Still to solve:** Continuous responsive vehicle audio, reliable RPM, duplicate-free ownership of GTA's original engine sounds, automatic geometry coverage, and real-time acoustic rendering. **There is no playable public release yet.**
+**Independent benchmark work:** Genuine NPC-controlled Bati movement has been observed; the abrupt-stop investigation remains separate and unchanged by this renderer. [Benchmark investigation](https://github.com/icydv/RichAudio/pull/45). The original [combined geometry/benchmark record](docs/ACOUSTICS_05_BENCHMARK_01.md) remains at its recorded 60%; offline acoustic work earns no additional live-test credit.
+
+**Still to solve:** Continuous responsive vehicle audio, reliable RPM, duplicate-free ownership of GTA's original engine sounds, calibrated/live geometry, diffuse late reverberation and real-time device/game integration. My next acoustic step is a bounded owned synthetic-beacon output host driven by neutral source/listener data, subject to separate live validation. **There is no playable public release yet.**
 
 > **Keeping this up to date:** Every completed milestone or significant validated development should update this section in the same pull request, including the date, evidence link and what remains unproven. The [pull request checklist](.github/PULL_REQUEST_TEMPLATE.md) prompts this review; updates are **not automatic**.

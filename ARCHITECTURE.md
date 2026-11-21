@@ -1,5 +1,7 @@
 # Proposed architecture
 
+**ACOUSTICS-06 implementation:** The [original offline acoustic engine](docs/ACOUSTICS_06_AUDIO_PROPAGATION_ENGINE.md) now implements a metric scene/source contract, retarded-time finite-path solver and bounded stereo PCM processor under `src/acoustics/engine`. Simulation preparation is separate from sample processing. This is a working Node reference backend with no game or device dependency, not an in-process GTA renderer. Historical proposals below remain useful integration context; native ownership, calibrated GTA units, live snapshot transport and output hosting are still separate gates.
+
 **Parallel ACOUSTICS-01 research:** [local geometry and first-order paths](docs/ACOUSTICS_01_LOCAL_GEOMETRY.md) now have an independent original-fixture prototype under `src/acoustics/research`. It provides no game adapter, source synthesis or audio output. This narrowly authorised offline work does not clear telemetry, native ownership or live Phase 3 gates; the broader proposals below remain future architecture.
 
 ## Master vision alignment — 25 October 2026
