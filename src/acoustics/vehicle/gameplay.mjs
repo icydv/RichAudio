@@ -7,6 +7,7 @@ import {AcousticQualityController} from '../streaming/acoustic-quality.mjs';
 import {inBox} from '../research/local-geometry.mjs';
 import {resolveLatencyProfile} from './latency-profile.mjs';
 import {isQualifiedStaticScene,staticSceneMetadata} from '../world/scene.mjs';
+import {isSceneUnion03,sceneUnionMetadata03} from '../world/scene-union03.mjs';
 import {StationaryEmissionController} from './stationary-emission.mjs';
 const FS=48000,BLOCK=512,MAX=2,unit=v=>{const n=Math.hypot(...v);if(n<1e-8)throw Error('orientation discontinuity');return v.map(x=>x/n);};
 const mix=(a,b,u)=>a.map((x,i)=>x+(b[i]-x)*u),distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
@@ -87,6 +88,28 @@ export class StockGameplay {
   if(metadata.session!==this.session||metadata.worldDigest!==worldDigest||metadata.generation!==generation||metadata.authority!=='authored-fixture-only'||metadata.mode!=='offline-static-fixture')throw Error('Static world identity/generation mismatch');
   const at=this.now();this.pipeline.replaceScene(scene);this.staticSceneBinding=metadata;this.sceneExpiry=at+metadata.durationMs;
   this.geometryAnchor={at,observationMs:metadata.geometryTimeOriginMs};this.stats.geometryUpdates++;
+ }
+ // Explicit offline resource-format integration only. No ordinary gameplay
+ // caller invokes this; native event acquisition/ownership remain disabled.
+ setPreparedResourceScene03(scene,{worldDigest,generation}={}){
+  if(!validated.scene(scene)||!isSceneUnion03(scene))throw Error('Branded prepared resource scene required');
+  const metadata=sceneUnionMetadata03(scene),durationMs=metadata.validUntil-metadata.geometryTimeMs;
+  if(metadata.session!==this.session||metadata.worldDigest!==worldDigest||metadata.generation!==generation||
+   metadata.authority!=='original-parser-resource-fixture'||metadata.installedWorldVerified!==false||
+   !Number.isFinite(durationMs)||durationMs<=0||durationMs>60000||
+   JSON.stringify(scene.config.airDbPerMetre)!==JSON.stringify(this.direct.config.airDbPerMetre))throw Error('Resource scene identity, horizon or existing distance presentation mismatch');
+  const previous=this.pipeline.simulation.scene;
+  const preserveIdenticalReflectors=previous?.tile?.coverage==='complete-synthetic'&&scene.tile.coverage==='complete-synthetic'&&
+   previous.tile.missingRegions.length===0&&scene.tile.missingRegions.length===0&&!previous.observationModel&&!scene.observationModel&&
+   JSON.stringify(previous.tile.surfaces)===JSON.stringify(scene.tile.surfaces)&&JSON.stringify(previous.materials)===JSON.stringify(scene.materials)&&
+   JSON.stringify(previous.config)===JSON.stringify(scene.config)&&previous.coordinateSpace===scene.coordinateSpace;
+  const at=this.now();this.pipeline.replaceScene(scene,{preserveIdenticalReflectors:!!preserveIdenticalReflectors});
+  this.staticSceneBinding=Object.freeze({...metadata,mode:'offline-resource-subset',durationMs,geometryTimeOriginMs:metadata.geometryTimeMs});
+  this.sceneExpiry=at+durationMs;this.geometryAnchor={at,observationMs:metadata.geometryTimeMs};this.stats.geometryUpdates++;
+ }
+ clearPreparedResourceScene03(binding={}){
+  if(this.staticSceneBinding?.mode!=='offline-resource-subset')throw Error('Exact prepared resource scene required');
+  this.clearQualifiedStaticScene(binding);
  }
  clearQualifiedStaticScene({worldDigest,generation}={}){
   if(!this.staticSceneBinding||this.staticSceneBinding.worldDigest!==worldDigest||this.staticSceneBinding.generation!==generation)throw Error('Exact static world invalidation identity required');
@@ -199,7 +222,7 @@ export class StockGameplay {
    sourceStates:this.slots.filter(s=>s.source).map(s=>({bank:s.source.vehicle.model,context:s.source.npc?'npc':'player',running:s.vehicle?.running??false,
     operatingPoint:s.vehicle?.operatingPoint??null,sourceFrame:s.source.frame,dryPeak:s.source.stats.peak,
     listenerDistance:this.sample?.state&&s.vehicle?distance(s.vehicle.position,this.sample.state.position):null})),
-   geometry:this.pipeline.simulation.scene===this.direct?'conditional-direct-unobserved-space-assumed-clear':this.staticSceneBinding?'qualified-static-authored-fixture':'qualified-observed-partial',controlDelayMs:this.controlDelayMs,latencyProfile:this.latencyProfile.id,continuityPolicy:this.continuityPolicy,...(this.continuousTimingPolicy==='baseline'?{}:{continuousTimingPolicy:this.continuousTimingPolicy}),...(this.operatingEmission?{operatingEmission:this.operatingEmission.diagnostics()}:{}),sourceHistoryLimitSeconds:2.5,propagationLimitSeconds:2,
+   geometry:this.pipeline.simulation.scene===this.direct?'conditional-direct-unobserved-space-assumed-clear':this.staticSceneBinding?.mode==='offline-resource-subset'?'qualified-original-resource-subset':this.staticSceneBinding?'qualified-static-authored-fixture':'qualified-observed-partial',controlDelayMs:this.controlDelayMs,latencyProfile:this.latencyProfile.id,continuityPolicy:this.continuityPolicy,...(this.continuousTimingPolicy==='baseline'?{}:{continuousTimingPolicy:this.continuousTimingPolicy}),...(this.operatingEmission?{operatingEmission:this.operatingEmission.diagnostics()}:{}),sourceHistoryLimitSeconds:2.5,propagationLimitSeconds:2,
    quality:this.quality.diagnostics(),pipeline:this.pipeline.diagnostics(),playout:this.playout.stats,memory:process.memoryUsage()};}
  close(){this.pipeline.close();}
 }

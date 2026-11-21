@@ -1,0 +1,424 @@
+{
+  "schema": 1,
+  "kind": "acoustic-world-03-offline-real-format-integration",
+  "passed": true,
+  "baseline": "e9d256f26841546f42e6cee1de0889e1b2616c8d",
+  "sourcePins": [
+    {
+      "file": "docs/ACOUSTIC_WORLD_03_NATIVE_OWNERSHIP_RESEARCH.md",
+      "sha256": "d3cdc2ac8605db17fc39c6cc8e907ce03188cafab7b2a78a2e1ebc5272a6baea",
+      "canonicalGitSha256": "d3cdc2ac8605db17fc39c6cc8e907ce03188cafab7b2a78a2e1ebc5272a6baea"
+    },
+    {
+      "file": "docs/ACOUSTIC_WORLD_03_READ_ONLY_SCOPE.md",
+      "sha256": "8bfc31a6bdffa25cf772cf6c05bf26d4a4051df62ceb5322ed8ddabb891b9d2d",
+      "canonicalGitSha256": "8bfc31a6bdffa25cf772cf6c05bf26d4a4051df62ceb5322ed8ddabb891b9d2d"
+    },
+    {
+      "file": "docs/ACOUSTIC_WORLD_03_RESULT.md",
+      "sha256": "ab06adef9e2f0b9d4bd65f78b4f3380df7d254c9b0b6ee5ea2d3a8a29f599ca5",
+      "canonicalGitSha256": "ab06adef9e2f0b9d4bd65f78b4f3380df7d254c9b0b6ee5ea2d3a8a29f599ca5"
+    },
+    {
+      "file": "docs/ACOUSTIC_WORLD_03_VEHICLE_ACQUISITION.md",
+      "sha256": "ec4a897b110e88f79ca691854fa96241bf4cbe3e962f4d42f67b31790e98ed70",
+      "canonicalGitSha256": "ec4a897b110e88f79ca691854fa96241bf4cbe3e962f4d42f67b31790e98ed70"
+    },
+    {
+      "file": "evidence/acoustic-world-03-vehicle-acquisition.json",
+      "sha256": "87bd8fae1c205d880afd11012c0f8ef7366a5162a7213e03e45aae0a75d06e6d",
+      "canonicalGitSha256": "25092b71962d1a2382e90685228e22d69b46690a649a7e5149e0cc0744023396"
+    },
+    {
+      "file": "src/acoustics/bridge/Rph/VehicleObservation03.Rph.cs",
+      "sha256": "5ee2655a61cbd23846a36137745623b925a2a3a6cfc247741ca85bc7e416a582",
+      "canonicalGitSha256": "5ee2655a61cbd23846a36137745623b925a2a3a6cfc247741ca85bc7e416a582"
+    },
+    {
+      "file": "src/acoustics/events/vehicle-observation03.mjs",
+      "sha256": "77bdb45d480af53a37427bc4c462d63f24f85b4090a31546998b273033ef0918",
+      "canonicalGitSha256": "77bdb45d480af53a37427bc4c462d63f24f85b4090a31546998b273033ef0918"
+    },
+    {
+      "file": "src/acoustics/events/vehicle-world-link03.mjs",
+      "sha256": "74e1ade92661471a4e85916d222b5baeb0ec267b8ea653e233352d22e82ebf1e",
+      "canonicalGitSha256": "74e1ade92661471a4e85916d222b5baeb0ec267b8ea653e233352d22e82ebf1e"
+    },
+    {
+      "file": "src/acoustics/observation/VehicleContactObservation03.cs",
+      "sha256": "675a6dc1cdd7c8826ac827bdbaaf055e5033be0da10f9736a3f9db97f1dc0ebd",
+      "canonicalGitSha256": "675a6dc1cdd7c8826ac827bdbaaf055e5033be0da10f9736a3f9db97f1dc0ebd"
+    },
+    {
+      "file": "src/acoustics/observation/VehicleObservation03.cs",
+      "sha256": "23183e0296de73609d488eb4b0660b39274f94e508fc54e997a5a82292f81573",
+      "canonicalGitSha256": "23183e0296de73609d488eb4b0660b39274f94e508fc54e997a5a82292f81573"
+    },
+    {
+      "file": "src/acoustics/vehicle/gameplay.mjs",
+      "sha256": "6c3ec00dd8e079ba64a72f25bf7e8280835fbce854c01ebbfa7fa05a13792c20",
+      "canonicalGitSha256": "cb0a59c3a114fd8d63d8fe5b5ecb2014313089cba155cdf09750b8fe0881f9b1"
+    },
+    {
+      "file": "src/acoustics/world/CodeWalkerResourceBoundary03.cs",
+      "sha256": "47be1a539810b19d7b7a728604ba10d67b6a5e0af2586972518f9d132686bab0",
+      "canonicalGitSha256": "47be1a539810b19d7b7a728604ba10d67b6a5e0af2586972518f9d132686bab0"
+    },
+    {
+      "file": "src/acoustics/world/CodeWalkerStaticResourceAdapter02.cs",
+      "sha256": "17d662e80be9eaa2d37dadd7544ff39fd91007f47820e1986176c6506ee4e4b6",
+      "canonicalGitSha256": "2fdfc20f206c155b913c4b0e48f70fce01ce0227d9c53365bd753f6dfc1e3e1b"
+    },
+    {
+      "file": "src/acoustics/world/resource-import03.mjs",
+      "sha256": "1b623a5a48c8c790be689166f80d58a9cb3b5de2d09f85711d698f6190308c46",
+      "canonicalGitSha256": "1b623a5a48c8c790be689166f80d58a9cb3b5de2d09f85711d698f6190308c46"
+    },
+    {
+      "file": "src/acoustics/world/scene-preparation03.mjs",
+      "sha256": "cd907760353536ebaadfcceecc98bcdff0c2403d334a5724a176efb206bbf94d",
+      "canonicalGitSha256": "cd907760353536ebaadfcceecc98bcdff0c2403d334a5724a176efb206bbf94d"
+    },
+    {
+      "file": "src/acoustics/world/scene-union03.mjs",
+      "sha256": "f6bf8b8d6e013f0c8f118e9a3ec5f38d6ea76ac8f4f304417bca7a4e5577cab2",
+      "canonicalGitSha256": "f6bf8b8d6e013f0c8f118e9a3ec5f38d6ea76ac8f4f304417bca7a4e5577cab2"
+    },
+    {
+      "file": "src/acoustics/world/scene-worker03.mjs",
+      "sha256": "a5fe6d84efb0aaa76611d6c20e1fabbdc971e6342e8483f97dbc8bb79d9a5250",
+      "canonicalGitSha256": "a5fe6d84efb0aaa76611d6c20e1fabbdc971e6342e8483f97dbc8bb79d9a5250"
+    },
+    {
+      "file": "tests/Check-StaticResources03.mjs",
+      "sha256": "d815fe4f67df847b2c2882a51c66abc21bdc9d7bf2414be6105e1e38f48aebe7",
+      "canonicalGitSha256": "d815fe4f67df847b2c2882a51c66abc21bdc9d7bf2414be6105e1e38f48aebe7"
+    },
+    {
+      "file": "tests/Check-VehicleObservation03.mjs",
+      "sha256": "b47e43fa18c47680b3a4e22bc71826369b7f033d22a6bb58d3dc4d1eebcf15a7",
+      "canonicalGitSha256": "b47e43fa18c47680b3a4e22bc71826369b7f033d22a6bb58d3dc4d1eebcf15a7"
+    },
+    {
+      "file": "tests/Test-ResourceImport03.mjs",
+      "sha256": "4fe5a107385cb8c07de2af9512f1f886bebecb170144aff39bb913be15860d8e",
+      "canonicalGitSha256": "4fe5a107385cb8c07de2af9512f1f886bebecb170144aff39bb913be15860d8e"
+    },
+    {
+      "file": "tests/Test-VehicleObservation03.mjs",
+      "sha256": "d4f7187835e139a4b2f5b448745c07686b5370f2a28671ede37570669e7633bb",
+      "canonicalGitSha256": "d4f7187835e139a4b2f5b448745c07686b5370f2a28671ede37570669e7633bb"
+    },
+    {
+      "file": "tests/Test-VehicleWorldLink03.mjs",
+      "sha256": "204fc68f034e4d3efb1cc20a9a27adcca5526b24d901bdbdcda60348e97aca9e",
+      "canonicalGitSha256": "204fc68f034e4d3efb1cc20a9a27adcca5526b24d901bdbdcda60348e97aca9e"
+    },
+    {
+      "file": "tests/Test-WorldSceneUnion03.mjs",
+      "sha256": "ed4901ef72db486b854a34975da35b1fa93f91fd55d1e1a44c53c9c1fd3d8b0b",
+      "canonicalGitSha256": "ed4901ef72db486b854a34975da35b1fa93f91fd55d1e1a44c53c9c1fd3d8b0b"
+    },
+    {
+      "file": "tests/fixtures/ResourceFormats03.mjs",
+      "sha256": "06d627e9f7243b5136b0fb27884a1c6e47498af8299992ff45c4bc219d8868e1",
+      "canonicalGitSha256": "06d627e9f7243b5136b0fb27884a1c6e47498af8299992ff45c4bc219d8868e1"
+    },
+    {
+      "file": "tests/fixtures/VehicleObservations03.mjs",
+      "sha256": "54fbe5f5745a7e30596382295cf9b44db84d045c2dc5057a40681d343638d942",
+      "canonicalGitSha256": "54fbe5f5745a7e30596382295cf9b44db84d045c2dc5057a40681d343638d942"
+    },
+    {
+      "file": "tests/host/FakeVehicleRph03.cs",
+      "sha256": "0ee030d10581508afb3683fb783f046237d09991f5715dc6ed50cefabf310b06",
+      "canonicalGitSha256": "0ee030d10581508afb3683fb783f046237d09991f5715dc6ed50cefabf310b06"
+    },
+    {
+      "file": "tests/host/TestVehicleObservation03.cs",
+      "sha256": "8d43a89fc460db2ac98cb26ce1eb4e9848370ae40100ef0e08ca01a0f64907f7",
+      "canonicalGitSha256": "8d43a89fc460db2ac98cb26ce1eb4e9848370ae40100ef0e08ca01a0f64907f7"
+    },
+    {
+      "file": "tools/Build-CodeWalkerProfile03.ps1",
+      "sha256": "c82fe782c56e46d652b0b973d82eb4975696c6f9f9350d0b2abff0b46653b1d4",
+      "canonicalGitSha256": "c82fe782c56e46d652b0b973d82eb4975696c6f9f9350d0b2abff0b46653b1d4"
+    },
+    {
+      "file": "tools/Measure-ResourceBati03.mjs",
+      "sha256": "c3503ff98597e1d8381f632d98d733aa12e3590982750eb7334579d50af37e89",
+      "canonicalGitSha256": "c3503ff98597e1d8381f632d98d733aa12e3590982750eb7334579d50af37e89"
+    },
+    {
+      "file": "tools/Prepare-CodeWalkerPublicProfile03.ps1",
+      "sha256": "6ccfd2b43b7164c3c2c4d32af8dbde0bbd4d299fd84bd64f0cb49c9feee31991",
+      "canonicalGitSha256": "6ccfd2b43b7164c3c2c4d32af8dbde0bbd4d299fd84bd64f0cb49c9feee31991"
+    },
+    {
+      "file": "tools/Test-Offline.ps1",
+      "sha256": "067a8b66d8f79563d376a088b6e836e1da7625872dfe6e2b821ba56b2725f8bd",
+      "canonicalGitSha256": "a35bcd2736c92b5c59d5b4c1667a87366fbdb9dfd8d5e34df287fa7a1a32c73f"
+    },
+    {
+      "file": "tools/Test-StaticResources03.ps1",
+      "sha256": "72286f586ae23e70d7ba7df34097b65b73fe015550a3b0182fa350979d74338c",
+      "canonicalGitSha256": "72286f586ae23e70d7ba7df34097b65b73fe015550a3b0182fa350979d74338c"
+    },
+    {
+      "file": "tools/Test-VehicleObservation03.ps1",
+      "sha256": "18482d34d77e52910e1ddf2f8140c9b1e42cfb8d1512431bfa64772ce19e5476",
+      "canonicalGitSha256": "18482d34d77e52910e1ddf2f8140c9b1e42cfb8d1512431bfa64772ce19e5476"
+    }
+  ],
+  "sourceHashScope": "sha256 binds the reviewed local working-tree bytes; canonicalGitSha256 separately binds staged Git bytes because checkout line endings can differ",
+  "scope": "Original actual RSC7 byte fixtures under explicit Gen9 and legacy selectors, unchanged genuine private Bati banks with authored observations, declaration-only native adapters; no installed-world or runtime qualification",
+  "newPortableTestsPassed": 48,
+  "actualResourceIndependentChecksPassed": 121,
+  "resourceHeaderNegativeControlsPassed": 36,
+  "resourceStrictMetaNegativeControlsPassed": 4,
+  "vehicleAuthoredCSharpAssertionsPassed": 1039,
+  "referenceSdkCompileOnlyPassed": true,
+  "referenceSdkRuntimeQualified": false,
+  "completeLocalOfflinePassed": true,
+  "completeLocalOfflineBeforeFinalSceneIdentityHardening": true,
+  "finalFocusedAfterHardeningPassed": true,
+  "parserSourceCommit": "485d56bec00262ed7fa472261cce7bbc6202b96e",
+  "parserSHA256": "fd6e6f21e95f1f0cfa7441a6a8da11254ef47c09f72f164e8ce9a58f985e90f0",
+  "legacyAndGen9BuildingBytesIdentical": true,
+  "educationalResearchProfileOnly": true,
+  "productionRedistributionQualified": false,
+  "privateEvidence": {
+    "actualResourceProof": {
+      "sha256": "0c2f20e8fb0b13000309799337b92ea5b6eab753886481a8dca2184d032c6e90"
+    },
+    "actualResourceDecode": {
+      "sha256": "b9bf5a07ea3e4410e6d1520a0589a5b7502ca282ac321994a791082108e7b6a2"
+    },
+    "pcmComparison": {
+      "sha256": "b253e61de0bf3cbbc21002c35400598e5f6f4573c701dcb46bb270bf2d2c473c"
+    },
+    "pcmReview": {
+      "sha256": "e5d3540d376173ba8654705df2657605f9ed2da2a296f40d12bcc6edd41cdbc8"
+    },
+    "backgroundPreparation": {
+      "sha256": "fdf01d638b47bab9cb5fd60ca22f7c70a6db85db0d0a4d31fc63ec3539a92195"
+    },
+    "sourceSceneReview": {
+      "sha256": "e3ab1d12ae8575bd1137b01461cafe59322432259cb60052cfe9a5b453ae352e"
+    },
+    "geometryReview": {
+      "sha256": "e52874bbc57e7f17cc11d0eb9c551268a7dbc7ca614dba7a2c6653bb0f367b20"
+    },
+    "vehicleWorldLinkReview": {
+      "sha256": "d38d30fc0c979e9e2d73b9f278ecbac998b55cb4c38b00fced970bf585938fc2"
+    },
+    "historicalPreservation": {
+      "sha256": "914c8d5e58f46239881585ebe193dc7a0464e10ae3c272825b163b4471cb8246"
+    },
+    "completeOfflineLog": {
+      "sha256": "dbed9e7b18d6207248432198c93b28f71e19267cf5876d316a86283556d6b63d"
+    },
+    "finalFocusedLog": {
+      "sha256": "1926c9909e145a3451f38175fc4d7fbd33c027b32ffa17800eef766597633ad0"
+    }
+  },
+  "comparison": {
+    "framesPerArm": 192000,
+    "sampleRate": 48000,
+    "sourceBankChanged": false,
+    "calibrationChanged": false,
+    "defaultBitExactToOriginal": true,
+    "decodedOpenBitExactToDefault": true,
+    "drySourceBitExactAllArms": true,
+    "results": [
+      {
+        "arm": "exact-original",
+        "pcmSha256": "b854fda720bcfa27403c4b669da9c941099f9d2e96bed4e17d4a086110fffb66",
+        "drySourceSha256": "9d089450b53478bcb07393ba362282ebccd6d2f075c24c8e81ee6f88c071e290",
+        "peak": 0.050302136689424515,
+        "rms": 0.016702550644907933,
+        "reflectionDifferenceRms": 0,
+        "processingMs": {
+          "count": 375,
+          "median": 1.815599999999904,
+          "p95": 3.9501999999999953,
+          "p99": 7.878799999999956,
+          "maximum": 70.72259999999994,
+          "mean": 2.300381866666673
+        },
+        "renderBlockBudgetMs": 10.666666666666666,
+        "renderProcessingOverBudgetCalls": 1,
+        "resourceAndScenePreparationMs": 0,
+        "sourceCreations": 1,
+        "continuousSourceFramesVerified": 186368,
+        "sourceHistoryBytes": 11558912,
+        "historyAffectedFrames": 0,
+        "rendererLimitedSamples": 0,
+        "headroomPathsOmitted": 0
+      },
+      {
+        "arm": "unchanged-default",
+        "pcmSha256": "b854fda720bcfa27403c4b669da9c941099f9d2e96bed4e17d4a086110fffb66",
+        "drySourceSha256": "9d089450b53478bcb07393ba362282ebccd6d2f075c24c8e81ee6f88c071e290",
+        "peak": 0.050302136689424515,
+        "rms": 0.016702550644907933,
+        "reflectionDifferenceRms": 0,
+        "processingMs": {
+          "count": 375,
+          "median": 2.332200000000057,
+          "p95": 4.0052999999998065,
+          "p99": 4.534200000000055,
+          "maximum": 19.856899999999996,
+          "mean": 2.595856533333333
+        },
+        "renderBlockBudgetMs": 10.666666666666666,
+        "renderProcessingOverBudgetCalls": 1,
+        "resourceAndScenePreparationMs": 0,
+        "sourceCreations": 1,
+        "continuousSourceFramesVerified": 186368,
+        "sourceHistoryBytes": 11558912,
+        "historyAffectedFrames": 0,
+        "rendererLimitedSamples": 0,
+        "headroomPathsOmitted": 0
+      },
+      {
+        "arm": "open",
+        "pcmSha256": "b854fda720bcfa27403c4b669da9c941099f9d2e96bed4e17d4a086110fffb66",
+        "drySourceSha256": "9d089450b53478bcb07393ba362282ebccd6d2f075c24c8e81ee6f88c071e290",
+        "peak": 0.050302136689424515,
+        "rms": 0.016702550644907933,
+        "reflectionDifferenceRms": 0,
+        "processingMs": {
+          "count": 375,
+          "median": 2.272599999999784,
+          "p95": 3.8182999999999083,
+          "p99": 4.462799999999788,
+          "maximum": 17.577000000000226,
+          "mean": 2.5414637333333414
+        },
+        "renderBlockBudgetMs": 10.666666666666666,
+        "renderProcessingOverBudgetCalls": 1,
+        "resourceAndScenePreparationMs": 53.5586000000003,
+        "sourceCreations": 1,
+        "continuousSourceFramesVerified": 186368,
+        "sourceHistoryBytes": 11558912,
+        "historyAffectedFrames": 0,
+        "rendererLimitedSamples": 0,
+        "headroomPathsOmitted": 0
+      },
+      {
+        "arm": "building",
+        "pcmSha256": "b976acca271e7236335fd4e213fead5e232946a151c9cf4ac8f84ecb4b781583",
+        "drySourceSha256": "9d089450b53478bcb07393ba362282ebccd6d2f075c24c8e81ee6f88c071e290",
+        "peak": 0.0553387776017189,
+        "rms": 0.017374365377720146,
+        "reflectionDifferenceRms": 0.00446249174546593,
+        "processingMs": {
+          "count": 375,
+          "median": 2.4605000000001382,
+          "p95": 4.0646999999999025,
+          "p99": 4.910600000000159,
+          "maximum": 21.791600000000017,
+          "mean": 2.727743733333334
+        },
+        "renderBlockBudgetMs": 10.666666666666666,
+        "renderProcessingOverBudgetCalls": 1,
+        "resourceAndScenePreparationMs": 48.065000000000055,
+        "sourceCreations": 1,
+        "continuousSourceFramesVerified": 186368,
+        "sourceHistoryBytes": 11558912,
+        "historyAffectedFrames": 0,
+        "rendererLimitedSamples": 0,
+        "headroomPathsOmitted": 0
+      },
+      {
+        "arm": "passage",
+        "pcmSha256": "da63bf1178427c5d8a3fe72486e2b4bfa73dbc838ddac64a6c50fa09442576d6",
+        "drySourceSha256": "9d089450b53478bcb07393ba362282ebccd6d2f075c24c8e81ee6f88c071e290",
+        "peak": 0.07372487336397171,
+        "rms": 0.01945295022150186,
+        "reflectionDifferenceRms": 0.009845154241816203,
+        "processingMs": {
+          "count": 375,
+          "median": 3.090299999999843,
+          "p95": 5.075600000000122,
+          "p99": 6.176300000000083,
+          "maximum": 20.83179999999993,
+          "mean": 3.407711733333332
+        },
+        "renderBlockBudgetMs": 10.666666666666666,
+        "renderProcessingOverBudgetCalls": 1,
+        "resourceAndScenePreparationMs": 41.02800000000025,
+        "sourceCreations": 1,
+        "continuousSourceFramesVerified": 186368,
+        "sourceHistoryBytes": 11558912,
+        "historyAffectedFrames": 0,
+        "rendererLimitedSamples": 0,
+        "headroomPathsOmitted": 0
+      }
+    ],
+    "postArmProcessMemorySnapshotBytes": {
+      "rss": 331046912,
+      "heapTotal": 87285760,
+      "heapUsed": 9955152,
+      "external": 180868229,
+      "arrayBuffers": 178334503
+    },
+    "memoryScope": "post-arm process snapshot, not peak",
+    "liveDropoutOrLatencyMeasured": false
+  },
+  "background": {
+    "samplesPerArm": 12,
+    "nominalPrepareWallMs": {
+      "p50": 33.5494,
+      "p95": 42.5863,
+      "p99": 42.5863,
+      "max": 42.5863
+    },
+    "oneBusyCpuWorkerPrepareWallMs": {
+      "p50": 37.2342,
+      "p95": 39.4775,
+      "p99": 39.4775,
+      "max": 39.4775
+    },
+    "nominalReuseMedianMs": 0.0777,
+    "contentionReuseMedianMs": 0.0555,
+    "workersStarted": 25,
+    "workersJoined": 25,
+    "cpuWorkerExitedAndJoined": true,
+    "immediateCancellationPublishesNothing": true,
+    "observedProcessSnapshotMaximumRssBytes": 80244736,
+    "notPeakMemory": true,
+    "notPopulationTailEstimate": true
+  },
+  "boundaries": {
+    "installedAssetsRead": false,
+    "installedWorldVerified": false,
+    "actualGtaGetterInvoked": false,
+    "actualEventOccurrenceQualified": false,
+    "sourceMountsQualified": false,
+    "eventBusEnabled": false,
+    "additionalPcmQueueFrames": 0,
+    "nativeOwnedComponents": 48,
+    "nativeSuppression": false,
+    "gameLaunched": false,
+    "rphLaunched": false,
+    "realEndpointAccess": false,
+    "newRecording": false,
+    "gameDeployment": false,
+    "oldCandidateConsumed": true,
+    "oldCandidateReused": false,
+    "merge": false
+  },
+  "nextEvidenceScope": "docs/ACOUSTIC_WORLD_03_READ_ONLY_SCOPE.md",
+  "nextScopeIsExecutableApprovedCandidate": false,
+  "limitations": [
+    "Resource fixture bytes do not discriminate Enhanced for this unchanged supported Meta/static-bounds subset.",
+    "Authored placements and material coefficients are not observed real city acoustics.",
+    "Read-only RPH bindings compile against a 1.131 reference SDK but have no exact-target runtime validation.",
+    "Poll differences and last-contact history are not physical events or qualified source origins.",
+    "Private parser supervision, effective mount precedence, activation, coordinate scale and collision ownership remain indispensable.",
+    "Per-arm processing overruns and memory snapshot variability are retained, not claimed live dropout or leak measurements.",
+    "All native takeover capabilities remain blocked."
+  ]
+}

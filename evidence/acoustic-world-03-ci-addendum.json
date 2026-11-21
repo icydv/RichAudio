@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "kind": "acoustic-world-03-hosted-fixture-correction",
+  "passed": true,
+  "implementationCommit": "b531e0694f2849827a7490db616f2cc69d58da9b",
+  "initialWorkflow": {
+    "id": 41537963168,
+    "job": 125594539895,
+    "attempt": 1,
+    "conclusion": "failure",
+    "unmodified": true,
+    "decodedJobLogSha256": "be52c454a06091dba5378cc66d762be31f3de48a6038b04c25e2ec92b756bc6d",
+    "failedPredicate": "primary.Contains(connection/clean-eof)",
+    "actual": {
+      "stage": "connection",
+      "code": "connection-failed",
+      "exceptionType": "IOException",
+      "connections": 0,
+      "received": 0
+    },
+    "preciseOriginalThrowSiteAvailable": false,
+    "expirySuiteReached": false,
+    "expiryArtifactCreated": false,
+    "worldPortableChecksPassed": 48,
+    "authoredCSharpChecksPassed": 1039,
+    "actualResourceChecksPassed": 121,
+    "hostedParserSha256": "6534e47ec42d9efbeb96448a968c8d9ad12ccb2be31dc03eedf4f01a865495bf"
+  },
+  "sourceHashScope": "sha256 is the reviewed local file bytes; canonicalGitSha256 is the staged Git content",
+  "sourcePins": [
+    {
+      "file": "tests/host/TestHostShutdown.cs",
+      "sha256": "19b4b2efa468fc6c0bbb4c276314d69d33d01e78fb2fc25144ac9dd601a7b9c0",
+      "canonicalGitSha256": "af20dc18ed98eed297f8a0356d330de5ef1c47be5467ccca149070f7d38b9f41"
+    },
+    {
+      "file": "tools/Build-AcousticsHost.ps1",
+      "sha256": "e1c4db514d05e5eeec490634d64877af711887be5ff684ddbbffea93c141f4ce",
+      "canonicalGitSha256": "cf79d23db710146021b8834cb9cdac7e4def715e2fcf4f47b34112ca9fafe604"
+    },
+    {
+      "file": "tests/host/TestHostConnectionBoundary03.cs",
+      "sha256": "e8b9a34ec04b9357d830feb489480425f57576a06baab5795c1a5fdef2b9b863",
+      "canonicalGitSha256": "e8b9a34ec04b9357d830feb489480425f57576a06baab5795c1a5fdef2b9b863"
+    },
+    {
+      "file": "tools/Test-HostConnectionBoundary03.ps1",
+      "sha256": "0540f157720858088925737bf439522350127184fa6cc19ed1f863e6cd495f98",
+      "canonicalGitSha256": "0540f157720858088925737bf439522350127184fa6cc19ed1f863e6cd495f98"
+    },
+    {
+      "file": "docs/ACOUSTIC_WORLD_03_CI_ADDENDUM.md",
+      "sha256": "ea4f144d1436b7f4dd94aa224409dae091cb42773a7d5188e195b68986bff7f3",
+      "canonicalGitSha256": "ea4f144d1436b7f4dd94aa224409dae091cb42773a7d5188e195b68986bff7f3"
+    }
+  ],
+  "correction": {
+    "productionSourceChanged": false,
+    "productionTransportReclassified": false,
+    "sourceFreshnessRelaxed": false,
+    "protocolPayloadAdded": false,
+    "originalCleanEofAssertionRetained": true,
+    "requiresActualServerPeerQualification": true,
+    "minimumAgeMilliseconds": -2,
+    "maximumAgeMilliseconds": 250,
+    "headerDeadlineMilliseconds": 750,
+    "startupBudgetMilliseconds": 1000,
+    "startupDiscardLimit": 4,
+    "additionalFixedPcmQueueFrames": 0
+  },
+  "validation": {
+    "rootHostAssertionsPassed": 1702,
+    "rootHostShutdownModesPassed": 8,
+    "independentHostAssertionsPassed": 1702,
+    "independentHostShutdownModesPassed": 8,
+    "causalSchedules": [
+      {
+        "phase": "before-begin",
+        "passed": true,
+        "connections": 0,
+        "accepted": 0,
+        "rejected": 1,
+        "received": 0,
+        "stage": "connection",
+        "code": "connection-failed",
+        "outcome": "failed",
+        "exceptionType": "IOException",
+        "terminal": true,
+        "anotherAttempt": false,
+        "peerMatchesSender": false,
+        "clientAttempts": 1,
+        "terminalCallbacks": 1,
+        "clientConnectedQpc": 1788612822982,
+        "clientClosedQpc": 1788612823206,
+        "beforeBeginWaitReleasedQpc": 1788612824307,
+        "peerQualifiedQpc": 0,
+        "terminalQpc": 1788612844642,
+        "qpcFrequency": 10000000,
+        "senderExceptionType": null,
+        "senderJoined": true,
+        "serverJoined": true
+      },
+      {
+        "phase": "after-peer",
+        "passed": true,
+        "connections": 1,
+        "accepted": 0,
+        "rejected": 0,
+        "received": 0,
+        "stage": "connection",
+        "code": "clean-eof",
+        "outcome": "unexpected-eof",
+        "exceptionType": null,
+        "terminal": true,
+        "anotherAttempt": false,
+        "peerMatchesSender": true,
+        "clientAttempts": 1,
+        "terminalCallbacks": 1,
+        "clientConnectedQpc": 1788612853286,
+        "clientClosedQpc": 1788612857459,
+        "beforeBeginWaitReleasedQpc": 0,
+        "peerQualifiedQpc": 1788612857314,
+        "terminalQpc": 1788612873262,
+        "qpcFrequency": 10000000,
+        "senderExceptionType": null,
+        "senderJoined": true,
+        "serverJoined": true
+      }
+    ],
+    "freshnessControls": 4,
+    "actualCorrectedDisconnect": {
+      "mode": "disconnect",
+      "result": 1,
+      "senderJoined": true,
+      "senderExceptionType": null,
+      "senderHResult": null,
+      "clientConnectedQpc": 1788622633841,
+      "peerQualificationObservedQpc": 1788622780228,
+      "closeRequestedQpc": 1788622780229,
+      "senderExitedQpc": 1788622780693,
+      "clockFrequency": 10000000,
+      "deviceFreeFixture": true,
+      "ownedThreadsJoined": true,
+      "accepted": 0,
+      "rejected": 0,
+      "connections": 1,
+      "outputMuted": true,
+      "hostStopped": true,
+      "shutdownCompleted": true,
+      "primaryFailureStage": "listener-terminal",
+      "stage": "connection",
+      "code": "clean-eof",
+      "outcome": "unexpected-eof",
+      "exceptionType": null
+    },
+    "maximumProjectedCaseBytes": 580,
+    "rootHostLogSha256": "1ec0d80ade9920cf5e59f460b03087742eadc248db21a56b4a6b1f2239debc20",
+    "rootIndependentReviewSha256": "a179b2437c723eea4ebfff8c2ce4e514be2d3723ac35682629ee1e33cce34195",
+    "newRegressionIndependentReceiptSha256": "e532f587b022797f90791abe08fdb4c56551a745758eb45aef234b37092ee1e0",
+    "originalInvestigationSha256": "d80b81dba7c4a6e9b3098045d247e7638df97179e0558bfd2a2f59a802a9d380"
+  },
+  "preservation": {
+    "originalWorldBindingsVerified": 33,
+    "worldImplementationUnchanged": true,
+    "genuineBatiPcmMeasurementsUnchanged": true,
+    "completedEndpointExperimentUnchanged": true,
+    "consumedCandidateReused": false,
+    "priorPrHeadsChanged": false,
+    "gameLaunch": false,
+    "endpointAccess": false,
+    "recording": false,
+    "deployment": false,
+    "installedAssetsRead": false,
+    "nativeSuppression": false,
+    "merge": false
+  },
+  "limits": [
+    "Deterministically reproduced lifecycle assumption matches original available operands; original instruction-level throw site remains unavailable.",
+    "Private-copy gates are test controls, not production synchronization or runtime/audio evidence.",
+    "The new hosted full-suite result is reported in draft PR82; the original failed run is preserved."
+  ]
+}

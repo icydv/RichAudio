@@ -27,29 +27,63 @@ namespace RichAudio.Beacon.Tests
             return 0;
         }
         private static void Require(bool test,string message){if(!test)throw new Exception(message);}
+        private static object Field(Dictionary<string,object> record,string name){object value;return record!=null&&record.TryGetValue(name,out value)?value:null;}
+        private static bool FixturePeerQualified(uint expectedPeer)
+        {
+            // Client Connect is not the server's completed accept/peer check.
+            // Reflection is confined to this compiled fixture; no host hook,
+            // protocol byte, accepted observation or production deadline changes.
+            Thread.MemoryBarrier();
+            var server=(StatePipeServer)typeof(HostProgram).GetField("shutdownFixturePipe",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Static).GetValue(null);
+            return server!=null&&server.Connections==1&&server.PeerProcessId==expectedPeer;
+        }
         private static int Integration(string root,string mode)
         {
             if(mode=="blocked-callback")return BlockedCallbackIntegration(root);
             string directory=Path.Combine(Path.GetTempPath(),"RichAudio-host-shutdown-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(directory);
             string pipe="RichAudio.Shutdown."+Guid.NewGuid().ToString("N");Exception senderError=null;
+            long clientConnectedQpc=0,peerQualificationObservedQpc=0,closeRequestedQpc=0,senderExitedQpc=0;
+            uint expectedPeer=(uint)Process.GetCurrentProcess().Id;
             var sender=new Thread(delegate(){try{
                 using(var client=new NamedPipeClientStream(".",pipe,PipeDirection.InOut,PipeOptions.Asynchronous)){
-                    client.Connect(3000);
-                    if(mode=="disconnect")return;
+                    client.Connect(3000);clientConnectedQpc=Stopwatch.GetTimestamp();
+                    if(mode=="disconnect"){
+                        Require(SpinWait.SpinUntil(delegate{return FixturePeerQualified(expectedPeer);},3000),"fixture server peer qualification completed before disconnect");
+                        peerQualificationObservedQpc=Stopwatch.GetTimestamp();closeRequestedQpc=Stopwatch.GetTimestamp();return;
+                    }
                     if(mode=="controlled"||mode=="audio-stop-fault"){TransportStop.Write(client,TransportStop.Frame());TransportStop.Ack(client,TransportStop.Stopped);return;}
                     var state=Protocol.Synthetic(new string('a',32),0,0);state.ObservationTicks=Stopwatch.GetTimestamp()+Stopwatch.Frequency;
                     TransportStop.Write(client,Protocol.Frame(state));
                     try{TransportStop.ReadAck(client);}catch(InvalidDataException){}catch(IOException){}
                 }
-            }catch(Exception error){senderError=error;}});sender.IsBackground=true;
+            }catch(Exception error){senderError=error;}finally{senderExitedQpc=Stopwatch.GetTimestamp();}});sender.IsBackground=true;
             try{
                 if(mode=="evidence-failure")Directory.CreateDirectory(Path.Combine(directory,"renderer-diagnostics.txt"));
                 sender.Start();int result=HostProgram.RunShutdownFixture(root,directory,pipe,mode=="secondary",null,
                     mode=="audio-stop-fault"||mode=="audio-after-listener-fault"?"InvalidOperationException: fixture producer starvation during output stop":null);
-                Require(sender.Join(3000),"sender terminated");Require(senderError==null,"actual pipe sender failure: "+senderError);
+                bool senderJoined=sender.Join(3000);
                 var summary=new JavaScriptSerializer().Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(directory,"host-result.json")));
+                var transport=Field(summary,"transport") as Dictionary<string,object>;
+                var ending=Field(summary,"listenerTerminal") as Dictionary<string,object>;
+                // Retain bounded non-payload operands before any assertion. No
+                // paths, pipe/session identities, raw PID, stacks or messages.
+                Console.WriteLine("HOST_SHUTDOWN_CASE "+new JavaScriptSerializer().Serialize(new{
+                    mode,result,senderJoined,senderExceptionType=senderError==null?null:senderError.GetType().Name,
+                    senderHResult=senderError==null?(int?)null:senderError.HResult,
+                    clientConnectedQpc,peerQualificationObservedQpc,closeRequestedQpc,senderExitedQpc,clockFrequency=Stopwatch.Frequency,
+                    deviceFreeFixture=Field(summary,"deviceFreeFixture"),ownedThreadsJoined=Field(summary,"ownedThreadsJoined"),
+                    accepted=Field(transport,"accepted"),rejected=Field(transport,"rejected"),connections=Field(transport,"connections"),
+                    outputMuted=Field(transport,"outputMuted"),hostStopped=Field(transport,"hostStopped"),shutdownCompleted=Field(transport,"shutdownCompleted"),
+                    primaryFailureStage=Field(Field(summary,"primaryFailure") as Dictionary<string,object>,"stage"),
+                    stage=Field(ending,"Stage"),code=Field(ending,"Code"),outcome=Field(ending,"Outcome"),exceptionType=Field(ending,"ExceptionType")}));
+                Require(senderJoined,"sender terminated");Require(senderError==null,"actual pipe sender failure: "+senderError);
+                Require(transport!=null&&ending!=null,"actual listener and transport terminal records retained");
                 Require((bool)summary["deviceFreeFixture"],"endpoint was not started");Require((bool)summary["ownedThreadsJoined"],"owned Process stream threads joined");
-                var transport=(Dictionary<string,object>)summary["transport"];Require((bool)transport["outputMuted"]&&(bool)transport["hostStopped"]&&(bool)transport["shutdownCompleted"],"muted and transport callback joined");
+                Require((bool)transport["outputMuted"]&&(bool)transport["hostStopped"]&&(bool)transport["shutdownCompleted"],"muted and transport callback joined");
+                if(mode=="disconnect"){
+                    Require(clientConnectedQpc>0&&peerQualificationObservedQpc>=clientConnectedQpc&&closeRequestedQpc>=peerQualificationObservedQpc&&senderExitedQpc>=closeRequestedQpc,"peer qualification precedes close without protocol payload");
+                    Require(Convert.ToInt64(transport["accepted"])==0&&Convert.ToInt64(transport["rejected"])==0&&Convert.ToInt64(transport["connections"])==1,"qualified disconnect keeps zero acceptance/rejection and one connection");
+                }
                 string primary=summary["producerError"] as string;
                 if(mode=="controlled"){Require(result==0&&primary==null,"controlled stop remains successful: "+primary);}
                 else if(mode=="audio-stop-fault"){

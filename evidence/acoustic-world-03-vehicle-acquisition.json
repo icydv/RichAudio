@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "kind": "world03-read-only-vehicle-acquisition-offline-result",
+  "passed": true,
+  "sourcePins": [
+    {
+      "file": "src/acoustics/observation/VehicleObservation03.cs",
+      "sha256": "23183e0296de73609d488eb4b0660b39274f94e508fc54e997a5a82292f81573"
+    },
+    {
+      "file": "src/acoustics/observation/VehicleContactObservation03.cs",
+      "sha256": "675a6dc1cdd7c8826ac827bdbaaf055e5033be0da10f9736a3f9db97f1dc0ebd"
+    },
+    {
+      "file": "src/acoustics/bridge/Rph/VehicleObservation03.Rph.cs",
+      "sha256": "5ee2655a61cbd23846a36137745623b925a2a3a6cfc247741ca85bc7e416a582"
+    },
+    {
+      "file": "src/acoustics/events/vehicle-observation03.mjs",
+      "sha256": "77bdb45d480af53a37427bc4c462d63f24f85b4090a31546998b273033ef0918"
+    },
+    {
+      "file": "tests/host/FakeVehicleRph03.cs",
+      "sha256": "0ee030d10581508afb3683fb783f046237d09991f5715dc6ed50cefabf310b06"
+    },
+    {
+      "file": "tests/host/TestVehicleObservation03.cs",
+      "sha256": "8d43a89fc460db2ac98cb26ce1eb4e9848370ae40100ef0e08ca01a0f64907f7"
+    },
+    {
+      "file": "tests/fixtures/VehicleObservations03.mjs",
+      "sha256": "54fbe5f5745a7e30596382295cf9b44db84d045c2dc5057a40681d343638d942"
+    },
+    {
+      "file": "tests/Test-VehicleObservation03.mjs",
+      "sha256": "d4f7187835e139a4b2f5b448745c07686b5370f2a28671ede37570669e7633bb"
+    },
+    {
+      "file": "tests/Check-VehicleObservation03.mjs",
+      "sha256": "b47e43fa18c47680b3a4e22bc71826369b7f033d22a6bb58d3dc4d1eebcf15a7"
+    },
+    {
+      "file": "tools/Test-VehicleObservation03.ps1",
+      "sha256": "18482d34d77e52910e1ddf2f8140c9b1e42cfb8d1512431bfa64772ce19e5476"
+    },
+    {
+      "file": "docs/ACOUSTIC_WORLD_03_VEHICLE_ACQUISITION.md",
+      "sha256": "ec4a897b110e88f79ca691854fa96241bf4cbe3e962f4d42f67b31790e98ed70"
+    }
+  ],
+  "nodeTests": 24,
+  "nativeAuthoredApiChecks": 1039,
+  "csharpToJavaScriptStateAndContactReplayPassed": true,
+  "samplerCostMs": {
+    "count": 1000,
+    "median": 0.0006,
+    "p95": 0.0029,
+    "p99": 0.0042,
+    "maximum": 0.007
+  },
+  "managedBytesAfterRun": 2161680,
+  "performanceScope": "1,000 authored in-process fake getter captures, not RPH/native game-fiber or audio callback cost",
+  "referenceDeclarationCompilationPassed": true,
+  "referenceSdkSha256": "1f8a8a88a511d8c6d4aacd196e72b5192970b730f4070606d8bfac63ed722d45",
+  "referenceSdkVersion": "1.131.1424.17745",
+  "referenceMetadataReceiptSha256": "a5ac233543a058645e9bd21e1975ed2c6535de5e69d562d48275cf5271b89dc6",
+  "selectedReferenceDeclarations": 16,
+  "allSelectedMethodRvaZero": true,
+  "exactEnhancedRuntimeVerified": false,
+  "actualNativeGetterInvocations": 0,
+  "nativeWrites": 0,
+  "sourceEventOccurrenceAvailable": false,
+  "sourceEventMultiplicityAvailable": false,
+  "physicalRpmAvailable": false,
+  "wheelSlipAvailable": false,
+  "collisionImpulseAvailable": false,
+  "collisionPositionCoordinateSpaceQualified": false,
+  "componentEmissionMountsAvailable": false,
+  "materialCoefficientsQualified": false,
+  "nativeEventBusEnabled": false,
+  "mayGenerateDirect": false,
+  "mayGenerateReflections": false,
+  "nativePrimary": true,
+  "gtaLaunched": false,
+  "endpointOpened": false,
+  "newAudioRecording": false,
+  "installedAssetsRead": false,
+  "sourceFreshnessMilliseconds": 250,
+  "boundedRecordsPerSampler": 4096,
+  "boundedFieldsPerStateCapture": 6,
+  "acquisitionServiceAdmissionMilliseconds": 10,
+  "captureAdmissionIsPreemptiveNativeDeadline": false,
+  "captureCostIncludesNoMapOrGeometryWork": true,
+  "primarySources": [
+    "https://github.com/citizenfx/natives/blob/c00e0ed83d06dcba2457424ba254fbaa7a05bf7e/AUDIO/IsHornActive.md",
+    "https://docs.ragepluginhook.net/html/P_Rage_Vehicle_IsEngineStarting.htm",
+    "https://docs.ragepluginhook.net/html/M_Rage_Entity_GetLastCollision_2.htm",
+    "https://docs.ragepluginhook.net/html/Properties_T_Rage_VehicleWheel.htm"
+  ],
+  "limits": "Callable read-only getter candidates compiled against declarations and exercised through original authored API fakes. All physical events, exact runtime behavior, occurrence clocks, multiplicity, source mounts, clock-to-output mapping and native ownership remain unqualified. No autonomous sampler or live registration."
+}
