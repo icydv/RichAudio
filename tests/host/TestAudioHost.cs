@@ -31,6 +31,31 @@ namespace RichAudio.Beacon.Tests
             Check(gate.Withdrawn,"conflated terminal withdrawal acknowledged");
             frame.PowertrainRevision=4;frame.PowertrainGate="voice";
             Throws(delegate{gate.Accept(frame,now);},"withdrawal is terminal");
+
+            // Resetting the endpoint makes it silent immediately. The owner
+            // also needs evidence that tracking has caught up in the mute revision.
+            gate = new PowertrainOutputGate();
+            long revision = 0;
+            foreach (string mode in new[]{"prepare","voice","mute"})
+            {
+                frame.PowertrainRevision = ++revision;
+                frame.Listener.Sequence = revision;
+                frame.PowertrainGate = mode;
+                gate.Accept(frame, now);
+                gate.BoundaryComplete(gate.Requested);
+                if (mode == "mute")
+                {
+                    gate.Submitted(new PowertrainSubmission { Source = gate.Rendered(3), Qualified = 512 });
+                    var before = gate.Status(session,1,true,true,0,null);
+                    Check((long)before.GetType().GetProperty("appliedRevision").GetValue(before) == 2,
+                        "mute acknowledgement waits for a current silent submission");
+                }
+                gate.Submitted(new PowertrainSubmission { Source = gate.Rendered((uint)revision + 1),
+                    Qualified = 512, Peak = mode == "voice" ? .25f : 0 });
+            }
+            var after = gate.Status(session,1,true,true,0,null);
+            Check((long)after.GetType().GetProperty("appliedRevision").GetValue(after) == 3,
+                "same-revision muted PCM completes mute acknowledgement");
         }
         static unsafe void CheckPowertrainOutputTiming()
         {
@@ -70,6 +95,41 @@ namespace RichAudio.Beacon.Tests
             progress.Record(6,missing);
             Check(progress.LongestFrames==8,"mute and resume divide audible gaps");
         }
+        static unsafe void CheckPowertrainGateCauses()
+        {
+            foreach (bool expired in new[]{false,true})
+            {
+                var gate = new PowertrainOutputGate();
+                var ring = new PcmRing();
+                long now = System.Diagnostics.Stopwatch.GetTimestamp();
+                long second = System.Diagnostics.Stopwatch.Frequency;
+                long inputTime = now-second;
+                string session = Guid.NewGuid().ToString("N");
+                var frame = new RichAudio.Beacon.Transport.GameplayFrame {
+                    Listener=RichAudio.Beacon.Transport.Protocol.Synthetic(session,1,0),
+                    Vehicles=new[]{new RichAudio.Beacon.Transport.GameplayVehicle {
+                        Id="one",Model=0xb779a091,Generation=1,Context="player",Running=true,Valid=true}},
+                    ValidThroughTicks=expired?now-second/2:now+5*second,
+                    OperatingPointEvidence="shvdne-enhanced-native-F9DDA40BC293A61E",PowertrainRevision=1,PowertrainGate="prepare"
+                };
+                gate.Accept(frame,inputTime);
+                frame.Listener.Sequence=2; frame.PowertrainRevision=2; frame.PowertrainGate="voice";
+                gate.Accept(frame,inputTime);
+                gate.BoundaryComplete(gate.Requested);
+                Check(ring.TryWrite(new[]{.25f,.25f},1,gate.Rendered(3),inputTime),"current revision PCM ready");
+                if (!expired)
+                {
+                    frame.Listener.Sequence=3; frame.PowertrainRevision=3; frame.PowertrainGate="mute";
+                    gate.Accept(frame,inputTime);
+                }
+                var output = new float[2];
+                PowertrainSubmission block;
+                fixed(float* p=output) gate.Fill(ring,p,1,out block);
+                Check(block.Qualified==0&&block.Discarded==1&&output[0]==0&&output[1]==0,"suppressed PCM reaches endpoint as zero");
+                string expected = expired ? "SourceLeaseExpired" : "GainBoundaryPending";
+                Check(block.Longest.Causes.ToString()==expected,"report the gate's actual reason for suppressing current-revision PCM");
+            }
+        }
         public static unsafe int Main(string[] args)
         {
             try
@@ -99,6 +159,7 @@ namespace RichAudio.Beacon.Tests
                 if(args.Length!=0)throw new ArgumentException("Unsupported test option");
                 CheckPowertrainWithdrawal();
                 CheckPowertrainOutputTiming();
+                CheckPowertrainGateCauses();
                 Check(HostProgram.BeaconFrequencyArguments(95,"harmonic",false)=="","default producer invocation preserved");
                 Check(HostProgram.AuditionArguments(0,"open-road","harmonic",1,95,.22,.08f,false,false,false,false)=="","default audition disabled");
                 Check(HostProgram.AuditionArguments(12,"open-road","harmonic",1,600,.44,.20f,true,true,false,false)==" --beacon-output-trim-db 12","bounded geometry audition forwarding");

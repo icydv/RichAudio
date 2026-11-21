@@ -60,7 +60,8 @@ namespace RichAudio.Beacon.Windows
     internal enum PowertrainGapCause
     {
         None = 0, NoSlot = 1, Untagged = 2, RevisionMismatch = 4, StaleOnArrival = 8,
-        StaleBeforeEnqueue = 16, StaleInRing = 32, StaleUnmeasured = 64
+        StaleBeforeEnqueue = 16, StaleInRing = 32, StaleUnmeasured = 64,
+        GainBoundaryPending = 128, SourceLeaseExpired = 256
     }
     internal struct PowertrainGap
     {
@@ -131,7 +132,8 @@ namespace RichAudio.Beacon.Windows
         {return FillCore(output,frames,gain,1);}
         // Consume only one tagged slot per gain decision. Other host modes use
         // the original sample loop directly, with no per-frame revision checks.
-        internal unsafe int FillPowertrain(float* output,int frames,float gain,long revision,long now,out PowertrainSubmission submission,bool audible=false)
+        internal unsafe int FillPowertrain(float* output,int frames,float gain,long revision,long now,
+            out PowertrainSubmission submission,bool audible=false,PowertrainGapCause suppression=PowertrainGapCause.None)
         {
             if(output==null||frames<0||frames>8192)throw new ArgumentException("Output bounds");
             int supplied=0,done=0;
@@ -142,7 +144,7 @@ namespace RichAudio.Beacon.Windows
                 var stamp=available?stamps[index]:null;
                 int chunk=available?Math.Min(frames-done,lengths[index]-offset):frames-done;
                 bool stale=stamp!=null&&stamp.Deadline<=now;
-                bool qualified=stamp!=null&&stamp.Revision==revision&&!stale;
+                bool qualified=suppression==PowertrainGapCause.None&&stamp!=null&&stamp.Revision==revision&&!stale;
                 if (audible)
                 {
                     long arrival = arrivedAt[index], enqueue = enqueuedAt[index];
@@ -154,7 +156,8 @@ namespace RichAudio.Beacon.Windows
                         submission.MaxRingWait = Math.Max(submission.MaxRingWait, now - enqueue);
                     }
                     PowertrainGapCause cause;
-                    if (!available) cause = PowertrainGapCause.NoSlot;
+                    if (suppression != PowertrainGapCause.None) cause = suppression;
+                    else if (!available) cause = PowertrainGapCause.NoSlot;
                     else if (stamp == null) cause = PowertrainGapCause.Untagged;
                     else if (stamp.Revision != revision) cause = PowertrainGapCause.RevisionMismatch;
                     else if (!stale) cause = PowertrainGapCause.None;

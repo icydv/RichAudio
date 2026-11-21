@@ -88,7 +88,8 @@ namespace RichAudio.Beacon.Windows
         internal void BoundaryComplete(Command command)
         {
             sink=command;
-            if(command.Mode=="withdraw"||command.Mode=="mute"){
+            if(command.Mode=="mute")outputPeak=0;
+            if(command.Mode=="withdraw"){
                 outputPeak=0;
                 Volatile.Write(ref applied,command);
             }
@@ -96,9 +97,10 @@ namespace RichAudio.Beacon.Windows
         internal unsafe int Fill(PcmRing ring,float* data,int frames,out PowertrainSubmission submission)
         {
             long now=Stopwatch.GetTimestamp();
-            bool current=sink==Requested&&!Expired(now);
-            return ring.FillPowertrain(data,frames,current&&sink.Mode=="voice"?1:0,
-                current?sink.Revision:0,now,out submission,sink.Mode=="voice");
+            var suppression = sink != Requested ? PowertrainGapCause.GainBoundaryPending :
+                Expired(now) ? PowertrainGapCause.SourceLeaseExpired : PowertrainGapCause.None;
+            return ring.FillPowertrain(data,frames,sink.Mode=="voice"?1:0,
+                sink.Revision,now,out submission,sink.Mode=="voice",suppression);
         }
         internal void Submitted(PowertrainSubmission result)
         {
@@ -122,7 +124,7 @@ namespace RichAudio.Beacon.Windows
             submittedOperatingPoint=result.Source.OperatingPoint;
             lastSubmitted=now;
             maximumObservationAge=Math.Max(maximumObservationAge,now-result.Source.ObservedAt);
-            if(sink.Mode=="prepare"||sink.Mode=="voice"&&result.Peak>0)Volatile.Write(ref applied,sink);
+            if(sink.Mode=="prepare"||sink.Mode=="mute"||sink.Mode=="voice"&&result.Peak>0)Volatile.Write(ref applied,sink);
         }
         internal object Status(string session,int hostPid,bool fixture,bool endpointStarted,long underflow,string failure)
         {
