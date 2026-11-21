@@ -7,6 +7,14 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & node --test tests/Test-NgMetadata041.mjs tests/Test-NgReview041.mjs tests/Test-SoundMapWorld041.mjs tests/Test-WorldPipeline041.mjs
+    if($LASTEXITCODE-ne0){throw 'Original encrypted metadata, bounded catalogue identities or read-only cached SoundMap integration failed.'}
+    & (Join-Path $repo 'tests\Test-NgAcquisition041.ps1') -OutputRoot (Join-Path $output 'world041-ciphertext-controls')
+    $ngSupervisor=Join-Path $output 'world041-contained-supervisor'
+    $ngRuntime=Join-Path $output 'world041-public-node26'
+    & (Join-Path $repo 'tools\world041-build-contained.ps1') -OutputRoot $ngSupervisor
+    & (Join-Path $repo 'tools\Prepare-NgRuntime041.ps1') -OutputRoot $ngRuntime
+    & (Join-Path $repo 'tools\Test-NgContainment041.ps1') -SupervisorRoot $ngSupervisor -RuntimeRoot $ngRuntime -OutputLog (Join-Path $output 'world041-containment.log')
     & node --test tests/Test-CacheBuilder04.mjs tests/Test-Interior04.mjs tests/Test-WorldContinuity04.mjs tests/Test-ResourceProposal04.mjs tests/Test-World04Review.mjs
     if($LASTEXITCODE-ne0){throw 'Offline installed-world cache, interior contracts, continuity or read-only proposal controls failed.'}
     & (Join-Path $repo 'tests\Test-HeaderCandidate04.ps1') -OutputRoot (Join-Path $output 'world04-header-controls')
@@ -17,6 +25,7 @@ try {
     # ORIGINAL bytes in CI; no installed asset discovery or private SDK input.
     $parserRoot=Join-Path $repo ('.local/world-03/public-parser-'+[guid]::NewGuid().ToString('N'))
     & (Join-Path $repo 'tools\Prepare-CodeWalkerPublicProfile03.ps1') -OutputRoot $parserRoot
+    & (Join-Path $repo 'tools\Test-NgReference041.ps1') -ProfileRoot (Join-Path $parserRoot 'profile') -OutputRoot (Join-Path $output 'world041-ng-reference')
     $legacyShell=Join-Path $env:WINDIR 'System32/WindowsPowerShell/v1.0/powershell.exe'
     & $legacyShell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $repo 'tools/Test-StaticResources03.ps1') -ProfileRoot (Join-Path $parserRoot 'profile') -OutputRoot (Join-Path $repo ('.local/world-03/resource-fixture-'+[guid]::NewGuid().ToString('N')))
     if($LASTEXITCODE-ne0){throw 'Actual-format original Gen9/legacy resource decode, finite tile/cache or reflection PCM failed.'}

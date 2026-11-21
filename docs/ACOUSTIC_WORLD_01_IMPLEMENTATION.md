@@ -1,6 +1,6 @@
 # ACOUSTIC-WORLD-01 — first offline implementation result
 
-I have started the continuity, static-world and latency implementation on draft PR #77. Codex implemented and tested these changes in a separate checkout, preserving the PLAYABLE-15 branch and closed live approvals. This is an offline candidate, not a completed city map or a claim of uninterrupted live audio. Selective native replacement remains blocked.
+I have started the continuity, static-world and latency implementation on draft PR #77. This change introduced and tested these changes in a separate checkout, preserving the PLAYABLE-15 branch and closed live approvals. This is an offline candidate, not a completed city map or a claim of uninterrupted live audio. Selective native replacement remains blocked.
 
 ## What is implemented
 
@@ -42,7 +42,7 @@ Four-second matched renders use bit-identical genuine Bati dry PCM. The empty fi
 
 ## Native replacement remains blocked
 
-Codex recovered the original P2-02 research from its historical commit, rechecked the retained SDK metadata and pinned public declarations, and preserved the original ownership simulation. The new prototype cannot enable production takeover. Exact session/handle/generation/model, eligible fresh observations, known baseline, component isolation, measured handoff and independently surviving recovery are separate requirements. Failed restoration stays unknown/failed. A copied audio profile remains a research lead, not a verified mute.
+The project record recovered the original P2-02 research from its historical commit, rechecked the retained SDK metadata and pinned public declarations, and preserved the original ownership simulation. The new prototype cannot enable production takeover. Exact session/handle/generation/model, eligible fresh observations, known baseline, component isolation, measured handoff and independently surviving recovery are separate requirements. Failed restoration stays unknown/failed. A copied audio profile remains a research lead, not a verified mute.
 
 A separate review corrected a policy bug that allowed an ineligible observation's fresh timestamp to qualify preparation. Only a new eligible observation can now requalify it; health status alone cannot. The final ownership suite passes 32 tests. [Mechanisms, component boundaries, negative controls and rollback](NATIVE_AUDIO_OWNERSHIP_01.md).
 
@@ -54,7 +54,7 @@ A separate review corrected a policy bug that allowed an ineligible observation'
 - Exact original `d9fdc90` PCM ring versus current default: **16 matched authored scenarios**, alongside **64 queue exploration scenarios**. No default PCM, credits, queue-depth or fatal-underflow behaviour difference was found under those fixtures.
 - Independent reviewers checked continuity, static geometry/cache/workers, native policy and the latency profile/fixture source bindings. Resolved findings include converter-revision invalidation, worker terminal success and ownership eligibility. Original private review receipts are preserved; follow-up reviews are separate receipts.
 
-An additional journal fixture initially completed its four executable cases but could not write its report because this new checkout lacked an old private diagnosis input. Codex copied that retained input byte-for-byte, verified its digest and reran the report successfully. No proposal, approval, test threshold or historical receipt was regenerated to fit an authorization.
+An additional journal fixture initially completed its four executable cases but could not write its report because this new checkout lacked an old private diagnosis input. The project record copied that retained input byte-for-byte, verified its digest and reran the report successfully. No proposal, approval, test threshold or historical receipt was regenerated to fit an authorization.
 
 The original 15 preserved live-evidence files, totalling **31,926,034 bytes**, were rehashed against preservation manifest `62efb00fa7f5972e3d9211f8f135d1957e2f87e50f3c854b20766de4fc80c001`. Recordings, bank material, derived WAVs, detailed traces and cache data remain private. Publication screening now also rejects the new static-cache extension/header.
 

@@ -13,12 +13,22 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
   if(!Number.isInteger(port)||port<0||port>65535)throw Error('Port bound');
   const privateRoot=privateDirectory(root),token=randomBytes(32).toString('hex'),recorder=new SessionRecorder(privateRoot,{now});
   if(ownerId!==null&&(typeof ownerId!=='string'||!/^[a-f0-9]{32}$/.test(ownerId)))throw Error('Owner identity bound');
-  const passive=new PassiveListener(now);let requestClose;
+  // The standalone passive viewer is also packaged without engine sources.
+  // Load the opt-in cache adapter only after trusted local code publishes one.
+  const passive=new PassiveListener(now);let cacheFeed=null,cacheLoading=null,cacheEpoch=0,cacheRevision=0,cacheReason='not-supplied',requestClose;
+  const emptyCacheStatus=()=>({available:false,generation:null,revision:cacheRevision,reason:cacheReason,clockQualified:true,ageMs:null,geometryTimeMs:null,authority:'original-authored-fixture-only',installedWorldVerified:false,viewerCanPublishAcoustics:false});
+  const cacheWorld={
+    async publish(packet){const epoch=++cacheEpoch;const module=await(cacheLoading??=import('./cache-world041.mjs'));if(epoch!==cacheEpoch||closing)return {...this.status(),publicationWithdrawn:true};cacheFeed??=new module.CachedWorldFeed041(now);return cacheFeed.publish(packet);},
+    status(){return cacheFeed?.status()??emptyCacheStatus();},
+    snapshot(generation=''){return cacheFeed?.snapshot(generation)??{packet:null,status:emptyCacheStatus()};},
+    clear(reason='withdrawn'){if(typeof reason!=='string'||!/^[A-Za-z0-9_.:-]{1,80}$/.test(reason))throw Error('Bounded withdrawal reason');cacheEpoch++;cacheRevision++;cacheReason=reason;return cacheFeed?.clear(reason)??emptyCacheStatus();},
+    invalidate(worldDigest){if(typeof worldDigest!=='string'||!/^[a-f0-9]{64}$/.test(worldDigest))throw Error('Explicit next inventory digest');cacheEpoch++;cacheRevision++;cacheReason='resource-inventory-changed';return cacheFeed?.invalidate(worldDigest)??emptyCacheStatus();}
+  };
   let frame=null,receivedAt=0,sessionId=null,streamId=null,sequence=-1,replay=null,lastHost=null,stopping=null;
   const geometry=new Map(),stats={accepted:0,droppedUpdates:0,invalidUpdates:0,sessionChanges:0,geometryCacheEvictions:0};
   let boundPort;
   const status=()=>({connected:!!frame&&now()-receivedAt<=1500,sessionId,streamId,ageMs:frame?now()-receivedAt:null,...stats,
-    passive:passive.status(),recording:recorder.status(),replay:replay?{id:replay.id,durationMs:replay.durationMs}:null,
+    passive:passive.status(),cacheWorld:cacheWorld.status(),recording:recorder.status(),replay:replay?{id:replay.id,durationMs:replay.durationMs}:null,
     audio:{hostConnected:!!lastHost&&now()-lastHost.receivedAt<1500,host:lastHost?.info??null}});
   const server=http.createServer(async(req,res)=>{
     const origin='http://127.0.0.1:'+boundPort;
@@ -38,7 +48,9 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
       if(route==='/api/status'&&req.method==='GET')send(status());
       else if(route==='/api/frame'&&req.method==='GET'){
         const g=frame?geometry.get(frame.geometryGeneration):null;
-        send({mode:'live',frame,passive:passive.snapshot(),geometry:g&&url.searchParams.get('geometryGeneration')!==g.generation?g:null,status:status()});
+        send({mode:'live',frame,passive:passive.snapshot(),cacheWorld:cacheWorld.snapshot(url.searchParams.get('cacheWorldGeneration')??''),geometry:g&&url.searchParams.get('geometryGeneration')!==g.generation?g:null,status:status()});
+      }else if(route==='/api/cache-world'&&req.method==='GET'){
+        send(cacheWorld.snapshot(url.searchParams.get('generation')??''));
       }else if(route==='/api/passive'&&req.method==='POST'){
         send(passive.accept(value));
       }else if(route==='/api/service/stop'&&req.method==='POST'){
@@ -125,9 +137,9 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
   const temporary=path.join(privateRoot,'service-'+randomBytes(8).toString('hex')+'.tmp');fs.writeFileSync(temporary,JSON.stringify(descriptor),{flag:'wx'});fs.renameSync(temporary,descriptorFile);
   const tick=setInterval(()=>{recorder.tick();if(stopping&&now()-stopping.at>1500){recorder.event('audio-tail-unconfirmed',{reason:'host-flush-timeout'});recorder.stop('host-flush-timeout');stopping=null;}},100);tick.unref();
   let closing=null;
-  const close=()=>closing??=(async()=>{clearInterval(tick);recorder.stop('service-shutdown');await new Promise(resolve=>server.close(resolve));})();
+  const close=()=>closing??=(async()=>{cacheWorld.clear('service-shutdown');clearInterval(tick);recorder.stop('service-shutdown');await new Promise(resolve=>server.close(resolve));})();
   requestClose=close;
-  return {server,descriptor,recorder,status,privateRoot,close};
+  return {server,descriptor,recorder,status,privateRoot,cacheWorld,close};
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
   let root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..'),port=17833,ownerId=null;

@@ -1,6 +1,6 @@
 # LATENCY-02: separate timing for continuous sound and transients
 
-I have an executable **offline synthetic-event prototype**, separate from my continuous vehicle policy. A transient does not wait for 75–100 ms of listener history or enter the vehicle PCM FIFO. Codex implemented prewarmed acoustic kernels and a bounded late-mixing stage, and tested them without opening an endpoint. My existing live route passes a literal null event bus and retains its defaults.
+I have an executable **offline synthetic-event prototype**, separate from my continuous vehicle policy. A transient does not wait for 75–100 ms of listener history or enter the vehicle PCM FIFO. This change introduced prewarmed acoustic kernels and a bounded late-mixing stage, and tested them without opening an endpoint. My existing live route passes a literal null event bus and retains its defaults.
 
 This is not a live weapon implementation. Supported acquisition of complete timestamped GTA muzzle events, selective native ownership/restoration, moving-event geometry and actual endpoint presentation-clock mapping remain unqualified. GTA's existing gunshots remain operational; no RichAudio muzzle blast is added to them.
 
@@ -32,7 +32,7 @@ The same existing acoustic renderer implementation prepares every kernel. `Causa
 
 ## Event acquisition and coexistence
 
-Codex checked the existing native/RPH research, the actual reference SDK metadata and pinned primary native/framework sources. `IS_PED_SHOOTING` is a boolean polling observation. `GET_PED_LAST_WEAPON_IMPACT_COORD` supplies a last impact coordinate, not a complete timestamped shot sequence. Generic script-event queues do not establish a stable muzzle-event schema or a sample-clock timestamp. RPH's ped-shot notifications describe a ped being hit, not every muzzle discharge, miss, explosion or impact; their payload lacks the required occurrence timestamp and the reference/runtime versions differ.
+The operator checked the existing native/RPH research, the actual reference SDK metadata and pinned primary native/framework sources. `IS_PED_SHOOTING` is a boolean polling observation. `GET_PED_LAST_WEAPON_IMPACT_COORD` supplies a last impact coordinate, not a complete timestamped shot sequence. Generic script-event queues do not establish a stable muzzle-event schema or a sample-clock timestamp. RPH's ped-shot notifications describe a ped being hit, not every muzzle discharge, miss, explosion or impact; their payload lacks the required occurrence timestamp and the reference/runtime versions differ.
 
 The [source-capability report](LATENCY_02_SOURCE_EVENT_CAPABILITIES.md) separates an occurrence interval from the bracket around acquiring an observation. A function returning successfully is not timestamp or multiplicity proof. The production capability registry is immutable and blocked; caller-supplied claims cannot enable it. Only branded original authored impulses can enter the fixture path.
 
