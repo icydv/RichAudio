@@ -1,5 +1,9 @@
 # Contributing to RichAudio
 
+## Development branches
+
+I keep verified changes and meaningful live results on the active development branch. Use a short commit subject, push the branch normally, and check that GitHub resolves the commit. Check every outgoing commit for private game assets, recordings, binaries, backups, local evidence and secrets. Merges, tags and releases are separate decisions.
+
 ## Evidence and change control
 
 Preserve the results, numerical measurements and limitations of each experiment. Keep immutable receipts and hash-pinned inputs tied to the implementation they verified.
