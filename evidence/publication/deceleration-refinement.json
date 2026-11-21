@@ -1,0 +1,933 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "scope": "Offline deceleration interaction diagnosis; no game integration",
+  "parentPr": 14,
+  "parentCommit": "bc69ef3ce56f2e363ecd870e8503d301d28dd7d4",
+  "mainReviewed": "e5fbd8f3502d3e28169a224caa07471e090e368f",
+  "outcome": "PARTIAL",
+  "acceptedReferenceSha256": "5F31B5CB6378A878F9B54E6531CE85F9A117B97A5915705B7A27EA35D794D77A",
+  "baselineReproduced": true,
+  "originalDecodedHashesMatched": 12,
+  "referenceAndRejectedWavsPreserved": 6,
+  "archivesAccessed": 0,
+  "gameWrites": 0,
+  "gameLaunches": 0,
+  "rphLaunches": 0,
+  "dependenciesInstalled": 0,
+  "audioUploaded": false,
+  "ranges": {
+    "rate": 48000,
+    "overlap": 5760,
+    "accelStart": 90240,
+    "decelStart": 412731,
+    "decelEnd": 837239,
+    "idleStart": 831479,
+    "exhaustEnd": 786911,
+    "end": 927479,
+    "clipStart": 398331,
+    "clipEnd": 850679
+  },
+  "maxComponentSumError": 0.000030517578125,
+  "baselinePreviewMeasurements": {
+    "A_engine_decel.wav": {
+      "sha256": "7145BF112299CD4446102237AC95F4E3C2E752275C0992FC69D03B52226BABCB",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 452348,
+      "durationSeconds": 9.423916666666667,
+      "peak": 0.158843994140625,
+      "rms": 0.04144116474604782,
+      "dc": -0.00014445703005830135,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.13470458984375,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 472
+    },
+    "B_exhaust_decel.wav": {
+      "sha256": "B46220F2AD389521F050EC1EA1E12697440CF5E632D3AA7B45499DC19B4EB277",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 452348,
+      "durationSeconds": 9.423916666666667,
+      "peak": 0.11920166015625,
+      "rms": 0.05300004155630569,
+      "dc": -0.00036720880970911085,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.02252197265625,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 46,
+      "windowCount": 472
+    },
+    "C_mix_decel.wav": {
+      "sha256": "B32419070493CA599771FE862B2C2DD688567EDCF4F6D68C977929913E909F58",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 452348,
+      "durationSeconds": 9.423916666666667,
+      "peak": 0.277984619140625,
+      "rms": 0.06630535261542223,
+      "dc": -0.0005118369305606179,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.13690185546875,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 472
+    },
+    "E_full_reference.wav": {
+      "sha256": "5F31B5CB6378A878F9B54E6531CE85F9A117B97A5915705B7A27EA35D794D77A",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 927479,
+      "durationSeconds": 19.322479166666668,
+      "peak": 0.277984619140625,
+      "rms": 0.062411287032119366,
+      "dc": 0.00010742009556281059,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.13690185546875,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 967
+    },
+    "D_raw_engine_decel.wav": {
+      "sha256": "C78E85B1860F125B694BC92EAC593B6EAC7DD9B4855AF17882C4583735F44C95",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 424508,
+      "durationSeconds": 8.843916666666667,
+      "peak": 0.794281005859375,
+      "rms": 0.20553263733493154,
+      "dc": -0.0006624850994783962,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.673431396484375,
+      "stepsAboveHalfScale": 80,
+      "silent20msWindows": 0,
+      "windowCount": 443
+    },
+    "D_listen_engine_decel.wav": {
+      "sha256": "256B6C0B1D73EE6E3E8D79C28B3AC5F7B80BD0720576A7DBDB2F3A1FDD601C29",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 424508,
+      "durationSeconds": 8.843916666666667,
+      "peak": 0.158843994140625,
+      "rms": 0.04110644280165991,
+      "dc": -0.00013249490635059438,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.13470458984375,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 443
+    },
+    "D_raw_exhaust_decel.wav": {
+      "sha256": "574DBB61C486F18848839300C9D72219957258CEEA6B1F93710EB72EF6270F2F",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 374180,
+      "durationSeconds": 7.795416666666667,
+      "peak": 0.794281005859375,
+      "rms": 0.37769120790789135,
+      "dc": -0.0037091028404246033,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.16156005859375,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 390
+    },
+    "D_listen_exhaust_decel.wav": {
+      "sha256": "890D40A04053C4925866544C7779CC290A01D6AA87607EC7F81772EEA52566FF",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 374180,
+      "durationSeconds": 7.795416666666667,
+      "peak": 0.119140625,
+      "rms": 0.056654069662928186,
+      "dc": -0.0005563823943199546,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.02423095703125,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 390
+    }
+  },
+  "listening": [
+    {
+      "preview": "A engine-only common-range stem",
+      "result": "No ghosting heard"
+    },
+    {
+      "preview": "B exhaust-only common-range stem",
+      "result": "No ghosting heard"
+    },
+    {
+      "preview": "C unchanged combined common-range mix",
+      "result": "Ghosting returned throughout deceleration"
+    },
+    {
+      "preview": "Candidate common-range mix",
+      "result": "Slightly improved"
+    },
+    {
+      "preview": "Full candidate",
+      "result": "Idle and acceleration fine; deceleration still reverberant/out-of-phase"
+    }
+  ],
+  "rawSourcePreviewsAuditioned": false,
+  "controlledBlindedListening": false,
+  "hypothesisStatus": {
+    "componentCombination": "Implicated by paired informal listening",
+    "specificNativePhaseCause": "UNDETERMINED",
+    "transitionSoleCause": "Not supported by interior listening/measurements",
+    "durationMismatchSoleCause": "Not sufficient for interior effect",
+    "timingCorrection": "Unsupported; none applied",
+    "metadataSynchronisation": "Unverified"
+  },
+  "numerical": {
+    "method": "38 interior 200ms windows; 4096-point Hann FFT; +/-2ms lag search on4-frame grid with stride8 accumulation",
+    "limitations": "Windowed interference and lag search do not establish physical/native alignment or perceptual quality.",
+    "baselineRange": {
+      "zeroLagRange": [
+        -0.2098743131435407,
+        0.05508852787616031
+      ],
+      "bands": [
+        {
+          "lowHz": 20,
+          "highHz": 250,
+          "minDb": -4.605777868667708,
+          "maxDb": 1.75437724554478
+        },
+        {
+          "lowHz": 250,
+          "highHz": 1000,
+          "minDb": -2.0101970980368185,
+          "maxDb": 1.4779990497793818
+        },
+        {
+          "lowHz": 1000,
+          "highHz": 4000,
+          "minDb": -0.38426597659411393,
+          "maxDb": 0.3228853484355643
+        }
+      ]
+    },
+    "candidateRange": {
+      "zeroLagRange": [
+        -0.20987395947894447,
+        0.05508687746147109
+      ],
+      "bands": [
+        {
+          "lowHz": 20,
+          "highHz": 250,
+          "minDb": -3.395929662536459,
+          "maxDb": 1.5721551125269655
+        },
+        {
+          "lowHz": 250,
+          "highHz": 1000,
+          "minDb": -1.9854464493095043,
+          "maxDb": 1.5047399248699826
+        },
+        {
+          "lowHz": 1000,
+          "highHz": 4000,
+          "minDb": -0.49943735854180876,
+          "maxDb": 0.4031984054127895
+        }
+      ]
+    },
+    "baselineInterior": {
+      "rate": 48000,
+      "channels": 1,
+      "frames": 367220,
+      "durationSeconds": 7.650416666666667,
+      "peak": 0.277984619140625,
+      "rms": 0.07046250979048485,
+      "dc": -0.0006625611202551008,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.13690185546875,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 383
+    },
+    "candidateInterior": {
+      "rate": 48000,
+      "channels": 1,
+      "frames": 367220,
+      "durationSeconds": 7.650416666666667,
+      "peak": 0.23828125,
+      "rms": 0.06467684654218354,
+      "dc": -0.000621415161046384,
+      "clippedSamples": 0,
+      "allZero": false,
+      "nonfiniteSamples": 0,
+      "maxAdjacentStep": 0.103240966796875,
+      "stepsAboveHalfScale": 0,
+      "silent20msWindows": 0,
+      "windowCount": 383
+    },
+    "baselineWindows": [
+      {
+        "startFrame": 418491,
+        "endFrame": 428091,
+        "engineRms": 0.07209430880869055,
+        "exhaustRms": 0.04636697678768671,
+        "mixRms": 0.0867394376403127,
+        "zeroLagCorrelation": 0.025887670288635898,
+        "strongestBoundedLag": {
+          "lagSamples": -56,
+          "correlation": -0.19089130679910518
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": -3.3980905919930926
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": 1.4779990497793818
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": -0.07461155045557716
+          }
+        ]
+      },
+      {
+        "startFrame": 485691,
+        "endFrame": 495291,
+        "engineRms": 0.05488730668562344,
+        "exhaustRms": 0.05187728414478474,
+        "mixRms": 0.0755003538492867,
+        "zeroLagCorrelation": -0.0018497133901264435,
+        "strongestBoundedLag": {
+          "lagSamples": -60,
+          "correlation": -0.028846870076979603
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": -3.4535066646908263
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": 0.46509135380232725
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": -0.11906708154997413
+          }
+        ]
+      },
+      {
+        "startFrame": 504891,
+        "endFrame": 514491,
+        "engineRms": 0.0547204410211691,
+        "exhaustRms": 0.0536357567311254,
+        "mixRms": 0.07703058598570321,
+        "zeroLagCorrelation": 0.010150236934929224,
+        "strongestBoundedLag": {
+          "lagSamples": 68,
+          "correlation": -0.05715511031653899
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": -4.605777868667708
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": 0.647924230082126
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": 0.0702696182544261
+          }
+        ]
+      },
+      {
+        "startFrame": 552891,
+        "endFrame": 562491,
+        "engineRms": 0.04445155902562419,
+        "exhaustRms": 0.06924268334602972,
+        "mixRms": 0.08126005126581974,
+        "zeroLagCorrelation": -0.027139187349145284,
+        "strongestBoundedLag": {
+          "lagSamples": 32,
+          "correlation": -0.050493553006741805
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": -0.29653564470096555
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": 0.505994864873945
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": 0.05998189168939952
+          }
+        ]
+      },
+      {
+        "startFrame": 620091,
+        "endFrame": 629691,
+        "engineRms": 0.03483322166899098,
+        "exhaustRms": 0.06934432201426934,
+        "mixRms": 0.07592670720689446,
+        "zeroLagCorrelation": -0.052455115398759904,
+        "strongestBoundedLag": {
+          "lagSamples": 24,
+          "correlation": -0.058561708189316976
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": -0.6782107217088136
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": -0.2950471525208028
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": 0.00028619253813048614
+          }
+        ]
+      },
+      {
+        "startFrame": 687291,
+        "endFrame": 696891,
+        "engineRms": 0.026044381686828155,
+        "exhaustRms": 0.05510851549357898,
+        "mixRms": 0.06185259064456915,
+        "zeroLagCorrelation": 0.03789030830698758,
+        "strongestBoundedLag": {
+          "lagSamples": -80,
+          "correlation": 0.10055730404533808
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": -0.14679270090840424
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": 1.145852868373136
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": -0.22419742755249855
+          }
+        ]
+      },
+      {
+        "startFrame": 754491,
+        "endFrame": 764091,
+        "engineRms": 0.018704321289907136,
+        "exhaustRms": 0.03885682713018979,
+        "mixRms": 0.04331072547801227,
+        "zeroLagCorrelation": 0.011172570258388135,
+        "strongestBoundedLag": {
+          "lagSamples": -96,
+          "correlation": 0.13590395378716882
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": 0.17155041041187535
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": -0.40418311794775036
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": 0.04946054132012178
+          }
+        ]
+      }
+    ],
+    "candidateWindows": [
+      {
+        "startFrame": 418491,
+        "endFrame": 428091,
+        "engineRms": 0.05407105816286456,
+        "exhaustRms": 0.04636697678768671,
+        "mixRms": 0.07215106870452367,
+        "zeroLagCorrelation": 0.02589164252688248,
+        "strongestBoundedLag": {
+          "lagSamples": -56,
+          "correlation": -0.1908931557212965
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": -2.531407377089725
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": 1.5047399248699826
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": -0.09726180193533197
+          }
+        ]
+      },
+      {
+        "startFrame": 485691,
+        "endFrame": 495291,
+        "engineRms": 0.041165452635566736,
+        "exhaustRms": 0.05187728414478474,
+        "mixRms": 0.06620533064795457,
+        "zeroLagCorrelation": -0.001853970234524511,
+        "strongestBoundedLag": {
+          "lagSamples": -60,
+          "correlation": -0.028847639714115546
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": -2.6183415940665666
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": 0.44908477095279054
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": -0.15267115111855645
+          }
+        ]
+      },
+      {
+        "startFrame": 504891,
+        "endFrame": 514491,
+        "engineRms": 0.04104034071786288,
+        "exhaustRms": 0.0536357567311254,
+        "mixRms": 0.06788267198810005,
+        "zeroLagCorrelation": 0.010154768365851335,
+        "strongestBoundedLag": {
+          "lagSamples": 68,
+          "correlation": -0.05714970379047597
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": -3.395929662536459
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": 0.6058688752914039
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": 0.089021564548518
+          }
+        ]
+      },
+      {
+        "startFrame": 552891,
+        "endFrame": 562491,
+        "engineRms": 0.03333868314170005,
+        "exhaustRms": 0.06924268334602972,
+        "mixRms": 0.07603005455879297,
+        "zeroLagCorrelation": -0.02713413478954256,
+        "strongestBoundedLag": {
+          "lagSamples": 32,
+          "correlation": -0.050494575619744166
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": -0.23502241180840394
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": 0.46043958821694736
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": 0.07778013961259694
+          }
+        ]
+      },
+      {
+        "startFrame": 620091,
+        "endFrame": 629691,
+        "engineRms": 0.026124885270087432,
+        "exhaustRms": 0.06934432201426934,
+        "mixRms": 0.07278928083998956,
+        "zeroLagCorrelation": -0.05246267426878684,
+        "strongestBoundedLag": {
+          "lagSamples": 24,
+          "correlation": -0.05858387222367149
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": -0.5271294616745039
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": -0.3031302203037821
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": 0.00036067570806055005
+          }
+        ]
+      },
+      {
+        "startFrame": 687291,
+        "endFrame": 696891,
+        "engineRms": 0.01953323766160875,
+        "exhaustRms": 0.05510851549357898,
+        "mixRms": 0.059172133321720916,
+        "zeroLagCorrelation": 0.03787909514403672,
+        "strongestBoundedLag": {
+          "lagSamples": -80,
+          "correlation": 0.10057349283079539
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": -0.11581127897297458
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": 1.1700975307677506
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": -0.29884011538525235
+          }
+        ]
+      },
+      {
+        "startFrame": 754491,
+        "endFrame": 764091,
+        "engineRms": 0.014028185186411374,
+        "exhaustRms": 0.03885682713018979,
+        "mixRms": 0.041457380563682276,
+        "zeroLagCorrelation": 0.011160241868098976,
+        "strongestBoundedLag": {
+          "lagSamples": -96,
+          "correlation": 0.1358523013588857
+        },
+        "bands": [
+          {
+            "lowHz": 20,
+            "highHz": 250,
+            "combinedVsIndependentDb": 0.13578731543567163
+          },
+          {
+            "lowHz": 250,
+            "highHz": 1000,
+            "combinedVsIndependentDb": -0.43961361722041004
+          },
+          {
+            "lowHz": 1000,
+            "highHz": 4000,
+            "combinedVsIndependentDb": 0.06554967800852776
+          }
+        ]
+      }
+    ],
+    "totalWindowsPerVariant": 38,
+    "publishedWindowSelection": "Every seventh window plus most destructive sampled 20–250Hz window; full numeric traces retained privately"
+  },
+  "candidate": {
+    "settings": "examples/decel-gain-candidate.json",
+    "changedControl": "decelEngineScale",
+    "baselineValue": 1,
+    "candidateValue": 0.75,
+    "amplitudeChangeDb": -2.4987747321659985,
+    "timingOrPhaseChange": false,
+    "preferredDefault": false,
+    "repeatedOutputsMatch": true,
+    "exhaustHashUnchanged": true,
+    "outsideDecelerationUnchanged": true,
+    "renderMs": 93.26939999999999,
+    "renderCpuUserMs": 93,
+    "renderCpuSystemMs": 62,
+    "memoryRssBytes": 86007808,
+    "outputs": {
+      "engine": {
+        "file": "demo_engine.wav",
+        "sha256": "FBDB7115548C3CB135A9D037867095FFAF6F1731DC60768489AB4A7A332DD283",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 927479,
+        "durationSeconds": 19.322479166666668,
+        "peak": 0.1590576171875,
+        "rms": 0.037171958746872735,
+        "dc": 0.00009589777910823991,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.11968994140625,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 967
+      },
+      "exhaust": {
+        "file": "demo_exhaust.wav",
+        "sha256": "03B506DD74C00373FBEFADC57C36E55601786DBE590201D5CF1474BF1ED53528",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 927479,
+        "durationSeconds": 19.322479166666668,
+        "peak": 0.11920166015625,
+        "rms": 0.05166428582685541,
+        "dc": 0.00002801254646626433,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.02252197265625,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 46,
+        "windowCount": 967
+      },
+      "mix": {
+        "file": "demo_mix.wav",
+        "sha256": "0F587C86DCD78A697A739C0F9DF34E14F8DB031AB51D0D0F5315B91D6450C857",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 927479,
+        "durationSeconds": 19.322479166666668,
+        "peak": 0.239990234375,
+        "rms": 0.05979983032070107,
+        "dc": 0.0001235086031513247,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.119598388671875,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 967
+      }
+    },
+    "previewMeasurements": {
+      "A_engine_decel.wav": {
+        "sha256": "7A7CD135A01CB9859197BC1D0F3A7E38D6656ED5BF881AFAA031C29A0D924876",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 452348,
+        "durationSeconds": 9.423916666666667,
+        "peak": 0.158843994140625,
+        "rms": 0.032280314931155116,
+        "dc": -0.0001108642703339713,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.112640380859375,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 472
+      },
+      "B_exhaust_decel.wav": {
+        "sha256": "B46220F2AD389521F050EC1EA1E12697440CF5E632D3AA7B45499DC19B4EB277",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 452348,
+        "durationSeconds": 9.423916666666667,
+        "peak": 0.11920166015625,
+        "rms": 0.05300004155630569,
+        "dc": -0.00036720880970911085,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.02252197265625,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 46,
+        "windowCount": 472
+      },
+      "C_mix_decel.wav": {
+        "sha256": "1F4A3E4673BDF37F674EC9AB2C5FF1C2C340060782F2C8FDE5293671CF10AEA1",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 452348,
+        "durationSeconds": 9.423916666666667,
+        "peak": 0.23828125,
+        "rms": 0.06117211301618965,
+        "dc": -0.000478849600165242,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.11181640625,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 472
+      },
+      "E_full_reference.wav": {
+        "sha256": "0F587C86DCD78A697A739C0F9DF34E14F8DB031AB51D0D0F5315B91D6450C857",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 927479,
+        "durationSeconds": 19.322479166666668,
+        "peak": 0.239990234375,
+        "rms": 0.05979983032070107,
+        "dc": 0.0001235086031513247,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.119598388671875,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 967
+      },
+      "D_raw_engine_decel.wav": {
+        "sha256": "C78E85B1860F125B694BC92EAC593B6EAC7DD9B4855AF17882C4583735F44C95",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 424508,
+        "durationSeconds": 8.843916666666667,
+        "peak": 0.794281005859375,
+        "rms": 0.20553263733493154,
+        "dc": -0.0006624850994783962,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.673431396484375,
+        "stepsAboveHalfScale": 80,
+        "silent20msWindows": 0,
+        "windowCount": 443
+      },
+      "D_listen_engine_decel.wav": {
+        "sha256": "2246F2EADE83DA5B8CE85735F8945E1AB6CE89054CCF7CE258C29EB9F3075DCF",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 424508,
+        "durationSeconds": 8.843916666666667,
+        "peak": 0.119140625,
+        "rms": 0.030830435407226815,
+        "dc": -0.00009936178023846135,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.10101318359375,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 443
+      },
+      "D_raw_exhaust_decel.wav": {
+        "sha256": "574DBB61C486F18848839300C9D72219957258CEEA6B1F93710EB72EF6270F2F",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 374180,
+        "durationSeconds": 7.795416666666667,
+        "peak": 0.794281005859375,
+        "rms": 0.37769120790789135,
+        "dc": -0.0037091028404246033,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.16156005859375,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 390
+      },
+      "D_listen_exhaust_decel.wav": {
+        "sha256": "890D40A04053C4925866544C7779CC290A01D6AA87607EC7F81772EEA52566FF",
+        "rate": 48000,
+        "channels": 1,
+        "frames": 374180,
+        "durationSeconds": 7.795416666666667,
+        "peak": 0.119140625,
+        "rms": 0.056654069662928186,
+        "dc": -0.0005563823943199546,
+        "clippedSamples": 0,
+        "allZero": false,
+        "nonfiniteSamples": 0,
+        "maxAdjacentStep": 0.02423095703125,
+        "stepsAboveHalfScale": 0,
+        "silent20msWindows": 0,
+        "windowCount": 390
+      }
+    },
+    "actualUnchangedScopeVerified": true
+  },
+  "automatedValidation": {
+    "decelerationTests": 8,
+    "stockAudioTests": 19,
+    "extractionPublicationGuards": 8,
+    "ownershipTests": 15,
+    "coreAssertions": 65,
+    "drivetrainAssertions": 35,
+    "metadataParserTests": 17,
+    "diagnosticAnalyzerTests": 3,
+    "phase1Checks": 122,
+    "configurationAssertions": 9,
+    "appendExpectations": 8,
+    "result": "PASS"
+  },
+  "nextStep": "Offline validation of engine/exhaust cycle/state synchronisation evidence before RPM/load-responsive mapping",
+  "correctedReferenceEstablished": false,
+  "nativeSchedulingRecreated": false,
+  "phase3Ready": false,
+  "telemetryChanged": false,
+  "licenceSelected": false
+}

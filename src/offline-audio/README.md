@@ -16,6 +16,12 @@ negative result, not recommended playback or proven native granular behaviour.
 rate, with explicit transition fades and short repeated idle. This limited
 baseline has no dynamic RPM mapping; shorter components end rather than loop.
 No public pack ABI is frozen.
+
+P2-03.1 adds optional `decelEngineScale` (default 1, bounded 0.5–1) as a
+deceleration-only balance experiment. The tested 0.75 candidate gave slight
+listening improvement but did not resolve the ghosting. It is not the default
+or a phase correction. Isolation/diagnosis lives in `tools/Inspect-Deceleration.mjs`;
+the accepted reference remains byte-identical with default settings.
 Actual content and all stock-derived output stay in ignored private storage.
 Public tests generate original sine/ramp material in memory or private folders.
 

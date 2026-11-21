@@ -126,10 +126,13 @@ export function renderReference(sources, options = {}) {
   const rate = options.rate ?? 48000, master = options.master ?? 0.2;
   const gains = options.gains ?? {engine: 1, exhaust: 0.75};
   const idleSeconds = options.idleSeconds ?? 2, crossfadeSeconds = options.crossfadeSeconds ?? 0.12;
+  // Optional diagnostic balance experiment. Default preserves the accepted bytes.
+  const decelEngineScale = options.decelEngineScale ?? 1;
   if (!Number.isInteger(rate) || rate < 8000 || rate > 96000 || !Number.isFinite(master) || master <= 0 || master > 0.25 ||
       !['engine', 'exhaust'].every(c => Number.isFinite(gains[c]) && gains[c] >= 0 && gains[c] <= 1) ||
       !Number.isFinite(idleSeconds) || idleSeconds < 0.5 || idleSeconds > 4 ||
-      !Number.isFinite(crossfadeSeconds) || crossfadeSeconds < 0.005 || crossfadeSeconds > 0.2) throw Error('invalid reference settings');
+      !Number.isFinite(crossfadeSeconds) || crossfadeSeconds < 0.005 || crossfadeSeconds > 0.2 ||
+      !Number.isFinite(decelEngineScale) || decelEngineScale < 0.5 || decelEngineScale > 1) throw Error('invalid reference settings');
   const assets = sourceMap(sources), overlap = Math.round(rate * crossfadeSeconds);
   if ([...assets.values()].some(s => s.audio.rate !== rate)) throw Error('reference requires original matching sample rates');
   const states = ['idle', 'accel', 'decel', 'idle'];
@@ -155,7 +158,8 @@ export function renderReference(sources, options = {}) {
         // A shorter component ends explicitly; never loop/stretch invented tail.
         if (available < stage.frames && n >= available - edge) w *= smooth((available - 1 - n) / edge);
         const value = stage.state === 'idle' ? loopSample(a, n, 0) : a.data[n];
-        target[stage.start + n] += value * w * master * gains[component];
+        const scale = component === 'engine' && stage.state === 'decel' ? decelEngineScale : 1;
+        target[stage.start + n] += value * w * master * gains[component] * scale;
       }
     }
   }
