@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "milestone": "ACOUSTICS-07.8",
+  "runtimeSource": "d9dfc22880566cd3157b4371d39cd0833778c334",
+  "approved": true,
+  "executed": true,
+  "runtimeModified": false,
+  "counts": {
+    "publisherAttempts": 1,
+    "launchAttempts": 1,
+    "bridgeActivations": 1,
+    "retries": 0,
+    "receiverConnections": 1,
+    "hostSessions": 1,
+    "bridgeLoads": 1
+  },
+  "configuration": {
+    "hostAndBridgeCapSeconds": 120,
+    "freshnessMaximumMs": 250,
+    "audioCapture": false,
+    "spatialBufferMs": 100,
+    "experimentalOrientation": false,
+    "orientationBufferMs": 100,
+    "scene": "synthetic-metric-open-road",
+    "gain": 0.12,
+    "beacon": "original-harmonic",
+    "initiallyMuted": true,
+    "freshnessMinimumMs": -2,
+    "predictionMs": 50,
+    "initialEmission": false
+  },
+  "sender": {
+    "missedObservations": 2,
+    "expiredUnsentBefore": 0,
+    "fullEncodingRecordAvailable": false,
+    "terminal": "connection/sender-stop/deliberate-stop",
+    "firstExpiredAgeMsRounded": 372.819,
+    "expiredUnsentAfter": 1,
+    "anotherStartDisabled": true,
+    "attempts": 1,
+    "observations": 1106,
+    "acknowledged": 1099
+  },
+  "receiver": {
+    "accepted": 1099,
+    "connections": 1,
+    "terminalCode": "sender-stop",
+    "anotherAttempt": false,
+    "offendingFrame": null,
+    "terminalOutcome": "deliberate-stop",
+    "terminalStage": "connection",
+    "firstFrame": {
+      "FrameSequence": 7,
+      "CopyMs": null,
+      "AgeBeforeEncodeMs": null,
+      "EncodeMs": null,
+      "AgeBeforeWriteMs": null,
+      "WriteMs": null,
+      "AckMs": 0.2232,
+      "ConnectionMs": 17346.1964,
+      "HeaderMs": 382.1046,
+      "PayloadMs": 0.0286,
+      "DecodeMs": 20.6477,
+      "DecisionAgeMs": 50.5444,
+      "CallbackMs": 2.6035,
+      "AgeClass": "within-bounds",
+      "MinimumAgeMs": -2,
+      "MaximumAgeMs": 250,
+      "ClockFrequencyAgrees": true
+    },
+    "rejected": 0,
+    "terminalElapsedMs": 72737.2901
+  },
+  "handoff": {
+    "missingHistory": 0,
+    "sourceEmittingObserved": true,
+    "startup": {
+      "deadlineFrames": 120000,
+      "fadeFrames": 480,
+      "start": 1782784,
+      "readyFrame": 1782784,
+      "status": "ready",
+      "silentFrames": 0
+    },
+    "cursorResets": 0,
+    "rejectedControls": 0,
+    "hostForwarded": 1099,
+    "maximumPaths": 2,
+    "listenerPlayout": {
+      "accepted": 1099,
+      "resets": 1,
+      "coalesced": 0,
+      "interpolated": 5148,
+      "predicted": 3,
+      "unavailable": 5
+    },
+    "nodeRejected": 0,
+    "nodeMessages": 1099,
+    "validNativeOrientationObserved": true
+  },
+  "host": {
+    "rendererPeak": 0.021253272709220394,
+    "terminationReason": "controlled-stop",
+    "producerError": null,
+    "outputMuted": true,
+    "receivedBlocks": 6816,
+    "rendererRms": 0.006769453990851726,
+    "limitedSamples": 0,
+    "rendererExitCode": 0,
+    "endpointBufferFrames": 1056,
+    "submissionP99Ms": 0.0252,
+    "emptyPaddingEvents": 0,
+    "deviceError": null,
+    "hostStopped": true,
+    "submissionMedianMs": 0.0153,
+    "workingSetBytes": 40898560,
+    "durationWallSeconds": 72.8068809,
+    "wakeTimeouts": 0,
+    "simulationMs": {
+      "count": 6816,
+      "median": 0.11910000000352738,
+      "p95": 0.21319999999832362,
+      "max": 1.6833000000005995
+    },
+    "renderedFrames": 3489792,
+    "endpointBufferMs": 22,
+    "rejectedBlocks": 0,
+    "underflowFrames": 0,
+    "rmsSubmitted": 0.0008120913035176097,
+    "cpuSeconds": 1.4375,
+    "dspMs": {
+      "count": 6816,
+      "median": 0.04620000000431901,
+      "p95": 0.09130000000004657,
+      "max": 2.5203999999998814
+    },
+    "peakSubmitted": 0.002550392644479871,
+    "submittedFrames": 3488736,
+    "submissionMaxMs": 0.2911
+  },
+  "operator": {
+    "ownedProcessesKilled": 0,
+    "statusBeforeActivation": true,
+    "stopTargetSeconds": [
+      45,
+      60
+    ],
+    "normalGameClosure": true,
+    "hostTerminalWrapperMs": 72840,
+    "hostStartCommandWrapperMs": 37284,
+    "stopTargetMissed": true,
+    "startupVisibleWhileAlive": true,
+    "hostEmissionStartCount": 1,
+    "before90SecondLimit": true
+  },
+  "listening": {
+    "feedback": "I could hear it yes, didn't notice anything wrong with it, however it wasn't that loud and it's too low of a frequency for my ears, try 600hz and make it louder",
+    "gainChangedDuringAttempt": false,
+    "captureAvailable": false,
+    "frequencyChangedDuringAttempt": false,
+    "explicitLeftRightVerdict": "Too quiet/low to judge direction",
+    "nextRequestedFrequencyHz": 600,
+    "audibility": "positive-qualified"
+  },
+  "validation": {
+    "runtimeSourceCi": "40734642136",
+    "independentRestoration": {
+      "Pass": true,
+      "Utc": "2026-10-28T18:40:42.070677Z",
+      "RootFiles": 32,
+      "Directories": 5,
+      "ArchiveMetadata": 179,
+      "SampledHashes": 10,
+      "Signatures": "Valid",
+      "IntroducedPathsAbsent": true,
+      "AliasAbsent": true,
+      "OwnedProcessesAbsent": true
+    },
+    "transportCases": 71,
+    "pinnedSdkBuild": true,
+    "productionTestHooksAbsent": true,
+    "hostAssertions": 648
+  },
+  "acceptance": {
+    "rendererHandoffStartup": "PASS",
+    "firstObservation": "PASS",
+    "unsentExpiry": "PASS",
+    "boundedShutdown": "PASS",
+    "acknowledgedDeliberateStop": "PASS",
+    "restoration": "PASS",
+    "audibleContinuityCameraResponse": "NOT OBSERVED"
+  },
+  "limits": [
+    "Audibility confirmed and no noticed defect; direction was too quiet/low to judge.",
+    "Stop missed intended 45-60 seconds, but completed before 90 seconds.",
+    "No audio capture; generated/submitted PCM and subjective listening remain distinct.",
+    "Receiver expiry fields are not sender counters; sender evidence comes from retained bridge status.",
+    "This session does not establish earlier historical failure causes, headset latency or general device reliability."
+  ]
+}
