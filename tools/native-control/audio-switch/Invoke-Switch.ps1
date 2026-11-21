@@ -1,6 +1,8 @@
 [CmdletBinding()]
 param([ValidateSet('Status','Ready','Restore','Report')][string]$Operation='Status',
-      [switch]$KnownStock, [ValidateLength(0,1024)][string]$Text='')
+      [switch]$KnownStock, [ValidateLength(0,1024)][string]$Text='',
+      [ValidateSet('VOLTIC','RCBANDITO')][string]$Donor='VOLTIC',
+      [ValidateSet('Engine','Exhaust','Horn')][string]$Cue)
 $ErrorActionPreference='Stop'
 $root=Join-Path $env:LOCALAPPDATA 'RichAudio/AudioSwitch'
 $s=Get-Content -Raw -LiteralPath "$root/status.json" | ConvertFrom-Json
@@ -13,7 +15,7 @@ if ($Operation -ne 'Report' -and (!$s.Foreground -or !$s.Engine -or !$s.Vehicle)
 $id=[guid]::NewGuid().ToString('N')
 $dir=Join-Path $root $s.Session
 $tmp=Join-Path $dir "$id.tmp"
-@{Session=$s.Session;Id=$id;Generation=$s.Generation;Focus=$s.Focus;Operation=$Operation;KnownStock=[bool]$KnownStock;Text=$Text;ExpiresTicks=[Diagnostics.Stopwatch]::GetTimestamp()+3*[Diagnostics.Stopwatch]::Frequency}|ConvertTo-Json|Out-File -Encoding utf8 -LiteralPath $tmp -NoClobber
+@{Session=$s.Session;Id=$id;Generation=$s.Generation;Focus=$s.Focus;Operation=$Operation;Donor=$Donor.ToUpperInvariant();Cue=$Cue;KnownStock=[bool]$KnownStock;Text=$Text;ExpiresTicks=[Diagnostics.Stopwatch]::GetTimestamp()+3*[Diagnostics.Stopwatch]::Frequency}|ConvertTo-Json|Out-File -Encoding utf8 -LiteralPath $tmp -NoClobber
 try { [IO.File]::Move($tmp,"$dir/pending.json") } finally { if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp } }
 $clock=[Diagnostics.Stopwatch]::StartNew()
 while ($clock.Elapsed.TotalSeconds -lt 5) {

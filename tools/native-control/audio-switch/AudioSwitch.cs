@@ -85,7 +85,8 @@ namespace RichAudio.AudioSwitch
 
         public sealed class Request
         {
-            public string Session, Generation, Focus, Id, Operation, Text;
+            public string Session, Generation, Focus, Id, Operation, Text, Cue;
+            public string Donor = Switch.DefaultDonor;
             public bool KnownStock;
             public long ExpiresTicks;
         }
@@ -124,7 +125,7 @@ namespace RichAudio.AudioSwitch
                 if (File.Exists(reserved)) return;
                 using (File.Open(reserved,FileMode.CreateNew,FileAccess.Write,FileShare.None)) {}
                 bool engine = v != null && v.IsEngineRunning;
-                string name = q.Operation == "Ready" ? Switch.Donor : q.Operation == "Restore" ? "ADDER" : null;
+                string name = q.Operation == "Ready" ? q.Donor : q.Operation == "Restore" ? "ADDER" : null;
                 string result;
                 if (q.Operation == "Report" && q.Text != null && q.Text.Length <= 1024) result = "report saved";
                 else if (name == null || q.ExpiresTicks < Stopwatch.GetTimestamp()) result = "invalid or expired";
@@ -152,10 +153,10 @@ namespace RichAudio.AudioSwitch
                             throw new InvalidOperationException("final target check failed");
                         v.ForceUseAudioGameObject(requested);
                         if (!apply) Function.Call<bool>(Hash.DECOR_REMOVE,v.Handle,Marker);
-                    });
+                    }, q.Donor);
                 }
                 Log(new { utc=DateTime.UtcNow.ToString("o"), q.Id, q.Operation, q.Generation, vehicle=key,
-                    model=v == null ? null : "ADDER", engine, requested=name, phase=control.Phase, outcome=result, listeningReport=q.Text });
+                    model=v == null ? null : "ADDER", engine, requested=name, phase=control.Phase, outcome=result, cue=q.Cue, listeningReport=q.Text });
                 Publish(reply,result);
             }
             catch(Exception e)

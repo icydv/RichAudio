@@ -36,6 +36,17 @@ class TestSwitch
         s.Observe(null);
         s.Command("Ready", s.Generation, true, true, true, set);
         Check(calls.Count == 5);
+        var quiet = new Switch();
+        quiet.Observe("stock ADDER");
+        string car = quiet.Generation;
+        var requests = new List<string>();
+        Check(quiet.Command("Ready", car, true, true, true, requests.Add, "NULL") == "unsupported donor");
+        Check(quiet.Command("Ready", car, true, true, true, requests.Add, "RCBANDITO") == "returned");
+        quiet.Command("Ready", car, true, true, true, requests.Add, "VOLTIC");
+        quiet.Command("Restore", "different", true, true, true, requests.Add);
+        Check(quiet.Command("Restore", car, true, true, true, requests.Add) == "returned");
+        quiet.Command("Restore", car, true, true, true, requests.Add);
+        Check(String.Join(",", requests) == "RCBANDITO,ADDER");
         Console.WriteLine("Passed single dispatch, same-target restore, foreground, target replacement, token loss and uncertainty checks.");
     }
 }

@@ -6,7 +6,7 @@ namespace RichAudio.AudioSwitch
 {
     internal sealed class Switch
     {
-        internal const string Donor = "VOLTIC";
+        internal const string DefaultDonor = "VOLTIC";
         string target;
         internal string Generation { get; private set; }
         internal string Phase { get; private set; }
@@ -22,17 +22,18 @@ namespace RichAudio.AudioSwitch
         }
 
         internal string Command(string operation, string generation, bool foreground, bool running,
-                                bool tokenValid, Action<string> dispatch)
+                                bool tokenValid, Action<string> dispatch, string donor = DefaultDonor)
         {
             if (!foreground) return "GTA is not foreground";
             if (target == null || generation != Generation) return "target changed or unavailable";
             if (!running) return "engine stopped";
             if (!tokenValid) return "vehicle token mismatch";
             bool apply = operation == "Ready";
+            if (apply && donor != DefaultDonor && donor != "RCBANDITO") return "unsupported donor";
             if (!(apply && Phase == "idle") && !(operation == "Restore" && Phase == "restore available"))
                 return "operation unavailable";
             Phase = apply ? "restore available" : "restore uncertain";
-            try { dispatch(apply ? Switch.Donor : "ADDER"); }
+            try { dispatch(apply ? donor : "ADDER"); }
             catch (Exception e) { return "uncertain: " + e.Message; }
             if (!apply) Phase = "idle";
             return "returned";
