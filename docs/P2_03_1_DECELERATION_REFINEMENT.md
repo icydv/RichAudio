@@ -1,5 +1,7 @@
 # P2-03.1: deceleration isolation and balance experiment
 
+Subsequent [P2-03.2 cycle/state research](P2_03_2_CYCLE_SYNCHRONISATION.md) found independent marker/periodicity evidence and clear listening improvement in a bounded interior state-matched excerpt. This does not overwrite the historical reference or promote the gain-only candidate below.
+
 26 October 2026. Offline-only, stacked on open PR #14 at `bc69ef3ce56f2e363ecd870e8503d301d28dd7d4`; canonical main inspected at `e5fbd8f3502d3e28169a224caa07471e090e368f`. No PR was merged. Production telemetry/schema, RPM validation and game integration are unchanged.
 
 ## Decision

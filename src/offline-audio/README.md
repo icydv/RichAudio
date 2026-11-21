@@ -22,6 +22,12 @@ deceleration-only balance experiment. The tested 0.75 candidate gave slight
 listening improvement but did not resolve the ghosting. It is not the default
 or a phase correction. Isolation/diagnosis lives in `tools/Inspect-Deceleration.mjs`;
 the accepted reference remains byte-identical with default settings.
+
+[P2-03.2](../../docs/P2_03_2_CYCLE_SYNCHRONISATION.md) adds separate tools for
+relative marker/periodicity evidence and one bounded cycle-state experiment.
+The 14–28 interior-state preview improved listening at unchanged gains; an
+exhaust-led variant was preferred. These tools do not modify this accepted
+renderer or establish native phase, physical RPM or full-range load response.
 Actual content and all stock-derived output stay in ignored private storage.
 Public tests generate original sine/ramp material in memory or private folders.
 
