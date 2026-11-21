@@ -1,5 +1,7 @@
 # P2-03.8: second-state generalisation of exhaust playback
 
+Subsequent hard-gate result: [P2-03.9](P2_03_9_EXHAUST_STATE_TRANSITION.md) finds continuous source eligibility but stops the single timed handoff policy before renderer/audio generation. It does not overturn this hold comparison or establish a missing-recording gap. The historical audio and findings below are preserved.
+
 26 October 2026. **PARTIAL: conclusion 2, partial improvement reproduced.** At the independently selected marker-state **27**, my A/B verdict was **“B slightly more natural.”** Asked about new clicks, ghosting, unnatural transitions, exhaust character and repetition, I replied **“no it sounded fine.”** I reported no new problem in that follow-up, but did not separately grade repetition or standalone realism. This is not another clear-naturalness breakthrough or complete responsive-engine acceptance.
 
 The single experiment is finished. No further state, endpoint, blend duration, source ordering, gain, effect or engine variant followed. State 21 remains historical supporting evidence, not a controlled comparison against state 27. Each intervention is judged only against its own same-state control. No GTA/RPH launch, game/archive access, new extraction, dependency installation, audio mutation or Phase 3 work occurred.
