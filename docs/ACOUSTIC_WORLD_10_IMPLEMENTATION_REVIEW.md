@@ -1,6 +1,6 @@
 # ACOUSTIC-WORLD-10 independent implementation review
 
-An independent Codex reviewer examined the audio changes written by a separate implementation agent and the distribution/host changes written by the coordinating agent. This review does not independently review the CodeWalker API adapter authored by the same reviewer, authenticate a vendor DLL, or establish genuine installed geometry. My live game, endpoint, deployment and merge boundary remains closed.
+An independent review examined the audio changes from a separate implementation pass and the distribution/host changes from the coordination pass. This review does not independently review the CodeWalker API adapter authored by the same reviewer, authenticate a vendor DLL, or establish genuine installed geometry. My live game, endpoint, deployment and merge boundary remains closed.
 
 ## Audio preparation and ownership
 
@@ -20,7 +20,7 @@ The reviewer independently recomputed the retained portable evidence totals: fro
 
 ## Distribution findings and corrections
 
-The initial notice rule accepted any two safe filenames, which did not enforce the notices and third-party review described by the proposal. The coordinating agent corrected it to require CodeWalker attribution, source-boundary and permission notices plus SharpDX's licence; independently reviewed notice completeness and exact third-party obligations are required. If FBX is present, its licence is required. A source-redistribution obligation is incompatible with this source-free packaging profile and therefore blocks it rather than silently discarding the obligation.
+The initial notice rule accepted any two safe filenames, which did not enforce the notices and third-party review described by the proposal. The implementation was corrected to require CodeWalker attribution, source-boundary and permission notices plus SharpDX's licence; independently reviewed notice completeness and exact third-party obligations are required. If FBX is present, its licence is required. A source-redistribution obligation is incompatible with this source-free packaging profile and therefore blocks it rather than silently discarding the obligation.
 
 The initial CLI checked metadata-file size before an unbounded `readFile`, permitting file growth to exceed the check. It now reads at most 262,145 bytes, compares the observed length and final file identity metadata to the initial size/time, and rejects growth or change. Runtime files/notices use exact bounded handle reads, expected digests, an extra-byte check and pre/post identity checks before any component is published.
 
@@ -30,7 +30,7 @@ Existing output ancestors are checked before recursive directory creation and ag
 
 ## Host readiness boundary
 
-The new host gate waits for producer readiness before either fixture sink or WASAPI startup. Worker preparation and the existing demo lease wait share the same five-second allowance; no block size, reserve, credit window or output queue was enlarged. The review identified a readiness-boundary edge where a ready flag could bypass failure checks after the loop. The coordinating agent added a final common shutdown/stop/reader-end/owner/child/deadline check immediately before sink selection. Source inspection confirms the correction and the unchanged shared deadline. This review does not claim that a source check can eliminate every subsequent concurrent process failure.
+The new host gate waits for producer readiness before either fixture sink or WASAPI startup. Worker preparation and the existing demo lease wait share the same five-second allowance; no block size, reserve, credit window or output queue was enlarged. The review identified a readiness-boundary edge where a ready flag could bypass failure checks after the loop. The implementation added a final common shutdown/stop/reader-end/owner/child/deadline check immediately before sink selection. Source inspection confirms the correction and the unchanged shared deadline. This review does not claim that a source check can eliminate every subsequent concurrent process failure.
 
 The reviewer also checked `WORLD_10_DISTRIBUTION.md` and `ACOUSTIC_WORLD_10_READ_ONLY_PROPOSAL.md` against the implementation. They preserve the unsealed genuine-building boundary, distinguish a trusted review assertion from authenticated publisher/legal proof, exclude the modified research binary from product qualification, and retain the missing public API, capability and native containment prerequisites. The proposal states the current compressed-resource versions, 128-triangle/128-metre scene limits and independently frozen authored-versus-private PCM authority. No new protected-input, launch, endpoint or deployment authority arises from those documents.
 
@@ -46,4 +46,4 @@ node --test --test-reporter=tap --test-concurrency=1 `
 
 Those tests exercise original analytic PCM, original finite-wall reflections, scene-worker cancellation/join behavior, source preparation and dummy distribution data. They open no real audio endpoint and qualify no installed geometry. Host compilation/device-free verification is coordinated separately; reading the host source does not replace those checks.
 
-After the typed-budget/fallback correction, the reviewer reran the expanded source-preparation suite: 13 tests passed with zero failures/skips. Those include the nine-bank capacity case, a counterfeit message error remaining fatal, and invalid prepared PCM remaining fatal. The separate ninth-invalid-bank probe above records the precise deferred-activation limitation. The coordinating agent retains final aggregate and host-build evidence separately.
+After the typed-budget/fallback correction, the reviewer reran the expanded source-preparation suite: 13 tests passed with zero failures/skips. Those include the nine-bank capacity case, a counterfeit message error remaining fatal, and invalid prepared PCM remaining fatal. The separate ninth-invalid-bank probe above records the precise deferred-activation limitation. The coordination record retains final aggregate and host-build evidence separately.

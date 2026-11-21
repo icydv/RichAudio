@@ -2,7 +2,7 @@
 
 I retain the earlier 144-call measurements: local maxima of **61.1894 ms** and **84.8955 ms**, each with one call above **10.6667 ms**, and the separately reported hosted maximum **20.7482 ms** with two overruns. These are processing findings. They do not measure fixed output latency, an endpoint dropout or the cause of the spikes. The historical public figures remain in [my WORLD04.1 result](ACOUSTIC_WORLD_041_RESULT.md); this investigation does not reopen its private evidence.
 
-Codex added `tools/Profile-AcousticBudget042.mjs` around my existing production source, gameplay, solver and PCM renderer. The runner supplies original analytic mono PCM to the Bati source class and finite authored scene contexts. It calls no bank loader, installed-resource reader, audio endpoint or recording API. It changes no core implementation, acoustic coefficient, timing gate or default setting.
+The implementation added `tools/Profile-AcousticBudget042.mjs` around my existing production source, gameplay, solver and PCM renderer. The runner supplies original analytic mono PCM to the Bati source class and finite authored scene contexts. It calls no bank loader, installed-resource reader, audio endpoint or recording API. It changes no core implementation, acoustic coefficient, timing gate or default setting.
 
 The full diagnostic runs each condition in a fresh Node child, sequentially, reversing condition order on alternate repetitions:
 
@@ -29,7 +29,7 @@ Existing report files are never overwritten. Selected source hashes and runtime/
 
 ## Fresh findings
 
-Codex ran two coordinated, sequential local profiles using Node **v24.19.0**, six fresh children and **144 calls per child**, with a 24-call cold prefix. The initial report is retained unchanged (SHA-256 `2926d68e10c6c73ca51984f42a3048b4bd0f5d96d99b50e2b2824840b06f78c8`). It showed the same zero-based block **10** overrun in every child, including the reference without scene workers. Its large remainder motivated adding a separate source-construction interval. That refinement has its own fresh report, SHA-256 `7cabe12802c02b119ed09972ce902d11ac6e4eb882d21330d513ff7ab3bf5e43`:
+The validation ran two coordinated, sequential local profiles using Node **v24.19.0**, six fresh children and **144 calls per child**, with a 24-call cold prefix. The initial report is retained unchanged (SHA-256 `2926d68e10c6c73ca51984f42a3048b4bd0f5d96d99b50e2b2824840b06f78c8`). It showed the same zero-based block **10** overrun in every child, including the reference without scene workers. Its large remainder motivated adding a separate source-construction interval. That refinement has its own fresh report, SHA-256 `7cabe12802c02b119ed09972ce902d11ac6e4eb882d21330d513ff7ab3bf5e43`:
 
 | Condition | Repetition | p50 / p99 / maximum (ms) | Overruns / calls |
 | --- | ---: | --- | ---: |

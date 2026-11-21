@@ -1,6 +1,6 @@
 # WORLD11 independent implementation review
 
-Codex used separate implementation and review agents for my two production changes. Neither reviewer approved their own production edit. The measurement harness and acceptance/API documents were also reviewed separately from their authors. No private bank, installed resource, key, real endpoint or game was accessed.
+My two production changes received separate implementation and review passes. The production edits were reviewed separately from their implementation. The measurement harness and acceptance/API documents were also reviewed separately from their authors. No private bank, installed resource, key, real endpoint or game was accessed.
 
 The synthesis change confines scratch arrays to a synchronous `renderInto` call and refills them before use. Array reductions become ordered scalar loops with the same initial values, accumulation order and dominant-mode tie choice. Source position/envelope, mode weights, role order, interval addresses, alignment calls, voice calls, events, gain multiplication and frame advancement retain their original order. Only scalar addresses/rates/indices reach voice methods; scratch arrays do not enter grain history. `stock-grain.mjs`, construction preparation and calibration are unchanged.
 
