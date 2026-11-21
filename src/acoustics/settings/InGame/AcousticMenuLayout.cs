@@ -7,7 +7,7 @@ namespace RichAudio.Settings.InGame
     public sealed partial class AcousticMenuModel
     {
         private static readonly int Gold=unchecked((int)0xFFD4AF37),GoldLight=unchecked((int)0xFFE6CF81),
-            Ink=unchecked((int)0xFF111318),TextColor=unchecked((int)0xFFECEFF2),Muted=unchecked((int)0xFF9BA4AD),
+            TextColor=unchecked((int)0xFFECEFF2),Muted=unchecked((int)0xFF9BA4AD),
             Background=unchecked((int)0xE80D1116),RowBackground=unchecked((int)0xA91E242B),Warning=unchecked((int)0xFFE7C778);
         private static readonly string[] Descriptions={
             "Sets the maximum direct and early-path detail per source. Auto adapts to measured workload. 32/64-path tiers are experimental and can exceed audio deadlines.",
@@ -54,111 +54,152 @@ namespace RichAudio.Settings.InGame
                 }
             }
         }
-        private static void Viewport(int width,int height,out float scale,out float x,out float y)
+        // Full-height, left-anchored sidebar. No floating window margins:
+        // the 1000-unit canvas is fitted to the actual drawable screen height.
+        internal const float SidebarWidth=620f,SidebarHeight=1000f;
+        internal static float SidebarScale(int width,int height)
         {
             if(width<640||height<360||width>7680||height>4320)throw new ArgumentException("Bounded menu viewport required");
-            scale=Math.Min(height/1080f,width/1100f);float panel=760*scale;
-            x=Math.Max(18*scale,(width-panel)*.075f);y=(height-1000*scale)/2;
+            return Math.Min(height/SidebarHeight,width/900f);
         }
+        private static void Viewport(int width,int height,out float scale,out float x,out float y)
+        {
+            scale=SidebarScale(width,height);x=0;y=0;
+        }
+        private static readonly int SelectedRow=unchecked((int)0xF02B3037),
+            Divider=unchecked((int)0x70424B56),
+            PanelInset=unchecked((int)0xF21C2229);
         private void Row(Painter p,int row,float y,float height,string label,string value,bool locked=false)
         {
-            bool selected=SelectedIndex==row;int fill=selected?Gold:RowBackground,foreground=selected?Ink:locked?Muted:TextColor;
-            p.Rect(16,y,728,height-2,fill);if(!selected)p.Rect(16,y,3,height-2,unchecked((int)0x5CD4AF37));
-            p.Text(label,32,y+9,21,foreground,selected);
-            if(!String.IsNullOrEmpty(value))p.Text(value,382,y+10,19,foreground,selected);
-            p.Hit(HitRegionKind.Row,row,-1,16,y,728,height-2);
+            bool selected=SelectedIndex==row;
+            p.Rect(24,y,572,height-2,selected?SelectedRow:RowBackground);
+            if(selected)p.Rect(24,y,3,height-2,Gold);
+            p.Rect(39,y+height-2,540,1,Divider);
+            p.Text(label,40,y+8,17,locked?Muted:TextColor,selected);
+            if(!String.IsNullOrEmpty(value))p.Text(value,330,y+9,15,selected?GoldLight:Muted,selected);
+            p.Hit(HitRegionKind.Row,row,-1,24,y,572,height-2);
         }
         public MenuFrame BuildFrame(int width,int height,MenuStatus status)
         {
             if(!Visible)return new MenuFrame(new DrawCommand[0],new HitRegion[0]);
-            float s,x,y;Viewport(width,height,out s,out x,out y);var p=new Painter(x,y,s,760);
+            float s,x,y;Viewport(width,height,out s,out x,out y);var p=new Painter(x,y,s,SidebarWidth);
             status=status??MenuStatus.Unavailable("No host status received");
-            p.Rect(5,7,760,1000,unchecked((int)0x35000000));
-            p.Rect(0,0,760,1000,Background);p.Rect(0,0,760,3,Gold);p.Rect(0,0,1,1000,unchecked((int)0x8AD4AF37));
-            p.Rect(759,0,1,1000,unchecked((int)0x5CD4AF37));
-            // Subtle metallic rim and shadow use the same supported text/rect
-            // primitives in the RPH adapter and controlled preview.
-            p.Text("RichAudio",31,20,45,unchecked((int)0xFF30250D),true);
-            p.Text("RichAudio",30,17.5f,45,GoldLight,true);p.Text("RichAudio",30,19,45,Gold,true);
-            p.Text("ACOUSTIC SETTINGS",33,73,15,Muted,true);
-            int[] metal={unchecked((int)0xFF80651E),unchecked((int)0xFFAF8B29),Gold,GoldLight,
-                unchecked((int)0xFFF3E2AB),GoldLight,Gold,unchecked((int)0xFFAF8B29)};
-            for(int i=0;i<metal.Length;i++)p.Rect(30+i*87.5f,98,87.5f,2,metal[i]);
-            p.Rect(16,112,728,96,unchecked((int)0xB5222B33));
-            p.Text("RICHAUDIO STATUS",30,122,13,Gold,true);
-            if(status.Available){
-                p.Text(Title(status.ActiveQuality)+"  /  cap "+status.PathBudget+" paths/source",30,145,20,TextColor,true);
-                p.Text(status.ActiveAcceleration.ToUpperInvariant(),542,145,20,Gold,true);
+
+            // Restrained charcoal, gold accents, and a fine right-hand edge.
+            // The translucent scene dimmer is composed by MenuTransition.Present.
+            p.Rect(0,0,SidebarWidth,SidebarHeight,Background);
+            p.Rect(0,0,4,SidebarHeight,unchecked((int)0xDAD4AF37));
+            p.Rect(619,0,1,SidebarHeight,Divider);
+            p.Rect(620,0,7,SidebarHeight,unchecked((int)0x35000000));
+            p.Text("RichAudio",30,24,38,Gold,true);
+            p.Text("IMMERSIVE WORLD AUDIO",32,73,12,Muted,true);
+            p.Text("SETTINGS",520,47,12,Muted,true);
+            p.Rect(30,105,559,1,Divider);
+
+            p.Rect(24,121,572,109,PanelInset);
+            p.Rect(24,121,3,109,Gold);
+            p.Text("ENGINE STATUS",39,132,12,GoldLight,true);
+            if(status.Available)
+            {
+                p.Text(Title(status.ActiveQuality)+"  /  cap "+status.PathBudget+" paths/source",39,152,20,TextColor,true);
+                p.Text(status.ActiveAcceleration.ToUpperInvariant(),501,157,14,Gold,true);
                 string device=String.IsNullOrEmpty(status.Device)?"Device information unavailable":status.Device;
-                p.Wrap(device,30,171,680,13,Muted,1);
-                p.Wrap(!String.IsNullOrEmpty(status.FallbackReason)?"Fallback: "+status.FallbackReason:status.Detail,30,188,680,13,
-                    !String.IsNullOrEmpty(status.FallbackReason)?Warning:Muted,1);
-            }else if(status.StockAudioActive){
-                p.Text("Stock audio active",30,145,20,TextColor,true);
-                p.Wrap(status.Detail,30,174,680,14,Muted,1);
-            }else{
-                p.Text("Quality / backend unavailable",30,145,20,TextColor,true);
-                p.Wrap(status.Detail,30,174,680,14,Muted,1);
+                p.Wrap(device,39,182,530,12,Muted,1);
+                p.Wrap(!String.IsNullOrEmpty(status.FallbackReason)?"Fallback: "+status.FallbackReason:status.Detail,
+                    39,203,532,12,!String.IsNullOrEmpty(status.FallbackReason)?Warning:Muted,1);
             }
-            p.Text("ACOUSTICS",30,214,15,Muted,true);
-            p.Text("* 32 / 64: higher processing cost",382,214,13,Warning);
-            Row(p,0,238,68,"Acoustic Quality",Title(Pending.Quality)+(qualityExperimental(Pending.Quality)?" (experimental)":""));
-            string[] names={"AUTO","12","16","32*","64*"};int quality=Array.IndexOf(MenuPreferences.Qualities,Pending.Quality);
-            for(int i=0;i<5;i++){
-                float cx=382+i*66;p.Rect(cx,273,60,24,i==quality?Ink:unchecked((int)0xAF303842));
-                p.Text(names[i],cx+9,275,14,i==quality?Gold:TextColor,i==quality);
-                p.Hit(HitRegionKind.QualityChoice,0,i,cx,270,60,30);
+            else if(status.StockAudioActive)
+            {
+                p.Text("Stock audio active",39,155,20,TextColor,true);
+                p.Wrap(status.Detail,39,187,525,13,Muted,2);
             }
-            Row(p,1,306,56,"Acoustic Acceleration",null);int acceleration=Array.IndexOf(MenuPreferences.Accelerations,Pending.Acceleration);
-            string[] accelerations={"AUTO","CPU","GPU"};
-            for(int i=0;i<3;i++){
-                float cx=382+i*110;p.Rect(cx,319,104,29,i==acceleration?Ink:unchecked((int)0xAF303842));
-                p.Text(accelerations[i],cx+20,324,16,i==acceleration?Gold:TextColor,i==acceleration);
-                p.Hit(HitRegionKind.AccelerationChoice,1,i,cx,315,104,36);
+            else
+            {
+                p.Text("Quality / backend unavailable",39,155,19,TextColor,true);
+                p.Wrap(status.Detail,39,186,525,13,Muted,2);
             }
-            p.Text("AUDIO",30,376,15,Muted,true);
-            string activeAudio=status.StockAudioActive?"GTA audio active / RichAudio stopped":status.Available&&status.ActiveOutputEnabled.HasValue&&status.ActiveOutputLevel.HasValue&&status.ActiveEarlyReflections.HasValue?
+
+            p.Text("ACOUSTICS",30,237,12,GoldLight,true);
+            p.Text("* 32 / 64: higher processing cost",347,237,11,Warning);
+            Row(p,0,254,78,"Acoustic Quality",Title(Pending.Quality)+(qualityExperimental(Pending.Quality)?" (experimental)":""));
+            string[] qualityNames={"AUTO","12","16","32*","64*"};
+            int quality=Array.IndexOf(MenuPreferences.Qualities,Pending.Quality);
+            for(int i=0;i<5;i++)
+            {
+                float cx=316+i*54;
+                p.Rect(cx,295,50,26,i==quality?unchecked((int)0xE0514230):unchecked((int)0xA4293139));
+                p.Text(qualityNames[i],cx+7,300,13,i==quality?GoldLight:Muted,i==quality);
+                p.Hit(HitRegionKind.QualityChoice,0,i,cx,292,50,32);
+            }
+            Row(p,1,334,67,"Acoustic Acceleration",null);
+            string[] accelerationNames={"AUTO","CPU","GPU"};
+            int acceleration=Array.IndexOf(MenuPreferences.Accelerations,Pending.Acceleration);
+            for(int i=0;i<3;i++)
+            {
+                float cx=317+i*91;
+                p.Rect(cx,367,86,26,i==acceleration?unchecked((int)0xE0514230):unchecked((int)0xA4293139));
+                p.Text(accelerationNames[i],cx+20,373,13,i==acceleration?GoldLight:Muted,i==acceleration);
+                p.Hit(HitRegionKind.AccelerationChoice,1,i,cx,365,86,30);
+            }
+
+            p.Text("PLAYBACK",30,409,12,GoldLight,true);
+            string activeAudio=status.StockAudioActive?"GTA audio active / RichAudio stopped":
+                status.Available&&status.ActiveOutputEnabled.HasValue&&status.ActiveOutputLevel.HasValue&&status.ActiveEarlyReflections.HasValue?
                 "Active: "+(status.ActiveOutputEnabled.Value?"On":"Muted")+" / "+
                 ((int)Math.Round(status.ActiveOutputLevel.Value*100)).ToString(CultureInfo.InvariantCulture)+"% / early "+
                 (status.ActiveEarlyReflections.Value?"On":"Off"):"Active audio state unavailable";
-            p.Text(activeAudio,140,376,13,Muted);
-            Row(p,2,400,44,"RichAudio output",Pending.Enabled?"On":"Muted");
-            Row(p,3,444,62,"Output Level",((int)Math.Round(Pending.OutputLevel*100)).ToString(CultureInfo.InvariantCulture)+"%");
-            p.Rect(382,482,326,5,unchecked((int)0xFF4A525C));p.Rect(382,482,(float)(326*Pending.OutputLevel),5,SelectedIndex==3?Ink:Gold);
-            p.Rect(378+(float)(326*Pending.OutputLevel),477,8,15,SelectedIndex==3?Ink:Gold);
-            p.Hit(HitRegionKind.Level,3,-1,382,472,326,27);
-            Row(p,4,506,44,"Early Reflections",Pending.EarlyReflections?"On":"Off");
-            Row(p,5,550,44,"Doppler", "On (fixed)",true);
-            Row(p,6,594,44,"Diagnostics Overlay",Pending.DiagnosticsOverlay?"On":"Off");
-            Row(p,7,638,38,"SoundMap viewer",Pending.SoundMapVisible?"Visible":"Hidden");
-            Row(p,8,676,38,"Audio integration",Pending.IntegrationMode=="experimental-additive"?"Additive (experimental)":"GTA stock fallback");
-            Row(p,MenuKeyRow,714,44,"Open menu key",null);int menuKey=Array.IndexOf(MenuPreferences.MenuToggleKeys,Pending.MenuToggleKey);
-            for(int i=0;i<MenuPreferences.MenuToggleKeys.Length;i++){
-                float cx=382+i*66;p.Rect(cx,724,60,25,i==menuKey?Ink:unchecked((int)0xAF303842));
-                p.Text(MenuPreferences.MenuToggleKeys[i],cx+14,728,14,i==menuKey?Gold:TextColor,i==menuKey);
-                p.Hit(HitRegionKind.MenuKeyChoice,MenuKeyRow,i,cx,720,60,34);
+            p.Text(activeAudio,207,410,12,Muted);
+            Row(p,2,432,40,"RichAudio output",Pending.Enabled?"On":"Muted");
+            Row(p,3,473,62,"Output Level",((int)Math.Round(Pending.OutputLevel*100)).ToString(CultureInfo.InvariantCulture)+"%");
+            p.Rect(331,512,239,4,unchecked((int)0xFF4A535D));
+            p.Rect(331,512,(float)(239*Pending.OutputLevel),4,Gold);
+            p.Rect(328+(float)(239*Pending.OutputLevel),506,7,16,SelectedIndex==3?GoldLight:TextColor);
+            p.Hit(HitRegionKind.Level,3,-1,331,502,239,27);
+            Row(p,4,537,40,"Early Reflections",Pending.EarlyReflections?"On":"Off");
+            Row(p,5,578,40,"Doppler","On (fixed)",true);
+            Row(p,6,619,40,"Diagnostics Overlay",Pending.DiagnosticsOverlay?"On":"Off");
+            Row(p,7,660,40,"SoundMap viewer",Pending.SoundMapVisible?"Visible":"Hidden");
+            Row(p,8,701,40,"Audio integration",Pending.IntegrationMode=="experimental-additive"?"Additive (experimental)":"GTA stock fallback");
+            Row(p,MenuKeyRow,742,52,"Open menu key",null);
+            int menuKey=Array.IndexOf(MenuPreferences.MenuToggleKeys,Pending.MenuToggleKey);
+            for(int i=0;i<MenuPreferences.MenuToggleKeys.Length;i++)
+            {
+                float cx=324+i*52;
+                p.Rect(cx,759,48,25,i==menuKey?unchecked((int)0xE0514230):unchecked((int)0xA4293139));
+                p.Text(MenuPreferences.MenuToggleKeys[i],cx+10,764,12,i==menuKey?GoldLight:Muted,i==menuKey);
+                p.Hit(HitRegionKind.MenuKeyChoice,MenuKeyRow,i,cx,756,48,30);
             }
-            p.Rect(16,774,728,66,unchecked((int)0x9E10171E));p.Rect(16,774,3,66,Gold);
+
+            // The context stays readable without making every row a separate card.
+            p.Rect(24,802,572,60,PanelInset);
+            p.Rect(24,802,3,60,Gold);
             string description=Descriptions[SelectedIndex];
             if(SelectedIndex==RecordingRow)description=(AudioTestRecordingMode?
                 "Local WAVs: RichAudio and the selected output mix, including other apps. No microphone or uploads.":Descriptions[RecordingRow])+" "+RecordingDetail;
             if(SelectedIndex==ResetRow&&!CanApply)description=ResetAvailable?
-                "Recovers this supported configuration by preserving its exact original bytes before saving validated defaults. The background service rechecks the file before replacement.":
+                "Recovers this configuration by preserving original bytes before saving validated defaults. The background service rechecks the file.":
                 "Settings recovery is unavailable for this configuration. No file or preference will be replaced.";
-            p.Wrap(description,31,784,680,15,TextColor,3);
+            p.Wrap(description,37,810,537,13,TextColor,3);
+
             string recordingButton=AudioTestRecordingMode?(RecordingPending?"TEST PENDING":RecordingActive?"STOP AUDIO TEST":"RECORD AUDIO TEST"):
                 (RecordingPending?"REC PENDING":RecordingActive?"STOP RECORDING":"START RECORDING");
             string[] buttons={"APPLY CHANGES","RESET DEFAULTS","BACK",recordingButton};
-            for(int i=0;i<4;i++){
-                int row=ApplyRow+i;float cx=16+i*184;bool selected=SelectedIndex==row;bool locked=i==0&&!CanApply||i==1&&!CanApply&&!ResetAvailable||i==3&&(!RecordingAvailable||RecordingPending);
-                p.Rect(cx,856,176,45,selected&&!locked?Gold:RowBackground);
-                p.Text(locked?(i==0?"APPLY UNAVAILABLE":i==1?"RESET UNAVAILABLE":AudioTestRecordingMode?recordingButton:RecordingPending?"REC PENDING":"REC UNAVAILABLE"):buttons[i],cx+10,870,14,locked?Muted:selected?Ink:TextColor,selected);
-                p.Hit(HitRegionKind.Row,row,-1,cx,856,176,45);
+            for(int i=0;i<4;i++)
+            {
+                int row=ApplyRow+i;float cx=24+(i%2)*290,cy=868+(i/2)*35;
+                bool selected=SelectedIndex==row;
+                bool locked=i==0&&!CanApply||i==1&&!CanApply&&!ResetAvailable||i==3&&(!RecordingAvailable||RecordingPending);
+                p.Rect(cx,cy,280,32,selected&&!locked?unchecked((int)0xF0524631):PanelInset);
+                if(selected)p.Rect(cx,cy,3,32,Gold);
+                string shown=locked?(i==0?"APPLY UNAVAILABLE":i==1?"RESET UNAVAILABLE":
+                    AudioTestRecordingMode?recordingButton:RecordingPending?"REC PENDING":"REC UNAVAILABLE"):buttons[i];
+                p.Text(shown,cx+12,cy+7,14,locked?Muted:selected?GoldLight:TextColor,selected);
+                p.Hit(HitRegionKind.Row,row,-1,cx,cy,280,32);
             }
-            p.Text("ARROWS  Navigate / adjust     ENTER  Select     ESC  Back",30,920,15,Muted);
+            p.Text("ARROWS  Navigate     ENTER  Select     ESC  Close",31,939,12,Muted);
             string notice=Notice;
             if(String.IsNullOrEmpty(notice))notice=Dirty?"Pending changes - Apply to save.":"Preferences saved. Active state is measured separately.";
-            p.Wrap(notice,30,955,700,14,NoticeIsError?unchecked((int)0xFFE0A28B):Warning,1);
+            p.Wrap(notice,31,963,551,12,NoticeIsError?unchecked((int)0xFFE0A28B):GoldLight,2);
             lastFrame=new MenuFrame(p.Commands.ToArray(),p.Hits.ToArray());return lastFrame;
         }
         public MenuFrame BuildDiagnosticFrame(int width,int height,MenuStatus status)
