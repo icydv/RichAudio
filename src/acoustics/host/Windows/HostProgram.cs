@@ -119,7 +119,7 @@ namespace RichAudio.Beacon.Windows
 #if STATE_TRANSPORT
                 if (listenerPipe)
                 {
-                    pipe = new StatePipeServer("RichAudio.Acoustics07.Listener.v1", delegate(ListenerState state, double age) { Enqueue(new ControlMessage{ListenerJson=Protocol.EncodeJson(state),ReceiptAgeMs=age,QueuedTicks=Stopwatch.GetTimestamp(),Sequence=state.Sequence,ObservationQpc100ns=state.ObservationTicks*(10000000.0/state.ClockFrequency)}); }); pipe.Start();
+                    pipe = new StatePipeServer("RichAudio.Acoustics07.Listener.v1", delegate(ListenerState state, double age) { Enqueue(new ControlMessage{ListenerJson=Protocol.EncodeJson(state),ReceiptAgeMs=age,QueuedTicks=Stopwatch.GetTimestamp(),Sequence=state.Sequence,ObservationQpc100ns=state.ObservationTicks*(10000000.0/state.ClockFrequency)}); },true,ListenerEnded); pipe.Start();
                 }
 #else
                 if (listenerPipe) throw new NotSupportedException("Listener transport was not included in this build");
@@ -160,7 +160,7 @@ namespace RichAudio.Beacon.Windows
                 if (reader != null && reader.IsAlive) reader.Join(1000); if (stderr != null && stderr.IsAlive) stderr.Join(1000);
                 self.Refresh();
                 var result = new Dictionary<string, object> {
-                    {"schemaVersion",1},{"backend","WASAPI shared event-driven, exact Float32 stereo 48k"},{"mode",wav == null ? "incremental-streaming" : "known-WAV-device-test"},{"scene",scene},{"beacon",beacon},{"sources",sources},{"durationWallSeconds",wall.Elapsed.TotalSeconds},{"gain",gain},
+                    {"schemaVersion",1},{"backend","WASAPI shared event-driven, exact Float32 stereo 48k"},{"mode",wav == null ? "incremental-streaming" : "known-WAV-device-test"},{"scene",scene},{"beacon",beacon},{"sources",sources},{"terminationReason",producerError!=null?"failure":wall.Elapsed.TotalSeconds>=seconds?"duration-limit":"controlled-stop"},{"durationWallSeconds",wall.Elapsed.TotalSeconds},{"gain",gain},
                     {"cpuSeconds",(self.TotalProcessorTime-initialCpu).TotalSeconds},{"workingSetBytes",self.WorkingSet64},{"privateBytes",self.PrivateMemorySize64},{"managedHeapBytes",GC.GetTotalMemory(false)},
                     {"managedAllocatedBytes",AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize-initialAllocated},{"allocationScope","Host AppDomain, all threads; not isolated audio callback allocation measurement"},{"gen0Collections",GC.CollectionCount(0)-initialGen0},{"gen1Collections",GC.CollectionCount(1)-initialGen1},{"gen2Collections",GC.CollectionCount(2)-initialGen2},
                     {"receivedBlocks",receivedBlocks},{"rejectedBlocks",rejectedBlocks},{"producerError",producerError},{"rendererExitCode",child != null && child.HasExited ? (object)child.ExitCode : null},
@@ -168,7 +168,7 @@ namespace RichAudio.Beacon.Windows
                 };
                 result["listenerForwarding"]=new Dictionary<string,object>{{"written",listenerMessagesWritten},{"maxHostQueueAgeMs",maxListenerHostQueueAgeMs},{"first128Receipts",listenerReceipts},{"remainingClockUncertainty","Anonymous-pipe transit after write plus Windows device buffering are separate from acoustic delay"}};
 #if STATE_TRANSPORT
-                if (pipe != null) result["transport"] = new Dictionary<string,object>{{"accepted",pipe.Accepted},{"rejected",pipe.Rejected},{"connections",pipe.Connections},{"lastAgeMs",pipe.Accepted>0?(object)pipe.LastAgeMs:null},{"error",pipe.Error}};
+                if (pipe != null) result["transport"] = new Dictionary<string,object>{{"accepted",pipe.Accepted},{"rejected",pipe.Rejected},{"connections",pipe.Connections},{"lastAgeMs",pipe.Accepted>0?(object)pipe.LastAgeMs:null},{"error",pipe.Error},{"diagnostic",pipe.Diagnostic},{"strict",true},{"outputMuted",output==null||output.Muted},{"hostStopped",stop}};
 #endif
                 WriteNew(Path.Combine(directory, "host-result.json"), json.Serialize(result));
                 lock (logLock) WriteNew(Path.Combine(directory, "renderer-diagnostics.txt"), string.Join(Environment.NewLine, rendererLog.ToArray()));
@@ -179,6 +179,7 @@ namespace RichAudio.Beacon.Windows
             return producerError != null || (output != null && output.Error != null) ? 1 : 0;
         }
         private static Dictionary<string, object> Action(string name, double ms, long frame) { return new Dictionary<string,object>{{"command",name},{"hostMs",ms},{"consumedFrame",frame},{"qpc100ns",Stopwatch.GetTimestamp()*(10000000.0/Stopwatch.Frequency)}}; }
+        internal static void ListenerEnded(TransportResult ending){if(output!=null)output.Muted=true;stop=true;if(ending.Outcome!="deliberate-stop")producerError="Listener terminal: "+ending.Stage+"/"+ending.Code;Console.WriteLine("Listener terminal "+json.Serialize(ending)+"; owned output muted/stopping");stop=true;}
         private static void Control(string command)
         {
             if (command == "stop") { stop = true; if (output != null) output.Muted = true; }

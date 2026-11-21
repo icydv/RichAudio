@@ -51,6 +51,15 @@ namespace RichAudio.Beacon.Tests
                 Check(typeof(IAudioClock).GUID.ToString()=="cd63314f-3fba-4a1b-812c-ef96358728e7","Microsoft IAudioClock IID");
                 Check(typeof(IMMDeviceCollection).GUID.ToString()=="0bd7a1be-7a1a-44db-8397-cc5392387b5e","Microsoft IMMDeviceCollection IID");
                 ring.EndOfStream=true;fixed(float* p=output){ring.Fill(p,512,.1f);}Check(ring.EndSilenceFrames==512&&ring.UnderflowFrames==512,"known EOF silence distinct from starvation");
+                var flags=System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic;
+                using(var unopened=new WasapiOutput(new PcmRing(),-1)){
+                    unopened.Muted=false;typeof(HostProgram).GetField("output",flags).SetValue(null,unopened);
+                    HostProgram.ListenerEnded(new RichAudio.Beacon.Transport.TransportResult{Outcome="failed",Stage="schema",Code="invalid-schema",Terminal=true});
+                    Check(unopened.Muted,"terminal transport immediately mutes without opening endpoint");
+                    Check((bool)typeof(HostProgram).GetField("stop",flags).GetValue(null),"terminal transport stops host");
+                    Check(((string)typeof(HostProgram).GetField("producerError",flags).GetValue(null)).Contains("schema/invalid-schema"),"terminal status visible");
+                    typeof(HostProgram).GetField("output",flags).SetValue(null,null);
+                }
                 Console.WriteLine("PASS: "+checks+" original host/ring/framing assertions; no audio endpoint opened.");return 0;
             }catch(Exception ex){Console.Error.WriteLine(ex);return 1;}
         }
