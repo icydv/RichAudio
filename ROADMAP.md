@@ -1,5 +1,7 @@
 # Roadmap
 
+**Latest P2-01 RPM decision, 25 October:** retain the proven RPH motion integration; its RPM getter is unusable in the completed manual experiment. The [offline cross-framework review](docs/RPM_SOURCE_INVESTIGATION.md) prepares vendor evidence and identifies SHVDNE as an independent source-supported candidate, with exact-build/dependency/identity gates still open. No second framework, new launch, full live certification or Phase 3 is approved by this review. Historical checkpoint statements below retain their dated context.
+
 ## Current governing roadmap — 25 October 2026
 
 The expanded world-wide audio vision broadens future source families and acceptance criteria while preserving the existing stage gates. Historical checkpoint paragraphs below retain their original context; their pending-selection statements are superseded by [the controlled attempt](docs/P2_01_ENHANCED_RUNTIME_ATTEMPT.md).

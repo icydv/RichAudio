@@ -1,5 +1,7 @@
 # Evidence and sources
 
+25 October RPM follow-up: [cross-framework investigation and permanent source links](docs/RPM_SOURCE_INVESTIGATION.md), [versioned reviewed-commit/capability inventory](evidence/publication/rpm-source-review.json), and [unsubmitted vendor reproduction](docs/RPH_RPM_VENDOR_REPRO.md). This refresh distinguishes memory-backed SHVDNE/IKT getters, HUD estimation, Cfx-only natives and exact-build support gaps; it includes no new live test or redistributed source/binary.
+
 Checked 24 October 2026. Local observations are primary evidence for this installation. Upstream reverse-engineering code is primary evidence for what that project implements, not an official Rockstar guarantee. Web support/version claims are time-sensitive and must be refreshed before deployment.
 
 ## Local evidence index
@@ -11,11 +13,11 @@ Checked 24 October 2026. Local observations are primary evidence for this instal
 | E3 | `evidence/vehicle-trace.json`, `evidence/bati-override-search.json` | Bati model/hash references, sound/container paths, sampled override search |
 | E4 | `evidence/bati-awc-summary.json` | Actual loaded Bati AWC format/stream counts and names; no samples |
 | E5 | `evidence/geometry-summary.json` | Two occlusion samples and one collision resource; derived counts only |
-| E6 | `evidence/GUI_OBSERVATIONS.md` | Recorded CodeWalker navigation/viewer actions seen through Computer Use |
+| E6 | `evidence/GUI_OBSERVATIONS.md` | Recorded CodeWalker navigation/viewer actions observed in the desktop interface |
 | E7 | `evidence/binary-versions.json`, `evidence/environment.json`, `evidence/telemetry-api-inventory.json` | Binary versions/fingerprints, selected machine/tool facts and native-declaration presence |
 | E8 | `evidence/validation.json` | Final repository/synthetic-fixture/consistency checks actually executed |
 
-Raw XML, all archive filename inventories and parser summaries remain in ignored `.local/inspection`, `.local/extra`, `.local/trace-resources`, `.local/geometry` and `.local/dlc`. They are local derivatives of proprietary files and are not distributable repository fixtures. Logs in the Codex conversation contain actual command results and GUI captures; the prose GUI observation file is a navigation record, not an independent screenshot artifact or a runtime audio test.
+Raw XML, all archive filename inventories and parser summaries remain in ignored `.local/inspection`, `.local/extra`, `.local/trace-resources`, `.local/geometry` and `.local/dlc`. They are local derivatives of proprietary files and are not distributable repository fixtures. The working records retain the command output and GUI captures. The GUI observations document navigation through the desktop tools.
 
 ## Pinned source checkouts (local `.local/`, not committed)
 
