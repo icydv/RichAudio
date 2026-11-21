@@ -4,12 +4,16 @@ namespace RichAudio.Settings.InGame
 {
     public sealed partial class AcousticMenuModel
     {
-        public const int RowCount=12;
+        public const int RowCount=13;
         public bool Visible {get;private set;}
         public int SelectedIndex {get;private set;}
         public MenuPreferences Pending {get;private set;}
         public bool CanApply {get;private set;}
         public bool ResetAvailable {get;private set;}
+        public bool RecordingAvailable {get;private set;}
+        public bool RecordingActive {get;private set;}
+        public bool RecordingPending {get;private set;}
+        public string RecordingDetail {get;private set;}
         public bool Dirty {get{return !Pending.Same(baseline);}}
         public string Notice {get;private set;}
         public bool NoticeIsError {get;private set;}
@@ -26,6 +30,8 @@ namespace RichAudio.Settings.InGame
         public void Close(){Visible=false;Pending=baseline.With();lastFrame=null;}
         public void SetWritable(bool canApply){CanApply=canApply;}
         public void SetResetAvailable(bool resetAvailable){ResetAvailable=resetAvailable;}
+        public void SetRecording(bool available,bool active,bool pending,string detail)
+        {RecordingAvailable=available;RecordingActive=active;RecordingPending=pending;RecordingDetail=detail??"Recorder unavailable";}
         public void SetNotice(string message,bool error=false)
         {Notice=(message??"").Replace('\r',' ').Replace('\n',' ');if(Notice.Length>160)Notice=Notice.Substring(0,160);NoticeIsError=error;}
         public void Acknowledge(MenuPreferences saved,string message)
@@ -41,7 +47,7 @@ namespace RichAudio.Settings.InGame
             if(input==MenuInput.Down){SelectedIndex=(SelectedIndex+1)%RowCount;return MenuAction.None;}
             if(input==MenuInput.Left||input==MenuInput.Right){
                 int direction=input==MenuInput.Left?-1:1;
-                if(SelectedIndex>=9){SelectedIndex=9+(SelectedIndex-9+direction+3)%3;return MenuAction.None;}
+                if(SelectedIndex>=9){SelectedIndex=9+(SelectedIndex-9+direction+4)%4;return MenuAction.None;}
                 Adjust(direction,false);return MenuAction.None;
             }
             if(input==MenuInput.Accept){
@@ -55,6 +61,11 @@ namespace RichAudio.Settings.InGame
                     Pending=MenuPreferences.Defaults;SetNotice("Defaults selected. Apply to save; Back discards pending changes.");return MenuAction.None;
                 }
                 if(SelectedIndex==11){Close();return MenuAction.Close;}
+                if(SelectedIndex==12){
+                    if(!RecordingAvailable||RecordingPending){SetNotice(RecordingDetail??"Recorder unavailable or request pending",true);return MenuAction.None;}
+                    SetNotice("Recording request queued; completion is confirmed by the recorder service.");
+                    return RecordingActive?MenuAction.StopRecording:MenuAction.StartRecording;
+                }
                 Adjust(1,true);
             }
             return MenuAction.None;

@@ -8,10 +8,11 @@ const root=fileURLToPath(new URL('../../',import.meta.url)),FS=48000,BLOCK=512;
 export const transitionBlocks=Object.freeze({introduced:64,revised:112,invalid:160,recovered:192,expired:286,
   reacquired:320,sourceGeneration:352,listenerGeneration:416,sessionMismatch:440,newSession:464,emitStop:512});
 const hash=b=>createHash('sha256').update(b).digest('hex');
-export async function replayGeometry({mode='observed',blocks=560}={}){
+export async function replayGeometry({mode='observed',blocks=560,extraArgs=[],obstructed=false,geometryScale=10}={}){
   if(!['observed','direct-reference','fixed-scene'].includes(mode)||!Number.isInteger(blocks)||blocks<32||blocks>1024)throw Error('replay budget');
   const args=['tools/Run-Acoustics07.mjs','--headless-clock','audio','--trace-blocks','yes','--history-diagnostics','yes'];
   if(mode!=='fixed-scene')args.push('--geometry-input','required');
+  args.push(...extraArgs);
   const child=spawn(process.execPath,args,{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
   let raw=Buffer.alloc(0),stderr='',failure=null,exitCode=null,closed=false;
   let wake=null;
@@ -48,10 +49,11 @@ export async function replayGeometry({mode='observed',blocks=560}={}){
   try{
     for(let b=0;b<blocks;b++){
       const time=b*BLOCK/FS,messages=[];
-      if(b===0 && mode!=='fixed-scene')messages.push(liveConfiguration());
+      if(b===0 && mode!=='fixed-scene'){const c=liveConfiguration();c.configuration.coordinates.metresPerNativeUnit=geometryScale;messages.push(c);}
       if(b%5===0||b===416||b===440||b===464){
         const u=Math.max(0,Math.min(time-1,1)),angle=u*.9,position=[100.3+.08*Math.sin(u*2),200.1,3.7],
           velocity=[time>1&&time<2?.16*Math.cos(u*2):0,0,0];
+        if(obstructed){position[1]=200.8;position[2]=3.8;}
         messages.push(nativeEnvelope(time,b,{position,velocity,forward:[-Math.cos(angle),-Math.sin(angle),0],
           generation:b>=416?2:1,session:b>=440?'b'.repeat(32):'a'.repeat(32)}));
       }
@@ -64,6 +66,7 @@ export async function replayGeometry({mode='observed',blocks=560}={}){
         if(b===352)messages.push({type:'owned-sources',epoch:1,sources:[nativeSource(2)]});
         if(b===464){
           const c=liveConfiguration(2);c.configuration.listenerSession='b'.repeat(32);
+          c.configuration.coordinates.metresPerNativeUnit=geometryScale;
           c.configuration.geometrySession='controlled-observation-2';c.configuration.clock.id='controlled-clock-2';
           c.configuration.sources=[nativeSource(2)];messages.push(c);
           revision=1;g=geometryEvent(time,revision,{empty});g.epoch=2;g.session='controlled-observation-2';g.clockId='controlled-clock-2';

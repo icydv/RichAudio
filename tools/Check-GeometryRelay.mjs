@@ -20,7 +20,7 @@ export function checkGeometryRelay(root,directory){
   assert.ok(final.geometry.stats.configured>=2);assert.ok(final.geometry.stats.expired>=1);
   assert.ok(relay.maximumAcceptedRoundTripMs<=10&&relay.maximumObservedRoundTripMs>10&&relay.rejected>0);
   const acoustic=final.acousticSettings??null;
-  const renderers=[0,1].map(()=>new StreamingRenderer({sourceIds:['beacon-0'],generationReleaseGuard:true,
+  const renderers=[0,1].map(()=>new StreamingRenderer({sourceIds:['beacon-0'],generationReleaseGuard:true,continuousRates:true,
     ...(acoustic?{pathCapacityPerSource:64}:{})}));
   const output=[0,1].map(()=>[new Float32Array(blocks.length*512),new Float32Array(blocks.length*512)]),
     dry=new Float32Array(512),left=new Float32Array(512),right=new Float32Array(512);

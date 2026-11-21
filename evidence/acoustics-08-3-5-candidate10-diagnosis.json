@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "247e7ff2af8f1670ba454ae303ba56cb4f16fb19",
+  "scope": "Sanitized diagnosis of the preserved Candidate 10 failure; no live operation",
+  "achievement": {
+    "humanConfirmedAudible": true,
+    "listenerPacketsAccepted": 404,
+    "listenerPacketsRejected": 0,
+    "sourceContextInitialized": true,
+    "conditionalDirectWorked": true,
+    "restorationVerified": true
+  },
+  "rejection": {
+    "originalError": "Audition trim rejected nonfinite or over-ceiling block; no clipping or automatic gain reduction",
+    "guard": 0.5,
+    "trimDb": 12,
+    "cumulativeRawDspPeak": 0.12808259642231856,
+    "largestAcceptedPreTrimPeak": 0.12558718025684357,
+    "preTrimThreshold": 0.125594321575479,
+    "finiteOverCeilingEstablished": true,
+    "classificationBasis": "The sealed renderer accumulates raw peak before Float32 output. Nonfinite raw output would poison that cumulative peak; the retained finite maximum exceeds the unchanged guard threshold and the accepted-block maximum. The final processed 512-frame block was not published. Finite startup multipliers and +12 dB cannot produce a nonfinite value from this bounded input.",
+    "rejectedBlockStart": 982016,
+    "rejectedBlockEndExclusive": 982528,
+    "exactOffendingSampleIndex": null,
+    "channel": null,
+    "rejectedFloat32Value": null,
+    "remainingUncertainty": "Exact offending sample, channel and unsampled path/pose state were not retained. Close-range point-source gain reproduces the same finite guard failure, but is not a reconstruction of every historical control."
+  },
+  "chronology": {
+    "recordingRelativeMs": {
+      "producerStop": 19965,
+      "firstUnderflow": 19993,
+      "hostCaptureStop": 20224
+    },
+    "guardPrecedesUnderflowEventReceiptMs": 28,
+    "receiptScope": "SoundMap server receipt times of producer-stop and audio-discontinuity events, not exact guard execution-to-device timing",
+    "underflowFrames": 160,
+    "hostPrimary": {
+      "stage": "audio-output",
+      "message": "InvalidOperationException: Producer starvation: stopped to prevent renderer/device clock drift; no automatic resume",
+      "exceptionType": null,
+      "stack": null,
+      "duringShutdown": false
+    },
+    "hostSecondary": [
+      {
+        "stage": "producer-exit",
+        "message": "Renderer exited with code 1",
+        "exceptionType": null,
+        "stack": null,
+        "duringShutdown": true
+      }
+    ],
+    "attribution": "Renderer guard rejection precedes PCM exhaustion; terminal starvation and underflow follow. The independently earlier processing miss is not relabelled as that terminal cause."
+  },
+  "historicalTiming": {
+    "nominalListenerHz": 20,
+    "acceptedPerHostWallSecond": 19.382951882997403,
+    "sampledObservationIntervalMs": {
+      "count": 306,
+      "median": 56.4139,
+      "p95": 101.4564,
+      "maximum": 126.3881
+    },
+    "sampledObservationCaveat": "SoundMap deliberately samples about 16 Hz; these gaps include skipped genuine observations and are not the complete RPH getter cadence.",
+    "observationToSolverPublicationMs": {
+      "count": 320,
+      "median": 132.891357421875,
+      "p95": 163.831298828125,
+      "maximum": 178.17822265625
+    },
+    "publicationClockCaveat": "Retained playout-bracket observation to solver publication, including configured 100 ms playout and observation bracketing. Do not add that 100 ms twice. Same-host UTC/QPC anchor conversion has millisecond wall-clock/anchor uncertainty and is not speaker time.",
+    "firstAcceptedNativeDecisionAgeMs": 9.2934,
+    "maximumMeasuredRelayRoundTripMs": 5.5845,
+    "maximumProducerReceiptAgeMs": 26.573500000000266,
+    "maximumNodeQueueAgeMs": 0,
+    "nodeQueueCaveat": "Historical geometry snapshot bypassed its Node queue aggregate; zero is unavailable evidence, not proof of zero queue latency.",
+    "configuredListenerPlayoutMs": 100,
+    "audioBlockMs": 10.666666666666666,
+    "controlCadenceFrames": 512,
+    "workerMs": {
+      "count": 320,
+      "median": 0.2921999999998661,
+      "p95": 0.47379999999975553,
+      "maximum": 0.7633000000023458
+    },
+    "workerRoundTripMs": {
+      "count": 320,
+      "median": 0.6477999999988242,
+      "p95": 1.0613000000003012,
+      "maximum": 3.2798000000002503
+    },
+    "sampledProducerProcessingMs": {
+      "count": 320,
+      "median": 0.8257999999987078,
+      "p95": 1.32129999999961,
+      "maximum": 4.1480999999985215
+    },
+    "pcmInitialCreditFrames": 2048,
+    "pcmInitialCreditDurationMs": 42.666666666666664,
+    "pcmRingCapacityFrames": 4096,
+    "ringOccupancyCaveat": "Historical queue occupancy was not retained. The 42.67 ms credit window is capacity/lead, not a constant delay measurement.",
+    "endpointBufferMs": 22,
+    "reportedStreamLatencyMs": 0,
+    "devicePeriodMs": 10,
+    "physicalPropagationMsRange": [
+      5.502038121545059,
+      26.795042754098002
+    ],
+    "qualityDeadlineMisses": 1,
+    "maximumProcessingMs": 59.8673,
+    "speakerToEarLatencyMeasured": false
+  },
+  "camera": {
+    "poseRejectionsAtFirstRecordedFrame": 32,
+    "totalPoseRejections": 35,
+    "assessment": "Original timestamps, complete rejected block poses and per-observation generation transitions were not retained; no weakening of identity, freshness or 100 m/s discontinuity guards is justified."
+  },
+  "recording": {
+    "frames": 957120,
+    "seconds": 19.94,
+    "allFourHashesMatched": true,
+    "filesFinalized": true,
+    "gaps": [
+      {
+        "reason": "host-terminal-failure",
+        "tailConfirmed": false,
+        "explanation": "Captured prefix is retained; failed host does not establish a complete listening session"
+      }
+    ],
+    "completePlannedSession": false
+  },
+  "noSensingOrGpu": {
+    "geometryAccepted": 0,
+    "gpuDispatches": 0
+  }
+}

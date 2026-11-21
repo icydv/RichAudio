@@ -19,6 +19,9 @@ obj/
 *.rgl
 *.cache
 *.wav
+*.f32le
+*.pcm
+*.rasoundmap-context
 *.flac
 *.ogg
 *.mp3

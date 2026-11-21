@@ -17,7 +17,14 @@ namespace RichAudio.Beacon.Windows
     {
         private static volatile bool stop, producerEnded;
         private static volatile string producerError;
+        private static readonly object failureLock=new object();
+        private static readonly List<Dictionary<string,object>> secondaryFailures=new List<Dictionary<string,object>>();
+        private static Dictionary<string,object> primaryFailure;
+        private static TransportResult listenerTerminal;
+        private static Dictionary<string,object> listenerTerminalBoundary;
+        private static long controlsRejectedDuringShutdown;
         private static volatile string latestRendererStatus;
+        private static bool auditionOutputEnabled;
         private static readonly object inputLock = new object(), logLock = new object();
         private sealed class ControlMessage { internal string Text, ListenerJson; internal long QueuedTicks, Sequence, ObservationTicks; internal double ObservationQpc100ns; }
         private static readonly Queue<ControlMessage> inputQueue = new Queue<ControlMessage>();
@@ -36,7 +43,11 @@ namespace RichAudio.Beacon.Windows
 #endif
         private static WasapiOutput output;
         private static readonly List<string> rendererLog = new List<string>();
-        private static long droppedLogLines, receivedBlocks, rejectedBlocks;
+        private static string overflowRendererBlock,overflowRendererFinal;
+        private static long droppedLogLines, receivedBlocks, rejectedBlocks,drainedShutdownBlocks;
+        private static readonly long[] pcmQueueBlocks=new long[PcmRing.Slots+1];
+        private static long pcmQueueSamples;
+        private static double maximumCommandQueueAgeMs;
         private static readonly JavaScriptSerializer json = new JavaScriptSerializer { MaxJsonLength = 65536, RecursionLimit = 16 };
 
         [STAThread]
@@ -49,6 +60,8 @@ namespace RichAudio.Beacon.Windows
                     "  --acoustic-quality auto|performance|balanced|quality|max\n"+
                     "  --acoustic-acceleration auto|cpu|gpu\n"+
                     "  --acoustic-settings <private .local JSON file>\n"+
+                    "  --beacon-output-trim-db 12 enables the bounded geometry audition profile (default 0)\n"+
+                    "  --soundmap-config <private .local/soundmap/service.json> enables bounded viewer telemetry and owned post-gain PCM recording\n"+
                     "  --rich-audio-enabled true|false; --rich-audio-output-level 0..1; --early-reflections true|false; --acoustic-diagnostics-overlay true|false\n"+
                     "Saved .local/acoustic-settings.json loads automatically on subsequent incremental launches.\n"+
                     "Build/run build/acoustic-settings/RichAudio.Settings.exe for the five-position slider and independent backend selector.\n"+
@@ -63,7 +76,8 @@ namespace RichAudio.Beacon.Windows
             string scene = "open-road", beacon = "harmonic", outputPath = null, wav = null, geometryModel=null; int device = -1, seconds = 15, sources = 1; float gain = .08f;
             double beaconFrequencyHz = 95;
             double beaconLevel = .22;
-            string acousticSettingsPath=null,acousticQuality=null,acousticAcceleration=null;
+            double outputTrimDb=0;
+            string acousticSettingsPath=null,acousticQuality=null,acousticAcceleration=null,soundMapConfig=null;
             bool? richAudioEnabled=null,earlyReflections=null,diagnosticsOverlay=null;double? acousticOutputLevel=null;
             bool autostart = false, exercise = false, loopback = false, listenerPipe = false, list = false, probe = false;
             try
@@ -85,8 +99,10 @@ namespace RichAudio.Beacon.Windows
                         else if (key == "--beacon") beacon = value;
                         else if (key == "--beacon-frequency-hz") beaconFrequencyHz = double.Parse(value, CultureInfo.InvariantCulture);
                         else if (key == "--beacon-level") beaconLevel = double.Parse(value, CultureInfo.InvariantCulture);
+                        else if (key == "--beacon-output-trim-db") outputTrimDb=double.Parse(value,CultureInfo.InvariantCulture);
                         else if (key == "--geometry-model") geometryModel=Path.GetFullPath(value);
                         else if (key == "--acoustic-settings") acousticSettingsPath=value;
+                        else if (key == "--soundmap-config") soundMapConfig=Path.GetFullPath(value);
                         else if (key == "--acoustic-quality") acousticQuality=value;
                         else if (key == "--acoustic-acceleration") acousticAcceleration=value;
                         else if (key == "--rich-audio-enabled") richAudioEnabled=bool.Parse(value);
@@ -102,6 +118,7 @@ namespace RichAudio.Beacon.Windows
                         else throw new ArgumentException("Unknown option " + key);
                     }
                 }
+                string auditionArguments=AuditionArguments(outputTrimDb,scene,beacon,sources,beaconFrequencyHz,beaconLevel,gain,listenerPipe,geometryModel!=null,wav!=null,autostart||exercise||loopback||list||probe);
                 if (list) { string[] devices = WasapiOutput.ListDevices(); for (int i = 0; i < devices.Length; i++) Console.WriteLine(i + ": " + devices[i]); return 0; }
                 if (probe) { if(device < -1)throw new ArgumentException("Invalid device index"); Console.WriteLine(json.Serialize(WasapiOutput.ProbeDevice(device))); return 0; }
                 if (seconds < 1 || seconds > 120 || sources < 1 || sources > 4 || device < -1 || !new List<string>{"open-road","urban-street","obstructed-corner","enclosure","flyby"}.Contains(scene)) throw new ArgumentException("Host bounds: 1..120 seconds, 1..4 measured sources, known scene, valid endpoint");
@@ -118,7 +135,8 @@ namespace RichAudio.Beacon.Windows
                     acousticSettings=(acousticSettings??AcousticSettings.Defaults(1)).WithAudio(richAudioEnabled,acousticOutputLevel,earlyReflections,diagnosticsOverlay);}
                 outputPath = PrivateOutput(root, outputPath ?? Path.Combine(".local", "acoustics07-host-" + Guid.NewGuid().ToString("N")));
                 Directory.CreateDirectory(outputPath);
-                return Run(root, scene, beacon, sources, seconds, gain, device, autostart, exercise, loopback, listenerPipe, wav, outputPath, beaconFrequencyHz, beaconLevel,geometryModel,acousticSettings,resolvedSettingsPath);
+                auditionOutputEnabled=outputTrimDb!=0;
+                return Run(root, scene, beacon, sources, seconds, gain, device, autostart, exercise, loopback, listenerPipe, wav, outputPath, beaconFrequencyHz, beaconLevel,geometryModel,acousticSettings,resolvedSettingsPath,soundMapConfig,auditionArguments);
             }
             catch (Exception ex) { Console.Error.WriteLine(ex.GetType().Name + ": " + ex.Message); return 1; }
         }
@@ -146,12 +164,22 @@ namespace RichAudio.Beacon.Windows
             return level == .22 ? "" : " --beacon-level " + level.ToString("R", CultureInfo.InvariantCulture);
         }
 
-        private static int Run(string root, string scene, string beacon, int sources, int seconds, float gain, int device, bool autostart, bool exercise, bool loopbackEnabled, bool listenerPipe, string wav, string directory, double beaconFrequencyHz, double beaconLevel,string geometryModel,AcousticSettings acousticSettings,string settingsPath)
+        internal static string AuditionArguments(double db,string scene,string beacon,int sources,double hz,double level,float gain,bool listener,bool geometry,bool wav,bool incompatible)
+        {
+            if(db==0)return "";
+            if(db!=12||scene!="open-road"||beacon!="harmonic"||sources!=1||hz!=600||level!=.44||gain!=.20f||!listener||!geometry||wav||incompatible)
+                throw new ArgumentException("Audition trim requires explicit +12dB, one 600Hz/.44 geometry-enabled harmonic source, required listener, gain .20 and manual muted startup without loopback/device probes");
+            return " --beacon-output-trim-db 12";
+        }
+
+        private static int Run(string root, string scene, string beacon, int sources, int seconds, float gain, int device, bool autostart, bool exercise, bool loopbackEnabled, bool listenerPipe, string wav, string directory, double beaconFrequencyHz, double beaconLevel,string geometryModel,AcousticSettings acousticSettings,string settingsPath,string soundMapConfig,string auditionArguments, string fixturePipe=null)
         {
             AppDomain.MonitoringIsEnabled = true;
             long initialAllocated = AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
             int initialGen0 = GC.CollectionCount(0), initialGen1 = GC.CollectionCount(1), initialGen2 = GC.CollectionCount(2);
             PcmRing ring = new PcmRing(); Thread reader = null, controls = null, stderr = null; LoopbackCapture capture = null;
+            OwnedOutputTap ownedRecorder=null;
+            bool childDisposed=false, listenerJoined=true, geometryRelayDisposalDeferred=false,audioErrorReported=false;
             var actions = new List<Dictionary<string, object>>(); Stopwatch wall = Stopwatch.StartNew(); Process self = Process.GetCurrentProcess(); TimeSpan initialCpu = self.TotalProcessorTime;
 #if STATE_TRANSPORT
             StatePipeServer pipe = null;
@@ -161,13 +189,14 @@ namespace RichAudio.Beacon.Windows
 #if GEOMETRY_LIVE
                 var geometrySettings=geometryModel==null?null:LoadGeometryModel(root,geometryModel);
 #endif
-                Console.CancelKeyPress += delegate(object sender, ConsoleCancelEventArgs e) { e.Cancel = true; stop = true; if (output != null) output.Muted = true; };
+                Console.CancelKeyPress += delegate(object sender, ConsoleCancelEventArgs e) { e.Cancel = true; if (output != null) output.Stop(); stop = true; };
+                if(soundMapConfig!=null)ownedRecorder=new OwnedOutputTap(soundMapConfig);
                 if (wav == null)
                 {
                     if(acousticSettings!=null)acousticSettingsMonitor=new AcousticSettingsMonitor(root,settingsPath,acousticSettings,
                         delegate(AcousticSettings changed){Send(changed.ControlMessage());});
                     string script = Path.Combine(root, "tools", "Run-Acoustics07.mjs"); if (!File.Exists(script)) throw new FileNotFoundException("Streaming worker is not built", "Run-Acoustics07.mjs");
-                    child = new Process { StartInfo = new ProcessStartInfo { FileName = "node.exe", Arguments = Quote(script) + " --scene " + scene + " --sources " + sources + " --beacon " + beacon + BeaconFrequencyArguments(beaconFrequencyHz, beacon, false) + BeaconLevelArguments(beaconLevel, beacon, false) + (listenerPipe ? " --listener-input required" : "")+(geometryModel!=null?" --geometry-input required":"")+(acousticSettings==null?"":acousticSettings.ProducerArguments()), WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true } };
+                    child = new Process { StartInfo = new ProcessStartInfo { FileName = "node.exe", Arguments = Quote(script) + " --scene " + scene + " --sources " + sources + " --beacon " + beacon + BeaconFrequencyArguments(beaconFrequencyHz, beacon, false) + BeaconLevelArguments(beaconLevel, beacon, false) + auditionArguments + (listenerPipe ? " --listener-input required" : "")+(geometryModel!=null?" --geometry-input required":"")+(acousticSettings==null?"":acousticSettings.ProducerArguments())+(soundMapConfig==null?"":" --soundmap-config "+Quote(soundMapConfig))+ListeningFixtureArguments(), WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true } };
                     child.Start();
                     inputWriter = new Thread(WriteControls); inputWriter.IsBackground = true; inputWriter.Start();
                     stderr = new Thread(ReadDiagnostics); stderr.IsBackground = true; stderr.Start();
@@ -179,14 +208,16 @@ namespace RichAudio.Beacon.Windows
                 else reader = new Thread(delegate() { ReadWav(wav, ring); });
                 reader.IsBackground = true; reader.Start();
                 output = new WasapiOutput(ring, device); output.Volume = gain; output.Muted = !autostart;
+                output.OwnedRecorder=ownedRecorder;
                 if (loopbackEnabled) { capture = new LoopbackCapture(device, seconds + 2); capture.Start(); capture.Ready.WaitOne(3000); }
-                output.Start(); if (!output.Ready.WaitOne(5000)) throw new TimeoutException("Endpoint readiness timeout"); if (output.Error != null) throw new InvalidOperationException(output.Error);
+                if(fixturePipe==null){output.Start(); if (!output.Ready.WaitOne(5000)) throw new TimeoutException("Endpoint readiness timeout"); if (output.Error != null) throw new InvalidOperationException(output.Error);}
 #if STATE_TRANSPORT
                 if (listenerPipe)
                 {
-                    pipe = new StatePipeServer("RichAudio.Acoustics07.Listener.v1", ListenerReceived,true,ListenerEnded);
+                    pipe = new StatePipeServer(fixturePipe??"RichAudio.Acoustics07.Listener.v1", ListenerReceived,true,ListenerEnded);
+                    if(fixturePipe!=null)shutdownFixturePipe=pipe;
 #if GEOMETRY_LIVE
-                    if(geometrySettings!=null){geometryRelay=new RichAudio.GeometryLive.GeometryHostRelay(Send,delegate{return pipe.PeerProcessId;},geometrySettings);geometryRelay.Start();}
+                    if(geometrySettings!=null){geometryRelay=new RichAudio.GeometryLive.GeometryHostRelay(Send,delegate{return pipe.PeerProcessId;},geometrySettings,ListeningFixtureGeometryPipe());geometryRelay.Start();}
 #else
                     if(geometryModel!=null)throw new NotSupportedException("Geometry relay not included");
 #endif
@@ -196,11 +227,14 @@ namespace RichAudio.Beacon.Windows
                 if (listenerPipe) throw new NotSupportedException("Listener transport was not included in this build");
 #endif
                 Console.WriteLine("RichAudio shared output: " + output.EndpointName + ". Commands: start, mute, resume, emit-stop, status, stop. Maximum " + seconds + " seconds; gain " + gain.ToString(CultureInfo.InvariantCulture));
-                controls = new Thread(delegate() { string line; while (!stop && (line = Console.ReadLine()) != null) { if (line == "status") { Console.WriteLine("queued=" + ring.Count + " underflowFrames=" + Interlocked.Read(ref ring.UnderflowFrames)); Console.WriteLine(latestRendererStatus ?? "Renderer status pending (or known-WAV mode)."); if(acousticSettingsMonitor!=null)Console.WriteLine(latestAcousticSettingsStatus??"Acoustic settings active status pending."); } else Control(line.Trim()); } }); controls.IsBackground = true; controls.Start();
+                if(fixturePipe==null){controls = new Thread(delegate() { string line; while (!stop && (line = Console.ReadLine()) != null) { if(stop)break; if (line == "status") { Console.WriteLine("queued=" + ring.Count + " underflowFrames=" + Interlocked.Read(ref ring.UnderflowFrames)); Console.WriteLine(latestRendererStatus ?? "Renderer status pending (or known-WAV mode)."); if(acousticSettingsMonitor!=null)Console.WriteLine(latestAcousticSettingsStatus??"Acoustic settings active status pending."); } else Control(line.Trim()); } }); controls.IsBackground = true; controls.Start();}
                 bool didMute = false, didResume = false, didEmitStop = false; double drainStart = -1;
                 while (!stop && wall.Elapsed.TotalSeconds < seconds)
                 {
-                    if (output.Error != null || producerError != null) break;
+                    // Main-loop telemetry only: no work or allocation added to Fill.
+                    int queuedBlocks=ring.Count;if(queuedBlocks>=0&&queuedBlocks<pcmQueueBlocks.Length){pcmQueueBlocks[queuedBlocks]++;pcmQueueSamples++;}
+                    if(output.Error!=null){RecordFailure("audio-output",output.Error);audioErrorReported=true;break;}if(producerError!=null)break;
+                    ConsumeListeningFixture(ring,ownedRecorder);
                     int credits = ring.TakeCredits(); if (credits != 0 && child != null && !producerEnded) Send("{\"type\":\"credit\",\"blocks\":" + credits + "}");
                     if (exercise)
                     {
@@ -212,65 +246,98 @@ namespace RichAudio.Beacon.Windows
                     Thread.Sleep(2);
                 }
             }
-            catch (Exception ex) { producerError = ex.GetType().Name + ": " + ex.Message; }
+            catch (Exception ex) { RecordFailure("host-run",ex.Message,ex); }
             finally
             {
-                stop = true; if (output != null) { output.Muted = true; try { output.Dispose(); } catch(Exception ex) { producerError="Output shutdown: "+ex.GetType().Name; } }
+                // Stop the consumer before ending the producer/reader or waiting
+                // on transport callbacks. Muting alone still drains the ring and
+                // caused Candidate 08's avoidable shutdown starvation.
+                if(output!=null)output.Stop();stop = true;
+                if(shutdownFixtureHook!=null)ShutdownStep("fixture-secondary",shutdownFixtureHook);
 #if STATE_TRANSPORT
-                if (pipe != null) pipe.Dispose();
+                if(pipe!=null){listenerJoined=false;ShutdownStep("listener-shutdown",delegate{listenerJoined=pipe.StopAndWait(1000);if(!listenerJoined)throw new TimeoutException("Listener callback thread did not finish; callback resources retained until process exit");});}
 #endif
-#if GEOMETRY_LIVE
-                if(geometryRelay!=null)geometryRelay.Dispose();
-#endif
-                if (capture != null) { try { capture.Dispose(); } catch(Exception ex) { producerError="Capture shutdown: "+ex.GetType().Name; } }
+                if(acousticSettingsMonitor!=null)ShutdownStep("settings-shutdown",acousticSettingsMonitor.Dispose);
+                if(output!=null)ShutdownStep("output-shutdown",output.Dispose);
+                if(output!=null&&output.Error!=null&&!audioErrorReported){RecordFailure("audio-output",output.Error);audioErrorReported=true;}
+                ShutdownStep("fixture-sink-shutdown",CloseListeningFixture);
+                if(capture!=null)ShutdownStep("capture-shutdown",capture.Dispose);
+                if(ownedRecorder!=null){ownedRecorder.TerminalFailure=producerError;ShutdownStep("recording-shutdown",ownedRecorder.Dispose);}
                 if (child != null)
                 {
-                    SendControl("stop");
-                    if (!child.WaitForExit(2500)) { child.Kill(); child.WaitForExit(2000); if(producerError==null)producerError="Renderer did not acknowledge bounded shutdown; owned child terminated"; }
-                    else if(child.ExitCode!=0 && producerError==null)producerError="Renderer exited with code "+child.ExitCode;
-                    inputStop=true;inputSignal.Set();if(inputWriter!=null&&inputWriter.IsAlive)inputWriter.Join(1000);
-                    try { child.StandardInput.Close(); } catch (IOException) { }
+                    ShutdownStep("producer-stop",delegate{SendControl("stop");if(!child.WaitForExit(2500)){child.Kill();if(!child.WaitForExit(2000))throw new TimeoutException("Owned producer did not terminate");RecordFailure("producer-stop","Renderer did not acknowledge bounded shutdown; owned child terminated");}else if(child.ExitCode!=0)RecordFailure("producer-exit","Renderer exited with code "+child.ExitCode);});
+                    inputStop=true;inputSignal.Set();
+                    ShutdownStep("control-writer-join",delegate{JoinOwnedThread(inputWriter,"control writer");});
+                    // The Process writer owns its BaseStream. Our UTF-8 wrapper
+                    // leaves it open and is joined before this sole-owner close.
+                    if(inputWriter==null||!inputWriter.IsAlive)ShutdownStep("producer-input-close",delegate{child.StandardInput.Close();});
                 }
-                if (reader != null && reader.IsAlive) reader.Join(1000); if (stderr != null && stderr.IsAlive) stderr.Join(1000);
-                if(acousticSettingsMonitor!=null)acousticSettingsMonitor.Dispose();
+                ShutdownStep("PCM-reader-join",delegate{JoinOwnedThread(reader,"PCM reader");});ShutdownStep("diagnostics-reader-join",delegate{JoinOwnedThread(stderr,"diagnostics reader");});
+#if GEOMETRY_LIVE
+                // Both ListenerReceived and the stderr reader call this relay.
+                // A timed-out join retains their target until process exit.
+                if(geometryRelay!=null){geometryRelayDisposalDeferred=!listenerJoined||(stderr!=null&&stderr.IsAlive);
+                    if(geometryRelayDisposalDeferred)RecordFailure("geometry-shutdown-deferred","Geometry relay retained until process exit because a callback thread is still active");
+                    else ShutdownStep("geometry-shutdown",geometryRelay.Dispose);}
+#endif
+                try{
                 self.Refresh();
                 var result = new Dictionary<string, object> {
-                    {"schemaVersion",1},{"backend","WASAPI shared event-driven, exact Float32 stereo 48k"},{"mode",wav == null ? "incremental-streaming" : "known-WAV-device-test"},{"scene",scene},{"beacon",beacon},{"sources",sources},{"terminationReason",producerError!=null?"failure":wall.Elapsed.TotalSeconds>=seconds?"duration-limit":"controlled-stop"},{"durationWallSeconds",wall.Elapsed.TotalSeconds},{"gain",gain},
+                    {"schemaVersion",1},{"backend",fixturePipe==null?"WASAPI shared event-driven, exact Float32 stereo 48k":"device-free fixture; WASAPI unstarted"},{"mode",wav == null ? "incremental-streaming" : "known-WAV-device-test"},{"scene",scene},{"beacon",beacon},{"sources",sources},{"terminationReason",producerError!=null?"failure":wall.Elapsed.TotalSeconds>=seconds?"duration-limit":"controlled-stop"},{"durationWallSeconds",wall.Elapsed.TotalSeconds},{"gain",gain},
                     {"cpuSeconds",(self.TotalProcessorTime-initialCpu).TotalSeconds},{"workingSetBytes",self.WorkingSet64},{"privateBytes",self.PrivateMemorySize64},{"managedHeapBytes",GC.GetTotalMemory(false)},
                     {"managedAllocatedBytes",AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize-initialAllocated},{"allocationScope","Host AppDomain, all threads; not isolated audio callback allocation measurement"},{"gen0Collections",GC.CollectionCount(0)-initialGen0},{"gen1Collections",GC.CollectionCount(1)-initialGen1},{"gen2Collections",GC.CollectionCount(2)-initialGen2},
                     {"receivedBlocks",receivedBlocks},{"rejectedBlocks",rejectedBlocks},{"producerError",producerError},{"rendererExitCode",child != null && child.HasExited ? (object)child.ExitCode : null},
+                    {"drainedShutdownBlocks",drainedShutdownBlocks},
                     {"audio",output != null ? output.Metrics() : null},{"actions",actions},{"rendererDiagnosticsDropped",droppedLogLines},{"listening","not confirmed"},{"loopback",capture != null ? capture.Metrics() : null}
                 };
                 result["beaconFrequencyHz"] = beaconFrequencyHz;
                 result["beaconLevel"] = beaconLevel;
+                result["beaconOutputTrimDb"]=auditionOutputEnabled?12:0;
+                result["pcmQueue"]=new Dictionary<string,object>{{"samples",pcmQueueSamples},{"blockHistogram",pcmQueueBlocks},{"blockFrames",512},{"sampleRate",48000},{"initialCredits",4},{"ringCapacityBlocks",PcmRing.Slots},
+                    {"measurementScope","Main-loop concurrent SPSC snapshots; each occupied block contains 1..512 remaining frames; startup and terminal empty samples retained. No endpoint presentation latency claim."}};
+                result["ownedRecorder"] = ownedRecorder==null?null:ownedRecorder.Metrics();
                 if(acousticSettingsMonitor!=null)result["acousticSettings"]=acousticSettingsMonitor.Metrics();
 #if GEOMETRY_LIVE
                 if(geometryRelay!=null){result["geometryRelay"]=geometryRelay.Metrics();var rejected=geometryRelay.RejectedEvidence();if(rejected!=null)
                     using(var file=new FileStream(Path.Combine(directory,"geometry-rejected.bin"),FileMode.CreateNew,FileAccess.Write))file.Write(rejected,0,rejected.Length);}
 #endif
-                result["listenerForwarding"]=new Dictionary<string,object>{{"written",listenerMessagesWritten},{"maxHostQueueAgeMs",maxListenerHostQueueAgeMs},{"first128Receipts",listenerReceipts},{"remainingClockUncertainty","Anonymous-pipe transit after write plus Windows device buffering are separate from acoustic delay"}};
+                result["listenerForwarding"]=new Dictionary<string,object>{{"written",listenerMessagesWritten},{"maxHostQueueAgeMs",maxListenerHostQueueAgeMs},{"first128Receipts",listenerReceipts},{"maximumCommandQueueAgeMs",maximumCommandQueueAgeMs},{"maximumControlWriteMs",maximumControlWriteMs},{"controlQueueHigh",controlQueueHigh},{"remainingClockUncertainty","Anonymous-pipe transit after write plus Windows device buffering are separate from acoustic delay"}};
 #if STATE_TRANSPORT
-                if (pipe != null) result["transport"] = new Dictionary<string,object>{{"accepted",pipe.Accepted},{"rejected",pipe.Rejected},{"connections",pipe.Connections},{"lastAgeMs",pipe.Accepted>0?(object)pipe.LastAgeMs:null},{"error",pipe.Error},{"diagnostic",pipe.Diagnostic},{"strict",true},{"outputMuted",output==null||output.Muted},{"hostStopped",stop}};
+                if (pipe != null) result["transport"] = new Dictionary<string,object>{{"accepted",pipe.Accepted},{"rejected",pipe.Rejected},{"startupDiscarded",pipe.StartupDiscarded},{"shutdownCompleted",pipe.ShutdownCompleted},{"connections",pipe.Connections},{"lastAgeMs",pipe.Accepted>0?(object)pipe.LastAgeMs:null},{"error",pipe.Error},{"diagnostic",pipe.Diagnostic},{"strict",true},{"outputMuted",output==null||output.Muted},{"hostStopped",stop}};
 #endif
-                WriteNew(Path.Combine(directory, "host-result.json"), json.Serialize(result));
-                lock (logLock) WriteNew(Path.Combine(directory, "renderer-diagnostics.txt"), string.Join(Environment.NewLine, rendererLog.ToArray()));
-                if (capture != null) capture.Save(Path.Combine(directory, "loopback.wav"));
+                result["deviceFreeFixture"]=fixturePipe!=null;
+                if(listeningFixture)result["deviceFreeSink"]=ListeningFixtureMetrics(ring);
+                result["geometryRelayDisposalDeferred"]=geometryRelayDisposalDeferred;
+                result["ownedThreadsJoined"]=(inputWriter==null||!inputWriter.IsAlive)&&(reader==null||!reader.IsAlive)&&(stderr==null||!stderr.IsAlive);
+                if(capture!=null)ShutdownStep("loopback-evidence",delegate{capture.Save(Path.Combine(directory,"loopback.wav"));});
+                if(child!=null&&(inputWriter==null||!inputWriter.IsAlive)&&(reader==null||!reader.IsAlive)&&(stderr==null||!stderr.IsAlive)){ShutdownStep("producer-dispose",child.Dispose);childDisposed=true;}
+                PublishTerminal(directory,result);
                 Console.WriteLine("Host stopped. Underflow frames: " + ring.UnderflowFrames + "; peak submitted: " + ring.Peak.ToString("G6", CultureInfo.InvariantCulture) + "; output: " + directory);
-                if (child != null) child.Dispose();
+                }catch(Exception ex){RecordFailure("terminal-summary",ex.Message,ex);
+                    if(!childDisposed&&child!=null&&(inputWriter==null||!inputWriter.IsAlive)&&(reader==null||!reader.IsAlive)&&(stderr==null||!stderr.IsAlive)){ShutdownStep("producer-dispose",child.Dispose);childDisposed=true;}
+                    PublishTerminal(directory,new Dictionary<string,object>{{"schemaVersion",1},{"summaryFallback",true},{"deviceFreeFixture",fixturePipe!=null},{"geometryRelayDisposalDeferred",geometryRelayDisposalDeferred},{"durationWallSeconds",wall.Elapsed.TotalSeconds},{"outputMuted",output==null||output.Muted},{"hostStopped",stop}});}
             }
             return producerError != null || (output != null && output.Error != null) ? 1 : 0;
         }
         private static Dictionary<string, object> Action(string name, double ms, long frame) { return new Dictionary<string,object>{{"command",name},{"hostMs",ms},{"consumedFrame",frame},{"qpc100ns",Stopwatch.GetTimestamp()*(10000000.0/Stopwatch.Frequency)}}; }
         internal static double ObservationAgeAtWrite(long observed,long now,long frequency){return Math.Max(0,(now-observed)*1000.0/frequency);}
         internal static void ListenerReceived(ListenerState state,double age){
+            if(listenerFixtureHook!=null)listenerFixtureHook();
 #if GEOMETRY_LIVE
             if(geometryRelay!=null){geometryRelay.Listener(state);return;}
 #endif
             Enqueue(new ControlMessage{ListenerJson=Protocol.EncodeJson(state),ObservationTicks=state.ObservationTicks,QueuedTicks=Stopwatch.GetTimestamp(),Sequence=state.Sequence,ObservationQpc100ns=state.ObservationTicks*(10000000.0/state.ClockFrequency)});}
-        internal static void ListenerEnded(TransportResult ending){if(output!=null)output.Muted=true;stop=true;if(ending.Outcome!="deliberate-stop")producerError="Listener terminal: "+ending.Stage+"/"+ending.Code;Console.WriteLine("Listener terminal "+json.Serialize(ending)+"; owned output muted/stopping");stop=true;}
+        internal static void ListenerEnded(TransportResult ending){
+            if(output!=null)output.Stop();
+            long fixtureCompletedAtRequest=listeningFixture?Interlocked.Read(ref fixtureSinkFrames):0;
+            listenerTerminalBoundary=new Dictionary<string,object>{{"qpcTicks",Stopwatch.GetTimestamp()},{"qpcFrequency",Stopwatch.Frequency},
+                {"consumedFrame",output==null?0:output.ConsumerFrame},{"outputMuted",output==null||output.Muted},{"outputStopRequested",true}};
+            if(listeningFixture){listenerTerminalBoundary["fixtureCompletedFrames"]=fixtureCompletedAtRequest;listenerTerminalBoundary["fixtureSubmissionFrames"]=512;}
+            listenerTerminal=ending;if(ending.Outcome!="deliberate-stop")RecordFailure("listener-terminal","Listener terminal: "+ending.Stage+"/"+ending.Code);stop=true;Console.WriteLine("Listener terminal "+json.Serialize(ending)+"; owned output muted/stopping");}
         private static void Control(string command)
         {
-            if (command == "stop") { stop = true; if (output != null) output.Muted = true; }
+            if(stop)return;
+            if (command == "stop") { if (output != null) output.Stop();stop = true; }
             else if (command == "mute") { if (output != null) output.Muted = true; }
             else if (command == "start" || command == "resume") { if (output != null && output.Error == null) output.Muted = false; SendControl(command); }
             else if (command == "emit-stop") SendControl(command);
@@ -279,8 +346,8 @@ namespace RichAudio.Beacon.Windows
         private static void ReadDiagnostics()
         {
             try { ReadDiagnosticsCore(); }
-            catch(IOException ex) { if(!stop)producerError="Diagnostic pipe closed: "+ex.GetType().Name; }
-            catch(ObjectDisposedException) { if(!stop)producerError="Diagnostic pipe disposed"; }
+            catch(IOException ex) { RecordFailure("diagnostic-pipe",ex.Message,ex); }
+            catch(ObjectDisposedException ex) { RecordFailure("diagnostic-pipe-disposed",ex.Message,ex); }
         }
         private static void ReadDiagnosticsCore()
         {
@@ -307,8 +374,21 @@ namespace RichAudio.Beacon.Windows
             if(!overlong&&geometryRelay!=null)geometryRelay.Diagnostic(line);
 #endif
             if(!overlong && line.StartsWith("{\"type\":\"status\",",StringComparison.Ordinal))latestRendererStatus=line;
-            lock(logLock){if(!overlong&&rendererLog.Count<4096)rendererLog.Add(line);else droppedLogLines++;}
+            lock(logLock){
+                if(overlong){droppedLogLines++;return;}
+                if(rendererLog.Count<4094){rendererLog.Add(line);return;}
+                // Reserve the existing bound's final two slots for actual last
+                // progress and the first terminal record. Long trace fixtures
+                // must not lose the precise guard result after the prefix fills.
+                if(line.StartsWith("{\"type\":\"final\",",StringComparison.Ordinal)){
+                    if(overflowRendererFinal==null)overflowRendererFinal=line;else droppedLogLines++;
+                }else if(line.StartsWith("{\"type\":\"block\",",StringComparison.Ordinal)){
+                    if(overflowRendererBlock!=null)droppedLogLines++;overflowRendererBlock=line;
+                }else droppedLogLines++;
+            }
         }
+        internal static string[] RendererDiagnosticsSnapshot(){lock(logLock){
+            var retained=new List<string>(rendererLog);if(overflowRendererBlock!=null)retained.Add(overflowRendererBlock);if(overflowRendererFinal!=null)retained.Add(overflowRendererFinal);return retained.ToArray();}}
         private static void Send(string message)
         {
             if (child == null) return;
@@ -316,13 +396,13 @@ namespace RichAudio.Beacon.Windows
 #if GEOMETRY_LIVE
             if(geometryRelay!=null)maximum=65536;
 #endif
-            if(message.Length>maximum){producerError="Control message size limit";return;}
+            if(message.Length>maximum){RecordFailure("control-message","Control message size limit");return;}
             Enqueue(new ControlMessage{Text=message,QueuedTicks=Stopwatch.GetTimestamp()});
         }
         private static void Enqueue(ControlMessage message)
         {
             if(child==null)return;
-            lock(inputLock){if(inputQueue.Count>=64){producerError="Bounded control queue overflow";return;}inputQueue.Enqueue(message);controlQueueHigh=Math.Max(controlQueueHigh,inputQueue.Count);}inputSignal.Set();
+            lock(inputLock){if(inputStop){Interlocked.Increment(ref controlsRejectedDuringShutdown);return;}if(inputQueue.Count>=64){RecordFailure("control-queue","Bounded control queue overflow");return;}inputQueue.Enqueue(message);controlQueueHigh=Math.Max(controlQueueHigh,inputQueue.Count);}inputSignal.Set();
         }
         private static void WriteControls()
         {
@@ -331,12 +411,13 @@ namespace RichAudio.Beacon.Windows
                 // Framework Process.StandardInput inherits a console-dependent
                 // encoding, which can prepend a BOM to the first JSON frame.
                 // Own the byte encoding; no locale or console settings change.
-                using(var controlWriter=new StreamWriter(child.StandardInput.BaseStream,new UTF8Encoding(false,true)))
+                using(var controlWriter=new StreamWriter(child.StandardInput.BaseStream,new UTF8Encoding(false,true),1024,true))
                 {
                 while(!inputStop)
                 {
                     ControlMessage message=null;lock(inputLock){if(inputQueue.Count>0)message=inputQueue.Dequeue();}
                     if(message==null){inputSignal.WaitOne(50);continue;}
+                    maximumCommandQueueAgeMs=Math.Max(maximumCommandQueueAgeMs,(Stopwatch.GetTimestamp()-message.QueuedTicks)*1000.0/Stopwatch.Frequency);
                     string text=message.Text;
                     if(message.ListenerJson!=null)
                     {
@@ -349,24 +430,30 @@ namespace RichAudio.Beacon.Windows
                 }
                 }
             }
-            catch (IOException ex) { if (!stop) producerError = "Control pipe closed: " + ex.GetType().Name; }
-            catch (ObjectDisposedException) { }
-            catch (InvalidOperationException) { if (!stop) producerError = "Control producer unavailable"; }
+            catch (IOException ex) { RecordFailure("control-pipe",ex.Message,ex); }
+            catch (ObjectDisposedException ex) { RecordFailure("control-writer-disposed",ex.Message,ex); }
+            catch (InvalidOperationException ex) { RecordFailure("control-producer",ex.Message,ex); }
         }
         private static void ReadBlocks(Stream stream, PcmRing ring)
         {
             byte[] header = new byte[16], payload = new byte[4096]; float[] samples = new float[1024]; uint sequence = 0;
             try
             {
-                while (!stop && BlockProtocol.ReadExact(stream, header, header.Length))
+                // After output Stop, continue draining already credited stdout
+                // until the owned producer exits. Abandoning the pipe here can
+                // deadlock its pending write and prevent normal stop/final.
+                while (BlockProtocol.ReadExact(stream, header, header.Length))
                 {
                     int frames = BlockProtocol.ValidateHeader(header, sequence++);
                     if (!BlockProtocol.ReadExact(stream, payload, frames * 8)) throw new EndOfStreamException("Missing PCM payload");
                     Buffer.BlockCopy(payload, 0, samples, 0, frames * 8);
+                    if(auditionOutputEnabled)for(int i=0;i<frames*2;i++)if(float.IsNaN(samples[i])||float.IsInfinity(samples[i])||Math.Abs(samples[i])>.5f)throw new InvalidDataException("Audition pre-master ceiling violated");
+                    if(stop){drainedShutdownBlocks++;continue;}
+                    CaptureListeningFixturePreHost(payload,frames);
                     if (!ring.TryWrite(samples, frames)) throw new InvalidDataException("Producer exceeded granted PCM credits"); receivedBlocks++;
                 }
             }
-            catch (Exception ex) { if (!stop) { rejectedBlocks++; producerError = ex.GetType().Name + ": " + ex.Message; } }
+            catch (Exception ex) { rejectedBlocks++; RecordFailure("PCM-reader",ex.Message,ex); }
             finally { if(producerError==null)ring.EndOfStream=true; producerEnded = true; }
         }
         private static void ReadWav(string filename, PcmRing ring)
@@ -393,7 +480,7 @@ namespace RichAudio.Beacon.Windows
                     if (!found) throw new InvalidDataException("No WAV data");
                 }
             }
-            catch (Exception ex) { if (!stop) producerError = ex.GetType().Name + ": " + ex.Message; }
+            catch (Exception ex) { RecordFailure("WAV-reader",ex.Message,ex); }
             finally { if(producerError==null)ring.EndOfStream=true; producerEnded = true; }
         }
         private static string Quote(string text) { if (text.IndexOf('"') >= 0) throw new ArgumentException("Unsupported quote in path"); return "\"" + text + "\""; }

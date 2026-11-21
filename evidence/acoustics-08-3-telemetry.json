@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "scope": "Offline original synthetic fixture; aggregate only, no private coordinates, game data, PCM or proprietary assets",
+  "date": "2026-10-29",
+  "command": "node --test tests/Test-SoundMapTelemetry.mjs",
+  "tests": {"passed": 11, "failed": 0},
+  "checks": {
+    "bitIdenticalControlsAndOwnedPcmWithTelemetry": true,
+    "realSelectedSolverContactsOrders": [0, 1, 2],
+    "originalRetardedEmissionPosition": true,
+    "rejectedUnknownPrunedAndObstructedDistinct": true,
+    "actualWorkerOptInAndCacheReset": true,
+    "restartedWorkerStreamIdentitySeparateFromListenerSession": true,
+    "initialMissingObservationHasExplicitUnavailableIdentity": true,
+    "sharedNativeTransformAndOriginalGeometryExpiry": true,
+    "frameByteCap": 262144,
+    "immutableGeometryByteCap": 524288,
+    "defaultVisualPathCap": 128,
+    "maximumVisualPathCap": 256
+  },
+  "measurement": {
+    "scene": "original-enclosure",
+    "sources": 1,
+    "solverHz": 40,
+    "visualFps": 20,
+    "updatesPerRun": 240,
+    "visualFramesPerEnabledRun": 120,
+    "hardwareGpuDispatches": 0,
+    "pairs": [
+      {"disabled": {"wallMs": 105.5644, "cpuMs": 125, "updateP50Ms": 0.4172, "updateP95Ms": 0.5811, "updateMaxMs": 0.6543}, "enabled": {"wallMs": 128.0582, "cpuMs": 157, "updateP50Ms": 0.5962, "updateP95Ms": 0.6715, "updateMaxMs": 0.8766, "serializationP95Ms": 0.2117}},
+      {"disabled": {"wallMs": 104.0707, "cpuMs": 109, "updateP50Ms": 0.4094, "updateP95Ms": 0.5806, "updateMaxMs": 0.8311}, "enabled": {"wallMs": 127.9255, "cpuMs": 172, "updateP50Ms": 0.5899, "updateP95Ms": 0.7414, "updateMaxMs": 0.8499, "serializationP95Ms": 0.2286}},
+      {"disabled": {"wallMs": 101.3253, "cpuMs": 94, "updateP50Ms": 0.4079, "updateP95Ms": 0.5499, "updateMaxMs": 0.6382}, "enabled": {"wallMs": 127.0055, "cpuMs": 125, "updateP50Ms": 0.5875, "updateP95Ms": 0.7300, "updateMaxMs": 0.9186, "serializationP95Ms": 0.2305}}
+    ],
+    "addedWallMsPerSolveRange": [0.0937242, 0.1070008],
+    "limits": "Short warmed CPU-only synthetic measurements, not live GTA deadlines or whole-service recording overhead. Windows process CPU counters are coarse and noisy. No assertion of a GPU speedup or acoustic audibility."
+  },
+  "additionalRegression": {"passed": 74, "failed": 0, "suites": ["Test-AcousticStreaming.mjs", "Test-ObservedGeometryAudio.mjs", "Test-AcousticQuality.mjs", "Test-AcousticAcceleration.mjs"]},
+  "liveActions": {"gtaWrites": false, "gtaLaunch": false, "rphLaunch": false, "audioEndpoint": false}
+}

@@ -35,3 +35,13 @@ test('publisher clocks require current packet delivery evidence and tolerate a l
   assert.equal(first.upper,10205);assert.equal(next.upper,10201);assert.equal(next.lower,10200);
   assert.throws(()=>clock.now({...a,queueUncertaintyMs:2,delivery:{maximumMs:1,basis:'measured-forwarding-upper-bound',reference:'relay:3'}}),/uncertainty/);
 });
+test('listener context is delivered without inventing a geometry clock and a bounded initial three-event transaction is accepted',()=>{
+  const f=fixture(),context={type:'listener-context-config',configuration:{contextEpoch:1}},config=liveConfiguration();
+  const geometry={type:'geometry',groups:[]};delete config.configuration.clock.delivery;
+  f.gate.receive(stage(1,[context,config,geometry]));assert.equal(f.applied.length,0);
+  f.tick(1);f.gate.receive({type:'geometry-relay-commit',sequence:1,maximumMs:1});
+  assert.equal(f.applied.length,1);assert.equal(f.applied[0].messages[0].configuration.clock,undefined);
+  assert.equal(f.applied[0].messages[1].configuration.clock.delivery.reference,'relay:1');
+  const overflow=fixture();overflow.gate.receive(stage(1,[context,config,geometry,geometry]));
+  assert.equal(overflow.gate.stats.rejected,1);assert.equal(overflow.applied.length,0);
+});

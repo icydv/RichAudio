@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual producer/worker/renderer static direct isolation; early reflections off for source-calibration comparison; no endpoint, no normalization; both untrimmed .44 source to retain failed near-field baseline",
+  "sourceRadius": 10,
+  "trimDb": 12,
+  "hostGain": 0.2,
+  "measurements": [
+    {
+      "distance": 1,
+      "original": {
+        "peak": 0.17247383296489716,
+        "rms": 0.10981865010361998,
+        "crestFactorDb": 3.9209422792266206,
+        "harmonic2RelativeDb": -9.123650457042858,
+        "harmonic3RelativeDb": -16.49115597464979,
+        "sha256": "b1886b7c8cbc457342f4f7d391fcc9e56f47757d065c8dc703468fec561b4228"
+      },
+      "corrected": {
+        "peak": 0.025784838944673538,
+        "rms": 0.016417888242542086,
+        "crestFactorDb": 3.9209425603951082,
+        "harmonic2RelativeDb": -9.12365052228366,
+        "harmonic3RelativeDb": -16.49115614852761,
+        "sha256": "f0123c8948f531ddf3f08565c386465bf15494ad259a7a4cc87226d44925a6ed"
+      },
+      "levelChangeDb": -16.507176119253483,
+      "maximumSampleDifference": 0.14668899588286877,
+      "pcmBitIdentical": false
+    },
+    {
+      "distance": 6.0827625302982185,
+      "original": {
+        "peak": 0.02831585891544819,
+        "rms": 0.01803392160250321,
+        "crestFactorDb": 3.9187912482037666,
+        "harmonic2RelativeDb": -9.136639755208922,
+        "harmonic3RelativeDb": -16.523982102782817,
+        "sha256": "ada7a8f8cf4e9546727b3be6a11d92d6da2783c6ea477f752862b97839094194"
+      },
+      "corrected": {
+        "peak": 0.022649381309747696,
+        "rms": 0.014425032234707345,
+        "crestFactorDb": 3.9187910201657066,
+        "harmonic2RelativeDb": -9.136639779967625,
+        "harmonic3RelativeDb": -16.523982078706595,
+        "sha256": "b586384f309de948e3125ba9090c4a483c651f62114de0bd1076ea4d15a1e360"
+      },
+      "levelChangeDb": -1.9394677009690753,
+      "maximumSampleDifference": 0.005666477605700493,
+      "pcmBitIdentical": false
+    },
+    {
+      "distance": 8,
+      "original": {
+        "peak": 0.021517101675271988,
+        "rms": 0.013704727386152492,
+        "crestFactorDb": 3.918267421110215,
+        "harmonic2RelativeDb": -9.14349451272603,
+        "harmonic3RelativeDb": -16.541631543399134,
+        "sha256": "10a29792bf467a44a1b581ab5a8b93218537a4ed1da083f8151e45b72eb58f14"
+      },
+      "corrected": {
+        "peak": 0.020312143489718437,
+        "rms": 0.012937262607620173,
+        "crestFactorDb": 3.918267240983244,
+        "harmonic2RelativeDb": -9.143494442684627,
+        "harmonic3RelativeDb": -16.541631615873584,
+        "sha256": "7f8a453728a1849885ce70c195e4b9c4d63ea0bb599d75a0a828566dfc4efb29"
+      },
+      "levelChangeDb": -0.5005601441890497,
+      "maximumSampleDifference": 0.0012049581855535507,
+      "pcmBitIdentical": false
+    },
+    {
+      "distance": 10,
+      "original": {
+        "peak": 0.01720440201461315,
+        "rms": 0.010961684399531919,
+        "crestFactorDb": 3.9152457620632153,
+        "harmonic2RelativeDb": -9.14422795043626,
+        "harmonic3RelativeDb": -16.542860588677566,
+        "sha256": "400e5d8fae2b313e3135ed47d1ce65a7d2213137dbee57984cd7c0e4132312d0"
+      },
+      "corrected": {
+        "peak": 0.01720440201461315,
+        "rms": 0.010961684399531919,
+        "crestFactorDb": 3.9152457620632153,
+        "harmonic2RelativeDb": -9.14422795043626,
+        "harmonic3RelativeDb": -16.542860588677566,
+        "sha256": "400e5d8fae2b313e3135ed47d1ce65a7d2213137dbee57984cd7c0e4132312d0"
+      },
+      "levelChangeDb": 0,
+      "maximumSampleDifference": 0,
+      "pcmBitIdentical": true
+    },
+    {
+      "distance": 12,
+      "original": {
+        "peak": 0.014337016269564629,
+        "rms": 0.009134124265682934,
+        "crestFactorDb": 3.915837247638565,
+        "harmonic2RelativeDb": -9.142762876633023,
+        "harmonic3RelativeDb": -16.53820354286087,
+        "sha256": "068002bebdf4114bdd3fa73508c4c8033861e550ee2a7f4ebc029c5053584a65"
+      },
+      "corrected": {
+        "peak": 0.014337016269564629,
+        "rms": 0.009134124265682934,
+        "crestFactorDb": 3.915837247638565,
+        "harmonic2RelativeDb": -9.142762876633023,
+        "harmonic3RelativeDb": -16.53820354286087,
+        "sha256": "068002bebdf4114bdd3fa73508c4c8033861e550ee2a7f4ebc029c5053584a65"
+      },
+      "levelChangeDb": 0,
+      "maximumSampleDifference": 0,
+      "pcmBitIdentical": true
+    }
+  ],
+  "qualifiedGeometryEvaluations": {
+    "profile": {
+      "frequencyHz": 600,
+      "sourceLevel": 0.44,
+      "trimDb": 12,
+      "hostGain": 0.2,
+      "quality": "balanced",
+      "acceleration": "auto",
+      "sampleRate": 48000,
+      "blockFrames": 512
+    },
+    "ceiling": 0.5,
+    "rejectedEvaluations": [
+      {
+        "radius": 6,
+        "geometryScale": 0.2,
+        "transitionPolicy": "prior independent attack/release",
+        "classification": "over-ceiling",
+        "firstOffendingAudioFrame": 33607,
+        "channel": "right",
+        "originalSample": -0.1272178590297699,
+        "postTrimSample": -0.5064634084701538,
+        "predictedBlockPeak": 0.5268998742103577,
+        "pathCount": 4
+      },
+      {
+        "radius": 8,
+        "geometryScale": 0.01,
+        "transitionPolicy": "prior independent attack/release",
+        "classification": "over-ceiling",
+        "firstOffendingAudioFrame": 57428,
+        "channel": "right",
+        "originalSample": -0.12592506408691406,
+        "postTrimSample": -0.5013167262077332,
+        "predictedBlockPeak": 0.5340964794158936,
+        "pathCount": 4
+      },
+      {
+        "radius": 8,
+        "geometryScale": 0.01,
+        "transitionPolicy": "corrected complementary20ms replacement",
+        "classification": "over-ceiling",
+        "firstOffendingAudioFrame": 66629,
+        "channel": "right",
+        "originalSample": -0.125644713640213,
+        "postTrimSample": -0.500200629234314,
+        "predictedBlockPeak": 0.500917911529541,
+        "pathCount": 4,
+        "phase": "steady18blocks after revision; exceeds20ms release duration"
+      }
+    ],
+    "passingEvaluation": {
+      "radius": 10,
+      "transitionPolicy": "corrected complementary20ms replacement",
+      "cases": [
+        {
+          "geometryScale": 0.01,
+          "peak": 0.432587206363678,
+          "headroomDb": 1.2579266634300215
+        },
+        {
+          "geometryScale": 0.05,
+          "peak": 0.425043523311615,
+          "headroomDb": 1.4107320284773475
+        },
+        {
+          "geometryScale": 0.1,
+          "peak": 0.4074791371822357,
+          "headroomDb": 1.777292528934372
+        },
+        {
+          "geometryScale": 0.2,
+          "peak": 0.35532790422439575,
+          "headroomDb": 2.966813799313774
+        },
+        {
+          "geometryScale": 1,
+          "peak": 0.30281856656074524,
+          "headroomDb": 4.355750100299545
+        },
+        {
+          "geometryScale": 2,
+          "peak": 0.15872587263584137,
+          "headroomDb": 9.966445618774616
+        }
+      ],
+      "verifiedErrorCounts": {
+        "guardRejectedBlocks": 0,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "rendererLimitedSamples": 0
+      },
+      "scopeLimit": "Qualified bounded two-surface/four-path fixture with movement, revisions, generation release/reacquisition and expiry; not a universal all-world level guarantee"
+    }
+  },
+  "limits": "Original model fixtures only. Exact far-field direct PCM comparison and measured four-path headroom do not prove every GTA environment or universal reflected-path bound."
+}

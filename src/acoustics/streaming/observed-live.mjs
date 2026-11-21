@@ -1,7 +1,7 @@
 // Opt-in worker boundary. No game/device IO; existing causal solver owns propagation.
 import { observationCoordinates, ObservedGeometryFeed, modelPoint, modelDirection, modelVelocity } from '../engine/observed-geometry.mjs';
-import { freeze, requireValue } from '../engine/contracts.mjs';
-import { vector } from '../research/local-geometry.mjs';
+import { freeze, requireValue, conditionalDirectScene } from '../engine/contracts.mjs';
+import { vector, inBox } from '../research/local-geometry.mjs';
 import { validateNeutralEnvelope } from './listener-control.mjs';
 
 const id=x=>typeof x==='string' && /^[\w.:-]{1,80}$/.test(x);
@@ -59,11 +59,50 @@ export class ObservedSimulationInput {
   constructor(simulation,sourceIds){
     this.simulation=simulation;this.sourceIds=sourceIds;this.feed=new ObservedGeometryFeed();
     this.config=null;this.epoch=0;this.lastRevision=0;this.lastUpdate=-Infinity;
+    this.context=null;this.contextEpoch=0;this.directScene=null;this.lastAnchor=null;this.poseAccepted=false;this.transportAccepted=false;
     this.stats={configured:0,accepted:0,rejected:0,expired:0,poseRejected:0};
     this.status={mode:'missing-configuration',reason:null};
   }
-  clear(reason,mode='rejected'){
-    this.feed.scene=null;this.simulation.replaceScene(null);this.status={mode,reason};
+  clear(reason,mode='rejected',permitDirect=true){
+    this.feed.scene=null;this.simulation.replaceScene(permitDirect?this.directScene:null);
+    this.status=this.directScene&&permitDirect?{mode:'conditional-direct-only',geometryMode:mode,reason,
+      visibilityAssumption:'unobserved-space-assumed-clear',geometryPresent:false}:{mode,reason};
+  }
+  contextConfiguration(c,now){
+    requireValue(c&&Number.isSafeInteger(c.contextEpoch)&&c.contextEpoch>this.contextEpoch&&
+      /^[a-f0-9]{32}$/.test(c.listenerSession)&&id(c.build)&&Number.isSafeInteger(c.minimumListenerGeneration)&&c.minimumListenerGeneration>0,
+      'listener context identity/epoch');
+    requireValue(this.sourceIds.length===1&&this.sourceIds[0]==='beacon-0'&&c.directPath?.mode==='listener-only-conditional-direct'&&
+      c.directPath.sourceId==='beacon-0'&&c.directPath.rights==='original-generated'&&
+      c.directPath.visibilityAssumption==='unobserved-space-assumed-clear','explicit original beacon conditional-direct authorisation');
+    if(this.context?.listenerSession===c.listenerSession)requireValue(c.minimumListenerGeneration>(this.lastListenerGeneration??this.context.minimumListenerGeneration),
+      'new context requires a new listener generation');
+    const coordinates=observationCoordinates(c.coordinates),lo=vector(c.region?.minNative),hi=vector(c.region?.maxNative);
+    requireValue(lo.every((x,i)=>hi[i]>x),'bounded native model region required');
+    const corners=[];for(const x of [lo[0],hi[0]])for(const y of [lo[1],hi[1]])for(const z of [lo[2],hi[2]])corners.push(modelPoint(coordinates,[x,y,z]));
+    const modelBounds={min:[0,1,2].map(i=>Math.min(...corners.map(p=>p[i]))),max:[0,1,2].map(i=>Math.max(...corners.map(p=>p[i])))};
+    const direct=conditionalDirectScene({calibration:coordinates,modelBounds,listenerSession:c.listenerSession,contextEpoch:c.contextEpoch,
+      sourceId:c.directPath.sourceId,visibilityAssumption:c.directPath.visibilityAssumption,engine:c.engine});
+    this.coordinates=coordinates;this.owned=null;this.sources(c.sources,now);
+    this.context=freeze(structuredClone(c));this.contextEpoch=c.contextEpoch;this.directScene=direct;this.lastAnchor=null;this.poseAccepted=false;
+    this.config=null;this.clock=null;this.feed=new ObservedGeometryFeed();this.lastRevision=0;this.lastUpdate=-Infinity;
+    this.clear(null,'not-requested');this.stats.configured++;
+  }
+  listenerTime(anchor){
+    requireValue(!anchor?.clockError,anchor?.clockError);
+    const envelope={type:'listener',state:anchor?.state,receiptAgeMs:anchor?.receiptAgeMs};
+    const old=this.lastAnchor;
+    if(old?.session===anchor?.state?.session&&old.sequence===anchor.state.sequence)
+      requireValue(JSON.stringify(old)===JSON.stringify(anchor.state),'listener packet identity changed without sequence');
+    const m=validateNeutralEnvelope(envelope,old&&old.sequence!==anchor?.state?.sequence?old:null);
+    const d=anchor.delivery,fixture=d?.basis==='controlled-fixture';
+    requireValue(d&&id(d.reference)&&Number.isFinite(d.maximumMs)&&d.maximumMs>=0&&d.maximumMs<=10&&
+      (fixture||d.basis==='measured-forwarding-upper-bound')&&(fixture||d.maximumMs>0),'listener measured forwarding evidence required');
+    requireValue(Number.isFinite(anchor.queueAgeMs)&&anchor.queueAgeMs>=0&&anchor.queueAgeMs<=250&&
+      m.receiptAgeMs+anchor.queueAgeMs+d.maximumMs<=250,'listener context freshness');
+    requireValue(m.state.valid&&!m.state.paused&&m.state.listenerKind==='camera'&&m.state.coordinates==='gta-native-unscaled'&&
+      m.state.units==='native-unverified','valid native camera listener required');
+    this.lastAnchor=m.state;return m;
   }
   sources(sources,now) {
     requireValue(Array.isArray(sources)&&sources.length===this.sourceIds.length,'owned source count');
@@ -77,7 +116,9 @@ export class ObservedSimulationInput {
       const positionNative=vector(s.positionNative),velocityNative=vector(s.velocityNative),
         forwardNative=modelDirection(this.coordinates,s.forwardNative),upNative=modelDirection(this.coordinates,s.upNative);
       requireValue(Math.hypot(...modelVelocity(this.coordinates,velocityNative))<=100,'mapped source speed');
-      return {...s,positionNative,velocityNative,forward:forwardNative,up:upNative,at:now};
+      const nearFieldRadius=s.nearFieldRadius??0;
+      requireValue(Number.isFinite(nearFieldRadius)&&nearFieldRadius>=0&&nearFieldRadius<=10,'finite source radius');
+      return {...s,nearFieldRadius,positionNative,velocityNative,forward:forwardNative,up:upNative,at:now};
     });
     this.owned=freeze(checked);
   }
@@ -93,17 +134,22 @@ export class ObservedSimulationInput {
         'coordinate/context change requires a new listener generation');
     }
     const coordinates=observationCoordinates(c.coordinates),clock=new ObservationClock(c.clock);
-    this.coordinates=coordinates;this.owned=null;this.sources(c.sources,now);
+    if(this.context){
+      requireValue(c.listenerSession===this.context.listenerSession&&c.minimumListenerGeneration>=this.context.minimumListenerGeneration&&
+        c.build===this.context.build&&JSON.stringify(c.coordinates)===JSON.stringify(this.context.coordinates)&&
+        JSON.stringify(c.sources)===JSON.stringify(this.context.sources)&&JSON.stringify(c.region)===JSON.stringify(this.context.region),
+        'geometry must attach to established listener/source context');
+    }else{this.coordinates=coordinates;this.owned=null;this.sources(c.sources,now);}
     this.config=freeze(structuredClone(c));this.clock=clock;this.epoch=c.epoch;
     this.feed=new ObservedGeometryFeed();this.lastRevision=0;this.lastUpdate=-Infinity;
-    this.simulation.replaceScene(null);this.stats.configured++;
-    this.status={mode:'waiting-for-geometry',reason:null};
+    this.clear(null,'waiting-for-geometry');this.stats.configured++;
   }
   consume(events,anchor,now) {
     requireValue(Array.isArray(events)&&events.length<=liveGeometryLimits.events,'geometry event budget');
     for(const event of events){
       try {
         requireValue(Buffer.byteLength(JSON.stringify(event))<=liveGeometryLimits.bytes,'geometry byte budget');
+        if(event.type==='listener-context-config'){this.contextConfiguration(event.configuration,now);continue;}
         if(event.type==='geometry-config'){this.configure(event.configuration,now);continue;}
         requireValue(this.config&&event.epoch===this.epoch,'geometry configuration missing/incompatible');
         if(event.type==='owned-sources'){this.sources(event.sources,now);continue;}
@@ -116,7 +162,7 @@ export class ObservedSimulationInput {
           requireValue(id(event.unavailableReason)&&Array.isArray(event.groups)&&!event.groups.length,'unavailable geometry notice');
           this.clear(event.unavailableReason,'unavailable');continue;
         }
-        requireValue(anchor?.state.session===this.config.listenerSession,'listener/geometry session pairing missing');
+        requireValue(anchor?.state?.session===this.config.listenerSession,'listener/geometry session pairing missing');
         const t=this.clock.now(anchor);
         requireValue(t.upper-this.lastUpdate>=liveGeometryLimits.minimumUpdateMs-1e-7,'geometry update rate');
         requireValue(Array.isArray(event.groups)&&event.groups.length<=liveGeometryLimits.groups,'live geometry group budget');
@@ -132,27 +178,34 @@ export class ObservedSimulationInput {
           visibilityAssumption:'unobserved-space-assumed-clear',motionAssumption:'static-during-snapshot',engine:this.config.engine});
         this.simulation.replaceScene(scene);this.lastUpdate=t.upper;this.stats.accepted++;
         this.status={mode:'active',reason:null,revision:event.revision,calibration:'declared-demonstration-scale',
-          physicalCalibration:'unverified',geometryKey:scene.geometryKey,clock:t,
+          physicalCalibration:'unverified',geometryKey:scene.geometryKey,clock:t,visibilityAssumption:'unobserved-space-assumed-clear',geometryPresent:true,
           originalObservationTimes:scene.observationModel.evidence.map(e=>({kind:e.kind,finishedMs:e.finishedMs,validUntilMs:e.originalValidUntilMs}))};
       }catch(error){
-        if(event?.type==='geometry-config'){this.config=null;this.owned=null;}
+        if(event?.type==='listener-context-config'){this.context=null;this.directScene=null;this.config=null;this.owned=null;}
+        if(event?.type==='geometry-config'){this.config=null;if(!this.context)this.owned=null;}
         this.stats.rejected++;this.clear(error.message);
       }
     }
   }
   prepareSnapshot(snapshot,anchor,now) {
     let time;
+    this.poseAccepted=false;this.transportAccepted=false;
     try{
-      requireValue(this.config&&anchor?.state.session===this.config.listenerSession&&
-        anchor.state.generation>=this.config.minimumListenerGeneration,'listener/geometry session pairing unavailable');
-      time=this.clock.now(anchor);
+      const context=this.context??this.config;
+      requireValue(context&&anchor?.state?.session===context.listenerSession&&
+        anchor.state.generation>=context.minimumListenerGeneration,'listener/source session pairing unavailable');
+      if(this.context)this.listenerTime(anchor);
+      if(this.config)time=this.clock.now(anchor);
+      this.transportAccepted=true;
       this.lastListenerGeneration=anchor.state.generation;
       if(this.feed.scene && !this.feed.current({session:this.config.geometrySession,build:this.config.build,
         interior:this.config.interior,nowMs:time.upper})){
         this.stats.expired++;this.clear('original observation lease expired','expired');
       }
       requireValue(snapshot?.listener?.coordinates==='gta-native-unscaled'&&snapshot.listener.units==='native-unverified'&&
-        snapshot.session===this.config.listenerSession,'native pose context required; no synthetic position fallback');
+        snapshot.session===context.listenerSession&&snapshot.listener.session===anchor.state.session&&
+        snapshot.listener.generation===anchor.state.generation&&snapshot.listener.sequence<=anchor.state.sequence&&
+        snapshot.listener.observationTicks<=anchor.state.observationTicks,'native pose context required; no synthetic position fallback');
       const s=snapshot.listener;
       const listener={position:modelPoint(this.coordinates,s.position),velocity:modelVelocity(this.coordinates,s.velocity),
         forward:modelDirection(this.coordinates,s.forward),up:modelDirection(this.coordinates,s.up),generation:s.generation,
@@ -160,15 +213,39 @@ export class ObservedSimulationInput {
       const sources=this.owned.map(s=>({id:s.id,generation:s.generation,
         position:modelPoint(this.coordinates,s.positionNative.map((x,i)=>x+s.velocityNative[i]*(now-s.at))),
         velocity:modelVelocity(this.coordinates,s.velocityNative),forward:s.forward,up:s.up,valid:true,
-        emitting:snapshot.emitting,directivity:0.2}));
+        emitting:snapshot.emitting,directivity:0.2,nearFieldRadius:s.nearFieldRadius}));
       this.simulation.observe({time:now,session:snapshot.session,generation:snapshot.generation,listener,sources,paused:snapshot.paused});
-    }catch(error){this.stats.poseRejected++;this.clear(error.message,'unavailable-pose');}
+      this.poseAccepted=listener.valid&&!snapshot.paused;
+      if(this.poseAccepted&&this.directScene&&!this.feed.scene&&this.simulation.scene!==this.directScene)this.clear(this.status.reason,this.status.geometryMode??this.status.mode);
+      this.listenerEvidence={session:snapshot.session,generation:s.generation,sequence:s.sequence,
+        observationTicks:s.observationTicks,clockFrequency:s.clockFrequency,gameTimeMs:s.gameTimeMs,
+        coordinates:s.coordinates,units:s.units,listenerKind:s.listenerKind,velocityKind:s.velocityKind};
+    }catch(error){this.stats.poseRejected++;this.clear(error.message,'unavailable-pose',false);}
     return time;
   }
   decorate(control,time,now){
     control.geometry={...this.status,stats:{...this.stats},sourceRights:'original-generated',
+      // Direction-only basis accompanies the actual worker result. Presentation
+      // must project native camera rotation in this same model coordinate frame.
+      presentationAxes:this.coordinates?.axes??null,
+      presentationScale:this.coordinates?.metresPerNativeUnit??null,
       mappedListener:this.simulation.records.at(-1)?.time===now?this.simulation.records.at(-1).listener:null,
       mappedSources:this.simulation.records.at(-1)?.time===now?this.simulation.records.at(-1).sources:null,clock:time??null};
+    const context=this.context??this.config,current=this.simulation.records.at(-1)?.time===now?this.simulation.records.at(-1):null,
+      bounds=this.simulation.scene?.modelBounds??this.simulation.scene?.tile?.bounds;
+    const listenerInRegion=Boolean(bounds&&current?.listener&&inBox(current.listener.position,bounds)),
+      sourcesInRegion=Boolean(bounds&&current&&this.sourceIds.every(id=>current.sources[id]&&inBox(current.sources[id].position,bounds)));
+    const originalReady=Boolean(this.poseAccepted&&context&&this.owned?.length&&this.simulation.scene&&listenerInRegion&&sourcesInRegion);
+    control.readiness={transportAccepted:this.transportAccepted,contextInitialized:Boolean(context&&this.owned?.length),
+      rendererReadyForOwnedEmission:originalReady,genuineGeometryPresent:Boolean(this.feed.scene?.tile),
+      observedSurfaceCount:this.feed.scene?.tile?.surfaces.length??0,
+      emissionUnavailableReason:!this.poseAccepted?'listener-unavailable':!context||!this.owned?.length?'context-unavailable':
+        !bounds?'propagation-model-unavailable':!listenerInRegion?'listener-outside-configured-region':!sourcesInRegion?'owned-source-outside-configured-region':null,
+      reflectionsActive:control.paths.some(p=>p.order>0),mode:this.simulation.scene?.directPath?'listener-only-conditional-direct':
+        this.feed.scene?'conditional-observed-geometry':'unavailable',visibilityAssumption:originalReady?'unobserved-space-assumed-clear':null};
+    if(this.simulation.captureSoundMap&&this.simulation.soundMapState){
+      this.simulation.soundMapState.coordinateContract=this.coordinates??null;
+      this.simulation.soundMapState.listenerEvidence=this.simulation.records.at(-1)?.time===now?this.listenerEvidence:null;}
     return control;
   }
   update(snapshot,anchor,now){
@@ -181,15 +258,16 @@ export class ObservedSimulationInput {
     if(frame.terminal)return this.decorate(this.simulation.completeUpdate(frame),time,now);
     const current=()=>{
       try{
-        time=this.clock.now(refreshAnchor());
-        if(!this.feed.current({session:this.config.geometrySession,build:this.config.build,interior:this.config.interior,nowMs:time.upper})){
+        if(this.context)this.listenerTime(refreshAnchor());
+        if(this.config)time=this.clock.now(refreshAnchor());
+        if(this.feed.scene&&!this.feed.current({session:this.config.geometrySession,build:this.config.build,interior:this.config.interior,nowMs:time.upper})){
           this.stats.expired++;this.clear('original observation lease expired during acoustic work','expired');return false;
         }
         return true;
-      }catch(error){this.stats.poseRejected++;this.clear(error.message,'unavailable-pose');return false;}
+      }catch(error){this.poseAccepted=false;this.stats.poseRejected++;this.clear(error.message,'unavailable-pose',false);return false;}
     };
     if(!current())return this.decorate(this.simulation.update(now,{geometryTimeMs:time?.upper}),time,now);
-    const queries=await backend.query(frame.scene.tile,frame.segments,{generation:frame.geometryEpoch});
+    const queries=frame.scene.directPath?null:await backend.query(frame.scene.tile,frame.segments,{generation:frame.geometryEpoch});
     if(!current())return this.decorate(this.simulation.update(now,{geometryTimeMs:time?.upper}),time,now);
     let control=this.simulation.completeUpdate(frame,queries);
     if(!current())control=this.simulation.update(now,{geometryTimeMs:time?.upper});
