@@ -9,12 +9,14 @@ const contexts=new WeakSet(),metadata=new WeakMap();
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x);
 const overlap=(a,b)=>a.min.every((n,i)=>n<b.max[i]&&a.max[i]>b.min[i]);
 const contains=(a,b)=>a.min.every((n,i)=>n<=b.min[i]&&a.max[i]>=b.max[i]);
+function supportedContext03(layout,authority){return authority==='original-parser-resource-fixture'&&['legacy-rsc7','gen9-rsc7'].includes(layout)||['original-reference-xml-fixture05','review-policy-static-xml05'].includes(authority)&&['legacy-codewalker-xml05','gen9-codewalker-xml05'].includes(layout);}
 
 export function createSceneTileContext03({tileId,worldDigest,scene,sourceBindings,layout='legacy-rsc7',authority='original-parser-resource-fixture'}={}){
  requireWorld(hex(worldDigest)&&validated.scene(scene)&&scene.tile&&scene.coordinateSpace===coordinateSpace&&!scene.observationModel,
   'explicit immutable finite scene/world identity required');identifier(tileId);
- requireWorld(authority==='original-parser-resource-fixture'&&['legacy-rsc7','gen9-rsc7'].includes(layout),
+ requireWorld(supportedContext03(layout,authority),
   'resource-layout fixtures confer no installed-world authority');
+ if(layout.endsWith('-codewalker-xml05'))requireWorld(scene.tile.surfaces.every(s=>s.provenance.kind===(authority==='review-policy-static-xml05'?'derived':'synthetic'))&&(authority!=='review-policy-static-xml05'||scene.tile.coverage==='partial'),'XML context provenance/partial coverage cannot promote reviewed exports');
  requireWorld(Array.isArray(sourceBindings)&&sourceBindings.length>0&&sourceBindings.length<=256,'bounded explicit resource dependencies');
  const seen=new Set(),sources=sourceBindings.map(b=>{identifier(b.id);requireWorld(!seen.has(b.id)&&hex(b.sha256),'unique resource dependency/digest');seen.add(b.id);return {id:b.id,sha256:b.sha256};}).sort((a,b)=>a.id.localeCompare(b.id));
  const contentDigest=digest({tileId,worldDigest,geometryKey:scene.geometryKey,materials:scene.materials,engine:scene.config,sources,layout,authority});
@@ -94,7 +96,7 @@ export function composeSceneUnion03({contexts:input,session,worldDigest,generati
  const scene=acousticScene(tile,materials,base.scene.config);
  const info=freeze({schema:1,contentKey,worldDigest,generation,session,tileIds:selected.map(c=>c.tileId),contextDigests:selected.map(c=>c.contentDigest),
   layout:base.layout,partitionCells:uncovered.cells,unpreparedVolumes:uncovered.regions.length,unknownRegions:unknown.length,surfaces:surfaces.size,
-  authority:base.authority,installedWorldVerified:false,coverage:'selected-original-resource-volumes-with-explicit-unknown-gaps',
+  authority:base.authority,installedWorldVerified:false,coverage:base.layout.endsWith('-codewalker-xml05')?'selected-xml-static-volumes-with-explicit-unknown-gaps':'selected-original-resource-volumes-with-explicit-unknown-gaps',
   sourceGenerationsModified:0,pcmQueueFramesAdded:0,geometryTimeMs,createdAt,validUntil});metadata.set(scene,info);return freeze({scene,metadata:info});
 }
 export function sceneUnionMetadata03(scene){requireWorld(metadata.has(scene),'prepared union scene brand');return metadata.get(scene);}
@@ -114,8 +116,8 @@ export function decodeUnionResult03(packet,expectedRequest){
  requireWorld(m.schema===1&&hex(m.worldDigest)&&/^[a-f0-9]{32}$/.test(m.session)&&Number.isSafeInteger(m.generation)&&m.generation>0&&m.generation<=2147483647&&
   Array.isArray(m.tileIds)&&m.tileIds.length>0&&m.tileIds.length<=8&&new Set(m.tileIds).size===m.tileIds.length&&
   Array.isArray(m.contextDigests)&&m.contextDigests.length===m.tileIds.length&&m.contextDigests.every(hex)&&
-  ['legacy-rsc7','gen9-rsc7'].includes(m.layout)&&m.authority==='original-parser-resource-fixture'&&
-  m.coverage==='selected-original-resource-volumes-with-explicit-unknown-gaps'&&m.sourceGenerationsModified===0&&m.pcmQueueFramesAdded===0,
+  supportedContext03(m.layout,m.authority)&&
+  m.coverage===(m.layout.endsWith('-codewalker-xml05')?'selected-xml-static-volumes-with-explicit-unknown-gaps':'selected-original-resource-volumes-with-explicit-unknown-gaps')&&m.sourceGenerationsModified===0&&m.pcmQueueFramesAdded===0,
   'worker metadata cannot promote layout, authority, coverage or source identity');m.tileIds.forEach(identifier);
  requireWorld(Number.isInteger(m.partitionCells)&&m.partitionCells>0&&m.partitionCells<=4096&&Number.isInteger(m.unpreparedVolumes)&&m.unpreparedVolumes>=0&&m.unpreparedVolumes<=32&&
   m.unknownRegions===packet.tile.missingRegions?.length&&m.unpreparedVolumes<=m.unknownRegions&&m.surfaces===packet.tile.surfaces?.length&&

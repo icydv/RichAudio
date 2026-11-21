@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BoundsFile>
+ <Bounds type="Composite">
+  <BoxMin x="0" y="0" z="0" />
+  <BoxMax x="0" y="0" z="0" />
+  <BoxCenter x="0" y="0" z="0" />
+  <SphereCenter x="0" y="0" z="0" />
+  <SphereRadius value="0" />
+  <Margin value="0" />
+  <Volume value="0" />
+  <Inertia x="0" y="0" z="0" />
+  <MaterialIndex value="0" />
+  <MaterialColourIndex value="0" />
+  <ProceduralID value="0" />
+  <RoomID value="0" />
+  <PedDensity value="0" />
+  <UnkFlags value="0" />
+  <PolyFlags value="0" />
+  <UnkType value="1" />
+  <Children>
+   <Item type="Geometry">
+    <BoxMin x="9" y="0" z="-5.5" />
+    <BoxMax x="11" y="4" z="-0.5" />
+    <BoxCenter x="0" y="0" z="0" />
+    <SphereCenter x="0" y="0" z="0" />
+    <SphereRadius value="0" />
+    <Margin value="0" />
+    <Volume value="0" />
+    <Inertia x="0" y="0" z="0" />
+    <MaterialIndex value="0" />
+    <MaterialColourIndex value="0" />
+    <ProceduralID value="0" />
+    <RoomID value="0" />
+    <PedDensity value="0" />
+    <UnkFlags value="0" />
+    <PolyFlags value="0" />
+    <UnkType value="1" />
+    <CompositeTransform>
+     0.87758255 0.47942555 0 0
+     -0.47942555 0.87758255 0 0
+     0 0 1 0
+     100 20 30 1
+    </CompositeTransform>
+    <CompositeFlags1>NONE</CompositeFlags1>
+    <CompositeFlags2>NONE</CompositeFlags2>
+    <GeometryCenter x="10" y="2" z="-3" />
+    <UnkFloat1 value="0" />
+    <UnkFloat2 value="0" />
+    <Materials>
+     <Item>
+      <Type value="7" />
+      <ProceduralID value="0" />
+      <RoomID value="0" />
+      <PedDensity value="0" />
+      <Flags>FLAG_SHOOT_THROUGH_FX</Flags>
+      <MaterialColourIndex value="0" />
+      <Unk value="1" />
+     </Item>
+    </Materials>
+    <Vertices>
+     -1, -2, -2.5
+     0, 0.9999695, 2.5
+     1, 2, -1.49998474
+    </Vertices>
+    <Polygons>
+     <Triangle m="0" v1="0" v2="1" v3="2" f1="0" f2="0" f3="0" />
+    </Polygons>
+   </Item>
+  </Children>
+ </Bounds>
+</BoundsFile>

@@ -170,7 +170,9 @@ export function parseVisualContext(text){
   fail(typeof text==='string'&&new TextEncoder().encode(text).length<=LIMITS.contextBytes,'Private context file exceeds 4 MiB');
   const c=JSON.parse(text);
   fail(c?.schemaVersion===1&&c.kind==='richaudio-visual-context'&&c.coordinateSpace===MODEL_SPACE,'Unsupported visual context schema');
-  fail(c.acousticUse===false&&c.knowledge==='historical'&&calibrationKey(c.calibration),'Context must declare historical visual-only use and its exact calibration');
+  fail(c.acousticUse===false&&c.knowledge==='historical'&&(calibrationKey(c.calibration)||c.inspection05?.mode==='admitted-xml05'&&c.calibration===null),'Context must declare historical visual-only use and its exact calibration');
+  if(c.inspection05!==undefined){const p=c.inspection05;fail(p&&Object.keys(p).sort().join(',')==='anchor,geometryGeneration,mode,modelSessionId,modelStreamId'&&['unqualified-xml05','admitted-xml05'].includes(p.mode)&&isPoint(p.anchor),'Bounded XML inspection context');
+    fail(p.mode==='unqualified-xml05'?[p.modelSessionId,p.modelStreamId,p.geometryGeneration].every(x=>x===null):[p.modelSessionId,p.modelStreamId,p.geometryGeneration].every(ident),'Inspection cannot invent model alignment');}
   fail(ident(c.provenance?.reference)&&['private-simplified-collision','original-synthetic'].includes(c.provenance.kind),'Context provenance required');
   fail(Array.isArray(c.tiles)&&c.tiles.length<=LIMITS.contextTiles,'Context tile budget exceeded');
   let vertices=0,faces=0;
@@ -186,6 +188,10 @@ export function parseVisualContext(text){
   return immutable(c);
 }
 export function visibleContext(c,geometry,listener,radius=80){
+  if(c?.inspection05){const p=c.inspection05;if(p.mode==='unqualified-xml05'){if(geometry)return {tiles:[],reason:'Unqualified inspection is hidden beside acoustic evidence'};listener=p.anchor;}
+    else if(!geometry||!isPoint(listener)||geometry.sessionId!==p.modelSessionId||geometry.streamId!==p.modelStreamId||geometry.generation!==p.geometryGeneration)return {tiles:[],reason:'No exact admitted XML model alignment'};
+    if(p.mode==='admitted-xml05'){const calibration=geometry.calibration??geometry.observationModel?.calibration??null;if(calibrationKey(c.calibration)!==calibrationKey(calibration)||(c.calibration===null)!==(calibration===null))return {tiles:[],reason:'XML inspection calibration mismatch'};}
+    const distance=t=>Math.hypot(...listener.map((x,i)=>Math.max(t.bounds.min[i]-x,0,x-t.bounds.max[i])));return {tiles:c.tiles.filter(t=>distance(t)<=radius).slice(0,LIMITS.visibleContextTiles),reason:p.mode==='unqualified-xml05'?'Unqualified XML inspection only; no acoustic authority':'Exact XML tile boundary inspection; no acoustic authority'};}
   if(!c||!geometry||!isPoint(listener))return {tiles:[],reason:'No compatible acoustic coordinate evidence'};
   const calibration=geometry.calibration||geometry.observationModel?.calibration;
   if(calibrationKey(c.calibration)!==calibrationKey(calibration))return {tiles:[],reason:'Coordinate calibration mismatch; context hidden'};

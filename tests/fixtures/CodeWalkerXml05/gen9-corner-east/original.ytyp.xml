@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CMapTypes>
+ <extensions />
+ <archetypes>
+  <Item type="CBaseArchetypeDef">
+   <lodDist value="100" />
+   <flags value="0" />
+   <specialAttribute value="0" />
+   <bbMin x="-2" y="-2" z="0" />
+   <bbMax x="2" y="2" z="4" />
+   <bsCentre x="0" y="0" z="2" />
+   <bsRadius value="3.46410155" />
+   <hdTextureDist value="0" />
+   <name>hash_075BCD15</name>
+   <textureDictionary />
+   <clipDictionary />
+   <drawableDictionary />
+   <physicsDictionary>hash_3ADE68B1</physicsDictionary>
+   <assetType>ASSET_TYPE_UNINITIALIZED</assetType>
+   <assetName>hash_01FCA055</assetName>
+   <extensions />
+  </Item>
+ </archetypes>
+ <name>hash_0153158E</name>
+ <dependencies />
+ <compositeEntityTypes itemType="CCompositeEntityType" />
+</CMapTypes>

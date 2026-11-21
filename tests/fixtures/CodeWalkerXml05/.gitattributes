@@ -1,0 +1,2 @@
+# Preserve exact actual-export bytes used by the XML identity checks.
+*.xml -text whitespace=cr-at-eol

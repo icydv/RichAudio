@@ -9,6 +9,7 @@ import {resolveLatencyProfile} from './latency-profile.mjs';
 import {isQualifiedStaticScene,staticSceneMetadata} from '../world/scene.mjs';
 import {isSceneUnion03,sceneUnionMetadata03} from '../world/scene-union03.mjs';
 import {StationaryEmissionController} from './stationary-emission.mjs';
+import {StockSourcePreparation05,stockSourceIdentity05} from './source-preparation05.mjs';
 const FS=48000,BLOCK=512,MAX=2,unit=v=>{const n=Math.hypot(...v);if(n<1e-8)throw Error('orientation discontinuity');return v.map(x=>x/n);};
 const mix=(a,b,u)=>a.map((x,i)=>x+(b[i]-x)*u),distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
 const pcmCounters=()=>({nonzeroBlocks:0,peak:0,sumSquares:0});
@@ -18,7 +19,8 @@ function observePcmBlock(left,counters,right=null){let peak=0,energy=0;
  if(peak>0)counters.nonzeroBlocks++;counters.peak=Math.max(counters.peak,peak);counters.sumSquares+=energy;
 }
 export class StockGameplay {
- constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null}){
+ constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled'}){
+  if(!['disabled','explicit-control05'].includes(sourcePreparationPolicy))throw Error('Explicit source preparation policy required');
   if(!['baseline','camera-source-01'].includes(continuityPolicy))throw Error('Explicit vehicle continuity policy required');
   if(!['baseline','arrived-segments-50'].includes(continuousTimingPolicy))throw Error('Explicit continuous timing policy required');
   if(continuousTimingPolicy==='arrived-segments-50'&&continuityPolicy!=='camera-source-01')throw Error('Arrived-segment research requires independent camera/source continuity');
@@ -44,6 +46,18 @@ export class StockGameplay {
   // One sampled block in eight, at most two selected sources. This is lineage
   // metadata only; it does not participate in source selection or DSP.
   this.latencyDiagnostics=latencyDiagnostics;this.lastTiming=null;this.captureTiming=false;this.latencyBrackets=[];
+  this.sourcePreparation05=sourcePreparationPolicy==='explicit-control05'?new StockSourcePreparation05({now:()=>this.now(),candidates:()=>this.sourceCandidates05(),createSource:(model,context,options)=>this.registry.createSource(model,context,options)}):null;
+ }
+ // Explicit startup/control work. No accept/render caller starts preparation.
+ prepareSources05(options={}){if(!this.sourcePreparation05)throw Error('Opt-in explicit-control05 source preparation required');return this.sourcePreparation05.prepare(options);}
+ cancelPreparedSources05(){if(!this.sourcePreparation05)throw Error('Opt-in explicit-control05 source preparation required');this.sourcePreparation05.cancel();return this.sourcePreparation05.diagnostics();}
+ sourceCandidates05(){
+  const latest=this.snapshots.at(-1);if(!latest||this.now()>=latest.wallExpires||!latest.frame.listener.valid||latest.frame.listener.paused)return [];
+  return latest.frame.vehicles.filter(v=>v.valid&&!this.slots.some(s=>s.identity===stockSourceIdentity05(v))).flatMap(v=>{
+   const resolved=this.registry.resolve(v.model,v.context);if(resolved.status!=='available')return [];
+   const profile=this.profiles?.profiles?.[resolved.bank.model],options={sourceGain:profile?.sourceGain??1,...(profile?.pressureSharesByState?{pressureSharesByState:profile.pressureSharesByState}:{})};
+   return [{identity:stockSourceIdentity05(v),vehicleId:v.id,session:this.session,model:v.model,context:v.context,bank:resolved.bank,options,expiresAt:latest.wallExpires}];
+  });
  }
  accept(frame,ageMs,validForMs=null){
   try{
@@ -67,6 +81,7 @@ export class StockGameplay {
    this.snapshots.push({time,frame:structuredClone(frame),wallExpires:validForMs===null?Infinity:this.now()+validForMs});while(this.snapshots.length>64)this.snapshots.shift();
    this.lastFrame=state.sequence;this.lastGeneration=state.generation;this.stats.acceptedFrames++;
    for(const v of frame.vehicles)if(v.valid){this.stageCounters.validVehicleObservations++;if(v.running)this.stageCounters.runningVehicleObservations++;else this.lifecycle.observedNotRunning++;}
+   this.sourcePreparation05?.observe(frame.vehicles.filter(v=>v.valid).map(stockSourceIdentity05));
   }catch(e){this.stats.rejectedFrames++;throw e;}
  }
  setSettings(s){
@@ -155,6 +170,9 @@ export class StockGameplay {
   }return result;
  }
  async render(){
+  const preparation=this.sourcePreparation05;
+  if(preparation){if(preparation.rendering)throw Error('One opt-in gameplay render at a time');preparation.rendering=true;}
+  try{
   const start=this.now(),time=this.pipeline.renderer.frame/FS;this.sample=this.playout.sample(time,this.now());
   this.captureTiming=this.latencyDiagnostics&&this.stats.blocks%8===0;this.lastTiming=null;if(this.captureTiming)this.latencyBrackets=[];
   if(this.pipeline.simulation.scene!==this.direct&&this.now()>=this.sceneExpiry){this.pipeline.replaceScene(this.direct);this.staticSceneBinding=null;this.stats.geometryFallbacks++;}
@@ -182,7 +200,8 @@ export class StockGameplay {
    s.identity=null;s.source=null;s.vehicle=null;this.stats.retired++;
   }
   for(const item of selected){let slot=this.slots.find(s=>s.identity===item.identity);if(!slot){slot=this.slots.find(s=>!s.identity);slot.identity=item.identity;slot.generation++;const profile=this.profiles?.profiles?.[item.resolved.bank.model];
-    slot.source=this.registry.createSource(item.v.model,item.v.context,{sourceGain:profile?.sourceGain??1,...(profile?.pressureSharesByState?{pressureSharesByState:profile.pressureSharesByState}:{})});this.stats.arrivals++;this.stageCounters.sourceCreations++;}
+    const sourceOptions={sourceGain:profile?.sourceGain??1,...(profile?.pressureSharesByState?{pressureSharesByState:profile.pressureSharesByState}:{})};
+    slot.source=this.sourcePreparation05?.take({identity:item.identity,session:this.session,bank:item.resolved.bank,options:sourceOptions})??this.registry.createSource(item.v.model,item.v.context,sourceOptions);this.stats.arrivals++;this.stageCounters.sourceCreations++;}
    slot.vehicle=item.v;slot.score=item.score;
   }
   const sources=[];for(const s of this.slots){const ids=['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`);for(const id of ids)this.inputs[id].fill(0);
@@ -213,6 +232,7 @@ export class StockGameplay {
    sourceTargetTimeSeconds:this.sample.targetTime??null,latestAcceptedSequence:this.lastFrame,controlDelayMs:this.controlDelayMs,
    sourceBrackets:this.latencyBrackets.filter(s=>selectedIds.has(s.id)).slice(0,MAX),...(this.operatingEmission?{emissionOperatingState:this.operatingEmission.selected,sourceBracketsScope:'Spatial query history; current emission geometry separately qualified by authored stationary world contract'}:{})};}
   return [this.left,this.right];
+  }finally{if(preparation)preparation.rendering=false;}
  }
  diagnostics(){return {...this.stats,active:this.slots.filter(s=>s.identity).length,activeLimit:this.activeLimit,mode:this.settings.mode,nativeReplacement:false,
    lifecycle:{...this.lifecycle,lastRetirements:this.lifecycle.lastRetirements.map(r=>({...r}))},
@@ -223,6 +243,6 @@ export class StockGameplay {
     operatingPoint:s.vehicle?.operatingPoint??null,sourceFrame:s.source.frame,dryPeak:s.source.stats.peak,
     listenerDistance:this.sample?.state&&s.vehicle?distance(s.vehicle.position,this.sample.state.position):null})),
    geometry:this.pipeline.simulation.scene===this.direct?'conditional-direct-unobserved-space-assumed-clear':this.staticSceneBinding?.mode==='offline-resource-subset'?'qualified-original-resource-subset':this.staticSceneBinding?'qualified-static-authored-fixture':'qualified-observed-partial',controlDelayMs:this.controlDelayMs,latencyProfile:this.latencyProfile.id,continuityPolicy:this.continuityPolicy,...(this.continuousTimingPolicy==='baseline'?{}:{continuousTimingPolicy:this.continuousTimingPolicy}),...(this.operatingEmission?{operatingEmission:this.operatingEmission.diagnostics()}:{}),sourceHistoryLimitSeconds:2.5,propagationLimitSeconds:2,
-   quality:this.quality.diagnostics(),pipeline:this.pipeline.diagnostics(),playout:this.playout.stats,memory:process.memoryUsage()};}
- close(){this.pipeline.close();}
+   quality:this.quality.diagnostics(),pipeline:this.pipeline.diagnostics(),playout:this.playout.stats,memory:process.memoryUsage(),...(this.sourcePreparation05?{sourcePreparation05:this.sourcePreparation05.diagnostics()}:{})};}
+ close(){const pending=this.sourcePreparation05?.close();this.pipeline.close();return pending;}
 }
