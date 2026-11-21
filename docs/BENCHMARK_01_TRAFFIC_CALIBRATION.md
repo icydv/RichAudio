@@ -155,7 +155,9 @@ I then inspected only the relevant local Steam app manifest and update-log entri
 
 I have not repaired files, overwritten the historical baseline, disabled security or performed another deployment/launch. The successful earlier restoration receipt remains intact. Exact-compatibility review is required before a new baseline or runtime attempt can be considered.
 
-## Simplified follow-up direction: blanket requests, bounded observations
+## Simplified follow-up direction recorded at the stopped-attempt checkpoint
+
+The proposal below was subsequently implemented as a separate opt-in, offline-tested candidate. See [the blanket-request preparation and compatibility review](BENCHMARK_01_BLANKET_TRAFFIC.md) for its current scope and approval boundary. The historical sealed candidate and execution evidence described in this report remain unchanged.
 
 My revised requirement is blanket suppression of naturally occurring traffic during the benchmark. The three prepared native calls already take only a multiplier, **no area argument**. The yellow rectangle limits evidence collection; it never limits where density requests are sent. The existing preparation should therefore not be described as an area-specific traffic-disabling mechanism.
 

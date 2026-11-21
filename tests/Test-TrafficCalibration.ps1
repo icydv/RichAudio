@@ -12,3 +12,10 @@ $fixture=Join-Path $repo ('.local\traffic-fixtures-'+[guid]::NewGuid().ToString(
 if($LASTEXITCODE-ne0){throw 'Traffic lifecycle tests failed'}
 & node (Join-Path $repo 'tests\Check-TrafficFixtures.mjs') $fixture
 if($LASTEXITCODE-ne0){throw 'Independent traffic evidence interpretation failed'}
+$poolExe=Join-Path $build 'PoolObservation.Tests.exe'
+& $compiler /nologo /optimize+ /warnaserror+ /r:System.Runtime.Serialization.dll ('/r:'+(Join-Path $build 'RichAudio.Traffic.Core.dll')) ('/out:'+$poolExe) (Join-Path $repo 'tests\Test-PoolObservation.cs')
+if($LASTEXITCODE-ne0){throw 'Pool observation test build failed'}
+& $poolExe $fixture
+if($LASTEXITCODE-ne0){throw 'Pool observation fixtures failed'}
+& node (Join-Path $repo 'tests\Check-PoolFixtures.mjs') $fixture
+if($LASTEXITCODE-ne0){throw 'Independent pool interpretation failed'}

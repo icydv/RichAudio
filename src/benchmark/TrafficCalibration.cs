@@ -23,10 +23,11 @@ namespace RichAudio.TrafficResearch
     {
         [DataMember] public V3 Anchor,Forward,Right;
         [DataMember] public string Provenance="measured-player-pose-local-corridor-v1";
+        public bool StreamedPool {get{return Provenance=="measured-player-pose-streamed-pool-v2";}}
         // Road must be on the right: longitudinal 12..42, lateral 0..12, height +/-3 native units.
         public Area Copy(){return new Area{Anchor=Anchor,Forward=Forward,Right=Right,Provenance=Provenance};}
-        public void Validate(){if(!Anchor.Finite||!Forward.Finite||!Right.Finite||Anchor.Length>200000||Math.Abs(Forward.Length-1)>1e-6||Math.Abs(Right.Length-1)>1e-6||Math.Abs(V3.Dot(Forward,Right))>1e-6||Forward.Z!=0||Right.Z!=0||Provenance!="measured-player-pose-local-corridor-v1")throw new ArgumentException("area basis");}
-        public bool Contains(V3 p){V3 d=V3.Sub(p,Anchor);double f=V3.Dot(d,Forward),r=V3.Dot(d,Right);return p.Finite&&f>=12&&f<=42&&r>=0&&r<=12&&Math.Abs(d.Z)<=3;}
+        public void Validate(){if(!Anchor.Finite||!Forward.Finite||!Right.Finite||Anchor.Length>200000||Math.Abs(Forward.Length-1)>1e-6||Math.Abs(Right.Length-1)>1e-6||Math.Abs(V3.Dot(Forward,Right))>1e-6||Forward.Z!=0||Right.Z!=0||(!StreamedPool&&Provenance!="measured-player-pose-local-corridor-v1"))throw new ArgumentException("area basis");}
+        public bool Contains(V3 p){V3 d=V3.Sub(p,Anchor);double f=V3.Dot(d,Forward),r=V3.Dot(d,Right);return p.Finite&&(StreamedPool?p.Length<=200000:f>=12&&f<=42&&r>=0&&r<=12&&Math.Abs(d.Z)<=3);}
         public V3 Point(double f,double r){return new V3(Anchor.X+f*Forward.X+r*Right.X,Anchor.Y+f*Forward.Y+r*Right.Y,Anchor.Z);}
     }
     [DataContract] public sealed class VehicleReading
@@ -43,6 +44,7 @@ namespace RichAudio.TrafficResearch
         [DataMember] public double AtMs,ObservationCostMs;
         [DataMember] public string Phase,Coverage;
         [DataMember] public int Enumerated,ReadErrors;
+        [DataMember(EmitDefaultValue=false)] public int PoolEligible,PoolOmitted;
         [DataMember] public V3 Listener,CameraRotation;
         [DataMember] public VehicleReading[] Vehicles;
         public Sample Copy(){var s=(Sample)MemberwiseClone();s.Vehicles=Array.ConvertAll(Vehicles,v=>v.Copy());return s;}
@@ -99,11 +101,15 @@ namespace RichAudio.TrafficResearch
             Rules.Time(now);if(!Running||Phase(now)!=State||!Due(now))throw new InvalidOperationException("observation order/clock");
             if(input==null||input.Vehicles==null||input.Vehicles.Length>64||samples.Count>=800||input.Enumerated<0||input.Enumerated>4096||input.ReadErrors<0||input.ReadErrors>4096||!input.Listener.Finite||!input.CameraRotation.Finite||!Rules.Finite(input.ObservationCostMs)||input.ObservationCostMs<0||input.ObservationCostMs>1000)throw new ArgumentException("sample bounds");
             if(input.Coverage!="PARTIAL"&&!(domain=="original-synthetic-fixture"&&input.Coverage=="VALID"))throw new ArgumentException("coverage cannot be certified by runtime enumeration");
+            if(area.StreamedPool){
+                if(input.Coverage!="PARTIAL"||input.PoolEligible<0||input.PoolEligible>input.Enumerated||input.PoolEligible+input.ReadErrors!=input.Enumerated||input.Vehicles.Length!=Math.Min(PoolSelection.Limit,input.PoolEligible)||input.PoolOmitted!=input.PoolEligible-input.Vehicles.Length)throw new ArgumentException("pool selection accounting");
+                foreach(var v in input.Vehicles)if(v==null||v.Identity!=PoolSelection.Identity(v.Handle,v.Model,v.PoolCounter))throw new ArgumentException("pool generation identity");
+            }else if(input.PoolEligible!=0||input.PoolOmitted!=0)throw new ArgumentException("pool fields on corridor evidence");
             if(V3.Sub(input.Listener,area.Anchor).Length>.25)throw new InvalidOperationException("listener moved");
             var seen=new HashSet<string>();var handles=new HashSet<uint>();foreach(var v in input.Vehicles){if(v==null)throw new ArgumentException("missing vehicle");v.Validate();if(!area.Contains(v.Position)||!seen.Add(v.Identity)||!handles.Add(v.Handle))throw new ArgumentException("outside or duplicate observation");}
             if(lastSample>=0&&now-lastSample>400)gaps++;lastSample=now;Sample copy=input.Copy();copy.AtMs=now;copy.Phase=State;samples.Add(copy);
         }
         public void Stop(double now,string reason,bool failed){Rules.Time(now);if(!Running&&State!="IDLE")return;finished=now;State=failed?"FAILED":"STOPPED";Reason=reason;}
-        public Evidence Snapshot(){return new Evidence{Domain=domain,Session=session,Area=area.Copy(),State=State,Reason=Reason,BeginMs=begin,FinishedMs=finished,ControlCalls=calls,ControlFrames=frames,PartialControlFrames=partial,MissedControlFrames=missed,ObservationGaps=gaps,LastControlFrame=lastControl,Samples=samples.ConvertAll(s=>s.Copy()).ToArray(),Receipts=receipts.ConvertAll(r=>r.Copy()).ToArray()};}
+        public Evidence Snapshot(){return new Evidence{Version=area.StreamedPool?2:1,Domain=domain,Session=session,Area=area.Copy(),State=State,Reason=Reason,BeginMs=begin,FinishedMs=finished,ControlCalls=calls,ControlFrames=frames,PartialControlFrames=partial,MissedControlFrames=missed,ObservationGaps=gaps,LastControlFrame=lastControl,Samples=samples.ConvertAll(s=>s.Copy()).ToArray(),Receipts=receipts.ConvertAll(r=>r.Copy()).ToArray()};}
     }
 }
