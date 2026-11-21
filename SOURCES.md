@@ -1,5 +1,7 @@
 # Evidence and sources
 
+P2-03.5 adds Alastair MacGregor's historical **The Sound of Grand Theft Auto V**, Rockstar North, GDC 2014: [official catalogue](https://gdcvault.com/play/1021165/The-Sound-of-Grand-Theft), [reviewed mirrored slides](https://gta.com.ua/img/news/sound-of-gta5-gdc2014.pdf#page=18). Pages 18–20 were visually inspected. The official page redirected to maintenance. Mirror provenance, hash and historical/Enhanced limitations are recorded in the [model report](docs/P2_03_5_NATIVE_GRANULAR_MODEL.md). Slides are not redistributed; pinned CodeWalker source remains S1 below.
+
 P2-03 adds [actual local waveform evidence](docs/P2_03_STOCK_AUDIO_RECONSTRUCTION.md): the pinned supplied CodeWalker parser decoded twelve streams from the two previously inspected archives, with exact PCM/WAV payload equality, repeat hashes and unchanged originals. Public evidence contains metadata/statistics only; recordings, grain exports, spectrogram and previews remain private. The file-render prototype and synthetic tests are original RichAudio code.
 
 25 October P2-02 follow-up: [audio ownership report](docs/P2_02_AUDIO_OWNERSHIP.md) reuses the pinned CodeWalker/Cfx source and prior Bati evidence, adding codec/granular limitations, category-specific siren controls, Windows mix boundaries and original synthetic ownership tests. No waveform or third-party implementation is redistributed; no native audio capability is promoted to live-verified.
@@ -17,11 +19,11 @@ Checked 24 October 2026. Local observations are primary evidence for this instal
 | E3 | `evidence/vehicle-trace.json`, `evidence/bati-override-search.json` | Bati model/hash references, sound/container paths, sampled override search |
 | E4 | `evidence/bati-awc-summary.json` | Actual loaded Bati AWC format/stream counts and names; no samples |
 | E5 | `evidence/geometry-summary.json` | Two occlusion samples and one collision resource; derived counts only |
-| E6 | `evidence/GUI_OBSERVATIONS.md` | Recorded CodeWalker navigation/viewer actions seen through Computer Use |
+| E6 | `evidence/GUI_OBSERVATIONS.md` | Recorded CodeWalker navigation/viewer actions observed in the desktop interface |
 | E7 | `evidence/binary-versions.json`, `evidence/environment.json`, `evidence/telemetry-api-inventory.json` | Binary versions/fingerprints, selected machine/tool facts and native-declaration presence |
 | E8 | `evidence/validation.json` | Final repository/synthetic-fixture/consistency checks actually executed |
 
-Raw XML, all archive filename inventories and parser summaries remain in ignored `.local/inspection`, `.local/extra`, `.local/trace-resources`, `.local/geometry` and `.local/dlc`. They are local derivatives of proprietary files and are not distributable repository fixtures. Logs in the Codex conversation contain actual command results and GUI captures; the prose GUI observation file is a navigation record, not an independent screenshot artifact or a runtime audio test.
+Raw XML, all archive filename inventories and parser summaries remain in ignored `.local/inspection`, `.local/extra`, `.local/trace-resources`, `.local/geometry` and `.local/dlc`. They are local derivatives of proprietary files and are not distributable repository fixtures. The working records retain the command output and GUI captures. The GUI observations document navigation through the desktop tools.
 
 ## Pinned source checkouts (local `.local/`, not committed)
 

@@ -1,0 +1,2659 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "parentPr": 18,
+  "parentCommit": "e8618e31ebe70f2459b54b653d3642fd4c9e5c76",
+  "mainReviewed": "e5fbd8f3502d3e28169a224caa07471e090e368f",
+  "outcome": "PARTIAL",
+  "modelAssessment": "Important assumptions unverified",
+  "scope": "Existing private Bati source metadata/audio and previous holds. Numeric diagnostics only; no synthesis or listening.",
+  "reviewedSources": {
+    "codewalkerCommit": "485d56bec00262ed7fa472261cce7bbc6202b96e",
+    "files": [
+      "CodeWalker.Core/GameFiles/FileTypes/AwcFile.cs",
+      "CodeWalker.Core/GameFiles/FileTypes/RelFile.cs"
+    ],
+    "installedBinarySourceIdentityProven": false,
+    "historicPresentation": {
+      "author": "Alastair MacGregor, Rockstar North",
+      "title": "The Sound of Grand Theft Auto V",
+      "event": "GDC 2014",
+      "catalogue": "https://gdcvault.com/play/1021165/The-Sound-of-Grand-Theft",
+      "reviewedCopy": "https://gta.com.ua/img/news/sound-of-gta5-gdc2014.pdf",
+      "sha256": "10E7C3AEF884499C28B551868FE4BE5CADEC81D1E295A6714A8797F154B0579B",
+      "pages": [
+        18,
+        19,
+        20
+      ],
+      "provenance": "Speaker-attributed historical slides on a third-party mirror; official catalogue redirects to maintenance. No official byte-identity or Enhanced runtime equivalence claimed.",
+      "findings": "Authoring includes synchronization-loop regions, loop/grain playback and selection/window controls. Historic runtime distinguishes player components and exported NPC loops. Exact evaluator is absent."
+    }
+  },
+  "nativeRecord": {
+    "reference": "hash_0346A636",
+    "clockPairs": [
+      [
+        12,
+        50
+      ],
+      [
+        11,
+        11
+      ]
+    ],
+    "movingClockIndices": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "idleClockIndices": [
+      1,
+      1
+    ],
+    "outputBuffers": [
+      0,
+      1,
+      0,
+      1,
+      0,
+      1
+    ],
+    "stretchBytes": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "maxLoopProportions": [
+      0.5,
+      0.5,
+      1,
+      1,
+      1,
+      1
+    ],
+    "loopRandomisationChangeRate": 0.01,
+    "loopRandomisationPitchFraction": 0.05,
+    "channelVolumes": [
+      0,
+      0,
+      0,
+      0,
+      -800,
+      0
+    ],
+    "classification": "Stored values observed in existing XML; old-field to current-source name correspondence inferred from layout. No evaluation units/equations or binary renaming verified."
+  },
+  "structures": [
+    {
+      "name": "engine_decel",
+      "sha256": "C78E85B1860F125B694BC92EAC593B6EAC7DD9B4855AF17882C4583735F44C95",
+      "markers": 174,
+      "intervals": 173,
+      "trailer": 1,
+      "fieldSummaries": {
+        "position": {
+          "count": 174,
+          "min": 1176,
+          "max": 424206,
+          "mean": 154929.62068965516,
+          "median": 132678,
+          "cv": 0.7257807778463269
+        },
+        "float": {
+          "count": 174,
+          "min": 6.58616924,
+          "max": 38.0348663,
+          "mean": 24.170505847356328,
+          "median": 24.76796625,
+          "cv": 0.3830049104156677
+        },
+        "low": {
+          "count": 174,
+          "min": 5672,
+          "max": 26027,
+          "mean": 21546.045977011494,
+          "median": 26027,
+          "cv": 0.28703904673326724
+        },
+        "high": {
+          "count": 174,
+          "min": 7042,
+          "max": 26027,
+          "mean": 21561.591954022988,
+          "median": 25636.5,
+          "cv": 0.2767702431813945
+        }
+      },
+      "indexBaseHypotheses": [
+        {
+          "base": 0,
+          "valid": true
+        },
+        {
+          "base": 1,
+          "valid": true
+        }
+      ],
+      "coveredReferences": 68,
+      "overlappingReferences": 0,
+      "groups": [
+        {
+          "index": 0,
+          "count": 18,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            35.6612167,
+            37.6175537
+          ],
+          "spanSeconds": 0.46552083333333333,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 1,
+          "count": 17,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            30.2076778,
+            32.2249336
+          ],
+          "spanSeconds": 0.5128333333333334,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 2,
+          "count": 12,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            23.6336784,
+            25.18363
+          ],
+          "spanSeconds": 0.450125,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 3,
+          "count": 8,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            17.3535786,
+            18.35564
+          ],
+          "spanSeconds": 0.3925,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 4,
+          "count": 7,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            12.8,
+            13.7614679
+          ],
+          "spanSeconds": 0.45325,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 5,
+          "count": 6,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            8.654824,
+            9.550338
+          ],
+          "spanSeconds": 0.546625,
+          "referenceInterpretation": "zero-based hypothesis"
+        }
+      ],
+      "peakFieldHypotheses": {
+        "firstAsPositivePeak": {
+          "medianAbsoluteError": 0,
+          "maxAbsoluteError": 0.17572021484375,
+          "exactIntervals": 128,
+          "intervals": 173
+        },
+        "secondAsNegativePeak": {
+          "medianAbsoluteError": 0.01898193359375,
+          "maxAbsoluteError": 0.235992431640625,
+          "exactIntervals": 53,
+          "intervals": 173
+        },
+        "literalLowThenHighSumError": {
+          "medianAbsoluteError": 0.035980224609375,
+          "maxAbsoluteError": 0.4388427734375,
+          "exactIntervals": 51,
+          "intervals": 173
+        },
+        "caution": "Predeclared interval-peak interpretations only; partial matches cannot establish native peak-window, gain or envelope semantics."
+      }
+    },
+    {
+      "name": "engine_accel",
+      "sha256": "6256183775002E5273F6FC20CC2D2B2D5D1C9614F812EDC8A2901185D01B681A",
+      "markers": 155,
+      "intervals": 154,
+      "trailer": 1,
+      "fieldSummaries": {
+        "position": {
+          "count": 155,
+          "min": 471,
+          "max": 327578,
+          "mean": 204742.85806451613,
+          "median": 220533,
+          "cv": 0.4263043241880677
+        },
+        "float": {
+          "count": 155,
+          "min": 8.24459,
+          "max": 39.5387154,
+          "mean": 26.833232245161298,
+          "median": 28.0475731,
+          "cv": 0.34499558824336335
+        },
+        "low": {
+          "count": 155,
+          "min": 7761,
+          "max": 26027,
+          "mean": 20501.935483870966,
+          "median": 21770,
+          "cv": 0.1978571380777777
+        },
+        "high": {
+          "count": 155,
+          "min": 9878,
+          "max": 23716,
+          "mean": 20553.045161290323,
+          "median": 22316,
+          "cv": 0.18215912716692667
+        }
+      },
+      "indexBaseHypotheses": [
+        {
+          "base": 0,
+          "valid": true
+        },
+        {
+          "base": 1,
+          "valid": true
+        }
+      ],
+      "coveredReferences": 60,
+      "overlappingReferences": 0,
+      "groups": [
+        {
+          "index": 0,
+          "count": 5,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            8.253802,
+            9.434977
+          ],
+          "spanSeconds": 0.47075,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 1,
+          "count": 8,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            14.9296265,
+            16.945591
+          ],
+          "spanSeconds": 0.43914583333333335,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 2,
+          "count": 11,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            23.0489521,
+            25.3279457
+          ],
+          "spanSeconds": 0.41589583333333335,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 3,
+          "count": 16,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            29.7491837,
+            32.6748238
+          ],
+          "spanSeconds": 0.4788541666666667,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 4,
+          "count": 20,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            37.3626175,
+            39.5387154
+          ],
+          "spanSeconds": 0.4915625,
+          "referenceInterpretation": "zero-based hypothesis"
+        }
+      ],
+      "peakFieldHypotheses": {
+        "firstAsPositivePeak": {
+          "medianAbsoluteError": 0.00958251953125,
+          "maxAbsoluteError": 0.148681640625,
+          "exactIntervals": 61,
+          "intervals": 154
+        },
+        "secondAsNegativePeak": {
+          "medianAbsoluteError": 0.0296478271484375,
+          "maxAbsoluteError": 0.12640380859375,
+          "exactIntervals": 0,
+          "intervals": 154
+        },
+        "literalLowThenHighSumError": {
+          "medianAbsoluteError": 0.0548858642578125,
+          "maxAbsoluteError": 0.240478515625,
+          "exactIntervals": 0,
+          "intervals": 154
+        },
+        "caution": "Predeclared interval-peak interpretations only; partial matches cannot establish native peak-window, gain or envelope semantics."
+      }
+    },
+    {
+      "name": "engine_idle",
+      "sha256": "3B8A97FEA007E838F524C1694918E0A56FD82C4DDC96EBBEB67E3CFDCC206430",
+      "markers": 9,
+      "intervals": 8,
+      "trailer": 1,
+      "fieldSummaries": {
+        "position": {
+          "count": 9,
+          "min": 762,
+          "max": 36524,
+          "mean": 18604.222222222223,
+          "median": 18662,
+          "cv": 0.6202032827016131
+        },
+        "float": {
+          "count": 9,
+          "min": 10.1673374,
+          "max": 11.0803328,
+          "mean": 10.782864255555555,
+          "median": 10.822999,
+          "cv": 0.024135455499587594
+        },
+        "low": {
+          "count": 9,
+          "min": 20998,
+          "max": 26027,
+          "mean": 24619.222222222223,
+          "median": 24978,
+          "cv": 0.06208506228046956
+        },
+        "high": {
+          "count": 9,
+          "min": 24619,
+          "max": 24619,
+          "mean": 24619,
+          "median": 24619,
+          "cv": 0
+        }
+      },
+      "indexBaseHypotheses": [
+        {
+          "base": 0,
+          "valid": true
+        },
+        {
+          "base": 1,
+          "valid": true
+        }
+      ],
+      "coveredReferences": 0,
+      "overlappingReferences": 0,
+      "groups": [],
+      "peakFieldHypotheses": {
+        "firstAsPositivePeak": {
+          "medianAbsoluteError": 0.057769775390625,
+          "maxAbsoluteError": 0.224395751953125,
+          "exactIntervals": 3,
+          "intervals": 8
+        },
+        "secondAsNegativePeak": {
+          "medianAbsoluteError": 0.04296875,
+          "maxAbsoluteError": 0.12353515625,
+          "exactIntervals": 0,
+          "intervals": 8
+        },
+        "literalLowThenHighSumError": {
+          "medianAbsoluteError": 0.1053924560546875,
+          "maxAbsoluteError": 0.181427001953125,
+          "exactIntervals": 0,
+          "intervals": 8
+        },
+        "caution": "Predeclared interval-peak interpretations only; partial matches cannot establish native peak-window, gain or envelope semantics."
+      }
+    },
+    {
+      "name": "exhaust_decel",
+      "sha256": "574DBB61C486F18848839300C9D72219957258CEEA6B1F93710EB72EF6270F2F",
+      "markers": 155,
+      "intervals": 154,
+      "trailer": 1,
+      "fieldSummaries": {
+        "position": {
+          "count": 155,
+          "min": 914,
+          "max": 373683,
+          "mean": 138520.90967741935,
+          "median": 117308,
+          "cv": 0.7337654348891057
+        },
+        "float": {
+          "count": 155,
+          "min": 8.177172,
+          "max": 37.97468,
+          "mean": 24.163364071032262,
+          "median": 24.55243,
+          "cv": 0.3839764671410448
+        },
+        "low": {
+          "count": 155,
+          "min": 14487,
+          "max": 26027,
+          "mean": 25790.167741935486,
+          "median": 26027,
+          "cv": 0.055208559351232755
+        },
+        "high": {
+          "count": 155,
+          "min": 22689,
+          "max": 26027,
+          "mean": 25815.54193548387,
+          "median": 26027,
+          "cv": 0.02562541544445734
+        }
+      },
+      "indexBaseHypotheses": [
+        {
+          "base": 0,
+          "valid": true
+        },
+        {
+          "base": 1,
+          "valid": true
+        }
+      ],
+      "coveredReferences": 80,
+      "overlappingReferences": 0,
+      "groups": [
+        {
+          "index": 0,
+          "count": 24,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            35.6083069,
+            37.97468
+          ],
+          "spanSeconds": 0.6255,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 1,
+          "count": 17,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            28.2519131,
+            30.2648163
+          ],
+          "spanSeconds": 0.5463541666666667,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 2,
+          "count": 15,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            20.6985779,
+            22.6095142
+          ],
+          "spanSeconds": 0.6464791666666667,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 3,
+          "count": 10,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            15.1629066,
+            16.72602
+          ],
+          "spanSeconds": 0.5646458333333333,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 4,
+          "count": 8,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            10.9364319,
+            11.9572525
+          ],
+          "spanSeconds": 0.6134166666666667,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 5,
+          "count": 6,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            8.177172,
+            9.146377
+          ],
+          "spanSeconds": 0.5801041666666666,
+          "referenceInterpretation": "zero-based hypothesis"
+        }
+      ],
+      "peakFieldHypotheses": {
+        "firstAsPositivePeak": {
+          "medianAbsoluteError": 0,
+          "maxAbsoluteError": 0.3531494140625,
+          "exactIntervals": 122,
+          "intervals": 154
+        },
+        "secondAsNegativePeak": {
+          "medianAbsoluteError": 0.1119537353515625,
+          "maxAbsoluteError": 0.334686279296875,
+          "exactIntervals": 55,
+          "intervals": 154
+        },
+        "literalLowThenHighSumError": {
+          "medianAbsoluteError": 0.1299896240234375,
+          "maxAbsoluteError": 0.334686279296875,
+          "exactIntervals": 39,
+          "intervals": 154
+        },
+        "caution": "Predeclared interval-peak interpretations only; partial matches cannot establish native peak-window, gain or envelope semantics."
+      }
+    },
+    {
+      "name": "exhaust_accel",
+      "sha256": "D2964EF675622A5D448DE8F11081AF3369CF02A9ACA19F98D3E59A4A3BB7CAAE",
+      "markers": 155,
+      "intervals": 154,
+      "trailer": 1,
+      "fieldSummaries": {
+        "position": {
+          "count": 155,
+          "min": 724,
+          "max": 327472,
+          "mean": 204651.49677419354,
+          "median": 220446,
+          "cv": 0.42643918968542416
+        },
+        "float": {
+          "count": 155,
+          "min": 8.20011,
+          "max": 39.5061722,
+          "mean": 26.87469858580646,
+          "median": 28.01088,
+          "cv": 0.34764704431671317
+        },
+        "low": {
+          "count": 155,
+          "min": 22079,
+          "max": 26027,
+          "mean": 22859,
+          "median": 22672,
+          "cv": 0.031894979629066636
+        },
+        "high": {
+          "count": 155,
+          "min": 22304,
+          "max": 24220,
+          "mean": 22861.406451612904,
+          "median": 22707,
+          "cv": 0.02075785093724058
+        }
+      },
+      "indexBaseHypotheses": [
+        {
+          "base": 0,
+          "valid": true
+        },
+        {
+          "base": 1,
+          "valid": true
+        }
+      ],
+      "coveredReferences": 55,
+      "overlappingReferences": 0,
+      "groups": [
+        {
+          "index": 0,
+          "count": 5,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            8.20011,
+            9.334036
+          ],
+          "spanSeconds": 0.4627291666666667,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 1,
+          "count": 6,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            12.5195618,
+            14.1462736
+          ],
+          "spanSeconds": 0.378,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 2,
+          "count": 10,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            19.3662415,
+            21.277256
+          ],
+          "spanSeconds": 0.4429375,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 3,
+          "count": 14,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            26.8339329,
+            29.7004
+          ],
+          "spanSeconds": 0.46175,
+          "referenceInterpretation": "zero-based hypothesis"
+        },
+        {
+          "index": 4,
+          "count": 20,
+          "style": 2,
+          "identifier": "4C633D07",
+          "consecutive": true,
+          "stateRange": [
+            37.5,
+            39.5061722
+          ],
+          "spanSeconds": 0.49304166666666666,
+          "referenceInterpretation": "zero-based hypothesis"
+        }
+      ],
+      "peakFieldHypotheses": {
+        "firstAsPositivePeak": {
+          "medianAbsoluteError": 0,
+          "maxAbsoluteError": 0,
+          "exactIntervals": 154,
+          "intervals": 154
+        },
+        "secondAsNegativePeak": {
+          "medianAbsoluteError": 0.0596466064453125,
+          "maxAbsoluteError": 0.224639892578125,
+          "exactIntervals": 0,
+          "intervals": 154
+        },
+        "literalLowThenHighSumError": {
+          "medianAbsoluteError": 0.0766754150390625,
+          "maxAbsoluteError": 0.224639892578125,
+          "exactIntervals": 0,
+          "intervals": 154
+        },
+        "caution": "Predeclared interval-peak interpretations only; partial matches cannot establish native peak-window, gain or envelope semantics."
+      }
+    },
+    {
+      "name": "exhaust_idle",
+      "sha256": "30D373508B0B675D9D7261D7AB26F79A310A497477C095CB574630BA321758AD",
+      "markers": 9,
+      "intervals": 8,
+      "trailer": 1,
+      "fieldSummaries": {
+        "position": {
+          "count": 9,
+          "min": 1,
+          "max": 36239,
+          "mean": 17934.777777777777,
+          "median": 17947,
+          "cv": 0.6465840205588511
+        },
+        "float": {
+          "count": 9,
+          "min": 8.761683,
+          "max": 10.9750671,
+          "mean": 10.579567855555558,
+          "median": 10.7695761,
+          "cv": 0.061607047153894395
+        },
+        "low": {
+          "count": 9,
+          "min": 26027,
+          "max": 26027,
+          "mean": 26027,
+          "median": 26027,
+          "cv": 0
+        },
+        "high": {
+          "count": 9,
+          "min": 26027,
+          "max": 26027,
+          "mean": 26027,
+          "median": 26027,
+          "cv": 0
+        }
+      },
+      "indexBaseHypotheses": [
+        {
+          "base": 0,
+          "valid": true
+        },
+        {
+          "base": 1,
+          "valid": true
+        }
+      ],
+      "coveredReferences": 0,
+      "overlappingReferences": 0,
+      "groups": [],
+      "peakFieldHypotheses": {
+        "firstAsPositivePeak": {
+          "medianAbsoluteError": 0,
+          "maxAbsoluteError": 0,
+          "exactIntervals": 8,
+          "intervals": 8
+        },
+        "secondAsNegativePeak": {
+          "medianAbsoluteError": 0,
+          "maxAbsoluteError": 0,
+          "exactIntervals": 8,
+          "intervals": 8
+        },
+        "literalLowThenHighSumError": {
+          "medianAbsoluteError": 0,
+          "maxAbsoluteError": 0,
+          "exactIntervals": 8,
+          "intervals": 8
+        },
+        "caution": "Predeclared interval-peak interpretations only; partial matches cannot establish native peak-window, gain or envelope semantics."
+      }
+    }
+  ],
+  "pairs": {
+    "engine": [
+      {
+        "index": 106,
+        "startFrame": 172931,
+        "endFrame": 175206,
+        "state": 21.258567550000002,
+        "frames": 2275,
+        "seconds": 0.04739583333333333,
+        "rms": 0.19560909757600667,
+        "dc": 0.001219482421875,
+        "min": -0.60150146484375,
+        "max": 0.647247314453125,
+        "closureMismatch": 0.083160400390625,
+        "startSlope": 0.04095458984375,
+        "continuationSlope": -0.102813720703125,
+        "groups": [],
+        "dominantRelativeHarmonics": [
+          {
+            "order": 6,
+            "fraction": 0.16478523027732556
+          },
+          {
+            "order": 4,
+            "fraction": 0.1348076138782899
+          }
+        ]
+      },
+      {
+        "index": 107,
+        "startFrame": 175206,
+        "endFrame": 177481,
+        "state": 21.03143285,
+        "frames": 2275,
+        "seconds": 0.04739583333333333,
+        "rms": 0.19047917838573564,
+        "dc": -0.008302310482486263,
+        "min": -0.622100830078125,
+        "max": 0.561492919921875,
+        "closureMismatch": 0.004974365234375,
+        "startSlope": -0.102813720703125,
+        "continuationSlope": -0.03143310546875,
+        "groups": [],
+        "dominantRelativeHarmonics": [
+          {
+            "order": 6,
+            "fraction": 0.15530180762513368
+          },
+          {
+            "order": 4,
+            "fraction": 0.1398303319387598
+          }
+        ]
+      },
+      {
+        "index": 108,
+        "startFrame": 177481,
+        "endFrame": 179785,
+        "state": 20.826274849999997,
+        "frames": 2304,
+        "seconds": 0.048,
+        "rms": 0.185631017935573,
+        "dc": -0.0035024616453382704,
+        "min": -0.587371826171875,
+        "max": 0.638275146484375,
+        "closureMismatch": 0.013885498046875,
+        "startSlope": -0.03143310546875,
+        "continuationSlope": -0.043670654296875,
+        "groups": [],
+        "dominantRelativeHarmonics": [
+          {
+            "order": 6,
+            "fraction": 0.1794160125286088
+          },
+          {
+            "order": 4,
+            "fraction": 0.12045900360110362
+          }
+        ]
+      },
+      {
+        "index": 109,
+        "startFrame": 179785,
+        "endFrame": 182110,
+        "state": 20.605874049999997,
+        "frames": 2325,
+        "seconds": 0.0484375,
+        "rms": 0.1860823325667168,
+        "dc": -0.00007749495967741936,
+        "min": -0.482421875,
+        "max": 0.55621337890625,
+        "closureMismatch": 0.023895263671875,
+        "startSlope": -0.043670654296875,
+        "continuationSlope": -0.015655517578125,
+        "groups": [],
+        "dominantRelativeHarmonics": [
+          {
+            "order": 6,
+            "fraction": 0.168225763486124
+          },
+          {
+            "order": 4,
+            "fraction": 0.11351184535317563
+          }
+        ]
+      }
+    ],
+    "exhaust": [
+      {
+        "index": 93,
+        "startFrame": 151154,
+        "endFrame": 153403,
+        "state": 21.3439245,
+        "frames": 2249,
+        "seconds": 0.04685416666666667,
+        "rms": 0.44542078080170705,
+        "dc": -0.013142939830897066,
+        "min": -0.794281005859375,
+        "max": 0.794281005859375,
+        "closureMismatch": 0.01824951171875,
+        "startSlope": 0.0230712890625,
+        "continuationSlope": 0.024993896484375,
+        "groups": [
+          2
+        ],
+        "dominantRelativeHarmonics": [
+          {
+            "order": 6,
+            "fraction": 0.49563324375588963
+          },
+          {
+            "order": 4,
+            "fraction": 0.23920978923849964
+          }
+        ]
+      },
+      {
+        "index": 94,
+        "startFrame": 153403,
+        "endFrame": 155675,
+        "state": 21.170318100000003,
+        "frames": 2272,
+        "seconds": 0.04733333333333333,
+        "rms": 0.4477617251508369,
+        "dc": -0.013809096645301496,
+        "min": -0.794281005859375,
+        "max": 0.794281005859375,
+        "closureMismatch": 0.003997802734375,
+        "startSlope": 0.024993896484375,
+        "continuationSlope": 0.01593017578125,
+        "groups": [
+          2
+        ],
+        "dominantRelativeHarmonics": [
+          {
+            "order": 6,
+            "fraction": 0.49991195584987347
+          },
+          {
+            "order": 4,
+            "fraction": 0.24164679258268493
+          }
+        ]
+      },
+      {
+        "index": 95,
+        "startFrame": 155675,
+        "endFrame": 157952,
+        "state": 21.0519509,
+        "frames": 2277,
+        "seconds": 0.0474375,
+        "rms": 0.4482435943508863,
+        "dc": -0.011673610253348704,
+        "min": -0.794281005859375,
+        "max": 0.794281005859375,
+        "closureMismatch": 0.01422119140625,
+        "startSlope": 0.01593017578125,
+        "continuationSlope": 0.02313232421875,
+        "groups": [
+          2
+        ],
+        "dominantRelativeHarmonics": [
+          {
+            "order": 6,
+            "fraction": 0.5005711205716864
+          },
+          {
+            "order": 4,
+            "fraction": 0.23689076284285984
+          }
+        ]
+      },
+      {
+        "index": 96,
+        "startFrame": 157952,
+        "endFrame": 160249,
+        "state": 20.891970899999997,
+        "frames": 2297,
+        "seconds": 0.04785416666666667,
+        "rms": 0.43830468968432207,
+        "dc": -0.01557966870850566,
+        "min": -0.794281005859375,
+        "max": 0.794281005859375,
+        "closureMismatch": 0.00439453125,
+        "startSlope": 0.02313232421875,
+        "continuationSlope": 0.021759033203125,
+        "groups": [
+          2
+        ],
+        "dominantRelativeHarmonics": [
+          {
+            "order": 6,
+            "fraction": 0.503715625552186
+          },
+          {
+            "order": 4,
+            "fraction": 0.22391407647719966
+          }
+        ]
+      },
+      {
+        "index": 97,
+        "startFrame": 160249,
+        "endFrame": 162568,
+        "state": 20.74339895,
+        "frames": 2319,
+        "seconds": 0.0483125,
+        "rms": 0.43941965390947413,
+        "dc": -0.01049659929690869,
+        "min": -0.794281005859375,
+        "max": 0.794281005859375,
+        "closureMismatch": 0.01708984375,
+        "startSlope": 0.021759033203125,
+        "continuationSlope": 0.0169677734375,
+        "groups": [
+          2
+        ],
+        "dominantRelativeHarmonics": [
+          {
+            "order": 6,
+            "fraction": 0.5179467334974607
+          },
+          {
+            "order": 4,
+            "fraction": 0.2147619270346482
+          }
+        ]
+      }
+    ],
+    "combinations": [
+      {
+        "engineIndex": 106,
+        "exhaustIndex": 93,
+        "stateError": 0.00401517881198904,
+        "sourceDurationRatio": 0.9885714285714285,
+        "engineReadRates": [
+          0.9951881014873141,
+          0.9956236323851203
+        ],
+        "exhaustReadRates": [
+          0.9838145231846019,
+          0.9842450765864332
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.11372792093290893,
+        "rmsRatio": 0.4391557511617047,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 106,
+        "exhaustIndex": 94,
+        "stateError": 0.004151241601412569,
+        "sourceDurationRatio": 0.9986813186813187,
+        "engineReadRates": [
+          0.9951881014873141,
+          0.9956236323851203
+        ],
+        "exhaustReadRates": [
+          0.9938757655293088,
+          0.9943107221006564
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.12045569385672245,
+        "rmsRatio": 0.43685979972967115,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 106,
+        "exhaustIndex": 95,
+        "stateError": 0.009719217887754664,
+        "sourceDurationRatio": 1.0008791208791208,
+        "engineReadRates": [
+          0.9951881014873141,
+          0.9956236323851203
+        ],
+        "exhaustReadRates": [
+          0.9960629921259843,
+          0.9964989059080963
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.12731355208440578,
+        "rmsRatio": 0.43639016829515104,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 106,
+        "exhaustIndex": 96,
+        "stateError": 0.017244654379358935,
+        "sourceDurationRatio": 1.0096703296703298,
+        "engineReadRates": [
+          0.9951881014873141,
+          0.9956236323851203
+        ],
+        "exhaustReadRates": [
+          1.004811898512686,
+          1.0052516411378556
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.13148495853731754,
+        "rmsRatio": 0.44628565967863404,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 106,
+        "exhaustIndex": 97,
+        "stateError": 0.024233457818281016,
+        "sourceDurationRatio": 1.0193406593406593,
+        "engineReadRates": [
+          0.9951881014873141,
+          0.9956236323851203
+        ],
+        "exhaustReadRates": [
+          1.0144356955380578,
+          1.0148796498905908
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.14026329913117458,
+        "rmsRatio": 0.4451532739505196,
+        "classification": "INVALID UNDER EXISTING CONSTRAINTS",
+        "reason": "Paired state error or source-duration ratio exceeds existing gates"
+      },
+      {
+        "engineIndex": 107,
+        "exhaustIndex": 93,
+        "stateError": 0.014858314800933704,
+        "sourceDurationRatio": 0.9885714285714285,
+        "engineReadRates": [
+          0.9951881014873141,
+          0.9956236323851203
+        ],
+        "exhaustReadRates": [
+          0.9838145231846019,
+          0.9842450765864332
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.13654449141647323,
+        "rmsRatio": 0.4276387330714446,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 107,
+        "exhaustIndex": 94,
+        "stateError": 0.006603698901095143,
+        "sourceDurationRatio": 0.9986813186813187,
+        "engineReadRates": [
+          0.9951881014873141,
+          0.9956236323851203
+        ],
+        "exhaustReadRates": [
+          0.9938757655293088,
+          0.9943107221006564
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.14272182599908226,
+        "rmsRatio": 0.42540299379445434,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 107,
+        "exhaustIndex": 95,
+        "stateError": 0.0009755897349618635,
+        "sourceDurationRatio": 1.0008791208791208,
+        "engineReadRates": [
+          0.9951881014873141,
+          0.9956236323851203
+        ],
+        "exhaustReadRates": [
+          0.9960629921259843,
+          0.9964989059080963
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.1482246015733151,
+        "rmsRatio": 0.42494567861382093,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 107,
+        "exhaustIndex": 96,
+        "stateError": 0.006631119762246951,
+        "sourceDurationRatio": 1.0096703296703298,
+        "engineReadRates": [
+          0.9951881014873141,
+          0.9956236323851203
+        ],
+        "exhaustReadRates": [
+          1.004811898512686,
+          1.0052516411378556
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.1530572604858694,
+        "rmsRatio": 0.43458165716393193,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 107,
+        "exhaustIndex": 97,
+        "stateError": 0.013695400691636758,
+        "sourceDurationRatio": 1.0193406593406593,
+        "engineReadRates": [
+          0.9951881014873141,
+          0.9956236323851203
+        ],
+        "exhaustReadRates": [
+          1.0144356955380578,
+          1.0148796498905908
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.16281765004274532,
+        "rmsRatio": 0.43347896866027913,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 108,
+        "exhaustIndex": 93,
+        "stateError": 0.02485560445775077,
+        "sourceDurationRatio": 0.9761284722222222,
+        "engineReadRates": [
+          1.0078740157480315,
+          1.0083150984682714
+        ],
+        "exhaustReadRates": [
+          0.9838145231846019,
+          0.9842450765864332
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.18298852110589187,
+        "rmsRatio": 0.4167542825493192,
+        "classification": "INVALID UNDER EXISTING CONSTRAINTS",
+        "reason": "Paired state error or source-duration ratio exceeds existing gates"
+      },
+      {
+        "engineIndex": 108,
+        "exhaustIndex": 94,
+        "stateError": 0.01651967298414895,
+        "sourceDurationRatio": 0.9861111111111112,
+        "engineReadRates": [
+          1.0078740157480315,
+          1.0083150984682714
+        ],
+        "exhaustReadRates": [
+          0.9938757655293088,
+          0.9943107221006564
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.19037392736403597,
+        "rmsRatio": 0.4145754482990696,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 108,
+        "exhaustIndex": 95,
+        "stateError": 0.010836121756071232,
+        "sourceDurationRatio": 0.98828125,
+        "engineReadRates": [
+          1.0078740157480315,
+          1.0083150984682714
+        ],
+        "exhaustReadRates": [
+          0.9960629921259843,
+          0.9964989059080963
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.1956424339888586,
+        "rmsRatio": 0.4141297729070514,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 108,
+        "exhaustIndex": 96,
+        "stateError": 0.003154479160251728,
+        "sourceDurationRatio": 0.9969618055555556,
+        "engineReadRates": [
+          1.0078740157480315,
+          1.0083150984682714
+        ],
+        "exhaustReadRates": [
+          1.004811898512686,
+          1.0052516411378556
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.19982245914037383,
+        "rmsRatio": 0.4235204922613743,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 108,
+        "exhaustIndex": 97,
+        "stateError": 0.003979391446473572,
+        "sourceDurationRatio": 1.0065104166666667,
+        "engineReadRates": [
+          1.0078740157480315,
+          1.0083150984682714
+        ],
+        "exhaustReadRates": [
+          1.0144356955380578,
+          1.0148796498905908
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.21196480568899131,
+        "rmsRatio": 0.42244586987412097,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 109,
+        "exhaustIndex": 93,
+        "stateError": 0.0358174784631377,
+        "sourceDurationRatio": 0.9673118279569892,
+        "engineReadRates": [
+          1.0170603674540681,
+          1.0175054704595186
+        ],
+        "exhaustReadRates": [
+          0.9838145231846019,
+          0.9842450765864332
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.16635737648968896,
+        "rmsRatio": 0.4177675146448929,
+        "classification": "INVALID UNDER EXISTING CONSTRAINTS",
+        "reason": "Paired state error or source-duration ratio exceeds existing gates"
+      },
+      {
+        "engineIndex": 109,
+        "exhaustIndex": 94,
+        "stateError": 0.027392385716344118,
+        "sourceDurationRatio": 0.9772043010752688,
+        "engineReadRates": [
+          1.0170603674540681,
+          1.0175054704595186
+        ],
+        "exhaustReadRates": [
+          0.9938757655293088,
+          0.9943107221006564
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.17210042987705465,
+        "rmsRatio": 0.4155833831130419,
+        "classification": "INVALID UNDER EXISTING CONSTRAINTS",
+        "reason": "Paired state error or source-duration ratio exceeds existing gates"
+      },
+      {
+        "engineIndex": 109,
+        "exhaustIndex": 95,
+        "stateError": 0.021648043121956496,
+        "sourceDurationRatio": 0.9793548387096774,
+        "engineReadRates": [
+          1.0170603674540681,
+          1.0175054704595186
+        ],
+        "exhaustReadRates": [
+          0.9960629921259843,
+          0.9964989059080963
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.17918755987853274,
+        "rmsRatio": 0.4151366241746024,
+        "classification": "INVALID UNDER EXISTING CONSTRAINTS",
+        "reason": "Paired state error or source-duration ratio exceeds existing gates"
+      },
+      {
+        "engineIndex": 109,
+        "exhaustIndex": 96,
+        "stateError": 0.013884237538567304,
+        "sourceDurationRatio": 0.9879569892473118,
+        "engineReadRates": [
+          1.0170603674540681,
+          1.0175054704595186
+        ],
+        "exhaustReadRates": [
+          1.004811898512686,
+          1.0052516411378556
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": [
+              2
+            ]
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.18070662400957194,
+        "rmsRatio": 0.4245501746758355,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      },
+      {
+        "engineIndex": 109,
+        "exhaustIndex": 97,
+        "stateError": 0.006674062923334355,
+        "sourceDurationRatio": 0.9974193548387097,
+        "engineReadRates": [
+          1.0170603674540681,
+          1.0175054704595186
+        ],
+        "exhaustReadRates": [
+          1.0144356955380578,
+          1.0148796498905908
+        ],
+        "engineGroups": [
+          {
+            "base": 0,
+            "groups": []
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "exhaustGroups": [
+          {
+            "base": 0,
+            "groups": [
+              2
+            ]
+          },
+          {
+            "base": 1,
+            "groups": []
+          }
+        ],
+        "phaseNormalisedShapeCorrelation": -0.19279241872538094,
+        "rmsRatio": 0.4234729396174256,
+        "classification": "PLAUSIBLE BUT UNVERIFIED",
+        "reason": "Numerically state/rate compatible; no native pairing, emission phase or timbre equivalence established"
+      }
+    ],
+    "scope": "Four/five individually eligible intervals; 20 products, 15 numeric passes and five paired-state failures. No combination is native-verified or adopted."
+  },
+  "comparisons": [
+    {
+      "component": "engine",
+      "original": {
+        "continuity": {
+          "frames": 9179,
+          "durationSeconds": 0.19122916666666667,
+          "segmentationDifferingSamples": 0,
+          "stateRange": [
+            20.605874049999997,
+            21.258567550000002
+          ],
+          "intervalRms": {
+            "count": 4,
+            "min": 0.185631017935573,
+            "max": 0.19560909757600667,
+            "mean": 0.18945040661600804,
+            "median": 0.18828075547622622,
+            "cv": 0.021264836131734532
+          },
+          "neighborShapeCorrelation": {
+            "count": 3,
+            "min": 0.6136217875871819,
+            "max": 0.75454752250224,
+            "mean": 0.6789764032356517,
+            "median": 0.6687598996175332,
+            "cv": 0.08539983305455487
+          },
+          "naturalBoundarySteps": {
+            "count": 3,
+            "min": 0.051849365234375,
+            "max": 0.1800537109375,
+            "mean": 0.10245768229166667,
+            "median": 0.075469970703125,
+            "cv": 0.5437328750525164
+          },
+          "naturalSlopeChanges": {
+            "count": 3,
+            "min": 0.0081787109375,
+            "max": 0.077239990234375,
+            "mean": 0.04315185546875,
+            "median": 0.044036865234375,
+            "cv": 0.6535314212304799
+          }
+        },
+        "texture": {
+          "windowFrames": 4096,
+          "windows": 5,
+          "rms": {
+            "count": 5,
+            "min": 0.17959155142498118,
+            "max": 0.19673263152024684,
+            "mean": 0.18696896799782603,
+            "median": 0.18656291590643226,
+            "cv": 0.032073707864514044
+          },
+          "centroidHz": {
+            "count": 5,
+            "min": 1247.3693497253853,
+            "max": 1475.5926856455042,
+            "mean": 1355.2785177173869,
+            "median": 1383.0679703442297,
+            "cv": 0.06501488921546836
+          },
+          "below250Fraction": {
+            "count": 5,
+            "min": 0.34019604496201106,
+            "max": 0.4069267152256002,
+            "mean": 0.37088615044529727,
+            "median": 0.3553427105192333,
+            "cv": 0.0726579974631413
+          },
+          "above1kFraction": {
+            "count": 5,
+            "min": 0.3249290010599358,
+            "max": 0.3980901701769241,
+            "mean": 0.3606363813559107,
+            "median": 0.36860687937541453,
+            "cv": 0.07197735731829699
+          },
+          "normalisedSpectralFlux": {
+            "count": 4,
+            "min": 0.3177992331287096,
+            "max": 0.40406630600360305,
+            "mean": 0.3622390567678781,
+            "median": 0.3635453439695999,
+            "cv": 0.10534596366310892
+          },
+          "caution": "Different observation lengths/state progression confound variation comparisons. These summaries are not naturalness scores."
+        },
+        "contextStateDrift": [
+          {
+            "seconds": 0.25,
+            "completeIntervals": 4,
+            "stateRange": [
+              20.605874049999997,
+              21.258567550000002
+            ],
+            "maxRequestedStateError": 0.018767902380952523
+          },
+          {
+            "seconds": 0.5,
+            "completeIntervals": 10,
+            "stateRange": [
+              19.9353075,
+              21.92848
+            ],
+            "maxRequestedStateError": 0.05069964285714284
+          },
+          {
+            "seconds": 1,
+            "completeIntervals": 20,
+            "stateRange": [
+              18.98734475,
+              23.044451799999997
+            ],
+            "maxRequestedStateError": 0.09735484761904749
+          }
+        ]
+      },
+      "holds": [
+        {
+          "label": "reference",
+          "sha256": "5DF2C6AC637B11EB2DCB7F061DEECA5CE18F294C93E5BB4DF7A3CB3F5CD88294",
+          "gainRemovedForEnvelopeComparison": 0.07,
+          "equalDurationTexture": {
+            "windowFrames": 4096,
+            "windows": 5,
+            "rms": {
+              "count": 5,
+              "min": 0.18478380785774873,
+              "max": 0.1969689351759521,
+              "mean": 0.19028494493814857,
+              "median": 0.1892442284944277,
+              "cv": 0.02615757784394635
+            },
+            "centroidHz": {
+              "count": 5,
+              "min": 1248.070379813808,
+              "max": 1416.2163442839346,
+              "mean": 1313.3448874434882,
+              "median": 1259.4427165545242,
+              "cv": 0.05468149018348922
+            },
+            "below250Fraction": {
+              "count": 5,
+              "min": 0.35144831769865753,
+              "max": 0.4158053829641815,
+              "mean": 0.38668079609219935,
+              "median": 0.40083547142523,
+              "cv": 0.0683868151142562
+            },
+            "above1kFraction": {
+              "count": 5,
+              "min": 0.32163194502179165,
+              "max": 0.382655017353492,
+              "mean": 0.35159099614127715,
+              "median": 0.3426001453037844,
+              "cv": 0.0642042435638515
+            },
+            "normalisedSpectralFlux": {
+              "count": 4,
+              "min": 0.3191497341327575,
+              "max": 0.39026468891818283,
+              "mean": 0.3493784098487438,
+              "median": 0.34404960817201746,
+              "cv": 0.07381925761221585
+            },
+            "caution": "Different observation lengths/state progression confound variation comparisons. These summaries are not naturalness scores."
+          },
+          "longHoldTexture": {
+            "windowFrames": 4096,
+            "windows": 32,
+            "rms": {
+              "count": 32,
+              "min": 0.183478030566315,
+              "max": 0.19829510530651248,
+              "mean": 0.19080243631039184,
+              "median": 0.19097138711281714,
+              "cv": 0.01997639732655325
+            },
+            "centroidHz": {
+              "count": 32,
+              "min": 1224.9248176197973,
+              "max": 1421.3883675459047,
+              "mean": 1304.78050174391,
+              "median": 1287.5556398099984,
+              "cv": 0.04624006880216105
+            },
+            "below250Fraction": {
+              "count": 32,
+              "min": 0.3534055753110715,
+              "max": 0.4156888642950086,
+              "mean": 0.3922986544832677,
+              "median": 0.4021666368315071,
+              "cv": 0.05333152597360794
+            },
+            "above1kFraction": {
+              "count": 32,
+              "min": 0.32052631645699825,
+              "max": 0.3879028855918759,
+              "mean": 0.3485943378452254,
+              "median": 0.346942356277446,
+              "cv": 0.05852479174498378
+            },
+            "normalisedSpectralFlux": {
+              "count": 31,
+              "min": 0.37028264914205206,
+              "max": 0.44146082544738136,
+              "mean": 0.4047469511033078,
+              "median": 0.4071067825565009,
+              "cv": 0.0494588232349873
+            },
+            "caution": "Different observation lengths/state progression confound variation comparisons. These summaries are not naturalness scores."
+          },
+          "naturalSourceSuccessors": 52,
+          "transitions": 104,
+          "boundaryStepsRawScale": {
+            "count": 104,
+            "min": 0.05144391741071428,
+            "max": 0.18266950334821427,
+            "mean": 0.10041456956129807,
+            "median": 0.07367815290178571,
+            "cv": 0.5285073839887607
+          },
+          "selectedIntervals": [
+            107,
+            106,
+            108
+          ],
+          "limitation": "PCM16 quantisation differs from original before gain removal. Short local sources cannot certify long-term texture at fixed state."
+        },
+        {
+          "label": "reordered",
+          "sha256": "B5CD395A6B14039D42CAB209CC24CFADFAFAE6C22D1EDA0E680A80ED424DAA18",
+          "gainRemovedForEnvelopeComparison": 0.07,
+          "equalDurationTexture": {
+            "windowFrames": 4096,
+            "windows": 5,
+            "rms": {
+              "count": 5,
+              "min": 0.18410529133139109,
+              "max": 0.19501179355931667,
+              "mean": 0.18921933218397352,
+              "median": 0.18860615533768832,
+              "cv": 0.021668039123612697
+            },
+            "centroidHz": {
+              "count": 5,
+              "min": 1278.3154547595234,
+              "max": 1408.1796366097558,
+              "mean": 1333.237141308978,
+              "median": 1342.6127726591758,
+              "cv": 0.036754981246608455
+            },
+            "below250Fraction": {
+              "count": 5,
+              "min": 0.35827724267054645,
+              "max": 0.4144443836874754,
+              "mean": 0.3835923620221175,
+              "median": 0.3876467817183739,
+              "cv": 0.056407173334116906
+            },
+            "above1kFraction": {
+              "count": 5,
+              "min": 0.3267330933471679,
+              "max": 0.37828326007438884,
+              "mean": 0.358904376161485,
+              "median": 0.3690962926427782,
+              "cv": 0.051361448948885335
+            },
+            "normalisedSpectralFlux": {
+              "count": 4,
+              "min": 0.34305769186113855,
+              "max": 0.3950884324052088,
+              "mean": 0.3729020734339858,
+              "median": 0.3767310847347979,
+              "cv": 0.05291592351372993
+            },
+            "caution": "Different observation lengths/state progression confound variation comparisons. These summaries are not naturalness scores."
+          },
+          "longHoldTexture": {
+            "windowFrames": 4096,
+            "windows": 32,
+            "rms": {
+              "count": 32,
+              "min": 0.1830146652184704,
+              "max": 0.19575185914383075,
+              "mean": 0.190032539566509,
+              "median": 0.19101310727214554,
+              "cv": 0.016922799134386168
+            },
+            "centroidHz": {
+              "count": 32,
+              "min": 1241.0237440645653,
+              "max": 1445.3210488716309,
+              "mean": 1358.9032511983826,
+              "median": 1385.2896059824066,
+              "cv": 0.04684228978488264
+            },
+            "below250Fraction": {
+              "count": 32,
+              "min": 0.350704383993517,
+              "max": 0.41225388083054443,
+              "mean": 0.3769597232807482,
+              "median": 0.36925171569880555,
+              "cv": 0.05851663568269389
+            },
+            "above1kFraction": {
+              "count": 32,
+              "min": 0.3197867658635005,
+              "max": 0.4067017446460707,
+              "mean": 0.3677047827290756,
+              "median": 0.3764734486362371,
+              "cv": 0.06433027516220345
+            },
+            "normalisedSpectralFlux": {
+              "count": 31,
+              "min": 0.17620662460598194,
+              "max": 0.5056129705240698,
+              "mean": 0.3597364972968689,
+              "median": 0.3994623944679792,
+              "cv": 0.2902207380938023
+            },
+            "caution": "Different observation lengths/state progression confound variation comparisons. These summaries are not naturalness scores."
+          },
+          "naturalSourceSuccessors": 25,
+          "transitions": 104,
+          "boundaryStepsRawScale": {
+            "count": 104,
+            "min": 0.05144391741071428,
+            "max": 0.18266950334821427,
+            "mean": 0.09930369618174792,
+            "median": 0.07367815290178571,
+            "cv": 0.5673617962649355
+          },
+          "selectedIntervals": [
+            106,
+            107,
+            108
+          ],
+          "limitation": "PCM16 quantisation differs from original before gain removal. Short local sources cannot certify long-term texture at fixed state."
+        }
+      ]
+    },
+    {
+      "component": "exhaust",
+      "original": {
+        "continuity": {
+          "frames": 11414,
+          "durationSeconds": 0.23779166666666668,
+          "segmentationDifferingSamples": 0,
+          "stateRange": [
+            20.74339895,
+            21.3439245
+          ],
+          "intervalRms": {
+            "count": 5,
+            "min": 0.43830468968432207,
+            "max": 0.4482435943508863,
+            "mean": 0.4438300887794453,
+            "median": 0.44542078080170705,
+            "cv": 0.009422710522482395
+          },
+          "neighborShapeCorrelation": {
+            "count": 4,
+            "min": 0.9940936331191004,
+            "max": 0.998766272783674,
+            "mean": 0.9964802494465108,
+            "median": 0.9965305459416343,
+            "cv": 0.001941203711099386
+          },
+          "naturalBoundarySteps": {
+            "count": 4,
+            "min": 0.01849365234375,
+            "max": 0.023895263671875,
+            "mean": 0.02001190185546875,
+            "median": 0.018829345703125,
+            "cv": 0.11243174242231163
+          },
+          "naturalSlopeChanges": {
+            "count": 4,
+            "min": 0.00274658203125,
+            "max": 0.007965087890625,
+            "mean": 0.00542449951171875,
+            "median": 0.0054931640625,
+            "cv": 0.3648020351432612
+          }
+        },
+        "texture": {
+          "windowFrames": 4096,
+          "windows": 8,
+          "rms": {
+            "count": 8,
+            "min": 0.43304286616255006,
+            "max": 0.4446445328076911,
+            "mean": 0.439390624361204,
+            "median": 0.43923810392663765,
+            "cv": 0.008215270805097603
+          },
+          "centroidHz": {
+            "count": 8,
+            "min": 159.64939050249157,
+            "max": 163.68404618452706,
+            "mean": 161.9622588171481,
+            "median": 162.11542011400124,
+            "cv": 0.00748644510234
+          },
+          "below250Fraction": {
+            "count": 8,
+            "min": 0.8549108360999267,
+            "max": 0.8651403928021537,
+            "mean": 0.8594895565625925,
+            "median": 0.8597601714308769,
+            "cv": 0.0033146282099611743
+          },
+          "above1kFraction": {
+            "count": 8,
+            "min": 0.00246188605481434,
+            "max": 0.003539757175609943,
+            "mean": 0.00283847076943973,
+            "median": 0.0027703867582970433,
+            "cv": 0.12357074693498683
+          },
+          "normalisedSpectralFlux": {
+            "count": 7,
+            "min": 0.036480654381547586,
+            "max": 0.08724700210410063,
+            "mean": 0.0654055248542516,
+            "median": 0.07600466573197631,
+            "cv": 0.3060375513821143
+          },
+          "caution": "Different observation lengths/state progression confound variation comparisons. These summaries are not naturalness scores."
+        },
+        "contextStateDrift": [
+          {
+            "seconds": 0.25,
+            "completeIntervals": 5,
+            "stateRange": [
+              20.74339895,
+              21.3439245
+            ],
+            "maxRequestedStateError": 0.01637735714285714
+          },
+          {
+            "seconds": 0.5,
+            "completeIntervals": 9,
+            "stateRange": [
+              20.19621375,
+              21.636295
+            ],
+            "maxRequestedStateError": 0.0382755357142858
+          },
+          {
+            "seconds": 1,
+            "completeIntervals": 20,
+            "stateRange": [
+              18.7574139,
+              22.421250299999997
+            ],
+            "maxRequestedStateError": 0.10678981428571431
+          }
+        ]
+      },
+      "holds": [
+        {
+          "label": "reference",
+          "sha256": "309AF886374A5255CCFC9BDB61E71837DD599C9B13FE930C60D4E6A85D230360",
+          "gainRemovedForEnvelopeComparison": 0.15,
+          "equalDurationTexture": {
+            "windowFrames": 4096,
+            "windows": 8,
+            "rms": {
+              "count": 8,
+              "min": 0.4333756061777732,
+              "max": 0.45196119033016313,
+              "mean": 0.4407974927104609,
+              "median": 0.43847613771674676,
+              "cv": 0.013483603358679663
+            },
+            "centroidHz": {
+              "count": 8,
+              "min": 159.3590897107015,
+              "max": 163.45882671532823,
+              "mean": 161.3651702669801,
+              "median": 161.09532660335628,
+              "cv": 0.0071879040512180855
+            },
+            "below250Fraction": {
+              "count": 8,
+              "min": 0.8563192902977494,
+              "max": 0.86546865918549,
+              "mean": 0.8593586664668482,
+              "median": 0.8590215692565617,
+              "cv": 0.003292823075212599
+            },
+            "above1kFraction": {
+              "count": 8,
+              "min": 0.002514211165687803,
+              "max": 0.003102209855488727,
+              "mean": 0.0028538515177989935,
+              "median": 0.0029049150048213435,
+              "cv": 0.0707640760824163
+            },
+            "normalisedSpectralFlux": {
+              "count": 7,
+              "min": 0.04295360919894906,
+              "max": 0.07365187381438094,
+              "mean": 0.05724828136017547,
+              "median": 0.05278303699197791,
+              "cv": 0.1800754001769582
+            },
+            "caution": "Different observation lengths/state progression confound variation comparisons. These summaries are not naturalness scores."
+          },
+          "longHoldTexture": {
+            "windowFrames": 4096,
+            "windows": 32,
+            "rms": {
+              "count": 32,
+              "min": 0.4291082743670039,
+              "max": 0.4657974780459245,
+              "mean": 0.44560755333086977,
+              "median": 0.443942381767454,
+              "cv": 0.019937185459612674
+            },
+            "centroidHz": {
+              "count": 32,
+              "min": 159.29121799960868,
+              "max": 163.5263890857808,
+              "mean": 161.11850921869777,
+              "median": 161.1263592729661,
+              "cv": 0.007280847834695651
+            },
+            "below250Fraction": {
+              "count": 32,
+              "min": 0.8561460985339076,
+              "max": 0.8655264314674435,
+              "mean": 0.8599522923090128,
+              "median": 0.8588708259079012,
+              "cv": 0.0034907782206930883
+            },
+            "above1kFraction": {
+              "count": 32,
+              "min": 0.00252079754797739,
+              "max": 0.003130756313832568,
+              "mean": 0.0028298463885269485,
+              "median": 0.0028825780601896,
+              "cv": 0.07063305959538901
+            },
+            "normalisedSpectralFlux": {
+              "count": 31,
+              "min": 0.05218706832813723,
+              "max": 0.09695631557486846,
+              "mean": 0.06596136407220725,
+              "median": 0.061870797710682705,
+              "cv": 0.1704504888742728
+            },
+            "caution": "Different observation lengths/state progression confound variation comparisons. These summaries are not naturalness scores."
+          },
+          "naturalSourceSuccessors": 22,
+          "transitions": 104,
+          "boundaryStepsRawScale": {
+            "count": 104,
+            "min": 0.018310546875,
+            "max": 0.019327799479166668,
+            "mean": 0.018830910707131415,
+            "median": 0.0189208984375,
+            "cv": 0.01946734219072124
+          },
+          "selectedIntervals": [
+            95,
+            93,
+            96
+          ],
+          "limitation": "PCM16 quantisation differs from original before gain removal. Short local sources cannot certify long-term texture at fixed state."
+        },
+        {
+          "label": "reordered",
+          "sha256": "8D04996BE38410DDB6432CCFD0300CD5D11AA1517E672FB3C56E44E78D3AA7AE",
+          "gainRemovedForEnvelopeComparison": 0.15,
+          "equalDurationTexture": {
+            "windowFrames": 4096,
+            "windows": 8,
+            "rms": {
+              "count": 8,
+              "min": 0.42863979267580193,
+              "max": 0.4510152003477824,
+              "mean": 0.4388533311310025,
+              "median": 0.4386498955996713,
+              "cv": 0.015152909035421113
+            },
+            "centroidHz": {
+              "count": 8,
+              "min": 160.2134156794971,
+              "max": 163.2747876857856,
+              "mean": 161.8977019878392,
+              "median": 162.16638040256532,
+              "cv": 0.006971734928478984
+            },
+            "below250Fraction": {
+              "count": 8,
+              "min": 0.8534764048891746,
+              "max": 0.8624199788857754,
+              "mean": 0.8579227227760722,
+              "median": 0.8572600580211771,
+              "cv": 0.0031967603074416397
+            },
+            "above1kFraction": {
+              "count": 8,
+              "min": 0.002491951579366589,
+              "max": 0.0032133027957125704,
+              "mean": 0.0028891381083825506,
+              "median": 0.002857658389669145,
+              "cv": 0.07415461675588565
+            },
+            "normalisedSpectralFlux": {
+              "count": 7,
+              "min": 0.04101698818621266,
+              "max": 0.08645818969417375,
+              "mean": 0.061581296058304945,
+              "median": 0.0656320612891555,
+              "cv": 0.23700922379012004
+            },
+            "caution": "Different observation lengths/state progression confound variation comparisons. These summaries are not naturalness scores."
+          },
+          "longHoldTexture": {
+            "windowFrames": 4096,
+            "windows": 32,
+            "rms": {
+              "count": 32,
+              "min": 0.43219727418374715,
+              "max": 0.46069458065397206,
+              "mean": 0.44380594196334616,
+              "median": 0.44244435793321635,
+              "cv": 0.018205457502951092
+            },
+            "centroidHz": {
+              "count": 32,
+              "min": 159.20765410420861,
+              "max": 163.31478529597064,
+              "mean": 161.9231047607584,
+              "median": 162.3296863639775,
+              "cv": 0.00711200244043401
+            },
+            "below250Fraction": {
+              "count": 32,
+              "min": 0.8534661970733011,
+              "max": 0.8658259139572918,
+              "mean": 0.857938405527779,
+              "median": 0.8569655429691545,
+              "cv": 0.003413852276575194
+            },
+            "above1kFraction": {
+              "count": 32,
+              "min": 0.0024981454727783865,
+              "max": 0.0032126375922567054,
+              "mean": 0.0029316558615978465,
+              "median": 0.00297792300314179,
+              "cv": 0.06585289260111886
+            },
+            "normalisedSpectralFlux": {
+              "count": 31,
+              "min": 0.03992555631830232,
+              "max": 0.1112327663742913,
+              "mean": 0.069724759576589,
+              "median": 0.07165061270663745,
+              "cv": 0.273686237597279
+            },
+            "caution": "Different observation lengths/state progression confound variation comparisons. These summaries are not naturalness scores."
+          },
+          "naturalSourceSuccessors": 15,
+          "transitions": 104,
+          "boundaryStepsRawScale": {
+            "count": 104,
+            "min": 0.018310546875,
+            "max": 0.019327799479166668,
+            "mean": 0.018877860827323727,
+            "median": 0.0189208984375,
+            "cv": 0.021948372449515176
+          },
+          "selectedIntervals": [
+            93,
+            95,
+            96
+          ],
+          "limitation": "PCM16 quantisation differs from original before gain removal. Short local sources cannot certify long-term texture at fixed state."
+        }
+      ]
+    }
+  ],
+  "performance": {
+    "elapsedMs": 427.0743,
+    "rssBytes": 80523264,
+    "firstRunElapsedMs": 437.30469999999997
+  },
+  "preservation": {
+    "preExistingPrivateFilesMatched": 1175,
+    "preExistingFixtureLinksUnchangedAndNotFollowed": 15,
+    "gameOrArchivesAccessed": false,
+    "gameWrites": 0,
+    "stockAudioRendered": 0,
+    "audioPlayed": 0,
+    "rendererModified": false,
+    "productionTelemetryModified": false
+  },
+  "listening": {
+    "newListening": "NOT TESTED: no new audio experiment",
+    "previousObservation": "I found the reordered hold less repetitive but still artificial."
+  },
+  "recommendation": {
+    "model": "Hybrid continuous/granular direction; research hypothesis, not native reimplementation",
+    "nextExperiment": "One exhaust-only coherent-context ablation using the same five eligible consecutive intervals at relative state 21. A uses existing per-marker joins; B retains a continuous cursor internally, applying the unchanged join only at the block wrap. Identical source intervals/order, read-rate mapping, clock, gain, duration and input in both. Prepared only after separate authorisation; not implemented here.",
+    "limits": "About 0.238 seconds of eligible context is not an indefinite steady-state recording. The ablation can reject internal join handling as the main defect without rejecting all hybrid methods. No larger source window or relaxed state/rate bound is presumed."
+  },
+  "validation": {
+    "newSyntheticTests": 14,
+    "fullOfflineSuite": "PASS",
+    "phase1Checks": 127,
+    "numericReportRepeatIdentical": true,
+    "phaseGridSamples": 4096,
+    "harmonicPowerNormalisation": "All positive-frequency energy via Parseval, not selected low orders only",
+    "hostedCi": "Reported separately after push"
+  }
+}

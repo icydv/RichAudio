@@ -1,5 +1,7 @@
 # Roadmap
 
+**Latest source-model review, 26 October — P2-03.5:** [native granular model investigation](docs/P2_03_5_NATIVE_GRANULAR_MODEL.md) is PARTIAL. Historical authoring evidence and measured group/context structure identify omissions in the adjacent-interval model; native rules remain unknown. No new stock audio or renderer was made. The sole proposed follow-up is an exhaust-only coherent-context ablation, not another seed or broader synthesis implementation. Telemetry, ownership and Phase 3 gates remain unchanged.
+
 **Latest offline source checkpoint, 26 October — P2-03.4:** [cycle-order recurrence experiment](docs/P2_03_4_CYCLE_RECURRENCE.md) is PARTIAL. The measured 0.667-second PCM repeat is removed under fixed state/gain/rate/join rules, but I found the candidate less repetitive and still artificial. The three-pair bank is unchanged. No sweep or further tuning followed; read-only cycle-model investigation is the next proposed step. Accepted references, telemetry and native ownership/Phase 3 gates remain unchanged.
 
 **P2-03 offline milestone:** [successful stock PCM decoding and deterministic private references](docs/P2_03_STOCK_AUDIO_RECONSTRUCTION.md), conservatively Outcome B. Human listening rejected the grain prototype and favoured continuous recordings, with deceleration phasing unresolved. Next useful experiment is isolated engine/exhaust deceleration A/B listening. Live RPM, native ownership and full telemetry/Phase 3 release gates are not advanced by file playback.
