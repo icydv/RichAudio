@@ -27,6 +27,7 @@ try {
     & (Join-Path $repo 'tests\Test-TrafficCalibration.ps1')
     & (Join-Path $repo 'tests\Test-BenchmarkMarkers.ps1')
     & (Join-Path $repo 'tests\Test-BatiController.ps1')
+    & (Join-Path $repo 'tests\Test-DrivingActivation.ps1')
     & (Join-Path $repo 'tests\Test-ModKitContract.ps1')
     & (Join-Path $repo 'tests\Test-FiveStopController.ps1')
     & (Join-Path $repo 'tests\Test-AirportSurvey.ps1')

@@ -119,9 +119,24 @@ namespace RichAudio.BatiResearch
         }
         public RouteEvidence Copy(){var c=(RouteEvidence)MemberwiseClone();if(Points!=null)c.Points=(MarkerPoint[])Points.Clone();if(Candidate!=null)c.Candidate=Candidate.Copy();return c;}
     }
+    // Pure bounded readiness observation, not proof of AI/physics activity.
+    public sealed class GameplayReadiness
+    {
+        private uint? prior;
+        public bool Observe(bool? console,bool? paused,uint? gameTime){bool ready=console==false&&paused==false&&prior.HasValue&&gameTime.HasValue&&unchecked(gameTime.Value-prior.Value)>0&&unchecked(gameTime.Value-prior.Value)<=1000;prior=console==false&&paused==false?gameTime:null;return ready;}
+    }
+    [DataContract]public sealed class DrivingDiagnostic
+    {
+        [DataMember]public double? StartAcceptedAt,FirstEligibleAt,FirstTaskRequestedAt,FirstTaskReturnedAt,LastProgressAt,FirstMovementAt,LastObservedAt;
+        [DataMember]public bool InvocationAttempted,InvocationReturned;
+        [DataMember]public string TimestampBasis="copied monotonic observation epoch; sub-observation call duration unmeasured",ExceptionType,TaskState="UNKNOWN",StateMeaning="generic RPH current task status; not specific task identity";
+        [DataMember]public bool? ConsoleOpen,GamePaused;[DataMember]public uint? GameTimeMs;
+        public DrivingDiagnostic Copy(){return (DrivingDiagnostic)MemberwiseClone();}
+    }
     [DataContract] public sealed class Reading
     {
         [DataMember]public double At,Speed;
+        [DataMember]public uint? GameTimeMs; [DataMember]public bool? ConsoleOpen,GamePaused;
         [DataMember]public MarkerPoint Position,Velocity,Rotation,PlayerPosition,PlayerVelocity;
         [DataMember]public Identity Bike,Rider;
         [DataMember]public bool Mounted,EngineOn,Collision,TaskFailed,Interrupted;
@@ -155,6 +170,7 @@ namespace RichAudio.BatiResearch
         [DataMember]public Policy Settings;
         [DataMember]public Upgrade[] Upgrades;
         [DataMember]public ModKitDiagnostic ModKit;
+        [DataMember]public DrivingDiagnostic Driving;
         [DataMember]public SpeedPoint[] Samples;
         [DataMember]public string[] Lifecycle;
         [DataMember]public SpeedSummary Summary;

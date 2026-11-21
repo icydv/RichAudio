@@ -14,7 +14,7 @@ public sealed class FakeWorld:IBenchmarkWorld
     public readonly Dictionary<uint,Identity> Entities=new Dictionary<uint,Identity>();
     public readonly Dictionary<int,int> Counts=new Dictionary<int,int>{{11,4},{13,3},{12,3},{15,0}};
     public readonly Dictionary<int,int> Applied=new Dictionary<int,int>();
-    public readonly List<uint> Deleted=new List<uint>();public int Spawns,Drives,Brakes,Mutations;public bool RiderFailure,TuningFailure,DeleteFailure,Reuse,RiderReuse,Unknown,PartialCreation,WrongSession,WrongModel,BrakeFailure;public bool Turbo=true,TurboRead=true,Readback=true,IsPersistent=true;
+    public readonly List<uint> Deleted=new List<uint>();public int Spawns,Drives,Brakes,Mutations;public bool DriveFailure;public bool RiderFailure,TuningFailure,DeleteFailure,Reuse,RiderReuse,Unknown,PartialCreation,WrongSession,WrongModel,BrakeFailure;public bool Turbo=true,TurboRead=true,Readback=true,IsPersistent=true;
     public Capability TurboCapability=Capability.Supported;
     public int MismatchedCategory=-1,ThrowSetCategory=-1;
     public bool UnresolvedCreation {get{return PartialCreation;}}
@@ -35,7 +35,7 @@ public sealed class FakeWorld:IBenchmarkWorld
     public void EnableTurbo(Identity id){Guard(id);Turbo=true;Mutations++;}
     public bool ReadTurbo(Identity id){return Turbo&&TurboRead;}
     public bool Mounted(Identity rider,Identity bike){return true;}
-    public void Drive(Identity r,Identity b,MarkerPoint target,double speed){if(!r.Same(Entities[11])||!b.Same(Entities[10]))throw new Exception("unowned task");Drives++;}
+    public void Drive(Identity r,Identity b,MarkerPoint target,double speed){if(!r.Same(Entities[11])||!b.Same(Entities[10]))throw new Exception("unowned task");Drives++;if(DriveFailure)throw new InvalidOperationException("synthetic task invocation failure");}
     public void Brake(Identity r,Identity b,int durationMs){if(!r.Same(Entities[11])||!b.Same(Entities[10])||durationMs<=0||durationMs>20000)throw new Exception("unowned braking");Brakes++;if(BrakeFailure)throw new Exception("braking request failed");}
     public void StopOwnedTask(Identity id){if(Inspect(id)!=Presence.Present)throw new Exception("unowned stop");}
     public void DeleteOwned(Identity id){if(DeleteFailure)throw new Exception("cleanup exception");if(Inspect(id)!=Presence.Present)throw new Exception("unowned delete");Deleted.Add(id.Handle);Entities.Remove(id.Handle);}
@@ -56,8 +56,8 @@ public static class TestBatiController
     static MarkerSnapshot Markers(){var m=new MarkerPlan("original-synthetic-fixture","marker-fixture");m.Set(MarkerKind.Start,new MarkerPose{Position=new MarkerPoint(0,0,1),AtMs=1,OnFoot=false});m.Set(MarkerKind.Finish,new MarkerPose{Position=new MarkerPoint(100,0,1),AtMs=2,OnFoot=false});return m.Set(MarkerKind.Listener,new MarkerPose{Position=new MarkerPoint(50,10,3),AtMs=3,OnFoot=true});}
     static MarkerSet Parse(MarkerSnapshot m){var b=Json(m);return MarkerSet.Parse(b,Check.Hash(b),3,"marker-fixture","original-synthetic-fixture");}
     static RouteEvidence Route(MarkerSet m){return new RouteEvidence{Domain="original-synthetic-fixture",Session="run-fixture",MarkerFingerprint=m.Fingerprint,Revision="original-survey-1",Points=new[]{m.Start,new MarkerPoint(50,0,1),m.Finish},SurfaceSpawnVerified=true,TrafficIsolationVerified=true,CoverageComplete=true,CleanupReviewed=true};}
-    static Controller Ready(FakeWorld w){var m=Parse(Markers());var c=new Controller(m,new Policy(),w,"run-fixture");c.Prepare(Route(m));c.Arm(true);return c;}
-    static Reading R(Controller c,double t,double x,double speed){var s=c.Snapshot();return new Reading{At=t,Domain="original-synthetic-fixture",Bike=s.Bike,Rider=s.Rider,Position=new MarkerPoint(x,0,1),Velocity=new MarkerPoint(speed,0,0),Rotation=new MarkerPoint(),PlayerPosition=new MarkerPoint(50,10,3),PlayerVelocity=new MarkerPoint(),Speed=speed,Mounted=true,EngineOn=true,Simulation="OBSERVED_CONTIGUOUS",Interference="NONE_OBSERVED_COMPLETE_COVERAGE",RawRpm=48.333335876464844,Gear=2};}
+    public static Controller Ready(FakeWorld w){var m=Parse(Markers());var c=new Controller(m,new Policy(),w,"run-fixture");c.Prepare(Route(m));c.Arm(true);return c;}
+    public static Reading R(Controller c,double t,double x,double speed){var s=c.Snapshot();return new Reading{At=t,Domain="original-synthetic-fixture",Bike=s.Bike,Rider=s.Rider,Position=new MarkerPoint(x,0,1),Velocity=new MarkerPoint(speed,0,0),Rotation=new MarkerPoint(),PlayerPosition=new MarkerPoint(50,10,3),PlayerVelocity=new MarkerPoint(),Speed=speed,Mounted=true,EngineOn=true,Simulation="OBSERVED_CONTIGUOUS",Interference="NONE_OBSERVED_COMPLETE_COVERAGE",RawRpm=48.333335876464844,Gear=2};}
     static void Failure(Action<Reading> change,string reason){var w=new FakeWorld();var c=Ready(w);Yes(c.Start(0),"failure fixture starts");var r=R(c,0,0,0);change(r);c.Observe(r);Yes(c.Snapshot().Outcome=="FAILED"&&c.Snapshot().Reason.Contains(reason),reason);Yes(c.State==Stage.Cleaned&&w.Deleted.Count==2,"terminal cleanup after "+reason);}
     public static int Main(string[] args)
     {
