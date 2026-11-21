@@ -34,7 +34,7 @@ $binding=Join-Path $out 'Candidate.cs'
 $code=@"
 namespace RichAudio.NativeSuppression01 {
  internal static class Candidate {
-  internal const string ExecutionDirectory = @"C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01\unknown-name-brake-run";
+  internal const string ExecutionDirectory = @"C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01\unknown-name-adder-run";
   internal const string SourceCommit = "$head";
   internal const string GamePath = @"$game";
   internal const string GameSha256 = "$gamePin";
@@ -44,9 +44,10 @@ namespace RichAudio.NativeSuppression01 {
 "@
 [IO.File]::WriteAllText($binding,$code,[Text.UTF8Encoding]::new($false))
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-$variant=Join-Path $repo '.local/unknown-name-brake/tools'
+$variant=Join-Path $repo '.local/unknown-name-adder/tools'
 $sources=@('IdleExperiment.cs','IdleNativeApi.cs','AutomaticRun.cs','LocalBridge.cs')|ForEach-Object{Join-Path $variant $_}
-$sources+=@('SetupState.cs','SetupNativeApi.cs','IdleProbe.Shvdne.cs')|ForEach-Object{Join-Path "$PSScriptRoot/../native-suppression11" $_}
+$sources+=@(Join-Path $variant 'SetupNativeApi.cs')
+$sources+=@('SetupState.cs','IdleProbe.Shvdne.cs')|ForEach-Object{Join-Path "$PSScriptRoot/../native-suppression11" $_}
 $sources+=@(Join-Path $repo 'tools/native-control/native-suppression01/IdleDecoratorRegistration.cs')
 $binary=Join-Path $out 'RichAudio.UnknownAudioName.dll'
 & $compiler /nologo /target:library /platform:x64 /langversion:5 /optimize+ /unsafe+ /warnaserror+ /nowarn:0649 /r:System.Web.Extensions.dll /r:System.Core.dll /r:System.Windows.Forms.dll ('/r:'+$api) ('/out:'+$binary) @sources $binding

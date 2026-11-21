@@ -37,7 +37,7 @@ def put(path, value):
 
 
 def relabel(value):
-    for a, b in [("execution-11", "unknown-name-brake-run"), ("Live11", "UnknownName"),
+    for a, b in [("execution-11", "unknown-name-adder-run"), ("Live11", "UnknownName"),
                  ("NativeSuppression11", "UnknownAudioName"), ("Recorder11.lua", "Recorder.lua")]:
         value = value.replace(a, b)
     return value
@@ -74,18 +74,22 @@ def seal(build_path, checks_dir):
             "focusConfiguration focusPolicy coverageAdmission proceduralTiming lifetime registrationOperation "
             "feedbackFocus measurement runtimeFailurePolicy operations setupTransitions capture operator").split()
     scope = {key: old[key] for key in keys}
-    dest = BASE / "unknown-name-brake"
+    dest = BASE / "unknown-name-adder"
     run = Path(relabel(old["installation"]["executionDirectory"]))
     require(not run.exists() and not dest.exists(), "Fresh private destination required")
     catalogue = check()
     dest.mkdir()
     install = dest / "installation"
     install.mkdir()
-    scope.update(candidateName="unknown-name-brake", sourceCommit=head, implementationCommit=head,
-                 sequence=["stock baseline", "BATI", catalogue["name"], "BATI"],
+    scope.update(candidateName="unknown-name-adder", sourceCommit=head, implementationCommit=head,
+                 sequence=["stock baseline", "ADDER", catalogue["name"], "ADDER"],
                  catalogue=catalogue, assignmentTarget="A only", activeLimitSeconds=600,
                  comparison="Stationary matched idle, separate physical horn, same-A release and unassigned B controls")
-    scope["operations"]["riderBrake"] = "Only while the verified player drives exact A: accelerator and brake/reverse clamped, enabled handbrake (76) at 1.0 for the next frame, including observed BATI return. Ceases on dismount/retirement/abort."
+    scope["operations"]["riderBrake"] = "Only while the verified player drives exact A: accelerator and brake/reverse clamped, enabled handbrake (76) at 1.0 for the next frame, including observed ADDER return. Ceases on dismount/retirement/abort."
+    scope["lifetime"] = scope["lifetime"].replace("Bati", "ADDER")
+    scope["runtimeFailurePolicy"] = scope["runtimeFailurePolicy"].replace("BATI", "ADDER")
+    scope["operations"]["site"].update(layouts="Up to 80 nearby loaded layouts, eight headings per radius, 14m between ADDER centers.",
+        placement="Stationary on-foot return point clear, minimum 8m from both car centers, radius 4m clear car footprints. Center and four corners require pavement and ground heights within 0.15m; pair centers within 0.20m. One ground-placement request per owned ADDER.")
     scope["operations"]["horn"] = "At most four A-only 600ms requests, one per observation. Log active readback and physical sound separately."
     scope["setupTransitions"]["qualification"] = receipts[0]
     scope["setupTransitions"]["initialStationaryAcquisition"] = dict(requiredSeconds=10, timeoutSeconds=30, speedMpsStrictlyBelow=0.15, maximumWaitableSpeedMps=0.30, timeoutRenewed=False)
@@ -129,6 +133,19 @@ def seal(build_path, checks_dir):
         freshPreflightSchema="NativeSuppression01UnknownNameFreshLivePreflight")
     for key in ["requiredAbsentDirectories", "additionalRequiredAbsent"]:
         scope[key] = scope["installation"][key] = [relabel(s) for s in old["installation"][key]]
+    startup = BASE / "unknown-name-brake-fresh"
+    require(pin(startup / "scope.json")["sha256"] == "75c4e92e19ffacb216c8103f0eecca6ee2f5d420a5549fab73ae0acc858fe7e9", "Startup scope changed")
+    previous = read(startup / "scope.json")
+    for name in ["Prepare-Session", "Start-Session", "Admission", "Window", "Test-NativeMemoryCompletion", "Close-Session", "Save-StartupLogs"]:
+        src = startup / (name + ".ps1")
+        require(pin(src) in previous["builds"], "Startup tool changed: " + name)
+        shutil.copyfile(src, dest / src.name)
+        scope["builds"].append(pin(dest / src.name))
+    shutil.copyfile(tools / "Preflight.ps1", dest / "Preflight.ps1")
+    scope["builds"].append(pin(dest / "Preflight.ps1"))
+    scope.update(receiptPath=str(REPO / ".local/unknown-live-adder/preflight.json"),
+                 independentVerifier=pin(tools / "Verify-Restoration.ps1"),
+                 executionEntry=pin(dest / "Prepare-Session.ps1"), normalClosureEntry=pin(dest / "Close-Session.ps1"))
     print(json.dumps(put(dest / "scope.json", scope), indent=2))
 
 

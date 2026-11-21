@@ -1,0 +1,338 @@
+--- a/IdleNativeApi.cs
++++ b/IdleNativeApi.cs
+@@ -10,10 +10,10 @@
+ namespace RichAudio.NativeSuppression01
+ {
+     // Native plumbing retained from the isolated profile probe. It only owns newly
+-    // created disposable Batis. No existing vehicle can be adopted by this API.
++    // created disposable Adders. No existing vehicle can be adopted by this API.
+     internal sealed partial class IdleNativeApi : IAutomaticIdleApi
+     {
+-        const uint Bati = 0xF9300CC5;
++        const uint Adder = 0xB779A091;
+         const string Decorator = "RA_NS01_8b7e24c1";
+         readonly int thread = Thread.CurrentThread.ManagedThreadId;
+         readonly IIdleDecoratorLock decoratorLock;
+@@ -54,10 +54,11 @@
+         public RuntimeProgress ReadProgress() {
+             Context();return new RuntimeProgress {GameMilliseconds=native.GameTime,SimulationFrames=native.FrameCount,StoryReady=StoryReady,PauseMenu=native.Paused};
+         }
++        sealed class SpaceOccupiedException:InvalidOperationException {internal SpaceOccupiedException(string reason):base(reason){}}
+         void Space(Vector3 p)
+         {
+             if(Single.IsNaN(p.X)||Single.IsNaN(p.Y)||Single.IsNaN(p.Z)||Math.Abs(p.X)>10000||Math.Abs(p.Y)>10000||Math.Abs(p.Z)>3000)throw new InvalidOperationException("spawn-coordinate-invalid position="+p);
+-            if(native.Call<bool>(Hash.IS_POSITION_OCCUPIED,p.X,p.Y,p.Z,3f,false,true,true,false,false,0,false))throw new InvalidOperationException("spawn-space-occupied position="+p+" radius=3");
++            if(native.Call<bool>(Hash.IS_POSITION_OCCUPIED,p.X,p.Y,p.Z,4f,false,true,true,true,false,0,false))throw new SpaceOccupiedException("spawn-space-occupied position="+p+" radius=4");
+         }
+         public void Prepare()
+         {
+@@ -67,15 +68,15 @@
+             Space(a); Space(b);
+             sitePlaced=true;
+             native.RegisterDecorator(Decorator, decoratorLock, log);
+-            native.Call(Hash.REQUEST_MODEL, Bati); // Nonblocking. Readiness polled by later ticks.
+-        }
+-        public bool ModelReady { get { Context(); return native.Call<bool>(Hash.HAS_MODEL_LOADED, Bati); } }
++            native.Call(Hash.REQUEST_MODEL, Adder); // Nonblocking. Readiness polled by later ticks.
++        }
++        public bool ModelReady { get { Context(); return native.Call<bool>(Hash.HAS_MODEL_LOADED, Adder); } }
+         public Lifetime Spawn(string role, int token)
+         {
+             Context(); if (!StoryReady || !ModelReady) throw new InvalidOperationException("spawn prerequisites changed");
+             var p = role == "A" ? a : b; Space(p);
+             int handle;
+-            try{handle=native.Call<int>(Hash.CREATE_VEHICLE,Bati,p.X,p.Y,p.Z,heading,false,false,false);}
++            try{handle=native.Call<int>(Hash.CREATE_VEHICLE,Adder,p.X,p.Y,p.Z,heading,false,false,false);}
+             catch(Exception e){creationUnknown=true;log("create-outcome-unknown role="+role+" requestedPosition="+p+" reason="+e.GetType().Name+":"+e.Message+"; no handle to reacquire, never respawn");throw;}
+             var item = new Lifetime { Handle = handle, Role = role, Token = token };
+             if(handle==0||!Exists(item)){creationUnknown=true;throw new InvalidOperationException("creation-return-not-verifiable role="+role+" handle="+handle+" requestedPosition="+p);}
+@@ -101,7 +102,7 @@
+         public bool Matches(Lifetime item)
+         {
+             Context(); if(item==null||item.Lost||item.Deleted)return false;
+-            bool match=Exists(item) && native.Call<uint>(Hash.GET_ENTITY_MODEL, item.Handle) == Bati &&
++            bool match=Exists(item) && native.Call<uint>(Hash.GET_ENTITY_MODEL, item.Handle) == Adder &&
+                 native.Call<bool>(Hash.DOES_ENTITY_BELONG_TO_THIS_SCRIPT, item.Handle, true) &&
+                 native.Call<bool>(Hash.DECOR_EXIST_ON, item.Handle, Decorator) && native.Call<int>(Hash.DECOR_GET_INT, item.Handle, Decorator) == item.Token;
+             if(!match&&!item.DeleteIssued)item.Lost=true;
+@@ -185,7 +186,7 @@
+         // Match the SDK's Entity.Delete: point to this call's integer handle.
+         // The synchronous native call finishes before that stack slot expires.
+         internal static unsafe InputArgument CreateDeleteArgument(int* handle) { return handle; }
+-        public void ReleaseModel() { Context(); native.Call(Hash.SET_MODEL_AS_NO_LONGER_NEEDED, Bati); }
++        public void ReleaseModel() { Context(); native.Call(Hash.SET_MODEL_AS_NO_LONGER_NEEDED, Adder); }
+
+         sealed class GroundPendingException:InvalidOperationException {internal GroundPendingException(string s):base(s){}}
+         sealed class SlopeException:InvalidOperationException {internal SlopeException(string s):base(s){}}
+@@ -195,10 +196,29 @@
+             if(Single.IsNaN(z)||Single.IsInfinity(z)||Math.Abs(z-p.Z)>3f)throw new SlopeException("local-ground-height-invalid position="+p+" observedZ="+z);
+             return z;
+         }
++        unsafe bool Paved(Vector3 p) {
++            int ray=native.Call<int>(Hash.START_EXPENSIVE_SYNCHRONOUS_SHAPE_TEST_LOS_PROBE,
++                p.X,p.Y,p.Z+1,p.X,p.Y,p.Z-1,1,0,7);
++            int hit=0, entity=0;
++            uint material=0;
++            long* point=stackalloc long[3];
++            long* normal=stackalloc long[3];
++            int status=native.Call<int>(Hash.GET_SHAPE_TEST_RESULT_INCLUDING_MATERIAL,
++                ray,&hit,point,normal,&material,&entity);
++            return status==2 && hit!=0 && (material==(uint)MaterialHash.Concrete ||
++                material==(uint)MaterialHash.ConcretePavement || material==(uint)MaterialHash.Tarmac ||
++                material==(uint)MaterialHash.TarmacPainted);
++        }
+         Vector3 FlatGround(Vector3 p) {
+             float z=Ground(p);
+-            foreach(var d in new[]{new Vector3(1,1,0),new Vector3(-1,1,0),new Vector3(1,-1,0),new Vector3(-1,-1,0)})
+-                if(Math.Abs(Ground(p+d)-z)>.20f)throw new SlopeException("local-slope-exceeds-0.20 position="+p+" centerZ="+z+" corner="+d);
++            // Bound the entire car footprint at any heading, plus the driver door.
++            foreach(var d in new[]{Vector3.Zero,new Vector3(3,3,0),new Vector3(-3,3,0),
++                                    new Vector3(3,-3,0),new Vector3(-3,-3,0)}) {
++                Vector3 sample=p+d;
++                sample.Z=Ground(sample);
++                if(Math.Abs(sample.Z-z)>.15f || !Paved(sample))
++                    throw new SlopeException("level-paved-footprint-unavailable");
++            }
+             return new Vector3(p.X,p.Y,z+.5f);
+         }
+         void PlayerIdentity() {
+--- a/AutomaticRun.cs
++++ b/AutomaticRun.cs
+@@ -84,7 +84,7 @@
+         }
+         double Elapsed(long t) { return (clock()-t)/(double)frequency; }
+         double ActiveSeconds { get { return Elapsed(activeStart); } }
+-        string Profile { get { return phase=="baseline"||phase=="release"?"BATI": phase=="B-pre"||phase=="B-post"||phase=="start"?"NONE":IdleExperiment.Profiles[Int32.Parse(phase,CultureInfo.InvariantCulture)]; } }
++        string Profile { get { return phase=="baseline"||phase=="release"?"ADDER": phase=="B-pre"||phase=="B-post"||phase=="start"?"NONE":IdleExperiment.Profiles[Int32.Parse(phase,CultureInfo.InvariantCulture)]; } }
+         internal RunState State { get { return new RunState { Session=session,Phase=phase,Generation=core.Generation,Profile=Profile,Observation=observation,Stage=stage,Status=status,Recording=recording,SetupOutcome=setupOutcome,SetupReason=setupReason,Ticks=lastTick,ActiveStart=activeStart,Deadline=activeStart==0?0:activeStart+SessionSeconds*frequency,AwaitingReview=stage=="Review"&&phaseWindowComplete,Finished=finished,Retired=retired,ArmPending=stage=="Dispatch",RequiredDurableSequence=durableBarrier,DurableBarrierSatisfied=journal.Durable(durableBarrier),CallbackSequence=callbackSequence,LastSimulationProgressTicks=simulationProgressAt,RuntimeReady=RuntimeReady,PauseMenu=progress!=null&&progress.PauseMenu,GameMilliseconds=progress==null?0:progress.GameMilliseconds,SimulationFrames=progress==null?0:progress.SimulationFrames }; } }
+         void Enter(string next) { stage=next;entered=clock();stableSince=0;lastPose=null;status=next+" "+phase;journal.Write("runner-state stage="+stage+" phase="+phase+" generation="+core.Generation); }
+         void Window(string kind,int offset,int duration) { journal.Write("window-declared observation="+observation+" phase="+phase+" kind="+kind+" anchorQpc="+(kind=="horn"?hornStart:windowStart)+" offsetSeconds="+offset+" durationSeconds="+duration+" recording="+recording+"; fixed first anchor, no replacement"); }
+@@ -198,7 +198,7 @@
+                 if(stage=="Spawn"&&!Progress(SetupStep.Models,5,capture))return;
+                 if(!core.Stopped)core.Tick();
+                 if(core.Stopped&&!terminal) { terminal=true;NewObservation("release");Enter(core.RestoreReturned?"ReleaseObserve":!core.Changed?"Retire":"ReleasePending"); }
+-                // Final and emergency BATI observations use the same rider controls as stock.
++                // Final and emergency ADDER observations use the same rider controls as stock.
+                 bool observingReturn=terminal && (phase=="2"||phase=="release") &&
+                     (stage=="ReleaseObserve"||stage=="Idle"||stage=="Horn"||stage=="Review"||
+                      stage=="ReviewDurable"||stage=="Resume");
+@@ -266,7 +266,7 @@
+                     if(!Settled(seated,seated,seated?aPose:bPose))return;
+                     if(phase=="B-pre") { bReviewed=true;Enter("SeatBaseline");return; }
+                     if(phase=="B-post") { Enter("Retire");return; }
+-                    if(phase=="release") { core.ConfirmObservation(SelectionEvidence.BatiReturned);FinishRelease();return; }
++                    if(phase=="release") { core.ConfirmObservation(SelectionEvidence.AdderReturned);FinishRelease();return; }
+                     core.ConfirmObservation(core.ExpectedEvidence);
+                     if(phase=="2") { FinishRelease();return; }
+                     Enter("DispatchReady");return;
+--- a/IdleExperiment.cs
++++ b/IdleExperiment.cs
+@@ -27,11 +27,11 @@
+         void ReleaseModel();
+         string Snapshot(Lifetime item);
+     }
+-    internal enum SelectionEvidence { None, StockBatiNormal, SelfAssignmentStable, UnknownNameReviewed, BatiReturned }
++    internal enum SelectionEvidence { None, StockAdderNormal, SelfAssignmentStable, UnknownNameReviewed, AdderReturned }
+     internal sealed class IdleExperiment
+     {
+         internal static readonly string[] Profiles = {
+-            "BATI", "ra_quiet_orchard", "BATI"
++            "ADDER", "ra_quiet_orchard", "ADDER"
+         };
+         readonly IIdleApi api;
+         readonly Action<string> log;
+@@ -45,12 +45,12 @@
+         bool baselineAccepted, observationPending, releaseOutcomeRecorded;
+         internal SelectionEvidence ExpectedEvidence {
+             get {
+-                if (stopped && RestoreReturned) return SelectionEvidence.BatiReturned;
+-                if (!baselineAccepted) return SelectionEvidence.StockBatiNormal;
++                if (stopped && RestoreReturned) return SelectionEvidence.AdderReturned;
++                if (!baselineAccepted) return SelectionEvidence.StockAdderNormal;
+                 switch (applied) {
+                     case 0: return SelectionEvidence.SelfAssignmentStable;
+                     case 1: return SelectionEvidence.UnknownNameReviewed;
+-                    case 2: return SelectionEvidence.BatiReturned;
++                    case 2: return SelectionEvidence.AdderReturned;
+                     default: return SelectionEvidence.None;
+                 }
+             }
+@@ -99,7 +99,7 @@
+             used = true; end = start + 600 * frequency; releaseBy = start + 525 * frequency; loadEnd = clock() + 5 * frequency;
+             log("spawn-request; known stock experiment baseline; no arbitrary prior override recovery");
+             loading = true;
+-            try { api.Prepare(); Status = "Loading BATI"; }
++            try { api.Prepare(); Status = "Loading ADDER"; }
+             catch (ThreadAbortException) { throw; }
+             catch { Stop("spawn preparation failed"); throw; }
+         }
+@@ -187,7 +187,7 @@
+                 api.Assign(a, profile, delegate {
+                     bool admitted = !aborted && !stopped && healthy() && clock() < expiry && clock() < releaseBy &&
+                         (applied == 2 || end - clock() >= 100 * frequency);
+-                    // A refused final guard has not dispatched BATI; the stop
++                    // A refused final guard has not dispatched ADDER; the stop
+                     // path may still perform its separately admitted release.
+                     if (admitted && (applied == 2)) restoreAttempted = true;
+                     if (admitted) changed = true;
+@@ -223,7 +223,7 @@
+             if (applied != -1 && clock() - observationStart < 15 * frequency)
+                 throw new InvalidOperationException("finish fixed idle window before horn");
+             hornCue = clock();
+-            log("physical-horn-cue intended=" + (applied == -1 ? "stock baseline BATI" : Profiles[applied]) +
++            log("physical-horn-cue intended=" + (applied == -1 ? "stock baseline ADDER" : Profiles[applied]) +
+                 " role=A handle=" + a.Handle + " token=" + a.Token + "; sound horn once at cue+2 to +5s; event window cue+0 / 10s; activation and audible identity require video/listening; getter auxiliary only");
+         }
+         internal void ConfirmObservation(SelectionEvidence evidence)
+@@ -237,10 +237,10 @@
+             if (evidence != ExpectedEvidence || evidence == SelectionEvidence.None)
+             { Stop("missing or ambiguous independent audible evidence"); throw new InvalidOperationException("wrong evidence for intended phase"); }
+             // A manual attestation, not automatic acoustic analysis or an effective-profile getter.
+-            log("reviewed-observation-accepted intended=" + (applied == -1 ? "stock baseline BATI" : Profiles[applied]) +
++            log("reviewed-observation-accepted intended=" + (applied == -1 ? "stock baseline ADDER" : Profiles[applied]) +
+                 " evidence=" + evidence + "; session/phase-bound listening and capture review; getter not gated; controller does not measure audio");
+             baselineAccepted = true; observationPending = false;
+-            if (evidence == SelectionEvidence.BatiReturned) {
++            if (evidence == SelectionEvidence.AdderReturned) {
+                 releaseOutcomeRecorded = true;
+                 if (!stopped) { restoreAttempted = false; RestoreReturned = false; }
+             }
+@@ -269,12 +269,12 @@
+             if (changed && !restoreAttempted && api.StoryReady && Own(a) && api.CanRestore(a))
+             {
+                 restoreAttempted = true;
+-                log("restore-intent same surviving A; requested=BATI; audible restoration UNVERIFIED");
++                log("restore-intent same surviving A; requested=ADDER; audible restoration UNVERIFIED");
+                 try
+                 {
+-                    api.Assign(a, "BATI", delegate { return !aborted&&clock()<end; }); changed = false; RestoreReturned = true;
++                    api.Assign(a, "ADDER", delegate { return !aborted&&clock()<end; }); changed = false; RestoreReturned = true;
+                     applied = 2; observationStart = clock(); hornCue = 0; observationPending = true; releaseOutcomeRecorded = false;
+-                    Status = "BATI restore returned - record same surviving A before F10 cleanup";
++                    Status = "ADDER restore returned - record same surviving A before F10 cleanup";
+                 }
+                 catch (ThreadAbortException) { throw; }
+                 catch { Status = "RESTORE UNKNOWN - do not retry assignment; end session normally"; }
+--- a/InspectAutomatic11.cs
++++ b/InspectAutomatic11.cs
+@@ -50,7 +50,7 @@
+         Type controller=a.GetType("RichAudio.NativeSuppression01.IdleExperiment"),adapter=a.GetType("RichAudio.NativeSuppression01.IdleNativeApi"),binding=a.GetType("RichAudio.NativeSuppression01.Candidate");
+         Need((string)binding.GetField("SourceCommit",F).GetRawConstantValue()==(string)build["sourceCommit"],"compiled source commit");
+         Need(binding.GetField("DlcSha256",F)==null,"no DLC binding");
+-        var order=Decode(controller.TypeInitializer).Where(x=>x.op=="ldstr").Select(x=>(string)x.value).ToArray();Need(order.SequenceEqual(new[]{"BATI","ra_quiet_orchard","BATI"}),"compiled exact phase order and names");
++        var order=Decode(controller.TypeInitializer).Where(x=>x.op=="ldstr").Select(x=>(string)x.value).ToArray();Need(order.SequenceEqual(new[]{"ADDER","ra_quiet_orchard","ADDER"}),"compiled exact phase order and names");
+         var assign=Decode(adapter.GetMethod("Assign",F));
+         var all=a.GetTypes().SelectMany(t=>t.GetMethods(F).Cast<MethodBase>().Concat(t.GetConstructors(F)).Concat(t.TypeInitializer==null?new MethodBase[0]:new[]{t.TypeInitializer})).Distinct().SelectMany(Decode).ToList();
+         var setter=Decode(adapter.GetMethod("VehicleAudioSetter",F));
+--- a/SetupNativeApi.cs
++++ b/SetupNativeApi.cs
+@@ -8,6 +8,7 @@
+ {
+     internal sealed partial class IdleNativeApi
+     {
++        int nextLayout;
+         Vector3 requestedStanding;
+         readonly HashSet<SetupStep> completed=new HashSet<SetupStep>();
+         static bool IsSeat(SetupStep s){return s==SetupStep.SeatInitial||s==SetupStep.SeatBaseline;}
+@@ -19,7 +20,7 @@
+             if(!v.Exists){if(!life.DeleteIssued&&!life.Deleted)life.Lost=true;return v;}
+             v.Model=native.Call<uint>(Hash.GET_ENTITY_MODEL,life.Handle);v.Owned=native.Call<bool>(Hash.DOES_ENTITY_BELONG_TO_THIS_SCRIPT,life.Handle,true);
+             v.Decor=native.Call<bool>(Hash.DECOR_EXIST_ON,life.Handle,Decorator);if(v.Decor)v.Token=native.Call<int>(Hash.DECOR_GET_INT,life.Handle,Decorator);
+-            v.Identity=!life.Lost&&!life.Deleted&&v.Model==Bati&&v.Owned&&v.Decor&&v.Token==life.Token;
++            v.Identity=!life.Lost&&!life.Deleted&&v.Model==Adder&&v.Owned&&v.Decor&&v.Token==life.Token;
+             if(!v.Identity){life.Lost=true;return v;}
+             v.Data=true;v.Driver=native.Call<int>(Hash.GET_PED_IN_VEHICLE_SEAT,life.Handle,-1,false);v.Passenger=native.Call<int>(Hash.GET_PED_IN_VEHICLE_SEAT,life.Handle,0,false);
+             v.Engine=native.Call<bool>(Hash.GET_IS_VEHICLE_ENGINE_RUNNING,life.Handle);v.Speed=native.Call<float>(Hash.GET_ENTITY_SPEED,life.Handle);
+@@ -77,15 +78,33 @@
+             if(native.Call<int>(Hash.GET_INTERIOR_FROM_ENTITY,s.Ped)!=0)return Result(SetupStep.Site,s,TransitionOutcome.UNSAFE,"current-location-is-interior");
+             if(siteSelected&&(s.Position-siteAnchor).Length()>.10f){if(sitePlaced)return Result(SetupStep.Site,s,TransitionOutcome.UNSAFE,"committed-local-anchor-moved");siteSelected=false;}
+             if(!siteSelected){
+-                bool unavailable=false;float original=native.Call<float>(Hash.GET_ENTITY_HEADING,s.Ped);
+-                for(int i=0;i<4;i++){
+-                    float angle=original+i*90f;double r=angle*Math.PI/180;Vector3 left=Offset(s.Position,-5,8,r),right=Offset(s.Position,5,8,r);
+-                    try{left=FlatGround(left);right=FlatGround(right);}catch(GroundPendingException){unavailable=true;continue;}catch(SlopeException){continue;}
+-                    try{Space(left);Space(right);}catch(InvalidOperationException){continue;}
+-                    a=left;b=right;heading=angle;layout=i;siteAnchor=s.Position;siteSelected=true;
+-                    log("loaded-local-layout-selected index="+layout+" anchor="+siteAnchor+" A="+a+" B="+b+" heading="+heading+"; no distant teleport or streaming-focus change");break;
+-                }
+-                if(!siteSelected)return Result(SetupStep.Site,s,unavailable?TransitionOutcome.PENDING:TransitionOutcome.UNSAFE,unavailable?"local-ground-data-not-ready":"all-four-local-layouts-blocked");
++                if(initialExitRequested)originalPosition=s.Position; // Return to the on-foot exit point.
++                if(native.Call<bool>(Hash.IS_POSITION_OCCUPIED,originalPosition.X,originalPosition.Y,originalPosition.Z,
++                    .60f,false,true,true,true,false,savedPed,false))
++                    return Result(SetupStep.Site,s,TransitionOutcome.UNSAFE,"saved-return-space-occupied");
++                // Survey one nearby layout per callback to bound collision queries.
++                int i=nextLayout++;
++                if(i>=80)return Result(SetupStep.Site,s,TransitionOutcome.UNSAFE,"no-clear-loaded-paved-pair");
++                float angle=native.Call<float>(Hash.GET_ENTITY_HEADING,s.Ped)+(i%8)*45f;
++                double r=angle*Math.PI/180;
++                float forward=14f+(i/8)*12f;
++                Vector3 left=Offset(s.Position,-7,forward,r),right=Offset(s.Position,7,forward,r);
++                try {
++                    left=FlatGround(left);right=FlatGround(right);
++                    if(Math.Abs(left.Z-right.Z)>.20f || (left-originalPosition).Length()<8 ||
++                        (right-originalPosition).Length()<8)throw new SlopeException("pair-height-or-return-clearance");
++                    Space(left);Space(right);
++                    Vector3 listener=Offset(right,0,-4,r);
++                    listener.Z=Ground(listener);
++                    if(!Paved(listener))throw new SlopeException("B-listener-surface");
++                    Space(listener);
++                }catch(InvalidOperationException e){
++                    if(!(e is SlopeException || e is GroundPendingException || e is SpaceOccupiedException))throw;
++                    return Result(SetupStep.Site,s,TransitionOutcome.PENDING,"survey-next-layout "+e.Message);
++                }
++                a=left;b=right;heading=angle;layout=i;siteAnchor=s.Position;siteSelected=true;
++                log("paved-pair-selected layout="+i+" A="+a+" B="+b+" return="+originalPosition);
++
+             }
+             return Result(SetupStep.Site,s,TransitionOutcome.READY,"loaded-local-location-qualified layout="+layout);
+         }
+@@ -112,7 +131,7 @@
+             if((s.Position-requestedStanding).Length()<=.10f){foreach(var key in issued.Keys)if(key==SetupStep.BViewPre||key==SetupStep.BViewPost)completed.Add(key);}
+             string command;if(!cleanup&&issued.TryGetValue(step,out command)&&command=="uncertain")return Result(step,s,TransitionOutcome.UNSAFE,"command-outcome-unknown-never-resend");
+             if(step==SetupStep.Site)return Site(s);
+-            if(step==SetupStep.Models){bool ready=ModelReady;return Result(step,s,ready?TransitionOutcome.READY:TransitionOutcome.PENDING,"Bati-model-loaded="+ready);}
++            if(step==SetupStep.Models){bool ready=ModelReady;return Result(step,s,ready?TransitionOutcome.READY:TransitionOutcome.PENDING,"Adder-model-loaded="+ready);}
+             bool exit=step==SetupStep.ExitBPre||step==SetupStep.ExitBPost||step==SetupStep.ExitRetire;
+             if(exit){
+                 if(cleanup&&InFlight(IsSeat)&&!s.InVehicle)return Result(step,s,TransitionOutcome.PENDING,"previous-seat-command-still-in-flight");
+@@ -162,7 +181,7 @@
+             if(step==SetupStep.BViewPre||step==SetupStep.BViewPost){
+                 if(s.InVehicle||s.A.Engine||!s.B.Engine)return Result(step,s,TransitionOutcome.UNSAFE,"B-comparison-engine-or-occupancy-contradiction");
+                 if(!issued.ContainsKey(step)){
+-                    requestedStanding=native.Call<Vector3>(Hash.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS,control.Handle,0f,-3f,0f);
++                    requestedStanding=native.Call<Vector3>(Hash.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS,control.Handle,0f,-4f,0f);
+                     try{requestedStanding.Z=Ground(requestedStanding)+1f;}catch(GroundPendingException){return Result(step,s,TransitionOutcome.PENDING,"B-standing-ground-data-pending");}
+                     if((requestedStanding-s.Position).Length()>20||native.Call<bool>(Hash.IS_POSITION_OCCUPIED,requestedStanding.X,requestedStanding.Y,requestedStanding.Z,.45f,false,true,true,false,false,savedPed,false))return Result(step,s,TransitionOutcome.UNSAFE,"B-standing-point-blocked-or-beyond-20m requested="+requestedStanding);
+                     return Result(step,s,TransitionOutcome.PENDING,"B-standing-placement-not-issued requested="+requestedStanding,true);
+--- a/SetupGame11.cs
++++ b/SetupGame11.cs
+@@ -9,8 +9,9 @@
+ // Authored game responses only. Real runner, adapter and retained SDK
+ // InputArgument conversions execute; no ScriptHook/GTA native is invoked.
+ internal sealed class SetupGame11:IIdleNativeCalls {
++    internal int UnpavedSamples;
+     internal sealed class Entity {
+-        internal int Handle,Token,Driver,Passenger;internal uint Model=0xF9300CC5;
++        internal int Handle,Token,Driver,Passenger;internal uint Model=0xB779A091;
+         internal bool Exists=true,Owned,Engine,Dead,Driveable=true,Collision=true,Air,Wheels=true;
+         internal float Speed,Heading;internal Vector3 Position;
+     }
+@@ -64,11 +65,16 @@
+                 Require(a.Length==6&&U(a[3])>65535,"ground caller-owned float pointer");
+                 if(GroundNever||Now<GroundAt)return false;
+                 Marshal.Copy(BitConverter.GetBytes(0f),0,new IntPtr(unchecked((long)U(a[3]))),4);GroundWrites++;return true;
+-            case Hash.REQUEST_MODEL:Require(unchecked((uint)U(a[0]))==0xF9300CC5,"Bati model");ModelAt=Now+(long)(ModelDelay*1000);Count("model");return null;
++            case Hash.START_EXPENSIVE_SYNCHRONOUS_SHAPE_TEST_LOS_PROBE:return 1;
++            case Hash.GET_SHAPE_TEST_RESULT_INCLUDING_MATERIAL:
++                Marshal.WriteInt32(new IntPtr((long)U(a[1])),1);
++                Marshal.WriteInt32(new IntPtr((long)U(a[4])),UnpavedSamples-- > 0 ? unchecked((int)GTA.MaterialHash.Rock) : (int)GTA.MaterialHash.Concrete);
++                return 2;
++            case Hash.REQUEST_MODEL:Require(unchecked((uint)U(a[0]))==0xB779A091,"Adder model");ModelAt=Now+(long)(ModelDelay*1000);Count("model");return null;
+             case Hash.HAS_MODEL_LOADED:return Now>=ModelAt;
+             case Hash.SET_MODEL_AS_NO_LONGER_NEEDED:Count("release-model");return null;
+             case Hash.CREATE_VEHICLE:
+-                Require(a.Length==8&&I(a[5])==0&&I(a[6])==0&&I(a[7])==0,"local create arguments");
++                Require((uint)U(a[0])==0xB779A091 && a.Length==8&&I(a[5])==0&&I(a[6])==0&&I(a[7])==0,"local create arguments");
+                 int handle=100+(Created++);var e=new Entity{Handle=handle,Position=new Vector3(F(a[1]),F(a[2]),F(a[3])),Heading=F(a[4]),Speed=1,Collision=false,Air=true,Wheels=false};Entities.Add(handle,e);Count("create");
+                 Later(PhysicsDelay,delegate{e.Speed=0;e.Collision=true;e.Air=false;e.Wheels=true;});if(ThrowCreateB&&handle==101)throw new Exception("AUTHORED lost B create return");return handle;
+             case Hash.SET_ENTITY_AS_MISSION_ENTITY:E(a[0]).Owned=true;return null;

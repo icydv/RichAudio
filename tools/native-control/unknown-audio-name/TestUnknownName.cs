@@ -117,9 +117,20 @@ internal static class TestUnknownName {
             f.At("B-post");long last=f.Input.LastBrake;f.Review();f.Finish();
             Check(f.Input.LastBrake==last && last<f.Game.Now,"no brake during control comparison or retirement");f.SafeRetired();
         });
+        Test("authored pavement survey skips rock and keeps both cars clear of return",()=>{
+            var f=new Fixture();f.Game.UnpavedSamples=1;f.Begin();f.At("B-pre");
+            var a=f.Game.Entities[100];var b=f.Game.Entities[101];
+            Check(f.Has("paved-pair-selected layout=1"),"rock layout rejected");
+            Check((a.Position-b.Position).Length()>13.9f && a.Position.Length()>8 && b.Position.Length()>8,"car and return clearance");
+            f.Stop();f.SafeRetired();
+        });
+        Test("authored all-rock site ends before creating cars or assigning audio",()=>{
+            var f=new Fixture();f.Game.UnpavedSamples=1000;f.Begin();f.Finish();
+            Check(f.Game.Created==0 && f.Game.Profiles.Count==0,"no pair on an unqualified surface");
+        });
         Test("only the self assignment, unknown name and same-A release dispatch",()=>{
             var f=new Fixture();f.Begin();f.Finish(true);
-            Check(f.Game.Profiles.SequenceEqual(new[]{"BATI","ra_quiet_orchard","BATI"}),"three A-only dispatches in order");
+            Check(f.Game.Profiles.SequenceEqual(new[]{"ADDER","ra_quiet_orchard","ADDER"}),"three A-only dispatches in order");
             f.SafeRetired();
         });
         Test("setup failure before any audio write retires without release",()=>{
@@ -129,7 +140,7 @@ internal static class TestUnknownName {
         Test("uncertain unknown-name observation releases only once",()=>{
             var f=new Fixture();f.Begin();f.At("B-pre");f.Review();f.At("baseline");f.Review();
             f.At("0");f.Review();f.At("1");f.Review("Ambiguous");f.Finish(true);
-            Check(f.Game.Profiles.SequenceEqual(new[]{"BATI","ra_quiet_orchard","BATI"}),"one terminal release");f.SafeRetired();
+            Check(f.Game.Profiles.SequenceEqual(new[]{"ADDER","ra_quiet_orchard","ADDER"}),"one terminal release");f.SafeRetired();
         });
         Test("first setter lookup fails before admission and cleanup writes no profile",()=>{
             var f=new Fixture();f.FailLookup=true;f.Begin();f.Finish(true);
@@ -138,7 +149,7 @@ internal static class TestUnknownName {
         Test("lost A after unknown name cannot receive a release",()=>{
             var f=new Fixture();f.Begin();f.At("B-pre");f.Review();f.At("baseline");f.Review();
             f.At("0");f.Review();f.At("1");f.Game.Entities[100].Token=999;f.Step();f.Finish(true);
-            Check(f.Game.Profiles.SequenceEqual(new[]{"BATI","ra_quiet_orchard"})&&!f.Run.State.Retired,"no writes to replaced A");
+            Check(f.Game.Profiles.SequenceEqual(new[]{"ADDER","ra_quiet_orchard"})&&!f.Run.State.Retired,"no writes to replaced A");
         });
         Test("missing horn readback on unknown name still records the physical observation",()=>{
             var f=new Fixture();

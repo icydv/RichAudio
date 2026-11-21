@@ -5,10 +5,12 @@ if(!$out.StartsWith((Join-Path $repo '.local')+'\',[StringComparison]::OrdinalIg
 New-Item -ItemType Directory -Path $out|Out-Null
 $csc='C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe';$sdk=Join-Path $repo '.local/shvdne-reference/release/ScriptHookVDotNet3.dll'
 if((Get-FileHash $sdk).Hash.ToLowerInvariant()-cne'1e4d0bc4d34d05a6038fc87eede492d3dc4265522de473ec19cdf6746b5b0e48'){throw 'Exact retained SDK required'}
-$variant=Join-Path $repo '.local/unknown-name-brake/tools'
+$variant=Join-Path $repo '.local/unknown-name-adder/tools'
 $sources=@('IdleExperiment.cs','AutomaticRun.cs','IdleNativeApi.cs')|ForEach-Object{Join-Path $variant $_}
-$sources+=@('SetupState.cs','SetupNativeApi.cs')|ForEach-Object{Join-Path "$PSScriptRoot/../native-suppression11" $_}
-$sources+=@('tools/native-control/native-suppression01/IdleDecoratorRegistration.cs','tests/host/SetupGame11.cs','tools/native-control/unknown-audio-name/TestUnknownName.cs')|ForEach-Object{Join-Path $repo $_}
+$sources+=@(Join-Path $variant 'SetupNativeApi.cs')
+$sources+=@('SetupState.cs')|ForEach-Object{Join-Path "$PSScriptRoot/../native-suppression11" $_}
+$sources+=@(Join-Path $variant 'SetupGame11.cs')
+$sources+=@('tools/native-control/native-suppression01/IdleDecoratorRegistration.cs','tools/native-control/unknown-audio-name/TestUnknownName.cs')|ForEach-Object{Join-Path $repo $_}
 $binary=Join-Path $out 'SetupFixtures11.exe'
 $key=Join-Path $out 'test-only-public-key.bin';[IO.File]::WriteAllBytes($key,[Reflection.AssemblyName]::GetAssemblyName((Join-Path $repo '.local/shvdne-reference/release/ScriptHookVDotNet.asi')).GetPublicKey())
 # Delay-signed test stand-in in this disposable fixture folder only; no private

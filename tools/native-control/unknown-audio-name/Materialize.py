@@ -8,14 +8,14 @@ from tempfile import TemporaryDirectory
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 BASE = "af167ed004d9ab1568a06613f8e5f9bb8ffbec08"
-PRIVATE = REPO / ".local" / "unknown-name-brake"
+PRIVATE = REPO / ".local" / "unknown-name-adder"
 
 
 # Change only the experiment identity in the isolated copies of historical tools.
 def trial_labels(source):
-    for old, new in (("candidate-11", "unknown-name-brake"), ("execution-11", "unknown-name-brake-run"),
+    for old, new in (("candidate-11", "unknown-name-adder"), ("execution-11", "unknown-name-adder-run"),
                      ("NativeSuppression11", "UnknownAudioName"), ("Live11", "UnknownName"),
-                     ("Candidate11", "UnknownName"), ("candidate11", "unknown-name-brake"),
+                     ("Candidate11", "UnknownName"), ("candidate11", "unknown-name-adder"),
                      ("Execution11", "UnknownName"), ("Automatic11", "UnknownName"),
                      ("Preflight11", "Preflight"), ("Restoration11", "Restoration"),
                      ("Recorder11", "Recorder"), ("Operator11", "Operator")):
@@ -40,6 +40,13 @@ def materialize():
         subprocess.run(["git", "apply", "--no-index", "--whitespace=nowarn",
                         "--directory=" + stage.relative_to(REPO).as_posix(),
                         str(HERE / "unknown-name.patch")], cwd=REPO, check=True)
+        for name, source in [("SetupNativeApi.cs", "tools/native-control/native-suppression11/SetupNativeApi.cs"),
+                             ("SetupGame11.cs", "tests/host/SetupGame11.cs")]:
+            (stage / name).write_bytes((REPO / source).read_text().encode())
+            templates[name] = source
+        subprocess.run(["git", "apply", "--no-index", "--whitespace=nowarn",
+                        "--directory=" + stage.relative_to(REPO).as_posix(),
+                        str(HERE / "adder.patch")], cwd=REPO, check=True)
         if dest.exists():
             if (set(p.name for p in dest.iterdir()) != set(templates)
                     or any(not filecmp.cmp(stage / n, dest / n, shallow=False) for n in templates)):
