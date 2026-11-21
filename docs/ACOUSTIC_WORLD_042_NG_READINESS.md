@@ -1,6 +1,6 @@
 # ACOUSTIC-WORLD-04.2: my saved NG decoding readiness
 
-My next NG step is blocked. A saved encrypted directory can be decoded without reopening its archive, but I have not supplied an approved private decryption capability or its exact file bindings. Codex researched public source only in this increment. Codex did not read earlier private captures, acquire keys, run a key loader, inspect a game executable or launch a tool against my installation.
+My next NG step is blocked. A saved encrypted directory can be decoded without reopening its archive, but I have not supplied an approved private decryption capability or its exact file bindings. The analysis researched public source only in this increment. The operator did not read earlier private captures, acquire keys, run a key loader, inspect a game executable or launch a tool against my installation.
 
 ## What existing tooling establishes
 
@@ -8,7 +8,7 @@ At CodeWalker commit `485d56bec00262ed7fa472261cce7bbc6202b96e`, [`RpfFile.ReadH
 
 The normal public [`LoadFromPath`/`UseMagicData`](https://github.com/dexyfex/CodeWalker/blob/485d56bec00262ed7fa472261cce7bbc6202b96e/CodeWalker.Core/GameFiles/Utils/GTAKeys.cs#L166-L315) path accesses an executable when no AES input is supplied, then processes an embedded data dependency. Its `gen9` branch selects the Enhanced executable. A supplied AES input avoids that executable branch but still enters the broader embedded-data pipeline. These are source observations, not permission to invoke the loader or evidence that a particular binary will work on my installation. The inspected functions do not expose a separately qualified saved-directory-only command.
 
-My narrow route is an independently supplied direct capability. A provider would need to supply the following privately, with provenance and permission for this use. These are required shapes, not files that Codex has located:
+My narrow route is an independently supplied direct capability. A provider would need to supply the following privately, with provenance and permission for this use. These are required shapes, not files that the operator has located:
 
 | Input | Exact decoded size |
 | --- | ---: |
@@ -29,4 +29,4 @@ Before any later decode, I need exact supplied paths, sizes and SHA-256 values; 
 
 CodeWalker's pinned [source-release notice](https://github.com/dexyfex/CodeWalker/blob/485d56bec00262ed7fa472261cce7bbc6202b96e/Readme_Src.txt) limits that release to educational purposes. [`GTACrypto.cs`](https://github.com/dexyfex/CodeWalker/blob/485d56bec00262ed7fa472261cce7bbc6202b96e/CodeWalker.Core/GameFiles/Utils/GTACrypto.cs#L1-L20) separately carries the Neodymium MIT notice, also present in [Notice.txt](https://github.com/dexyfex/CodeWalker/blob/485d56bec00262ed7fa472261cce7bbc6202b96e/Notice.txt). Those notices do not establish rights to obtain or publish game key material or redistribute every CodeWalker dependency. Applicable tool terms, asset permissions and production redistribution remain unresolved qualification work; this is a research finding, not a legal conclusion.
 
-I have not identified an authorized provider. Codex must not search for default key directories, download embedded key assets, scan executables or run extraction to fill that gap. My [blocked proposals](ACOUSTIC_WORLD_042_READ_ONLY_PROPOSALS.md) keep every private input path and hash unset and supply no executable command.
+I have not identified an authorized provider. The operator must not search for default key directories, download embedded key assets, scan executables or run extraction to fill that gap. My [blocked proposals](ACOUSTIC_WORLD_042_READ_ONLY_PROPOSALS.md) keep every private input path and hash unset and supply no executable command.

@@ -37,7 +37,7 @@ The unresolved C order prevents an exact final live procedure/deadline and autho
 
 Retain the independent fixed-deadline supervisor, exact PID/creation/path/hash binding and one-use activation semantics. Its current maximum configurable process lifetime is 15 minutes; attachment must be within ten seconds of process creation and never resets the origin. Final startup/active/exit bounds must be pinned only after the admitted experiment scope is settled. Missing heartbeat in an active candidate, lost monitor, resource error, timing failure or a deadline revokes activation and triggers normal exit; it never authorizes a new phase or restart.
 
-Review the visible notice with me before any approved launch and require an explicit ready handoff. Codex must not be the only reader of a console stop line. The current UI may be obscured by exclusive fullscreen; its TopMost flag and headless process fixtures do not prove visibility. If a reliable notice/handoff cannot be established, do not start the run. No forced process/runtime termination is included. An unresponsive normal quit leaves files installed and backups retained until process closure is established.
+Review the visible notice with me before any approved launch and require an explicit ready handoff. The operator must not be the only reader of a console stop line. The current UI may be obscured by exclusive fullscreen; its TopMost flag and headless process fixtures do not prove visibility. If a reliable notice/handoff cannot be established, do not start the run. No forced process/runtime termination is included. An unresponsive normal quit leaves files installed and backups retained until process closure is established.
 
 ## Restoration after process absence
 

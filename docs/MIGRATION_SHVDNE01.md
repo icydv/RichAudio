@@ -1,6 +1,6 @@
 # MIGRATION-SHVDNE-01 — implementation and offline qualification
 
-I am making ScriptHookVDotNet Enhanced the intended primary managed GTA integration for RichAudio. **Codex implemented and compiled the new integration, ran offline regressions and prepared an RPH-free private candidate. Live compatibility with Enhanced 1.0.1158.16 remains unverified.** My existing RPH adapter and all historical Gate A evidence remain available. This is a working implementation candidate, not a claim that release parity or native audio ownership has passed.
+I am making ScriptHookVDotNet Enhanced the intended primary managed GTA integration for RichAudio. **This change introduced and compiled the new integration, ran offline regressions and prepared an RPH-free private candidate. Live compatibility with Enhanced 1.0.1158.16 remains unverified.** My existing RPH adapter and all historical Gate A evidence remain available. This is a working implementation candidate, not a claim that release parity or native audio ownership has passed.
 
 The isolated worktree is `C:\Users\Libby\Documents\RichAudio-SHVDNE01`, branch `feature/migration-shvdne-01`, based on `8f1900c47a00d3622b07e929d78b74753d1af692`. Changes are left uncommitted for review. Nothing was pushed, merged, released, installed or executed in GTA. Compilation/tests opened no audio endpoint. Authored fixture processes named like GTA are test executables inside private fixture directories, not the installed game.
 

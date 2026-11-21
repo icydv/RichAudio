@@ -1,6 +1,6 @@
 # MIGRATION-SHVDNE-01 — first exact-build admission
 
-I am adopting SHVDNE as RichAudio's intended primary managed integration. This is the separate, bounded live procedure prepared by Codex. **It has not been authorized or executed.** My migration task permits source changes, compilation and offline fixtures only. No earlier Gate A approval applies.
+I am adopting SHVDNE as RichAudio's intended primary managed integration. This is the separate, bounded live procedure prepared for this stage. **It has not been authorized or executed.** My migration task permits source changes, compilation and offline fixtures only. No earlier Gate A approval applies.
 
 ## Prerequisites and sealed inputs
 

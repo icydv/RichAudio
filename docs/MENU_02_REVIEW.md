@@ -1,12 +1,12 @@
 # MENU-02 independent offline review
 
-I am keeping MENU-02 at offline preparation until I separately approve the protected inventory and live session. A separate Codex agent reviewed the candidate source, actual compiled metadata, payload configuration and retained evidence. This is an automated independent review, not human maintainer approval or live acceptance.
+I am keeping MENU-02 at offline preparation until I separately approve the protected inventory and live session. A separate review covered the candidate source, actual compiled metadata, payload configuration and retained evidence. This is an automated independent review, not human maintainer approval or live acceptance.
 
-Codex found no blocker within that offline scope. The three existing MENU-01 runtime files remain unchanged from integrated starting commit `65a17ca05d19a43b8aa56706f704d1775ab66028`. The separate entry starts only the menu; the actual DLL has exactly one public `Main`/`OnUnload` pair and one RPH plugin identity. Its historical name/version checks precede menu startup. No gameplay runtime, listener/vehicle observation, world warmup, audio host, GPU backend, Node worker or SoundMap service is linked.
+The analysis found no blocker within that offline scope. The three existing MENU-01 runtime files remain unchanged from integrated starting commit `65a17ca05d19a43b8aa56706f704d1775ab66028`. The separate entry starts only the menu; the actual DLL has exactly one public `Main`/`OnUnload` pair and one RPH plugin identity. Its historical name/version checks precede menu startup. No gameplay runtime, listener/vehicle observation, world warmup, audio host, GPU backend, Node worker or SoundMap service is linked.
 
-The unchanged menu starts preference and recording-availability workers. Codex verified the isolated sidecar, disabled initial output, `stock-fallback`, F10, and absence of both recorder descriptor and host-status file. No recorder address/token exists in this workspace. Recording controls are locked by `PLAYABLE_PRODUCT`; Apply/Reset affect isolated preferences. A saved choice does not establish an engine change.
+The unchanged menu starts preference and recording-availability workers. The analysis verified the isolated sidecar, disabled initial output, `stock-fallback`, F10, and absence of both recorder descriptor and host-status file. No recorder address/token exists in this workspace. Recording controls are locked by `PLAYABLE_PRODUCT`; Apply/Reset affect isolated preferences. A saved choice does not establish an engine change.
 
-Codex independently rehashed all **18 source/build/input/payload pins** and **nine public-evidence bindings**, then inspected copied DLL bytes through the existing development copy of Mono.Cecil. Neither the plugin nor SDK was executed. The retained DLL is **88,064 bytes**, SHA-256 `8e70ddbbcc5d98b57239c54eb764427f6d055c808b3b9fd616ac71daaa525d0b`.
+The analysis independently rehashed all **18 source/build/input/payload pins** and **nine public-evidence bindings**, then inspected copied DLL bytes through the existing development copy of Mono.Cecil. Neither the plugin nor SDK was executed. The retained DLL is **88,064 bytes**, SHA-256 `8e70ddbbcc5d98b57239c54eb764427f6d055c808b3b9fd616ac71daaa525d0b`.
 
 The reviewed file identities are SHA-256 of actual checkout bytes:
 

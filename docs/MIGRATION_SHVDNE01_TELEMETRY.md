@@ -1,6 +1,6 @@
 # MIGRATION-SHVDNE-01 — observation and execution contracts
 
-I am keeping RichAudio's existing listener and gameplay v1 wire contracts. Codex implemented a separate SHVDNE adapter and compiled it against the authentic v1.1.0.6 API3 binary. These are source and offline fixture findings. **No SHVDNE observation, memory-backed property, native invocation or timing behavior has been qualified in GTA Enhanced 1.0.1158.16.**
+I am keeping RichAudio's existing listener and gameplay v1 wire contracts. This change introduced a separate SHVDNE adapter and compiled it against the authentic v1.1.0.6 API3 binary. These are source and offline fixture findings. **No SHVDNE observation, memory-backed property, native invocation or timing behavior has been qualified in GTA Enhanced 1.0.1158.16.**
 
 ## Exact upstream identity
 
@@ -15,7 +15,7 @@ I am keeping RichAudio's existing listener and gameplay v1 wire contracts. Codex
 | Compatibility limit | The release specifically replaces a memory pattern for Enhanced `1.0.1158.13`; this is not a claim about `.16`. |
 | Private reference location | `.local/shvdne-reference/release`, `.local/shvdne-reference/source`, and `release.json` in this migration worktree; these third-party files are not committed or included in the RichAudio payload. |
 
-The older retained investigation checkout is at `C:\Users\Libby\Documents\RichAudio\.local\shvdne`, commit `b5314686ab534d9cec8914625a0f5ab2dde528ea`. It differs from the selected release. Codex used the new tag checkout for implementation decisions rather than assuming that the earlier checkout describes this binary.
+The older retained investigation checkout is at `C:\Users\Libby\Documents\RichAudio\.local\shvdne`, commit `b5314686ab534d9cec8914625a0f5ab2dde528ea`. It differs from the selected release. The operator used the new tag checkout for implementation decisions rather than assuming that the earlier checkout describes this binary.
 
 ## Boundary and observation classification
 

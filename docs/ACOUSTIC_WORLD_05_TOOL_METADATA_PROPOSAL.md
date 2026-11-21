@@ -1,6 +1,6 @@
 # ACOUSTIC-WORLD-05: completed tool metadata scope and remaining export boundary
 
-I supplied one exact local path to `CodeWalker RPF Explorer.exe`. Codex completed the separately reviewed T0 metadata inspection once under my existing offline tool-research instruction. Candidate03 is consumed. It did not launch CodeWalker. Preparation had treated my path as text, without statting or opening that source; independent review passed before the parent executor invoked the fixed metadata inspector.
+I supplied one exact local path to `CodeWalker RPF Explorer.exe`. The operator completed the separately reviewed T0 metadata inspection once under my existing offline tool-research instruction. Candidate03 is consumed. It did not launch CodeWalker. Preparation had treated my path as text, without statting or opening that source; independent review passed before the parent executor invoked the fixed metadata inspector.
 
 The inspection read **1,364 bytes in 11 bounded calls**, including an **844-byte RT_VERSION payload**. The file declares product/description `CodeWalker RPF Explorer`, company `dexyfex software`, fixed file/product versions `1.0.0.0` and product-version string `1.0.0`. These are untrusted declarations. They do not authenticate a `30_dev46` release, the pinned public source, dependencies, licensing permission or Enhanced compatibility. No complete-file hash or signature verification was performed.
 

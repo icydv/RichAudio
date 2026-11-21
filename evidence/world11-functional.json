@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "kind": "RichAudioWorld11FunctionalEvidence",
-  "executor": "Codex local Windows runner",
+  "executor": "Local Windows test runner",
   "passed": true,
   "runtime": {
     "executableSha256": "dccc52de28d8df2ee22d2062424f8c563070d95d8ad70c54c4bf01d590dec14f",

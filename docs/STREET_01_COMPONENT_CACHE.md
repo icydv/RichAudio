@@ -1,12 +1,12 @@
 # STREET-01 shared static geometry
 
-I want repeated local acoustic requests to reuse the same validated static geometry while each new observation keeps its own position, generation and original freshness deadline. Codex implemented the component cache, bounded diagnostics and authored regression tests described here. This change does not establish live GTA activation, whole-world completion or a successful genuine-installation qualification.
+I want repeated local acoustic requests to reuse the same validated static geometry while each new observation keeps its own position, generation and original freshness deadline. This change introduced the component cache, bounded diagnostics and authored regression tests described here. This change does not establish live GTA activation, whole-world completion or a successful genuine-installation qualification.
 
 ## What the original pressure fixture proves
 
 The retained failed qualification reports repeated query misses, rereads and analytic tessellation. Its old per-query keys and entry sizes were not recorded, so the exact historical GTA eviction sequence remains unknown.
 
-Codex reproduced the same computational pressure with entirely original arithmetic geometry before changing the algorithm. In that construction, a wide view contains 17,268 records and is charged 70,730,240 bytes under the old `512 + records × 4096` accounting. It exceeds the unchanged 64 MiB byte limit while remaining below the 32,768-record admission ceiling. Other views charge 33,554,944, 8,598,016, 44,777,984 and 43,532,800 bytes. Repeated queries revisit the same five keys, but these overlapping copies evict each other by bytes. The instrumented baseline records no resource-owner or entry-count cause for that cycle.
+The run reproduced the same computational pressure with entirely original arithmetic geometry before changing the algorithm. In that construction, a wide view contains 17,268 records and is charged 70,730,240 bytes under the old `512 + records × 4096` accounting. It exceeds the unchanged 64 MiB byte limit while remaining below the 32,768-record admission ceiling. Other views charge 33,554,944, 8,598,016, 44,777,984 and 43,532,800 bytes. Repeated queries revisit the same five keys, but these overlapping copies evict each other by bytes. The instrumented baseline records no resource-owner or entry-count cause for that cycle.
 
 This establishes a concrete failure mechanism in the original reproduction. It does not recover unrecorded native per-query geometry or prove that every historical miss had that precise cause. The old implementation also admitted a view before evicting previous views; its retained accounting limit was not a hard cap on transient allocations or process memory.
 
@@ -52,7 +52,7 @@ Only the final selected geometry receives the request's real observation headers
 
 Normal profiles expose numeric descriptor, component, decode, tessellation, panel and materialization counters. Separate diagnostic snapshots retain at most 128 descriptor events, 256 query-history entries, 128 owner-history entries, 128 component events and 256 component tombstones. Stable hashed IDs, byte charges, removal reasons, owner cascades and observed reuse after eviction make descriptor hits distinguishable from component churn. Adaptive-pass evidence reports actual capacity witnesses without presenting a lower-bound count as an exact omission total.
 
-Codex's authored tests cover component identity collisions, exact analytic metadata and triangles, immutable shared data, aggregate retention pressure, bounded histories, restored-mtime corruption, proof revocation, owner eviction, moved poses, clipping, conservative gaps, adaptive scope and source-bound transport. Performance and genuine-installation qualification evidence are recorded separately; the earlier failed evidence remains preserved.
+The authored tests cover component identity collisions, exact analytic metadata and triangles, immutable shared data, aggregate retention pressure, bounded histories, restored-mtime corruption, proof revocation, owner eviction, moved poses, clipping, conservative gaps, adaptive scope and source-bound transport. Performance and genuine-installation qualification evidence are recorded separately; the earlier failed evidence remains preserved.
 
 ## Consumer activation
 

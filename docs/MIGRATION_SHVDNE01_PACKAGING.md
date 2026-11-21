@@ -1,6 +1,6 @@
 # MIGRATION-SHVDNE-01 — RPH-free package architecture
 
-Codex prepared an isolated build and package tool for my SHVDNE migration. It writes only fresh directories beneath this worktree's `.local/migration-shvdne-01`. It does not install files, launch GTA, execute an ASI or invoke an installer.
+The implementation prepared an isolated build and package tool for my SHVDNE migration. It writes only fresh directories beneath this worktree's `.local/migration-shvdne-01`. It does not install files, launch GTA, execute an ASI or invoke an installer.
 
 ```text
 candidate/

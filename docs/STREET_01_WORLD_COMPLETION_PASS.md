@@ -6,7 +6,7 @@ I am continuing from `58491c7` using my existing genuine collision cache. My ear
 
 ## Changes in my normal startup path
 
-Codex separated discovery, decoded geometry, static placement and runtime activation on my existing resource manifest. All 10,663 selected collision sources can enter the bounded potential-geometry queue. A conditional map group, higher collision layer or interior no longer has to be treated as undecodable merely because its live activation is unknown. Potential variants retain separate source identities and conditions; they cannot enter the acoustic scene together through this change. My existing conditional layer-zero exterior scene remains the admitted software model.
+The implementation separated discovery, decoded geometry, static placement and runtime activation on my existing resource manifest. All 10,663 selected collision sources can enter the bounded potential-geometry queue. A conditional map group, higher collision layer or interior no longer has to be treated as undecodable merely because its live activation is unknown. Potential variants retain separate source identities and conditions; they cannot enter the acoustic scene together through this change. My existing conditional layer-zero exterior scene remains the admitted software model.
 
 The summary now exposes `CoverageStates01` and `GeometryQueue`, while keeping the historical exterior-only counts separate. Cached partial source models, source-only models without supported surfaces, unknown representation counts and complete acoustic resources are distinct. These resource counts are not geographic coverage percentages. Runtime activation remains unobserved for the entire selected denominator.
 
@@ -14,7 +14,7 @@ The first valid normal gameplay observation now reaches the existing preparation
 
 The direct Capture-to-supervisor offer also works when the normal audio host is disabled in stock fallback. It copies one immutable pose without file IO or waiting on the game fibre. Background writing requires the validated enabled sidecar and original observation age at most 500 ms. Eight actual adapter/supervisor scenarios pass, including sequence zero, stale input, disabled/cancelled preparation and a busy shared writer lock. A later audio worker preserves the earlier valid same-session priority. This is source verification with authored observations; initial-player timing in GTA remains unqualified.
 
-Codex also corrected actual outer-startup contracts. The resolver now accepts the supervisor's 1,800-second stage budget and receives the exact reference catalogue required by the final binding check. Reference and resolved vehicle metadata both use the explicit Bati filter. A completed geometry receipt no longer bypasses current archive-content validation on warm startup. A same-size, same-time content change withdraws affected cached geometry and writes a source-refresh marker; the ordinary next preparation pass refreshes catalogue/metadata before allowing those sources to decode. File names and timestamps do not become content authority.
+The implementation also corrected actual outer-startup contracts. The resolver now accepts the supervisor's 1,800-second stage budget and receives the exact reference catalogue required by the final binding check. Reference and resolved vehicle metadata both use the explicit Bati filter. A completed geometry receipt no longer bypasses current archive-content validation on warm startup. A same-size, same-time content change withdraws affected cached geometry and writes a source-refresh marker; the ordinary next preparation pass refreshes catalogue/metadata before allowing those sources to decode. File names and timestamps do not become content authority.
 
 Normal scene admission now requires the exact supervisor startup epoch in the manifest and each resource's current archive-validation proof. The archive hash must also match the source-bound conversion receipt. A missing epoch, stale row or malformed proof remains unknown; an explicit pinned offline model remains a conditional static read. Proof publication now occurs only after equal before/after archive hashes. The initial revalidation and each decoded checkpoint clear earlier proof instead of publishing readiness. This ordering correction was made after the genuine warm attempt described below; that attempt cannot qualify the corrected behavior.
 
@@ -26,7 +26,7 @@ Every owned preparation phase now records wall time, peak Job memory, user/kerne
 
 The actual supported metadata reader visits the selected YMAP sources and effective MLO archetypes. It preserves CodeWalker's resolved position, orientation and scale as an explicit matrix rather than applying the regular-entity quaternion rule to an MLO. Source YMAP/YTYP payload hashes stay private and bound to the installation model.
 
-My new metadata revision retains 392 MLO archetypes, 763 declared instances, 1,690 rooms and 2,827 portals after visiting all 5,420 selected YMAP files. Twenty-two unbounded or invalid room boxes remain explicit unknown descriptors. Codex preserved the preceding revision's sixteen projection failures, then changed the adapter to retain those room descriptors without discarding an otherwise usable archetype.
+My new metadata revision retains 392 MLO archetypes, 763 declared instances, 1,690 rooms and 2,827 portals after visiting all 5,420 selected YMAP files. Twenty-two unbounded or invalid room boxes remain explicit unknown descriptors. The project record preserved the preceding revision's sixteen projection failures, then changed the adapter to retain those room descriptors without discarding an otherwise usable archetype.
 
 [CodeWalker's manifest processing](https://github.com/dexyfex/CodeWalker/blob/master/CodeWalker.Core/World/Space.cs) explicitly associates child collision bounds with their parent interior and treats those bounds as local. My placement resolver requires that structured relationship, the selected parent archetype and a hash-bound YMAP instance; a direct physics-dictionary binding is also retained where present. This resolves 558 interior collision references to 1,244 static instance placements. Fifty-six references have no selected instance. These are metadata placements, not observed active interiors.
 
@@ -34,7 +34,7 @@ Declared room adjacency and transformed portal corners remain metadata. No porta
 
 ## The two previous bounds failures
 
-Codex inspected every retained triangle of both failed resources. Only reconstructed Box corners exceeded the native metadata envelopes: ten repeated triangle vertices in one resource and six in the other, by at most 0.0025749 and 0.0031738 native units. The native indexed surface points themselves fit the unchanged 0.001-unit qualification tolerance.
+The analysis inspected every retained triangle of both failed resources. Only reconstructed Box corners exceeded the native metadata envelopes: ten repeated triangle vertices in one resource and six in the other, by at most 0.0025749 and 0.0031738 native units. The native indexed surface points themselves fit the unchanged 0.001-unit qualification tolerance.
 
 My old check incorrectly treated the envelope of four native Box indices and the complete reconstructed Box envelope as the same contract. [The public Box interface](https://github.com/dexyfex/CodeWalker/blob/master/CodeWalker.Core/GameFiles/Resources/Bounds.cs) distinguishes indexed vertices from their derived shape. The new optional index qualifier records native indexed support bounds separately. For retained data, it first reproduces **every original chunk SHA-256** from the exact retained normalizer. It then preserves all reconstructed surfaces and expands their query envelope; it neither clamps coordinates nor widens the tolerance. A changed native point, changed normalizer or mismatched chunk remains rejected.
 
@@ -59,7 +59,7 @@ The first batch includes one deadline-ended phase; all its owned processes joine
 
 ## Actual normal startup measurements
 
-Codex exercised the existing outer preparation driver, including ordinary installation and current archive validation. Both attempts failed and their receipts remain preserved:
+The run exercised the existing outer preparation driver, including ordinary installation and current archive validation. Both attempts failed and their receipts remain preserved:
 
 | Attempt | Wall time | Maximum observed Job memory | Logical reads | Logical writes | Result |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -76,7 +76,7 @@ All original installed/software readers joined by 15:49:30 UTC, before my approv
 
 ## Focused verification and remaining qualification
 
-Codex's original fixtures exercise cache-only conditional/layer preparation, unchanged-source failure retention, withheld activation, exact interior bindings and transforms, rejected missing/wrong source relationships, sentinel room descriptors, rotated Box envelopes and corrupt derivations. The actual production geometry driver also completes a zero-decoder authored warm pass and detects an intentionally changed same-size/same-time authored archive before a stale catalogue can launch a decoder. These controls use no game or vendor payload.
+The original fixtures exercise cache-only conditional/layer preparation, unchanged-source failure retention, withheld activation, exact interior bindings and transforms, rejected missing/wrong source relationships, sentinel room descriptors, rotated Box envelopes and corrupt derivations. The actual production geometry driver also completes a zero-decoder authored warm pass and detects an intentionally changed same-size/same-time authored archive before a stale catalogue can launch a decoder. These controls use no game or vendor payload.
 
 An additional deterministic control uses the actual driver and owned helpers with two inert authored archives. It pauses before the final hash: neither arm has a current proof or admitted normal scene then. The unchanged arm publishes proof only after matching final hashes. A same-size/same-time content change in the other arm withdraws the resource, fails and never publishes a current proof at an observed phase. Both owned child processes join. Stale and missing compact-view controls also prevent continuation.
 

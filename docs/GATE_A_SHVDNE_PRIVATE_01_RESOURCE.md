@@ -1,6 +1,6 @@
 # GATE-A-SHVDNE-PRIVATE-01 resource and identification
 
-For my first private vehicle-audio experiment, Codex constructed **`ra_gapriv01_bati`**, JOAAT **`dd89929d`**. It changes one horn contribution in a private copy of the retained Bati profile. The private output is non-silent. My shared acoustic engine and production audio paths are unchanged.
+For my first private vehicle-audio experiment, the implementation constructed **`ra_gapriv01_bati`**, JOAAT **`dd89929d`**. It changes one horn contribution in a private copy of the retained Bati profile. The private output is non-silent. My shared acoustic engine and production audio paths are unchanged.
 
 The canonical private output is `.local/gate-a-shvdne-private-01/resource`. Its `resource-manifest.json` SHA-256 is **`9243c912b1eafaf5fe862c7c16cf5fdbd27c210d6bccea039f9915f277aa2f48`**. Copied structural records and generated resources stay under `.local`; they are excluded from public and normal production packages. No stock audio samples were copied into this resource.
 
@@ -19,7 +19,7 @@ The six declared link relocations are checked individually. Reversing these relo
 
 The real source XMLs came from the preserved `RichAudio-World13/.local/street01/gate-a-profile-01b` export, whose receipt binds the original `update.rpf` to SHA-256 `c3a68386a7d067772d6d6038ac505040e7280640205b230fdc1f829567cec913` before and after the read. Game XML SHA-256 is `4c94c681996251253f49be45a3f3a4697dd833f057175f95aa197c158ffdc6c9`; sounds XML SHA-256 is `2a1a61e8ccbd5e6d2d58c38783c1027d05ccc65583450d7e44a11ec5761b9e8f`. The selected Bati record and engine identities also match the retained StockSource05 resolved catalog, SHA-256 `c4250395be8638b9d44df2a43da966caec99841a83f26e3131be51edca57c018`.
 
-The older Marker A preparation used an authored 116-byte minimal `Vehicle` XML containing only a name and horn field. Codex preserved that evidence but did not use it as a complete vehicle profile here.
+The older Marker A preparation used an authored 116-byte minimal `Vehicle` XML containing only a name and horn field. The project record preserved that evidence but did not use it as a complete vehicle profile here.
 
 ## Original wave and references
 
@@ -63,7 +63,7 @@ Capture provenance and temporal labels remain separate requirements. A future re
 
 Sixteen marker fixtures passed: clean and delayed/gain-scaled/noisy/reflected originals; stereo opposite-phase signals; single tone, wrong word, reversed word, fragment and simultaneous-tone negatives; clipping, silence, truncated/wrong-rate capture; isolated target attribution; contaminated baseline/control; missing target and silent control. These are authored fixtures, not measured game recordings or estimates of population false-positive rates.
 
-Eight resource fixtures passed against the actual canonical resource: typed four-record graph and exact original wave, modified AWC, missing DAT54, changed manifest, resealed wrong profile, changed audit, resealed wrong role and path escape. The receipt is `.local/gate-a-shvdne-private-01/resource-tests-01/result.json`. The first local validator attempt exposed a PowerShell numeric-overload issue in the peak check; Codex corrected the accumulator to `double` and retained the failed attempt directory before running the eight passing cases.
+Eight resource fixtures passed against the actual canonical resource: typed four-record graph and exact original wave, modified AWC, missing DAT54, changed manifest, resealed wrong profile, changed audit, resealed wrong role and path escape. The receipt is `.local/gate-a-shvdne-private-01/resource-tests-01/result.json`. The first local validator attempt exposed a PowerShell numeric-overload issue in the peak check; the implementation corrected the accumulator to `double` and retained the failed attempt directory before running the eight passing cases.
 
 `ResourceBuild.ps1`, `ResourceValidate.ps1`, `tests/Test-PrivateResource01.ps1` and `tests/Test-PrivateResourceMarker01.mjs` reproduce the offline work. All output construction requires a fresh private directory. None of these tools installs resources, invokes GTA natives or accesses an audio device.
 
