@@ -85,7 +85,7 @@ namespace RichAudio.AudioSwitch
 
         public sealed class Request
         {
-            public string Session, Generation, Focus, Id, Operation, Text, Cue;
+            public string Session, Generation, Focus, Id, Operation, Text, Cue, Finding;
             public string Donor = Switch.DefaultDonor;
             public bool KnownStock;
             public long ExpiresTicks;
@@ -106,7 +106,7 @@ namespace RichAudio.AudioSwitch
                 hadFocus = focused;
                 var status = json.Serialize(new { Session=session, Pid=pid, ProcessStart=processStart, Generation=control.Generation,
                     Focus=focusEpoch, Foreground=focused, Vehicle=key, Engine=v != null && v.IsEngineRunning,
-                    Phase=control.Phase, Reason=reason });
+                    Phase=control.Phase, Comparison=control.Comparison.ToString(), Reason=reason });
                 if (status != previousStatus)
                 {
                     Publish(Path.Combine(root, "status.json"), status);
@@ -127,17 +127,27 @@ namespace RichAudio.AudioSwitch
                 bool engine = v != null && v.IsEngineRunning;
                 string name = q.Operation == "Ready" ? q.Donor : q.Operation == "Restore" ? "ADDER" : null;
                 string result;
-                if (q.Operation == "Report" && q.Text != null && q.Text.Length <= 1024) result = "report saved";
+                bool ownsTarget = v != null && token != 0 && Marked(v) &&
+                    Function.Call<int>(Hash.DECOR_GET_INT, v.Handle, Marker) == token;
+                if (q.Operation == "Report" && q.Text != null && q.Text.Length <= 1024)
+                {
+                    result = "report saved";
+                    if (!String.IsNullOrEmpty(q.Finding))
+                        result = String.IsNullOrWhiteSpace(q.Text) || q.ExpiresTicks < Stopwatch.GetTimestamp()
+                            ? "invalid or expired finding"
+                            : control.RecordFinding(q.Finding, q.Generation, engine, ownsTarget);
+                }
                 else if (name == null || q.ExpiresTicks < Stopwatch.GetTimestamp()) result = "invalid or expired";
                 else if (q.Operation == "Ready" && !q.KnownStock) result = "confirm known stock audio first";
                 else
                 {
                     bool apply = q.Operation == "Ready";
-                    bool valid = v != null && (apply ? !Marked(v) : Marked(v) && token != 0 &&
-                        Function.Call<int>(Hash.DECOR_GET_INT,v.Handle,Marker) == token);
+                    bool markNewTarget = apply && q.Donor != Switch.PrivateQuiet;
+                    bool keepMarker = control.KeepMarkerOnRestore;
+                    bool valid = v != null && (markNewTarget ? !Marked(v) : ownsTarget);
                     result = control.Command(q.Operation,q.Generation,focused && q.Focus == focusEpoch,engine,valid,delegate(string requested)
                     {
-                        if (apply)
+                        if (markNewTarget)
                         {
                             if (!Function.Call<bool>(Hash.DECOR_IS_REGISTERED_AS_TYPE, Marker, 3))
                             {
@@ -152,11 +162,13 @@ namespace RichAudio.AudioSwitch
                             !Marked(v) || Function.Call<int>(Hash.DECOR_GET_INT,v.Handle,Marker) != token)
                             throw new InvalidOperationException("final target check failed");
                         v.ForceUseAudioGameObject(requested);
-                        if (!apply) Function.Call<bool>(Hash.DECOR_REMOVE,v.Handle,Marker);
+                        if (!apply && !keepMarker && !Function.Call<bool>(Hash.DECOR_REMOVE,v.Handle,Marker))
+                            throw new InvalidOperationException("stock call returned but token removal failed");
                     }, q.Donor);
                 }
                 Log(new { utc=DateTime.UtcNow.ToString("o"), q.Id, q.Operation, q.Generation, vehicle=key,
-                    model=v == null ? null : "ADDER", engine, requested=name, phase=control.Phase, outcome=result, cue=q.Cue, listeningReport=q.Text });
+                    model=v == null ? null : "ADDER", engine, requested=name, phase=control.Phase, comparison=control.Comparison.ToString(), outcome=result,
+                    cue=q.Cue, finding=q.Finding, listeningReport=q.Text });
                 Publish(reply,result);
             }
             catch(Exception e)

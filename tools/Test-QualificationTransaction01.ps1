@@ -3,8 +3,8 @@ $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'playable/QualificationTransaction01.ps1')
 $root=Join-Path (Split-Path -Parent $PSScriptRoot) ('.local/qualification-transaction-fixture-'+[guid]::NewGuid().ToString('N'))
 $null=[IO.Directory]::CreateDirectory($root)
-foreach($kind in @('phase1','marker-a','soundmap-view')){
- $pack=if($kind -ceq 'marker-a'){'raprobe_0123abcd'}else{''}
+foreach($kind in @('phase1','marker-a','soundmap-view','audio-switch-pack')){
+ $pack=if($kind -ceq 'marker-a'){'raprobe_0123abcd'}elseif($kind -ceq 'audio-switch-pack'){'ra_rc_9f6c2b57'}else{''}
  $fixture=Join-Path $root $kind
  $game=Join-Path $fixture 'disposable-install'
  $null=[IO.Directory]::CreateDirectory((Join-Path $game 'Plugins'))
@@ -15,7 +15,7 @@ foreach($kind in @('phase1','marker-a','soundmap-view')){
  $plan=@()
  for($i=0;$i -lt $relative.Count;$i++){
   $target=Safe-Path $game $relative[$i]
-  $existing=$i -eq 0 -or ($kind -ceq 'phase1' -and $i -eq 1)
+  $existing=($i -eq 0 -and $kind -cne 'audio-switch-pack') -or ($kind -ceq 'phase1' -and $i -eq 1)
   if($existing){[IO.File]::WriteAllText($target,"original $i")}
   $original=Get-Menu02RestoreFileState $target
   $payload=Join-Path $fixture "payload-$i"

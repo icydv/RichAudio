@@ -3,11 +3,14 @@
 param(
  [Parameter(Mandatory=$true)][string]$ResourceRoot,
  [Parameter(Mandatory=$true)][string]$Output,
- [string]$CodeWalkerCore='C:\Users\Libby\Desktop\CodeWalker30_dev46\CodeWalker.Core.dll'
+ [string]$CodeWalkerCore='C:\Users\Libby\Desktop\CodeWalker30_dev46\CodeWalker.Core.dll',
+ [ValidateSet('ra_ns01_8b7e24c1','ra_rc_9f6c2b57')][string]$Pack='ra_ns01_8b7e24c1'
 )
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
-$private=[IO.Path]::GetFullPath((Join-Path $repo '.local\native-suppression-01')).TrimEnd('\')+'\'
+$rcPowertrain = $Pack -eq 'ra_rc_9f6c2b57'
+$workRoot = if ($rcPowertrain) { '.local\audio-switch' } else { '.local\native-suppression-01' }
+$private=[IO.Path]::GetFullPath((Join-Path $repo $workRoot)).TrimEnd('\')+'\'
 foreach($path in @($ResourceRoot,$Output)){
  $full=[IO.Path]::GetFullPath($path)
  if(!$full.StartsWith($private,[StringComparison]::OrdinalIgnoreCase)){throw 'Only private task-local inputs/outputs permitted'}
@@ -17,20 +20,41 @@ $out=[IO.Path]::GetFullPath($Output)
 if(Test-Path -LiteralPath $out){throw 'Fresh output required'}
 function Hash([string]$p){(Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash.ToLowerInvariant()}
 if((Hash $CodeWalkerCore)-cne'3d2bb91b35cf0d1888c12772a9af25441adea3ccc8510a149fcf0d47c8e71ca8'){throw 'Pinned CodeWalker required'}
-$pack='ra_ns01_8b7e24c1';$device='dlc_'+$pack;$waveFolder=$device
-$names=@('ra_ns01_game.dat151.rel','ra_ns01_sounds.dat54.rel','ra_ns01_idle_a.awc','ra_ns01_idle_b.awc','ra_ns01_idle_c.awc')
+$pack=$Pack.ToLowerInvariant();$device='dlc_'+$pack;$waveFolder=$device
+if ($rcPowertrain) {
+ $profiles=@('ra_rc_audible','ra_rc_quiet')
+ $names=@('ra_rc_game.dat151.rel','ra_rc_sounds.dat54.rel','ra_rc_audible.awc','ra_rc_quiet.awc')
+} else {
+ $profiles=@('ra_ns01_bati_a','ra_ns01_bati_b','ra_ns01_bati_c')
+ $names=@('ra_ns01_game.dat151.rel','ra_ns01_sounds.dat54.rel','ra_ns01_idle_a.awc','ra_ns01_idle_b.awc','ra_ns01_idle_c.awc')
+}
 $inputs=@(foreach($name in $names){$path=Join-Path $ResourceRoot $name;if(!(Test-Path -LiteralPath $path -PathType Leaf)){throw ('Missing resource: '+$name)};[pscustomobject]@{name=$name;path=$path;bytes=(Get-Item $path).Length;sha256=(Hash $path)}})
 if(@($inputs|Where-Object {$_.bytes-le0-or$_.bytes-gt16MB}).Count){throw 'Bounded nonempty resource payload required'}
 $manifestPath=Join-Path $ResourceRoot 'resource-manifest.json'
 $manifest=Get-Content -LiteralPath $manifestPath -Raw|ConvertFrom-Json
 $manifestHash=Hash $manifestPath
-if($manifest.schema-cne'RichAudioNativeIdleResources01'-or$manifest.pack-cne$pack-or$manifest.device-cne$device-or!$manifest.experimentalOnly-or$manifest.publicRedistributionAllowed){throw 'Expected private experimental resource manifest'}
-if($manifest.files.Count-ne5-or!$manifest.verified.relocationReversal-or!$manifest.verified.relRoundtrip-or!$manifest.verified.awcRoundtrip-or!$manifest.verified.pcmRoundtrip){throw 'Offline resource checks required'}
+if ($rcPowertrain) {
+ if ($manifest.pack -cne $pack -or $manifest.device -cne $device) { throw 'Expected the private RC powertrain resource manifest' }
+ foreach ($check in 'matchedRel','reopenedRel','reopenedAwc','pcm') {
+  if ($manifest.verified.$check -isnot [bool] -or !$manifest.verified.$check) { throw "Private resource check did not pass: $check" }
+ }
+} else {
+ if($manifest.schema-cne'RichAudioNativeIdleResources01'-or$manifest.pack-cne$pack-or$manifest.device-cne$device-or!$manifest.experimentalOnly-or$manifest.publicRedistributionAllowed){throw 'Expected private experimental resource manifest'}
+ if(!($manifest.verified.relocationReversal-and$manifest.verified.relRoundtrip-and$manifest.verified.awcRoundtrip-and$manifest.verified.pcmRoundtrip)){throw 'Offline resource checks required'}
+}
+if ($manifest.files.Count -ne $names.Count) { throw 'Unexpected resource manifest scope' }
 foreach($input in $inputs){$bound=@($manifest.files|Where-Object path -CEQ $input.name);if($bound.Count-ne1-or$bound[0].sha256-cne$input.sha256-or$bound[0].bytes-ne$input.bytes){throw ('Resource manifest integrity differs: '+$input.name)}}
-[Reflection.Assembly]::Load([IO.File]::ReadAllBytes($CodeWalkerCore))|Out-Null
+if ($rcPowertrain) {
+ foreach ($name in 'SharpDX.dll','SharpDX.Mathematics.dll') {
+  [void][Reflection.Assembly]::LoadFrom((Join-Path (Split-Path -Parent $CodeWalkerCore) $name))
+ }
+ [void][Reflection.Assembly]::LoadFrom($CodeWalkerCore)
+} else {
+ [void][Reflection.Assembly]::Load([IO.File]::ReadAllBytes($CodeWalkerCore))
+}
 [IO.Directory]::CreateDirectory($out)|Out-Null
-$gameLogical=$device+':/x64/audio/config/ra_ns01_game.dat'
-$soundLogical=$device+':/x64/audio/config/ra_ns01_sounds.dat'
+$gameLogical=$device+':/x64/audio/config/'+($names[0] -replace '151\.rel$','')
+$soundLogical=$device+':/x64/audio/config/'+($names[1] -replace '54\.rel$','')
 $waveLogical=$device+':/x64/audio/sfx/'+$waveFolder
 $change=$pack+'_STARTUP'
 $setup=@"
@@ -68,7 +92,7 @@ $file=Join-Path $out 'dlc.rpf'
 $read=New-Object CodeWalker.GameFiles.RpfFile($file,'dlc.rpf');$read.ScanStructure($null,$null)
 if($read.LastError-or$read.Encryption-ne[CodeWalker.GameFiles.RpfEncryption]::OPEN){throw 'Private DLC archive failed reopening'}
 $files=@($read.AllEntries|Where-Object {$_-is[CodeWalker.GameFiles.RpfFileEntry]})
-if($files.Count-ne7){throw 'Expected only two manifests and five private resources'}
+if($files.Count-ne($names.Count+2)){throw 'Unexpected archive member count'}
 $verified=@()
 foreach($name in $payload.Keys){
  $member=@($files|Where-Object Name -CEQ $name)
@@ -77,6 +101,47 @@ foreach($name in $payload.Keys){
  $expected='dlc.rpf\'+$(if($name.EndsWith('.rel')){'x64\audio\config\'}elseif($name.EndsWith('.awc')){'x64\audio\sfx\'+$waveFolder+'\'}else{''})+$name
  if($member[0].Path-cne$expected){throw 'Member mount path differs'}
  $verified+=[ordered]@{name=$name;member=$member[0].Path;bytes=$payload[$name].Length}
+}
+if ($rcPowertrain) {
+ function AudioHash([string]$name) { [CodeWalker.GameFiles.JenkHash]::GenHash($name.ToLowerInvariant()) }
+ $gameMember = $files | Where-Object Name -CEQ $names[0]
+ $gameRel = [CodeWalker.GameFiles.RelFile]::new()
+ $gameRel.Load($read.ExtractFile($gameMember), $gameMember)
+ $soundMember = $files | Where-Object Name -CEQ $names[1]
+ $soundRel = [CodeWalker.GameFiles.RelFile]::new()
+ $soundRel.Load($read.ExtractFile($soundMember), $soundMember)
+ if ($gameRel.RelDatas.Count -ne 4 -or $soundRel.RelDatas.Count -ne 2) { throw 'Packed private REL population differs' }
+ foreach ($profile in $profiles) {
+  $variant = $manifest.variants | Where-Object profile -CEQ $profile
+  $root = $gameRel.RelDataDict[(AudioHash $profile)]
+  if (!$root -or $root.GetType().Name -cne 'Dat151Vehicle' -or $root.Horns.Hash -ne 0xF7725613L -or
+      $root.EngineGranular.Hash -or $root.ElectricEngine.Hash -or $root.Engine.Hash -ne (AudioHash $variant.engine)) {
+   throw "Packed private vehicle root or ADDER horn reference differs: $profile"
+  }
+  $engine = $gameRel.RelDataDict[$root.Engine.Hash]
+  $soundHash = AudioHash $variant.sound
+  foreach ($field in 'EngineLow','EngineHigh','EngineIdleLoop','ExhaustHigh','RevsOff') {
+   if ($engine.$field.Hash -ne $soundHash) { throw "Packed private $field reference differs: $profile" }
+  }
+  $sound = $soundRel.RelDataDict[$soundHash]
+  if ($sound.ContainerName.Hash -ne (AudioHash "$device/$profile") -or $sound.FileName.Hash -ne 0xAF479EA3L) {
+   throw "Packed motor wave reference differs: $profile"
+  }
+  $bankMember = $files | Where-Object Name -CEQ "$profile.awc"
+  $bank = [CodeWalker.GameFiles.AwcFile]::new()
+  $bank.Load($read.ExtractFile($bankMember), $bankMember)
+  if ($bank.ErrorMessage -or $bank.Streams.Count -ne 1 -or $bank.Streams[0].Hash.Hash -ne 0x0F479EA3) {
+   throw "Packed private bank failed reopening: $profile"
+  }
+  $pcm = $bank.Streams[0].GetPcmData()
+  $digest = [Security.Cryptography.SHA256]::Create()
+  try { $pcmHash = [BitConverter]::ToString($digest.ComputeHash($pcm)).Replace('-', '').ToLowerInvariant() }
+  finally { $digest.Dispose() }
+  $silent = [Convert]::ToBase64String($pcm) -ceq [Convert]::ToBase64String([byte[]]::new($pcm.Length))
+  if ($pcmHash -cne $variant.pcmSha256 -or $silent -ne ($profile -ceq 'ra_rc_quiet')) {
+   throw "Packed motor PCM differs: $profile"
+  }
+ }
 }
 $setupParsed=New-Object CodeWalker.GameFiles.DlcSetupFile;$setupParsed.Load([xml]$setup)
 $contentParsed=New-Object CodeWalker.GameFiles.DlcContentFile;$contentParsed.Load([xml]$content)
@@ -87,6 +152,6 @@ for($i=0;$i-lt3;$i++){if($contentParsed.dataFiles[$i].fileType-cne$types[$i]-or$
 [IO.File]::WriteAllText((Join-Path $out 'setup2.xml'),$setup,$utf8);[IO.File]::WriteAllText((Join-Path $out 'content.xml'),$content,$utf8)
 foreach($input in $inputs){if((Hash $input.path)-cne$input.sha256){throw 'Resource input changed during packaging'}}
 if((Hash $manifestPath)-cne$manifestHash){throw 'Resource manifest changed during packaging'}
-$receipt=[ordered]@{schema=1;kind='private-audio-DLC-layout';state='offline-layout-verified';pack=$pack;device=$device;profiles=@('ra_ns01_bati_a','ra_ns01_bati_b','ra_ns01_bati_c');sourceInputs=$inputs;sourceManifest=[ordered]@{path=$manifestPath;sha256=$manifestHash};archive=$file;bytes=(Get-Item $file).Length;sha256=(Hash $file);members=$verified;resourceLayoutOfflineVerified=$true;offlineRegistrationAdmitted=$false;runtimeMounted=$false;proposedDestination=('mods/update/x64/dlcpacks/'+$pack+'/dlc.rpf');listEntry=('dlcpacks:/'+$pack+'/');registrationTypes=$types;logicalNames=$paths;gameFilesWritten=$false;approvedForInstallation=$false;remainingPrerequisites=@('Qualified Enhanced mods-loader identity/cache behavior','Bound complete private update archive shadow','Player idle-branch positive activation and suppression evidence','Separately authorized exact-build runtime mounting and selection')}
+$receipt=[ordered]@{schema=1;kind='private-audio-DLC-layout';state='offline-layout-verified';pack=$pack;device=$device;profiles=$profiles;sourceInputs=$inputs;sourceManifest=[ordered]@{path=$manifestPath;sha256=$manifestHash};archive=$file;bytes=(Get-Item $file).Length;sha256=(Hash $file);members=$verified;resourceLayoutOfflineVerified=$true;offlineRegistrationAdmitted=$false;runtimeMounted=$false;proposedDestination=('mods/update/x64/dlcpacks/'+$pack+'/dlc.rpf');listEntry=('dlcpacks:/'+$pack+'/');registrationTypes=$types;logicalNames=$paths;gameFilesWritten=$false;approvedForInstallation=$false;remainingPrerequisites=@('Qualified Enhanced mods-loader identity/cache behavior','Bound complete private update archive shadow',$(if ($rcPowertrain) { 'Private RC motor selection and horn listening checks' } else { 'Player idle-branch positive activation and suppression evidence' }),'Separately authorized exact-build runtime mounting and selection')}
 $receipt|ConvertTo-Json -Depth 7|Set-Content -LiteralPath (Join-Path $out 'dlc-receipt.json') -Encoding UTF8
 Write-Output ('PASS private DLC layout: '+(Join-Path $out 'dlc-receipt.json'))

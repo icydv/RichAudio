@@ -9,10 +9,14 @@ param(
 )
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
-$private=[IO.Path]::GetFullPath((Join-Path $repo '.local\native-suppression-01')).TrimEnd('\')+'\'
+$workRoot = switch -CaseSensitive ($Pack) {
+ 'ra_ns01_8b7e24c1' { '.local\native-suppression-01' }
+ 'ra_rc_9f6c2b57' { '.local\audio-switch' }
+ default { throw 'Exact private pack namespace required' }
+}
+$private=[IO.Path]::GetFullPath((Join-Path $repo $workRoot)).TrimEnd('\')+'\'
 $out=[IO.Path]::GetFullPath($Output)
 if(!$out.StartsWith($private,[StringComparison]::OrdinalIgnoreCase)-or(Test-Path -LiteralPath $out)){throw 'Fresh private registration output required'}
-if($Pack-cne'ra_ns01_8b7e24c1'){throw 'Exact private pack namespace required'}
 foreach($path in @($out,$GameRoot,$CodeWalkerRoot)){for($p=[IO.Path]::GetFullPath($path);$p;$p=[IO.Path]::GetDirectoryName($p)){if((Test-Path -LiteralPath $p)-and((Get-Item -LiteralPath $p -Force).Attributes-band[IO.FileAttributes]::ReparsePoint)){throw 'Linked input/output refused'}}}
 $source=Join-Path ([IO.Path]::GetFullPath($GameRoot)) 'update\update.rpf'
 $core=Join-Path $CodeWalkerRoot 'CodeWalker.Core.dll'

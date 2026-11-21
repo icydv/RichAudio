@@ -49,6 +49,9 @@ function Get-QualificationTargets01([string]$Kind,[string]$Pack){
  if($Kind -ceq 'marker-a' -and $Pack -cmatch '^raprobe_[a-f0-9]{8}$'){
   return @('Plugins/RichAudio.dll','mods/update/update.rpf',"mods/update/x64/dlcpacks/$Pack/dlc.rpf")
  }
+ if($Kind -ceq 'audio-switch-pack' -and $Pack -ceq 'ra_rc_9f6c2b57'){
+  return @('mods/update/update.rpf',"mods/update/x64/dlcpacks/$Pack/dlc.rpf")
+ }
  throw 'Unknown qualification transaction type'
 }
 
@@ -73,7 +76,8 @@ function Install-Qualification01 {
   if((& $AcquireBaseline) -cne $true){throw 'Current protected baseline did not qualify'}
   [IO.Directory]::CreateDirectory($backupRoot)|Out-Null
   $markerDirectories=@()
-  if($Kind -ceq 'marker-a'){
+  if($Kind -cin @('marker-a','audio-switch-pack')){
+   if($Kind -ceq 'audio-switch-pack' -and (Test-Path -LiteralPath (Safe-Path $GameRoot 'mods'))){throw 'Expected absent mods directory for the one-car switch'}
    $markerDirectories=@('mods','mods/update','mods/update/x64','mods/update/x64/dlcpacks',"mods/update/x64/dlcpacks/$Pack"|ForEach-Object {Safe-Path $GameRoot $_})
    if(Test-Path -LiteralPath $markerDirectories[-1]){throw 'Expected absent private pack directory'}
   }
@@ -176,7 +180,7 @@ function Restore-Qualification01 {
  $restore=@{Changes=$receipt.files;AllowedRoot=$GameRoot;AllowedTargets=$allowed;BackupRoot=(Join-Path $Transaction 'original')
   ReceiptPath=(Join-Path $Transaction 'restored.json');AssertProcessClosure=$ProcessClosure}
  $null=Invoke-Menu02Restoration @restore
- if($Kind -ceq 'marker-a'){
+ if($Kind -cin @('marker-a','audio-switch-pack')){
   $possible=@('mods','mods/update','mods/update/x64','mods/update/x64/dlcpacks',"mods/update/x64/dlcpacks/$Pack"|ForEach-Object {Safe-Path $GameRoot $_})
   $intent=Read-Json (Join-Path $Transaction 'intent.json')
   $created=@($receipt.createdDirectories)

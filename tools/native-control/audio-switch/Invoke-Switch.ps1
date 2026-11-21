@@ -1,8 +1,9 @@
 [CmdletBinding()]
 param([ValidateSet('Status','Ready','Restore','Report')][string]$Operation='Status',
       [switch]$KnownStock, [ValidateLength(0,1024)][string]$Text='',
-      [ValidateSet('VOLTIC','RCBANDITO')][string]$Donor='VOLTIC',
-      [ValidateSet('Engine','Exhaust','Horn')][string]$Cue)
+      [ValidateSet('VOLTIC','RCBANDITO','RA_RC_AUDIBLE','RA_RC_QUIET')][string]$Donor='VOLTIC',
+      [ValidateSet('Engine','Exhaust','Horn')][string]$Cue,
+      [ValidateSet('RecognisedPrivateMotor','PrivateMotorUnresolved','StockReturned','StockReturnUnresolved', IgnoreCase=$false)][string]$Finding)
 $ErrorActionPreference='Stop'
 $root=Join-Path $env:LOCALAPPDATA 'RichAudio/AudioSwitch'
 $s=Get-Content -Raw -LiteralPath "$root/status.json" | ConvertFrom-Json
@@ -12,10 +13,11 @@ if ($Operation -eq 'Status') { $s; return }
 if ($Operation -eq 'Ready' -and !$KnownStock) { throw 'Confirm this ADDER has known stock audio' }
 if ($Operation -eq 'Report' -and !$Text) { throw 'Supply the original listening report' }
 if ($Operation -ne 'Report' -and (!$s.Foreground -or !$s.Engine -or !$s.Vehicle)) { throw "Idle. Foreground=$($s.Foreground). $($s.Reason)" }
+if ($Finding -and $Operation -ne 'Report') { throw 'Record a listening finding with Report' }
 $id=[guid]::NewGuid().ToString('N')
 $dir=Join-Path $root $s.Session
 $tmp=Join-Path $dir "$id.tmp"
-@{Session=$s.Session;Id=$id;Generation=$s.Generation;Focus=$s.Focus;Operation=$Operation;Donor=$Donor.ToUpperInvariant();Cue=$Cue;KnownStock=[bool]$KnownStock;Text=$Text;ExpiresTicks=[Diagnostics.Stopwatch]::GetTimestamp()+3*[Diagnostics.Stopwatch]::Frequency}|ConvertTo-Json|Out-File -Encoding utf8 -LiteralPath $tmp -NoClobber
+@{Session=$s.Session;Id=$id;Generation=$s.Generation;Focus=$s.Focus;Operation=$Operation;Donor=$Donor.ToUpperInvariant();Cue=$Cue;Finding=$Finding;KnownStock=[bool]$KnownStock;Text=$Text;ExpiresTicks=[Diagnostics.Stopwatch]::GetTimestamp()+3*[Diagnostics.Stopwatch]::Frequency}|ConvertTo-Json|Out-File -Encoding utf8 -LiteralPath $tmp -NoClobber
 try { [IO.File]::Move($tmp,"$dir/pending.json") } finally { if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp } }
 $clock=[Diagnostics.Stopwatch]::StartNew()
 while ($clock.Elapsed.TotalSeconds -lt 5) {
