@@ -10,6 +10,28 @@ namespace RichAudio.Beacon.Tests
         private static int checks;
         private static void Check(bool value,string text){checks++;if(!value)throw new Exception(text);}
         private static void Throws(Action action,string text){bool rejected=false;try{action();}catch(ArgumentException){rejected=true;}catch(InvalidDataException){rejected=true;}catch(EndOfStreamException){rejected=true;}Check(rejected,text);}
+        static void CheckPowertrainWithdrawal()
+        {
+            var gate=new PowertrainOutputGate();
+            long now=System.Diagnostics.Stopwatch.GetTimestamp();
+            string session=Guid.NewGuid().ToString("N");
+            var frame=new RichAudio.Beacon.Transport.GameplayFrame {
+                Listener=RichAudio.Beacon.Transport.Protocol.Synthetic(session,1,0),
+                Vehicles=new[]{new RichAudio.Beacon.Transport.GameplayVehicle {
+                    Id="one",Model=0xb779a091,Generation=1,Context="player",Running=true,Valid=true}},
+                ValidThroughTicks=now+System.Diagnostics.Stopwatch.Frequency/4,
+                OperatingPointEvidence="shvdne-enhanced-native-F9DDA40BC293A61E",PowertrainRevision=1,PowertrainGate="prepare"
+            };
+            gate.Accept(frame,now);
+            frame.PowertrainRevision=3;frame.PowertrainGate="voice";
+            Throws(delegate{gate.Accept(frame,now);},"lost gain command cannot enable a later revision");
+            // A newer terminal command may replace an unconsumed voice command in the sender's one-slot mailbox.
+            frame.PowertrainGate="withdraw";gate.Accept(frame,now);
+            gate.BoundaryComplete(gate.Requested);
+            Check(gate.Withdrawn,"conflated terminal withdrawal acknowledged");
+            frame.PowertrainRevision=4;frame.PowertrainGate="voice";
+            Throws(delegate{gate.Accept(frame,now);},"withdrawal is terminal");
+        }
         public static unsafe int Main(string[] args)
         {
             try
@@ -37,6 +59,7 @@ namespace RichAudio.Beacon.Tests
                     Console.WriteLine("PASS: "+checks+" silent actual-device starvation assertions; no automatic restart.");return 0;
                 }
                 if(args.Length!=0)throw new ArgumentException("Unsupported test option");
+                CheckPowertrainWithdrawal();
                 Check(HostProgram.BeaconFrequencyArguments(95,"harmonic",false)=="","default producer invocation preserved");
                 Check(HostProgram.AuditionArguments(0,"open-road","harmonic",1,95,.22,.08f,false,false,false,false)=="","default audition disabled");
                 Check(HostProgram.AuditionArguments(12,"open-road","harmonic",1,600,.44,.20f,true,true,false,false)==" --beacon-output-trim-db 12","bounded geometry audition forwarding");

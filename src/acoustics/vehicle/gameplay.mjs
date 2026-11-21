@@ -453,6 +453,12 @@ export class StockGameplay {
   for(const c of this.localAirflow)c.fill(0);this.airflowState.riderActive=false;this.airflowState.exteriorSources=0;
   const sources=[];for(const s of this.slots){const ids=['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`),aeroId=`stock:slot${s.index}:aero`;for(const id of [...ids,aeroId])this.inputs[id].fill(0);
    if(!s.source||!this.sample.state&&(!independentSource||!selected.some(item=>item.identity===s.identity)))continue;const v=s.vehicle;
+   if(v.powertrainRevision!==undefined&&s.powertrainRevision!==v.powertrainRevision){
+    // The retained grain heads continue following the vehicle while muted.
+    // Drop delayed pressure samples from the preceding output revision.
+    for(const id of ids)this.pipeline.renderer.discardSourcePcm(id);
+    s.powertrainRevision=v.powertrainRevision;
+   }
    const stockStart=this.captureCompleteRenderStages01?this.now():0;
    s.source.renderInto({operatingPoint:v.operatingPoint,load:v.lift ? .05 : .9,lift:v.lift,running:v.running},this.inputs[ids[0]],this.inputs[ids[1]]);
    if(this.captureCompleteRenderStages01){

@@ -4,6 +4,22 @@ using System.Threading;
 
 namespace RichAudio.Beacon.Windows
 {
+    internal sealed class PowertrainStamp
+    {
+        internal readonly long Revision, Sequence, Deadline, ObservedAt;
+        internal readonly double OperatingPoint;
+        internal PowertrainStamp(long revision,long sequence,long deadline,long observedAt,double operatingPoint)
+        {
+            Revision=revision;Sequence=sequence;Deadline=deadline;
+            ObservedAt=observedAt;OperatingPoint=operatingPoint;
+        }
+    }
+    internal struct PowertrainSubmission
+    {
+        internal PowertrainStamp Source;
+        internal int Qualified, Discarded, Stale;
+        internal float Peak;
+    }
     // Exactly one producer and one consumer. Slot publication uses volatile ordering.
     public sealed class PcmRing
     {
@@ -19,6 +35,7 @@ namespace RichAudio.Beacon.Windows
         public readonly int GameplayPrefillBlocks;
         public double SelectedGameplayReserveMilliseconds {get{return GameplayPrefillBlocks*MaximumFrames/48.0;}}
         private readonly float[][] data = new float[Slots][];
+        private readonly PowertrainStamp[] stamps = new PowertrainStamp[Slots];
         private readonly int[] lengths = new int[Slots];
         private int write, read, offset, credits;
         public long UnderflowFrames, ConsumedFrames, ConsumedBlocks, EndSilenceFrames;
@@ -35,12 +52,14 @@ namespace RichAudio.Beacon.Windows
         internal int PendingCredits { get { return Volatile.Read(ref credits); } }
         public int TakeCredits() { return Interlocked.Exchange(ref credits, 0); }
         public bool TryWrite(float[] samples, int frames)
+        { return TryWrite(samples, frames, null); }
+        internal bool TryWrite(float[] samples, int frames, PowertrainStamp stamp)
         {
             if (samples == null || frames < 1 || frames > MaximumFrames || samples.Length < frames * 2) throw new ArgumentException("PCM block bounds");
             for (int i = 0; i < frames * 2; i++) if (float.IsNaN(samples[i]) || float.IsInfinity(samples[i]) || Math.Abs(samples[i]) > 1) throw new InvalidDataException("Invalid PCM sample");
             int cursor = Thread.VolatileRead(ref write);
             if (cursor - Thread.VolatileRead(ref read) >= Slots) return false;
-            Array.Copy(samples, 0, data[cursor % Slots], 0, frames * 2); lengths[cursor % Slots] = frames;
+            Array.Copy(samples, 0, data[cursor % Slots], 0, frames * 2); lengths[cursor % Slots] = frames; stamps[cursor % Slots] = stamp;
             Thread.VolatileWrite(ref write, cursor + 1); return true;
         }
         public unsafe int Fill(float* output, int frames, float gain)
@@ -49,6 +68,32 @@ namespace RichAudio.Beacon.Windows
         // Legacy audition API above retains its original .25 safety ceiling.
         public unsafe int FillCalibrated(float* output,int frames,float gain)
         {return FillCore(output,frames,gain,1);}
+        // Consume only one tagged slot per gain decision. Other host modes use
+        // the original sample loop directly, with no per-frame revision checks.
+        internal unsafe int FillPowertrain(float* output,int frames,float gain,long revision,long now,out PowertrainSubmission submission)
+        {
+            if(output==null||frames<0||frames>8192)throw new ArgumentException("Output bounds");
+            int supplied=0,done=0;
+            submission=new PowertrainSubmission();
+            while(done<frames){
+                int cursor=read,index=cursor%Slots;
+                bool available=cursor<Thread.VolatileRead(ref write);
+                var stamp=available?stamps[index]:null;
+                int chunk=available?Math.Min(frames-done,lengths[index]-offset):frames-done;
+                bool stale=stamp!=null&&stamp.Deadline<=now;
+                bool qualified=stamp!=null&&stamp.Revision==revision&&!stale;
+                float* target=output+done*2;
+                int taken=FillCore(target,chunk,qualified?gain:0,1);
+                if(qualified){
+                    submission.Qualified+=taken;
+                    submission.Source=stamp;
+                    if(gain>0)for(int i=0;i<taken*2;i++)submission.Peak=Math.Max(submission.Peak,Math.Abs(target[i]));
+                }else submission.Discarded+=taken;
+                if(stale)submission.Stale+=taken;
+                supplied+=taken;done+=chunk;
+            }
+            return supplied;
+        }
         private unsafe int FillCore(float* output,int frames,float gain,float ceiling)
         {
             if (output == null || frames < 0 || frames > 8192 || float.IsNaN(gain) || gain < 0 || gain > ceiling) throw new ArgumentException("Output bounds");

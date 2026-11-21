@@ -53,7 +53,7 @@ namespace RichAudio.Beacon.Windows
         [STAThread]
         public static int Main(string[] args)
         {
-            if(args.Length>0&&(args[0]=="--gameplay"||args[0]=="--gameplay-fixture"))return GameplayHost.Run(args);
+            if(args.Length>0&&(args[0]=="--gameplay"||args[0]=="--gameplay-fixture"||args[0]=="--powertrain-host"||args[0]=="--powertrain-fixture"))return GameplayHost.Run(args);
             if(args.Length==1 && (args[0]=="--help" || args[0]=="-h"))
             {
                 Console.WriteLine("RichAudio Windows host\n"+

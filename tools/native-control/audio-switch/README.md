@@ -1,5 +1,38 @@
 # One-car audio switch
 
+## Playable powertrain replacement
+
+This opt-in developer mode uses the qualified `RA_RC_QUIET` pack from 3c94d0f. In that listening session the driver recognized the private audible control, heard stock ADDER return, then heard “zero engine or exhaust sound” with the quiet control while gear clunks, tyres and horn remained audible. They heard the ADDER again after the final return. The final stock horn check was unreported.
+
+The external renderer supplies a **Bati development voice on ADDER telemetry**. On the SHVDNE callback, `PowertrainFrames` reads the bound driver's ADDER and camera through `ShvdneGameSource` and `CameraListenerTracker`. The Enhanced public-native rev ratio (`0xF9DDA40BC293A61E`) drives the source operating point. It is a normalized ratio; physical crankshaft RPM and throttle-pedal position are not measured. The existing renderer infers lift from falling ratio and uses that signal for its acceleration/deceleration blend. Vehicle and listener pose, velocity, running state and timestamps keep their observed meaning. Missing, invalid or stale telemetry withholds playback.
+
+`PowertrainLink` connects the existing gameplay publisher to the owned external acoustics host. The package admits just the ADDER/player identity and resolves the donor at the audio-bank boundary. `Run-Gameplay.mjs` uses the real stock gameplay renderer and the retained Bati engine/exhaust idle, acceleration and deceleration layers. Rendered PCM carries the source observation sequence through the existing RA07 pipe to the PCM ring. The host checks the observation lifetime and gain revision before submitting to WASAPI.
+
+| Listener | Codex command through `Invoke-Switch.ps1` |
+| --- | --- |
+| Ready | `ReadyPowertrain -KnownStock` prepares the voice with output gain closed. Fresh observations, advancing nonzero source render blocks and corresponding output submissions must arrive before the script requests `RA_RC_QUIET` on the tagged car. Once the setter returns, the host opens gain for the new revision. |
+| Mute RichAudio | `MutePowertrain` closes only RichAudio gain. Listen for GTA's gear, tyre and horn sounds. Tracking and rendering continue. |
+| Bring RichAudio back | `ResumePowertrain` admits audio from the new voice revision at the current operating point. Neither gain command requests a GTA profile. |
+| Put it back | `RestorePowertrain` withdraws playback, waits for a buffer-reset acknowledgement or confirmed host exit, and requests `ADDER` once on the original vehicle. Story Mode stays open for listening. |
+
+Use `Status` for the replacement phase and reason. `Report -Text` retains the driver's words. A native return, source-backed PCM, and WASAPI submission are software evidence. The driver judges responsiveness, gaps and what comes from RichAudio during the mute comparison. If the host disappears or output progress expires after takeover, advancing SHVDNE callbacks handle withdrawal and the same-car stock return. Losing the target abandons the binding. An uncertain setter is never resent automatically. Recovery requires the surviving script and its validated target.
+
+Keep GTA running and foreground during preparation. If preparation fails before the quiet call, inspect the reason and wait for that attempt's owned host to exit before a fresh “ready” on the same stock car. Pausing or stalling callbacks during playback can expire the 250 ms input lease. `PowertrainEvidenceDirectory` identifies the attempt's transport and host records. Use underflows, discarded/stale frames, submission age and maximum callback gap to diagnose audible dropouts. Submitted-observation age measures software chronology.
+
+Build the switch and host from the same worktree, then stage an external private package in a fresh directory. `Prepare-PowertrainHost.ps1` verifies the retained SHVDNE source pins, copies the six Bati layers, and writes a manifest that binds the Windows host, Node worker, renderer code and assets.
+
+```powershell
+$switchTools = './tools/native-control/audio-switch'
+& "$switchTools/Build.ps1"
+& ./tools/Build-AcousticsHost.ps1
+$package = & "$switchTools/Prepare-PowertrainHost.ps1" -OutputRoot "$PWD/.local/audio-switch/powertrain-session"
+& ./tools/Test-PowertrainPlayback.ps1 -Manifest $package.manifest -OutputRoot "$PWD/.local/audio-switch/powertrain-session-test"
+```
+
+The playback fixture runs the real worker, pipe, external host, Node renderer and PCM ring against a device-free sink, using authored car observations and a recorded setter delegate. The source's rev input is still unverified through SHVDNE on a live 1.0.1158.16 ADDER. A running car must yield a finite positive ratio no greater than one. If it cannot, record the specific refusal and leave stock audio available.
+
+For one authorized session reuse the two verified private overlay files and the existing one-car installation/rollback transaction. Include `RichAudio.Powertrain.json` from the chosen package as an additional temporary file under the game's `scripts`, with its original absence checked and its installed hash in the rollback ledger. The host package stays in its prepared location. Launch GTA normally once and wait for the user's controls. After normal closure, check that the session-owned host and producer have exited, retain the switch log and per-attempt transport/host evidence, and verify removal of the extra pointer along with the script, runtime and overlay. The private comparison and ordinary stock donors remain available in a separate switch session.
+
 Run `Build.ps1` from PowerShell on the RichAudio development machine. It builds the SHVDNE script in `.local/audio-switch` and runs the offline checks against that DLL. Use the matching Enhanced SHVDNE runtime and verify fresh successful SDK initialization before issuing a command. Stock comparisons use just the script and runtime. The private comparison also uses the two-file OpenRPF overlay described below.
 
 Drive a running stock ADDER with its original ADDER engine audio. The operator and listener must know the vehicle's audio history. The model check alone cannot establish that history. Listen to stock idle or revs for as long as you like, then say **ready**. Codex operates the following commands through `Invoke-Switch.ps1`.

@@ -616,6 +616,12 @@ export class StreamingRenderer {
       })
     );
   }
+  discardSourcePcm(id) {
+    const source = this.sources.get(id);
+    requireValue(source, "known source history");
+    source.frames.fill(-1);
+    source.low = source.upper = 0;
+  }
   setSourceGeneration(id, generation) {
     const s = this.sources.get(id);
     requireValue(

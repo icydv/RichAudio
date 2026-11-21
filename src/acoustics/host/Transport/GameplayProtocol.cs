@@ -67,6 +67,10 @@ namespace RichAudio.Beacon.Transport {
   [DataMember(Name="worldPreparationStartedUtc",EmitDefaultValue=false)]public string WorldPreparationStartedUtc;
   [DataMember(Name="cameraInterior01",EmitDefaultValue=false)]public GameplayInterior CameraInterior01;
   [DataMember(Name="cameraInteriorReadback",EmitDefaultValue=false)]public CameraInteriorReadback CameraInteriorReadback;
+  // Used by the one-car developer host. Ordinary gameplay frames omit these.
+  [DataMember(Name="powertrainRevision",EmitDefaultValue=false)]public long PowertrainRevision;
+  [DataMember(Name="powertrainGate",EmitDefaultValue=false)]public string PowertrainGate;
+  [DataMember(Name="operatingPointEvidence",EmitDefaultValue=false)]public string OperatingPointEvidence;
  }
  public static class GameplayWire {
   public const int MaximumBytes=32768;

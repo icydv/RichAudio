@@ -16,6 +16,7 @@ namespace RichAudio.Beacon.Transport {
   [DataMember(Name="transportValidationOnly",EmitDefaultValue=false)]public bool TransportValidationOnly;
   public bool Shvdne {get{return IntegrationFramework=="shvdne";}}
   public const string ShvdneApi3Sha256="1e4d0bc4d34d05a6038fc87eede492d3dc4265522de473ec19cdf6746b5b0e48";
+  [DataMember(Name="powertrainVoice",EmitDefaultValue=false)]public string PowertrainVoice;
   [DataMember(Name="demoProfile",EmitDefaultValue=false)]public string DemoProfile;
   [DataMember(Name="latencyProfile",EmitDefaultValue=false)]public string LatencyProfile;
   [DataMember(Name="continuityPolicy",EmitDefaultValue=false)]public string ContinuityPolicy;
@@ -78,6 +79,10 @@ namespace RichAudio.Beacon.Transport {
    if(c.LatencyProfile!=null&&c.LatencyProfile!="baseline"&&c.LatencyProfile!="low-latency-01"&&c.LatencyProfile!="street-01")throw new InvalidDataException("Unknown immutable gameplay latency profile");
    if(c.ContinuityPolicy!=null&&c.ContinuityPolicy!="baseline"&&c.ContinuityPolicy!="camera-source-01")throw new InvalidDataException("Unknown immutable gameplay continuity policy");
    ValidateIntegration(c);
+   if(c.PowertrainVoice!=null&&(c.PowertrainVoice!="bati-player-on-adder"||!c.Shvdne||c.DemoProfile!=null||c.TransportValidationOnly||
+    c.CatalogueFleet||c.OutputSink!=null||c.LatencyProfile!=null&&c.LatencyProfile!="baseline"||c.Eligible==null||c.Eligible.Length!=1||
+    c.Eligible[0]==null||c.Eligible[0].Model!=0xb779a091u||c.Eligible[0].Context!="player"))
+    throw new InvalidDataException("Private powertrain package requires one player ADDER and the Bati development voice");
    if(c.TransportValidationOnly&&(c.Eligible==null||c.Eligible.Length!=0||c.Bindings==null||c.Bindings.Length!=1||c.Bindings[0].File!="runtime/RichAudio.Acoustics.Host.exe"))throw new InvalidDataException("Transport validation binds only its host, with no synthesis eligibility");
    if(c.Schema!=1||c.GameVersion!="1.0.1158.16"||c.DemoProfile!=null&&c.DemoProfile!="PLAYABLE-13"||c.Bindings==null||c.Bindings.Length<(c.TransportValidationOnly?1:8)||c.Bindings.Length>512||c.Eligible==null||(!c.TransportValidationOnly&&!c.CatalogueFleet&&c.Eligible.Length<1)||c.Eligible.Length>64)throw new InvalidDataException("supported playable manifest required");
    if(c.DemoProfile=="PLAYABLE-13"&&(c.Eligible.Length!=1||c.Eligible[0].Model!=0xF9300CC5||c.Eligible[0].Context!="player"))throw new InvalidDataException("Bati-player-only demonstration package required");

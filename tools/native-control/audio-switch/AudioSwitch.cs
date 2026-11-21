@@ -22,6 +22,11 @@ namespace RichAudio.AudioSwitch
         string directory, previousStatus, focusEpoch;
         bool hadFocus;
         int token;
+        bool legacyAssignment;
+        PowertrainLink powertrainLink;
+        PowertrainHandoff powertrain;
+        string powertrainGeneration, powertrainFocus, powertrainVehicle, powertrainCommandId;
+        string powertrainJournalError;
         [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
         [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hwnd, out int id);
 
@@ -38,6 +43,7 @@ namespace RichAudio.AudioSwitch
             Directory.CreateDirectory(directory);
             Interval = 50;
             Tick += OnTick;
+            Aborted += delegate { if (powertrainLink != null) powertrainLink.Abort(); };
         }
 
         static Vehicle Current(out string reason)
@@ -78,6 +84,167 @@ namespace RichAudio.AudioSwitch
             return Function.Call<bool>(Hash.DECOR_EXIST_ON, v.Handle, Marker);
         }
 
+        bool Owns(Vehicle vehicle)
+        {
+            return vehicle != null && token != 0 && Marked(vehicle) &&
+                Function.Call<int>(Hash.DECOR_GET_INT, vehicle.Handle, Marker) == token;
+        }
+
+        void Mark(Vehicle vehicle)
+        {
+            if (!Function.Call<bool>(Hash.DECOR_IS_REGISTERED_AS_TYPE, Marker, 3))
+            {
+                using (var game = Process.GetCurrentProcess())
+                    IdleDecoratorRegistration.Ensure(Marker, IdleDecoratorLock.Capture(game.MainModule), delegate {});
+            }
+            token = Guid.NewGuid().GetHashCode() | 1;
+            if (!Function.Call<bool>(Hash.DECOR_SET_INT, vehicle.Handle, Marker, token))
+                throw new InvalidOperationException("token unavailable");
+        }
+
+        void PowertrainLog(string phase, string reason)
+        {
+            try
+            {
+                PowertrainStatus host = powertrainLink == null ? null : powertrainLink.Snapshot;
+                Log(new { utc = DateTime.UtcNow.ToString("o"), powertrain = phase, reason,
+                    qpc = Stopwatch.GetTimestamp(), generation = powertrainGeneration, vehicle = powertrainVehicle,
+                    hostMode = host == null ? null : host.Mode, revision = host == null ? 0 : host.AppliedRevision,
+                    observedQpc = host == null ? 0 : host.ObservedQpc, renderedBlocks = host == null ? 0 : host.RenderedBlocks,
+                    submittedFrames = host == null ? 0 : host.SubmittedFrames });
+            }
+            catch (Exception failure) { powertrainJournalError = failure.Message; }
+        }
+
+        void ClearPowertrainMarker()
+        {
+            try
+            {
+                string reason;
+                Vehicle vehicle = Current(out reason);
+                if (Key(vehicle) == powertrainVehicle && control.Generation == powertrainGeneration && Owns(vehicle))
+                {
+                    if (!Function.Call<bool>(Hash.DECOR_REMOVE, vehicle.Handle, Marker))
+                        PowertrainLog("Marker retained", "ADDER token removal failed");
+                }
+            }
+            catch (Exception failure) { PowertrainLog("Marker cleanup failed", failure.Message); }
+        }
+
+        void AssignPowertrain(string profile)
+        {
+            PowertrainLog("Native assignment reserved", profile);
+            Vehicle vehicle;
+            try
+            {
+                string reason;
+                vehicle = Current(out reason);
+                if (Key(vehicle) != powertrainVehicle || control.Generation != powertrainGeneration || !Owns(vehicle))
+                    throw new InvalidOperationException("original ADDER identity or owner token changed");
+                if (profile == Switch.PrivateQuiet)
+                {
+                    if (!vehicle.IsEngineRunning || !CanAcceptInput() || focusEpoch != powertrainFocus)
+                        throw new InvalidOperationException("ready authorization or engine state expired");
+                    var host = powertrainLink.Snapshot;
+                    if (!HostCurrent(host) || !host.Prepared || host.Mode != "prepare" ||
+                        host.AppliedRevision != 1 || host.VehicleId != powertrainGeneration)
+                        throw new InvalidOperationException("muted render/output progress expired before native quiet");
+                }
+            }
+            catch (Exception failure) { throw new PowertrainAssignmentRefused(failure.Message); }
+
+            vehicle.ForceUseAudioGameObject(profile);
+            PowertrainLog("Native returned", profile);
+        }
+
+        static bool HostCurrent(PowertrainStatus host)
+        {
+            long age = Stopwatch.GetTimestamp() - host.ObservedQpc;
+            return host.Fresh && age >= 0 && age <= Stopwatch.Frequency / 4;
+        }
+
+        void AdvancePowertrain(Vehicle vehicle, string key, bool focused)
+        {
+            if (powertrain == null || !powertrain.NeedsTarget) return;
+            bool owns;
+            try { owns = key == powertrainVehicle && control.Generation == powertrainGeneration && Owns(vehicle); }
+            catch (Exception failure)
+            {
+                PowertrainLog("Owner check failed", failure.Message);
+                owns = false;
+            }
+            bool running = false;
+            string submitFailure = null;
+            if (owns)
+            {
+                try
+                {
+                    running = vehicle.IsEngineRunning;
+                    if (powertrain.TracksInput) powertrainLink.Submit(running ? vehicle : null, powertrainGeneration);
+                }
+                catch (Exception failure) { submitFailure = "game input publication failed: " + failure.Message; }
+            }
+            var host = powertrainLink.Snapshot;
+            var evidence = new PowertrainEvidence(host.VehicleId, host.AppliedRevision, host.Mode,
+                                                   HostCurrent(host) && running, host.Prepared, host.Ended,
+                                                   submitFailure ?? host.Failure);
+            powertrain.Advance(Stopwatch.GetTimestamp(), control.Generation, owns,
+                               focused && focusEpoch == powertrainFocus && running, evidence);
+            if (powertrain.Phase == "Failed" || powertrain.Phase == "Restored")
+                ClearPowertrainMarker();
+        }
+
+        string CommandPowertrain(Request request, Vehicle vehicle, string key, bool focused)
+        {
+            long now = Stopwatch.GetTimestamp();
+            if (request.ExpiresTicks < now) return "expired request";
+            if (vehicle == null || request.Generation != control.Generation) return "original ADDER unavailable";
+            bool validFocus = focused && focusEpoch == request.Focus;
+            if (request.Operation == "ReadyPowertrain")
+            {
+                if (!request.KnownStock || !validFocus || !vehicle.IsEngineRunning)
+                    return "confirm a running, known-stock ADDER while GTA is foreground";
+                if (powertrain != null && (key != powertrainVehicle || control.Generation != powertrainGeneration))
+                    return "original ADDER lifetime changed";
+                if (powertrain != null && (!powertrain.CanRetry || !powertrainLink.Snapshot.Ended))
+                    return "previous powertrain attempt still owns the session or its native outcome";
+                if (legacyAssignment || control.Phase != "idle" || Marked(vehicle))
+                    return "start on an unclaimed stock ADDER";
+
+                powertrainGeneration = control.Generation;
+                powertrainVehicle = key;
+                powertrainFocus = focusEpoch;
+                try
+                {
+                    Mark(vehicle);
+                    powertrainLink = PowertrainLink.TryCreate(directory);
+                    if (powertrainLink == null)
+                    {
+                        ClearPowertrainMarker();
+                        return "powertrain developer configuration unavailable";
+                    }
+                }
+                catch (Exception failure)
+                {
+                    ClearPowertrainMarker();
+                    return "could not begin powertrain preparation: " + failure.Message;
+                }
+                powertrain = new PowertrainHandoff(Stopwatch.Frequency, powertrainLink.SetGain,
+                    powertrainLink.Withdraw, AssignPowertrain, PowertrainLog);
+                powertrain.Start(powertrainGeneration, now);
+                return "accepted";
+            }
+
+            if (powertrain == null || key != powertrainVehicle || control.Generation != powertrainGeneration || !Owns(vehicle))
+                return "original claimed ADDER unavailable";
+            if (request.Operation == "MutePowertrain") return powertrain.Mute(now);
+            if (request.Operation == "ResumePowertrain")
+                return validFocus && vehicle.IsEngineRunning ? powertrain.Resume(now) : "foreground running ADDER required to resume";
+            string result = powertrain.Restore(now);
+            if (powertrain.Phase == "Failed") ClearPowertrainMarker();
+            return result;
+        }
+
         void Log(object row)
         {
             File.AppendAllText(Path.Combine(directory, "events.jsonl"), json.Serialize(row) + Environment.NewLine);
@@ -104,9 +271,14 @@ namespace RichAudio.AudioSwitch
                 bool focused = CanAcceptInput();
                 if (focused != hadFocus || focusEpoch == null) focusEpoch = Guid.NewGuid().ToString("N");
                 hadFocus = focused;
+                AdvancePowertrain(v, key, focused);
                 var status = json.Serialize(new { Session=session, Pid=pid, ProcessStart=processStart, Generation=control.Generation,
                     Focus=focusEpoch, Foreground=focused, Vehicle=key, Engine=v != null && v.IsEngineRunning,
-                    Phase=control.Phase, Comparison=control.Comparison.ToString(), Reason=reason });
+                    Phase=control.Phase, Comparison=control.Comparison.ToString(), Reason=reason,
+                    Powertrain=powertrain == null ? "Inactive" : powertrain.Phase,
+                    PowertrainReason=powertrain == null ? null : powertrain.Reason,
+                    PowertrainJournalError=powertrainJournalError, PowertrainCommandId=powertrainCommandId,
+                    PowertrainEvidenceDirectory=powertrainLink == null ? null : powertrainLink.EvidenceDirectory });
                 if (status != previousStatus)
                 {
                     Publish(Path.Combine(root, "status.json"), status);
@@ -127,8 +299,7 @@ namespace RichAudio.AudioSwitch
                 bool engine = v != null && v.IsEngineRunning;
                 string name = q.Operation == "Ready" ? q.Donor : q.Operation == "Restore" ? "ADDER" : null;
                 string result;
-                bool ownsTarget = v != null && token != 0 && Marked(v) &&
-                    Function.Call<int>(Hash.DECOR_GET_INT, v.Handle, Marker) == token;
+                bool ownsTarget = Owns(v);
                 if (q.Operation == "Report" && q.Text != null && q.Text.Length <= 1024)
                 {
                     result = "report saved";
@@ -137,6 +308,13 @@ namespace RichAudio.AudioSwitch
                             ? "invalid or expired finding"
                             : control.RecordFinding(q.Finding, q.Generation, engine, ownsTarget);
                 }
+                else if (q.Operation == "ReadyPowertrain" || q.Operation == "MutePowertrain" ||
+                         q.Operation == "ResumePowertrain" || q.Operation == "RestorePowertrain")
+                {
+                    result = CommandPowertrain(q, v, key, focused);
+                    if (result == "accepted") powertrainCommandId = q.Id;
+                }
+                else if (powertrain != null) result = "this session is reserved for the powertrain replacement";
                 else if (name == null || q.ExpiresTicks < Stopwatch.GetTimestamp()) result = "invalid or expired";
                 else if (q.Operation == "Ready" && !q.KnownStock) result = "confirm known stock audio first";
                 else
@@ -147,20 +325,12 @@ namespace RichAudio.AudioSwitch
                     bool valid = v != null && (markNewTarget ? !Marked(v) : ownsTarget);
                     result = control.Command(q.Operation,q.Generation,focused && q.Focus == focusEpoch,engine,valid,delegate(string requested)
                     {
-                        if (markNewTarget)
-                        {
-                            if (!Function.Call<bool>(Hash.DECOR_IS_REGISTERED_AS_TYPE, Marker, 3))
-                            {
-                                using (var game = Process.GetCurrentProcess())
-                                    IdleDecoratorRegistration.Ensure(Marker, IdleDecoratorLock.Capture(game.MainModule), delegate {});
-                            }
-                            token = Guid.NewGuid().GetHashCode() | 1;
-                            if (!Function.Call<bool>(Hash.DECOR_SET_INT,v.Handle,Marker,token)) throw new InvalidOperationException("token unavailable");
-                        }
+                        if (markNewTarget) Mark(v);
                         Log(new { utc=DateTime.UtcNow.ToString("o"), q.Id, vehicle=key, requested, engine=true, outcome="dispatch reserved" });
                         if (Key(Current(out reason)) != key || !CanAcceptInput() || !v.IsEngineRunning ||
                             !Marked(v) || Function.Call<int>(Hash.DECOR_GET_INT,v.Handle,Marker) != token)
                             throw new InvalidOperationException("final target check failed");
+                        legacyAssignment = true;
                         v.ForceUseAudioGameObject(requested);
                         if (!apply && !keepMarker && !Function.Call<bool>(Hash.DECOR_REMOVE,v.Handle,Marker))
                             throw new InvalidOperationException("stock call returned but token removal failed");
@@ -168,12 +338,18 @@ namespace RichAudio.AudioSwitch
                 }
                 Log(new { utc=DateTime.UtcNow.ToString("o"), q.Id, q.Operation, q.Generation, vehicle=key,
                     model=v == null ? null : "ADDER", engine, requested=name, phase=control.Phase, comparison=control.Comparison.ToString(), outcome=result,
-                    cue=q.Cue, finding=q.Finding, listeningReport=q.Text });
+                    cue=q.Cue, finding=q.Finding, listeningReport=q.Text,
+                    powertrain=powertrain == null ? "Inactive" : powertrain.Phase });
                 Publish(reply,result);
             }
             catch(Exception e)
             {
-                if (!observed) control.Observe(null);
+                if (!observed)
+                {
+                    control.Observe(null);
+                    if (powertrain != null)
+                        powertrain.Advance(Stopwatch.GetTimestamp(), null, false, false, default(PowertrainEvidence));
+                }
                 previousStatus = null;
                 try { Log(new { utc=DateTime.UtcNow.ToString("o"), error=e.Message }); } catch(IOException) {}
             }

@@ -18,6 +18,12 @@ import {ClockedFleetEvidence02} from '../src/acoustics/vehicle/clocked-fleet-evi
 import {enableStockGrainTiming04} from '../src/acoustics/vehicle/stock-grain.mjs';
 const args=process.argv.slice(2);if(args.length!==4||args[0]!=='--manifest'||args[2]!=='--session')throw Error('owned manifest/session required');
 const manifest=path.resolve(args[1]),root=path.dirname(manifest),config=JSON.parse(fs.readFileSync(manifest,'utf8')),session=args[3];
+const privatePowertrain=config.powertrainVoice==='bati-player-on-adder';
+const adderModel=0xb779a091,batiModel=0xf9300cc5;
+if(config.powertrainVoice!==undefined&&(!privatePowertrain||
+  config.eligible?.length!==1||config.eligible[0].model!==adderModel||config.eligible[0].context!=='player'||
+  config.acousticWorld!==false||config.demoProfile||config.vehicleSourcePolicy))
+ throw Error('one stock ADDER player and a dedicated private powertrain package required');
 const latencyProfile=resolveLatencyProfile(config.latencyProfile);
 if(latencyProfile.id==='low-latency-01'&&(config.demoProfile!=='PLAYABLE-13'||config.eligible?.length!==1||config.eligible[0].model!==0xf9300cc5||config.eligible[0].context!=='player'))throw Error('LOW-LATENCY-01 requires the Bati-player demonstration package');
 validateStreetLatencySelection01(config);
@@ -28,8 +34,28 @@ const qualification=normalQualification01(config,root,session);
 const inside=relative=>{const p=path.resolve(root,relative);if(!p.startsWith(root+path.sep))throw Error('package path escaped');return p;};
 const assets=loadStockCatalogAssets(inside(config.playerManifest),{sustainAtlasFile:inside(config.atlas)});
 const playerOnlyQualification=qualification&&!fleet&&!config.eligible.some(e=>e.context==='npc');
-const npcAssets=playerOnlyQualification?null:loadStockNpcAssets(inside(config.npcManifest));
-const registry=loadInstalledStockRegistry({catalogFile:inside(config.catalog),catalogSha256:config.catalogSha256,assets,npcAssets}),profiles=JSON.parse(fs.readFileSync(inside(config.profiles),'utf8'));
+const npcAssets=playerOnlyQualification||privatePowertrain?null:loadStockNpcAssets(inside(config.npcManifest));
+const stockRegistry=loadInstalledStockRegistry({catalogFile:inside(config.catalog),catalogSha256:config.catalogSha256,assets,npcAssets});
+const profiles=JSON.parse(fs.readFileSync(inside(config.profiles),'utf8'));
+// Resolve the donor at the bank boundary. Every gameplay frame and voice
+// identity retains the observed ADDER model and generation.
+const privateTarget=(model,context)=>model===adderModel&&context==='player';
+const batiVoice=privatePowertrain?stockRegistry.resolve(batiModel,'player'):null;
+if(privatePowertrain&&(batiVoice?.status!=='available'||batiVoice.bank.model!=='bati'))
+ throw Error('verified six-layer Bati player bank unavailable');
+const registry=privatePowertrain?{
+ resolve:(model,context)=>privateTarget(model,context)?{...batiVoice,model:'adder',modelHash:model}:
+  {status:'unavailable',reason:'unbound-private-powertrain-vehicle'},
+ createSource(model,context,options){
+  if(!privateTarget(model,context))throw Error('unbound private powertrain vehicle');
+  return stockRegistry.createSource(batiModel,context,options);
+ },
+ prepareSource10(model,context){
+  if(!privateTarget(model,context))throw Error('unbound private powertrain vehicle');
+  return stockRegistry.prepareSource10(batiModel,context);
+ },
+ preparationDiagnostics10:()=>stockRegistry.preparationDiagnostics10(),
+}:stockRegistry;
 // Prepare pure bank data and bounded untouched voices before host readiness.
 // The normal eligibility selection still controls when any voice is acquired.
 const startupBegan=performance.now(),startupPairs=fleet?registry.fleetPreparationPairs():config.eligible;
@@ -198,6 +224,11 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
    const remaining=m.validForMs===undefined?null:m.validForMs-(now-m.receivedAt);
    if(age<=250&&(remaining===null||remaining>0)){
     const proofEpoch=qualification?qualification.acceptLaunch(m.frame.worldPreparationStartedUtc):m.frame.worldPreparationStartedUtc;
+    // The older observation actually selected by interpolation identifies this PCM.
+    if(config.powertrainVoice&&m.frame.vehicles.length===1){
+     m.frame.vehicles[0].powertrainSequence=s.sequence;
+     m.frame.vehicles[0].powertrainRevision=m.frame.powertrainRevision;
+    }
     engine.accept(m.frame,age,remaining);lastFrame={frame:m.frame,age,at:now,validUntil:remaining===null?null:now+remaining,receivedAt:m.receivedAt,hostWriteBeforeQpc:m.hostWriteBeforeQpc??null,hostQpcFrequency:m.hostQpcFrequency??null};
     evidence?.record({type:'normal-gameplay-observation',at:now,ageMs:age,validForMs:remaining,frame:m.frame});
     if(installedScenes&&!installedScenes.failed&&!installedScenes.closed&&(!s.valid||s.paused))installedScenes.withdrawCameraInterior01(now);
@@ -211,11 +242,17 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
    }
   }
   if(pendingGeometry){const value=pendingGeometry;pendingGeometry=null;try{geometry(value);}catch(e){log({type:'geometry-rejected',reason:e.message});}}
-  const nonzeroBefore=clockedEvidence?engine.stageCounters.stereo.nonzeroBlocks:0;
+  const nonzeroBefore=clockedEvidence||config.powertrainVoice?engine.stageCounters.stereo.nonzeroBlocks:0;
+  const playbackBefore=engine.stageCounters.sourcePlaybackBlocks;
   const controlIngressMs=clockedEvidence?performance.now()-startedAt:0;
   const channels=await engine.render();if(stopped)return;
   const beforeFraming=clockedEvidence?performance.now():0;
   credits--;encodeVehicleRa07(...channels,sequence,packet);sequence=(sequence+1)>>>0;
+  if(config.powertrainVoice&&engine.stageCounters.stereo.nonzeroBlocks>nonzeroBefore&&engine.stageCounters.sourcePlaybackBlocks>playbackBefore){
+   const used=engine.slots.find(slot=>slot.source)?.vehicle?.powertrainSequence;
+   if(!Number.isInteger(used)||used<0||used>=0xffffffff)throw Error('powertrain PCM missing source observation');
+   packet.writeUInt32LE(used+1,12);
+  }
   clockedEvidence?.block(engine,performance.now()-beforeFraming,controlIngressMs,engine.stageCounters.stereo.nonzeroBlocks>nonzeroBefore,packet);
   evidence?.record({type:'complete-render-block',sequence:(sequence-1)>>>0,completeRenderMs:engine.lastCompleteRenderMs,
    stages:engine.lastRenderStages01});
@@ -286,4 +323,7 @@ input.on('line',line=>{try{if(line.length>131072)throw Error('producer command s
 input.on('close',()=>{if(!stopped)finish(null,'host-control-eof');});process.on('SIGTERM',()=>finish(null,'process-signal-SIGTERM'));process.on('SIGINT',()=>finish(null,'process-signal-SIGINT'));
 const timer=setInterval(()=>{if(!stopped)status();},500);timer.unref();
 if(qualification)setTimeout(()=>finish(Error('normal qualification cutoff reached'),'coordinator-cutoff'),Math.max(1,qualification.stopBy-Date.now())).unref();
-log({type:'gameplay-ready',featureProfile:'STREET-01-main',...sourceStartupPreparation10,startupVoices,normalControlWarmup,mode:'experimental-additive',nativeSuppression:false,airflowImplemented:true,airflowEnabled:engine.settings.airflowEnabled,installedWorldQualified:false});
+log({type:'gameplay-ready',featureProfile:'STREET-01-main',...(privatePowertrain?{
+ powertrainVoice:config.powertrainVoice,observedModel:adderModel,voiceModel:batiVoice.bank.model,
+ voiceAwcSha256:batiVoice.bank.provenance.awcSha256
+}:{}),...sourceStartupPreparation10,startupVoices,normalControlWarmup,mode:'experimental-additive',nativeSuppression:false,airflowImplemented:true,airflowEnabled:engine.settings.airflowEnabled,installedWorldQualified:false});

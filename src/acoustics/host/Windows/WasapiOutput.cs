@@ -14,6 +14,9 @@ namespace RichAudio.Beacon.Windows
         private readonly Thread thread;
         private Latency03OutputSession isolatedExperiment;
         private uint experimentPadding;
+#if STATE_TRANSPORT
+        internal PowertrainOutputGate Powertrain;
+#endif
         public OwnedOutputTap OwnedRecorder;
         private int startState, disposed;
         private volatile bool stop;
@@ -117,6 +120,20 @@ namespace RichAudio.Beacon.Windows
                     if(stop)break;
                     if (!signalled) { WakeTimeouts++; if (++consecutiveTimeouts >= 5) throw new TimeoutException("Audio endpoint stopped signalling"); continue; }
                     consecutiveTimeouts = 0;
+#if STATE_TRANSPORT
+                    if(Powertrain!=null){
+                        var command=Powertrain.Requested;
+                        if(Powertrain.NeedsBoundary(command)){
+                            // The endpoint may still own submitted frames. Reset on its owning
+                            // thread, then prime with silence before acknowledging the transition.
+                            Native.Check(client.Stop()); Native.Check(client.Reset());
+                            IntPtr ignored;Native.Check(renderer.GetBuffer(BufferFrames,out ignored));
+                            Native.Check(renderer.ReleaseBuffer(BufferFrames,2));
+                            Native.Check(client.Start());Powertrain.BoundaryComplete(command);
+                            continue;
+                        }
+                    }
+#endif
                     long begin = Stopwatch.GetTimestamp(), interval = begin - lastWake; lastWake = begin;
                     long allocatedBefore=isolatedExperiment==null?-1:Latency03OutputSession.AllocatedBytes();
                     long paddingBefore=isolatedExperiment==null?0:Stopwatch.GetTimestamp();Native.Check(client.GetCurrentPadding(out padding));long paddingAfter=isolatedExperiment==null?0:Stopwatch.GetTimestamp(); if (padding > BufferFrames) throw new InvalidOperationException("Invalid device padding"); if (padding == 0) EmptyPaddingEvents++;
@@ -147,6 +164,16 @@ namespace RichAudio.Beacon.Windows
             if(isolatedExperiment!=null){if(frames==0||stop)return;if(OwnedRecorder!=null){isolatedExperiment.Fail(Latency03Failure.ForbiddenRecording);stop=true;return;}MaximumCallbackFrames=Math.Max(MaximumCallbackFrames,frames);MinimumCallbackFrames=Math.Min(MinimumCallbackFrames,frames);bool okay=isolatedExperiment.Submit(ring,renderer,frames,SubmittedFrames,experimentPadding,Muted?0:volume);if(isolatedExperiment.LastSubmissionCommitted)SubmittedFrames+=frames;if(!okay){Muted=true;stop=true;}return;}
             if (frames == 0 || stop) return; IntPtr data; Native.Check(renderer.GetBuffer(frames, out data));
             MaximumCallbackFrames=Math.Max(MaximumCallbackFrames,frames);MinimumCallbackFrames=Math.Min(MinimumCallbackFrames,frames);
+#if STATE_TRANSPORT
+            if(Powertrain!=null){
+                PowertrainSubmission submission;
+                try{Powertrain.Fill(ring,(float*)data,(int)frames,out submission);}
+                catch{Native.Check(renderer.ReleaseBuffer(frames,2));throw;}
+                Native.Check(renderer.ReleaseBuffer(frames,0));
+                SubmittedFrames+=frames;ring.RequireContinuousProducer();Powertrain.Submitted(submission);
+                return;
+            }
+#endif
             int captureSlot=-1;OwnedOutputTap recorder=OwnedRecorder;
             try {long underflow=ring.UnderflowFrames,endSilence=ring.EndSilenceFrames,producerStart=ring.ConsumedFrames-underflow-endSilence;
                 // The live route deliberately passes no event bus: native
