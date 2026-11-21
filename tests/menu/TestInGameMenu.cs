@@ -124,6 +124,11 @@ public static class TestInGameMenu
         foreach(int[] size in new[]{new[]{800,600},new[]{1280,720},new[]{1920,1080},new[]{3440,1440},new[]{3840,2160}}){
             var frame=menu.BuildFrame(size[0],size[1],CpuFallback());
             Check(frame.Commands.Count<=256&&frame.Regions.Count<=64,"bounded drawing/input frame");
+            bool anchored=false;float sidebarPixels=AcousticMenuModel.SidebarWidth*AcousticMenuModel.SidebarScale(size[0],size[1]);
+            foreach(var shape in frame.Commands)if(shape.Kind==DrawCommandKind.Rectangle&&
+                shape.X==0&&shape.Y==0&&Math.Abs(shape.Width-sidebarPixels)<.01f&&
+                Math.Abs(shape.Height-size[1])<.01f)anchored=true;
+            Check(anchored,"settings sidebar starts at the left edge and fills the viewport vertically");
             foreach(var c in frame.Commands){Check(c.X>=0&&c.Y>=0&&c.X<size[0]&&c.Y<size[1],"command origin inside viewport");
                 if(c.Kind==DrawCommandKind.Rectangle)Check(c.X+c.Width<=size[0]+1&&c.Y+c.Height<=size[1]+1,"rectangle inside viewport");}
             foreach(var hit in frame.Regions)Check(hit.X>=0&&hit.Y>=0&&hit.X+hit.Width<=size[0]&&hit.Y+hit.Height<=size[1],"pointer bounds inside viewport");
@@ -163,7 +168,21 @@ public static class TestInGameMenu
         var original=menu.BuildFrame(1920,1080,CpuFallback());
         var transition=new MenuTransition();transition.SetOpen(true,0);
         foreach(int time in new[]{55,110,165,220})Draw(MenuTransition.Present(original,transition.Sample(time),1920,1080),1920,1080,Path.Combine(dest,"richaudio-opening-"+time+"ms.png"));
+        Draw(MenuTransition.Present(original,transition.Sample(220),1920,1080,180,410,true),
+            1920,1080,Path.Combine(dest,"richaudio-sidebar-cursor.png"));
         transition.SetOpen(false,220);foreach(int time in new[]{275,330,385,440})Draw(MenuTransition.Present(original,transition.Sample(time),1920,1080),1920,1080,Path.Combine(dest,"richaudio-closing-"+(time-220)+"ms.png"));
+        // Keep the pinned PR94 previews above, and also render the adapter's
+        // actual 260 ms timing without changing its imported presentation.
+        var runtime=new MenuTransition(260);runtime.SetOpen(true,0);
+        Draw(MenuTransition.Present(original,runtime.Sample(130),1920,1080),1920,1080,Path.Combine(dest,"richaudio-runtime260-half.png"));
+        var level=Region(original,HitRegionKind.Level,3,-1);
+        Draw(MenuTransition.Present(original,runtime.Sample(260),1920,1080,
+            level.X+level.Width*(float)menu.Pending.OutputLevel,level.Y+level.Height*.5f,true),
+            1920,1080,Path.Combine(dest,"richaudio-runtime260-cursor.png"));
+        var wide=menu.BuildFrame(3440,1440,CpuFallback());
+        Draw(MenuTransition.Present(wide,runtime.Sample(260),3440,1440),3440,1440,Path.Combine(dest,"richaudio-runtime260-ultrawide.png"));
+        runtime.SetOpen(false,260);Check(MenuTransition.Present(original,runtime.Sample(520),1920,1080,180,410,true).Commands.Count==0,
+            "actual adapter duration removes all cursor and drawing commands after close");
         var stock=menu.BuildFrame(1920,1080,MenuStatus.StockFallback());Draw(stock,1920,1080,Path.Combine(dest,"richaudio-stock-fallback.png"));
         Select(menu,AcousticMenuModel.RecordingRow);
         menu.SetAudioTestRecording(false,false,false,"Locked until an approved vehicle playback test passes.");

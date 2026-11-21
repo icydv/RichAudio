@@ -1,0 +1,147 @@
+{
+  "kind": "Menu02OfflinePreparationEvidence",
+  "schema": 1,
+  "baselineCommit": "65a17ca05d19a43b8aa56706f704d1775ab66028",
+  "branch": "feature/world-13-reliable-ci-render-tails",
+  "runtimeMenuContentMatchesPr94": true,
+  "payload": [
+    {
+      "name": "RichAudio.Menu02.Rph.dll",
+      "bytes": 88064,
+      "sha256": "8e70ddbbcc5d98b57239c54eb764427f6d055c808b3b9fd616ac71daaa525d0b"
+    },
+    {
+      "name": "RichAudio.Menu.json",
+      "bytes": 233,
+      "sha256": "15a4ec13441701642a38ceb16eafa74302d91e9163e20a126e86731d9d55a41a"
+    },
+    {
+      "name": "isolated-preferences.json",
+      "bytes": 317,
+      "sha256": "0a86d25230b74ebf65c2b804c34d1a5899c1d0095a838bc50858ed9fdf1c7a36"
+    }
+  ],
+  "candidateReceiptSha256": "229f20ab7bfde7f2810cf85e633c392e2d1caa710f5e1a721d956a0e5ba7a081",
+  "builderSha256": "5ab9e8a8328c5727825a477b2604be22ee8b5718fbeb7eb349f83949bc69d7f8",
+  "entrySha256": "2261e18d7b2cd9868a6bdebbc25a3c8776b241c156e0f1b1c27a73884f11dda0",
+  "sdk": {
+    "sha256": "5d439745604a5fedbf8fa401520d4f296c1b6800d77e2923ba3bf9772182c7e0",
+    "fileVersion": "1.124.1393.17586",
+    "origin": "Existing non-installed private development reference",
+    "redistributed": false
+  },
+  "compilerSha256": "46809206887326d2d24db1eff1f3064de972c3451abe766b49111450a5e08e00",
+  "build": {
+    "exitCode": 0,
+    "attempts": 1,
+    "warningsAsErrors": true,
+    "sourceCount": 12,
+    "byteIdenticalRebuildClaimed": false,
+    "reproducibility": "Source/compiler/SDK/options retained; legacy compiler PE timestamp/MVID varies. Retained payload hashes identify this candidate."
+  },
+  "offline": {
+    "menu": 1568,
+    "settings": 59,
+    "persistenceCas": 60,
+    "allExitsZero": true,
+    "receiptSha256": "c8a6b26ee404163da5bd67701451714800ebf00a925b1d6053367c25463a33b9",
+    "scope": "Focused fixtures with isolated outputs, no installed state or live game."
+  },
+  "validation": {
+    "metadataSha256": "422c28a52ac996b0869b8bd7a2e9b8c4122c5df74c0f70a551cc678eee332fa5",
+    "builderRejectionReceiptSha256": "6dabcf9808cd2d1e0b815acabfb9b7e7652380847ed0db943641d15d139905a3",
+    "parsedPayloadReceiptSha256": "7ecb898e0392c74f69d2d64c11e401c9f8c849c2813b56229cab41d7504ad49e",
+    "preservedHarnessFailures": [
+      "Old Cecil inspection cleanup called unavailable Dispose; corrected separate inspection passed.",
+      "Config fixture compilation used unsuitable relative paths; separate absolute-path compile/test passed."
+    ],
+    "candidateBuildFailure": false
+  },
+  "hosted": {
+    "observedUtc": "2026-11-04T16:22:41Z",
+    "manifestSha256": "9344ca35abf23bce911c3c7906a12388fc744910b26cc28fdf826aaf15ff2244",
+    "aggregateSupplementSha256": "aaeae1cf177229004c7d0f100dd61de96bee40955a307caa24e4a0f687a82fb4",
+    "menu": {
+      "run": 41863999039,
+      "job": 126693298415,
+      "result": "success",
+      "checks": 1568,
+      "testMerge": "2a30bda87755b846cc799f6b8a3f346818928052"
+    },
+    "originalMenu": {
+      "run": 41853033357,
+      "result": "success",
+      "checks": 1262
+    },
+    "broader": {
+      "run": 41863999023,
+      "workflowSummaryAtSnapshot": "queued",
+      "requiredAggregateJob": 126698334097,
+      "actualAggregate": "failure",
+      "functional": "success",
+      "node22": {
+        "result": "failure",
+        "phase": "focused control 22 before timing",
+        "measuredDeadlineMisses": null
+      },
+      "node24": {
+        "result": "failure",
+        "candidateBlocks": 13440,
+        "hardMisses": 17,
+        "above8ms": 55,
+        "hardGate": false,
+        "headroomGate": false
+      }
+    },
+    "historicalWorld13": {
+      "run": 41854828012,
+      "functional": "success",
+      "processing": "failure",
+      "aggregate": "failure",
+      "node22": {
+        "candidateBlocks": 13440,
+        "hardMisses": 265,
+        "above8ms": 591
+      },
+      "node24": {
+        "candidateBlocks": 13440,
+        "hardMisses": 180,
+        "above8ms": 384
+      }
+    },
+    "rerun": false,
+    "cancelled": false,
+    "dispatched": false
+  },
+  "compatibility": {
+    "installedVersionsVerified": false,
+    "requiredHistoricalGame": "1.0.1158.16",
+    "requiredHistoricalLoadedApi": "1.132.1428.17748",
+    "matchingVersionsAuthenticateRuntime": false,
+    "sdkCompilationProvesRuntimeCompatibility": false,
+    "launcherAndLoadedApiRequireIndependentIdentity": true
+  },
+  "scope": {
+    "installedResourceInspection": false,
+    "gameDirectoryRead": false,
+    "deployed": false,
+    "gameLaunched": false,
+    "audioEndpointOpened": false,
+    "audioPlayed": false,
+    "recordingStarted": false,
+    "interfaceRedesigned": false,
+    "acousticEngineChanged": false,
+    "merged": false
+  },
+  "acceptance": {
+    "sidebar": "live-unexecuted",
+    "cursor": "live-unexecuted",
+    "interactions": "live-unexecuted",
+    "settings": "offline-pass-live-unexecuted",
+    "gamePerformance": "unmeasured",
+    "confirmedLiveDefects": [],
+    "restoration": "not-needed-no-installation-changes; live rollback unexecuted",
+    "widerTestingReady": false
+  },
+  "next": "Fresh explicit approval for bounded read-only installed metadata/config/display inventory, then separately review exact deployment/rollback and one-session live proposal."
+}

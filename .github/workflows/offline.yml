@@ -11,11 +11,11 @@ permissions:
 
 concurrency:
   group: offline-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  offline:
-    name: offline-node-${{ matrix.node }}
+  functional:
+    name: functional-node-${{ matrix.node }}
     runs-on: windows-latest
     timeout-minutes: 30
     strategy:
@@ -32,27 +32,76 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           package-manager-cache: false
-      - name: Validate original controls, bounded expiry diagnostics and matched WORLD12 processing
+      - name: Required inherited controls and independent cleanup diagnostics
         shell: pwsh
-        run: ./tools/Test-Offline12.ps1
-      - name: Retain sanitized WORLD12 functional, expiry and separate timing evidence
+        run: ./tools/Test-Offline13.ps1 -Mode Functional
+      - name: Retain sanitized functional evidence even after failure
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2, reused reviewed official pin
         with:
-          name: world12-offline-${{ matrix.node }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: world13-functional-${{ matrix.node }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
-            .local/world12-offline-*/artifact/*.tap
-            .local/world12-offline-*/artifact/*.json
-            .local/world12-ci-*.json
-            .local/world12-current-ci-*/snapshot12.json
-            .local/world12-baseline-ci-*/snapshot12.json
-            .local/world12-retention-control-*.json
-            .local/world12-lifecycle-control-*.json
+            .local/world13-functional-*/artifact/*.tap
+            .local/world13-functional-*/artifact/*.json
+            .local/cleanup13-ci-evidence/*.json
             .local/expiry-ci-evidence/*.json
             .local/expiry12-ci-evidence/*.json
-            .local/world11-retention-control-*.json
-            .local/world11-lifecycle-control-*.json
-            .local/world10-retention-control-*.json
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
+
+  processing:
+    # Independently scheduled: inherited failures cannot suppress measurements.
+    name: processing-node-${{ matrix.node }}
+    runs-on: windows-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22.23.4, 24.19.0]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Exact-state controls and full processing trials with required timing gates
+        shell: pwsh
+        run: ./tools/Test-Offline13.ps1 -Mode Processing
+      - name: Retain every block and verdict even after deadline failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: world13-processing-${{ matrix.node }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .local/world13-processing-*/artifact/*.tap
+            .local/world13-processing-*/artifact/*.json
+            .local/world13-current-ci-*/snapshot13.json
+            .local/world13-baseline-ci-*/snapshot13.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  required-validation:
+    name: required-offline-validation
+    if: always()
+    needs: [functional, processing]
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 22.23.4
+          package-manager-cache: false
+      - name: Every required functional and processing population must pass
+        shell: pwsh
+        env:
+          WORLD13_FUNCTIONAL_RESULT: ${{ needs.functional.result }}
+          WORLD13_PROCESSING_RESULT: ${{ needs.processing.result }}
+        run: node ./tools/ci-gates13.mjs
