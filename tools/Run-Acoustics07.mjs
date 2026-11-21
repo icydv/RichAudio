@@ -9,12 +9,15 @@ import {
   orientationTiming,
 } from "../src/acoustics/streaming/orientation-presentation.mjs";
 import { createHash } from "node:crypto";
+import { DEFAULT_BEACON_FREQUENCY_HZ, DEFAULT_BEACON_LEVEL, validateBeaconFrequencyHz, validateBeaconLevel } from "../src/acoustics/streaming/beacon-frequency.mjs";
 
 const args = process.argv.slice(2),
   options = {
     scene: "open-road",
     sources: 1,
     beacon: "harmonic",
+    frequencyHz: DEFAULT_BEACON_FREQUENCY_HZ,
+    level: DEFAULT_BEACON_LEVEL,
     delayMs: 100,
     headless: false,
     trace: false,
@@ -27,6 +30,8 @@ for (let i = 0; i < args.length; i += 2) {
   if (args[i] === "--scene") options.scene = args[i + 1];
   else if (args[i] === "--sources") options.sources = Number(args[i + 1]);
   else if (args[i] === "--beacon") options.beacon = args[i + 1];
+  else if (args[i] === "--beacon-frequency-hz") options.frequencyHz = Number(args[i + 1]);
+  else if (args[i] === "--beacon-level") options.level = Number(args[i + 1]);
   else if (args[i] === "--listener-delay-ms")
     options.delayMs = Number(args[i + 1]);
   else if (args[i] === "--headless-clock" && args[i + 1] === "audio")
@@ -57,6 +62,10 @@ if (
   !["harmonic", "pulse", "impulse"].includes(options.beacon)
 )
   throw Error("Scene/source/beacon budget");
+validateBeaconFrequencyHz(options.frequencyHz);
+validateBeaconLevel(options.level);
+if ((options.frequencyHz !== DEFAULT_BEACON_FREQUENCY_HZ || options.level !== DEFAULT_BEACON_LEVEL) && options.beacon !== "harmonic")
+  throw Error("Custom frequency/level is supported for the harmonic beacon only");
 if (options.orientation && options.delayMs !== 100)
   throw Error("Orientation experiment requires the 100 ms spatial policy");
 if (
@@ -162,6 +171,8 @@ async function finish(error) {
     cpu = process.cpuUsage(cpuStart);
   log({
     type: "final",
+    beaconFrequencyHz: options.frequencyHz,
+    beaconLevel: options.level,
     error: error?.message ?? null,
     frames: renderer.frame,
     wallSeconds: (performance.now() - wallStart) / 1000,
@@ -401,10 +412,10 @@ async function pump() {
       );
       for (let j = 0; j < BLOCK; j++) {
         gain +=
-          (Number(enabled) * 0.22 - gain) * (1 - Math.exp(-1 / (0.01 * FS)));
+          (Number(enabled) * options.level - gain) * (1 - Math.exp(-1 / (0.01 * FS)));
         for (let i = 0; i < ids.length; i++) {
           phase[i] =
-            (phase[i] + (2 * Math.PI * (95 + i * 7)) / FS) % (2 * Math.PI);
+            (phase[i] + (2 * Math.PI * (options.frequencyHz + i * 7)) / FS) % (2 * Math.PI);
           let value =
             (Math.sin(phase[i]) +
               0.35 * Math.sin(2 * phase[i]) +
@@ -519,6 +530,8 @@ async function pump() {
       if (stats.blocks % 94 === 0)
         log({
           type: "status",
+          beaconFrequencyHz: options.frequencyHz,
+          beaconLevel: options.level,
           frame: renderer.frame,
           paths: renderer.activePaths,
           sourceEmitting: enabled,

@@ -1,0 +1,681 @@
+{
+  "schemaVersion": 1,
+  "scope": "Silent offline producer plus actual PcmRing gain; no endpoint, game, playback or capture",
+  "parent": "be8e60c71d9c28808b2ca6b866eed7f5ff7d41b5",
+  "defaults": {
+    "frequencyHz": 95,
+    "sourceLevel": 0.22,
+    "hostGain": 0.08,
+    "listenerBufferMs": 100
+  },
+  "candidate": {
+    "frequencyHz": 600,
+    "sourceLevel": 0.44,
+    "hostGain": 0.2
+  },
+  "frequencyBoundsHz": [
+    20,
+    2000
+  ],
+  "sourceLevelBounds": [
+    0,
+    0.5
+  ],
+  "hostGainMaximum": 0.25,
+  "frequencyMeasurement": {
+    "exportedPcm16AlsoValidated": true,
+    "windowSeconds": [
+      1,
+      2
+    ],
+    "observedHz": 600,
+    "nominalBinUncertaintyHz": 0.5,
+    "binSpacingHz": 1
+  },
+  "negativePilot": {
+    "note": "Higher master gain alone did not establish higher RMS than the previous 95Hz reference; this result was retained.",
+    "sourceLevel": 0.22,
+    "versus95HzReferenceDb": -2.1837859790826712,
+    "stationaryRms": 0.0008901121611743925,
+    "frequencyHz": 600,
+    "hostGain": 0.2
+  },
+  "comparisons": {
+    "sameFrequencyMasterGainIncreaseDb": 4.436975350706786,
+    "candidateVersusLegacyRmsDb": 3.836813934196953,
+    "frequencyOnlyVersusLegacyDb": -6.620761329789459
+  },
+  "baselineFingerprints": [
+    {
+      "floatPcmSha256": "a709f3c3259e4718b6e398d0ddef34a3490e4252a5f4836f2538986b6cf5ffb1",
+      "sources": 1,
+      "seconds": 3,
+      "fixture": "stationary"
+    },
+    {
+      "floatPcmSha256": "3c55655835ec10d7e51da89c7c364cd0ae0c6280b38538fe52407ea3ea2d4253",
+      "sources": 1,
+      "seconds": 3,
+      "fixture": "turn"
+    },
+    {
+      "floatPcmSha256": "a14578477eebc9dd86c39d398297ff8a1a442d1bf6b8f726060e49050e7e6d3e",
+      "sources": 4,
+      "seconds": 3,
+      "fixture": "stationary"
+    }
+  ],
+  "results": [
+    {
+      "startupReadyFrame": 5120,
+      "acceleratedSinkWallMs": 273.4175,
+      "scenario": "stationary",
+      "outputs": [
+        {
+          "gain": 0.12,
+          "wavSha256": "b9e119db6254e3afb17feca6c47abf081a3c06b345177325bd302c1ed07ab64a",
+          "wavValidation": {
+            "sampleRate": 48000,
+            "channels": 2,
+            "bits": 16,
+            "frames": 192000,
+            "durationSeconds": 4,
+            "maximumQuantisationError": 1.5258905477821827E-05,
+            "metrics": {
+              "peak": 0.0018005920574069023,
+              "rms": 0.0011447067876399861,
+              "clippedSamples": 0,
+              "nonfiniteSamples": 0,
+              "zeroSamples": 12640,
+              "maximumAdjacentStep": 6.103701889514923E-05
+            }
+          },
+          "peak": 0.0018073025858029723,
+          "rms": 0.0011445480600186387,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 10240,
+          "maximumAdjacentStep": 3.9310857573582325E-05,
+          "headroomDb": 54.85938260076572,
+          "steadyEnvelope": {
+            "windowMs": 20,
+            "count": 100,
+            "minimumRms": 0.0011235200352463807,
+            "maximumRms": 0.0011897445467232576,
+            "zeroWindows": 0
+          }
+        }
+      ],
+      "simulationMs": {
+        "count": 375,
+        "median": 0.07170000000002119,
+        "p95": 0.12110000000001264,
+        "max": 1.134600000000006
+      },
+      "sourceLevel": 0.22,
+      "maximumPaths": 2,
+      "floatPcmSha256": "ab953f49b95cf7e5eed7ccff08f9a9d1b03f8a39e07bf7a48ce71ca2b7e78cd9",
+      "dspMs": {
+        "count": 375,
+        "median": 0.04210000000000491,
+        "p95": 0.12650000000000716,
+        "max": 1.6337000000000046
+      },
+      "limited": 0,
+      "label": "reference",
+      "frequencyHz": 95,
+      "frames": 192000,
+      "missingHistory": 0
+    },
+    {
+      "startupReadyFrame": 5120,
+      "acceleratedSinkWallMs": 283.607,
+      "scenario": "stationary",
+      "outputs": [
+        {
+          "gain": 0.12,
+          "wavSha256": "47780af7e9b6fd7a6d75c826f322148f44604837f233de87b4e04fd6905d82df",
+          "wavValidation": {
+            "sampleRate": 48000,
+            "channels": 2,
+            "bits": 16,
+            "frames": 192000,
+            "durationSeconds": 4,
+            "maximumQuantisationError": 1.5258061466738582E-05,
+            "metrics": {
+              "peak": 0.001037629321217537,
+              "rms": 0.0005337854602275614,
+              "clippedSamples": 0,
+              "nonfiniteSamples": 0,
+              "zeroSamples": 15166,
+              "maximumAdjacentStep": 0.00012207403779029846
+            }
+          },
+          "peak": 0.0010423557832837105,
+          "rms": 0.0005340672746690283,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 10240,
+          "maximumAdjacentStep": 0.00012469997454900295,
+          "headroomDb": 59.63968039339953,
+          "steadyEnvelope": {
+            "windowMs": 20,
+            "count": 100,
+            "minimumRms": 0.0005424303248307808,
+            "maximumRms": 0.0005424303248307808,
+            "zeroWindows": 0
+          }
+        }
+      ],
+      "simulationMs": {
+        "count": 375,
+        "median": 0.07390000000000896,
+        "p95": 0.11699999999999022,
+        "max": 1.257400000000004
+      },
+      "sourceLevel": 0.22,
+      "maximumPaths": 2,
+      "floatPcmSha256": "d4c1a15abb487acf4b452536668f34562aa3eb0a479f4518e32b3e4bc37b15e7",
+      "dspMs": {
+        "count": 375,
+        "median": 0.04250000000001819,
+        "p95": 0.12839999999999918,
+        "max": 1.733300000000014
+      },
+      "limited": 0,
+      "label": "frequency-only",
+      "frequencyHz": 600,
+      "frames": 192000,
+      "missingHistory": 0
+    },
+    {
+      "startupReadyFrame": 5120,
+      "acceleratedSinkWallMs": 303.5492999999999,
+      "scenario": "stationary",
+      "outputs": [
+        {
+          "gain": 0.12,
+          "wavSha256": "3b22cc81e507786b181a81bcb69235d47d1cd19c889fcca73cf89d1a2fab6dea",
+          "wavValidation": {
+            "sampleRate": 48000,
+            "channels": 2,
+            "bits": 16,
+            "frames": 192000,
+            "durationSeconds": 4,
+            "maximumQuantisationError": 1.5257799532264471E-05,
+            "metrics": {
+              "peak": 0.002075258642435074,
+              "rms": 0.0010683673892298573,
+              "clippedSamples": 0,
+              "nonfiniteSamples": 0,
+              "zeroSamples": 15098,
+              "maximumAdjacentStep": 0.00027466658502817154
+            }
+          },
+          "peak": 0.002084711566567421,
+          "rms": 0.0010681345493380567,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 10240,
+          "maximumAdjacentStep": 0.0002493999490980059,
+          "headroomDb": 53.619080480119905,
+          "steadyEnvelope": {
+            "windowMs": 20,
+            "count": 100,
+            "minimumRms": 0.0010848606496615615,
+            "maximumRms": 0.0010848606496615615,
+            "zeroWindows": 0
+          }
+        },
+        {
+          "gain": 0.2,
+          "wavSha256": "c7778bfa0501acd9061c921472222f970ab6230a39a4db9b9ae77a8d74f29415",
+          "wavValidation": {
+            "sampleRate": 48000,
+            "channels": 2,
+            "bits": 16,
+            "frames": 192000,
+            "durationSeconds": 4,
+            "maximumQuantisationError": 1.525023253634572E-05,
+            "metrics": {
+              "peak": 0.003479110077023506,
+              "rms": 0.0017809349568497957,
+              "clippedSamples": 0,
+              "nonfiniteSamples": 0,
+              "zeroSamples": 15068,
+              "maximumAdjacentStep": 0.0004272591322660446
+            }
+          },
+          "peak": 0.003474519355222583,
+          "rms": 0.001780224322348785,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 10240,
+          "maximumAdjacentStep": 0.0004156666109338403,
+          "headroomDb": 49.182105293776374,
+          "steadyEnvelope": {
+            "windowMs": 20,
+            "count": 100,
+            "minimumRms": 0.001808101157456666,
+            "maximumRms": 0.001808101157456666,
+            "zeroWindows": 0
+          }
+        }
+      ],
+      "simulationMs": {
+        "count": 375,
+        "median": 0.07880000000000109,
+        "p95": 0.1303000000000054,
+        "max": 1.3414000000000073
+      },
+      "sourceLevel": 0.44,
+      "maximumPaths": 2,
+      "floatPcmSha256": "bed1583692ff1bb6cec3f0da16092660974e6cb1441664885b05ed9c98234d48",
+      "dspMs": {
+        "count": 375,
+        "median": 0.043400000000019645,
+        "p95": 0.1372000000000071,
+        "max": 1.8712999999999909
+      },
+      "limited": 0,
+      "label": "candidate",
+      "frequencyHz": 600,
+      "frames": 192000,
+      "missingHistory": 0
+    },
+    {
+      "startupReadyFrame": 5120,
+      "acceleratedSinkWallMs": 281.84910000000013,
+      "scenario": "turn",
+      "outputs": [
+        {
+          "gain": 0.12,
+          "wavSha256": "c189723360f68b61d5da752f9a1c32d8a4b6eb54535d7361f5f40154efd82f35",
+          "wavValidation": {
+            "sampleRate": 48000,
+            "channels": 2,
+            "bits": 16,
+            "frames": 192000,
+            "durationSeconds": 4,
+            "maximumQuantisationError": 1.525922561995685E-05,
+            "metrics": {
+              "peak": 0.0024109622463583946,
+              "rms": 0.0011445792032351,
+              "clippedSamples": 0,
+              "nonfiniteSamples": 0,
+              "zeroSamples": 13071,
+              "maximumAdjacentStep": 6.103701889514923E-05
+            }
+          },
+          "peak": 0.0024085580371320248,
+          "rms": 0.001144539950245086,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 10240,
+          "maximumAdjacentStep": 5.239051915850723E-05,
+          "headroomDb": 52.36485768740609,
+          "steadyEnvelope": null
+        }
+      ],
+      "simulationMs": {
+        "count": 375,
+        "median": 0.07740000000001146,
+        "p95": 0.1273999999999944,
+        "max": 1.1979000000000042
+      },
+      "sourceLevel": 0.22,
+      "maximumPaths": 2,
+      "floatPcmSha256": "49cda1e5074ba0002856eee282e63bf01627f486cf45e554385cb93e81219871",
+      "dspMs": {
+        "count": 375,
+        "median": 0.04290000000000305,
+        "p95": 0.13930000000000575,
+        "max": 1.4087999999999994
+      },
+      "limited": 0,
+      "label": "reference",
+      "frequencyHz": 95,
+      "frames": 192000,
+      "missingHistory": 0
+    },
+    {
+      "startupReadyFrame": 5120,
+      "acceleratedSinkWallMs": 294.3553999999999,
+      "scenario": "turn",
+      "outputs": [
+        {
+          "gain": 0.12,
+          "wavSha256": "bb1173aaff1cc0148e78794a1006e7a351373a74d41f97ef9e798a0dedb1880a",
+          "wavValidation": {
+            "sampleRate": 48000,
+            "channels": 2,
+            "bits": 16,
+            "frames": 192000,
+            "durationSeconds": 4,
+            "maximumQuantisationError": 1.5259254723787308E-05,
+            "metrics": {
+              "peak": 0.0014038514345884323,
+              "rms": 0.000534136544997,
+              "clippedSamples": 0,
+              "nonfiniteSamples": 0,
+              "zeroSamples": 19686,
+              "maximumAdjacentStep": 0.0001831110566854477
+            }
+          },
+          "peak": 0.0013915147865191102,
+          "rms": 0.0005340774272180738,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 10240,
+          "maximumAdjacentStep": 0.00016662833513692021,
+          "headroomDb": 57.13024348807865,
+          "steadyEnvelope": null
+        }
+      ],
+      "simulationMs": {
+        "count": 375,
+        "median": 0.07640000000000668,
+        "p95": 0.1296999999999997,
+        "max": 1.1509999999999962
+      },
+      "sourceLevel": 0.22,
+      "maximumPaths": 2,
+      "floatPcmSha256": "ecab87c6395f38fb91fc63aaf75f95740869fba9ba7d750dd95bd2b1192108a1",
+      "dspMs": {
+        "count": 375,
+        "median": 0.043099999999981264,
+        "p95": 0.1303000000000054,
+        "max": 1.4161000000000001
+      },
+      "limited": 0,
+      "label": "frequency-only",
+      "frequencyHz": 600,
+      "frames": 192000,
+      "missingHistory": 0
+    },
+    {
+      "startupReadyFrame": 5120,
+      "acceleratedSinkWallMs": 285.3879000000002,
+      "scenario": "turn",
+      "outputs": [
+        {
+          "gain": 0.12,
+          "wavSha256": "f9e502dfd08fde702282a15ced9b084d222628f7ac478ee29daeefa6f84b1e05",
+          "wavValidation": {
+            "sampleRate": 48000,
+            "channels": 2,
+            "bits": 16,
+            "frames": 192000,
+            "durationSeconds": 4,
+            "maximumQuantisationError": 1.5259254723787308E-05,
+            "metrics": {
+              "peak": 0.00277718435972929,
+              "rms": 0.0010680801110343793,
+              "clippedSamples": 0,
+              "nonfiniteSamples": 0,
+              "zeroSamples": 16851,
+              "maximumAdjacentStep": 0.00033570360392332077
+            }
+          },
+          "peak": 0.0027830295730382204,
+          "rms": 0.0010681548544361477,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 10240,
+          "maximumAdjacentStep": 0.00033325667027384043,
+          "headroomDb": 51.10964357479902,
+          "steadyEnvelope": null
+        },
+        {
+          "gain": 0.2,
+          "wavSha256": "cff1190a2a6d5c00ab71ad77251421b735497f94f68fb30427fa6396ebc932e9",
+          "wavValidation": {
+            "sampleRate": 48000,
+            "channels": 2,
+            "bits": 16,
+            "frames": 192000,
+            "durationSeconds": 4,
+            "maximumQuantisationError": 1.5259254723787308E-05,
+            "metrics": {
+              "peak": 0.0046388134360313416,
+              "rms": 0.0017803179443673179,
+              "clippedSamples": 0,
+              "nonfiniteSamples": 0,
+              "zeroSamples": 14732,
+              "maximumAdjacentStep": 0.0005798516795039177
+            }
+          },
+          "peak": 0.004638382699340582,
+          "rms": 0.0017802581610846572,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 10240,
+          "maximumAdjacentStep": 0.0005554277449846268,
+          "headroomDb": 46.67266843713811,
+          "steadyEnvelope": null
+        }
+      ],
+      "simulationMs": {
+        "count": 375,
+        "median": 0.07179999999999609,
+        "p95": 0.12539999999999907,
+        "max": 1.2383999999999986
+      },
+      "sourceLevel": 0.44,
+      "maximumPaths": 2,
+      "floatPcmSha256": "8e76728eefb5159b9c9aea7213f893739c2a9a38050428551a528fd40864f128",
+      "dspMs": {
+        "count": 375,
+        "median": 0.04259999999999309,
+        "p95": 0.13150000000000261,
+        "max": 1.599100000000007
+      },
+      "limited": 0,
+      "label": "candidate",
+      "frequencyHz": 600,
+      "frames": 192000,
+      "missingHistory": 0
+    },
+    {
+      "startupReadyFrame": 5120,
+      "acceleratedSinkWallMs": 353.1731,
+      "scenario": "emission-stop",
+      "outputs": [
+        {
+          "gain": 0.12,
+          "wavSha256": "81b8b1ff43f1b8d02106cd6ee719fb325598a6a83dd442f58b912e1a7dadde80",
+          "wavValidation": {
+            "sampleRate": 48000,
+            "channels": 2,
+            "bits": 16,
+            "frames": 192000,
+            "durationSeconds": 4,
+            "maximumQuantisationError": 1.5258905477821827E-05,
+            "metrics": {
+              "peak": 0.0018005920574069023,
+              "rms": 0.0008047319636419792,
+              "clippedSamples": 0,
+              "nonfiniteSamples": 0,
+              "zeroSamples": 196412,
+              "maximumAdjacentStep": 6.103701889514923E-05
+            }
+          },
+          "peak": 0.0018073025858029723,
+          "rms": 0.0008046185619345951,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 105992,
+          "maximumAdjacentStep": 3.9310857573582325E-05,
+          "headroomDb": 54.85938260076572,
+          "steadyEnvelope": null
+        }
+      ],
+      "simulationMs": {
+        "count": 375,
+        "median": 0.07939999999999259,
+        "p95": 0.13560000000001082,
+        "max": 1.187100000000001
+      },
+      "sourceLevel": 0.22,
+      "maximumPaths": 2,
+      "floatPcmSha256": "04ace8ef8e74d8562dccdae74128ca95bd5cc56726052c742b61a11e7d86209d",
+      "dspMs": {
+        "count": 375,
+        "median": 0.04899999999997817,
+        "p95": 0.13280000000000314,
+        "max": 1.5989000000000004
+      },
+      "limited": 0,
+      "label": "reference",
+      "frequencyHz": 95,
+      "frames": 192000,
+      "missingHistory": 0
+    },
+    {
+      "startupReadyFrame": 5120,
+      "acceleratedSinkWallMs": 364.09429999999975,
+      "scenario": "emission-stop",
+      "outputs": [
+        {
+          "gain": 0.12,
+          "wavSha256": "f387b5a1bac5d937bf597b36672dfc4937be70184bbafb339f087d019b3f8b6a",
+          "wavValidation": {
+            "sampleRate": 48000,
+            "channels": 2,
+            "bits": 16,
+            "frames": 192000,
+            "durationSeconds": 4,
+            "maximumQuantisationError": 1.5258061466738582E-05,
+            "metrics": {
+              "peak": 0.001037629321217537,
+              "rms": 0.00037534068576078897,
+              "clippedSamples": 0,
+              "nonfiniteSamples": 0,
+              "zeroSamples": 198696,
+              "maximumAdjacentStep": 0.00012207403779029846
+            }
+          },
+          "peak": 0.0010423557832837105,
+          "rms": 0.000375528841308622,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 107094,
+          "maximumAdjacentStep": 0.00012469997454900295,
+          "headroomDb": 59.63968039339953,
+          "steadyEnvelope": null
+        }
+      ],
+      "simulationMs": {
+        "count": 375,
+        "median": 0.07630000000000337,
+        "p95": 0.12510000000000332,
+        "max": 1.2650000000000006
+      },
+      "sourceLevel": 0.22,
+      "maximumPaths": 2,
+      "floatPcmSha256": "322632236779370b1653b78a627dc200f2df623cd5655a5cb39ee9e9ae776c7b",
+      "dspMs": {
+        "count": 375,
+        "median": 0.0438999999999794,
+        "p95": 0.13119999999999266,
+        "max": 1.5725000000000051
+      },
+      "limited": 0,
+      "label": "frequency-only",
+      "frequencyHz": 600,
+      "frames": 192000,
+      "missingHistory": 0
+    },
+    {
+      "startupReadyFrame": 5120,
+      "acceleratedSinkWallMs": 321.66010000000006,
+      "scenario": "emission-stop",
+      "outputs": [
+        {
+          "gain": 0.12,
+          "wavSha256": "72964de7502207ae6412bf1e2d4a6a83fd45915f9bec3333df996a43a7a47bba",
+          "wavValidation": {
+            "sampleRate": 48000,
+            "channels": 2,
+            "bits": 16,
+            "frames": 192000,
+            "durationSeconds": 4,
+            "maximumQuantisationError": 1.5257799532264471E-05,
+            "metrics": {
+              "peak": 0.002075258642435074,
+              "rms": 0.0007512261792071189,
+              "clippedSamples": 0,
+              "nonfiniteSamples": 0,
+              "zeroSamples": 197988,
+              "maximumAdjacentStep": 0.00027466658502817154
+            }
+          },
+          "peak": 0.002084711566567421,
+          "rms": 0.000751057682617244,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 106434,
+          "maximumAdjacentStep": 0.0002493999490980059,
+          "headroomDb": 53.619080480119905,
+          "steadyEnvelope": null
+        },
+        {
+          "gain": 0.2,
+          "wavSha256": "d8d4430fa81d2500cdad012e144f514b538eae47cfaeb2ad8fe97ff92206adeb",
+          "wavValidation": {
+            "sampleRate": 48000,
+            "channels": 2,
+            "bits": 16,
+            "frames": 192000,
+            "durationSeconds": 4,
+            "maximumQuantisationError": 1.5257755876518786E-05,
+            "metrics": {
+              "peak": 0.003479110077023506,
+              "rms": 0.0012522646092608663,
+              "clippedSamples": 0,
+              "nonfiniteSamples": 0,
+              "zeroSamples": 197486,
+              "maximumAdjacentStep": 0.0004272591322660446
+            }
+          },
+          "peak": 0.003474519355222583,
+          "rms": 0.0012517628559296098,
+          "clippedSamples": 0,
+          "nonfiniteSamples": 0,
+          "zeroSamples": 105860,
+          "maximumAdjacentStep": 0.0004156666109338403,
+          "headroomDb": 49.182105293776374,
+          "steadyEnvelope": null
+        }
+      ],
+      "simulationMs": {
+        "count": 375,
+        "median": 0.07269999999999754,
+        "p95": 0.11979999999999791,
+        "max": 1.187899999999999
+      },
+      "sourceLevel": 0.44,
+      "maximumPaths": 2,
+      "floatPcmSha256": "2ea42ec8d5c6e71fbf09e68a09ad4f0e77aaa66b90876c8d94f7d4cb2960a8d2",
+      "dspMs": {
+        "count": 375,
+        "median": 0.04290000000000305,
+        "p95": 0.12779999999999347,
+        "max": 1.3963999999999999
+      },
+      "limited": 0,
+      "label": "candidate",
+      "frequencyHz": 600,
+      "frames": 192000,
+      "missingHistory": 0
+    }
+  ],
+  "nonPanningSchedulesEqual": true,
+  "defaultsFingerprintsUnchanged": true,
+  "transportChanged": false,
+  "buffersChanged": false,
+  "acousticsChanged": false,
+  "publicSourceCap": 4,
+  "liveApprovalCreated": false,
+  "subjectiveAcceptance": "Not assessed"
+}
