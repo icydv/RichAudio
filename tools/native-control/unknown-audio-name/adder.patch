@@ -224,6 +224,17 @@
          var assign=Decode(adapter.GetMethod("Assign",F));
          var all=a.GetTypes().SelectMany(t=>t.GetMethods(F).Cast<MethodBase>().Concat(t.GetConstructors(F)).Concat(t.TypeInitializer==null?new MethodBase[0]:new[]{t.TypeInitializer})).Distinct().SelectMany(Decode).ToList();
          var setter=Decode(adapter.GetMethod("VehicleAudioSetter",F));
+@@ -71,7 +71,9 @@
+         Need(Has(Decode(calls.GetMethods(F).First(m=>m.Name=="Call"&&m.IsGenericMethod)),"GTA.Native.Function::Call")&&Has(Decode(adapter.GetConstructors(F).Single()),"IdleNativeCalls::.ctor"),"production default forwards native calls to retained SDK");
+         Need(Enum.GetNames(a.GetType("RichAudio.NativeSuppression01.TransitionOutcome")).SequenceEqual(new[]{"READY","PENDING","UNSAFE","TIMED_OUT"}),"four explicit readiness outcomes");
+         Need(Has(Decode(adapter.GetMethod("RequestSetup",F)),"setup-command-reserved")&&Has(Decode(adapter.GetMethod("Delete",F)),"DeleteIssued"),"compiled exactly-once setup and deletion reservations");
+-        Need(Has(Decode(adapter.GetMethod("Site",F)),"loaded-local-layout-selected")&&!Has(all,"fixed-exterior-site"),"compiled nearby loaded location selection");
++        Need(Has(Decode(adapter.GetMethod("Site",F)),"paved-pair-selected")&&!Has(all,"fixed-exterior-site"),"compiled nearby loaded location selection");
++        Need((uint)adapter.GetField("Adder",F).GetRawConstantValue()==0xB779A091u && !Has(all,"BATI"),"compiled ADDER model and no BATI literal");
++        Need(Has(Decode(adapter.GetMethod("FlatGround",F)),"::Paved"),"footprint invokes surface qualification");
+         Need(!a.GetTypes().Any(t=>t.FullName.Contains("SetupGame11")||t.FullName.Contains("SdkStringPin")||t.FullName=="SHVDN.ScriptDomain"),"test backend and string lifetime stand-in absent from live candidate");
+         Need(Has(automatic,"ReadProgress")&&Has(automatic,"Resume")&&Has(Decode(a.GetType("RichAudio.NativeSuppression01.AutomaticRun").GetMethod("Command",F)),"StartupAdmitted"),"compiled passive runtime admission and unarmed feedback resume");
+         Need(Has(automatic,"Durable")&&Has(automatic,"dispatch-reserved"),"durable reservation before local dispatch");
 --- a/SetupNativeApi.cs
 +++ b/SetupNativeApi.cs
 @@ -8,6 +8,7 @@
