@@ -23,15 +23,15 @@ jobs:
           persist-credentials: false
           # The regression runs the exact pre-fix relay and producer source.
           fetch-depth: 0
-      - name: Build and package headless CodeWalker; validate original native archives and inherited offline suites
+      - name: Validate bounded headless initialization, original NG geometry, processing and inherited offline suites
         shell: pwsh
-        run: ./tools/Test-Offline08.ps1
+        run: ./tools/Test-Offline09.ps1
       - name: Retain validated companion package and sanitized summary
         if: success()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2, reused reviewed official pin
         with:
           name: world08-companion-${{ github.run_id }}-${{ github.run_attempt }}
-          path: .local/world08-offline-*/artifact/*
+          path: .local/world09-offline-*/artifact/*
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
@@ -41,6 +41,17 @@ jobs:
         with:
           name: expiry-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
           path: .local/expiry-ci-evidence/*.json
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Retain original-only processing phases and WORLD09 test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # same reviewed official pin
+        with:
+          name: world09-processing-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .local/world09-processing-world09-offline-*.json
+            .local/world09-offline-*/world09-tests.tap
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7

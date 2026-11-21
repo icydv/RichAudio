@@ -52,6 +52,54 @@ foreach($f in $files){
  $text=[IO.File]::ReadAllText($f.FullName).Replace("`r`n","`n")
  if($relative-ceq'CodeWalker.Core/GameFiles/Utils/GTAKeys.cs'){
   $text=ReplaceOnce $text '            UseMagicData(path, gen9, key);' '            throw new NotSupportedException("RichAudio-CodeWalker-protected-bootstrap-unavailable: no proprietary bootstrap data is included; no executable or key path was opened.");'
+  # Adapt CodeWalker by dexyfex's UseMagicData to explicitly supplied memory.
+  # No embedded payload, executable search or filesystem fallback is enabled.
+  $text=ReplaceOnce $text '        private static void UseMagicData(string path, bool gen9, string key)' @'
+        public static void InitializeFromRichAudio09(byte[] magic, byte[] aes)
+        {
+            if (magic == null || magic.Length < 16 || magic.Length > 1048576 || aes == null || aes.Length != 32)
+                throw new ArgumentException("bounded explicit CodeWalker bootstrap inputs required");
+            byte[][] random = new byte[4][]; byte[] decoded = null, payload = null, encrypted = null;
+            try
+            {
+                Random rnd = new Random(unchecked((int)JenkHash.GenHash(aes)));
+                for (int r = 0; r < 4; r++) { random[r] = new byte[magic.Length]; rnd.NextBytes(random[r]); }
+                encrypted = new byte[magic.Length];
+                for (int i = 0; i < magic.Length; i++)
+                    encrypted[i] = unchecked((byte)(magic[i] - random[0][i] - random[1][i] - random[2][i] - random[3][i]));
+                decoded = GTACrypto.DecryptAESData(encrypted, aes);
+                payload = new byte[306272];
+                using (var input = new MemoryStream(decoded, false))
+                using (var inflater = new DeflateStream(input, CompressionMode.Decompress))
+                {
+                    int at = 0, n;
+                    while (at < payload.Length && (n = inflater.Read(payload, at, payload.Length - at)) > 0) at += n;
+                    if (at != payload.Length || inflater.ReadByte() != -1)
+                        throw new InvalidDataException("CodeWalker bootstrap must decode exactly 306272 bytes");
+                }
+                byte[] schedules = new byte[27472], tables = new byte[278528], lut = new byte[256];
+                uint[] awc = new uint[4];
+                try
+                {
+                    Buffer.BlockCopy(payload, 0, schedules, 0, schedules.Length);
+                    Buffer.BlockCopy(payload, 27472, tables, 0, tables.Length);
+                    Buffer.BlockCopy(payload, 306000, lut, 0, lut.Length);
+                    Buffer.BlockCopy(payload, 306256, awc, 0, 16);
+                    var keys = CryptoIO.ReadNgKeys(schedules); var decryptTables = CryptoIO.ReadNgTables(tables);
+                    PC_AES_KEY = (byte[])aes.Clone(); PC_NG_KEYS = keys; PC_NG_DECRYPT_TABLES = decryptTables;
+                    PC_LUT = lut; PC_AWC_KEY = awc; GTA5Hash.LUT = lut;
+                }
+                finally { Array.Clear(schedules, 0, schedules.Length); Array.Clear(tables, 0, tables.Length); }
+            }
+            finally
+            {
+                foreach (var bytes in random) if (bytes != null) Array.Clear(bytes, 0, bytes.Length);
+                foreach (var bytes in new[] { decoded, payload, encrypted }) if (bytes != null) Array.Clear(bytes, 0, bytes.Length);
+            }
+        }
+
+        private static void UseMagicData(string path, bool gen9, string key)
+'@
  }
  elseif($relative-ceq'CodeWalker.Core/Properties/Resources.Designer.cs'){
   $text=ReplaceOnce $text "                object obj = ResourceManager.GetObject(`"magic`", resourceCulture);`n                return ((byte[])(obj));" '                throw new NotSupportedException("RichAudio-CodeWalker-protected-bootstrap-unavailable: proprietary embedded data is excluded.");'

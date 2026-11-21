@@ -3,7 +3,7 @@
   "kind": "RichAudioAcousticWorld042OfflineResult",
   "basePR": 84,
   "baseCommit": "50f168be7f76396a6348ac6ada0a35ff89d93b55",
-  "executor": "Codex, independent Codex reviewers and offline test runners",
+  "executor": "Automated implementation review and offline test runners",
   "evidenceScope": "original authored metadata, resources, XML, geometry, poses and analytic PCM only",
   "genuineBuildingQualified": false,
   "enhancedInstallationCompatibilityVerified": false,
