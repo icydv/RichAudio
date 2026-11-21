@@ -26,7 +26,7 @@ test('cutoff race, absent sender evidence, progress expiry and terminal immutabi
  const before=ready();before.status(status,24500);assert.deepEqual(before.status({...status,frame:1024},24999),['start']);
  const at=ready();at.status(status,24500);assert.deepEqual(at.status({...status,frame:1024},25000),['mute','stop']);
  const noAck=ready();noAck.senderAck=false;noAck.status(status,100);assert.deepEqual(noAck.status({...status,frame:1024},200),[]);
- const stale=ready();stale.status(status,100);stale.status({...status,frame:1024},200);assert.deepEqual(stale.tick(1201),['mute','stop']);
+ const stale=ready();stale.status(status,100);stale.status({...status,frame:1024},200);assert.deepEqual(stale.tick(1711),['mute','stop']);
  const terminal='Listener terminal '+JSON.stringify({Connection:1,Stage:'connection',Code:'sender-stop',Outcome:'deliberate-stop',Terminal:true,AnotherAttempt:false})+'; owned output muted/stopping';
  stale.line(terminal,1300);assert.equal(stale.state,'aborted');
  const normal=ready();normal.status(status,100);normal.status({...status,frame:1024},200);normal.line(terminal,500);assert.equal(normal.state,'complete');assert.deepEqual(normal.status({...status,frame:2048},600),[]);

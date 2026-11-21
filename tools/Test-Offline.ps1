@@ -7,7 +7,8 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
-    & node --test tests/Test-OperatorDeadlines.mjs
+    & (Join-Path $PSScriptRoot 'operator/Build-Owner.ps1')
+    & node --test tests/Test-LaunchAdapter.mjs tests/Test-OwnedLaunch.mjs tests/Test-OperatorDeadlines.mjs
     if($LASTEXITCODE -ne 0){throw 'Device-free operator deadline tests failed.'}
     & node --check tools/Inspect-SteamInstall.mjs
     if($LASTEXITCODE -ne 0){throw 'Metadata inspector syntax check failed.'}

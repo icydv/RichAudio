@@ -1,5 +1,6 @@
-// Operator deadlines only; never changes host/transport deadlines.
-export const budget = Object.freeze({ ready:25000, stop:45000, ack:60000, kill:65000, end:70000, statusAge:1000 });
+// Operator progress: ceil(94 * 512 / 48000 * 1000 + 250 poll + 250 scheduling margin) to 10 ms = 1510 ms.
+// This is not transport freshness, prediction or an audio mute deadline.
+export const budget = Object.freeze({ ready:25000, stop:45000, ack:60000, kill:65000, end:70000, statusAge:1510 });
 export class Policy {
   constructor(limits=budget) {
     for(const key of Object.keys(budget))if(!Number.isFinite(limits[key])||limits[key]<=0||limits[key]>budget[key])throw Error('Invalid operator budget');
