@@ -1,5 +1,7 @@
 # P2-03.3: responsive stock-source research prototype
 
+Follow-up: the [P2-03.4 selection-order experiment](P2_03_4_CYCLE_RECURRENCE.md) removes the measured exact short recurrence but remains perceptually artificial. The historical results and reference implementation below are preserved.
+
 26 October 2026. Stacked on open PR #16 / `ae710742779cd61c38357c82b5d9812bf8fe65bb`; main reviewed at `e5fbd8f3502d3e28169a224caa07471e090e368f`. Earlier PRs remain unmerged. Original references, telemetry/schema, RPM validation, game integration and accepted renderers remain unchanged.
 
 ## Decision
