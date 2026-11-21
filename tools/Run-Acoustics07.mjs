@@ -11,6 +11,7 @@ import {
 import { createHash } from "node:crypto";
 import { DEFAULT_BEACON_FREQUENCY_HZ, DEFAULT_BEACON_LEVEL, validateBeaconFrequencyHz, validateBeaconLevel } from "../src/acoustics/streaming/beacon-frequency.mjs";
 import { liveGeometryLimits } from '../src/acoustics/streaming/observed-live.mjs';
+import { GeometryRelayGate } from '../src/acoustics/streaming/geometry-relay.mjs';
 
 const args = process.argv.slice(2),
   options = {
@@ -146,6 +147,18 @@ let credits = 0,
   inputText = "",
   external = null;
 let geometryEvents=[];
+const geometryRelay=options.geometry&&!options.headless?new GeometryRelayGate({now:receiptClock,log,
+  apply:({listener,messages,at,elapsed,delivery})=>{
+    if(geometryEvents.length+messages.length>liveGeometryLimits.events)throw Error('relay geometry queue bound');
+    // Presentation uses conservative age; the geometry clock retains the lower
+    // receipt age and its separately measured interval, avoiding double counting.
+    const upperAge=listener.receiptAgeMs+elapsed+delivery.maximumMs;
+    const accepted=listenerPlayout.add({...listener,receiptAgeMs:upperAge},renderer.frame/FS,receiptClock());
+    external={state:accepted.state,receiptAgeMs:listener.receiptAgeMs,receivedAt:at,pendingReceipt:true,
+      audioTime:renderer.frame/FS,delivery};
+    stats.listenerMessages++;stats.maxReceiptAgeMs=Math.max(stats.maxReceiptAgeMs,upperAge);
+    geometryEvents.push(...messages);
+  },unavailable:event=>{if(event){geometryEvents=[];geometryEvents.push(event);}}}):null;
 let lastControl = null,
   lastPlayout = null;
 const phase = new Float64Array(options.sources);
@@ -198,6 +211,7 @@ async function finish(error) {
     startup,
     simulation: lastControl?.stats ?? null,
     geometry: lastControl?.geometry ?? null,
+    geometryRelay: geometryRelay?.stats ?? null,
     listenerPlayout: listenerPlayout.stats,
     orientation: orientation?.stats ?? null,
     ownedArrayBytes: renderer.ownedArrayBytes,
@@ -230,9 +244,14 @@ function simulate(snapshot, now) {
     }, 1000);
     pending = { id, resolve, reject, timer };
     const events=geometryEvents;geometryEvents=[];
+    let anchor=null;
+    if(options.geometry&&external){
+      const before=process.hrtime.bigint(),age=Math.max(0,receiptClock()-external.receivedAt),after=process.hrtime.bigint();
+      anchor={state:external.state,receiptAgeMs:external.receiptAgeMs,queueAgeMs:age,delivery:external.delivery,
+        dispatchNs:((before+after)/2n).toString(),dispatchUncertaintyMs:options.headless?0:Number(after-before)/2e6+.001};
+    }
     worker.postMessage({ id, snapshot, now, geometryEvents:events,
-      anchor:options.geometry&&external?{state:external.state,receiptAgeMs:external.receiptAgeMs,
-        queueAgeMs:Math.max(0,receiptClock()-external.receivedAt),dispatchNs:process.hrtime.bigint().toString()}:null });
+      anchor });
   });
 }
 function baseListener() {
@@ -434,9 +453,10 @@ async function pump() {
         stats.pathMaximum,
         result.control.paths.length,
       );
+      const renderingEnabled=enabled;
       for (let j = 0; j < BLOCK; j++) {
         gain +=
-          (Number(enabled) * options.level - gain) * (1 - Math.exp(-1 / (0.01 * FS)));
+          (Number(renderingEnabled) * options.level - gain) * (1 - Math.exp(-1 / (0.01 * FS)));
         for (let i = 0; i < ids.length; i++) {
           phase[i] =
             (phase[i] + (2 * Math.PI * (options.frequencyHz + i * 7)) / FS) % (2 * Math.PI);
@@ -493,6 +513,7 @@ async function pump() {
           orientation: orientationDiagnostic,
           spatialFingerprint,
           pathPresentation: lastControl.paths.map((p) => ({
+            ...(options.geometry?{sourceId:p.sourceId,generation:p.generation}:{}),
             id: p.id,
             pan: p.pan,
             arrivalDirection: p.arrivalDirection,
@@ -524,7 +545,7 @@ async function pump() {
           pan: lastControl.paths.find((p) => p.order === 0)?.pan ?? null,
           delays: lastControl.paths.map((p) => p.delay),
           pathIds: lastControl.paths.map((p) => p.id),
-          emitting: enabled,
+          emitting: renderingEnabled,
           missingDelta: renderer.stats.missingHistory - previousMissing,
           historyDelta: diagnosticsBefore
             ? Object.fromEntries(
@@ -580,6 +601,7 @@ async function pump() {
 }
 function receive(m) {
   if (!m || typeof m !== "object") throw Error("Control object");
+  if(geometryRelay?.receive(m))return;
   if (m.type === "credit") {
     if (
       !Number.isInteger(m.blocks) ||
@@ -621,8 +643,13 @@ function receive(m) {
   } else throw Error("Unknown message");
 }
 process.stdin.setEncoding("utf8");
+let initialControlChunk=true;
 process.stdin.on("data", (chunk) => {
   try {
+    // Framework Process can prime redirected stdin with the UTF-8 preamble
+    // before the host owns its writer. Allow exactly one stream-start BOM;
+    // later/repeated prefixes still fail ordinary JSON parsing and all bounds.
+    if(initialControlChunk&&chunk.length){initialControlChunk=false;if(chunk.charCodeAt(0)===0xfeff)chunk=chunk.slice(1);}
     inputText += chunk;
     const frameBound=options.geometry?liveGeometryLimits.bytes:16384;
     if (inputText.length > (options.geometry?liveGeometryLimits.bytes*2:65536)) throw Error("Control buffer bound");
