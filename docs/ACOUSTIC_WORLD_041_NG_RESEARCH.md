@@ -2,11 +2,11 @@
 
 My approved ACOUSTIC-WORLD-04 header attempt reported `0x0FEFFFFF`. The pinned public source identifies that value as **`RpfEncryption.NG`**. I now classify the declaration as recognized NG. My existing plain-table inventory cannot process it, and genuine NG decryption on my installation remains unqualified. The consumed candidate03 and its original reports remain historical evidence.
 
-The missing private decryption data is the information needed to turn the protected directory bytes into names and offsets. Public algorithm code supplies the procedure, not an authorized private input. I have not identified or supplied that input. Codex will not search for it or extract it from my game to continue this work.
+The missing private decryption data is the information needed to turn the protected directory bytes into names and offsets. Public algorithm code supplies the procedure, not an authorized private input. I have not identified or supplied that input. The operator will not search for it or extract it from my game to continue this work.
 
 ## Pinned primary-source findings
 
-Codex inspected named public text functions at CodeWalker commit `485d56bec00262ed7fa472261cce7bbc6202b96e`; no game executable, installed archive, key file or embedded key-data blob was accessed in this increment.
+The analysis inspected named public text functions at CodeWalker commit `485d56bec00262ed7fa472261cce7bbc6202b96e`; no game executable, installed archive, key file or embedded key-data blob was accessed in this increment.
 
 | Primary source | Relevant functions and finding |
 | --- | --- |
@@ -23,7 +23,7 @@ The inspected NG round functions have no Gen9 branch. The loader's executable ch
 
 For a directly supplied archive-specific decryption capability, the required shapes are one 272-byte expanded key, 278,528 bytes of decryption tables and a 256-byte hash lookup table: **279,056 bytes** total. A full set of 101 expanded keys raises that total to **306,256 bytes**. These sizes describe dependencies, not known key values. The new synthetic profile API accepts either shape and verifies a selected key's index. It does not qualify real key material.
 
-A future direct capability avoids invoking the broad key loader. AES key acquisition, executable scanning, embedded-data downloads, default `Keys` directory searches, AWC keys and encryption-table generation are outside this metadata proposal. No key values, encoded key strings or real table bytes belong in GitHub, logs, exception text or public reports. Exact private capability provenance and permitted use must be established before Codex can read it.
+A future direct capability avoids invoking the broad key loader. AES key acquisition, executable scanning, embedded-data downloads, default `Keys` directory searches, AWC keys and encryption-table generation are outside this metadata proposal. No key values, encoded key strings or real table bytes belong in GitHub, logs, exception text or public reports. Exact private capability provenance and permitted use must be established before the operator can read it.
 
 The separately implemented offline tests use wholly original synthetic lookup/table/key material. They can check unsigned arithmetic, round ordering, selected-key binding, bounded metadata and failure behavior. They cannot demonstrate the correctness or availability of a genuine installed-world key capability.
 

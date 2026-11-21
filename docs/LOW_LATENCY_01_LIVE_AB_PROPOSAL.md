@@ -6,7 +6,7 @@ I want one comparison experiment comprising **two separately sealed, independent
 
 Both arms must use `continuityPolicy='camera-source-01'`, the same reviewed source commit, Bati source banks, DSP, gains, source phase/Doppler, quality, endpoint selection and recording policy. Arm A selects `latencyProfile='baseline'` (100 ms/eight credits). Arm B selects `low-latency-01` (75 ms/eight startup, then six qualified credits). A versus combined LL/AW would confound the comparison; AW continuity must be identical in both.
 
-Before seeking approval, Codex must prepare and independently review two exact deployment manifests and host/RPH/native/source binding sets, a fresh proposal hash and bounded supervision/rollback helpers. The private offline evidence identifies the source and fixture hosts that motivated the comparison, but these new deployment and operational pins **do not yet exist**. No operational directory, authorization receipt or endpoint probe should be created as a side effect of this proposal.
+Before seeking approval, the operator must prepare and independently review two exact deployment manifests and host/RPH/native/source binding sets, a fresh proposal hash and bounded supervision/rollback helpers. The private offline evidence identifies the source and fixture hosts that motivated the comparison, but these new deployment and operational pins **do not yet exist**. No operational directory, authorization receipt or endpoint probe should be created as a side effect of this proposal.
 
 The implemented source motivating this proposal is `be5ed5c484dcd5ad54c7dba9f14415952d0735df`. Its final **device-free fixture** references are:
 

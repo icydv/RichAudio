@@ -6,7 +6,7 @@ The source-state experiment improves control response in that narrow stationary 
 
 ## Defaults and the original failure
 
-Codex replayed the unchanged original engine from the previous worktree beside the new implementation on the same retained source bits and constructed delivery schedule. Default 100 ms PCM is identical (`be5d36be1d842ef47be8ea3b5d48496ac125b687518b550d07156654b5516e92`). Reviewed 75 ms with `camera-source-01` is also identical (`f0fc0b292d4becc25a7250b85ee90db21d499af332fbd3ef2dbd69f0b337da08`). The named profile registry, startup/steady credits, source calibration and WASAPI route are unchanged.
+The analysis replayed the unchanged original engine from the previous worktree beside the new implementation on the same retained source bits and constructed delivery schedule. Default 100 ms PCM is identical (`be5d36be1d842ef47be8ea3b5d48496ac125b687518b550d07156654b5516e92`). Reviewed 75 ms with `camera-source-01` is also identical (`f0fc0b292d4becc25a7250b85ee90db21d499af332fbd3ef2dbd69f0b337da08`). The named profile registry, startup/steady credits, source calibration and WASAPI route are unchanged.
 
 The legacy private 50 ms override still fails at producer frame **612,352 / 12.757333 s**, with both continuity policies. Prediction is followed by interpolation within listener generation 2; the resulting listener step is approximately 113.7035 model units/s against the existing 100-unit/s guard. The adjacent original observations are approximately 65.8 native units/s. This is a reconstruction recovery failure, not proof that the actual camera or Bati moved at that rejected speed. The original [50 ms investigation](LOW_LATENCY_01_50MS_EXPLORATION.md) remains preserved.
 

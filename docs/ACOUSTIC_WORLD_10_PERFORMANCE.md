@@ -1,6 +1,6 @@
 # ACOUSTIC-WORLD-10 processing evidence
 
-My audio-block deadline remains **512 / 48,000 = 10.6667 ms**. Codex implemented immutable source-data preparation before gameplay readiness, separate authored JIT work, and initialization of empty reader fields. None of those operations advances a genuine source, supplies invented observation history, changes an actual source's first eligible block, or adds a PCM queue. The source and renderer still begin on the existing eligibility and ownership path.
+My audio-block deadline remains **512 / 48,000 = 10.6667 ms**. This change introduced immutable source-data preparation before gameplay readiness, separate authored JIT work, and initialization of empty reader fields. None of those operations advances a genuine source, supplies invented observation history, changes an actual source's first eligible block, or adds a PCM queue. The source and renderer still begin on the existing eligibility and ownership path.
 
 The final measurement is **fully pinned 07**: **96 independent children and 15,360 blocks**, split between 48 parent-baseline children and 48 prepared-plus-JIT children. The baseline retains **105 misses in 7,680 blocks**; the prepared path retains **zero misses in 7,680 blocks**. All **48** matching-arm comparisons preserve every dry/stereo PCM block, source creation/retirement/reacquisition and renderer history with identical frozen input-helper bindings. All **192** contention workers stopped and joined. The [final pinned comparison](../evidence/acoustic-world-10-processing-pinned07.json) retains every trial, failure finding and source/input binding.
 
@@ -30,7 +30,7 @@ An independent review found a limitation in the earlier 04/05 reports: their run
 
 ## What the retained hosted evidence establishes
 
-The exact WORLD09 hosted report from the approved original-only profiler archive contains **34 overruns in 2,304 blocks**, with per-child maxima **36.4524–42.8739 ms**. Its raw JSON SHA-256 is `cfc43d88e4eba19f967076b998e5bde8f276af26197f6b7d412b49ea4c2bfb1a`. Codex read that report through the exact permitted archive; no installed resource, private bank, game/tool executable or key was inspected.
+The exact WORLD09 hosted report from the approved original-only profiler archive contains **34 overruns in 2,304 blocks**, with per-child maxima **36.4524–42.8739 ms**. Its raw JSON SHA-256 is `cfc43d88e4eba19f967076b998e5bde8f276af26197f6b7d412b49ea4c2bfb1a`. The analysis read that report through the exact permitted archive; no installed resource, private bank, game/tool executable or key was inspected.
 
 In its eight instrumented first-source blocks, construction cost **19.9680–24.0432 ms**, and first synthesis cost **9.3656–10.3744 ms**. Construction therefore exceeds my complete deadline by itself in that workload. It does not explain the other early misses: block 11 retains **7.4755–9.1285 ms** of source synthesis, while block 13/14 retains PCM-renderer costs up to **6.7698 ms**, alongside separately nested control/filter/renderer-accept work. Those measured intervals identify specific costs; they do not identify JIT, garbage collection or OS scheduling as their complete cause. The earlier independent 42.9559 ms maximum remains a separate historical result.
 
