@@ -1,5 +1,7 @@
 # GTA audio research
 
+**P2-03 actual decoding:** [twelve stock PCM streams and private listening evidence](docs/P2_03_STOCK_AUDIO_RECONSTRUCTION.md) now validate usable waveform data for the Bati-traced family. Raw PCM and WAV payloads match exactly; archive hashes are unchanged. The initial grain demo failed listening. A limited 19-second continuous-recording reference was received positively, with deceleration phasing unresolved. Neither is a verified native granular model. This supersedes earlier waveform-not-exported status, while native suppression/ownership remains unresolved.
+
 **25 October P2-02 update:** [stock source access and native ownership](docs/P2_02_AUDIO_OWNERSHIP.md). The reviewed CodeWalker source identifies codec 0 as PCM and provides raw/PCM/WAV paths, but the sampled stock data has not been exported or playback-validated. Granular reconstruction, per-instance engine/exhaust suppression, unrelated-sound preservation and fail-open recovery remain unverified. Public siren controls are a separate category-specific lead, not proof of engine ownership. No new game/audio experiment was performed.
 
 Investigation: 24 October 2026. See [SOURCES.md](SOURCES.md) for evidence identifiers. All findings concern the installed files unless an upstream source is explicitly named. Parser labels reflect CodeWalker dev46 reverse engineering, not a Rockstar audio specification.

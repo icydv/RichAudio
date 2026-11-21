@@ -63,7 +63,7 @@ The listing requires SHVDNE v1.1.0.6 or newer and a compatible Script Hook V, wi
 
 ## NFSgauge 2.63.2
 
-No matching NFSgauge archive/source was found in the checked local Downloads or Codex attachment filenames. The [author's mod page](https://www.gta5-mods.com/scripts/nfsgauge-rpm-gear-speedometer) identifies **XMOD**, version 2.63.2 (30 December 2017), a Script Hook V ASI, and credits IKT/LeFix for gear-reading/programming contributions. Its older changelog discusses version calibration, idle calibration and needle corrections. The newer page-update timestamp is not evidence of a rebuilt Enhanced release. The author's pinned testing statement names Legacy 1868.1.
+No matching NFSgauge archive/source was found in the checked local Downloads or supplied attachment filenames. The [author's mod page](https://www.gta5-mods.com/scripts/nfsgauge-rpm-gear-speedometer) identifies **XMOD**, version 2.63.2 (30 December 2017), a Script Hook V ASI, and credits IKT/LeFix for gear-reading/programming contributions. Its older changelog discusses version calibration, idle calibration and needle corrections. The newer page-update timestamp is not evidence of a rebuilt Enhanced release. The author's pinned testing statement names Legacy 1868.1.
 
 No lawful public source for this version was established. Its exact RPM acquisition, offsets, filtering and displayed scale remain **UNRESOLVED**. Credits do not prove it uses a particular IKT RPM function. A generic claim of an RPM gauge or historical auto-calibration does not prove Enhanced 1158.16 support. No ASI was executed, disassembled or reproduced. The author restricts reupload; nothing from this package is included. This is a historical pointer, not a dependency candidate.
 
