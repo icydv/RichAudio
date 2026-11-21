@@ -10,11 +10,35 @@ internal static class TestUnknownName {
         internal readonly List<string> Lines=new List<string>();long seq;
         public bool Healthy{get{return true;}}public long Write(string s){Lines.Add(s);if(OnWrite!=null)OnWrite(s);return ++seq;}public bool Durable(long s){return s<=seq;}
     }
+    // This adapter records requested controls. It never changes a speed or simulates brake physics.
+    sealed class RiderInput : IIdleNativeCalls {
+        readonly SetupGame11 game;
+        internal long LastBrake, FirstBrake, ThrottleClamp;
+        internal RiderInput(SetupGame11 game){this.game=game;}
+        static ulong Bits(GTA.Native.InputArgument a){return (ulong)typeof(GTA.Native.InputArgument)
+            .GetField("_data",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(a);}
+        public int GameTime{get{return game.GameTime;}}
+        public int FrameCount{get{return game.FrameCount;}}
+        public bool Paused{get{return game.Paused;}}
+        public void RegisterDecorator(string n,IIdleDecoratorLock g,Action<string> log){game.RegisterDecorator(n,g,log);}
+        public void Call(GTA.Native.Hash h,params GTA.Native.InputArgument[] a){
+            if(h==GTA.Native.Hash.DISABLE_CONTROL_ACTION && Bits(a[1])==71)ThrottleClamp=game.Now;
+            game.Call(h,a);
+        }
+        public T Call<T>(GTA.Native.Hash h,params GTA.Native.InputArgument[] a){
+            if(h!=GTA.Native.Hash.SET_CONTROL_VALUE_NEXT_FRAME)return game.Call<T>(h,a);
+            if(game.Current!=100 || game.Entities[100].Driver!=2 || ThrottleClamp!=game.Now)
+                throw new Exception("Unexpected brake target or unclamped throttle");
+            if(a.Length!=3 || Bits(a[0])!=0 || Bits(a[1])!=76 || (uint)Bits(a[2])!=0x3f800000)
+                throw new Exception("Expected next-frame full handbrake");
+            LastBrake=game.Now;if(FirstBrake==0)FirstBrake=LastBrake;return (T)(object)true;
+        }
+    }
     sealed class Fixture {
         internal readonly SetupGame11 Game=new SetupGame11();internal readonly Journal Log=new Journal();
         internal readonly IdleNativeApi Api;internal readonly AutomaticRun Run;internal CaptureLease Capture;int token=10;
-        internal bool FailLookup;
-        internal Fixture(){current=this;fixtures.Add(this);Api=new IdleNativeApi(null,s=>Log.Write(s),Game,()=>Game.Now,1000,handle=>{
+        internal bool FailLookup;internal readonly RiderInput Input;
+        internal Fixture(){current=this;fixtures.Add(this);Input=new RiderInput(Game);Api=new IdleNativeApi(null,s=>Log.Write(s),Input,()=>Game.Now,1000,handle=>{
                 if(FailLookup) throw new InvalidOperationException("authored failed vehicle lookup");
                 return name=>Game.Call(GTA.Native.Hash.FORCE_USE_AUDIO_GAME_OBJECT,handle,name);
             });Run=new AutomaticRun(Api,Log,()=>Game.Now,1000,()=>++token,"authored11");Step();Step();}
@@ -73,6 +97,25 @@ internal static class TestUnknownName {
                 if(condition=="changed token")b.Token++;
                 f.Step();Check(f.Run.State.Stage!="Stability"&&f.Game.Profiles.Count==0,condition+" never enters waiting");
             }
+        });
+        Test("recorded settle-run speeds still stop a braked A",()=>{
+            var f=new Fixture();f.Begin();f.Stage("Stability");long start=f.Game.Now;
+            Check(f.Input.FirstBrake>0 && f.Input.FirstBrake<start,"brake requested before recorded disturbance");
+            for(int i=0;i<25;i++)f.Step();
+            f.Game.Entities[100].Speed=.217305109f;f.Step(.053);
+            Check(f.Run.State.Stage=="Stability" && f.Input.LastBrake==f.Game.Now,"recorded first sample restarts clock while braked");
+            f.Game.Entities[100].Speed=.3516701f;f.Step(.016);
+            Check(f.Has("unsafe-motion") && f.Game.Profiles.Count==0,"recorded second sample still stops progression");
+            long last=f.Input.LastBrake;f.Game.Entities[100].Speed=0;f.Finish();
+            Check(last==f.Input.LastBrake && last<f.Game.Now,"no brake renewals during early retirement");f.SafeRetired();
+        });
+        Test("authored stationary response maintains brake across four seated listening phases",()=>{
+            var f=new Fixture();f.Begin();f.At("B-pre");Check(f.Input.LastBrake<f.Game.Now,"brake expired off bike");f.Review();
+            foreach(string phase in new[]{"baseline","0","1","2"}){
+                f.At(phase);Check(f.Input.LastBrake==f.Game.Now,"brake through idle and horn "+phase);f.Review();
+            }
+            f.At("B-post");long last=f.Input.LastBrake;f.Review();f.Finish();
+            Check(f.Input.LastBrake==last && last<f.Game.Now,"no brake during control comparison or retirement");f.SafeRetired();
         });
         Test("only the self assignment, unknown name and same-A release dispatch",()=>{
             var f=new Fixture();f.Begin();f.Finish(true);

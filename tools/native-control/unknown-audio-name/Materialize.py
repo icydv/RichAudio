@@ -8,14 +8,14 @@ from tempfile import TemporaryDirectory
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 BASE = "af167ed004d9ab1568a06613f8e5f9bb8ffbec08"
-PRIVATE = REPO / ".local" / "unknown-name-settle"
+PRIVATE = REPO / ".local" / "unknown-name-brake"
 
 
 # Change only the experiment identity in the isolated copies of historical tools.
 def trial_labels(source):
-    for old, new in (("candidate-11", "unknown-name-settle"), ("execution-11", "unknown-name-settle-run"),
+    for old, new in (("candidate-11", "unknown-name-brake"), ("execution-11", "unknown-name-brake-run"),
                      ("NativeSuppression11", "UnknownAudioName"), ("Live11", "UnknownName"),
-                     ("Candidate11", "UnknownName"), ("candidate11", "unknown-name-settle"),
+                     ("Candidate11", "UnknownName"), ("candidate11", "unknown-name-brake"),
                      ("Execution11", "UnknownName"), ("Automatic11", "UnknownName"),
                      ("Preflight11", "Preflight"), ("Restoration11", "Restoration"),
                      ("Recorder11", "Recorder"), ("Operator11", "Operator")):

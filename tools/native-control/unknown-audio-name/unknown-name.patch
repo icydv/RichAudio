@@ -117,9 +117,31 @@
 +            setAudio(profile);
              log("native-dispatch-returned role=A handle=" + item.Handle + " token=" + item.Token + " requested=" + profile + "; audible outcome unmeasured");
          }
-@@ -242,4 +250,27 @@
-                 Gameplay=native.Call<bool>(Hash.IS_GAMEPLAY_CAM_RENDERING)&&(p-f).Length()<.03f&&(r-fr).Length()<.1f};
+@@ -230,7 +238,19 @@
+             log("normal-gameplay-follow-view-requested seated="+seated+" mode=1 heading=0 pitch=-8; no scripted-camera/listener override");
          }
+-        public void HoldInputs() {
++        bool renewingRiderBrake;
++        public void HoldInputs(Lifetime rider) {
+             PlayerIdentity();
+             foreach(int control in new[]{0,1,2,26,59,60,63,64,68,69,70,71,72,75,79,80,86})native.Call(Hash.DISABLE_CONTROL_ACTION,0,control,true);
++            bool onA=rider!=null && rider.Role=="A" && Matches(rider) &&
++                native.Call<bool>(Hash.IS_PED_IN_ANY_VEHICLE,savedPed,false) &&
++                native.Call<int>(Hash.GET_VEHICLE_PED_IS_IN,savedPed,false)==rider.Handle &&
++                native.Call<int>(Hash.GET_PED_IN_VEHICLE_SEAT,rider.Handle,-1,false)==savedPed;
++            if(onA) {
++                // Brake/reverse (72) is clamped. The separate handbrake input remains enabled.
++                if(!native.Call<bool>(Hash.SET_CONTROL_VALUE_NEXT_FRAME,0,(int)Control.VehicleHandbrake,1f))
++                    throw new InvalidOperationException("occupied-A handbrake input refused");
++                if(!renewingRiderBrake)log("rider-handbrake first next-frame request accepted role=A handle="+rider.Handle+" token="+rider.Token);
++            }
++            renewingRiderBrake=onA;
+             native.Call(Hash.SET_THIRD_PERSON_CAM_RELATIVE_HEADING_LIMITS_THIS_UPDATE,0f,0f);
+             native.Call(Hash.SET_THIRD_PERSON_CAM_RELATIVE_PITCH_LIMITS_THIS_UPDATE,-8f,-8f);
+@@ -241,4 +261,27 @@
+             return new Pose {X=p.X,Y=p.Y,Z=p.Z,RX=r.X,RY=r.Y,RZ=r.Z,PlayerX=ped.X,PlayerY=ped.Y,PlayerZ=ped.Z,
+                 Gameplay=native.Call<bool>(Hash.IS_GAMEPLAY_CAM_RENDERING)&&(p-f).Length()<.03f&&(r-fr).Length()<.1f};
++        }
 +        public bool StationarySample(Lifetime target,Lifetime control,string phase) {
 +            SetupObservation s=Observe(target,control);
 +            if(target==null||control==null||target.Role!="A"||control.Role!="B"||
@@ -142,10 +164,9 @@
 +                }
 +            }
 +            return still;
-+        }
+         }
          public bool PairState(Lifetime target,Lifetime control,bool seated,bool aEngine) {
-             SetupObservation s=Observe(target,control);string why=null;
-@@ -254,5 +285,5 @@
+@@ -254,5 +297,5 @@
          public void HornA(Lifetime target) {
              SetupObservation s=Observe(target,null);string why=VehicleProblem(s.A,false,true);
 -            if(++horns>7||!s.PlayerValid||!s.Story||!s.Coherent||why!=null||!s.InVehicle||s.CurrentVehicle!=target.Handle||s.A.Driver!=savedPed||!s.A.Engine)throw new InvalidOperationException("physical-horn-refused count="+horns+" reason="+(why??"player/engine/context")+" "+s);
@@ -154,7 +175,12 @@
              // Same vehicle-bound native and arguments as retained SDK Vehicle.SoundHorn.
 --- a/AutomaticRun.cs
 +++ b/AutomaticRun.cs
-@@ -27,4 +27,5 @@
+@@ -23,8 +23,9 @@
+     {
+         RuntimeProgress ReadProgress();
+-        void SaveView(); void RestoreView(); void HoldInputs();
++        void SaveView(); void RestoreView(); void HoldInputs(Lifetime rider);
+         SetupResult ObserveSetup(SetupStep step,Lifetime a,Lifetime b);
          void RequestSetup(SetupStep step,Lifetime a,Lifetime b,Func<bool> stillAdmitted);
          void SetView(bool seated); Pose ReadPose();
 +        bool StationarySample(Lifetime a,Lifetime b,string phase);
@@ -177,7 +203,19 @@
 +            return phase=="1" && decision=="Observed";
          }
          bool CaptureOK(CaptureLease c,bool focus) { return RuntimeReady&&c!=null&&c.Recording==recording&&c.Ready(clock(),frequency,focus); }
-@@ -210,9 +210,17 @@
+@@ -199,5 +199,10 @@
+                 if(!core.Stopped)core.Tick();
+                 if(core.Stopped&&!terminal) { terminal=true;NewObservation("release");Enter(core.RestoreReturned?"ReleaseObserve":!core.Changed?"Retire":"ReleasePending"); }
+-                if(saved&&!terminal)api.HoldInputs();
++                // Final and emergency BATI observations use the same rider controls as stock.
++                bool observingReturn=terminal && (phase=="2"||phase=="release") &&
++                    (stage=="ReleaseObserve"||stage=="Idle"||stage=="Horn"||stage=="Review"||
++                     stage=="ReviewDurable"||stage=="Resume");
++                if(saved && (!terminal||observingReturn))
++                    api.HoldInputs(stage=="LeaveBPre"||phase=="B-post"?null:core.A);
+                 if(stage=="Spawn") { if(!core.Active)return;Enter("PairSettle");return; }
+                 if(stage=="PairSettle") {if(Progress(SetupStep.PairSettled,8,capture,2))Enter("Seat");return;}
+@@ -210,9 +215,17 @@
                  if(stage=="StabilitySettle") {
                      if(!Settled(true,true,null,CaptureOK(capture,true)))return;
 -                    core.Snapshot();windowStart=clock();Window("B-stability",0,10);Enter("Stability");return;
@@ -198,28 +236,28 @@
 +                    Window("B-stability",0,10);
                      core.Snapshot();Enter("LeaveBPre");return;
                  }
-@@ -238,5 +246,5 @@
+@@ -238,5 +251,5 @@
                      bool seated=phase!="B-pre"&&phase!="B-post";
                      if(!api.PairState(core.A,core.B,seated,seated)&&!terminal)Stop("operating state lost awaiting feedback",capture);
 -                    if(terminal&&ActiveSeconds>=ReviewReleaseBy) { uncertain=true;if(phase=="release"||phase=="4")FinishRelease();else Enter("Retire"); }
 +                    if(terminal&&ActiveSeconds>=ReviewReleaseBy) { uncertain=true;if(phase=="release"||phase=="2")FinishRelease();else Enter("Retire"); }
                      return;
                  }
-@@ -256,5 +264,5 @@
+@@ -256,5 +269,5 @@
                      if(phase=="release") { core.ConfirmObservation(SelectionEvidence.BatiReturned);FinishRelease();return; }
                      core.ConfirmObservation(core.ExpectedEvidence);
 -                    if(phase=="4") { FinishRelease();return; }
 +                    if(phase=="2") { FinishRelease();return; }
                      Enter("DispatchReady");return;
                  }
-@@ -283,5 +291,5 @@
+@@ -283,5 +296,5 @@
                      // No chat, IO, wait or second model response between these calls.
                      core.Arm();core.Apply();windowStart=core.ObservationTicks;pose=aPose;
 -                    if(phase=="4")terminal=true;
 +                    if(phase=="2")terminal=true;
                      Window("transition",0,10);Window("steady",5,10);Enter("Idle");return;
                  }
-@@ -296,6 +304,6 @@
+@@ -296,6 +309,6 @@
                      if(hornIssued&&api.HornActive(core.A))heardHorn=true;
                      if(Elapsed(hornStart)<10)return;
 -                    if(!heardHorn)throw new InvalidOperationException("vehicle horn-active witness absent");
@@ -241,7 +279,7 @@
 +++ b/Operator.py
 @@ -1,3 +1,3 @@
 -"""Finite local operator for the approved08 run. No keyboard phase controls."""
-+"""Finite local operator for the unknown-name-settle test. No keyboard phase controls."""
++"""Finite local operator for the unknown-name-brake test. No keyboard phase controls."""
  from pathlib import Path
  import argparse,ctypes,datetime,hashlib,json,os,re,subprocess,sys,time,uuid
 @@ -6,5 +6,5 @@
@@ -269,13 +307,13 @@
 @@ -2,5 +2,5 @@
  $ErrorActionPreference = 'Stop'
  $run = $PSScriptRoot
--if ($run -cne 'C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01\unknown-name-settle-run') { throw 'Run only the retained execution08 rollback copy' }
-+if ($run -cne 'C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01\unknown-name-settle-run') { throw 'Run only the retained unknown-name-settle rollback copy' }
+-if ($run -cne 'C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01\unknown-name-brake-run') { throw 'Run only the retained execution08 rollback copy' }
++if ($run -cne 'C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\native-suppression-01\unknown-name-brake-run') { throw 'Run only the retained unknown-name-brake rollback copy' }
  $ledgerPath = Join-Path $run 'transaction.json'
  $t = Get-Content -LiteralPath $ledgerPath -Raw | ConvertFrom-Json
 @@ -28,7 +28,7 @@
- if ($t.schema -cne 'NativeSuppression01Execution' -or $t.candidate -cne 'unknown-name-settle' -or $t.status -cne 'installed-verified') { throw 'Full-install restore requires installed-verified; complete authorized partial rollback from the ledger instead' }
- if ($s.candidateName -cne 'unknown-name-settle' -or $s.sourceCommit -cne $t.sourceCommit -or (HashFile (Join-Path $run 'scope.json')) -cne $t.scopeSha256 -or (HashFile $PSCommandPath) -cne $s.installation.rollbackScript.sha256 -or (HashFile (Join-Path $run 'approval.json')) -cne $t.authorizationSha256) { throw 'Execution scope, authorization, or rollback identity differs' }
+ if ($t.schema -cne 'NativeSuppression01Execution' -or $t.candidate -cne 'unknown-name-brake' -or $t.status -cne 'installed-verified') { throw 'Full-install restore requires installed-verified; complete authorized partial rollback from the ledger instead' }
+ if ($s.candidateName -cne 'unknown-name-brake' -or $s.sourceCommit -cne $t.sourceCommit -or (HashFile (Join-Path $run 'scope.json')) -cne $t.scopeSha256 -or (HashFile $PSCommandPath) -cne $s.installation.rollbackScript.sha256 -or (HashFile (Join-Path $run 'approval.json')) -cne $t.authorizationSha256) { throw 'Execution scope, authorization, or rollback identity differs' }
 -$expectedGame = @('ScriptHookVDotNet.asi','ScriptHookVDotNet2.dll','ScriptHookVDotNet3.dll','MinHook.x64.dll','ScriptHookVDotNet.ini','scripts\RichAudio.UnknownAudioName.dll','scripts\RichAudio.UnknownAudioName.ini','mods\update\x64\dlcpacks\ra_ns01_8b7e24c1\dlc.rpf','mods\update\update.rpf') | ForEach-Object { Join-Path $game $_ }
 +$expectedGame = @('ScriptHookVDotNet.asi','ScriptHookVDotNet2.dll','ScriptHookVDotNet3.dll','MinHook.x64.dll','ScriptHookVDotNet.ini','scripts\RichAudio.UnknownAudioName.dll','scripts\RichAudio.UnknownAudioName.ini') | ForEach-Object { Join-Path $game $_ }
  $expectedObs = @((Join-Path $obs 'basic\profiles\NativeSuppression01UnknownName\basic.ini'),(Join-Path $obs 'basic\scenes\NativeSuppression01UnknownName.json'))

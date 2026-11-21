@@ -26,6 +26,31 @@ The fresh runner allows 30 seconds from entry into Stability to acquire ten cons
 
 Run the fresh preflight from C:/Users/Libby/Documents/RichAudio-NativeSuppressionFixes. Create and verify the private parent directory, pass the absolute worktree path .local/unknown-live-settle/preflight.json (resolved against that worktree) and read the passing receipt back from the same absolute path before installation. Preserve previous execution and approval records.
 
+## Rider control and the two observed excursions
+
+Times below are seconds relative to the first captured speed above 0.15 m/s, from each journal's monotonic clock. The two early runs were real. Everything after their stop in a fixture is authored.
+
+| Operation or observation | unknown-name-run | unknown-name-settle-run |
+| --- | ---: | ---: |
+| A / B ground placement returned | -5.487 / -5.487 | -5.460 / -5.460 |
+| Seat A returned | -3.381 | -3.385 |
+| Start A / B engine returned | -3.366 / -3.345 | -3.370 / -3.345 |
+| Initial camera request returned | -3.328 | -3.332 |
+| Enter Stability | -1.309 | -1.303 |
+| A speed at zero time (m/s), B at zero | 0.217606142 | 0.217305109 |
+| Stop | +0.0004 | +0.0160 at 0.3516701 m/s |
+| First vehicle cleanup command, exit A | +0.141 | +0.147 |
+
+The old operator clamps inputs every live callback before the stop, including accelerator 71, brake/reverse 72 and steering. Disabling input does not apply brake pressure. It never requests ordinary braking or the independent handbrake (76). There is no scheduled control release at Stability or at the first bad sample. A is placed once, seated via SET_PED_INTO_VEHICLE in the driver seat and started via SET_VEHICLE_ENGINE_ON(true,true,false). There is no driving or braking task. Readbacks showed the expected driver, both engines running, loaded contact and all wheels down. Seat and start are only about 15 ms apart, so their matching latency across runs cannot distinguish seating, rider balance, engine startup or terrain effects.
+
+The pinned Entity.Speed getter uses GET_ENTITY_SPEED and returns one value in m/s. It carries no direction, wheel rotation or brake pressure. Before the later stop A moved about +3 mm X, -3 mm Y and -4.4 mm Z from its preceding stationary position. Its heading changed from 108.019 to 107.995 degrees. The first run's initial displacement was also millimetric and downward. Immediately before the exit task, the net horizontal displacement in each run was about +0.017 m X and -0.044 m Y, predominantly across the bike's heading. That last sample is after the stop and cessation of clamps, but before the exit task. The intervening cleanup samples reached 0.358013958 and 0.4827009 m/s respectively. Neither is a clean continued acquisition. Later rider and camera movement includes exit and retirement.
+
+Codex decoded the original videos around the QPC-to-recording anchors. Contact sheet rows are the first run (PTS 24.867, 25.233, 25.267, 25.300, 25.400, 25.700 s), the settle run (25.267, 25.633, 25.667, 25.733, 25.800, 26.133 s), and Candidate-04 (119.900 through 138.900 s). A is occupied on an unpaved surface before both stops. The later frames show the rider dismounting. The 30 fps rear view and changing camera do not resolve wheel slip, the small vertical movement or the 16 ms gap between the two later speed readings. A localized settling or balance movement is consistent with the direction and timing; forward rolling, a particular rider animation and brake causation are unproved.
+
+Candidate-04 spawned relative to my on-foot position on the paved lot. I mounted manually. Its probe did not ground-place the pair, warp me into the seat or clamp my driving controls. A was already running and sampled at zero at 02:39:27; B's separately requested start returned at 02:40:12. Both then read zero at the stability snapshots 19.138 s apart. The video supports a stationary comparison there. No brake-input history or continuous two-bike speed trace exists for 04.
+
+The correction keeps accelerator and brake/reverse clamped. It supplies the enabled vehicle handbrake input at full scale for the next frame only while the same live player actually drives exact owned A. This avoids requesting reverse torque at standstill. It starts with confirmed occupancy before the comparison, covers stock, self, unknown and same-A BATI return, and expires when renewals stop. A false native input return fails the phase. Input acceptance does not establish brake force, physics or audibility. All prior motion, geometry, time, capture and release gates apply.
+
 ## Listening sequence
 
 | Window | What to listen to |
