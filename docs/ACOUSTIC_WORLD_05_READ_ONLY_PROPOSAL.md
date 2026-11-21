@@ -1,12 +1,12 @@
 # ACOUSTIC-WORLD-05: my next read-only input and export boundary
 
-**No installed-resource or export access is authorized or performed.** I supplied one exact external CodeWalker Explorer executable path privately. Codex completed the separately reviewed [T0 tool metadata scope](ACOUSTIC_WORLD_05_TOOL_METADATA_PROPOSAL.md) once under my existing offline tool-research instruction; that identity is consumed. The bounded PE/header/RT_VERSION result declares `CodeWalker RPF Explorer` and version `1.0.0.0`, without authenticating dev46, dependencies or Enhanced compatibility. It did not launch CodeWalker or consume/reuse any previous archive approval.
+**No installed-resource or export access is authorized or performed.** I supplied one exact external CodeWalker Explorer executable path privately. The operator completed the separately reviewed [T0 tool metadata scope](ACOUSTIC_WORLD_05_TOOL_METADATA_PROPOSAL.md) once under my existing offline tool-research instruction; that identity is consumed. The bounded PE/header/RT_VERSION result declares `CodeWalker RPF Explorer` and version `1.0.0.0`, without authenticating dev46, dependencies or Enhanced compatibility. It did not launch CodeWalker or consume/reuse any previous archive approval.
 
-My building, archive/member paths, authenticated exporter build/dependency closure, existing exports and private export destination remain unidentified. There is no sealed game-resource/export candidate. A template with missing bindings is not executable permission. Codex must not guess these identities, scan for a tool, reuse consumed capture approval or open old private evidence to fill the gaps. GTA resources, game executables, keys, tool launch and export still need my explicit approval.
+My building, archive/member paths, authenticated exporter build/dependency closure, existing exports and private export destination remain unidentified. There is no sealed game-resource/export candidate. A template with missing bindings is not executable permission. The operator must not guess these identities, scan for a tool, reuse consumed capture approval or open old private evidence to fill the gaps. GTA resources, game executables, keys, tool launch and export still need my explicit approval.
 
 ## Alternative M0: one supplied selection/provenance descriptor
 
-If I already have an export/selection record, a small alternative scope is one metadata descriptor I explicitly supply outside the installation. It can state what exports/tool/selection evidence already exist and what is unknown. It cannot discover a building absent that information. If I have no such record, Codex must report that acquisition remains blocked rather than presenting this as successful installed discovery.
+If I already have an export/selection record, a small alternative scope is one metadata descriptor I explicitly supply outside the installation. It can state what exports/tool/selection evidence already exist and what is unknown. It cannot discover a building absent that information. If I have no such record, the operator must report that acquisition remains blocked rather than presenting this as successful installed discovery.
 
 | Item | Proposed fixed bound |
 | --- | --- |
@@ -31,7 +31,7 @@ The [public-source research](ACOUSTIC_WORLD_05_EXPORT_RESEARCH.md) shows that no
 
 I have not approved that startup, executable/key access or recursive inventory. A future installed-discovery proposal must first bind a legitimate tool/runtime distribution and every permitted startup source and metadata operation. Those identities are currently unknown, so no GUI command or wildcard source allowlist is offered here. An isolated raw-buffer converter is useful only if independently supplied raw exports already exist; it cannot conjure those inputs or avoid an upstream acquisition approval.
 
-A new nonrecursive folder/header inventory would not, by itself, identify the selected entity, relevant archetype and collision owner. Codex will not spend another approval on that as though it established a building. If a specifically named directory/table question later becomes necessary, it needs its own minimal, independently reviewed metadata proposal and fresh approval. The earlier encrypted capture remains consumed and untouched.
+A new nonrecursive folder/header inventory would not, by itself, identify the selected entity, relevant archetype and collision owner. The operator will not spend another approval on that as though it established a building. If a specifically named directory/table question later becomes necessary, it needs its own minimal, independently reviewed metadata proposal and fresh approval. The earlier encrypted capture remains consumed and untouched.
 
 ## Later E1: exact one-building export, a separate scope
 

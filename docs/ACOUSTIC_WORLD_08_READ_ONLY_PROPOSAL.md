@@ -39,6 +39,6 @@ The final private candidate needs:
 
 ## Current status
 
-The runtime implementation and original native tests are available. **The real candidate is not sealed:** private capability availability/identities, current source identities/member ranges, real coordinate/ownership controls and private-profile containment qualification are missing. There is no safe executable invocation to approve yet, and Codex has not filled unknown hashes with invented values.
+The runtime implementation and original native tests are available. **The real candidate is not sealed:** private capability availability/identities, current source identities/member ranges, real coordinate/ownership controls and private-profile containment qualification are missing. There is no safe executable invocation to approve yet, and the operator has not filled unknown hashes with invented values.
 
 I can next authorize a concrete, separately reviewed private identity/provisioning scope once its exact inputs are known, then the bounded real metadata-plus-collision batch. No GTA/RPH launch, endpoint playback, recording, native suppression, deployment, archive modification or merge belongs to either scope. The final install/launch/prewarm experience remains my goal; this proposal does not claim it is already validated.
