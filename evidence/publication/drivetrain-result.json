@@ -404,7 +404,7 @@
     "full NPC streaming/range certification"
   ],
   "interruption": {
-    "cause": "Codex usage limit after recordings were disabled, not a game failure",
+    "cause": "An external execution quota paused the session after recording was disabled. The game did not fail.",
     "sameGameProcessAndStartVerified": true,
     "freshPluginStatusHealthy": true,
     "deployedPinsVerified": true,
