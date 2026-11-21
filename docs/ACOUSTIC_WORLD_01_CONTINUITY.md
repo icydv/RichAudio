@@ -1,10 +1,10 @@
 # AW-01: camera/source continuity, offline only
 
-I want camera changes to preserve a still-qualified Bati source, and I want loss of driver scope to remain distinct from observed engine shutdown. Codex implemented the opt-in `continuityPolicy: 'camera-source-01'` on the existing `StockGameplay` and listener playout. The default remains `baseline`; this work does not deploy or change my installed game, original recordings, source banks, DSP, gains or live approval.
+I want camera changes to preserve a still-qualified Bati source, and I want loss of driver scope to remain distinct from observed engine shutdown. This change introduced the opt-in `continuityPolicy: 'camera-source-01'` on the existing `StockGameplay` and listener playout. The default remains `baseline`; this work does not deploy or change my installed game, original recordings, source banks, DSP, gains or live approval.
 
 ## Recorded baseline and reproducible boundary
 
-Codex remeasured the original retained Float32 WAV: the two internal near-silent windows are exactly 4,301 and 4,835 frames, or 89.604 and 100.729 ms at 48 kHz. Both channels must remain at or below absolute `1e-6` for at least 20 ms. These samples and original frame/expiry bits remain unchanged.
+The operator remeasured the original retained Float32 WAV: the two internal near-silent windows are exactly 4,301 and 4,835 frames, or 89.604 and 100.729 ms at 48 kHz. Both channels must remain at or below absolute `1e-6` for at least 20 ms. These samples and original frame/expiry bits remain unchanged.
 
 The code explains an avoidable part of the interruption: each camera generation discarded listener presentation records and vehicle pose brackets, reanchored the observation clock, and waited for the 100 ms retrospective target to reach the new first pose. Dry source rendering paused during that wait even though vehicle identity remained qualified. Retained interpolation brackets independently recover clock-phase changes of approximately +12.1723 ms and -14.2208 ms at the two boundaries.
 
