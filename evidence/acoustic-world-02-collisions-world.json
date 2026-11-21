@@ -2403,12 +2403,12 @@
   "peerReview": {
     "collision": {
       "sha256": "fb313733cf15d13474657c31dc6b0385ad1b12af76725396fa8865f2ba535533",
-      "reviewer": "separate Codex component agent",
+      "reviewer": "automated component review",
       "passed": true
     },
     "runtimeResource": {
       "sha256": "2ca97682ca06512ca1bd86f06df73c40647b9b10b0add9c2a8c040b07b8cc26a",
-      "reviewer": "separate Codex endpoint agent",
+      "reviewer": "automated endpoint review",
       "passed": true,
       "independentFunctionalTestsPassed": 13,
       "actualOriginalRscBytesVerified": 3

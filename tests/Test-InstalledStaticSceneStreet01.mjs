@@ -1,0 +1,34 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {originalInstalledCache01} from './fixtures/InstalledStaticCache01.mjs';
+import {InstalledStaticWorld01,isInstalledStaticScene01,installedStaticSceneMetadata01,encodeInstalledStaticScene01,decodeInstalledStaticScene01} from '../src/acoustics/world/installed-static-scene01.mjs';
+import {pathGeometry} from '../src/acoustics/engine/paths.mjs';
+import {createTile,querySegment} from '../src/acoustics/research/local-geometry.mjs';
+import {acousticScene} from '../src/acoustics/engine/contracts.mjs';
+import {digest} from '../src/acoustics/world/contracts.mjs';
+const request={listener:[0,-3,1],sources:[[1,-3,1]],session:'1'.repeat(32),generation:1,geometryTimeMs:0,durationMs:1000,radius:4,maximumSurfaces:2048};
+test('existing installed-cache format produces finite clipped derived surfaces, explicit assumptions and feasible reflection candidates',()=>{
+ const f=originalInstalledCache01();try{const w=new InstalledStaticWorld01(f),scene=w.window(request),m=installedStaticSceneMetadata01(scene);assert.equal(scene.tile.surfaces.length,2);assert.equal(scene.tile.coverage,'partial');assert(scene.tile.surfaces.every(s=>s.provenance.kind==='derived'&&s.material.observedId===7));assert.equal(scene.observationModel.kind,'conditional-installed-static-model');assert.equal(scene.observationModel.calibration.physicalCalibration,'unverified');assert.equal(m.runtimeActivationVerified,false);assert.equal(m.installedWorldVerified,false);assert.equal(m.reflectionCandidates,1);const reflector=scene.tile.surfaces.find(s=>s.id===scene.observationModel.reflectionSurfaceIds[0]),p=pathGeometry(scene,request.sources[0],request.listener,[reflector]);assert.equal(p.status,'clear');assert(p.distance>1);assert(Math.abs(p.points[0][1])<1e-8);const n=w.window({...request,generation:2});assert.deepEqual(n.tile.surfaces.map(s=>s.id),scene.tile.surfaces.map(s=>s.id));assert.equal(w.status().resourceLoads,1);w.close();
+ }finally{f.close();}
+});
+test('transport binds the worker request and cannot promote synthetic, measured, runtime or complete authority',()=>{
+ const f=originalInstalledCache01();try{const w=new InstalledStaticWorld01(f),scene=w.window(request),packet=encodeInstalledStaticScene01(scene),expected={...request,catalogSHA256:f.catalogSHA256},copy=decodeInstalledStaticScene01(packet,expected);assert(isInstalledStaticScene01(copy));assert.equal(copy.geometryKey,scene.geometryKey);assert.equal(copy.tile.surfaces.length,2);assert.throws(()=>decodeInstalledStaticScene01(packet,{...expected,generation:2}),/matches request/);for(const mutate of [p=>p.tile.coverage='complete-synthetic',p=>p.model.runtimeActivationVerified=true,p=>p.model.calibration.metresPerNativeUnit=2,p=>p.tile.surfaces[0].provenance.kind='synthetic']){const altered=structuredClone(packet);mutate(altered);const {packetDigest,...body}=altered;altered.packetDigest=digest(body);assert.throws(()=>decodeInstalledStaticScene01(altered,expected));}
+ }finally{f.close();}
+});
+test('known unsupported geometry becomes bounded unknown volumes; missing and corrupted resources cannot become empty success',()=>{
+ const f=originalInstalledCache01({unsupported:true});try{const w=new InstalledStaticWorld01(f),scene=w.window(request);assert(scene.tile.missingRegions.length>0);assert.equal(installedStaticSceneMetadata01(scene).unsupportedPrimitiveRegions,1);assert(querySegment(scene.tile,[-4,-1,0],[-4,1,0]).unknown.length>0);fs.writeFileSync(f.result.index,'deliberately corrupt original index');const fresh=new InstalledStaticWorld01(f),failed=fresh.window(request),m=installedStaticSceneMetadata01(failed);assert.equal(m.genuineResourceVerified,false);assert.equal(m.successfulResources,0);assert.equal(m.failures.length,1);assert.equal(failed.tile.surfaces.length,0);assert(failed.tile.missingRegions.length>0);assert.equal(m.coverage,'partial');
+ }finally{f.close();}
+});
+test('surface omissions remain explicit and default fixture ceilings remain unchanged',()=>{
+ const f=originalInstalledCache01();try{const w=new InstalledStaticWorld01(f),scene=w.window({...request,maximumSurfaces:1}),m=installedStaticSceneMetadata01(scene);assert.equal(scene.tile.surfaces.length,1);assert.equal(m.omittedSurfaces,1);assert(scene.tile.missingRegions.length>0,'a planar omitted triangle must retain a thin conservative unknown volume');assert(querySegment(scene.tile,[-3,-1,3],[-3,1,3]).unknown.length>0);assert.throws(()=>w.window({...request,maximumSurfaces:4097}),/bounded/);assert.throws(()=>createTile({...scene.tile,surfaces:Array(129).fill(scene.tile.surfaces[0])}),/surface limit/);const open=acousticScene(createTile({...scene.tile,surfaces:[]}),{}, {...scene.config,observationModel:scene.observationModel});assert.equal(open.tile.surfaces.length,0);
+ }finally{f.close();}
+});
+test('omitted imported resources remain unknown and changed receipt bindings cannot hit the old resident resource',()=>{
+ const f=originalInstalledCache01();try{const w=new InstalledStaticWorld01(f);w.rows.push({...w.rows[0],row:{...w.rows[0].row,Id:'original-independent-neighbour'}});const limited=w.window({...request,maximumResources:1});assert.equal(installedStaticSceneMetadata01(limited).omittedResources,1);assert(limited.tile.missingRegions.length>0);assert.equal(installedStaticSceneMetadata01(w.window(request)).successfulResources,2);f.manifest.Resources[0].Result.ReceiptSHA256='f'.repeat(64);fs.writeFileSync(f.manifestPath,JSON.stringify(f.manifest));w.reload();const changed=w.window(request),m=installedStaticSceneMetadata01(changed);assert.equal(m.successfulResources,0);assert.equal(m.genuineResourceVerified,false);assert.equal(m.failures.length,1);assert(changed.tile.missingRegions.length>0);
+ }finally{f.close();}
+});
+test('adaptive local capacity reports its reduced active scope and preserves every gap within that scope',()=>{
+ const f=originalInstalledCache01({distantWall:true});try{const w=new InstalledStaticWorld01(f),fixed=w.window({...request,radius:32,maximumSurfaces:2,adaptiveRadius:false}),limited=installedStaticSceneMetadata01(fixed);assert.equal(limited.omittedSurfaces,2);assert(fixed.tile.missingRegions.length>0);const scene=w.window({...request,radius:32,maximumSurfaces:2}),m=installedStaticSceneMetadata01(scene);assert.equal(m.requestedRadius,32);assert.equal(m.activeRadius,8);assert.equal(m.worksetLimited,true);assert.equal(m.adaptiveAttempts,3);assert.equal(m.activeSurfaces,2);assert.equal(m.omittedSurfaces,0);assert.equal(m.installedWorldVerified,false);assert.equal(scene.observationModel.workset.outsideActiveWindow,'unknown-static-coverage');assert.equal(w.status().preparation.totalTiles,1,'global resource coverage cannot be narrowed by the local window');assert(m.preparationMilliseconds>=0);
+ }finally{f.close();}
+});

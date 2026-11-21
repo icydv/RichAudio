@@ -60,6 +60,31 @@ test('external atlas and supplied spectral features preserve exact source histor
  prepared.voices.engine.accel.intervals[0].start=17;prepared.voices.engine.accel.features[0].bandFractions.low=.001;
  const fresh=new StockVehicleSource(bank,{atlas,preparation10:plan});assert.equal(fresh.voices.engine.accel.intervals[0].start,0);assert.equal(fresh.voices.engine.accel.features[0].bandFractions.low,.3);
 });
+test('a prepared first registration preserves exact PCM, RNG and read counters',()=>{
+ const {bank}=intervalBank(32000,{features:true}),preparation10=prepareStockSource10(bank);
+ const control={operatingPoint:.5,load:.9,lift:false,running:true};
+ const scratch=new StockVehicleSource(bank,{preparation10});
+ const live=new StockVehicleSource(bank,{preparation10}),reference=new StockVehicleSource(bank);
+ const a=[new Float32Array(512),new Float32Array(512)],b=[new Float32Array(512),new Float32Array(512)];
+ scratch.prepareInitialMatches01();
+ scratch.renderInto(control,...a);
+ assert.equal(live.frame,0);
+ for(let block=0;block<6;block++){
+  live.renderInto(control,...a);
+  reference.renderInto(control,...b);
+  assert.deepEqual(a,b);
+ }
+ assert.equal(live.initialMatchReuses01(),2);
+ assert.deepEqual(live.stats,reference.stats);
+ for(const role of ['engine','exhaust'])for(const mode of ['idle','accel','decel']){
+  const actual=live.voices[role][mode],expected=reference.voices[role][mode];
+  assert.equal(actual.textureSeed,expected.textureSeed);
+  assert.deepEqual(actual.stats,expected.stats);
+ }
+ const other=new StockVehicleSource(bank,{preparation10});
+ other.renderInto({...control,load:.05,lift:true},...a);
+ assert.equal(other.initialMatchReuses01(),0);
+});
 test('counterfeit plans, changed PCM aliases and changed metadata cannot reuse stale preparation',()=>{
  for(const change of ['samples','interval','features','peak','rate','replacement','atlas','sustain-state','context','model']){
   const {bank,atlas}=intervalBank(24000,{atlas:true,features:true}),plan=prepareStockSource10(bank,{atlas}),asset=bank.layers.engine.idle;
@@ -148,6 +173,16 @@ test('installed registry prepares only exact requested verified banks before fra
   const prepared=registry.createSource(0xf9300cc5,'player');assert.equal(prepared.frame,0);assert.equal(reference.frame,0);
   const a=[new Float32Array(512),new Float32Array(512)],b=[new Float32Array(512),new Float32Array(512)],control={operatingPoint:.5,load:.9,running:true};
   for(let block=0;block<16;block++){reference.renderInto(control,...a);prepared.renderInto(control,...b);assert.deepEqual(b,a);}
+  const gameplay=new StockGameplay({registry,session:budgetSession042});
+  try{
+   assert.equal(gameplay.prepareStartupVoices01([{model:0xf9300cc5,context:'player'}]),1);
+   const ready=gameplay.startupVoices01.get(0xf9300cc5+':player'),untouched=registry.createSource(0xf9300cc5,'player');
+   assert.equal(gameplay.pipeline.renderer.frame,0);
+   assert.equal(ready.frame,0);
+   assert.equal(ready.stats.frames,0);
+   untouched.renderInto(control,...a);ready.renderInto(control,...b);
+   assert.deepEqual(b,a);
+  }finally{gameplay.close();}
   assert.throws(()=>registry.prepareSource10(0,'player'),/unavailable/);
  }finally{const resolved=path.resolve(folder);assert(resolved.startsWith(path.resolve(root)+path.sep));fs.rmSync(resolved,{recursive:true});}
 });

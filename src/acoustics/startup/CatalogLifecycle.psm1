@@ -31,15 +31,24 @@ function Write-CatalogAtomicJson {
           [Parameter(Mandatory=$true)][AllowNull()]$Value,
           [ValidateRange(1,268435456)][int]$MaximumBytes=67108864,
           [ValidateRange(1,32)][int]$Depth=18,
-          [scriptblock]$BeforePublish)
+          [scriptblock]$BeforePublish,
+          [string]$CancellationPath='')
     $destination=Assert-CatalogPrivatePath $PrivateRoot $Path
+    $cancel=if($CancellationPath){Assert-CatalogPrivatePath $PrivateRoot $CancellationPath}else{''}
+    $checkCancellation={if($cancel -and [IO.File]::Exists($cancel)){throw [OperationCanceledException]::new('Catalogue publication cancelled before atomic commit')}}
+    & $checkCancellation
     $json=ConvertTo-Json -InputObject $Value -Depth $Depth -Compress
     $bytes=[Text.UTF8Encoding]::new($false,$true).GetBytes($json)
     if($bytes.Length -gt $MaximumBytes){throw 'Catalogue JSON exceeds publication byte bound'}
+    & $checkCancellation
     $directory=[IO.Path]::GetDirectoryName($destination)
     [IO.Directory]::CreateDirectory($directory)|Out-Null
     [void](Assert-CatalogPrivatePath $PrivateRoot $destination)
-    $pending=Join-Path $directory ('.'+[IO.Path]::GetFileName($destination)+'.pending-'+[Guid]::NewGuid().ToString('N'))
+    # Do not append the destination basename here. A 64-hex catalogue key plus
+    # the pending suffix exceeded legacy .NET Framework's path limit even when
+    # its parent and final destination were valid. Keep the same-directory,
+    # create-new ownership and atomic move/replace sequence with a fixed name.
+    $pending=Join-Path $directory ('.pending-'+[Guid]::NewGuid().ToString('N'))
     [void](Assert-CatalogPrivatePath $PrivateRoot $pending)
     $stream=[IO.File]::Open($pending,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None)
     try{$stream.Write($bytes,0,$bytes.Length);$stream.Flush($true)}finally{$stream.Dispose()}
@@ -48,6 +57,7 @@ function Write-CatalogAtomicJson {
     if($BeforePublish){& $BeforePublish $pending}
     [void](Assert-CatalogPrivatePath $PrivateRoot $pending)
     [void](Assert-CatalogPrivatePath $PrivateRoot $destination)
+    & $checkCancellation
     if([IO.File]::Exists($destination)){
         [IO.File]::Replace($pending,$destination,[System.Management.Automation.Language.NullString]::Value)
     }else{
@@ -81,7 +91,10 @@ function Read-CatalogCacheJson {
         }catch{$invalid=$true}
     }
     if(!$invalid){return $value}
-    $quarantine=$source+'.invalid-'+[Guid]::NewGuid().ToString('N')+'.json'
+    # Quarantine has the same expanded-basename hazard as pending publication.
+    # A fresh bounded sibling name preserves the exact invalid bytes; no caller
+    # owns or removes a previous interrupted/quarantined file by name matching.
+    $quarantine=Join-Path ([IO.Path]::GetDirectoryName($source)) ('.invalid-'+[Guid]::NewGuid().ToString('N')+'.json')
     [void](Assert-CatalogPrivatePath $PrivateRoot $quarantine)
     [void](Assert-CatalogPrivatePath $PrivateRoot $source)
     [IO.File]::Move($source,$quarantine)

@@ -8,6 +8,7 @@ param(
     [ValidateRange(1,600)][int]$MaximumArchiveSeconds=180,
     [ValidateRange(1,512)][int]$MaximumArchives=256,
     [switch]$HashArchives,
+    [ValidatePattern('^[a-zA-Z0-9_]{0,64}$')][string]$VehicleModelFilter='',
     [string]$CatalogScriptPath='',
     [string]$RunId='',
     [switch]$Worker
@@ -30,7 +31,9 @@ $cancel=Join-Path $output 'cancel.request'
 $statusFile=Join-Path $output 'status.json'
 function Write-Json([string]$Path,$Value,[int]$Depth=14){
     if($Path -eq $statusFile -and $Value -is [Collections.IDictionary]){$Value['RunId']=$RunId}
-    [void](Write-CatalogAtomicJson -PrivateRoot $output -Path $Path -Value $Value -Depth $Depth)
+    $publication=@{PrivateRoot=$output;Path=$Path;Value=$Value;Depth=$Depth}
+    if($Path -ne $statusFile){$publication.CancellationPath=$cancel}
+    [void](Write-CatalogAtomicJson @publication)
 }
 if(!$Worker){
     $lease=[IO.File]::Open((Join-Path $output 'worker.lock'),[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)
@@ -45,6 +48,7 @@ if(!$Worker){
     # Same trusted ScriptBlock loading as Trace-StockVehicles; execution policy is unchanged.
     $command='$catalogPath='+(Ps-Literal $scriptPath)+'; & ([ScriptBlock]::Create([IO.File]::ReadAllText($catalogPath))) -CatalogScriptPath $catalogPath -Worker -RunId '+(Ps-Literal $RunId)+' -GameRoot '+(Ps-Literal $game)+' -CodeWalkerRoot '+(Ps-Literal $cw)+' -OutputRoot '+(Ps-Literal $output)+' -MaximumSeconds '+$MaximumSeconds+' -MaximumArchiveSeconds '+$MaximumArchiveSeconds+' -MaximumArchives '+$MaximumArchives
     if($HashArchives){$command+=' -HashArchives'}
+    if($VehicleModelFilter){$command+=' -VehicleModelFilter '+(Ps-Literal $VehicleModelFilter)}
     $arguments=@('-NoProfile','-NonInteractive','-EncodedCommand',[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command)))
     $process=Start-Process -FilePath $framework -ArgumentList $arguments -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $output 'worker.stdout.log') -RedirectStandardError (Join-Path $output 'worker.stderr.log')
     $watch=[Diagnostics.Stopwatch]::StartNew();$stopped=$null
@@ -87,8 +91,11 @@ foreach($path in @($core,$exe)){if(!(Test-Path -LiteralPath $path -PathType Leaf
 $codeHash=File-Hash $core
 $binding=[ordered]@{GameExecutable='GTA5_Enhanced.exe';GameVersion=[Diagnostics.FileVersionInfo]::GetVersionInfo($exe).FileVersion;GameExecutableSHA256=File-Hash $exe;CodeWalkerCoreSHA256=$codeHash;ScriptSHA256=File-Hash $scriptPath;HelperSHA256=File-Hash (Join-Path $repo 'src\acoustics\startup\InstalledCatalog.psm1');LifecycleSHA256=File-Hash $lifecyclePath}
 Write-Json (Join-Path $output 'current-input-binding.json') $binding
-foreach($dll in Get-ChildItem -LiteralPath $cw -Filter '*.dll'){[Reflection.Assembly]::Load([IO.File]::ReadAllBytes($dll.FullName))|Out-Null}
-[CodeWalker.GameFiles.GTA5Keys]::LoadFromPath($game,$null)
+foreach($dll in @('SharpDX.dll','SharpDX.Mathematics.dll','CodeWalker.Core.dll')){[Reflection.Assembly]::Load([IO.File]::ReadAllBytes((Join-Path $cw $dll)))|Out-Null}
+$initHelper=Join-Path $repo 'src\acoustics\startup\CodeWalkerInitialization01.psm1'
+Import-Module (New-Module -Name RichAudioCodeWalkerInitialization01 -ScriptBlock ([ScriptBlock]::Create([IO.File]::ReadAllText($initHelper)))) -Force
+$initialization=Initialize-InstalledCodeWalker01 -GameRoot $game
+$binding.InitializationHelperSHA256=File-Hash $initHelper
 $cache=Join-Path $output 'archive-cache';[IO.Directory]::CreateDirectory($cache)|Out-Null
 $all=New-Object Collections.Generic.List[object]
 $issues=New-Object Collections.Generic.List[object]
@@ -102,7 +109,7 @@ function Read-ArchiveCatalog([string]$Relative,[string]$Layer,[int]$DeclaredOrde
     $path=Resolve-CatalogArchivePath $game $Relative
     if(!(Test-Path -LiteralPath $path -PathType Leaf)){$issues.Add([pscustomobject]@{Kind='archive-missing';Archive=$Relative});return}
     $info=Get-Item -LiteralPath $path
-    $stamp=[ordered]@{Archive=$Relative;Layer=$Layer;DeclaredDlcIndex=$DeclaredOrder;Bytes=$info.Length;LastWriteUtc=$info.LastWriteTimeUtc.ToString('o');GameExecutable=$binding.GameExecutableSHA256;CodeWalker=$codeHash;Script=$binding.ScriptSHA256;Helper=$binding.HelperSHA256;HashArchives=[bool]$HashArchives}
+    $stamp=[ordered]@{Archive=$Relative;Layer=$Layer;DeclaredDlcIndex=$DeclaredOrder;Bytes=$info.Length;LastWriteUtc=$info.LastWriteTimeUtc.ToString('o');GameExecutable=$binding.GameExecutableSHA256;CodeWalker=$codeHash;Script=$binding.ScriptSHA256;Helper=$binding.HelperSHA256;HashArchives=[bool]$HashArchives;VehicleModelFilter=$VehicleModelFilter}
     $key=Get-CatalogArchiveFingerprint $stamp
     $cached=Join-Path $cache ($key+'.json')
     Write-Json $statusFile ([ordered]@{State='scanning';Archive=$Relative;ArchiveStartedUtc=[DateTime]::UtcNow.ToString('o');CompletedArchives=$all.Count})
@@ -150,7 +157,7 @@ function Read-ArchiveCatalog([string]$Relative,[string]$Layer,[int]$DeclaredOrde
         if($entry.Name -notmatch '^vehicles(?:_[A-Za-z0-9_-]+)?\.meta$' -and !$extraVehiclePaths.Contains($entry.Path)){continue}
         Check-Cancel
         try{$bytes=$record.Owner.ExtractFile($entry);$doc=Read-CatalogXml $bytes;$source=$entry.Path.Replace('\','/');$hash=Get-CatalogByteHash $bytes
-            foreach($vehicle in @(Get-CatalogVehicleDeclarations $doc $source)){$vehicle|Add-Member -NotePropertyName MetadataSHA256 -NotePropertyValue $hash;$vehicles.Add($vehicle)}
+            foreach($vehicle in @(Get-CatalogVehicleDeclarations $doc $source)){if($VehicleModelFilter-and$vehicle.Model-ine$VehicleModelFilter){continue};$vehicle|Add-Member -NotePropertyName MetadataSHA256 -NotePropertyValue $hash;$vehicles.Add($vehicle)}
         }catch{$localIssues.Add([pscustomobject]@{Kind='vehicle-meta-parse-failed';Path=$entry.Path.Replace('\','/')})}
     }
     $after=Get-Item -LiteralPath $path

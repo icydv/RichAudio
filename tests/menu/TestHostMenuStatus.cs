@@ -17,6 +17,19 @@ namespace RichAudio.Settings.InGame
             var json=new JavaScriptSerializer();
             Func<MenuStatus> read=()=>HostMenuStatus.Read(json.Serialize(wrapper),now,5);
             var cpu=read();Check(cpu.Available&&cpu.ActiveAcceleration=="cpu");Check(cpu.Detail.Contains("waiting for engine acknowledgement"));
+            Check(cpu.WorldDetail.Contains("no qualified installed coverage"));
+            var world=new Dictionary<string,object>{{"stage","building-missing-regions"},{"installedWorldVerified",false},
+                {"preparation",new Dictionary<string,object>{{"completedEligibleTiles",3},{"eligibleTiles",9},{"totalTiles",12}}}};
+            status["acousticWorld"]=world;Check(read().WorldDetail.Contains("3/9 cached; 12 declared"));
+            world["stage"]="ready-within-declared-coverage";Check(read().WorldDetail.Contains("installed coverage unverified"));
+            world["installedWorldVerified"]=true;Check(read().WorldDetail.Contains("ready-within-declared-coverage"));
+            ((Dictionary<string,object>)world["preparation"])["completedEligibleTiles"]=10;Check(read().WorldDetail.Contains("invalid coverage"));
+            ((Dictionary<string,object>)world["preparation"])["completedEligibleTiles"]=3;
+            var coverage=new Dictionary<string,object>{{"denominator",12},{"geometry",new Dictionary<string,object>{{"eligible",12},{"prepared",9}}},{"placement",new Dictionary<string,object>{{"cacheIdentityQualified",3}}},{"activation",new Dictionary<string,object>{{"observedActive",0},{"unobserved",12}}}};
+            world["coverageStates"]=coverage;Check(read().WorldDetail.Contains("models 9/12")&&read().WorldDetail.Contains("placed(model) 3")&&read().WorldDetail.Contains("runtime unobserved"));
+            ((Dictionary<string,object>)coverage["geometry"])["prepared"]=13;Check(read().WorldDetail.Contains("invalid coverage"));
+            ((Dictionary<string,object>)coverage["geometry"])["prepared"]=9;coverage.Remove("denominator");Check(read().WorldDetail.Contains("invalid coverage"));
+            status.Remove("acousticWorld");
             status["activeAcceleration"]="gpu";Check(!read().Available);
             status["gpuCapability"]="hardware-directcompute";Check(!read().Available);
             status["gpuResultsApplied"]=12;var gpu=read();Check(gpu.Available&&gpu.GpuResultsApplied==12&&gpu.ActiveAcceleration=="gpu");

@@ -41,7 +41,9 @@ public static class TestInGameMenu
         Select(menu,3);for(int i=0;i<5;i++)menu.Handle(MenuInput.Left);Check(Math.Abs(menu.Pending.OutputLevel-.75)<1e-12,"level steps by five percent");
         for(int i=0;i<40;i++)menu.Handle(MenuInput.Right);Check(menu.Pending.OutputLevel==1,"level never boosts beyond profile");
         Select(menu,4);menu.Handle(MenuInput.Accept);Check(!menu.Pending.EarlyReflections,"early processing toggle");
-        Select(menu,5);var lockedBefore=menu.Pending;menu.Handle(MenuInput.Accept);menu.Handle(MenuInput.Left);Check(menu.Pending.Same(lockedBefore),"unsupported Doppler bypass stays read-only");
+        Select(menu,5);menu.Handle(MenuInput.Accept);Check(menu.Pending.AirflowEnabled,"airflow comparison toggles on");
+        menu.Handle(MenuInput.Left);Check(menu.Pending.AirflowLevel==.3,"airflow level adjusts without changing engine output");
+        menu.Handle(MenuInput.Accept);Check(!menu.Pending.AirflowEnabled&&menu.Pending.AirflowLevel==.3,"airflow off retains selected restrained level");
         Select(menu,7);menu.Handle(MenuInput.Accept);Check(menu.Pending.SoundMapVisible,"SoundMap visibility is a real preference");
         Select(menu,8);menu.Handle(MenuInput.Accept);Check(menu.Pending.IntegrationMode=="experimental-additive","integration mode accurately selects additive playback");
         Select(menu,AcousticMenuModel.MenuKeyRow);Check(menu.Pending.MenuToggleKey=="F10","default menu key remains F10");

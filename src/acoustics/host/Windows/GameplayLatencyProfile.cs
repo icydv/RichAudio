@@ -8,6 +8,7 @@ namespace RichAudio.Beacon.Windows {
   internal static GameplayLatencyProfile Resolve(string id){
    if(id==null||id=="baseline")return new GameplayLatencyProfile("baseline",100,8,8);
    if(id=="low-latency-01")return new GameplayLatencyProfile(id,75,8,6);
+   if(id=="street-01")return new GameplayLatencyProfile(id,75,8,6);
    throw new ArgumentException("Unknown immutable gameplay latency profile");
   }
  }

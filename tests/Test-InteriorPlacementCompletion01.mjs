@@ -1,0 +1,19 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {resolveInteriorCollisionPlacements01} from '../src/acoustics/world/interior-placements-completion01.mjs';
+import {collisionNameHash} from '../src/acoustics/world/static-world-resource.mjs';
+import {identity} from '../src/acoustics/world/collision-mesh.mjs';
+const pin='a'.repeat(64),resourceHash=collisionNameHash('original_collision'),archetypeHash=collisionNameHash('original_interior');
+function catalog(){return {Resources:[{Kind:'ymap',Path:'original.rpf/map.ymap'},{Kind:'ytyp',Path:'original.rpf/types.ytyp'}],InteriorPlacementMetadata01:{Schema:1,Kind:'RichAudioInstalledMloPlacementMetadata01',YmapSourceBindings:[{Path:'original.rpf/map.ymap',SHA256:pin}],YtypSourceBindings:[{Path:'original.rpf/types.ytyp',SHA256:pin}],Archetypes:[{ArchetypeHash:archetypeHash,PhysicsDictionaryHash:resourceHash,SourceYtyp:'original.rpf/types.ytyp',SourceSHA256:pin,LocalMin:[0,0,0],LocalMax:[2,4,3],Rooms:[{Index:0},{Index:1}],Portals:[{Index:0,RoomFrom:0,RoomTo:1,Flags:3,AudioOcclusion:2,Corners:[[0,0,0],[0,2,0],[0,2,2],[0,0,2]]}]}],Instances:[{InstanceId:'original.rpf/map.ymap#mlo:0',ArchetypeHash:archetypeHash,SourceYmap:'original.rpf/map.ymap',SourceSHA256:pin,Matrix:identity.map((v,i)=>i===12?100:i===13?200:v)}]}};}
+test('explicit physics dictionary, manifest parent and selected YMAP resolve static interior instances without opening portals',()=>{
+ const c=catalog(),result=resolveInteriorCollisionPlacements01(c,resourceHash,[{InteriorName:'original_interior'}]);assert.equal(result.state,'metadata-interior-instances-resolved');assert.equal(result.placements.length,1);const p=result.placements[0];assert.deepEqual(p.bounds,{min:[100,200,0],max:[102,204,3]});assert.deepEqual(p.declaredPortals[0].cornersWorld[2],[100,202,2]);assert.equal(p.declaredPortals[0].openingState,'unobserved-not-an-acoustic-opening');assert.equal(p.liveSceneInclusionAllowed,false);assert.equal(p.runtimeActivation,'unobserved');
+});
+test('matching names, missing selected sources, changed source pins and unresolved parent bindings never invent placement',()=>{
+ for(const change of [c=>{c.InteriorPlacementMetadata01.Archetypes[0].PhysicsDictionaryHash='0x00000001';},c=>{c.Resources=[];},c=>{c.InteriorPlacementMetadata01.Instances[0].SourceSHA256='b'.repeat(64);},c=>{c.InteriorPlacementMetadata01.Instances[0].Matrix=[0];}]){const c=catalog();change(c);assert.equal(resolveInteriorCollisionPlacements01(c,resourceHash,[{InteriorName:'original_interior'}]).placements.length,0);}
+ assert.equal(resolveInteriorCollisionPlacements01(catalog(),resourceHash,[{InteriorName:'other_interior'}]).placements.length,0);assert.equal(resolveInteriorCollisionPlacements01({},resourceHash,[{InteriorName:'original_interior'}]).reason,'selected-YMAP-YTYP-placement-metadata-not-retained');
+});
+test('an explicit complete YMF child-parent edge places declared interior child geometry without a filename guess',()=>{
+ const c=catalog();c.InteriorPlacementMetadata01.Archetypes[0].PhysicsDictionaryHash='0x00000001';c.CollisionPlacementIndex={IndexComplete:true,ProjectionSchemaGaps:0};const membership={InteriorName:'original_interior',BoundsHash:resourceHash};const result=resolveInteriorCollisionPlacements01(c,resourceHash,[membership]);assert.equal(result.placements.length,1);assert.match(result.placements[0].basis,/explicit-YMF-child-bound/);assert.equal(result.placements[0].liveSceneInclusionAllowed,false);
+ assert.equal(resolveInteriorCollisionPlacements01(c,resourceHash,[{...membership,BoundsHash:'0x00000002'}]).placements.length,0);
+ const incomplete=catalog();incomplete.InteriorPlacementMetadata01.Archetypes[0].PhysicsDictionaryHash='0x00000001';incomplete.CollisionPlacementIndex={IndexComplete:false,ProjectionSchemaGaps:0};assert.equal(resolveInteriorCollisionPlacements01(incomplete,resourceHash,[membership]).placements.length,0);
+});

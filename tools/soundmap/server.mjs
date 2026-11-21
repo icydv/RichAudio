@@ -5,17 +5,43 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {SessionRecorder,privateDirectory,replayFrame,LIMITS} from './recorder.mjs';
 import {PassiveListener} from './passive.mjs';
+import {SOUND_MAP_WIRE,geometryWireBudget} from './ui/wire-limits.mjs';
+import {createOperatorMap01} from './operator-map01.mjs';
 
 const ui=path.join(path.dirname(fileURLToPath(import.meta.url)),'ui');
+const wireContract=fileURLToPath(new URL('../../src/acoustics/streaming/soundmap-wire.mjs',import.meta.url));
 const equal=(a,b)=>typeof a==='string'&&a.length===b.length&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 async function body(req,limit){const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>limit)throw Error('Request byte bound');chunks.push(chunk);}return Buffer.concat(chunks);}
-export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.now,ownerId=null}={}) {
+export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.now,ownerId=null,installedContext=null,viewOnly=false,viewOnlyMap=false,worldAtlas=null,sourceReceipt=null,sourceMonitor=null,onClosed=()=>{}}={}) {
   if(!Number.isInteger(port)||port<0||port>65535)throw Error('Port bound');
   const privateRoot=privateDirectory(root),token=randomBytes(32).toString('hex'),recorder=new SessionRecorder(privateRoot,{now});
   if(ownerId!==null&&(typeof ownerId!=='string'||!/^[a-f0-9]{32}$/.test(ownerId)))throw Error('Owner identity bound');
-  // The standalone passive viewer is also packaged without engine sources.
-  // Load the opt-in cache adapter only after trusted local code publishes one.
-  const passive=new PassiveListener(now);let cacheFeed=null,cacheLoading=null,cacheEpoch=0,cacheRevision=0,cacheReason='not-supplied',requestClose;
+  // Passive presentation needs only the pure shared wire contract. Load the
+  // opt-in cache adapter only after trusted local code publishes one.
+  if(viewOnlyMap&&(!viewOnly||!ownerId||!installedContext))throw Error('View-only map requires an owned service and bound context');
+  const contextModule=installedContext?await import('./installed-world-context01.mjs'):null;
+  if(sourceReceipt&&(!viewOnlyMap||!contextModule?.isBoundMapProofReceipt01(sourceReceipt,installedContext,ownerId)))throw Error('Verified owned atlas source receipt required');
+  const operator=sourceReceipt?.operatorControlled===true?createOperatorMap01(now):null;
+  if(operator&&(!worldAtlas||typeof sourceMonitor!=='function'))throw Error('Operator session requires a pinned atlas and current source monitor');
+  let sourceCheck={live:false,checkedAt:null,reason:null},sourceCheckedMonotonic=-Infinity;
+  function refreshSource(){
+    if(sourceCheck.reason)return;
+    try{sourceMonitor();sourceCheck={live:true,checkedAt:now(),reason:null};sourceCheckedMonotonic=performance.now();}
+    catch(error){sourceCheck={...sourceCheck,live:false,reason:String(error.message).slice(0,300)};}
+  }
+  if(operator){refreshSource();if(!sourceCheck.live)throw Error(sourceCheck.reason);}
+  // The sealed camera-only entry point must name its exact atlas explicitly.
+  // Ordinary SoundMap startup uses the prepared workspace atlas, if present.
+  // Minimal passive packages omit the installed-world modules altogether.
+  const atlasPointer=!viewOnlyMap&&fs.lstatSync(path.resolve(root,'.local','soundmap','world-atlas.json'),{throwIfNoEntry:false});
+  const atlasModule=worldAtlas||atlasPointer?await import('./world-atlas01.mjs'):null;
+  const atlasConfig=worldAtlas??(atlasPointer?await atlasModule.configuredWorldAtlas01(root):null);
+  const atlas=atlasConfig?await atlasModule.openWorldAtlas01({...atlasConfig,installedContext,sourceReceipt,now,
+    sourceHealth:operator?()=>({...sourceCheck,live:sourceCheck.live&&performance.now()-sourceCheckedMonotonic<=45000}):null}):null;
+  const worldContext=contextModule&&!atlas?new contextModule.InstalledWorldContext01(installedContext,{viewOnlyMap}):null;
+  const passive=new PassiveListener(now,{viewOnlyMap});
+  const passiveContext=sample=>viewOnlyMap?contextModule.passiveWorldContext01(sample,installedContext,now()):null;
+  let cacheFeed=null,cacheLoading=null,cacheEpoch=0,cacheRevision=0,cacheReason='not-supplied',requestClose;
   const emptyCacheStatus=()=>({available:false,generation:null,revision:cacheRevision,reason:cacheReason,clockQualified:true,ageMs:null,geometryTimeMs:null,authority:'original-authored-fixture-only',installedWorldVerified:false,viewerCanPublishAcoustics:false});
   const cacheWorld={
     async publish(packet){const epoch=++cacheEpoch;const module=await(cacheLoading??=import('./cache-world041.mjs'));if(epoch!==cacheEpoch||closing)return {...this.status(),publicationWithdrawn:true};cacheFeed??=new module.CachedWorldFeed041(now);return cacheFeed.publish(packet);},
@@ -25,9 +51,9 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
     invalidate(worldDigest){if(typeof worldDigest!=='string'||!/^[a-f0-9]{64}$/.test(worldDigest))throw Error('Explicit next inventory digest');cacheEpoch++;cacheRevision++;cacheReason='resource-inventory-changed';return cacheFeed?.invalidate(worldDigest)??emptyCacheStatus();}
   };
   let frame=null,receivedAt=0,sessionId=null,streamId=null,sequence=-1,replay=null,lastHost=null,stopping=null;
-  const geometry=new Map(),stats={accepted:0,droppedUpdates:0,invalidUpdates:0,sessionChanges:0,geometryCacheEvictions:0};
+  const geometry=new Map(),geometrySizes=new Map(),stats={accepted:0,droppedUpdates:0,invalidUpdates:0,sessionChanges:0,geometryCacheEvictions:0};let geometryCacheBytes=0;
   let boundPort;
-  const status=()=>({connected:!!frame&&now()-receivedAt<=1500,sessionId,streamId,ageMs:frame?now()-receivedAt:null,...stats,
+  const status=()=>({viewOnly,viewOnlyMap,operatorMap:operator?.status()??null,worldAtlas:atlas?.status()??null,connected:!!frame&&now()-receivedAt<=1500,sessionId,streamId,ageMs:frame?now()-receivedAt:null,...stats,geometryCacheBytes,geometryCacheMaximumBytes:SOUND_MAP_WIRE.serviceGeometryCacheBytes,geometryCacheCount:geometry.size,
     passive:passive.status(),cacheWorld:cacheWorld.status(),recording:recorder.status(),replay:replay?{id:replay.id,durationMs:replay.durationMs}:null,
     audio:{hostConnected:!!lastHost&&now()-lastHost.receivedAt<1500,host:lastHost?.info??null}});
   const server=http.createServer(async(req,res)=>{
@@ -40,15 +66,39 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
       if(req.headers.host!=='127.0.0.1:'+boundPort||req.headers.origin&&req.headers.origin!==origin||route.startsWith('/api/')&&req.headers['sec-fetch-site']==='cross-site'){send({error:'Same-origin localhost only'},403);return;}
       if(route==='/api/session'&&req.method==='GET'){send({token});return;}
       if(route.startsWith('/api/')&&!equal(req.headers['x-richaudio-token'],token)){send({error:'Session capability required'},403);return;}
+      if((viewOnlyMap||viewOnly&&atlas)&&route.startsWith('/api/')&&!['GET /api/status','GET /api/frame','GET /api/world-context','POST /api/passive','POST /api/service/stop'].includes(req.method+' '+route)&&
+       !(atlas&&req.method==='GET'&&['/api/atlas/index','/api/atlas/page','/api/atlas/coverage'].includes(route))&&
+       !(operator&&req.method==='POST'&&['/api/atlas/metrics','/api/operator/stop'].includes(route))){send({error:'Map qualification accepts camera observations only'},403);return;}
+      if(viewOnly&&req.method==='POST'&&(route.startsWith('/api/record/')||route.startsWith('/api/host/'))){send({error:'SoundMap is view only'},403);return;}
       let value=null;
       if(req.method==='POST'&&route!=='/api/host/pcm'){
         if(!String(req.headers['content-type']).startsWith('application/json'))throw Error('JSON content type required');
-        value=JSON.parse((await body(req,LIMITS.frameBytes)).toString('utf8')||'{}');
+        value=JSON.parse((await body(req,route==='/api/telemetry'?LIMITS.telemetryBytes:LIMITS.frameBytes)).toString('utf8')||'{}');
       }
       if(route==='/api/status'&&req.method==='GET')send(status());
       else if(route==='/api/frame'&&req.method==='GET'){
         const g=frame?geometry.get(frame.geometryGeneration):null;
-        send({mode:'live',frame,passive:passive.snapshot(),cacheWorld:cacheWorld.snapshot(url.searchParams.get('cacheWorldGeneration')??''),geometry:g&&url.searchParams.get('geometryGeneration')!==g.generation?g:null,status:status()});
+        const camera=passive.snapshot(),mapContext=passiveContext(camera);
+        send({mode:'live',frame,passive:camera,mapContext,atlasContext:atlas?.context(viewOnlyMap?mapContext:frame)??null,cacheWorld:cacheWorld.snapshot(url.searchParams.get('cacheWorldGeneration')??''),geometry:g&&url.searchParams.get('geometryGeneration')!==g.generation?g:null,status:status()});
+      }else if(route==='/api/world-context'&&req.method==='GET'){
+        const sample=viewOnlyMap?passiveContext(passive.snapshot()):frame;
+        send(atlas?.context(sample)??worldContext?.snapshot(sample,url.searchParams.get('generation'))??{state:'context-not-configured',tiles:[]});
+      }else if(atlas&&req.method==='GET'&&route==='/api/atlas/index'){
+        res.setHeader('Content-Type','application/json');res.end(atlas.index);
+      }else if(atlas&&req.method==='GET'&&route==='/api/atlas/page'){
+        const result=await atlas.mesh(url.searchParams.get('name'));
+        if(!result.bytes){send({error:result.error},result.code);return;}
+        res.setHeader('Content-Type','application/octet-stream');res.setHeader('Content-Length',result.bytes.length);res.end(result.bytes);
+      }else if(atlas&&req.method==='GET'&&route==='/api/atlas/coverage'){
+        const value=atlas.coverage(url.searchParams.get('tile'));
+        if(!value){send({error:'No located retained geometry in this atlas cell'},404);return;}
+        send(value);
+      }else if(operator&&req.method==='POST'&&route==='/api/atlas/metrics'){
+        if(!operator.accept(value)){send({error:'Bounded viewer metrics required'},400);return;}
+        send({accepted:true});
+      }else if(operator&&req.method==='POST'&&route==='/api/operator/stop'){
+        if(!value||Object.keys(value).length!==1||value.end!==true){send({error:'Explicit operator stop required'},400);return;}
+        send({stopRequestedAt:operator.stop()});
       }else if(route==='/api/cache-world'&&req.method==='GET'){
         send(cacheWorld.snapshot(url.searchParams.get('generation')??''));
       }else if(route==='/api/passive'&&req.method==='POST'){
@@ -59,19 +109,22 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
       }else if(route==='/api/telemetry'&&req.method==='POST'){
         const f=value.frame,g=value.geometry;
         if(!f||f.schemaVersion!==1||typeof f.sessionId!=='string'||f.sessionId.length>256||f.streamId!==undefined&&(typeof f.streamId!=='string'||f.streamId.length>128)||!Number.isSafeInteger(f.audioFrame)||f.audioFrame<0||!Number.isSafeInteger(f.sequence)||!Array.isArray(f.paths)||f.paths.length>512)throw Error('Telemetry schema/bounds');
+        if(Buffer.byteLength(JSON.stringify(f))>SOUND_MAP_WIRE.frameBytes)throw Error('Telemetry frame byte budget');
+        let geometrySize=0;if(g){const budget=geometryWireBudget(g);geometrySize=Buffer.byteLength(JSON.stringify(g));if(g.schemaVersion!==1||g.sessionId!==f.sessionId||typeof g.generation!=='string'||g.generation!==f.geometryGeneration||!Array.isArray(g.surfaces)||g.surfaces.length>budget.surfaces||geometrySize>budget.bytes)throw Error('Geometry schema/byte/surface bounds');}
         if(f.sessionId!==sessionId||(f.streamId??null)!==streamId){
           const initialQualification=sessionId==='uninitialised'&&frame?.listenerSessionId===null&&(f.streamId??null)===streamId&&f.sessionId!=='uninitialised'&&typeof f.listenerSessionId==='string';
           if(initialQualification&&f.sequence<=sequence){stats.droppedUpdates++;recorder.event('stale-telemetry',{sessionId:f.sessionId,sequence:f.sequence,lastAccepted:sequence});send({accepted:false,reason:'old-sequence'});return;}
           const reason=initialQualification?'listener-initialised':sessionId!==null&&(f.streamId??null)!==streamId?'stream-change':'session-change';
           recorder.event(reason,{previous:sessionId,current:f.sessionId,previousStreamId:streamId,streamId:f.streamId??null});
           if(!initialQualification&&sessionId!==null&&recorder.active)recorder.stop(reason);
-          geometry.clear();sessionId=f.sessionId;streamId=f.streamId??null;if(!initialQualification)sequence=-1;stats.sessionChanges++;
+          geometry.clear();geometrySizes.clear();geometryCacheBytes=0;sessionId=f.sessionId;streamId=f.streamId??null;if(!initialQualification)sequence=-1;stats.sessionChanges++;
         }
         if(f.sequence<=sequence){stats.droppedUpdates++;recorder.event('stale-telemetry',{sessionId:f.sessionId,sequence:f.sequence,lastAccepted:sequence});send({accepted:false,reason:'old-sequence'});return;}
         if(sequence>=0&&f.sequence>sequence+1)stats.droppedUpdates+=f.sequence-sequence-1;
-        if(g){if(g.schemaVersion!==1||g.sessionId!==sessionId||typeof g.generation!=='string'||!Array.isArray(g.surfaces)||g.surfaces.length>4096)throw Error('Geometry schema/bounds');
+        if(g){
           if(geometry.has(g.generation)&&JSON.stringify(geometry.get(g.generation))!==JSON.stringify(g))throw Error('Immutable geometry generation changed');
-          geometry.set(g.generation,g);while(geometry.size>16){geometry.delete(geometry.keys().next().value);stats.geometryCacheEvictions++;}}
+          geometryCacheBytes-=geometrySizes.get(g.generation)??0;geometry.set(g.generation,g);geometrySizes.set(g.generation,geometrySize);geometryCacheBytes+=geometrySize;
+          while(geometry.size>16||geometryCacheBytes>SOUND_MAP_WIRE.serviceGeometryCacheBytes){const oldest=geometry.keys().next().value;geometry.delete(oldest);geometryCacheBytes-=geometrySizes.get(oldest);geometrySizes.delete(oldest);stats.geometryCacheEvictions++;}}
         if(frame?.sessionId===f.sessionId){
           if(JSON.stringify(frame.sources?.map(s=>[s.id,s.generation]))!==JSON.stringify(f.sources?.map(s=>[s.id,s.generation])))recorder.event('source-generation',{sources:f.sources?.map(s=>({id:s.id,generation:s.generation}))});
           if(frame.paths?.map(p=>p.id+':'+p.status).join('|')!==f.paths.map(p=>p.id+':'+p.status).join('|'))recorder.event('path-change',{sequence:f.sequence});
@@ -79,7 +132,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
         frame=f;sequence=f.sequence;receivedAt=now();stats.accepted++;
         recorder.frame(f,g??geometry.get(f.geometryGeneration),receivedAt);
         if(f.diagnostics?.audioDeadlineFailures||f.diagnostics?.missingHistorySinceLastSample||(f.performance?.workerTotalMs??0)>512/48)recorder.event('diagnostic',{performance:f.performance,diagnostics:f.diagnostics,audioFrame:f.audioFrame});
-        send({accepted:true});
+        send({accepted:true,geometryNeeded:typeof f.geometryGeneration==='string'&&!geometry.has(f.geometryGeneration)});
       }else if(route==='/api/producer/event'&&req.method==='POST'){recorder.event(value.type??'producer-event',value);send({accepted:true});}
       else if(route==='/api/record/start'&&req.method==='POST'){
         const recording=recorder.start(value);stopping=null;
@@ -123,6 +176,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
         header.write('RIFF');header.writeUInt32LE(bytes+36,4);header.write('WAVEfmt ',8);header.writeUInt32LE(16,16);header.writeUInt16LE(3,20);header.writeUInt16LE(2,22);header.writeUInt32LE(48000,24);header.writeUInt32LE(384000,28);header.writeUInt16LE(8,32);header.writeUInt16LE(32,34);header.write('data',36);header.writeUInt32LE(bytes,40);
         res.setHeader('Content-Type','audio/wav');res.setHeader('Content-Disposition','attachment; filename="owned-output.wav"');res.write(header);fs.createReadStream(path.join(replay.dir,'owned-output.f32le')).pipe(res);
       }else if(req.method==='GET'&&!route.startsWith('/api/')){
+        if(route==='/wire-limits.mjs'){res.setHeader('Content-Type','text/javascript');fs.createReadStream(wireContract).pipe(res);return;}
         const relative=route==='/'?'index.html':decodeURIComponent(route.slice(1));
         if(relative.includes('..')||relative.includes('\\')||path.isAbsolute(relative))throw Error('Static path rejected');
         const file=path.join(ui,relative);if(!fs.existsSync(file)||!fs.statSync(file).isFile()){send({error:'Not found'},404);return;}
@@ -136,14 +190,62 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
   const descriptorFile=path.join(privateRoot,'service.json');if(fs.existsSync(descriptorFile)&&fs.lstatSync(descriptorFile).isSymbolicLink()){server.close();throw Error('Linked service descriptor rejected');}
   const temporary=path.join(privateRoot,'service-'+randomBytes(8).toString('hex')+'.tmp');fs.writeFileSync(temporary,JSON.stringify(descriptor),{flag:'wx'});fs.renameSync(temporary,descriptorFile);
   const tick=setInterval(()=>{recorder.tick();if(stopping&&now()-stopping.at>1500){recorder.event('audio-tail-unconfirmed',{reason:'host-flush-timeout'});recorder.stop('host-flush-timeout');stopping=null;}},100);tick.unref();
+  const sourcePoll=operator?setInterval(refreshSource,15000):null;sourcePoll?.unref();
   let closing=null;
-  const close=()=>closing??=(async()=>{cacheWorld.clear('service-shutdown');clearInterval(tick);recorder.stop('service-shutdown');await new Promise(resolve=>server.close(resolve));})();
+  const close=()=>closing??=(async()=>{
+    cacheWorld.clear('service-shutdown');clearInterval(tick);clearInterval(sourcePoll);recorder.stop('service-shutdown');
+    const [contextClosure]=await Promise.all([worldContext?.close(),new Promise(resolve=>server.close(resolve))]);
+    const terminal={contextClosure:contextClosure??(atlas?{workerJoined:true,closedWorkers:0}:null),operatorMap:operator?.status()??null,worldAtlas:atlas?.status()??null,acceptedCameraSamples:passive.accepted,rendererFrames:stats.accepted};
+    onClosed(terminal);
+    return terminal;
+  })();
   requestClose=close;
   return {server,descriptor,recorder,status,privateRoot,cacheWorld,close};
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
-  let root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..'),port=17833,ownerId=null;
-  for(let i=2;i<process.argv.length;i+=2){if(process.argv[i]==='--root')root=path.resolve(process.argv[i+1]);else if(process.argv[i]==='--port')port=Number(process.argv[i+1]);else if(process.argv[i]==='--owner')ownerId=process.argv[i+1];else throw Error('Unknown SoundMap option');}
-  const service=await startSoundMap({root,port,ownerId});console.log('SoundMap '+service.descriptor.url+' (private configuration: .local/soundmap/service.json)');
-  const close=()=>service.close().then(()=>process.exit(0));process.on('SIGINT',close);process.on('SIGTERM',close);
+  let root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..'),port=17833,ownerId=null,installedContext=null,viewOnly=false,viewOnlyMap=false,mapStopAt=null,mapProofReceipt=null,mapProofSHA256=null,atlasFile=null,atlasSHA256=null,sourceReceipt=null,operatorMap=false,scopeFile=null,scopeSHA=null,sourceMonitor=null;
+  for(let i=2;i<process.argv.length;i++){
+    const option=process.argv[i];
+    if(option==='--view-only'){viewOnly=true;continue;}
+    if(option==='--view-only-map'){viewOnly=viewOnlyMap=true;continue;}
+    if(option==='--operator-map'){operatorMap=true;continue;}
+    const value=process.argv[++i];
+    if(!value)throw Error('Missing SoundMap option value');
+    if(option==='--root')root=path.resolve(value);
+    else if(option==='--port')port=Number(value);
+    else if(option==='--installed-context')installedContext=(await import('./installed-world-context01.mjs')).installedContextConfig01(value);
+    else if(option==='--owner')ownerId=value;
+    else if(option==='--map-stop-utc-ms')mapStopAt=Number(value);
+    else if(option==='--map-proof-receipt')mapProofReceipt=value;
+    else if(option==='--map-proof-sha256')mapProofSHA256=value;
+    else if(option==='--world-atlas')atlasFile=value;
+    else if(option==='--world-atlas-sha256')atlasSHA256=value;
+    else if(option==='--map-source-scope')scopeFile=value;
+    else if(option==='--map-source-sha256')scopeSHA=value;
+    else throw Error('Unknown SoundMap option');
+  }
+  const mapBudget=mapStopAt-Date.now();
+  if(viewOnlyMap){
+    if(!mapProofReceipt||!mapProofSHA256||
+     (operatorMap?mapStopAt!==null||!scopeFile||!scopeSHA||!atlasFile:scopeFile!==null||scopeSHA!==null||!Number.isSafeInteger(mapStopAt)||mapBudget<=0||mapBudget>25*60*1000))
+     throw Error('Explicit view-only map policy and source receipt required');
+    const {verifyMapProofReceipt01}=await import('./installed-world-context01.mjs');
+    sourceReceipt=verifyMapProofReceipt01(mapProofReceipt,mapProofSHA256,installedContext,ownerId,mapStopAt);
+    if(operatorMap)sourceMonitor=(await import('./verify-map-source01.mjs')).sourceMonitor01(scopeFile,scopeSHA,sourceReceipt);
+  }else if(operatorMap||scopeFile!==null||scopeSHA!==null||mapStopAt!==null||mapProofReceipt!==null||mapProofSHA256!==null)throw Error('Map qualification arguments require camera-only mode');
+  const cutoff=performance.now()+mapBudget;
+  if(Boolean(atlasFile)!==Boolean(atlasSHA256))throw Error('Specify both the private atlas and its SHA-256');
+  const service=await startSoundMap({root,port,ownerId,installedContext,viewOnly,viewOnlyMap,worldAtlas:atlasFile?{file:atlasFile,sha256:atlasSHA256}:null,sourceReceipt,sourceMonitor,onClosed:terminal=>{
+    if(viewOnlyMap){
+      if(terminal.contextClosure?.workerJoined!==true)process.exitCode=1;
+      console.log(JSON.stringify({kind:'soundmap-view-only-terminal',...terminal}));
+    }
+  }});console.log('SoundMap '+service.descriptor.url+' (private configuration: .local/soundmap/service.json)');
+  const close=()=>service.close().then(({contextClosure})=>process.exit(contextClosure?.workerJoined===false?1:0));
+  process.on('SIGINT',close);process.on('SIGTERM',close);
+  if(viewOnlyMap&&!operatorMap){
+    // Independent monotonic budget. An owned HTTP stop also closes this timer.
+    const timer=setTimeout(close,Math.max(1,cutoff-performance.now()));timer.unref();
+    service.server.once('close',()=>clearTimeout(timer));
+  }
 }

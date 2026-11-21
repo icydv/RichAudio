@@ -23,7 +23,8 @@ const usage=()=>process.cpuUsage();
 const used=start=>{const x=process.cpuUsage(start);return (x.user+x.system)/1000;};
 const total=d=>d.taskCpuMs??d.cpuTaskCpuMs??null;
 const summary=values=>{const s=values.filter(Number.isFinite).sort((a,b)=>a-b);return {count:s.length,
-  median:s.length?s[Math.floor(s.length*.5)]:null,p95:s.length?s[Math.min(s.length-1,Math.floor(s.length*.95))]:null,max:s.at(-1)??null};};
+  median:s.length?s[Math.floor(s.length*.5)]:null,p95:s.length?s[Math.min(s.length-1,Math.floor(s.length*.95))]:null,
+  p99:s.length?s[Math.min(s.length-1,Math.floor(s.length*.99))]:null,max:s.at(-1)??null};};
 const delta=(end,start,key)=>(end[key]??0)-(start[key]??0);
 function digest(channels){const b=Buffer.alloc(channels[0].length*8);for(let i=0;i<channels[0].length;i++){
   b.writeFloatLE(channels[0][i],i*8);b.writeFloatLE(channels[1][i],i*8+4);}return createHash('sha256').update(b).digest('hex');}
@@ -70,7 +71,7 @@ async function runCase(f,{name,quality,mode,blocks,directory}){
     const channels=[new Float32Array(blocks*BLOCK),new Float32Array(blocks*BLOCK)],
       left=new Float32Array(BLOCK),right=new Float32Array(BLOCK),dry=Object.fromEntries(f.sourceIds.map(id=>[id,new Float32Array(BLOCK)])),
       phase=new Float64Array(f.sourceIds.length),worker=[],taskWall=[],taskCpu=[],dsp=[],gpuExecution=[],gpuSubmit=[],gpuTransfer=[],gpuReadback=[],roundTrips=[],pathCounts=[],
-      sourceIdentities=new Set(),orders=new Set(),activeBackends={cpu:0,gpu:0},qualityTimeline=[];
+      sourceIdentities=new Set(),orders=new Set(),activeBackends={cpu:0,gpu:0},qualityTimeline=[],rawBlocks=[];
     const fingerprint=createHash('sha256');let gain=0,firstActive=null,steadyWindows=0,workerMisses=0,blockMisses=0,previousQuality=null,maximumRss=process.memoryUsage().rss;
     const sourceRings=renderer.sourceList.map(s=>s.bands.map(b=>b.buffer));
     const measuredStartedAtUtc=new Date().toISOString(),measuredStart=performance.now(),measuredCpu=usage();
@@ -84,7 +85,12 @@ async function runCase(f,{name,quality,mode,blocks,directory}){
       const snapshot=f.snapshot(now);snapshot.emitting=now>=.3;
       for(const s of snapshot.sources)s.emitting=snapshot.emitting;
       sim.observe(snapshot);
-      const simulationStart=performance.now(),control=await sim.updateAccelerated(now,{},backend),simulationMs=performance.now()-simulationStart;
+      // Same production prepare/query/complete operations, measured separately.
+      // These intervals are disjoint; GPU counters are nested inside query and
+      // must never be added to it to invent a larger total or speaker latency.
+      const simulationStart=performance.now(),prepared=sim.prepareUpdate(now,{}),preparedAt=performance.now();
+      const queries=prepared.terminal||prepared.scene.directPath?null:await backend.query(prepared.scene.tile,prepared.segments,{generation:prepared.geometryEpoch});
+      const queriedAt=performance.now(),control=sim.completeUpdate(prepared,queries),completedAt=performance.now(),simulationMs=completedAt-simulationStart;
       const diagnostic=backend.diagnostics();worker.push(simulationMs);workerMisses+=Number(simulationMs>PERIOD_MS);
       activeBackends[diagnostic.activeAcceleration]++;taskWall.push(diagnostic.taskWallMs);taskCpu.push(total(diagnostic));
       if(diagnostic.activeAcceleration==='gpu'){
@@ -112,7 +118,12 @@ async function runCase(f,{name,quality,mode,blocks,directory}){
         requireValue(energy>1e-12,'Unexpected silence in a valid steady-state interval');steadyWindows++;
       }
       fingerprint.update(JSON.stringify({frame,sourceGenerations:control.sourceGenerations,paths:control.paths}));
-      blockMisses+=Number(performance.now()-blockStart>PERIOD_MS);
+      const blockMs=performance.now()-blockStart;blockMisses+=Number(blockMs>PERIOD_MS);
+      rawBlocks.push({block:b,frame,quality:selected,activeBackend:diagnostic.activeAcceleration,paths:control.paths.length,
+        prepareMs:preparedAt-simulationStart,visibilityQueryMs:queriedAt-preparedAt,exactCompletionMs:completedAt-queriedAt,
+        simulationMs,dspMs:dsp.at(-1),totalBlockMs:blockMs,headroomMiss:blockMs>8,hardDeadlineMiss:blockMs>PERIOD_MS,
+        gpuResultsApplied:diagnostic.gpuResultsApplied??0,gpuDeadlineMisses:diagnostic.deadlineMisses??0,
+        rejectedGpuAttempt:diagnostic.lastRejectedGpuAttempt??null});
       if(b%16===0)maximumRss=Math.max(maximumRss,process.memoryUsage().rss);
       // Normal event-loop service, not a simulated GPU clock or audio-buffer
       // increase. Auto's shadow calibration is intentionally nonblocking.
@@ -149,7 +160,10 @@ async function runCase(f,{name,quality,mode,blocks,directory}){
       cursorResets:renderer.stats.cursorResets,pathOverflow:renderer.stats.pathOverflow,limiterFrames:renderer.stats.limited,
       steadyWindows,firstActiveFrame:firstActive,primedFrame:gate.readyFrame,rendererOwnedBytes:renderer.ownedArrayBytes,nodePeakRssBytes:maximumRss,
       nodeRssScope:'Whole benchmark process high-water sample, including fixtures, warm-up allocations and retained reference PCM; not an isolated runtime renderer working set.',
-      workerDeadlineMisses:workerMisses,totalBlockDeadlineMisses:blockMisses,deadlineMs:PERIOD_MS,
+      workerDeadlineMisses:workerMisses,totalBlockDeadlineMisses:blockMisses,deadlineMs:PERIOD_MS,headroomTargetMs:8,
+      totalBlockMs:summary(rawBlocks.map(r=>r.totalBlockMs)),blocksAboveHeadroom:rawBlocks.filter(r=>r.headroomMiss).length,
+      prepareMs:summary(rawBlocks.map(r=>r.prepareMs)),exactCompletionMs:summary(rawBlocks.map(r=>r.exactCompletionMs)),rawBlocks,
+      timingRelationship:'Disjoint prepare + query + exact completion = simulation; simulation and DSP are included in total block. GPU subintervals are nested inside query, not additive latency.',
       underruns:{measured:false,count:null,reason:'No audio endpoint or hardware callback is opened by this driver.'},
       finalBackend:after,hardwareVerified:mode==='gpu'&&gpuResultsApplied>0&&gpuAcousticDispatches>0,
       gameLaunched:false,audioEndpointOpened:false,subjectiveListening:'not performed'};

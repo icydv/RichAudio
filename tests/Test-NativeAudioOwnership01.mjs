@@ -4,7 +4,7 @@ import {OfflineOwnershipPolicy, nativeAudioOwnership, requiredEvidence, takeover
   retainedNativeComponents} from '../src/acoustics/ownership/policy.mjs';
 
 const identity = {session: 'authored-session', handle: 7, generation: 1, model: 0xf9300cc5};
-const baseline = {known: true, profile: 'original-fixture-profile', identityKey: JSON.stringify(Object.values(identity))};
+const baseline = {kind: 'authored-exact-profile', known: true, profile: 'original-fixture-profile', identityKey: JSON.stringify(Object.values(identity))};
 const certificate = {kind: 'authored-fixture-assumptions', build: 'fixture-1', components: ['engine', 'exhaust'],
   ...Object.fromEntries(requiredEvidence.map(k => [k, true]))};
 const make = (extra = {}) => new OfflineOwnershipPolicy({identity, build: 'fixture-1', mode: 'authored-fixture', ...extra});
@@ -54,7 +54,9 @@ test('all independent capability evidence is required, and arbitrary gain/mute p
 
 test('known exact original profile, healthy replacement and fresh source are independently necessary', () => {
   for (const patch of [{baseline: null}, {baseline: {...baseline, profile: ''}}, {baseline: {...baseline, known: false}},
-    {baseline: {...baseline, identityKey: 'other'}}, {replacementHealthy: false}]) {
+    {baseline: {...baseline, identityKey: 'other'}},
+    {baseline: {...baseline, kind: 'vehicle-default-horn', profile: '022894E9'}},
+    {baseline: {...baseline, kind: 'projected-model-profile'}}, {replacementHealthy: false}]) {
     const m = make(); observe(m); assert.equal(prepare(m, patch), false);
   }
   const m = make(); assert.equal(prepare(m), false); observe(m);

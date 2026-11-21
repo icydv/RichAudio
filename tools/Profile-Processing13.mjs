@@ -10,6 +10,7 @@ import {verifyProcessingSnapshot13,processingParent13} from './Freeze-Processing
 import {startOwnedProcessing13,qualifyOwnedAffinity13,qualifyOwnedCompletion13,ownedChildGate13,waitOwnedMessage13,hashExecutedNode13} from './Owned-Processing13.mjs';
 import {accountSpans09} from './Profile-Processing09.mjs';
 import {sourceHistoryHash13,processingStateHash13} from './Processing-Continuity13.mjs';
+import {createProcessingRoleCaptureStreet01,processingInputBindingStreet01,compareProcessingRolesStreet01,processingRoleContractStreet01} from './Processing-RolesStreet01.mjs';
 export {accountSpans09 as accountProcessingSpans13} from './Profile-Processing09.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex'),check=(ok,reason)=>{if(!ok)throw Error(reason);};
@@ -48,7 +49,7 @@ export async function runProcessingWorkload13(input={}, {runtimeAtGate=null}={})
  const [{StockGameplay},sourceModule,{ScenePreparation03},fixture]=await Promise.all([load('src/acoustics/vehicle/gameplay.mjs'),load('src/acoustics/vehicle/stock-source.mjs'),load('src/acoustics/world/scene-preparation03.mjs'),load('tests/fixtures/Processing13.mjs')]);
  const {StockVehicleSource}=sourceModule,{processingBank13,processingLifecycleFrame13,processingContexts13,budgetFrame042,budgetSession042,budgetWorld042}=fixture;
  const bank=processingBank13({texture:config.texture}),records=[],outsideRender=[],gcEvents=[],sourceRows=[],pathRows=[],observationSequence=[],pcmBlocks=[],dry=createHash('sha256'),stereo=createHash('sha256');
- const sourceNumbers=new WeakMap(),lastFrames=new WeakMap();let instance,runtime,recorder=null,sourceSerial=0,wall=0,next=0,sequence=0,histories=null,sourceCursorContinuous=true,rendererHistoryStable=true,plan=null,droppedGcEvents=0,maxRssBytes=0;
+ const sourceNumbers=new WeakMap(),lastFrames=new WeakMap();let instance,runtime,recorder=null,sourceSerial=0,wall=0,next=0,sequence=0,histories=null,sourceCursorContinuous=true,rendererHistoryStable=true,plan=null,droppedGcEvents=0,maxRssBytes=0,roleCapture,roleCaptureMs=0,maximumRoleCaptureMs=0;
  const outside=async(name,fn)=>{const startMs=performance.now();try{return await fn();}finally{outsideRender.push({name,startMs,endMs:performance.now()});}};
  const sync=(name,fn)=>recorder?recorder.sync(name,fn):fn();
  const wrap=(target,method,name,async=false)=>{if(!config.instrumented)return;const original=target[method];check(typeof original==='function','existing production phase required');target[method]=async?function(...args){return recorder?recorder.async(name,()=>original.apply(this,args)):original.apply(this,args);}:function(...args){return recorder?recorder.sync(name,()=>original.apply(this,args)):original.apply(this,args);};};
@@ -68,6 +69,7 @@ export async function runProcessingWorkload13(input={}, {runtimeAtGate=null}={})
   instance=await outside('engineConstruction',()=>new StockGameplay({registry,session:budgetSession042,now:()=>wall,continuityPolicy:'camera-source-01'}));
   if(config.profile==='fixed-cpu-balanced')instance.setSettings({quality:'balanced',acceleration:'cpu',enabled:true,volume:1,reflections:true,mode:'experimental-additive'});
   const settings={...instance.settings};
+  roleCapture=createProcessingRoleCaptureStreet01(instance,{sourceSerials:sourceNumbers,inputBinding:processingInputBindingStreet01(bank,config,budgetSession042),expectedBlocks:config.blocks});
   for(const [target,method,name,async]of [[instance.playout,'sample','listenerPlayout'],[instance,'vehiclesAt','sourcePose'],[instance,'filter','controlFilter'],[instance.pipeline,'prepare','controlPreparation',true],[instance.pipeline.simulation,'observe','acousticObserve'],[instance.pipeline.simulation,'updateAccelerated','acousticUpdate',true],[instance.pipeline.simulation,'prepareUpdate','acousticPathPreparation'],[instance.pipeline.backend,'query','acousticVisibility',true],[instance.pipeline.backend,'cpu','acousticVisibilityCpu'],[instance.pipeline.simulation,'completeUpdate','acousticPathCompletion'],[instance.pipeline.renderer,'accept','rendererAccept'],[instance.pipeline,'process','pcmPipeline'],[instance.pipeline.renderer,'process','pcmRenderer']])wrap(target,method,name,async);
   if(config.scene==='walls'){
    runtime=new ScenePreparation03({session:budgetSession042,worldDigest:budgetWorld042});
@@ -79,7 +81,7 @@ export async function runProcessingWorkload13(input={}, {runtimeAtGate=null}={})
   observer?.observe({entryTypes:['gc']});await sampler?.start();
   for(let block=0;block<config.blocks;block++){
    const time=block*512/48000;wall=time*1000;
-   if(time+1e-10>=next){const frame=budgetFrame042(sequence++,next),observed=config.lifecycle?processingLifecycleFrame13(frame,next):frame;instance.accept(observed,Math.max(0,(time-next)*1000),200);observationSequence.push({block,time:next,vehicles:observed.vehicles.map(v=>({id:v.id,generation:v.generation,context:v.context,running:v.running,operatingPoint:v.operatingPoint}))});next+=.05;}
+   if(time+1e-10>=next){const frame=budgetFrame042(sequence++,next),observed=config.lifecycle?processingLifecycleFrame13(frame,next):frame;roleCapture.observe(observed);instance.accept(observed,Math.max(0,(time-next)*1000),200);observationSequence.push({block,time:next,vehicles:observed.vehicles.map(v=>({id:v.id,generation:v.generation,context:v.context,running:v.running,operatingPoint:v.operatingPoint}))});next+=.05;}
    await immediate();
    const heapBefore=config.instrumented?process.memoryUsage().heapUsed:null;
    recorder=config.instrumented?recorder13():null;
@@ -90,6 +92,7 @@ export async function runProcessingWorkload13(input={}, {runtimeAtGate=null}={})
    records.push({block,phase:block<config.coldBlocks?'cold-prefix':'later-blocks',startMs,endMs,renderMs,overBudget:renderMs>processingBudgetMs13,spans,heapUsedBefore:heapBefore,heapUsedAfter:config.instrumented?process.memoryUsage().heapUsed:null,sourceCreations:instance.stageCounters.sourceCreations,selectedPaths:instance.pipeline.lastControl.paths.length,reflectedPaths:instance.pipeline.lastControl.paths.filter(p=>p.order>0).length});
    const blockDry=createHash('sha256');for(const id of instance.ids){dry.update(typed(instance.inputs[id]));blockDry.update(typed(instance.inputs[id]));}
    stereo.update(typed(instance.left));stereo.update(typed(instance.right));pcmBlocks.push({block,drySha256:blockDry.digest('hex'),stereoSha256:sha(Buffer.concat([typed(instance.left),typed(instance.right)]))});
+   const roleStart=performance.now();roleCapture.record(block);const roleMs=performance.now()-roleStart;roleCaptureMs+=roleMs;maximumRoleCaptureMs=Math.max(maximumRoleCaptureMs,roleMs);
    const sources=instance.slots.filter(s=>s.source).map(s=>{const prior=lastFrames.get(s.source);if(prior!==undefined)sourceCursorContinuous&&=s.source.frame-prior===512;lastFrames.set(s.source,s.source.frame);return {slot:s.index,identity:s.identity,sourceSerial:sourceNumbers.get(s.source),frame:s.source.frame,statsFrames:s.source.stats.frames,phaseHistorySha256:sourceHistoryHash13(s.source)};});sourceRows.push({block,sources});
    pathRows.push({block,pathsSha256:processingStateHash13(instance.pipeline.lastControl.paths),selectedPaths:records.at(-1).selectedPaths,reflectedPaths:records.at(-1).reflectedPaths});
    histories??=instance.pipeline.renderer.sourceList.map(s=>s.bands);rendererHistoryStable&&=instance.pipeline.renderer.sourceList.every((s,i)=>s.bands===histories[i]);
@@ -103,10 +106,11 @@ export async function runProcessingWorkload13(input={}, {runtimeAtGate=null}={})
   const diagnostics={stageCounters:instance.stageCounters,lifecycle:structuredClone(instance.lifecycle),pipeline:{history:instance.pipeline.renderer.historyDiagnostics,renderer:instance.pipeline.renderer.stats}};
   const after=await verifyProcessingSnapshot13(root);check(after.manifestSha256===snapshot.manifestSha256,'frozen closure manifest changed during trial');
   const runtimeAfter=await hashExecutedNode13();check(runtimeBefore.sha256===runtimeAfter.sha256,'render Node binary changed during workload');
-  return {schema:1,kind:'RichAudioOriginalProcessingWorkload13',config,implementation:snapshot.manifest.implementation,runtime:{node:process.version,execSha256:runtimeBefore.sha256,executable:{atHeldGate:runtimeAtGate,before:runtimeBefore,after:runtimeAfter,stable:true},platform:process.platform,arch:process.arch,availableParallelism:os.availableParallelism(),logicalCpus:os.cpus().length},snapshot:{name:config.snapshot,manifestSha256:snapshot.manifestSha256,files:snapshot.manifest.files},
+  return {schema:2,kind:'RichAudioOriginalProcessingWorkload13',config,implementation:snapshot.manifest.implementation,runtime:{node:process.version,execSha256:runtimeBefore.sha256,executable:{atHeldGate:runtimeAtGate,before:runtimeBefore,after:runtimeAfter,stable:true},platform:process.platform,arch:process.arch,availableParallelism:os.availableParallelism(),logicalCpus:os.cpus().length},snapshot:{name:config.snapshot,manifestSha256:snapshot.manifestSha256,files:snapshot.manifest.files},
    summary:{all:summarizeDurations13(records.map(r=>r.renderMs)),cold:summarizeDurations13(records.slice(0,config.coldBlocks).map(r=>r.renderMs)),later:summarizeDurations13(records.slice(config.coldBlocks).map(r=>r.renderMs))},records,outsideRender,gcEvents,droppedGcEvents,cpuSampling,
-   instrumentation:{enabled:config.instrumented,cpuKind:config.instrumented?cpuKind:null,cpuCountersQuantizedOnWindows:true,inspector:config.instrumented,gcObserver:config.instrumented,heapReads:config.instrumented,phaseWrappers:config.instrumented,commonWallTimer:true},
-   continuity:{drySha256:dry.digest('hex'),stereoSha256:stereo.digest('hex'),blocks:pcmBlocks,rendererFrames:instance.pipeline.renderer.frame,sourceRows,pathRows,sourceConstructions:sourceSerial,sourceCreations:diagnostics.stageCounters.sourceCreations,sourceCursorContinuous,rendererHistoryStable,historyAffectedFrames:diagnostics.pipeline.history.affectedFrames,limiterEvents:diagnostics.pipeline.renderer.limited,nonzeroBlocks:diagnostics.stageCounters.stereo.nonzeroBlocks},observationSequence,lifecycle:diagnostics.lifecycle,beforeRender,settings,sceneWorkers:runtime?{...runtime.stats}:null,maxRssBytes,
+   instrumentation:{enabled:config.instrumented,cpuKind:config.instrumented?cpuKind:null,cpuCountersQuantizedOnWindows:true,inspector:config.instrumented,gcObserver:config.instrumented,heapReads:config.instrumented,phaseWrappers:config.instrumented,commonWallTimer:true,
+    launch:{execArgv:[...process.execArgv],bytecodeRetention:process.execArgv.includes('--no-flush-bytecode'),normalHostStartup:false,preparedExactInitialMatches:false}},
+   continuity:{drySha256:dry.digest('hex'),stereoSha256:stereo.digest('hex'),blocks:pcmBlocks,rendererFrames:instance.pipeline.renderer.frame,sourceRows,pathRows,sourceConstructions:sourceSerial,sourceCreations:diagnostics.stageCounters.sourceCreations,sourceCursorContinuous,rendererHistoryStable,historyAffectedFrames:diagnostics.pipeline.history.affectedFrames,limiterEvents:diagnostics.pipeline.renderer.limited,nonzeroBlocks:diagnostics.stageCounters.stereo.nonzeroBlocks},comparisonContract:processingRoleContractStreet01,roleAudio:roleCapture.finish(),roleDiagnostics:{outsideRenderTimer:true,totalMs:roleCaptureMs,maximumBlockMs:maximumRoleCaptureMs,framesAdded:0},observationSequence,lifecycle:diagnostics.lifecycle,beforeRender,settings,sceneWorkers:runtime?{...runtime.stats}:null,maxRssBytes,
    limits:{blockFrames:512,sampleRate:48000,blockBudgetMs:processingBudgetMs13,pcmQueueFramesAdded:0,actualSourceWarmFrames:0,sourcePreparationCpuIsolation:false,commonBookkeepingOutsideRenderTimer:true,burstWithDeterministicObservationTime:true,osSchedulerTrace:false,deviceUnderflowMeasured:false,endpointUnderflows:null,endpointOpened:false,installedResourcesRead:false,privateBanksRead:false}};
  }finally{recorder=null;observer?.disconnect();sampler?.close();await instance?.close();if(runtime)await runtime.close();}
 }
@@ -115,7 +119,15 @@ export function compareProcessingPcm13(reference,trial){
  const a=reference.continuity,b=trial.continuity;
  const phaseQualified=c=>Array.isArray(c.sourceRows)&&c.sourceRows.length===c.blocks.length&&c.sourceRows.every(r=>Array.isArray(r.sources)&&r.sources.every(s=>/^[a-f0-9]{64}$/.test(s.phaseHistorySha256??'')));
  const pathsQualified=c=>Array.isArray(c.pathRows)&&c.pathRows.length===c.blocks.length&&c.pathRows.every(r=>/^[a-f0-9]{64}$/.test(r.pathsSha256??'')&&Number.isInteger(r.selectedPaths)&&Number.isInteger(r.reflectedPaths)&&r.reflectedPaths>=0&&r.reflectedPaths<=r.selectedPaths);
- return {dryBitIdentical:a.drySha256===b.drySha256,stereoBitIdentical:a.stereoSha256===b.stereoSha256,everyBlockBitIdentical:JSON.stringify(a.blocks)===JSON.stringify(b.blocks),framesIdentical:a.rendererFrames===b.rendererFrames,sourceLifecycleIdentical:JSON.stringify(a.sourceRows)===JSON.stringify(b.sourceRows),phaseAndGrainHistoryIdentical:[a,b].every(phaseQualified)&&JSON.stringify(a.sourceRows)===JSON.stringify(b.sourceRows),directAndReflectedPathsIdentical:[a,b].every(pathsQualified)&&JSON.stringify(a.pathRows)===JSON.stringify(b.pathRows),sourceCreationsIdentical:a.sourceCreations===b.sourceCreations,observationSequenceIdentical:JSON.stringify(reference.observationSequence)===JSON.stringify(trial.observationSequence),lifecycleDiagnosticsIdentical:JSON.stringify(reference.lifecycle)===JSON.stringify(trial.lifecycle),settingsIdentical:JSON.stringify(reference.settings)===JSON.stringify(trial.settings),historyPreserved:[a,b].every(c=>c.sourceCursorContinuous&&c.rendererHistoryStable&&c.historyAffectedFrames===0&&c.limiterEvents===0&&c.nonzeroBlocks>0),zeroHistoryBeforeRender:[reference,trial].every(r=>r.beforeRender.sourceConstructions===0&&r.beforeRender.sourceCreations===0&&r.beforeRender.rendererFrame===0)};
+ const exact={dryBitIdentical:a.drySha256===b.drySha256,stereoBitIdentical:a.stereoSha256===b.stereoSha256,everyBlockBitIdentical:JSON.stringify(a.blocks)===JSON.stringify(b.blocks),framesIdentical:a.rendererFrames===b.rendererFrames,sourceLifecycleIdentical:JSON.stringify(a.sourceRows)===JSON.stringify(b.sourceRows),phaseAndGrainHistoryIdentical:[a,b].every(phaseQualified)&&JSON.stringify(a.sourceRows)===JSON.stringify(b.sourceRows),directAndReflectedPathsIdentical:[a,b].every(pathsQualified)&&JSON.stringify(a.pathRows)===JSON.stringify(b.pathRows),sourceCreationsIdentical:a.sourceCreations===b.sourceCreations,observationSequenceIdentical:JSON.stringify(reference.observationSequence)===JSON.stringify(trial.observationSequence),lifecycleDiagnosticsIdentical:JSON.stringify(reference.lifecycle)===JSON.stringify(trial.lifecycle),settingsIdentical:JSON.stringify(reference.settings)===JSON.stringify(trial.settings),historyPreserved:[a,b].every(c=>c.sourceCursorContinuous&&c.rendererHistoryStable&&c.historyAffectedFrames===0&&c.limiterEvents===0&&c.nonzeroBlocks>0),zeroHistoryBeforeRender:[reference,trial].every(r=>r.beforeRender.sourceConstructions===0&&r.beforeRender.sourceCreations===0&&r.beforeRender.rendererFrame===0)};
+ if((reference.schema??1)<2&&(trial.schema??1)<2&&reference.comparisonContract===undefined&&trial.comparisonContract===undefined&&!reference.roleAudio&&!trial.roleAudio)return exact;
+ check(reference.comparisonContract===processingRoleContractStreet01&&trial.comparisonContract===processingRoleContractStreet01,'matching explicit role-aware comparison versions required');
+ check([reference,trial].every(r=>r.roleAudio?.blocks.length===r.continuity.blocks.length&&r.roleAudio.blocks.length*512===r.continuity.rendererFrames),'complete role/renderer block timeline required');
+ // Historical raw aggregate hashes stay in the reports. Fresh role-aware
+ // qualification compares every legacy role, identity and setting explicitly,
+ // and separately requires the new disabled-feature buffers to be zero.
+ const {dryBitIdentical,everyBlockBitIdentical,settingsIdentical,...unchanged}=exact;
+ return {...unchanged,...compareProcessingRolesStreet01(reference.roleAudio,trial.roleAudio)};
 }
 
 export async function runProcessingTrial13(input,{affinity='normal',contention=0,failAfterContenderReady=null,failStop=false}={}){
@@ -126,26 +138,29 @@ export async function runProcessingTrial13(input,{affinity='normal',contention=0
  const executedParentHelpers=['tools/Profile-Processing13.mjs','tools/Owned-Processing13.mjs','tools/Freeze-Processing13.mjs'];
  const verifyParent=async()=>{for(const member of executedParentHelpers)check(sha(await fs.readFile(path.join(root,member)))===closure.manifest.files.find(f=>f.path===member)?.sha256,'executed parent harness differs from frozen closure: '+member);};
  await verifyParent();
- const owned=[],contenders=[];let render,result=null,failure=null;const started=performance.now();
+ const owned=[],contenders=[];let render,result=null,failure=null,failureCode=null;const started=performance.now();
  try{
   render=startOwnedProcessing13(script,'render',config);owned.push(render);
   const qualified=await qualifyOwnedAffinity13(render,{mode:affinity});
   for(let i=0;i<contention;i++){
    const contender=startOwnedProcessing13(script,'contender',{}, {failStop:failStop&&i===0});owned.push(contender);contenders.push(contender);
-   await qualifyOwnedAffinity13(contender,{mode:affinity,mask:qualified.actualMask});await contender.go();await waitOwnedMessage13(contender,'contender-active');
+   await qualifyOwnedAffinity13(contender,{mode:affinity,mask:qualified.actualMask});
+  }
+  for(const [i,contender] of contenders.entries()){
+   await contender.go();await waitOwnedMessage13(contender,'contender-active');
    if(failAfterContenderReady===i+1)throw Error('injected owned contender startup failure');
   }
   await render.go();await render.done;
   try{result=JSON.parse(render.record.stdout);check(result.kind==='RichAudioOriginalProcessingWorkload13'&&JSON.stringify(result.config)===JSON.stringify(config),'exact child workload identity required');check(result.snapshot?.manifestSha256===closure.manifestSha256&&result.snapshot.name===config.snapshot&&result.implementation===closure.manifest.implementation,'child result differs from authorized frozen closure');check(result.runtime.execSha256===parentRuntimeBefore.sha256&&result.runtime.node===parentRuntimeBefore.node&&result.runtime.executable.stable,'matched qualified parent/child Node bytes required');}catch(error){failure=error.message;}
   if(!qualifyOwnedCompletion13(render.record,{render:true}))failure??='owned render completion qualification failed';
- }catch(error){failure??=error.message;}
+ }catch(error){failure??=error.message;failureCode=error.code??null;}
  finally{await Promise.all(owned.filter(o=>!o.record.joined).map(o=>o.stop()));}
  const workers=owned.map(o=>{const {stdout,...record}=o.record;return {...record,unparsedStdout:o===render&&!result?stdout:undefined};});
  const contendersQualified=contenders.length===contention&&contenders.every(c=>qualifyOwnedCompletion13(c.record));
  if(!contendersQualified)failure??='owned contender completion qualification failed';
  try{await verifyParent();}catch(error){failure??=error.message;}
  let parentRuntimeAfter=null;try{parentRuntimeAfter=await hashExecutedNode13();check(parentRuntimeBefore.sha256===parentRuntimeAfter.sha256,'parent Node binary changed during trial');}catch(error){failure??=error.message;}
- return {config,affinity,contention,childWallMs:performance.now()-started,result,failure,workers,parentRuntime:{before:parentRuntimeBefore,after:parentRuntimeAfter,stable:parentRuntimeAfter?.sha256===parentRuntimeBefore.sha256},allChildrenJoined:workers.every(w=>w.joined),contentionQualified:contendersQualified,closureManifestSha256:closure.manifestSha256};
+ return {config,affinity,contention,childWallMs:performance.now()-started,result,failure,failureCode,workers,parentRuntime:{before:parentRuntimeBefore,after:parentRuntimeAfter,stable:parentRuntimeAfter?.sha256===parentRuntimeBefore.sha256},allChildrenJoined:workers.every(w=>w.joined),contentionQualified:contendersQualified,closureManifestSha256:closure.manifestSha256};
 }
 
 export async function profileProcessing13({snapshots=[],selectedPreparations=['authored-jit'],instrumentation=[false,true],affinities=['normal','restricted4'],contentionCounts=[0,2],repetitions=2,topologies=['plain','texture'],scenes=['direct','walls'],profile='fixed-cpu-balanced'}={}, {trialRunner=runProcessingTrial13}={}){
@@ -159,7 +174,7 @@ export async function profileProcessing13({snapshots=[],selectedPreparations=['a
   const config=processingOptions13({snapshot,preparation,instrumented,profile,scene,blocks:topology==='texture'?192:144,lifecycle:topology==='texture',texture:topology==='texture'});let trial;
   try{trial=await trialRunner(config,{affinity,contention});}catch(error){trial={config,affinity,contention,result:null,failure:error.message,workers:[],allChildrenJoined:true,contentionQualified:false};}
   trials.push({repetition,topology,...trial});process.stderr.write(JSON.stringify({progress:trials.length,requestedTrials,repetition,snapshot,preparation,instrumented,affinity,contention,topology,failure:trial.failure,summary:trial.result?.summary.all})+'\n');
-  if(trial.failure){terminalFailure={trial:trials.length-1,reason:trial.failure,automaticRetry:false,remainingTrialsStarted:false};break outer;}
+  if(trial.failure){terminalFailure={trial:trials.length-1,reason:trial.failure,...(trial.failureCode?{code:trial.failureCode}:{}),automaticRetry:false,remainingTrialsStarted:false};break outer;}
  }
  let runtimeAfter=null,runtimeFailure=null;try{runtimeAfter=await hashExecutedNode13();}catch(error){runtimeFailure=error.message;}
  const runtimeStable=runtimeBefore.sha256===runtimeAfter?.sha256;

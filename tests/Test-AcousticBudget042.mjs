@@ -20,7 +20,7 @@ test('GC associations use process-local interval overlap without inferring a cau
 });
 test('constructor settings and source/renderer implementations remain unchanged by diagnostic wrappers',async()=>{
  const engine=createBudgetEngine042({profile:'constructor-defaults'});
- try{assert.deepEqual(engine.instance.settings,{quality:'auto',acceleration:'auto',enabled:true,volume:1,reflections:true,mode:'experimental-additive'});}finally{engine.instance.close();}
+ try{assert.deepEqual(engine.instance.settings,{quality:'auto',acceleration:'auto',enabled:true,volume:1,reflections:true,mode:'experimental-additive',airflowEnabled:false,airflowLevel:.35});}finally{engine.instance.close();}
  const options={blocks:36,coldBlocks:8,profile:'constructor-defaults'};
  const reference=await runBudgetWorkload042({...options,variant:'reference-direct'}),instrumented=await runBudgetWorkload042({...options,variant:'instrumented-direct'});
  assert.deepEqual(compareContinuity042(reference,instrumented),{dryPcmIdentical:true,stereoCompared:true,stereoPcmIdentical:true,framesIdentical:true,sourceCursorIdentical:true,sourceContinuity:true,nonzeroAuthoredOutput:true});

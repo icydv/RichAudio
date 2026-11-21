@@ -1,7 +1,8 @@
 [CmdletBinding()]
-param([string]$SdkPath='',[switch]$CoreOnly,[switch]$Playable,[string]$Output='',[switch]$ShvHandoff,[string]$ShvHandoffPolicySource='',[switch]$ShvHandoff13,[switch]$BatiPlayback,[switch]$ShvHandoff14,[switch]$ShvHandoff15)
+param([string]$SdkPath='',[switch]$CoreOnly,[switch]$Playable,[string]$Output='',[switch]$ShvHandoff,[string]$ShvHandoffPolicySource='',[switch]$ShvHandoff13,[switch]$BatiPlayback,[switch]$ShvHandoff14,[switch]$ShvHandoff15,[switch]$SoundMapViewOnly)
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
+if($SoundMapViewOnly-and($CoreOnly-or$Playable-or$ShvHandoff-or!$Output)){throw 'View-only SoundMap requires its own explicit build output and profile.'}
 if($ShvHandoff15){if(!$ShvHandoff-or$ShvHandoff13-or$ShvHandoff14){throw 'PLAYABLE-15 requires its explicit combined profile.'}}
 elseif(($ShvHandoff13-and!$ShvHandoff)-or($BatiPlayback-and!$ShvHandoff13)){throw 'PLAYABLE-13 audio requires the explicit handoff13 profile.'}
 if($ShvHandoff14-and(!$ShvHandoff-or$ShvHandoff13-or$BatiPlayback)){throw 'PLAYABLE-14 requires its separate passive-only handoff profile.'}
@@ -16,6 +17,7 @@ if(!@($allowed|Where-Object{$output.StartsWith($_,[StringComparison]::OrdinalIgn
 for($cursor=$output;$cursor;$cursor=[IO.Path]::GetDirectoryName($cursor)){
     if((Test-Path -LiteralPath $cursor) -and ((Get-Item -LiteralPath $cursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked bridge build output is not permitted.'}
 }
+if($SoundMapViewOnly-and(Test-Path -LiteralPath $output)){throw 'View-only SoundMap requires a fresh output directory.'}
 if($ShvHandoff){
     $profileRoots=if($ShvHandoff15){@('.local/playable-15')}elseif($ShvHandoff14){@('.local/playable-14')}else{@('build/playable-12-passive-bridge','.local/playable-12','.local/playable-13')}
     $handoffRoots=$profileRoots|ForEach-Object{[IO.Path]::GetFullPath((Join-Path $repo $_)).TrimEnd('\')+'\'}
@@ -55,6 +57,12 @@ if(!$CoreOnly)
         $adapter+=$policy
         $handoffPins=@(@($transport)+@($geometry)+@($menu)+@($adapter)|Sort-Object -Unique|ForEach-Object{[ordered]@{path=$_;sha256=(Get-FileHash -LiteralPath $_).Hash.ToLowerInvariant()}})
     }elseif($Playable){$base+='/define:PLAYABLE_PRODUCT'}
+    if($SoundMapViewOnly){
+        $base+='/define:SOUND_MAP_VIEW_ONLY'
+        $adapter=@('CameraSampler.Rph.cs','PassiveListener.Rph.cs')|ForEach-Object{Join-Path $repo ('src/acoustics/bridge/Rph/'+$_)}
+        $geometry=@()
+        $menu=@('AcousticSettings.cs','InGameSettingsBridge.cs','MenuDiagnostic.cs','PassiveSoundMapBridge.cs')|ForEach-Object{Join-Path $repo ('src/acoustics/host/Windows/'+$_)}
+    }
     & $compiler @base '/r:System.Web.Extensions.dll' '/r:System.Drawing.dll' '/r:System.Windows.Forms.dll' '/r:Microsoft.CSharp.dll' ('/r:'+$SdkPath) ('/out:'+$binary) @transport @geometry @menu @adapter
     if($LASTEXITCODE -ne 0){throw 'Listener RPH adapter build failed.'}
     if($ShvHandoff){
@@ -65,7 +73,7 @@ if(!$CoreOnly)
     # package must separately bind this opt-in sidecar and the changed plugin.
     $menuConfig=Join-Path $output 'RichAudio.Menu.json'
     if(!(Test-Path -LiteralPath $menuConfig)){
-        [ordered]@{schemaVersion=1;workspaceRoot=$repo;settingsPath='.local/acoustic-settings.json';toggleKey='F10';controllerEnabled=$true} |
+        [ordered]@{schemaVersion=1;workspaceRoot=$repo;settingsPath='.local/acoustic-settings.json';toggleKey='F10';controllerEnabled=!$SoundMapViewOnly} |
             ConvertTo-Json | Set-Content -LiteralPath $menuConfig -Encoding UTF8
     }
     [ordered]@{schema=1;sdkSha256=$hash;sdkFileVersion=[Diagnostics.FileVersionInfo]::GetVersionInfo($SdkPath).FileVersion;pluginSha256=(Get-FileHash -LiteralPath $binary -Algorithm SHA256).Hash;targetGta='1.0.1158.16';targetRph='1.132.1428.17748';scope='compiled-only; not deployed or live validated';dependencies='Windows .NET Framework; authentic private RPH SDK'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $output 'bridge-build-receipt.json') -Encoding UTF8

@@ -2,9 +2,9 @@
 
 **No installed access is authorized in this increment.** My next access candidate captures a fixed encrypted directory range without decrypting it. This needs no key material and cannot reveal filenames. A later attempt to decode those saved bytes remains blocked by unavailable private decryption data and processing qualification. These are separate scopes.
 
-In plain terms, the directory is encrypted. Codex can prepare a tiny read-only capture of its encrypted bytes now, then retain them privately for future approved work without repeatedly reopening the archive. Reading the filenames would require private decryption data that I have not identified or supplied. Codex must not invent a key path, fetch keys or inspect my game to obtain them.
+In plain terms, the directory is encrypted. The operator can prepare a tiny read-only capture of its encrypted bytes now, then retain them privately for future approved work without repeatedly reopening the archive. Reading the filenames would require private decryption data that I have not identified or supplied. The operator must not invent a key path, fetch keys or inspect my game to obtain them.
 
-Candidate03 is consumed. The capture uses a new independently reviewed identity and needs fresh explicit approval. The earlier private `world041-ng-read-proposal-01` descriptor remains preserved as a blocked decoding draft; it has no executable command or key capability. Codex has not reopened or statted the archive, loaded private keys or invoked candidate03 during ACOUSTIC-WORLD-04.1.
+Candidate03 is consumed. The capture uses a new independently reviewed identity and needs fresh explicit approval. The earlier private `world041-ng-read-proposal-01` descriptor remains preserved as a blocked decoding draft; it has no executable command or key capability. The operator has not reopened or statted the archive, loaded private keys or invoked candidate03 during ACOUSTIC-WORLD-04.1.
 
 ## Stage A: exact ciphertext-only source scope
 
@@ -44,7 +44,7 @@ An independent peer reran all **20** synthetic acquisition/private-evidence cont
 
 No private key-source allowlist exists yet. The descriptor contains **no key path or key value** and no permission to search for one. The minimum direct archive-specific capability is described in the [research](ACOUSTIC_WORLD_041_NG_RESEARCH.md): a selected expanded key, decryption tables and filename-hash lookup table. Reading any such input requires its exact private path or pre-provided buffer identity, length, hashes, origin, target binding and explicitly approved use in a new independently reviewed closure.
 
-To unblock that prerequisite, I must identify an existing authorized private capability and the use I permit. Codex must not acquire it from a game executable, default key folder, downloaded key-data blob, another archive, guessed values or a broad parser initialization. A separate request for non-secret capability metadata may establish the missing path/format/provenance; it would not authorize reading or deriving the secret material. Synthetic material cannot replace this requirement.
+To unblock that prerequisite, I must identify an existing authorized private capability and the use I permit. The operator must not acquire it from a game executable, default key folder, downloaded key-data blob, another archive, guessed values or a broad parser initialization. A separate request for non-secret capability metadata may establish the missing path/format/provenance; it would not authorize reading or deriving the secret material. Synthetic material cannot replace this requirement.
 
 The proposed key-material ceiling is **279,056 bytes** for a selected schedule or **306,256 bytes** for a fully justified 101-schedule profile. AES/AWC keys and encryption tables are excluded. Actual formats and hashes remain unset. The current public API accepts original synthetic authority only; a real-capability adapter would need separate implementation and review before any approved use of saved real ciphertext. Stage A approval would not authorize any key read or decryption.
 

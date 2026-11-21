@@ -35,7 +35,7 @@ internal static class TestBatiPlaybackSession
     GameTimeMs=n*25,Position=new[]{0d,0d,1d},Velocity=new[]{0d,0d,0d},Forward=new[]{Math.Sin(n*.002),Math.Cos(n*.002),0d},Up=new[]{0d,0d,1d},
     ListenerKind="camera",VelocityKind="estimated-camera-difference",Paused=false,Valid=true,Reason="valid",Coordinates="gta-native-unscaled",Units="native-unverified"},
    Vehicles=new[]{new GameplayVehicle{Id="accepted-Bati-fixture",Generation=1,ObservationTicks=now,Model=model,Context="player",
-    Position=new[]{2d,4d,1d},Velocity=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},OperatingPoint=(double)ratio,Running=true,Valid=true}}};
+    Position=new[]{2d,4d,1d},Velocity=new[]{0d,12d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},OperatingPoint=(double)ratio,Running=true,Valid=true,RiderAttached=true,RiderViewAttached=true}}};
  }
  static void Feed(){var f=Frame();if(!current.PublishAccepted(f,f.ValidThroughTicks))throw new Exception("fixture observation rejected: "+current.State);}
  static void Until(Func<bool> condition,int milliseconds,bool feed){
@@ -75,7 +75,9 @@ internal static class TestBatiPlaybackSession
    For(250,false);Check(current.HostPid==0&&current.Attempts==0,"enable without fresh accepted state opens no host");
    current.Disable();For(300,true);Check(current.HostPid==0&&current.Attempts==0,"fresh evidence without user enable opens no host");
    Check(current.Enable(),"explicit enable while provider fresh");
-   Until(()=>Nonzero(),15000,true);Check(current.Attempts==1,"one actual owned host start");Record("first-enabled-engine-exhaust-stereo");
+   Until(()=>Nonzero(),15000,true);Check(current.Attempts==1,"one actual owned host start");
+   Until(()=>{var flow=Part(Part(Evidence(),"worker"),"airflow");return flow!=null&&flow.ContainsKey("riderActive")&&(bool)flow["riderActive"];},5000,true);
+   Check(true,"actual package receives rider attachment/view and activates local airflow");Record("first-enabled-engine-exhaust-stereo");
    int first=current.HostPid;using(var old=Process.GetProcessById(first)){current.Disable();Until(()=>current.HostPid==0,10000,true);Check(old.HasExited,"explicit disable observes old host exit");}
    var faded=Evidence();Check(faded!=null&&Convert.ToString(faded["hostState"])=="stopped"&&Number(faded,"sumSquares")>0,"controlled stop retains actual nonzero playback evidence");
    Check(Number(faded,"fixtureTrailingSilentFrames")>=960&&Number(faded,"fixtureLastPeak")==0,"actual post-gain ring PCM reaches exact zero before controlled host exit");

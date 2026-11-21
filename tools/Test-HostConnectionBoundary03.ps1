@@ -11,7 +11,7 @@ $paths=@('src/acoustics/host/Transport/StatePipe.cs','src/acoustics/host/Transpo
 $pins=@($paths|ForEach-Object{@{file=$_;sha256=Hash (Join-Path $repo $_)}})
 $source=[IO.File]::ReadAllText((Join-Path $repo $paths[0]));$patches=@(
  @{before='public uint PeerProcessId{get;private set;}';after='internal Action ConnectionBoundaryBeforeWait03,ConnectionBoundaryAfterPeer03; public uint PeerProcessId{get;private set;}'},
- @{before='active=pipe;if(stopping)break;var connect=pipe.BeginWaitForConnection';after='active=pipe;if(stopping)break;if(ConnectionBoundaryBeforeWait03!=null)ConnectionBoundaryBeforeWait03();var connect=pipe.BeginWaitForConnection'},
+ @{before='active=pipe;if(stopping)break;PipeDeadline.WaitForConnection';after='active=pipe;if(stopping)break;if(ConnectionBoundaryBeforeWait03!=null)ConnectionBoundaryBeforeWait03();PipeDeadline.WaitForConnection'},
  @{before='PeerProcessId=peer;';after='PeerProcessId=peer;if(ConnectionBoundaryAfterPeer03!=null)ConnectionBoundaryAfterPeer03();'}
 )
 foreach($patch in $patches){if([regex]::Matches($source,[regex]::Escape($patch.before)).Count-ne1){throw 'Exact unique private instrumentation site required'};$source=$source.Replace($patch.before,$patch.after)}

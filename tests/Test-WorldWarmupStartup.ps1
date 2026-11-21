@@ -29,8 +29,15 @@ function WaitFile([string]$file){$clock=[Diagnostics.Stopwatch]::StartNew();whil
 function ChildGone([string]$pidFile){$ownedId=[int][IO.File]::ReadAllText($pidFile);$clock=[Diagnostics.Stopwatch]::StartNew();while(Get-Process -Id $ownedId -ErrorAction SilentlyContinue){if($clock.Elapsed.TotalSeconds -gt 4){throw 'Owned fixture descendant survived job close'};Start-Sleep -Milliseconds 50}}
 try{
  Assert ([RichAudio.Preparation.WorldWarmupSupervisor]::ConfigurationForGameExecutable($exe) -eq (Join-Path $game 'Plugins\RichAudio.WorldWarmup.json')) 'cached RPH assembly must not change installed sidecar location'
- $c=Configure 'complete' '[IO.File]::WriteAllText((Join-Path $OutputRoot ''done.txt''),''fixture complete'')'
- $w=StartWorker;Await $w @('preparation-finished-read-summary');Assert (Test-Path -LiteralPath (Join-Path $c.OutputRoot 'done.txt')) 'worker did not execute'
+ # Exercise the real sidecar generator's defaults against the real supervisor
+ # validator. Only inert authored game/parser identity files are read here.
+ $generatedSidecar=Join-Path $root 'generated-world-warmup.json'
+ & (Join-Path $repo 'tools\Prepare-WorldWarmupSidecar.ps1') -GameRoot $game -CodeWalkerRoot $cw -PowerShellPath $hostPath -OutputPath $generatedSidecar -CacheRoot (Join-Path $root '.local\generated-cache') | Out-Null
+ $generated=[RichAudio.Preparation.WorldWarmupSupervisor]::ReadConfiguration($generatedSidecar,$exe)
+ Assert ($generated.MaximumStageSeconds -eq 1800 -and $generated.MaximumGeometryResources -eq 262144) 'generated full-world queue budget must be accepted without the former global128-resource cap'
+ $c=Configure 'complete' '[IO.File]::AppendAllText((Join-Path $OutputRoot ''done.txt''),''fixture complete'')'
+ $w=StartWorker;$w.Start($configuration,$exe);$w.Start($configuration,$exe)
+ Await $w @('preparation-finished-read-summary');Assert ([IO.File]::ReadAllText((Join-Path $c.OutputRoot 'done.txt')) -ceq 'fixture complete') 'repeated startup must queue exactly one worker'
  [IO.File]::AppendAllText($script,'# changed')
  $w=StartWorker;Await $w @('blocked-InvalidDataException');Assert (!(Test-Path -LiteralPath (Join-Path $c.OutputRoot 'cancel.request'))) 'input rejection mutated cancellation'
  $c=Configure 'manual-cancel' 'throw ''must not execute'''
@@ -46,7 +53,7 @@ try{
  $c=Configure 'orphan' $spawn;$w=StartWorker;Await $w @('preparation-finished-read-summary');ChildGone (Join-Path $c.OutputRoot 'child.pid')
  $c=Configure 'cancel' ($spawn+'Start-Sleep -Seconds 60');$w=StartWorker;WaitFile (Join-Path $c.OutputRoot 'child.pid');$w.Stop();Await $w @('cancelled');ChildGone (Join-Path $c.OutputRoot 'child.pid')
  $c=Configure 'deadline' ($spawn+'Start-Sleep -Seconds 60');$w=StartWorker;Await $w @('deadline') 30;ChildGone (Join-Path $c.OutputRoot 'child.pid')
- 'Startup supervisor fixtures passed: exact bindings, private output, own-marker resume, manual cancellation, normal completion, orphan cleanup, cancellation and monotonic deadline. No game/RPH/audio ran.'
+ 'Startup supervisor fixtures passed: actual generated full-world sidecar defaults, one queued worker across repeated start, exact bindings, private output, own-marker resume, manual cancellation, normal completion, orphan cleanup, cancellation and monotonic deadline. No game/RPH/audio ran.'
 }finally{
  foreach($w in $workers){$w.Stop()}
  Start-Sleep -Milliseconds 2200

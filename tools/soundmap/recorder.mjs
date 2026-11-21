@@ -2,8 +2,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {createHash, randomUUID} from 'node:crypto';
+import {SOUND_MAP_WIRE} from './ui/wire-limits.mjs';
 
-export const LIMITS = Object.freeze({frameBytes:1048576, pcmBytes:1048576, maxBytes:256*1024*1024,
+export const LIMITS = Object.freeze({frameBytes:1048576,telemetryBytes:SOUND_MAP_WIRE.telemetryBytes,geometryBytes:SOUND_MAP_WIRE.installedGeometryBytes, pcmBytes:1048576, maxBytes:256*1024*1024,
   defaultBytes:64*1024*1024, maxDurationSeconds:600, defaultDurationSeconds:120, totalBytes:1024*1024*1024});
 const sha = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 export function privateDirectory(root) {

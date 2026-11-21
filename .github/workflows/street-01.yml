@@ -1,0 +1,99 @@
+name: STREET-01 original-only functional validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - ".github/workflows/street-01.yml"
+      - "src/acoustics/**"
+      - "src/telemetry/StreetTracked01/**"
+      - "tests/**"
+      - "tools/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: street01-original-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  functional:
+    name: street01-original-node-${{ matrix.node }}
+    runs-on: windows-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22.23.4, 24.19.0]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # existing reviewed publisher v6 pin
+        with:
+          persist-credentials: false
+          # Role-aware and cold-history controls execute their exact Git parent.
+          fetch-depth: 0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # existing reviewed official v6 pin
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Main worker, native ring, world cache and SoundMap original fixtures
+        shell: pwsh
+        run: ./tools/Test-Street01Functional.ps1
+      - name: Retain original-only logs and scope receipt after success or failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # existing reviewed v4.6.2 pin
+        with:
+          name: street01-original-${{ matrix.node }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .local/street01/functional-*/logs/*.log
+            .local/street01/functional-*/receipt.json
+            .local/street01-cache-pressure01/ci-lifecycle-*/result.json
+            .local/street01/soundmap-demand/*/validation.json
+            .local/street01/cold-npc-failure-*/*.json
+            .local/street01/initial-preparation-offer-*/build.log
+            .local/street01/initial-preparation-offer-*/attempt.json
+            .local/street01/initial-preparation-offer-*/validation.json
+            .local/street01/initial-preparation-offer-*/*/stdout.log
+            .local/street01/initial-preparation-offer-*/*/stderr.log
+            .local/street01/initial-preparation-offer-*/*/failure-context.json
+            .local/street01/initial-preparation-offer-*/*/failure.json
+            .local/street01/initial-preparation-offer-*/*/expected-camera-cache-failure.json
+            .local/street01-completion/atomic-publication-*/reader.stdout.log
+            .local/street01-completion/atomic-publication-*/reader.stderr.log
+            .local/street01-completion/atomic-publication-*/reader-lifecycle.json
+            .local/street01-completion/atomic-publication-*/publication.json
+            .local/street01-completion/atomic-publication-*/test-failure.json
+            .local/street01-completion/pipe-lifetime01/*/build.log
+            .local/street01-completion/pipe-lifetime01/*/*.stdout.log
+            .local/street01-completion/pipe-lifetime01/*/*.stderr.log
+            .local/street01-completion/pipe-lifetime01/*/*.json
+            .local/street01-normal-readiness01/focused*/*.json
+            .local/street01-normal-readiness01/focused*/*.log
+            .local/street01-normal-readiness01/original/*/validation.json
+            .local/street01-normal-readiness01/original/*/driver.stdout.log
+            .local/street01-normal-readiness01/original/*/driver.stderr.log
+            .local/street01-passive-fixtures-*/validation.json
+            .local/street01-launcher-rehearsal-*/validation.json
+            .local/street01-launcher-rehearsal-*/**/*.log
+            .local/catalog-publication-tests-*/validation.json
+            .local/catalog-publication-legacy-*/validation.json
+            .local/catalog-publication-legacy-*/*.log
+            .local/resolver-publication-*/validation.json
+            .local/resolver-publication-*/*-result.json
+            .local/resolver-publication-*/*.log
+            .local/resolver-publication-*/child-closure*.json
+            .local/ns01-*/validation.json
+            .local/ns01-*/initializer-and-timing-audit.json
+            .local/ns01-*/failed-rehearsal.json
+            .local/ns01-*/**/case-validation.json
+            .local/ns01-*/**/*.log
+            .local/street01-responsive-controls/original-*/validation.json
+            .local/street01-passive-telemetry01/supervision-*/validation.json
+            .local/street01/tracked-diagnostic-*/validation.json
+            .local/street01/tracked-diagnostic-*/*/run.log
+            .local/street01/tracked-diagnostic-*/*/stderr.log
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7

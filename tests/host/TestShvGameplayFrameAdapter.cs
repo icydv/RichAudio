@@ -76,6 +76,7 @@ internal static class TestShvGameplayFrameAdapter
             GameplayWire.Validate(frame,Fixture.Session);var decoded=GameplayWire.Decode(GameplayWire.Encode(frame,Fixture.Session),Fixture.Session);var v=decoded.Vehicles[0];
             Check(v.OperatingPoint==H.Decode(c.RawBits)&&v.Id=="vehicle-local"&&v.Generation==1&&v.Model==H.BatiModel,"exact scalar and host identity roundtrip");
             Check(v.Running&&v.Valid&&v.Context=="player"&&v.Position[0]==10&&v.Velocity[1]==3,"actual peer pose and running scope");
+            Check(v.RiderAttached==true&&v.RiderViewAttached==null,"qualified player-driver attachment; camera view remains unknown until observed");
             Check(v.ObservationTicks==peer.Context.StartTicks+(peer.Context.EndTicks-peer.Context.StartTicks)/2&&v.ObservationTicks!=f.Clock.Value,"pose was not retimestamped");
             Check(line.RawBits==c.RawBits&&line.SessionId==Fixture.Session&&line.SourceSequence==1&&line.SourceGeneration==1,"private source lineage");
             Check(line.MinimumHostTicks==c.MinimumHostTicks&&line.MaximumHostTicks==c.MaximumHostTicks&&line.ValidThroughHostTicks==c.ValidThroughHostTicks,"uncertainty and expiry retained");

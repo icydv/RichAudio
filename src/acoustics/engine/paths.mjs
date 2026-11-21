@@ -92,7 +92,7 @@ export function finishPathGeometry(plan,queries=null,stats={queries:0,surfaceTes
   const {scene,surfaces,source,listener,vertices,points,conditional}=plan,tile=scene.tile;
   let distance = 0;
   const hits = [];
-  let uncertain = false;
+  let uncertain = false,ambiguousContact=false;const unmappedRegions=new Set();
   for (let i = 0; i < vertices.length - 1; i++) {
     const a = vertices[i],
       b = vertices[i + 1];
@@ -110,6 +110,7 @@ export function finishPathGeometry(plan,queries=null,stats={queries:0,surfaceTes
         ),
     );
     hits.push(...actual);
+    ambiguousContact||=q.ambiguous.length>0;for(const id of q.unknown)unmappedRegions.add(id);
     if (
       q.ambiguous.length ||
       q.unknown.length ||
@@ -125,7 +126,13 @@ export function finishPathGeometry(plan,queries=null,stats={queries:0,surfaceTes
     if (a * b <= E || (s.reflectiveSide === "front" && (a <= E || b <= E)))
       return { status: "wrong-reflecting-side" };
   }
-  if (uncertain) return { status: "unknown", distance, hits };
+  // Limited operation through an unmapped static region retains the existing
+  // conditional direct source, explicitly labelled as such. It grants no
+  // reflection/clearance authority, and never bypasses a represented wall or
+  // ambiguous contact. Every reflected leg still fails on an unknown region.
+  const unknownDirectFallback=uncertain&&!surfaces.length&&!hits.length&&!ambiguousContact&&unmappedRegions.size>0&&scene.observationModel?.kind==='conditional-installed-static-model';
+  if (uncertain&&!unknownDirectFallback) return { status: "unknown", distance, hits,
+    ...(scene.observationModel?.kind==='conditional-installed-static-model'?{ambiguousContact,unmappedRegions:[...unmappedRegions]}:{}) };
   if (hits.length && surfaces.length)
     return { status: "blocked-reflection", distance, hits };
   return {
@@ -135,14 +142,16 @@ export function finishPathGeometry(plan,queries=null,stats={queries:0,surfaceTes
     hits,
     arrivalDirection: unit(sub(vertices.at(-2), listener)),
     emissionDirection: unit(sub(vertices[1], source)),
+    ...(unknownDirectFallback?{unknownDirectFallback:true,unmappedRegions:[...unmappedRegions]}:{}),
   };
 }
 export function candidatePaths(scene, {maxReflectors=scene.config.maxReflectors}={}) {
   requireValue(Number.isInteger(maxReflectors)&&maxReflectors>=1&&maxReflectors<=16,'bounded reflector candidates');
   if(scene.directPath)return [{id:'direct',surfaces:[]}];
   // Stable deterministic cap by ID. No hidden change of material or invented echo when pruned.
-  const s = [...scene.tile.surfaces]
-      .sort((a, b) => a.id.localeCompare(b.id, "en"))
+  const installedIds=scene.observationModel?.kind==='conditional-installed-static-model'?scene.observationModel.reflectionSurfaceIds:null;
+  if(installedIds!==undefined&&installedIds!==null)requireValue(Array.isArray(installedIds)&&installedIds.length<=16&&new Set(installedIds).size===installedIds.length&&installedIds.every(id=>scene.tile.surfaces.some(s=>s.id===id)),'finite installed reflection candidates');
+  const s = (installedIds?installedIds.map(id=>scene.tile.surfaces.find(s=>s.id===id)):[...scene.tile.surfaces].sort((a, b) => a.id.localeCompare(b.id, "en")))
       .slice(0, maxReflectors),
     result = [{ id: "direct", surfaces: [] }];
   if (scene.config.order >= 1)
@@ -279,12 +288,12 @@ export function finishPath(plan,queries=null,stats={queries:0,surfaceTests:0}) {
     emissionDirection: g.emissionDirection,
     materialBasis,
     nearFieldRadius:source.nearFieldRadius??0,
-    geometryEvidence: scene.directPath?'conditional-listener-only-no-geometry':scene.observationModel ? 'conditional-finite-observed-model' : 'synthetic-model',
+    geometryEvidence: g.unknownDirectFallback?'conditional-direct-fallback-unmapped-regions':scene.directPath?'conditional-listener-only-no-geometry':scene.observationModel?.kind==='conditional-installed-static-model'?'conditional-genuine-installed-static-model':scene.observationModel ? 'conditional-finite-observed-model' : 'synthetic-model',
     visibilityAssumption:scene.directPath?.visibilityAssumption??scene.observationModel?.visibilityAssumption??null,
     generation: state.generation,
     visibility:
-      scene.directPath?'conditional-unobserved-space-assumed-clear':scene.observationModel
-        ? (g.status === 'blocked' ? 'authored-transmission-in-partial-model' : 'conditional-observed-path')
+      g.unknownDirectFallback?'conditional-direct-unknown-coverage':scene.directPath?'conditional-unobserved-space-assumed-clear':scene.observationModel
+        ? (g.status === 'blocked' ? 'authored-transmission-in-partial-model' : scene.observationModel.kind==='conditional-installed-static-model'?'conditional-installed-static-path':'conditional-observed-path')
         : g.status === "blocked" ? "authored-transmission" : "verified-synthetic-path",
     retardedResidual: residual,
   };

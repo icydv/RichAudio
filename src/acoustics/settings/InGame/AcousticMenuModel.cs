@@ -86,6 +86,8 @@ namespace RichAudio.Settings.InGame
                 case 2:Pending=Pending.With(enabled:cycle?!Pending.Enabled:direction>0);break;
                 case 3:Pending=Pending.With(outputLevel:Math.Max(0,Math.Min(1,Math.Round((Pending.OutputLevel+direction*.05)*20)/20)));break;
                 case 4:Pending=Pending.With(earlyReflections:cycle?!Pending.EarlyReflections:direction>0);break;
+                case 5:Pending=cycle?Pending.With(airflowEnabled:!Pending.AirflowEnabled):
+                    Pending.With(airflowLevel:Math.Max(0,Math.Min(1,Math.Round((Pending.AirflowLevel+direction*.05)*20)/20)));break;
                 case 6:Pending=Pending.With(diagnosticsOverlay:cycle?!Pending.DiagnosticsOverlay:direction>0);break;
                 case 7:Pending=Pending.With(soundMapVisible:cycle?!Pending.SoundMapVisible:direction>0);break;
                 case 8:Pending=Pending.With(integrationMode:cycle?(Pending.IntegrationMode=="stock-fallback"?"experimental-additive":"stock-fallback"):(direction>0?"experimental-additive":"stock-fallback"));break;

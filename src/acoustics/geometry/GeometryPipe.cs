@@ -46,8 +46,8 @@ namespace RichAudio.GeometryLive
             Protocol.Check(n>0&&n<=MaximumBytes,"geometry frame length");byte[] b=new byte[n];Protocol.Check(ReadExact(pipe,b,250),"truncated geometry frame");return b;
         }
         private static bool ReadExact(PipeStream p,byte[] b,int timeout){int at=0;var watch=Stopwatch.StartNew();while(at<b.Length){
-            var a=p.BeginRead(b,at,b.Length-at,null,null);using(var done=a.AsyncWaitHandle){if(!done.WaitOne(Math.Max(1,timeout-(int)watch.ElapsedMilliseconds))){p.Dispose();throw new TimeoutException("geometry read");}
-                int n=p.EndRead(a);if(n==0){Protocol.Check(at==0,"partial geometry frame");return false;}at+=n;}}return true;}
+            int n=PipeDeadline.Read(p,b,at,b.Length-at,Math.Max(1,timeout-(int)watch.ElapsedMilliseconds),"geometry read");
+            if(n==0){Protocol.Check(at==0,"partial geometry frame");return false;}at+=n;}return true;}
         public static void Write(PipeStream p,byte[] b){var frame=new byte[b.Length+4];Buffer.BlockCopy(BitConverter.GetBytes(b.Length),0,frame,0,4);Buffer.BlockCopy(b,0,frame,4,b.Length);TransportStop.Write(p,frame);}
     }
     // A latest-value mailbox. Qualification, serialization, connection and pipe IO
@@ -91,8 +91,8 @@ namespace RichAudio.GeometryLive
         public GeometryPipeServer(string name,Action<GeometryPacket,uint> consumer,Action<string> unavailable){this.name=name;this.consumer=consumer;this.unavailable=unavailable;}
         public void Start(){thread=new Thread(Run){IsBackground=true,Name="RichAudio geometry receiver"};thread.Start();}
         private void Run(){int attempts=0;while(!stopped&&attempts++<4){try{using(var p=new NamedPipeServerStream(name,PipeDirection.In,1,PipeTransmissionMode.Byte,
-            PipeOptions.Asynchronous,4096,65536,StatePipeServer.CurrentUserSecurity())){active=p;var c=p.BeginWaitForConnection(null,null);
-            using(var done=c.AsyncWaitHandle){if(!done.WaitOne(30000))throw new TimeoutException("geometry connect");p.EndWaitForConnection(c);}Connections++;
+            PipeOptions.Asynchronous,4096,65536,StatePipeServer.CurrentUserSecurity())){active=p;if(stopped)break;
+            PipeDeadline.WaitForConnection(p,30000,"geometry connect");Connections++;
             uint pid;if(!GetNamedPipeClientProcessId(p.SafePipeHandle,out pid))throw new IOException("geometry peer PID");string session=null,listenerSession=null;long sequence=-1,generation=0;int? interior=null;
             double lastFinished=-1;int frames=0;
             while(!stopped){byte[] bytes=GeometryWire.Read(p,1250);if(bytes==null)break;GeometryPacket packet;

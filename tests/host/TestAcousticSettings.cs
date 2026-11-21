@@ -22,6 +22,14 @@ namespace RichAudio.Settings.Tests
                 Check(AcousticSettingsStore.Resolve(root,null,null,null,out resolved)==null,"absent settings preserve the legacy launch");
                 var selected=new AcousticSettings("quality","cpu",1);
                 Check(selected.MenuToggleKey=="F10"&&AcousticSettings.Defaults(1).MenuToggleKey=="F10","legacy/default menu key remains F10");
+                Check(!selected.AirflowEnabled&&selected.AirflowLevel==.35,"legacy engine-only default has no added airflow");
+                var airflow=new AcousticSettings("balanced","auto",1,airflowEnabled:true,airflowLevel:.45);
+                Check(AcousticSettings.Parse(airflow.Serialize()).SamePreferences(airflow),"airflow selection survives restart serialization");
+                Check(airflow.WithRevision(2).AirflowEnabled&&airflow.WithSelections("max","cpu",2).AirflowLevel==.45&&airflow.WithAudio(false,.4,false,false).AirflowEnabled,"other controls retain airflow selection");
+                Check(!airflow.SamePreferences(selected),"airflow edits count as preference changes");
+                foreach(double bad in new[]{Double.NaN,Double.PositiveInfinity,-.1,1.1})Reject(delegate{new AcousticSettings("auto","cpu",1,airflowLevel:bad);},"invalid airflow level rejected");
+                Reject(delegate{AcousticSettings.Parse(airflow.Serialize().Replace("\"airflowEnabled\":true","\"airflowEnabled\":1"));},"wrong attachment-independent airflow preference scalar rejected");
+                Reject(delegate{AcousticSettings.Parse(airflow.Serialize().Replace("\"airflowLevel\":0.45","\"airflowLevel\":0.45,\"airflowLevel\":0.5"));},"duplicate airflow level rejected");
                 var rebound=new AcousticSettings("quality","cpu",1,false,.35,false,true,"experimental-additive",true,"F7");
                 Check(AcousticSettings.Parse(rebound.Serialize()).SamePreferences(rebound),"rebound menu key and all audio preferences survive serialization");
                 Check(rebound.WithRevision(2).MenuToggleKey=="F7"&&rebound.WithSelections("balanced","auto",2).MenuToggleKey=="F7"&&rebound.WithAudio(true,.5,true,false).MenuToggleKey=="F7","background revisions, editor selections and audio updates retain the menu binding");

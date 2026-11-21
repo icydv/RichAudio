@@ -26,7 +26,24 @@ namespace RichAudio.Settings.Tests
                 Directory.CreateDirectory(dir);string prefsRelative=Path.Combine(relative,"preferences.json"),prefs=Path.Combine(root,prefsRelative),pointer=Path.Combine(dir,"RichAudio.Menu.json");
                 var legacy=AcousticSettings.Parse("{\"schemaVersion\":1,\"revision\":1,\"acousticQuality\":\"quality\",\"acousticAcceleration\":\"cpu\"}");
                 Check(legacy.RichAudioEnabled&&legacy.OutputLevel==1&&legacy.EarlyReflections&&!legacy.DiagnosticsOverlay,"old v1 files retain the calibrated profile defaults");
-                var audio=new AcousticSettings("max","cpu",2,false,.35,false,true,menuToggleKey:"F7");
+                var audio=new AcousticSettings("max","cpu",2,false,.35,false,true,menuToggleKey:"F7",airflowEnabled:true,airflowLevel:.45);
+                string worldRoot=Path.Combine(dir,"original-world-status"),worldSummary=Path.Combine(worldRoot,".local","plugin-world-warmup","geometry","summary.json");Directory.CreateDirectory(Path.GetDirectoryName(worldSummary));
+                File.WriteAllText(worldSummary,"{\"Schema\":1,\"ProcessedResources\":3,\"EligibleExteriorCount\":9,\"SelectedYbnCount\":12}");
+                var worldJson=new JavaScriptSerializer();var worldOnly=worldJson.DeserializeObject(WorldWarmupMenuStatus01.Merge(worldRoot,null)) as Dictionary<string,object>;
+                Check((string)worldOnly["hostState"]=="stopped"&&((Dictionary<string,object>)worldOnly["status"]).ContainsKey("acousticWorld"),"cached progress is visible without starting audio");
+                string staleWorldHost=worldJson.Serialize(new{schemaVersion=1,hostState="running",recordedAtUtc=DateTime.UtcNow.AddSeconds(-10).ToString("o"),status=new{activeAcceleration="gpu"}});
+                var merged=worldJson.DeserializeObject(WorldWarmupMenuStatus01.Merge(worldRoot,staleWorldHost)) as Dictionary<string,object>;
+                Check((string)merged["hostState"]=="stopped"&&!((Dictionary<string,object>)merged["status"]).ContainsKey("activeAcceleration"),"world progress cannot refresh a stale active GPU claim");
+                File.WriteAllText(worldSummary,"{\"Schema\":1,\"ProcessedResources\":13,\"EligibleExteriorCount\":9,\"SelectedYbnCount\":12}");
+                Check(WorldWarmupMenuStatus01.Merge(worldRoot,staleWorldHost)==staleWorldHost,"invalid coverage counts cannot become preparation evidence");
+                File.Delete(worldSummary);
+                string heartbeat=Path.Combine(worldRoot,".local","plugin-world-warmup","supervisor-status.json");
+                File.WriteAllText(heartbeat,worldJson.Serialize(new{Schema=1,RecordedUtc=DateTime.UtcNow.ToString("o"),Running=true,Stage="preparing/indexing"}));
+                var preparing=worldJson.DeserializeObject(WorldWarmupMenuStatus01.Merge(worldRoot,null)) as Dictionary<string,object>;
+                var preparingState=(Dictionary<string,object>)preparing["status"];var preparingWorld=(Dictionary<string,object>)preparingState["acousticWorld"];
+                Check((string)preparing["hostState"]=="stopped"&&((string)preparingWorld["stage"]).Contains("preparing"),"fresh owned preparation is visible before the first geometry summary without starting audio");
+                File.WriteAllText(heartbeat,worldJson.Serialize(new{Schema=1,RecordedUtc=DateTime.UtcNow.AddSeconds(-4).ToString("o"),Running=true}));
+                Check(WorldWarmupMenuStatus01.Merge(worldRoot,null)==null,"stale preparation heartbeat cannot assert current world work");
                 Check(AcousticSettings.Parse(audio.Serialize()).SamePreferences(audio),"all six preferences persist and validate");
                 Check(audio.ProducerArguments().Contains("--rich-audio-enabled false")&&audio.ProducerArguments().Contains("--rich-audio-output-level 0.35")&&
                     audio.ProducerArguments().Contains("--early-reflections false")&&audio.ProducerArguments().Contains("--acoustic-diagnostics-overlay true"),"actual producer arguments carry supported audio controls invariantly");
