@@ -17,7 +17,7 @@ class TestSwitch
         s.Command("Ready", a, true, true, true, set);
         Check(s.Command("Restore", a, true, true, true, set) == "returned");
         s.Command("Restore", a, true, true, true, set);
-        Check(String.Join(",", calls) == "ra_quiet_orchard,ADDER");
+        Check(String.Join(",", calls) == "VOLTIC,ADDER");
         s.Command("Ready", a, true, true, true, set);
         s.Observe("B");
         s.Command("Restore", a, true, true, true, set);

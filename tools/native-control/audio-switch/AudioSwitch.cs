@@ -124,7 +124,7 @@ namespace RichAudio.AudioSwitch
                 if (File.Exists(reserved)) return;
                 using (File.Open(reserved,FileMode.CreateNew,FileAccess.Write,FileShare.None)) {}
                 bool engine = v != null && v.IsEngineRunning;
-                string name = q.Operation == "Ready" ? "ra_quiet_orchard" : q.Operation == "Restore" ? "ADDER" : null;
+                string name = q.Operation == "Ready" ? Switch.Donor : q.Operation == "Restore" ? "ADDER" : null;
                 string result;
                 if (q.Operation == "Report" && q.Text != null && q.Text.Length <= 1024) result = "report saved";
                 else if (name == null || q.ExpiresTicks < Stopwatch.GetTimestamp()) result = "invalid or expired";

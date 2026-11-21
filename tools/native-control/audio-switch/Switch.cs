@@ -6,6 +6,7 @@ namespace RichAudio.AudioSwitch
 {
     internal sealed class Switch
     {
+        internal const string Donor = "VOLTIC";
         string target;
         internal string Generation { get; private set; }
         internal string Phase { get; private set; }
@@ -31,7 +32,7 @@ namespace RichAudio.AudioSwitch
             if (!(apply && Phase == "idle") && !(operation == "Restore" && Phase == "restore available"))
                 return "operation unavailable";
             Phase = apply ? "restore available" : "restore uncertain";
-            try { dispatch(apply ? "ra_quiet_orchard" : "ADDER"); }
+            try { dispatch(apply ? Switch.Donor : "ADDER"); }
             catch (Exception e) { return "uncertain: " + e.Message; }
             if (!apply) Phase = "idle";
             return "returned";
