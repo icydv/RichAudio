@@ -1,4 +1,5 @@
 param([string]$Output=('.local/expiry-'+[guid]::NewGuid().ToString('N')),[switch]$Baseline)
+. (Join-Path $PSScriptRoot 'expiry/Diagnostics.ps1')
 $ErrorActionPreference='Stop';$repo=Split-Path -Parent $PSScriptRoot;Set-Location $repo
 if($Output -notmatch '^\.local[/\\][A-Za-z0-9_-]+$'){throw 'Private output required'}
 $out=[IO.Path]::GetFullPath((Join-Path $repo $Output));for($d=[IO.DirectoryInfo]::new($out);$d;$d=$d.Parent){if($d.Exists -and ($d.Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked output'}}
@@ -22,17 +23,26 @@ if($Baseline){
 if($LASTEXITCODE){throw 'Build failed'}
 foreach($case in @('none-1','none-2','none-3','domain-1','domain-2','domain-3','before','after','late')){
  $mode=$case.Split('-')[0];$pipe='RichAudio.Expiry.'+[guid]::NewGuid().ToString('N');$rx=Join-Path $out ($case+'-receiver.json');$tx=Join-Path $out ($case+'-sender.json')
- $receiver=Start-Process $exe -ArgumentList @('receive',$pipe,$mode,('"'+$rx+'"')) -PassThru -WindowStyle Hidden
- try{$w=[Diagnostics.Stopwatch]::StartNew();while(!(Test-Path ($rx+'.ready')) -and $w.ElapsedMilliseconds -lt 2000){Start-Sleep -Milliseconds 10};if(!(Test-Path ($rx+'.ready'))){throw 'Readiness deadline'}
-  $sender=Start-Process $exe -ArgumentList @('send',$pipe,$mode,('"'+$tx+'"')) -PassThru -WindowStyle Hidden
-  try{if(!$sender.WaitForExit(5000) -or !$receiver.WaitForExit(6000)){throw 'Child lifetime'};if($sender.ExitCode -ne 0 -or $receiver.ExitCode -ne 0){throw 'Child failed'}}finally{if(!$sender.HasExited){$sender.Kill()}}
- }finally{if(!$receiver.HasExited){$receiver.Kill()}}
- $r=Get-Content $rx -Raw|ConvertFrom-Json;$t=Get-Content $tx -Raw|ConvertFrom-Json
- if($mode -eq 'late'){if($r.diagnostic.Code -ne 'deadline' -or $r.accepted -ne 0 -or $t.attempts -ne 1 -or $t.diagnostic.Outcome -ne 'failed'){throw 'Original header deadline must remain terminal'}}
- elseif($Baseline -and $mode -in @('domain','before','after')){if($r.accepted -ne 0 -or $r.diagnostic.FirstFrame.AgeClass -ne 'too-old' -or $t.attempts -ne 1){throw 'Baseline expiry not reproduced'}}
- elseif($r.connections -ne 1 -or $t.attempts -ne 1 -or $r.accepted -le 0 -or $r.rejected -ne 0 -or $r.diagnostic.Outcome -ne 'deliberate-stop' -or $t.diagnostic.Outcome -ne 'deliberate-stop'){throw "Case failed; no retry: $case"}
- if(!$Baseline -and $mode -in @('before','after','late') -and ($t.expiredAfter -ne 1 -or $t.firstExpired.AgeMs -le 250)){throw 'Controlled expiry was not attributed'}
- [pscustomobject]@{Case=$case;Accepted=$r.accepted;Rejected=$r.rejected;Age=$r.diagnostic.FirstFrame.DecisionAgeMs;Outcome=$r.diagnostic.Outcome;Encode=$t.diagnostic.FirstFrame.EncodeMs;PreWriteAge=$t.diagnostic.FirstFrame.AgeBeforeWriteMs;Write=$t.diagnostic.FirstFrame.WriteMs;ExpiredAfter=$t.expiredAfter;FirstExpired=$t.firstExpired}|ConvertTo-Json -Compress
+ $receiver=$null;$sender=$null;$failure=$null;$watch=[Diagnostics.Stopwatch]::StartNew()
+ $life=[ordered]@{ReceiverStarted=$false;SenderStarted=$false;ReceiverExited=$false;SenderExited=$false;ReceiverExitCode=$null;SenderExitCode=$null;ReceiverKillRequested=$false;SenderKillRequested=$false;FailureStage=$null;ElapsedMs=0}
+ $stage='receiver-start'
+ try {
+  $receiver=Start-Process $exe -ArgumentList @('receive',$pipe,$mode,('"'+$rx+'"')) -PassThru -WindowStyle Hidden;$life.ReceiverStarted=$true
+  $stage='receiver-readiness';$w=[Diagnostics.Stopwatch]::StartNew();while(!(Test-Path ($rx+'.ready')) -and $w.ElapsedMilliseconds -lt 2000){Start-Sleep -Milliseconds 10};if(!(Test-Path ($rx+'.ready'))){throw 'Readiness deadline'}
+  $stage='sender-start';$sender=Start-Process $exe -ArgumentList @('send',$pipe,$mode,('"'+$tx+'"')) -PassThru -WindowStyle Hidden;$life.SenderStarted=$true
+  $stage='child-lifetime';if(!$sender.WaitForExit(5000) -or !$receiver.WaitForExit(6000)){throw 'Child lifetime'}
+  $stage='child-exit';if($sender.ExitCode -ne 0 -or $receiver.ExitCode -ne 0){throw 'Child failed'}
+ } catch {$life.FailureStage=$stage;$failure=$_}
+ finally {
+  foreach($role in @('Sender','Receiver')){$child=if($role-eq'Sender'){$sender}else{$receiver};if($null-ne$child){
+   try{if(!$child.HasExited){$life[$role+'KillRequested']=$true;$child.Kill();[void]$child.WaitForExit(1000)};$life[$role+'Exited']=$child.HasExited;if($child.HasExited){$life[$role+'ExitCode']=$child.ExitCode}}catch{$life.FailureStage='cleanup-unverified'}
+  }}
+  $life.ElapsedMs=$watch.Elapsed.TotalMilliseconds
+  $record=Write-ExpiryDiagnostic -Case $case -Mode $mode -Baseline ([bool]$Baseline) -ReceiverPath $rx -SenderPath $tx -Directory (Join-Path $out 'diagnostics') -Lifecycle $life
+ }
+ if($failure){throw $failure}
+ if(!$record.passed){throw "Case failed; no retry: $case"}
+
 }
 # Console capture is tested with a synthetic Console.WriteLine child only; no host/backend entry point.
 $readyWatch=[Diagnostics.Stopwatch]::StartNew()
