@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-12",
+  "decision": "GO-FOR-EXACT-ARTIFACT-PASSIVE-LIVE-APPROVAL-ONLY",
+  "runtimePolicy": "functional-compatibility",
+  "readyForApproval": true,
+  "liveApprovalGranted": false,
+  "deployed": false,
+  "gameLaunched": false,
+  "liveHandoffQualified": false,
+  "audioQualified": false,
+  "artifacts": [
+    {
+      "name": "RichAudio.dll",
+      "bytes": 337408,
+      "sha256": "1b9ed8586906c0c56f9f8c695dcbe137857b4d08da02a6797eb6811002727866"
+    },
+    {
+      "name": "RichAudio.OperatingState.ShvHandoff.asi",
+      "bytes": 129024,
+      "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+      "sourceChanged": false,
+      "rebuilt": false
+    }
+  ],
+  "privateBuildReceiptSha256": "55ad9a36f30443f72a6dd8315cf057707bbb59c9c86fff7a3c1dfb723054185a",
+  "privateProfileReceiptSha256": "0f7a6aa9870e4dfcf586f1c88faa8913eb43cded6542d53bf00968f1d753d3d0",
+  "privateFocusedComponentReceiptSha256": "413e6d367faaf0b633e57eaa73a7801194fad484540df275e580b35fb18f6adc",
+  "privateCompatibilityReceiptSha256": "e5a3c0e5d2b378cae69911538c53bf9de3ab519ca0b2e8f9619f1d1f14317cd1",
+  "privatePreparationGuardsSha256": "aa94cabf1a184a3355edaeec927b5ef6acec189ea6ea26ef106feae3f37ac49a",
+  "manifests": [
+    {
+      "name": "installation-manifest.json",
+      "bytes": 8166,
+      "sha256": "121a4ded92537baca3819e6edda9285595b56ce1539624956fd87985a0549ce4"
+    },
+    {
+      "name": "rollback-manifest.json",
+      "bytes": 2366,
+      "sha256": "59a2571f7866c100ef3d1558e2fec5d0df4ed04ced62cc521426759d0ce317af"
+    },
+    {
+      "name": "preflight.json",
+      "bytes": 5697,
+      "sha256": "6e55ad65f301dbc2be112cbe1c287c3592fff63106f69e27a2e83cfb6ab359a8"
+    }
+  ],
+  "payloadCount": 2,
+  "leaseFields": 21,
+  "sourceGeneration": 1,
+  "limits": {
+    "launchesProposed": 1,
+    "retriesAllowed": false,
+    "waitingSeconds": 300,
+    "activeSeconds": 120,
+    "maximumTargets": 2400,
+    "minimumTargetIntervalMilliseconds": 50,
+    "queueCapacity": 128,
+    "maximumRawRows": 4801,
+    "maximumEvidenceBytes": 12582912,
+    "sourceStopDrainMilliseconds": 500,
+    "sourceCompletionDistinctFromRetirement": true,
+    "nativeAndOsCallsPreemptible": false
+  },
+  "stockFallback": true,
+  "modificationAwareLoudness": false,
+  "synchronizedAudioRecording": false,
+  "sourceScope": "Engine-running player-driven Bati, offline Story Mode, Enhanced1.0.1158.16 on reviewed SHV stack; normalised operating state, not physical RPM",
+  "identityLimit": "Read-only pool-counter and opaque-address correspondence; full unobserved counter-wrap/address reuse remains excluded.",
+  "nextGate": "Fresh explicit approval for these exact two artifacts and proposal; normal exit then ownership/hash-verified rollback. No audio or recording approval.",
+  "privacy": "Only relative names/digests and sanitised aggregates are published; absolute paths, generated policy, sessions, secrets and captures stay private."
+}

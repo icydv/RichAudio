@@ -8,7 +8,9 @@ using Rage.Attributes;
 using Rage.Native;
 using RichAudio.Beacon.Transport;
 
+#if !PLAYABLE_PRODUCT
 [assembly:Plugin("RichAudio Listener Beacon Bridge",Author="RichAudio",Description="ACOUSTICS-07 opt-in read-only camera listener; no game sound ownership",EntryPoint="RichAudio.Beacon.Rph.ListenerBridge.Main",ExitPoint="RichAudio.Beacon.Rph.ListenerBridge.OnUnload",PrefersSingleInstance=true,ShouldTickInPauseMenu=true)]
+#endif
 namespace RichAudio.Beacon.Rph
 {
     public static class ListenerBridge

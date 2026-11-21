@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-08",
+  "kind": "telemetry",
+  "provenance": "actual-live",
+  "verdict": "accepted",
+  "scope": {
+    "gameVersion": "1.0.1158.16",
+    "gameSha256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea",
+    "modelHash": 4180675781,
+    "providerSha256": "41361aa281493e1cc54fe196161aafc4a93ce002bfe0bb9da2effbc742465484",
+    "quantity": "normalised-engine-operating-state",
+    "handleDomain": "shv"
+  },
+  "evidenceSha256": "7edc205af64f2a1547ec7fbd8bee58498c5356c0fabf7e8e05da140019530076",
+  "primaryPassed": true,
+  "humanScopeReviewAccepted": true,
+  "rawValuesPreserved": true,
+  "decision": "Restricted engine-running Bati signal evidence accepted for preparing and separately validating the next handoff experiment; no product/runtime authorisation",
+  "qualifiedContext": {
+    "offlineStoryModeOnly": true,
+    "currentLocalPlayerDriverOnly": true,
+    "engineRunningTrueOnly": true,
+    "framework": "Script Hook V",
+    "scriptHookVVersion": "3889.0/1158.13",
+    "scriptHookVSha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f",
+    "rphVersion": "1.132.1428.17748",
+    "rphSha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac",
+    "publishedNativeHash": "F9DDA40BC293A61E",
+    "nativeResolverBypassed": false,
+    "versionSpecificMemoryOffsetsUsed": false,
+    "observedRawMinimum": 0.20000000298023224,
+    "observedRawMaximum": 1,
+    "rawUnits": "Dimensionless observed operating-state signal; not calibrated physical RPM",
+    "exactProviderArtifactOnly": true,
+    "futureChangedProviderBuildRequiresReviewAndLiveValidation": true
+  },
+  "observations": {
+    "completeTriplets": 1633,
+    "distinctRawFloatBitPatterns": 836,
+    "primaryCriteriaPassed": 7,
+    "primaryCriteriaChanged": false,
+    "initialIdleSeconds": 14.7600852,
+    "returnIdleSeconds": 13.2956572,
+    "accelerationSpeedQuarterDeltaMps": 29.010689735412598,
+    "accelerationRatioQuarterDelta": 0.329006552696228,
+    "decelerationSpeedQuarterDeltaMps": -13.325404167175293,
+    "decelerationRatioQuarterDelta": -0.32184018194675446,
+    "producerValidityClaimStillFalse": true,
+    "analyzerProviderQualificationStillFalse": true,
+    "manualReviewAcceptanceIsSeparateFromImmutableProducerAndAnalyzerFlags": true
+  },
+  "excludedClaims": [
+    "Physical crankshaft RPM or an RPM conversion",
+    "Engine-off, restart, stall and engine-running zero semantics",
+    "Measured gear, actual throttle or W/S intent as engine actuation",
+    "All rev-labelled samples being stationary",
+    "Other vehicles, NPCs, builds, framework versions or provider artifacts",
+    "Long-duration or repeated-session reliability",
+    "Cross-framework handle equality, authenticated SHV-to-RPH identity or clock mapping",
+    "Live RichAudio PCM, audible playback, listening acceptance, loudness calibration or audio capture"
+  ],
+  "nextGate": {
+    "handoffQualified": false,
+    "livePlaybackQualified": false,
+    "humanListeningAccepted": false,
+    "nextAction": "Prepare isolated fail-closed handoff validation without runtime activation; separately authorise its eventual exact live test",
+    "grantsAuthorization": false,
+    "opensEndpoint": false,
+    "changesFeatureFlags": false,
+    "trustedCompositionMustAuthenticateReviewedReceiptAndEnforceRestrictions": true
+  },
+  "integrity": {
+    "actualLiveEvidenceSha256": "7edc205af64f2a1547ec7fbd8bee58498c5356c0fabf7e8e05da140019530076",
+    "rollbackEvidenceSha256": "36de43eb2d6c8896a336a98c4b258f96994b62def4d5e8a50434a9d5b5259d20",
+    "privateAnalysisSha256": "858003718ea49ed56037993ef14598cf6c8a816ead83a17ada9f387375d5197b",
+    "privateIndependentReviewSha256": "af08337c01373d9405e804069d638b6df8bfb34ca00ac484f14b97d2d6bb1410",
+    "privateHumanReportSha256": "e81825b2e6a1236014ad2a3166c61787f7b2f58edf182c207ebf350b5c45797a",
+    "privateIndependentPostrollbackSha256": "469121aa552383c1400686d1b244bfe68aa97d94a6db5ff34b94fae696997ba5",
+    "primaryAnalyzerSha256": "c246ea676c54b8298503cadfcc8603eac4c7f1fbfca012bf7e5a726e48937799"
+  },
+  "earlierAttempt": {
+    "firstPlayable08Result": "INCOMPLETE",
+    "evidence": "evidence/playable-08-live.json",
+    "retrospectivePhaseRelabelling": false
+  }
+}

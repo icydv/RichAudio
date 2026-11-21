@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-08",
+  "scope": "Focused offline controls apply the actual restricted telemetry acceptance to the unchanged pure production activation evaluator. No later-stage acceptance receipt is fabricated.",
+  "privateValidationReceiptSha256": "1358b6f824f7e4061aa51ed0269cec638c9f89285e1a048679b57cd44cf5170f",
+  "testSource": {
+    "file": "tests/Test-EngineStateAcceptance.mjs",
+    "sha256": "df3497f1d79585619471c5fee0d17d7c100d6f47ad70532405740c0fbf5d3bde"
+  },
+  "inputPins": {
+    "acceptance": "1beb111e5c2cbe60d5eb0a58d7821a6e2f1d101c79d7271c67c2df2fb3f214ab",
+    "live": "7edc205af64f2a1547ec7fbd8bee58498c5356c0fabf7e8e05da140019530076",
+    "rollback": "36de43eb2d6c8896a336a98c4b258f96994b62def4d5e8a50434a9d5b5259d20",
+    "incomplete": "1f63306d01b7281a479a07fd5d77c9f06667e8dd5e3cefb58d5a309f47f09edd",
+    "activation": "a07c8e444852fd43629eba076662db328bc0a3b32430c7326a311466b558a9dc",
+    "analyzer": "c246ea676c54b8298503cadfcc8603eac4c7f1fbfca012bf7e5a726e48937799"
+  },
+  "passed": 11,
+  "failed": 0,
+  "privateFrozenEvidenceDigestsChecked": true,
+  "acceptedScope": {
+    "gameVersion": "1.0.1158.16",
+    "gameSha256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea",
+    "modelHash": 4180675781,
+    "providerSha256": "41361aa281493e1cc54fe196161aafc4a93ce002bfe0bb9da2effbc742465484",
+    "quantity": "normalised-engine-operating-state",
+    "handleDomain": "shv"
+  },
+  "requestedFeaturesInNegativeControls": {
+    "schema": 1,
+    "modificationAwareLoudness": true,
+    "synchronizedAudioRecording": true
+  },
+  "telemetryOnlyResult": {
+    "schema": 1,
+    "scopeValid": true,
+    "stages": {
+      "telemetry": true,
+      "handoff": false,
+      "playback": false,
+      "listening": false,
+      "loudnessCalibrated": false
+    },
+    "loudnessCalibrationAllowed": false,
+    "productionLoudnessAllowed": false,
+    "ownedPcmRecordingAllowed": false,
+    "loopbackRecordingAllowed": false,
+    "recordingReadiness": {
+      "FeatureEnabled": true,
+      "ExplicitUserStart": false,
+      "TelemetryQualified": true,
+      "HandoffQualified": false,
+      "LivePcmVerified": false,
+      "HumanListeningApproved": false,
+      "LoopbackExplicitlyApproved": false
+    },
+    "missing": [
+      "handoff",
+      "playback",
+      "listening",
+      "loudnessCalibrated",
+      "current-session-authorization"
+    ],
+    "grantsAuthorization": false,
+    "opensEndpoint": false
+  },
+  "controls": [
+    {
+      "name": "actual acceptance digests, exact scope and measurements match reviewed evidence",
+      "passed": true
+    },
+    {
+      "name": "private frozen analysis, human report and independent reviews retain their accepted digests",
+      "passed": true
+    },
+    {
+      "name": "actual restricted telemetry passes while every later stage and requested feature stays blocked",
+      "passed": true
+    },
+    {
+      "name": "caller supplied nominal session flags cannot replace missing handoff, PCM and listening evidence",
+      "passed": true
+    },
+    {
+      "name": "the preserved first PLAYABLE08 incomplete attempt cannot become telemetry acceptance",
+      "passed": true
+    },
+    {
+      "name": "actual receipt cannot qualify another vehicle",
+      "passed": true
+    },
+    {
+      "name": "actual receipt cannot qualify another provider artifact",
+      "passed": true
+    },
+    {
+      "name": "actual receipt cannot qualify RPH handles",
+      "passed": true
+    },
+    {
+      "name": "actual receipt cannot qualify another executable",
+      "passed": true
+    },
+    {
+      "name": "actual receipt cannot qualify physical RPM units",
+      "passed": true
+    },
+    {
+      "name": "fixture provenance and absent human review remain rejected negative mutations",
+      "passed": true
+    }
+  ],
+  "sourceProducerProviderValidStillFalse": true,
+  "sourceAnalyzerProviderQualificationStillFalse": true,
+  "noLaterStageAcceptanceInvented": true,
+  "earlierIncompleteAttemptRejected": true,
+  "differentModelProviderExecutableUnitsAndHandleDomainRejected": true,
+  "actualGameStartedByControls": false,
+  "actualShvExecutedByControls": false,
+  "audioHostStarted": false,
+  "endpointOpened": false,
+  "productionFeaturesActivated": false,
+  "runtimeFeatureFlagsChanged": false,
+  "newRuntimeAuthorisationGranted": false,
+  "limitations": [
+    "The evaluator is structural and does not authenticate arbitrary JSON or grant user consent.",
+    "Trusted future composition must authenticate the reviewed receipt and enforce engine-running, offline local-driver, exact-build and handle-domain restrictions on every live observation.",
+    "These controls qualify no handoff, live PCM, listening, loudness, audio recording, physical RPM, engine-off state or other vehicle."
+  ]
+}

@@ -1,0 +1,2711 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-07",
+  "dateUtc": "2026-11-01",
+  "scope": "One separately authorised actual SHV diagnostic launch; changing raw observations are separate from operating-state qualification, product integration and audio testing.",
+  "decision": {
+    "nativeCallRouteWithRepeatedChangingSignalEstablished": true,
+    "primaryQualification": "INCOMPLETE",
+    "primaryDataQualityFailures": 0,
+    "operatingStateProviderQualified": false,
+    "productIntegration": "BLOCKED",
+    "measuredRPM": false,
+    "providerValid": false,
+    "reason": "No phase ADVANCE was recorded. The operator later confirmed enabling and stopping capture without advancing labels. The changing signal is established, but the approved phase chronology and full operating-state contract remain unestablished.",
+    "additionalCaptureAuthorisedByThisRecord": false
+  },
+  "candidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "sha256": "21302b4c5c5fb99f63b7b25dce2fa973117bfb0246f16745d0782f062fe1a69e",
+    "bytes": 378880,
+    "unchangedFromOfflineFixtures": true
+  },
+  "authorisation": {
+    "maximumDeployments": 1,
+    "maximumLaunches": 1,
+    "maximumCaptures": 1,
+    "maximumActiveMs": 120000,
+    "maximumTargets": 2400,
+    "maximumHz": 20,
+    "automaticRetry": false,
+    "audioTestAuthorised": false,
+    "installationManifestSha256": "885179510f2829cbb6b8ad8a1d1cce567df7316dfe21f4db94090185fee18634",
+    "explicitUserApproval": true,
+    "approvalConsumed": true
+  },
+  "actualExecution": {
+    "gameStarted": true,
+    "actualScriptHookVLoaded": true,
+    "actualScriptHookVExecuted": true,
+    "launchRoute": "Existing working RPH launch route",
+    "actualLaunches": 1,
+    "actualCaptures": 1,
+    "automaticRetryPerformed": false,
+    "scriptHookVVersion": "3889.0/1158.13",
+    "scriptHookVInternalGameLabel": "VER_EN_1_0_1158_13",
+    "gameFileVersion": "1.0.1158.16",
+    "gameVersionBasis": "Protected executable hash matches the preserved verified build baseline",
+    "asiLoadCount": 1,
+    "scriptRegistrationCount": 1,
+    "scriptCallbackLaunchCount": 1,
+    "scriptUnregistrationCount": 1
+  },
+  "capture": {
+    "targetHash": "F9DDA40BC293A61E",
+    "targetAttempts": 1869,
+    "targetOutcomesObserved": 1869,
+    "completeObservations": 1869,
+    "rawReturns": 1869,
+    "declarations": 1869,
+    "phaseEvents": 2,
+    "records": 5609,
+    "producerCompleted": true,
+    "writerFailed": false,
+    "terminalReason": "operator-stop",
+    "operatorStopWasEarly": true,
+    "deadlineReached": false,
+    "exceptionCode": 0,
+    "presentationExceptionCodeAtCapture": 0,
+    "zeroWhileRunningCount": 0,
+    "droppedOperatorEvents": 0,
+    "journalStages": [
+      "capture-open",
+      "operator-armed",
+      "active-start",
+      "capture-terminal"
+    ],
+    "terminalJournalCaptureWritten": true,
+    "tripletsCorrespondAndAreOrdered": true,
+    "rawReturnsWithoutCompleteContext": 0,
+    "allResultPointersPresent": true,
+    "readStatusCounts": {
+      "good": 1869
+    },
+    "classificationCounts": {
+      "finite-unvalidated": 1869
+    },
+    "failedNativeHash": "0000000000000000",
+    "staleOperatorEvents": 0,
+    "unpublishedRecordPresent": false,
+    "aggregateCaptureBytes": 4797335,
+    "measuredRPM": false,
+    "providerValid": false
+  },
+  "bounds": {
+    "waitingTimeoutMs": 300000,
+    "maximumActiveMs": 120000,
+    "maximumTargetObservations": 2400,
+    "minimumAfterToNextTargetMs": 50,
+    "maximumObservationGapMs": 250,
+    "ringCapacityRecords": 128,
+    "maximumTimelineRowBytes": 2047,
+    "maximumReturnRowBytes": 511,
+    "maximumTimelineRecords": 7209,
+    "aggregateFileBudgetBytes": 12582912,
+    "terminalHudMaxMs": 5000,
+    "watchdogCanPreemptNative": false,
+    "unknownNativeFailureIsContained": false,
+    "maximumHz": 20,
+    "withinRecordedCaptureBounds": true
+  },
+  "timing": {
+    "qpcFrequencyHz": 10000000,
+    "activeStartSecondsSinceSession": 59.8988825,
+    "operatorCallbackBeforeSecondsSinceSession": 59.876704,
+    "activeEndSeconds": 105.2790288,
+    "firstTargetStartSeconds": 0.0000301,
+    "lastTargetStartSeconds": 105.2366993,
+    "lastTargetEndSeconds": 105.2367004,
+    "firstToLastTargetSpanSeconds": 105.2366692,
+    "minimumStartGapMs": 54.6002,
+    "maximumStartGapMs": 57.9446,
+    "minimumAfterToNextStartGapMs": 54.5984,
+    "targetWindowMs": {
+      "minimum": 0.0008,
+      "median": 0.0011,
+      "maximum": 0.4404
+    },
+    "interpretation": "Relative monotonic observation timings; target window includes dispatch/copy bookkeeping and is not a native handler or audio performance benchmark",
+    "basis": "Relative monotonic timings. Zero is activeStartQpc; absolute QPC values remain private.",
+    "activeStartTicksSinceSession": 598988825,
+    "activeDurationTicks": 1052790288,
+    "activeDurationSeconds": 105.2790288,
+    "firstTargetStartTicks": 301,
+    "lastTargetStartTicks": 1052366993,
+    "lastTargetEndTicks": 1052367004
+  },
+  "operatorMarkers": {
+    "requestedObservationPhases": {
+      "OFF": 1869
+    },
+    "events": [
+      {
+        "action": "start",
+        "requestedPhase": "OFF",
+        "earlyStop": false,
+        "terminalVirtualKeyHex": "DC",
+        "inputBeforeTicksSinceActive": -221785,
+        "inputBeforeSecondsSinceActive": -0.0221785,
+        "inputAfterTicksSinceActive": -221784,
+        "inputAfterSecondsSinceActive": -0.0221784,
+        "acceptedTicksSinceActive": -137080,
+        "acceptedSecondsSinceActive": -0.013708
+      },
+      {
+        "action": "stop",
+        "requestedPhase": "OFF",
+        "earlyStop": true,
+        "terminalVirtualKeyHex": "DC",
+        "inputBeforeTicksSinceActive": 1052784846,
+        "inputBeforeSecondsSinceActive": 105.2784846,
+        "inputAfterTicksSinceActive": 1052784847,
+        "inputAfterSecondsSinceActive": 105.2784847,
+        "acceptedTicksSinceActive": 1052790283,
+        "acceptedSecondsSinceActive": 105.2790283
+      }
+    ],
+    "advanceEventsRecorded": 0,
+    "lastRequestedPhase": "OFF",
+    "operatorStopWasEarly": true,
+    "operatorLabelsAreAchievedStateProof": false,
+    "inputClockDescribesCallbackNotHardwareInstant": true,
+    "laterClarification": {
+      "paraphrase": "The operator reported enabling capture and stopping it without advancing phase labels.",
+      "receivedAfterCapture": true,
+      "operatorReportsNoPhaseAdvanceAttempt": true,
+      "missingMarkersExplainedByOperatorReport": true,
+      "keyboardControlDefectEstablished": false,
+      "additionalCaptureAuthorised": false
+    }
+  },
+  "rawSignal": {
+    "minimum": {
+      "rawBitsHex": "3E4CCCCD",
+      "binary32": 0.20000000298023224,
+      "serializedRawFloat": 0.200000003,
+      "relativeSeconds": 0.0000301
+    },
+    "maximum": {
+      "rawBitsHex": "3F800000",
+      "binary32": 1,
+      "serializedRawFloat": 1,
+      "relativeSeconds": 3.1549478
+    },
+    "uniqueBitPatterns": 1351,
+    "classificationCounts": {
+      "finite-unvalidated": 1869
+    },
+    "largestConsecutiveAbsoluteChange": {
+      "magnitude": 0.05690622329711914,
+      "delta": 0.05690622329711914,
+      "time": 42.1969766,
+      "from": 0.66185063123703,
+      "to": 0.7187568545341492,
+      "speedFrom": 20.228754,
+      "speedTo": 19.986969
+    },
+    "stepsAbove0_35": 0,
+    "longestIdenticalBitsRun": {
+      "samples": 153,
+      "startSeconds": 89.0678316,
+      "endSeconds": 97.6315357,
+      "spanSeconds": 8.563704099999995,
+      "ratioMinimum": 0.20000000298023224,
+      "ratioMaximum": 0.20000000298023224,
+      "ratioMedian": 0.20000000298023224,
+      "speedMinimumMps": 0,
+      "speedMaximumMps": 5.9682641,
+      "speedQuarterDeltaMps": -2.19138014,
+      "ratioQuarterDelta": 0,
+      "rawBitsHex": "3E4CCCCD",
+      "interpretation": "A stable repeated value is not by itself a stale-read failure"
+    },
+    "rangeBinary32": 0.7999999970197678,
+    "constantSignal": false,
+    "rawValuesClampedOrRescaled": false,
+    "physicalRpmConversionEstablished": false
+  },
+  "context": {
+    "modelHash": "F9300CC5",
+    "uniquePreContextIdentities": 1,
+    "allIdentityBracketsValid": true,
+    "allDriversMatchOwnPed": true,
+    "preEngineRunningRawCounts": {
+      "1": 1869
+    },
+    "postEngineRunningRawCounts": {
+      "1": 1869
+    },
+    "minimumSpeedMps": 0,
+    "maximumSpeedMps": 48.4427528,
+    "nearStationaryBothSamples": 633,
+    "movingBothSamples": 1236,
+    "engineOffObserved": false,
+    "actualGearAvailable": false,
+    "actualThrottleAvailable": false,
+    "controlAxisAvailable": false,
+    "speedUsedAsRpm": false,
+    "samplingDoesNotProveContinuousStateBetweenObservations": true
+  },
+  "keyboardIntent": {
+    "wKnownBeforeSamples": 1869,
+    "wDownBeforeSamples": 0,
+    "sKnownBeforeSamples": 0,
+    "sDownBeforeSamples": 0,
+    "actualThrottleAvailable": false,
+    "gearAvailable": false,
+    "intentProvesActuation": false,
+    "wEventCounterFirst": 62,
+    "wEventCounterLast": 62,
+    "fullKeyboardEventTraceClaimed": false,
+    "wDownCorrelationEstablished": false,
+    "scope": "SDK notification model only. No W-down sample is present; this does not identify actual throttle, controller use or physical engine actuation."
+  },
+  "primaryAnalysis": {
+    "verdict": "incomplete",
+    "providerQualified": false,
+    "measuredRPM": false,
+    "reviewThresholds": {
+      "idleSeconds": 2,
+      "idleMinimumSamples": 10,
+      "idleBaseline": 0.2,
+      "idleBaselineTolerance": 0.05,
+      "idleMaximumExcursion": 0.03,
+      "returnIdleTolerance": 0.03,
+      "stationaryMps": 0.1,
+      "speedChangeMps": 2,
+      "activitySeconds": 2,
+      "signalChange": 0.1,
+      "orderedChange": 0.05,
+      "maximumGapMs": 250,
+      "maximumStepForAutomaticReview": 0.35,
+      "maximumActiveSeconds": 120,
+      "maximumTargets": 2400,
+      "maximumHz": 20
+    },
+    "criteria": {
+      "initialIdleContextAndStability": false,
+      "returnIdleContextAndStability": false,
+      "independentAcceleration": false,
+      "independentDeceleration": false,
+      "ratioRiseDuringObservedAcceleration": false,
+      "ratioFallDuringObservedDeceleration": false,
+      "meaningfulRunningVariation": true
+    },
+    "qualityFailures": [],
+    "evidenceGaps": [
+      "initialIdleContextAndStability",
+      "returnIdleContextAndStability",
+      "independentAcceleration",
+      "independentDeceleration",
+      "ratioRiseDuringObservedAcceleration",
+      "ratioFallDuringObservedDeceleration"
+    ],
+    "warnings": [
+      "engine-off-unobserved",
+      "gear-and-actual-throttle-unavailable-with-approved-native-set",
+      "stationary-rev-input-association-unobserved",
+      "keyboard-intent-does-not-prove-engine-actuation"
+    ],
+    "phaseSelectedWindows": {
+      "initialIdle": {
+        "samples": 0,
+        "durationSeconds": 0
+      },
+      "returnIdle": {
+        "samples": 0,
+        "durationSeconds": 0
+      },
+      "acceleration": {
+        "samples": 0,
+        "durationSeconds": 0
+      },
+      "deceleration": {
+        "samples": 0,
+        "durationSeconds": 0
+      },
+      "engineOff": {
+        "samples": 0,
+        "durationSeconds": 0
+      }
+    },
+    "independentReviewAgrees": true,
+    "laterOperatorClarificationDoesNotRelabelData": true
+  },
+  "humanObservation": {
+    "statement": "idle, stationary revving, significant acceleration, acceleration redlining doing a wheelie, deceleration and idle again",
+    "receivedAfterCapture": true,
+    "exactStateTransitionTimesEstablished": false,
+    "engineOffClaimProvided": false,
+    "gearTransitionClaimProvided": false,
+    "qualitativeCorroborationOnly": true,
+    "doesNotOverrideRecordedPhaseMarkers": true,
+    "reportedRedliningIsNotPhysicalRedlineCalibration": true
+  },
+  "exploratoryContextReview": {
+    "label": "Exploratory only: independent speed/engine context selection ignores requested phase labels and cannot satisfy or relabel the approved primary experiment",
+    "nearStationaryRunningSegmentsAtLeast2Seconds": [
+      {
+        "samples": 374,
+        "startSeconds": 0.0000301,
+        "endSeconds": 21.0135622,
+        "spanSeconds": 21.0135321,
+        "ratioMinimum": 0.20000000298023224,
+        "ratioMaximum": 1,
+        "ratioMedian": 0.20000000298023224,
+        "speedMinimumMps": 0,
+        "speedMaximumMps": 0.0410488658,
+        "speedQuarterDeltaMps": 0.0163015649,
+        "ratioQuarterDelta": 0.3096066564321518
+      },
+      {
+        "samples": 259,
+        "startSeconds": 90.7021507,
+        "endSeconds": 105.2366993,
+        "spanSeconds": 14.534548599999994,
+        "ratioMinimum": 0.20000000298023224,
+        "ratioMaximum": 1,
+        "ratioMedian": 0.20000000298023224,
+        "speedMinimumMps": 0,
+        "speedMaximumMps": 0.0863354057,
+        "speedQuarterDeltaMps": 0,
+        "ratioQuarterDelta": 0
+      }
+    ],
+    "stationaryBaselineCandidatesAtLeast2Seconds": [
+      {
+        "samples": 42,
+        "startSeconds": 0.0000301,
+        "endSeconds": 2.3099009,
+        "spanSeconds": 2.3098708,
+        "ratioMinimum": 0.20000000298023224,
+        "ratioMaximum": 0.21416930854320526,
+        "ratioMedian": 0.20000000298023224,
+        "speedMinimumMps": 0,
+        "speedMaximumMps": 0.0118157538,
+        "speedQuarterDeltaMps": 0,
+        "ratioQuarterDelta": 0
+      },
+      {
+        "samples": 64,
+        "startSeconds": 4.0562724,
+        "endSeconds": 7.6055187,
+        "spanSeconds": 3.5492463,
+        "ratioMinimum": 0.20000000298023224,
+        "ratioMaximum": 0.20000000298023224,
+        "ratioMedian": 0.20000000298023224,
+        "speedMinimumMps": 0,
+        "speedMaximumMps": 0,
+        "speedQuarterDeltaMps": 0,
+        "ratioQuarterDelta": 0
+      },
+      {
+        "samples": 39,
+        "startSeconds": 9.8591622,
+        "endSeconds": 11.9995766,
+        "spanSeconds": 2.140414399999999,
+        "ratioMinimum": 0.20000000298023224,
+        "ratioMaximum": 0.21125496923923492,
+        "ratioMedian": 0.20000000298023224,
+        "speedMinimumMps": 0,
+        "speedMaximumMps": 0,
+        "speedQuarterDeltaMps": 0,
+        "ratioQuarterDelta": 0
+      },
+      {
+        "samples": 40,
+        "startSeconds": 14.8167667,
+        "endSeconds": 17.013874,
+        "spanSeconds": 2.1971073000000008,
+        "ratioMinimum": 0.20000000298023224,
+        "ratioMaximum": 0.2278835028409958,
+        "ratioMedian": 0.20000000298023224,
+        "speedMinimumMps": 0,
+        "speedMaximumMps": 0.0126693342,
+        "speedQuarterDeltaMps": 0,
+        "ratioQuarterDelta": 0
+      },
+      {
+        "samples": 125,
+        "startSeconds": 90.7021507,
+        "endSeconds": 97.6877385,
+        "spanSeconds": 6.9855877999999905,
+        "ratioMinimum": 0.20000000298023224,
+        "ratioMaximum": 0.21412509679794312,
+        "ratioMedian": 0.20000000298023224,
+        "speedMinimumMps": 0,
+        "speedMaximumMps": 0.0863354057,
+        "speedQuarterDeltaMps": 0,
+        "ratioQuarterDelta": 0
+      },
+      {
+        "samples": 46,
+        "startSeconds": 102.7016653,
+        "endSeconds": 105.2366993,
+        "spanSeconds": 2.535033999999996,
+        "ratioMinimum": 0.20000000298023224,
+        "ratioMaximum": 0.2112550437450409,
+        "ratioMedian": 0.20000000298023224,
+        "speedMinimumMps": 0,
+        "speedMaximumMps": 0.00889138225,
+        "speedQuarterDeltaMps": 0.00443941681,
+        "ratioQuarterDelta": 0
+      }
+    ],
+    "baselineSelection": "Engine-running both contexts, speed both <=0.10m/s, measured ratio within 0.03 of the prior 0.20 idle candidate; this is a signal-region description, not independent physical-idle or throttle proof",
+    "activitySelection": "All non-overlapping 3-second bins anchored at active start with at least 2 s of actual sample span; selected only by independent speed quarter-median change >=2 m/s; ratio quarter-median direction assessed afterwards",
+    "speedSelectedWindowCounts": [
+      {
+        "direction": "speed-increase",
+        "windows": 13,
+        "sameDirectionRatio": 5,
+        "oppositeDirectionRatio": 4,
+        "ratioChangeBelow0_05": 4
+      },
+      {
+        "direction": "speed-decrease",
+        "windows": 9,
+        "sameDirectionRatio": 6,
+        "oppositeDirectionRatio": 2,
+        "ratioChangeBelow0_05": 1
+      }
+    ],
+    "speedSelectedWindows": [
+      {
+        "samples": 54,
+        "startSeconds": 21.0135622,
+        "endSeconds": 23.9993838,
+        "spanSeconds": 2.9858216000000013,
+        "ratioMinimum": 0.2139458954334259,
+        "ratioMaximum": 0.7667588591575623,
+        "ratioMedian": 0.5121873021125793,
+        "speedMinimumMps": 0.0410488658,
+        "speedMaximumMps": 16.9274101,
+        "speedQuarterDeltaMps": 12.38515282,
+        "ratioQuarterDelta": 0.2603650689125061,
+        "direction": "speed-increase",
+        "ratioDirection": "increase"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 24.0560391,
+        "endSeconds": 26.9861127,
+        "spanSeconds": 2.9300736,
+        "ratioMinimum": 0.6774410009384155,
+        "ratioMaximum": 0.9741227030754089,
+        "ratioMedian": 0.7759463787078857,
+        "speedMinimumMps": 17.2865582,
+        "speedMaximumMps": 28.8125629,
+        "speedQuarterDeltaMps": 8.1203976,
+        "ratioQuarterDelta": 0.010158658027648926,
+        "direction": "speed-increase",
+        "ratioDirection": "less-than-0.05"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 27.0419812,
+        "endSeconds": 29.9712972,
+        "spanSeconds": 2.929316,
+        "ratioMinimum": 0.7159620523452759,
+        "ratioMaximum": 0.9547454714775085,
+        "ratioMedian": 0.8568746447563171,
+        "speedMinimumMps": 29.0202274,
+        "speedMaximumMps": 34.6508675,
+        "speedQuarterDeltaMps": 3.684913699999999,
+        "ratioQuarterDelta": -0.097653329372406,
+        "direction": "speed-increase",
+        "ratioDirection": "decrease"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 30.028734,
+        "endSeconds": 32.9573805,
+        "spanSeconds": 2.9286464999999993,
+        "ratioMinimum": 0.765841543674469,
+        "ratioMaximum": 0.8733973503112793,
+        "ratioMedian": 0.8300391435623169,
+        "speedMinimumMps": 34.7762833,
+        "speedMaximumMps": 39.6467628,
+        "speedQuarterDeltaMps": 3.7292479999999983,
+        "ratioQuarterDelta": 0.08262753486633301,
+        "direction": "speed-increase",
+        "ratioDirection": "increase"
+      },
+      {
+        "samples": 54,
+        "startSeconds": 33.0133631,
+        "endSeconds": 35.9992285,
+        "spanSeconds": 2.9858654000000016,
+        "ratioMinimum": 0.8748167157173157,
+        "ratioMaximum": 0.9328613877296448,
+        "ratioMedian": 0.909542053937912,
+        "speedMinimumMps": 39.7164268,
+        "speedMaximumMps": 42.3978386,
+        "speedQuarterDeltaMps": 2.048107100000003,
+        "ratioQuarterDelta": 0.04457443952560425,
+        "direction": "speed-increase",
+        "ratioDirection": "less-than-0.05"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 36.0557228,
+        "endSeconds": 38.9855713,
+        "spanSeconds": 2.9298484999999985,
+        "ratioMinimum": 0.6171925663948059,
+        "ratioMaximum": 0.938734769821167,
+        "ratioMedian": 0.7975199222564697,
+        "speedMinimumMps": 35.1197815,
+        "speedMaximumMps": 42.6647606,
+        "speedQuarterDeltaMps": -5.624092099999999,
+        "ratioQuarterDelta": -0.12752878665924072,
+        "direction": "speed-decrease",
+        "ratioDirection": "decrease"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 39.0416025,
+        "endSeconds": 41.9712041,
+        "spanSeconds": 2.929601599999998,
+        "ratioMinimum": 0.46740636229515076,
+        "ratioMaximum": 0.7980607151985168,
+        "ratioMedian": 0.6999838352203369,
+        "speedMinimumMps": 20.9510117,
+        "speedMaximumMps": 34.8274422,
+        "speedQuarterDeltaMps": -10.674009299999998,
+        "ratioQuarterDelta": -0.09966695308685303,
+        "direction": "speed-decrease",
+        "ratioDirection": "decrease"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 42.026984,
+        "endSeconds": 44.9568828,
+        "spanSeconds": 2.9298988000000037,
+        "ratioMinimum": 0.3633743226528168,
+        "ratioMaximum": 0.7711698412895203,
+        "ratioMedian": 0.6072657108306885,
+        "speedMinimumMps": 8.21194744,
+        "speedMaximumMps": 20.7095985,
+        "speedQuarterDeltaMps": -10.580751430000001,
+        "ratioQuarterDelta": -0.12239789962768555,
+        "direction": "speed-decrease",
+        "ratioDirection": "decrease"
+      },
+      {
+        "samples": 54,
+        "startSeconds": 45.0129007,
+        "endSeconds": 47.9987396,
+        "spanSeconds": 2.9858388999999974,
+        "ratioMinimum": 0.6903123259544373,
+        "ratioMaximum": 1,
+        "ratioMedian": 0.9182344675064087,
+        "speedMinimumMps": 11.6222286,
+        "speedMaximumMps": 26.6158028,
+        "speedQuarterDeltaMps": 9.769446399999998,
+        "ratioQuarterDelta": -0.2784894108772278,
+        "direction": "speed-increase",
+        "ratioDirection": "decrease"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 48.0549191,
+        "endSeconds": 50.9846581,
+        "spanSeconds": 2.929738999999998,
+        "ratioMinimum": 0.7163805365562439,
+        "ratioMaximum": 0.9538401961326599,
+        "ratioMedian": 0.8603454232215881,
+        "speedMinimumMps": 26.8325901,
+        "speedMaximumMps": 34.0670624,
+        "speedQuarterDeltaMps": 5.3728981000000005,
+        "ratioQuarterDelta": 0.040862202644348145,
+        "direction": "speed-increase",
+        "ratioDirection": "less-than-0.05"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 51.0412794,
+        "endSeconds": 53.9701818,
+        "spanSeconds": 2.9289023999999984,
+        "ratioMinimum": 0.590569257736206,
+        "ratioMaximum": 0.9167249202728271,
+        "ratioMedian": 0.8351041674613953,
+        "speedMinimumMps": 28.9503937,
+        "speedMaximumMps": 34.472393,
+        "speedQuarterDeltaMps": -2.1206932000000016,
+        "ratioQuarterDelta": 0.1501641869544983,
+        "direction": "speed-decrease",
+        "ratioDirection": "increase"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 54.0266891,
+        "endSeconds": 56.9558188,
+        "spanSeconds": 2.9291297000000043,
+        "ratioMinimum": 0.7311689853668213,
+        "ratioMaximum": 0.9564027786254883,
+        "ratioMedian": 0.7875645160675049,
+        "speedMinimumMps": 32.8442192,
+        "speedMaximumMps": 37.0329208,
+        "speedQuarterDeltaMps": 2.7954330000000027,
+        "ratioQuarterDelta": -0.13583898544311523,
+        "direction": "speed-increase",
+        "ratioDirection": "decrease"
+      },
+      {
+        "samples": 54,
+        "startSeconds": 57.0122691,
+        "endSeconds": 59.9985805,
+        "spanSeconds": 2.9863114000000053,
+        "ratioMinimum": 0.8184252977371216,
+        "ratioMaximum": 0.9038010835647583,
+        "ratioMedian": 0.8667402565479279,
+        "speedMinimumMps": 37.1342163,
+        "speedMaximumMps": 41.064827,
+        "speedQuarterDeltaMps": 3.015952999999996,
+        "ratioQuarterDelta": 0.06531554460525513,
+        "direction": "speed-increase",
+        "ratioDirection": "increase"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 63.0405933,
+        "endSeconds": 65.9701581,
+        "spanSeconds": 2.9295648000000085,
+        "ratioMinimum": 0.7935990691184998,
+        "ratioMaximum": 0.8429738879203796,
+        "ratioMedian": 0.8221162557601929,
+        "speedMinimumMps": 41.6881714,
+        "speedMaximumMps": 44.2973404,
+        "speedQuarterDeltaMps": 2.005901400000006,
+        "ratioQuarterDelta": 0.03796195983886719,
+        "direction": "speed-increase",
+        "ratioDirection": "less-than-0.05"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 66.0272147,
+        "endSeconds": 68.9562802,
+        "spanSeconds": 2.929065499999993,
+        "ratioMinimum": 0.6337520480155945,
+        "ratioMaximum": 0.8736091256141663,
+        "ratioMedian": 0.8449676036834717,
+        "speedMinimumMps": 28.6963596,
+        "speedMaximumMps": 45.1177826,
+        "speedQuarterDeltaMps": -12.658498699999999,
+        "ratioQuarterDelta": -0.14662998914718628,
+        "direction": "speed-decrease",
+        "ratioDirection": "decrease"
+      },
+      {
+        "samples": 54,
+        "startSeconds": 69.0124397,
+        "endSeconds": 71.9981909,
+        "spanSeconds": 2.9857511999999957,
+        "ratioMinimum": 0.4050024449825287,
+        "ratioMaximum": 0.9454272985458374,
+        "ratioMedian": 0.6902994811534882,
+        "speedMinimumMps": 16.0973682,
+        "speedMaximumMps": 28.1953583,
+        "speedQuarterDeltaMps": -2.6754798000000015,
+        "ratioQuarterDelta": 0.3295009732246399,
+        "direction": "speed-decrease",
+        "ratioDirection": "increase"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 72.0544446,
+        "endSeconds": 74.9847541,
+        "spanSeconds": 2.930309500000007,
+        "ratioMinimum": 0.6915876865386963,
+        "ratioMaximum": 0.9730091094970703,
+        "ratioMedian": 0.8135994672775269,
+        "speedMinimumMps": 23.7871323,
+        "speedMaximumMps": 32.4608307,
+        "speedQuarterDeltaMps": 7.033878399999999,
+        "ratioQuarterDelta": 0.10238373279571533,
+        "direction": "speed-increase",
+        "ratioDirection": "increase"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 75.0410105,
+        "endSeconds": 77.9698472,
+        "spanSeconds": 2.928836700000005,
+        "ratioMinimum": 0.7605843544006348,
+        "ratioMaximum": 1,
+        "ratioMedian": 0.9465228319168091,
+        "speedMinimumMps": 32.6563301,
+        "speedMaximumMps": 40.3259125,
+        "speedQuarterDeltaMps": 5.573596899999998,
+        "ratioQuarterDelta": -0.08339959383010864,
+        "direction": "speed-increase",
+        "ratioDirection": "decrease"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 78.0264582,
+        "endSeconds": 80.9559387,
+        "spanSeconds": 2.929480500000011,
+        "ratioMinimum": 0.7463852763175964,
+        "ratioMaximum": 1,
+        "ratioMedian": 0.9596747756004333,
+        "speedMinimumMps": 40.4939194,
+        "speedMaximumMps": 46.2453613,
+        "speedQuarterDeltaMps": 4.473308500000002,
+        "ratioQuarterDelta": 0.08600819110870361,
+        "direction": "speed-increase",
+        "ratioDirection": "increase"
+      },
+      {
+        "samples": 54,
+        "startSeconds": 81.0119268,
+        "endSeconds": 83.9977818,
+        "spanSeconds": 2.985855000000001,
+        "ratioMinimum": 0.7260413765907288,
+        "ratioMaximum": 0.9905714988708496,
+        "ratioMedian": 0.894176185131073,
+        "speedMinimumMps": 35.4648666,
+        "speedMaximumMps": 48.4427528,
+        "speedQuarterDeltaMps": -8.0260849,
+        "ratioQuarterDelta": -0.03950709104537964,
+        "direction": "speed-decrease",
+        "ratioDirection": "less-than-0.05"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 84.0542192,
+        "endSeconds": 86.9837558,
+        "spanSeconds": 2.9295365999999916,
+        "ratioMinimum": 0.35730868577957153,
+        "ratioMaximum": 0.7714896202087402,
+        "ratioMedian": 0.5944958925247192,
+        "speedMinimumMps": 14.5133123,
+        "speedMaximumMps": 34.9540329,
+        "speedQuarterDeltaMps": -15.651001,
+        "ratioQuarterDelta": -0.2141219973564148,
+        "direction": "speed-decrease",
+        "ratioDirection": "decrease"
+      },
+      {
+        "samples": 53,
+        "startSeconds": 87.0399629,
+        "endSeconds": 89.9695835,
+        "spanSeconds": 2.9296205999999927,
+        "ratioMinimum": 0.20000000298023224,
+        "ratioMaximum": 0.5613199472427368,
+        "ratioMedian": 0.35286545753479004,
+        "speedMinimumMps": 2.69564939,
+        "speedMaximumMps": 14.2247229,
+        "speedQuarterDeltaMps": -8.723061829999999,
+        "ratioQuarterDelta": -0.2973438948392868,
+        "direction": "speed-decrease",
+        "ratioDirection": "decrease"
+      }
+    ],
+    "noPostHocPhaseAssignment": true,
+    "ratioVersusSpeedCaution": "The fixed speed-selected windows include opposite and small ratio trends as well as matching trends. Gear/load/actuation changes could affect these relations, but their causes are unobserved and must not be invented.",
+    "status": "Exploratory descriptive analysis only; no replacement or relabelling of primary requested-phase criteria"
+  },
+  "trajectory": {
+    "basis": "All one-second bins anchored at active start using target-before timestamps. No achieved phase is assigned. Ratio decodes rawBits; speed independently decodes preContext.speedBits. No smoothing, interpolation or speed-to-ratio conversion.",
+    "binCount": 106,
+    "totalSamples": 1869,
+    "requestedPhaseForAllSamples": "OFF",
+    "bins": [
+      {
+        "secondSinceActiveStart": 0,
+        "samples": 18,
+        "firstTargetStartSeconds": 0.0000301,
+        "lastTargetStartSeconds": 0.957634,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0.011815753765404224
+        }
+      },
+      {
+        "secondSinceActiveStart": 1,
+        "samples": 18,
+        "firstTargetStartSeconds": 1.0137463,
+        "lastTargetStartSeconds": 1.9722494,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 2,
+        "samples": 18,
+        "firstTargetStartSeconds": 2.0280742,
+        "lastTargetStartSeconds": 2.9859142,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.4112400412559509,
+          "max": 0.8902558088302612
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0.003701781271956861,
+          "max": 0.0168713741004467
+        }
+      },
+      {
+        "secondSinceActiveStart": 3,
+        "samples": 18,
+        "firstTargetStartSeconds": 3.0423971,
+        "lastTargetStartSeconds": 3.9998785,
+        "rawRevRatio": {
+          "min": 0.2393394112586975,
+          "median": 0.7180615663528442,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0.014075741171836853
+        }
+      },
+      {
+        "secondSinceActiveStart": 4,
+        "samples": 17,
+        "firstTargetStartSeconds": 4.0562724,
+        "lastTargetStartSeconds": 4.9576708,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 5,
+        "samples": 18,
+        "firstTargetStartSeconds": 5.0137355,
+        "lastTargetStartSeconds": 5.9716208,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 6,
+        "samples": 18,
+        "firstTargetStartSeconds": 6.028235,
+        "lastTargetStartSeconds": 6.9862273,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 7,
+        "samples": 18,
+        "firstTargetStartSeconds": 7.0422437,
+        "lastTargetStartSeconds": 7.9998596,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.5801113843917847
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0.0167036484926939
+        }
+      },
+      {
+        "secondSinceActiveStart": 8,
+        "samples": 17,
+        "firstTargetStartSeconds": 8.0562809,
+        "lastTargetStartSeconds": 8.9576654,
+        "rawRevRatio": {
+          "min": 0.6363992094993591,
+          "median": 1,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0.0006102888728491962,
+          "median": 0.004233605694025755,
+          "max": 0.01302525494247675
+        }
+      },
+      {
+        "secondSinceActiveStart": 9,
+        "samples": 18,
+        "firstTargetStartSeconds": 9.0138717,
+        "lastTargetStartSeconds": 9.9716939,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.5775527060031891,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0.00673619145527482
+        }
+      },
+      {
+        "secondSinceActiveStart": 10,
+        "samples": 18,
+        "firstTargetStartSeconds": 10.0284196,
+        "lastTargetStartSeconds": 10.9857141,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 11,
+        "samples": 18,
+        "firstTargetStartSeconds": 11.0418636,
+        "lastTargetStartSeconds": 11.9995766,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 12,
+        "samples": 17,
+        "firstTargetStartSeconds": 12.0561532,
+        "lastTargetStartSeconds": 12.9575307,
+        "rawRevRatio": {
+          "min": 0.2420228123664856,
+          "median": 0.6928144097328186,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0.000682205893099308,
+          "median": 0.007322629913687706,
+          "max": 0.015230758115649223
+        }
+      },
+      {
+        "secondSinceActiveStart": 13,
+        "samples": 18,
+        "firstTargetStartSeconds": 13.0139432,
+        "lastTargetStartSeconds": 13.9713677,
+        "rawRevRatio": {
+          "min": 1,
+          "median": 1,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0.01135160680860281,
+          "median": 0.012652684934437275,
+          "max": 0.01327630877494812
+        }
+      },
+      {
+        "secondSinceActiveStart": 14,
+        "samples": 18,
+        "firstTargetStartSeconds": 14.027867,
+        "lastTargetStartSeconds": 14.9857847,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.5070542246103287,
+          "max": 0.9858323931694031
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0.013090594671666622
+        }
+      },
+      {
+        "secondSinceActiveStart": 15,
+        "samples": 18,
+        "firstTargetStartSeconds": 15.0418356,
+        "lastTargetStartSeconds": 15.9993477,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 16,
+        "samples": 17,
+        "firstTargetStartSeconds": 16.0559236,
+        "lastTargetStartSeconds": 16.95764,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 17,
+        "samples": 18,
+        "firstTargetStartSeconds": 17.013874,
+        "lastTargetStartSeconds": 17.9711617,
+        "rawRevRatio": {
+          "min": 0.2278835028409958,
+          "median": 0.7066996395587921,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0.012669334188103676,
+          "median": 0.01700760703533888,
+          "max": 0.018916398286819458
+        }
+      },
+      {
+        "secondSinceActiveStart": 18,
+        "samples": 18,
+        "firstTargetStartSeconds": 18.0277359,
+        "lastTargetStartSeconds": 18.9857319,
+        "rawRevRatio": {
+          "min": 1,
+          "median": 1,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0.015147795900702477,
+          "median": 0.017906063236296177,
+          "max": 0.01998770423233509
+        }
+      },
+      {
+        "secondSinceActiveStart": 19,
+        "samples": 18,
+        "firstTargetStartSeconds": 19.0422293,
+        "lastTargetStartSeconds": 19.9995079,
+        "rawRevRatio": {
+          "min": 0.45058968663215637,
+          "median": 0.9294508695602417,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0.018074999563395977,
+          "max": 0.01902998611330986
+        }
+      },
+      {
+        "secondSinceActiveStart": 20,
+        "samples": 17,
+        "firstTargetStartSeconds": 20.0561286,
+        "lastTargetStartSeconds": 20.9572314,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.39404091238975525
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 21,
+        "samples": 18,
+        "firstTargetStartSeconds": 21.0135622,
+        "lastTargetStartSeconds": 21.9713878,
+        "rawRevRatio": {
+          "min": 0.2139458954334259,
+          "median": 0.3370882421731949,
+          "max": 0.45887109637260437
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0.041048865765333176,
+          "median": 3.4241729974746704,
+          "max": 6.860354900360107
+        }
+      },
+      {
+        "secondSinceActiveStart": 22,
+        "samples": 18,
+        "firstTargetStartSeconds": 22.0275566,
+        "lastTargetStartSeconds": 22.9859241,
+        "rawRevRatio": {
+          "min": 0.4796663820743561,
+          "median": 0.6162319779396057,
+          "max": 0.7667588591575623
+        },
+        "independentPreContextSpeedMps": {
+          "min": 7.1470489501953125,
+          "median": 10.424628257751465,
+          "max": 11.65847396850586
+        }
+      },
+      {
+        "secondSinceActiveStart": 23,
+        "samples": 18,
+        "firstTargetStartSeconds": 23.0418011,
+        "lastTargetStartSeconds": 23.9993838,
+        "rawRevRatio": {
+          "min": 0.45760348439216614,
+          "median": 0.5411737263202667,
+          "max": 0.6632060408592224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 11.200458526611328,
+          "median": 13.843775749206543,
+          "max": 16.927410125732422
+        }
+      },
+      {
+        "secondSinceActiveStart": 24,
+        "samples": 17,
+        "firstTargetStartSeconds": 24.0560391,
+        "lastTargetStartSeconds": 24.9572748,
+        "rawRevRatio": {
+          "min": 0.6774410009384155,
+          "median": 0.7898063063621521,
+          "max": 0.8934357762336731
+        },
+        "independentPreContextSpeedMps": {
+          "min": 17.286558151245117,
+          "median": 20.127599716186523,
+          "max": 22.7624454498291
+        }
+      },
+      {
+        "secondSinceActiveStart": 25,
+        "samples": 18,
+        "firstTargetStartSeconds": 25.0136868,
+        "lastTargetStartSeconds": 25.9719945,
+        "rawRevRatio": {
+          "min": 0.6922261118888855,
+          "median": 0.8911654949188232,
+          "max": 0.9741227030754089
+        },
+        "independentPreContextSpeedMps": {
+          "min": 23.053556442260742,
+          "median": 24.224852561950684,
+          "max": 24.92481231689453
+        }
+      },
+      {
+        "secondSinceActiveStart": 26,
+        "samples": 18,
+        "firstTargetStartSeconds": 26.0274887,
+        "lastTargetStartSeconds": 26.9861127,
+        "rawRevRatio": {
+          "min": 0.7047089338302612,
+          "median": 0.7570690810680389,
+          "max": 0.807903528213501
+        },
+        "independentPreContextSpeedMps": {
+          "min": 25.145885467529297,
+          "median": 27.006084442138672,
+          "max": 28.812562942504883
+        }
+      },
+      {
+        "secondSinceActiveStart": 27,
+        "samples": 18,
+        "firstTargetStartSeconds": 27.0419812,
+        "lastTargetStartSeconds": 27.9995841,
+        "rawRevRatio": {
+          "min": 0.8137078285217285,
+          "median": 0.8593592941761017,
+          "max": 0.8980556726455688
+        },
+        "independentPreContextSpeedMps": {
+          "min": 29.020227432250977,
+          "median": 30.655734062194824,
+          "max": 32.04651641845703
+        }
+      },
+      {
+        "secondSinceActiveStart": 28,
+        "samples": 17,
+        "firstTargetStartSeconds": 28.0558883,
+        "lastTargetStartSeconds": 28.9573675,
+        "rawRevRatio": {
+          "min": 0.9021773934364319,
+          "median": 0.9287593960762024,
+          "max": 0.9547454714775085
+        },
+        "independentPreContextSpeedMps": {
+          "min": 32.195194244384766,
+          "median": 33.27867889404297,
+          "max": 34.09027099609375
+        }
+      },
+      {
+        "secondSinceActiveStart": 29,
+        "samples": 18,
+        "firstTargetStartSeconds": 29.0139037,
+        "lastTargetStartSeconds": 29.9712972,
+        "rawRevRatio": {
+          "min": 0.7159620523452759,
+          "median": 0.750463604927063,
+          "max": 0.8568503856658936
+        },
+        "independentPreContextSpeedMps": {
+          "min": 32.8552360534668,
+          "median": 33.619895935058594,
+          "max": 34.6508674621582
+        }
+      },
+      {
+        "secondSinceActiveStart": 30,
+        "samples": 18,
+        "firstTargetStartSeconds": 30.028734,
+        "lastTargetStartSeconds": 30.985766,
+        "rawRevRatio": {
+          "min": 0.765841543674469,
+          "median": 0.7889890670776367,
+          "max": 0.8111616969108582
+        },
+        "independentPreContextSpeedMps": {
+          "min": 34.776283264160156,
+          "median": 35.822628021240234,
+          "max": 36.827247619628906
+        }
+      },
+      {
+        "secondSinceActiveStart": 31,
+        "samples": 18,
+        "firstTargetStartSeconds": 31.0418373,
+        "lastTargetStartSeconds": 31.999606,
+        "rawRevRatio": {
+          "min": 0.8136155605316162,
+          "median": 0.8308721482753754,
+          "max": 0.8468631505966187
+        },
+        "independentPreContextSpeedMps": {
+          "min": 36.93684387207031,
+          "median": 37.6870002746582,
+          "max": 38.42006301879883
+        }
+      },
+      {
+        "secondSinceActiveStart": 32,
+        "samples": 17,
+        "firstTargetStartSeconds": 32.0559918,
+        "lastTargetStartSeconds": 32.9573805,
+        "rawRevRatio": {
+          "min": 0.8486692309379578,
+          "median": 0.8618816137313843,
+          "max": 0.8733973503112793
+        },
+        "independentPreContextSpeedMps": {
+          "min": 38.504173278808594,
+          "median": 39.10999298095703,
+          "max": 39.64676284790039
+        }
+      },
+      {
+        "secondSinceActiveStart": 33,
+        "samples": 18,
+        "firstTargetStartSeconds": 33.0133631,
+        "lastTargetStartSeconds": 33.9713336,
+        "rawRevRatio": {
+          "min": 0.8748167157173157,
+          "median": 0.8874479830265045,
+          "max": 0.8985273241996765
+        },
+        "independentPreContextSpeedMps": {
+          "min": 39.716426849365234,
+          "median": 40.3101921081543,
+          "max": 40.82255935668945
+        }
+      },
+      {
+        "secondSinceActiveStart": 34,
+        "samples": 18,
+        "firstTargetStartSeconds": 34.0278281,
+        "lastTargetStartSeconds": 34.9859877,
+        "rawRevRatio": {
+          "min": 0.8997587561607361,
+          "median": 0.909542053937912,
+          "max": 0.9180599451065063
+        },
+        "independentPreContextSpeedMps": {
+          "min": 40.879432678222656,
+          "median": 41.32806587219238,
+          "max": 41.71908950805664
+        }
+      },
+      {
+        "secondSinceActiveStart": 35,
+        "samples": 18,
+        "firstTargetStartSeconds": 35.0422708,
+        "lastTargetStartSeconds": 35.9992285,
+        "rawRevRatio": {
+          "min": 0.9190006256103516,
+          "median": 0.926349550485611,
+          "max": 0.9328613877296448
+        },
+        "independentPreContextSpeedMps": {
+          "min": 41.76225662231445,
+          "median": 42.09908866882324,
+          "max": 42.3978385925293
+        }
+      },
+      {
+        "secondSinceActiveStart": 36,
+        "samples": 17,
+        "firstTargetStartSeconds": 36.0557228,
+        "lastTargetStartSeconds": 36.9569132,
+        "rawRevRatio": {
+          "min": 0.7131512761116028,
+          "median": 0.9342978000640869,
+          "max": 0.938734769821167
+        },
+        "independentPreContextSpeedMps": {
+          "min": 41.219539642333984,
+          "median": 42.46363067626953,
+          "max": 42.66476058959961
+        }
+      },
+      {
+        "secondSinceActiveStart": 37,
+        "samples": 18,
+        "firstTargetStartSeconds": 37.0138822,
+        "lastTargetStartSeconds": 37.9714689,
+        "rawRevRatio": {
+          "min": 0.6171925663948059,
+          "median": 0.7931146919727325,
+          "max": 0.8001067638397217
+        },
+        "independentPreContextSpeedMps": {
+          "min": 40.709388732910156,
+          "median": 41.65614128112793,
+          "max": 41.99077224731445
+        }
+      },
+      {
+        "secondSinceActiveStart": 38,
+        "samples": 18,
+        "firstTargetStartSeconds": 38.0278414,
+        "lastTargetStartSeconds": 38.9855713,
+        "rawRevRatio": {
+          "min": 0.6735637784004211,
+          "median": 0.8048866987228394,
+          "max": 0.8555875420570374
+        },
+        "independentPreContextSpeedMps": {
+          "min": 35.119781494140625,
+          "median": 37.66090393066406,
+          "max": 40.36861038208008
+        }
+      },
+      {
+        "secondSinceActiveStart": 39,
+        "samples": 18,
+        "firstTargetStartSeconds": 39.0416025,
+        "lastTargetStartSeconds": 39.9990255,
+        "rawRevRatio": {
+          "min": 0.5122283101081848,
+          "median": 0.7092798352241516,
+          "max": 0.7628093361854553
+        },
+        "independentPreContextSpeedMps": {
+          "min": 29.988628387451172,
+          "median": 32.37421417236328,
+          "max": 34.82744216918945
+        }
+      },
+      {
+        "secondSinceActiveStart": 40,
+        "samples": 17,
+        "firstTargetStartSeconds": 40.0556312,
+        "lastTargetStartSeconds": 40.9567369,
+        "rawRevRatio": {
+          "min": 0.6250446438789368,
+          "median": 0.7458479404449463,
+          "max": 0.7980607151985168
+        },
+        "independentPreContextSpeedMps": {
+          "min": 25.429697036743164,
+          "median": 27.53681182861328,
+          "max": 29.711593627929688
+        }
+      },
+      {
+        "secondSinceActiveStart": 41,
+        "samples": 18,
+        "firstTargetStartSeconds": 41.0129268,
+        "lastTargetStartSeconds": 41.9712041,
+        "rawRevRatio": {
+          "min": 0.46740636229515076,
+          "median": 0.6424189805984497,
+          "max": 0.7021292448043823
+        },
+        "independentPreContextSpeedMps": {
+          "min": 20.951011657714844,
+          "median": 23.033774375915527,
+          "max": 25.173696517944336
+        }
+      },
+      {
+        "secondSinceActiveStart": 42,
+        "samples": 18,
+        "firstTargetStartSeconds": 42.026984,
+        "lastTargetStartSeconds": 42.9849561,
+        "rawRevRatio": {
+          "min": 0.5491730570793152,
+          "median": 0.7023661136627197,
+          "max": 0.7711698412895203
+        },
+        "independentPreContextSpeedMps": {
+          "min": 16.683263778686523,
+          "median": 18.68120765686035,
+          "max": 20.709598541259766
+        }
+      },
+      {
+        "secondSinceActiveStart": 43,
+        "samples": 18,
+        "firstTargetStartSeconds": 43.0410464,
+        "lastTargetStartSeconds": 43.9986333,
+        "rawRevRatio": {
+          "min": 0.4051035940647125,
+          "median": 0.5558938682079315,
+          "max": 0.6433728337287903
+        },
+        "independentPreContextSpeedMps": {
+          "min": 10.039528846740723,
+          "median": 14.040921211242676,
+          "max": 16.445663452148438
+        }
+      },
+      {
+        "secondSinceActiveStart": 44,
+        "samples": 17,
+        "firstTargetStartSeconds": 44.0549199,
+        "lastTargetStartSeconds": 44.9568828,
+        "rawRevRatio": {
+          "min": 0.3633743226528168,
+          "median": 0.5820908546447754,
+          "max": 0.7451369762420654
+        },
+        "independentPreContextSpeedMps": {
+          "min": 8.211947441101074,
+          "median": 8.974250793457031,
+          "max": 11.01065731048584
+        }
+      },
+      {
+        "secondSinceActiveStart": 45,
+        "samples": 18,
+        "firstTargetStartSeconds": 45.0129007,
+        "lastTargetStartSeconds": 45.9703084,
+        "rawRevRatio": {
+          "min": 0.7851845026016235,
+          "median": 1,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 11.622228622436523,
+          "median": 17.0953369140625,
+          "max": 21.57378578186035
+        }
+      },
+      {
+        "secondSinceActiveStart": 46,
+        "samples": 18,
+        "firstTargetStartSeconds": 46.026933,
+        "lastTargetStartSeconds": 46.9849047,
+        "rawRevRatio": {
+          "min": 0.7734673023223877,
+          "median": 0.9438758492469788,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 22.026371002197266,
+          "median": 23.29212474822998,
+          "max": 24.771440505981445
+        }
+      },
+      {
+        "secondSinceActiveStart": 47,
+        "samples": 18,
+        "firstTargetStartSeconds": 47.0411289,
+        "lastTargetStartSeconds": 47.9987396,
+        "rawRevRatio": {
+          "min": 0.6903123259544373,
+          "median": 0.7362304329872131,
+          "max": 0.964006245136261
+        },
+        "independentPreContextSpeedMps": {
+          "min": 23.865554809570312,
+          "median": 24.866665840148926,
+          "max": 26.615802764892578
+        }
+      },
+      {
+        "secondSinceActiveStart": 48,
+        "samples": 17,
+        "firstTargetStartSeconds": 48.0549191,
+        "lastTargetStartSeconds": 48.9564992,
+        "rawRevRatio": {
+          "min": 0.7521950006484985,
+          "median": 0.8002051115036011,
+          "max": 0.8450782895088196
+        },
+        "independentPreContextSpeedMps": {
+          "min": 26.832590103149414,
+          "median": 28.539745330810547,
+          "max": 30.1429443359375
+        }
+      },
+      {
+        "secondSinceActiveStart": 49,
+        "samples": 18,
+        "firstTargetStartSeconds": 49.0128826,
+        "lastTargetStartSeconds": 49.9707756,
+        "rawRevRatio": {
+          "min": 0.8502659797668457,
+          "median": 0.890423983335495,
+          "max": 0.9241026639938354
+        },
+        "independentPreContextSpeedMps": {
+          "min": 30.328895568847656,
+          "median": 31.772440910339355,
+          "max": 32.98606872558594
+        }
+      },
+      {
+        "secondSinceActiveStart": 50,
+        "samples": 18,
+        "firstTargetStartSeconds": 50.0268194,
+        "lastTargetStartSeconds": 50.9846581,
+        "rawRevRatio": {
+          "min": 0.7163805365562439,
+          "median": 0.929451197385788,
+          "max": 0.9538401961326599
+        },
+        "independentPreContextSpeedMps": {
+          "min": 32.92015838623047,
+          "median": 33.42621040344238,
+          "max": 34.06706237792969
+        }
+      },
+      {
+        "secondSinceActiveStart": 51,
+        "samples": 18,
+        "firstTargetStartSeconds": 51.0412794,
+        "lastTargetStartSeconds": 51.9983594,
+        "rawRevRatio": {
+          "min": 0.590569257736206,
+          "median": 0.7438221871852875,
+          "max": 0.8722285032272339
+        },
+        "independentPreContextSpeedMps": {
+          "min": 32.09089660644531,
+          "median": 33.75323677062988,
+          "max": 34.47239303588867
+        }
+      },
+      {
+        "secondSinceActiveStart": 52,
+        "samples": 17,
+        "firstTargetStartSeconds": 52.0549242,
+        "lastTargetStartSeconds": 52.9565408,
+        "rawRevRatio": {
+          "min": 0.8068797588348389,
+          "median": 0.8322713971138,
+          "max": 0.8865324854850769
+        },
+        "independentPreContextSpeedMps": {
+          "min": 28.950393676757812,
+          "median": 29.782785415649414,
+          "max": 31.810590744018555
+        }
+      },
+      {
+        "secondSinceActiveStart": 53,
+        "samples": 18,
+        "firstTargetStartSeconds": 53.0126487,
+        "lastTargetStartSeconds": 53.9701818,
+        "rawRevRatio": {
+          "min": 0.8402887582778931,
+          "median": 0.8816105425357819,
+          "max": 0.9167249202728271
+        },
+        "independentPreContextSpeedMps": {
+          "min": 29.969446182250977,
+          "median": 31.454371452331543,
+          "max": 32.71879959106445
+        }
+      },
+      {
+        "secondSinceActiveStart": 54,
+        "samples": 18,
+        "firstTargetStartSeconds": 54.0266891,
+        "lastTargetStartSeconds": 54.9849646,
+        "rawRevRatio": {
+          "min": 0.7311689853668213,
+          "median": 0.9293608963489532,
+          "max": 0.9564027786254883
+        },
+        "independentPreContextSpeedMps": {
+          "min": 32.84421920776367,
+          "median": 33.42282485961914,
+          "max": 34.13534927368164
+        }
+      },
+      {
+        "secondSinceActiveStart": 55,
+        "samples": 18,
+        "firstTargetStartSeconds": 55.0413,
+        "lastTargetStartSeconds": 55.9983625,
+        "rawRevRatio": {
+          "min": 0.7341983914375305,
+          "median": 0.7536202371120453,
+          "max": 0.7736613154411316
+        },
+        "independentPreContextSpeedMps": {
+          "min": 33.068138122558594,
+          "median": 34.064008712768555,
+          "max": 35.11676025390625
+        }
+      },
+      {
+        "secondSinceActiveStart": 56,
+        "samples": 17,
+        "firstTargetStartSeconds": 56.0546903,
+        "lastTargetStartSeconds": 56.9558188,
+        "rawRevRatio": {
+          "min": 0.7764187455177307,
+          "median": 0.797172486782074,
+          "max": 0.8161992430686951
+        },
+        "independentPreContextSpeedMps": {
+          "min": 35.24354553222656,
+          "median": 36.17457580566406,
+          "max": 37.032920837402344
+        }
+      },
+      {
+        "secondSinceActiveStart": 57,
+        "samples": 18,
+        "firstTargetStartSeconds": 57.0122691,
+        "lastTargetStartSeconds": 57.9702519,
+        "rawRevRatio": {
+          "min": 0.8184252977371216,
+          "median": 0.8360892534255981,
+          "max": 0.8515817523002625
+        },
+        "independentPreContextSpeedMps": {
+          "min": 37.13421630859375,
+          "median": 37.935855865478516,
+          "max": 38.6427001953125
+        }
+      },
+      {
+        "secondSinceActiveStart": 58,
+        "samples": 18,
+        "firstTargetStartSeconds": 58.0267487,
+        "lastTargetStartSeconds": 58.9845313,
+        "rawRevRatio": {
+          "min": 0.8533071279525757,
+          "median": 0.8667402565479279,
+          "max": 0.8795844316482544
+        },
+        "independentPreContextSpeedMps": {
+          "min": 38.72027587890625,
+          "median": 39.33695030212402,
+          "max": 39.941287994384766
+        }
+      },
+      {
+        "secondSinceActiveStart": 59,
+        "samples": 18,
+        "firstTargetStartSeconds": 59.0409633,
+        "lastTargetStartSeconds": 59.9985805,
+        "rawRevRatio": {
+          "min": 0.8810393810272217,
+          "median": 0.8931741118431091,
+          "max": 0.9038010835647583
+        },
+        "independentPreContextSpeedMps": {
+          "min": 40.01264572143555,
+          "median": 40.5762939453125,
+          "max": 41.06482696533203
+        }
+      },
+      {
+        "secondSinceActiveStart": 60,
+        "samples": 17,
+        "firstTargetStartSeconds": 60.0549795,
+        "lastTargetStartSeconds": 60.9563543,
+        "rawRevRatio": {
+          "min": 0.9049621224403381,
+          "median": 0.9136142134666443,
+          "max": 0.9213702082633972
+        },
+        "independentPreContextSpeedMps": {
+          "min": 41.118186950683594,
+          "median": 41.51570510864258,
+          "max": 41.8704833984375
+        }
+      },
+      {
+        "secondSinceActiveStart": 61,
+        "samples": 18,
+        "firstTargetStartSeconds": 61.0123147,
+        "lastTargetStartSeconds": 61.9705202,
+        "rawRevRatio": {
+          "min": 0.9223060011863708,
+          "median": 0.9293687343597412,
+          "max": 0.9355572462081909
+        },
+        "independentPreContextSpeedMps": {
+          "min": 41.910884857177734,
+          "median": 42.23740577697754,
+          "max": 42.51816177368164
+        }
+      },
+      {
+        "secondSinceActiveStart": 62,
+        "samples": 18,
+        "firstTargetStartSeconds": 62.026658,
+        "lastTargetStartSeconds": 62.9846362,
+        "rawRevRatio": {
+          "min": 0.6858296990394592,
+          "median": 0.8019430637359619,
+          "max": 0.939052164554596
+        },
+        "independentPreContextSpeedMps": {
+          "min": 41.22071075439453,
+          "median": 41.7460880279541,
+          "max": 42.675865173339844
+        }
+      },
+      {
+        "secondSinceActiveStart": 63,
+        "samples": 18,
+        "firstTargetStartSeconds": 63.0405933,
+        "lastTargetStartSeconds": 63.9984812,
+        "rawRevRatio": {
+          "min": 0.7935990691184998,
+          "median": 0.8037112951278687,
+          "max": 0.813117265701294
+        },
+        "independentPreContextSpeedMps": {
+          "min": 41.68817138671875,
+          "median": 42.222055435180664,
+          "max": 42.71889114379883
+        }
+      },
+      {
+        "secondSinceActiveStart": 64,
+        "samples": 17,
+        "firstTargetStartSeconds": 64.0548325,
+        "lastTargetStartSeconds": 64.9561901,
+        "rawRevRatio": {
+          "min": 0.8141685128211975,
+          "median": 0.8221162557601929,
+          "max": 0.8292766213417053
+        },
+        "independentPreContextSpeedMps": {
+          "min": 42.77413558959961,
+          "median": 43.19389343261719,
+          "max": 43.57276153564453
+        }
+      },
+      {
+        "secondSinceActiveStart": 65,
+        "samples": 18,
+        "firstTargetStartSeconds": 65.0125776,
+        "lastTargetStartSeconds": 65.9701581,
+        "rawRevRatio": {
+          "min": 0.8301199078559875,
+          "median": 0.8368888795375824,
+          "max": 0.8429738879203796
+        },
+        "independentPreContextSpeedMps": {
+          "min": 43.6175537109375,
+          "median": 43.97519874572754,
+          "max": 44.297340393066406
+        }
+      },
+      {
+        "secondSinceActiveStart": 66,
+        "samples": 18,
+        "firstTargetStartSeconds": 66.0272147,
+        "lastTargetStartSeconds": 66.9846563,
+        "rawRevRatio": {
+          "min": 0.8436482548713684,
+          "median": 0.8490465581417084,
+          "max": 0.8538928031921387
+        },
+        "independentPreContextSpeedMps": {
+          "min": 44.33308029174805,
+          "median": 44.61875915527344,
+          "max": 44.87525177001953
+        }
+      },
+      {
+        "secondSinceActiveStart": 67,
+        "samples": 18,
+        "firstTargetStartSeconds": 67.0410995,
+        "lastTargetStartSeconds": 67.9986098,
+        "rawRevRatio": {
+          "min": 0.6693547368049622,
+          "median": 0.8546975553035736,
+          "max": 0.8736091256141663
+        },
+        "independentPreContextSpeedMps": {
+          "min": 39.712120056152344,
+          "median": 44.91765022277832,
+          "max": 45.11778259277344
+        }
+      },
+      {
+        "secondSinceActiveStart": 68,
+        "samples": 17,
+        "firstTargetStartSeconds": 68.0551225,
+        "lastTargetStartSeconds": 68.9562802,
+        "rawRevRatio": {
+          "min": 0.6337520480155945,
+          "median": 0.7278687953948975,
+          "max": 0.856499195098877
+        },
+        "independentPreContextSpeedMps": {
+          "min": 28.696359634399414,
+          "median": 33.10810470581055,
+          "max": 38.93379211425781
+        }
+      },
+      {
+        "secondSinceActiveStart": 69,
+        "samples": 18,
+        "firstTargetStartSeconds": 69.0124397,
+        "lastTargetStartSeconds": 69.970192,
+        "rawRevRatio": {
+          "min": 0.4050024449825287,
+          "median": 0.5624673366546631,
+          "max": 0.6867642998695374
+        },
+        "independentPreContextSpeedMps": {
+          "min": 19.395891189575195,
+          "median": 23.847859382629395,
+          "max": 28.195358276367188
+        }
+      },
+      {
+        "secondSinceActiveStart": 70,
+        "samples": 18,
+        "firstTargetStartSeconds": 70.0266377,
+        "lastTargetStartSeconds": 70.9845692,
+        "rawRevRatio": {
+          "min": 0.6452245116233826,
+          "median": 0.688812792301178,
+          "max": 0.7656573057174683
+        },
+        "independentPreContextSpeedMps": {
+          "min": 16.097368240356445,
+          "median": 17.497005462646484,
+          "max": 19.520614624023438
+        }
+      },
+      {
+        "secondSinceActiveStart": 71,
+        "samples": 18,
+        "firstTargetStartSeconds": 71.0405389,
+        "lastTargetStartSeconds": 71.9981909,
+        "rawRevRatio": {
+          "min": 0.7799055576324463,
+          "median": 0.8718290328979492,
+          "max": 0.9454272985458374
+        },
+        "independentPreContextSpeedMps": {
+          "min": 19.878185272216797,
+          "median": 22.062262535095215,
+          "max": 24.0920352935791
+        }
+      },
+      {
+        "secondSinceActiveStart": 72,
+        "samples": 17,
+        "firstTargetStartSeconds": 72.0544446,
+        "lastTargetStartSeconds": 72.9561021,
+        "rawRevRatio": {
+          "min": 0.6915876865386963,
+          "median": 0.7416978478431702,
+          "max": 0.9730091094970703
+        },
+        "independentPreContextSpeedMps": {
+          "min": 23.787132263183594,
+          "median": 24.574838638305664,
+          "max": 25.79500389099121
+        }
+      },
+      {
+        "secondSinceActiveStart": 73,
+        "samples": 18,
+        "firstTargetStartSeconds": 73.0121724,
+        "lastTargetStartSeconds": 73.9700384,
+        "rawRevRatio": {
+          "min": 0.7291737198829651,
+          "median": 0.7779153883457184,
+          "max": 0.8238424062728882
+        },
+        "independentPreContextSpeedMps": {
+          "min": 26.004478454589844,
+          "median": 27.711349487304688,
+          "max": 29.3311710357666
+        }
+      },
+      {
+        "secondSinceActiveStart": 74,
+        "samples": 18,
+        "firstTargetStartSeconds": 74.0263661,
+        "lastTargetStartSeconds": 74.9847541,
+        "rawRevRatio": {
+          "min": 0.8290261030197144,
+          "median": 0.8710281252861023,
+          "max": 0.9118180274963379
+        },
+        "independentPreContextSpeedMps": {
+          "min": 29.519920349121094,
+          "median": 31.07017707824707,
+          "max": 32.46083068847656
+        }
+      },
+      {
+        "secondSinceActiveStart": 75,
+        "samples": 18,
+        "firstTargetStartSeconds": 75.0410105,
+        "lastTargetStartSeconds": 75.9979872,
+        "rawRevRatio": {
+          "min": 0.9167138934135437,
+          "median": 0.96393883228302,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 32.65633010864258,
+          "median": 34.13998985290527,
+          "max": 35.61599349975586
+        }
+      },
+      {
+        "secondSinceActiveStart": 76,
+        "samples": 17,
+        "firstTargetStartSeconds": 76.0544632,
+        "lastTargetStartSeconds": 76.955997,
+        "rawRevRatio": {
+          "min": 0.7887137532234192,
+          "median": 1,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 35.7895393371582,
+          "median": 37.12908172607422,
+          "max": 37.757850646972656
+        }
+      },
+      {
+        "secondSinceActiveStart": 77,
+        "samples": 18,
+        "firstTargetStartSeconds": 77.0123909,
+        "lastTargetStartSeconds": 77.9698472,
+        "rawRevRatio": {
+          "min": 0.7605843544006348,
+          "median": 0.8598345518112183,
+          "max": 0.8899291753768921
+        },
+        "independentPreContextSpeedMps": {
+          "min": 37.336387634277344,
+          "median": 38.86668586730957,
+          "max": 40.32591247558594
+        }
+      },
+      {
+        "secondSinceActiveStart": 78,
+        "samples": 18,
+        "firstTargetStartSeconds": 78.0264582,
+        "lastTargetStartSeconds": 78.9842088,
+        "rawRevRatio": {
+          "min": 0.8934359550476074,
+          "median": 0.9221984446048737,
+          "max": 0.9483662843704224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 40.493919372558594,
+          "median": 41.84785270690918,
+          "max": 43.05461502075195
+        }
+      },
+      {
+        "secondSinceActiveStart": 79,
+        "samples": 18,
+        "firstTargetStartSeconds": 79.0404771,
+        "lastTargetStartSeconds": 79.9981124,
+        "rawRevRatio": {
+          "min": 0.9512510299682617,
+          "median": 0.9741672575473785,
+          "max": 0.9949347972869873
+        },
+        "independentPreContextSpeedMps": {
+          "min": 43.18724060058594,
+          "median": 44.23593711853027,
+          "max": 45.193946838378906
+        }
+      },
+      {
+        "secondSinceActiveStart": 80,
+        "samples": 17,
+        "firstTargetStartSeconds": 80.054619,
+        "lastTargetStartSeconds": 80.9559387,
+        "rawRevRatio": {
+          "min": 0.7463852763175964,
+          "median": 1,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 45.29693603515625,
+          "median": 45.79517364501953,
+          "max": 46.245361328125
+        }
+      },
+      {
+        "secondSinceActiveStart": 81,
+        "samples": 18,
+        "firstTargetStartSeconds": 81.0119268,
+        "lastTargetStartSeconds": 81.9699246,
+        "rawRevRatio": {
+          "min": 0.8590399622917175,
+          "median": 0.892492026090622,
+          "max": 0.9091429114341736
+        },
+        "independentPreContextSpeedMps": {
+          "min": 45.87920379638672,
+          "median": 46.83017158508301,
+          "max": 47.737186431884766
+        }
+      },
+      {
+        "secondSinceActiveStart": 82,
+        "samples": 18,
+        "firstTargetStartSeconds": 82.0263188,
+        "lastTargetStartSeconds": 82.9843771,
+        "rawRevRatio": {
+          "min": 0.7260413765907288,
+          "median": 0.9119879007339478,
+          "max": 0.9905714988708496
+        },
+        "independentPreContextSpeedMps": {
+          "min": 44.6258544921875,
+          "median": 47.92547607421875,
+          "max": 48.442752838134766
+        }
+      },
+      {
+        "secondSinceActiveStart": 83,
+        "samples": 18,
+        "firstTargetStartSeconds": 83.0402619,
+        "lastTargetStartSeconds": 83.9977818,
+        "rawRevRatio": {
+          "min": 0.7813259959220886,
+          "median": 0.875521332025528,
+          "max": 0.9689036011695862
+        },
+        "independentPreContextSpeedMps": {
+          "min": 35.464866638183594,
+          "median": 39.80984115600586,
+          "max": 44.133975982666016
+        }
+      },
+      {
+        "secondSinceActiveStart": 84,
+        "samples": 17,
+        "firstTargetStartSeconds": 84.0542192,
+        "lastTargetStartSeconds": 84.9554299,
+        "rawRevRatio": {
+          "min": 0.5461797714233398,
+          "median": 0.7152334451675415,
+          "max": 0.7714896202087402
+        },
+        "independentPreContextSpeedMps": {
+          "min": 26.71453094482422,
+          "median": 30.857709884643555,
+          "max": 34.95403289794922
+        }
+      },
+      {
+        "secondSinceActiveStart": 85,
+        "samples": 18,
+        "firstTargetStartSeconds": 85.0117097,
+        "lastTargetStartSeconds": 85.9695834,
+        "rawRevRatio": {
+          "min": 0.5371564626693726,
+          "median": 0.6141949892044067,
+          "max": 0.7382028698921204
+        },
+        "independentPreContextSpeedMps": {
+          "min": 19.242053985595703,
+          "median": 21.744836807250977,
+          "max": 26.191160202026367
+        }
+      },
+      {
+        "secondSinceActiveStart": 86,
+        "samples": 18,
+        "firstTargetStartSeconds": 86.0260338,
+        "lastTargetStartSeconds": 86.9837558,
+        "rawRevRatio": {
+          "min": 0.35730868577957153,
+          "median": 0.5064631700515747,
+          "max": 0.5944958925247192
+        },
+        "independentPreContextSpeedMps": {
+          "min": 14.513312339782715,
+          "median": 16.859862327575684,
+          "max": 18.972721099853516
+        }
+      },
+      {
+        "secondSinceActiveStart": 87,
+        "samples": 18,
+        "firstTargetStartSeconds": 87.0399629,
+        "lastTargetStartSeconds": 87.9976846,
+        "rawRevRatio": {
+          "min": 0.39486268162727356,
+          "median": 0.47426818311214447,
+          "max": 0.5613199472427368
+        },
+        "independentPreContextSpeedMps": {
+          "min": 10.05227279663086,
+          "median": 12.07334041595459,
+          "max": 14.224722862243652
+        }
+      },
+      {
+        "secondSinceActiveStart": 88,
+        "samples": 17,
+        "firstTargetStartSeconds": 88.0541086,
+        "lastTargetStartSeconds": 88.955353,
+        "rawRevRatio": {
+          "min": 0.23516902327537537,
+          "median": 0.35286545753479004,
+          "max": 0.42785197496414185
+        },
+        "independentPreContextSpeedMps": {
+          "min": 6.382382392883301,
+          "median": 8.080504417419434,
+          "max": 9.838473320007324
+        }
+      },
+      {
+        "secondSinceActiveStart": 89,
+        "samples": 18,
+        "firstTargetStartSeconds": 89.011506,
+        "lastTargetStartSeconds": 89.9695835,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.21562525629997253
+        },
+        "independentPreContextSpeedMps": {
+          "min": 2.6956493854522705,
+          "median": 4.423794269561768,
+          "max": 6.17514705657959
+        }
+      },
+      {
+        "secondSinceActiveStart": 90,
+        "samples": 18,
+        "firstTargetStartSeconds": 90.0263306,
+        "lastTargetStartSeconds": 90.9834305,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0.7880304157733917,
+          "max": 2.4932868480682373
+        }
+      },
+      {
+        "secondSinceActiveStart": 91,
+        "samples": 18,
+        "firstTargetStartSeconds": 91.0396307,
+        "lastTargetStartSeconds": 91.9982285,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 92,
+        "samples": 17,
+        "firstTargetStartSeconds": 92.054011,
+        "lastTargetStartSeconds": 92.955476,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 93,
+        "samples": 18,
+        "firstTargetStartSeconds": 93.011599,
+        "lastTargetStartSeconds": 93.9693356,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 94,
+        "samples": 18,
+        "firstTargetStartSeconds": 94.0259542,
+        "lastTargetStartSeconds": 94.9836118,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 95,
+        "samples": 18,
+        "firstTargetStartSeconds": 95.039658,
+        "lastTargetStartSeconds": 95.9978378,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 96,
+        "samples": 17,
+        "firstTargetStartSeconds": 96.0540347,
+        "lastTargetStartSeconds": 96.9552863,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 97,
+        "samples": 18,
+        "firstTargetStartSeconds": 97.0115061,
+        "lastTargetStartSeconds": 97.9692003,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.42931559681892395
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0.011170447804033756
+        }
+      },
+      {
+        "secondSinceActiveStart": 98,
+        "samples": 18,
+        "firstTargetStartSeconds": 98.025856,
+        "lastTargetStartSeconds": 98.9835364,
+        "rawRevRatio": {
+          "min": 0.23571813106536865,
+          "median": 0.3327142000198364,
+          "max": 0.4471200406551361
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0.0013355679111555219,
+          "median": 0.008749701548367739,
+          "max": 0.015097303315997124
+        }
+      },
+      {
+        "secondSinceActiveStart": 99,
+        "samples": 18,
+        "firstTargetStartSeconds": 99.0396365,
+        "lastTargetStartSeconds": 99.997316,
+        "rawRevRatio": {
+          "min": 0.3934640884399414,
+          "median": 0.5654549896717072,
+          "max": 0.6392157077789307
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0.0029483153484761715,
+          "median": 0.006268762983381748,
+          "max": 0.018433034420013428
+        }
+      },
+      {
+        "secondSinceActiveStart": 100,
+        "samples": 17,
+        "firstTargetStartSeconds": 100.0538242,
+        "lastTargetStartSeconds": 100.9554727,
+        "rawRevRatio": {
+          "min": 0.6235294342041016,
+          "median": 0.801307201385498,
+          "max": 0.8379085063934326
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0.0030612710397690535,
+          "median": 0.008444842882454395,
+          "max": 0.02171206660568714
+        }
+      },
+      {
+        "secondSinceActiveStart": 101,
+        "samples": 18,
+        "firstTargetStartSeconds": 101.0115686,
+        "lastTargetStartSeconds": 101.9688809,
+        "rawRevRatio": {
+          "min": 0.8326797485351562,
+          "median": 1,
+          "max": 1
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0.006282160524278879,
+          "median": 0.006935980170965195,
+          "max": 0.00796479545533657
+        }
+      },
+      {
+        "secondSinceActiveStart": 102,
+        "samples": 18,
+        "firstTargetStartSeconds": 102.0256859,
+        "lastTargetStartSeconds": 102.9834385,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.40845151245594025,
+          "max": 0.887195885181427
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0.008354161866009235
+        }
+      },
+      {
+        "secondSinceActiveStart": 103,
+        "samples": 18,
+        "firstTargetStartSeconds": 103.0396215,
+        "lastTargetStartSeconds": 103.9969822,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        }
+      },
+      {
+        "secondSinceActiveStart": 104,
+        "samples": 17,
+        "firstTargetStartSeconds": 104.0533979,
+        "lastTargetStartSeconds": 104.9550761,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0.00889138225466013
+        }
+      },
+      {
+        "secondSinceActiveStart": 105,
+        "samples": 5,
+        "firstTargetStartSeconds": 105.0113168,
+        "lastTargetStartSeconds": 105.2366993,
+        "rawRevRatio": {
+          "min": 0.20000000298023224,
+          "median": 0.20000000298023224,
+          "max": 0.20000000298023224
+        },
+        "independentPreContextSpeedMps": {
+          "min": 0,
+          "median": 0,
+          "max": 0.007012021727859974
+        }
+      }
+    ]
+  },
+  "audio": {
+    "richAudioAudioTestPerformed": false,
+    "richAudioHostStartedByAgent": false,
+    "audioEndpointOpenedByProbe": false,
+    "stockFallbackRetained": true,
+    "richAudioListeningEstablished": false,
+    "loopbackOrRichAudioRecordingSubsystemRun": false
+  },
+  "integrity": {
+    "preservedCaptureInputs": [
+      {
+        "name": "capture.json",
+        "bytes": 2198,
+        "sha256": "e2c6c8e3423c65069d6a6f9742c2ad4af5892522823c958200ef8c77e2d54d1f"
+      },
+      {
+        "name": "journal.ndjson",
+        "bytes": 913,
+        "sha256": "b496a91256457a380e6363617b405a2292d20321990c72c912215623347d2c0d"
+      },
+      {
+        "name": "timeline.ndjson",
+        "bytes": 4794224,
+        "sha256": "661a6cc9c4a57fde3e3ffe656a1b4ccaad3680305c566e988f7c149a3d2f8ffd"
+      }
+    ],
+    "privateReceiptAndReviewInputs": [
+      {
+        "name": "analysis.json",
+        "bytes": 3252,
+        "sha256": "3f611b753418dac62da6343ccbfd56eec08141f22fe61f08af3ac2bfbc66111e"
+      },
+      {
+        "name": "authorisation.json",
+        "bytes": 562,
+        "sha256": "8395b7ce82961aa72d472c6003c834dc30351301a64d7b83feaec8597b78e87d"
+      },
+      {
+        "name": "capture-directories-before.json",
+        "bytes": 173,
+        "sha256": "401fe1be390208c735600416b752dff10ca51c48a2bb8e869eeb258722699286"
+      },
+      {
+        "name": "capture-location.json",
+        "bytes": 191,
+        "sha256": "194b11416bccd72d719dcccc99e3279c1f04e0d8d27a9ec6127f7de826a98e77"
+      },
+      {
+        "name": "capture-preservation.json",
+        "bytes": 805,
+        "sha256": "13032db277c4e9bf1d12b3dabc96dda34f0c2eace79e8819782633a9da2878b7"
+      },
+      {
+        "name": "independent-preflight.json",
+        "bytes": 12319,
+        "sha256": "e6f52229e4f3aa1133e4c9cb39632056e2d98fbea89927cc581775549b7d2eca"
+      },
+      {
+        "name": "independent-review.json",
+        "bytes": 26738,
+        "sha256": "b02552b514ed1da8624a4fa7039a0e67006679bef99a30784d8848ee359298e3"
+      },
+      {
+        "name": "independent-rollback.json",
+        "bytes": 18867,
+        "sha256": "468adf08f5cede3fab7b942b8e9bc4e6ac38ff295615e80f9e86c74a4e89aa12"
+      },
+      {
+        "name": "installation-receipt.json",
+        "bytes": 413,
+        "sha256": "e979288988ad1cb57dbcbcf86bf25f12228f3c1077bf802fe60bc78db89d9b53"
+      },
+      {
+        "name": "launch-receipt.json",
+        "bytes": 384,
+        "sha256": "e0f9ac7fef71c95c18761b9fa24160ea19b441e00de4a6daff5a28024c0f1694"
+      },
+      {
+        "name": "normal-exit.json",
+        "bytes": 318,
+        "sha256": "9e4a29fdec95cf1d9bff28177ccc306ecf171f3b141b3e2aba69be4d1c8d567c"
+      },
+      {
+        "name": "observed-processes.json",
+        "bytes": 102,
+        "sha256": "6bebbfa20149ae440c3924565d0fbc8a5a86971d4f7a7ce0d85532cfdff5231d"
+      },
+      {
+        "name": "one-launch-started.json",
+        "bytes": 166,
+        "sha256": "f73a5bf675c8c0fd4f2a0c4d96d6985cc5aac474537cc9b287c9a19764d04e87"
+      },
+      {
+        "name": "operator-clarification.json",
+        "bytes": 423,
+        "sha256": "120290c7ebd17db1a86862e5766741411ebd2f9e94f644d2620d3d2a2809dc60"
+      },
+      {
+        "name": "pending-creation-receipt.json",
+        "bytes": 363,
+        "sha256": "980cac74feb50786227687a8381b95d9bdd006746bc406f05b2b04778cd2dab1"
+      },
+      {
+        "name": "preflight.json",
+        "bytes": 354,
+        "sha256": "59d5204356762bd7b766be430ec8c77cf5b7cd35a706a930738cb6e55ea42a56"
+      },
+      {
+        "name": "rollback-receipt.json",
+        "bytes": 3852,
+        "sha256": "280cf156d95c7061e3a1824d841961687706df2493c104e6993cebda7ef44d17"
+      },
+      {
+        "name": "user-observation.json",
+        "bytes": 469,
+        "sha256": "659b9607726d4af1b477fde34561c455eade560d90e211aa6a5a14096195f788"
+      }
+    ],
+    "preservedLogInputs": [
+      {
+        "name": "RagePluginHook.log",
+        "bytes": 16324,
+        "sha256": "8b1838138b1616e0969c01ae47897394df9c3bc728c7c6c11cd23759ffce13d7"
+      },
+      {
+        "name": "ScriptHookV.log",
+        "bytes": 1167,
+        "sha256": "e71f680d17732815fc8449cb7574f77f8f92ffe4f62e3047cb491ca093230f1b"
+      },
+      {
+        "name": "asiloader.log",
+        "bytes": 1647,
+        "sha256": "866fe31b69f6f4ec60f2e8a5871ddaab03a935e7f8b4931401c173c4b52eaef6"
+      }
+    ],
+    "privateBuildReceiptSha256": "e8a9a4fe50ca18f53023d2f226788c3633607d220fd9c0da9eeef7fd3f75e7b5",
+    "privateFixtureReceiptSha256": "8a76c7afbd8a6c1e39e56df43181f61c2867542d4c71c3b7b6f643261d0990a3",
+    "privateAnalysisValidationReceiptSha256": "62c456ecfea14ed8789c41adfa44074e1093ccf6190d42c66abc557d3265c586",
+    "publicBuildReceipt": {
+      "name": "evidence/playable-07-build.json",
+      "bytes": 23041,
+      "sha256": "d31561d16db5a28c5701c6c398413610f4258fc8ccfd602ed98be5f27522474a"
+    },
+    "publicRollbackEvidence": {
+      "name": "evidence/playable-07-rollback.json",
+      "bytes": 17243,
+      "sha256": "fecc25ccf970a4aaf675c3b4dc064268db4fe9b750aaa3cf0a011f4b78ffa4f4"
+    },
+    "preparedManifests": [
+      {
+        "name": "installation-manifest.json",
+        "sha256": "885179510f2829cbb6b8ad8a1d1cce567df7316dfe21f4db94090185fee18634"
+      },
+      {
+        "name": "multi-state-proposal.json",
+        "sha256": "a2d77730e87cd6a7bc7ae58b67506f99aef4536ea9e63de4871c8948c20daae8"
+      },
+      {
+        "name": "rollback-manifest.json",
+        "sha256": "c5102bb13ffe63f03ccf7f534c4429b165300d750c64a6d36b918eb78e08ccf7"
+      }
+    ],
+    "frozenAnalyzerSha256": "c246ea676c54b8298503cadfcc8603eac4c7f1fbfca012bf7e5a726e48937799"
+  },
+  "cleanup": {
+    "publicEvidence": "evidence/playable-07-rollback.json",
+    "independentResult": "PASS",
+    "normalCloseRequestedAccordingToReceipt": true,
+    "quitDialogObservedAccordingToReceipt": true,
+    "quitConfirmationSentAccordingToReceipt": true,
+    "processExitObservedAccordingToReceipt": true,
+    "forcedTerminationRecorded": false,
+    "temporaryAsiDestinationAbsent": true,
+    "temporaryPendingPathAbsent": true,
+    "ownedRemovalVerified": true,
+    "protectedFileCount": 11,
+    "allProtectedHashesMatch": true,
+    "reviewedShortcutAndSettingsCount": 4,
+    "allReviewedSettingsMatch": true,
+    "stockFallbackSelected": true,
+    "namedGameRphHostsRemaining": 0,
+    "productCacheBoundNodeWorkersRemaining": 0,
+    "priorPreservedFiles": 37,
+    "privateCapturesAndLogsPreserved": true,
+    "recursiveDeletionUsed": false,
+    "qualification": "Historical close/dialog/confirmation claims are receipt-based; current process absence and byte preservation were independently verified."
+  },
+  "limits": [
+    "The signal genuinely varies, but response across independently marked operating states is not yet qualified.",
+    "All requested labels remained OFF while both engine queries were1; OFF is not engine-off evidence.",
+    "The operator confirmed no phase-advance attempt; no keyboard defect is established.",
+    "The later human report is qualitative and untimed; it does not restore missing primary phase chronology.",
+    "Gear, throttle, physical RPM and redline are unavailable; the ratio/speed relation is not assumed monotonic.",
+    "Exploratory regions and bins do not assign achieved phases or relax frozen criteria.",
+    "An identical raw-value run is not by itself stale-read proof; handler internals and universal build/vehicle semantics remain unestablished.",
+    "No further capture, deployment, launch, integration or audio test is authorised by this record."
+  ],
+  "privacy": "No process identifiers, native handles, absolute local paths, absolute QPC timestamps, raw pointers, capture-directory identifiers or raw log text are included. Raw captures and logs remain private."
+}

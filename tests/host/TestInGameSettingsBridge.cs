@@ -26,7 +26,7 @@ namespace RichAudio.Settings.Tests
                 Directory.CreateDirectory(dir);string prefsRelative=Path.Combine(relative,"preferences.json"),prefs=Path.Combine(root,prefsRelative),pointer=Path.Combine(dir,"RichAudio.Menu.json");
                 var legacy=AcousticSettings.Parse("{\"schemaVersion\":1,\"revision\":1,\"acousticQuality\":\"quality\",\"acousticAcceleration\":\"cpu\"}");
                 Check(legacy.RichAudioEnabled&&legacy.OutputLevel==1&&legacy.EarlyReflections&&!legacy.DiagnosticsOverlay,"old v1 files retain the calibrated profile defaults");
-                var audio=new AcousticSettings("max","cpu",2,false,.35,false,true);
+                var audio=new AcousticSettings("max","cpu",2,false,.35,false,true,menuToggleKey:"F7");
                 Check(AcousticSettings.Parse(audio.Serialize()).SamePreferences(audio),"all six preferences persist and validate");
                 Check(audio.ProducerArguments().Contains("--rich-audio-enabled false")&&audio.ProducerArguments().Contains("--rich-audio-output-level 0.35")&&
                     audio.ProducerArguments().Contains("--early-reflections false")&&audio.ProducerArguments().Contains("--acoustic-diagnostics-overlay true"),"actual producer arguments carry supported audio controls invariantly");
@@ -41,7 +41,8 @@ namespace RichAudio.Settings.Tests
                 Check(AcousticSettingsStore.Load(root,prefs).SamePreferences(audio),"CAS rejection preserves the external editor's audio preferences");
                 using(var editor=new AcousticSettingsWindow(root,prefs))
                 {editor.QualitySelector.Value=2;editor.AccelerationSelector.SelectedIndex=0;editor.SaveSelection();var saved=AcousticSettingsStore.Load(root,prefs);
-                    Check(!saved.RichAudioEnabled&&saved.OutputLevel==.35&&!saved.EarlyReflections&&saved.DiagnosticsOverlay,"external quality editor preserves all four newer preferences");}
+                    Check(!saved.RichAudioEnabled&&saved.OutputLevel==.35&&!saved.EarlyReflections&&saved.DiagnosticsOverlay,"external quality editor preserves all four newer preferences");
+                    Check(saved.MenuToggleKey=="F7","external quality editor preserves the persisted menu binding");}
                 File.WriteAllText(pointer,Link(root,prefsRelative));var link=InGameSettingsLink.Load(pointer);
                 Check(link.SettingsPath==prefs&&link.ToggleKey=="F10"&&link.ControllerEnabled,"validated menu pointer scopes the common settings file");
                 File.WriteAllText(pointer,Link(root,prefsRelative,"F4"));Reject(delegate{InGameSettingsLink.Load(pointer);},"default RPH console shortcut is not reserved by the menu");

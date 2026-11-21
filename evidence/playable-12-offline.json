@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-12",
+  "kind": "new-focused-offline-validation",
+  "recordedUtc": "2026-11-01T15:45:08.8334626Z",
+  "passed": true,
+  "compatibility": {
+    "cases": 37,
+    "assertions": 157,
+    "staticControls": 10,
+    "privateReceiptSha256": "e5a3c0e5d2b378cae69911538c53bf9de3ab519ca0b2e8f9619f1d1f14317cd1",
+    "runnerSha256": "5e689b5716b7e7a05205e97686bd34a85e92ed85162d66a75d4fcc187683b414",
+    "scope": "Actual compatibility implementation and unchanged RPH sampler against harmless compiled CLR API fixtures. Different same-version API/launcher bytes, unknown version, empty API location/hash/version admitted; missing required shapes and invalid getter/vehicle/pose data reject."
+  },
+  "nativeComponents": {
+    "cases": 11,
+    "assertions": 1055.0,
+    "fullHistoricalMatrixRerun": false,
+    "privateReceiptSha256": "413e6d367faaf0b633e57eaa73a7801194fad484540df275e580b35fb18f6adc",
+    "producerSha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+    "sourcePins": 12,
+    "casesPassed": [
+      {
+        "name": "valid_changing",
+        "passed": true,
+        "accepted": 8,
+        "frames": 8,
+        "targetCalls": 8
+      },
+      {
+        "name": "metadata_pending",
+        "passed": true,
+        "accepted": 8,
+        "frames": 8,
+        "targetCalls": 8
+      },
+      {
+        "name": "source_identity_changed",
+        "passed": true,
+        "accepted": 3,
+        "frames": 3,
+        "targetCalls": 3
+      },
+      {
+        "name": "freeze_after_3",
+        "passed": true,
+        "accepted": 3,
+        "frames": 3,
+        "targetCalls": 3
+      },
+      {
+        "name": "host_pool_counter_changed",
+        "passed": true,
+        "accepted": 3,
+        "frames": 3,
+        "targetCalls": 3
+      },
+      {
+        "name": "host_driver_changed",
+        "passed": true,
+        "accepted": 3,
+        "frames": 3,
+        "targetCalls": 3
+      },
+      {
+        "name": "post_peer_fault",
+        "passed": true,
+        "accepted": 3,
+        "frames": 3,
+        "targetCalls": 4
+      },
+      {
+        "name": "wrong_peer_address",
+        "passed": true,
+        "accepted": 0,
+        "frames": 0,
+        "targetCalls": 0
+      },
+      {
+        "name": "wrong_provider_hash",
+        "passed": true,
+        "accepted": 0,
+        "frames": 0,
+        "targetCalls": 0
+      },
+      {
+        "name": "wrong_session_key",
+        "passed": true,
+        "accepted": 0,
+        "frames": 0,
+        "targetCalls": 0
+      },
+      {
+        "name": "wrong_process_open",
+        "passed": true,
+        "accepted": 0,
+        "frames": 0,
+        "targetCalls": 0
+      }
+    ],
+    "scope": "Unchanged genuine compiled ASI plus changed managed module/scope, clock, composition, validator, expiry consumer, adapter and GameplayWire. Native imports and peer/camera observations are explicit fixtures; actual RPH/SHV are not executed."
+  },
+  "managedRegressions": [
+    {
+      "suite": "clock-and-autonomous-expiry",
+      "cases": 13,
+      "assertions": 43,
+      "privateReceiptSha256": "f1f40b0c88e62cd43c6a2968e37864109a3d4229cd711d401e065691d9a97a33"
+    },
+    {
+      "suite": "revised-shared-validator",
+      "cases": 69,
+      "assertions": 255,
+      "privateReceiptSha256": "f1f40b0c88e62cd43c6a2968e37864109a3d4229cd711d401e065691d9a97a33",
+      "intentionalChange": "RPH distribution metadata no longer participates in telemetry scope; all other rejection cases retained."
+    },
+    {
+      "suite": "gameplay-adapter",
+      "cases": 14,
+      "assertions": 63,
+      "privateReceiptSha256": "71866c19fa779f1b82ff56d6281bf46b4f608ffaac340eeddf77ed97bc345aa1"
+    },
+    {
+      "suite": "private-journal-and-process-lease",
+      "cases": 8,
+      "assertions": 67,
+      "privateReceiptSha256": "dbc24e52c85f75cfd4063079cbb63a8b23959642a9e241df52ff9b174da2f691"
+    }
+  ],
+  "exactProfile": {
+    "privateReceiptSha256": "0f7a6aa9870e4dfcf586f1c88faa8913eb43cded6542d53bf00968f1d753d3d0",
+    "runnerSha256": "aa7e818240b8dda19c172cc6dda3a97ae67ecd8fa7fe601a2e4682de2249c217",
+    "pluginSha256": "1b9ed8586906c0c56f9f8c695dcbe137857b4d08da02a6797eb6811002727866",
+    "pluginBytes": 337408,
+    "controls": 2,
+    "reachableMethods": 232,
+    "retainedArtifactPins": 5,
+    "legacyRpmGetterCalls": 0,
+    "reachableAudioMenuRecordingActivation": 0,
+    "reachableRphDistributionGates": 0,
+    "defaultProductMethods": 655,
+    "defaultProductMethodDifferences": 0,
+    "actualPluginExecuted": false
+  },
+  "preparationGuards": {
+    "cases": 5,
+    "privateReceiptSha256": "aa94cabf1a184a3355edaeec927b5ef6acec189ea6ea26ef106feae3f37ac49a",
+    "casesPassed": [
+      "occupied-output",
+      "enabled-flags-derived-fixture",
+      "wrong-plugin-digest",
+      "wrong-build-receipt-digest",
+      "wrong-profile-receipt-digest"
+    ],
+    "enabledFlagsTestUsesPrivateDerivedRunner": true,
+    "inverseTextExactlyCanonical": true,
+    "productionConfigMutated": false
+  },
+  "preservedHistoricalNativeMatrix": {
+    "cases": 32,
+    "receiptSha256": "48d362c7b89366bdec17f66323028b93089f395834d03fbf51311116d0211a6b",
+    "rerun": false,
+    "maximumDurationCaseRerun": false
+  },
+  "earlierAttempts": {
+    "retained": true,
+    "countedAsPassing": false,
+    "notes": [
+      "First authentic-SDK build failed on System.Object/Rage.Object ambiguity; qualified name and representative fixture corrected. A later final build adds a BCL-only lifecycle error boundary.",
+      "First native attempt refused real foreground setup before callback. Next attempt passed valid-changing but rejected initial metadata-pending binding with zero targets; exact binding reason was not retained. Fixture error text was expanded without changing product admission; final eleven-case matrix passed.",
+      "UI focused only owned fixture windows; no keyboard input or replacement of foreground readers. Window-close refresh races did not count as test failures or evidence of activation.",
+      "Earlier compatibility harness load-context/static-check setup corrections and profile-checker journal import allowlist corrections remain private.",
+      "First preparation guard run encountered the active-fixture process exclusion before its intended digest check; final guard run reached all five intended checks."
+    ]
+  },
+  "actualRphExecuted": false,
+  "actualShvRuntimeExecuted": false,
+  "actualNativeProducerExecutedAgainstFakeImports": true,
+  "gameLaunched": false,
+  "gameFilesWritten": false,
+  "endpointOpened": false,
+  "audioPlayback": false,
+  "liveHandoffQualified": false,
+  "limits": "New component/static results are not real framework correspondence, live telemetry, genuine engine audibility or endpoint proof. Positive fixture results never certify a real source. No unrelated long-duration matrix or broad audio suite was rerun."
+}

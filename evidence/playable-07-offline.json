@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-07",
+  "preparedUtc": "2026-11-01T00:39:31.6807510Z",
+  "scope": "Completed offline build, authentic-binary fake-framework validation, timeline analysis and proposal-only preparation; no deployment or live execution",
+  "decision": "GO to request fresh approval of one bounded multi-state live experiment; provider integration and playable development BLOCKED",
+  "candidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "bytes": 378880,
+    "sha256": "21302b4c5c5fb99f63b7b25dce2fa973117bfb0246f16745d0782f062fe1a69e",
+    "pathHint": "build/playable-07-shv-probe/RichAudio.OperatingState.Shv.asi"
+  },
+  "receiptIntegrity": {
+    "privateBuildSha256": "e8a9a4fe50ca18f53023d2f226788c3633607d220fd9c0da9eeef7fd3f75e7b5",
+    "privateFixtureSha256": "8a76c7afbd8a6c1e39e56df43181f61c2867542d4c71c3b7b6f643261d0990a3",
+    "privateAnalysisSha256": "62c456ecfea14ed8789c41adfa44074e1093ccf6190d42c66abc557d3265c586",
+    "preparationSha256": "e43f55026c2b798ab493f809c7acb2596e88fb3ee6066c548771ff0edee187a5",
+    "pathGuardReceiptSha256": "bdafdcc7ef3ca289651635d605a007268750af66bf008bb6c46d453310ec430a"
+  },
+  "proposalManifests": [
+    {
+      "name": "installation-manifest.json",
+      "sha256": "885179510f2829cbb6b8ad8a1d1cce567df7316dfe21f4db94090185fee18634"
+    },
+    {
+      "name": "multi-state-proposal.json",
+      "sha256": "a2d77730e87cd6a7bc7ae58b67506f99aef4536ea9e63de4871c8948c20daae8"
+    },
+    {
+      "name": "rollback-manifest.json",
+      "sha256": "c5102bb13ffe63f03ccf7f534c4429b165300d750c64a6d36b918eb78e08ccf7"
+    }
+  ],
+  "proposal": {
+    "requiresSeparateApproval": true,
+    "deployments": 1,
+    "launches": 1,
+    "storyModeOnly": true,
+    "vehicle": "Bati",
+    "operatorArmed": true,
+    "manualVehicleActionsOnly": true,
+    "maximumWaitingMs": 300000,
+    "maximumActiveMs": 120000,
+    "maximumTargetAttempts": 2400,
+    "maximumHz": 20,
+    "minimumAfterToNextBeforeMs": 50,
+    "maximumStartGapMs": 250,
+    "maximumTimelineRecords": 7209,
+    "maximumAggregateBytes": 12582912,
+    "maximumTimelineRowBytes": 2047,
+    "maximumRawReturnRowBytes": 511,
+    "ringCapacity": 128,
+    "terminalHudMaxMs": 5000,
+    "automaticRetry": false,
+    "watchdogCanPreemptNative": false,
+    "nativeFailureContainmentGuaranteed": false
+  },
+  "integrity": {
+    "protectedInstallationFiles": 11,
+    "protectedHashesMatch": true,
+    "reviewedShortcutAndSettingsFiles": 4,
+    "reviewedShortcutHashesMatch": true,
+    "settingsSha256": "73647afcfa175c643a6938c63fc25845c2527dc8c864221bcf35142ce956f711",
+    "stockFallback": true,
+    "timeoutOverridesAbsent": true,
+    "probeDestinationAbsent": true,
+    "pendingPathAbsent": true,
+    "previousArtifactEvidenceFiles": 37,
+    "previousArtifactEvidenceHashesRechecked": true,
+    "remainingGameRphHostFixtureProcesses": 0
+  },
+  "pathGuards": {
+    "passed": 3,
+    "checks": 3,
+    "parserErrors": 0,
+    "scriptSha256": "f2cf671a60423c51368d4102779f60d36eea6dd8a1147bec1d7f5f7566e4b77f",
+    "scope": "Early path rejection and PowerShell parsing only; no passing receipts supplied.",
+    "noGameWrites": true,
+    "noReceiptFabrication": true
+  },
+  "evidenceBoundary": {
+    "actualShvExecuted": false,
+    "gameStarted": false,
+    "deployed": false,
+    "gameFilesWritten": false,
+    "newRuntimeOrSystemSoftwareInstalled": false,
+    "rendererSourcePlaybackGainsMenuSettingsChanged": false,
+    "audioHostStarted": false,
+    "endpointOpened": false,
+    "recordingSubsystemBuilt": false,
+    "multiStateLiveBehaviourEstablished": false,
+    "providerQualified": false,
+    "measuredRPM": false,
+    "humanRichAudioListeningEstablished": false
+  },
+  "interpretation": "Prior PLAYABLE-06 idle0.200000003 is preserved as one credible point; PLAYABLE-05 zero remains inconclusive. Real multi-state qualification requires the future separately approved capture and human review, without RPM conversion.",
+  "privacy": "Private absolute paths, native handles, process identities, absolute QPC values and captures remain local; public receipts contain only sanitised evidence and content hashes."
+}

@@ -4,7 +4,7 @@ namespace RichAudio.Settings.InGame
 {
     public sealed partial class AcousticMenuModel
     {
-        public const int RowCount=13;
+        public const int RowCount=14,MenuKeyRow=9,ApplyRow=10,ResetRow=11,BackRow=12,RecordingRow=13;
         public bool Visible {get;private set;}
         public int SelectedIndex {get;private set;}
         public MenuPreferences Pending {get;private set;}
@@ -13,6 +13,7 @@ namespace RichAudio.Settings.InGame
         public bool RecordingAvailable {get;private set;}
         public bool RecordingActive {get;private set;}
         public bool RecordingPending {get;private set;}
+        public bool AudioTestRecordingMode {get;private set;}
         public string RecordingDetail {get;private set;}
         public bool Dirty {get{return !Pending.Same(baseline);}}
         public string Notice {get;private set;}
@@ -31,6 +32,10 @@ namespace RichAudio.Settings.InGame
         public void SetWritable(bool canApply){CanApply=canApply;}
         public void SetResetAvailable(bool resetAvailable){ResetAvailable=resetAvailable;}
         public void SetRecording(bool available,bool active,bool pending,string detail)
+        {AudioTestRecordingMode=false;ApplyRecording(available,active,pending,detail);}
+        public void SetAudioTestRecording(bool available,bool active,bool pending,string detail)
+        {AudioTestRecordingMode=true;ApplyRecording(available,active,pending,detail);}
+        private void ApplyRecording(bool available,bool active,bool pending,string detail)
         {RecordingAvailable=available;RecordingActive=active;RecordingPending=pending;RecordingDetail=detail??"Recorder unavailable";}
         public void SetNotice(string message,bool error=false)
         {Notice=(message??"").Replace('\r',' ').Replace('\n',' ');if(Notice.Length>160)Notice=Notice.Substring(0,160);NoticeIsError=error;}
@@ -47,23 +52,24 @@ namespace RichAudio.Settings.InGame
             if(input==MenuInput.Down){SelectedIndex=(SelectedIndex+1)%RowCount;return MenuAction.None;}
             if(input==MenuInput.Left||input==MenuInput.Right){
                 int direction=input==MenuInput.Left?-1:1;
-                if(SelectedIndex>=9){SelectedIndex=9+(SelectedIndex-9+direction+4)%4;return MenuAction.None;}
+                if(SelectedIndex>=ApplyRow){SelectedIndex=ApplyRow+(SelectedIndex-ApplyRow+direction+4)%4;return MenuAction.None;}
                 Adjust(direction,false);return MenuAction.None;
             }
             if(input==MenuInput.Accept){
-                if(SelectedIndex==9){if(!CanApply){SetNotice("Settings storage unavailable. Preferences have not been saved.",true);return MenuAction.None;}
+                if(SelectedIndex==ApplyRow){if(!CanApply){SetNotice("Settings storage unavailable. Preferences have not been saved.",true);return MenuAction.None;}
                     SetNotice("Saving requested. Active engine state is shown separately.");return MenuAction.Apply;}
-                if(SelectedIndex==10){
+                if(SelectedIndex==ResetRow){
                     if(!CanApply){
                         if(!ResetAvailable){SetNotice("Settings recovery is unavailable. Preferences have not been changed.",true);return MenuAction.None;}
                         Pending=MenuPreferences.Defaults;SetNotice("Defaults reset requested. The background service must preserve the original settings first.");return MenuAction.Reset;
                     }
                     Pending=MenuPreferences.Defaults;SetNotice("Defaults selected. Apply to save; Back discards pending changes.");return MenuAction.None;
                 }
-                if(SelectedIndex==11){Close();return MenuAction.Close;}
-                if(SelectedIndex==12){
+                if(SelectedIndex==BackRow){Close();return MenuAction.Close;}
+                if(SelectedIndex==RecordingRow){
                     if(!RecordingAvailable||RecordingPending){SetNotice(RecordingDetail??"Recorder unavailable or request pending",true);return MenuAction.None;}
                     SetNotice("Recording request queued; completion is confirmed by the recorder service.");
+                    if(AudioTestRecordingMode)return RecordingActive?MenuAction.StopAudioTest:MenuAction.StartAudioTest;
                     return RecordingActive?MenuAction.StopRecording:MenuAction.StartRecording;
                 }
                 Adjust(1,true);
@@ -81,6 +87,9 @@ namespace RichAudio.Settings.InGame
                 case 3:Pending=Pending.With(outputLevel:Math.Max(0,Math.Min(1,Math.Round((Pending.OutputLevel+direction*.05)*20)/20)));break;
                 case 4:Pending=Pending.With(earlyReflections:cycle?!Pending.EarlyReflections:direction>0);break;
                 case 6:Pending=Pending.With(diagnosticsOverlay:cycle?!Pending.DiagnosticsOverlay:direction>0);break;
+                case 7:Pending=Pending.With(soundMapVisible:cycle?!Pending.SoundMapVisible:direction>0);break;
+                case 8:Pending=Pending.With(integrationMode:cycle?(Pending.IntegrationMode=="stock-fallback"?"experimental-additive":"stock-fallback"):(direction>0?"experimental-additive":"stock-fallback"));break;
+                case MenuKeyRow:{int index=Array.IndexOf(MenuPreferences.MenuToggleKeys,Pending.MenuToggleKey),next=cycle?(index+1)%MenuPreferences.MenuToggleKeys.Length:Math.Max(0,Math.Min(MenuPreferences.MenuToggleKeys.Length-1,index+direction));Pending=Pending.With(menuToggleKey:MenuPreferences.MenuToggleKeys[next]);break;}
                 default:SetNotice("This control is read-only; no unsupported effect has been enabled.");return;
             }
             SetNotice("Pending changes. Apply to save and update a configured host.");
@@ -97,8 +106,9 @@ namespace RichAudio.Settings.InGame
             if(!click)return MenuAction.None;
             if(hit.Kind==HitRegionKind.QualityChoice){Pending=Pending.With(quality:MenuPreferences.Qualities[hit.ValueIndex]);SetNotice("Pending changes. Apply to save.");return MenuAction.None;}
             if(hit.Kind==HitRegionKind.AccelerationChoice){Pending=Pending.With(acceleration:MenuPreferences.Accelerations[hit.ValueIndex]);SetNotice("Pending changes. Apply to save.");return MenuAction.None;}
+            if(hit.Kind==HitRegionKind.MenuKeyChoice){Pending=Pending.With(menuToggleKey:MenuPreferences.MenuToggleKeys[hit.ValueIndex]);SetNotice("Menu key selected. Apply to save; other mods may use the same key.");return MenuAction.None;}
             if(hit.Kind==HitRegionKind.Level){double value=Math.Max(0,Math.Min(1,(pixelX-hit.X)/hit.Width));Pending=Pending.With(outputLevel:Math.Round(value*20)/20);SetNotice("Pending output level. Apply to save.");return MenuAction.None;}
-            if(SelectedIndex==0||SelectedIndex==1||SelectedIndex==3)return MenuAction.None;
+            if(SelectedIndex==0||SelectedIndex==1||SelectedIndex==3||SelectedIndex==MenuKeyRow)return MenuAction.None;
             return Handle(MenuInput.Accept);
         }
     }

@@ -1,12 +1,12 @@
 # P2-01 authorised deployment and first runtime attempt
 
-24 October 2026. **Stopped at RPH's compatibility gate; game-file additions rolled back.** The user explicitly approved the Microsoft prerequisite, the exact 26-file manifest, supported Story Mode launch and conditional A–E testing. This report supersedes earlier statements that no runtime had ever been installed/launched. The earlier readiness reports remain historical evidence.
+24 October 2026. **Stopped at RPH's compatibility gate; game-file additions rolled back.** I explicitly approved the Microsoft prerequisite, the exact 26-file manifest, supported Story Mode launch and conditional A–E testing. This report supersedes earlier statements that no runtime had ever been installed/launched. The earlier readiness reports remain historical evidence.
 
 ## Verified outcome
 
-The prerequisite installed successfully. All 26 approved additions were copied without overwriting any destination and their hashes verified. RPH 1.132.1428.17748 ran, displayed its first-run disclaimer and reached Settings. Its Settings window reported **Grand Theft Auto V 1.0.1013.34 Retail NOT SUPPORTED**, rather than the expected Enhanced 1.0.1158.16. The agent stopped there, used Exit without saving/starting the game, and did not retry.
+The prerequisite installed successfully. All 26 approved additions were copied without overwriting any destination and their hashes verified. RPH 1.132.1428.17748 ran, displayed its first-run disclaimer and reached Settings. Its Settings window reported **Grand Theft Auto V 1.0.1013.34 Retail NOT SUPPORTED**, rather than the expected Enhanced 1.0.1158.16. The session stopped there, used Exit without saving/starting the game, and did not retry.
 
-**GTA was not launched by the agent; RichAudio was not loaded; no live player/NPC telemetry was obtained.** Tests A–E were not run because the smoke-test prerequisite failed. No game crash was observed; game stability was not exercised. A bounded Windows Application log query found no matching RPH/GTA crash event. No telemetry JSONL file exists from this attempt.
+**GTA was not launched; RichAudio was not loaded; no live player/NPC telemetry was obtained.** Tests A–E were not run because the smoke-test prerequisite failed. No game crash was observed; game stability was not exercised. A bounded Windows Application log query found no matching RPH/GTA crash event. No telemetry JSONL file exists from this attempt.
 
 The 26 introduced files were moved back into ignored development quarantine; the introduced empty Plugins directory was removed. The approved shared Microsoft VC2010 x64 runtime remains installed. This is rollback of the game-file additions, not a claim that the shared prerequisite or every first-run application preference was reverted.
 
@@ -37,7 +37,7 @@ The UI-reported version matches the older GTA5.exe. **Inference:** executable se
 
 The actual deployed RPH file matches the reviewed official archive and expected version/hash. The telemetry adapter cannot explain the pre-game rejection because it had not been loaded. SDK member binding, DirectStorage behaviour, ASI/OpenRPF coexistence and game scheduling remain untested; none should be named as the observed cause.
 
-Screenshot and accessible UI text were preserved locally. The UI showed a compatibility warning, not a crash dialog. No RPH log file was found in the game root during this attempt. The Restart with logging button was deliberately not used because the user required stopping on a conflict. Microsoft generated two real installer logs from the requested log prefix; their actual paths/hashes are recorded in the installation receipt.
+Screenshot and accessible UI text were preserved locally. The UI showed a compatibility warning, not a crash dialog. No RPH log file was found in the game root during this attempt. The Restart with logging button was deliberately not used because I required stopping on a conflict. Microsoft generated two real installer logs from the requested log prefix; their actual paths/hashes are recorded in the installation receipt.
 
 ## Measurements and A–E results
 

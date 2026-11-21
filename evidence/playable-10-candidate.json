@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-10",
+  "decision": "OUTCOME-B-GO-FOR-DIAGNOSTIC-APPROVAL-ONLY",
+  "readyForApproval": true,
+  "liveApprovalGranted": false,
+  "deployed": false,
+  "gameLaunched": false,
+  "runtimeIdentityAuthenticated": false,
+  "actual09RuntimeOperandsKnown": false,
+  "liveHandoffQualified": false,
+  "audioQualified": false,
+  "artifact": {
+    "name": "RichAudio.RuntimeProvenance.Rph.dll",
+    "installName": "RichAudio.dll",
+    "bytes": 66560,
+    "sha256": "cb2555ba00169af86d2728ba545c808a825df0ab04ba08026f1268e02d3caf3a",
+    "platform": "x64",
+    "executed": false
+  },
+  "privateBuildReceiptSha256": "0b8f884941ef4b9efa84ad2d19a19aeaf863702f3994142a100bd9705c363ea3",
+  "privateProfileReceiptSha256": "66381837ed41890aef9a645c25961b4820f277e1e48efc2951528e3d195ab8a7",
+  "manifests": [
+    {
+      "name": "installation-manifest.json",
+      "sha256": "d57027bf0a6cb554b94674a9f5101f9033522ff65ed0a182689413d314bf9839",
+      "bytes": 6485
+    },
+    {
+      "name": "rollback-manifest.json",
+      "sha256": "7405c888caa84d062ccdbddf784f4fd4c1ff79cc16cbec7108b8843b1bf3d802",
+      "bytes": 2001
+    },
+    {
+      "name": "preflight.json",
+      "sha256": "ccf3031515e945f2b521d1d7105022dcd9aa7c87f52b55bffe9a4f6984096ce5",
+      "bytes": 839
+    }
+  ],
+  "preparerSha256": "83ff24fded554d0b1c8615a46100a66621345c702f630bfb41d5deb6a3ad9532",
+  "baselineSha256": "773b947526b5b83e8bfa6cdbaabd0b20ce2802ec2b2d523b53dac20fd95bbe28",
+  "preservation": {
+    "priorTrackedFilesByteIdentical": 723,
+    "prior09PrivateFilesByteIdentical": 579,
+    "protectedFilesMatching": 11,
+    "settingsMatching": 4,
+    "stockFallback": true,
+    "modificationAwareLoudness": false,
+    "synchronizedAudioRecording": false,
+    "ownedPathsAbsent": true,
+    "relevantProcessesAbsent": true
+  },
+  "payloadCount": 1,
+  "asiPayloadCount": 0,
+  "originalPlugin": {
+    "bytes": 222208,
+    "sha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657"
+  },
+  "preservedNativeProducerSha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+  "limits": {
+    "entryCaptures": 1,
+    "leaseWaitSeconds": 60,
+    "leaseMaximumBytes": 8192,
+    "inputMaximumBytesPerFile": 67108864,
+    "reportMaximumBytes": 32768,
+    "stringMaximumCharacters": 1024,
+    "osAndRuntimeCallsPreemptible": false,
+    "retryAllowed": false,
+    "secondLaunchAllowed": false,
+    "sourceAllowed": false,
+    "nativeInvocationAllowed": false,
+    "gameplayAllowed": false,
+    "audioAllowed": false,
+    "observationPromotedInSameSession": false
+  },
+  "nextEvidenceRequired": [
+    "Fresh explicit exact-artifact approval under user PLAYABLE-10 section8.",
+    "One diagnostic report or honest terminal/unobserved result, then normal exit and exact ownership rollback.",
+    "Subsequent independent review of actual API distribution provenance before any passive policy can accept it."
+  ],
+  "privacy": "Private paths, identifiers, generated policy, leases and captures are not published."
+}

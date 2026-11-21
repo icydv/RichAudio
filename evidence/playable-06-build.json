@@ -1,0 +1,346 @@
+{
+  "schema": 1,
+  "profile": "playable-06",
+  "builtUtc": "2026-10-31T23:41:57.6177899Z",
+  "scope": "Offline Microsoft x64 C++ compilation of the operator-armed diagnostic, exact public import-boundary linking and static PE inspection only",
+  "candidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "bytes": 323584,
+    "sha256": "af860dc42540a94c2176ee0dce09c77d9c16c9eeea46a1572d5011aaa8863be4",
+    "pathHint": "build/playable-06-shv-probe/RichAudio.OperatingState.Shv.asi",
+    "installablePlayableUpdate": false
+  },
+  "toolchain": {
+    "msvcVersion": "14.44.35207",
+    "windowsSdkVersion": "10.0.26100.0",
+    "compiler": {
+      "Name": "cl.exe",
+      "Bytes": 677776,
+      "Sha256": "fe251ef50a1545b1b0835ee17b1e785459712b38d79e45b5c1d3d28970a36619",
+      "FileVersion": "19.44.35229.0",
+      "AuthenticodeStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    },
+    "linker": {
+      "Name": "link.exe",
+      "Bytes": 3252616,
+      "Sha256": "a364af801a8539e4324d9489313dbf001d959128451fc99a27b24676bbac058f",
+      "FileVersion": "14.44.35229.0",
+      "AuthenticodeStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    },
+    "librarian": {
+      "Name": "lib.exe",
+      "Bytes": 23376,
+      "Sha256": "fde148a275981855689c45f932dda56b10dc9289a0290826a0fb93478da34929",
+      "FileVersion": "14.44.35229.0",
+      "AuthenticodeStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    },
+    "compilerFlags": [
+      "/std:c++17",
+      "/W4",
+      "/WX",
+      "/O2",
+      "/MT",
+      "/EHsc",
+      "/guard:cf",
+      "/Brepro",
+      "/utf-8"
+    ],
+    "linkerFlags": [
+      "/DLL",
+      "/MACHINE:X64",
+      "/INCREMENTAL:NO",
+      "/OPT:REF",
+      "/OPT:ICF",
+      "/GUARD:CF",
+      "/DYNAMICBASE",
+      "/NXCOMPAT",
+      "/HIGHENTROPYVA",
+      "/Brepro"
+    ]
+  },
+  "sourceInputs": [
+    {
+      "Name": "repo/src/telemetry/ShvProbe/Probe.cpp",
+      "Bytes": 52234,
+      "Sha256": "393cad6ba8ba3093835a35dbede8131fb4c19fae20c62d43ee3dadebbf3b0f5f"
+    },
+    {
+      "Name": "repo/src/telemetry/ShvProbe/ScriptHookVApi.h",
+      "Bytes": 1493,
+      "Sha256": "131f609ff3db49e0bdaa9264a296825669fe897115c65d76fd3f593115d077ba"
+    },
+    {
+      "Name": "repo/src/telemetry/ShvProbe/NativeIds.h",
+      "Bytes": 2491,
+      "Sha256": "b4f0cbe1181b6117d8515fa7366c7b94426a5e243e6c2afdd7b49b45781cf0dd"
+    }
+  ],
+  "headerProvenanceSha256": "eaed6b2cbb9d31ca32a5756d656ebc32dc45dfda9eb16ec79465efe03bc412f9",
+  "includedHeaderCount": 170,
+  "includedHeaderManifestSha256": "9a5ecaaba8b3119da018f7ec3818409bb6687cf630bad1c8d7aae4add6fa310d",
+  "linkedLibraries": [
+    {
+      "Name": "windows-sdk/Lib/10.0.26100.0/ucrt/x64/libucrt.lib",
+      "Bytes": 43336396,
+      "Sha256": "2b247d6a27c22c520c34134b8acf2da3366175a4690886927a51929f37725fdd"
+    },
+    {
+      "Name": "windows-sdk/Lib/10.0.26100.0/um/x64/kernel32.lib",
+      "Bytes": 311908,
+      "Sha256": "341c7d56125a03b458e4d5093e4c79b33123ccfdfd610fe236937b8e6f3134bb"
+    },
+    {
+      "Name": "windows-sdk/Lib/10.0.26100.0/um/x64/user32.lib",
+      "Bytes": 167864,
+      "Sha256": "f45759349ad08b848bdd4eee39cd9b428b2a7ae63a09889c09a197fe7b01421d"
+    },
+    {
+      "Name": "windows-sdk/Lib/10.0.26100.0/um/x64/uuid.lib",
+      "Bytes": 8936424,
+      "Sha256": "d077ffb106503e057428dc7bb4c5daac019c269ffc714edb18ca028723cc840a"
+    },
+    {
+      "Name": "repo/build/playable-06-shv-probe/ScriptHookV.lib",
+      "Bytes": 3912,
+      "Sha256": "62bfa11e363739a7deef59d4652ffad7131d4a7b269dc23116f9ac1c9f63eba5"
+    },
+    {
+      "Name": "msvc/14.44.35207/lib/x64/LIBCMT.lib",
+      "Bytes": 6534094,
+      "Sha256": "8fe40dd342b90b35d62b8f5d55b4e92df7785c122976618365cfe3b014cc857a"
+    },
+    {
+      "Name": "msvc/14.44.35207/lib/x64/libcpmt.lib",
+      "Bytes": 21684758,
+      "Sha256": "da86944db1497552c378e6252a7177fbefbdaeba4e69a6457de4db7fb2d235de"
+    },
+    {
+      "Name": "msvc/14.44.35207/lib/x64/libvcruntime.lib",
+      "Bytes": 2087406,
+      "Sha256": "e4f8daf356d63592ff6d6f7ad90c8c9da4c1230273ad113a9a2b56afd6bfcb04"
+    },
+    {
+      "Name": "msvc/14.44.35207/lib/x64/OLDNAMES.lib",
+      "Bytes": 157422,
+      "Sha256": "35bd82cfb02a0146ff9c0ca6bf7dbde61d49c6d4f3493befe584218c370ff41d"
+    }
+  ],
+  "generatedImportLibrary": {
+    "method": "Local MSVC librarian generated a COFF import library from eight statically verified decorated exports, including documented keyboard callbacks; no proprietary import-library binary was copied",
+    "definitionSha256": "23750cde4f9fa02c75b7275536e231a5cc6c9719c78744d4ea5cd45010c7fea8",
+    "librarySha256": "62bfa11e363739a7deef59d4652ffad7131d4a7b269dc23116f9ac1c9f63eba5",
+    "frameworkDll": "ScriptHookV.dll",
+    "exactImportedNames": [
+      "?keyboardHandlerRegister@@YAXP6AXKGEHHHH@Z@Z",
+      "?keyboardHandlerUnregister@@YAXP6AXKGEHHHH@Z@Z",
+      "?nativeCall@@YAPEA_KXZ",
+      "?nativeInit@@YAX_K@Z",
+      "?nativePush64@@YAX_K@Z",
+      "?scriptRegister@@YAXPEAUHINSTANCE__@@P6AXXZ@Z",
+      "?scriptUnregister@@YAXPEAUHINSTANCE__@@@Z",
+      "?scriptWait@@YAXK@Z"
+    ]
+  },
+  "preservedPlayable04Files": [
+    {
+      "Name": "build/playable-04-shv-probe/RichAudio.OperatingState.Shv.asi",
+      "Bytes": 288256,
+      "Sha256": "8f516dc5bdfd62f125c8f9624d3396c9c3f9debceb618c39f76784323fd7a083"
+    },
+    {
+      "Name": "build/playable-04-shv-probe/build-receipt.json",
+      "Bytes": 37212,
+      "Sha256": "d945e51d966583ca711dcca4e26d098d7838ce9ed4bd92ce90adc482f24c25ab"
+    },
+    {
+      "Name": "build/playable-04-shv-probe/pe-inspection.json",
+      "Bytes": 3400,
+      "Sha256": "cd0c7d23c5f765cb7efc88c22acf7945fd2643efbb88ab91d292638eacbbf65e"
+    },
+    {
+      "Name": "evidence/playable-04-build.json",
+      "Bytes": 10169,
+      "Sha256": "16a43f06dee0cf1e7445b7f13f1ffcadd70f2f6566ccda09aca68fa36fe2ea96"
+    },
+    {
+      "Name": "evidence/playable-04-fixtures.json",
+      "Bytes": 9376,
+      "Sha256": "6523b56791e9ed4788de92eb99b51c48f6f027c0b0d6b99477f9702785a25ce6"
+    },
+    {
+      "Name": "evidence/playable-05-rollback.json",
+      "Bytes": 6544,
+      "Sha256": "eca95581d9dbbbb75a569d4c2074c1825c3b12bae51f7ba12220d5c3e756063e"
+    }
+  ],
+  "earlierArtifactAndReceiptsUnchanged": true,
+  "pinnedInstalledBaselines": [
+    {
+      "Name": "ScriptHookV.dll",
+      "Bytes": 1987072,
+      "Sha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f",
+      "FileVersion": "3889.0.1158.13"
+    },
+    {
+      "Name": "dinput8.dll",
+      "Bytes": 131072,
+      "Sha256": "9fd9e02353b7d39fe07b9667f7ea2697229a7f2d0e7d389eb79eb212b1bb181d",
+      "FileVersion": "1.0.0.1"
+    },
+    {
+      "Name": "GTA5_Enhanced.exe",
+      "Bytes": 55819384,
+      "Sha256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea",
+      "FileVersion": "1.0.1158.16"
+    }
+  ],
+  "baselineHashesStillMatchAfterBuild": true,
+  "pe": {
+    "Name": "RichAudio.OperatingState.Shv.asi",
+    "Bytes": 323584,
+    "Sha256": "af860dc42540a94c2176ee0dce09c77d9c16c9eeea46a1572d5011aaa8863be4",
+    "Machine": "Amd64",
+    "PeKind": "PE32Plus",
+    "IsDll": true,
+    "EntryPointPresent": true,
+    "EntryPointExecutable": true,
+    "HasClrMetadata": false,
+    "GuardCF": true,
+    "DynamicBase": true,
+    "NxCompatible": true,
+    "HighEntropyVa": true,
+    "Imports": [
+      {
+        "Module": "ScriptHookV.dll",
+        "Functions": [
+          "?scriptWait@@YAXK@Z",
+          "?scriptUnregister@@YAXPEAUHINSTANCE__@@@Z",
+          "?keyboardHandlerRegister@@YAXP6AXKGEHHHH@Z@Z",
+          "?nativeInit@@YAX_K@Z",
+          "?keyboardHandlerUnregister@@YAXP6AXKGEHHHH@Z@Z",
+          "?scriptRegister@@YAXPEAUHINSTANCE__@@P6AXXZ@Z",
+          "?nativeCall@@YAPEA_KXZ",
+          "?nativePush64@@YAX_K@Z"
+        ],
+        "Ordinals": []
+      },
+      {
+        "Module": "KERNEL32.dll",
+        "Functions": [
+          "TlsSetValue",
+          "WriteConsoleW",
+          "GetConsoleMode",
+          "GetConsoleOutputCP",
+          "HeapReAlloc",
+          "HeapSize",
+          "GetEnvironmentVariableW",
+          "CreateDirectoryW",
+          "CreateFileW",
+          "FlushFileBuffers",
+          "GetFileAttributesW",
+          "GetFileInformationByHandle",
+          "GetFullPathNameW",
+          "WriteFile",
+          "CloseHandle",
+          "QueryPerformanceCounter",
+          "QueryPerformanceFrequency",
+          "Sleep",
+          "GetProcessTimes",
+          "GetCurrentProcess",
+          "GetCurrentProcessId",
+          "CreateThread",
+          "GetTickCount64",
+          "GetModuleHandleExW",
+          "SetStdHandle",
+          "GetStringTypeW",
+          "SetFilePointerEx",
+          "RtlCaptureContext",
+          "RtlLookupFunctionEntry",
+          "RtlVirtualUnwind",
+          "UnhandledExceptionFilter",
+          "SetUnhandledExceptionFilter",
+          "TerminateProcess",
+          "IsProcessorFeaturePresent",
+          "GetCurrentThreadId",
+          "GetSystemTimeAsFileTime",
+          "InitializeSListHead",
+          "IsDebuggerPresent",
+          "GetStartupInfoW",
+          "GetModuleHandleW",
+          "RtlUnwindEx",
+          "InterlockedFlushSList",
+          "GetLastError",
+          "SetLastError",
+          "EncodePointer",
+          "RaiseException",
+          "EnterCriticalSection",
+          "LeaveCriticalSection",
+          "DeleteCriticalSection",
+          "InitializeCriticalSectionAndSpinCount",
+          "TlsAlloc",
+          "TlsGetValue",
+          "TlsFree",
+          "FreeLibrary",
+          "GetProcAddress",
+          "LoadLibraryExW",
+          "RtlPcToFileHeader",
+          "ExitProcess",
+          "GetModuleFileNameW",
+          "HeapFree",
+          "HeapAlloc",
+          "GetStdHandle",
+          "GetFileType",
+          "FindClose",
+          "FindFirstFileExW",
+          "FindNextFileW",
+          "IsValidCodePage",
+          "GetACP",
+          "GetOEMCP",
+          "GetCPInfo",
+          "GetCommandLineA",
+          "GetCommandLineW",
+          "MultiByteToWideChar",
+          "WideCharToMultiByte",
+          "GetEnvironmentStringsW",
+          "FreeEnvironmentStringsW",
+          "FlsAlloc",
+          "FlsGetValue",
+          "FlsSetValue",
+          "FlsFree",
+          "InitializeCriticalSectionEx",
+          "VirtualProtect",
+          "LCMapStringW",
+          "GetProcessHeap"
+        ],
+        "Ordinals": []
+      },
+      {
+        "Module": "USER32.dll",
+        "Functions": [
+          "GetWindowThreadProcessId",
+          "GetForegroundWindow"
+        ],
+        "Ordinals": []
+      }
+    ],
+    "Exports": [],
+    "ExportFunctionCount": 0,
+    "ExportNameCount": 0,
+    "DelayImportDirectoryPresent": false,
+    "CodeExecuted": false
+  },
+  "runtimeSupportEstablished": false,
+  "nativeResolutionEstablished": false,
+  "operatingStateContractValidated": false,
+  "sourceOrRenderedAudioEstablished": false,
+  "gameFilesWritten": false,
+  "deployed": false,
+  "gameOrProbeExecuted": false,
+  "deviceFreeFixturesExecutedByBuilder": false,
+  "newSystemSoftwareInstalledByBuilder": false,
+  "qualification": "A compiled isolated operator-armed diagnostic candidate only. Static imports/entry point do not prove correct operator gating, successful ASI loading, native availability, valid engine telemetry or audible vehicle sound. Device-free fixtures are reported separately.",
+  "privacy": "Absolute project/toolchain/game paths, raw build logs, compiler dependency paths and private captures remain in ignored build storage. No source audio, SDK/runtime binaries or game assets are published."
+}

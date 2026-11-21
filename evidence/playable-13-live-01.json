@@ -1,0 +1,231 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-13",
+  "phase": "B-passive",
+  "kind": "genuine-live-result",
+  "date": "2026-11-01",
+  "approvedCommit": "c5635f470c01f446e80bbbaf5a0f28acff06a827",
+  "approvalReceiptSha256": "e7471b82c40b328b491209148c44a7d67a143381890d35e8a63de2e81d53f57d",
+  "proposalSha256": "692903c3ca8f23a108a03ef3b67b7ceb2168ab3ca5598f68a09d5e8acf54712a",
+  "decision": {
+    "startup": "PASS",
+    "handoff": "BLOCKED",
+    "reason": "measured-clock-map-required",
+    "restoration": "PASS",
+    "phaseCEligible": false
+  },
+  "deployments": 1,
+  "launches": 1,
+  "operatorStartCommands": 1,
+  "approvalConsumed": true,
+  "automaticRetry": false,
+  "artifacts": [
+    {
+      "file": "Plugins/RichAudio.dll",
+      "bytes": 343040,
+      "sha256": "720812a0ff9af2890bcc05da998bca17c6db0746145bd76601480e899f07f8e9"
+    },
+    {
+      "file": "RichAudio.OperatingState.ShvHandoff.asi",
+      "bytes": 129024,
+      "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40"
+    }
+  ],
+  "preflight": {
+    "passed": true,
+    "independentFileChecks": 207,
+    "failures": 0,
+    "protected": 11,
+    "settings": 4
+  },
+  "startup": {
+    "steamActionId": 11,
+    "gameArgsContinued": true,
+    "interstitialContinued": true,
+    "creatingProcessRecorded": true,
+    "steamCompletedRecorded": true,
+    "coordinatorContinueClicks": 1,
+    "secondModalVisuallyObserved": false,
+    "secondModalContinuationMechanism": "unobserved",
+    "enhancedPid": 31968,
+    "gameStartUtc": "2026-11-01T17:32:15.755042Z",
+    "markerToGameStartSeconds": 46.2531495,
+    "processLeaseIssued": true,
+    "leaseFields": 21,
+    "runtimePolicy": "functional-compatibility",
+    "rphEntryUtc": "2026-11-01T17:33:03.074Z",
+    "readyUtc": "2026-11-01T17:33:05.662Z"
+  },
+  "handoff": {
+    "ownerConfirmedBatiReady": true,
+    "functionalApiShapeAdmissionPassed": true,
+    "sourceOpenReached": true,
+    "clockMapsRecorded": 2233,
+    "initialBindingAccepted": false,
+    "nativeBeginReached": false,
+    "activePhaseReached": false,
+    "acceptedObservationsReported": 0,
+    "gameplayFramesReported": 0,
+    "nativeTargetAttemptsMeasured": null,
+    "sourceRecordBytes": 0,
+    "engineTelemetryQualified": false,
+    "independentCorrespondenceQualified": false,
+    "cameraPoseGameplayLineageQualified": false,
+    "dismountRetirementChallengePerformed": false,
+    "failureUtc": "2026-11-01T17:35:11.644Z",
+    "observerTerminalLaunchElapsedSeconds": 222.2515095,
+    "maximumWaitingSeconds": 300,
+    "maximumActiveSeconds": 120,
+    "maximumNativeAttempts": 2400,
+    "maximumHz": 20
+  },
+  "clockFinding": {
+    "mapsWereCreated": true,
+    "finalMapOrdinaryExpiryExplainsFailure": false,
+    "failureSite": "Initial TryBind -> BindInterval combined clock/map guard",
+    "failedContextOperandsRecorded": false,
+    "exactFailedPredicateEstablished": false,
+    "hypothesis": "Stale waiting callback context outside mapping window while direct clock export continued",
+    "hypothesisConfirmed": false,
+    "nextOfflineAction": "Reproduce paused/stale waiting context with advancing clock export and capture failed binding operands; preserve original timestamps and freshness limits.",
+    "intervalMappingArmSupportedByEventOrder": true,
+    "exactRejectedEndpointsOrInternalMapCheckRecorded": false
+  },
+  "retirement": {
+    "sourceRetired": true,
+    "began": false,
+    "consumerCleared": true,
+    "writerCompletionObservedWithinBound": true,
+    "writerWorkerAlive": false,
+    "producerCompleted": false,
+    "nativeFifoDrained": false,
+    "nativeCallbackOutcome": "outcome-unobserved",
+    "nativeAuditOutcomeUnobserved": true,
+    "eventsWritten": 2237,
+    "dropped": 0,
+    "queueHighWater": 1,
+    "bytesWritten": 774053
+  },
+  "executionLimits": {
+    "richAudioPlayback": false,
+    "wasapiOutput": false,
+    "loopback": false,
+    "audioRecording": false,
+    "modificationAwareLoudness": false,
+    "nativeAudioSuppressed": false,
+    "sourceGainRendererOrConfigurationChanged": false,
+    "substitutedArtifacts": false,
+    "secondLaunch": false
+  },
+  "restorationEvidence": "evidence/playable-13-live-rollback.json",
+  "privateEvidence": [
+    {
+      "file": ".local/playable-13/live-01/preflight.json",
+      "bytes": 1085,
+      "sha256": "0542dbdf03c8ffb908f90a4c8f62d013c86d7cc2e1c88b1170e6bc20935b4f89"
+    },
+    {
+      "file": ".local/playable-13/live-01/installation-receipt.json",
+      "bytes": 1740,
+      "sha256": "ef9ce7e658eecb790fbdaabe14a305ad56d40544779fb0693a6c2910882342c4"
+    },
+    {
+      "file": ".local/playable-13/live-01/one-launch-started.json",
+      "bytes": 541,
+      "sha256": "8575d1eab7598a4e220863d7661f2c2b4cceb0b0989314f531568edc4e417308"
+    },
+    {
+      "file": ".local/playable-13/live-01/launch-receipt.json",
+      "bytes": 280,
+      "sha256": "29a713890730d83d817968d59989ac9ff4295952393967e30df0d18453a10156"
+    },
+    {
+      "file": ".local/playable-13/live-01/lease-ownership.json",
+      "bytes": 815,
+      "sha256": "70f207869a8e7848b1695afccc6c02eed711af8e1b8ad22a2b97f27193656b34"
+    },
+    {
+      "file": ".local/playable-13/live-01/process-bound-lease-installed.json",
+      "bytes": 337,
+      "sha256": "7f46b8b2e025e183d3af8598b046dbf409a89dee93f66a6a3326b22a24b1e014"
+    },
+    {
+      "file": ".local/playable-13/live-01/startup-observer/result.json",
+      "bytes": 18411,
+      "sha256": "ced14208cbafc601e8a315cce17431ee30a2e1c8d12dbd14a6c4dd5147c7b20a"
+    },
+    {
+      "file": ".local/playable-13/live-01/startup-review.json",
+      "bytes": 5256,
+      "sha256": "aa21016702bd60ebdf5c62aa9f719fb4522d02f743ced8873c52833f2d08bcf5"
+    },
+    {
+      "file": ".local/playable-13/live-01/operator-observations.json",
+      "bytes": 1077,
+      "sha256": "331ecaa66ff60b0caeca180c251be13107bfa2b505c8570d16fe5bbc811b3aef"
+    },
+    {
+      "file": ".local/playable-13/live-01/normal-exit-observation.json",
+      "bytes": 545,
+      "sha256": "8be3761e6e496319e5d43015746cf507162b46a0b16d45f1d8807d7f8f3a8cc8"
+    },
+    {
+      "file": ".local/playable-13/live-01/rollback-receipt.json",
+      "bytes": 706,
+      "sha256": "80f7e822ce03e881a94cdc26f641cd8f5bc3e07965438fc794f8cde6585f44a8"
+    },
+    {
+      "file": ".local/playable-13/live-01/verification.json",
+      "bytes": 339,
+      "sha256": "5b84342b0c38d200b81aa93a87da28f833ea1e35ec73b455cc477ca96c7d9110"
+    },
+    {
+      "file": ".local/playable-13/live-01/supervisor-completed.json",
+      "bytes": 241,
+      "sha256": "72a9f70efc99000c6ec71c27553c54c0fe69e4556617813012d27154107f540b"
+    },
+    {
+      "file": ".local/playable-13/live-01/independent-review.json",
+      "bytes": 13751,
+      "sha256": "9d9b12d2008d6da59db0b72ab83bceaa038ca127a7c2002fe575f0f76ffa9950"
+    },
+    {
+      "file": ".local/playable-13/live-01/capture-index.json",
+      "bytes": 13105,
+      "sha256": "d36a4cd6e349af79023dffeb97e26843be945e4b44a555a7d9427b40fc5afd59"
+    },
+    {
+      "file": ".local/playable-13/live-session/fc9ff9663f0344ae8640a8b2120e74c5/events.ndjson",
+      "bytes": 774053,
+      "sha256": "051c12c898875b8938946d344f8546b5a6b0ce248925c3091aa32a829cfbd2c2"
+    },
+    {
+      "file": ".local/playable-13/live-session/fc9ff9663f0344ae8640a8b2120e74c5/source-records.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".local/playable-13/live-session/fc9ff9663f0344ae8640a8b2120e74c5/summary.json",
+      "bytes": 859,
+      "sha256": "7a90ce81d33da82f65a1b9f9eacd1decda23a9c9f479cc34554c42a14b76c38f"
+    },
+    {
+      "file": ".local/playable-13/live-01/clock-review.json",
+      "bytes": 8884,
+      "sha256": "a01fdc7e742a4e7338a46e61c481b33f737db75a90233aca7004ca1b044836d8"
+    },
+    {
+      "file": ".local/playable-13/live-01-independent-preflight.json",
+      "bytes": 95328,
+      "sha256": "fd7148212b02c5a3da6d3a4e3689915344e753de1f436bd2e95680f0490cdf9d"
+    }
+  ],
+  "limitations": [
+    "Managed zero accepted/frame counters are actual; native target attempts remain unobserved.",
+    "Writer join does not establish native callback/FIFO completion.",
+    "Failed binding operands are absent; the precise source-context cause remains a hypothesis.",
+    "Normal UI exit requested and process/window absence observed; no quit-confirmation dialog or numeric exit code captured.",
+    "No live accepted telemetry, gameplay-frame, audio or listening qualification follows."
+  ],
+  "nextApproval": "No additional live action is authorized. Review specific offline correction/candidate before fresh passive approval; PhaseC audio and optional recording still require separate later approval."
+}

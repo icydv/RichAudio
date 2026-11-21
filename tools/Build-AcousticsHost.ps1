@@ -1,12 +1,14 @@
 [CmdletBinding()]
-param([switch]$Tests)
+param([switch]$Tests,[string]$OutputDirectory='')
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
-$out=Join-Path $repo 'build\acoustics-host'
+$out=if($OutputDirectory){[IO.Path]::GetFullPath($OutputDirectory)}else{Join-Path $repo 'build\acoustics-host'}
+if($OutputDirectory){$privateRoots=@('.local\playable-08','.local\playable-13','.local\playable-15')|ForEach-Object{[IO.Path]::GetFullPath((Join-Path $repo $_)).TrimEnd('\')+'\'};if(!@($privateRoots|Where-Object{$out.StartsWith($_,[StringComparison]::OrdinalIgnoreCase)}).Count-or(Test-Path -LiteralPath $out)){throw 'New isolated .local/playable-08, .local/playable-13 or .local/playable-15 build output required.'};for($parent=Split-Path -Parent $out;$parent;$parent=Split-Path -Parent $parent){if((Test-Path -LiteralPath $parent)-and((Get-Item -LiteralPath $parent -Force).Attributes-band[IO.FileAttributes]::ReparsePoint)){throw 'Linked isolated build output rejected.'}}}
 [IO.Directory]::CreateDirectory($out) | Out-Null
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 if(!(Test-Path -LiteralPath $compiler)){throw 'Installed .NET Framework x64 C# compiler required.'}
 $sources=@(Get-ChildItem (Join-Path $repo 'src\acoustics\host\Windows') -Filter '*.cs' | ForEach-Object FullName)
+$sources+=@(Get-ChildItem (Join-Path $repo 'src\acoustics\recording') -Filter '*.cs' | ForEach-Object FullName)
 $options=@('/nologo','/optimize+','/warnaserror+','/unsafe+','/platform:x64','/target:exe','/r:System.Web.Extensions.dll','/r:System.Runtime.Serialization.dll')
 $transport=Join-Path $repo 'src\acoustics\host\Transport'
 if(Test-Path -LiteralPath $transport){$sources+=@(Get-ChildItem $transport -Filter '*.cs' | ForEach-Object FullName);$options+='/define:STATE_TRANSPORT'}

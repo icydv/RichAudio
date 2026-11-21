@@ -129,6 +129,18 @@ export function conditionalDirectScene({calibration,modelBounds,listenerSession,
   scenes.add(result);return result;
 }
 
+// Explicit stock-source fallback: no collision coverage or clear line of sight
+// is asserted. Native coordinates use the declared1unit/metre assumption.
+export function conditionalStockScene(sourceIds,session,engine={}) {
+  requireValue(Array.isArray(sourceIds)&&sourceIds.length>0&&sourceIds.length<=16&&
+    new Set(sourceIds).size===sourceIds.length&&sourceIds.every(s=>/^stock:[\w:-]+:(engine|exhaust)$/.test(s))&&/^[a-f0-9]{32}$/.test(session),'owned stock conditional context');
+  const result=freeze({version:1,tile:null,materials:{},config:engineConfiguration({...engine,order:0}),coordinateSpace,
+    geometryKey:'stock-direct:'+session,generation:1,observationModel:null,
+    directPath:{mode:'listener-only-conditional-direct',sourceIds:[...sourceIds],rights:'private-decoded-game-assets',visibilityAssumption:'unobserved-space-assumed-clear',geometryPresent:false},
+    modelBounds:{min:[-1000000,-1000000,-1000000],max:[1000000,1000000,1000000]}});
+  scenes.add(result);return result;
+}
+
 export function acousticScene(tile, materials = {}, options = {}) {
   const { observationModel = null, ...engineOptions } = options;
   if (observationModel) {

@@ -6,7 +6,7 @@ Run record: 24–25 October 2026; timestamps below are UTC. This report supersed
 
 The approved temporary filename change selected **Enhanced 1.0.1158.16**. RPH Settings identified that version as supported, and its launcher log reported `Version is supported`. The actual launched process was **GTA5_Enhanced.exe**, with the approved `-nobattleye` argument observed. This confirms the extra GTA5.exe name was causing the observed version-selection problem on this installation. It does not establish RPH's internal probing algorithm or a universal launcher contract.
 
-The old file remains a signed older Enhanced executable extra to the installed Steam depot set. Its creator/purpose remains unknown; the user did not create it. No documented explicit executable-selection configuration was established. The temporary rename is a locally tested discovery mechanism, not a permanent installation recommendation.
+The old file remains a signed older Enhanced executable extra to the installed Steam depot set. Its creator/purpose remains unknown; I did not create it. No documented explicit executable-selection configuration was established. The temporary rename is a locally tested discovery mechanism, not a permanent installation recommendation.
 
 **The smoke test failed.** At **2026-10-25T01:54:57.5997543Z**, Windows .NET Runtime event **1026** recorded an unhandled **System.IO.IOException** in RAGEPluginHook.exe. The stack includes FileStream, StreamWriter and File.InternalAppendAllText. The event does not identify the failing path or underlying OS error. Permissions, antivirus, file locking and storage compatibility are unproven explanations; no corresponding changes were attempted.
 
@@ -27,7 +27,7 @@ The launcher last reported finding the Enhanced process and waiting for its wind
 | Frame time / CPU overhead / stability | No valid baseline or steady-state run; no performance delta available. RPH startup instability observed |
 | Tests A–E | Not run; smoke-test prerequisite failed |
 
-The user paused to install a save. On resumption, a different, user-started Enhanced process was at a loading screen. It was closed through the normal game Quit confirmation before restoration; it is not counted as another controlled telemetry test. No forced termination was needed.
+I paused to install a save. On resumption, a different Enhanced process I had started was at a loading screen. It was closed through the normal game Quit confirmation before restoration; it is not counted as another controlled telemetry test. No forced termination was needed.
 
 ## Restoration and evidence
 
@@ -40,7 +40,7 @@ Restored executable SHA-256:
 
 All **32 original non-RPF root files** match their fresh predeployment size/hash baseline, with no additional root files remaining. All **179 RPF paths/lengths/modification timestamps** match; all **10 independently hashed archive samples** match their fresh predeployment SHA-256s. This is not a fresh full-content hash of all 179 archives. No GTA/RPH process remained at the restoration check.
 
-RPH's generated launcher log, INI and startup script were copied, hash-verified and moved outside the game. A newly created empty commandline.txt was preserved outside the game and removed with explicit user approval after the user confirmed they had not created it. No original file was overwritten. The approved shared VC2010 prerequisite remains installed.
+RPH's generated launcher log, INI and startup script were copied, hash-verified and moved outside the game. A newly created empty commandline.txt was preserved outside the game and removed with my explicit approval after I confirmed I had not created it. No original file was overwritten. The approved shared VC2010 prerequisite remains installed.
 
 Raw logs, screenshots, process evidence, deployment/restoration journals and archive checks remain local under ignored `.local/phase2.2/controlled-attempt-01/` and `evidence/phase2.2/controlled-attempt-01/`. These contain host paths and are intentionally excluded from future commits. The [portable result](../evidence/phase2.2/controlled-attempt-result.json) records the outcome without them.
 

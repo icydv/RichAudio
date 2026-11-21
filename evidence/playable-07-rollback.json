@@ -1,0 +1,491 @@
+{
+  "schema": 1,
+  "verifiedUtc": "2026-11-01T00:53:10.7064454Z",
+  "scope": "Independent read-only post-PLAYABLE-07 integrity, process identity and byte-preservation verification",
+  "result": "PASS",
+  "issues": [],
+  "protectedFileCount": 11,
+  "protectedFiles": [
+    {
+      "name": "GTA5_Enhanced.exe",
+      "bytes": 55819384,
+      "sha256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea",
+      "matches": true
+    },
+    {
+      "name": "RAGEPluginHook.exe",
+      "bytes": 12237182,
+      "sha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac",
+      "matches": true
+    },
+    {
+      "name": "Plugins/RichAudio.dll",
+      "bytes": 222208,
+      "sha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657",
+      "matches": true
+    },
+    {
+      "name": "Plugins/RichAudio.Playable.json",
+      "bytes": 198,
+      "sha256": "96a91834affba1f0c2bafcd7a6e14cb9fe17ac8846e98c72a14d14fd1b366001",
+      "matches": true
+    },
+    {
+      "name": "Plugins/RichAudio.Menu.json",
+      "bytes": 478,
+      "sha256": "63a6f398e838fe5c4503f0e2bf8de401ee8a2ac54203d8ddf16a25f1b16bcea3",
+      "matches": true
+    },
+    {
+      "name": "startup.rphs",
+      "bytes": 28,
+      "sha256": "4c7d8fb2dc1d84e4c84e7409c296744268f7f33be87af1b9585f104010141d1c",
+      "matches": true
+    },
+    {
+      "name": "DirectStorageFix.asi",
+      "bytes": 592384,
+      "sha256": "7f50b8a9a2e8a376e2adb7d46bc9483c2754bbbdd964f0918787d4f6f1b76e2c",
+      "matches": true
+    },
+    {
+      "name": "dstorage.dll",
+      "bytes": 206880,
+      "sha256": "8a7f9809b4630d22796445ab9aa44181458d0f73f03705b1dfafd79410e07334",
+      "matches": true
+    },
+    {
+      "name": "dstoragecore.dll",
+      "bytes": 1468960,
+      "sha256": "77c7b3acf5b5a9acec6ad3ed7aa3c33e1ad43e73116b437adfcd26965a079b2b",
+      "matches": true
+    },
+    {
+      "name": "dinput8.dll",
+      "bytes": 131072,
+      "sha256": "9fd9e02353b7d39fe07b9667f7ea2697229a7f2d0e7d389eb79eb212b1bb181d",
+      "matches": true
+    },
+    {
+      "name": "ScriptHookV.dll",
+      "bytes": 1987072,
+      "sha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f",
+      "matches": true
+    }
+  ],
+  "reviewedShortcutAndSettingsCount": 4,
+  "reviewedShortcutsAndSettings": [
+    {
+      "name": "RPH shortcut settings",
+      "bytes": 137,
+      "sha256": "680d11524a930e2671bfd606aa2e5ffd4bf070c3d1818c16fa70d5be6a727a38",
+      "matches": true
+    },
+    {
+      "name": "Trainer shortcut settings",
+      "bytes": 124715,
+      "sha256": "9f18051b30468cfa8c45a4fbea8727ff3286f9f822cf5b1b43916869b1e6f5de",
+      "matches": true
+    },
+    {
+      "name": "GTA saved keyboard overrides",
+      "bytes": 679,
+      "sha256": "d6eab888b9e43445100d5b86ba8ac009dc7bfaa8e204d2a32366f7898cdac85a",
+      "matches": true
+    },
+    {
+      "name": "RichAudio saved acoustic settings",
+      "bytes": 274,
+      "sha256": "73647afcfa175c643a6938c63fc25845c2527dc8c864221bcf35142ce956f711",
+      "matches": true
+    }
+  ],
+  "stockFallbackSelected": true,
+  "preservedPriorFileCount": 37,
+  "preservedPriorFiles": [
+    {
+      "name": ".local/playable-06/live-01/authorisation.json",
+      "bytes": 404,
+      "sha256": "9c50b4267e347626004f89142c188752b23b1b5d361430640ebaf7ca333b1411",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/before-logs/asiloader.log",
+      "bytes": 1501,
+      "sha256": "15146d758932b5b4f55c0b1f2a0fc0c6d936ef28f8ee017f40b7936ffc6343a0",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/before-logs/RagePluginHook.log",
+      "bytes": 16739,
+      "sha256": "d09408d70f606b836f71ee8fde06a760514d3bc2e165b2d5449bf5a5b2abcf64",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/before-logs/ScriptHookV.log",
+      "bytes": 1167,
+      "sha256": "0429e19fde5f8608a10eb408668a92bb53d42f5aa7313b30f692f2e7fd9ed0cb",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/capture-observation.json",
+      "bytes": 660,
+      "sha256": "18869d3128c8053c6c4d6dc9ac321c2a0e8f7262318de484f41a35f9645f9958",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/capture-snapshot/capture.json",
+      "bytes": 4249,
+      "sha256": "dd7f1dda97477b247f4152a238560e49173b5bbdbd7ca8e35a427d570c487e43",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/capture-snapshot/journal.ndjson",
+      "bytes": 3854,
+      "sha256": "adeb9da924e127e305eb3b104f5edca36a6c804d239de906b4b3acdf10d4d93d",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/final-logs/asiloader.log",
+      "bytes": 1647,
+      "sha256": "b565c7d10e3518eb3a05bdfc21e3f18e080b2028ca37c2970c4295e264c52691",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/final-logs/RagePluginHook.log",
+      "bytes": 16635,
+      "sha256": "98cd547da77269444c101b36524fa841af6de31075e1dd25241a4ac2ada1ebbd",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/final-logs/ScriptHookV.log",
+      "bytes": 1167,
+      "sha256": "a41053bf7b4f6904cc3025527ef6850951c355e8e478637b2f3e3e559f3254c4",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/installation-receipt.json",
+      "bytes": 413,
+      "sha256": "79a2d333178ad35d2abb6892aaf2ba6f875aa7ff16386ca7b1e7e0ac65bc1472",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/launch-receipt.json",
+      "bytes": 439,
+      "sha256": "590165a1b957b32a1296210723528c6ac38dc16aed97296aca198776c5a860ca",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/normal-exit.json",
+      "bytes": 392,
+      "sha256": "1478006c56e5510814298750d6d471e6a3b5d6606daf3fde078c1cd5348eaec5",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/observed-processes.json",
+      "bytes": 326,
+      "sha256": "05edaaca85ec19cc2cfdc2831611525dd3840b25a893317788f8d88d00a9fd41",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/one-launch-started.json",
+      "bytes": 164,
+      "sha256": "3de7864f0dcda0fbfeae4711209725e5d6688cbedc2e99ad628891c566a5261c",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/pending-creation-receipt.json",
+      "bytes": 343,
+      "sha256": "7f6d48e81b15fbc33721e91967fe2f03783c840a256b6bf75f288d383ab0996a",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/preflight.json",
+      "bytes": 610,
+      "sha256": "6b08ad46fc697e79dc6ff92b8878b9482c92d008eb47f6ca8c124ac5e6c8cfc1",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/publication-audit.json",
+      "bytes": 357,
+      "sha256": "50faa9c943497607d29539fe4f5cf36fc692ac19b0d623bf5398f693651586fa",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/rollback-receipt.json",
+      "bytes": 2712,
+      "sha256": "df9fec217e527ddc28db87b8fc6f6e473457096561bb5b40df75c2350f227380",
+      "matches": true
+    },
+    {
+      "name": ".local/playable-06/live-01/user-observation.json",
+      "bytes": 267,
+      "sha256": "7df85da6cfeb9d1cc7f1d52a1c838ffea8a511df56103dc52652eca2fafbfbdc",
+      "matches": true
+    },
+    {
+      "name": "build/playable-04-shv-probe/build-receipt.json",
+      "bytes": 37212,
+      "sha256": "d945e51d966583ca711dcca4e26d098d7838ce9ed4bd92ce90adc482f24c25ab",
+      "matches": true
+    },
+    {
+      "name": "build/playable-04-shv-probe/pe-inspection.json",
+      "bytes": 3400,
+      "sha256": "cd0c7d23c5f765cb7efc88c22acf7945fd2643efbb88ab91d292638eacbbf65e",
+      "matches": true
+    },
+    {
+      "name": "build/playable-04-shv-probe/RichAudio.OperatingState.Shv.asi",
+      "bytes": 288256,
+      "sha256": "8f516dc5bdfd62f125c8f9624d3396c9c3f9debceb618c39f76784323fd7a083",
+      "matches": true
+    },
+    {
+      "name": "build/playable-06-shv-probe/build-receipt.json",
+      "bytes": 38933,
+      "sha256": "b932f61fb37739d7a6b5e0ff5f591fbda004667f3473f573dfa59836793f3343",
+      "matches": true
+    },
+    {
+      "name": "build/playable-06-shv-probe/pe-inspection.json",
+      "bytes": 3684,
+      "sha256": "75e2db6e93ed9d2d6d3fb7831775a3661c904ecfa5e4e587834046befab024a8",
+      "matches": true
+    },
+    {
+      "name": "build/playable-06-shv-probe/RichAudio.OperatingState.Shv.asi",
+      "bytes": 323584,
+      "sha256": "af860dc42540a94c2176ee0dce09c77d9c16c9eeea46a1572d5011aaa8863be4",
+      "matches": true
+    },
+    {
+      "name": "evidence/playable-04-build.json",
+      "bytes": 10169,
+      "sha256": "16a43f06dee0cf1e7445b7f13f1ffcadd70f2f6566ccda09aca68fa36fe2ea96",
+      "matches": true
+    },
+    {
+      "name": "evidence/playable-04-fixtures.json",
+      "bytes": 9376,
+      "sha256": "6523b56791e9ed4788de92eb99b51c48f6f027c0b0d6b99477f9702785a25ce6",
+      "matches": true
+    },
+    {
+      "name": "evidence/playable-05-rollback.json",
+      "bytes": 6544,
+      "sha256": "eca95581d9dbbbb75a569d4c2074c1825c3b12bae51f7ba12220d5c3e756063e",
+      "matches": true
+    },
+    {
+      "name": "evidence/playable-06-build.json",
+      "bytes": 12099,
+      "sha256": "a8f5d7ef41dbc1286d35e222862bf82c518b98d98e1a0c524b2d387af7af0277",
+      "matches": true
+    },
+    {
+      "name": "evidence/playable-06-fixtures.json",
+      "bytes": 32099,
+      "sha256": "ea8ba7469e700c4549295899c434ebb11a562ed779ce1730aa0aff10a2a7e16d",
+      "matches": true
+    },
+    {
+      "name": "evidence/playable-06-header-provenance.json",
+      "bytes": 6790,
+      "sha256": "eaed6b2cbb9d31ca32a5756d656ebc32dc45dfda9eb16ec79465efe03bc412f9",
+      "matches": true
+    },
+    {
+      "name": "evidence/playable-06-keyboard-review.json",
+      "bytes": 2543,
+      "sha256": "4223ba531adfc113c6d27a58a37126a1ee9b5c7e03ae664b44178bb6be8cfa6d",
+      "matches": true
+    },
+    {
+      "name": "evidence/playable-06-live.json",
+      "bytes": 15784,
+      "sha256": "1c0982e755a1a71bd92dd4706f4dd03c0740364611985ea472b96b1af1e3b821",
+      "matches": true
+    },
+    {
+      "name": "evidence/playable-06-native-contracts.json",
+      "bytes": 15635,
+      "sha256": "5eaefdcb1e7969c71587b1adc0d0e71e0582a27c3186736917b812abe2b88639",
+      "matches": true
+    },
+    {
+      "name": "evidence/playable-06-offline.json",
+      "bytes": 6149,
+      "sha256": "0b3f9d4d4084cb30f35acde3a975b412212810ccd9830d7ea4712a9a3a4b07cc",
+      "matches": true
+    },
+    {
+      "name": "evidence/playable-06-rollback.json",
+      "bytes": 7724,
+      "sha256": "bb33402d7321a174605a07ed97e0a657aa24be495a3f58cb8413b1da565640b7",
+      "matches": true
+    }
+  ],
+  "sourceInputCount": 3,
+  "sourceInputs": [
+    {
+      "name": "repo/src/telemetry/ShvProbe/Probe.cpp",
+      "bytes": 69809,
+      "sha256": "7ed8cc3f3cebb95982cf36502ebbda45b14d269ec2218cdf75475e31d278e1b8",
+      "matches": true
+    },
+    {
+      "name": "repo/src/telemetry/ShvProbe/ScriptHookVApi.h",
+      "bytes": 1493,
+      "sha256": "131f609ff3db49e0bdaa9264a296825669fe897115c65d76fd3f593115d077ba",
+      "matches": true
+    },
+    {
+      "name": "repo/src/telemetry/ShvProbe/NativeIds.h",
+      "bytes": 2506,
+      "sha256": "2c256ef63e179a17361d7f06f12af763d4891a8b494206c03bc4ebd7e2d751b5",
+      "matches": true
+    }
+  ],
+  "preservedCandidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "bytes": 378880,
+    "sha256": "21302b4c5c5fb99f63b7b25dce2fa973117bfb0246f16745d0782f062fe1a69e",
+    "matches": true
+  },
+  "temporaryAsiDestinationAbsent": true,
+  "temporaryPlayable07PendingPathAbsent": true,
+  "ownedRemovalHistoryMatchesManifestAndIndependentInstalledPreflight": true,
+  "processVerification": {
+    "method": "Recorded game identity uses PID plus exact UTC start time; named game/RPH/product host and package-bound worker checks are read-only",
+    "recordedIdentities": [
+      {
+        "role": "GTA5_Enhanced",
+        "recordedIdentityPresent": false,
+        "recordedPidCurrentlyAbsent": true,
+        "pidReusedByDifferentIdentity": false,
+        "exactUtcStartTimeCompared": true
+      }
+    ],
+    "launchWrapper": {
+      "role": "launch-wrapper",
+      "exactStartTimeRecorded": false,
+      "recordedPidCurrentlyAbsent": true,
+      "matchingLauncherCommandLinesRemaining": 0,
+      "qualification": "Launch receipt records PID without an exact start time; no exact ownership is inferred from PID alone. Current route-matching command lines are independently checked."
+    },
+    "namedGameRphHostsRemaining": 0,
+    "productCacheBoundNodeWorkersRemaining": 0,
+    "processesStoppedByVerifier": 0
+  },
+  "exitHistory": {
+    "normalCloseRequestedAccordingToReceipt": true,
+    "method": "Computer-use Alt+F4, observed quit dialog, Return confirmation",
+    "quitDialogObservedAccordingToReceipt": true,
+    "quitConfirmationSentAccordingToReceipt": true,
+    "processExitObservedAccordingToReceipt": true,
+    "forcedTerminationRecorded": false,
+    "qualification": "Historical close/dialog/confirmation claims are receipt-based; current process absence and byte preservation were independently verified."
+  },
+  "preservedCaptureFileCount": 3,
+  "preservedCaptures": [
+    {
+      "name": "capture.json",
+      "bytes": 2198,
+      "sha256": "e2c6c8e3423c65069d6a6f9742c2ad4af5892522823c958200ef8c77e2d54d1f",
+      "originalAndCopyMatch": true,
+      "matchesPreservationReceipt": true
+    },
+    {
+      "name": "journal.ndjson",
+      "bytes": 913,
+      "sha256": "b496a91256457a380e6363617b405a2292d20321990c72c912215623347d2c0d",
+      "originalAndCopyMatch": true,
+      "matchesPreservationReceipt": true
+    },
+    {
+      "name": "timeline.ndjson",
+      "bytes": 4794224,
+      "sha256": "661a6cc9c4a57fde3e3ffe656a1b4ccaad3680305c566e988f7c149a3d2f8ffd",
+      "originalAndCopyMatch": true,
+      "matchesPreservationReceipt": true
+    }
+  ],
+  "preservedLogFileCount": 3,
+  "preservedLogs": [
+    {
+      "name": "asiloader.log",
+      "bytes": 1647,
+      "sha256": "866fe31b69f6f4ec60f2e8a5871ddaab03a935e7f8b4931401c173c4b52eaef6",
+      "originalAndCopyMatch": true
+    },
+    {
+      "name": "ScriptHookV.log",
+      "bytes": 1167,
+      "sha256": "e71f680d17732815fc8449cb7574f77f8f92ffe4f62e3047cb491ca093230f1b",
+      "originalAndCopyMatch": true
+    },
+    {
+      "name": "RagePluginHook.log",
+      "bytes": 16324,
+      "sha256": "8b1838138b1616e0969c01ae47897394df9c3bc728c7c6c11cd23759ffce13d7",
+      "originalAndCopyMatch": true
+    }
+  ],
+  "privateReceiptHashes": [
+    {
+      "name": "authorisation.json",
+      "sha256": "8395b7ce82961aa72d472c6003c834dc30351301a64d7b83feaec8597b78e87d"
+    },
+    {
+      "name": "preflight.json",
+      "sha256": "59d5204356762bd7b766be430ec8c77cf5b7cd35a706a930738cb6e55ea42a56"
+    },
+    {
+      "name": "independent-preflight.json",
+      "sha256": "e6f52229e4f3aa1133e4c9cb39632056e2d98fbea89927cc581775549b7d2eca"
+    },
+    {
+      "name": "pending-creation-receipt.json",
+      "sha256": "980cac74feb50786227687a8381b95d9bdd006746bc406f05b2b04778cd2dab1"
+    },
+    {
+      "name": "installation-receipt.json",
+      "sha256": "e979288988ad1cb57dbcbcf86bf25f12228f3c1077bf802fe60bc78db89d9b53"
+    },
+    {
+      "name": "one-launch-started.json",
+      "sha256": "f73a5bf675c8c0fd4f2a0c4d96d6985cc5aac474537cc9b287c9a19764d04e87"
+    },
+    {
+      "name": "launch-receipt.json",
+      "sha256": "e0f9ac7fef71c95c18761b9fa24160ea19b441e00de4a6daff5a28024c0f1694"
+    },
+    {
+      "name": "observed-processes.json",
+      "sha256": "6bebbfa20149ae440c3924565d0fbc8a5a86971d4f7a7ce0d85532cfdff5231d"
+    },
+    {
+      "name": "capture-preservation.json",
+      "sha256": "13032db277c4e9bf1d12b3dabc96dda34f0c2eace79e8819782633a9da2878b7"
+    },
+    {
+      "name": "normal-exit.json",
+      "sha256": "9e4a29fdec95cf1d9bff28177ccc306ecf171f3b141b3e2aba69be4d1c8d567c"
+    },
+    {
+      "name": "rollback-receipt.json",
+      "sha256": "280cf156d95c7061e3a1824d841961687706df2493c104e6993cebda7ef44d17"
+    }
+  ],
+  "preparedManifestSha256": "885179510f2829cbb6b8ad8a1d1cce567df7316dfe21f4db94090185fee18634",
+  "privateBuildReceiptSha256": "e8a9a4fe50ca18f53023d2f226788c3633607d220fd9c0da9eeef7fd3f75e7b5",
+  "gameFilesWrittenByVerifier": false,
+  "dllLoadedByVerifier": false,
+  "gameLaunchedByVerifier": false,
+  "sourceAudioMenuGainChangedByVerifier": false,
+  "windowControlPerformedByVerifier": false,
+  "liveCaptureAnalyzedByVerifier": false,
+  "privacy": "No absolute user/game paths, process identifiers, raw logs, raw capture values, native handles or capture directory identifiers are included",
+  "independentPrivateReceiptSha256": "468adf08f5cede3fab7b942b8e9bc4e6ac38ff295615e80f9e86c74a4e89aa12"
+}

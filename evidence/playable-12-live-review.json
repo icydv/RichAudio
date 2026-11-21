@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-12",
+  "kind": "independent-read-only-actual-startup-result-and-restoration-review",
+  "reviewer": "Separate trust_review agent; coordinator recorded its final verdict and exact reviewed-file hashes",
+  "verdict": "PASS-FOR-BLOCKED-STARTUP-FINDING-AND-VERIFIED-RESTORATION",
+  "liveHandoffQualified": false,
+  "audibilityQualified": false,
+  "blockingReportCorrections": [],
+  "actualResultChecks": {
+    "exactPayloadDeploymentRecorded": 1,
+    "launchRouteInvocationsRecorded": 1,
+    "boundedEnhancedProcessObservationDeadlineSeconds": 120,
+    "exactNewEnhancedProcessObserved": false,
+    "briefUnobservedGameProcessExcluded": false,
+    "leaseOrLeaseOwnershipPresent": false,
+    "operatorSessionOrCurrentJournalPresent": false,
+    "observerFinalState": "waiting",
+    "observerActiveIntervalObserved": false,
+    "pluginTerminalObserved": false,
+    "actualRuntimeCountersMeasured": false,
+    "nativeAttempts": null,
+    "acceptedObservations": null,
+    "gameplayFrames": null,
+    "unchangedRuntimeLogs": 4,
+    "oldLogEntriesTreatedAsHistorical": true,
+    "functionalApiOrHandoffFailureInferred": false,
+    "startupCauseEstablished": false,
+    "normalGtaExitInferred": false,
+    "launcherCancellationUiBasis": "Coordinator's recorded observation; this reviewer did not operate or personally observe the UI"
+  },
+  "restorationChecks": {
+    "originalPluginBytes": 222208,
+    "originalPluginSha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657",
+    "protectedFilesMatching": 11,
+    "settingsMatching": 4,
+    "primaryPlayable12OwnedPathsAbsent": 6,
+    "routeLauncherObserverGameRphAndAudioHostProcessesAbsent": true,
+    "stockFallbackSaved": true,
+    "modificationAwareLoudness": false,
+    "synchronizedAudioRecording": false,
+    "recursiveDeletionUsed": false,
+    "forceTerminationUsed": false,
+    "attemptReceiptsRetained": true
+  },
+  "preservationChecks": {
+    "frozenPreparationManifestEntriesMatching": 37,
+    "compiledInputPinsMatching": 47,
+    "frozenPreparationManifestSha256": "663b7cf99fb26b11b2bec79d4fe6aa04e2a569f7ca3a4e768339e24f8abc596e",
+    "indexedPrivateAttemptFilesMatching": 23,
+    "preexistingTrackedFiles": 776,
+    "trackedChangesBeforeLiveReportAdditions": 0,
+    "actualPrivatePathsSessionProcessOrRawQpcPublished": false
+  },
+  "verifiedPrivateReceiptDigests": {
+    "launchTerminalSha256": "6c00105a27abc3da58adcddfd8b475ee8af99e9be12e139f1f136d750b0fdb64",
+    "rollbackSha256": "6809ea396e8cd82e21a00d2cb303d11af82aa3c423d84641ae521a9b592181a8",
+    "verificationSha256": "829e6e1b09a3e6f54dfc38490b26767776c7fc822020f61245871dc0e986863c",
+    "observerCompletionSha256": "79a10810b6aa53e37003cc560e928ca5e9c3040485e7d7b2616cd251ab0571a1"
+  },
+  "reviewedFiles": [
+    {"name": "docs/PLAYABLE_12_LIVE_RESULT.md", "bytes": 6697, "sha256": "2558d72b3143b2193f845650c3a12408a566d39a2bdba8dcab0509f5855f7c43"},
+    {"name": "evidence/playable-12-live-01.json", "bytes": 6656, "sha256": "cd48af63a2ab18da9eba8a9631322095a2a34245d3664c2cc94ae74a70d374ca"},
+    {"name": "evidence/playable-12-live-rollback.json", "bytes": 1648, "sha256": "5025b00fe8b7ac7f7ab3001381479331f2d58f75daf476df1f3842218fdd9d71"}
+  ],
+  "approvalConsumed": true,
+  "retryAllowed": false,
+  "additionalLaunchAuthorised": false,
+  "reviewerFilesChanged": false,
+  "reviewerGameInputsOrProcessesChanged": false,
+  "limits": "The review validates the accurately bounded startup result and exact restoration, not actual game creation, API compatibility, native execution, live handoff or listening. Missing runtime counters remain unobserved. No live permission is granted by this review."
+}

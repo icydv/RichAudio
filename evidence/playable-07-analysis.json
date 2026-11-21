@@ -1,0 +1,258 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-07",
+  "dateUtc": "2026-11-01",
+  "scope": "Analysis logic checked against actual production-ASI fake-framework timelines plus labelled malformed-data controls; no live provider qualification",
+  "candidateSha256": "21302b4c5c5fb99f63b7b25dce2fa973117bfb0246f16745d0782f062fe1a69e",
+  "privateAnalysisReceiptSha256": "62c456ecfea14ed8789c41adfa44074e1093ccf6190d42c66abc557d3265c586",
+  "fixtureReceiptSha256": "8a76c7afbd8a6c1e39e56df43181f61c2867542d4c71c3b7b6f643261d0990a3",
+  "analysisSourceSha256": "c246ea676c54b8298503cadfcc8603eac4c7f1fbfca012bf7e5a726e48937799",
+  "testSource": {
+    "file": "tests/Test-ShvTelemetryAnalysis.mjs",
+    "sha256": "9046c1fef2bb822139953ffd8257f59b94595761d2fd2517f1763f0c62b7e4ed"
+  },
+  "passed": 30,
+  "failed": 0,
+  "negativeControlsValidated": true,
+  "actualShvExecuted": false,
+  "gameStarted": false,
+  "endpointOpened": false,
+  "providerQualified": false,
+  "measuredRPM": false,
+  "sourceCases": [
+    {
+      "case": "sequence_dynamic",
+      "timelineSha256": "a75b047063597e56442c3766f0acb397df79ff9d1ad4df23fc34b3af80817710",
+      "captureSha256": "d988729bd4f44b45df241d1012113ab4e746b5bdf2c72f06665edf50b7b577d3",
+      "verdict": "candidate-consistent",
+      "providerQualified": false
+    },
+    {
+      "case": "sequence_constant",
+      "timelineSha256": "c5862afe82fb05f31d8b78c58f56c92640e1ac76cadeea4ff4f9f6fe4bf771a0",
+      "captureSha256": "31533e4d533d68343715a637e10dd706bdc5f67d8e4a6e5e7c4f9967f1ad0aad",
+      "verdict": "inconsistent",
+      "providerQualified": false
+    },
+    {
+      "case": "sequence_wrong_trend",
+      "timelineSha256": "8fb274891054130a6d7f34341e0ce4a07295eb1d9c27e5c416f8231a6e11db9f",
+      "captureSha256": "1b740f79d84b27e3bbcdb6b55a24db5087d5ddc35b15abe518513cda3ace3020",
+      "verdict": "inconsistent",
+      "providerQualified": false
+    },
+    {
+      "case": "sequence_marker_only",
+      "timelineSha256": "0462848a05eefd3db9875d6088e9fca7710b8c6169fe3d86d931fae2a8580c2b",
+      "captureSha256": "63b9fdc53c6b063eba71080e73a28fdfc98c5469129c4e5912e3fad6aa3c9d1e",
+      "verdict": "incomplete",
+      "providerQualified": false
+    },
+    {
+      "case": "zero_running",
+      "timelineSha256": "93362465738460dd3d3b43c7d0207c9d9dee02393cd4f804def59f7eeb6d5683",
+      "captureSha256": "a587d86a84821bd506d56c3a2ed55e64b2d288b4d9b63a6102557f039d236bf6",
+      "verdict": "inconsistent",
+      "providerQualified": false
+    },
+    {
+      "case": "zero_off",
+      "timelineSha256": "b811d6fd4b06f637d04f1005aa0b81084b1d0b3bf6ba9962084e21db3cf16356",
+      "captureSha256": "4ad19a764603ec561b7fdafc8f9543ebc8f11a70bbd7ef719ecc403e7e53373b",
+      "verdict": "incomplete",
+      "providerQualified": false
+    },
+    {
+      "case": "rising",
+      "timelineSha256": "b742266030e8aeb5a33f62873d7b60dac7d57a3a8b09f311d7610d16129371a5",
+      "captureSha256": "873a5cc1d4667a871aacbe7e56ab744658c81aede67c88c689672b06b67be0ab",
+      "verdict": "incomplete",
+      "providerQualified": false
+    },
+    {
+      "case": "falling",
+      "timelineSha256": "a217c520b07502d6c461f6f3e0e8f5d2b0fef2ad9f3aa1a1ad86a7c803ab1f45",
+      "captureSha256": "c97806ac636b6d90a874702759d4de55070850c08d4efcf5c0ef6136e73c80f6",
+      "verdict": "incomplete",
+      "providerQualified": false
+    },
+    {
+      "case": "stale_gap",
+      "timelineSha256": "57667334a5d218fef3ba6de8cf3c9885043575b1d9adf70998f8adf839308469",
+      "captureSha256": "87090ea315ce2300f7ce1db1149d63334217a170fd5baad614dec9f827d75b82",
+      "verdict": "incomplete",
+      "providerQualified": false
+    },
+    {
+      "case": "post_identity_changed",
+      "timelineSha256": "26055ec8130708ae92a77de35a0a9257d713d1fa67a88690cfd3a6192650e101",
+      "captureSha256": "f2dae617163641a9e927e46133d00595cc6baebb8a05592da3cda42dd1a2801a",
+      "verdict": "inconsistent",
+      "providerQualified": false
+    },
+    {
+      "case": "post_context_seh",
+      "timelineSha256": "6f47d94f2ba71ddd06415fea66f7ebf998861f29990567f95c913a3cfb77f49d",
+      "captureSha256": "00fa17d85c251113dbc13f1a9067a0a6b7d799c44ffadd5f7587a6ad83789dd4",
+      "verdict": "inconsistent",
+      "providerQualified": false
+    },
+    {
+      "case": "target_seh",
+      "timelineSha256": "b0ada2857bd5ba8a72fffd4b19107ec5c6851ddd744f8e8901b6b61191e072b9",
+      "captureSha256": "313eb11c0b053eed0f09849f7df8479eaa716ca7ae502f879f046b9d77a50dc3",
+      "verdict": "inconsistent",
+      "providerQualified": false
+    },
+    {
+      "case": "null_pointer",
+      "timelineSha256": "1c6ebee85ff032fb7611f1e55096a4d359c7bf24c449e7e99f04f2b92b1d0b27",
+      "captureSha256": "8685837d6ad52e77383c99a20db6e3e6f244c86633c544b0234b76ed0082d52c",
+      "verdict": "inconsistent",
+      "providerQualified": false
+    },
+    {
+      "case": "nan",
+      "timelineSha256": "688d79b7284ecf4f48c55d3ac7467c0c826079a17b7ec2b8581a1480a3d3b082",
+      "captureSha256": "9bfcf392fdda2a48ad9c794e0272c375f08d54321c11f02cd93c6dd1808a7979",
+      "verdict": "inconsistent",
+      "providerQualified": false
+    },
+    {
+      "case": "out_of_range",
+      "timelineSha256": "e9c6cb99fdaec842e06dbd7f38d766c2664fc1ad4ab772f276c3e5918a438697",
+      "captureSha256": "1f587392b870db91a9269391f48dc7c1fc4ff3057f9cd08a9eb9f791cedaa4ea",
+      "verdict": "inconsistent",
+      "providerQualified": false
+    }
+  ],
+  "outcomes": [
+    {
+      "name": "actual dynamic binary timeline meets review heuristics without provider qualification",
+      "passed": true
+    },
+    {
+      "name": "constant output under actual independent speed activity is rejected",
+      "passed": true
+    },
+    {
+      "name": "actual opposite ratio trends are rejected independently of requested labels",
+      "passed": true
+    },
+    {
+      "name": "all requested labels with stationary unchanging observations remain incomplete",
+      "passed": true
+    },
+    {
+      "name": "running zero remains unexplained while engine-off zero remains recorded",
+      "passed": true
+    },
+    {
+      "name": "genuine rising and falling sequences alone do not satisfy multistate acceptance",
+      "passed": true
+    },
+    {
+      "name": "actual terminal stale/context/native failures prevent acceptance",
+      "passed": true
+    },
+    {
+      "name": "every actual timeline remains explicitly unqualified and uncalibrated",
+      "passed": true
+    },
+    {
+      "name": "failed writer cannot inherit otherwise valid observations",
+      "passed": true
+    },
+    {
+      "name": "missing completed-producer status remains incomplete",
+      "passed": true
+    },
+    {
+      "name": "mismatched terminal outcome and written record counts are rejected",
+      "passed": true
+    },
+    {
+      "name": "negative player identity is invalid even with matching driver and model",
+      "passed": true
+    },
+    {
+      "name": "unobserved pre-context cannot qualify a bracket",
+      "passed": true
+    },
+    {
+      "name": "290ms start gap remains stale despite a valid 50ms after-to-next gap",
+      "passed": true
+    },
+    {
+      "name": "missing declared or immediate-return triplet member stays incomplete",
+      "passed": true
+    },
+    {
+      "name": "early raw return disagreement cannot be hidden by a valid final observation",
+      "passed": true
+    },
+    {
+      "name": "phase advancement cannot skip requested states",
+      "passed": true
+    },
+    {
+      "name": "invalid numeric phase is not rescued by a plausible text label",
+      "passed": true
+    },
+    {
+      "name": "a different target native cannot inherit this candidate interpretation",
+      "passed": true
+    },
+    {
+      "name": "unarmed or differently armed identity remains incomplete",
+      "passed": true
+    },
+    {
+      "name": "missing observed row cannot inherit a complete terminal count",
+      "passed": true
+    },
+    {
+      "name": "duplicate observation indices are rejected",
+      "passed": true
+    },
+    {
+      "name": "probe-reported stale observation cannot be silently reused",
+      "passed": true
+    },
+    {
+      "name": "unfresh post-context and impossible acquisition ordering are rejected",
+      "passed": true
+    },
+    {
+      "name": "mismatched speed bits are not accepted as independent motion evidence",
+      "passed": true
+    },
+    {
+      "name": "raw ratio bit/value disagreement is rejected",
+      "passed": true
+    },
+    {
+      "name": "declared intent and phase markers without target outcomes are insufficient",
+      "passed": true
+    },
+    {
+      "name": "early raw returns without completed contexts remain incomplete",
+      "passed": true
+    },
+    {
+      "name": "unpublished raw result remains visible but cannot qualify a failed writer",
+      "passed": true
+    },
+    {
+      "name": "missing exact clock cannot produce a qualified timeline",
+      "passed": true
+    }
+  ],
+  "interpretation": "A candidate-consistent verdict for labelled fake-framework data validates analysis logic only. Human review of separately authorised real operating-state measurements is still required; no live provider is qualified.",
+  "limits": [
+    "Actual constant, wrong-trend and marker-only timelines fail candidate-consistent acceptance.",
+    "Additional labelled data mutations test missing/stale records, inconsistent clocks/raw bits/context, identity, stream triplets, marker progression, writer/producer status and summary counts.",
+    "Gear and actual throttle remain unavailable; keyboard intent and phase requests are not achieved-state proof."
+  ],
+  "privacy": "Only portable file labels, hashes, named checks and summary verdicts are included; no private paths, identifiers, raw handles, addresses or absolute QPC values."
+}

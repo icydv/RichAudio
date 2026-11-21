@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-14",
+  "kind": "sanitised-separately-requested-manual-attempt",
+  "attempt": 2,
+  "result": "BLOCKED-SUPERVISOR-PRIOR-LOG-MISATTRIBUTION",
+  "authorizationBasis": "Explicit owner request to try again after tabbing out, followed by confirmation to continue restoration and one fresh passive attempt",
+  "authorizationSha256": "042c13cbde2b73fdf613731351c07937b8616ff2171bc8323ac283c28b0185bc",
+  "sameApprovedCommit": "bf59244e482897ee744c6a64b70243f20743d755",
+  "artifacts": [
+    {
+      "file": "Plugins/RichAudio.dll",
+      "bytes": 361472,
+      "sha256": "ba19342ce5ceac63d179943e22d324819a42a8c8294d7f15e436f3833e01be0f"
+    },
+    {
+      "file": "RichAudio.OperatingState.ShvHandoff.asi",
+      "bytes": 129024,
+      "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40"
+    }
+  ],
+  "firstInstallationRestoredBeforeNewDeployment": true,
+  "deployments": 1,
+  "existingRouteInvocations": 1,
+  "launchMarkerUtc": "2026-11-01T19:01:53.5060563Z",
+  "steamAction": 13,
+  "steamContinueClicks": 0,
+  "pendingSteamConfirmationCancelled": true,
+  "rphNormallyCancelledAndExited": true,
+  "actualNewEnhancedProcessesObserved": 0,
+  "leaseIssued": false,
+  "operatorStartCommands": 0,
+  "sourceOpenObserved": false,
+  "nativeBeginObserved": false,
+  "nativeTargetAttemptCounterMeasured": false,
+  "coordinatorDeadlineSeconds": 120,
+  "coordinatorTerminalUtc": "2026-11-01T19:03:53.6200879Z",
+  "coordinatorTerminalReason": "Exact new game process not observed; no lease or retry.",
+  "observerDefect": {
+    "priorSameProfileLogMatched": true,
+    "misattributedTerminalUtc": "2026-11-01T18:55:51.128Z",
+    "falseEventAtLaunchElapsedSeconds": 0.1841328,
+    "gameProcessIdAtFalseEvent": 0,
+    "sessionAtFalseEvent": null,
+    "startupExactProcessObservedAtFalseEvent": false,
+    "oldActiveAndTerminalFieldsAreCurrentGameplayEvidence": false
+  },
+  "retainedActualTerminalReviewSha256": "604201325b57c03c1dcaef216f7ec851888fc76cf174505719cc2b71da9c4826",
+  "restoration": "PASS",
+  "independentRestorationReviewSha256": "2d661f4595eedb0de9a8dc1dedbed7573e149144a39d2dba7a26ceaad360d009",
+  "automaticRetry": false,
+  "thirdAttemptAuthorised": false,
+  "gameForceTerminationPerformed": false,
+  "audioPlayed": false,
+  "endpointOpened": false,
+  "recordingPerformed": false,
+  "report": "docs/PLAYABLE_14_LIVE_RESULT.md"
+}

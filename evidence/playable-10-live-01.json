@@ -1,0 +1,254 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-10",
+  "kind": "actual-one-authorised-diagnostic-launch",
+  "preparationCommit": "fbcaf994396492c98e67593e1412c2746ac14f9c",
+  "actualFrameworkExecution": true,
+  "launches": 1,
+  "deployments": 1,
+  "automaticRetry": false,
+  "approvalConsumed": true,
+  "diagnosticArtifact": {
+    "bytes": 66560,
+    "sha256": "cb2555ba00169af86d2728ba545c808a825df0ab04ba08026f1268e02d3caf3a"
+  },
+  "privateApprovalReceiptSha256": "8292ea9afa0ac9407fe5b982e4346c05ae8b2a6f703f827957d34b88d8964acc",
+  "privateInstallationReceiptSha256": "52a38d1f5658bb8b47b9f24e989579e3a54201d4b9ccbaf016673c7743dc4449",
+  "privateCaptureIndexSha256": "a498b8c109240a4a9a98f666b1a428190cdcd9fda34fc1df208676b84db145cf",
+  "privateRuntimeReportSha256": "ce2155c918c6cfc3e16f1ecaa9a3574c6f864084dd208749a2d135e772f47326",
+  "runtimeReportBytes": 8687,
+  "callerCompletionObserved": true,
+  "callerLogMatchesReportHashAndBytes": true,
+  "terminalReason": "api-runtime-policy-unreviewed",
+  "provenanceMatched": false,
+  "captureElapsedMilliseconds": 70.0792,
+  "comparisonCounts": {
+    "pass": 14,
+    "unreviewed": 7,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "name": "session-shape",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "session-context",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "process-observation",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "process-id",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "process-creation",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "game-process-path",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "launcher-capture",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "launcher-path",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "launcher-sha256",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "launcher-bytes",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "launcher-file-version",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "caller-assembly-capture",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "caller-sha256",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "api-assembly-capture",
+      "outcome": "pass",
+      "reason": null
+    },
+    {
+      "name": "api-runtime-reviewed-policy",
+      "outcome": "unreviewed",
+      "reason": "api-runtime-policy-unreviewed"
+    },
+    {
+      "name": "api-runtime-path",
+      "outcome": "unreviewed",
+      "reason": "api-runtime-operand-unreviewed"
+    },
+    {
+      "name": "api-runtime-sha256",
+      "outcome": "unreviewed",
+      "reason": "api-runtime-operand-unreviewed"
+    },
+    {
+      "name": "api-runtime-bytes",
+      "outcome": "unreviewed",
+      "reason": "api-runtime-operand-unreviewed"
+    },
+    {
+      "name": "api-runtime-file-version",
+      "outcome": "unreviewed",
+      "reason": "api-runtime-operand-unreviewed"
+    },
+    {
+      "name": "api-runtime-assembly-name",
+      "outcome": "unreviewed",
+      "reason": "api-runtime-operand-unreviewed"
+    },
+    {
+      "name": "api-runtime-module-mvid",
+      "outcome": "unreviewed",
+      "reason": "api-runtime-operand-unreviewed"
+    }
+  ],
+  "actualLauncher": {
+    "sha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac",
+    "bytes": 12237182,
+    "fileVersion": "1.132.1428.17748",
+    "fileStableDuringRead": true,
+    "error": null
+  },
+  "actualCaller": {
+    "sha256": "cb2555ba00169af86d2728ba545c808a825df0ab04ba08026f1268e02d3caf3a",
+    "bytes": 66560,
+    "fileVersion": "0.0.0.0",
+    "assemblyFullName": "RichAudio.RuntimeProvenance.Rph, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "manifestModuleName": "RichAudio.RuntimeProvenance.Rph.dll",
+    "moduleMvid": "d97c334a-2c45-4257-8343-bcd6d899e215",
+    "referencePresentInCurrentAppDomain": true,
+    "isDynamic": false,
+    "metadataComplete": true,
+    "loadedAndFileMetadataConsistent": true,
+    "fileStableDuringRead": true,
+    "linkCount": 1,
+    "error": null,
+    "fileError": null,
+    "signatureAvailability": "pe-certificate-table-absent",
+    "authenticodeSignatureVerified": false,
+    "certificateChainVerified": false,
+    "strongNamePublicKeyToken": "",
+    "strongNameCryptographicallyVerified": false
+  },
+  "actualApiRuntime": {
+    "sha256": "ea18ddff9ccd41898a9bdc8c2ec2b7866176543e126810279e8732ab2e0a6d62",
+    "bytes": 28720128,
+    "fileVersion": "1.132.1428.17748",
+    "assemblyFullName": "RagePluginHook, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "manifestModuleName": "RagePluginHook.dll",
+    "moduleMvid": "4c493f3e-e913-497c-a0d6-b293f9b8c3ef",
+    "referencePresentInCurrentAppDomain": true,
+    "isDynamic": false,
+    "metadataComplete": true,
+    "loadedAndFileMetadataConsistent": true,
+    "fileStableDuringRead": true,
+    "linkCount": 1,
+    "error": null,
+    "fileError": null,
+    "signatureAvailability": "pe-certificate-table-absent",
+    "authenticodeSignatureVerified": false,
+    "certificateChainVerified": false,
+    "strongNamePublicKeyToken": "",
+    "strongNameCryptographicallyVerified": false
+  },
+  "actualApiLocationClass": "temporary-directory-file; absolute path and temporary directory token private",
+  "actualApiIdentityObserved": true,
+  "runtimeDistributionAuthenticated": false,
+  "runtimeWitnessCopiedReadOnlyAndHashVerified": true,
+  "runtimeWitnessExecutedOrInstalled": false,
+  "expectedApiRuntimeState": "UNREVIEWED",
+  "expectedApiOperands": null,
+  "firstSeenHashPromoted": false,
+  "historical09ComparisonEvaluatedOnThis10Capture": {
+    "obsoleteExpectation": true,
+    "authoritativeForCurrentPolicy": false,
+    "trustGranted": false,
+    "purpose": "diagnostic-reconstruction-of-the-obsolete-launcher-as-api-runtime-comparison-only",
+    "sha256": {
+      "expectedInstalledLauncherSha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac",
+      "actualApiSha256": "ea18ddff9ccd41898a9bdc8c2ec2b7866176543e126810279e8732ab2e0a6d62",
+      "outcome": "fail"
+    },
+    "fileVersion": {
+      "expectedInstalledLauncherFileVersion": "1.132.1428.17748",
+      "actualApiFileVersion": "1.132.1428.17748",
+      "outcome": "pass"
+    },
+    "combinedOldEqualityResult": false
+  },
+  "actual09RuntimeOperandsRecovered": false,
+  "interpretation": {
+    "thisRunLauncherAndApiAreDifferentFilesAndBytes": true,
+    "thisRunOldHashComparison": "fail",
+    "thisRunOldFileVersionComparison": "pass",
+    "rootModelError": "Assumed launcher digest also identified the actual API runtime; that equality is false in this measured run.",
+    "likely09Explanation": "Same conflation is consistent with09 rejection, but09 exact API operands were not retained and cannot be retroactively proved.",
+    "extractionMechanismEstablished": false,
+    "frameworkDefectEstablished": false,
+    "nativeFailureEstablished": false
+  },
+  "boundaries": {
+    "asiDeployed": false,
+    "sourceAttachmentAllowed": false,
+    "sourceOpenAllowed": false,
+    "sourceBeginAllowed": false,
+    "gameplayPublicationAllowed": false,
+    "audioAllowed": false,
+    "sourceOrTargetNativeOrProducerCountersSampled": false,
+    "basis": "Actual diagnostic report/caller log plus compiled component omission; no invented producer/FIFO/frame measurements.",
+    "stockFallback": true,
+    "modificationAwareLoudness": false,
+    "synchronizedAudioRecording": false,
+    "vehicleActionsPerformedForDiagnostic": false,
+    "singlePlayerWorldVisuallyObservedBeforeExit": true,
+    "gameModeNativeQueried": false
+  },
+  "exit": {
+    "normalQuitPromptObserved": true,
+    "confirmationInputReturned": true,
+    "gameWindowDisappearanceObserved": true,
+    "processExitIndependentlyVerified": true,
+    "forceTerminationUsed": false
+  },
+  "decision": "DIAGNOSTIC-SUCCEEDED; BLOCKED-PENDING-INDEPENDENT-RUNTIME-DISTRIBUTION-PROVENANCE",
+  "nextLaunchAuthorised": false,
+  "limits": [
+    "One observed launch does not establish byte stability across future launches or authenticate runtime distribution.",
+    "The historical09 comparison is evaluated on this10 witness; it is not recovery of09 actual operands.",
+    "Temporary location, metadata equality and signature-table/token absence are observations, not provenance approval.",
+    "No live handoff, engine-state read, audibility or endpoint recording was attempted."
+  ],
+  "privacy": "Absolute paths, temporary directory IDs, process/session/file IDs, volume serial, absolute QPC and full logs remain private."
+}

@@ -48,6 +48,18 @@ function add(playout, time, sequence, overrides = {}, lag = 0) {
   );
 }
 
+test('fixed gameplay delay anchors original observations despite producer credit and delivery jitter',()=>{
+ const p=new ListenerPlayout({anchoredClock:true});
+ p.add(message(0,0),0,0);
+ for(let i=1;i<=24;i++){
+  const original=i*.05,age=[.004,.016,.009][i%3],queued=[.02,.07,.04][i%3];
+  p.add(message(original,i,{},age),original+queued,original*1000+age*1000);
+  near(p.records.at(-1).time,original);
+ }
+ const at=p.sample(.925,1250);near(at.targetTime,.825);near(at.state.position[0],.825*4);
+ near(p.delay,.1);assert.equal(p.stats.startupClockCalibrations,0,'stationary-camera startup cannot relabel independently moving vehicles');
+});
+
 test("Listener playout has an explicit 100 ms control delay and unchanged 50 ms forecast ceiling", () => {
   const p = new ListenerPlayout();
   assert.equal(p.delay, 0.1);

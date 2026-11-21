@@ -1,0 +1,410 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-06",
+  "dateUtc": "2026-10-31",
+  "scope": "One explicitly authorised actual Script Hook V operator-armed stable-idle diagnostic using the unchanged PLAYABLE-06 ASI; one target call, no multi-state or audio test.",
+  "acceptance": "CREDIBLE NONZERO PROVIDER CANDIDATE: recorded operator arming and stable-idle gate passed; engine operating-state contract, measured RPM and playable acceptance remain BLOCKED.",
+  "candidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "sha256": "af860dc42540a94c2176ee0dce09c77d9c16c9eeea46a1572d5011aaa8863be4",
+    "bytes": 323584,
+    "artifactUnchangedFromOfflineFixtures": true,
+    "onlyOneTemporaryAsiAdded": true
+  },
+  "authorisation": {
+    "explicitUserApproval": true,
+    "maximumDeployments": 1,
+    "maximumLaunches": 1,
+    "maximumTargetCalls": 1,
+    "audioTestAuthorised": false,
+    "automaticRetry": false
+  },
+  "actualExecution": {
+    "gameStarted": true,
+    "actualScriptHookVLoaded": true,
+    "actualScriptHookVExecuted": true,
+    "route": "Existing working RPH launch route",
+    "actualGameLaunches": 1,
+    "secondLaunchPerformed": false,
+    "nativeRetryPerformed": false,
+    "probeAsiLoadCount": 1,
+    "probeScriptRegistrationCount": 1,
+    "probeScriptCallbackLaunchCount": 1,
+    "probeScriptUnregistrationCount": 1,
+    "gameFileVersion": "1.0.1158.16",
+    "rphVersion": "1.132.1428.17748",
+    "scriptHookVVersion": "3889.0/1158.13",
+    "scriptHookVInternalGameLabel": "VER_EN_1_0_1158_13"
+  },
+  "capture": {
+    "schema": 2,
+    "purpose": "operator-armed-stable-idle-diagnostic",
+    "terminalReason": "completed-unvalidated",
+    "producerCompleted": true,
+    "deadlineReached": false,
+    "targetHash": "F9DDA40BC293A61E",
+    "targetAttempts": 1,
+    "targetReturned": true,
+    "resultPointerPresent": true,
+    "rawBitsHex": "3E4CCCCD",
+    "rawBits": 1045220557,
+    "rawFloat": 0.200000003,
+    "classification": "finite-unvalidated",
+    "exceptionCode": 0,
+    "failedNativeHash": "0000000000000000",
+    "presentationExceptionCodeAtCapture": 0,
+    "measuredRPM": false,
+    "providerValid": false,
+    "maximumSessionMilliseconds": 300000,
+    "eligibilityPolls": 211,
+    "captureBytes": 4249,
+    "journalBytes": 3854,
+    "armedMarkerIsInvocationProof": false,
+    "journalStages": [
+      "capture-open",
+      "operator-armed",
+      "stable-idle-qualified",
+      "capture-terminal"
+    ],
+    "journalTerminalRecordPresent": true,
+    "journalTerminalCaptureWritten": true
+  },
+  "operatorArming": {
+    "accepted": true,
+    "chord": "Ctrl+Shift+Backslash",
+    "terminalVirtualKeyHex": "DC",
+    "inputBeforeTicksSinceSession": 598851949,
+    "inputAfterTicksSinceSession": 598851950,
+    "observedTicksSinceSession": 598945434,
+    "inputBeforeSecondsSinceSession": 59.8851949,
+    "inputAfterSecondsSinceSession": 59.885195,
+    "observedSecondsSinceSession": 59.8945434,
+    "inputClockDescribesCallbackNotHardwareInstant": true,
+    "contextAcquisitionStartTicksSinceSession": 598945217,
+    "contextAcquisitionEndTicksSinceSession": 598945434,
+    "contextAcquisitionStartSecondsSinceSession": 59.8945217,
+    "contextAcquisitionEndSecondsSinceSession": 59.8945434
+  },
+  "context": {
+    "modelHash": "0xF9300CC5",
+    "driverMatchesPlayerPed": true,
+    "sameIdentityAtOperatorArmingAndFinalValidation": true,
+    "engineRunningRawAtArming": 1,
+    "engineRunningRawAtFinalValidation": 1,
+    "speedMpsAtArming": 0,
+    "speedBitsHexAtArming": "00000000",
+    "speedMpsAtFinalValidation": 0,
+    "speedBitsHexAtFinalValidation": "00000000"
+  },
+  "stableIdleGate": {
+    "requiredDurationMs": 2000,
+    "sampleIntervalMs": 100,
+    "maxAllowedGapMs": 250,
+    "postArmLimitMs": 3000,
+    "stationaryToleranceMps": 0.1,
+    "speedUsedAsRpm": false,
+    "sampleCount": 20,
+    "firstTicksSinceSession": 598945434,
+    "lastTicksSinceSession": 619786084,
+    "actualSampleSpanSeconds": 2.084065,
+    "maxSampleGapMilliseconds": 113.1492,
+    "maxSpeedMps": 0.00927900895,
+    "allSamplesEngineRunningRawOne": true,
+    "allSamplesSameIdentity": true,
+    "allSamplesFiniteWithinStationaryTolerance": true,
+    "qualified": true,
+    "freshPreTargetRevalidated": true,
+    "qualifiedJournalContainsFullGate": true,
+    "durableQualifiedSamplesMatchFinalCapture": true,
+    "qualifiedJournalPreTargetRevalidated": false,
+    "qualifiedJournalPrecedesFreshFinalValidation": true,
+    "samples": [
+      {
+        "index": 1,
+        "acquisitionStartTicksSinceSession": 598945217,
+        "acquisitionEndTicksSinceSession": 598945434,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 2,
+        "acquisitionStartTicksSinceSession": 600068326,
+        "acquisitionEndTicksSinceSession": 600068497,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 3,
+        "acquisitionStartTicksSinceSession": 601199825,
+        "acquisitionEndTicksSinceSession": 601199989,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 4,
+        "acquisitionStartTicksSinceSession": 602322234,
+        "acquisitionEndTicksSinceSession": 602322394,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "3C1806FC",
+        "speedMps": 0.00927900895,
+        "sameIdentity": true
+      },
+      {
+        "index": 5,
+        "acquisitionStartTicksSinceSession": 603304780,
+        "acquisitionEndTicksSinceSession": 603305061,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "3C069FD9",
+        "speedMps": 0.00821682159,
+        "sameIdentity": true
+      },
+      {
+        "index": 6,
+        "acquisitionStartTicksSinceSession": 604431649,
+        "acquisitionEndTicksSinceSession": 604431934,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 7,
+        "acquisitionStartTicksSinceSession": 605558680,
+        "acquisitionEndTicksSinceSession": 605558961,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 8,
+        "acquisitionStartTicksSinceSession": 606685239,
+        "acquisitionEndTicksSinceSession": 606685498,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 9,
+        "acquisitionStartTicksSinceSession": 607670791,
+        "acquisitionEndTicksSinceSession": 607671070,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 10,
+        "acquisitionStartTicksSinceSession": 608799797,
+        "acquisitionEndTicksSinceSession": 608800070,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 11,
+        "acquisitionStartTicksSinceSession": 609926441,
+        "acquisitionEndTicksSinceSession": 609926747,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 12,
+        "acquisitionStartTicksSinceSession": 611056027,
+        "acquisitionEndTicksSinceSession": 611056358,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 13,
+        "acquisitionStartTicksSinceSession": 612038350,
+        "acquisitionEndTicksSinceSession": 612038639,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 14,
+        "acquisitionStartTicksSinceSession": 613164958,
+        "acquisitionEndTicksSinceSession": 613165266,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 15,
+        "acquisitionStartTicksSinceSession": 614293194,
+        "acquisitionEndTicksSinceSession": 614293619,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 16,
+        "acquisitionStartTicksSinceSession": 615421541,
+        "acquisitionEndTicksSinceSession": 615421819,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 17,
+        "acquisitionStartTicksSinceSession": 616550003,
+        "acquisitionEndTicksSinceSession": 616550320,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 18,
+        "acquisitionStartTicksSinceSession": 617535682,
+        "acquisitionEndTicksSinceSession": 617535853,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 19,
+        "acquisitionStartTicksSinceSession": 618659364,
+        "acquisitionEndTicksSinceSession": 618659543,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      },
+      {
+        "index": 20,
+        "acquisitionStartTicksSinceSession": 619785925,
+        "acquisitionEndTicksSinceSession": 619786084,
+        "engineRunningRaw": 1,
+        "speedBitsHex": "00000000",
+        "speedMps": 0,
+        "sameIdentity": true
+      }
+    ]
+  },
+  "timing": {
+    "basis": "Exact relative monotonic QPC ticks and derived durations; absolute QPC values remain private.",
+    "qpcFrequencyHz": 10000000,
+    "targetBeforeTicksSinceSession": 619928881,
+    "targetAfterTicksSinceSession": 619933155,
+    "targetBeforeSecondsSinceSession": 61.9928881,
+    "targetAfterSecondsSinceSession": 61.9933155,
+    "targetInvocationWindowMilliseconds": 0.4274,
+    "operatorCallbackToTargetBeforeMilliseconds": 2107.6932,
+    "finalContextAcquisitionStartTicksSinceSession": 619928536,
+    "finalContextAcquisitionEndTicksSinceSession": 619928872,
+    "finalContextAcquisitionStartSecondsSinceSession": 61.9928536,
+    "finalContextAcquisitionEndSecondsSinceSession": 61.9928872,
+    "finalContextAcquisitionMilliseconds": 0.0336,
+    "finalContextEndToTargetBeforeMilliseconds": 0.0009,
+    "lastStableSampleEndToTargetBeforeMilliseconds": 14.2797,
+    "interpretation": "The target window includes caller bookkeeping, SHV init/push/call and immediate result copy; it is not an isolated native-handler or audio performance benchmark."
+  },
+  "humanObservation": {
+    "statement": "Armed once at stationary idle",
+    "statementReceivedAfterObservedTarget": true,
+    "probeRecordedExplicitOperatorAction": true,
+    "corroborationDoesNotOverrideRecordedGate": true,
+    "simultaneousHumanIdleObservationAtExactTargetEstablished": false
+  },
+  "interpretation": {
+    "registeredFrameworkCallbackAndCallPathEstablished": true,
+    "recordedOperatorArmingAndStableIdleGateSatisfied": true,
+    "nonnullReturnStorageEstablished": true,
+    "nonzeroRawReturnEstablished": true,
+    "credibleProviderCandidate": true,
+    "nativeHandlerSemanticsAuthenticated": false,
+    "authenticatedNativeProviderEstablished": false,
+    "engineOperatingStateContractEstablished": false,
+    "measuredRpmEstablished": false,
+    "rangeUnitsAndStateResponseEstablished": false,
+    "multiStateQualificationPerformed": false,
+    "priorRphRatioCauseEstablished": false,
+    "crossFrameworkValuesAreControlledComparison": false,
+    "playableAcceptance": "BLOCKED",
+    "automaticRepeatJustified": false,
+    "nextBoundary": "Review this one-state nonzero result and propose a separately authorised controlled multi-state qualification; this record authorises no further execution."
+  },
+  "audio": {
+    "richAudioAudioTestPerformed": false,
+    "richAudioHostStarted": false,
+    "richAudioEndpointOpened": false,
+    "nonzeroEngineOrExhaustPcmEstablished": false,
+    "processedStereoPcmEstablished": false,
+    "humanRichAudioListeningEstablished": false,
+    "stockFallbackRetained": true
+  },
+  "integrity": {
+    "captureSha256": "dd7f1dda97477b247f4152a238560e49173b5bbdbd7ca8e35a427d570c487e43",
+    "journalSha256": "adeb9da924e127e305eb3b104f5edca36a6c804d239de906b4b3acdf10d4d93d",
+    "captureObservationSha256": "18869d3128c8053c6c4d6dc9ac321c2a0e8f7262318de484f41a35f9645f9958",
+    "userObservationSha256": "7df85da6cfeb9d1cc7f1d52a1c838ffea8a511df56103dc52652eca2fafbfbdc",
+    "logs": [
+      {
+        "file": "asiloader.log",
+        "sha256": "b565c7d10e3518eb3a05bdfc21e3f18e080b2028ca37c2970c4295e264c52691"
+      },
+      {
+        "file": "RagePluginHook.log",
+        "sha256": "98cd547da77269444c101b36524fa841af6de31075e1dd25241a4ac2ada1ebbd"
+      },
+      {
+        "file": "ScriptHookV.log",
+        "sha256": "a41053bf7b4f6904cc3025527ef6850951c355e8e478637b2f3e3e559f3254c4"
+      }
+    ],
+    "rollbackReceiptSha256": "df9fec217e527ddc28db87b8fc6f6e473457096561bb5b40df75c2350f227380",
+    "normalExitReceiptSha256": "1478006c56e5510814298750d6d471e6a3b5d6606daf3fde078c1cd5348eaec5"
+  },
+  "limits": [
+    "One nonzero value after a qualified stable-idle gate strengthens the provider candidate but cannot establish native semantics, units, range or response across operating states.",
+    "The recorded two-second gate consists of sampled native observations; continuous physical state between samples is not independently measured.",
+    "Arming QPC timestamps bound keyboard callback handling, not the hardware key instant.",
+    "The later user statement corroborates intended stationary idle and does not replace the recorded machine observations.",
+    "No actual HUD rendering or human perception claim follows from these data alone.",
+    "The independent watchdog requests cancellation but cannot preempt a stalled native, fatal framework path or filesystem operation.",
+    "The existing mod stack was retained; no clean-install control, native retry, second launch, multi-state comparison or audio test occurred."
+  ],
+  "privacy": "No process identifiers, native handles, absolute local paths, absolute QPC timestamps, raw pointer addresses or raw logs/captures included.",
+  "cleanup": {
+    "normalCloseRequested": true,
+    "normalCloseMethod": "Alt+F4 through computer-use",
+    "quitDialogObserved": false,
+    "followupInputHelperErrorSanitised": "foreground window did not report a process id",
+    "processExitObserved": true,
+    "shvScriptUnregistrationObserved": true,
+    "forcedTerminationUsed": false,
+    "temporaryProbeRemoved": true,
+    "ownershipHashMatchedBeforeRemoval": true,
+    "pendingAbsent": true,
+    "destinationAbsent": true,
+    "protectedInstallationFiles": 11,
+    "allProtectedHashesMatch": true,
+    "savedSettingsMatch": true,
+    "shortcutHashesMatch": true,
+    "stockFallbackRetained": true,
+    "remainingGameRphProductHostProcesses": 0,
+    "privateCapturePreserved": true,
+    "priorCapturePreserved": true,
+    "recursiveDeletionUsed": false
+  }
+}

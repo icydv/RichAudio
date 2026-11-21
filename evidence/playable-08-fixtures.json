@@ -1,0 +1,850 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-08",
+  "dateUtc": "2026-11-01",
+  "scope": "Guided production ASI executed only with an isolated public-ABI fake SHV, supported callback dispatch, and a real owned Win32 foreground window. Fixture data does not qualify a live provider or prove GTA rendering.",
+  "candidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "sha256": "41361aa281493e1cc54fe196161aafc4a93ce002bfe0bb9da2effbc742465484",
+    "bytes": 380416,
+    "productionProbeExecutedOnlyInFakeContext": true,
+    "deployed": false
+  },
+  "sourceInputs": [
+    {
+      "file": "src/telemetry/ShvProbe/Probe.cpp",
+      "sha256": "1b82207462778c6d398839f51bc30abfc4de759583f72a15aad61305abc17760",
+      "bytes": 72667
+    },
+    {
+      "file": "src/telemetry/ShvProbe/ScriptHookVApi.h",
+      "sha256": "131f609ff3db49e0bdaa9264a296825669fe897115c65d76fd3f593115d077ba",
+      "bytes": 1493
+    },
+    {
+      "file": "src/telemetry/ShvProbe/NativeIds.h",
+      "sha256": "2c256ef63e179a17361d7f06f12af763d4891a8b494206c03bc4ebd7e2d751b5",
+      "bytes": 2506
+    }
+  ],
+  "testSources": [
+    {
+      "file": "tests/shv-probe/Fixture.cpp",
+      "sha256": "0413c897d503a9e3d61be22b0efdbd1bf18696c344952088f62e01e0e4fb34a1"
+    },
+    {
+      "file": "tests/shv-probe/Host.cpp",
+      "sha256": "a48cfec1c51e79f4059b5a10a6838eee6910dee9fec56bf9c8985a9ca90c2f50"
+    },
+    {
+      "file": "tools/Test-ShvTelemetryProbe.ps1",
+      "sha256": "7b498fd403f4dc2e798e0547016d25cf88f566609cea86886a9412ec0098028e"
+    },
+    {
+      "file": "tests/Test-ShvTelemetryAnalysis.mjs",
+      "sha256": "a365a78fa781614d303eb1e5564086212e92c9336038d6766d5e1a59911c9fc8"
+    }
+  ],
+  "testBinaries": {
+    "fixtureDllSha256": "e6aa442c52c4404af8e7bbd4bb27843648b7ea3ab5d580ef892834964cc3c712",
+    "hostExeSha256": "dcd1c0f48bbf078713934335fc0fd9672eb85583ac458982330af4a159b00248",
+    "privateFullReceiptSha256": "d8b320ec8a0bf5f919761624f1c4c3686d7b2bcee783e8452b54f261b61ec506",
+    "executionReceiptSha256": "7b8ba45f6e9b5451f5a9c43acbd13b65d213e4fc83a108e2e0f58bb80fbb592b",
+    "privateBuildReceiptSha256": "1b5e9fe47c95c20157bd199072cf56e08533798c751789175542a7614e4bc008",
+    "publicBuildEvidenceSha256": "08ec7ecf481af2d318f016a37486473e6d3129ea2895a96de26d8141abff1ea9"
+  },
+  "validation": {
+    "assertions": 53747,
+    "cases": 48,
+    "failed": 0,
+    "fullMatrix": true,
+    "boundedMultiStateValidated": true,
+    "phaseMarkersValidated": true,
+    "guidedHudValidated": true,
+    "fullDurationFixtureValidated": true,
+    "maximumCaptureSeconds": 120,
+    "maximumObservations": 2400,
+    "maximumHz": 20,
+    "aggregateOutputBudgetBytes": 12582912,
+    "maximumObservedCombinedOutputBytes": 4955017.0,
+    "maximumObservedTimelineRowBytes": 1631.0,
+    "maximumTimelineRowBytes": 2047,
+    "maximumMinimalReturnRowBytes": 511,
+    "maximumTimelineRecords": 7209,
+    "candidateAndFakeHashesVerifiedBeforeCallbacks": true,
+    "productionSourceLineageCheckedBeforeAndAfterValidation": true,
+    "executionRunnerSourceSha256": "7b498fd403f4dc2e798e0547016d25cf88f566609cea86886a9412ec0098028e",
+    "validationRunnerSourceSha256": "7b498fd403f4dc2e798e0547016d25cf88f566609cea86886a9412ec0098028e",
+    "readOnlyRevalidation": false,
+    "helperAndProductionSourcesUnchangedDuringSuccessfulFullMatrix": true,
+    "successfulFullMatrixFakeTargetCalls": 3171.0
+  },
+  "foregroundSetup": {
+    "realOsForegroundReaders": true,
+    "maximumPendingMilliseconds": 10000,
+    "productionLoadBlockedUntilOwnedWindowActuallyForeground": true,
+    "normalComputerUseActivations": 47,
+    "activationTraceSha256": "398f4c8c6cfe27d50411b76c43688dbd213dbac33574ffd67369290926a5ea7e",
+    "watcherMaximumSeconds": 600,
+    "stopMarkerObserved": true,
+    "keyboardInputsRequested": 0,
+    "mouseInputsRequested": 0,
+    "unrelatedWindowsActedOn": 0,
+    "foregroundReadersSubstituted": false,
+    "wrongForegroundCaseNeverPending": true,
+    "scope": "Official computer-use activated only observed exact owned pending fixture windows. Active/fault/focus-negative windows were not restored. SDK keyboard callbacks were dispatched by the fake framework; no global keys were injected."
+  },
+  "guidedHud": {
+    "observedManualPhaseLabels": [
+      "OFF",
+      "IDLE",
+      "REV",
+      "ACCEL",
+      "GEAR",
+      "DECEL",
+      "RETURN IDLE"
+    ],
+    "emittedPhaseExamples": [
+      "PHASE OFF 0s | LEFT 120s~n~If off unavailable, NEXT.~n~\\ NEXT | Ctrl+Shift+\\ STOP",
+      "PHASE IDLE 0s | LEFT 119s~n~Stay still 8s, then NEXT.~n~\\ NEXT | Ctrl+Shift+\\ STOP",
+      "PHASE REV 0s | LEFT 116s~n~Stay still; rev 8s, then NEXT.~n~\\ NEXT | Ctrl+Shift+\\ STOP",
+      "PHASE ACCEL 0s | LEFT 115s~n~Speed up 8s; NEXT before slowing.~n~\\ NEXT | Ctrl+Shift+\\ STOP",
+      "PHASE GEAR 0s | LEFT 112s~n~Optional 6s; gear unavailable.~n~\\ NEXT | Ctrl+Shift+\\ STOP",
+      "PHASE DECEL 0s | LEFT 112s~n~Slow down 8s, then NEXT.~n~\\ NEXT | Ctrl+Shift+\\ STOP",
+      "PHASE RETURN IDLE 0s | LEFT 109s~n~Stay still; idle 8s.~n~\\ FINISH | Ctrl+Shift+\\ STOP"
+    ],
+    "maximumObservedComponentUtf8Bytes": 91,
+    "componentLimitExclusiveBytes": 99,
+    "droppedHudStrings": 0,
+    "oversizedHudStrings": 0,
+    "timerComparedWithActualPhaseAndActiveQpc": true,
+    "timerToleranceSeconds": 1,
+    "phaseElapsedMonotonicWithinEachPhase": true,
+    "acceptedManualAdvanceResetsPhaseElapsed": true,
+    "returnFooterUsesFinish": true,
+    "runningZeroWarningObserved": true,
+    "actualGameRenderingVerified": false,
+    "limits": "Captured arguments to genuine production HUD calls prove emitted text and timing in a fake context; game layout, legibility, font rendering, user comprehension and live callback delivery remain unverified."
+  },
+  "unshortenedDurationCase": {
+    "targetCalls": 1928,
+    "targetOutcomesObserved": 1928,
+    "terminalReason": "active-deadline",
+    "dispatchStartDeadlineMs": 120000,
+    "firstActualTargetEntryRelativeMs": 0.0052,
+    "lastActualTargetEntryRelativeMs": 119996.3144,
+    "minimumActualTargetEntryGapMs": 59.8863,
+    "maximumActualTargetEntryGapMs": 64.7861,
+    "activeTimerStrings": 120,
+    "firstEmittedTimer": "PHASE OFF 0s | LEFT 120s~n~If off unavailable, NEXT.~n~\\ NEXT | Ctrl+Shift+\\ STOP",
+    "lastEmittedTimer": "PHASE OFF 119s | LEFT 1s~n~If off unavailable, NEXT.~n~\\ NEXT | Ctrl+Shift+\\ STOP",
+    "phaseRecords": 1,
+    "allRequestedPhases": "OFF",
+    "noAutomaticPhaseAdvance": true,
+    "limits": "Targets started before the 120000 ms dispatch deadline. The producer observed/completed termination later; activeEndQpc is not a filesystem publication timestamp. This is not a hard native-preemption or exact-rate guarantee.",
+    "cooperativeProducerEndRelativeMs": 120011.7635
+  },
+  "analysisValidation": {
+    "privateReceiptSha256": "5be5d5d690d077d1abd951df969113c728cf47b6363e4bc502297bbf47768e3c",
+    "analysisSourceSha256": "c246ea676c54b8298503cadfcc8603eac4c7f1fbfca012bf7e5a726e48937799",
+    "testSourceSha256": "a365a78fa781614d303eb1e5564086212e92c9336038d6766d5e1a59911c9fc8",
+    "passed": 30,
+    "failed": 0,
+    "negativeControlsValidated": true,
+    "sourceCases": [
+      {
+        "case": "sequence_dynamic",
+        "timelineSha256": "f37b9b0bf6de2df61331e00ac6ffa1c7232fefb51f1bcc9a30681dc2985a79ae",
+        "captureSha256": "59248bc699b13ff913b917fbc081b69d6d23a0dda67ad39116941151cbdc141d",
+        "verdict": "candidate-consistent",
+        "providerQualified": false
+      },
+      {
+        "case": "sequence_constant",
+        "timelineSha256": "e739e31783291842690a88b100ce9213c4e0e7cdbb9332831f1775ebc38f4615",
+        "captureSha256": "d8887617bce76ed112c06b0ba28d9b6f222a60eab3dd78b8b67d172fefffb67d",
+        "verdict": "inconsistent",
+        "providerQualified": false
+      },
+      {
+        "case": "sequence_wrong_trend",
+        "timelineSha256": "a87266c727d2caf5db9196350e90196a0daa4f5e4526e6cc64f62555883ba7d3",
+        "captureSha256": "3092582690b85edb503e0f6197e50d0127f34cb0354fc4d8b11520fa55490621",
+        "verdict": "inconsistent",
+        "providerQualified": false
+      },
+      {
+        "case": "sequence_marker_only",
+        "timelineSha256": "5e542ecdcdb282d4fa19647a0d69d34f3822194f35b297033efe0d185251832f",
+        "captureSha256": "fe036705d474484a4f6266dd1c9a9abe769e99111d55a2976d0c1c3b4369908a",
+        "verdict": "incomplete",
+        "providerQualified": false
+      },
+      {
+        "case": "zero_running",
+        "timelineSha256": "5f84eae50ef753e5ef66061111e5938290d903dfa6e563845260e1fd3cd91b9b",
+        "captureSha256": "11b49739f1f90de3ddd1ab97a5e0efe77116685b9896994b4a415c4ca65abe1e",
+        "verdict": "inconsistent",
+        "providerQualified": false
+      },
+      {
+        "case": "zero_off",
+        "timelineSha256": "8690c5c049debfe826971d4cf2b7cceaf11261eb0fb8ae80e36b6e17f4c21862",
+        "captureSha256": "cb2d07d6c7a92f7802d82ff76ba0bab5ccaf05ea5ee6af77bcaacc51eddfbe9b",
+        "verdict": "incomplete",
+        "providerQualified": false
+      },
+      {
+        "case": "rising",
+        "timelineSha256": "7f0c5c8acdfdd2852a14838a2c6475693b52f76cc7b1d5f92f437cdda66a50ef",
+        "captureSha256": "a2de42b19e72f08144505c8014bc4680b499d8c8d9ba4d154f770f011e6e3760",
+        "verdict": "incomplete",
+        "providerQualified": false
+      },
+      {
+        "case": "falling",
+        "timelineSha256": "582c03802a6362b6c03ec686a3e0a22ba3faaad9361825fabc72fb05531c7624",
+        "captureSha256": "4335120a8f177f9818835331cd311d30beee5d61ce3a69bb4946f7ad318844a7",
+        "verdict": "incomplete",
+        "providerQualified": false
+      },
+      {
+        "case": "stale_gap",
+        "timelineSha256": "2e2d940850fc9d4078849c2649ead7280ba6d80ebe044c0a7bf8a1c7505ea190",
+        "captureSha256": "5b7be521d4178fb5ba9faaa84a1ce654df99ea4ee8c0b0c9a658b05109ff248f",
+        "verdict": "incomplete",
+        "providerQualified": false
+      },
+      {
+        "case": "post_identity_changed",
+        "timelineSha256": "420086aca5eaf3c4c736e4de2de34c61fe281f13e35651d34cf051f32a87a2dd",
+        "captureSha256": "e1fb4cc6fb1658a13385ea1b5452a05467a53d8cc4c987298070066dc3cc24c5",
+        "verdict": "inconsistent",
+        "providerQualified": false
+      },
+      {
+        "case": "post_context_seh",
+        "timelineSha256": "f3bcf08dbfa4b27c7381b1b46a50f5facf471e0b2a2da5b042c5df234996a4ef",
+        "captureSha256": "ec0ef7cebcea21d6a66191a9e6b45b8ba43a5f9dc6b6025eeb0d6d8c66301ede",
+        "verdict": "inconsistent",
+        "providerQualified": false
+      },
+      {
+        "case": "target_seh",
+        "timelineSha256": "084c89f4e8236b7223972bfdae10cbf2ef90c239358b4190adba8a9827fb75ee",
+        "captureSha256": "2fde07ad556feb67750bc1768d62f83a6a7e57c43886d3aaa6b15a439b5b8ad6",
+        "verdict": "inconsistent",
+        "providerQualified": false
+      },
+      {
+        "case": "null_pointer",
+        "timelineSha256": "9b71853f1bdc51243802f3cc29fe745a4dd2873d7a21dfdb7b4f35d22d40e46e",
+        "captureSha256": "bb42f7fb05b205317c10bedfa95aa25bab46a2eee7820790ad702968def2905e",
+        "verdict": "inconsistent",
+        "providerQualified": false
+      },
+      {
+        "case": "nan",
+        "timelineSha256": "6286ff6ac7900934226bac3b85e4b9810d93ef62da2c4e6c2ad2f39750d3075b",
+        "captureSha256": "5a84983da86e9b34930723a207f30ba70c3e22bcc6e21e830410c1a8cf79b0c6",
+        "verdict": "inconsistent",
+        "providerQualified": false
+      },
+      {
+        "case": "out_of_range",
+        "timelineSha256": "e38d1ddc2b29826f3930a7c9e1943d4c0e20ca0c8fbe100584fb165e4db04426",
+        "captureSha256": "6f933f8ea602fe33880ce44fa6c717aa2d532f806a0670aa3c8c6e68f6efe077",
+        "verdict": "inconsistent",
+        "providerQualified": false
+      }
+    ],
+    "controls": [
+      {
+        "name": "actual dynamic binary timeline meets review heuristics without provider qualification",
+        "passed": true
+      },
+      {
+        "name": "constant output under actual independent speed activity is rejected",
+        "passed": true
+      },
+      {
+        "name": "actual opposite ratio trends are rejected independently of requested labels",
+        "passed": true
+      },
+      {
+        "name": "all requested labels with stationary unchanging observations remain incomplete",
+        "passed": true
+      },
+      {
+        "name": "running zero remains unexplained while engine-off zero remains recorded",
+        "passed": true
+      },
+      {
+        "name": "genuine rising and falling sequences alone do not satisfy multistate acceptance",
+        "passed": true
+      },
+      {
+        "name": "actual terminal stale/context/native failures prevent acceptance",
+        "passed": true
+      },
+      {
+        "name": "every actual timeline remains explicitly unqualified and uncalibrated",
+        "passed": true
+      },
+      {
+        "name": "failed writer cannot inherit otherwise valid observations",
+        "passed": true
+      },
+      {
+        "name": "missing completed-producer status remains incomplete",
+        "passed": true
+      },
+      {
+        "name": "mismatched terminal outcome and written record counts are rejected",
+        "passed": true
+      },
+      {
+        "name": "negative player identity is invalid even with matching driver and model",
+        "passed": true
+      },
+      {
+        "name": "unobserved pre-context cannot qualify a bracket",
+        "passed": true
+      },
+      {
+        "name": "290ms start gap remains stale despite a valid 50ms after-to-next gap",
+        "passed": true
+      },
+      {
+        "name": "missing declared or immediate-return triplet member stays incomplete",
+        "passed": true
+      },
+      {
+        "name": "early raw return disagreement cannot be hidden by a valid final observation",
+        "passed": true
+      },
+      {
+        "name": "phase advancement cannot skip requested states",
+        "passed": true
+      },
+      {
+        "name": "invalid numeric phase is not rescued by a plausible text label",
+        "passed": true
+      },
+      {
+        "name": "a different target native cannot inherit this candidate interpretation",
+        "passed": true
+      },
+      {
+        "name": "unarmed or differently armed identity remains incomplete",
+        "passed": true
+      },
+      {
+        "name": "missing observed row cannot inherit a complete terminal count",
+        "passed": true
+      },
+      {
+        "name": "duplicate observation indices are rejected",
+        "passed": true
+      },
+      {
+        "name": "probe-reported stale observation cannot be silently reused",
+        "passed": true
+      },
+      {
+        "name": "unfresh post-context and impossible acquisition ordering are rejected",
+        "passed": true
+      },
+      {
+        "name": "mismatched speed bits are not accepted as independent motion evidence",
+        "passed": true
+      },
+      {
+        "name": "raw ratio bit/value disagreement is rejected",
+        "passed": true
+      },
+      {
+        "name": "declared intent and phase markers without target outcomes are insufficient",
+        "passed": true
+      },
+      {
+        "name": "early raw returns without completed contexts remain incomplete",
+        "passed": true
+      },
+      {
+        "name": "unpublished raw result remains visible but cannot qualify a failed writer",
+        "passed": true
+      },
+      {
+        "name": "missing exact clock cannot produce a qualified timeline",
+        "passed": true
+      }
+    ],
+    "providerQualified": false
+  },
+  "cases": [
+    {
+      "case": "sequence_dynamic",
+      "targetCalls": 234,
+      "terminalReason": "operator-stop",
+      "rawCopiesVerified": 234,
+      "phaseRecords": 8,
+      "observations": 234,
+      "hudActiveTimerStrings": 26
+    },
+    {
+      "case": "sequence_constant",
+      "targetCalls": 233,
+      "terminalReason": "operator-stop",
+      "rawCopiesVerified": 233,
+      "phaseRecords": 8,
+      "observations": 233,
+      "hudActiveTimerStrings": 29
+    },
+    {
+      "case": "sequence_wrong_trend",
+      "targetCalls": 233,
+      "terminalReason": "operator-stop",
+      "rawCopiesVerified": 233,
+      "phaseRecords": 8,
+      "observations": 233,
+      "hudActiveTimerStrings": 27
+    },
+    {
+      "case": "sequence_marker_only",
+      "targetCalls": 233,
+      "terminalReason": "operator-stop",
+      "rawCopiesVerified": 233,
+      "phaseRecords": 8,
+      "observations": 233,
+      "hudActiveTimerStrings": 23
+    },
+    {
+      "case": "finite",
+      "targetCalls": 25,
+      "terminalReason": "operator-stop",
+      "rawCopiesVerified": 25,
+      "phaseRecords": 2,
+      "observations": 25,
+      "hudActiveTimerStrings": 2
+    },
+    {
+      "case": "uk_oem102",
+      "targetCalls": 25,
+      "terminalReason": "operator-stop",
+      "rawCopiesVerified": 25,
+      "phaseRecords": 2,
+      "observations": 25,
+      "hudActiveTimerStrings": 2
+    },
+    {
+      "case": "release_then_rising",
+      "targetCalls": 25,
+      "terminalReason": "operator-stop",
+      "rawCopiesVerified": 25,
+      "phaseRecords": 2,
+      "observations": 25,
+      "hudActiveTimerStrings": 2
+    },
+    {
+      "case": "rising",
+      "targetCalls": 49,
+      "terminalReason": "operator-stop",
+      "rawCopiesVerified": 49,
+      "phaseRecords": 2,
+      "observations": 49,
+      "hudActiveTimerStrings": 3
+    },
+    {
+      "case": "falling",
+      "targetCalls": 49,
+      "terminalReason": "operator-stop",
+      "rawCopiesVerified": 49,
+      "phaseRecords": 2,
+      "observations": 49,
+      "hudActiveTimerStrings": 3
+    },
+    {
+      "case": "zero_off",
+      "targetCalls": 25,
+      "terminalReason": "operator-stop",
+      "rawCopiesVerified": 25,
+      "phaseRecords": 2,
+      "observations": 25,
+      "hudActiveTimerStrings": 2
+    },
+    {
+      "case": "zero_running",
+      "targetCalls": 25,
+      "terminalReason": "operator-stop",
+      "rawCopiesVerified": 25,
+      "phaseRecords": 2,
+      "observations": 25,
+      "hudActiveTimerStrings": 2
+    },
+    {
+      "case": "nan",
+      "targetCalls": 3,
+      "terminalReason": "target-nonfinite",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 3,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "infinity",
+      "targetCalls": 3,
+      "terminalReason": "target-nonfinite",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 3,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "out_of_range",
+      "targetCalls": 3,
+      "terminalReason": "target-out-of-range",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 3,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "negative_ratio",
+      "targetCalls": 3,
+      "terminalReason": "target-out-of-range",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 3,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "null_pointer",
+      "targetCalls": 3,
+      "terminalReason": "target-null",
+      "rawCopiesVerified": 2,
+      "phaseRecords": 1,
+      "observations": 3,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "target_seh",
+      "targetCalls": 3,
+      "terminalReason": "target-seh",
+      "rawCopiesVerified": 2,
+      "phaseRecords": 1,
+      "observations": 3,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "delayed_target",
+      "targetCalls": 3,
+      "terminalReason": "observation-discontinuity",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 3,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "context_seh",
+      "targetCalls": 3,
+      "terminalReason": "precondition-seh",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 4,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "post_context_seh",
+      "targetCalls": 3,
+      "terminalReason": "precondition-seh",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 3,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "post_context_delay",
+      "targetCalls": 3,
+      "terminalReason": "observation-discontinuity",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 3,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "hud_seh_before",
+      "targetCalls": 0,
+      "terminalReason": "hud-seh",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "hud_seh_active",
+      "targetCalls": 3,
+      "terminalReason": "hud-seh",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 3,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "stale_gap",
+      "targetCalls": 3,
+      "terminalReason": "observation-discontinuity",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 4,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "slow_context",
+      "targetCalls": 3,
+      "terminalReason": "observation-discontinuity",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 4,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "identity_changed",
+      "targetCalls": 5,
+      "terminalReason": "context-changed",
+      "rawCopiesVerified": 5,
+      "phaseRecords": 1,
+      "observations": 6,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "post_identity_changed",
+      "targetCalls": 3,
+      "terminalReason": "context-changed",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 3,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "player_changed",
+      "targetCalls": 6,
+      "terminalReason": "context-changed",
+      "rawCopiesVerified": 6,
+      "phaseRecords": 1,
+      "observations": 7,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "driver_changed",
+      "targetCalls": 5,
+      "terminalReason": "context-invalid",
+      "rawCopiesVerified": 5,
+      "phaseRecords": 1,
+      "observations": 6,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "offline_lost",
+      "targetCalls": 5,
+      "terminalReason": "online-context",
+      "rawCopiesVerified": 5,
+      "phaseRecords": 1,
+      "observations": 6,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "focus_loss",
+      "targetCalls": 6,
+      "terminalReason": "foreground-lost",
+      "rawCopiesVerified": 6,
+      "phaseRecords": 1,
+      "observations": 6,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "pause",
+      "targetCalls": 5,
+      "terminalReason": "context-invalid",
+      "rawCopiesVerified": 5,
+      "phaseRecords": 1,
+      "observations": 6,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "negative_speed",
+      "targetCalls": 5,
+      "terminalReason": "speed-invalid",
+      "rawCopiesVerified": 5,
+      "phaseRecords": 1,
+      "observations": 6,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "nonfinite_speed",
+      "targetCalls": 5,
+      "terminalReason": "speed-nonfinite",
+      "rawCopiesVerified": 5,
+      "phaseRecords": 1,
+      "observations": 6,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "phase_overflow",
+      "targetCalls": 3,
+      "terminalReason": "operator-event-overflow",
+      "rawCopiesVerified": 3,
+      "phaseRecords": 1,
+      "observations": 3,
+      "hudActiveTimerStrings": 1
+    },
+    {
+      "case": "eligible_no_input",
+      "targetCalls": 0,
+      "terminalReason": "waiting-deadline",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "held_startup",
+      "targetCalls": 0,
+      "terminalReason": "waiting-deadline",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "wrong_foreground",
+      "targetCalls": 0,
+      "terminalReason": "waiting-deadline",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "missing_ctrl",
+      "targetCalls": 0,
+      "terminalReason": "waiting-deadline",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "missing_shift",
+      "targetCalls": 0,
+      "terminalReason": "waiting-deadline",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "extra_alt",
+      "targetCalls": 0,
+      "terminalReason": "waiting-deadline",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "wrong_key",
+      "targetCalls": 0,
+      "terminalReason": "waiting-deadline",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "input_before_ready",
+      "targetCalls": 0,
+      "terminalReason": "waiting-deadline",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "wrong_model",
+      "targetCalls": 0,
+      "terminalReason": "waiting-deadline",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "passenger",
+      "targetCalls": 0,
+      "terminalReason": "waiting-deadline",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "online",
+      "targetCalls": 0,
+      "terminalReason": "online-context",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "no_vehicle",
+      "targetCalls": 0,
+      "terminalReason": "waiting-deadline",
+      "rawCopiesVerified": 0,
+      "phaseRecords": 0,
+      "observations": 0,
+      "hudActiveTimerStrings": 0
+    },
+    {
+      "case": "max_duration",
+      "targetCalls": 1928,
+      "terminalReason": "active-deadline",
+      "rawCopiesVerified": 1928,
+      "phaseRecords": 1,
+      "observations": 1928,
+      "hudActiveTimerStrings": 120
+    }
+  ],
+  "boundaries": {
+    "actualShvExecuted": false,
+    "gameStarted": false,
+    "gameFilesWritten": false,
+    "endpointOpened": false,
+    "globalKeyboardInputInjected": false,
+    "audioRendered": false,
+    "providerQualified": false,
+    "measuredRPM": false,
+    "productionPlaybackReady": false,
+    "productionRecordingReady": false,
+    "primaryAnalysisCriteriaChanged": false,
+    "nativeHashSetChanged": false,
+    "gearGetterAvailable": false,
+    "throttleGetterAvailable": false,
+    "operatorLabelsAreAchievedStateProof": false,
+    "previousEvidenceOverwritten": false,
+    "limitations": "The fake supplies all native results. This validates the actual compiled ASI state machine, raw-copy handoff, boundaries, emitted HUD strings and unchanged analyzer controls. It does not validate native handler resolution, live gameplay phases, RPM conversion, playback, loopback recording or perception. A watchdog cannot preempt a blocked native and hot-unload remains unsupported."
+  },
+  "preservedSetupAttempts": {
+    "earlierFiniteSetupAttempts": 2,
+    "earlierFiniteCompletedCases": 0,
+    "earlierPartialMatrixCompletedCases": 8,
+    "earlierPartialMatrixFailedCase": "falling",
+    "finalSuccessfulMatrixCases": 48,
+    "failedCasesStoppedBeforeProductionAsiLoad": true,
+    "earlierFailuresAreNotProductionCallbackFailures": true,
+    "earlierAttemptsPreserved": true,
+    "earlierPartialAttemptsReportedAsFullPasses": false,
+    "note": "Two initial finite setup attempts failed the real foreground guard. A later partial matrix passed eight cases and failed foreground setup for falling. The unchanged final helpers then completed all 48 with the approved continuous normal-window activation watcher. These earlier attempts are distinct from the successful receipt and its assertions."
+  }
+}

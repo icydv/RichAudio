@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "dateUtc": "2026-10-31",
+  "baseCommit": "60ffda416bf9bbcc4882d953e6d4548b1c4bd8ca",
+  "scope": "Offline framework/native compatibility investigation; no new runtime observation or audio test",
+  "decision": "BLOCKED for playable integration; no qualified provider",
+  "hypotheses": {
+    "rphRatioOutOfContractEstablishedByPriorCapture": true,
+    "causeOf50Established": false,
+    "rphLookupFailureEstablishedByPriorCapture": true,
+    "nativeAbsenceOnExactBuildProven": false,
+    "enhancedIdentifierPublished": true,
+    "dynamicSyntaxDocumented": true,
+    "dynamicResolverDifferenceOrRepairEstablished": false,
+    "currentMaintainerAcknowledgedSpecificDefectFound": false,
+    "sdkRefreshAloneProvenFix": false
+  },
+  "sdkComparison": {
+    "officialPublisherPost": "https://www.lcpdfr.com/forums/topic/156960-lspdfr-api-documentation-and-rph-sdk/",
+    "archiveSha256": "043b37440a1d8506a3426465a53851b8e43f8b098d6baf26a95c338662b1f719",
+    "pinnedVersion": "1.124.1393.17586",
+    "comparisonVersion": "1.131.1424.17745",
+    "comparisonSdkSha256": "1f8a8a88a511d8c6d4aacd196e72b5192970b730f4070606d8bfac63ed722d45",
+    "comparisonXmlSha256": "adcb826402c3f871a7d6f4ffcf320a446b798ac1890f16ad2f4c77e076aabf27",
+    "publicInvocationContractIdentical": true,
+    "nativeCallFlagsTypeOrArgumentFound": false,
+    "dynamicCompilationDoesNotEstablishResolution": true,
+    "sdkRepinned": false
+  },
+  "enhancedNative": {
+    "source": "https://raw.githubusercontent.com/alloc8or/gta5-nativedb-data/424fb51b089049a9fbcebcc641500b1d44d255b4/natives_gen9.json",
+    "identifier": "0xF9DDA40BC293A61E",
+    "name": "_GET_VEHICLE_CURRENT_REV_RATIO",
+    "signature": "float(Vehicle)",
+    "introductionMetadata": "811",
+    "lastExplicitGameUpdate": "3889.0/1158.13",
+    "exact1158_16PresenceOrRangeValidated": false
+  },
+  "alternatives": {
+    "primary": "RPH maintainer-supported correction or documented dispatch clarification",
+    "independentFallback": "Qualify the already installed official Script Hook V standard native interface with a minimal ASI",
+    "secondaryFallback": "SHVDNE public normalized CurrentRPM, subject to framework offset validity and exact-build qualification",
+    "shv1158_13LabelAloneProvesIncompatibilityWith1158_16File": false,
+    "shvNativeSignalQualified": false,
+    "shvdneCurrentRpmIsCrankshaftRpm": false,
+    "shvdneMissingResolutionZeroAmbiguous": true,
+    "originalShvdnEnhancedSupportEstablished": false
+  },
+  "readiness": {
+    "newLiveCandidateReady": false,
+    "newProviderTestProposedOnlyConditionally": true,
+    "shvOfficialSdkAcquisition": "Official SDK link returned HTML rather than a ZIP; no authenticated SDK package obtained",
+    "nativeCppCompilerLocated": false,
+    "shvRuntimeInstalledOrReplaced": false,
+    "newProbeBuilt": false,
+    "providerAdapterEnabled": false,
+    "upstreamReportDraftPrepared": true,
+    "upstreamReportSubmitted": false
+  },
+  "validation": {
+    "authenticSdkContractBuilds": 2,
+    "floatVehicleMethodsPerLibrary": 3,
+    "pluginOrLifecycleEntries": 0,
+    "compiledLibrariesExecuted": false,
+    "powerShellSourcesParsed": 2,
+    "pcmTestsRepeated": 0,
+    "gtaLaunches": 0,
+    "newNativeInvocations": 0,
+    "gameInstallationWrites": 0,
+    "endpointOpened": false
+  },
+  "installationReadback": {
+    "recordedBaselineFiles": 11,
+    "allBaselineFilesUnchanged": true,
+    "settingsBytesUnchanged": true,
+    "mode": "stock-fallback",
+    "temporaryProbeDlls": 0,
+    "gameOrRichAudioProcesses": 0
+  },
+  "privacy": "No SDK/runtime binaries or documentation files, private paths, signed URLs, raw logs, handles, memory layouts or game assets published"
+}

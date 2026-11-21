@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-10",
+  "kind": "diagnostic-candidate-preparation-negative-guards-and-absolute-input-positive",
+  "passed": true,
+  "cases": 5,
+  "negativeCases": 4,
+  "negativeControls": [
+    {
+      "name": "existing-candidate-no-overwrite",
+      "passed": true,
+      "expectedReason": "Candidate already exists; no overwrite.",
+      "observedReason": "Candidate already exists; no overwrite."
+    },
+    {
+      "name": "changed-self-asserted-build-receipt",
+      "passed": true,
+      "expectedReason": "Unreviewed diagnostic build receipt.",
+      "observedReason": "Unreviewed diagnostic build receipt."
+    },
+    {
+      "name": "changed-self-asserted-validation-receipt",
+      "passed": true,
+      "expectedReason": "Unreviewed compiled-profile validation receipt.",
+      "observedReason": "Unreviewed compiled-profile validation receipt."
+    },
+    {
+      "name": "old09-output-directory",
+      "passed": true,
+      "expectedReason": "A new direct10 candidate directory is required.",
+      "observedReason": "A new direct10 candidate directory is required."
+    }
+  ],
+  "positiveAbsoluteReceiptPathsAccepted": true,
+  "positivePayloadSha256": "cb2555ba00169af86d2728ba545c808a825df0ab04ba08026f1268e02d3caf3a",
+  "manifestComparison": [
+    {
+      "name": "installation-manifest.json",
+      "canonicalSha256": "d57027bf0a6cb554b94674a9f5101f9033522ff65ed0a182689413d314bf9839",
+      "absolutePathCopySha256": "060b1469aa8943699ad6be1beec12ba5552dad44e43e15063931190510b9818c",
+      "equalAfterOnlyCandidateSourcePathNormalization": true
+    },
+    {
+      "name": "rollback-manifest.json",
+      "canonicalSha256": "7405c888caa84d062ccdbddf784f4fd4c1ff79cc16cbec7108b8843b1bf3d802",
+      "absolutePathCopySha256": "e473c96614e9cf8c9d637cbc9e19e018e08ba0dc54847e00b889226c3cbeb152",
+      "equalAfterOnlyCandidateSourcePathNormalization": true
+    },
+    {
+      "name": "preflight.json",
+      "canonicalSha256": "ccf3031515e945f2b521d1d7105022dcd9aa7c87f52b55bffe9a4f6984096ce5",
+      "absolutePathCopySha256": "ccf3031515e945f2b521d1d7105022dcd9aa7c87f52b55bffe9a4f6984096ce5",
+      "equalAfterOnlyCandidateSourcePathNormalization": true
+    }
+  ],
+  "preparer": {
+    "name": "tools/Prepare-RphRuntimeProvenance.ps1",
+    "sha256": "83ff24fded554d0b1c8615a46100a66621345c702f630bfb41d5deb6a3ad9532"
+  },
+  "validationReceiptSha256": "2ecd4344613e12e8d4114ae314431086faffb42710234a14e481f17db33de950",
+  "guardRunnerSha256": "860f56c35a1f8c6bd3b26e05f9850ba7df4884e6e390e28105c0cd32d904e897",
+  "buildReceiptSha256": "0b8f884941ef4b9efa84ad2d19a19aeaf863702f3994142a100bd9705c363ea3",
+  "compiledProfileValidationReceiptSha256": "66381837ed41890aef9a645c25961b4820f277e1e48efc2951528e3d195ab8a7",
+  "negativeCopiesOfActualReceiptsOnly": true,
+  "changedReceiptClaimsNotPromoted": true,
+  "noPassingReceiptFabrication": true,
+  "canonicalCandidateUnchanged": true,
+  "prior09CandidateUnchanged": true,
+  "protectedAndSettingsUnchanged": true,
+  "snapshotsVerified": 25,
+  "newNegativeOutputDirectoriesCreated": 0,
+  "initialFinding": {
+    "reason": "Absolute receipt inputs were rejected because Join-Path incorrectly prefixed them with the repository path.",
+    "effect": "Fail-closed usability defect; no candidate or game files changed.",
+    "correction": "Normalize absolute paths directly; join only relative input paths. Four negative guards repeated with legitimate absolute receipt arguments, plus one actual positive preparation.",
+    "earlierResultsRetained": true,
+    "canonicalProposalNotOverwritten": true
+  },
+  "gameFilesWritten": false,
+  "gameLaunched": false,
+  "runtimeExecuted": false,
+  "sourceAttached": false,
+  "sourceOpen": false,
+  "sourceBegin": false,
+  "endpointOpened": false,
+  "audioPlayback": false,
+  "liveApprovalGranted": false,
+  "privacy": "No process/session identifiers, absolute paths or private logs published."
+}

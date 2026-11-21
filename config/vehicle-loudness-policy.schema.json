@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:richaudio:vehicle-loudness-policy:1",
+  "title": "Offline foundation for modification-aware vehicle loudness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "enabled", "maximumVehicles", "transitionSeconds", "modificationStaleAfterSeconds", "reference", "minimumEmissionMultipliers", "stockTreatments", "modifiedTreatments", "performanceClassIds", "modelOverrides", "prominence"],
+  "properties": {
+    "schema": { "const": 1 },
+    "enabled": { "type": "boolean", "default": false },
+    "maximumVehicles": { "type": "integer", "minimum": 1, "maximum": 64 },
+    "transitionSeconds": { "type": "number", "minimum": 0.02, "maximum": 2 },
+    "modificationStaleAfterSeconds": { "type": "number", "minimum": 0.05, "maximum": 5 },
+    "reference": {
+      "type": "object", "additionalProperties": false,
+      "required": ["engine", "exhaust", "commonHeadroom"],
+      "properties": { "engine": { "const": 1 }, "exhaust": { "const": 10 }, "commonHeadroom": { "const": 0.25 } }
+    },
+    "minimumEmissionMultipliers": { "$ref": "#/$defs/treatment" },
+    "stockTreatments": {
+      "type": "object", "additionalProperties": false,
+      "required": ["civilian", "performance"],
+      "properties": { "civilian": { "$ref": "#/$defs/treatment" }, "performance": { "$ref": "#/$defs/treatment" } }
+    },
+    "modifiedTreatments": {
+      "type": "object", "additionalProperties": false,
+      "required": ["ems", "exhaust"],
+      "properties": { "ems": { "$ref": "#/$defs/treatment" }, "exhaust": { "$ref": "#/$defs/treatment" } }
+    },
+    "performanceClassIds": { "type": "array", "maxItems": 32, "uniqueItems": true, "items": { "type": "integer", "minimum": 0, "maximum": 31 } },
+    "modelOverrides": {
+      "type": "object", "maxProperties": 2048,
+      "propertyNames": { "pattern": "^0x[0-9a-f]{8}$" },
+      "additionalProperties": {
+        "type": "object", "additionalProperties": false,
+        "required": ["category", "engine", "exhaust"],
+        "properties": { "category": { "enum": ["civilian", "performance"] }, "engine": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }, "exhaust": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 } }
+      }
+    },
+    "prominence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["maximumUnits", "minimumBusGain"],
+      "properties": { "maximumUnits": { "type": "number", "minimum": 0, "maximum": 64 }, "minimumBusGain": { "type": "number", "minimum": 0.1, "maximum": 1 } }
+    }
+  },
+  "$defs": {
+    "treatment": {
+      "type": "object", "additionalProperties": false, "required": ["engine", "exhaust"],
+      "properties": { "engine": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }, "exhaust": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 } }
+    }
+  },
+  "$comment": "Runtime validation also enforces positive floors, the prominence capacity bound, and equality with the retained stock-pressure reference. All non-reference gains are authored and uncalibrated. Enabling this DSP request does not authorise live playback."
+}

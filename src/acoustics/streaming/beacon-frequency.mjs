@@ -1,6 +1,9 @@
 // Original owned-source configuration. Acoustic/path state is independent of it.
 export const DEFAULT_BEACON_FREQUENCY_HZ = 95;
 export const DEFAULT_BEACON_LEVEL = 0.22;
+// Explicit finite-emitter calibration for the original 600 Hz / .44 beacon.
+// Declared model metres; the game's physical unit scale is still unverified.
+export const ORIGINAL_BEACON_NEAR_FIELD_RADIUS = 10;
 export function validateBeaconLevel(level) {
   if (!Number.isFinite(level) || level < 0 || level > 0.5)
     throw Error("Beacon level must be finite, 0..0.5");

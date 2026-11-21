@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "inspectedUtc": "2026-10-31T21:36:26.3592680Z",
+  "purpose": "Read-only on-disk API and implementation-availability inspection; no live telemetry measurement",
+  "sdk": {
+    "role": "authentic-pinned-compile-time-sdk",
+    "bytes": 219648,
+    "sha256": "5d439745604a5fedbf8fa401520d4f296c1b6800d77e2923ba3bf9772182c7e0",
+    "fileVersion": "1.124.1393.17586",
+    "productVersion": "1.124.1393.17586"
+  },
+  "sdkAssemblyIdentity": "RagePluginHook, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+  "sdkVehicleMembers": [
+    {
+      "property": "System.Single Rage.Vehicle::EngineRevolutionsRatio()",
+      "getter": "System.Single Rage.Vehicle::get_EngineRevolutionsRatio()",
+      "returnType": "System.Single",
+      "visibility": "public",
+      "rva": 0,
+      "codeSize": 0,
+      "instructionCount": 0,
+      "implementationAvailable": false
+    },
+    {
+      "property": "System.Boolean Rage.Vehicle::IsEngineOn()",
+      "getter": "System.Boolean Rage.Vehicle::get_IsEngineOn()",
+      "returnType": "System.Boolean",
+      "visibility": "public",
+      "rva": 0,
+      "codeSize": 0,
+      "instructionCount": 0,
+      "implementationAvailable": false
+    },
+    {
+      "property": "System.Boolean Rage.Vehicle::IsEngineStarting()",
+      "getter": "System.Boolean Rage.Vehicle::get_IsEngineStarting()",
+      "returnType": "System.Boolean",
+      "visibility": "public",
+      "rva": 0,
+      "codeSize": 0,
+      "instructionCount": 0,
+      "implementationAvailable": false
+    },
+    {
+      "property": "System.Byte Rage.Vehicle::CurrentGear()",
+      "getter": "System.Byte Rage.Vehicle::get_CurrentGear()",
+      "returnType": "System.Byte",
+      "visibility": "public",
+      "rva": 0,
+      "codeSize": 0,
+      "instructionCount": 0,
+      "implementationAvailable": false
+    },
+    {
+      "property": "System.Byte Rage.Vehicle::NumberOfGears()",
+      "getter": "System.Byte Rage.Vehicle::get_NumberOfGears()",
+      "returnType": "System.Byte",
+      "visibility": "public",
+      "rva": 0,
+      "codeSize": 0,
+      "instructionCount": 0,
+      "implementationAvailable": false
+    },
+    {
+      "property": "System.Single Rage.Vehicle::AccelerationScale()",
+      "getter": "System.Single Rage.Vehicle::get_AccelerationScale()",
+      "returnType": "System.Single",
+      "visibility": "public",
+      "rva": 0,
+      "codeSize": 0,
+      "instructionCount": 0,
+      "implementationAvailable": false
+    },
+    {
+      "property": "System.Single Rage.Vehicle::EngineHealth()",
+      "getter": "System.Single Rage.Vehicle::get_EngineHealth()",
+      "returnType": "System.Single",
+      "visibility": "public",
+      "rva": 0,
+      "codeSize": 0,
+      "instructionCount": 0,
+      "implementationAvailable": false
+    }
+  ],
+  "sdkConclusion": "The pinned SDK declares the getter but has no getter IL (RVA zero). It cannot establish the runtime implementation, return units on Enhanced, memory layout or cause of a value of 50.",
+  "runtime": {
+    "role": "installed-rph-runtime",
+    "bytes": 12237182,
+    "sha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac",
+    "fileVersion": "1.132.1428.17748",
+    "productVersion": "1.132.1428.17748"
+  },
+  "metadataReader": {
+    "role": "installed-metadata-reader",
+    "bytes": 280576,
+    "sha256": "0f6465ce57a0cbabc37013c8e3c9f110672de1c127b6192177d59eb1c7809772",
+    "fileVersion": "0.9.6.0",
+    "productVersion": "0.9.6.0"
+  },
+  "runtimeReflection": {
+    "status": "unsupported-runtime-metadata",
+    "exceptionType": "System.BadImageFormatException",
+    "error": "Illegal tables in compressed metadata stream.",
+    "implementationAvailable": false
+  },
+  "runtimeCecil": {
+    "status": "unusable-zero-type-result",
+    "reportedTypeCount": 0,
+    "implementationAvailable": false
+  },
+  "plugin": {
+    "role": "inspected-existing-plugin-not-deployed-by-this-tool",
+    "bytes": 222208,
+    "sha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657",
+    "fileVersion": "0.0.0.0",
+    "productVersion": "0.0.0.0",
+    "identity": "RichAudio.Beacon.Rph, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "referencesRph": [
+      "RagePluginHook, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+    ],
+    "ratioGetterCalls": [
+      {
+        "caller": "System.Void RichAudio.Beacon.Rph.PlayableEntry::Capture(RichAudio.Beacon.Windows.GameplayRuntime)",
+        "instruction": "IL_049d: callvirt System.Single Rage.Vehicle::get_EngineRevolutionsRatio()",
+        "nextInstruction": "IL_04a2: conv.r8"
+      }
+    ]
+  },
+  "actualGetterImplementationEstablished": false,
+  "causeOf50": "Unestablished",
+  "outdatedOffsetProven": false,
+  "reliableAlternativeEstablished": false,
+  "measurementFeasibility": {
+    "existingRphGetterCanBeCompiled": true,
+    "proposedMeasure": "Raw EngineRevolutionsRatio accompanied by IsEngineOn, CurrentGear, identity and monotonic timing; none of the additional getters is treated as independently reliable RPM",
+    "purpose": "Characterise existing supported public getter across labelled real engine states; does not manufacture a replacement provider",
+    "requiresSeparateLiveAuthorisation": true,
+    "noMemoryAccessOrGuessedNativeHashes": true
+  },
+  "sdkOrRuntimeCodeExecuted": false,
+  "gameStarted": false,
+  "gameFilesWritten": false,
+  "privacy": "No absolute paths, raw RPH logs, game coordinates, process identifiers, runtime implementation dumps or source audio included"
+}

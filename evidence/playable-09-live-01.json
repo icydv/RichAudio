@@ -1,0 +1,210 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-09",
+  "attempt": "live-01",
+  "dateUtc": "2026-11-01",
+  "candidateCommit": "56686659fb022082727746c1aea977ca810cff32",
+  "origin": "Actual separately authorised GTA Enhanced/RPH/SHV launch; not fixture data",
+  "decision": "BLOCKED-AT-ACTUAL-RPH-RUNTIME-PROVENANCE-GATE",
+  "artifacts": [
+    {
+      "name": "RichAudio.OperatingState.ShvHandoff.asi",
+      "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+      "bytes": 129024
+    },
+    {
+      "name": "RichAudio.dll",
+      "sha256": "c97acbcb6af255a0497c28f8349d8be3447f53c6dc5e31a0d567a7ebbc76743d",
+      "bytes": 328192
+    }
+  ],
+  "authorisation": {
+    "explicitSeparateApprovalReceived": true,
+    "deployments": 1,
+    "routeInvocations": 1,
+    "automaticRetry": false,
+    "operatorBegins": 0,
+    "audioOrEndpointPermission": false,
+    "receiptSha256": "0d5520d2725fca34561edf8c220a0a063f215e7c5d8db2656989a5afad856183"
+  },
+  "observed": {
+    "gtaBuild": "1.0.1158.16",
+    "rphInstallationVersion": "1.132.1428.17748",
+    "shvInstallationVersion": "3889.0/1158.13",
+    "launchRoute": "Existing reviewed RPH command launcher",
+    "installedArtifactsVerifiedBeforeLaunch": true,
+    "temporaryPluginLoaded": true,
+    "strictProcessBoundLeaseReachedRuntimeGate": true,
+    "asiRegistrations": 1,
+    "asiMainLaunches": 1,
+    "asiUnregistrations": 1,
+    "failure": "actual-rph-runtime-bytes-or-version-unreviewed",
+    "failureLogTime": "2026-11-01 05:00:27.820 UTC",
+    "acceptedObservations": 0,
+    "gameplayFrames": 0,
+    "readyObserved": false,
+    "operatorReported": "Not ready / error shown",
+    "operatorArmRequestedByAgent": false,
+    "operatorArmConfirmedByUser": false,
+    "sessionJournalDirectoryCreated": false,
+    "sourceRecordFilesCreated": false,
+    "rawRowsObserved": 0,
+    "sourceModuleAttachReached": false,
+    "sourceOpenReached": false,
+    "compositionCreated": false,
+    "clockCalibrationReached": false,
+    "vehicleBindingReached": false,
+    "sourceBeginReached": false,
+    "targetNativeOutcome": "NOT-TESTED-IN-THIS-ATTEMPT",
+    "targetAttemptCounterMeasured": false,
+    "actualTargetAttemptCounter": null,
+    "targetAcquisitionNotEnteredByReviewedControlFlow": true
+  },
+  "runtimeGate": {
+    "code": "SHA256(typeof(Rage.Game).Assembly.Location) == expectedRphSha256 AND FileVersion == expectedRphVersion",
+    "expectedSha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac",
+    "expectedVersion": "1.132.1428.17748",
+    "expectedDigestAlsoPinsInstalledLauncher": true,
+    "combinedConditionPassed": false,
+    "actualAssemblyPathCaptured": false,
+    "actualAssemblyHashCaptured": false,
+    "actualAssemblyVersionCaptured": false,
+    "exactDifferingOperandKnown": false,
+    "explanation": "The computed actual API assembly hash and/or file version did not exactly match the configured expectation. The gate logged only its combined rejection before journal creation; it did not retain the actual operands.",
+    "packedLauncherVersusCachedApiAssembly": "PLAUSIBLE-HYPOTHESIS-NOT-PROVEN",
+    "frameworkDefectProven": false,
+    "targetNativeResolutionFailureProven": false,
+    "playable08SignalInvalidated": false
+  },
+  "earlyTerminalFlags": {
+    "producerCompletedReported": false,
+    "nativeFifoDrainedReported": false,
+    "writerCompletionObservedReported": false,
+    "lastObservedQueuedReported": 0,
+    "actualProducerCompletionQueried": false,
+    "actualFifoQueried": false,
+    "writerCreated": false,
+    "interpretation": "These are initialized local values on the pre-Attach/Open/journal rejection path, not measured producer, FIFO or writer failures."
+  },
+  "safety": {
+    "brokenRphRatioFallbackUsed": false,
+    "playbackHostStarted": false,
+    "richAudioPcmStarted": false,
+    "endpointOrMicrophoneCaptureStarted": false,
+    "menuServicesStarted": false,
+    "recordingStarted": false,
+    "loudnessEnabled": false,
+    "stockFallbackSelected": true,
+    "stockAudioHumanListeningAcceptance": "NOT-ASSESSED",
+    "furtherLaunchOrRetryPerformed": false
+  },
+  "cleanup": {
+    "quitPromptObserved": true,
+    "quitConfirmationInputAttempted": true,
+    "confirmationInputOutcome": "UNOBSERVED-TOOL-REPORTED-FOREGROUND-PROCESS-ID-ERROR",
+    "processExitVerified": true,
+    "forcedTerminationByAgent": false,
+    "rollbackResult": "PASS",
+    "originalPluginRestored": true,
+    "protectedFilesVerified": 11,
+    "settingsVerified": 4,
+    "ownedFilesAndProcessesAbsent": true,
+    "capturesAndLogsRetained": true
+  },
+  "nextBoundary": {
+    "liveHandoff": "BLOCKED",
+    "playback": "BLOCKED",
+    "listening": "BLOCKED",
+    "loudness": "BLOCKED-DISABLED",
+    "recording": "BLOCKED-DISABLED",
+    "nextOfflineWork": "Separate launcher installation identity from actual typed RPH API runtime identity and retain bounded actual provenance witnesses before rejecting. Relate any runtime artifact to reviewed framework provenance; do not trust a first-seen hash or version alone.",
+    "newArtifactAndFreshApprovalRequiredForAnotherLiveTest": true,
+    "noNewCandidateImplementedByThisResult": true
+  },
+  "independentReadOnlyReview": {
+    "gateOrderingAndDiagnosticLimitsReviewed": true,
+    "rollbackAndFinalLogHashesIndependentlyVerified": true,
+    "reviewersPerformedNoGameActions": true
+  },
+  "privateReceipts": [
+    {
+      "name": "authorisation.json",
+      "sha256": "0d5520d2725fca34561edf8c220a0a063f215e7c5d8db2656989a5afad856183"
+    },
+    {
+      "name": "preflight.json",
+      "sha256": "4e5e9bb605b1b19765a9784874872a56b7159cab05801182535d7d8070aeed84"
+    },
+    {
+      "name": "installation-receipt.json",
+      "sha256": "010d11a897f5e95a228bb378cae8fb455a33ae26594c293056700e362f2535d5"
+    },
+    {
+      "name": "one-launch-started.json",
+      "sha256": "6584ba0eeed24a1e6da562fb1cc211a95de9d5a3f5cabb623f24aad31fd8e0cf"
+    },
+    {
+      "name": "launch-receipt.json",
+      "sha256": "0a3b55e87698b5b092935f214ed8c5f0559636c58e212078924584e169700a02"
+    },
+    {
+      "name": "lease-ownership.json",
+      "sha256": "5c86fbb54ae5a9993ba0b5e0e7295ca439601017da8568e3e68be2621b04b2c3"
+    },
+    {
+      "name": "process-bound-lease-installed.json",
+      "sha256": "907b673f834f100ef439ed5d9affaf0f39bfe15777050854b71cc78f78929d0e"
+    },
+    {
+      "name": "observation-result.json",
+      "sha256": "86e202805fd57c7d8925f691502f519967b30f804f6c6e30c8a3675f42319e69"
+    },
+    {
+      "name": "operator-report.json",
+      "sha256": "58a3c757277850013b3ca97ca3882ba57d7a497b44eb96e3e9fb232a568e1c52"
+    },
+    {
+      "name": "normal-exit.json",
+      "sha256": "bfdac237983ba02b0a9e919da260a788bdcbcfe6ef3dba45e5198199f0e0af1d"
+    },
+    {
+      "name": "rollback-receipt.json",
+      "sha256": "eb99dfd4518a7745654cac9f3f14fa032efea14593895ff55ec26c2e609c3251"
+    },
+    {
+      "name": "final-log-digests.json",
+      "sha256": "62e287ec51a1ed03c01295760a366f14e490f21e5653194eb6d93515e25b421b"
+    },
+    {
+      "name": "LiveActions.ps1",
+      "sha256": "4221d04efeb7fd091afdf31467ad7f4d867853e23917576572a3cc923cbe7e63"
+    },
+    {
+      "name": "ObserveReadOnly.ps1",
+      "sha256": "e38499faff127afecfaaa1966797fac3f34a75755ae777103f7a639407513888"
+    }
+  ],
+  "privateFinalLogs": [
+    {
+      "name": "RagePluginHook.log",
+      "bytes": 14989,
+      "sha256": "398812f9b0c7fc30bfb43a9c2a6d74e527d67ed9d2aa066823119502ed83636b"
+    },
+    {
+      "name": "ScriptHookV.log",
+      "bytes": 1195,
+      "sha256": "48097b02527ee065490ef4d0f8ef722bb34afa96df56d0edeaa4589e9f997016"
+    },
+    {
+      "name": "asiloader.log",
+      "bytes": 1661,
+      "sha256": "6d547a1cbd1192f1bf83c6cb2dc000d139c9287725647ddd96a62735a9b6de85"
+    },
+    {
+      "name": "DirectStorageFix.log",
+      "bytes": 17136,
+      "sha256": "07fed52236fc18ccc105669872a99204185e98f84eb3a929a9fed422692a47d2"
+    }
+  ],
+  "privacy": "Only sanitized statuses, counts, exact approved artifacts and receipt/log digests are public. Session IDs, process IDs, paths, opaque addresses, full logs, original assets and credentials remain private."
+}

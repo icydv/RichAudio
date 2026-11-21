@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-15",
+  "kind": "sanitised-journal-profile-correction-and-prepared-retest",
+  "result": "PASS-OFFLINE-PREPARED-NOT-AUTHORISED",
+  "failedStageAAttempt": 1,
+  "failedLiveResult": "evidence/playable-15-stage-a-live-01.json",
+  "productionChange": {
+    "file": "src/acoustics/bridge/Rph/ShvHandoffJournal.Rph.cs",
+    "sha256": "1f0b091794224c15524bfb263be7440bbc6c6edab96f026160709532810d44a3",
+    "description": "Select PLAYABLE-15 evidence parent and summary profile before inherited14 branch",
+    "addedLines": 6,
+    "removedLines": 2,
+    "listenerOrSourceOrTimingChanged": false,
+    "calibrationChanged": false,
+    "hostRecorderRendererChanged": false
+  },
+  "originalSealedPassiveSha256": "3a124f3b0bb15e4790645d8ef1b0fa2268639a64386c6ae95f83009465efefda",
+  "originalSealedArtifactsPreserved": true,
+  "oldExactDllReproducedBeforeWorker": true,
+  "oldExactDllProbeSha256": "f5e18041ed87a078644a94f1a0e7ee09946db77999250ec22a186db8cce36dfe",
+  "focusedProfiles": [
+    15,
+    14,
+    13,
+    12
+  ],
+  "focusedAssertions": 56,
+  "focusedProfileValidationSha256": "0f1bf89c86b869a66151ba5f42981655af78386dceb3d2544b8862fbbecc3429",
+  "correctedExactPassiveProbeSha256": "2337261b93af52c34019a93ebfc107cab9287f04b9bd49a9d9c1f6b0d23fc482",
+  "correctedExactAudibleProbeSha256": "6bedab8dcc8f137d93277502703aa2fa631ca8b7fb164f34f5df886d2acbbe24",
+  "passiveProbeScope": "Actual configuration, journal constructor, event,summary,Complete and external writer join; explicit offline fixture, no source/native/game",
+  "audibleProbeScope": "Actual configuration and journal root IL equality only; no playback/host constructed",
+  "offlineJournalFixtureDistinctFromActualLiveSession": true,
+  "artifacts": [
+    {
+      "file": "passive/RichAudio.dll",
+      "sha256": "9d353872451e17149f10052232af278f5240b996cd0f227445b0cc0c1ab7970c",
+      "bytes": 381952
+    },
+    {
+      "file": "audible/RichAudio.dll",
+      "sha256": "a474df2201b6aa3a370029af479c4f4f62ad6958dfd4f72c7cb8420e2ec7ec5e",
+      "bytes": 387584
+    },
+    {
+      "file": "RichAudio.OperatingState.ShvHandoff.asi",
+      "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+      "bytes": 129024
+    }
+  ],
+  "buildReceiptSha256": "e7b448b35d577544c64cb030562b4ce0db83490340ae9552af73d7fa9f36d535",
+  "validationReceiptSha256": "f0ce719c4ff96b290be4796f62e1b5a290786a37cc2f12efade584ff500bacc1",
+  "candidateReceiptSha256": "a9449e06172e53167a2a3c9bc9da22c2b4aa3b21e29d6e157f1c3857d8e0a5e3",
+  "audioPackageManifestSha256": "abd313481b5048aa06caab5784cdded948754c8bd4b54e015e643d31dcb8c8c7",
+  "audioPackageBindings": 132,
+  "audioPackageChanged": false,
+  "hostRebuilt": false,
+  "recorderRebuilt": false,
+  "sourceBanksRebuilt": false,
+  "modes": [
+    {
+      "mode": "passive",
+      "installationManifestSha256": "b6e9965885a78ddc74ca75e7a3ff069b487c019946cba9fa457e9b8612bf1e7a",
+      "rollbackManifestSha256": "b09084fe892015b1ce549c0540947702b0f7aa607d225b3120aea98efcf12ce3",
+      "leaseTemplateSha256": "c97acdd962a0f3d70b5f32997d72b605dfa6b1eaf831208ae48459895d282708",
+      "preflightSha256": "e95b1c71e8409de85ca5bad0772442a52b6af199ebea3fbc96b83b556b908529",
+      "optionalRecordingLeaseSha256": null
+    },
+    {
+      "mode": "audible",
+      "installationManifestSha256": "e583933fad5ae8d3b14e0282608f131559e30f028b381988fd8c87aa49f253dc",
+      "rollbackManifestSha256": "3945c755ca2fe24708c7e3d8d18230f4de2f58555da93d335b87b10577fca3aa",
+      "leaseTemplateSha256": "ee3c6dbba50bb63386df61ff0b5dd3da4c41f4062d4aeb4b9d53cc3797ef0312",
+      "preflightSha256": "ea4acf815f64872f53bddd297e0aa2f75cc4fb3bb944246e35b84ac5e320fc5e",
+      "optionalRecordingLeaseSha256": "1b041ef77627a8cab1ff90f1c061d10e71113e48de7afbff2741444dd3b7b63b"
+    }
+  ],
+  "independentCandidateReviewSha256": "5889275b1c09bc7eca80663c32942ba9fa31829a685ad240cd09ed2861423e60",
+  "freshRetestCoordinatorReceiptSha256": "6e80b6cd4948b85c786f50ad95c64652f2a8f473f624a0908f39f3bcf8baab53",
+  "freshRetestCoordinatorReviewSha256": "b17e8ebaeb03eda52de8c6a613eb6c6ab623d8a0bbe00d6f196ef41eb3fe0103",
+  "freshRetestProposalSha256": "e6c3024f8777712ae5a7d2eb610573c63691d253506d782282d6d15799c2caff",
+  "freshRetestProposal": "docs/PLAYABLE_15_STAGE_A_RETEST_PROPOSAL.md",
+  "originalLimits": [
+    120,
+    300,
+    120,
+    2400,
+    20
+  ],
+  "newAuthorisationExists": false,
+  "newLive02OperationalDirectoryExists": false,
+  "newCoordinatorModesExecuted": false,
+  "correctedCandidateDeployed": false,
+  "secondGameLaunch": false,
+  "richAudioEndpointOpened": false,
+  "richAudioOutputPlayed": false,
+  "liveAudioRecorded": false,
+  "liveCorrectedStartupProven": false,
+  "liveCameraOrDriverQualificationProven": false,
+  "stageBAuthorised": false,
+  "audioReview": "docs/PLAYABLE_15_AUDIO_REVIEW.md",
+  "recordingPlan": "docs/PLAYABLE_15_RECORDING_PLAN.md",
+  "separateFreshApprovalRequired": true
+}

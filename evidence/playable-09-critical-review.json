@@ -1,0 +1,293 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-09",
+  "kind": "independent-critical-source-review",
+  "sourceReviewVerdict": "PASS-WITH-DECLARED-BOUNDS",
+  "completeCandidateVerdict": "GO-FOR-REQUESTING-ONE-PASSIVE-TELEMETRY-TEST-ONLY",
+  "actualLiveHandoffAccepted": false,
+  "reviewerDisclosure": {
+    "reviewer": "provider_research",
+    "independentlyReviewed": "Root-authored RPH sampler/entry/profile, bootstrap/preparation and separately authored common composition/module/expiry/journal changes.",
+    "nativeSourceAuthoredByReviewer": true,
+    "nativeIndependentReviewBySeparateAgent": "assembly_investigation",
+    "narrowRequestedEntryCleanupAndVisibilityCorrectionByReviewer": true,
+    "narrowOwnCorrectionNotCountedAsIndependentReview": true,
+    "reviewDoesNotClaimGameExecution": true,
+    "narrowOwnCorrectionReturnedForParentAndBuilderReview": true
+  },
+  "sourcePins": [
+    {
+      "path": "src/acoustics/bridge/Rph/ShvPassiveHandoff.Rph.cs",
+      "sha256": "ad31435d5f0082a38ebf4d27a78745ec8221f172d1bf5991c4d4ecf1fc36dbdb"
+    },
+    {
+      "path": "src/acoustics/bridge/Rph/ShvHandoffSampler.Rph.cs",
+      "sha256": "1497282001c477295e72fa2c03d30f01cc04665def2a6c487f5177f92a0336a2"
+    },
+    {
+      "path": "src/acoustics/bridge/Rph/Playable.Rph.cs",
+      "sha256": "28f37dc247eaf19241dbb651ba34d29510e095f9c591016e9a0b20fba930be97"
+    },
+    {
+      "path": "src/acoustics/bridge/Rph/ShvHandoffBootstrap.Rph.cs",
+      "sha256": "b012bbca646da898ebd90c8095a721a15012387d1914b93da5fe702e3b9831f7"
+    },
+    {
+      "path": "src/acoustics/bridge/Rph/ShvHandoffJournal.Rph.cs",
+      "sha256": "f0ce6da8df54b5e9317583492385b9e0380d71da8eaecb96b6015fc768e17da2"
+    },
+    {
+      "path": "src/acoustics/host/Handoff/ShvProducerModule.cs",
+      "sha256": "1209b605130f47ccbdadadfb89efaeed53a72f18d93ee34455b099fece594298"
+    },
+    {
+      "path": "src/acoustics/host/Handoff/TrustedShvComposition.cs",
+      "sha256": "9fe4517599265f180b43390f36fd1f7946c7642673b4ab9cffbe1c541877d464"
+    },
+    {
+      "path": "src/acoustics/host/Handoff/ShvHandoffConsumer.cs",
+      "sha256": "71b7e034c75ea16616692aacfc020bc793af8caf06fc06fae45f6264b6a9ae89"
+    },
+    {
+      "path": "src/acoustics/host/Handoff/ShvGameplayFrameAdapter.cs",
+      "sha256": "783f358ca9f6f1c64f4213cb55233adf10b3b61ffd91db927adb5fb4b5089dbe"
+    },
+    {
+      "path": "tools/Prepare-PassiveShvHandoff.ps1",
+      "sha256": "89df1d7c0e34aafe5634cdf8e477f0f7f1a50016ed2f0d39989a6ce0e95fcd85"
+    },
+    {
+      "path": "docs/PLAYABLE_09.md",
+      "sha256": "bc3a965ed08300acc501dd410efefc4beae38d664996b9dca8e3727eccc509ed"
+    },
+    {
+      "path": "docs/PLAYABLE_09_LIVE_PROPOSAL.md",
+      "sha256": "cb76440135a74595589c76cfdee5552de561afa57b1814648f8e8d055007f119"
+    },
+    {
+      "path": "docs/PLAYABLE_09_COMPOSITION.md",
+      "sha256": "f4769bff38d8726a293fa9cee1b960ae1591cc33b58c9da4a8e39566bd292464"
+    }
+  ],
+  "resolvedFindings": [
+    {
+      "finding": "Consumed known raw row could be lost when a later peer getter failed or expiry raced.",
+      "resolution": "Owned bounded audit queue retains the raw reply before interpretation/after-peer capture; ordinal admission/ack retry is byte-exact and idempotent.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding": "Cleanup camera queries preceded source STOP; drain exceptions could skip later disposal.",
+      "resolution": "No cleanup camera/entity getter; consumer retires first, pure C ABI STOP/drain, nested finally attempts journal completion and each later disposer.",
+      "status": "RESOLVED; forced cleanup is not guaranteed"
+    },
+    {
+      "finding": "RPH post-pose scope omitted living-entity rechecks.",
+      "resolution": "Retained ped/vehicle and current player death checks occur after pose acquisition before issuing the independent witness.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding": "A late filesystem write could persist a summary that looked like bounded completion.",
+      "resolution": "Summary explicitly cannot certify bounded join; actual caller Join and completion deadline observation are separate properties/console evidence.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding": "Producer callback completion could be mistaken for drained or admitted raw evidence.",
+      "resolution": "Separate callback-completed, native-FIFO-drained, last observed queued, pending consumed audit and raw admission failure states; unknown audit outcome remains explicit.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding": "Adjacent self-asserted bridge receipt could stage an arbitrary DLL as reviewed.",
+      "resolution": "The preparer hard-pins the exact final bridge, native build and full32-case pipeline receipt, verifies compiled source pins, and holds/copies exact candidate bytes. Actual copy/negative guards and independent final preflight passed.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding": "Temporary passive entry could start preserved menu-related services.",
+      "resolution": "Temporary profile has no menu/service initialization and no GameplayRuntime instance; normal menu/product source is preserved for rollback.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding": "Callback metadata may not exist yet during early plugin startup.",
+      "resolution": "Actual offline StoryReady precedes attachment; metadata has an explicit bounded observation phase; no Open/Begin before locked complete metadata; unreviewed runtime remains blocked.",
+      "status": "RESOLVED; runtime timing remains live-unproven"
+    }
+  ],
+  "reviewedSafety": {
+    "actualRphRuntimeAssemblyDigestAndVersionRequired": true,
+    "independentFrameworkRoleAndOpaqueAddressChecks": true,
+    "crossFrameworkHandleIntegersCompared": false,
+    "retainedRphWrappersAndLocalPoolCounterRechecked": true,
+    "noOwnedPointerDereferenceOrDecoratorWrite": true,
+    "sourceRawFloatBitsRetained": true,
+    "noRphRevolutionsGetterInPassivePath": true,
+    "noSilentGetterFallback": true,
+    "fullMappedIntervalsAndPeerListenerSkewChecked": true,
+    "freshnessCheckedAtUse": true,
+    "autonomousExpirySeparateFromFutureMessages": true,
+    "rejectionRetiresWithoutRebindOrLastGood": true,
+    "boundedBatchEmitsEachAcceptedObservation": true,
+    "sourceStopAndCallbackCompletionDistinguished": true,
+    "rawAuditQueueAndWriterBounded": true,
+    "malformedRawAuditCannotQualify": true,
+    "noGameplayAudioHostOrEndpointActivation": true,
+    "defaultProductAndGainsRendererPcmLoudnessRecordingPreserved": true,
+    "proposalAndRollbackAreUnexecuted": true
+  },
+  "declaredLimits": [
+    "Only the user-selected bounded read-only ordinary-reuse scope is reviewed; a fully unobserved eight-bit counter-wrap/address ABA is excluded.",
+    "Supported opaque-address equivalence and the actual cached RPH assembly identity must still be established by the separately authorized passive experiment.",
+    "Startup file verification, native calls and filesystem operations can block. Admission time budgets reject after return; no watchdog is claimed to forcibly interrupt every native/OS/fatal failure.",
+    "Arbitrary same-user or injected equal-privilege code is outside the claimed ownership boundary; no hostile in-process sandbox is claimed.",
+    "A fatal fault, forced termination, RPH fiber abort or OS failure may leave incomplete evidence/cleanup; unknown callback, audit or writer completion must stay unknown.",
+    "The proposed single-lease exit test proves exit-triggered retirement followed by absence/no resurrection; it does not independently prove silence caused that live retirement. Independent silence causation is offline fixture coverage.",
+    "The diagnostic producer acceptance is not inherited by the new producer, and no physical RPM, engine-off/restart, other model, NPC, playback, listening, loudness or recording acceptance is claimed."
+  ],
+  "validation": {
+    "finalPipeline": {
+      "status": "PASS",
+      "receiptSha256": "48d362c7b89366bdec17f66323028b93089f395834d03fbf51311116d0211a6b",
+      "fullMatrix": true,
+      "cases": 32,
+      "assertions": 22464,
+      "actualProducerExecuted": true,
+      "nativeCandidateSha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+      "fakeSdkSha256": "0c477cdbcaa1db0725d70c11ad73ba859cf5a3d15218f2ca9ec447de91989224",
+      "fixtureHostSha256": "d9950eeb5510bc819e44b0fa43aee75cc26c74cced363246f190befd294038c0",
+      "executionReceiptSha256": "b6878faa32e63fef71bdf3d97c0f24b61d1ca3fa9ae7518c2336f75eb162d9b6",
+      "testCaseNames": [
+        "valid_changing",
+        "metadata_pending",
+        "zero_running",
+        "null_pointer",
+        "target_seh",
+        "nan",
+        "infinity",
+        "out_of_range",
+        "source_identity_changed",
+        "source_address_changed",
+        "source_driver_changed",
+        "source_engine_off",
+        "source_model_changed",
+        "source_offline_lost",
+        "freeze_after_3",
+        "shutdown_after_3",
+        "post_context_delay",
+        "host_identity_changed",
+        "host_pool_counter_changed",
+        "host_owner_changed",
+        "host_driver_changed",
+        "host_exit",
+        "post_peer_fault",
+        "post_peer_abort",
+        "queue_full",
+        "wrong_peer_address",
+        "wrong_binding_policy",
+        "wrong_provider_hash",
+        "wrong_session_key",
+        "wrong_process_open",
+        "no_foreground",
+        "max_duration"
+      ],
+      "maximumDurationCase": {
+        "passed": true,
+        "targetCalls": 1929,
+        "accepted": 1928,
+        "elapsedMilliseconds": 120448,
+        "terminalReason": "consumer-active-deadline",
+        "sourceCompletedAfterRelease": true
+      },
+      "actualShvExecuted": false,
+      "actualRphWitnessExecuted": false,
+      "gameExecuted": false,
+      "endpointsOpened": false,
+      "audioActivated": false,
+      "globalKeyboardInputInjected": false,
+      "foregroundReadersSubstituted": false,
+      "canonicalPublicReceipt": "evidence/playable-09-pipeline.json",
+      "canonicalPublicReceiptSha256": "caef01dc028ea51e18c1b0713d171f26781055f2046ef55104d30b6097747710"
+    },
+    "bridge": {
+      "artifactSha256": "c97acbcb6af255a0497c28f8349d8be3447f53c6dc5e31a0d567a7ebbc76743d",
+      "bytes": 328192,
+      "receiptSha256": "2dc03eb013e1067fb946bbfd13a899f3b6193bf1332eaf4ed33447407dcdfd74",
+      "compiledSourcePinsMatchCurrent": true,
+      "staticInspection": {
+        "exactPublicEntryPair": true,
+        "pluginAttributeTargetsChecked": true,
+        "mainCallsPassiveRun": true,
+        "legacyEngineGetterReferences": 0,
+        "passiveEntryHostActivationCalls": 0,
+        "passiveEntryProductMenuStarts": 0,
+        "codeExecuted": false
+      },
+      "passiveOnly": true,
+      "audioPlaybackAllowed": false,
+      "runtimeCompatibilityEstablished": false,
+      "canonicalPublicReceipt": "evidence/playable-09-bridge.json",
+      "canonicalPublicReceiptSha256": "9c277fc5bac1d3f151aadfcf15d10827b839eecaa0d6a800a47e6aabcabca7d0"
+    },
+    "journal": {
+      "status": "PASS",
+      "cases": 8,
+      "assertions": 65,
+      "receiptSha256": "fedfcc4b3abbf5d0eccbd20743fbebd615a266547145aad32ee215a04359685a",
+      "journalSourceSha256": "f0ce6da8df54b5e9317583492385b9e0380d71da8eaecb96b6015fc768e17da2",
+      "actualPrivateDiskWriterExecuted": true,
+      "selfCertifiedBoundedCompletion": false,
+      "supersedesEarlierJournalReceiptSha256": "65c38353267ba78e0512eb6390cb2e36cf03853293ba8a3b5572fe2116c03ae9",
+      "supersessionReason": "The earlier receipt used a superseded journal implementation. This canonical existing8-case65-assertion run pins the final f0ce implementation; no additional rerun was needed for this evidence refresh."
+    },
+    "nativeBuild": {
+      "canonicalPublicReceipt": "evidence/playable-09-handoff-build.json",
+      "sha256": "13c8ccb344844d33af482223da11fe290ec9e2d43cec230df0cd5daf7aaadf05",
+      "nativeArtifactSha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+      "diagnosticQualificationInherited": false
+    },
+    "priorAttempts": {
+      "includedInFinalPass": false,
+      "history": [
+        "An earlier positive smoke subset passed eight frames and 131 assertions; it was not a completed matrix.",
+        "Earlier foreground/setup trials and partial matrices are retained privately and are not counted as final acceptance.",
+        "A preceding matrix stopped on the harness fixed-four-second queue-full assumption while the bounded source was still active with a full queue. The final harness awaited the actual next scheduled QueueFull condition within its independent eight-second cap; product source and acceptance limits were unchanged.",
+        "Earlier native build/inspection trials distinguished static CRT helper imports from authored object imports. Only the canonical final native build and final bridge are proposed."
+      ],
+      "noIncompleteAttemptPromotedToFinalPass": true
+    },
+    "canonicalPreparation": {
+      "status": "PASS",
+      "publicCandidate": "evidence/playable-09-candidate.json",
+      "publicCandidateSha256": "4423b1a112efc712dcf5e3bc297e81b4886a1116e248d81ebb0fc252fbf8c3c6",
+      "candidateDecision": "READY_FOR_FRESH_EXPLICIT_APPROVAL_ONLY",
+      "requiredNativeSha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+      "requiredBridgeSha256": "c97acbcb6af255a0497c28f8349d8be3447f53c6dc5e31a0d567a7ebbc76743d",
+      "preparerSha256": "89df1d7c0e34aafe5634cdf8e477f0f7f1a50016ed2f0d39989a6ce0e95fcd85",
+      "installationManifestSha256": "47b9a925d100cef5d65fb9defdff5828b55934f3f4b3a3eabfdeb0f9aa34556b",
+      "rollbackManifestSha256": "e8d5a2fa440bbe9db3c053420ba93f1e9a4dea349f7cdb577d3fe74a08c1c3e0",
+      "preparationPreflightSha256": "e5cd3a6210a205f4f97ebb53d46eff194898f9c073ab21402ad90f3ccde627ef",
+      "independentPreflightSha256": "b406ccecc18d9e975bb530970fe6596c0921628f4fe9e670acafcdbdfe4d7075",
+      "protectedFilesVerified": 11,
+      "settingsAndShortcutsVerified": 4,
+      "preservedPinsVerified": 170,
+      "compiledBridgeSourcesVerified": 44,
+      "nativeSourcesVerified": 4,
+      "pipelineSourcesVerified": 12,
+      "pinnedCopyCases": 5,
+      "copyGuardReceiptSha256": "3d1645b6daa2db55390ed9785779d367c633e8cd2a246c1d8e13bb935c263c8c",
+      "proposalNegativeCases": 4,
+      "proposalNegativeReceiptSha256": "5bd4d4eca4a8920e5815634b8c89afb5af97d8279c3d42d4c239a944ab1a4136",
+      "stagingOrPreflightIsNotLiveApproval": true,
+      "deployed": false,
+      "launched": false,
+      "endpointOpened": false,
+      "approvalGranted": false
+    },
+    "newLiveApprovalGranted": false,
+    "actualLiveHandoffAccepted": false,
+    "physicalRpmAccepted": false,
+    "audiblePlaybackAccepted": false,
+    "listeningAccepted": false,
+    "loudnessAccepted": false,
+    "recordingAccepted": false
+  },
+  "privacy": "Relative repository source names and digests only; no process identifiers, actual entity addresses/handles, absolute local paths, secrets, captures or absolute QPC values.",
+  "grantsDeploymentLaunchOrAudioAuthorization": false
+}

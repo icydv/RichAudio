@@ -5,7 +5,7 @@ $repo=Split-Path -Parent $PSScriptRoot
 $out=Join-Path $repo 'build\acoustic-settings'
 [IO.Directory]::CreateDirectory($out)|Out-Null
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
-$sources=@(Get-ChildItem (Join-Path $repo 'src\acoustics\host\Windows'),(Join-Path $repo 'src\acoustics\host\Transport'),(Join-Path $repo 'src\acoustics\geometry') -Filter '*.cs'|ForEach-Object FullName)
+$sources=@(Get-ChildItem (Join-Path $repo 'src\acoustics\host\Windows'),(Join-Path $repo 'src\acoustics\host\Transport'),(Join-Path $repo 'src\acoustics\geometry'),(Join-Path $repo 'src\acoustics\recording') -Filter '*.cs'|ForEach-Object FullName)
 $sources+=@('GeometryObservation.cs','SurfaceAcquisition.cs','DiagnosticTile.cs')|ForEach-Object{Join-Path $repo ('src\acoustics\observation\'+$_)}
 $sources+=Join-Path $repo 'src\acoustics\settings\AcousticSettingsWindow.cs'
 $sources+=@(Get-ChildItem (Join-Path $repo 'src\acoustics\settings\InGame') -Filter '*.cs'|ForEach-Object FullName)

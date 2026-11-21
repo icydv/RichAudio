@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-13",
+  "kind": "sanitised-live-restoration",
+  "result": "PASS",
+  "sourceRollbackReceiptSha256": "80f7e822ce03e881a94cdc26f641cd8f5bc3e07965438fc794f8cde6585f44a8",
+  "sourceVerificationSha256": "5b84342b0c38d200b81aa93a87da28f833ea1e35ec73b455cc477ca96c7d9110",
+  "independentReviewSha256": "9d9b12d2008d6da59db0b72ab83bceaa038ca127a7c2002fe575f0f76ffa9950",
+  "normalExitObservationSha256": "8be3761e6e496319e5d43015746cf507162b46a0b16d45f1d8807d7f8f3a8cc8",
+  "normalUiExitRequested": true,
+  "quitConfirmationObserved": false,
+  "numericExitCodeMeasured": false,
+  "forceTerminationPerformed": false,
+  "ownedGameLifetimeAndRphHostsAbsent": true,
+  "supervisorCompleted": true,
+  "originalPluginRestored": true,
+  "removedOwnedArtifacts": [
+    "Plugins/RichAudio.ShvHandoff.json",
+    "RichAudio.OperatingState.ShvHandoff.asi",
+    "Plugins/RichAudio.dll candidate before original restoration"
+  ],
+  "ownershipHashLengthVerified": true,
+  "protected": [
+    {
+      "file": "GTA5_Enhanced.exe",
+      "bytes": 55819384,
+      "sha256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea",
+      "matched": true
+    },
+    {
+      "file": "RAGEPluginHook.exe",
+      "bytes": 12237182,
+      "sha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac",
+      "matched": true
+    },
+    {
+      "file": "Plugins/RichAudio.dll",
+      "bytes": 222208,
+      "sha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657",
+      "matched": true
+    },
+    {
+      "file": "Plugins/RichAudio.Playable.json",
+      "bytes": 198,
+      "sha256": "96a91834affba1f0c2bafcd7a6e14cb9fe17ac8846e98c72a14d14fd1b366001",
+      "matched": true
+    },
+    {
+      "file": "Plugins/RichAudio.Menu.json",
+      "bytes": 478,
+      "sha256": "63a6f398e838fe5c4503f0e2bf8de401ee8a2ac54203d8ddf16a25f1b16bcea3",
+      "matched": true
+    },
+    {
+      "file": "startup.rphs",
+      "bytes": 28,
+      "sha256": "4c7d8fb2dc1d84e4c84e7409c296744268f7f33be87af1b9585f104010141d1c",
+      "matched": true
+    },
+    {
+      "file": "DirectStorageFix.asi",
+      "bytes": 592384,
+      "sha256": "7f50b8a9a2e8a376e2adb7d46bc9483c2754bbbdd964f0918787d4f6f1b76e2c",
+      "matched": true
+    },
+    {
+      "file": "dstorage.dll",
+      "bytes": 206880,
+      "sha256": "8a7f9809b4630d22796445ab9aa44181458d0f73f03705b1dfafd79410e07334",
+      "matched": true
+    },
+    {
+      "file": "dstoragecore.dll",
+      "bytes": 1468960,
+      "sha256": "77c7b3acf5b5a9acec6ad3ed7aa3c33e1ad43e73116b437adfcd26965a079b2b",
+      "matched": true
+    },
+    {
+      "file": "dinput8.dll",
+      "bytes": 131072,
+      "sha256": "9fd9e02353b7d39fe07b9667f7ea2697229a7f2d0e7d389eb79eb212b1bb181d",
+      "matched": true
+    },
+    {
+      "file": "ScriptHookV.dll",
+      "bytes": 1987072,
+      "sha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f",
+      "matched": true
+    }
+  ],
+  "settings": [
+    {
+      "file": "RagePluginHook.ini",
+      "bytes": 137,
+      "sha256": "680d11524a930e2671bfd606aa2e5ffd4bf070c3d1818c16fa70d5be6a727a38",
+      "matched": true
+    },
+    {
+      "file": "trainerv.ini",
+      "bytes": 124715,
+      "sha256": "9f18051b30468cfa8c45a4fbea8727ff3286f9f822cf5b1b43916869b1e6f5de",
+      "matched": true
+    },
+    {
+      "file": "user.xml",
+      "bytes": 679,
+      "sha256": "d6eab888b9e43445100d5b86ba8ac009dc7bfaa8e204d2a32366f7898cdac85a",
+      "matched": true
+    },
+    {
+      "file": "acoustic-settings.json",
+      "bytes": 274,
+      "sha256": "73647afcfa175c643a6938c63fc25845c2527dc8c864221bcf35142ce956f711",
+      "matched": true
+    }
+  ],
+  "ownedPathsCheckedAbsent": 23,
+  "stockFallback": true,
+  "bothProductionFeatureFlagsFalse": true,
+  "privateCapturesAndPackagesRetained": true,
+  "recursiveDeletion": false,
+  "retryPerformed": false,
+  "handoffDecision": "BLOCKED-measured-clock-map-required",
+  "phaseCEligible": false,
+  "writerJoinObserved": true,
+  "nativeCallbackCompletion": "unobserved",
+  "nativeFifoDrain": "unobserved"
+}

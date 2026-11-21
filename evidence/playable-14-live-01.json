@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-14",
+  "kind": "sanitised-genuine-live-result",
+  "attempt": 1,
+  "result": "BLOCKED-FULL-PASSIVE-QUALIFICATION",
+  "initialFreshContextBinding": "PASS-IN-GAME",
+  "approvedCommit": "bf59244e482897ee744c6a64b70243f20743d755",
+  "authorizationSha256": "b1f03411c62913ac212a62d8469ba39be9e8f11a1a6d2f41874fdae1828a446a",
+  "artifacts": [
+    {
+      "file": "Plugins/RichAudio.dll",
+      "bytes": 361472,
+      "sha256": "ba19342ce5ceac63d179943e22d324819a42a8c8294d7f15e436f3833e01be0f"
+    },
+    {
+      "file": "RichAudio.OperatingState.ShvHandoff.asi",
+      "bytes": 129024,
+      "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40"
+    }
+  ],
+  "deployments": 1,
+  "existingRouteInvocations": 1,
+  "actualNewEnhancedProcesses": 1,
+  "operatorStartCommands": 1,
+  "startup": {
+    "result": "PASS",
+    "steamAction": 12,
+    "argumentConfirmationContinued": true,
+    "interstitialContinued": true,
+    "steamContinueClicksDispatched": 1,
+    "secondInterstitialVisuallyObserved": false,
+    "newProcessCreationSecondsAfterLaunch": 32.8950311,
+    "exactProcessAndKernelCreationLeaseMatched": true,
+    "leaseFields": 21,
+    "readyUtc": "2026-11-01T18:52:32.459Z",
+    "reviewSha256": "1f10b58fc6ffcadd7080e5025fe1bf7c2f03920813dfefb5db9f8b6d9fd7b885"
+  },
+  "prebinding": {
+    "totalSessionClockMaps": 3519,
+    "diagnostics": 4,
+    "consoleWaits": 125,
+    "oldSourceSequence": 3087,
+    "oldSourceAgeAtPeekMs": 17512.6342,
+    "oldContextHadCurrentMap": true,
+    "oldContextSafelyWaited": true,
+    "readySourceSequence": 3089,
+    "readyAttempt": 127,
+    "readyAfterArmMs": 7133.8351,
+    "sourceAgeAtPeekMs": 5.0654,
+    "mappedSourceAgeMs": 8.2489,
+    "peerSkewMs": 5.1769,
+    "currentMap": true,
+    "originalAcquisitionAndIndependentBracketChecksPassed": true,
+    "recordedBindingCount": 1,
+    "recordedBeginCount": 1,
+    "nativeBeginExportEntryCounterMeasured": false
+  },
+  "native": {
+    "rows": 111,
+    "targetReturns": 55,
+    "finalObservations": 55,
+    "terminalRows": 1,
+    "terminalCode": 1,
+    "terminalMeaning": "CallerStopped by cleanup after managed listener failure; not proof of human Stop",
+    "attemptCountMeasured": true,
+    "minimumNextBeforeMinusPreviousAfterMs": 54.9336,
+    "firstBeforeToLastAfterMs": 3301.5544,
+    "within20Hz2400Attempts120Seconds": true,
+    "rawUniqueOperatingValues": 1,
+    "float32Bits": "3e4ccccd",
+    "minimumOperatingValue": 0.20000000298023224,
+    "maximumOperatingValue": 0.20000000298023224,
+    "lastNativeSampleWithoutGameplayFrame": 55
+  },
+  "gameplay": {
+    "callerAcceptedCounter": 54,
+    "frames": 54,
+    "rawFloat32ScalarAndSequenceLineagePassed": true,
+    "independentVehiclePoseCameraAndMappedClockChecksPassedForRecordedFrames": true,
+    "changingValuesObserved": false,
+    "sourceSpeedRange": [
+      0,
+      0
+    ],
+    "distinctVehiclePositions": 1,
+    "distinctListenerPositions": 1,
+    "maximumEndpointSkewMs": 29.0106,
+    "maximumMappedIntervalWidthMs": 0.574,
+    "deliberateDismountRetirementVerified": false
+  },
+  "retirement": {
+    "reason": "listener-discontinuous",
+    "activeLoggedUtc": "2026-11-01T18:55:47.768Z",
+    "stoppedUtc": "2026-11-01T18:55:51.109Z",
+    "retiredUtc": "2026-11-01T18:55:51.128Z",
+    "noCurrentOperatingStateAfterRetirement": true,
+    "emptyGameplayFramePublished": false,
+    "rejectedCameraOperandsRetained": false,
+    "ownerReportedAccidentalTabOut": true,
+    "tabOutCauseProven": false,
+    "producerCompleted": true,
+    "nativeFifoDrained": true,
+    "queuedRemaining": 0,
+    "pendingReturns": 0,
+    "pendingConsumedAuditRows": 0,
+    "sourceRecordsAdmitted": 111,
+    "sourceRecordsWritten": 111,
+    "eventsWritten": 3707,
+    "dropped": 0,
+    "writerJoinIndependentlyObserved": true,
+    "writerWorkerAlive": false
+  },
+  "inputCapturePins": [
+    {
+      "name": "source-records.bin",
+      "bytes": 28416,
+      "sha256": "36c0559a9361d43988410c31f928bb0ecb345daa76db647e0c17c29403aae576"
+    },
+    {
+      "name": "events.ndjson",
+      "bytes": 1355228,
+      "sha256": "bf87937c43acb77bcd16e5bfed3deef3df6fa239f067cb6f8335578ec6aefc58"
+    },
+    {
+      "name": "summary.json",
+      "bytes": 851,
+      "sha256": "8ff23c9490ca342512f4db546ee31630689130350a967c33310db534f9436a7b"
+    },
+    {
+      "name": "copied-run-only-RPH.log",
+      "bytes": 15567,
+      "sha256": "967b1d18ed9bb1af891e8061eae42efab7a5e9b2929cdee1d858653d1b3ca735"
+    },
+    {
+      "name": "reviewed-process-lease.json",
+      "bytes": 1279,
+      "sha256": "f41a69bc27f89b6a5e98d8e4f41ffeb9d60bb70e647711bdb0914610497efe32"
+    },
+    {
+      "name": "lease-ownership.json",
+      "bytes": 815,
+      "sha256": "42ddfa4c3e888f80299e494ee71a013e15f5287b3d9984080f9902df25da090f"
+    },
+    {
+      "name": "capture-index.json",
+      "bytes": 441,
+      "sha256": "b425141a81a3a7f7263bb3b2f02303c82affbe362ab523be6f98daa2fe024eb9"
+    }
+  ],
+  "independentHandoffReviewSha256": "766ac2735d00f47b06edbd54873053533a27407cf39ad3360a214d1b4b1b05cf",
+  "nativeTimingReviewSha256": "7db7de403c920d283bfc1682f9bb8fd449c509aef43b07798b1331d80c108e64",
+  "restoration": "PASS",
+  "normalExitReportedByOwner": true,
+  "forceTerminationPerformed": false,
+  "gameExitCodeMeasured": false,
+  "audioPlayed": false,
+  "endpointOpened": false,
+  "recordingPerformed": false,
+  "nativeSoundRetained": true,
+  "fullPassiveObjectiveAchieved": false,
+  "audibleCandidatePreparationAdvanced": false,
+  "report": "docs/PLAYABLE_14_LIVE_RESULT.md"
+}

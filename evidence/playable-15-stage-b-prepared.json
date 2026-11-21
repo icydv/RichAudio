@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-15",
+  "stage": "B",
+  "attempt": 1,
+  "kind": "sanitised-existing-audible-candidate-and-concrete-executor-preparation",
+  "result": "READY-FOR-SEPARATE-EXPLICIT-APPROVAL",
+  "stageA2Accepted": true,
+  "stageA2Acceptance": "Scoped changing genuine telemetry, six measured camera-cut recoveries and permanent source-scope retirement/completion",
+  "stageA2DirectDriverLossCauseProven": false,
+  "stageA2ResultEvidence": "evidence/playable-15-stage-a-live-02.json",
+  "stageA2RawReviewSha256": "0077ca026a293fbae8a7a70211bd3cdefadd989c4540c0d78e2dcae4f228c79d",
+  "stageA2CameraDriverReviewSha256": "a3623853a63cc65caa2bbf94e49e2c5d21963e42bf53d649597c8a34a6cc61c2",
+  "stageA2RestorationReviewSha256": "8d4bd86d0a9126d4c9e7cfdd51df74da5dbd96486716e47dd9ee819863237a90",
+  "candidateReceiptSha256": "a9449e06172e53167a2a3c9bc9da22c2b4aa3b21e29d6e157f1c3857d8e0a5e3",
+  "buildReceiptSha256": "e7b448b35d577544c64cb030562b4ce0db83490340ae9552af73d7fa9f36d535",
+  "validationReceiptSha256": "f0ce719c4ff96b290be4796f62e1b5a290786a37cc2f12efade584ff500bacc1",
+  "artifacts": [
+    {
+      "file": "RichAudio.OperatingState.ShvHandoff.asi",
+      "sha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+      "bytes": 129024
+    },
+    {
+      "file": "RichAudio.dll",
+      "sha256": "a474df2201b6aa3a370029af479c4f4f62ad6958dfd4f72c7cb8420e2ec7ec5e",
+      "bytes": 387584
+    },
+    {
+      "file": "RichAudio.Bati13.json",
+      "sha256": "fafda57aa87a277b670d4a2fa796b85c38062a1158fb220f18986e299cd00387",
+      "bytes": 228
+    }
+  ],
+  "host": {
+    "sha256": "5c64559983b81a19b0c66c7f01fb19a3b584eef30a9980ed6ef2296b5b611f42",
+    "bytes": 306176,
+    "modified": false
+  },
+  "packageManifestSha256": "abd313481b5048aa06caab5784cdded948754c8bd4b54e015e643d31dcb8c8c7",
+  "packageBindings": 132,
+  "installationManifestSha256": "e583933fad5ae8d3b14e0282608f131559e30f028b381988fd8c87aa49f253dc",
+  "rollbackManifestSha256": "3945c755ca2fe24708c7e3d8d18230f4de2f58555da93d335b87b10577fca3aa",
+  "defaultLeaseTemplateSha256": "ee3c6dbba50bb63386df61ff0b5dd3da4c41f4062d4aeb4b9d53cc3797ef0312",
+  "optionalRecordingLeaseTemplateSha256": "1b041ef77627a8cab1ff90f1c061d10e71113e48de7afbff2741444dd3b7b63b",
+  "leaseFields": 24,
+  "recordingDefaultAllowed": false,
+  "recordingDefaultLoopbackAllowed": false,
+  "explicitPairedRecordingApprovalRequired": true,
+  "recordingScope": [
+    "Actual final RichAudio endpoint-submission PCM and submission/QPC index",
+    "Actual selected endpoint loopback with GTA and unrelated mix audio, packet/QPC index",
+    "Recorded accepted source/pose/operating metadata; no physical RPM claim"
+  ],
+  "microphoneScopeIncluded": false,
+  "extraLiveDryOrRoleStemsIncluded": false,
+  "existingRecordingBudgetChanged": false,
+  "existingRecorderModified": false,
+  "analyzerSha256": "d4d4aad8195837f1d7350ef562d54604f6eb67a51c05a4c6b952852302e197d6",
+  "analyzerRoute": "Existing repository Analyze-Playable13Recording.mjs against finalized exact owned private capture; avoids13-only finalizer path wrapper",
+  "captureFailureVisibilityRequired": true,
+  "captureFailureAuthorisesRetry": false,
+  "procedure": {
+    "maximumDeployments": 1,
+    "maximumLaunches": 1,
+    "maximumAudioOnCommands": 1,
+    "maximumOperatorStarts": 1,
+    "targetListeningSeconds": [
+      30,
+      45
+    ],
+    "plannedDismountStopSeconds": [
+      30,
+      40
+    ],
+    "monotonicObservationalStopDeadlineSeconds": 45,
+    "intrinsicMaximumActiveSeconds": 120,
+    "maximumStartupSeconds": 120,
+    "maximumWaitingSeconds": 300,
+    "maximumNativeAttempts": 2400,
+    "maximumHz": 20,
+    "originalSourceExpiryMilliseconds": 250,
+    "nativeOrOsPreemptionClaimed": false,
+    "stopAdmissionAndCompletedPcmDrainAreSeparate": true,
+    "AudioOnBeforeFirstAcceptedFrame": true,
+    "freshIdentityClockScopeAndExpiryGatesUnchanged": true,
+    "automaticRetry": false,
+    "nativeSoundSuppression": false,
+    "savedStockFallbackF10AndFalseGlobalFlagsPreserved": true,
+    "ownedHostAndNodeStopRequiredBeforeRollback": true
+  },
+  "preparedCoordinatorReceiptSha256": "0d72f4c34f6eb2320f377991aa00585aff29ca7cf96fa3ea1d474e430698feaf",
+  "preparedCoordinatorRevision": 2,
+  "preparedHelpers": [
+    {
+      "name": "Inspect-Startup.ps1",
+      "sha256": "fee9845862c3558f0a969519382e73306b392c11bc2f88ff97011d134bac661a",
+      "bytes": 9836
+    },
+    {
+      "name": "LiveActions.ps1",
+      "sha256": "f31b7df26bcb2756d901615a996e06e950ac188328804d54029f47a58073b026",
+      "bytes": 33253
+    },
+    {
+      "name": "Observe-Live.ps1",
+      "sha256": "1cde3930e55fbbb36a9fce8c3ccf32addeff185d912e8b72e729e2117def482b",
+      "bytes": 10496
+    },
+    {
+      "name": "Run-LaunchOnce.ps1",
+      "sha256": "c45adf2e823464e1fa4e38c9a71c16c3881483abf9d88efc85295db98748e545",
+      "bytes": 1061
+    },
+    {
+      "name": "Select-CurrentHandoffLog.ps1",
+      "sha256": "f1bb0629cda4a331271e3c8b9d5e1ecd31d56fd011099239e282be5e15f5cb86",
+      "bytes": 8969
+    }
+  ],
+  "independentCandidateAndCaptureIntegrationReviewSha256": "3919c83362782775f7c34f2691cc9c05672958d1c2a58e8219603f2ca93b5173",
+  "independentCoordinatorReviewSha256": "323aebc06921445fc354dee3b0d2adcf73213935515ab0c0266b1d38cba4c6c1",
+  "proposalSha256": "ae26ca96be4999c875f1b12264234518c07f41ee99b7d0824248499f8b5d135e",
+  "proposal": "docs/PLAYABLE_15_STAGE_B_PROPOSAL.md",
+  "newAuthorisationCreated": false,
+  "liveB01OperationalDirectoryExists": false,
+  "anyCoordinatorModeExecuted": false,
+  "audibleDllLoaded": false,
+  "stageBDeployed": false,
+  "stageBGameLaunched": false,
+  "richAudioEndpointOpened": false,
+  "richAudioOutputPlayed": false,
+  "liveAudioRecorded": false,
+  "calibrationChanged": false,
+  "rendererSourceBankOrHostRebuilt": false,
+  "stageBAuthorised": false,
+  "freshExplicitStageBApprovalRequired": true
+}

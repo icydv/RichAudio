@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-11",
+  "kind": "bounded-retained-artifact-and-official-source-review",
+  "reviewedUtc": "2026-11-01T15:06:57.9808991Z",
+  "baseCommit": "8c06c46ee0c1925d93692fbac6672116cd7f8537",
+  "decision": "BLOCKED-INDEPENDENT-API-PROVENANCE-UNRESOLVED",
+  "observedApiMayBeTrusted": false,
+  "firstObservedHashPromoted": false,
+  "policyOrProductCodeChanged": false,
+  "acceptedPassiveCandidateCreated": false,
+  "archive": {
+    "bytes": 86824044,
+    "sha256": "8524e534f219c7f33634ed45ced055f3c7b0b461fa8302ff2f0ac46470c7ed34",
+    "entries": 1134,
+    "directApiNameEntries": 0,
+    "observedApiSizeEntries": 0,
+    "originalReceiptFiles": 23,
+    "originalReceiptEntriesMatchArchive": true,
+    "currentInstalledFilesMatchingOriginalArchive": 22,
+    "independentOfficialArchiveDigestLocated": false,
+    "localOriginMetadataAuthenticatesArchive": false
+  },
+  "launcher": {
+    "bytes": 12237182,
+    "sha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac",
+    "fileVersion": "1.132.1428.17748",
+    "installedMatchesArchiveEntry": true,
+    "retainedCopiesMatch": 2,
+    "identityDistinctFromApi": true
+  },
+  "api": {
+    "bytes": 28720128,
+    "sha256": "ea18ddff9ccd41898a9bdc8c2ec2b7866176543e126810279e8732ab2e0a6d62",
+    "fileVersion": "1.132.1428.17748",
+    "assemblyFullName": "RagePluginHook, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "module": "RagePluginHook.dll",
+    "mvid": "4c493f3e-e913-497c-a0d6-b293f9b8c3ef",
+    "privateWitnessRehashed": true,
+    "runtimeReportSha256": "ce2155c918c6cfc3e16f1ecaa9a3574c6f864084dd208749a2d135e772f47326",
+    "captureIndexSha256": "a498b8c109240a4a9a98f666b1a428190cdcd9fda34fc1df208676b84db145cf",
+    "distributionAuthenticated": false,
+    "extractionRelationshipEstablished": false,
+    "byteStabilityEstablished": false,
+    "locationContractEstablished": false
+  },
+  "readme": {
+    "bytes": 1409,
+    "sha256": "dae5b2742a2fa0313c89b4135a4266ba9d14afa24e8a38c23765829b6de91b48",
+    "officialIssueChannel": "https://discord.gg/0v9TP1BOmfwZms7y",
+    "inviteCurrentValidityVerified": false,
+    "containsSupportedCurrentApiVerificationContract": false
+  },
+  "installationDifferences": [
+    {
+      "name": "XInput1_4.dll",
+      "receiptMatchesArchive": true,
+      "archive": {
+        "name": "XInput1_4.dll",
+        "bytes": 34816,
+        "sha256": "bd0ba909de46470e0ddbf88cd72d7cf6f1eb04b709616366692eaea87b4c0551"
+      },
+      "installed": {
+        "name": "XInput1_4.dll",
+        "bytes": 133632,
+        "sha256": "a1a8bde409ed75d94a0439c37cf881bc354b13c2f8cd32e4bef3b10f308f1392"
+      },
+      "installedMatchesArchive": false
+    }
+  ],
+  "differenceInterpretation": "XInput1_4.dll substitution is a class documented by the official Enhanced distribution for SHV/DirectStorageFix compatibility. The exact installed bytes were not authenticated by this increment or the retained09 dinput8 loader scope. No malfunction, tampering or API causation is inferred.",
+  "sources": [
+    {
+      "url": "https://www.lcpdfr.com/downloads/gta5mods/g17media/52970-lspd-first-response-enhanced-preview/?changelog=0",
+      "kind": "official-maintainer-release-page",
+      "establishes": "LMS distribution route for build9695 Enhanced1158.16, bundled RPH compatibility, and documented XInput substitution class",
+      "doesNotEstablish": "Independent digest of retained archive or observed current API; supported extraction and identity verification contract"
+    },
+    {
+      "url": "https://www.lcpdfr.com/forums/topic/156960-lspdfr-api-documentation-and-rph-sdk/",
+      "kind": "official-maintainer-SDK-post",
+      "establishes": "Reference SDK publishing route; reviewed SDK targets an earlier RPH build",
+      "doesNotEstablish": "Current1.132 runtime identity; root fetch timed out, parallel reviewer accessed publisher post"
+    },
+    {
+      "url": "https://docs.ragepluginhook.net/html/P_Rage_Game_LocalPlayer.htm",
+      "kind": "historical-official-API-documentation",
+      "establishes": "Logical API assembly RagePluginHook in RagePluginHook.dll for historical0.56",
+      "doesNotEstablish": "Current API authenticity; direct fetch returned404, indexed historical official page retrieved"
+    },
+    {
+      "url": "https://www.lcpdfr.com/forums/forum/894-api-development/",
+      "kind": "accessible-official-maintainer-forum",
+      "establishes": "Public technical discussion route hosting LMS SDK post",
+      "doesNotEstablish": "Any current API digest or maintainer reply to this question"
+    }
+  ],
+  "dependency": "Official authenticated artifact/statement or independently verifiable supported distribution/extraction relationship linking the reviewed launcher to the observed API, including legitimate location/content variability and verification rules.",
+  "threatModel": "Artifact/session/process controls detect ordinary stale, wrong or changed inputs; they do not defend against fully privileged malicious code in the same process. Diagnostic capture pins are not handoff-lifetime API pins.",
+  "implementationDisposition": "Separate-artifact diagnostic model retained with production API UNREVIEWED. Rejected09 passive equality is preserved as historical code and is not eligible for a new qualification. No expected API whitelist value added.",
+  "gameLaunched": false,
+  "gameFilesWritten": false,
+  "binaryDownloaded": false,
+  "protectedLauncherUnpacked": false,
+  "frameworkExecuted": false,
+  "externalSubmission": false,
+  "endpointOpened": false,
+  "audioPlayback": false,
+  "privateResearchSha256": "714ba27f65284cf7b43c799142351a28d935d8413372a16f8278b0d0616cdfcf"
+}

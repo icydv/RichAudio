@@ -1,0 +1,559 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-08",
+  "verifiedUtc": "2026-11-01T01:42:06.5666774Z",
+  "scope": "Offline unchanged-PLAYABLE-07 diagnostic reuse, first-advance readiness/proposal validation and independent preflight only",
+  "decision": "Prepared for separate explicit live authorisation",
+  "candidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "bytes": 378880,
+    "sha256": "21302b4c5c5fb99f63b7b25dce2fa973117bfb0246f16745d0782f062fe1a69e"
+  },
+  "reusedBuildProfile": "playable-07",
+  "rebuildRequired": false,
+  "probeSourceChanged": false,
+  "primaryAnalyzerChanged": false,
+  "buildReceiptSha256": "e8a9a4fe50ca18f53023d2f226788c3633607d220fd9c0da9eeef7fd3f75e7b5",
+  "fullBinaryFixtureValidation": {
+    "profile": "PLAYABLE-07",
+    "receiptSha256": "8a76c7afbd8a6c1e39e56df43181f61c2867542d4c71c3b7b6f643261d0990a3",
+    "cases": 48,
+    "assertions": 51703,
+    "failed": 0,
+    "fullDurationSeconds": 120,
+    "nativeBinaryExecutionRepeatedFor08": false
+  },
+  "primaryAnalysisValidation": {
+    "profile": "PLAYABLE-07",
+    "receiptSha256": "62c456ecfea14ed8789c41adfa44074e1093ccf6190d42c66abc557d3265c586",
+    "passed": 30,
+    "failed": 0,
+    "sourceSha256": "c246ea676c54b8298503cadfcc8603eac4c7f1fbfca012bf7e5a726e48937799",
+    "criteriaChangedFor08": false,
+    "providerQualified": false
+  },
+  "firstAdvanceReadinessValidation": {
+    "passed": 49,
+    "failed": 0,
+    "receiptSha256": "b8e25bd9636bcf0df19c639d4684058d3f0f48091c86579836038ffc3739e133",
+    "observerSourceSha256": "4f4d9df7c98dbb5de63f9902c7b26cf78ca2aad499ac6c3e18d3f954163b9269",
+    "preparationSourceSha256": "f2006aed7462ec12bb39694af2124f407b872793f2cf6ad754d0cb807a6f8c20",
+    "testSourceSha256": "85f3a38c36c1af1f9bca3496d37ce3899cdb7e40d27c127dbc6d105549a9a8b8",
+    "copiedActualAbiFixtureRecords": true,
+    "labelledMutationControls": true,
+    "actualShvExecuted": false,
+    "gameStarted": false,
+    "endpointOpened": false,
+    "drivingInterlock": false,
+    "providerQualified": false,
+    "terminalFilesFailClosedBeforeHistoricalReadiness": true,
+    "allAvailableRecordsCheckedBeforeReady": true,
+    "finiteRawValueAndTripletChecks": true
+  },
+  "firstAdvanceProcedure": {
+    "requiredBeforeManualDriving": true,
+    "operatorInstruction": "Stay stationary. Release chord keys, then tap plain Backslash. Keep idling until the HUD says IDLE and the supervisor confirms the recorded ADVANCE.",
+    "expectedTransition": "START OFF(0) -> ADVANCE IDLE(1)",
+    "readOnlyObserver": "tools/Observe-ShvFirstAdvance.mjs",
+    "observerMustUseNewCurrentLaunchSession": true,
+    "requiredObservedContext": "A subsequent valid same-Bati identity bracket, both running queries true, both independent speeds within 0..0.10 m/s",
+    "motionBeforeConfirmationIsProtocolFailure": true,
+    "probeProvidesDrivingInterlock": false,
+    "observerProvidesDrivingInterlock": false,
+    "noFirstAdvanceRetryOrSecondLaunch": true
+  },
+  "freshProposal": {
+    "pathHint": ".local/playable-08/candidate",
+    "profile": "PLAYABLE-08",
+    "reusedBuildProfile": "playable-07",
+    "pendingSuffix": ".playable08.pending",
+    "executed": false,
+    "requiresSeparateDeploymentAndLaunchApproval": true,
+    "manifests": [
+      {
+        "name": "installation-manifest.json",
+        "bytes": 4732,
+        "sha256": "5cfa43163b4b3623c867c80195ba50ae72b44945d9f742aac2614367de856881"
+      },
+      {
+        "name": "multi-state-proposal.json",
+        "bytes": 4220,
+        "sha256": "0e7eb07023ad3f40bec4d0b39de58d0027b44c39abeea3e2b0f77d07d9a412aa"
+      },
+      {
+        "name": "preparation-receipt.json",
+        "bytes": 8359,
+        "sha256": "0a96c4736105b956f84982908e90e3947cd1ffb791f91342aaf1621baf9aef63"
+      },
+      {
+        "name": "rollback-manifest.json",
+        "bytes": 1173,
+        "sha256": "f740c58a88ef6fee712ef48c3f2b7b468d5730eb84e5bd7f5a30fd2701c4001f"
+      }
+    ]
+  },
+  "protectedFileCount": 11,
+  "protectedFiles": [
+    {
+      "name": "GTA5_Enhanced.exe",
+      "bytes": 55819384,
+      "sha256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea"
+    },
+    {
+      "name": "RAGEPluginHook.exe",
+      "bytes": 12237182,
+      "sha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac"
+    },
+    {
+      "name": "Plugins/RichAudio.dll",
+      "bytes": 222208,
+      "sha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657"
+    },
+    {
+      "name": "Plugins/RichAudio.Playable.json",
+      "bytes": 198,
+      "sha256": "96a91834affba1f0c2bafcd7a6e14cb9fe17ac8846e98c72a14d14fd1b366001"
+    },
+    {
+      "name": "Plugins/RichAudio.Menu.json",
+      "bytes": 478,
+      "sha256": "63a6f398e838fe5c4503f0e2bf8de401ee8a2ac54203d8ddf16a25f1b16bcea3"
+    },
+    {
+      "name": "startup.rphs",
+      "bytes": 28,
+      "sha256": "4c7d8fb2dc1d84e4c84e7409c296744268f7f33be87af1b9585f104010141d1c"
+    },
+    {
+      "name": "DirectStorageFix.asi",
+      "bytes": 592384,
+      "sha256": "7f50b8a9a2e8a376e2adb7d46bc9483c2754bbbdd964f0918787d4f6f1b76e2c"
+    },
+    {
+      "name": "dstorage.dll",
+      "bytes": 206880,
+      "sha256": "8a7f9809b4630d22796445ab9aa44181458d0f73f03705b1dfafd79410e07334"
+    },
+    {
+      "name": "dstoragecore.dll",
+      "bytes": 1468960,
+      "sha256": "77c7b3acf5b5a9acec6ad3ed7aa3c33e1ad43e73116b437adfcd26965a079b2b"
+    },
+    {
+      "name": "dinput8.dll",
+      "bytes": 131072,
+      "sha256": "9fd9e02353b7d39fe07b9667f7ea2697229a7f2d0e7d389eb79eb212b1bb181d"
+    },
+    {
+      "name": "ScriptHookV.dll",
+      "bytes": 1987072,
+      "sha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f"
+    }
+  ],
+  "shortcutAndSettingsFileCount": 4,
+  "shortcutsAndSettings": [
+    {
+      "name": "RPH shortcut settings",
+      "bytes": 137,
+      "sha256": "680d11524a930e2671bfd606aa2e5ffd4bf070c3d1818c16fa70d5be6a727a38"
+    },
+    {
+      "name": "Trainer shortcut settings",
+      "bytes": 124715,
+      "sha256": "9f18051b30468cfa8c45a4fbea8727ff3286f9f822cf5b1b43916869b1e6f5de"
+    },
+    {
+      "name": "GTA saved keyboard overrides",
+      "bytes": 679,
+      "sha256": "d6eab888b9e43445100d5b86ba8ac009dc7bfaa8e204d2a32366f7898cdac85a"
+    },
+    {
+      "name": "RichAudio saved acoustic settings",
+      "bytes": 274,
+      "sha256": "73647afcfa175c643a6938c63fc25845c2527dc8c864221bcf35142ce956f711"
+    }
+  ],
+  "priorPinnedFileCount": 37,
+  "priorPinsUnchanged": true,
+  "frozenSourceInputs": [
+    {
+      "Name": "repo/src/telemetry/ShvProbe/Probe.cpp",
+      "Bytes": 69809,
+      "Sha256": "7ed8cc3f3cebb95982cf36502ebbda45b14d269ec2218cdf75475e31d278e1b8"
+    },
+    {
+      "Name": "repo/src/telemetry/ShvProbe/ScriptHookVApi.h",
+      "Bytes": 1493,
+      "Sha256": "131f609ff3db49e0bdaa9264a296825669fe897115c65d76fd3f593115d077ba"
+    },
+    {
+      "Name": "repo/src/telemetry/ShvProbe/NativeIds.h",
+      "Bytes": 2506,
+      "Sha256": "2c256ef63e179a17361d7f06f12af763d4891a8b494206c03bc4ebd7e2d751b5"
+    }
+  ],
+  "preservedPlayable07EvidenceAndLiveFileCount": 59,
+  "preservedPlayable07EvidenceAndLiveFiles": [
+    {
+      "name": ".local/playable-07/analysis-validation-final-01.json",
+      "bytes": 8684,
+      "sha256": "62c456ecfea14ed8789c41adfa44074e1093ccf6190d42c66abc557d3265c586"
+    },
+    {
+      "name": ".local/playable-07/candidate/installation-manifest.json",
+      "bytes": 4611,
+      "sha256": "885179510f2829cbb6b8ad8a1d1cce567df7316dfe21f4db94090185fee18634"
+    },
+    {
+      "name": ".local/playable-07/candidate/multi-state-proposal.json",
+      "bytes": 3365,
+      "sha256": "a2d77730e87cd6a7bc7ae58b67506f99aef4536ea9e63de4871c8948c20daae8"
+    },
+    {
+      "name": ".local/playable-07/candidate/preparation-receipt.json",
+      "bytes": 1224,
+      "sha256": "e43f55026c2b798ab493f809c7acb2596e88fb3ee6066c548771ff0edee187a5"
+    },
+    {
+      "name": ".local/playable-07/candidate/rollback-manifest.json",
+      "bytes": 1104,
+      "sha256": "c5102bb13ffe63f03ccf7f534c4429b165300d750c64a6d36b918eb78e08ccf7"
+    },
+    {
+      "name": ".local/playable-07/dynamic-analysis-final.json",
+      "bytes": 4333,
+      "sha256": "3e79b525afabd6dbbf887b4627cf381892ad782152260098082bf733ae10e2a1"
+    },
+    {
+      "name": ".local/playable-07/dynamic-analysis-review.json",
+      "bytes": 4333,
+      "sha256": "3e79b525afabd6dbbf887b4627cf381892ad782152260098082bf733ae10e2a1"
+    },
+    {
+      "name": ".local/playable-07/guard-validation.json",
+      "bytes": 1251,
+      "sha256": "bdafdcc7ef3ca289651635d605a007268750af66bf008bb6c46d453310ec430a"
+    },
+    {
+      "name": ".local/playable-07/live-01/analysis.json",
+      "bytes": 3252,
+      "sha256": "3f611b753418dac62da6343ccbfd56eec08141f22fe61f08af3ac2bfbc66111e"
+    },
+    {
+      "name": ".local/playable-07/live-01/authorisation.json",
+      "bytes": 562,
+      "sha256": "8395b7ce82961aa72d472c6003c834dc30351301a64d7b83feaec8597b78e87d"
+    },
+    {
+      "name": ".local/playable-07/live-01/capture-directories-before.json",
+      "bytes": 173,
+      "sha256": "401fe1be390208c735600416b752dff10ca51c48a2bb8e869eeb258722699286"
+    },
+    {
+      "name": ".local/playable-07/live-01/capture-location.json",
+      "bytes": 191,
+      "sha256": "194b11416bccd72d719dcccc99e3279c1f04e0d8d27a9ec6127f7de826a98e77"
+    },
+    {
+      "name": ".local/playable-07/live-01/capture-preservation.json",
+      "bytes": 805,
+      "sha256": "13032db277c4e9bf1d12b3dabc96dda34f0c2eace79e8819782633a9da2878b7"
+    },
+    {
+      "name": ".local/playable-07/live-01/capture/capture.json",
+      "bytes": 2198,
+      "sha256": "e2c6c8e3423c65069d6a6f9742c2ad4af5892522823c958200ef8c77e2d54d1f"
+    },
+    {
+      "name": ".local/playable-07/live-01/capture/journal.ndjson",
+      "bytes": 913,
+      "sha256": "b496a91256457a380e6363617b405a2292d20321990c72c912215623347d2c0d"
+    },
+    {
+      "name": ".local/playable-07/live-01/capture/timeline.ndjson",
+      "bytes": 4794224,
+      "sha256": "661a6cc9c4a57fde3e3ffe656a1b4ccaad3680305c566e988f7c149a3d2f8ffd"
+    },
+    {
+      "name": ".local/playable-07/live-01/independent-preflight.json",
+      "bytes": 12319,
+      "sha256": "e6f52229e4f3aa1133e4c9cb39632056e2d98fbea89927cc581775549b7d2eca"
+    },
+    {
+      "name": ".local/playable-07/live-01/independent-review.json",
+      "bytes": 26738,
+      "sha256": "b02552b514ed1da8624a4fa7039a0e67006679bef99a30784d8848ee359298e3"
+    },
+    {
+      "name": ".local/playable-07/live-01/independent-rollback.json",
+      "bytes": 18867,
+      "sha256": "468adf08f5cede3fab7b942b8e9bc4e6ac38ff295615e80f9e86c74a4e89aa12"
+    },
+    {
+      "name": ".local/playable-07/live-01/installation-receipt.json",
+      "bytes": 413,
+      "sha256": "e979288988ad1cb57dbcbcf86bf25f12228f3c1077bf802fe60bc78db89d9b53"
+    },
+    {
+      "name": ".local/playable-07/live-01/launch-receipt.json",
+      "bytes": 384,
+      "sha256": "e0f9ac7fef71c95c18761b9fa24160ea19b441e00de4a6daff5a28024c0f1694"
+    },
+    {
+      "name": ".local/playable-07/live-01/logs/asiloader.log",
+      "bytes": 1647,
+      "sha256": "866fe31b69f6f4ec60f2e8a5871ddaab03a935e7f8b4931401c173c4b52eaef6"
+    },
+    {
+      "name": ".local/playable-07/live-01/logs/RagePluginHook.log",
+      "bytes": 16324,
+      "sha256": "8b1838138b1616e0969c01ae47897394df9c3bc728c7c6c11cd23759ffce13d7"
+    },
+    {
+      "name": ".local/playable-07/live-01/logs/ScriptHookV.log",
+      "bytes": 1167,
+      "sha256": "e71f680d17732815fc8449cb7574f77f8f92ffe4f62e3047cb491ca093230f1b"
+    },
+    {
+      "name": ".local/playable-07/live-01/normal-exit.json",
+      "bytes": 318,
+      "sha256": "9e4a29fdec95cf1d9bff28177ccc306ecf171f3b141b3e2aba69be4d1c8d567c"
+    },
+    {
+      "name": ".local/playable-07/live-01/observed-processes.json",
+      "bytes": 102,
+      "sha256": "6bebbfa20149ae440c3924565d0fbc8a5a86971d4f7a7ce0d85532cfdff5231d"
+    },
+    {
+      "name": ".local/playable-07/live-01/one-launch-started.json",
+      "bytes": 166,
+      "sha256": "f73a5bf675c8c0fd4f2a0c4d96d6985cc5aac474537cc9b287c9a19764d04e87"
+    },
+    {
+      "name": ".local/playable-07/live-01/operator-clarification.json",
+      "bytes": 423,
+      "sha256": "120290c7ebd17db1a86862e5766741411ebd2f9e94f644d2620d3d2a2809dc60"
+    },
+    {
+      "name": ".local/playable-07/live-01/pending-creation-receipt.json",
+      "bytes": 363,
+      "sha256": "980cac74feb50786227687a8381b95d9bdd006746bc406f05b2b04778cd2dab1"
+    },
+    {
+      "name": ".local/playable-07/live-01/preflight.json",
+      "bytes": 354,
+      "sha256": "59d5204356762bd7b766be430ec8c77cf5b7cd35a706a930738cb6e55ea42a56"
+    },
+    {
+      "name": ".local/playable-07/live-01/prelaunch-logs/asiloader.log",
+      "bytes": 1647,
+      "sha256": "b565c7d10e3518eb3a05bdfc21e3f18e080b2028ca37c2970c4295e264c52691"
+    },
+    {
+      "name": ".local/playable-07/live-01/prelaunch-logs/RagePluginHook.log",
+      "bytes": 16635,
+      "sha256": "98cd547da77269444c101b36524fa841af6de31075e1dd25241a4ac2ada1ebbd"
+    },
+    {
+      "name": ".local/playable-07/live-01/prelaunch-logs/ScriptHookV.log",
+      "bytes": 1167,
+      "sha256": "a41053bf7b4f6904cc3025527ef6850951c355e8e478637b2f3e3e559f3254c4"
+    },
+    {
+      "name": ".local/playable-07/live-01/publication-audit-final.json",
+      "bytes": 357,
+      "sha256": "11649be831cc4cb2ceb8afabd14eac67e6dd84d253c8d06163fbfcd825a9a8f1"
+    },
+    {
+      "name": ".local/playable-07/live-01/publication-audit.json",
+      "bytes": 357,
+      "sha256": "63da28351506f6b3a2ca8638fa1cd311a5b071a940befccffeac8630017f16bb"
+    },
+    {
+      "name": ".local/playable-07/live-01/rollback-receipt.json",
+      "bytes": 3852,
+      "sha256": "280cf156d95c7061e3a1824d841961687706df2493c104e6993cebda7ef44d17"
+    },
+    {
+      "name": ".local/playable-07/live-01/user-observation.json",
+      "bytes": 469,
+      "sha256": "659b9607726d4af1b477fde34561c455eade560d90e211aa6a5a14096195f788"
+    },
+    {
+      "name": ".local/playable-07/preflight-before-approval.json",
+      "bytes": 473,
+      "sha256": "e2e988732009297bfa8669985ef29ff4f6238cc65e198c2a39b14a3e33aea099"
+    },
+    {
+      "name": ".local/playable-07/publication-audit.json",
+      "bytes": 357,
+      "sha256": "a2119a0239dfe2727127a41bf3cd888ba6569b052b53d1d4eb5093e117452b19"
+    },
+    {
+      "name": ".local/playable-07/shortcut-baseline.json",
+      "bytes": 790,
+      "sha256": "6417a4d176cd6918c5a3410d07219511589dacb9dbf43a6a7521841250903d07"
+    },
+    {
+      "name": "build/playable-07-shv-probe/build-receipt.json",
+      "bytes": 49402,
+      "sha256": "e8a9a4fe50ca18f53023d2f226788c3633607d220fd9c0da9eeef7fd3f75e7b5"
+    },
+    {
+      "name": "build/playable-07-shv-probe/compile.log",
+      "bytes": 11,
+      "sha256": "77111d9d9ba939d20851b51eff0e9871a93e6e0dec2c02438ee11cb5251e87b3"
+    },
+    {
+      "name": "build/playable-07-shv-probe/import-library.log",
+      "bytes": 212,
+      "sha256": "812b8f696cda3039cc2a3a475af6154c78a48c0c869906790b697d4cff1c5bab"
+    },
+    {
+      "name": "build/playable-07-shv-probe/included-headers.portable.json",
+      "bytes": 26287,
+      "sha256": "6e7d00d087adbf55fb8d441c31dcccc01ed027ff5eb7339002c99a131ef388e6"
+    },
+    {
+      "name": "build/playable-07-shv-probe/link.log",
+      "bytes": 4861,
+      "sha256": "71708d3a9a9f4325aaac4fdd6170fddada442625d851035c331700f68904da04"
+    },
+    {
+      "name": "build/playable-07-shv-probe/pe-inspection.json",
+      "bytes": 3684,
+      "sha256": "3c78d99864a6ae0bf201e90bbd72041c562b1caace92b29d4ab84888c7852f23"
+    },
+    {
+      "name": "build/playable-07-shv-probe/Probe.obj",
+      "bytes": 268396,
+      "sha256": "66dfe0321fc05eb7e9415c60065a4069837fa501c37e009e57679bd1e8256e94"
+    },
+    {
+      "name": "build/playable-07-shv-probe/RichAudio.OperatingState.Shv.asi",
+      "bytes": 378880,
+      "sha256": "21302b4c5c5fb99f63b7b25dce2fa973117bfb0246f16745d0782f062fe1a69e"
+    },
+    {
+      "name": "build/playable-07-shv-probe/ScriptHookV.def",
+      "bytes": 325,
+      "sha256": "23750cde4f9fa02c75b7275536e231a5cc6c9719c78744d4ea5cd45010c7fea8"
+    },
+    {
+      "name": "build/playable-07-shv-probe/ScriptHookV.exp",
+      "bytes": 2268,
+      "sha256": "181a872caea2b3c44c821ce0ee37e9963a05d79c440ce0c911340b427eb98d17"
+    },
+    {
+      "name": "build/playable-07-shv-probe/ScriptHookV.lib",
+      "bytes": 3912,
+      "sha256": "c2d2f4b9e7a76a0361c6037ec80fdc58a0403502e9c4f4cf132b2f288b329519"
+    },
+    {
+      "name": "build/playable-07-shv-probe/source-dependencies.json",
+      "bytes": 19064,
+      "sha256": "feac2bbf4c8585ece8eae10ce0d77fb95166156785a77de4871dcd4e6ea6affe"
+    },
+    {
+      "name": "evidence/playable-07-analysis.json",
+      "bytes": 10003,
+      "sha256": "9b905557ea2f9f61c6036af986237a3ea386577393c50d0b06d2d3bab70a6ca9"
+    },
+    {
+      "name": "evidence/playable-07-build.json",
+      "bytes": 23041,
+      "sha256": "d31561d16db5a28c5701c6c398413610f4258fc8ccfd602ed98be5f27522474a"
+    },
+    {
+      "name": "evidence/playable-07-fixtures.json",
+      "bytes": 44627,
+      "sha256": "5f47ef221b7731b96aa300301fee8732a2cceb333735bd3abef69b9264c00120"
+    },
+    {
+      "name": "evidence/playable-07-header-provenance.json",
+      "bytes": 6927,
+      "sha256": "c5d16c5d12f11ea44fc4bb124646721287ee84edf982d7f6274a3eb505d8bac5"
+    },
+    {
+      "name": "evidence/playable-07-live.json",
+      "bytes": 86585,
+      "sha256": "a45c90f98f6c7abe9317a9243c52082623d4d12dfbecba460ed0a9ea828ea506"
+    },
+    {
+      "name": "evidence/playable-07-offline.json",
+      "bytes": 4235,
+      "sha256": "3ff792a322d9d481318e08e3865fa1c97f783aa12a29e6b7ba5c19b92dfde58f"
+    },
+    {
+      "name": "evidence/playable-07-rollback.json",
+      "bytes": 17243,
+      "sha256": "fecc25ccf970a4aaf675c3b4dc064268db4fe9b750aaa3cf0a011f4b78ffa4f4"
+    }
+  ],
+  "preservedPlayable07OriginalAndCopiedCaptureFiles": [
+    {
+      "name": "capture.json",
+      "bytes": 2198,
+      "sha256": "e2c6c8e3423c65069d6a6f9742c2ad4af5892522823c958200ef8c77e2d54d1f",
+      "originalAndCopyMatch": true
+    },
+    {
+      "name": "journal.ndjson",
+      "bytes": 913,
+      "sha256": "b496a91256457a380e6363617b405a2292d20321990c72c912215623347d2c0d",
+      "originalAndCopyMatch": true
+    },
+    {
+      "name": "timeline.ndjson",
+      "bytes": 4794224,
+      "sha256": "661a6cc9c4a57fde3e3ffe656a1b4ccaad3680305c566e988f7c149a3d2f8ffd",
+      "originalAndCopyMatch": true
+    }
+  ],
+  "old07OutputDirectoriesProtectedFromPreparation": true,
+  "currentProcesses": {
+    "namedGameRphHosts": 0,
+    "packageBoundNodeWorkers": 0,
+    "matchingLaunchWrappers": 0
+  },
+  "stockFallbackSelected": true,
+  "destinationAndPendingAbsent": true,
+  "timeoutOverridesAbsent": true,
+  "gameFilesWritten": false,
+  "gameDllLoaded": false,
+  "gameStarted": false,
+  "windowsActivated": false,
+  "live08FirstAdvanceEstablished": false,
+  "liveDeploymentAuthorised": false,
+  "providerQualified": false,
+  "sourceOrRenderedAudioEstablished": false,
+  "privacy": "No absolute user/game/toolchain paths, process IDs, raw logs, raw telemetry values or opaque session-directory identifiers are included. Previous evidence is preserved, not relabelled.",
+  "supersededReadinessValidation": {
+    "previousPublicPreflightSha256": "114715e9a84370da4cd7ebabb25c3af92911ed98bd3ac022cd1257ae26e10024",
+    "previousPrivatePreflightSha256": "f622dedfca30ab198df1f6625e7dd9ec7f8b8ec41c92fb1d5aa0cb2a7d9923a5",
+    "previousTestReceiptSha256": "17cd8fc2f26df116cf2a96e7563e373bc20d74dc529c8f91ed5548862d465392",
+    "previousChecks": 37,
+    "reason": "Corrected historical-IDLE readiness for terminal/partial/unknown-producer captures and added raw value/triplet validation; only08 observer/tests/evidence changed. Previous receipts are preserved."
+  },
+  "independentPrivateReceiptSha256": "0b730cad76dd68d4534e716c33bbec571d0c7055c4f48463eb15dc7469c60b81",
+  "finalPreapprovalIntegrity": {
+    "verifiedUtc": "2026-11-01T01:42:06.5666774Z",
+    "result": "PASS",
+    "privateReceiptSha256": "46cefca490a3b8008fad986c5312c1d77d8636b517184c5b17bab4559d2f9df5",
+    "protectedFileCount": 11,
+    "shortcutAndSettingsCount": 4,
+    "priorPinCount": 37,
+    "preservedPlayable07PinCount": 59,
+    "probeSourceInputCount": 3,
+    "preservedOriginalAndCopied07CaptureFiles": 3,
+    "candidateAndPrimaryAnalyzerUnchanged": true,
+    "asiDestinationAnd08PendingAbsent": true,
+    "timeoutOverridesAbsentAllThreeScopes": true,
+    "gameRphHostsAndOwnedWorkers": 0,
+    "stockFallbackSelected": true,
+    "readinessChecksRetained": 49,
+    "readinessTestReceiptSha256": "b8e25bd9636bcf0df19c639d4684058d3f0f48091c86579836038ffc3739e133",
+    "testsRerun": false,
+    "gameWrites": false
+  }
+}

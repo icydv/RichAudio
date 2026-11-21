@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-15",
+  "kind": "sanitised-independent-isolated-offline-audio-stage-review",
+  "result": "MEASUREMENTS-CONFIRMED-EXHAUST-DOMINANCE-IDENTIFIED",
+  "combinedWavSha256": "f65361738e36ce0e1bdb248ff1b724ba85e6be8e22b8d2d6c59fdd7efb0d73d8",
+  "combinedRerenderByteIdentical": true,
+  "genuineFramesConsumed": 670,
+  "maximumEngineExhaustStemSumError": 3.725290298461914e-9,
+  "finalOutput": {
+    "fullFftPowerBelow600Hz": 0.9682421020495613,
+    "fullFftPowerBelow1200Hz": 0.9980669221028363,
+    "welchPowerBelow600Hz": 0.9681669759784992,
+    "welchPowerBelow1200Hz": 0.9980473670656047,
+    "stereoCorrelation": 0.9970358466735972,
+    "monoToStereoRmsRatio": 0.9990407044246363,
+    "peakDbfs": -25.05187266034001,
+    "rmsDbfs": -36.072800890469935,
+    "integratedLufs": -34.607818035968236,
+    "nonfiniteSamples": 0,
+    "samplesAtOrAboveUnity": 0
+  },
+  "actualDryRoles": {
+    "enginePowerBelow600Hz": 0.6047260076209223,
+    "enginePowerBelow1200Hz": 0.6637806565577585,
+    "exhaustPowerBelow600Hz": 0.9718392562125673,
+    "exhaustPowerBelow1200Hz": 0.9986693137998283
+  },
+  "postAcousticRoles": {
+    "engineRmsDbfs": -63.990984790285694,
+    "exhaustRmsDbfs": -36.07622499366193,
+    "exhaustMinusEngineRmsDb": 27.91475979662376,
+    "engineExhaustCorrelation": -0.010292280314638124,
+    "combinedVsIncoherentEnergyDb": -0.0035897648528409208
+  },
+  "pathObservations": {
+    "engineDistanceRangeNativeUnits": [4.838296378702492, 5.276426087210456],
+    "exhaustDistanceRangeNativeUnits": [4.435743953317728, 5.821518467651514],
+    "maximumAbsolutePan": 0.12532805497766464,
+    "nominalHighRelativeToLowLossRangeDb": [0.44313082093644046, 0.581569694918385],
+    "nativeUnitScaleCalibrated": false,
+    "qualifiedOcclusionGeometryPresent": false
+  },
+  "conclusion": "The existing bass-heavy exhaust recording and preserved exhaust-dominant role balance explain the dominant spectral result before acoustic processing. The measured small band attenuation and negligible cross-role cancellation do not explain it.",
+  "productionSourcesChanged": false,
+  "sealedBuildChanged": false,
+  "sealedCandidateChanged": false,
+  "calibrationChanged": false,
+  "gameLaunched": false,
+  "endpointOpened": false,
+  "audioPlayed": false,
+  "recordingStarted": false,
+  "humanListeningPerformed": false,
+  "privateAnalysisSha256": "33185daa45c35ff9f46f6c4e01626d126f1301521e9aaaa5acd1e312b721e228",
+  "privateStemReportSha256": "16f776cb9dd97b516b744f01e752a4bb0efc3136cb116b819a6516ffbdb428c2",
+  "privateRendererHelperSha256": "4a6d3e9b13904e68abfb02ee500bdd28a3cb78fa4ead38891fd99ff45c1ce194",
+  "privateAnalysisHelperSha256": "8c6b437d70ea57d37df24458d5e90ac5066f2ca1e4ace2bc315907223c7906be",
+  "privateListeningIndexSha256": "bdafffd0ce5fcbdf5e9474769d14eee42d3bac418646e383914b7aee680275f3",
+  "privateListeningContainerReportSha256": "14fbde47b7ba825767a7ac9d859afc48340cbf90c62beb3bdd7d6ecc11c72da2",
+  "privateAlignmentReportSha256": "81edaf92154a2f221102529947ded5aa79de505b4edc594034359757fef0f421",
+  "privatePerBlockAlignmentCsvSha256": "e091bbc3dcca0b561fb1be64a83a07554c3d90875a8879e6deb767affd72d9b4",
+  "additionalLosslessWavContainers": {
+    "actualDryMonoRoles": 2,
+    "diagnosticEngineLeftExhaustRightPair": 1,
+    "pairIsSpatialStereo": false,
+    "pairIsPhysicalPremix": false,
+    "originalDecodedNativeRateMonoLayers": 6,
+    "originalSampleBitsPreserved": true,
+    "normalisationApplied": false,
+    "resamplingApplied": false
+  },
+  "perBlockAlignment": {
+    "blocks": 3718,
+    "blockFrames": 512,
+    "sharedTraceFrames": 1903616,
+    "latestRecordedAndActualRenderedOperatingControlsSeparate": true,
+    "unavailableControlsLeftBlank": true,
+    "combinedPcmReproducedAgain": true,
+    "runtimeClockValuesRemainPrivate": true
+  },
+  "initialAudibleRecommendation": {
+    "acceptedCalibrationPreserved": true,
+    "existingFinalPcmAndOptionalLoopbackHooks": true,
+    "additionalLiveRoleAndDryStemsDeferredToFutureReviewedBuild": true,
+    "newLiveStemIntegrationClaimed": false
+  },
+  "privatePlotHashes": {
+    "waveformSpectrogram": "c4d45f62a2ec25cd575ebbddf2ed1438f5dc02ef3f7c417f215338d23f0a021e",
+    "spectralRoleComparison": "7eb26ae655e9a8753a7adf9ef7c86dc43eeb9c8f7ef1ea3fe4098fc72ab46bac"
+  },
+  "limits": [
+    "Offline captured-telemetry rendering, not synchronised live GTA/native-renderer reference audio.",
+    "Raw whole recordings and selected source-control intervals are different contexts; actual dry taps supply the stronger stage comparison.",
+    "LUFS describes gated file loudness; no speaker SPL or endpoint level measured.",
+    "No native operating-state/RPM mapping defect is established by these spectra alone.",
+    "No production mix, EQ, stereo-width, gain or calibration change is proposed as already accepted."
+  ],
+  "report": "docs/PLAYABLE_15_AUDIO_REVIEW.md"
+}

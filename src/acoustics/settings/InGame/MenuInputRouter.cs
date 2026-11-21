@@ -2,6 +2,25 @@ using System;
 
 namespace RichAudio.Settings.InGame
 {
+    // A saved key change cannot turn a key already held during Apply into a
+    // fresh menu-toggle gesture. The adapter supplies physical held states.
+    public sealed class MenuShortcutLatch
+    {
+        public string Key {get;private set;}
+        public string PreviousKey {get;private set;}
+        public bool WaitingForRelease {get;private set;}
+        public MenuShortcutLatch(){Key=PreviousKey="F10";}
+        public void Configure(string key)
+        {
+            if(Array.IndexOf(MenuPreferences.MenuToggleKeys,key)<0)key="F10";
+            if(key==Key)return;PreviousKey=Key;Key=key;WaitingForRelease=true;
+        }
+        public bool Held(bool selectedKeyHeld,bool previousKeyHeld,bool controllerChordHeld)
+        {
+            if(WaitingForRelease){if(selectedKeyHeld||previousKeyHeld||controllerChordHeld)return false;WaitingForRelease=false;PreviousKey=Key;}
+            return selectedKeyHeld||controllerChordHeld;
+        }
+    }
     // Decisions only: the adapter owns visibility, pause state and actual input suppression.
     public struct MenuInputResult
     {
@@ -13,10 +32,10 @@ namespace RichAudio.Settings.InGame
 
     public sealed class MenuInputRouter
     {
-        private const double ToggleDebounceMs=250, InitialRepeatMs=400, RepeatMs=110;
+        private const double InitialRepeatMs=400, RepeatMs=110;
         private readonly bool[] previousNavigation=new bool[6];
         private bool previousToggle, previousVisible, navigationArmed, pendingConsoleRequest;
-        private double lastTime=Double.NegativeInfinity,lastToggle=Double.NegativeInfinity,nextRepeat;
+        private double lastTime=Double.NegativeInfinity,nextRepeat;
         private int repeatingDirection=-1;
 
         // Navigation order is exactly MenuInput: Up, Down, Left, Right, Accept, Back.
@@ -44,8 +63,10 @@ namespace RichAudio.Settings.InGame
                 return new MenuInputResult(false,menuVisible,null,false);
             }
 
-            bool toggle=toggleEdge&&nowMs-lastToggle>=ToggleDebounceMs;
-            if(toggle)lastToggle=nowMs;
+            // Physical rising edges already reject held keys. An additional
+            // time gate would discard genuine taps and prevent reversing the
+            // shorter220ms presentation. Rebinding has its own release gate.
+            bool toggle=toggleEdge;
             bool requested=pendingConsoleRequest;pendingConsoleRequest=false;
             if(!menuVisible)
             {

@@ -1,0 +1,478 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-08",
+  "attempt": "guided-live-02",
+  "dateUtc": "2026-11-01",
+  "origin": "Actual GTA Enhanced and ScriptHookV; not fixture data",
+  "candidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "sha256": "41361aa281493e1cc54fe196161aafc4a93ce002bfe0bb9da2effbc742465484",
+    "bytes": 380416
+  },
+  "authorization": {
+    "singleDeployment": true,
+    "singleLaunch": true,
+    "singleCapture": true,
+    "automaticRetry": false,
+    "maximumActiveSeconds": 120,
+    "maximumTargets": 2400,
+    "maximumHz": 20,
+    "maximumCaptureBytes": 12582912,
+    "audioPlaybackAuthorised": false,
+    "audioCaptureAuthorised": false,
+    "loudnessActivationAuthorised": false,
+    "receiptSha256": "7173bc797af2df24e97d387fd7449e043ef0859cc113203131c0f8aeb3c28d10"
+  },
+  "route": {
+    "launch": "Existing working RPH launch route",
+    "gtaProductVersion": "1.0.1158.16",
+    "gtaExecutableSha256": "b48e80f5fc899eb89e5dcc9f3b68e9551cc8dcfac78b2a940b207e569e9987ea",
+    "rphVersion": "1.132.1428.17748",
+    "rphSha256": "73f05b3f7973d4731f4151ae061dd3c991065e8bf3ece51ea1d9ab728b9b42ac",
+    "shvVersion": "3889.0/1158.13",
+    "shvInternalGameVersion": "VER_EN_1_0_1158_13",
+    "shvSha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f",
+    "asiLoaderSha256": "9fd9e02353b7d39fe07b9667f7ea2697229a7f2d0e7d389eb79eb212b1bb181d",
+    "installedCandidateHashMatchedBeforeLaunch": true,
+    "nativeTargetHash": "F9DDA40BC293A61E",
+    "rphTelemetryPathRepaired": false,
+    "rphRatioRejectionStillPresent": true,
+    "handleDomain": "ScriptHookV native context only; no RPH identity handoff established",
+    "logCounts": {
+      "asiLoadAttempts": 1,
+      "scriptRegistrations": 1,
+      "scriptMainLaunches": 1,
+      "scriptUnregistrations": 1
+    }
+  },
+  "capture": {
+    "terminalReason": "operator-stop",
+    "operatorStopWasEarly": false,
+    "producerCompleted": true,
+    "deadlineReached": false,
+    "sourceProviderValid": false,
+    "sourceMeasuredRPM": false,
+    "observations": 1633,
+    "completeDeclaredReturnObservationTriplets": 1633,
+    "timelineRecords": 4907,
+    "phaseMarkers": 8,
+    "distinctRawBits": 836,
+    "minimumRawBitsHex": "3E4CCCCD",
+    "maximumRawBitsHex": "3F800000",
+    "rawRatio": {
+      "minimum": 0.20000000298023224,
+      "maximum": 1,
+      "median": 0.46892979741096497,
+      "first": 0.20000000298023224,
+      "last": 0.20000000298023224
+    },
+    "everyTargetReadGood": true,
+    "everyResultPointerPresent": true,
+    "zeroValuedObservations": 0,
+    "zeroWhileRunningCount": 0,
+    "everyContextBracketValid": true,
+    "allPreAndPostEngineRunningRaw": 1,
+    "oneIdentityThroughout": true,
+    "everyDriverMatchesPlayerPed": true,
+    "modelHash": "F9300CC5",
+    "maximumAcquiredSpeedMps": 41.9758873,
+    "maximumObservedRatioStep": 0.05675327777862549,
+    "droppedOperatorEvents": 0,
+    "staleOperatorEvents": 0,
+    "writerFailed": false,
+    "exceptionCode": 0,
+    "presentationExceptionCodeAtCapture": 0,
+    "unpublishedRecordPresent": false,
+    "sourceFiles": [
+      {
+        "name": "capture.json",
+        "bytes": 2200,
+        "sha256": "79303551d1025db65bc4fe004c50461ee4582fc608f1da4e4d17bc657641641b",
+        "matchesPreservedSourceDigest": true
+      },
+      {
+        "name": "journal.ndjson",
+        "bytes": 913,
+        "sha256": "d18bbb227e168e6f82197842d875efc78c8d1e4e6abb294516eb4d17acd9299f",
+        "matchesPreservedSourceDigest": true
+      },
+      {
+        "name": "timeline.ndjson",
+        "bytes": 4203482,
+        "sha256": "233def1afaf12d8973abf57c81fdd478e41be36b4c165d08c6a853bfd753af67",
+        "matchesPreservedSourceDigest": true
+      }
+    ],
+    "aggregateCaptureBytes": 4206595,
+    "maximumObservedTimelineRowBytes": 1607,
+    "timing": {
+      "domain": "QueryPerformanceCounter in the game process",
+      "qpcFrequency": 10000000,
+      "relativeOrigin": "active-start",
+      "operatorCallbackBeforeRelativeSeconds": -0.0256467,
+      "operatorCallbackAfterRelativeSeconds": -0.0256467,
+      "operatorContextObservedRelativeSeconds": -0.0141699,
+      "waitingBeforeActiveSeconds": 49.2963187,
+      "firstTargetRelativeSeconds": 0.000022,
+      "lastTargetRelativeSeconds": 91.942061,
+      "lastTargetReturnRelativeSeconds": 91.942062,
+      "cooperativeProducerEndRelativeSeconds": 91.9984678,
+      "minimumTargetStartIntervalMs": 54.6783,
+      "maximumTargetStartIntervalMs": 57.927,
+      "minimumAfterReturnToNextTargetMs": 54.6771,
+      "uncertainty": "Keyboard bounds describe callback observation, not physical key timing. Native before/after and context acquisition bounds are local diagnostic timings; they do not isolate handler performance, engine simulation time, device latency or audio alignment. Producer end is not a disk publication timestamp."
+    }
+  },
+  "phases": [
+    {
+      "requestedPhaseIndex": 0,
+      "requestedPhase": "OFF",
+      "acceptedRelativeSeconds": -0.0141955,
+      "observations": 104,
+      "firstTargetRelativeSeconds": 0.000022,
+      "lastTargetRelativeSeconds": 5.8027341,
+      "observedSpanSeconds": 5.8027121,
+      "ratio": {
+        "minimum": 0.20000000298023224,
+        "maximum": 0.20000000298023224,
+        "median": 0.20000000298023224,
+        "first": 0.20000000298023224,
+        "last": 0.20000000298023224
+      },
+      "acquiredSpeedMps": {
+        "minimum": 0,
+        "maximum": 0.0202885196,
+        "median": 0,
+        "first": 0,
+        "last": 0
+      },
+      "operatorLabelIsAchievedStateProof": false
+    },
+    {
+      "requestedPhaseIndex": 1,
+      "requestedPhase": "IDLE",
+      "acceptedRelativeSeconds": 5.8594837,
+      "observations": 263,
+      "firstTargetRelativeSeconds": 5.8595039,
+      "lastTargetRelativeSeconds": 20.6195891,
+      "observedSpanSeconds": 14.7600852,
+      "ratio": {
+        "minimum": 0.20000000298023224,
+        "maximum": 0.20000000298023224,
+        "median": 0.20000000298023224,
+        "first": 0.20000000298023224,
+        "last": 0.20000000298023224
+      },
+      "acquiredSpeedMps": {
+        "minimum": 0,
+        "maximum": 0,
+        "median": 0,
+        "first": 0,
+        "last": 0
+      },
+      "operatorLabelIsAchievedStateProof": false
+    },
+    {
+      "requestedPhaseIndex": 2,
+      "requestedPhase": "STATIONARY_REV",
+      "acceptedRelativeSeconds": 20.6335479,
+      "observations": 315,
+      "firstTargetRelativeSeconds": 20.6756974,
+      "lastTargetRelativeSeconds": 38.3653321,
+      "observedSpanSeconds": 17.6896347,
+      "ratio": {
+        "minimum": 0.20000000298023224,
+        "maximum": 1,
+        "median": 0.7743250131607056,
+        "first": 0.20000000298023224,
+        "last": 0.20000000298023224
+      },
+      "acquiredSpeedMps": {
+        "minimum": 0,
+        "maximum": 0.853390515,
+        "median": 0.00179891393,
+        "first": 0,
+        "last": 0
+      },
+      "operatorLabelIsAchievedStateProof": false
+    },
+    {
+      "requestedPhaseIndex": 3,
+      "requestedPhase": "ACCELERATION",
+      "acceptedRelativeSeconds": 38.3933828,
+      "observations": 277,
+      "firstTargetRelativeSeconds": 38.4215764,
+      "lastTargetRelativeSeconds": 53.9711433,
+      "observedSpanSeconds": 15.5495669,
+      "ratio": {
+        "minimum": 0.20000000298023224,
+        "maximum": 0.9762794375419617,
+        "median": 0.8255267143249512,
+        "first": 0.20000000298023224,
+        "last": 0.9218510985374451
+      },
+      "acquiredSpeedMps": {
+        "minimum": 0,
+        "maximum": 41.8735008,
+        "median": 33.1292496,
+        "first": 0,
+        "last": 41.8735008
+      },
+      "operatorLabelIsAchievedStateProof": false
+    },
+    {
+      "requestedPhaseIndex": 4,
+      "requestedPhase": "GEAR_TRANSITIONS",
+      "acceptedRelativeSeconds": 53.9991283,
+      "observations": 267,
+      "firstTargetRelativeSeconds": 54.0274461,
+      "lastTargetRelativeSeconds": 69.0131621,
+      "observedSpanSeconds": 14.985716,
+      "ratio": {
+        "minimum": 0.33065924048423767,
+        "maximum": 0.9757658839225769,
+        "median": 0.7590860724449158,
+        "first": 0.9225494861602783,
+        "last": 0.5474153757095337
+      },
+      "acquiredSpeedMps": {
+        "minimum": 13.9928007,
+        "maximum": 41.9758873,
+        "median": 29.7055149,
+        "first": 41.9051437,
+        "last": 13.9928007
+      },
+      "operatorLabelIsAchievedStateProof": false
+    },
+    {
+      "requestedPhaseIndex": 5,
+      "requestedPhase": "DECELERATION",
+      "acceptedRelativeSeconds": 69.0413485,
+      "observations": 170,
+      "firstTargetRelativeSeconds": 69.0695644,
+      "lastTargetRelativeSeconds": 78.5901952,
+      "observedSpanSeconds": 9.5206308,
+      "ratio": {
+        "minimum": 0.20000000298023224,
+        "maximum": 0.6228369474411011,
+        "median": 0.20000000298023224,
+        "first": 0.5387220978736877,
+        "last": 0.20000000298023224
+      },
+      "acquiredSpeedMps": {
+        "minimum": 0,
+        "maximum": 15.9065275,
+        "median": 2.55212474,
+        "first": 13.7696667,
+        "last": 0
+      },
+      "operatorLabelIsAchievedStateProof": false
+    },
+    {
+      "requestedPhaseIndex": 6,
+      "requestedPhase": "RETURN_IDLE",
+      "acceptedRelativeSeconds": 78.6042121,
+      "observations": 237,
+      "firstTargetRelativeSeconds": 78.6464038,
+      "lastTargetRelativeSeconds": 91.942061,
+      "observedSpanSeconds": 13.2956572,
+      "ratio": {
+        "minimum": 0.20000000298023224,
+        "maximum": 0.20000000298023224,
+        "median": 0.20000000298023224,
+        "first": 0.20000000298023224,
+        "last": 0.20000000298023224
+      },
+      "acquiredSpeedMps": {
+        "minimum": 0,
+        "maximum": 0,
+        "median": 0,
+        "first": 0,
+        "last": 0
+      },
+      "operatorLabelIsAchievedStateProof": false
+    }
+  ],
+  "firstAdvance": {
+    "ready": true,
+    "confirmingObservationIndex": 105,
+    "acceptedRelativeSeconds": 5.8594837,
+    "confirmingContextRelativeSeconds": 5.859509,
+    "drivingInterlock": false,
+    "observerPerformedGameNativeCalls": 0
+  },
+  "primaryAnalysis": {
+    "sourceSha256": "c246ea676c54b8298503cadfcc8603eac4c7f1fbfca012bf7e5a726e48937799",
+    "receiptSha256": "858003718ea49ed56037993ef14598cf6c8a816ead83a17ada9f387375d5197b",
+    "verdict": "candidate-consistent",
+    "providerQualified": false,
+    "measuredRPM": false,
+    "criteriaUnchanged": true,
+    "allSevenCriteriaPassed": true,
+    "criteria": {
+      "initialIdleContextAndStability": true,
+      "returnIdleContextAndStability": true,
+      "independentAcceleration": true,
+      "independentDeceleration": true,
+      "ratioRiseDuringObservedAcceleration": true,
+      "ratioFallDuringObservedDeceleration": true,
+      "meaningfulRunningVariation": true
+    },
+    "qualityFailures": [],
+    "evidenceGaps": [],
+    "warnings": [
+      "engine-off-unobserved",
+      "gear-and-actual-throttle-unavailable-with-approved-native-set",
+      "stationary-rev-input-association-unobserved",
+      "keyboard-intent-does-not-prove-engine-actuation"
+    ],
+    "initialIdle": {
+      "samples": 263,
+      "durationSeconds": 14.7600852,
+      "median": 0.20000000298023224,
+      "minimum": 0.20000000298023224,
+      "maximum": 0.20000000298023224,
+      "maximumExcursion": 0,
+      "speedStart": 0,
+      "speedEnd": 0,
+      "speedQuarterDelta": 0,
+      "ratioQuarterDelta": 0
+    },
+    "returnIdle": {
+      "samples": 237,
+      "durationSeconds": 13.2956572,
+      "median": 0.20000000298023224,
+      "minimum": 0.20000000298023224,
+      "maximum": 0.20000000298023224,
+      "maximumExcursion": 0,
+      "speedStart": 0,
+      "speedEnd": 0,
+      "speedQuarterDelta": 0,
+      "ratioQuarterDelta": 0
+    },
+    "acceleration": {
+      "samples": 277,
+      "durationSeconds": 15.5495669,
+      "median": 0.8255267143249512,
+      "minimum": 0.20000000298023224,
+      "maximum": 0.9762794375419617,
+      "maximumExcursion": 0.6255267113447189,
+      "speedStart": 0,
+      "speedEnd": 41.87350082397461,
+      "speedQuarterDelta": 29.010689735412598,
+      "ratioQuarterDelta": 0.329006552696228
+    },
+    "deceleration": {
+      "samples": 170,
+      "durationSeconds": 9.5206308,
+      "median": 0.20000000298023224,
+      "minimum": 0.20000000298023224,
+      "maximum": 0.6228369474411011,
+      "maximumExcursion": 0.42283694446086884,
+      "speedStart": 13.76966667175293,
+      "speedEnd": 0,
+      "speedQuarterDelta": -13.325404167175293,
+      "ratioQuarterDelta": -0.32184018194675446
+    }
+  },
+  "humanReview": {
+    "receivedAfterCapture": true,
+    "report": "The operator reported completing the phases, including slowdown and a stationary return to idle.",
+    "receiptSha256": "e81825b2e6a1236014ad2a3166c61787f7b2f58edf182c207ebf350b5c45797a",
+    "noExactActionTimestampsSupplied": true,
+    "engineOffNotEstablished": true,
+    "measuredGearsNotEstablished": true
+  },
+  "supplementalStationaryRevObservation": {
+    "totalObservations": 315,
+    "bothAcquiredSpeedsAtMost01Mps": 309,
+    "observationsAboveStationarityThreshold": 6,
+    "nearStationaryRatio": {
+      "minimum": 0.20000000298023224,
+      "maximum": 1,
+      "median": 0.774660050868988,
+      "first": 0.20000000298023224,
+      "last": 0.20000000298023224
+    },
+    "nearStationaryDistinctRawBits": 223,
+    "maximumAcquiredSpeedMps": 0.853390515,
+    "actualEngineActuationProven": false,
+    "heldWIntentObserved": false,
+    "heldSIntentObserved": false
+  },
+  "recommendation": {
+    "status": "supports-restricted-human-review-acceptance",
+    "scope": "Engine-running normalized operating-state signal for Bati model F9300CC5 on this exact GTA Enhanced executable, SHV build and diagnostic artifact, across the captured idle, motion-associated rise/fall and stationary return.",
+    "humanReportCorroboratesCoreSequence": true,
+    "physicalRpmQualified": false,
+    "fullProviderQualified": false,
+    "productionIntegrationAccepted": false,
+    "productionPlaybackAccepted": false,
+    "productionRecordingAccepted": false,
+    "restrictions": [
+      "No physical RPM conversion or calibration is established.",
+      "Engine-off, stop/restart and zero semantics were not observed in this capture.",
+      "Gear and actual throttle remain unavailable with the approved native set.",
+      "Requested labels and keyboard intent are not achieved engine-actuation evidence.",
+      "Other models, builds, frameworks, NPC traffic and sustained production reliability remain unqualified.",
+      "SHV vehicle identities remain in the SHV native handle domain; no RPH handle interchange has been validated."
+    ],
+    "nextBoundary": "A separate offline handoff may consume only a scoped, explicitly reviewed signal. Real playback, listening, recording and production activation remain gated and require their own evidence and approval."
+  },
+  "integrity": {
+    "capturePreservationReceiptSha256": "2dee9c6fee31502fa9a76354f8b2b1844ed973aec0b1d9ea4848564fbfdb365b",
+    "independentInstalledPreflightSha256": "c70a96f292f677dc36b601f3421f81e3a2861ec2ad721f5564b92679e617716e",
+    "independentReviewSha256": "af08337c01373d9405e804069d638b6df8bfb34ca00ac484f14b97d2d6bb1410",
+    "sourceLogPins": [
+      {
+        "name": "asiloader.log",
+        "bytes": 1647,
+        "sha256": "00cf939a16c85bd8a0dd0675eb210bbc3eb97a261549454821f53088b4b64bbf"
+      },
+      {
+        "name": "ScriptHookV.log",
+        "bytes": 1167,
+        "sha256": "bdcbf354b54fc2511b67571ba8a66d9d1ec6cb157a51460076fc90f7b6e0a5dc"
+      },
+      {
+        "name": "RagePluginHook.log",
+        "bytes": 16157,
+        "sha256": "acd23c55346b42140762a94957787895d3b986876060dadfca0087ead0f94dfe"
+      }
+    ],
+    "earlier08IncompleteEvidenceSha256": "1f63306d01b7281a479a07fd5d77c9f06667e8dd5e3cefb58d5a309f47f09edd",
+    "earlier08IncompletePreserved": true
+  },
+  "closure": {
+    "normalQuitDialogObserved": true,
+    "yesReturnIssued": true,
+    "postInputVerificationReportedNoForegroundPid": true,
+    "relevantProcessesAbsent": true,
+    "forcedTermination": false,
+    "removedOnlyOwnedHashMatchedAsi": true,
+    "probeAbsent": true,
+    "protectedRuntimeFilesUnchanged": true,
+    "savedSettingsUnchanged": true,
+    "integrationMode": "stock-fallback",
+    "normalExitReceiptSha256": "0e735d84bd74613b877805a0bca878f28dcc1f4092dc323f9793e5148fdf508d",
+    "rollbackReceiptSha256": "35d741892fc33ed6a6dadbca04f81c589044e54b11a5877d129e431594e10f3f"
+  },
+  "boundaries": {
+    "actualFrameworkExecuted": true,
+    "actualGameStarted": true,
+    "audioHostStartedByAgent": false,
+    "productionFeatureActivation": false,
+    "audioRecorded": false,
+    "physicalRpmQualified": false,
+    "fullProviderQualified": false,
+    "productionPlaybackReady": false,
+    "productionRecordingReady": false,
+    "engineOffObserved": false,
+    "gearGetterAvailable": false,
+    "throttleGetterAvailable": false,
+    "operatorLabelsAreAchievedStateProof": false,
+    "keyboardIntentIsThrottle": false,
+    "primaryAnalysisCriteriaChanged": false,
+    "newLiveAuthorisationGrantedByThisEvidence": false
+  }
+}

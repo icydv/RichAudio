@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-10",
+  "kind": "actual-ownership-verified-post-exit-rollback",
+  "result": "PASS",
+  "privateRollbackReceiptSha256": "144fa0ae65179350e5ae8d7143e6e121585365793d287443e6aacfd113620420",
+  "privateProcessExitReceiptSha256": "58226a2f73e8c693d9998aeb84aaa477d7353744f3a9ca039894e9e45129be32",
+  "privateUiExitReceiptSha256": "c98ff8bd268268d8f6b612d42fc32f38929d8d1c8b7832cabee06e5b00ed6e80",
+  "privateLiveControllerSha256": "8f0fbde9ac8bfe9a1a08ef87f1742ad611901a27767a4aaabaea1dc738ff46df",
+  "originalPlugin": {
+    "bytes": 222208,
+    "sha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657",
+    "restoredAndVerified": true
+  },
+  "protectedFilesVerified": 11,
+  "settingsFingerprintsVerified": 4,
+  "priorTrackedFilesBytePreserved": 723,
+  "prior09PrivateFilesBytePreserved": 579,
+  "compiledDiagnosticSourcesBytePreserved": true,
+  "stockFallback": true,
+  "modificationAwareLoudness": false,
+  "synchronizedAudioRecording": false,
+  "ownedGamePathsAbsent": true,
+  "relevantAndOwnedLaunchProcessesAbsent": true,
+  "removedOnly": [
+    "owned exact diagnostic RichAudio.dll",
+    "owned exact process-bound diagnostic lease"
+  ],
+  "asiDeployedOrDeleted": false,
+  "recursiveDeletionUsed": false,
+  "capturesDeleted": false,
+  "forceTerminationUsed": false,
+  "approvalConsumed": true,
+  "anotherLaunchAuthorised": false,
+  "privacy": "Only aggregate counts, artifact identities and private receipt digests published."
+}

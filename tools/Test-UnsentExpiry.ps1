@@ -15,7 +15,9 @@ if($Baseline){
  $original=$original.Replace($anchor,('        internal Action BeforeEncodeTest, AfterEncodeTest;'+"`n"+$anchor))
  $original=$original.Replace('byte[] bytes=Protocol.Frame(state);','if(BeforeEncodeTest!=null)BeforeEncodeTest();byte[] bytes=Protocol.Frame(state);if(AfterEncodeTest!=null)AfterEncodeTest();')
  $baselineFile=Join-Path $out 'BaselineStatePipe.cs';$original|Set-Content $baselineFile
- $sources=@($sources|Where-Object { [IO.Path]::GetFileName($_) -ne 'StatePipe.cs' })+@($baselineFile)
+ # The historical listener protocol predates the independent gameplay ACK
+ # contract. Compile only the historical listener under test, unchanged.
+ $sources=@($sources|Where-Object { [IO.Path]::GetFileName($_) -notin @('StatePipe.cs','GameplayProtocol.cs') })+@($baselineFile)
  $define='/define:TRANSPORT_EXPIRY_TEST,EXPIRY_BASELINE'
 }
 & $compiler /nologo /optimize+ /warnaserror+ /platform:x64 $define /r:System.Runtime.Serialization.dll /r:System.Web.Extensions.dll ('/out:'+$exe) @sources

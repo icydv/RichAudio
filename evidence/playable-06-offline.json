@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "dateUtc": "2026-10-31",
+  "profile": "PLAYABLE-06",
+  "startingCommit": "63b76557c27a4f40f0670af413ae896576b62097",
+  "branch": "feature/playable-01",
+  "scope": "Offline actual operator-armed ASI build, genuine-binary fake-framework fixtures, proposal preparation and unchanged installation verification",
+  "candidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "bytes": 323584,
+    "sha256": "af860dc42540a94c2176ee0dce09c77d9c16c9eeea46a1572d5011aaa8863be4",
+    "pathHint": "build/playable-06-shv-probe/RichAudio.OperatingState.Shv.asi",
+    "installablePlayableUpdate": false
+  },
+  "priorPlayable05ZeroReclassified": false,
+  "preservedEarlierFiles": [
+    {
+      "Name": "build/playable-04-shv-probe/RichAudio.OperatingState.Shv.asi",
+      "Bytes": 288256,
+      "Sha256": "8f516dc5bdfd62f125c8f9624d3396c9c3f9debceb618c39f76784323fd7a083"
+    },
+    {
+      "Name": "build/playable-04-shv-probe/build-receipt.json",
+      "Bytes": 37212,
+      "Sha256": "d945e51d966583ca711dcca4e26d098d7838ce9ed4bd92ce90adc482f24c25ab"
+    },
+    {
+      "Name": "build/playable-04-shv-probe/pe-inspection.json",
+      "Bytes": 3400,
+      "Sha256": "cd0c7d23c5f765cb7efc88c22acf7945fd2643efbb88ab91d292638eacbbf65e"
+    },
+    {
+      "Name": "evidence/playable-04-build.json",
+      "Bytes": 10169,
+      "Sha256": "16a43f06dee0cf1e7445b7f13f1ffcadd70f2f6566ccda09aca68fa36fe2ea96"
+    },
+    {
+      "Name": "evidence/playable-04-fixtures.json",
+      "Bytes": 9376,
+      "Sha256": "6523b56791e9ed4788de92eb99b51c48f6f027c0b0d6b99477f9702785a25ce6"
+    },
+    {
+      "Name": "evidence/playable-05-rollback.json",
+      "Bytes": 6544,
+      "Sha256": "eca95581d9dbbbb75a569d4c2074c1825c3b12bae51f7ba12220d5c3e756063e"
+    }
+  ],
+  "validation": {
+    "actualX64CompilationPassed": true,
+    "staticPeAndEightPublicImportsPassed": true,
+    "onlyForegroundUser32Readers": true,
+    "assertions": 1280,
+    "cases": 37,
+    "fullMatrix": true,
+    "operatorArmingValidated": true,
+    "stableIdleGateValidated": true,
+    "requiredStableIdleMs": 2000,
+    "minimumQualifiedFixtureSpanMs": 2068.2504,
+    "largestCombinedCaptureJournalBytes": 7936.0,
+    "physicalGlobalInputInjected": false,
+    "actualInstalledShvLoaded": false,
+    "actualGameStarted": false,
+    "newSystemSoftwareInstalled": false,
+    "nativeCatalogueDefinitionsChecked": 25,
+    "sourceAndCandidateReceiptsMatch": true,
+    "preparationGuards": [
+      {
+        "check": "Manifest output must be new",
+        "passed": true
+      },
+      {
+        "check": "Refusing build or inspection output inside the game installation",
+        "passed": true
+      },
+      {
+        "check": "Deadline override rejected",
+        "passed": true
+      },
+      {
+        "check": "Subset fixture receipt rejected before output creation",
+        "passed": true
+      }
+    ]
+  },
+  "proposalPreparation": {
+    "schema": 1,
+    "candidateSha256": "af860dc42540a94c2176ee0dce09c77d9c16c9eeea46a1572d5011aaa8863be4",
+    "buildReceiptSha256": "b932f61fb37739d7a6b5e0ff5f591fbda004667f3473f573dfa59836793f3343",
+    "fixtureReceiptSha256": "03161bee748a5b5fe97b338dc0a7b11fd268a3cecaa3efb4e44ba4b37a3cc78c",
+    "protectedFiles": 11,
+    "protectedHashesMatch": true,
+    "settingsSha256": "73647afcfa175c643a6938c63fc25845c2527dc8c864221bcf35142ce956f711",
+    "reviewedShortcutFilesMatch": true,
+    "timeoutOverridesAbsent": true,
+    "stockFallback": true,
+    "gameProcesses": 0,
+    "probeDestinationAbsent": true,
+    "gameFilesWritten": false,
+    "deployed": false,
+    "launched": false,
+    "manifests": [
+      {
+        "name": "installation-manifest.json",
+        "sha256": "938fcbc3f1f55164132174cf80bf17bd8900e60afca3da2b7632601e0484cc19"
+      },
+      {
+        "name": "one-call-proposal.json",
+        "sha256": "84115ce7dc6ef6c4c76a21df351e3f679151b31be43b37d1dd11cc40c9db50ba"
+      },
+      {
+        "name": "rollback-manifest.json",
+        "sha256": "a8f86f1810e7295c777c0e6c98fc0c364abdacbf9fef6c5ead6636f25beb82b3"
+      }
+    ]
+  },
+  "installation": {
+    "protectedHashCount": 11,
+    "protectedHashesMatch": true,
+    "savedSettingsHashMatches": true,
+    "reviewedShortcutHashesMatch": true,
+    "stockFallbackSelected": true,
+    "deadlineOverrideAbsent": true,
+    "proposedAsiAndPendingPathsAbsent": true,
+    "gameRphProductAndFixtureProcesses": 0,
+    "gameFilesWritten": false,
+    "deployed": false,
+    "launched": false
+  },
+  "decision": {
+    "offlinePreparation": "PASS",
+    "oneLaunchOperatorArmedLiveQualification": "GO only after separate explicit approval for this exact artifact and plan",
+    "authenticTelemetryProvider": "BLOCKED: no revised live observation",
+    "playableDevelopment": "BLOCKED",
+    "multiStateOrAudioTestAuthorised": false,
+    "upstreamReportsSubmitted": false
+  },
+  "limits": [
+    "Fake keyboard callbacks and HUD are not proof of actual SHV key delivery, game rendering or authentic engine state",
+    "Discrete engine-running and near-stationary observations do not establish continuous physical state or revolution-signal semantics",
+    "Target acquisition deadline is 300 seconds; terminal HUD-only display may last a further5 seconds",
+    "Watchdog cannot preempt a blocked native, contain every fatal path or force filesystem completion",
+    "No previous live approval applies to the new candidate"
+  ],
+  "futureRecordingRequirement": {
+    "implemented": false,
+    "afterRealVehiclePlayback": [
+      "RichAudio-generated stereo PCM",
+      "Windows WASAPI loopback mix",
+      "Synchronized vehicle-state and audio-processing timestamps"
+    ],
+    "analysisGoals": [
+      "discontinuities",
+      "clipping",
+      "phase issues",
+      "dropouts",
+      "spatial movement",
+      "latency"
+    ],
+    "optionalHumanListening": true
+  },
+  "privacy": "No SDK/runtime/compiler/game binaries, original assets, private captures, absolute user paths, PIDs, handles or pointer addresses are published"
+}

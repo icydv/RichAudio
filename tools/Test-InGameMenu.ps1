@@ -7,6 +7,7 @@ $build=Join-Path $repo 'build\in-game-settings'
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 $sources=@(Get-ChildItem (Join-Path $repo 'src\acoustics\settings\InGame') -Filter '*.cs' | Where-Object Name -NotLike '*.Rph.cs' | ForEach-Object FullName)
 $sources+=Join-Path $repo 'tests\menu\TestInGameMenu.cs'
+$sources+=Join-Path $repo 'tests\menu\TestMenuTransition.cs'
 $options=@('/nologo','/optimize+','/warnaserror+','/langversion:5','/platform:x64','/r:System.Drawing.dll','/r:System.Web.Extensions.dll')
 $routerTest=Join-Path $repo 'tests\menu\TestMenuInputRouter.cs'
 if(Test-Path -LiteralPath $routerTest){$sources+=$routerTest;$options+='/define:MENU_INPUT_TESTS'}

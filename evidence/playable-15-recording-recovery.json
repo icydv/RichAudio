@@ -1,0 +1,234 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-15",
+  "kind": "offline-recording-recovery-and-latency-diagnostics",
+  "result": "OFFLINE_PASS; REVIEW_ONLY; LIVE_NOT_AUTHORIZED",
+  "baselineResultCommit": "a9e3fa713c1a2877bf3c31fd40c44e16776f53f6",
+  "concurrentReadmeCommitsPreserved": [
+    "f6db02cefc71bf7420184824e4da71840c2df3a6",
+    "fa5ea2c4539022c119496682aadf3a8890812cc7"
+  ],
+  "proprietaryAssetsIncluded": false,
+  "recordingsPrivate": true,
+  "runtimeIdentifiersIncluded": false,
+  "rootCause": {
+    "packetFlags": 1,
+    "timestampErrorBitPresent": false,
+    "firstPacket": true,
+    "oldFatalCondition": "(packet.Flags & 5) != 0",
+    "effect": "Session-wide admission sealed after first loopback packet, discarding independent later owned capture while playback continued",
+    "contractGuaranteesHarmlessStartup": false,
+    "missingInitialSamplesCanBeReconstructed": false,
+    "historicalSevenCaptureFilesIntegrityReverified": true
+  },
+  "correction": {
+    "validInitialPacketRetained": true,
+    "rawFlagsAndBytesRetained": true,
+    "wavFrameStartAssociated": true,
+    "initialMissingFrameCount": null,
+    "startupUncertaintyExplicit": true,
+    "loopbackFaultIndependentOfOwnedCapture": true,
+    "laterFaultsRemainDetectable": [
+      "data-discontinuity",
+      "timestamp-error",
+      "timestamp-unavailable",
+      "unknown-flags",
+      "device-frame-gap",
+      "device-frame-regression",
+      "qpc-regression",
+      "queue-overflow",
+      "release/backend/early-stop failure"
+    ],
+    "sharedWriterAndBudgetFailuresRemainSessionWide": true,
+    "captureFinalizationIsNotSynchronization": true,
+    "noGapPadding": true,
+    "automaticRestartAdded": false
+  },
+  "tests": {
+    "fullOffline": {
+      "passed": true,
+      "nodeTestExecutions": 576,
+      "nodeFailures": 0,
+      "nodeSkipped": 0,
+      "logSha256": "649acdd67cc2169186f659a34f7a12d203b0315caf2d7ba263169e1c4a32bf03",
+      "includesManagedNativeAndRecordingSuites": true,
+      "scope": "Broad run preceded final two analyser summary corrections; final affected regressions and exact-package chains reran afterward."
+    },
+    "finalRecorder": {
+      "csharpAssertions": 2460,
+      "existingAnalysisChecks": 17,
+      "latencyAnalysisControls": 25,
+      "failed": 0,
+      "eachStartupCaseSubmittedFrames": 122880,
+      "eachStartupCaseSeconds": 2.56,
+      "startupFlagsTested": [
+        0,
+        1,
+        3
+      ],
+      "ownedPcmBitExactToHostSubmissions": true,
+      "loopbackBytesMetadataAssociationVerified": true
+    },
+    "finalRecordingIntegration": {
+      "assertions": 65,
+      "findingsControls": 5,
+      "automaticFinalizerPassed": true
+    },
+    "finalBatiChain": {
+      "checks": 55,
+      "authoredTelemetry": true,
+      "deviceFreeSink": true
+    },
+    "finalTimingChain": {
+      "checks": 366,
+      "ownedFrames": 139200,
+      "durationSeconds": 2.9,
+      "producerTimingRows": 34,
+      "ringTimingRows": 34,
+      "controlDeliveryRows": 67,
+      "selectedSourceBrackets": 25,
+      "joinedRetainedSubmissions": 33,
+      "authoredTelemetry": true,
+      "endpointOpened": false,
+      "loopbackEndpointUsed": false
+    },
+    "diagnosticTransparency": {
+      "gameplayTests": 8,
+      "skipped": 0,
+      "stereoBlocksCompared": 112,
+      "allFloat32BytesIdentical": true
+    },
+    "camera": {
+      "cases": 11,
+      "assertions": 37
+    },
+    "journal": {
+      "profiles": 4,
+      "assertions": 56
+    },
+    "finalComponentReceipts": [
+      {
+        "path": ".local/playable-08/rec-ea0be05b75c4/validation.json",
+        "sha256": "3cf1c7cc30340a34e202fd4c33c727fb8956711bfe3c8104863ffaae8e2bb5be"
+      },
+      {
+        "path": ".local/playable-13/recording-validation-fe03ef7b91e848f382316ae7d7ceddbc/validation.json",
+        "sha256": "fe63b9494877ee95ec1168aa525f8e6a0c1c68d8e64ce472585f8b1d7bef5019"
+      },
+      {
+        "path": ".local/playable-13/bati-session-fixture-4607c95f84f04cd6961d9fda5b967d1d/validation.json",
+        "sha256": "91f2f278c6bf4c5a7a7c7d57c1e5dfab9ec5eb3278d8384401810f57bebfbe75"
+      },
+      {
+        "path": ".local/playable-15/latency-fixture-61d8fc91599e4eb69beea034f69602a6/validation.json",
+        "sha256": "ef6a69126f9febb0ce23847e8aa29799fdbf11d41c12200d4f4a65d7bcc7bbcb"
+      }
+    ],
+    "whitespaceCheckPassed": true
+  },
+  "candidate": {
+    "build": ".local/playable-15/build-recording-recovery-03",
+    "buildReceiptSha256": "2c13ab8fffd84e58b35f70071f06c82bb85da2d74f3d6c845890aef39cdc0156",
+    "root": ".local/playable-15/candidate-recording-recovery-02",
+    "receiptSha256": "fbd3b8a03601fa6aada0966dfd7e993b291142b48b220d0410b58518e6a5afc3",
+    "validationReceiptSha256": "e45afb73c3a680023636fc03647aa119781b7809a0d72789b1ecaad7e5a0fa68",
+    "hostSha256": "ebdf8df6563bb38480bfd84484247886f63ac3ac395c36ea08bd874eb26f6988",
+    "hostBytes": 324096,
+    "hostSourcePins": 34,
+    "currentCodePins": 63,
+    "packageManifestSha256": "68217b8b15a24f1ad395a39ed3a29938ffd579e6e2fecf082bf8f1c2a1ea52cb",
+    "packageBindings": 133,
+    "preservedAssetBindings": 69,
+    "managedSha256": "a474df2201b6aa3a370029af479c4f4f62ad6958dfd4f72c7cb8420e2ec7ec5e",
+    "managedBytes": 387584,
+    "nativeSha256": "05dde26d9264b1a3133a5c027e796f58849349f0335bc264bc4ae91a07bc7b40",
+    "nativeBytes": 129024,
+    "pointerSha256": "87ee2b12e1d4231547d960523e94ea8952955ecdf74a562ebec369f79fed6f4b",
+    "pointerBytes": 238,
+    "installationManifestSha256": "8db6e234f5e4cf29064e83175cc92339ed61afcdd9085cebe1d2d38489bbca4c",
+    "rollbackManifestSha256": "9c08aca1b183b30b043b5904c41aaf26d1ae610b245e4af34e44e603de9373f9",
+    "recording24FieldTemplateSha256": "b0cae2ea47c0d5609ecd9aabee3617d0785fe0b3a90687e9e7f6d8977d127ffa",
+    "default24FieldTemplateSha256": "e29e7a3609d22e07fa39b1fe8b03c0863fc9df723f34947052d411a710260965",
+    "proposalSha256": "11d6dab69ed6d5cfa44b68f1e2a7001bc48c0ca371b62e86495dd712050a3ddf",
+    "coordinatorPreparedReceiptSha256": "3f4664ad7571aab172bfff41e769052292ef78b6badf51ac7eabb836d68475a0",
+    "earlierPrivatePreparationsRetainedAndNotSelected": true
+  },
+  "independentReview": {
+    "result": "PASS_REVIEW_ONLY_NOT_AUTHORIZED",
+    "codeBuild594DigestReviewSha256": "d704fa9b6a938e0f2e90c61ff6f19d3bb24a3256efc1e2b04922ffb94c2b25f5",
+    "candidateProposalReviewSha256": "1d93de36a267cf8d2aa1e9176e091816b97b00f8727bc7d8ca9c6ac22a6c7fbe",
+    "proposalSemanticsReviewSha256": "992673f0c093f3bb672107057912bfb5187bb160e0b119b0b0b3f717003bcaea",
+    "protectedFiles": 11,
+    "savedSettings": 4,
+    "ownedPathsAbsent": 32,
+    "relevantProcessesAbsent": true,
+    "helperFilesParsedNotExecuted": 5,
+    "transitiveHelperPinsVerified": true,
+    "writerFinalizationFaultObservationVerified": true
+  },
+  "preserved": {
+    "nativeAndRphBinaries": true,
+    "sourceAssets": true,
+    "dsp": true,
+    "gainsAndCalibration": true,
+    "sourceIdentityAndExpiry": true,
+    "stockFallbackAndF10": true,
+    "globalProductionFeaturesDisabled": true,
+    "wasapiSubmissionCallback": true,
+    "pcmRing": true,
+    "controlDelayMs": 100,
+    "producerStartupBlocks": 8,
+    "producerReserveMs": 85.33333333333333,
+    "endpointBufferTuningChanged": false
+  },
+  "diagnostics": {
+    "hostClock": "host-Stopwatch-QPC",
+    "captureClock": "WASAPI-QPC-100ns",
+    "nodeClock": "node-performance-ms",
+    "nativeClock": "Original SHV source clock plus measured RPH mapping intervals in private journal",
+    "nativeOperatingTimestampIsNotVehiclePoseTimestamp": true,
+    "sourceSelectionJoinedByListenerSequences": true,
+    "sampleEveryProducerBlocks": 8,
+    "maximumNodeRows": 1500,
+    "maximumHostRingRows": 1500,
+    "maximumControlRows": 2400,
+    "diagnosticQueueRows": 128,
+    "pcmRingResidenceIsBracketed": true,
+    "uniqueSignalAndClockEvidenceRequiredForOffset": true,
+    "physicalSpeakerLatencyEstablished": false,
+    "totalSourceToSpeakerLatencyEstablished": false
+  },
+  "authorization": {
+    "granted": false,
+    "maximumProposedDeployments": 1,
+    "maximumProposedLaunches": 1,
+    "maximumAudioOn": 1,
+    "maximumStart": 1,
+    "maximumStop": 1,
+    "recordingAndSelectedEndpointLoopbackRequireExplicitApproval": true,
+    "microphoneAllowed": false,
+    "newLiveStemsAllowed": false,
+    "activeTargetSeconds": [
+      30,
+      40
+    ],
+    "observationalStopSeconds": 45,
+    "intrinsicMaximumSeconds": 120,
+    "maximumNativeAttempts": 2400,
+    "maximumHz": 20,
+    "sourceExpiryMs": 250,
+    "automaticRetry": false,
+    "operationalDirectoryCreated": false
+  },
+  "execution": {
+    "gameFilesWritten": false,
+    "deployed": false,
+    "gameLaunched": false,
+    "realEndpointOpened": false,
+    "livePlaybackStarted": false,
+    "liveRecordingStarted": false,
+    "coordinatorModeExecuted": false,
+    "prMerged": false
+  },
+  "limits": "Offline fixtures, known-signal offset checks and static reviewed preparation only. The owner-reported250-500ms remains subjective. No new live WASAPI capture, camera-transition audibility, direct driver-loss cause, physical speaker timing or complete StageB acceptance is established."
+}

@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-11",
+  "kind": "independent-read-only-critical-review",
+  "reviewer": "Separate trust_review agent; coordinator recorded its final verdict and exact reviewed hashes",
+  "verdict": "PASS-BOUNDED-UNRESOLVED-PROVENANCE-OUTCOME",
+  "baseCommit": "8c06c46ee0c1925d93692fbac6672116cd7f8537",
+  "apiDistributionAuthenticated": false,
+  "trustDecisionChanged": false,
+  "acceptedPassiveCandidateCreated": false,
+  "remainingCorrections": [],
+  "reviewedFiles": [
+    {
+      "name": "docs/PLAYABLE_11.md",
+      "bytes": 10841,
+      "sha256": "d7a4e5845fc0864fb08330aa2d7b5e8631c242da271ac887c556f92099132da5"
+    },
+    {
+      "name": "docs/UPSTREAM_RPH_API_PROVENANCE_QUESTION.md",
+      "bytes": 2465,
+      "sha256": "fed08dd0b51d7421357dcb0d72e181aaa554c8e89aec8e251968b2414417ac27"
+    },
+    {
+      "name": "evidence/playable-11-provenance.json",
+      "bytes": 5770,
+      "sha256": "d11d3987b7e49cf3af9fd3f70b121ab77fa46d7dfa1c0454275c68a860835fe3"
+    },
+    {
+      "name": "evidence/playable-11-offline-controls.json",
+      "bytes": 9075,
+      "sha256": "f36b31ce722831d062fc6af347aa67a12615dd582fa0f3771401771f1fa9f0b5"
+    },
+    {
+      "name": "evidence/playable-11-preservation.json",
+      "bytes": 961,
+      "sha256": "0986bbc7656a52d8fe47bd2ad70ea1e31a76095c215bcd7370550029364f4f15"
+    }
+  ],
+  "checks": {
+    "priorTrackedFilesRehashed": 750,
+    "preserved09FilesRehashed": 579,
+    "preserved10FilesRehashed": 532,
+    "protectedFilesRehashed": 11,
+    "settingsRehashed": 4,
+    "preservationMismatches": 0,
+    "currentDistributionFilesRehashed": 23,
+    "currentDistributionFilesChanged": 0,
+    "archiveBytesAndDigestIndependentlyVerified": true,
+    "archiveEntryCount": 1134,
+    "originalReceiptArchiveEntriesIndependentlyHashed": 23,
+    "originalReceiptArchiveEntryMismatches": 0,
+    "directApiNameAndSizeEntriesAbsent": true,
+    "launcherArchiveDigestVerified": true,
+    "apiWitnessReportAndIndexDigestsVerified": true,
+    "privateResearchBaselineAndTestReceiptDigestsVerified": true,
+    "rawNewTestReceiptsReviewed": true,
+    "provenanceCases": 35,
+    "provenanceAssertions": 337,
+    "profileControls": 25,
+    "independentRebuildEquivalentMethods": 187,
+    "entryFixtureCases": 16,
+    "entryFixtureAssertions": 260,
+    "defaultProductMethods": 655,
+    "defaultProductMethodDifferences": 0,
+    "runtimeSourceAndTrustFlowReviewed": true,
+    "noOpenBeginOrGameplayAfterDiagnosticRejection": true,
+    "diagnosticPinsNotMisrepresentedAsLifetimePins": true,
+    "historical09RejectionPreservedAndDeniedNewUse": true,
+    "firstObservedHashNotPromoted": true,
+    "exactInstalledXInputAuthenticationNotInferred": true,
+    "publicPrivacyChecked": true,
+    "maintainerDraftFourParagraphScopeChecked": true,
+    "retainedReadmeIssueChannelRead": true,
+    "officialApiDevelopmentForumIndependentlyAccessed": true
+  },
+  "sourceLimits": "Reviewer release-page refetch timed out. Its XInput compatibility statement was reviewed against the coordinator's successful official-source retrieval, not independently re-fetched by this reviewer. Neither review authenticates the exact installed XInput bytes or current API distribution.",
+  "reviewerTestsRerun": false,
+  "reviewerFilesWritten": false,
+  "reviewerFrameworkExecuted": false,
+  "reviewerGameLaunched": false,
+  "reviewerEndpointOpened": false,
+  "reviewerExternalSubmission": false,
+  "limits": "PASS approves the accurately bounded unresolved conclusion and preserved fail-closed posture. It is not API authenticity, corrected handoff acceptance, live compatibility, audibility, or user approval. The coordinator's later manifest is derived from these final reviewed files plus this receipt."
+}

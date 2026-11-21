@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-12",
+  "kind": "new-offline-preservation-check",
+  "recordedUtc": "2026-11-01T15:49:55.7968130Z",
+  "passed": true,
+  "baselineSha256": "15ad58db0e0c811498ea436a49874a14f93980bbe7712d8fbc831d2984df3b79",
+  "priorTracked": 750,
+  "intentionallyChangedTracked": [
+    {
+      "name": "src/acoustics/bridge/Rph/Playable.Rph.cs",
+      "beforeSha256": "28f37dc247eaf19241dbb651ba34d29510e095f9c591016e9a0b20fba930be97",
+      "afterSha256": "2759d4596f0141dcab35a1eb2132f13ee2e55ba33712313308feac75dd027755"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/ShvHandoffBootstrap.Rph.cs",
+      "beforeSha256": "b012bbca646da898ebd90c8095a721a15012387d1914b93da5fe702e3b9831f7",
+      "afterSha256": "076fbbe6155a2946b563257de4dd1cc1ba0a4c702688dbb2978b117c4fc8451b"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/ShvHandoffJournal.Rph.cs",
+      "beforeSha256": "f0ce6da8df54b5e9317583492385b9e0380d71da8eaecb96b6015fc768e17da2",
+      "afterSha256": "c598d6260d735cdb3697d736940d9d77ea83592470e6eb9d391d9e2f8e977aca"
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/ShvPassiveHandoff.Rph.cs",
+      "beforeSha256": "ad31435d5f0082a38ebf4d27a78745ec8221f172d1bf5991c4d4ecf1fc36dbdb",
+      "afterSha256": "132d9be8420d678951d6697682164236e0807b9e572206764677b8ef765a14a6"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvOperatingStateHandoff.cs",
+      "beforeSha256": "b16bc4168e9d9ce2c4f5996f633f17156ee75cf217bea5d642ef33c6b3b0152a",
+      "afterSha256": "5df84d09cfdce5176a3be3ff591b2874dbb83d489e7084c32bffe3c098b84d91"
+    },
+    {
+      "name": "src/acoustics/host/Handoff/ShvProducerModule.cs",
+      "beforeSha256": "1209b605130f47ccbdadadfb89efaeed53a72f18d93ee34455b099fece594298",
+      "afterSha256": "fe8351f1c2c73817a639c93c30d129c58ad88e79e6f8668808585356bcb9af39"
+    },
+    {
+      "name": "tests/host/TestShvHandoffJournal.cs",
+      "beforeSha256": "fceaf9b9e0fc3efc10b715b1c245d7781739cb1563a99f7e35e41983b7ea070f",
+      "afterSha256": "613b39d10cf21c2a144e304107e54233962af568c650c6a18670dd39de809fd9"
+    },
+    {
+      "name": "tests/host/TestShvOperatingStateHandoff.cs",
+      "beforeSha256": "ac7cbdc992fa230b8f0da1c313f215e59a32514818e6e528e1b1016a3045a728",
+      "afterSha256": "af0ea6f7cea8b095bbe31d41d3dc42accec41319d569586f15f7f4833bcaa9d6"
+    },
+    {
+      "name": "tests/shv-handoff/Host.cs",
+      "beforeSha256": "de7bc07cdc4b8d817c59df940d366b4667becdf096ce3a28c0aa86e3cc06d016",
+      "afterSha256": "97f806efb908d039a6319a59b4117840286d0768df4ef3c6e7bc19631f1277db"
+    },
+    {
+      "name": "tools/Build-BeaconBridge.ps1",
+      "beforeSha256": "8137034589683396a74af4cb570ae3f4d461d0d58c3af8cfd47209ac735e4635",
+      "afterSha256": "172d7f20a5f4c87a9c5e57ed7f65baa467df6ed1b88a9075e9f96f8d7771ce83"
+    },
+    {
+      "name": "tools/Test-ShvHandoffComposition.ps1",
+      "beforeSha256": "38a665e649c127b2e2e679369dd5397ec9cf248076bb58e60c34e021c7b4cf04",
+      "afterSha256": "46f3b0a51a02d90f0fbc7f5ae86ded799b3499c0a0ed5ff36006f8e81358d2d1"
+    },
+    {
+      "name": "tools/Test-ShvHandoffJournal.ps1",
+      "beforeSha256": "8e1945448ae0ddf273d06e7fb311c9eb2c739c3a0a8490f9b614e86116f0ca52",
+      "afterSha256": "dbfd6bd1d13e1f0cd16922f0e4da91c81bb1326bed0a2c912de2bb3d4dc14dbe"
+    }
+  ],
+  "otherPriorTrackedUnchanged": 738,
+  "local11FindingsPreserved": 7,
+  "privateHistoricalPinsPreserved": 1115,
+  "protectedFilesUnchanged": 11,
+  "settingsUnchanged": 4,
+  "nativeSourcesAndArtifactUnchanged": true,
+  "stockFallback": true,
+  "modificationAwareLoudness": false,
+  "synchronizedAudioRecording": false,
+  "ownedProcessesAbsent": true,
+  "gameFilesWritten": false,
+  "gameLaunched": false,
+  "endpointOpened": false,
+  "limits": "Before/after file hashes, process snapshots and offline action record; no continuous OS-wide monitoring claim."
+}

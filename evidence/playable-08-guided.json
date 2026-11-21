@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-08",
+  "recordedUtc": "2026-11-01T02:32:11.005Z",
+  "scope": "Reviewed offline guided-HUD candidate and fresh telemetry-only proposal after the consumed first PLAYABLE-08 live capture",
+  "decision": {
+    "guidedTelemetryTest": "GO to request fresh explicit approval only",
+    "actualFirstCaptureQualification": "INCOMPLETE",
+    "productHandoff": "BLOCKED",
+    "playableDevelopment": "BLOCKED",
+    "newCandidateDeployed": false,
+    "newCandidateLaunched": false,
+    "newLiveSessionAuthorised": false,
+    "additionalCapturePerformed": false,
+    "physicalRpmEstablished": false
+  },
+  "candidate": {
+    "name": "RichAudio.OperatingState.Shv.asi",
+    "bytes": 380416,
+    "sha256": "41361aa281493e1cc54fe196161aafc4a93ce002bfe0bb9da2effbc742465484",
+    "pathHint": "build/playable-08-shv-probe/RichAudio.OperatingState.Shv.asi",
+    "installablePlayableUpdate": false
+  },
+  "changes": {
+    "requestedPhaseCoach": true,
+    "phaseElapsedAndRemainingSeconds": true,
+    "shortActionAndNextFinishHints": true,
+    "manualPhaseAdvanceOnly": true,
+    "rawSignalTransformation": false,
+    "newNativeIdentifiers": false,
+    "nativeApiAndIdentifiersByteIdentical": true,
+    "gameplayRendererOrPlaybackChanged": false,
+    "newRuntimeOrSystemSoftwareInstalled": false,
+    "actualGameReadabilityVerified": false
+  },
+  "validation": {
+    "binaryCases": 48,
+    "binaryAssertions": 53747,
+    "primaryAnalysisControls": 30,
+    "readinessAndProposalControls": 50,
+    "failed": 0,
+    "maximumObservedHudComponentBytes": 91,
+    "full120SecondFixturePassed": true,
+    "fullDurationObservations": 1928,
+    "fullDurationAutoPhaseAdvances": 0,
+    "independentNarrowSourceAndHudReview": "PASS",
+    "independentFinalPreflight": "PASS",
+    "preservedArtifactAndEvidencePins": 140,
+    "unchangedProductionFoundationSourcePins": 24,
+    "protectedRuntimeFiles": 11,
+    "savedSettingsFingerprints": 4,
+    "stockFallbackSelected": true,
+    "probeAndPendingAbsent": true,
+    "relevantProcesses": 0,
+    "timeoutOverridesAbsentInAllThreeScopes": true,
+    "genuineFixtureEvidence": "evidence/playable-08-fixtures.json",
+    "actualFirstLiveEvidence": "evidence/playable-08-live.json",
+    "rollbackEvidence": "evidence/playable-08-rollback.json"
+  },
+  "futureProposal": {
+    "privatePathHint": ".local/playable-08/candidate-guided",
+    "manifestDigests": [
+      {
+        "name": "installation-manifest.json",
+        "sha256": "8301f6296af197d96beb8b63c6cde068711345ae44aadaaceeb09c65d9643b20"
+      },
+      {
+        "name": "multi-state-proposal.json",
+        "sha256": "dcfd60ea0afd1ba7f3c31dd6a190f90e7bae6150d0934b9bca7e20e7b18cf84e"
+      },
+      {
+        "name": "rollback-manifest.json",
+        "sha256": "8c79d8f3f56e61d902ca27b6861dfa5f2bad7273a2c18f5d76df28da096f346d"
+      }
+    ],
+    "ownership": "Only the exact newly approved ASI, create-new staging and ownership/hash-verified removal after normal game exit",
+    "maximumDeployments": 1,
+    "maximumLaunches": 1,
+    "maximumCaptures": 1,
+    "waitingDeadlineMs": 300000,
+    "maximumActiveMs": 120000,
+    "maximumObservations": 2400,
+    "maximumHz": 20,
+    "maximumCaptureBytes": 12582912,
+    "maximumTerminalHudMs": 5000,
+    "manualPhaseCuesSeconds": [
+      8,
+      8,
+      8,
+      6,
+      8,
+      8
+    ],
+    "firstRecordedAdvanceToStationaryRunningIdleRequired": true,
+    "drivingInterlock": false,
+    "automaticRetry": false,
+    "watchdogCanPreemptNative": false,
+    "nativeFaultRecoveryGuaranteed": false,
+    "audioPlayback": false,
+    "audioRecording": false,
+    "loopback": false,
+    "loudnessActivation": false
+  },
+  "featureRequests": {
+    "schema": 1,
+    "modificationAwareLoudness": false,
+    "synchronizedAudioRecording": false
+  },
+  "sourcePins": [
+    {
+      "file": "src/telemetry/ShvProbe/Probe.cpp",
+      "sha256": "1b82207462778c6d398839f51bc30abfc4de759583f72a15aad61305abc17760"
+    },
+    {
+      "file": "src/telemetry/ShvProbe/ScriptHookVApi.h",
+      "sha256": "131f609ff3db49e0bdaa9264a296825669fe897115c65d76fd3f593115d077ba"
+    },
+    {
+      "file": "src/telemetry/ShvProbe/NativeIds.h",
+      "sha256": "2c256ef63e179a17361d7f06f12af763d4891a8b494206c03bc4ebd7e2d751b5"
+    },
+    {
+      "file": "tools/Build-ShvTelemetryProbe.ps1",
+      "sha256": "6680cbc986ed0858b9c9586c1334bb9698f3eb99b95d0d443849e019d8243d1b"
+    },
+    {
+      "file": "tools/Inspect-ShvProbe.ps1",
+      "sha256": "f775f7f4c8203cdd1843faa41e942a537810883c19e5f3586727a5e8ff6c9c36"
+    },
+    {
+      "file": "tools/Prepare-ShvProbe.ps1",
+      "sha256": "5dc806e61cc5ec30e03496d919e819c67255741ba32032bb1376fcfa648145d8"
+    },
+    {
+      "file": "tools/Test-ShvTelemetryProbe.ps1",
+      "sha256": "7b498fd403f4dc2e798e0547016d25cf88f566609cea86886a9412ec0098028e"
+    },
+    {
+      "file": "tools/Observe-ShvFirstAdvance.mjs",
+      "sha256": "96a711b9f2d547494b934bbd70d8d7574ebee39656c32786aeb019d33f36318c"
+    },
+    {
+      "file": "tests/Test-ShvFirstAdvance.mjs",
+      "sha256": "26a26b5fbee7d1479acbdfafd25f228c855f869f5b134a1b83e8f3e38fa1b0d7"
+    },
+    {
+      "file": "tests/Test-ShvTelemetryAnalysis.mjs",
+      "sha256": "a365a78fa781614d303eb1e5564086212e92c9336038d6766d5e1a59911c9fc8"
+    },
+    {
+      "file": "tests/shv-probe/Fixture.cpp",
+      "sha256": "0413c897d503a9e3d61be22b0efdbd1bf18696c344952088f62e01e0e4fb34a1"
+    },
+    {
+      "file": "tests/shv-probe/Host.cpp",
+      "sha256": "a48cfec1c51e79f4059b5a10a6838eee6910dee9fec56bf9c8985a9ca90c2f50"
+    }
+  ],
+  "receipts": {
+    "buildEvidenceSha256": "08ec7ecf481af2d318f016a37486473e6d3129ea2895a96de26d8141abff1ea9",
+    "fixtureEvidenceSha256": "fb13ea285eb4d6991ad7596b34f4e8ec6df15bf9b930578efe6bbd0dafdff75f",
+    "privateBuildReceiptSha256": "1b5e9fe47c95c20157bd199072cf56e08533798c751789175542a7614e4bc008",
+    "privateFixtureReceiptSha256": "d8b320ec8a0bf5f919761624f1c4c3686d7b2bcee783e8452b54f261b61ec506",
+    "privateAnalysisReceiptSha256": "5be5d5d690d077d1abd951df969113c728cf47b6363e4bc502297bbf47768e3c",
+    "privateReadinessReceiptSha256": "f500c1b7139277d4cb105ff13f6e15f3a5832f6bb8134f22c04e62cb86884fbf",
+    "privatePreparationReceiptSha256": "4b0be625d815892a4b3a8ee5a9cddd1c697b14b1b8cae1bc58c5b1f08c957246",
+    "privateIndependentPreflightSha256": "2ed99be173ecf9d6d067a683f35579d286ba82c9e1c72720968423fef79cc5c0",
+    "privateNarrowReviewSha256": "33bb71d9654cf32f23c7e3fb9497b9bfe9c16faf5e768c216ceb69d691aa27c6",
+    "privateFixtureWindowActivationReceiptSha256": "398f4c8c6cfe27d50411b76c43688dbd213dbac33574ffd67369290926a5ea7e"
+  },
+  "privacy": "Raw live/fixture captures, absolute paths, identifiers, handles, absolute QPC timestamps and logs remain private; no binary or audio uploaded."
+}

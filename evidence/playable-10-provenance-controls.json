@@ -1,0 +1,340 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-10",
+  "kind": "standalone-provenance-typed-fixtures",
+  "passed": true,
+  "privateValidationSha256": "a1878e245403b59e87ee5a2c80c3ac1b1da4c597abac171e2398802126d9eae2",
+  "cases": 35,
+  "assertions": 337,
+  "casesPassed": [
+    {
+      "test": "different-reviewed-runtime-and-launcher",
+      "passed": true,
+      "terminalReason": "diagnostic-only-provenance-matched-no-activation",
+      "reportSha256": "19e5e0b61773c71d96afad2d19bb62a8e5627fba3d701c521fb0b2d4001605cd",
+      "reportBytes": 9857
+    },
+    {
+      "test": "unreviewed-does-not-adopt-observation",
+      "passed": true,
+      "terminalReason": "api-runtime-policy-unreviewed",
+      "reportSha256": "b58b9fbeaf8db46194afa14fb08f18b97baee7378360f966e4c427756d39b882",
+      "reportBytes": 9377
+    },
+    {
+      "test": "right-version-wrong-runtime-bytes",
+      "passed": true,
+      "terminalReason": "api-runtime-digest-mismatch",
+      "reportSha256": "00a67c05d46f259dd55b5413e21b2aa6828c7e0047d44a14f57a80a2ffa0eadc",
+      "reportBytes": 9862
+    },
+    {
+      "test": "right-bytes-wrong-runtime-version",
+      "passed": true,
+      "terminalReason": "api-runtime-version-mismatch",
+      "reportSha256": "28e6910c66a14ac4fd0e9a0966d7c6aec35706aeff5cefcded367487c137ca69",
+      "reportBytes": 9850
+    },
+    {
+      "test": "unexpected-runtime-cache-path",
+      "passed": true,
+      "terminalReason": "api-runtime-path-mismatch",
+      "reportSha256": "7003de5b3f9472465b95b3de877ba3625bf10276a297c7a1364b5941fa4607b7",
+      "reportBytes": 9858
+    },
+    {
+      "test": "runtime-size-mismatch",
+      "passed": true,
+      "terminalReason": "api-runtime-size-mismatch",
+      "reportSha256": "14995e66daccff269425bec457c7118e4288ed1377e9bbf904f237e4c4063eda",
+      "reportBytes": 9858
+    },
+    {
+      "test": "runtime-assembly-name-mismatch",
+      "passed": true,
+      "terminalReason": "api-runtime-assembly-name-mismatch",
+      "reportSha256": "4bc94aa76eca5882cc0f64ce5ecacf5c92a7b11c29a71410c764d92ea7fd69f4",
+      "reportBytes": 9804
+    },
+    {
+      "test": "runtime-mvid-mismatch",
+      "passed": true,
+      "terminalReason": "api-runtime-module-mvid-mismatch",
+      "reportSha256": "fecd06fbc402161560c9a7f484f87af4bf0ad88cb9731fd0e292f309f46adcec",
+      "reportBytes": 9872
+    },
+    {
+      "test": "runtime-evidence-missing",
+      "passed": true,
+      "terminalReason": "api-runtime-policy-evidence-missing",
+      "reportSha256": "60d782f061edf06a8b605c5af4cf5d9868efbd4d98692a4fcd6e14b0242a6df8",
+      "reportBytes": 9813
+    },
+    {
+      "test": "runtime-evidence-invalid",
+      "passed": true,
+      "terminalReason": "api-runtime-policy-evidence-missing",
+      "reportSha256": "d4dbd27769d059ec0f2e46c6af44ac65f1bf87401f750965cd73fdfbea8e5cab",
+      "reportBytes": 9827
+    },
+    {
+      "test": "runtime-evidence-count-bound",
+      "passed": true,
+      "terminalReason": "api-runtime-policy-evidence-missing",
+      "reportSha256": "d3986907863173547a037cc8ff03df858039ab28cb2547b0c8f77966255b6af9",
+      "reportBytes": 10348
+    },
+    {
+      "test": "launcher-wrong-hash",
+      "passed": true,
+      "terminalReason": "launcher-digest-mismatch",
+      "reportSha256": "4c2ad6914032c85dc1f5935a57454e42e54feee0a3f92369af94639e12a11d73",
+      "reportBytes": 9856
+    },
+    {
+      "test": "launcher-wrong-version",
+      "passed": true,
+      "terminalReason": "launcher-version-mismatch",
+      "reportSha256": "9fc8cd40acd8242f91028bdd8946fb3a892e1b7cde5776508679da20d3448cac",
+      "reportBytes": 9831
+    },
+    {
+      "test": "launcher-wrong-size",
+      "passed": true,
+      "terminalReason": "launcher-size-mismatch",
+      "reportSha256": "8b7a6afb3bdca3c6e50874c4ad51c50fb02cb94241863b709543b6c6a18f8801",
+      "reportBytes": 9846
+    },
+    {
+      "test": "launcher-missing",
+      "passed": true,
+      "terminalReason": "launcher-unavailable-or-inconsistent",
+      "reportSha256": "9b2168a3428f05a86bcd669ded8fcd6a20c75e3417a790ebe9dbc14546d0e24e",
+      "reportBytes": 9779
+    },
+    {
+      "test": "process-id-mismatch",
+      "passed": true,
+      "terminalReason": "process-id-mismatch",
+      "reportSha256": "8caa3576476aa10296bb512a920125e98fc9c7cc36eb1272fed892e3b98cff5d",
+      "reportBytes": 9846
+    },
+    {
+      "test": "process-creation-mismatch",
+      "passed": true,
+      "terminalReason": "process-creation-mismatch",
+      "reportSha256": "bf596d50207dc9f7f1295bcfe7469c8beaa391705f787fda3311c8464946f569",
+      "reportBytes": 9858
+    },
+    {
+      "test": "process-path-mismatch",
+      "passed": true,
+      "terminalReason": "game-process-path-mismatch",
+      "reportSha256": "94a77517122a8e8bac8fcb07aca8b07f4dfd53ad8fe1238152837fb8cad59857",
+      "reportBytes": 9796
+    },
+    {
+      "test": "session-context-mismatch",
+      "passed": true,
+      "terminalReason": "session-context-mismatch",
+      "reportSha256": "708fbb6eb22caef6177b5dd5c0d1dd04e8a4dc9af03a2b65298de15ce1021594",
+      "reportBytes": 9856
+    },
+    {
+      "test": "caller-hash-mismatch",
+      "passed": true,
+      "terminalReason": "caller-assembly-digest-mismatch",
+      "reportSha256": "e846b7eebf8230162452175dd0046e068e5a77603d6a2f7d8088b0142877cb7f",
+      "reportBytes": 9870
+    },
+    {
+      "test": "caller-is-not-reviewed-entry",
+      "passed": true,
+      "terminalReason": "caller-assembly-digest-mismatch",
+      "reportSha256": "6a50ca8f487bcd53ce3407c04bc41c530af84043e272093f857c3f1fe47092e9",
+      "reportBytes": 9762
+    },
+    {
+      "test": "missing-actual-runtime",
+      "passed": true,
+      "terminalReason": "api-runtime-unavailable-or-inconsistent",
+      "reportSha256": "08d3422f17cbd097d0bb92b6296b2f39cbed9e283a7e135bb167de472702f556",
+      "reportBytes": 9303
+    },
+    {
+      "test": "dynamic-runtime-no-location",
+      "passed": true,
+      "terminalReason": "api-runtime-unavailable-or-inconsistent",
+      "reportSha256": "03c64b92c574856131de7f40b47c897262954f82c80977c3d1ea8b6d0c1a3c5e",
+      "reportBytes": 9466
+    },
+    {
+      "test": "artifact-write-open-denied",
+      "passed": true,
+      "terminalReason": "launcher-unavailable-or-inconsistent",
+      "reportSha256": "f166e4e48f4d048f3c117cc850e7f5b753bec92569df2b4d6559f9ebd090caab",
+      "reportBytes": 9811
+    },
+    {
+      "test": "changed-file-before-capture",
+      "passed": true,
+      "terminalReason": "launcher-digest-mismatch",
+      "reportSha256": "c8f15baaf0dc207ea5342c7fe47d25b5f1611b3e5629fa1333f985dea9742542",
+      "reportBytes": 9859
+    },
+    {
+      "test": "hardlink-retains-safe-values-but-rejects",
+      "passed": true,
+      "terminalReason": "launcher-unavailable-or-inconsistent",
+      "reportSha256": "3b5f9cb585086c67d58f405844c04ec9893547d65bec055bfb06e482d9cd74c5",
+      "reportBytes": 9929
+    },
+    {
+      "test": "single-file-pin-spans-metadata-write-and-replace-attempts",
+      "passed": true
+    },
+    {
+      "test": "reparse-ancestor-refused",
+      "passed": true,
+      "terminalReason": "launcher-unavailable-or-inconsistent",
+      "reportSha256": "f772640e382ecd67c01185dc1d2ed02a495d94e6c70a18f797fa03bc0f7a71e5",
+      "reportBytes": 9845
+    },
+    {
+      "test": "artifact-size-rejected-before-hash",
+      "passed": true,
+      "terminalReason": "launcher-unavailable-or-inconsistent",
+      "reportSha256": "7ceaaceaa3e7ced5477a351fd6c3df7ddb26be2653f19e3fc94af7a5c1e4486d",
+      "reportBytes": 9779
+    },
+    {
+      "test": "output-first-create",
+      "passed": true,
+      "terminalReason": "diagnostic-only-provenance-matched-no-activation",
+      "reportSha256": "af2a491df4c1ba21e6d9ce41277ea542a5111ba77a16f8598efae19d375e7646",
+      "reportBytes": 9857
+    },
+    {
+      "test": "output-reuse-no-overwrite",
+      "passed": true,
+      "terminalReason": "provenance-session-output-already-exists",
+      "reportWritten": false
+    },
+    {
+      "test": "invalid-output-session",
+      "passed": true,
+      "terminalReason": "report-session-invalid",
+      "reportWritten": false
+    },
+    {
+      "test": "missing-workspace",
+      "passed": true,
+      "terminalReason": "owned-workspace-required",
+      "reportWritten": false
+    },
+    {
+      "test": "reparse-output-workspace",
+      "passed": true,
+      "terminalReason": "reparse-or-nondirectory-ancestor",
+      "reportWritten": false
+    },
+    {
+      "test": "output-write-failure-is-fail-closed",
+      "passed": true,
+      "terminalReason": "provenance-capture-or-output-failed:IOException"
+    }
+  ],
+  "sources": [
+    {
+      "name": "src/acoustics/host/Handoff/RphRuntimeProvenance.cs",
+      "sha256": "b4626b77782f9e40d40759bcb1bf3fb5f22b7a4baefc1b24035d866171e6b379"
+    },
+    {
+      "name": "tests/rph-provenance/ProvenanceUnitTests.cs",
+      "sha256": "bb5eb6a56bc156ce35e1b3efea4f40ff0b9b5426b8481ba2d7e079eb3eb25dfe"
+    },
+    {
+      "name": "tests/rph-provenance/RuntimeA.cs",
+      "sha256": "a82369a2d4ad35604ed5eb60e7857409311260af6de0dc033439c899b3f66277"
+    },
+    {
+      "name": "tests/rph-provenance/RuntimeB.cs",
+      "sha256": "b64afe628cd2d4a5e84e814da29e3851b4c781b356f9650f8685dacdba9bb494"
+    },
+    {
+      "name": "tests/rph-provenance/Launcher.cs",
+      "sha256": "e4bc5a1fecd530249261d5f4cc7b213ca5952c24630e1f09e27cdc073057fe14"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "LauncherFixture.dll",
+      "sha256": "6f94b79ea974ec2990ccb7fe3e48833a63172377396cc0188bd1ee4f18db8caa",
+      "bytes": 2560
+    },
+    {
+      "name": "RuntimeA.dll",
+      "sha256": "7b2b844af3769370b31f94dbcd3f87bdab361d3cb824c69b212cbaa04ea29811",
+      "bytes": 2560
+    },
+    {
+      "name": "RuntimeB.dll",
+      "sha256": "1943d3ae870200edfc3d9f8d6873c57cfb0e20a9714df1cbd3dd03b414dcf15f",
+      "bytes": 2560
+    },
+    {
+      "name": "RichAudio.RuntimeProvenance.UnitTests.exe",
+      "sha256": "e03df433234a8b8a420a4d6e3e332b82ca48cd57e485ede70b2f57a17b10d454",
+      "bytes": 78848
+    }
+  ],
+  "compiler": {
+    "sha256": "46809206887326d2d24db1eff1f3064de972c3451abe766b49111450a5e08e00",
+    "fileVersion": "4.8.9221.0 built by: NET481REL1LAST_25H2"
+  },
+  "runnerSha256": "5b43f5fdadb38b856222dd45e41d777d9700bca8e01634dc9a88b27e101fd523",
+  "matchesAuthenticSdkDiagnosticBuildCore": true,
+  "diagnosticBuildSha256": "cb2555ba00169af86d2728ba545c808a825df0ab04ba08026f1268e02d3caf3a",
+  "positiveControl": {
+    "separateLauncherAndApiBytes": true,
+    "matchingFileVersions": true,
+    "correctedReviewedFixtureApiPolicyPasses": true,
+    "obsoleteLauncherAsApiDigestComparison": "fail",
+    "obsoleteLauncherAsApiVersionComparison": "pass",
+    "obsoleteComparisonGrantsTrust": false,
+    "reviewedApiIsHarmlessFixtureOnly": true,
+    "authenticatesActualInstalledRuntime": false
+  },
+  "diagnosticReports": {
+    "written": 29,
+    "maximumObservedBytes": 10348.0,
+    "maximumAllowedBytes": 32768,
+    "artifactReadLimitBytes": 67108864,
+    "maximumStringCharacters": 1024,
+    "createNewAndNoOverwriteValidated": true,
+    "pinnedReadRejectsWriteAndRename": true,
+    "unreviewedOperandsKeepExpectedNull": true,
+    "individualComparisonStatesValidated": true,
+    "signatureEvidenceIsPresenceOnly": true,
+    "signatureTrustGranted": false
+  },
+  "fixtureOnly": true,
+  "actualRphRuntimeExecuted": false,
+  "actualRphApiUsed": false,
+  "gameLaunched": false,
+  "gameFilesWritten": false,
+  "sourceAttached": false,
+  "sourceOpened": false,
+  "sourceBegan": false,
+  "gameplayPublished": false,
+  "endpointOpened": false,
+  "audioPlayed": false,
+  "observedRuntimeAuthenticated": false,
+  "limits": [
+    "The positive reviewed-launcher/API control uses two harmless separately compiled assemblies reviewed only as test fixtures; it is not authentic installed RPH runtime identity or compatibility proof.",
+    "Private report hashes identify bounded fixture reports; report contents, paths, process identifiers, creation times and QPC values remain private.",
+    "File/ancestor handles cover hashing, file version and reflection-only metadata before a final file identity recheck. This does not authenticate loaded memory or establish protection against equal-privilege process modification.",
+    "Authenticode/strong-name cryptographic trust and online certificate/revocation checks are not performed; bounded offline PE certificate-table availability is recorded.",
+    "OS/CLR/filesystem/flush operations may block. Fatal exit or thread abort before a completed output remains unobserved. A failed diagnostic output cannot grant source, handoff or audio readiness."
+  ]
+}

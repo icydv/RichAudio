@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-09",
+  "recordedUtc": "2026-11-01T03:29:24.4620279Z",
+  "scope": "Static supported identity/lifetime API contract inspection only",
+  "sdkReferences": [
+    {
+      "label": "pinned-rph-sdk",
+      "sha256": "5d439745604a5fedbf8fa401520d4f296c1b6800d77e2923ba3bf9772182c7e0"
+    },
+    {
+      "label": "official-comparison-rph-sdk",
+      "sha256": "1f8a8a88a511d8c6d4aacd196e72b5192970b730f4070606d8bfac63ed722d45"
+    }
+  ],
+  "officialXmlSha256": "adcb826402c3f871a7d6f4ffcf320a446b798ac1890f16ad2f4c77e076aabf27",
+  "metadataReaderSha256": "0f6465ce57a0cbabc37013c8e3c9f110672de1c127b6192177d59eb1c7809772",
+  "rphSupportedMembers": [
+    "Rage.PoolHandle Rage.Entity.Handle",
+    "System.IntPtr Rage.Entity.MemoryAddress",
+    "System.Boolean Rage.Entity.IsValid()",
+    "System.UInt32 Rage.PoolHandle.Value",
+    "System.UInt32 Rage.PoolHandle.Index",
+    "System.Byte Rage.PoolHandle.Counter"
+  ],
+  "samePublicContractInBothInspectedSdks": true,
+  "documentedPoolHandle": {
+    "indexBits": 24,
+    "counterBits": 8,
+    "validity": "Occupied pool slot and matching slot counter",
+    "purpose": "Distinguishes immediate reuse of a freed pool slot",
+    "counterIsUnboundedUniqueLifetimeId": false,
+    "publicSetterIsValueManipulationNotEntityOwnership": true
+  },
+  "documentedInstanceValidity": "IHandleable.IsValid documents whether that instance still represents an existing world entity; it does not supply a separate immutable serial",
+  "documentedAddress": "IAddressable.MemoryAddress supplies the address of the instance",
+  "additionalImmutableEntitySerialFoundInInspectedPublicEntityVehiclePedMembers": false,
+  "shvSupportedHelper": {
+    "installedShvSha256": "126be57ca9dca00e471f9de611766009c900aad88f89ae6c2926ec62e5aaeb4f",
+    "signature": "BYTE* getScriptHandleBaseAddress(int)",
+    "exactExport": "?getScriptHandleBaseAddress@@YAPEAEH@Z",
+    "ordinal": 6,
+    "forwarded": false,
+    "nonzeroFunction": true,
+    "format": "AMD64 PE32+"
+  },
+  "correspondenceAssessment": {
+    "numericCrossFrameworkHandlesMayBeComparedAsIdentity": false,
+    "modelPoseSpeedAloneProveIdentity": false,
+    "freshSupportedOpaqueAddressAndLocalPoolCounterGuardOrdinaryReuse": true,
+    "addressOrByteCounterIsEverlastingInstanceIdentity": false,
+    "unobservedABAOrCounterWrapExcludedByTheseContracts": false,
+    "perEntityNonceCandidateRequiresSupportedRegistrationAndLifetimeProof": true,
+    "decoratorLockMemoryBypassAllowed": false,
+    "fixtureAuthoredGenerationIsActualLifetimeProof": false,
+    "actualLiveIdentityQualified": false
+  },
+  "gameDllLoaded": false,
+  "gameNativeCalls": 0,
+  "objectPointerDereferenced": false,
+  "rawMemoryRead": false,
+  "offsetOrMappingGuessed": false,
+  "gameFilesWritten": false,
+  "sourceEdited": false
+}

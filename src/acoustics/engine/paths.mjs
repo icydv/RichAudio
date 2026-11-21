@@ -12,6 +12,19 @@ import {
 } from "../research/local-geometry.mjs";
 import { pose, requireValue } from "./contracts.mjs";
 const E = 1e-8;
+// Explicit finite-emitter calibration, opt-in per source. Outside the declared
+// radius the original inverse-distance calculation is exactly unchanged. Inside,
+// pressure and its first derivative join 1/d at the boundary, with a finite
+// centre pressure and zero radial derivative. This is a source assumption, not a
+// limiter, automatic gain control, or alteration of delay/direction/Doppler.
+export function spreadingDistance(distance,referenceDistance,nearFieldRadius=0){
+  requireValue(Number.isFinite(distance)&&distance>=0&&Number.isFinite(referenceDistance)&&referenceDistance>0&&
+    Number.isFinite(nearFieldRadius)&&nearFieldRadius>=0&&nearFieldRadius<=10&&
+    (nearFieldRadius===0||nearFieldRadius>=referenceDistance),'finite emitter distance/radius');
+  if(nearFieldRadius===0||distance>=nearFieldRadius)return Math.max(distance,referenceDistance);
+  const u=distance/nearFieldRadius;
+  return nearFieldRadius/(1.5-.5*u*u);
+}
 export const mirror = (p, s) =>
   add(p, scale(s.normal, -2 * dot(sub(p, s.center), s.normal)));
 export function imageFor(p, surfaces) {
@@ -240,10 +253,11 @@ export function finishPath(plan,queries=null,stats={queries:0,surfaceTests:0}) {
               Math.min(1, dot(state.forward, g.emissionDirection)),
             ))) /
           2;
+  const spreading=spreadingDistance(g.distance,scene.config.referenceDistance,source.nearFieldRadius??0);
   bands = bands.map(
     (x, i) =>
       ((x * radiation * scene.config.referenceDistance) /
-        Math.max(g.distance, scene.config.referenceDistance)) *
+        spreading) *
       10 ** ((-scene.config.airDbPerMetre[i] * g.distance) / 20),
   );
   const pan = Math.max(
@@ -264,6 +278,7 @@ export function finishPath(plan,queries=null,stats={queries:0,surfaceTests:0}) {
     arrivalDirection: g.arrivalDirection,
     emissionDirection: g.emissionDirection,
     materialBasis,
+    nearFieldRadius:source.nearFieldRadius??0,
     geometryEvidence: scene.directPath?'conditional-listener-only-no-geometry':scene.observationModel ? 'conditional-finite-observed-model' : 'synthetic-model',
     visibilityAssumption:scene.directPath?.visibilityAssumption??scene.observationModel?.visibilityAssumption??null,
     generation: state.generation,

@@ -73,7 +73,7 @@ namespace RichAudio.Beacon.Windows
                             if(!ApplyMenu(menu,menuBridge))throw new Exception("Native menu did not queue owned-output restoration");phase=6;}
                         else if(phase==6 && AudioState(d,true,.4,false,true)&&Convert.ToDouble(d["outputGain"])>.39999&&MenuSynchronized(menuBridge,d))phase=7;
                         else if(phase==7 && resumedBlocks>=12)
-                        {OpenMenu(menu,menuBridge.Snapshot.Settings);SelectMenuRow(menu,10);menu.Handle(MenuInput.Accept);
+                        {OpenMenu(menu,menuBridge.Snapshot.Settings);SelectMenuRow(menu,AcousticMenuModel.ResetRow);menu.Handle(MenuInput.Accept);
                             if(!ApplyMenu(menu,menuBridge))throw new Exception("Native Reset Defaults did not reach the shared preference service");phase=8;}
                         else if(phase==8 && AudioState(d,true,1,true,false)&&(string)d["requestedQuality"]=="auto"&&(string)d["requestedAcceleration"]=="auto"&&
                             Convert.ToDouble(d["outputGain"])>.99999&&MenuSynchronized(menuBridge,d)){phase=9;completed=wall.Elapsed.TotalMilliseconds;}
@@ -132,7 +132,7 @@ namespace RichAudio.Beacon.Windows
         private static void SelectMenuRow(AcousticMenuModel menu,int row){for(int i=0;i<AcousticMenuModel.RowCount&&menu.SelectedIndex!=row;i++)menu.Handle(MenuInput.Down);}
         private static bool ApplyMenu(AcousticMenuModel menu,InGameSettingsBridge bridge)
         {
-            SelectMenuRow(menu,9);if(menu.Handle(MenuInput.Accept)!=MenuAction.Apply)return false;var p=menu.Pending;var current=bridge.Snapshot;
+            SelectMenuRow(menu,AcousticMenuModel.ApplyRow);if(menu.Handle(MenuInput.Accept)!=MenuAction.Apply)return false;var p=menu.Pending;var current=bridge.Snapshot;
             return bridge.TryApply(new AcousticSettings(p.Quality,p.Acceleration,Math.Max(1,current.SavedRevision),p.Enabled,p.OutputLevel,p.EarlyReflections,p.DiagnosticsOverlay),current.SavedRevision);
         }
         private static bool MenuSynchronized(InGameSettingsBridge bridge,Dictionary<string,object> d)

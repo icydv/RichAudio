@@ -1,0 +1,383 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-15",
+  "kind": "second-live-Bati-recording-recovery-result",
+  "date": "2026-11-02",
+  "result": "CONTINUOUS_CAPTURE_PASS; SOFTWARE_TIMING_PARTLY_LOCATED; NATURAL_SHUTDOWN_UNRESOLVED; RESTORATION_PASS",
+  "completeStageBQualificationEstablished": false,
+  "proprietaryAssetsIncluded": false,
+  "recordingsPrivate": true,
+  "runtimeIdentifiersIncluded": false,
+  "authority": {
+    "runtimeImplementationCommit": "fc6559e6fcd254cd3e9b2b9f72e6049ac9beb9de",
+    "documentationHeadBeforeAttempt": "19d372516ad79510020063f6889a63a86e7d9faa",
+    "documentationOnlyFilesChanged": 42,
+    "runtimeSourcesChangedByDocumentationCommits": 0,
+    "proposalSha256": "11d6dab69ed6d5cfa44b68f1e2a7001bc48c0ca371b62e86495dd712050a3ddf",
+    "candidateReceiptSha256": "fbd3b8a03601fa6aada0966dfd7e993b291142b48b220d0410b58518e6a5afc3",
+    "buildReceiptSha256": "2c13ab8fffd84e58b35f70071f06c82bb85da2d74f3d6c845890aef39cdc0156",
+    "coordinatorPreparedReceiptSha256": "3f4664ad7571aab172bfff41e769052292ef78b6badf51ac7eabb836d68475a0",
+    "freshApprovalReceiptSha256": "669069225ec382c4b7a16b56b86c15818e5c2f0b487cc3d42f9d0a2362759e23",
+    "recordingTemplateSha256": "b0cae2ea47c0d5609ecd9aabee3617d0785fe0b3a90687e9e7f6d8977d127ffa",
+    "leaseFields": 24,
+    "recordingAllowed": true,
+    "loopbackAllowed": true,
+    "microphoneAllowed": false,
+    "extraLiveStemsAllowed": false,
+    "approvalConsumed": true,
+    "unexpectedArtifactDrift": false,
+    "artifactRegenerationOrSubstitution": false
+  },
+  "preflight": {
+    "result": "PASS",
+    "independentFullPreflightSha256": "8f86cb658568421889027532f6c725e5956a505c6d30663e4de1ef6a5b1caf42",
+    "independentAnalysisPreflightSha256": "62715377c907c22a726daa0ec42fbe124b686071ed10ba09b4fbd1cf7a0c6531",
+    "packageBindings": 133,
+    "hostSources": 34,
+    "audibleRphSourcePins": 48,
+    "passiveRphSourcePins": 47,
+    "nativeInputs": 4,
+    "componentReceipts": 6,
+    "sealedHelpers": 5,
+    "originalProtectedFiles": 11,
+    "savedSettings": 4,
+    "ownedPathsAbsent": 32,
+    "relevantProcessesAbsent": true,
+    "proposalAndApprovalBindingsPreserved": true
+  },
+  "execution": {
+    "deployments": 1,
+    "launches": 1,
+    "audioOnCommands": 1,
+    "startCommands": 1,
+    "stopCommands": 0,
+    "automaticRetry": false,
+    "additionalPlaybackOrRecordingAttempt": false,
+    "steamArgumentsAndProcessCreationObserved": true,
+    "exactNewEnhancedLifetimeBound": true,
+    "maximumStartupSeconds": 120,
+    "maximumWaitingSeconds": 300,
+    "observationalActiveStopSeconds": 45,
+    "intrinsicMaximumSeconds": 120,
+    "maximumNativeAttempts": 2400,
+    "maximumHz": 20,
+    "sourceExpiryMs": 250,
+    "consoleCloseInputReturnedAfterStartEnterMs": 83.0382,
+    "inputTimingsAreApiReturnBrackets": true,
+    "trainerMenuVisibleDuringConsoleClose": true
+  },
+  "timeline": {
+    "clock": "RPH local wall-clock logs; GMT Standard Time on this date, UTC",
+    "audioOn": "2026-11-02T00:08:57.864Z",
+    "startArmed": "2026-11-02T00:09:22.131Z",
+    "active": "2026-11-02T00:09:22.291Z",
+    "scopeStopped": "2026-11-02T00:09:55.879Z",
+    "joinedRetirement": "2026-11-02T00:09:56.920Z",
+    "activeToScopeStopSeconds": 33.588,
+    "scopeStopToJoinedRetirementMs": 1041.0,
+    "observerFirstTerminalElapsedSeconds": 33.5545145,
+    "observerCounterContinuesAfterTerminal": true,
+    "explicitStopNotRequired": true
+  },
+  "telemetry": {
+    "nativeTargetReturns": 582,
+    "nativeObservations": 582,
+    "terminalRecords": 1,
+    "rawRows": 1165,
+    "publishedFrames": 580,
+    "rawDistinctOperatingValues": 525,
+    "publishedDistinctOperatingValues": 523,
+    "normalizedOperatingMinimum": 0.20000000298023224,
+    "normalizedOperatingMaximum": 1.0,
+    "physicalRpmEstablished": false,
+    "cameraGenerations": [
+      {
+        "generation": 1,
+        "publishedFrames": 236
+      },
+      {
+        "generation": 2,
+        "publishedFrames": 19
+      },
+      {
+        "generation": 3,
+        "publishedFrames": 325
+      }
+    ],
+    "cameraBaselineNativeSequencesWithheld": [
+      237,
+      257
+    ],
+    "nativeWireBitsAndIdentityAndOriginalExpiryVerified": true,
+    "maximumMappedNativeIntervalWidthMs": 1.2416,
+    "maximumNativeToRphPeerEndpointSkewMs": 17.6787,
+    "maximumNativeToListenerEndpointSkewMs": 27.107,
+    "sourceRecordsDropped": 0,
+    "hostReceivedSnapshots": 570,
+    "supersededSnapshots": 10,
+    "retainedControlRows": 560,
+    "retainedReceiverFrameRows": 559,
+    "workerAcceptedVehicleObservations": 559,
+    "expiredHostSnapshots": 0,
+    "unclassifiedHostConnectionIoEvents": 1
+  },
+  "capture": {
+    "complete": true,
+    "ownedCaptureComplete": true,
+    "loopbackCaptureComplete": true,
+    "ownedFrames": 1594176,
+    "loopbackFrames": 1593120,
+    "sampleRate": 48000,
+    "ownedSeconds": 33.212,
+    "loopbackSeconds": 33.19,
+    "ownedSubmissionRows": 3320,
+    "loopbackPackets": 3319,
+    "ownedIndexFramesMatchWave": true,
+    "loopbackIndexFramesMatchWave": true,
+    "fileLengthsDoNotEstablishOffset": true,
+    "startupDiscontinuity": true,
+    "initialSamplesMissingUnknown": true,
+    "missingInitialSamples": null,
+    "laterDiscontinuities": 0,
+    "timestampErrors": 0,
+    "deviceFrameGapsOrRegressions": 0,
+    "packetIntegrityFaults": 0,
+    "fullSessionCoverageGuaranteed": false,
+    "synchronizationEstablished": false,
+    "nonfixture": true,
+    "endpointOpened": true,
+    "allFiveFinalManifestFilesVerified": true,
+    "allSevenCaptureFilesPreserved": true,
+    "files": [
+      {
+        "file": "demo-analysis-request.json",
+        "bytes": 588,
+        "sha256": "b4449076dd342c6386c15a6855f72696c825209bc19e70044310e5e007e8c4e2",
+        "boundInFinalManifest": false
+      },
+      {
+        "file": "diagnostics.ndjson",
+        "bytes": 1503592,
+        "sha256": "13dbe9b62bd7553eaab3df7196ddafa2b902f6f76745aa72415929185c6d235f",
+        "boundInFinalManifest": true
+      },
+      {
+        "file": "loopback-index.ndjson",
+        "bytes": 1451402,
+        "sha256": "fe5485274af4a3a3be84c8038f65ac5bf64b91e08468e6b8987f47d2a635fc07",
+        "boundInFinalManifest": true
+      },
+      {
+        "file": "loopback.wav",
+        "bytes": 12745040,
+        "sha256": "36e22909af69ad497366792eef7a322624e960c8c62b33011a9fad2abe0605f4",
+        "boundInFinalManifest": true
+      },
+      {
+        "file": "owned-index.ndjson",
+        "bytes": 1234747,
+        "sha256": "e8e3fa87517952481c097698b805bd908428d48904ea843cc196966f65fe5f9b",
+        "boundInFinalManifest": true
+      },
+      {
+        "file": "richaudio.wav",
+        "bytes": 12753466,
+        "sha256": "e86d54d9f305b24dd86264d456f3f8786e741c0aaaaeab42a82bd70016a021fe",
+        "boundInFinalManifest": true
+      },
+      {
+        "file": "session.json",
+        "bytes": 2073,
+        "sha256": "b49c75b8b67f8a0cb89e92c1c9abbbe7ecb0d721d9ae1764b01cc88964804e47",
+        "boundInFinalManifest": false
+      }
+    ]
+  },
+  "audio": {
+    "submittedFrames": 1594176,
+    "consumedFrames": 1594176,
+    "underflowFrames": 0,
+    "peak": 0.16770119965076447,
+    "rms": 0.03202727856139168,
+    "hostAggregateAgreement": true,
+    "independentSecondLiveByteCaptureForBitExactComparison": false,
+    "ownedNonfiniteSamples": 0,
+    "ownedOverFullScaleSamples": 0,
+    "loopbackNonfiniteSamples": 0,
+    "loopbackOverFullScaleSamples": 0,
+    "engineNonzeroBlocks": 3012,
+    "exhaustNonzeroBlocks": 3012,
+    "stereoNonzeroBlocks": 3014,
+    "workerDeadlineMisses": 1,
+    "workerMaximumProcessingMs": 35.7461,
+    "hardcodedWorkerClippedSampleCounterNotUsedAsProof": true,
+    "nearSilenceDefinition": "Both channels abs<=1e-6 for at least20ms; not physical silence or automatically a dropout",
+    "nearSilentPrefixMs": 213.33333333333334,
+    "cameraNearSilentIntervals": [
+      {
+        "startFrame": 605491,
+        "frames": 4301,
+        "durationMs": 89.60416666666667
+      },
+      {
+        "startFrame": 659229,
+        "frames": 4835,
+        "durationMs": 100.72916666666667
+      }
+    ],
+    "nearSilentTailMs": 676.375,
+    "cameraNearSilenceCoincidesWithGenerationChanges": true,
+    "uninterruptedCameraAudioEstablished": false
+  },
+  "timing": {
+    "retainedNodeEvents": 389,
+    "retainedRingEvents": 389,
+    "emittedNodeTimingRows": 390,
+    "producerTimingRowsOmitted": 0,
+    "hostProducerTimingRowsRejected": 1,
+    "unretainedProducerTimingFrame": 0,
+    "unretainedRowCause": "unclassified",
+    "nativeMappedAcquisitionToHostReceiptMedianIntervalMs": [
+      14.929,
+      14.956
+    ],
+    "rphPublicationToHostReceiptMedianMs": 0.611,
+    "controlQueueMeanMs": 0.31158875,
+    "controlQueueMedianMs": 0.241,
+    "controlQueueMaximumMs": 32.1699,
+    "sampledProcessingMeanMs": 2.843559383,
+    "sampledProcessingMaximumMs": 8.38,
+    "pcmPipeReadMeanMs": 11.051259897,
+    "pcmPipeReadMaximumMs": 55.1356,
+    "pipeReadIncludesProductionWait": true,
+    "ringAdmissionToFirstOverlappingSubmissionPrepare": {
+      "samples": 389,
+      "meanMs": 62.69522904884318,
+      "medianMs": 63.2742,
+      "minimumMs": 34.713,
+      "maximumMs": 76.5765,
+      "preparationFollowsConsumption": true
+    },
+    "olderSelectedNativeEndpointAgeAtSubmission": {
+      "samples": 377,
+      "medianMinimumMs": 203.8923,
+      "medianMaximumMs": 203.9207
+    },
+    "newerSelectedNativeEndpointAgeAtSubmission": {
+      "samples": 376,
+      "medianMinimumMs": 146.0432,
+      "medianMaximumMs": 146.0759
+    },
+    "interpretation": "Age of selected native observations at matching submitted blocks, not physical throttle response or audible onset. Ring interval is already included; do not add again.",
+    "nodeHostOffsetBoundMedianHalfWidthMs": 0.167,
+    "nodeHostOffsetBoundMaximumHalfWidthMs": 10.788,
+    "rawPoseAgeFieldMeasuredBeforeEncoding": true,
+    "recomputedPoseAgeAtActualWriteMedianMs": 0.862,
+    "recomputedPoseAgeAtActualWriteMaximumMs": 32.751,
+    "rawReportedPoseAgeMaximumMs": 26.4949,
+    "pcmToLoopbackOffset": {
+      "available": false,
+      "reason": "Independent retained windows do not confirm one stable waveform offset",
+      "physicalSpeakerLatencyEstablished": false,
+      "totalSourceToSpeakerLatencyEstablished": false
+    },
+    "envelopeSimilarityIsCandidateOnly": true,
+    "absoluteSpeakerLatencyEstablished": false,
+    "totalSourceToSpeakerLatencyEstablished": false
+  },
+  "retirement": {
+    "reason": "rph-model-or-running-scope-lost",
+    "dismountConfirmedByMyFeedback": true,
+    "directDriverLossCauseEstablished": false,
+    "fadeReserveConsumed": true,
+    "rphRetirementToHostAudioStoppedMs": 886.6667,
+    "fadeRequestToHostAudioStoppedMs": 676.4024,
+    "nativeFifoDrained": true,
+    "writerCompletionObserved": true,
+    "writerWorkerAliveAfterJoin": false,
+    "lastObservedQueuedAudits": 0,
+    "generatedRingFramesAtStop": 2752,
+    "allGeneratedFramesClaimedSubmitted": false,
+    "ownedHostNodeAndHelpersAbsent": true,
+    "remountReplayTested": false,
+    "naturalEngineShutdownEstablished": false
+  },
+  "myFeedback": {
+    "heardAudio": true,
+    "quality": "Bike sound brilliant",
+    "delayStillNoticeable": true,
+    "numericalDelayEstimateThisRun": null,
+    "improvementOverFirstRunEstablished": false,
+    "ending": "binary OFF rather than natural engine shutdown",
+    "thirdFirstCameraTransitionCompleted": true,
+    "cameraTransitionReportedWorking": true,
+    "normalGameExitConfirmed": true,
+    "subjectiveSeparatedFromMeasurements": true,
+    "firstFeedbackSha256": "1fe853e823a1e9021c6e7d970156b3bfe4efa8d6d6fb97e5f69c52f67e493213",
+    "followupFeedbackSha256": "2d912d0b627e27162f548f700a0b1de1c76ad553d6afde6c91de25f546162183"
+  },
+  "analysis": {
+    "pinnedAnalyzerUnchanged": true,
+    "firstFileOnlyInvocationRejectedOuterOutputPath": true,
+    "firstInvocationCreatedOutput": false,
+    "successfulInvocationUsedPackagePrivateRoot": true,
+    "liveAttemptRepeated": false,
+    "analysisSha256": "e351ddd02336beca794e68264da15a16443bb357027d0645ed0ad09f4456fc34",
+    "waveformSpectrogramPlots": 4,
+    "automaticAudioCorrectionsApplied": false
+  },
+  "restoration": {
+    "result": "PASS",
+    "independentHashLengthChecks": 379,
+    "protectedFiles": 11,
+    "settings": 4,
+    "originalPluginBytes": 222208,
+    "originalPluginSha256": "611347ab5828bedf0bd71102e4df125ed13666f6a7e7e3eccbc761a76a7fb657",
+    "stockFallbackF10AndFalseFlagsRestored": true,
+    "ownedPathsAbsent": 32,
+    "exactOwnedPidsAbsent": 8,
+    "supervisorFailure": null,
+    "capturesRemoved": false,
+    "recursiveDeletion": false,
+    "hotReplacement": false,
+    "rollbackReceiptSha256": "182a40c97beb6a8fe1f7e1284806027fb99064d6b15b43a2bd99aa138409f5ae",
+    "verificationReceiptSha256": "c678fc0f6bd73cae583febdc1606357c8a83a5b1605102227ec62cd3fc303203",
+    "independentReviewSha256": "dfea0f876db92fc025a2d788346e6a87221465ea1d8c402f00b2ca3c3124cb67"
+  },
+  "preservation": {
+    "files": 15,
+    "bytes": 31926034,
+    "allOriginalsAndCopiesRehashed": true,
+    "originalsRemoved": false,
+    "manifestSha256": "62efb00fa7f5972e3d9211f8f135d1957e2f87e50f3c854b20766de4fc80c001"
+  },
+  "independentReviews": {
+    "closedAnalysisSha256": "f92469f1ec39ba0a790ddcba5104c37414dc63a5b41e8d3bf17e128f82844005",
+    "telemetryTimingSha256": "08ad0f085fddc7fdfb8943e726b474c597c89c1410e44450a84cd1fca17d54f9",
+    "telemetryTimingSupplementSha256": "0ae7e9f5cb156fac1a7d1abccc6d3c9f52783c79b78dac2db2ff542776b24056",
+    "restorationSha256": "dfea0f876db92fc025a2d788346e6a87221465ea1d8c402f00b2ca3c3124cb67"
+  },
+  "unchanged": {
+    "soundSettings": true,
+    "dsp": true,
+    "gainsCalibration": true,
+    "sourceMappingExpiryIdentity": true,
+    "controlDelayMs": 100,
+    "startupReserveMs": 85.33333333333333,
+    "endpointBufferMs": 22,
+    "bufferTuningChanged": false,
+    "productionFeatureFlagsEnabled": false,
+    "microphoneCaptured": false,
+    "extraStemsCaptured": false
+  },
+  "limitations": [
+    "Continuous retained capture is not full initial coverage or established synchronization",
+    "Two camera-related near-silent PCM intervals; uninterrupted audible transition not established",
+    "Qualified PCM-loopback offset and physical input-to-ear latency unavailable",
+    "One unclassified host connection I/O event and one rejected timing row retained in report",
+    "Original passive/human-listening metadata labels preserved; actual lease/host and later feedback identify execution",
+    "Natural shutdown sound and direct driver-loss cause remain unresolved",
+    "Another live attempt requires fresh exact proposal and approval"
+  ],
+  "prMerged": false
+}

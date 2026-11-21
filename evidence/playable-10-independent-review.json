@@ -1,0 +1,237 @@
+{
+  "schema": 1,
+  "profile": "PLAYABLE-10",
+  "kind": "independent-final-critical-review",
+  "reviewedUtc": "2026-11-01T05:44:54.0866123Z",
+  "passed": true,
+  "decision": "PASS-TO-REQUEST-FRESH-DIAGNOSTIC-ONLY-APPROVAL",
+  "outcome": "B",
+  "criticalImplementationBlockers": [],
+  "ownership": {
+    "reviewer": "assembly_investigation",
+    "independentOfReviewedImplementation": true,
+    "implementationAuthors": "Other team members authored the reviewed PLAYABLE-10 entry, bootstrap, core, builder, preparer and profile fixtures.",
+    "reviewerAuthored": [
+      "PLAYABLE-10 artifact research receipts",
+      "PLAYABLE-10 redirected unchanged PLAYABLE-09 managed regression receipts"
+    ],
+    "reviewerDidNotAuthor": "Reviewed PLAYABLE-10 implementation, profile isolation runner or entry fixtures",
+    "noImplementationEditsDuringReview": true
+  },
+  "artifact": {
+    "name": "RichAudio.RuntimeProvenance.Rph.dll",
+    "sha256": "cb2555ba00169af86d2728ba545c808a825df0ab04ba08026f1268e02d3caf3a",
+    "bytes": 66560,
+    "executed": false
+  },
+  "reviewedSourceAndDocumentPins": [
+    {
+      "name": "src/acoustics/bridge/Rph/RphProvenanceEntry.Rph.cs",
+      "sha256": "6e6d9948fbead579ca9e879c378a0775276ed9b0f11f7e17355b063654052c8f",
+      "bytes": 3388
+    },
+    {
+      "name": "src/acoustics/bridge/Rph/RphProvenanceBootstrap.Rph.cs",
+      "sha256": "778dca93a2287507e77ed48f713972f29eb74183c220ee26d3b883e29950b61e",
+      "bytes": 8224
+    },
+    {
+      "name": "src/acoustics/host/Handoff/RphRuntimeProvenance.cs",
+      "sha256": "b4626b77782f9e40d40759bcb1bf3fb5f22b7a4baefc1b24035d866171e6b379",
+      "bytes": 28238
+    },
+    {
+      "name": "tools/Build-RphRuntimeProvenance.ps1",
+      "sha256": "d332a6089a60572826a4b9e8462cb0b6b8bfc64c70ec547bb4331d2351b9655e",
+      "bytes": 7281
+    },
+    {
+      "name": "tools/Prepare-RphRuntimeProvenance.ps1",
+      "sha256": "83ff24fded554d0b1c8615a46100a66621345c702f630bfb41d5deb6a3ad9532",
+      "bytes": 9671
+    },
+    {
+      "name": "tools/Test-RphProvenanceProfile.ps1",
+      "sha256": "d05100782e2e2455e49f3be23138b1a25ef53c91098c9862ed38ca6b1d443d0c",
+      "bytes": 22827
+    },
+    {
+      "name": "tests/rph-provenance/FakeRph.cs",
+      "sha256": "5a83930818b8e56a80b08e320276c0c5373111144c318779072c3e3792f67625",
+      "bytes": 1916
+    },
+    {
+      "name": "tests/rph-provenance/EntryFixture.cs",
+      "sha256": "d4a4379a72047e57b3d9d2facdafa12a5c806ac44a376e8f74ffa9561a59ad6d",
+      "bytes": 11090
+    },
+    {
+      "name": "docs/PLAYABLE_10.md",
+      "sha256": "ef33692ad12427c219f78b2fe63b622fec8d3bb7dda5615059f170bebec99d16",
+      "bytes": 12739
+    },
+    {
+      "name": "docs/PLAYABLE_10_LIVE_PROPOSAL.md",
+      "sha256": "fe29f9a25ef38f88f68da127fab9db5719755436cf39e5c18e047dd3485dbed0",
+      "bytes": 5488
+    }
+  ],
+  "actualCompiledImage": {
+    "metadataOnly": true,
+    "metadataReaderSha256": "0f6465ce57a0cbabc37013c8e3c9f110672de1c127b6192177d59eb1c7809772",
+    "architecture": "AMD64",
+    "kind": "Dll",
+    "typeCount": 24,
+    "methodCount": 187,
+    "entryPair": [
+      "System.Void RichAudio.Beacon.Rph.RphProvenanceEntry::Main()",
+      "System.Void RichAudio.Beacon.Rph.RphProvenanceEntry::OnUnload()"
+    ],
+    "runtimePolicyCalls": [
+      "Unreviewed"
+    ],
+    "permissionGetters": [
+      {
+        "name": "get_SourceAllowed",
+        "il": [
+          "ldc.i4.0",
+          "ret"
+        ]
+      },
+      {
+        "name": "get_HandoffAllowed",
+        "il": [
+          "ldc.i4.0",
+          "ret"
+        ]
+      },
+      {
+        "name": "get_AudioAllowed",
+        "il": [
+          "ldc.i4.0",
+          "ret"
+        ]
+      }
+    ],
+    "rphCalls": [
+      "System.Void Rage.Game::LogTrivial(System.String)",
+      "System.Void Rage.GameFiber::Sleep(System.Int32)"
+    ],
+    "imports": [
+      "CreateFileW",
+      "GetFileInformationByHandle",
+      "GetFinalPathNameByHandleW",
+      "GetProcessTimes"
+    ],
+    "forbiddenTypeReferences": 0,
+    "embeddedResources": 0
+  },
+  "findings": [
+    {
+      "area": "profile and actual image",
+      "result": "PASS",
+      "finding": "Direct diagnostic-only compilation physically omits source/Open/BEGIN, gameplay, menu, recorder and audio components. Actual entry uses Unreviewed; permission getters return constant false."
+    },
+    {
+      "area": "actual versus expected evidence",
+      "result": "PASS",
+      "finding": "Separate launcher and actual typed API assembly witnesses retain bounded available operands before comparison. Missing, dynamic, inaccessible, changed, linked or inconsistent identity cannot match. Expected API operands remain null/unreviewed in production; observations cannot mint acceptance."
+    },
+    {
+      "area": "capture and output failure",
+      "result": "PASS",
+      "finding": "Pinned file/ancestor handles span hash, version and file-metadata inspection; loaded/file metadata consistency is checked. Report admission is new-only and bounded. Output failure returns reportWritten false and no permission; fatal or unobserved completion is not a pass."
+    },
+    {
+      "area": "bootstrap and build",
+      "result": "PASS",
+      "finding": "Exact 23-field, 8-KiB process-bound purpose lease rejects unknown/duplicate fields and all activation opt-ins. Generated production policy fixes paths and scope, never reviewed API identity. Authentic SDK compilation is separate from actual runtime authentication."
+    },
+    {
+      "area": "offline fixture scope",
+      "result": "PASS",
+      "finding": "Reviewed profile checker, six serialized mutations, source-identical fixture-policy entry and test-only CLR facade. Production artifact is static-inspected/rebuilt, not executed. All diagnostic compilations use the authentic SDK. Default 655-method comparison retains method bodies and initializer content."
+    },
+    {
+      "area": "candidate and rollback",
+      "result": "PASS",
+      "finding": "One exact managed payload, no ASI. Reversible pending/absent same-volume backup sequence and process-exit-only rollback require ownership plus exact hashes/lengths. Lease cleanup depends on its generated ownership receipt. Unknown changes are preserved; no wildcard, recursive or ASI deletion is admitted."
+    },
+    {
+      "area": "preparation guards and documentation",
+      "result": "PASS",
+      "finding": "Reviewed four negative guards and legitimate absolute-input positive receipt. Exact build/validation literals prevent self-asserted receipts; only fresh direct PLAYABLE-10 candidate output is allowed. Documents accurately say outcome B, proposed only, no actual runtime authentication and no implicit live approval."
+    }
+  ],
+  "privateReviewSha256": "75454a8e909116f9877816dfb220e5d81a23110c6ac2de9c1360274a0e7d801e",
+  "buildReceiptSha256": "0b8f884941ef4b9efa84ad2d19a19aeaf863702f3994142a100bd9705c363ea3",
+  "profileValidationReceiptSha256": "66381837ed41890aef9a645c25961b4820f277e1e48efc2951528e3d195ab8a7",
+  "typedFixtureReceiptSha256": "a1878e245403b59e87ee5a2c80c3ac1b1da4c597abac171e2398802126d9eae2",
+  "preparationGuardReceiptSha256": "2ecd4344613e12e8d4114ae314431086faffb42710234a14e481f17db33de950",
+  "manifests": [
+    {
+      "name": "installation-manifest.json",
+      "sha256": "d57027bf0a6cb554b94674a9f5101f9033522ff65ed0a182689413d314bf9839",
+      "bytes": 6485
+    },
+    {
+      "name": "rollback-manifest.json",
+      "sha256": "7405c888caa84d062ccdbddf784f4fd4c1ff79cc16cbec7108b8843b1bf3d802",
+      "bytes": 2001
+    },
+    {
+      "name": "preflight.json",
+      "sha256": "ccf3031515e945f2b521d1d7105022dcd9aa7c87f52b55bffe9a4f6984096ce5",
+      "bytes": 839
+    }
+  ],
+  "reviewedValidation": {
+    "typedCases": 35,
+    "typedAssertions": 337,
+    "profileControls": 25,
+    "serializedMutants": 6,
+    "entryCases": 16,
+    "entryAssertions": 260,
+    "independentRebuildMethods": 187,
+    "rebuildMethodDifferences": 0,
+    "defaultProductMethods": 655,
+    "defaultMethodDifferences": 0,
+    "preparationNegativeGuards": 4,
+    "absoluteInputPositive": 1,
+    "testsRepeatedForThisReview": false,
+    "nativeMatrixRerun": false
+  },
+  "preservation": {
+    "candidatePreflightReviewed": true,
+    "priorTrackedFilesInPinnedPreflight": 723,
+    "prior09PrivateFilesInPinnedPreflight": 579,
+    "protectedFilesInPinnedPreflight": 11,
+    "settingsInPinnedPreflight": 4,
+    "completePreservationScanRepeatedForThisReview": false
+  },
+  "remainingBlockers": [
+    "Actual installed API runtime provenance is UNREVIEWED; its PLAYABLE-09 operands remain unknown.",
+    "No fresh diagnostic deployment/launch approval has been granted.",
+    "Passive handoff and audio require subsequent independently justified provenance and a separately reviewed/approved candidate."
+  ],
+  "limits": [
+    "Static/source review and fixture receipts do not establish live loading, actual API identity, live report completion or audibility.",
+    "Actual production DLL was not executed. A separately generated fixture policy and CLR facade are not actual RPH execution.",
+    "OS/CLR/filesystem/flush calls are not preemptible; fatal process or fibre abort may leave completion unobserved.",
+    "Session strings and digest syntax do not authenticate human approval; equivalent-privilege tampering is outside the guarantee.",
+    "A first observed runtime hash, name, version, cache location, signature-table or token presence does not authenticate runtime distribution."
+  ],
+  "gameFilesWritten": false,
+  "gameLaunched": false,
+  "actualRphExecuted": false,
+  "actualShvExecuted": false,
+  "sourceAttached": false,
+  "sourceOpen": false,
+  "sourceBegin": false,
+  "gameplayPublished": false,
+  "endpointOpened": false,
+  "audioPlayback": false,
+  "runtimeIdentityAuthenticated": false,
+  "liveApprovalGranted": false,
+  "privacy": "Only relative source/document names, artifact metadata and digests are public. No absolute user paths, process/session identifiers, generated policy or private logs."
+}
