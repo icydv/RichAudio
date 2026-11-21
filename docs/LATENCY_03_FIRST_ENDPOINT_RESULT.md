@@ -2,11 +2,11 @@
 
 **Result: experiment and audio acceptance FAILED; independent postflight restoration PASSED. The single approval is consumed. No retry occurred.**
 
-I approved exactly one endpoint-only attempt of the private candidate prepared at PR #79 head `62886953077efb374ac5f5c1c3340724da852d15`. Codex invoked its copied, unchanged helper once after an independent preflight and my explicit confirmation of Headphones — Astro A50 Game at a comfortable listening level. Windows volume and default-device preferences were not set or changed.
+I approved exactly one endpoint-only attempt of the private candidate prepared at PR #79 head `62886953077efb374ac5f5c1c3340724da852d15`. The run invoked its copied, unchanged helper once after an independent preflight and my explicit confirmation of Headphones — Astro A50 Game at a comfortable listening level. Windows volume and default-device preferences were not set or changed.
 
 The real shared-mode endpoint opened and accepted six PCM packets. The clock qualified briefly, then rejected a position/time pair before the first two-second event slot. **None of the 526 planned synthetic events was observed, authored, admitted or submitted.** Direct inspection of the unchanged reference WAV confirms that all 3,456 submitted frames were its initial zero-valued prefix. No nonzero Bati or transient PCM was submitted. This attempt therefore establishes neither audible Bati continuity nor real transient responsiveness.
 
-The worker reported successful Stop/Reset and joins. A separate supervisor exit-code exception prevented `supervision.json` from being written. Codex preserved this incomplete evidence and performed the required independent manual postflight rather than treating helper exit as a cleanup pass.
+The worker reported successful Stop/Reset and joins. A separate supervisor exit-code exception prevented `supervision.json` from being written. The project record preserved this incomplete evidence and performed the required independent manual postflight rather than treating helper exit as a cleanup pass.
 
 ## Exact approval and preflight
 
@@ -85,7 +85,7 @@ The worker reports Stop and Reset `S_OK`, joined output/reader/producer/authorin
 
 The planned 30-second internal limit, 35-second stop-request and 42-second containment thresholds were not reached. No stop-request marker exists. This early return does not validate their behavior under a long stall. On unwinding, the reviewed job's disposal path closes containment; actual lifetime absence was separately checked rather than inferred from that source path.
 
-Codex and the independent postflight verifier checked the original supervisor, worker, Node and invocation-shell **PID plus creation-time lifetimes**, all absent, and found no remaining candidate-path or forbidden game/host process. All 65 payloads, 60 source bindings and original inputs retained their approved hashes. `attempt-consumed.json`, admission/claim files and raw results remain preserved. Independent restoration passes; experiment/audio acceptance and complete supervision evidence do not.
+The postflight included independent checks of the original supervisor, worker, Node and invocation-shell **PID plus creation-time lifetimes**, all absent, and found no remaining candidate-path or forbidden game/host process. All 65 payloads, 60 source bindings and original inputs retained their approved hashes. `attempt-consumed.json`, admission/claim files and raw results remain preserved. Independent restoration passes; experiment/audio acceptance and complete supervision evidence do not.
 
 Twelve original result/invocation files are hash/length pinned privately, including the supervisor stderr and failed helper return. The [sanitized actual evidence](../evidence/latency-03-first-endpoint-result.json) retains counters, distributions and receipt hashes without endpoint IDs, session tokens, PIDs, private absolute paths or proprietary audio. No subjective listening report is inferred from the silent submitted prefix.
 

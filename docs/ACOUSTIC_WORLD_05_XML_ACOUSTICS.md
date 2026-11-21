@@ -1,6 +1,6 @@
 # My original XML acoustic comparison
 
-Codex prepared a matched acoustic comparison using the existing XML admission, resource inventory, cache builder, joined scene worker, `StockVehicleSource` and stock acoustic pipeline. Its geometry is the wholly original cube exported through the pinned public CodeWalker XML writer. Its sound is original analytic PCM supplied to the existing Bati source class. **Neither the building nor the PCM is a genuine GTA asset.** No endpoint or recording was opened.
+The implementation prepared a matched acoustic comparison using the existing XML admission, resource inventory, cache builder, joined scene worker, `StockVehicleSource` and stock acoustic pipeline. Its geometry is the wholly original cube exported through the pinned public CodeWalker XML writer. Its sound is original analytic PCM supplied to the existing Bati source class. **Neither the building nor the PCM is a genuine GTA asset.** No endpoint or recording was opened.
 
 Both paired cases use identical source PCM, operating controls, listener/source poses and renderer settings. The paired engine/exhaust emitters keep the existing forward offsets **0.35 / -0.75 m**, up offsets **0.65 / 0.3 m**, directivities **0.1 / 0.65**, accepted pressure gains **0.25 / 2.5**, and master gain **0.175**. The comparison uses my existing `authored-detail-loss-v1` presentation and explicit assumed passive wall coefficients. It does not modify default gameplay or create another synthesis/propagation engine.
 

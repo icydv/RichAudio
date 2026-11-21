@@ -3,7 +3,7 @@
   "kind": "RichAudioAcousticWorld06OfflineResult",
   "basePR": 86,
   "baseCommit": "7efaaab17497a36a352c468558e3dfea145fe4ea",
-  "executor": "Codex, independent Codex reviewers and original offline test runners",
+  "executor": "Automated implementation review and original offline test runners",
   "productIntent": "Prepare the complete qualified supported static world before gameplay; runtime locality selects completed geometry rather than discovering it through visits",
   "genuineInstalledWorldQualified": false,
   "nativeLoadingLabelQualified": false,
