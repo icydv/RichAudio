@@ -4,6 +4,11 @@ import { Worker } from "node:worker_threads";
 import { StreamingRenderer } from "../src/acoustics/streaming/causal.mjs";
 import { ListenerPlayout } from "../src/acoustics/streaming/listener-playout.mjs";
 import { StartupGate } from "../src/acoustics/streaming/startup-gate.mjs";
+import {
+  OrientationPresentation,
+  orientationTiming,
+} from "../src/acoustics/streaming/orientation-presentation.mjs";
+import { createHash } from "node:crypto";
 
 const args = process.argv.slice(2),
   options = {
@@ -15,6 +20,8 @@ const args = process.argv.slice(2),
     trace: false,
     required: false,
     diagnostics: false,
+    orientation: false,
+    barrierFrame: null,
   };
 for (let i = 0; i < args.length; i += 2) {
   if (args[i] === "--scene") options.scene = args[i + 1];
@@ -30,6 +37,10 @@ for (let i = 0; i < args.length; i += 2) {
     options.required = true;
   else if (args[i] === "--history-diagnostics" && args[i + 1] === "yes")
     options.diagnostics = true;
+  else if (args[i] === "--experimental-orientation" && args[i + 1] === "50ms")
+    options.orientation = true;
+  else if (args[i] === "--headless-barrier-frame")
+    options.barrierFrame = Number(args[i + 1]);
   else throw Error("Unknown producer option");
 }
 if (
@@ -46,6 +57,18 @@ if (
   !["harmonic", "pulse", "impulse"].includes(options.beacon)
 )
   throw Error("Scene/source/beacon budget");
+if (options.orientation && options.delayMs !== 100)
+  throw Error("Orientation experiment requires the 100 ms spatial policy");
+if (
+  options.barrierFrame !== null &&
+  (!options.headless ||
+    !options.trace ||
+    !Number.isInteger(options.barrierFrame) ||
+    options.barrierFrame < 0 ||
+    options.barrierFrame > 480000 ||
+    options.barrierFrame % 512)
+)
+  throw Error("Headless barrier budget");
 const FS = 48000,
   BLOCK = 512,
   ids = Array.from({ length: options.sources }, (_, i) => "beacon-" + i);
@@ -61,6 +84,9 @@ const renderer = new StreamingRenderer({
     { workerData: { scene: options.scene } },
   );
 const listenerPlayout = new ListenerPlayout({ delayMs: options.delayMs });
+const orientation = options.orientation ? new OrientationPresentation() : null;
+let barrier = null,
+  orientationDiagnostic = null;
 const startup = new StartupGate();
 let startupIdentity = null,
   lifecycle = "initial-priming",
@@ -83,6 +109,7 @@ const stats = {
   maxNodeQueueAgeMs: 0,
   simulationMs: [],
   dspMs: [],
+  orientationMs: [],
   pathMinimum: Infinity,
   pathMaximum: 0,
   listenerMode: "synthetic-metric",
@@ -125,6 +152,11 @@ async function finish(error) {
     pending.reject(Error("Producer stopping"));
     pending = null;
   }
+  if (barrier) {
+    clearTimeout(barrier.timer);
+    barrier.reject(Error("Producer stopping"));
+    barrier = null;
+  }
   await worker.terminate();
   const memory = process.memoryUsage(),
     cpu = process.cpuUsage(cpuStart);
@@ -139,12 +171,14 @@ async function finish(error) {
       pathMinimum: Number.isFinite(stats.pathMinimum) ? stats.pathMinimum : 0,
       simulationMs: summary(stats.simulationMs),
       dspMs: summary(stats.dspMs),
+      orientationMs: summary(stats.orientationMs),
     },
     dsp: renderer.stats,
     historyDiagnostics: renderer.historyDiagnostics,
     startup,
     simulation: lastControl?.stats ?? null,
     listenerPlayout: listenerPlayout.stats,
+    orientation: orientation?.stats ?? null,
     ownedArrayBytes: renderer.ownedArrayBytes,
     memory,
     clockModel: options.headless
@@ -261,8 +295,72 @@ async function pump() {
         await finish();
         break;
       }
-      const result = await simulate(snapshot(now), now);
+      const spatialSnapshot = snapshot(now);
+      const controlContext = lastPlayout?.state ?? null;
+      const orientationStarted = orientation ? performance.now() : 0;
+      const selection = orientation?.select(
+        lastPlayout,
+        listenerPlayout,
+        renderer.frame,
+        receiptClock(),
+      );
+      let orientationMilliseconds = orientation
+        ? performance.now() - orientationStarted
+        : 0;
+      orientationDiagnostic =
+        orientation || !options.trace
+          ? null
+          : {
+              policy: "buffered-" + options.delayMs,
+              selectionMode: "reference",
+              spatialTargetTime: lastPlayout?.targetTime ?? null,
+              ...orientationTiming(
+                listenerPlayout,
+                lastPlayout,
+                renderer.frame,
+                receiptClock(),
+              ),
+            };
+      const result = await simulate(spatialSnapshot, now);
       if (stopping) break;
+      // Test-only bounded hold of an actual worker result, before DSP handoff.
+      if (options.barrierFrame === renderer.frame) {
+        await new Promise((resolve, reject) => {
+          const timer = setTimeout(() => {
+            barrier = null;
+            reject(Error("Headless barrier deadline"));
+          }, 500);
+          barrier = { resolve, reject, timer };
+          log({ type: "selection-barrier", frame: renderer.frame });
+        });
+      }
+      if (stopping) break;
+      let mutePresentation = false;
+      const spatialFingerprint = options.trace
+        ? createHash("sha256")
+            .update(
+              JSON.stringify({
+                frame: result.control.frame,
+                sourceGenerations: result.control.sourceGenerations,
+                paths: result.control.paths.map(({ pan, ...p }) => p),
+              }),
+            )
+            .digest("hex")
+        : null;
+      if (orientation) {
+        const t = performance.now(),
+          presented = orientation.present(
+            result.control,
+            selection,
+            receiptClock(),
+            controlContext,
+          );
+        result.control = presented.control;
+        mutePresentation = presented.muteBlock;
+        orientationDiagnostic = presented.diagnostic;
+        orientationMilliseconds += performance.now() - t;
+        stats.orientationMs.push(orientationMilliseconds);
+      }
       lastControl = result.control;
       const identity = Object.values(lastControl.sourceGenerations).join(":");
       if (identity && startupIdentity !== identity) {
@@ -327,6 +425,10 @@ async function pump() {
       const started = performance.now();
       renderer.process(inputs, left, right, BLOCK);
       startup.apply(left, right, renderer.frame - BLOCK, ready);
+      if (mutePresentation) {
+        left.fill(0);
+        right.fill(0);
+      }
       const dspMilliseconds = performance.now() - started;
       stats.dspMs.push(dspMilliseconds);
       packet.write("RA07", 0, "ascii");
@@ -347,9 +449,26 @@ async function pump() {
           type: "block",
           frame: renderer.frame - BLOCK,
           dspMilliseconds,
+          orientationMilliseconds,
           simulationMilliseconds: result.milliseconds,
           paths: lastControl.paths.length,
           activePaths: renderer.activePaths,
+          orientation: orientationDiagnostic,
+          spatialFingerprint,
+          pathPresentation: lastControl.paths.map((p) => ({
+            id: p.id,
+            pan: p.pan,
+            arrivalDirection: p.arrivalDirection,
+            order: p.order,
+            delay: p.delay,
+            rate: p.rate,
+            bands: p.bands,
+            emissionFrame: p.emissionFrame,
+          })),
+          smoothedPan: renderer.slots
+            .filter((s) => s.active)
+            .map((s) => ({ id: s.id, pan: s.pan })),
+          presentationMuted: mutePresentation,
           missingHistory: renderer.stats.missingHistory,
           mode:
             lastPlayout?.mode ??
@@ -357,12 +476,14 @@ async function pump() {
           targetTime: lastPlayout?.targetTime ?? now,
           age: lastPlayout?.newestAgeSeconds ?? 0,
           prediction: lastPlayout?.extrapolationSeconds ?? 0,
-          orientationAgeSeconds: lastPlayout?.state
-            ? lastPlayout.playoutSeconds +
-              (lastPlayout.mode === "predicted"
-                ? lastPlayout.extrapolationSeconds
-                : 0)
-            : null,
+          orientationAgeSeconds:
+            orientationDiagnostic?.ageSeconds ??
+            (lastPlayout?.state
+              ? lastPlayout.playoutSeconds +
+                (lastPlayout.mode === "predicted"
+                  ? lastPlayout.extrapolationSeconds
+                  : 0)
+              : null),
           pan: lastControl.paths.find((p) => p.order === 0)?.pan ?? null,
           delays: lastControl.paths.map((p) => p.delay),
           pathIds: lastControl.paths.map((p) => p.id),
@@ -438,6 +559,7 @@ function receive(m) {
     else throw Error("Unknown control");
   } else if (m.type === "listener") {
     m = listenerPlayout.add(m, renderer.frame / FS, receiptClock());
+    orientation?.add(m, renderer.frame / FS, receiptClock());
     const s = m.state;
     external = {
       state: s,
@@ -448,6 +570,11 @@ function receive(m) {
     };
     stats.listenerMessages++;
     stats.maxReceiptAgeMs = Math.max(stats.maxReceiptAgeMs, m.receiptAgeMs);
+  } else if (m.type === "headless-release" && options.headless && barrier) {
+    const b = barrier;
+    barrier = null;
+    clearTimeout(b.timer);
+    b.resolve();
   } else throw Error("Unknown message");
 }
 process.stdin.setEncoding("utf8");

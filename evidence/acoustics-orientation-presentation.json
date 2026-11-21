@@ -1,0 +1,2484 @@
+{
+  "schema": 1,
+  "base": "5e7d15fa452954e438545d5e1bb535b6a628aab5",
+  "scope": "silent pre-device synthetic experiment; no subjective acceptance",
+  "baselineFingerprintsMatched": true,
+  "comparisonCount": 24,
+  "verdict": "PASS_SOFTWARE_CRITERIA",
+  "comparisons": [
+    {
+      "name": "step-0ms",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0.011277868645265698,
+      "improvementMs": 40.000000000000036,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.02125367894768715,
+        "rms": 0.00953130690698684,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.9999999999999734,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "response": {
+          "observation": 1.5,
+          "receipt": 1.5253333333333334,
+          "pcmWindow": [
+            1.58,
+            1.6
+          ],
+          "afterObservationMs": [
+            80.00000000000007,
+            100.00000000000009
+          ],
+          "afterReceiptMs": [
+            54.66666666666664,
+            74.66666666666666
+          ],
+          "selectionReachesObservationAt": 1.6,
+          "analysisWindowMs": 20,
+          "controlBlockMs": 10.666666666666666
+        },
+        "targetPanMaximumBlockStep": 0.32087002403323067,
+        "smoothedPanMaximumBlockStep": 0.2901880902161347,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.02125367894768715,
+        "rms": 0.009531171177431212,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.9999999999999734,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 146,
+        "interpolatedOrientationBlocks": 219,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "response": {
+          "observation": 1.5,
+          "receipt": 1.5253333333333334,
+          "pcmWindow": [
+            1.54,
+            1.56
+          ],
+          "afterObservationMs": [
+            40.000000000000036,
+            60.00000000000006
+          ],
+          "afterReceiptMs": [
+            14.666666666666606,
+            34.66666666666662
+          ],
+          "selectionReachesObservationAt": 1.5573333333333332,
+          "analysisWindowMs": 20,
+          "controlBlockMs": 10.666666666666666
+        },
+        "targetPanMaximumBlockStep": 0.7164711881047874,
+        "smoothedPanMaximumBlockStep": 0.46989491553856294,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "turn-0ms",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0.0007167384028434753,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.02007131651043892,
+        "rms": 0.009537833131787077,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.7828781668341208,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "currentTrackingRms": 0.1303722675819325,
+        "targetPanMaximumBlockStep": 0.01920132503268146,
+        "smoothedPanMaximumBlockStep": 0.019193872437343603,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.02007327228784561,
+        "rms": 0.009537831258030515,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.7830837891884325,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 194,
+        "interpolatedOrientationBlocks": 171,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 51.33333333333323,
+          "max": 88.00000000000009
+        },
+        "currentTrackingRms": 0.08355552266828341,
+        "targetPanMaximumBlockStep": 0.08190309165271702,
+        "smoothedPanMaximumBlockStep": 0.053934990827903144,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "step-4ms",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0.01137305679731071,
+      "improvementMs": 40.00000000000004,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.02125367894768715,
+        "rms": 0.009531318106811456,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.9999999999999734,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "response": {
+          "observation": 1.504,
+          "receipt": 1.5253333333333334,
+          "pcmWindow": [
+            1.58,
+            1.6
+          ],
+          "afterObservationMs": [
+            76.00000000000007,
+            96.00000000000009
+          ],
+          "afterReceiptMs": [
+            54.66666666666664,
+            74.66666666666666
+          ],
+          "selectionReachesObservationAt": 1.6106666666666667,
+          "analysisWindowMs": 20,
+          "controlBlockMs": 10.666666666666666
+        },
+        "targetPanMaximumBlockStep": 0.33517042199971386,
+        "smoothedPanMaximumBlockStep": 0.29108184022853284,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.02125367894768715,
+        "rms": 0.009531180258429067,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.9999999999999734,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 145,
+        "interpolatedOrientationBlocks": 220,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "response": {
+          "observation": 1.504,
+          "receipt": 1.5253333333333334,
+          "pcmWindow": [
+            1.54,
+            1.56
+          ],
+          "afterObservationMs": [
+            36.00000000000003,
+            56.00000000000005
+          ],
+          "afterReceiptMs": [
+            14.666666666666606,
+            34.66666666666662
+          ],
+          "selectionReachesObservationAt": 1.5573333333333332,
+          "analysisWindowMs": 20,
+          "controlBlockMs": 10.666666666666666
+        },
+        "targetPanMaximumBlockStep": 0.5970107693202026,
+        "smoothedPanMaximumBlockStep": 0.3915472522592209,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "turn-4ms",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0.0007172701880335808,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.020071325823664665,
+        "rms": 0.009537833296358,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.7828556484046052,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "currentTrackingRms": 0.1304096734355994,
+        "targetPanMaximumBlockStep": 0.01920248743676603,
+        "smoothedPanMaximumBlockStep": 0.019192838293335762,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.020073257386684418,
+        "rms": 0.009537831529353013,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.7830820259191438,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 194,
+        "interpolatedOrientationBlocks": 171,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 51.333333333333286,
+          "max": 89.33333333333326
+        },
+        "currentTrackingRms": 0.08364573363169442,
+        "targetPanMaximumBlockStep": 0.08561901144313303,
+        "smoothedPanMaximumBlockStep": 0.056288211515400366,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "step-8ms",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0.01108642015606165,
+      "improvementMs": 40.00000000000003,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.02125367894768715,
+        "rms": 0.00951817972359233,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.11733333333333333,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.11733333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.9999999999999734,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 364,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "response": {
+          "observation": 1.508,
+          "receipt": 1.536,
+          "pcmWindow": [
+            1.58,
+            1.6
+          ],
+          "afterObservationMs": [
+            72.00000000000006,
+            92.00000000000009
+          ],
+          "afterReceiptMs": [
+            44.00000000000004,
+            64.00000000000006
+          ],
+          "selectionReachesObservationAt": 1.6106666666666667,
+          "analysisWindowMs": 20,
+          "controlBlockMs": 10.666666666666666
+        },
+        "targetPanMaximumBlockStep": 0.33341790739685095,
+        "smoothedPanMaximumBlockStep": 0.2797980361547295,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.02125367894768715,
+        "rms": 0.00951804600914171,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.11733333333333333,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.11733333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.9999999999999734,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 144,
+        "interpolatedOrientationBlocks": 220,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "response": {
+          "observation": 1.508,
+          "receipt": 1.536,
+          "pcmWindow": [
+            1.54,
+            1.56
+          ],
+          "afterObservationMs": [
+            32.00000000000003,
+            52.00000000000004
+          ],
+          "afterReceiptMs": [
+            4.0000000000000036,
+            24.00000000000002
+          ],
+          "selectionReachesObservationAt": 1.568,
+          "analysisWindowMs": 20,
+          "controlBlockMs": 10.666666666666666
+        },
+        "targetPanMaximumBlockStep": 0.7863183388224204,
+        "smoothedPanMaximumBlockStep": 0.515703904834963,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "turn-8ms",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0.0007170224562287331,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.02007112465798855,
+        "rms": 0.009524692667276829,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.11733333333333333,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.11733333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.7829213658179945,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 364,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "currentTrackingRms": 0.13044809950078592,
+        "targetPanMaximumBlockStep": 0.01920278562984152,
+        "smoothedPanMaximumBlockStep": 0.01919286343869977,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.020073220133781433,
+        "rms": 0.00952469089099208,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.11733333333333333,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.11733333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.7830847578305372,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 193,
+        "interpolatedOrientationBlocks": 171,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 51.33333333333323,
+          "max": 87.99999999999997
+        },
+        "currentTrackingRms": 0.0836994207466254,
+        "targetPanMaximumBlockStep": 0.08662369437173932,
+        "smoothedPanMaximumBlockStep": 0.05698263508310967,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "stationary",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.009537900714421814,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.009537900714421814,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 146,
+        "interpolatedOrientationBlocks": 219,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "startup",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.009312217603343298,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.28
+          }
+        ],
+        "startupReadyTime": 0.288,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.288
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 348,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.009312217603343298,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.28
+          }
+        ],
+        "startupReadyTime": 0.288,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.288
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 139,
+        "interpolatedOrientationBlocks": 209,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.33333333333347
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "jitter",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.009537900714421814,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.009537900714421814,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 194,
+        "interpolatedOrientationBlocks": 171,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 51.33333333333323,
+          "max": 88.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "short-gap",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.009520789373415333,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ],
+          [
+            1.6106666666666667,
+            1.6213333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 5,
+        "interpolatedOrientationBlocks": 359,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 149.99999999999991
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.009520789373415333,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [
+          [
+            1.5573333333333332,
+            1.6106666666666667
+          ]
+        ],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ],
+          [
+            1.6106666666666667,
+            1.6213333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 5,
+        "fallbackSeconds": 0.05333333333333334,
+        "heldOrientationBlocks": 150,
+        "interpolatedOrientationBlocks": 214,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 149.99999999999991
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "expired",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.008761680934500445,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          },
+          {
+            "start": 1.64,
+            "end": 2.2
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ],
+          [
+            1.6106666666666667,
+            2.208
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 5,
+        "interpolatedOrientationBlocks": 304,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 149.99999999999991
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.008761680934500445,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          },
+          {
+            "start": 1.64,
+            "end": 2.2
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [
+          [
+            1.5573333333333332,
+            1.6106666666666667
+          ]
+        ],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ],
+          [
+            1.6106666666666667,
+            2.208
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 5,
+        "fallbackSeconds": 0.05333333333333334,
+        "heldOrientationBlocks": 130,
+        "interpolatedOrientationBlocks": 179,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 149.99999999999991
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "pause",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.008789533179085216,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          },
+          {
+            "start": 1.56,
+            "end": 2.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ],
+          [
+            1.5253333333333334,
+            2.1013333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 311,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.008789533179085216,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          },
+          {
+            "start": 1.56,
+            "end": 2.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ],
+          [
+            1.5253333333333334,
+            2.1013333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 126,
+        "interpolatedOrientationBlocks": 185,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "replacement",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.009424482663466816,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          },
+          {
+            "start": 2.04,
+            "end": 2.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ],
+          [
+            2.026666666666667,
+            2.1013333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 358,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.009424482663466816,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          },
+          {
+            "start": 2.04,
+            "end": 2.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ],
+          [
+            2.026666666666667,
+            2.1013333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 144,
+        "interpolatedOrientationBlocks": 214,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "emission-stop",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.006705154833602352,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          },
+          {
+            "start": 2.1,
+            "end": 4
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.006705154833602352,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          },
+          {
+            "start": 2.1,
+            "end": 4
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 146,
+        "interpolatedOrientationBlocks": 219,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "stop",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 96256,
+        "peak": 0.015060855075716972,
+        "rms": 0.009381835460605567,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 178,
+        "terminalOutputSeconds": 2.005333333333333,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000003,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 96256,
+        "peak": 0.015060855075716972,
+        "rms": 0.009381835460605567,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 70,
+        "interpolatedOrientationBlocks": 108,
+        "terminalOutputSeconds": 2.005333333333333,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "failure",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 96256,
+        "peak": 0.015060855075716972,
+        "rms": 0.009381835460605567,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 178,
+        "terminalOutputSeconds": 2.005333333333333,
+        "terminalError": "Unknown message",
+        "orientationAgeMs": {
+          "median": 100.00000000000003,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 96256,
+        "peak": 0.015060855075716972,
+        "rms": 0.009381835460605567,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 70,
+        "interpolatedOrientationBlocks": 108,
+        "terminalOutputSeconds": 2.005333333333333,
+        "terminalError": "Unknown message",
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "rapid",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0.0030068261548876762,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.019637566059827805,
+        "rms": 0.009537856436540352,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.7085417872179939,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0.08541294291325244,
+        "smoothedPanMaximumBlockStep": 0.08455571235878409,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.01968032494187355,
+        "rms": 0.009537854740915015,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.7149615132547409,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 146,
+        "interpolatedOrientationBlocks": 219,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "targetPanMaximumBlockStep": 0.2362464772225446,
+        "smoothedPanMaximumBlockStep": 0.1590052023598265,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "wrap",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0.00029593007639050484,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.021253518760204315,
+        "rms": 0.009537268099244526,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.9999827076796932,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0.006400353024280905,
+        "smoothedPanMaximumBlockStep": 0.006400004180551591,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.021253425627946854,
+        "rms": 0.009537176638683904,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.9999892465253847,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 146,
+        "interpolatedOrientationBlocks": 219,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "targetPanMaximumBlockStep": 0.01799854588167113,
+        "smoothedPanMaximumBlockStep": 0.012180494387660577,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "invalid",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.008790241083350787,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          },
+          {
+            "start": 1.56,
+            "end": 2.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ],
+          [
+            1.5253333333333334,
+            2.1013333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 311,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.008790241083350787,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          },
+          {
+            "start": 1.56,
+            "end": 2.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ],
+          [
+            1.5253333333333334,
+            2.1013333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 126,
+        "interpolatedOrientationBlocks": 185,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "monotonic-gap",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0.0002950183115899563,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.021253567188978195,
+        "rms": 0.009519705991548107,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ],
+          [
+            1.6106666666666667,
+            1.6213333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.9999812930080262,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 5,
+        "interpolatedOrientationBlocks": 359,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 149.99999999999991
+        },
+        "targetPanMaximumBlockStep": 0.0062196618051877095,
+        "smoothedPanMaximumBlockStep": 0.008628463678220455,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.021253444254398346,
+        "rms": 0.009519707458857168,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [
+          [
+            1.5573333333333332,
+            1.6106666666666667
+          ]
+        ],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ],
+          [
+            1.6106666666666667,
+            1.6213333333333333
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.9999651477118657,
+        "fallbackBlocks": 5,
+        "fallbackSeconds": 0.05333333333333334,
+        "heldOrientationBlocks": 150,
+        "interpolatedOrientationBlocks": 214,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 149.99999999999991
+        },
+        "targetPanMaximumBlockStep": 0.016599477013480746,
+        "smoothedPanMaximumBlockStep": 0.012585365351967526,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "coalesced",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.009537900714421814,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.015060855075716972,
+        "rms": 0.009537900714421814,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 146,
+        "interpolatedOrientationBlocks": 219,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "targetPanMaximumBlockStep": 0,
+        "smoothedPanMaximumBlockStep": 0,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "moving-listener",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0.0003982102498412132,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.018760493025183678,
+        "rms": 0.009476137495315303,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.5789110530555142,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "targetPanMaximumBlockStep": 0.011167071522140623,
+        "smoothedPanMaximumBlockStep": 0.01115969669792427,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.018755029886960983,
+        "rms": 0.009476137392028895,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.5773816691104465,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 146,
+        "interpolatedOrientationBlocks": 219,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 50.00000000000004,
+          "max": 69.3333333333333
+        },
+        "targetPanMaximumBlockStep": 0.02906046136454328,
+        "smoothedPanMaximumBlockStep": 0.019955043667283817,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "reflected-turn",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0.0005691330879926682,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.013100177980959415,
+        "rms": 0.005344879564664636,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.999944947160299,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "currentTrackingRms": 0.13500959564177864,
+        "targetPanMaximumBlockStep": 0.01920132503268146,
+        "smoothedPanMaximumBlockStep": 0.019193872437343603,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.013101615011692047,
+        "rms": 0.005346614886964921,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.9999908309433592,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 194,
+        "interpolatedOrientationBlocks": 171,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 51.33333333333323,
+          "max": 88.00000000000009
+        },
+        "currentTrackingRms": 0.09299830607927127,
+        "targetPanMaximumBlockStep": 0.08190309165271702,
+        "smoothedPanMaximumBlockStep": 0.053934990827903144,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    },
+    {
+      "name": "four-source-turn",
+      "sameNonPanControls": true,
+      "maxFloatDifference": 0.002849087119102478,
+      "improvementMs": null,
+      "issues": [],
+      "reference": {
+        "frames": 192000,
+        "peak": 0.07932586967945099,
+        "rms": 0.01884441212557226,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.8514136246153778,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 0,
+        "interpolatedOrientationBlocks": 365,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 100.00000000000009,
+          "max": 100.00000000000009
+        },
+        "currentTrackingRms": 0.13725120782259423,
+        "targetPanMaximumBlockStep": 0.01920132503268146,
+        "smoothedPanMaximumBlockStep": 0.019193872437343603,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      },
+      "candidate": {
+        "frames": 192000,
+        "peak": 0.07962559163570404,
+        "rms": 0.018844407810866746,
+        "clipped": 0,
+        "missingHistory": 0,
+        "lowEnvelopeIntervals": [
+          {
+            "start": 0,
+            "end": 0.1
+          }
+        ],
+        "startupReadyTime": 0.10666666666666667,
+        "fallbackIntervals": [],
+        "spatialUnavailableIntervals": [
+          [
+            0,
+            0.10666666666666667
+          ]
+        ],
+        "maximumSmoothedPanMagnitude": 0.8516041006475312,
+        "fallbackBlocks": 0,
+        "fallbackSeconds": 0,
+        "heldOrientationBlocks": 194,
+        "interpolatedOrientationBlocks": 171,
+        "terminalOutputSeconds": 4,
+        "terminalError": null,
+        "orientationAgeMs": {
+          "median": 51.33333333333323,
+          "max": 88.00000000000009
+        },
+        "currentTrackingRms": 0.09491556923879844,
+        "targetPanMaximumBlockStep": 0.08190309165271702,
+        "smoothedPanMaximumBlockStep": 0.053934990827903144,
+        "fallbackBackwardTargetStep": 0,
+        "fallbackBackwardSmoothedStep": 0,
+        "backwardAt": null
+      }
+    }
+  ],
+  "profile": {
+    "schema": 1,
+    "scope": "accelerated silent producer with diagnostic tracing; no callback/device benchmark",
+    "rows": [
+      {
+        "sources": 1,
+        "experimental": false,
+        "blocks": 563,
+        "simulationMs": {
+          "count": 563,
+          "median": 0.06379999999995789,
+          "p95": 0.10269999999999868,
+          "max": 1.1484000000000094
+        },
+        "dspMs": {
+          "count": 563,
+          "median": 0.04210000000000491,
+          "p95": 0.12309999999999377,
+          "max": 1.3636000000000053
+        },
+        "orientationMs": {
+          "count": 0,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "cpuSeconds": 0.578,
+        "wallSeconds": 0.2826044,
+        "memory": {
+          "rss": 71725056,
+          "heapTotal": 13361152,
+          "heapUsed": 7859496,
+          "external": 5697081,
+          "arrayBuffers": 3558254
+        },
+        "ownedArrayBytes": 2881152,
+        "paths": 2,
+        "missingHistory": 0,
+        "limited": 0,
+        "maximumOutstandingCredits": 1
+      },
+      {
+        "sources": 1,
+        "experimental": true,
+        "blocks": 563,
+        "simulationMs": {
+          "count": 563,
+          "median": 0.06299999999998818,
+          "p95": 0.10159999999999059,
+          "max": 1.2228000000000065
+        },
+        "dspMs": {
+          "count": 563,
+          "median": 0.041700000000020054,
+          "p95": 0.12159999999998661,
+          "max": 1.4365999999999985
+        },
+        "orientationMs": {
+          "count": 563,
+          "median": 0.013500000000021828,
+          "p95": 0.027100000000018554,
+          "max": 0.42979999999999663
+        },
+        "cpuSeconds": 0.485,
+        "wallSeconds": 0.2896687,
+        "memory": {
+          "rss": 72196096,
+          "heapTotal": 12836864,
+          "heapUsed": 7539856,
+          "external": 5238380,
+          "arrayBuffers": 3099553
+        },
+        "ownedArrayBytes": 2881152,
+        "paths": 2,
+        "missingHistory": 0,
+        "limited": 0,
+        "maximumOutstandingCredits": 1
+      },
+      {
+        "sources": 1,
+        "experimental": true,
+        "blocks": 563,
+        "simulationMs": {
+          "count": 563,
+          "median": 0.06289999999999907,
+          "p95": 0.10309999999999775,
+          "max": 1.3606999999999942
+        },
+        "dspMs": {
+          "count": 563,
+          "median": 0.04199999999997317,
+          "p95": 0.12400000000000944,
+          "max": 1.4679999999999893
+        },
+        "orientationMs": {
+          "count": 563,
+          "median": 0.013700000000000045,
+          "p95": 0.02740000000000009,
+          "max": 0.3418999999999919
+        },
+        "cpuSeconds": 0.624,
+        "wallSeconds": 0.2878039,
+        "memory": {
+          "rss": 72654848,
+          "heapTotal": 13623296,
+          "heapUsed": 9125888,
+          "external": 5764610,
+          "arrayBuffers": 3625783
+        },
+        "ownedArrayBytes": 2881152,
+        "paths": 2,
+        "missingHistory": 0,
+        "limited": 0,
+        "maximumOutstandingCredits": 1
+      },
+      {
+        "sources": 1,
+        "experimental": false,
+        "blocks": 563,
+        "simulationMs": {
+          "count": 563,
+          "median": 0.06219999999999004,
+          "p95": 0.10210000000000719,
+          "max": 1.174900000000008
+        },
+        "dspMs": {
+          "count": 563,
+          "median": 0.04220000000000823,
+          "p95": 0.12379999999998859,
+          "max": 1.4786000000000001
+        },
+        "orientationMs": {
+          "count": 0,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "cpuSeconds": 0.516,
+        "wallSeconds": 0.2784758,
+        "memory": {
+          "rss": 71921664,
+          "heapTotal": 13099008,
+          "heapUsed": 8167368,
+          "external": 5632229,
+          "arrayBuffers": 3493402
+        },
+        "ownedArrayBytes": 2881152,
+        "paths": 2,
+        "missingHistory": 0,
+        "limited": 0,
+        "maximumOutstandingCredits": 1
+      },
+      {
+        "sources": 4,
+        "experimental": false,
+        "blocks": 563,
+        "simulationMs": {
+          "count": 563,
+          "median": 0.14990000000000236,
+          "p95": 0.2116999999999507,
+          "max": 1.6594999999999942
+        },
+        "dspMs": {
+          "count": 563,
+          "median": 0.18880000000001473,
+          "p95": 0.23820000000000618,
+          "max": 4.7646000000000015
+        },
+        "orientationMs": {
+          "count": 0,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "cpuSeconds": 0.891,
+        "wallSeconds": 0.5043607,
+        "memory": {
+          "rss": 81326080,
+          "heapTotal": 12574720,
+          "heapUsed": 8584400,
+          "external": 14409380,
+          "arrayBuffers": 12270553
+        },
+        "ownedArrayBytes": 11524608,
+        "paths": 8,
+        "missingHistory": 0,
+        "limited": 0,
+        "maximumOutstandingCredits": 1
+      },
+      {
+        "sources": 4,
+        "experimental": true,
+        "blocks": 563,
+        "simulationMs": {
+          "count": 563,
+          "median": 0.15040000000001896,
+          "p95": 0.22210000000001173,
+          "max": 1.7830999999999904
+        },
+        "dspMs": {
+          "count": 563,
+          "median": 0.19160000000002242,
+          "p95": 0.26130000000000564,
+          "max": 4.387900000000002
+        },
+        "orientationMs": {
+          "count": 563,
+          "median": 0.016299999999944248,
+          "p95": 0.02960000000000207,
+          "max": 0.31469999999998777
+        },
+        "cpuSeconds": 0.953,
+        "wallSeconds": 0.5256797,
+        "memory": {
+          "rss": 82534400,
+          "heapTotal": 12574720,
+          "heapUsed": 8866200,
+          "external": 14410631,
+          "arrayBuffers": 12271804
+        },
+        "ownedArrayBytes": 11524608,
+        "paths": 8,
+        "missingHistory": 0,
+        "limited": 0,
+        "maximumOutstandingCredits": 1
+      },
+      {
+        "sources": 4,
+        "experimental": true,
+        "blocks": 563,
+        "simulationMs": {
+          "count": 563,
+          "median": 0.15200000000004366,
+          "p95": 0.2144999999999868,
+          "max": 1.741400000000013
+        },
+        "dspMs": {
+          "count": 563,
+          "median": 0.188699999999983,
+          "p95": 0.23179999999999268,
+          "max": 4.466400000000007
+        },
+        "orientationMs": {
+          "count": 563,
+          "median": 0.01639999999997599,
+          "p95": 0.029699999999991178,
+          "max": 0.32800000000000296
+        },
+        "cpuSeconds": 0.937,
+        "wallSeconds": 0.5195212,
+        "memory": {
+          "rss": 82321408,
+          "heapTotal": 12836864,
+          "heapUsed": 8913080,
+          "external": 14410660,
+          "arrayBuffers": 12271833
+        },
+        "ownedArrayBytes": 11524608,
+        "paths": 8,
+        "missingHistory": 0,
+        "limited": 0,
+        "maximumOutstandingCredits": 1
+      },
+      {
+        "sources": 4,
+        "experimental": false,
+        "blocks": 563,
+        "simulationMs": {
+          "count": 563,
+          "median": 0.15260000000000673,
+          "p95": 0.21699999999999875,
+          "max": 1.7946999999999917
+        },
+        "dspMs": {
+          "count": 563,
+          "median": 0.19259999999997035,
+          "p95": 0.24099999999998545,
+          "max": 4.81689999999999
+        },
+        "orientationMs": {
+          "count": 0,
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "cpuSeconds": 0.922,
+        "wallSeconds": 0.5204831999999999,
+        "memory": {
+          "rss": 82444288,
+          "heapTotal": 12574720,
+          "heapUsed": 7805752,
+          "external": 14540394,
+          "arrayBuffers": 12401567
+        },
+        "ownedArrayBytes": 11524608,
+        "paths": 8,
+        "missingHistory": 0,
+        "limited": 0,
+        "maximumOutstandingCredits": 1
+      }
+    ]
+  },
+  "protectedFiles": 883
+}
