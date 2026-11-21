@@ -1,6 +1,6 @@
 # My first-source preparation change
 
-My WORLD04.2 investigation retained a first-source constructor cost around **11–12 ms**, plus the earlier larger local and hosted processing overruns. Those reports remain unchanged. Codex added a small opt-in control API around my existing `StockVehicleSource`; its constructor, grain implementation, synthesis, gains, renderer and audio block budget remain unchanged.
+My WORLD04.2 investigation retained a first-source constructor cost around **11–12 ms**, plus the earlier larger local and hosted processing overruns. Those reports remain unchanged. The implementation added a small opt-in control API around my existing `StockVehicleSource`; its constructor, grain implementation, synthesis, gains, renderer and audio block budget remain unchanged.
 
 `StockGameplay` still defaults to `sourcePreparationPolicy: 'disabled'`. An explicit `sourcePreparationPolicy: 'explicit-control05'` enables `prepareSources05({sourceIds, maximum, validForMs, signal})`. Trusted startup/control code can call it after accepting an original observation and **await completion before beginning a render deadline**. No call to `accept`, `render`, scene loading or an audio callback starts preparation automatically.
 
@@ -10,7 +10,7 @@ At most two untouched, sample-zero sources remain ready for at most 250 ms, boun
 
 New observations prune disappeared source identities. Source generation, bank/profile changes, invalid/reversed control time, an aborted signal, explicit `cancelPreparedSources05()` and closure prevent stale readiness from being used. Preparation refuses an active opt-in render, including after its initial yield. Closing the opt-in engine joins pending preparation without starting construction afterward. Loaded bank memory is trusted as in the existing registry contract; changing assets must replace the bank object. Consumption does not rescan or hash PCM during rendering.
 
-Codex used original analytic PCM through the existing Bati source class. No real Bati bank, installed resource, endpoint or recording was accessed. The nine focused tests compare bit-identical dry/stereo PCM and sample counts, frame-zero consumption, immediate fallback, exact bindings, bounded readiness/reuse, abort/close behaviour, and source/history continuity through moving tile boundaries, unknown geometry, cancelled scene workers and expiry.
+The run used original analytic PCM through the existing Bati source class. No real Bati bank, installed resource, endpoint or recording was accessed. The nine focused tests compare bit-identical dry/stereo PCM and sample counts, frame-zero consumption, immediate fallback, exact bindings, bounded readiness/reuse, abort/close behaviour, and source/history continuity through moving tile boundaries, unknown geometry, cancelled scene workers and expiry.
 
 ## Coordinated local measurements
 
