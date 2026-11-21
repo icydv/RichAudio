@@ -3,7 +3,7 @@
   "kind": "RichAudioAcousticWorld041OfflineResult",
   "basePR": 83,
   "baseCommit": "f627411e875705542d9749651eae71b68d6d6ebb",
-  "executor": "Codex and offline test runners",
+  "executor": "Automation and offline test runners",
   "formatDeclaration": "known-RPF7-NG",
   "formatTag": "0x0FEFFFFF",
   "publicReferenceCommit": "485d56bec00262ed7fa472261cce7bbc6202b96e",

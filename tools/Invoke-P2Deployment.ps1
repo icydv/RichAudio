@@ -29,7 +29,7 @@ if($Action -eq 'Install'){
         if((Get-FileHash -LiteralPath $file.Source).Hash -ne $file.SHA256){throw 'Source hash mismatch: '+$file.Source}
     }
     foreach($name in @('MSVCR100.dll','MSVCP100.dll')){if(!(Test-Path -LiteralPath (Join-Path "$env:WINDIR\System32" $name))){throw 'Approved system prerequisite is not present.'}}
-    $receipt=[ordered]@{SchemaVersion=1;StartedUtc=[DateTime]::UtcNow.ToString('o');Approval='Explicit current-chat user approval for the verified 26-file proposal and controlled Story Mode test';ManifestSHA256=(Get-FileHash -LiteralPath $manifestPath).Hash;State='INSTALLING';CreatedDirectories=@();Files=@()}
+    $receipt=[ordered]@{SchemaVersion=1;StartedUtc=[DateTime]::UtcNow.ToString('o');Approval='Explicit approval for the verified 26-file proposal and controlled Story Mode test';ManifestSHA256=(Get-FileHash -LiteralPath $manifestPath).Hash;State='INSTALLING';CreatedDirectories=@();Files=@()}
     try{
         foreach($file in $manifest.Files){
             $parent=Split-Path -Parent $file.Destination;Parents $parent
