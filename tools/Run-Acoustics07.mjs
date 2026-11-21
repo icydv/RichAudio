@@ -1,0 +1,354 @@
+// Bounded, credit-paced live PCM producer. stdout is exclusively RA07 binary.
+// The Windows endpoint thread never runs this JavaScript or the geometry solver.
+import { Worker } from "node:worker_threads";
+import { StreamingRenderer } from "../src/acoustics/streaming/causal.mjs";
+import { ListenerPlayout } from "../src/acoustics/streaming/listener-playout.mjs";
+
+const args = process.argv.slice(2),
+  options = { scene: "open-road", sources: 1, beacon: "harmonic" };
+for (let i = 0; i < args.length; i += 2) {
+  if (args[i] === "--scene") options.scene = args[i + 1];
+  else if (args[i] === "--sources") options.sources = Number(args[i + 1]);
+  else if (args[i] === "--beacon") options.beacon = args[i + 1];
+  else throw Error("Unknown producer option");
+}
+if (
+  ![
+    "open-road",
+    "urban-street",
+    "obstructed-corner",
+    "enclosure",
+    "flyby",
+  ].includes(options.scene) ||
+  !Number.isInteger(options.sources) ||
+  options.sources < 1 ||
+  options.sources > 16 ||
+  !["harmonic", "pulse", "impulse"].includes(options.beacon)
+)
+  throw Error("Scene/source/beacon budget");
+const FS = 48000,
+  BLOCK = 512,
+  ids = Array.from({ length: options.sources }, (_, i) => "beacon-" + i);
+const renderer = new StreamingRenderer({ sourceIds: ids }),
+  worker = new Worker(
+    new URL(
+      "../src/acoustics/streaming/simulation-worker.mjs",
+      import.meta.url,
+    ),
+    { workerData: { scene: options.scene } },
+  );
+const listenerPlayout = new ListenerPlayout();
+const inputs = Object.fromEntries(
+  ids.map((id) => [id, new Float32Array(BLOCK)]),
+);
+const left = new Float32Array(BLOCK),
+  right = new Float32Array(BLOCK),
+  packet = Buffer.alloc(16 + BLOCK * 8);
+const stats = {
+  blocks: 0,
+  listenerMessages: 0,
+  listenerRejected: 0,
+  listenerSuperseded: 0,
+  maxReceiptAgeMs: 0,
+  maxNodeQueueAgeMs: 0,
+  simulationMs: [],
+  dspMs: [],
+  pathMinimum: Infinity,
+  pathMaximum: 0,
+  listenerMode: "synthetic-metric",
+  controlCadenceFrames: BLOCK,
+};
+const cpuStart = process.cpuUsage(),
+  wallStart = performance.now();
+let credits = 0,
+  inFlight = 0,
+  running = false,
+  stopping = false,
+  enabled = false,
+  gain = 0,
+  sequence = 0,
+  requestId = 0,
+  pending = null,
+  inputText = "",
+  external = null;
+let lastControl = null,
+  lastPlayout = null;
+const phase = new Float64Array(options.sources);
+function log(value) {
+  process.stderr.write(JSON.stringify(value) + "\n");
+}
+function summary(values) {
+  const s = values.slice().sort((a, b) => a - b);
+  return {
+    count: s.length,
+    median: s[Math.floor(s.length * 0.5)] ?? 0,
+    p95: s[Math.floor(s.length * 0.95)] ?? 0,
+    max: s.at(-1) ?? 0,
+  };
+}
+async function finish(error) {
+  if (stopping) return;
+  stopping = true;
+  enabled = false;
+  if (pending) {
+    clearTimeout(pending.timer);
+    pending.reject(Error("Producer stopping"));
+    pending = null;
+  }
+  await worker.terminate();
+  const memory = process.memoryUsage(),
+    cpu = process.cpuUsage(cpuStart);
+  log({
+    type: "final",
+    error: error?.message ?? null,
+    frames: renderer.frame,
+    wallSeconds: (performance.now() - wallStart) / 1000,
+    cpuSeconds: (cpu.user + cpu.system) / 1e6,
+    statistics: {
+      ...stats,
+      pathMinimum: Number.isFinite(stats.pathMinimum) ? stats.pathMinimum : 0,
+      simulationMs: summary(stats.simulationMs),
+      dspMs: summary(stats.dspMs),
+    },
+    dsp: renderer.stats,
+    simulation: lastControl?.stats ?? null,
+    listenerPlayout: listenerPlayout.stats,
+    ownedArrayBytes: renderer.ownedArrayBytes,
+    memory,
+    clockModel:
+      "Receipt age plus Node queue age; audio render clock leads endpoint by bounded queues, no hardware timestamp alignment",
+    subjectiveListening: "pending",
+  });
+  process.stdin.pause();
+  process.exitCode = error ? 1 : 0;
+}
+worker.on("error", (e) => finish(e));
+worker.on("message", (m) => {
+  if (!pending || m.id !== pending.id) return;
+  const p = pending;
+  pending = null;
+  clearTimeout(p.timer);
+  if (m.error) p.reject(Error(m.error));
+  else p.resolve(m);
+});
+function simulate(snapshot, now) {
+  return new Promise((resolve, reject) => {
+    const id = ++requestId;
+    const timer = setTimeout(() => {
+      pending = null;
+      reject(Error("Simulation worker deadline exceeded"));
+    }, 1000);
+    pending = { id, resolve, reject, timer };
+    worker.postMessage({ id, snapshot, now });
+  });
+}
+function baseListener() {
+  return {
+    position: options.scene === "flyby" ? [0, 6, 1] : [5, 0, 1],
+    velocity: [0, 0, 0],
+    forward: options.scene === "flyby" ? [0, 1, 0] : [-1, 0, 0],
+    up: [0, 0, 1],
+    generation: 1,
+    valid: true,
+  };
+}
+function sourceStates(time, externalMode) {
+  return ids.map((id, i) => {
+    let position = [-5, i * 0.4, 1],
+      velocity = [0, 0, 0];
+    if (options.scene === "flyby" && !externalMode) {
+      const angle = (time - 3) * 0.35;
+      position = [35 * Math.sin(angle), i * 0.4, 1];
+      velocity = [12.25 * Math.cos(angle), 0, 0];
+    }
+    return {
+      id,
+      generation: 1,
+      position,
+      velocity,
+      forward: [1, 0, 0],
+      up: [0, 0, 1],
+      directivity: 0.2,
+      valid: true,
+      emitting: enabled,
+    };
+  });
+}
+function snapshot(now) {
+  if (!external)
+    return {
+      time: now,
+      session: "synthetic-owned",
+      generation: 1,
+      listener: baseListener(),
+      sources: sourceStates(now, false),
+      paused: false,
+    };
+  if (external.pendingReceipt) {
+    stats.maxNodeQueueAgeMs = Math.max(
+      stats.maxNodeQueueAgeMs,
+      performance.now() - external.receivedAt,
+    );
+    external.pendingReceipt = false;
+  }
+  lastPlayout = listenerPlayout.sample(now, performance.now());
+  const s = lastPlayout.state ?? external.state;
+  const native = s.coordinates === "gta-native-unscaled";
+  const listener = {
+    ...baseListener(),
+    position: native ? baseListener().position : s.position,
+    velocity: native ? [0, 0, 0] : s.velocity,
+    forward: s.forward,
+    up: s.up,
+    valid: Boolean(lastPlayout.state),
+  };
+  stats.listenerMode = native
+    ? "native-orientation-only-in-synthetic-scene"
+    : "external-synthetic-metric";
+  return {
+    time: now,
+    session: s.session,
+    generation: s.generation,
+    listener,
+    sources: sourceStates(now, true),
+    paused: s.paused,
+  };
+}
+async function pump() {
+  if (running || stopping) return;
+  running = true;
+  try {
+    while (credits > 0 && !stopping) {
+      credits--;
+      inFlight = 1;
+      const now = renderer.frame / FS;
+      if (now >= 120) {
+        await finish();
+        break;
+      }
+      const result = await simulate(snapshot(now), now);
+      if (stopping) break;
+      lastControl = result.control;
+      renderer.accept(result.control);
+      stats.simulationMs.push(result.milliseconds);
+      stats.pathMinimum = Math.min(
+        stats.pathMinimum,
+        result.control.paths.length,
+      );
+      stats.pathMaximum = Math.max(
+        stats.pathMaximum,
+        result.control.paths.length,
+      );
+      for (let j = 0; j < BLOCK; j++) {
+        gain +=
+          (Number(enabled) * 0.22 - gain) * (1 - Math.exp(-1 / (0.01 * FS)));
+        for (let i = 0; i < ids.length; i++) {
+          phase[i] =
+            (phase[i] + (2 * Math.PI * (95 + i * 7)) / FS) % (2 * Math.PI);
+          let value =
+            (Math.sin(phase[i]) +
+              0.35 * Math.sin(2 * phase[i]) +
+              0.15 * Math.sin(3 * phase[i])) /
+            1.5;
+          if (options.beacon === "pulse")
+            value =
+              (Math.cos(phase[i]) +
+                0.5 * Math.cos(2 * phase[i]) +
+                0.25 * Math.cos(3 * phase[i]) +
+                0.125 * Math.cos(4 * phase[i])) /
+              1.875;
+          if (options.beacon === "impulse")
+            value = (renderer.frame + j) % FS === FS / 2 ? 1 : 0;
+          inputs[ids[i]][j] = gain * value;
+        }
+      }
+      const started = performance.now();
+      renderer.process(inputs, left, right, BLOCK);
+      stats.dspMs.push(performance.now() - started);
+      packet.write("RA07", 0, "ascii");
+      packet.writeUInt32LE(sequence++, 4);
+      packet.writeUInt32LE(BLOCK, 8);
+      packet.writeUInt32LE(0, 12);
+      for (let j = 0; j < BLOCK; j++) {
+        packet.writeFloatLE(left[j], 16 + j * 8);
+        packet.writeFloatLE(right[j], 20 + j * 8);
+      }
+      await new Promise((resolve, reject) =>
+        process.stdout.write(packet, (e) => (e ? reject(e) : resolve())),
+      );
+      stats.blocks++;
+      inFlight = 0;
+      if (stats.blocks % 94 === 0)
+        log({
+          type: "status",
+          frame: renderer.frame,
+          paths: renderer.activePaths,
+          sourceEmitting: enabled,
+          listenerMode: stats.listenerMode,
+          observationAgeSeconds:
+            lastPlayout?.newestAgeSeconds ?? lastControl.ageSeconds,
+          listenerPlayoutMode: lastPlayout?.mode ?? null,
+          listenerControlDelaySeconds: lastPlayout?.playoutSeconds ?? 0,
+          peak: renderer.stats.peak,
+          limited: renderer.stats.limited,
+        });
+    }
+  } catch (e) {
+    if (!stopping) await finish(e);
+  } finally {
+    running = false;
+    if (credits > 0 && !stopping) queueMicrotask(pump);
+  }
+}
+function receive(m) {
+  if (!m || typeof m !== "object") throw Error("Control object");
+  if (m.type === "credit") {
+    if (
+      !Number.isInteger(m.blocks) ||
+      m.blocks < 1 ||
+      m.blocks > 8 ||
+      credits + m.blocks + inFlight > 8
+    )
+      throw Error("Credit budget");
+    credits += m.blocks;
+    void pump();
+  } else if (m.type === "control") {
+    if (m.command === "start" || m.command === "resume") enabled = true;
+    else if (m.command === "emit-stop") enabled = false;
+    else if (m.command === "mute") enabled = false;
+    else if (m.command === "stop") void finish();
+    else throw Error("Unknown control");
+  } else if (m.type === "listener") {
+    m = listenerPlayout.add(m, renderer.frame / FS, performance.now());
+    const s = m.state;
+    external = {
+      state: s,
+      receiptAgeMs: Math.max(0, m.receiptAgeMs),
+      receivedAt: performance.now(),
+      pendingReceipt: true,
+      audioTime: renderer.frame / FS,
+    };
+    stats.listenerMessages++;
+    stats.maxReceiptAgeMs = Math.max(stats.maxReceiptAgeMs, m.receiptAgeMs);
+  } else throw Error("Unknown message");
+}
+process.stdin.setEncoding("utf8");
+process.stdin.on("data", (chunk) => {
+  try {
+    inputText += chunk;
+    if (inputText.length > 65536) throw Error("Control buffer bound");
+    let end;
+    while ((end = inputText.indexOf("\n")) >= 0) {
+      const line = inputText.slice(0, end);
+      inputText = inputText.slice(end + 1);
+      if (line.length > 16384) throw Error("Control frame bound");
+      if (line.trim()) receive(JSON.parse(line));
+    }
+    if (inputText.length > 16384) throw Error("Unterminated control bound");
+  } catch (e) {
+    void finish(e);
+  }
+});
+process.stdin.on("end", () => void finish());
+process.stdout.on("error", (e) => void finish(e));
+process.on("SIGINT", () => void finish());

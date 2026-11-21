@@ -44,6 +44,8 @@ The next geometry challenge is safely maintaining a bounded local tile as the li
 
 We now have a **working offline acoustic renderer**: original synthetic audio travels through finite scenes with distance loss, propagation delay, material filtering, obstruction, directional reflections and Doppler. Five reproducible stereo WAV demonstrations exercise it. This is synthetic-scene audio processing, **not a playable GTA audio overhaul or public release**. [Implementation and listening instructions](docs/ACOUSTICS_06_AUDIO_PROPAGATION_ENGINE.md).
 
+Our independent **Windows development audio host now plays incrementally rendered synthetic sound through a real output device**. Moving-source playback, a one-minute soak, four-source playback and synthetic listener messages were checked through WASAPI and private loopback capture. A read-only RPH listener bridge compiles, but has not been deployed or tested in GTA. Human listening acceptance remains separate. [Host build, controls and measured limits](docs/ACOUSTICS_07_REALTIME_AUDIO_HOST.md).
+
 ## Follow the project
 
 Interested in where this is heading? Watch or star the repository to follow development.

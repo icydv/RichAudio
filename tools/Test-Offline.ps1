@@ -17,6 +17,13 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Offline acoustic geometry research tests failed.'}
     & node --test tests/Test-AcousticRenderer.mjs tests/Test-AcousticMotion.mjs tests/Test-AcousticDemo.mjs
     if($LASTEXITCODE -ne 0){throw 'Original synthetic acoustic PCM tests failed.'}
+    & node --test tests/Test-AcousticStreaming.mjs
+    if($LASTEXITCODE -ne 0){throw 'Causal acoustic streaming and independent oracle tests failed.'}
+    & node --test tests/Test-AcousticsHostProducer.mjs tests/Test-ListenerPlayout.mjs
+    if($LASTEXITCODE -ne 0){throw 'Actual synthetic host-producer framing and lifecycle tests failed.'}
+    # Original PCM, bounded queues and local transport only: these tests never open an audio endpoint.
+    & (Join-Path $repo 'tools\Build-AcousticsHost.ps1') -Tests
+    & (Join-Path $repo 'tools\Test-BeaconTransport.ps1')
     & (Join-Path $repo 'tests\Test-GeometryObservation.ps1')
     & node --test tests/Test-SurfaceReconstruction.mjs tests/Test-SurfacePrivatePaths.mjs
     if($LASTEXITCODE-ne0){throw 'Surface reconstruction/privacy tests failed.'}
