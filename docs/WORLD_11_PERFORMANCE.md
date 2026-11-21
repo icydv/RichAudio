@@ -1,6 +1,6 @@
 # WORLD11 processing results and remaining failures
 
-My real-time gate remains open. Codex measured fewer total misses after two small, PCM-preserving changes, but neither local runtime meets zero overruns with the additional 8 ms maximum-block headroom target. Functional success does not qualify an endpoint or the private Bati bank.
+My real-time gate remains open. The analysis measured fewer total misses after two small, PCM-preserving changes, but neither local runtime meets zero overruns with the additional 8 ms maximum-block headroom target. Functional success does not qualify an endpoint or the private Bati bank.
 
 The parent is PR90 at `f612bfc5f9f8ecce5565cb9853b1aacfe8179cba`, already containing WORLD10 source preparation. These results must not be pooled with WORLD10's earlier `8a995c8` baseline or its 96/2,688 hosted candidate result. The current harness, lifecycle, process controls and runtime populations differ. The [measurement scope](WORLD_11_MEASUREMENT_SCOPE.md) describes those controls and their limits.
 

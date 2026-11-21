@@ -1,6 +1,6 @@
 # ACOUSTIC-WORLD-06: installation-wide static preparation feasibility
 
-I want my supported static acoustic world prepared before normal gameplay, including places I have never visited. Nearby tile loading is a runtime selection policy, not a discovery policy. Codex researched public source and documentation for this increment; it did not inspect my installation, tools, previous private captures, SDK binaries or keys.
+I want my supported static acoustic world prepared before normal gameplay, including places I have never visited. Nearby tile loading is a runtime selection policy, not a discovery policy. The analysis researched public source and documentation for this increment; it did not inspect my installation, tools, previous private captures, SDK binaries or keys.
 
 The practical architecture is **headless static discovery and decoding, followed by runtime state validation**. Public development source demonstrates that archived map/collision resources can be indexed and decoded without moving the player. It does not establish a supported, redistributable, complete GTA V Enhanced reader for my installation. I cannot presently name a qualified public RPH/Enhanced API that returns the complete effective world inventory and all unstreamed collision triangles. The next real experiment therefore needs a legitimate metadata/archive provider and a bounded broad inventory, rather than another one-building export or a camera tour.
 

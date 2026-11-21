@@ -619,7 +619,12 @@ export class StreamingRenderer {
     ))
       if (this.sources.has(id)) this.setSourceGeneration(id, generation);
     for (const slot of this.slots) {
-      slot.target.fill(0);
+      // Every target is exactly three bands. Keep clearing every slot (even
+      // inactive signed-zero targets) without a native fill call per slot.
+      const target = slot.target;
+      target[0] = 0;
+      target[1] = 0;
+      target[2] = 0;
       slot.present = false;
     }
     for (const p of control.paths) {
@@ -645,12 +650,27 @@ export class StreamingRenderer {
         p.panTrajectory.frames>=2&&p.panTrajectory.frames<=512&&
         p.panTrajectory.basis==='arrived-observation-brackets'&&p.panTrajectory.start===p.pan&&
         Number.isFinite(p.panTrajectory.end)&&Math.abs(p.panTrajectory.end)<=1,'invalid bracketed pan trajectory');
-      let slot = this.slots.find((s) => s.active && s.id === p.id),
-        fresh = !slot;
-      const pathKey=p.id.replace(/:g\d+(?::geometry\d+)?$/,'');
-      const replacement=this.continuousTransitions&&fresh&&this.slots.some(s=>s.active&&s.id!==p.id&&
-        s.source?.id===p.sourceId&&s.pathKey===pathKey);
-      if (!slot) slot = this.slots.find((s) => !s.active);
+      // Keep the original first matching/first free slot order without making
+      // per-path search callbacks. Stable arrivals need no new suffix removal:
+      // pathKey is only consumed when a genuinely fresh slot is introduced.
+      let slot;
+      for (let i = 0; i < this.slots.length; i++) {
+        const candidate = this.slots[i];
+        if (candidate.active && candidate.id === p.id) { slot = candidate; break; }
+      }
+      const fresh = !slot,
+        pathKey = fresh ? p.id.replace(/:g\d+(?::geometry\d+)?$/,'') : null;
+      let replacement = false;
+      if (this.continuousTransitions && fresh) for (let i = 0; i < this.slots.length; i++) {
+        const candidate = this.slots[i];
+        if (candidate.active && candidate.id !== p.id && candidate.source?.id === p.sourceId && candidate.pathKey === pathKey) {
+          replacement = true;
+          break;
+        }
+      }
+      if (!slot) for (let i = 0; i < this.slots.length; i++) {
+        if (!this.slots[i].active) { slot = this.slots[i]; break; }
+      }
       if (!slot) {
         this.stats.pathOverflow++;
         continue;

@@ -3,11 +3,15 @@ param(
  [switch]$Baseline,
  [ValidateSet('none-1','none-2','none-3','domain-1','domain-2','domain-3','before','after','late','domain-late')]
  [string[]]$Case=@('none-1','none-2','none-3','domain-1','domain-2','domain-3','before','after','late','domain-late'),
- [switch]$SkipConsoleFixture
+ [switch]$SkipConsoleFixture,
+ [ValidateSet('none','before-child-entry','child-entry','appdomain-create-before','appdomain-activate-before','sender-entry','sender-ready','first-work-published','first-completion-observed','sender-stop-before','appdomain-unload-before','terminal-record-before')]
+ [string]$DiagnosticFault='none'
 )
 $ErrorActionPreference='Stop';$repo=Split-Path -Parent $PSScriptRoot;Set-Location $repo
 . (Join-Path $PSScriptRoot 'UnsentExpiry.Diagnostics.ps1')
 if($Case.Count -eq 0 -or $Case.Count -gt 10 -or @($Case|Select-Object -Unique).Count -ne $Case.Count){throw 'Select each expiry case at most once'}
+if($DiagnosticFault -ne 'none' -and ($Case.Count -ne 1 -or $Case[0] -ne 'domain-1' -or $Baseline)){throw 'Explicit fault controls require one original domain-1 case'}
+$faultCode=if($DiagnosticFault -eq 'none'){'none'}elseif($DiagnosticFault -eq 'before-child-entry'){'before-child-entry'}else{[string](@($script:ExpiryStages.Keys|Where-Object{$script:ExpiryStages[$_] -ceq $DiagnosticFault})[0])}
 if($Output -notmatch '^\.local[/\\][A-Za-z0-9_-]+$'){throw 'Private output required'}
 $out=[IO.Path]::GetFullPath((Join-Path $repo $Output));for($d=[IO.DirectoryInfo]::new($out);$d;$d=$d.Parent){if($d.Exists -and ($d.Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Linked output'}}
 if($out -eq (Join-Path $repo '.local/expiry-ci-evidence')){throw 'Sanitized hosted evidence directory is reserved'}
@@ -20,7 +24,7 @@ if($env:GITHUB_ACTIONS -eq 'true'){
  [void][IO.Directory]::CreateDirectory($hostedEvidence)
 }
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe';$exe=Join-Path $out 'Expiry.exe'
-$sources=@(Get-ChildItem src/acoustics/host/Transport -Filter '*.cs'|ForEach-Object FullName)+(Join-Path $repo 'tests/host/ExpiryExperiment.cs')
+$sources=@(Get-ChildItem src/acoustics/host/Transport -Filter '*.cs'|ForEach-Object FullName)+@((Join-Path $repo 'tests/host/ExpiryExperiment.cs'),(Join-Path $repo 'tests/host/ExpiryStageJournal.cs'))
 $define='/define:TRANSPORT_EXPIRY_TEST'
 if($Baseline){
  $original=git show '61fa719635bad23e76da129e55ac23459d5bb123:src/acoustics/host/Transport/StatePipe.cs'
@@ -41,31 +45,61 @@ if($LASTEXITCODE){throw 'Build failed'}
 foreach($caseName in $Case){
  $mode=if($caseName -ceq 'domain-late'){'domain-late'}else{$caseName.Split('-')[0]};$pipe='RichAudio.Expiry.'+[guid]::NewGuid().ToString('N');$rx=Join-Path $out ($caseName+'-receiver.json');$tx=Join-Path $out ($caseName+'-sender.json')
  $receiver=$null;$sender=$null;$senderKilled=$false;$receiverKilled=$false
- $execution=[pscustomobject]@{ReadinessObserved=$false;SenderWaitCompleted=$null;ReceiverWaitCompleted=$null;PrimaryTerminal=$null;CleanupErrors=[Collections.Generic.List[object]]::new();Sender=$null;Receiver=$null}
- $operation='receiver-start'
+ $senderJournal=$null;$receiverJournal=$null
+ $execution=[pscustomobject]@{ReadinessObserved=$false;SenderWaitCompleted=$null;ReceiverWaitCompleted=$null;SenderWaitBudgetMs=$null;SenderBudgetElapsedMs=$null;ReceiverWaitBudgetMs=$null;ReceiverBudgetElapsedMs=$null;PrimaryTerminal=$null;CleanupErrors=[Collections.Generic.List[object]]::new();Sender=$null;Receiver=$null}
+ $operation='stage-journal-create'
  try{
-  $receiver=Start-Process $exe -ArgumentList @('receive',$pipe,$mode,('"'+$rx+'"')) -PassThru -WindowStyle Hidden
-  $operation='readiness';$w=[Diagnostics.Stopwatch]::StartNew();while(!(Test-Path ($rx+'.ready')) -and $w.ElapsedMilliseconds -lt 2000){Start-Sleep -Milliseconds 10}
-  $execution.ReadinessObserved=Test-Path ($rx+'.ready')
+  $senderJournal=New-ExpiryStageJournal (Join-Path $out ($caseName+'-sender.stage-journal.bin')) 'sender'
+  $receiverJournal=New-ExpiryStageJournal (Join-Path $out ($caseName+'-receiver.stage-journal.bin')) 'receiver'
+  $operation='receiver-start'
+  Add-ExpiryParentStage $receiverJournal 1
+  $receiver=Start-Process $exe -ArgumentList @('receive',$pipe,$mode,('"'+$rx+'"'),('"'+$receiverJournal.Path+'"'),$receiverJournal.Nonce,$receiverJournal.OwnerPid,$receiverJournal.OwnerTicks,'none') -PassThru -WindowStyle Hidden
+  $w=[Diagnostics.Stopwatch]::StartNew()
+  Add-ExpiryParentStage $receiverJournal 2
+  $operation='readiness';while(!(Test-Path ($rx+'.ready')) -and $w.ElapsedMilliseconds -lt 2000){Start-Sleep -Milliseconds 10}
+  $markerPresent=Test-Path ($rx+'.ready');$execution.ReadinessObserved=$markerPresent -and $w.Elapsed.TotalMilliseconds -le 2000
   if(!$execution.ReadinessObserved){$execution.PrimaryTerminal=[pscustomobject]@{Code='readiness-deadline';ExceptionType=$null}}
   else{
-   $operation='sender-start';$sender=Start-Process $exe -ArgumentList @('send',$pipe,$mode,('"'+$tx+'"')) -PassThru -WindowStyle Hidden
-   $operation='sender-wait';$execution.SenderWaitCompleted=$sender.WaitForExit(5000)
-   if($execution.SenderWaitCompleted){$operation='receiver-wait';$execution.ReceiverWaitCompleted=$receiver.WaitForExit(6000)}
+   $operation='sender-start';Add-ExpiryParentStage $senderJournal 1
+   $sender=Start-Process $exe -ArgumentList @('send',$pipe,$mode,('"'+$tx+'"'),('"'+$senderJournal.Path+'"'),$senderJournal.Nonce,$senderJournal.OwnerPid,$senderJournal.OwnerTicks,$faultCode) -PassThru -WindowStyle Hidden
+   $senderBudget=[Diagnostics.Stopwatch]::StartNew()
+   Add-ExpiryParentStage $senderJournal 2;Add-ExpiryParentStage $senderJournal 3
+   $operation='sender-wait';$remaining=Get-ExpiryRemainingWaitMs $senderBudget.Elapsed.TotalMilliseconds 5000
+   $execution.SenderWaitBudgetMs=$remaining
+   $waitCompleted=$remaining -gt 0 -and $sender.WaitForExit($remaining)
+   $execution.SenderBudgetElapsedMs=$senderBudget.Elapsed.TotalMilliseconds
+   $execution.SenderWaitCompleted=$waitCompleted -and $execution.SenderBudgetElapsedMs -le 5000
+   Add-ExpiryParentStage $senderJournal $(if($execution.SenderWaitCompleted){4}else{5})
+   if($execution.SenderWaitCompleted){
+    $receiverBudget=[Diagnostics.Stopwatch]::StartNew();$operation='receiver-wait';Add-ExpiryParentStage $receiverJournal 3
+    $remaining=Get-ExpiryRemainingWaitMs $receiverBudget.Elapsed.TotalMilliseconds 6000;$execution.ReceiverWaitBudgetMs=$remaining
+    $waitCompleted=$remaining -gt 0 -and $receiver.WaitForExit($remaining);$execution.ReceiverBudgetElapsedMs=$receiverBudget.Elapsed.TotalMilliseconds
+    $execution.ReceiverWaitCompleted=$waitCompleted -and $execution.ReceiverBudgetElapsedMs -le 6000
+    Add-ExpiryParentStage $receiverJournal $(if($execution.ReceiverWaitCompleted){4}else{5})
+   }
    if(!$execution.SenderWaitCompleted -or !$execution.ReceiverWaitCompleted){$execution.PrimaryTerminal=[pscustomobject]@{Code='child-lifetime';ExceptionType=$null}}
    else{$operation='child-status';if($sender.ExitCode -ne 0 -or $receiver.ExitCode -ne 0){$execution.PrimaryTerminal=[pscustomobject]@{Code='child-failed';ExceptionType=$null}}}
   }
  }catch{$execution.PrimaryTerminal=[pscustomobject]@{Code=($operation+'-failed');ExceptionType=Get-ExpiryExceptionType $_.Exception;HResult=$_.Exception.HResult}}
  finally{
-  foreach($child in @([pscustomobject]@{Role='sender';Process=$sender},[pscustomobject]@{Role='receiver';Process=$receiver})){
+  foreach($child in @([pscustomobject]@{Role='sender';Process=$sender;Journal=$senderJournal},[pscustomobject]@{Role='receiver';Process=$receiver;Journal=$receiverJournal})){
    if($null -eq $child.Process){continue}
-   try{if(!$child.Process.HasExited){if($child.Role -eq 'sender'){$senderKilled=$true}else{$receiverKilled=$true};$child.Process.Kill();if(!$child.Process.WaitForExit(2000)){$execution.CleanupErrors.Add([pscustomobject]@{Role=$child.Role;Code='kill-exit-unverified';ExceptionType=$null})}}}
+   try{if(!$child.Process.HasExited){if($child.Role -eq 'sender'){$senderKilled=$true}else{$receiverKilled=$true};try{Add-ExpiryParentStage $child.Journal 6}catch{};$child.Process.Kill();if(!$child.Process.WaitForExit(2000)){$execution.CleanupErrors.Add([pscustomobject]@{Role=$child.Role;Code='kill-exit-unverified';ExceptionType=$null})}else{Add-ExpiryParentStage $child.Journal 7}};if($child.Process.HasExited){Add-ExpiryParentStage $child.Journal 8}}
    catch{$execution.CleanupErrors.Add([pscustomobject]@{Role=$child.Role;Code='kill-failed';ExceptionType=Get-ExpiryExceptionType $_.Exception;HResult=$_.Exception.HResult})}
   }
   $execution.Sender=Get-ExpiryProcessState $sender $senderKilled;$execution.Receiver=Get-ExpiryProcessState $receiver $receiverKilled
  }
  $r=Read-ExpiryRecord $rx;$t=Read-ExpiryRecord $tx
  $record=New-ExpiryDiagnostic $caseName ([bool]$Baseline) $r $t $execution
+ $journals=[ordered]@{}
+ foreach($child in @([pscustomobject]@{Role='Sender';Process=$sender;Journal=$senderJournal},[pscustomobject]@{Role='Receiver';Process=$receiver;Journal=$receiverJournal})){
+  try{$journals[$child.Role]=Read-ExpiryStageJournal $child.Journal $child.Process}
+  catch{$journals[$child.Role]=[pscustomobject]@{State='read-failed';Events=@()}}
+  finally{try{Close-ExpiryStageJournal $child.Journal}catch{$record.Passed=$false;$record.FailedPredicates=@($record.FailedPredicates)+@('diagnostic.journal-close-succeeded')}}
+ }
+ $record|Add-Member -NotePropertyName StageJournals -NotePropertyValue ([pscustomobject]$journals)
+ $record|Add-Member -NotePropertyName DiagnosticFault -NotePropertyValue $DiagnosticFault
+ if(@($journals.Values|Where-Object{$_.State -ne 'qualified'}).Count -gt 0){$record.Passed=$false;$record.FailedPredicates=@($record.FailedPredicates)+@('diagnostic.journal-qualified')}
  Publish-ExpiryDiagnostic $record $diagnosticDirectory $hostedEvidence
 }
 if($SkipConsoleFixture){return}

@@ -3,6 +3,7 @@
 $script:ExpiryCaseNames=@('none-1','none-2','none-3','domain-1','domain-2','domain-3','before','after','late','domain-late')
 $script:ExpiryRecordByteLimit=65536
 $script:ExpiryDiagnosticByteLimit=16384
+. (Join-Path $PSScriptRoot 'UnsentExpiry.StageJournal.ps1')
 
 function Get-ExpiryProperty($Value,[string]$Name) {
  if($null -eq $Value){return $null}
@@ -159,8 +160,9 @@ function ConvertTo-ExpiryProcess($Value) {
 }
 function ConvertTo-ExpiryExecution($Value) {
  $safe=[ordered]@{ReadinessObserved=ConvertTo-ExpiryBoolean (Get-ExpiryProperty $Value 'ReadinessObserved');SenderWaitCompleted=ConvertTo-ExpiryBoolean (Get-ExpiryProperty $Value 'SenderWaitCompleted');ReceiverWaitCompleted=ConvertTo-ExpiryBoolean (Get-ExpiryProperty $Value 'ReceiverWaitCompleted')}
+ foreach($name in @('SenderWaitBudgetMs','SenderBudgetElapsedMs','ReceiverWaitBudgetMs','ReceiverBudgetElapsedMs')){$safe[$name]=ConvertTo-ExpiryNumber (Get-ExpiryProperty $Value $name)}
  $primary=Get-ExpiryProperty $Value 'PrimaryTerminal'
- $codes=@('receiver-start-failed','readiness-failed','readiness-deadline','sender-start-failed','sender-wait-failed','receiver-wait-failed','child-status-failed','child-failed','child-lifetime')
+ $codes=@('stage-journal-create-failed','receiver-start-failed','readiness-failed','readiness-deadline','sender-start-failed','sender-wait-failed','receiver-wait-failed','child-status-failed','child-failed','child-lifetime')
  $safe.PrimaryTerminal=if($null -eq $primary){$null}else{[pscustomobject]@{Code=ConvertTo-ExpiryEnum (Get-ExpiryProperty $primary 'Code') $codes;ExceptionType=ConvertTo-ExpiryEnum (Get-ExpiryProperty $primary 'ExceptionType') @('Exception','ArgumentException','ArgumentOutOfRangeException','InvalidDataException','InvalidOperationException','IOException','UnauthorizedAccessException','TimeoutException','Win32Exception','ObjectDisposedException','RuntimeException','MethodInvocationException');HResult=ConvertTo-ExpiryNumber (Get-ExpiryProperty $primary 'HResult')}}
  $cleanup=[Collections.Generic.List[object]]::new();$cleanupSource=Get-ExpiryProperty $Value 'CleanupErrors'
  $allCleanup=@(if($null -ne $cleanupSource){$cleanupSource})
@@ -286,6 +288,25 @@ function ConvertTo-ExpiryCompactChild($Value) {
  $safe.Transport=if($null -eq $transport){$null}else{[pscustomobject]$t}
  return [pscustomobject]$safe
 }
+function ConvertTo-ExpiryCompactStageJournals($Value) {
+ if($null -eq $Value){return $null}
+ $safe=[ordered]@{}
+ foreach($role in @('Sender','Receiver')){
+  $journal=Get-ExpiryProperty $Value $role
+  $lastChild=Get-ExpiryProperty $journal 'LastChildStage';$lastQpc=$null
+  foreach($entry in @(Get-ExpiryProperty $journal 'Events')){if($entry -is [Array] -and $entry.Count -eq 3 -and $entry[0] -ceq $lastChild){$lastQpc=ConvertTo-ExpiryClockInteger $entry[1]}}
+  $safe[$role]=[pscustomobject][ordered]@{
+   State=ConvertTo-ExpiryEnum (Get-ExpiryProperty $journal 'State') @('qualified','invalid-entry','missing','owner-mismatch','read-failed')
+   ParentEventCount=ConvertTo-ExpiryNumber (Get-ExpiryProperty $journal 'ParentEventCount')
+   ChildEventCount=ConvertTo-ExpiryNumber (Get-ExpiryProperty $journal 'ChildEventCount')
+   LastParentStage=ConvertTo-ExpiryEnum (Get-ExpiryProperty $journal 'LastParentStage') @($script:ExpiryStages.Keys|Where-Object{$_ -lt 32}|ForEach-Object{$script:ExpiryStages[$_]})
+   LastChildStage=ConvertTo-ExpiryEnum $lastChild @($script:ExpiryStages.Keys|Where-Object{$_ -ge 32}|ForEach-Object{$script:ExpiryStages[$_]})
+   LastChildQpc=$lastQpc
+   EventsOmitted=@(Get-ExpiryProperty $journal 'Events').Count
+  }
+ }
+ return [pscustomobject]$safe
+}
 function Get-ExpiryPublicationRecord($Record) {
  if($Record.Case -cnotin $script:ExpiryCaseNames){throw 'Unrecognized expiry case'}
  $json=$Record|ConvertTo-Json -Depth 12 -Compress
@@ -309,8 +330,9 @@ function Get-ExpiryPublicationRecord($Record) {
   FailedPredicates=$predicates.ToArray();RetentionFailures=$Record.RetentionFailures
   ProjectionMode='compact';OriginalProjectedBytes=$bytes
   OriginalFailedPredicateCount=@($Record.FailedPredicates).Count;FailedPredicatesOmitted=$omitted
-  OmittedSections=@('lifecycle-duration-details','additional-timing-fields','capture-records-after-first','cleanup-error-details-after-first','duplicate-child-process-status')
+  OmittedSections=@('lifecycle-duration-details','additional-timing-fields','capture-records-after-first','cleanup-error-details-after-first','duplicate-child-process-status','stage-journal-events-before-last')
   Execution=$execution;Receiver=ConvertTo-ExpiryCompactChild $Record.Receiver;Sender=ConvertTo-ExpiryCompactChild $Record.Sender
+  StageJournals=ConvertTo-ExpiryCompactStageJournals (Get-ExpiryProperty $Record 'StageJournals');DiagnosticFault=ConvertTo-ExpiryEnum (Get-ExpiryProperty $Record 'DiagnosticFault') @('none','before-child-entry','child-entry','appdomain-create-before','appdomain-activate-before','sender-entry','sender-ready','first-work-published','first-completion-observed','sender-stop-before','appdomain-unload-before','terminal-record-before')
  }
 }
 function ConvertTo-ExpiryDiagnosticJson($Record) {

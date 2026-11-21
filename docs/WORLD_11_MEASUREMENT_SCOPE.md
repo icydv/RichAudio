@@ -1,6 +1,6 @@
 # WORLD11 measurement and acceptance scope
 
-My hard block deadline remains **512 / 48,000 = 10.6667 ms**. Every individual miss remains a failure; functional success, PCM equality and averages do not pass this timing gate. For reporting meaningful headroom, Codex also checks an additional **8 ms maximum-block target**, leaving 2.6667 ms (25%) below the hard deadline. This target neither changes the renderer deadline nor adds latency. Results must retain the actual maximum and every missed block even when a group meets a percentile target.
+My hard block deadline remains **512 / 48,000 = 10.6667 ms**. Every individual miss remains a failure; functional success, PCM equality and averages do not pass this timing gate. For reporting meaningful headroom, the operator also checks an additional **8 ms maximum-block target**, leaving 2.6667 ms (25%) below the hard deadline. This target neither changes the renderer deadline nor adds latency. Results must retain the actual maximum and every missed block even when a group meets a percentile target.
 
 ## Controlled comparisons
 
@@ -16,7 +16,7 @@ Instrumentation-off retains the common render wall-clock envelope and identical 
 
 ## Runtime identity
 
-Codex obtained two public Windows x64 runtimes directly from Node's official distribution and checked each ZIP against its exact official SHA-256 manifest. Only `node.exe` and its licence are extracted for local tests. They are test tools, not a new product dependency or deployment.
+The run obtained two public Windows x64 runtimes directly from Node's official distribution and checked each ZIP against its exact official SHA-256 manifest. Only `node.exe` and its licence are extracted for local tests. They are test tools, not a new product dependency or deployment.
 
 | Runtime | Official ZIP SHA-256 | Extracted `node.exe` SHA-256 |
 | --- | --- | --- |

@@ -68,8 +68,9 @@ internal static class ExpiryPreparation
 
 public sealed class DomainSender:MarshalByRefObject
 {
-    public string Run(string pipe,string mode)
+    public string Run(string pipe,string mode,ExpiryStageJournal journal)
     {
+        if(journal!=null)journal.Mark(38,AppDomain.CurrentDomain.Id);
         long runStart=Stopwatch.GetTimestamp(),stopRequestQpc=0,finishedQpc=0,preparationBeforeQpc=0,preparationAfterQpc=0,publisherStartBeforeQpc=0,publisherStartAfterQpc=0;
         var observations=new ExpiryObservation[32];var encoding=new ExpiryEncoding[32];
         int observationCount=0,encodingCount=0,observationDropped=0,encodingDropped=0,currentEncoding=-1;
@@ -78,7 +79,7 @@ public sealed class DomainSender:MarshalByRefObject
         Exception primaryFailure=null,cleanupFailure=null,signalCleanupFailure=null;string failureStage=null;
         double constructMs=0,startMs=0,firstSyntheticMs=0,firstPublishMs=0,firstPublicationAtMs=0;
         double productionLoopMs=0,stopRequestMs=0,stopWaitMs=0,disposeMs=0;
-        long publications=0,sent=0,attempts=0,replaced=0;bool finished=false;
+        long publications=0,sent=0,attempts=0,replaced=0;bool finished=false,connectedObserved=false,completionObserved=false;
         TransportResult diagnostic=null;
 #if !EXPIRY_BASELINE
         long transmitted=0,startupDiscarded=0,expiredBefore=0,expiredAfter=0;
@@ -90,7 +91,7 @@ public sealed class DomainSender:MarshalByRefObject
 #if !EXPIRY_BASELINE
             // Preparation is test setup, outside the production connection/header
             // budgets. The original cold baseline remains a separate fixture.
-            stage="codec-preparation";preparationBeforeQpc=Stopwatch.GetTimestamp();ExpiryPreparation.Run();preparationAfterQpc=Stopwatch.GetTimestamp();
+            stage="codec-preparation";if(journal!=null)journal.Mark(39,AppDomain.CurrentDomain.Id);preparationBeforeQpc=Stopwatch.GetTimestamp();ExpiryPreparation.Run();preparationAfterQpc=Stopwatch.GetTimestamp();if(journal!=null)journal.Mark(40,AppDomain.CurrentDomain.Id);
             prewarmMs=(preparationAfterQpc-preparationBeforeQpc)*1000.0/Stopwatch.Frequency;prewarmed=true;
 #endif
             stage="deadline-signal-open";if(mode=="domain-late")deadlineSignal=EventWaitHandle.OpenExisting(pipe+".Deadline");
@@ -126,7 +127,8 @@ public sealed class DomainSender:MarshalByRefObject
                 if(mode=="after"&&delayed==1)Thread.Sleep(350);
                 if(currentEncoding>=0)encoding[currentEncoding].AfterEncodeQpc=Stopwatch.GetTimestamp();
             };
-            stage="publisher-start";mark=Stopwatch.GetTimestamp();publisherStartBeforeQpc=mark;publisher.Start();publisherStartAfterQpc=Stopwatch.GetTimestamp();startMs=ExpiryRecords.Ms(mark);
+            if(journal!=null)journal.Mark(41,AppDomain.CurrentDomain.Id);
+            stage="publisher-start";mark=Stopwatch.GetTimestamp();publisherStartBeforeQpc=mark;publisher.Start();publisherStartAfterQpc=Stopwatch.GetTimestamp();startMs=ExpiryRecords.Ms(mark);if(journal!=null)journal.Mark(42,AppDomain.CurrentDomain.Id);
             var watch=Stopwatch.StartNew();long n=0;
             stage="sender-publish";
             while(watch.ElapsedMilliseconds<1100&&!publisher.Finished)
@@ -137,17 +139,20 @@ public sealed class DomainSender:MarshalByRefObject
                 if(observationCount<observations.Length)observations[observationCount++]=new ExpiryObservation{Sequence=state.Sequence,ObservationTicks=state.ObservationTicks,PublishBeforeQpc=mark,PublishAfterQpc=publishedAt};
                 else observationDropped++;
                 if(n==1){firstPublishMs=ExpiryRecords.Ms(mark);firstPublicationAtMs=watch.Elapsed.TotalMilliseconds;}
-                while(watch.ElapsedMilliseconds<n*50&&!publisher.Finished)Thread.Sleep(0);
+                if(n==1&&journal!=null)journal.Mark(44,AppDomain.CurrentDomain.Id);
+                while(watch.ElapsedMilliseconds<n*50&&!publisher.Finished){ObservePublisher(publisher,journal,ref connectedObserved,ref completionObserved);Thread.Sleep(0);}
             }
+            ObservePublisher(publisher,journal,ref connectedObserved,ref completionObserved);
             productionLoopMs=watch.Elapsed.TotalMilliseconds;
-            stage="sender-stop";mark=Stopwatch.GetTimestamp();stopRequestQpc=mark;publisher.RequestStop();stopRequestMs=ExpiryRecords.Ms(mark);
+            stage="sender-stop";if(journal!=null)journal.Mark(46,AppDomain.CurrentDomain.Id);mark=Stopwatch.GetTimestamp();stopRequestQpc=mark;publisher.RequestStop();stopRequestMs=ExpiryRecords.Ms(mark);
             watch.Restart();stage="sender-stop-wait";
             while(!publisher.Finished&&watch.ElapsedMilliseconds<1500)Thread.Sleep(1);
             stopWaitMs=watch.Elapsed.TotalMilliseconds;
             if(!publisher.Finished)throw new TimeoutException("sender lifetime");
             finishedQpc=Stopwatch.GetTimestamp();
+            if(journal!=null)journal.Mark(47,AppDomain.CurrentDomain.Id);
         }
-        catch(Exception exception){primaryFailure=exception;failureStage=stage;}
+        catch(Exception exception){primaryFailure=exception;failureStage=stage;if(journal!=null)journal.Mark(63,AppDomain.CurrentDomain.Id);}
         finally
         {
             if(publisher!=null)
@@ -163,7 +168,8 @@ public sealed class DomainSender:MarshalByRefObject
                 firstTransmitted=publisher.FirstTransmittedSequence;
 #endif
                 long mark=Stopwatch.GetTimestamp();
-                try{publisher.Dispose();}catch(Exception exception){cleanupFailure=exception;}
+                if(journal!=null)journal.Mark(48,AppDomain.CurrentDomain.Id);
+                try{publisher.Dispose();if(journal!=null)journal.Mark(49,AppDomain.CurrentDomain.Id);}catch(Exception exception){cleanupFailure=exception;}
                 disposeMs=ExpiryRecords.Ms(mark);
             }
             if(deadlineSignal!=null)try{deadlineSignal.Dispose();}catch(Exception exception){signalCleanupFailure=exception;}
@@ -192,19 +198,28 @@ public sealed class DomainSender:MarshalByRefObject
         if(signalCleanupFailure!=null)((List<object>)record["cleanupFailures"]).Add(ExpiryRecords.Failure("deadline-signal-dispose","fixture-cleanup-failed",signalCleanupFailure));
         return new JavaScriptSerializer().Serialize(record);
     }
+    private static void ObservePublisher(StatePublisher publisher,ExpiryStageJournal journal,ref bool connected,ref bool completed)
+    {
+        if(journal==null)return;
+        // Read-only fixture polling outside production callbacks. These are
+        // observation times, not the exact transport transition timestamps.
+        if(!connected&&publisher.FirstFrame.ConnectionMs>0){connected=true;journal.Mark(43,AppDomain.CurrentDomain.Id);}
+        if(!completed&&publisher.Sent>0){completed=true;journal.Mark(45,AppDomain.CurrentDomain.Id);}
+    }
     public override object InitializeLifetimeService(){return null;}
 }
 
 internal static class ExpiryExperiment
 {
-    private static Dictionary<string,object> Receive(string[] arguments)
+    private static Dictionary<string,object> Receive(string[] arguments,ExpiryStageJournal journal)
     {
+        if(journal!=null)journal.Mark(56,AppDomain.CurrentDomain.Id);
         long runStart=Stopwatch.GetTimestamp(),readyQpc=0,finishedQpc=0,preparationBeforeQpc=0,preparationAfterQpc=0,serverStartBeforeQpc=0,serverStartAfterQpc=0;
         EventWaitHandle deadlineSignal=null;bool prewarmed=false;double prewarmMs=0;
         StatePipeServer server=null;string stage="receiver-construct";
         Exception primaryFailure=null,cleanupFailure=null,signalCleanupFailure=null;string failureStage=null;
         double constructMs=0,startMs=0,readyMarkerAtMs=0,waitMs=0,disposeMs=0;
-        long accepted=0,rejected=0,connections=0;bool finished=false,markerWritten=false;TransportResult diagnostic=null;
+        long accepted=0,rejected=0,connections=0;bool finished=false,markerWritten=false,connectedObserved=false,completionObserved=false;TransportResult diagnostic=null;
 #if !EXPIRY_BASELINE
         long startupDiscarded=0;
 #endif
@@ -221,14 +236,20 @@ internal static class ExpiryExperiment
             stage="receiver-ready-marker";File.WriteAllText(arguments[3]+".ready","ready");
             readyMarkerAtMs=ExpiryRecords.Ms(runStart);markerWritten=true;
             readyQpc=Stopwatch.GetTimestamp();
+            if(journal!=null)journal.Mark(57,AppDomain.CurrentDomain.Id);
             var watch=Stopwatch.StartNew();stage="receiver-wait";
-            while(!server.Finished&&watch.ElapsedMilliseconds<5000)Thread.Sleep(1);
+            while(!server.Finished&&watch.ElapsedMilliseconds<5000){
+                if(journal!=null&&!connectedObserved&&server.Connections>0){connectedObserved=true;journal.Mark(58,AppDomain.CurrentDomain.Id);}
+                if(journal!=null&&!completionObserved&&server.Accepted>0){completionObserved=true;journal.Mark(59,AppDomain.CurrentDomain.Id);}
+                Thread.Sleep(1);
+            }
             waitMs=watch.Elapsed.TotalMilliseconds;
             if(!server.Finished)throw new TimeoutException("receiver lifetime");
             finishedQpc=Stopwatch.GetTimestamp();
+            if(journal!=null)journal.Mark(60,AppDomain.CurrentDomain.Id);
             stage="receiver-terminal-signal";if(deadlineSignal!=null)deadlineSignal.Set();
         }
-        catch(Exception exception){primaryFailure=exception;failureStage=stage;}
+        catch(Exception exception){primaryFailure=exception;failureStage=stage;if(journal!=null)journal.Mark(63,AppDomain.CurrentDomain.Id);}
         finally
         {
             if(server!=null)
@@ -239,7 +260,8 @@ internal static class ExpiryExperiment
                 startupDiscarded=server.StartupDiscarded;
 #endif
                 long mark=Stopwatch.GetTimestamp();
-                try{server.Dispose();}catch(Exception exception){cleanupFailure=exception;}
+                if(journal!=null)journal.Mark(61,AppDomain.CurrentDomain.Id);
+                try{server.Dispose();if(journal!=null)journal.Mark(62,AppDomain.CurrentDomain.Id);}catch(Exception exception){cleanupFailure=exception;}
                 disposeMs=ExpiryRecords.Ms(mark);
             }
             if(deadlineSignal!=null)try{deadlineSignal.Dispose();}catch(Exception exception){signalCleanupFailure=exception;}
@@ -261,30 +283,32 @@ internal static class ExpiryExperiment
         return record;
     }
 
-    private static Dictionary<string,object> Send(string[] arguments)
+    private static Dictionary<string,object> Send(string[] arguments,ExpiryStageJournal journal)
     {
         if(arguments[2]!="domain"&&arguments[2]!="domain-late")
         {
-            string result=new DomainSender().Run(arguments[1],arguments[2]);return ExpiryRecords.Read(result);
+            string result=new DomainSender().Run(arguments[1],arguments[2],journal);return ExpiryRecords.Read(result);
         }
         AppDomain domain=null;string stage="appdomain-create";
         Dictionary<string,object> outer=null;Exception primaryFailure=null,cleanupFailure=null;string failureStage=null;
         double createMs=0,activateMs=0,unloadMs=0;
         try
         {
-            long mark=Stopwatch.GetTimestamp();domain=AppDomain.CreateDomain("original-synthetic-domain");createMs=ExpiryRecords.Ms(mark);
+            if(journal!=null)journal.Mark(33,AppDomain.CurrentDomain.Id);long mark=Stopwatch.GetTimestamp();domain=AppDomain.CreateDomain("original-synthetic-domain");createMs=ExpiryRecords.Ms(mark);if(journal!=null)journal.Mark(34,AppDomain.CurrentDomain.Id);
             stage="appdomain-activate";mark=Stopwatch.GetTimestamp();
+            if(journal!=null)journal.Mark(35,AppDomain.CurrentDomain.Id);
             var sender=(DomainSender)domain.CreateInstanceAndUnwrap(typeof(DomainSender).Assembly.FullName,typeof(DomainSender).FullName);
-            activateMs=ExpiryRecords.Ms(mark);stage="appdomain-run";
-            string result=sender.Run(arguments[1],arguments[2]);outer=ExpiryRecords.Read(result);outer["mode"]=arguments[2];
+            activateMs=ExpiryRecords.Ms(mark);if(journal!=null)journal.Mark(36,AppDomain.CurrentDomain.Id);stage="appdomain-run";
+            if(journal!=null)journal.Mark(37,AppDomain.CurrentDomain.Id);string result=sender.Run(arguments[1],arguments[2],journal);if(journal!=null)journal.Mark(50,AppDomain.CurrentDomain.Id);outer=ExpiryRecords.Read(result);outer["mode"]=arguments[2];
         }
-        catch(Exception exception){primaryFailure=exception;failureStage=stage;}
+        catch(Exception exception){primaryFailure=exception;failureStage=stage;if(journal!=null)journal.Mark(63,AppDomain.CurrentDomain.Id);}
         finally
         {
             if(domain!=null)
             {
                 long mark=Stopwatch.GetTimestamp();
-                try{AppDomain.Unload(domain);}catch(Exception exception){cleanupFailure=exception;}
+                if(journal!=null)journal.Mark(51,AppDomain.CurrentDomain.Id);
+                try{AppDomain.Unload(domain);if(journal!=null)journal.Mark(52,AppDomain.CurrentDomain.Id);}catch(Exception exception){cleanupFailure=exception;}
                 unloadMs=ExpiryRecords.Ms(mark);
             }
         }
@@ -303,12 +327,20 @@ internal static class ExpiryExperiment
             Console.WriteLine("READY synthetic-console; no endpoint");Console.Out.Flush();
             if(arguments.Length>1)File.WriteAllText(arguments[1],"emitted");Thread.Sleep(1200);return 0;
         }
-        if(arguments.Length!=4||(arguments[0]!="receive"&&arguments[0]!="send"))return 2;
+        if((arguments.Length!=4&&arguments.Length!=9)||(arguments[0]!="receive"&&arguments[0]!="send"))return 2;
         long mainStart=Stopwatch.GetTimestamp();
-        var record=arguments[0]=="receive"?Receive(arguments):Send(arguments);
+        ExpiryStageJournal journal=null;
+        try {
+        if(arguments.Length==9)journal=new ExpiryStageJournal(arguments[4],arguments[5],Int32.Parse(arguments[6]),Int64.Parse(arguments[7]),arguments[8],arguments[0]);
+        if(arguments.Length==9&&arguments[8]=="before-child-entry")Thread.Sleep(30000);
+        if(journal!=null)journal.Mark(32,AppDomain.CurrentDomain.Id);
+        var record=arguments[0]=="receive"?Receive(arguments,journal):Send(arguments,journal);
         ((Dictionary<string,object>)record["lifecycle"])["mainMs"]=ExpiryRecords.Ms(mainStart);
-        try{File.WriteAllText(arguments[3],new JavaScriptSerializer().Serialize(record));}
+        if(journal!=null)journal.Mark(53,AppDomain.CurrentDomain.Id);
+        try{File.WriteAllText(arguments[3],new JavaScriptSerializer().Serialize(record));if(journal!=null)journal.Mark(54,AppDomain.CurrentDomain.Id);}
         catch(Exception){Console.Error.WriteLine("fixture-record-write-failed");return 1;}
+        if(journal!=null)journal.Mark(55,AppDomain.CurrentDomain.Id);
         return ExpiryRecords.Failed(record)?1:0;
+        } finally {if(journal!=null)journal.Dispose();}
     }
 }
