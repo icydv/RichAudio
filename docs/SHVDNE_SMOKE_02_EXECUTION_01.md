@@ -1,6 +1,6 @@
 # SHVDNE-SMOKE-02 execution-01 — Phase A timing failure, exact restoration passed
 
-I authorized one attempt against execution-manifest SHA-256 `5b3a09c0a1d026902e69c7655435e9b7fff4a3f0b15473d1729ede3c9b0eae16`, adapter `1bf387110da02a48984fdcaa65fd9a981576def52d2fc91526832c7d8c43d0ba` and host `df8f53eaad02b4fba3b3efc5c22f546ff08c43d1425bff288a9c181891c631fb`. Codex ran the single normal Steam launch. **Phase A failed the fixed timing gate. No host was armed or started, no Insert reload occurred, and no later phase was attempted.** The game exited normally and all checked originals were restored exactly. My authorization is consumed.
+I authorized one attempt against execution-manifest SHA-256 `5b3a09c0a1d026902e69c7655435e9b7fff4a3f0b15473d1729ede3c9b0eae16`, adapter `1bf387110da02a48984fdcaa65fd9a981576def52d2fc91526832c7d8c43d0ba` and host `df8f53eaad02b4fba3b3efc5c22f546ff08c43d1425bff288a9c181891c631fb`. The session used a single normal Steam launch. **Phase A failed the fixed timing gate. No host was armed or started, no Insert reload occurred, and no later phase was attempted.** The game exited normally and all checked originals were restored exactly. My authorization is consumed.
 
 The execution evidence is in `C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\migration-shvdne-01\smoke-02-preparation\execution-01`. The original preparation manifest, procedure, candidate bytes and Stage 1 evidence were preserved; this report is a separate result and does not rewrite them.
 
@@ -23,7 +23,7 @@ The execution evidence is in `C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local
 | Matching SHVDNE v1.1.0.6/API3 initialized; exactly one RichAudio script started | 00:22:17, core log |
 | Runtime package/ownership validation | 00:22:18.220 |
 | First journal file created | 00:22:18.222 |
-| Codex first read the timing failure; 987 batches / 6,229 ticks retained at that observation | 00:23:12.054 |
+| The analysis first read the timing failure; 987 batches / 6,229 ticks retained at that observation | 00:23:12.054 |
 | Stop decision recorded; no host arm or reload | `phase-a-stop.json` |
 | Normal Alt+F4 quit prompt requested and observed | `normal-exit-request.json` |
 | Enter sent to GTA's normal quit confirmation; process first observed absent | 00:23:46.570 |
@@ -31,7 +31,7 @@ The execution evidence is in `C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local
 
 The journal-file deadline conservatively starts one second before file creation, giving a cutoff of **00:27:17.222**. The absolute ceiling was **00:38:28.101**. Normal exit occurred before both. Actual playable readiness was not separately timestamped before the first ready journal; the journal already showed valid Story context by then. No second launch was attempted.
 
-Codex observed no journal at 00:22:13.950; its next journal read at 00:23:12.054 found the failure. Both overruns were already recorded by the second diagnostic row. No movement handoff was issued after that discovery; the planned 30–45-second controlled camera/walk/vehicle sequence was not performed. This was not a complete movement or vehicle-lifetime qualification.
+The run observed no journal at 00:22:13.950; its next journal read at 00:23:12.054 found the failure. Both overruns were already recorded by the second diagnostic row. No movement handoff was issued after that discovery; the planned 30–45-second controlled camera/walk/vehicle sequence was not performed. This was not a complete movement or vehicle-lifetime qualification.
 
 ## Timing findings
 
@@ -63,13 +63,13 @@ All journal host PIDs are zero, command state is always `passive`, and `passiveG
 
 RPM ratio, gear, throttle, brake, steering, clutch, aggregate wheel speed and engine-starting values are null in all 283 raw sampled observations. Both optional provider flags remain false in the archived installed configuration. The existing public-native vehicle class, health, wheels/horn/siren status getters are part of the sealed baseline source and did produce values; they were not newly enabled optional providers. No operating point was invented and no synthesis vehicle was transported.
 
-The loader identifies only DirectStorageFix, ScriptHookVDotNet and StraightToStoryMode ASIs. TrainerV/OpenRPF were parked as approved. The original RPH log remained unchanged and no RPH process was observed. The normal SHVDNE framework initialization hooks appear in its own log, as in Stage 1; Codex added or invoked no extra hook/patch or compatibility bypass. No profile probe was installed, no assignment/native suppression/private registration was performed, and no RichAudio audio endpoint/producer/renderer ran.
+The loader identifies only DirectStorageFix, ScriptHookVDotNet and StraightToStoryMode ASIs. TrainerV/OpenRPF were parked as approved. The original RPH log remained unchanged and no RPH process was observed. The normal SHVDNE framework initialization hooks appear in its own log, as in Stage 1; the implementation added or invoked no extra hook/patch or compatibility bypass. No profile probe was installed, no assignment/native suppression/private registration was performed, and no RichAudio audio endpoint/producer/renderer ran.
 
 I reported **“No unexpected behaviour noticed”** during startup and the normal quit. This is my subjective observation, not a game frame-time measurement. There is no final script `stopped` row or runtime-closed row; final journal drain during process teardown is best effort. The normal quit prompt, process cessation and zero host activity corroborate ordinary exit, without claiming a live normal-reload or active-host teardown result.
 
 ## Restoration and next boundary
 
-Codex archived every installed file, recognized generated file, loader/core log and post-run settings copy before removing or restoring anything. All 24 protected originals match their baseline SHA-256 values; TrainerV.asi and OpenRPF.asi are restored. All ten installed files, new SHVDNE root log and created `scripts` tree are absent. The selected Steam entry remains `-nobattleye`; unrelated Steam metadata and saves were not replaced. Backups, raw evidence and partial-action receipts remain available.
+The run archived every installed file, recognized generated file, loader/core log and post-run settings copy before removing or restoring anything. All 24 protected originals match their baseline SHA-256 values; TrainerV.asi and OpenRPF.asi are restored. All ten installed files, new SHVDNE root log and created `scripts` tree are absent. The selected Steam entry remains `-nobattleye`; unrelated Steam metadata and saves were not replaced. Backups, raw evidence and partial-action receipts remain available.
 
 The final independent verification rechecks the sealed 119 bindings, all 582 historical files including all 324 Stage 1 preparation/evidence files, the original RPH worktree/menu, current protected originals and process absence. No production source/candidate change was made during this execution. Gate A ownership is unchanged.
 

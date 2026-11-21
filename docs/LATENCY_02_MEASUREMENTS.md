@@ -1,6 +1,6 @@
 # LATENCY-02: device-free measurements and limits
 
-I now have a bounded synthetic transient path that avoids the continuous vehicle history and PCM FIFO. Codex measured it with the existing acoustic renderer, native ring and an authored fake output clock. **No actual WASAPI submission, device-period query, speaker latency or GTA event timing was measured.** The existing live event route remains disabled.
+I now have a bounded synthetic transient path that avoids the continuous vehicle history and PCM FIFO. The analysis measured it with the existing acoustic renderer, native ring and an authored fake output clock. **No actual WASAPI submission, device-period query, speaker latency or GTA event timing was measured.** The existing live event route remains disabled.
 
 The implementation is on a separate branch based on PR #77 at `d8f82c578d3819569b2e7d198fc469e6517a86b4`. The native late-mix/timing implementation is `84af203`; continuous timing is `b364d3f` plus the authored-only qualifier/clock correction `51efefe`. My PR #76 results, PR #77 branch, consumed live approvals and original retained assets remain separate.
 
@@ -48,7 +48,7 @@ Negative controls are deliberately unsuccessful audio conditions: a 40 ms device
 
 ## Continuous Bati response and the remaining queue
 
-Codex also prepared two fresh private fixture copies from the original reviewed Bati package, rehashing all retained bindings before and after copying. The default and 75 ms arms used the same `camera-source-01` continuity policy, gains, banks, settings and authored 120-value 20 Hz stationary/rev/moving schedule. Real Node source generation, `RA07`, native credits and the production ring ran into the existing device-free sink. No recorder or endpoint was enabled.
+The implementation also prepared two fresh private fixture copies from the original reviewed Bati package, rehashing all retained bindings before and after copying. The default and 75 ms arms used the same `camera-source-01` continuity policy, gains, banks, settings and authored 120-value 20 Hz stationary/rev/moving schedule. Real Node source generation, `RA07`, native credits and the production ring ran into the existing device-free sink. No recorder or endpoint was enabled.
 
 | Current genuine-bank fixture | Default 100 ms / eight credits | Reviewed 75 ms / eight cold, six steady |
 | --- | --- | --- |

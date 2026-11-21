@@ -15,13 +15,13 @@ I heard no sustained change in A's engine or physical horn after BATI self-assig
 
 I approved one run under scope `7a78d774c6d01b0d87dec9b630667d576cbbacf7097f7fac0d972d49a05f44b4`, source `0ef9a600c357f3e161e1497349acb488f8b3147f`, probe `b3af23ebaa529de155ce5af5e1aac70d6f74009401a0a3eb0ec6f4719790c3d5` and DLC `b5a421652ecfef3eda8302f20a6d1d127c46db044c87ea3d96c508e20ad88996`.
 
-Codex verified 98 prerequisite identities and 19 absent paths, used the sealed temporary installer and requested one Steam launch. SHVDNE completed NativeMemory initialization before probe startup, with no intervening initialization failure or reload. F5 restored the prior locked decorator state before creating A and B. Recording started at 23:05:12.345 UTC on 14 November 2026; F5 was logged at 23:05:21.5107577 UTC, giving 9.1657577 seconds of pre-roll.
+The analysis verified 98 prerequisite identities and 19 absent paths, used the sealed temporary installer and requested one Steam launch. SHVDNE completed NativeMemory initialization before probe startup, with no intervening initialization failure or reload. F5 restored the prior locked decorator state before creating A and B. Recording started at 23:05:12.345 UTC on 14 November 2026; F5 was logged at 23:05:21.5107577 UTC, giving 9.1657577 seconds of pre-roll.
 
 A retained handle 2306 / token 406913610; B retained handle 2562 / token 891464325. A was the left white bike, B the right orange bike. B received exactly one permitted manual engine-start request and zero audio-profile assignments. The only audio setter dispatches were `BATI`, then terminal `BATI`, both on A.
 
 ADDER armed at 23:12:25.5976695 UTC. Apply failed at 23:12:37.5783462 UTC, 11.9806767 seconds later. The allowed arm duration was ten seconds. The controller recorded `not armed or expired`, stopped progression and issued its one permitted BATI release at 23:12:37.5790610 UTC, active second 436.0683033, before the second-525 release deadline. There was no retry, ADDER assignment, private assignment, second launch, silent profile or extra native hook.
 
-Codex checked the owning `IdleExperiment.Apply` source offline: the expired-arm test throws before phase consumption, assignment logging and `api.Assign`. The journal independently agrees: no ADDER dispatch intent or return exists. This was the intended expiry guard, not evidence that an ADDER setter call failed. No source or candidate change is justified by treating that absent call as a resource failure.
+The operator checked the owning `IdleExperiment.Apply` source offline: the expired-arm test throws before phase consumption, assignment logging and `api.Assign`. The journal independently agrees: no ADDER dispatch intent or return exists. This was the intended expiry guard, not evidence that an ADDER setter call failed. No source or candidate change is justified by treating that absent call as a resource failure.
 
 ## Physical horn and operating context
 
@@ -29,7 +29,7 @@ I described the baseline, self-assignment and terminal-release physical horns as
 
 Both B-stability endpoints were running/stationary, separated by 10.856 seconds. The separate B baseline endpoints were 16.397 seconds apart. A's engine readback was **off** during both B baseline snapshots, despite my initial impression that it had stayed running. It was off again at both B post snapshots, which matches that part of the comparison. B stayed on. Road traffic appears in the background, so the mixed track cannot quantify either bike alone.
 
-The A baseline and self steady views were stable in the retained review frames. The terminal release view turns within its fixed +5/10-second idle window; Codex rejected its restoration context rather than moving the cut. I used F2 at 23:14:29.1707878 UTC to record an uncertain/context-limited release outcome. No setter retry followed.
+The A baseline and self steady views were stable in the retained review frames. The terminal release view turns within its fixed +5/10-second idle window; the analysis rejected its restoration context rather than moving the cut. I used F2 at 23:14:29.1707878 UTC to record an uncertain/context-limited release outcome. No setter retry followed.
 
 B's post endpoints were 14.176 seconds apart, 0.824 seconds short of the requested 15-second endpoint. The fixed +5/10-second recording is retained without a replacement take. The post comparison is limited by this endpoint timing and approximate viewpoint matching.
 
@@ -47,7 +47,7 @@ The raw recording, immutable prefixes, extraction receipts, failed finalized rec
 
 I confirmed ENDED, visible disappearance of both bikes, normal GTA exit and normal OBS exit. The journal records ENDED at 23:15:25.9961463 UTC, active second 604.4853886. Retirement was therefore 4.485 seconds after the 600-second active boundary. This is retained as a timing deviation; no diagnostic assignment occurred after the earlier stop. The controller's retirement path performed containment, and its ENDED result includes both native deletion/nonexistence results. A retained video frame at recording second 614 shows ENDED and the empty bike position. The earlier review frame named `video-review/retirement.png` is actually before deletion; `analysis/retirement-actual.png` is the correctly timed closure frame.
 
-Codex ran the retained rollback only after GTA, PlayGTAV and OBS were closed, then ran a separate verifier. All 22 enumerated temporary paths were absent. Five original files, including Trainer and OBS settings/logs, matched their original hashes, creation/write times and attributes. Fifty-three original identities matched, including the game, base/granular/resident archives and exact root DLL/ASI inventory. The transaction is `restored-independently-verified`. Disk restoration, vehicle retirement and audible restoration remain separate results.
+The validation ran the retained rollback only after GTA, PlayGTAV and OBS were closed, then ran a separate verifier. All 22 enumerated temporary paths were absent. Five original files, including Trainer and OBS settings/logs, matched their original hashes, creation/write times and attributes. Fifty-three original identities matched, including the game, base/granular/resident archives and exact root DLL/ASI inventory. The transaction is `restored-independently-verified`. Disk restoration, vehicle retirement and audible restoration remain separate results.
 
 ## Remaining native-suppression obstacle
 

@@ -1,6 +1,6 @@
 # WORLD12 local processing results
 
-My processing gate still fails. The fresh matched comparison records **50 parent / 39 candidate misses on Node 22** and **9 / 8 on Node 24**, each over 10,752 blocks per implementation. The parent is exactly PR91 at `3d0642df9588aa46721efd85712fd2ba07446345`. WORLD11's historical 41/9 candidate counts use another harness and earlier run; they are not the new baseline. Codex implemented the reviewed changes and ran the new comparisons with original authored material only.
+My processing gate still fails. The fresh matched comparison records **50 parent / 39 candidate misses on Node 22** and **9 / 8 on Node 24**, each over 10,752 blocks per implementation. The parent is exactly PR91 at `3d0642df9588aa46721efd85712fd2ba07446345`. WORLD11's historical 41/9 candidate counts use another harness and earlier run; they are not the new baseline. This change introduced the reviewed changes and ran the new comparisons with original authored material only.
 
 The result is mixed. Most medians and upper percentiles improve, but the worst candidate blocks are slower than their parents in both runtimes. Node 24 uninstrumented goes from zero parent misses to one candidate miss. Neither zero misses nor the 8 ms headroom target is achieved. The [scope](WORLD_12_MEASUREMENT_SCOPE.md) identifies runtime identities, controls, additional common outside-timer history/path bookkeeping and limits.
 

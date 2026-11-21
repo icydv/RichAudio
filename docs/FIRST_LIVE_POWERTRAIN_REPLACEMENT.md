@@ -8,7 +8,7 @@ The six Bati layers used the Adder's live, normalised rev ratio. The renderer in
 
 ## What needs fixing
 
-The voice was much too quiet. At sustained high revs I heard a steady note and couldn't hear a limiter bounce. After resume the sound became choppy and unpleasant enough that Codex muted the voice again.
+The voice was much too quiet. At sustained high revs I heard a steady note and couldn't hear a limiter bounce. After resume the sound became choppy and unpleasant. The voice was muted again.
 
 The host counted 1,189,760 stale frames and zero PCM-ring underflow frames over the session. Those totals include time spent muted. The next job is to find where audio spent its 250 ms freshness budget around resume and check whether discarded frames line up with the breakup I heard. Gain and high-rev behaviour are separate follow-ups. This demonstration covers one driven car.
 

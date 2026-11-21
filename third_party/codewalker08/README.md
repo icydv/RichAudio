@@ -1,10 +1,10 @@
 # My integrated CodeWalker dependency
 
-I chose to integrate the required CodeWalker.Core functionality into RichAudio. Codex builds the pinned public C# source automatically and packages the worker, dependencies, corresponding adapted source and notices. Users do not need to download or launch CodeWalker separately.
+I chose to integrate the required CodeWalker.Core functionality into RichAudio. The build compiles the pinned public C# source and packages the worker, dependencies, corresponding adapted source and notices. Users do not need to download or launch CodeWalker separately.
 
 Credit: **CodeWalker by dexyfex**. [Author's download page](https://www.gta5-mods.com/tools/codewalker-gtav-interactive-3d-map) · [Pinned source](https://github.com/dexyfex/CodeWalker/tree/485d56bec00262ed7fa472261cce7bbc6202b96e).
 
-Original source headers, `Notice.txt` and `Readme_Src.txt` are preserved. My project decision to use and redistribute this component is not a claim that Codex verified a blanket upstream licence or written authorisation. The notices retain their original meanings.
+Original source headers, `Notice.txt` and `Readme_Src.txt` are preserved. The decision to redistribute this component does not establish a blanket upstream licence or written authorisation. The notices retain their original meanings.
 
 The build adapts bounded in-memory archive admission, unavailable implicit-bootstrap errors and WORLD09's explicit bounded memory initializer. It includes no `magic.dat`, `.resx`, game executable, archive, exported game asset or private key material. Protected bootstrap material is unavailable in this package. The memory initializer can consume separately approved opaque/AES inputs through the supervised worker; authored containers exercise it offline. Actual archive/resource readers remain functional for supported inputs; that is not proof of installed Enhanced compatibility.
 

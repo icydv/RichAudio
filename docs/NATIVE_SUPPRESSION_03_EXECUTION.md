@@ -2,7 +2,7 @@
 
 ## Audio result
 
-The Bati pair spawned. I heard normal native sound while seated on B, but its engine stopped when I got off. A second normal entry and quick exit gave the same result. The required empty-and-idling B condition was unavailable, so Codex stopped progression before any profile assignment.
+The Bati pair spawned. I heard normal native sound while seated on B, but its engine stopped when I got off. A second normal entry and quick exit gave the same result. The required empty-and-idling B condition was unavailable, so the run stopped progression before any profile assignment.
 
 | Observation | Result |
 | --- | --- |
@@ -18,9 +18,9 @@ This is an operating-setup failure, followed by a separate retirement fault. It 
 
 ## Approved run and registration
 
-I approved one run of candidate-03 under scope `f5ec2445b92397b7f95216173f714672cd5e14de8873578e61614fb28d414464`, including the guarded SHVDNE decorator-lock operation. Codex verified the clean worktree at `d3479068853bfb75e2fd58c546b506f05324d883`, its own build receipt, DLL `bd6fa535657d20bddbb40f8d8aa222fe00eb13613d3d727a03bafb2c0d4c91e8`, framework identities and installation files. Earlier candidate binaries and approvals were not substituted.
+I approved one run of candidate-03 under scope `f5ec2445b92397b7f95216173f714672cd5e14de8873578e61614fb28d414464`, including the guarded SHVDNE decorator-lock operation. The analysis verified the clean worktree at `d3479068853bfb75e2fd58c546b506f05324d883`, its own build receipt, DLL `bd6fa535657d20bddbb40f8d8aa222fe00eb13613d3d727a03bafb2c0d4c91e8`, framework identities and installation files. Earlier candidate binaries and approvals were not substituted.
 
-The current launch logged successful `NativeMemory` initialization at 01:51:09 UTC, followed by probe startup without an intervening failure or reload. Codex checked this before F5. At 01:52:23.2321498, the probe recorded `initialInt=false finalInt=True priorLocked=True lockRestored=True`. The single private integer tag was registered, and the original locked state was read back before model request and creation. This is positive runtime evidence for the prepared registration path; initialization logs alone do not independently prove every binding's semantics. Restoring the lock does not unregister the session-wide name or qualify concurrent registry users.
+The current launch logged successful `NativeMemory` initialization at 01:51:09 UTC, followed by probe startup without an intervening failure or reload. The operator checked this before F5. At 01:52:23.2321498, the probe recorded `initialInt=false finalInt=True priorLocked=True lockRestored=True`. The single private integer tag was registered, and the original locked state was read back before model request and creation. This is positive runtime evidence for the prepared registration path; initialization logs alone do not independently prove every binding's semantics. Restoring the lock does not unregister the session-wide name or qualify concurrent registry users.
 
 One F5 request created A with handle 1794/token 971077682 and B with handle 2050/token 2080214356. At the mounted stock-B snapshot, B's engine-running readback was true and speed was 0.0109274024 m/s. At the later on-foot observation, the same B handle/token had engine-running false and speed zero. The journal's snapshots do not themselves contain seat occupancy; video and my reports provide that context.
 
@@ -41,11 +41,11 @@ There was one Story Mode launch, one pair, zero arm events and zero audio-profil
 
 ## Retirement and installation restoration
 
-My first F10 input produced no journal event and both bikes remained visible. Codex then sent the permitted cleanup control once. The probe logged manual cleanup but threw `InvalidCastException: Unable to cast object of type 'System.Int32' to native value`. Both bikes remained visible under the fault STOP overlay. Codex did not retry deletion or patch the running script. I exited GTA normally through its menu.
+My first F10 input produced no journal event and both bikes remained visible. The run then sent the permitted cleanup control once. The probe logged manual cleanup but threw `InvalidCastException: Unable to cast object of type 'System.Int32' to native value`. Both bikes remained visible under the fault STOP overlay. The operator did not retry deletion or patch the running script. I exited GTA normally through its menu.
 
 The exact retained SHVDNE API explains this fault: `OutputArgument(object)` boxes the integer handle, while `Function.ObjectToNative` accepts only null, strings and `INativeValue` implementations. The exception occurs while constructing the argument, before the deletion native is called. This is a managed argument-conversion defect, not evidence that GTA rejected deletion or that either vehicle's identity was reused. The old test double accepted arbitrary boxed objects and missed the defect.
 
-Codex stopped and closed OBS normally, preserved the new logs and recording, restored the enumerated files/settings and retained the rollback ledger. Independent verification passed at 01:59:58 UTC: 125 file identities, the exact 49-file root DLL/ASI inventory, base/granular archives, four original settings/log files and Trainer bytes/timestamps/attributes matched. All eleven temporary installation destinations, the generated journal, created directories and Live03 scene backup are absent. GTA, PlayGTAV, RPH and OBS are closed. Candidates 01, 02 and 03 remain unchanged; candidate-03 remains clean at its approved commit. The unrelated protected World13 menu file also matches its separately supplied contextual baseline.
+The run stopped and closed OBS normally, preserved the new logs and recording, restored the enumerated files/settings and retained the rollback ledger. Independent verification passed at 01:59:58 UTC: 125 file identities, the exact 49-file root DLL/ASI inventory, base/granular archives, four original settings/log files and Trainer bytes/timestamps/attributes matched. All eleven temporary installation destinations, the generated journal, created directories and Live03 scene backup are absent. GTA, PlayGTAV, RPH and OBS are closed. Candidates 01, 02 and 03 remain unchanged; candidate-03 remains clean at its approved commit. The unrelated protected World13 menu file also matches its separately supplied contextual baseline.
 
 The cleanup receipt is `cleanup-verification.json`, SHA-256 `47293b2eb05d9e75909bfb3eea74778665a6e99ee86eae931ad3457718f97901`. Disk restoration passed; in-game retirement failed. Session exit is containment and is not audible restoration on a surviving A. No audio restoration call was necessary because no override had been assigned.
 
@@ -62,7 +62,7 @@ There is no preserve/B1 comparison, frozen calibration, C/B2 measurement, wider-
 
 ## Offline correction and the next suppression step
 
-Codex completed the directly justified source corrections in the separate `RichAudio-NativeSuppressionFixes` worktree. The approved candidate-03 source, scope and DLL remain intact. No audio resource was rebuilt or expanded, and no new live scope was sealed as part of this work.
+The operator completed the directly justified source corrections in the separate `RichAudio-NativeSuppressionFixes` worktree. The approved candidate-03 source, scope and DLL remain intact. No audio resource was rebuilt or expanded, and no new live scope was sealed as part of this work.
 
 The deletion correction follows the retained SDK's own `Entity.Delete`: a pointer to a local integer handle is passed only during the synchronous deletion call. The helper creates an `InputArgument` through the SDK's supported pointer conversion. It does not inspect game memory or change the existing ownership and retirement checks. The authored adapter fixture now rejects the old boxed-integer form and validates the pointer during dispatch.
 

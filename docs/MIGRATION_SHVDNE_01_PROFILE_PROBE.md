@@ -1,6 +1,6 @@
 # MIGRATION-SHVDNE-01: isolated profile probe
 
-I am keeping the profile experiment separate from the intended RichAudio release. Codex ported the disposable Bati A/B experiment to SHVDNE API v3 without changing my historical RPH probe, its evidence, the consumed LIVE-01 authorization, or the PROFILE-02 evidence-method refusal. The new implementation is compiled and covered by authored offline fixtures. It has not been installed or run in GTA. Gate A remains blocked.
+I am keeping the profile experiment separate from the intended RichAudio release. The implementation ported the disposable Bati A/B experiment to SHVDNE API v3 without changing my historical RPH probe, its evidence, the consumed LIVE-01 authorization, or the PROFILE-02 evidence-method refusal. The new implementation is compiled and covered by authored offline fixtures. It has not been installed or run in GTA. Gate A remains blocked.
 
 The two implementation sources are `tools/native-control/ProfileAssignmentController.cs` and `tools/native-control/GateAProfile01.Shvdne.cs`. The first contains the framework-independent one-pair/one-assignment state machine. The second contains a separate `GTA.Script`, callback-scoped native adapter, explicit key commands and an asynchronous durable journal. The normal product package excludes both sources and their resulting DLL. `tests/host/TestGateAProfileShvdne.cs` executes the actual controller and native adapter source against authored APIs; `tools/Test-GateAProfileShvdne.ps1` compiles and runs those fixtures.
 

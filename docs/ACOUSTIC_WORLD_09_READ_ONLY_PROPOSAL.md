@@ -1,6 +1,6 @@
 # ACOUSTIC-WORLD-09: one bounded Enhanced geometry experiment
 
-**Proposal and offline implementation only. My next genuine test is unsealed and has no current access approval.** Codex has not inspected protected installed resources, private captures, real key material, or game/supplied external-tool executables, including their metadata or directory listings. Earlier consumed approvals stay exhausted. There is no installation command to approve in this document because exact private source identities are still unknown.
+**Proposal and offline implementation only. My next genuine test is unsealed and has no current access approval.** The operator has not inspected protected installed resources, private captures, real key material, or game/supplied external-tool executables, including their metadata or directory listings. Earlier consumed approvals stay exhausted. There is no installation command to approve in this document because exact private source identities are still unknown.
 
 My goal is one authentic static exterior collision surface through my existing CodeWalker.Core worker, resource catalogue, acoustic tile cache, solver and SoundMap. Directory names, metadata bounds, authored fixtures and display lines do not establish genuine collision geometry. No genuine Los Santos collision has been qualified by this increment.
 

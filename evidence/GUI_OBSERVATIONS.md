@@ -1,6 +1,6 @@
 # CodeWalker GUI observation record
 
-24 October 2026, this Codex investigation. Computer Use skill was used through the supported Windows `sky` API. These are observed actions, not hypothetical instructions.
+24 October 2026. These observations record the actions taken in the Windows desktop tools.
 
 1. Attempted to launch the supplied `CodeWalker RPF Explorer.exe`; the request timed out and the subsequent CodeWalker-only window query returned no target.
 2. Started supplied `CodeWalker.exe explorer` with its tool directory as working directory. A targetable **RPF Explorer - CodeWalker by dexyfex** window appeared and its tree listed the actual Enhanced installation root.

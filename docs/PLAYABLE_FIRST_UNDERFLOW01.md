@@ -1,6 +1,6 @@
 # First Bati underflow: credit delivery and fixture cadence
 
-I want the direct Bati prototype I heard to survive its intended listening window. Codex retained the failed timeout/underflow populations and corrected two demonstrated mechanisms without changing synthesis, thread priorities, gains, source mapping, buffers, prefill or the status watchdog.
+I want the direct Bati prototype I heard to survive its intended listening window. The project record retained the failed timeout/underflow populations and corrected two demonstrated mechanisms without changing synthesis, thread priorities, gains, source mapping, buffers, prefill or the status watchdog.
 
 ## Evidence before correction
 
@@ -35,7 +35,7 @@ The duration fixture verifies **consumed active output frames**, not only elapse
 | Publication withdrawn while PCM remains supplied | Existing watchdog retired safely and preserved the first fault. |
 | Node producer terminated | Safe retirement, original `producer ended` evidence, bounded closure and no revival. |
 
-All owned test processes joined; an independent scoped process probe was empty. The failed intermediate duration run and all original failures remain retained. The successful full-duration run followed the credit-owner correction; Codex did not repeat an unchanged failing build until it passed. These are authored, device-free contracts, not GTA frame-time, physical latency or live output guarantees. The earlier live native completion/FIFO-drain limitation remains unchanged.
+All owned test processes joined; an independent scoped process probe was empty. The failed intermediate duration run and all original failures remain retained. The successful full-duration run followed the credit-owner correction; the operator did not repeat an unchanged failing build until it passed. These are authored, device-free contracts, not GTA frame-time, physical latency or live output guarantees. The earlier live native completion/FIFO-drain limitation remains unchanged.
 
 Raw evidence is under `.local/playable-15/first-underflow01`, with the intermediate wrapper run under `.local/playable-15/runtime-health-e75f713587c645789c9d6f8db1d64716`. The updated focused runner is `tools/Test-BatiRuntimeHealth01.ps1`.
 

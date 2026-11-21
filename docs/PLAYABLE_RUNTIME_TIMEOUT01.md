@@ -1,12 +1,12 @@
 # Bati runtime timeout: narrow correction and remaining listening blocker
 
-I heard RichAudio in the approved manual-arming attempt at `34522635a82cf0a8af769ecc4624f841524362df`. It consumed 14.672 seconds of audio before the runtime retired. The original installation was restored; that approval remains consumed. Codex has made no further deployment or launch.
+I heard RichAudio in the approved manual-arming attempt at `34522635a82cf0a8af769ecc4624f841524362df`. It consumed 14.672 seconds of audio before the runtime retired. The original installation was restored; that approval remains consumed. The operator has made no further deployment or launch.
 
 ## First-fault evidence and its limits
 
 The retained live RPH log reports a Bati-runtime `TimeoutException`, but does not retain its original message or stack. The stopped host status replaced its running status. My live record alone cannot establish the exact watchdog operands or whether publication was missing, stale, blocked or misobserved. The two render-deadline misses and zero underflow do not identify the timeout's cause.
 
-Codex reproduced the **same explicit status-watchdog exception** through the actual runtime/host/Node/renderer chain, using original-authored procedural PCM and an authored executable identity with a device-free sink. That ordinary run retired after 58.650 seconds with `Bati host status stopped`. Before shutdown, the new first-fault receipt captured a running host, continuing progress, zero underflow and a status file only 2.583 ms old. The captured stack names `GameplayRuntime.RunBati`.
+The run reproduced the **same explicit status-watchdog exception** through the actual runtime/host/Node/renderer chain, using original-authored procedural PCM and an authored executable identity with a device-free sink. That ordinary run retired after 58.650 seconds with `Bati host status stopped`. Before shutdown, the new first-fault receipt captured a running host, continuing progress, zero underflow and a status file only 2.583 ms old. The captured stack names `GameplayRuntime.RunBati`.
 
 A separate bounded Windows reproduction isolated the unsafe operation: during the same `File.WriteAllText` / `File.Replace` publication pattern, `File.Exists` returned true but `File.GetLastWriteTimeUtc` returned **1601-01-01**, its invalid/unavailable metadata sentinel. The old watchdog interprets that as an expired status and throws immediately. This occurred after 21 probes and one publication in 1.859 ms. The supported false-timeout mechanism is demonstrated; the historical live attempt did not retain enough information to prove that its precise query returned this sentinel.
 
@@ -38,7 +38,7 @@ The real chain tests use the production loaders and JavaScript producer with aut
 
 ## Next decision
 
-**The false status-timeout mechanism is corrected, but the prototype is blocked for another proposed listening attempt because the required corrected 90-second check did not complete.** The separate demonstrated producer-starvation failure is relevant to the intended listening window. Codex stopped without changing audio scheduling, increasing buffering, optimising GPU work, rerunning historical populations or preparing another manual-arming proposal.
+**The false status-timeout mechanism is corrected, but the prototype is blocked for another proposed listening attempt because the required corrected 90-second check did not complete.** The separate demonstrated producer-starvation failure is relevant to the intended listening window. The run stopped without changing audio scheduling, increasing buffering, optimising GPU work, rerunning historical populations or preparing another manual-arming proposal.
 
 Only the affected plugin and host were rebuilt under `.local/playable-15/runtime-timeout-components02`. The previous package, proposals and genuine evidence remain unchanged. A future deployment would need new source pins, plugin/host hashes, package-manifest and pointer/lease bindings, plus fresh approval; no new deployment scope has been issued while the duration criterion is failing. Newer unrelated working-tree changes were preserved.
 

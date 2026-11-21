@@ -1,8 +1,8 @@
 # PRIVATE03I — STOP acknowledgment and cleanup
 
-My PRIVATE03H approval is consumed. I reported seeing the second STOP-only notice and clicking “I am exiting normally”. That is my reported interaction; the historical software did not record handler entry, transmission or receipt, so its timing and delivery cannot be reconstructed. Codex must not turn the missing receipt into a claim that I ignored the notice or clicked late.
+My PRIVATE03H approval is consumed. I reported seeing the second STOP-only notice and clicking “I am exiting normally”. That is my reported interaction; the historical software did not record handler entry, transmission or receipt, so its timing and delivery cannot be reconstructed. The operator must not turn the missing receipt into a claim that I ignored the notice or clicked late.
 
-Codex performed this correction with disposable processes and automated UI actions only. GTA, RPH and OBS remain outside this qualification. No human-attended rehearsal, installation or live audio experiment is authorized by this preparation.
+The operator performed this correction with disposable processes and automated UI actions only. GTA, RPH and OBS remain outside this qualification. No human-attended rehearsal, installation or live audio experiment is authorized by this preparation.
 
 ## Historical chronology
 
@@ -24,7 +24,7 @@ The five-second origin remains STOP/failure, not window-ready time. The target c
 
 ## Qualification boundaries
 
-`tests/Test-NoticeDelivery03I.py` covers real disposable processes with clearly labelled synthetic envelopes for receiver faults. `tests/Start-PrivateNoticeFixture03I.ps1` and `tests/PrivateNoticeFixture03I.py` coordinate actual visible-button tests; UI actions are performed separately by Codex through Computer Use. Test-only controls are compiled under SUPERVISION_FIXTURES, require offline-fixture mode and are absent from the candidate binary.
+`tests/Test-NoticeDelivery03I.py` covers real disposable processes with clearly labelled synthetic envelopes for receiver faults. `tests/Start-PrivateNoticeFixture03I.ps1` and `tests/PrivateNoticeFixture03I.py` coordinate actual visible-button tests; UI actions are performed separately with desktop automation. Test-only controls are compiled under SUPERVISION_FIXTURES, require offline-fixture mode and are absent from the candidate binary.
 
 Staged STOP-only tests initialize the neutral window, then induce one new failure. The failure starts its one unchanged five-second clock. These test the actual handler/mailbox/monitor path, but do not measure cold notice startup or human response. The candidate build is tested through the actual normal UI and cold failure paths. A cold automation attempt with no handler event remains failed evidence. Automated success cannot qualify my direct handoff or fullscreen visibility.
 

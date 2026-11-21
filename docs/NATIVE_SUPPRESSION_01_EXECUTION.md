@@ -4,7 +4,7 @@
 
 The approved attempt ended before either disposable Bati was created. No private audio profile was assigned, so it produced no result for resource resolution, marker activation, silence, marker return, normal audible restoration or control isolation.
 
-I approved one execution of scope `bfc40239474832aeb3c69c6eeb1809456c329dc9cce47605ce6d32a943f9a0bb` and participated in the run. Codex installed the exact prepared candidate at source commit `03c1dc139586bae887bfcadc1e40d781bbafa1a3`, started the approved OBS recording and used one normal Story Mode launch. The fresh SHVDNE log confirmed that the probe loaded; its `DORMANT` status was visible.
+I approved one execution of scope `bfc40239474832aeb3c69c6eeb1809456c329dc9cce47605ce6d32a943f9a0bb` and participated in the run. The installer deployed the exact prepared candidate at source commit `03c1dc139586bae887bfcadc1e40d781bbafa1a3`, started the approved OBS recording and used one normal Story Mode launch. The fresh SHVDNE log confirmed that the probe loaded; its `DORMANT` status was visible.
 
 After I dismounted in an open parking area and pressed Ctrl+Shift+F5, the journal recorded:
 

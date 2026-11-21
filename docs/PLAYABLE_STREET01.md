@@ -1,8 +1,8 @@
 # My next private Bati demonstration
 
-I have a testable private Bati build prepared for a separately approved GTA V Enhanced session. Codex has not deployed it, launched GTA, opened an audio endpoint or recorded sound for this checkpoint. My earlier listening results remain historical evidence; this build still needs my ears in GTA.
+I have a testable private Bati build prepared for a separately approved GTA V Enhanced session. The operator has not deployed it, launched GTA, opened an audio endpoint or recorded sound for this checkpoint. My earlier listening results remain historical evidence; this build still needs my ears in GTA.
 
-The build reuses the previously heard PLAYABLE-15 SHV/RPH telemetry route and exact retained native producer/source banks. Codex rebuilt the managed plugin and audio host from this checkout and packaged the current JavaScript modules. It preserves the existing engine/exhaust mapping, pressure ratio, gains, source expiry, 48-kHz/512-frame processing and baseline buffering. It adds the missing player-driver attachment flag and observes the existing gameplay/follow-vehicle camera predicates so the existing rider airflow can activate. Unknown camera mode withholds local airflow. Camera orientation still drives the existing spatial renderer.
+The build reuses the previously heard PLAYABLE-15 SHV/RPH telemetry route and exact retained native producer/source banks. The implementation rebuilt the managed plugin and audio host from this checkout and packaged the current JavaScript modules. It preserves the existing engine/exhaust mapping, pressure ratio, gains, source expiry, 48-kHz/512-frame processing and baseline buffering. It adds the missing player-driver attachment flag and observes the existing gameplay/follow-vehicle camera predicates so the existing rider airflow can activate. Unknown camera mode withholds local airflow. Camera orientation still drives the existing spatial renderer.
 
 This is additive audio. GTA's own bike sound remains enabled. There is one RichAudio engine/exhaust source pair; the first listening comparison must assess how it combines with stock sound. This is not native replacement or proof of phase compatibility with GTA's simultaneous mix. No gain increase or additional buffer was introduced.
 
@@ -17,15 +17,15 @@ Genuine building reflections are **disabled** in this first demonstration. The c
 
 ## CI findings and narrow corrections
 
-Codex inspected hosted runs [STREET-01 functional](https://github.com/icydv/RichAudio/actions/runs/42264138839) and [offline validation](https://github.com/icydv/RichAudio/actions/runs/42264138783) for checkpoint `73da43e`.
+The analysis inspected hosted runs [STREET-01 functional](https://github.com/icydv/RichAudio/actions/runs/42264138839) and [offline validation](https://github.com/icydv/RichAudio/actions/runs/42264138783) for checkpoint `73da43e`.
 
 The two normal-startup scene tests reproduced locally. Asynchronous metadata preparation returned `not-ready`, and the service discarded the only waiting observation. The service now retains at most one still-fresh observation under a new ordered transport ID, preserving its original request, geometry and expiry timestamps. A newer observation takes precedence. The existing dispatch floor and expiry remain strict: if preparation plus rate limiting consumes that lease, only a distinct fresh observation can produce a scene. The normal-startup tests now observe installation and supply that fresh observation when needed, rather than assuming synchronous reload during one query. A dedicated regression proves a retained observation is not retimestamped.
 
 The reader test was also waiting for `manifestLoads` to count an epoch-mismatched read; the new architecture incremented it only on successful installation. The helper now reports actual read/parse attempts, including mismatch, while scene-thread manifest-read time remains zero. The test verifies one unchanged mismatched read and the off-thread measurement.
 
-The Node 22 moving-scene failure passed the cold/warm/neighbour/generation assertions but missed the final twelve-acceptance population. The fixed eight-second observation window previously included asynchronous metadata startup. Codex bounded startup separately at five seconds, retained the same movement window, acceptance counts, one-second leases and stale-result assertions, and verified the resulting test. This is a test-population correction, not a guarantee of every hosted scheduler's timing.
+The Node 22 moving-scene failure passed the cold/warm/neighbour/generation assertions but missed the final twelve-acceptance population. The fixed eight-second observation window previously included asynchronous metadata startup. The implementation bounded startup separately at five seconds, retained the same movement window, acceptance counts, one-second leases and stale-result assertions, and verified the resulting test. This is a test-population correction, not a guarantee of every hosted scheduler's timing.
 
-The independent processing workflow remains red: Node 22 completed its sixteen trials with the functional gate passing and processing deadline gate failing; Node 24 failed its affinity-helper deadline in a control. Codex did not rerun or loosen these historical populations. They do not exercise the installed metadata reader, and the isolated direct demonstration does not start it.
+The independent processing workflow remains red: Node 22 completed its sixteen trials with the functional gate passing and processing deadline gate failing; Node 24 failed its affinity-helper deadline in a control. The operator did not rerun or loosen these historical populations. They do not exercise the installed metadata reader, and the isolated direct demonstration does not start it.
 
 ## Focused evidence
 

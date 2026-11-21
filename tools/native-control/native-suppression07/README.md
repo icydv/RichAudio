@@ -1,12 +1,12 @@
 # Automatic native-audio test tools
 
-These tools prepare candidate-07. They do not authorize a live run. The normal live interaction is approve, watch/listen and answer Codex's phase question. The local runner handles the mechanics.
+These tools prepare candidate-07. They do not authorize a live run. The normal live interaction is approve, watch/listen and answer the current listening question. The local runner handles the mechanics.
 
 `IdleExperiment.cs` is the candidate-07 copy of the checked candidate-06 controller. `AutomaticRun.cs` operates it. `IdleNativeApi.cs` contains the finite reviewed game operations. `LocalBridge.cs` owns bounded file IO on a worker; `IdleProbe.Shvdne.cs` drains commands and performs game work on the SHVDNE callback. Only the optional emergency F9 remains in the key handler, and it queues the same stop path.
 
-`Operator07.py watch` attaches to an already launched, newly approved game process; it never launches GTA. It starts the private OBS collection, controls its finite Lua recorder, verifies actual state, coordinates immutable capture bundles and asks Codex for review through published observation events. The operator uses only local files and OBS's supported scripting API. There is no network server.
+`Operator07.py watch` attaches to an already launched, newly approved game process; it never launches GTA. It starts the private OBS collection, controls its finite Lua recorder, verifies actual state, coordinates immutable capture bundles and requests review through published observation events. The operator uses only local files and OBS's supported scripting API. There is no network server.
 
-Codex saves the ordinary listening answer in a private UTF-8 file, retaining the original observation from the question. After media/context review it invokes:
+The operator saves the ordinary listening answer in a private UTF-8 file, retaining the original observation from the question. After media/context review it invokes:
 
 ```powershell
 python.exe -I -S -B Operator07.py review --plan <retained-plan> --observation <original-observation> --decision <finite-decision> --text-file <answer-file> --context-reviewed

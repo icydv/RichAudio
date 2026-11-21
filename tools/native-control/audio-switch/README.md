@@ -8,7 +8,7 @@ The external renderer supplies a **Bati development voice on ADDER telemetry**. 
 
 `PowertrainLink` connects the existing gameplay publisher to the owned external acoustics host. The package admits just the ADDER/player identity and resolves the donor at the audio-bank boundary. `Run-Gameplay.mjs` uses the real stock gameplay renderer and the retained Bati engine/exhaust idle, acceleration and deceleration layers. Rendered PCM carries the source observation sequence through the existing RA07 pipe to the PCM ring. The host checks the observation lifetime and gain revision before submitting to WASAPI.
 
-| Listener | Codex command through `Invoke-Switch.ps1` |
+| Listener | Operator command through `Invoke-Switch.ps1` |
 | --- | --- |
 | Ready | `ReadyPowertrain -KnownStock` prepares the voice with output gain closed. Fresh observations, advancing nonzero source render blocks and corresponding output submissions must arrive before the script requests `RA_RC_QUIET` on the tagged car. Once the setter returns, the host opens gain for the new revision. |
 | Mute RichAudio | `MutePowertrain` closes only RichAudio gain. Listen for GTA's gear, tyre and horn sounds. Tracking and rendering continue. |
@@ -35,7 +35,7 @@ For one authorized session reuse the two verified private overlay files and the 
 
 Run `Build.ps1` from PowerShell on the RichAudio development machine. It builds the SHVDNE script in `.local/audio-switch` and runs the offline checks against that DLL. Use the matching Enhanced SHVDNE runtime and verify fresh successful SDK initialization before issuing a command. Stock comparisons use just the script and runtime. The private comparison also uses the two-file OpenRPF overlay described below.
 
-Drive a running stock ADDER with its original ADDER engine audio. The operator and listener must know the vehicle's audio history. The model check alone cannot establish that history. Listen to stock idle or revs for as long as you like, then say **ready**. Codex operates the following commands through `Invoke-Switch.ps1`.
+Drive a running stock ADDER with its original ADDER engine audio. The operator and listener must know the vehicle's audio history. The model check alone cannot establish that history. Listen to stock idle or revs for as long as you like, then say **ready**. The operator operates the following commands through `Invoke-Switch.ps1`.
 
 | Command | Effect |
 | --- | --- |
@@ -71,7 +71,7 @@ The completed stock RC test at 558f98b displaced the familiar ADDER engine and e
 
 ## Private audible and quiet comparison
 
-Start from a running, known-stock ADDER. The listener identifies the ADDER baseline under throttle before “ready”. Use one vehicle and one game session throughout. The listener drives and operates the physical horn. Codex uses the existing switch client.
+Start from a running, known-stock ADDER. The listener identifies the ADDER baseline under throttle before “ready”. Use one vehicle and one game session throughout. The listener drives and operates the physical horn. The operator uses the existing switch client.
 
 | Stage | Operator action and listening check |
 | --- | --- |

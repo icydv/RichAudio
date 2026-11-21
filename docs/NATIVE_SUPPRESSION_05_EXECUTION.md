@@ -1,6 +1,6 @@
 # D changed the recorded mix but failed the selection witness
 
-I approved one candidate-05 run on 14 November 2026, with scope SHA-256 `f9d05b4ed18c7c9d8bb531ea5fb4c00e05542700d8bff27b027a18040544cbba`. Codex installed the existing candidate, launched GTA once through Steam into Story Mode, and stopped experimental progression after D. S1, S2 and S3 were not assigned. The one permitted BATI release returned normal engine sound and horn on the same surviving A. Both disposable bikes were then retired, GTA and OBS closed normally, and the installation was restored and independently verified.
+I approved one candidate-05 run on 14 November 2026, with scope SHA-256 `f9d05b4ed18c7c9d8bb531ea5fb4c00e05542700d8bff27b027a18040544cbba`. The run installed the existing candidate, launched GTA once through Steam into Story Mode, and stopped experimental progression after D. S1, S2 and S3 were not assigned. The one permitted BATI release returned normal engine sound and horn on the same surviving A. Both disposable bikes were then retired, GTA and OBS closed normally, and the installation was restored and independently verified.
 
 The earliest observed change was associated with **D, the private vehicle root that retains stock powertrain references**. Its horn readback stayed in the stock Bati set rather than the disjoint donor set. I described a change in engine balance, without identifying a clearly changed donor horn. This failed the prepared D gate. It does not identify the effective private profile, prove that a private REL mounted, or establish deliberate native suppression.
 
@@ -21,7 +21,7 @@ The current launch logged `NativeMemory took 6416 milliseconds`, followed by pro
 
 B received one manually requested engine start, with no profile assignment. Both engines reported running at the stability endpoints 17.865 seconds apart. Subsequent baseline snapshots recorded B running and A off while I stood behind B. I then entered A, started it normally, sounded the stock horn and recorded the fixed stock idle window. No A engine setter, second B start, extra pair, reload or second GTA launch occurred.
 
-OBS initially opened hidden. Codex dismissed a duplicate-instance prompt without launching a second recorder instance, and I showed the existing window from its tray icon. This happened before recording and F5. After GTA's normal exit, Codex stopped recording. The OBS menu did not accept automation reliably, so I completed File → Exit normally. Neither application was forcibly terminated.
+OBS initially opened hidden. The operator dismissed a duplicate-instance prompt without launching a second recorder instance, and I showed the existing window from its tray icon. This happened before recording and F5. After GTA's normal exit, the run stopped recording. The OBS menu did not accept automation reliably, so I completed File → Exit normally. Neither application was forcibly terminated.
 
 ## What ran
 
@@ -76,7 +76,7 @@ The stricter initial reproduction attempts are retained as failures. OBS finaliz
 
 ## Offline source work
 
-Codex added [`Audit-SelectionPath05.ps1`](../tools/native-control/native-suppression05/Audit-SelectionPath05.ps1) and ran it against the installed-source ledger after independent restoration. It reads the exact retained DLC and update shadow using the pinned disk codec; it makes no game calls and creates no replacement candidate.
+The implementation added [`Audit-SelectionPath05.ps1`](../tools/native-control/native-suppression05/Audit-SelectionPath05.ps1) and ran it against the installed-source ledger after independent restoration. It reads the exact retained DLC and update shadow using the pinned disk codec; it makes no game calls and creates no replacement candidate.
 
 The audit establishes the following on disk:
 
@@ -93,7 +93,7 @@ The next justified source focus is the unresolved **mount/registration/name-sele
 
 ## Closure and retained results
 
-Normal audible return, vehicle retirement, normal process closure and disk restoration were checked separately. The pointer-backed deletion reported both entities absent and ENDED; I confirmed both disappeared, and Codex observed the cleared scene. The loader recorded normal script unregistration. I exited GTA and OBS normally.
+Normal audible return, vehicle retirement, normal process closure and disk restoration were checked separately. The pointer-backed deletion reported both entities absent and ENDED; I confirmed both disappeared, and the run observed the cleared scene. The loader recorded normal script unregistration. I exited GTA and OBS normally.
 
 The sealed rollback retained the journal, loader/framework logs, OBS log and temporary OBS serialization. Independent restoration verified 22 temporary paths absent, five original files' bytes and metadata restored, 52 original-file identities and the exact root DLL/ASI inventory. The original base and granular archives matched their approved hashes. The approved scope, probe and DLC remain unchanged.
 

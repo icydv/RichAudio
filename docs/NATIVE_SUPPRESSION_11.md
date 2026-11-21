@@ -1,6 +1,6 @@
 # NATIVE-SUPPRESSION-11 — Observe the complete setup and cleanup
 
-I want the existing automatic sound comparison to run without using each GTA launch to discover another immediate-state assumption. Codex has corrected the existing runner and native adapter offline. This candidate has not been installed or launched. My candidate-10 approval remains consumed.
+I want the existing automatic sound comparison to run without using each GTA launch to discover another immediate-state assumption. The operator has corrected the existing runner and native adapter offline. This candidate has not been installed or launched. My candidate-10 approval remains consumed.
 
 ## What candidate-10 actually establishes
 
@@ -8,7 +8,7 @@ The retained execution-10 report, result, raw journal, recording and restoration
 
 Background capture worked and coverage admission completed at recording second 16.934563. The bridge accepted Begin, the old adapter moved to its fixed exterior, and A/B were created. Seating intent followed placement by about 22ms; the A-start guard refused about 10ms later, before its setter. The stationary-dismount guard then refused before its exit task. Both guards combined several predicates without recording the failed operand. No profile assignment, explicit engine-start setter or horn event occurred. In-game retirement was unverified. GTA later closed normally; the final confirmation actor was not established. Independent disk restoration passed.
 
-The scenery frames are consistent with an unsettled placement, but neither they nor the combined exceptions prove which predicate failed. Codex has not relabelled motion, seating, automatic engine start or private audio resources as the historical cause.
+The scenery frames are consistent with an unsettled placement, but neither they nor the combined exceptions prove which predicate failed. The operator has not relabelled motion, seating, automatic engine start or private audio resources as the historical cause.
 
 ## Assumptions corrected
 
@@ -55,7 +55,7 @@ The runner initiates ordinary release at active second 450, ends terminal listen
 
 ## Compiled tests and evidence limits
 
-Codex ran 29 authored delayed-response cases with 307 assertions through the actual compiled candidate-11 runner, controller and native adapter, referencing the exact retained ScriptHookVDotNet3 DLL. Native operations reach a test backend only after the retained SDK constructs actual InputArgument objects. The backend reads real arguments, writes the actual float ground pointer and caller-owned integer delete pointer, and supplies delayed state on later callbacks.
+The validation ran 29 authored delayed-response cases with 307 assertions through the actual compiled candidate-11 runner, controller and native adapter, referencing the exact retained ScriptHookVDotNet3 DLL. Native operations reach a test backend only after the retained SDK constructs actual InputArgument objects. The backend reads real arguments, writes the actual float ground pointer and caller-owned integer delete pointer, and supplies delayed state on later callbacks.
 
 The test executable is hosted by PowerShell 7 outside GTA. A disposable, explicitly labelled string-pinning stand-in supplies the SDK's string-lifetime dependency; it supplies no game observations, native dispatcher, scanner or controller logic. The real mixed GTA core and decorator initialization remain unexecuted. No machine strong-name policy was changed. Neither stand-in nor backend is compiled into the live candidate; reflection-only inspection checks their absence and verifies the production default forwards to the retained SDK.
 
