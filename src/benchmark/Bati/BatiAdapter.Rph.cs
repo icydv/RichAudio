@@ -39,8 +39,9 @@ namespace RichAudio.BatiRph
         public Identity CreateBike(MarkerPoint start,string session,string creation){LiveGate.Require();LiveGate.Creation(true);uncertain=true;var point=spawn??start;var v=new Vehicle("bati",new Vector3((float)point.X,(float)point.Y,(float)point.Z),heading);var id=Claim(v,session,creation);v.IsPersistent=true;v.IsEngineOn=true;uncertain=false;return id;}
         public Identity CreateRider(Identity bike,string session,string creation){LiveGate.Require();LiveGate.Creation(false);var v=Bike(bike);uncertain=true;var ped=new Ped("a_m_y_roadcyc_01",v.Position,heading);var id=Claim(ped,session,creation);ped.IsPersistent=true;ped.WarpIntoVehicle(v,-1);uncertain=false;return id;}
         public bool Persistent(Identity id){return RequireOwned(id).IsPersistent;}
-        public void InstallKit(Identity id){LiveGate.Require();Bike(id).Mods.InstallModKit();}
-        public bool KitVerified(Identity id){return NativeFunction.CallByName<int>("GET_VEHICLE_MOD_KIT",Bike(id))==0;}
+        public void InstallKit(Identity id,int selection){LiveGate.Require();Check.That(selection==0,"default kit request only");NativeFunction.CallByName("SET_VEHICLE_MOD_KIT",typeof(void),Bike(id),selection);}
+        public int? ReadKit(Identity id){return NativeFunction.CallByName<int>("GET_VEHICLE_MOD_KIT",Bike(id));}
+        public int? AvailableKits(Identity id){return NativeFunction.CallByName<int>("GET_NUM_MOD_KITS",Bike(id));}
         public int ModCount(Identity id,int c){Check.That(c==11||c==12||c==13||c==15,"performance categories only");return NativeFunction.CallByName<int>("GET_NUM_VEHICLE_MODS",Bike(id),c);}
         public void SetMod(Identity id,int c,int index){LiveGate.Require();Check.That(index>=0&&index<ModCount(id,c),"invalid mod index");NativeFunction.CallByName<uint>("SET_VEHICLE_MOD",Bike(id),c,index,false);}
         public int ReadMod(Identity id,int c){ModCount(id,c);return NativeFunction.CallByName<int>("GET_VEHICLE_MOD",Bike(id),c);}
