@@ -5,6 +5,7 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import test from 'node:test';
 import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';
+import {ClockedFleetEvidence02} from '../src/acoustics/vehicle/clocked-fleet-evidence02.mjs';
 import {StockVehicleSource,prepareStockSource10,loadStockCatalogAssets,loadStockNpcAssets} from '../src/acoustics/vehicle/stock-source.mjs';
 import {loadInstalledStockRegistry} from '../src/acoustics/vehicle/installed-stock-registry.mjs';
 import {authoredStartupBank10} from '../src/acoustics/vehicle/stock-source-preparation10.mjs';
@@ -40,6 +41,37 @@ async function step(eng,block,vehicles,lease=250,generation=1){
  return eng.g.render();
 }
 const slot=(g,id)=>g.slots.find(s=>s.vehicle?.id===id);
+
+test('clocked receipts retain each render, mixer decision and completed pipe interval',async()=>{
+ const parent=path.resolve('.local/street01');
+ fs.mkdirSync(parent,{recursive:true});
+ const root=fs.mkdtempSync(path.join(parent,'clocked-paths-')),session='1'.repeat(32);
+ const directory=path.join(root,'.local/gameplay',session);
+ fs.mkdirSync(directory,{recursive:true});
+ const receipt=new ClockedFleetEvidence02(root,session),e=engine(true),g=e.g;
+ g.pipeline.clockedStages={};g.captureCompleteRenderStages01=true;
+ receipt.ready({});
+ try{
+  for(let block=0;block<40;block++){
+   const began=performance.now();
+   receipt.credit(1,began);receipt.begin(began);
+   await step(e,block,[['timed']]);
+   receipt.block(g,0,0,true,Buffer.alloc(4112));
+   receipt.delivered(performance.now());
+  }
+  receipt.close('test-complete');
+  const report=JSON.parse(fs.readFileSync(path.join(directory,'clocked-fleet-producer.json'),'utf8'));
+  assert.equal(report.allBlocks.deliveredBlocks,40);
+  assert(report.allBlocks.stages.candidatePreparationMs.max>0);
+  assert(report.allBlocks.stages.pathApplicationMs.max>0);
+  assert(report.allBlocks.stages.stereoMixMs.max>0);
+  const {proposed,eligible,selected,applied}=report.allBlocks.counts;
+  assert(proposed.total>=eligible.total&&eligible.total>=selected.total&&selected.total>=applied.total&&applied.total>0);
+  const csv=fs.readFileSync(path.join(directory,report.blockTimesFile),'utf8').trimEnd().split('\n');
+  assert.equal(csv.length,41);
+  assert.match(csv[0],/proposed,segments,eligible,selected,applied/);
+ }finally{await g.close();}
+});
 
 test('a new NPC model maps by exact labelled graph channels and rejects role swaps',()=>{
  const parent=path.resolve('.local/street01');

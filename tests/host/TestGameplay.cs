@@ -6,7 +6,8 @@ internal static class TestGameplay {
  static GameplayRuntime runtime;static long sequence,generation=1;static bool wasPaused;static readonly JavaScriptSerializer Json=new JavaScriptSerializer();static string root;static int checks;static readonly List<int> owned=new List<int>();
  static bool environmentFixture,deliveryFixture,deliveryViewerFixture;
  static double[] wallListener,wallSource,wallTangent;
- static bool warmWall;
+ static bool warmWall,multiWall;
+ static double multiWallMotionStart=Double.PositiveInfinity;
  static void Check(bool x,string why){checks++;if(!x)throw new Exception(why);}
  static Dictionary<string,object> Read(string f){try{using(var s=new FileStream(f,FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete))
   using(var r=new StreamReader(s))return Json.DeserializeObject(r.ReadToEnd()) as Dictionary<string,object>;}catch(IOException){return null;}}
@@ -29,7 +30,7 @@ internal static class TestGameplay {
  }
  static void Until(Func<bool> condition,int milliseconds,int count=1,bool pause=false){var clock=Stopwatch.StartNew();while(!condition()){if(clock.ElapsedMilliseconds>milliseconds)throw new TimeoutException(runtime.State+"; "+(Evidence()==null?"no host status":Json.Serialize(Evidence())));if(wallListener!=null)FleetFrame(0,count,false);else Feed(count,pause);Thread.Sleep(50);}}
  static void For(int milliseconds,int count=1,bool pause=false,bool valid=true){var clock=Stopwatch.StartNew();while(clock.ElapsedMilliseconds<milliseconds){Feed(count,pause,valid);Thread.Sleep(50);}}
- static void Settings(long revision,bool enabled=true,double volume=1){AcousticSettingsStore.Save(root,AcousticSettingsStore.DefaultPath(root),new AcousticSettings("performance","cpu",Math.Max(revision,File.Exists(AcousticSettingsStore.DefaultPath(root))?AcousticSettingsStore.Load(root,AcousticSettingsStore.DefaultPath(root)).Revision+1:1),enabled,volume,true,false,"experimental-additive",deliveryViewerFixture));}
+ static void Settings(long revision,bool enabled=true,double volume=1){AcousticSettingsStore.Save(root,AcousticSettingsStore.DefaultPath(root),new AcousticSettings("performance",multiWall?"auto":"cpu",Math.Max(revision,File.Exists(AcousticSettingsStore.DefaultPath(root))?AcousticSettingsStore.Load(root,AcousticSettingsStore.DefaultPath(root)).Revision+1:1),enabled,volume,true,false,"experimental-additive",deliveryViewerFixture));}
  static float Marker(int frame){return .1f*(frame%251)/251;}
  static unsafe bool Reserve(int blocks,int callbackFrames){
   var ring=new PcmRing();var input=new float[1024];var output=new float[callbackFrames*2];int sourceFrame=0,consumedFrame=0;
@@ -122,10 +123,16 @@ internal static class TestGameplay {
   if(wallListener!=null)for(int i=0;i<vehicles.Count;i++){
    GameplayVehicle v=vehicles[i];
    double phase=time*(.5+i*.07)+i*.82, along=1.15*Math.Sin(phase), across=.18*i;
+   double tangentSpeed=1.15*(.5+i*.07)*Math.Cos(phase);
+   if(multiWall){
+    // Hold through actual scene admission, then move smoothly along the street.
+    double moving=Math.Max(0,time-multiWallMotionStart),frequency=.6+i*.07,amplitude=i%2==0?1.8:-1.8;
+    along=amplitude*(1-Math.Cos(moving*frequency));
+    tangentSpeed=amplitude*frequency*Math.Sin(moving*frequency);
+   }
    v.Model=0xF9300CC5u;v.Context=i==0?"player":"npc";
    v.Position=new[]{wallSource[0]+wallTangent[0]*along-wallTangent[1]*across,
     wallSource[1]+wallTangent[1]*along+wallTangent[0]*across,wallSource[2]};
-   double tangentSpeed=1.15*(.5+i*.07)*Math.Cos(phase);
    v.Velocity=new[]{wallTangent[0]*tangentSpeed,wallTangent[1]*tangentSpeed,0d};
    v.Forward=wallTangent;
   }
@@ -149,9 +156,12 @@ internal static class TestGameplay {
   do{
    double time=run.Elapsed.TotalSeconds;
    int n=wallListener!=null?(warmWall&&time<6?1:limit):time<1?1:time<3?2:time<6?3:time<9?5:time<12?10:25;
+   if(multiWall&&warmWall)n=time<=multiWallMotionStart?1:Math.Min(limit,1+(int)(time-multiWallMotionStart));
    FleetFrame(time,Math.Min(limit,n),legacy);
    if(run.ElapsedMilliseconds>=nextSample){
     var host=Evidence();var worker=host!=null&&host.ContainsKey("worker")?host["worker"]as Dictionary<string,object>:null;
+    if(multiWall&&Double.IsPositiveInfinity(multiWallMotionStart)&&Number(worker,"reflectionPathsSelected")>0&&Number(worker,"activeSources")== (warmWall?1:limit))
+     multiWallMotionStart=time+2;
     samples.Add(new{seconds=time,requestedPopulation=Math.Min(limit,n),receivedBlocks=Number(host,"receivedBlocks"),
      consumedFrames=Number(host,"consumedFrames"),active=Number(worker,"activeSources"),paths=Number(worker,"selectedPaths"),
      reflections=Number(worker,"reflectionPathsSelected"),arrivals=Number(worker,"arrivals"),retired=Number(worker,"retired"),
@@ -171,7 +181,8 @@ internal static class TestGameplay {
   string receipt=Path.Combine(root,".local","fleet-driver.json");
   using(var output=new StreamWriter(new FileStream(receipt,FileMode.CreateNew)))
    output.Write(new JavaScriptSerializer{MaxJsonLength=8388608}.Serialize(new{schema=1,session=runtime.Session,
-    reason,requestedBlocks=blocks,requestedPopulation=limit,seconds,startBlocks,startFrames,closed,attempts=runtime.Attempts,initial,final,samples}));
+    reason,requestedBlocks=blocks,requestedPopulation=limit,seconds,startBlocks,startFrames,closed,attempts=runtime.Attempts,
+    motionStartedAfterSeconds=Double.IsPositiveInfinity(multiWallMotionStart)?(double?)null:multiWallMotionStart,initial,final,samples}));
   Console.WriteLine(receipt);
   return closed&&runtime.Attempts==1&&final!=null&&false.Equals(Value(final,"endpointOpened"))?0:1;
  }
@@ -208,6 +219,7 @@ internal static class TestGameplay {
    root=Path.GetFullPath(args[0]);string manifest=Path.Combine(root,"playable.json");var raw=fleet?Read(manifest):null;
    string wallPath=Path.Combine(root,"installed-wall-drive.json");
    bool retainedWall=fleet&&File.Exists(wallPath);
+   multiWall=retainedWall&&true.Equals(Value(Value(raw,"acousticWorld")as Dictionary<string,object>,"installedReflectionTrains"));
    if(fleet)Check(root.IndexOf(Path.DirectorySeparatorChar+".local"+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase)>=0&&
     (retainedWall||String.Equals(Value(raw,"gameExecutable")as string,Process.GetCurrentProcess().MainModule.FileName,StringComparison.OrdinalIgnoreCase))&&
     "environment-observation".Equals(Value(raw,"outputSink")),"private authored self-owner and discard sink required before package verification");
@@ -217,6 +229,7 @@ internal static class TestGameplay {
     var wall=Read(wallPath);
     wallListener=WallVector(wall,"listener");wallSource=WallVector(wall,"source");wallTangent=WallVector(wall,"tangent");
     warmWall=true.Equals(Value(wall,"warmWall"));
+    Check(multiWall==true.Equals(Value(wall,"multiWall")),"bound wall motion and train request agree");
     double tangentLength=Math.Sqrt(wallTangent[0]*wallTangent[0]+wallTangent[1]*wallTangent[1]);
     Check(Math.Abs(tangentLength-1)<.00001&&wallTangent[2]==0,"horizontal unit drive tangent");
    }

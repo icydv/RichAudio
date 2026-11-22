@@ -9,7 +9,8 @@ param(
     [string]$RetainedSourceManifest,
     [string]$RetainedWorld,
     [string]$WallPose,
-    [switch]$WarmWall
+    [switch]$WarmWall,
+    [switch]$MultiWall
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
@@ -31,6 +32,9 @@ if ($retained -and ($retained -ne 3 -or $Legacy -or $Population -notin 1, 2, 5))
 if ($WarmWall -and (!$retained -or $Population -eq 1 -or $Blocks -lt 768)) {
     throw 'The wall warm-up needs a retained two- or five-vehicle case with at least 768 blocks'
 }
+if ($MultiWall -and (!$retained -or $Blocks -lt 768)) {
+    throw 'Multi-wall measurement needs retained inputs and at least 768 blocks for the stationary and moving phases'
+}
 $node = (Get-Item -LiteralPath $NodeExecutable).FullName
 [IO.Directory]::CreateDirectory($out) | Out-Null
 $owner = & (Join-Path $PSScriptRoot 'Test-Gameplay.ps1') -CompileObservationOwner (Join-Path $out 'authored-owner')
@@ -48,6 +52,10 @@ $prepareArguments = @($out, $owner, $node, $audioHost, $mode)
 if ($retained) {
     $prepareArguments += @($RetainedSourceManifest, $RetainedWorld, $WallPose | ForEach-Object { (Resolve-Path -LiteralPath $_).Path })
     if ($WarmWall) { $prepareArguments += 'warm-wall' }
+    if ($MultiWall) {
+        & (Join-Path $PSScriptRoot 'Build-AcousticGpu.ps1') -OutputDirectory (Join-Path $out 'gpu-build') | Out-Host
+        $prepareArguments += 'multi-wall'
+    }
 }
 $prepared = & $node (Join-Path $repo 'tests/fixtures/PrepareClockedFleet02.mjs') @prepareArguments
 if ($LASTEXITCODE) { throw 'Benchmark package preparation failed' }
@@ -57,9 +65,13 @@ $files = @('src/acoustics/host','src/acoustics/recording','src/acoustics/observa
 $files += @('tests/host/TestGameplay.cs','tests/fixtures/PrepareClockedFleet02.mjs','tests/fixtures/InstalledStaticCache01.mjs',
     'tests/fixtures/StreetGameplayPackage01.mjs','tools/Test-ClockedFleet02.ps1','tools/Test-Gameplay.ps1','tools/Build-AcousticsHost.ps1') |
     ForEach-Object { Get-Item -LiteralPath (Join-Path $repo $_) }
+if ($MultiWall) {
+    $files += @('tools/Build-AcousticGpu.ps1','src/acoustics/gpu/AcousticGpu.cs','src/acoustics/gpu/FiniteCull.hlsl') |
+        ForEach-Object { Get-Item -LiteralPath (Join-Path $repo $_) }
+}
 [ordered]@{
     sourceCommit = (& git -C $repo rev-parse HEAD)
-    mode = $mode; requestedBlocks = $Blocks; requestedPopulation = $Population; warmWall = [bool]$WarmWall
+    mode = $mode; requestedBlocks = $Blocks; requestedPopulation = $Population; warmWall = [bool]$WarmWall; multiWall = [bool]$MultiWall
     package = $package; node = (& $node --version)
     compiledAndRuntime = @($owner,$identity,$audioHost,$node,$compiler) | ForEach-Object { Get-FileHash -LiteralPath $_ }
     sources = $files | Get-FileHash
@@ -85,15 +97,23 @@ try {
     $sceneQualified = $counters.firstActivations -gt 0 -and $counters.replacements -gt 0
     $reflected = if ($retained) { $producer.byActiveWithReflection."$Population" } else { $null }
     if ($retained) { $sceneQualified = $sceneQualified -and $reflected.selectedWallBlocks -gt 0 }
+    $phases = if ($MultiWall) { $producer.installedByActive."$Population" }
+    if ($MultiWall) {
+        $sceneQualified = $sceneQualified -and ($WarmWall -or $phases.stationary.multiBounceBlocks -gt 0) -and $phases.moving.multiBounceBlocks -gt 0
+    }
     $passed = $driver.reason -eq 'workload-complete' -and $driver.closed -and !$driver.final.failure -and
         $sustained -and $populationQualified -and $sceneQualified -and $producer.hardMisses -eq 0 -and
         $producer.overflowBlocks -eq 0 -and $driver.final.underflowFrames -eq 0 -and $driver.final.discardCadence.deferredCallbacks -eq 0
+    if ($MultiWall) { $passed = $passed -and $producer.allBlocks.throughPipeWriteMisses -eq 0 -and $producer.allBlocks.deliveredBlocks -eq $producer.blocks }
     [ordered]@{
         passed = $passed; reason = $driver.reason; closed = $driver.closed; producerReceipt = $producerFile
         blocks = $producer.blocks; nonzeroBlocks = $producer.nonzeroBlocks
         sustained = $sustained; populationQualified = [bool]$populationQualified; sceneQualified = $sceneQualified
         hardMisses = $producer.hardMisses; underflowFrames = $driver.final.underflowFrames
         expiredSnapshots = $driver.final.expiredSnapshots; reflectedActivePopulation = $reflected
+        throughPipeWriteMisses = $producer.allBlocks.throughPipeWriteMisses
+        deferredCallbacks = $driver.final.discardCadence.deferredCallbacks; endpointOpened = $driver.final.endpointOpened
+        installedAtRequestedPopulation = $phases
     } | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $out 'benchmark-result.json')
     if (!$passed) { throw 'Clocked benchmark failed its workload, render deadline, or ring delivery gate' }
 } finally {

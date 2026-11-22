@@ -7,7 +7,7 @@ import {writeOriginalGameplayPackageStreet01} from './StreetGameplayPackage01.mj
 import {originalInstalledCache01} from './InstalledStaticCache01.mjs';
 
 const repo=fileURLToPath(new URL('../../',import.meta.url));
-const [directory,owner,node,host,mode,retainedSourceManifest,retainedWorld,wallPose,warmWall]=process.argv.slice(2);
+const [directory,owner,node,host,mode,retainedSourceManifest,retainedWorld,wallPose,...phases]=process.argv.slice(2);
 const root=path.join(directory,'package');
 const hash=file=>createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(dir,e.name)):[path.join(dir,e.name)]);
@@ -32,23 +32,28 @@ if(retainedSourceManifest){
  const sources=read(retainedSourceManifest), sourceRoot=path.dirname(path.resolve(retainedSourceManifest));
  const geometry=read(retainedWorld), pose=read(wallPose);
  const resourceId=pose.sourceResourceId??pose.resourceId;
+ const multiWall=phases.includes('multi-wall');
+ const resourceIds=multiWall&&pose.resourceIds?pose.resourceIds:[resourceId];
  const validVector=v=>Array.isArray(v)&&v.length===3&&v.every(Number.isFinite);
- if(!validVector(pose.listener)||!validVector(pose.source)||Math.hypot(...pose.source.map((x,i)=>x-pose.listener[i]))>12||
-    !/^[a-f0-9]{24}$/.test(resourceId)||!/^installed01:[a-f0-9]{40}$/.test(pose.surfaceId))
+ if(!validVector(pose.listener)||!validVector(pose.source)||Math.hypot(...pose.source.map((x,i)=>x-pose.listener[i]))>(multiWall?128:12)||
+    !Array.isArray(resourceIds)||resourceIds.length<1||resourceIds.length>32||!resourceIds.includes(resourceId)||
+    resourceIds.some(id=>!/^[a-f0-9]{24}$/.test(id))||new Set(resourceIds).size!==resourceIds.length||
+    !/^installed01:[a-f0-9]{40}$/.test(pose.surfaceId))
    throw Error('Bounded wall fixture pose and retained surface identity required');
  const catalogueSHA256=hash(geometry.catalogPath),gameManifest=read(geometry.manifestPath);
  if(catalogueSHA256!==geometry.catalogSHA256||gameManifest.ResolvedCatalogSHA256!==catalogueSHA256||
     gameManifest.InputBinding?.GameExecutableSHA256!==sources.gameSha256||hash(sources.gameExecutable)!==sources.gameSha256)
    throw Error('Retained catalogue, geometry and source game identity differ');
+ if(multiWall)copy(path.join(directory,'gpu-build/RichAudio.AcousticGpu.exe'),path.join(root,'build/acoustic-gpu/RichAudio.AcousticGpu.exe'));
  for(const binding of sources.bindings.filter(b=>b.file.startsWith('sources/'))){
   const from=inside(sourceRoot,binding.file);
   if(hash(from)!==binding.sha256)throw Error('Retained audio package source changed');
   copy(from,inside(root,binding.file));
  }
- if(warmWall!==undefined&&warmWall!=='warm-wall')throw Error('Unknown wall fixture phase');
+ if(phases.some(phase=>!['multi-wall','warm-wall'].includes(phase)))throw Error('Unknown wall fixture phase');
  fs.writeFileSync(path.join(root,'installed-wall-drive.json'),JSON.stringify({listener:pose.listener,source:pose.source,
   tangent:validVector(pose.forward)?pose.forward:[1,0,0],surfaceId:pose.surfaceId,resourceId,
-  warmWall:warmWall==='warm-wall'}),{flag:'wx'});
+  warmWall:phases.includes('warm-wall'),...(multiWall?{multiWall:true}: {})}),{flag:'wx'});
  const cacheRoot=path.resolve(path.dirname(geometry.catalogPath),'..');
  const relativeCache=file=>{const rel=path.relative(cacheRoot,file);inside(cacheRoot,rel);return rel;};
  config={
@@ -57,7 +62,8 @@ if(retainedSourceManifest){
   catalog:sources.catalog,catalogSha256:sources.catalogSha256,atlas:sources.atlas,latencyProfile:'street-01',
   acousticWorld:{privateCacheRoot:cacheRoot,derivedCacheRoot:cacheRoot,
    manifestPath:relativeCache(geometry.manifestPath),catalogPath:relativeCache(geometry.catalogPath),
-   retainedManifestSHA256:hash(geometry.manifestPath),catalogSHA256:catalogueSHA256,resourceIds:[resourceId]}
+   retainedManifestSHA256:hash(geometry.manifestPath),catalogSHA256:catalogueSHA256,resourceIds,
+   ...(multiWall?{installedReflectionTrains:true}: {})}
  };
 }else{
  const world=originalInstalledCache01({outputDirectory:path.join(root,'world'),gameHash,distantWall:true});

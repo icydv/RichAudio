@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Security.AccessControl;
 using System.Threading;
 using System.Web.Script.Serialization;
@@ -95,6 +96,25 @@ internal sealed class TestPowertrainPlayback
         object value;
         if (!row.TryGetValue(key, out value) || value == null) return -1;
         return Convert.ToDouble(value, CultureInfo.InvariantCulture);
+    }
+
+    static long LastAudibleBlock(Dictionary<string, object> status)
+    {
+        var chronology = status["initialAudibleChronology"] as Dictionary<string,object>;
+        var last = chronology == null ? null : chronology["last"] as Dictionary<string,object>;
+        return last == null ? -1 : (long)Number(last, "PcmBlock");
+    }
+
+    static bool TargetReflection(Dictionary<string,object> path, WorldPose pose)
+    {
+        var basis = (System.Collections.IList)path["materialBasis"];
+        var ids = basis.Cast<Dictionary<string,object>>().Select(m => (string)m["surface"]).ToArray();
+        if (pose.orderedSurfaces == null) return ids.Contains(pose.surfaceId);
+        if (!ids.SequenceEqual(pose.orderedSurfaces) || Number(path,"order") != ids.Length) return false;
+        var points = path["bouncePoints"] as System.Collections.IList;
+        var bands = path["mixerEndBands"] as System.Collections.IList;
+        return points != null && points.Count == ids.Length && bands != null && bands.Count == 3 &&
+            bands.Cast<object>().Any(b => Convert.ToDouble(b, CultureInfo.InvariantCulture) > 0);
     }
 
     static void Require(bool test, string why)
@@ -300,24 +320,37 @@ internal sealed class TestPowertrainPlayback
                 handoff.Phase == "Active" && assignments.Count == 1 && Number(r, "appliedRevision") == 2 &&
                 Number(r, "outputPeak") > 0 && Math.Abs(Number(r, "submittedOperatingPoint") - observed) < .00001);
             object reflectionEvidence = null;
+            object reflectionSinkInterval = null;
             if (pose != null)
             {
                 string proof = Path.Combine(directory, "powertrain-source.json");
+                var recent = new List<Dictionary<string,object>> { playing };
                 Drive("retained exterior contributed a reflection to tagged Bati output on the ADDER", r =>
                 {
+                    recent.Add(r);
+                    if (recent.Count > 32) recent.RemoveAt(0);
                     var row = ReadSharedJson(proof);
                     if (row == null || Number(row, "reflectionPaths") <= 0 || row["geometry"] == null ||
                         row["provenance"] == null || Number(r, "submittedFrames") <= Number(playing, "submittedFrames") ||
                         Number(r, "outputPeak") <= 0 || handoff.Phase != "Active") return false;
                     var paths = (Dictionary<string,object>)row["provenance"];
                     if (!paths.ContainsKey("reflected")) return false;
-                    bool selectedSurface = false;
-                    foreach (Dictionary<string,object> path in (System.Collections.IList)paths["reflected"])
+                    var reflected = ((System.Collections.IList)paths["reflected"]).Cast<Dictionary<string,object>>();
+                    if (!reflected.Any(path => TargetReflection(path, pose))) return false;
+                    if (pose.orderedSurfaces != null)
                     {
-                        foreach (Dictionary<string,object> basis in (System.Collections.IList)path["materialBasis"])
-                            selectedSurface |= pose.surfaceId.Equals(basis["surface"]);
+                        long packet = (long)Number(paths, "packetSequence");
+                        if (!session.Equals(paths["session"]) || !vehicle.Equals(paths["vehicleId"]) ||
+                            Number(paths,"revision") != 2 || Number(paths,"vehicleGeneration") <= 0 ||
+                            Number(paths,"frame") != packet * 512 || Number(paths,"sourceSequence") < 0 ||
+                            Number(r,"submittedObservationSequence") < Number(paths,"sourceSequence") ||
+                            LastAudibleBlock(r) <= packet) return false;
+                        var previous = recent.LastOrDefault(s => LastAudibleBlock(s) >= 0 && LastAudibleBlock(s) < packet);
+                        if (previous == null || Number(previous,"audibleSubstitutedFrames") != Number(r,"audibleSubstitutedFrames"))
+                            return false;
+                        reflectionSinkInterval = new {packet, beforeBlock = LastAudibleBlock(previous), afterBlock = LastAudibleBlock(r),
+                            revision = 2, substitutedFrames = 0, underflowFrames = 0};
                     }
-                    if (!selectedSurface) return false;
                     reflectionEvidence = row;
                     return true;
                 });
@@ -377,7 +410,7 @@ internal sealed class TestPowertrainPlayback
                 Console.WriteLine("PASS withdrawal retired source and reached silent output before stock return");
             }
             return new {
-                session, termination, stages, assignments, handoffJournal, evidenceDirectory = directory, reflectionEvidence,
+                session, termination, stages, assignments, handoffJournal, evidenceDirectory = directory, reflectionEvidence, reflectionSinkInterval,
                 observationCount, minimumCallbackIntervalMs, maximumCallbackIntervalMs,
                 transportReceipt = Path.Combine(linkDirectory, "powertrain-transport.json"), finalHost = ReadStatus()
             };
@@ -400,6 +433,7 @@ internal sealed class TestPowertrainPlayback
         public double[] source { get; set; }
         public double[] forward { get; set; }
         public string surfaceId { get; set; }
+        public string[] orderedSurfaces { get; set; }
     }
 
     static int Main(string[] args)
@@ -415,8 +449,10 @@ internal sealed class TestPowertrainPlayback
                 var pose = serializer.Deserialize<WorldPose>(File.ReadAllText(args[3]));
                 Require(pose != null && pose.listener != null && pose.listener.Length == 3 &&
                     pose.source != null && pose.source.Length == 3 && pose.forward != null && pose.forward.Length == 3 &&
-                    !String.IsNullOrEmpty(pose.surfaceId),
-                    "Authored listener, vehicle and forward vectors and target surface required");
+                    (pose.orderedSurfaces == null ? !String.IsNullOrEmpty(pose.surfaceId) :
+                        pose.orderedSurfaces.Length >= 2 && pose.orderedSurfaces.Length <= 3 &&
+                        pose.orderedSurfaces.All(id => !String.IsNullOrEmpty(id))),
+                    "Authored pose and target surface or ordered reflection required");
                 var playbackWorld = new TestPowertrainPlayback().Run(args[0], root, "world-expiry", pose:pose);
                 File.WriteAllText(args[1], serializer.Serialize(new { passed=true, fixture="device-free", authoredObservations=true,
                     nativeAssignmentsAreFixtureActions=true, playbackWorld }));

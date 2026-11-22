@@ -14,6 +14,40 @@ function measure(result, pcm) {
 const level = ({samples, energy, peak}) => ({samples, peak, rms: samples ? Math.sqrt(energy / samples) : null});
 const range = (prior, value) => prior ? [Math.min(prior[0], value), Math.max(prior[1], value)] : [value, value];
 
+// Sample after processing and RA07 tagging. A scene publication on its own
+// cannot establish which routes had a mixer slot in that output block.
+export function powertrainPathBlock(pipeline, packetSequence, vehicle) {
+  const {renderer, simulation, lastControl} = pipeline;
+  const sample = simulation.lastInstalledPaths01;
+  if (!sample || !lastControl || !simulation.scene?.tile || sample.frame !== packetSequence * 512 ||
+      lastControl.frame !== sample.frame || renderer.frame !== sample.frame + 512 ||
+      sample.observationKey !== simulation.scene.tile.observationKey) return null;
+
+  const selected = lastControl.paths.filter(p => p.order > 0 && p.diagnosticReflection);
+  const byOrder = {};
+  const groups = new Map();
+  for (const route of selected) {
+    byOrder[route.order] = (byOrder[route.order] ?? 0) + 1;
+    const key = route.sourceId + ':' + route.order;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(route);
+  }
+  // One representative per emitter and order comes before extra paths, so a
+  // busy engine cannot fill every diagnostic row before exhaust is sampled.
+  // Cycle through each group on successive 16-block diagnostic snapshots.
+  const index = Math.floor(packetSequence / 16);
+  const representatives = Array.from(groups.values(), routes => routes[index % routes.length]);
+  const rows = [...new Set([...representatives, ...selected])].slice(0, 6);
+  return {...sample, packetSequence, sourceSequence: vehicle.powertrainSequence, revision: vehicle.powertrainRevision,
+    vehicleId: vehicle.id, vehicleGeneration: vehicle.generation, selectedByOrder: byOrder,
+    reflected: rows.map(p => {
+      const slot = renderer.slots.find(s => s.active && s.present && s.id === p.id && s.generation === p.generation);
+      return {sourceId:p.sourceId, order:p.order, ...p.diagnosticReflection, distance:p.distance, delay:p.delay,
+        arrivalDirection:p.arrivalDirection, arrivalOrigin:p.arrivalOrigin, bands:p.bands,
+        mixerEndBands:slot ? Array.from(slot.gain) : null};
+    })};
+}
+
 // Bounded opt-in measurements on the existing producer thread. Units are
 // normalized rev ratio, native camera coordinates, and digital full scale.
 export class PowertrainVoiceEvidence {

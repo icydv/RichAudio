@@ -40,18 +40,25 @@ export class VehicleAcousticPipeline {
   replaceScene(scene, options) { this.simulation.replaceScene(scene, options); }
   // Called on the source/control worker. GPU preparation is never in process().
   async prepare(snapshot, options = {}, acceptControl = () => true) {
+    if(this.clockedStages)Object.assign(this.clockedStages,{
+      candidatePreparationMs:0,visibilityMs:0,pathSelectionMs:0,pathApplicationMs:0,stereoMixMs:0,
+      proposed:0,segments:0,eligible:0,selected:0
+    });
     this.simulation.observe(snapshot);
     return this.prepareObserved(snapshot.time, options, acceptControl);
   }
   // Re-evaluate geometry for the already observed block after an asynchronous
   // invalidation. Do not append another source observation or advance grains.
   async prepareObserved(time, options = {}, acceptControl = () => true) {
-    let control = await this.simulation.updateAccelerated(time, options, this.backend);
+    const stages=this.clockedStages;
+    let control = await this.simulation.updateAccelerated(time, options, this.backend, stages);
     if (!acceptControl()) return false;
+    const began=stages?performance.now():0;
     if(this.controlFilter)control=this.controlFilter(control,this.renderer);
     this.renderer.accept(control);
     if (this.directRenderer) this.directRenderer.accept({ ...control, paths: control.paths.filter(p => p.order === 0) });
     this.lastControl = control;
+    if(stages)stages.pathApplicationMs+=performance.now()-began;
     return control;
   }
   // Existing bounded synchronous PCM renderer: caller supplies all buffers.
@@ -60,10 +67,12 @@ export class VehicleAcousticPipeline {
       directLeft.length < frames || directRight.length < frames || directLeft === directRight ||
       directLeft === left || directLeft === right || directRight === left || directRight === right))
       throw Error('independent caller-owned direct-stem buffers required');
+    const began=this.clockedStages?performance.now():0;
     this.renderer.process(inputs, left, right, frames, localStereo);
     if (this.directRenderer) {
       this.directRenderer.process(inputs, directLeft, directRight, frames);
     }
+    if(this.clockedStages)this.clockedStages.stereoMixMs=performance.now()-began;
   }
   diagnostics() {
     return { quality: this.quality, simulation: { ...this.simulation.stats }, renderer: { ...this.renderer.stats },

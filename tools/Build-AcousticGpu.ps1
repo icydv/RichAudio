@@ -1,8 +1,8 @@
 [CmdletBinding()]
-param([switch]$Probe,[switch]$RequireHardware,[switch]$Tests)
+param([switch]$Probe,[switch]$RequireHardware,[switch]$Tests,[string]$OutputDirectory)
 $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
-$out=Join-Path $repo 'build\acoustic-gpu'
+$out=if($OutputDirectory){[IO.Path]::GetFullPath($OutputDirectory)}else{Join-Path $repo 'build\acoustic-gpu'}
 [IO.Directory]::CreateDirectory($out)|Out-Null
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 if(!(Test-Path -LiteralPath $compiler)){throw 'Installed Framework x64 compiler required; no dependency is installed.'}

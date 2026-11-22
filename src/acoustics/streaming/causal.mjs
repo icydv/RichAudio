@@ -402,7 +402,7 @@ export class CausalSimulation {
           arrivalDirection: p.arrivalDirection,
           ...(this.scene.directPath||this.scene.observationModel?{arrivalOrigin:p.points.at(-1)??plan.state.position}:{}),
           ...(evidence&&p.order?{diagnosticReflection:{source:plan.state.position,listener:plan.listener.position,
-            materialBasis:evidenceMaterialBasis(p.materialBasis)}}:{}),
+            bouncePoints:p.points,materialBasis:evidenceMaterialBasis(p.materialBasis)}}:{}),
           distance: p.distance,
           delay: p.delay,
           order: p.order,
@@ -444,11 +444,24 @@ export class CausalSimulation {
     };
   }
   update(now,options={}){return this.completeUpdate(this.prepareUpdate(now,options));}
-  async updateAccelerated(now,options,backend){
+  async updateAccelerated(now,options,backend,stages){
+    const began=stages?performance.now():0,pruned=this.stats.prunedPaths;
     const frame=this.prepareUpdate(now,options);
+    if(stages)stages.candidatePreparationMs+=performance.now()-began;
     if(frame.terminal)return this.completeUpdate(frame);
+    const visibilityAt=stages?performance.now():0;
     const queries=frame.scene.directPath?null:await backend.query(frame.scene.tile,frame.segments,{generation:frame.geometryEpoch});
-    return this.completeUpdate(frame,queries);
+    const selectionAt=stages?performance.now():0;
+    const control=this.completeUpdate(frame,queries);
+    if(stages){
+      stages.visibilityMs+=selectionAt-visibilityAt;
+      stages.pathSelectionMs+=performance.now()-selectionAt;
+      for(const source of frame.sources)stages.proposed+=source.plans.length;
+      stages.segments+=frame.segments.length;
+      stages.eligible+=control.paths.length+this.stats.prunedPaths-pruned;
+      stages.selected+=control.paths.length;
+    }
+    return control;
   }
 }
 
