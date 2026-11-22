@@ -28,6 +28,8 @@ try {
     & (Join-Path $repo 'tests\Test-BenchmarkMarkers.ps1')
     & (Join-Path $repo 'tests\Test-BatiController.ps1')
     & (Join-Path $repo 'tests\Test-DrivingActivation.ps1')
+    & node --test tests/Test-BatiMovementAnalysis.mjs
+    if($LASTEXITCODE-ne0){throw 'Offline Bati movement analysis tests failed.'}
     & (Join-Path $repo 'tests\Test-ModKitContract.ps1')
     & (Join-Path $repo 'tests\Test-FiveStopController.ps1')
     & (Join-Path $repo 'tests\Test-AirportSurvey.ps1')
