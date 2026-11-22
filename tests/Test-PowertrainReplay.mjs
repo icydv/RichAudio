@@ -63,6 +63,14 @@ test('match original engine frames to both WAV takes and leave silent comparison
     assert.deepEqual(second.frame.renderedVoices, voices);
     assert.deepEqual(second.frame.paths[0].points, [[.5, 1, 0]]);
     assert.equal(second.geometry.surfaces[0].id, 'finite-wall');
+    const roundedBrowserTimeMs = Math.floor(3 * 1000000 / 48000) / 1000;
+    const witness = await request('/api/replay/frame?timeMs=' + roundedBrowserTimeMs).then(res => res.json());
+    assert.equal(witness.frame?.sessionId, 'wall-on', 'a browser seek within half a sample resolves the intended take');
+    assert.equal(witness.frame.sequence, second.frame.sequence);
+    assert.deepEqual(witness.frame.paths[0].vertices, reflection.vertices);
+    const event = opened.events.find(e => e.type === 'Selected wall bounce');
+    assert.equal(event.detail.sequence, witness.frame.sequence);
+    assert.deepEqual(event.detail.vertices, reflection.vertices);
     const audio = await request('/api/replay/audio');
     assert.deepEqual(Buffer.from(await audio.arrayBuffer()), exactWav);
     assert.equal((await request('/api/telemetry', {method: 'POST', body: '{}'})).status, 403);

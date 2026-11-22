@@ -32,12 +32,15 @@ try {
     const bytes = await fetch(url + '/api/replay/audio', {headers});
     if (!bytes.ok || !Buffer.from(await bytes.arrayBuffer()).equals(replay.wav)) throw Error('Replay audio readback differs');
     for (const event of replay.events) {
-      const response = await fetch(url + '/api/replay/frame?timeMs=' + event.timeMs, {headers});
+      const browserTimeMs = Math.floor(event.timeMs * 1000) / 1000;
+      const response = await fetch(url + '/api/replay/frame?timeMs=' + browserTimeMs, {headers});
       if (!response.ok) throw Error('Replay timeline seek failed');
       if (event.type === 'Selected wall bounce') {
         const sample = await response.json();
-        if (!sample.geometry || !sample.frame?.paths.some(ray => ray.status === 'selected' &&
-          ray.surfaceIds?.some(surface => event.detail.surfaceIds.includes(surface))))
+        if (!sample.geometry || sample.frame?.sequence !== event.detail.sequence ||
+          sample.frame?.streamId !== event.detail.streamId || !sample.frame.paths.some(ray =>
+            ray.id === event.detail.pathId && ray.status === 'selected' &&
+            JSON.stringify(ray.vertices) === JSON.stringify(event.detail.vertices)))
           throw Error('Selected reflection or admitted geometry missing from replay');
       }
     }

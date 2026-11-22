@@ -117,15 +117,17 @@ export async function openPowertrainReplay(root, take = 'comparison') {
           const fromWitness = take === 'wall-on' && row.timeMs === referenceMs &&
             (!result.wall.witness.reflected?.id || ray.id === result.wall.witness.reflected.id);
           if (!strongestReflection || fromWitness || !strongestReflection.fromWitness && score > strongestReflection.score)
-            strongestReflection = {timeMs: row.timeMs, score, fromWitness, path: ray};
+            strongestReflection = {timeMs: row.timeMs, sequence: row.frame.sequence, streamId: row.frame.streamId,
+              score, fromWitness, path: ray};
         }
       }
     }
   }
   need(endFrame === takeWave.frames, 'Replay takes do not cover the WAV extent');
   if (strongestReflection) {
-    const {timeMs, path: ray} = strongestReflection;
-    events.push({timeMs, type: 'Selected wall bounce', detail: {sourceId: ray.sourceId, surfaceIds: ray.surfaceIds, vertices: ray.vertices}});
+    const {timeMs, sequence, streamId, path: ray} = strongestReflection;
+    events.push({timeMs, type: 'Selected wall bounce', detail: {sequence, streamId, pathId: ray.id,
+      sourceId: ray.sourceId, surfaceIds: ray.surfaceIds, vertices: ray.vertices}});
   }
   const sha256 = createHash('sha256').update(takeWave.wav).digest('hex');
   const id = 'drive-' + take + '-' + sha256.slice(0, 16);
