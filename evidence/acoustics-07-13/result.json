@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "operatorSource": "c3f6c81952ceeb63d5db2b1e23378693efabfd02",
+  "runtimeSource": "b5143db8c99decef49a8c9fdf1473f0c3db4840f",
+  "candidateSha256": "D8E07531B2C80F9F322940A6770B462E7FEDC28DCAF870DFEDA7A13E38981C41",
+  "outcome": "FAIL_LAUNCH_NO_VISIBLE_SESSION",
+  "launchApiCalls": 1,
+  "launchApiResult": "launched app did not expose a targetable window",
+  "causeEstablished": false,
+  "retryPerformed": false,
+  "hostSessions": 0,
+  "bridgeActivations": 0,
+  "emissionStarts": 0,
+  "listening": "NOT OBSERVED",
+  "acknowledgedStop": "NOT OBSERVED",
+  "ownedTreeCleanup": "NOT OBSERVED",
+  "forcedTerminationPerformed": false,
+  "freshApprovalClosed": true,
+  "restoration": {
+    "result": "PASS",
+    "verifiedUtc": "2026-10-28T23:55:46.8756210Z",
+    "originalRootFiles": 32,
+    "directories": 5,
+    "archiveMetadataRecords": 179,
+    "sampledArchiveHashes": 10,
+    "signatures": "Valid",
+    "introducedPathsAbsent": true,
+    "temporaryAliasAbsent": true,
+    "relevantProcessesAbsent": true
+  },
+  "acoustics079": "INCOMPLETE_FAILED_STOP_TIMING",
+  "combinedMilestonePercent": 60
+}
