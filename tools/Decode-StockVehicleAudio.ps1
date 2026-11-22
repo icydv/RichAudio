@@ -23,7 +23,14 @@ foreach($bank in $banks){if($bank.model-notin@('bati','lectro','prototipo','scha
 if($Npc -and (@($banks).Count -ne 1 -or $banks.model -ne 'bati')){throw 'This representative NPC decode is limited to one explicit Bati bank'}
 $requiredStates=if($Npc){@('idle','accel')}else{@('idle','accel','decel')}
 foreach($dll in Get-ChildItem -LiteralPath $cw -Filter '*.dll'){[Reflection.Assembly]::Load([IO.File]::ReadAllBytes($dll.FullName))|Out-Null}
-[CodeWalker.GameFiles.GTA5Keys]::LoadFromPath($game,$null)
+if (!(Test-Path -LiteralPath (Join-Path $game 'gta5.exe') -PathType Leaf) -and
+    (Test-Path -LiteralPath (Join-Path $game 'GTA5_Enhanced.exe') -PathType Leaf)) {
+ $initHelper=Join-Path $repo 'src\acoustics\startup\CodeWalkerInitialization01.psm1'
+ Import-Module (New-Module -Name RichAudioCodeWalkerInitialization01 -ScriptBlock ([ScriptBlock]::Create([IO.File]::ReadAllText($initHelper)))) -Force
+ Initialize-InstalledCodeWalker01 -GameRoot $game | Out-Null
+} else {
+ [CodeWalker.GameFiles.GTA5Keys]::LoadFromPath($game,$null)
+}
 Add-Type -Path (Join-Path $decoderRoot 'StockPcmDecode.cs')
 function FileHash([string]$p){(Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash}
 function JsonFile([string]$p,$value,[int]$depth){[IO.File]::WriteAllText($p,($value|ConvertTo-Json -Depth $depth),[Text.UTF8Encoding]::new($false))}
