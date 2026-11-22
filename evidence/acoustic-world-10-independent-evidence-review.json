@@ -1,0 +1,298 @@
+{
+  "schema": 1,
+  "kind": "RichAudioIndependentProcessingEvidenceReview10",
+  "createdUtc": "2026-11-03T22:33:41.826Z",
+  "reviewScope": "Evidence/harness only; this reviewer authored the audio implementation and does not independently review that implementation.",
+  "reviewedFiles": [
+    {
+      "file": "tools/Profile-Processing10.mjs",
+      "sha256": "fcafbec4ec72f775d5b2944b6b6771bf5c28fcd614a6cd763d1ca21737437f1e"
+    },
+    {
+      "file": "tools/Freeze-Processing10.mjs",
+      "sha256": "b78f5faac2f76c6d4780c1fd5599b7af78bae9595b706168b5227cb83106ca36"
+    },
+    {
+      "file": "tools/Summarize-Processing10.mjs",
+      "sha256": "d40ca71955145aee8a45e746bf094ea6eb754da0ba7d624904505c5190552849"
+    },
+    {
+      "file": "tests/fixtures/Processing10.mjs",
+      "sha256": "ca0ff7ee29d755f6b3b946d3a31881e87b74807cd0bad02a9f6f7c27b428ed20"
+    },
+    {
+      "file": "tests/Test-Processing10.mjs",
+      "sha256": "3f1d55e9a9585950dd8dd62711404571ba747bc657bfac205c3b2815dc8d7880"
+    },
+    {
+      "file": "docs/ACOUSTIC_WORLD_10_PERFORMANCE.md",
+      "sha256": "3890bcfd8d90d256e6c1a34ae2622e9762c64b57073326e66a065728f331066b"
+    }
+  ],
+  "baseline": {
+    "commit": "8a995c8c8f5e7ab1461af64e756f30eafb7667a3",
+    "filesComparedToGit": 118,
+    "archiveSha256": "f67997621bf15626106251a589cc10e138c4fa277bf201826c862bc29d1951e7",
+    "exactFiles": 0,
+    "newlineOnlyDifferences": 118,
+    "archiveEntriesVerified": 118,
+    "archiveExtractedBytesMatch": true
+  },
+  "snapshots": [
+    {
+      "name": "world10-current-final04",
+      "files": 120,
+      "manifestSha256": "4a75752ed356acb9cb11f2bc05558488fb2ca5d59e0174f88194d730fb91c775",
+      "fixture10Bound": false
+    },
+    {
+      "name": "world10-current-final05",
+      "files": 120,
+      "manifestSha256": "0e90953c02c5246bd99f718e38f91bb95fa3cdc1afc4bb83b2cdf00b325d2c53",
+      "fixture10Bound": false
+    },
+    {
+      "name": "world10-current-final01",
+      "files": 119,
+      "manifestSha256": "200a0223f4e2c8cde6056b607e213e2fe82adb385c64f0b84486730d57dd4983",
+      "fixture10Bound": false
+    },
+    {
+      "name": "world10-current-final02",
+      "files": 120,
+      "manifestSha256": "b49f347cab99cafd855409a8edf95f9a35e1f8dc36a5b9abcd1dc4eb0f135658",
+      "fixture10Bound": false
+    },
+    {
+      "name": "world10-current-final03",
+      "files": 120,
+      "manifestSha256": "d9346f5f11bd2a0e0fcbb96163aa1c2d1573ef7db797669c1134d7f1515a0d59",
+      "fixture10Bound": false
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "world10-retained-hosted09.json",
+      "bytes": 18327166,
+      "sha256": "cfc43d88e4eba19f967076b998e5bde8f276af26197f6b7d412b49ea4c2bfb1a",
+      "evidence": "evidence/acoustic-world-10-processing.json"
+    },
+    {
+      "name": "world10-final-instrumented-04.json",
+      "bytes": 110273277,
+      "sha256": "5f91af015bd212f037ffafb2551fbb8dbcb772ada84d6e35e3df9ff3f8586bb2",
+      "evidence": "evidence/acoustic-world-10-processing.json"
+    },
+    {
+      "name": "world10-final-reference-04.json",
+      "bytes": 15673823,
+      "sha256": "aea3ab5852ef6f0e7aca0dc7dacfb5e57a7adf4bdf12b737cc9bd0abf7546fc3",
+      "evidence": "evidence/acoustic-world-10-processing.json"
+    },
+    {
+      "name": "world10-final-texture-instrumented-04.json",
+      "bytes": 37127170,
+      "sha256": "4fde179287bd0a2abd48487772883ef856a6afc55217be528c41cbafa28abf96",
+      "evidence": "evidence/acoustic-world-10-processing.json"
+    },
+    {
+      "name": "world10-final-texture-reference-04.json",
+      "bytes": 11645318,
+      "sha256": "7d5b4d7914cacb82ca801ac4c9fdbbdccb89dcefe8416e8a7c99674e08753b47",
+      "evidence": "evidence/acoustic-world-10-processing.json"
+    },
+    {
+      "name": "world10-final-instrumented-05.json",
+      "bytes": 27391828,
+      "sha256": "69578d846cfbf54ebc9143345dae5f9cbf8a9f454fec6e7e6c22a243f5bf2934",
+      "evidence": "evidence/acoustic-world-10-processing.json"
+    },
+    {
+      "name": "world10-final-reference-05.json",
+      "bytes": 7654672,
+      "sha256": "e1ec27f2771e1aa4c667a70c1639b05aa600e0d0f7d6b8b1dc1f04171109ab3f",
+      "evidence": "evidence/acoustic-world-10-processing.json"
+    },
+    {
+      "name": "world10-final-texture-instrumented-05.json",
+      "bytes": 18000526,
+      "sha256": "694aa6327a3143037fa0009f76267dae55bf96a4ea6f5d191e711a7a93c38af6",
+      "evidence": "evidence/acoustic-world-10-processing.json"
+    },
+    {
+      "name": "world10-final-texture-reference-05.json",
+      "bytes": 5245589,
+      "sha256": "82852196d91fe7720d0262c4e32d671c2bf20b0ba025c4c7207bb0b18327de48",
+      "evidence": "evidence/acoustic-world-10-processing.json"
+    },
+    {
+      "name": "world10-baseline-processing-01.json",
+      "bytes": 27774264,
+      "sha256": "2aac51f43d3d68fa04fa02bea93429f6b131430d3ca522c7f0b5344122c1aae2",
+      "evidence": "evidence/acoustic-world-10-processing-history.json"
+    },
+    {
+      "name": "world10-after-processing-01.json",
+      "bytes": 83978161,
+      "sha256": "4ef7253cb411d66d77adc4587e1506c0751bbb58901630f8a5ffef8bdf69f05a",
+      "evidence": "evidence/acoustic-world-10-processing-history.json"
+    },
+    {
+      "name": "world10-lifecycle-processing-01.json",
+      "bytes": 35778219,
+      "sha256": "eeb6f61458422859347d5a4ae83b474ccad49a07d79f97121119a1fe9de11b27",
+      "evidence": "evidence/acoustic-world-10-processing-history.json"
+    },
+    {
+      "name": "world10-copy-refinement-diagnostic-01.json",
+      "bytes": 6871618,
+      "sha256": "64a552c2e3f351ab1fcfe20978bdefe4f305c4eaa63cc8cad1498c02cd83a219",
+      "evidence": "evidence/acoustic-world-10-processing-history.json"
+    },
+    {
+      "name": "world10-frozen-processing-01.json",
+      "bytes": 110354473,
+      "sha256": "c318f061c62d30a493a775fc472219e972d346e4265ebf80fceb80c7cdcb7464",
+      "evidence": "evidence/acoustic-world-10-processing-history.json"
+    },
+    {
+      "name": "world10-frozen-texture-lifecycle-01.json",
+      "bytes": 38294250,
+      "sha256": "b087dacc1dab1e6c239aeeafc6d968af2171bf38e8edfa18f3e8e5b72bd5dde9",
+      "evidence": "evidence/acoustic-world-10-processing-history.json"
+    },
+    {
+      "name": "world10-texture-warm-diagnostic-02.json",
+      "bytes": 4742544,
+      "sha256": "98e3f76871ed5470546137b130d52e7c342d78f197cc236239eab06e448c23e0",
+      "evidence": "evidence/acoustic-world-10-processing-history.json"
+    },
+    {
+      "name": "world10-reference-texture-diagnostic-02.json",
+      "bytes": 1553909,
+      "sha256": "44a3d5d93adb445b48390ed8ae8a0181a513dbb5b78e3a76aea55d86668a0a24",
+      "evidence": "evidence/acoustic-world-10-processing-history.json"
+    },
+    {
+      "name": "world10-reference-texture-diagnostic-03.json",
+      "bytes": 1311774,
+      "sha256": "d096ebc943781803b83e62a1583916c710bbb7dce12d5ff82048c1e9baa0d3cf",
+      "evidence": "evidence/acoustic-world-10-processing-history.json"
+    },
+    {
+      "name": "world10-instrumented-texture-diagnostic-03.json",
+      "bytes": 4489387,
+      "sha256": "b770108727e5fde28cb152d703023d50ab1fd6002047695c8b857739233860da",
+      "evidence": "evidence/acoustic-world-10-processing-history.json"
+    },
+    {
+      "name": "world10-reference-texture-diagnostic-04.json",
+      "bytes": 1308424,
+      "sha256": "9f23b36d8225366465db2c2718b5f0af914fe0d7ed42a3111e290025b21b7d21",
+      "evidence": "evidence/acoustic-world-10-processing-history.json"
+    },
+    {
+      "name": "world10-instrumented-texture-diagnostic-04.json",
+      "bytes": 4518224,
+      "sha256": "9baf14765bdad0443b33af758391a28bf53ebc3da8d5f1e43d406e4318aeb174",
+      "evidence": "evidence/acoustic-world-10-processing-history.json"
+    }
+  ],
+  "sets": [
+    {
+      "file": "evidence/acoustic-world-10-processing.json",
+      "artifacts": 9,
+      "reports": 8,
+      "comparisons": 128,
+      "mixedInstrumentationComparisons": 24
+    },
+    {
+      "file": "evidence/acoustic-world-10-processing-history.json",
+      "artifacts": 12,
+      "reports": 12,
+      "comparisons": 128,
+      "mixedInstrumentationComparisons": 6
+    }
+  ],
+  "checked": {
+    "renderChildren": 352,
+    "blocks": 55104,
+    "spans": 597794,
+    "contentionWorkers": 672,
+    "allArtifactDigestsMatch": true,
+    "allStrictDeadlineDecisionsMatch": true,
+    "allNestedSpanArithmeticMatches": true,
+    "allPortableModeSummariesMatch": true,
+    "allRetainedPcmLifecycleComparisonsPass": true,
+    "allContentionWorkersRequestedStopAndJoined": true
+  },
+  "final04": {
+    "all": {
+      "processes": 128,
+      "blocks": 19968,
+      "misses": 114,
+      "maximumRangeMs": [
+        4.423300000000012,
+        28.315499999999986
+      ],
+      "workerProcesses": 256
+    },
+    "preparedJit": {
+      "processes": 48,
+      "blocks": 7680,
+      "misses": 0,
+      "maximumRangeMs": [
+        4.423300000000012,
+        10.434500000000014
+      ],
+      "workerProcesses": 96
+    },
+    "baseline": {
+      "processes": 48,
+      "blocks": 7680,
+      "misses": 97,
+      "maximumRangeMs": [
+        19.169300000000007,
+        28.315499999999986
+      ],
+      "workerProcesses": 96
+    }
+  },
+  "final05": {
+    "preparedJit": {
+      "processes": 48,
+      "blocks": 7680,
+      "misses": 0,
+      "maximumRangeMs": [
+        4.1396000000000015,
+        9.919200000000046
+      ],
+      "workerProcesses": 96
+    }
+  },
+  "findings": [
+    {
+      "severity": "medium",
+      "code": "unbound-authored-input-module",
+      "detail": "Historical reports bind production snapshots and the top-level profiler hash, but not the root-loaded Processing10 fixture and helper closure. No drift is observed; complete measurement-time input closure is unqualified."
+    },
+    {
+      "severity": "low",
+      "code": "cross-instrumentation-reference-selection",
+      "detail": "Historical summarizer selects baselines without checking instrumented. Exact PCM comparison remains true, but cross-report reference-arm provenance is implicit."
+    }
+  ],
+  "heavyMeasurementsRerun": false,
+  "privateAudit": {
+    "name": "world10-evidence-independent-audit-01.json",
+    "sha256": "20669960e44018974902bf33790e0d53302074cd63f8c818ffbf9976d6da8f12"
+  },
+  "focusedTests": {
+    "artifact": "world10-processing-source-tests-final.tap",
+    "sha256": "cc9e62775e41041d529f537fae8511cbcf912799ce9d2e720dc389b541d2bc11",
+    "tests": 14,
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0
+  }
+}

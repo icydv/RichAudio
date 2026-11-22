@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "kind": "RichAudioIndependentPinnedProcessingEvidenceReview10",
+  "createdUtc": "2026-11-03T23:03:39.159Z",
+  "scope": "Independent evidence/harness follow-up only; does not independently approve audio implementation authored by this reviewer.",
+  "priorReview": {
+    "file": "evidence/acoustic-world-10-independent-evidence-review-06.json",
+    "sha256": "341e694e5167c517f06b5be82a770bd091e99e4b2ee70018bb722b16586c48a1"
+  },
+  "reviewedFiles": [
+    {
+      "file": "tools/Profile-Processing10.mjs",
+      "sha256": "adf647449f4cf31c93f34dd7d2484e94dc778d68ffb83114fbbecb8886bdcce3"
+    },
+    {
+      "file": "tools/Freeze-Processing10.mjs",
+      "sha256": "b78f5faac2f76c6d4780c1fd5599b7af78bae9595b706168b5227cb83106ca36"
+    },
+    {
+      "file": "tools/Summarize-Processing10.mjs",
+      "sha256": "28eaf73bb844d52d277a90fb12ef3fb634c02744853571450d4d5bb99a86305c"
+    },
+    {
+      "file": "tests/fixtures/Processing10.mjs",
+      "sha256": "ca0ff7ee29d755f6b3b946d3a31881e87b74807cd0bad02a9f6f7c27b428ed20"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "world10-pinned-instrumented-07.json",
+      "bytes": 55303348,
+      "sha256": "c8a4eeecf39c2cf39b649ca08a301773bab7247aaf9694df07b8860cbea9c7d2"
+    },
+    {
+      "name": "world10-pinned-reference-07.json",
+      "bytes": 15922011,
+      "sha256": "25fcb2069a462200c8264a2764a5deabef298a18e460f3418286e7957eb7ff6a"
+    },
+    {
+      "name": "world10-pinned-texture-instrumented-07.json",
+      "bytes": 37458361,
+      "sha256": "aad7419878913e9d6b1ab2cbb9c8a1a512d75f726258eb475d4bc2ca38b42f35"
+    },
+    {
+      "name": "world10-pinned-texture-reference-07.json",
+      "bytes": 11892615,
+      "sha256": "de844fe48e6b336ab11036d35db5f4c716a0a520e9cef968df42b78f0f84029e"
+    }
+  ],
+  "snapshots": [
+    {
+      "name": "world10-current-pinned07",
+      "files": 123,
+      "manifestSha256": "9cdb07dba250669c30b0ebcb741fa97ecf0aebffa227e1b814c607b3a0493d18",
+      "fixture10Bound": true
+    }
+  ],
+  "checked": {
+    "reports": 4,
+    "children": 96,
+    "blocks": 15360,
+    "nestedSpans": 113328,
+    "contentionWorkers": 192,
+    "pcmLifecycleComparisons": 48,
+    "allComparedInputsMatch": true,
+    "allSourceAndInputBindingsMatch": true,
+    "allStrictDeadlineDecisionsMatch": true,
+    "allNestedArithmeticMatches": true,
+    "allWorkersReadyStoppedRequestedAndJoined": true,
+    "allChildrenCompleted": true
+  },
+  "outcome": {
+    "baseline": {
+      "children": 48,
+      "calls": 7680,
+      "misses": 105
+    },
+    "preparedJit": {
+      "children": 48,
+      "calls": 7680,
+      "misses": 0
+    }
+  },
+  "experiments": [
+    {
+      "name": "world10-pinned-instrumented-07.json",
+      "modes": [
+        {
+          "mode": "baseline-cold",
+          "trials": 16,
+          "blocks": 2304,
+          "misses": 16,
+          "perChildMaximumRangeMs": [
+            19.201300000000003,
+            29.325999999999993
+          ]
+        },
+        {
+          "mode": "current-prepared-jit",
+          "trials": 16,
+          "blocks": 2304,
+          "misses": 0,
+          "perChildMaximumRangeMs": [
+            5.4114999999999895,
+            8.624800000000022
+          ]
+        }
+      ]
+    },
+    {
+      "name": "world10-pinned-reference-07.json",
+      "modes": [
+        {
+          "mode": "baseline-cold",
+          "trials": 16,
+          "blocks": 2304,
+          "misses": 16,
+          "perChildMaximumRangeMs": [
+            19.867099999999994,
+            22.349000000000018
+          ]
+        },
+        {
+          "mode": "current-prepared-jit",
+          "trials": 16,
+          "blocks": 2304,
+          "misses": 0,
+          "perChildMaximumRangeMs": [
+            4.2549999999999955,
+            8.954999999999984
+          ]
+        }
+      ]
+    },
+    {
+      "name": "world10-pinned-texture-instrumented-07.json",
+      "modes": [
+        {
+          "mode": "baseline-cold",
+          "trials": 8,
+          "blocks": 1536,
+          "misses": 40,
+          "perChildMaximumRangeMs": [
+            23.6079,
+            27.054100000000005
+          ]
+        },
+        {
+          "mode": "current-prepared-jit",
+          "trials": 8,
+          "blocks": 1536,
+          "misses": 0,
+          "perChildMaximumRangeMs": [
+            9.327600000000018,
+            10.641699999999958
+          ]
+        }
+      ]
+    },
+    {
+      "name": "world10-pinned-texture-reference-07.json",
+      "modes": [
+        {
+          "mode": "baseline-cold",
+          "trials": 8,
+          "blocks": 1536,
+          "misses": 33,
+          "perChildMaximumRangeMs": [
+            23.721599999999995,
+            25.663900000000012
+          ]
+        },
+        {
+          "mode": "current-prepared-jit",
+          "trials": 8,
+          "blocks": 1536,
+          "misses": 0,
+          "perChildMaximumRangeMs": [
+            7.598899999999958,
+            8.292100000000005
+          ]
+        }
+      ]
+    }
+  ],
+  "findings": {
+    "historicalInputClosureLimitationRetained": true,
+    "futureFixtureHelperHarnessClosureBound": true,
+    "matchingInstrumentationBaselineComparisonVerified": true
+  },
+  "fullMeasurementsRerunByReviewer": false,
+  "portableSummary": {
+    "file": "evidence/acoustic-world-10-processing-pinned07.json",
+    "sha256": "00d27fb8428592ced2d53c0e7bb50e7932e25cb0f3989d397045f2e4ca2b34c6",
+    "allArtifactBindingsAndModeSummariesMatch": true,
+    "comparisonsWithExplicitMatchingBaseline": 48
+  },
+  "currentProductionBinding": {
+    "files": 117,
+    "allMatchPinned07": true
+  },
+  "maximumPreparedTexturedInstrumented": {
+    "renderMs": 10.641699999999958,
+    "deadlineMs": 10.666666666666666,
+    "marginMs": 0.024966666666708548,
+    "block": 43,
+    "scene": "direct",
+    "repetition": 0,
+    "contentionWorkers": 4,
+    "sourceConstructionMs": 0.14519999999998845,
+    "sourceSynthesisMs": 7.460100000000011,
+    "gcTemporalOverlapMs": 0.7726999819278717,
+    "interpretation": "Approximately25microseconds observed margin is not robust real-time headroom; GC overlap is temporal, not a complete causal attribution."
+  }
+}

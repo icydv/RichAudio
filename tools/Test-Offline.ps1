@@ -1,7 +1,8 @@
 # Framework-independent validation only. No game inspection or deployment.
 [CmdletBinding()]
-param()
+param([switch]$SkipCodeWalkerSourceResearch)
 $ErrorActionPreference='Stop'
+if($SkipCodeWalkerSourceResearch-and$env:RICHAUDIO_CODEWALKER_ROOT){throw 'Source-research-free validation refuses the optional RICHAUDIO_CODEWALKER_ROOT input; use a separately scoped research runner.'}
 $repo=Split-Path -Parent $PSScriptRoot
 $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory($output) | Out-Null
@@ -23,12 +24,14 @@ try {
     & (Join-Path $repo 'tools\Test-VehicleObservation03.ps1')
     # Public, pinned parser source/dependencies only. Always test Gen9/legacy
     # ORIGINAL bytes in CI; no installed asset discovery or private SDK input.
-    $parserRoot=Join-Path $repo ('.local/world-03/public-parser-'+[guid]::NewGuid().ToString('N'))
-    & (Join-Path $repo 'tools\Prepare-CodeWalkerPublicProfile03.ps1') -OutputRoot $parserRoot
-    & (Join-Path $repo 'tools\Test-NgReference041.ps1') -ProfileRoot (Join-Path $parserRoot 'profile') -OutputRoot (Join-Path $output 'world041-ng-reference')
-    $legacyShell=Join-Path $env:WINDIR 'System32/WindowsPowerShell/v1.0/powershell.exe'
-    & $legacyShell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $repo 'tools/Test-StaticResources03.ps1') -ProfileRoot (Join-Path $parserRoot 'profile') -OutputRoot (Join-Path $repo ('.local/world-03/resource-fixture-'+[guid]::NewGuid().ToString('N')))
-    if($LASTEXITCODE-ne0){throw 'Actual-format original Gen9/legacy resource decode, finite tile/cache or reflection PCM failed.'}
+    if(!$SkipCodeWalkerSourceResearch){
+        $parserRoot=Join-Path $repo ('.local/world-03/public-parser-'+[guid]::NewGuid().ToString('N'))
+        & (Join-Path $repo 'tools\Prepare-CodeWalkerPublicProfile03.ps1') -OutputRoot $parserRoot
+        & (Join-Path $repo 'tools\Test-NgReference041.ps1') -ProfileRoot (Join-Path $parserRoot 'profile') -OutputRoot (Join-Path $output 'world041-ng-reference')
+        $legacyShell=Join-Path $env:WINDIR 'System32/WindowsPowerShell/v1.0/powershell.exe'
+        & $legacyShell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $repo 'tools/Test-StaticResources03.ps1') -ProfileRoot (Join-Path $parserRoot 'profile') -OutputRoot (Join-Path $repo ('.local/world-03/resource-fixture-'+[guid]::NewGuid().ToString('N')))
+        if($LASTEXITCODE-ne0){throw 'Actual-format original Gen9/legacy resource decode, finite tile/cache or reflection PCM failed.'}
+    }else{Write-Output 'EXCLUDED: CodeWalker upstream-source preparation, modified Core build and original native parser-reference controls; standard Core API remains unqualified.'}
     & (Join-Path $repo 'tools\Test-Latency031Clock.ps1')
     & (Join-Path $repo 'tools\Test-Latency031Process.ps1')
     & (Join-Path $repo 'tools\Test-Latency031Supervision.ps1')
@@ -41,7 +44,9 @@ try {
     & (Join-Path $repo 'tools\Test-Latency03Admission.ps1')
     # Explicit optional open-source parser input only. Never discover/read a
     # game directory or archive, including when this input is absent in CI.
-    if($env:RICHAUDIO_CODEWALKER_ROOT){
+    if($SkipCodeWalkerSourceResearch){
+        Write-Output 'EXCLUDED: optional CodeWalker parser environment input is ignored by the source-research-free runner.'
+    }elseif($env:RICHAUDIO_CODEWALKER_ROOT){
         $legacyShell=Join-Path $env:WINDIR 'System32/WindowsPowerShell/v1.0/powershell.exe'
         & $legacyShell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $repo 'tools/Test-StaticResources02.ps1') -CodeWalkerRoot $env:RICHAUDIO_CODEWALKER_ROOT -OutputRoot (Join-Path $repo ('.local/world-02/resource-fixture-'+[guid]::NewGuid().ToString('N')))
         if($LASTEXITCODE-ne0){throw 'Original YMAP/YTYP/YBN byte fixtures or finite geometry integration failed.'}

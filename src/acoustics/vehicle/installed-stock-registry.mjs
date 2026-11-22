@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import {createHash} from 'node:crypto';
 import {isVerifiedStockBank,stockRoles,stockModes,StockVehicleSource} from './stock-source.mjs';
+import {StockSourceDataPreparation10} from './stock-source-preparation10.mjs';
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const digest=s=>typeof s==='string'&&/^[a-f0-9]{64}$/i.test(s);
 const id=s=>{if(typeof s!=='string'||!/^(?:0x)?[a-f0-9]{8}$/i.test(s))throw Error('exact stream/model hash required');return parseInt(s.replace(/^0x/i,''),16);};
@@ -68,6 +69,7 @@ export function loadInstalledStockRegistry({catalogFile,catalogSha256,assets,npc
   // NPC graphs are resolved only on an explicit request, not enumerated here.
   entries.set(modelHash,Object.freeze({model:v.Model,modelHash,contexts:Object.freeze(contexts),npcSound:v.Sounds?.EngineAccelNPC}));
  }
+ const prepared10=new StockSourceDataPreparation10();
  return Object.freeze({catalogSha256:catalogSha256.toLowerCase(),modelCount:entries.size,
   resolve(modelHash,context){
    if(!Number.isInteger(modelHash)||modelHash<0||modelHash>0xffffffff||!['player','npc'].includes(context))throw Error('unsigned model hash and explicit context required');
@@ -75,7 +77,14 @@ export function loadInstalledStockRegistry({catalogFile,catalogSha256,assets,npc
   },
   createSource(modelHash,context,options={}){
    const resolved=this.resolve(modelHash,context);if(resolved.status!=='available')throw Error('native stock source unavailable: '+resolved.reason);
-   return new StockVehicleSource(resolved.bank,options);
+   const plan=options.atlas==null?prepared10.get(resolved.bank):null;
+   return new StockVehicleSource(resolved.bank,{...(plan?{preparation10:plan}:{}),...options});
+  },
+  prepareSource10(modelHash,context){
+   const resolved=this.resolve(modelHash,context);if(resolved.status!=='available')throw Error('native stock source unavailable: '+resolved.reason);
+   return prepared10.prepare(resolved.bank);
+  },
+  preparationDiagnostics10(){return prepared10.diagnostics();
   }
  });
 }

@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "kind": "RichAudioIndependentPinnedProcessingEvidenceReview10",
+  "createdUtc": "2026-11-03T22:39:22.949Z",
+  "scope": "Independent evidence/harness follow-up only; does not independently approve audio implementation authored by this reviewer.",
+  "priorReview": {
+    "file": "evidence/acoustic-world-10-independent-evidence-review.json",
+    "sha256": "5ebc178179bd35ee88cd255ce9ab3a71a8b9de37844a9b39ed8789a0f6ebb6c1"
+  },
+  "reviewedFiles": [
+    {
+      "file": "tools/Profile-Processing10.mjs",
+      "sha256": "fcafbec4ec72f775d5b2944b6b6771bf5c28fcd614a6cd763d1ca21737437f1e"
+    },
+    {
+      "file": "tools/Freeze-Processing10.mjs",
+      "sha256": "b78f5faac2f76c6d4780c1fd5599b7af78bae9595b706168b5227cb83106ca36"
+    },
+    {
+      "file": "tools/Summarize-Processing10.mjs",
+      "sha256": "5fdf56a1c9a83e7845ca2d227471ec456ae97d8ef2e318994993347094620e8a"
+    },
+    {
+      "file": "tests/fixtures/Processing10.mjs",
+      "sha256": "ca0ff7ee29d755f6b3b946d3a31881e87b74807cd0bad02a9f6f7c27b428ed20"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "world10-pinned-instrumented-06.json",
+      "bytes": 55297096,
+      "sha256": "80b325baa02f4ea963e65974c855737e7883fe43dcb9ef21ffc4c238d5e27811"
+    },
+    {
+      "name": "world10-pinned-reference-06.json",
+      "bytes": 15963001,
+      "sha256": "02f0b5136181b83af724bef85945d44a638356153b717aba3c31b3dd6d39fc2c"
+    },
+    {
+      "name": "world10-pinned-texture-instrumented-06.json",
+      "bytes": 37331462,
+      "sha256": "48ddc9a8a0ea2bf956b15a80592b94793022a0e8dd4daf4bdff988ad559b9a9a"
+    },
+    {
+      "name": "world10-pinned-texture-reference-06.json",
+      "bytes": 12081850,
+      "sha256": "7948bde79737c70a2bcaa3fe2af127975feb2f621f0fb9bec0e4c0739a74f533"
+    }
+  ],
+  "snapshots": [
+    {
+      "name": "world10-current-pinned06",
+      "files": 122,
+      "manifestSha256": "55420e694990509972b2dc5ef47390b08087f8277454ff0dfd6bb69fa33ee630",
+      "fixture10Bound": true
+    }
+  ],
+  "checked": {
+    "reports": 4,
+    "children": 96,
+    "blocks": 15360,
+    "nestedSpans": 113328,
+    "contentionWorkers": 192,
+    "pcmLifecycleComparisons": 48,
+    "allComparedInputsMatch": true,
+    "allSourceAndInputBindingsMatch": true,
+    "allStrictDeadlineDecisionsMatch": true,
+    "allNestedArithmeticMatches": true,
+    "allWorkersReadyStoppedRequestedAndJoined": true,
+    "allChildrenCompleted": true
+  },
+  "outcome": {
+    "baseline": {
+      "children": 48,
+      "calls": 7680,
+      "misses": 107
+    },
+    "preparedJit": {
+      "children": 48,
+      "calls": 7680,
+      "misses": 0
+    }
+  },
+  "experiments": [
+    {
+      "name": "world10-pinned-instrumented-06.json",
+      "modes": [
+        {
+          "mode": "baseline-cold",
+          "trials": 16,
+          "blocks": 2304,
+          "misses": 17,
+          "perChildMaximumRangeMs": [
+            19.032699999999977,
+            22.1104
+          ]
+        },
+        {
+          "mode": "current-prepared-jit",
+          "trials": 16,
+          "blocks": 2304,
+          "misses": 0,
+          "perChildMaximumRangeMs": [
+            5.387400000000014,
+            8.69380000000001
+          ]
+        }
+      ]
+    },
+    {
+      "name": "world10-pinned-reference-06.json",
+      "modes": [
+        {
+          "mode": "baseline-cold",
+          "trials": 16,
+          "blocks": 2304,
+          "misses": 16,
+          "perChildMaximumRangeMs": [
+            18.897199999999998,
+            24.281800000000004
+          ]
+        },
+        {
+          "mode": "current-prepared-jit",
+          "trials": 16,
+          "blocks": 2304,
+          "misses": 0,
+          "perChildMaximumRangeMs": [
+            4.324900000000014,
+            8.7757
+          ]
+        }
+      ]
+    },
+    {
+      "name": "world10-pinned-texture-instrumented-06.json",
+      "modes": [
+        {
+          "mode": "baseline-cold",
+          "trials": 8,
+          "blocks": 1536,
+          "misses": 36,
+          "perChildMaximumRangeMs": [
+            23.247199999999992,
+            29.07940000000002
+          ]
+        },
+        {
+          "mode": "current-prepared-jit",
+          "trials": 8,
+          "blocks": 1536,
+          "misses": 0,
+          "perChildMaximumRangeMs": [
+            8.658600000000035,
+            10.025800000000004
+          ]
+        }
+      ]
+    },
+    {
+      "name": "world10-pinned-texture-reference-06.json",
+      "modes": [
+        {
+          "mode": "baseline-cold",
+          "trials": 8,
+          "blocks": 1536,
+          "misses": 38,
+          "perChildMaximumRangeMs": [
+            22.450699999999983,
+            28.009000000000015
+          ]
+        },
+        {
+          "mode": "current-prepared-jit",
+          "trials": 8,
+          "blocks": 1536,
+          "misses": 0,
+          "perChildMaximumRangeMs": [
+            7.727200000000039,
+            10.23169999999999
+          ]
+        }
+      ]
+    }
+  ],
+  "findings": {
+    "historicalInputClosureLimitationRetained": true,
+    "futureFixtureHelperHarnessClosureBound": true,
+    "matchingInstrumentationBaselineComparisonVerified": true
+  },
+  "fullMeasurementsRerunByReviewer": false
+}
