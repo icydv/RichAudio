@@ -143,7 +143,8 @@ namespace RichAudio.BatiResearch
         [DataMember]public string Simulation="UNDETERMINED",Interference="UNKNOWN",TaskState="unavailable",Domain;
         [DataMember]public int? Gear;
         [DataMember]public double? RawRpm;
-        public Reading Copy(){return (Reading)MemberwiseClone();}
+        [DataMember(EmitDefaultValue=false)]public StopBoundaryReading StopBoundary;
+        public Reading Copy(){var c=(Reading)MemberwiseClone();c.StopBoundary=StopBoundary==null?null:StopBoundary.Copy();return c;}
     }
     [DataContract] public sealed class SpeedPoint
     {
