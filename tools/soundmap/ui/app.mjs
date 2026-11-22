@@ -14,6 +14,7 @@ const operatorFrames={frames:0,emptyCoveredFrames:0,detailFallbackFrames:0,frame
 let operatorLastDraw=null,operatorLastPublish=-Infinity,operatorSending=false;
 const player=$('replay-audio');
 const format=n=>Number.isFinite(n)?n.toFixed(2):'unavailable';
+const vehicleName=v=>v.model===0xb779a091?'ADDER':v.model===0xf9300cc5?'Bati':v.vehicle;
 const time=n=>{const ms=Math.max(0,Math.round(n||0));return `${String(Math.floor(ms/60000)).padStart(2,'0')}:${String(Math.floor(ms/1000)%60).padStart(2,'0')}.${String(ms%1000).padStart(3,'0')}`;};
 const safeText=(el,value)=>{el.textContent=String(value??'unavailable');};
 function notice(message,error=false){safeText($('notice'),message);$('notice').className=error?'error':'';$('notice').style.display='block';noticeUntil=performance.now()+8000;}
@@ -172,7 +173,14 @@ function draw(now){
   ctx.globalAlpha=health.expired?.7:1;
   for(const p of f?.paths||[]){if(!$('show-rejected').checked&&p.status!=='selected')continue;const style=pathStyle(p);if(!p.vertices)continue;const selected=p.status==='selected',dash=health.expired?[4,6]:view.kind==='replay'&&selected?[13,3]:style.dash;line(p.vertices,selected?'#0a0e14':style.color,selected?5.6:1.6,dash);if(selected)line(p.vertices,style.color,3.2,dash);for(const point of p.points||[])dot(point,style.color,selected?4.5:2.5);}
   ctx.globalAlpha=1;
-  for(const s of f?.sources||[])if(s.valid!==false)dot(s.position,'#ffbc80',8,s.id,true);
+  const renderedVoices=f?.renderedVoices??[];
+  for(const source of f?.sources||[]){
+    if(source.valid===false)continue;
+    const index=renderedVoices.findIndex(voice=>source.id===voice.engine||source.id===voice.exhaust);
+    const voice=renderedVoices[index];
+    const label=voice?vehicleName(voice)+' '+(source.id===voice.engine?'engine':'exhaust'):source.id;
+    dot(source.position,index===1?'#8fd8ff':'#ffbc80',8,label,true);
+  }
   if(view.listener?.valid&&(!usingAtlas||freshAtlasCamera)){const l=view.listener;dot(l.position,health.expired?'#8897af':'#73bcff',8,view.kind==='passive'?'Camera · passive':'Listener');if(isPoint(l.forward)){const end=l.position.map((n,i)=>n+l.forward[i]*2.5);line([l.position,end],'#b6dcff',3.5,health.expired?[5,4]:[]);dot(end,'#b6dcff',3);}if(isPoint(l.up))line([l.position,l.position.map((n,i)=>n+l.up[i]*1.2)],'#a9c7e9',2);}
   // Fixed-scale axes indicate the model basis only.
   ctx.font='11px Segoe UI';ctx.fillStyle='#b0bed2';ctx.fillText('Z ↑  ·  X / Y reference plane',camera.width-174,camera.height-20);
@@ -236,6 +244,8 @@ function metadata(now){
   $('display-fps').dataset.target=String(fps);$('telemetry-rate').dataset.pollTarget=String(TELEMETRY_POLL_FPS);
   safeText($('grid-note'),isCached?'Reference grid only · authored cache model metres':isPassive?'Reference grid only · native units, physical scale unverified':'Reference grid only · model metres, physical scale unverified');
   $('metrics').replaceChildren();
+  for(const voice of f?.renderedVoices??[])
+    metric(vehicleName(voice)+' · '+voice.context,voice.voice+' voice · rev '+format(voice.operatingPoint)+' · '+voice.vehicle+' g'+voice.observedGeneration);
   if(atlas&&atlasShown&&!isReplay){
     const s=atlas.snapshot(),p=serviceStatus.worldAtlas?.proof,data=atlas.index;
     const currentInterior=atlasLive&&now<atlasLive.until&&!passive.health(now).expired?atlasLive.sample:null;
@@ -312,7 +322,7 @@ function recordingStatus(){
   $('record-start').disabled=!!active||isReplay;$('record-stop').disabled=!active||r?.state==='stopping';
   safeText($('record-status'),r?`${r.state} · ${time(r.durationMs)} · ${format((r.bytes||0)/1048576)} MiB${r.terminationReason?' · '+r.terminationReason:''}`:'Not recording');
 }
-async function refreshRecordings(){const {recordings=[]}=await api('/api/recordings');const selected=$('recordings').value;$('recordings').replaceChildren(new Option('Choose a local recording…',''));for(const r of recordings)$('recordings').add(new Option(`${r.id} · ${time(r.durationMs)} · ${r.state}`,r.id));$('recordings').value=selected;}
+async function refreshRecordings(){const {recordings=[]}=await api('/api/recordings');const selected=$('recordings').value;$('recordings').replaceChildren(new Option('Choose a local recording…',''));for(const r of recordings)$('recordings').add(new Option(`${r.title??r.id} · ${time(r.durationMs)} · ${r.state}`,r.id));$('recordings').value=selected;}
 async function fetchStatus(){try{serviceStatus=await api('/api/status');serviceHeardAt=performance.now();connected=serviceStatus.connected===true;startAtlas();recordingStatus();}catch(error){connected=false;safeText($('record-status'),'Local service unavailable');}}
 async function statusLoop(){await fetchStatus();setTimeout(statusLoop,1000);}
 async function telemetryLoop(){
@@ -323,7 +333,7 @@ async function telemetryLoop(){
       const epoch=requestEpoch,requestStarted=performance.now();
       try{
         const query=`geometryGeneration=${encodeURIComponent(state.geometryRequestKey())}&cacheWorldGeneration=${encodeURIComponent(cacheWorld.requestKey())}`;
-        const url=isReplay?`/api/replay/frame?timeMs=${Math.round(playbackTime)}&${query}`:`/api/frame?${query}`;
+        const url=isReplay?`/api/replay/frame?timeMs=${playbackTime}&${query}`:`/api/frame?${query}`;
         const envelope=await api(url);
         if(epoch===requestEpoch){
           const received=performance.now(),timing={requestElapsedMs:received-requestStarted};
@@ -375,31 +385,48 @@ function animationLoop(now){
 bind('record-start',async()=>{await api('/api/record/start',{maxDurationSeconds:Number($('max-seconds').value),maxBytes:Math.round(Number($('max-mib').value)*1048576)});await fetchStatus(performance.now());notice('Recording started. Only RichAudio-owned output and its acoustic timeline are requested.');});
 bind('record-stop',async()=>{const result=await api('/api/record/stop',{id:serviceStatus.recording?.id});await fetchStatus(performance.now());await refreshRecordings();notice(result.recording?.state==='stopping'?'Recording is stopping; waiting for the owned PCM tail.':'Recording stopped. Original timeline and PCM evidence remain in the private bundle.');});
 bind('refresh-recordings',refreshRecordings);
-bind('open-replay',async()=>{
-  const id=$('recordings').value;if(!id)throw Error('Select a local recording first.');
+async function openReplay(id){
+  if(!id)throw Error('Select a local recording first.');
   const result=await api('/api/replay/open',{id});clearAudio();replayAudioInfo={...result.audio,timeline:result.timeline};requestEpoch++;isReplay=true;replay.open(result.durationMs);state.reset();pendingSeek=true;lastReplayRequest=-1;
-  $('scrubber').max=String(replay.durationMs);$('scrubber').disabled=false;$('play-pause').disabled=false;$('close-replay').disabled=false;recordingStatus();
-  $('events').replaceChildren();for(const event of (result.events||[]).slice(0,2000)){const button=document.createElement('button');safeText(button,`${time(event.timeMs)} ${event.type}`);button.title=typeof event.detail==='string'?event.detail:JSON.stringify(event.detail??{});if(/fail|gap|expiry|expired|spike|missing|discontinu|invalid|stale/i.test(event.type))button.className='anomaly';button.addEventListener('click',()=>{player.pause();replay.playing=false;replay.seek(event.timeMs);pendingSeek=true;requestEpoch++;});$('events').append(button);}
+  $('scrubber').max=String(replay.durationMs);$('scrubber').disabled=false;$('play-pause').disabled=false;$('close-replay').disabled=result.audio?.kind==='offline-rendered-file';recordingStatus();
+  $('events').replaceChildren();for(const event of (result.events||[]).slice(0,2000)){const button=document.createElement('button');safeText(button,`${time(event.timeMs)} ${event.type}`);button.title=typeof event.detail==='string'?event.detail:JSON.stringify(event.detail??{});if(/fail|gap|expiry|expired|spike|missing|discontinu|invalid|stale/i.test(event.type))button.className='anomaly';button.addEventListener('click',()=>seekReplay(event.timeMs));$('events').append(button);}
   $('load-audio').disabled=!result.audio?.available||!Number.isFinite(result.audio?.startTimeMs);
   safeText($('audio-evidence'),result.audio?.available?'Visual replay · audio is opt-in':'PCM unavailable / discontinuous');
+  safeText($('load-audio'),result.audio?.kind==='offline-rendered-file'?'Load rendered audio':'Load owned PCM');
   notice('Historical replay opened. Observation timestamps and failed events are preserved.');
-});
+}
+bind('open-replay',()=>openReplay($('recordings').value));
 function clearAudio(){player.pause();player.removeAttribute('src');player.hidden=true;if(audioObjectUrl)URL.revokeObjectURL(audioObjectUrl);audioObjectUrl=null;$('load-audio').disabled=true;}
-bind('load-audio',async()=>{
+function seekReplay(timeMs) {
+  player.pause();replay.seek(timeMs);pendingSeek=true;requestEpoch++;
+  if(audioObjectUrl)player.currentTime=Math.max(0,(replay.timeMs-(replayAudioInfo?.startTimeMs||0))/1000);
+}
+async function loadReplayAudio(){
   if(!replayAudioInfo?.available)throw Error('No contiguous owned PCM evidence is available.');
   const result=await fetch('/api/replay/audio',{headers:{'X-RichAudio-Token':token},cache:'no-store',signal:AbortSignal.timeout(10000)});
   if(!result.ok)throw Error((await result.json()).error||'Owned PCM unavailable');
   const blob=await result.blob();if(blob.size>256*1048576+44)throw Error('Audio bundle exceeds the viewer memory bound');
   audioObjectUrl=URL.createObjectURL(blob);player.src=audioObjectUrl;player.hidden=false;$('load-audio').disabled=true;
-  const engineClock=replayAudioInfo.timeline?.basis==='original-engine-audioFrame';
+  const rendered=replayAudioInfo.kind==='offline-rendered-file';
+  const engineClock=rendered||replayAudioInfo.timeline?.basis==='original-engine-audioFrame';
   safeText($('audio-evidence'),engineClock?'Engine frame sync':'Audio sync approximate');$('audio-evidence').title=replayAudioInfo.clockUncertainty||'Original submitted PCM lineage; not speaker presentation time';
-  notice('Owned PCM loaded, not playing. Press its audio Play control to hear it. '+(engineClock?'The acoustic timeline uses original engine frames; wall-clock event alignment is approximate.':'Timeline alignment uses the approximate host UTC/QPC anchor.'));
-});
+  if(rendered){
+    seekReplay(replay.timeMs);
+    notice('Rendered PCM is ready. Press Play to hear it with the acoustic timeline.');
+  }else notice('Owned PCM is ready. Press its audio Play control to hear it. '+(engineClock?'The acoustic timeline uses original engine frames.':'Timeline alignment uses the approximate host UTC/QPC anchor.'));
+}
+bind('load-audio',loadReplayAudio);
 player.addEventListener('play',()=>{replay.playing=true;pendingSeek=true;});player.addEventListener('pause',()=>{replay.playing=false;replay.lastNow=null;});
 player.addEventListener('seeked',()=>{replay.seek(player.currentTime*1000+(replayAudioInfo?.startTimeMs||0));pendingSeek=true;requestEpoch++;});
 player.addEventListener('ended',()=>{replay.playing=false;});
-bind('play-pause',()=>{player.pause();if(replay.timeMs>=replay.durationMs)replay.seek(0);replay.playing=!replay.playing;replay.lastNow=performance.now();pendingSeek=true;});
-$('scrubber').addEventListener('input',()=>{player.pause();replay.seek($('scrubber').value);pendingSeek=true;requestEpoch++;});
+bind('play-pause',async()=>{
+  if(replayAudioInfo?.kind==='offline-rendered-file'&&audioObjectUrl){
+    if(player.paused){if(player.ended)seekReplay(0);await player.play();}else player.pause();
+    return;
+  }
+  player.pause();if(replay.timeMs>=replay.durationMs)replay.seek(0);replay.playing=!replay.playing;replay.lastNow=performance.now();pendingSeek=true;
+});
+$('scrubber').addEventListener('input',()=>seekReplay($('scrubber').value));
 bind('isometric',()=>{camera.topDown=false;$('isometric').classList.add('active');$('topdown').classList.remove('active');});
 bind('topdown',()=>{camera.topDown=true;$('topdown').classList.add('active');$('isometric').classList.remove('active');});
 bind('follow',()=>{follow=!follow;if(follow&&atlas&&camera.scale<.14)atlasFirstFollow=true;$('follow').classList.toggle('active',follow);});
@@ -431,4 +458,12 @@ canvas.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-dra
   else {camera.yaw+=dx*.008;camera.pitch=Math.max(.15,Math.min(1.5,camera.pitch+dy*.005));}});
 canvas.addEventListener('wheel',e=>{e.preventDefault();if(atlas){atlasPoseInitialised=true;atlasFirstFollow=false;}camera.scale=Math.max(atlas?.index?.bounds?Math.min(.01,camera.width/(atlas.index.bounds.max[0]-atlas.index.bounds.min[0]+1)*.5):2,Math.min(80,camera.scale*Math.exp(-e.deltaY*.001)));},{passive:false});
 document.addEventListener('visibilitychange',()=>{replay.lastNow=null;operatorLastDraw=null;pendingSeek=true;displayCadence.reset();displayRate.reset();});
-refreshRecordings().catch(()=>{});statusLoop();telemetryLoop().catch(error=>notice(error.message,true));installedContextLoop();requestAnimationFrame(animationLoop);
+async function loadReplayLink(){
+  await refreshRecordings();
+  const id=new URLSearchParams(location.search).get('replay');
+  if(!id)return;
+  $('recordings').value=id;
+  await openReplay(id);
+  if(replayAudioInfo?.kind==='offline-rendered-file')await loadReplayAudio();
+}
+loadReplayLink().catch(error=>notice(error.message,true));statusLoop();telemetryLoop().catch(error=>notice(error.message,true));installedContextLoop();requestAnimationFrame(animationLoop);

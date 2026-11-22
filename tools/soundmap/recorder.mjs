@@ -125,5 +125,5 @@ export class SessionRecorder {
 export function replayFrame(replay,timeMs) {
   if(!Number.isFinite(timeMs)||timeMs<0||timeMs>replay.durationMs+1)throw Error('Replay time outside recording');
   let lo=0,hi=replay.frames.length-1,index=-1;while(lo<=hi){const mid=(lo+hi)>>1;if(replay.frames[mid].timeMs<=timeMs){index=mid;lo=mid+1;}else hi=mid-1;}
-  const row=index<0?null:replay.frames[index];return {mode:'replay',playbackTimeMs:timeMs,frame:row?.frame??null,geometry:row?replay.geometries.get(row.frame.geometryGeneration)??null:null,status:{connected:false,historical:true,originalFrameTimeMs:row?.timeMs??null,ageMs:row?timeMs-row.timeMs:null}};
+  const row=index<0?null:replay.frames[index];return {mode:'replay',playbackTimeMs:timeMs,frame:row?.frame??null,geometry:row?.frame?replay.geometries.get(row.frame.geometryGeneration)??null:null,status:{connected:false,historical:true,originalFrameTimeMs:row?.timeMs??null,ageMs:row?timeMs-row.timeMs:null}};
 }

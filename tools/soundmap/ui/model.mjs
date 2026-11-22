@@ -90,6 +90,14 @@ export function checkFrame(f) {
   fail(Array.isArray(f.paths)&&f.paths.length<=LIMITS.paths&&Array.isArray(f.sources)&&f.sources.length<=LIMITS.sources,'Visual frame budget exceeded');
   fail(!f.listener?.valid||isPoint(f.listener.position),'Invalid listener pose');
   for(const s of f.sources)fail(!s.position||isPoint(s.position),'Invalid source pose');
+  if(f.renderedVoices!==undefined){
+    const name=value=>typeof value==='string'&&/^[\w:.-]{1,96}$/.test(value);
+    fail(Array.isArray(f.renderedVoices)&&f.renderedVoices.length<=5&&f.renderedVoices.every(v=>
+      v&&name(v.vehicle)&&name(v.engine)&&name(v.exhaust)&&typeof v.voice==='string'&&/^[\w .-]{1,64}$/.test(v.voice)&&
+      ['player','npc'].includes(v.context)&&Number.isInteger(v.model)&&v.model>=0&&v.model<=0xffffffff&&
+      Number.isSafeInteger(v.observedGeneration)&&v.observedGeneration>=0&&
+      Number.isFinite(v.operatingPoint)&&v.operatingPoint>=0&&v.operatingPoint<=1),'Invalid rendered vehicle attribution');
+  }
   for(const p of f.paths){
     fail(['selected','rejected','unknown','pruned'].includes(p.status),'Unknown solver path state');
     fail(p.vertices===null||p.vertices===undefined||(Array.isArray(p.vertices)&&p.vertices.length>=2&&p.vertices.length<=4&&p.vertices.every(isPoint)),'Invalid solver path vertices');

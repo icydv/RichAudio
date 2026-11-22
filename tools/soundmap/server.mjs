@@ -12,8 +12,9 @@ const ui=path.join(path.dirname(fileURLToPath(import.meta.url)),'ui');
 const wireContract=fileURLToPath(new URL('../../src/acoustics/streaming/soundmap-wire.mjs',import.meta.url));
 const equal=(a,b)=>typeof a==='string'&&a.length===b.length&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 async function body(req,limit){const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>limit)throw Error('Request byte bound');chunks.push(chunk);}return Buffer.concat(chunks);}
-export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.now,ownerId=null,installedContext=null,viewOnly=false,viewOnlyMap=false,worldAtlas=null,sourceReceipt=null,sourceMonitor=null,onClosed=()=>{}}={}) {
+export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.now,ownerId=null,installedContext=null,viewOnly=false,viewOnlyMap=false,worldAtlas=null,sourceReceipt=null,sourceMonitor=null,renderedReplay=null,onClosed=()=>{}}={}) {
   if(!Number.isInteger(port)||port<0||port>65535)throw Error('Port bound');
+  if(renderedReplay)viewOnly=true;
   const privateRoot=privateDirectory(root),token=randomBytes(32).toString('hex'),recorder=new SessionRecorder(privateRoot,{now});
   if(ownerId!==null&&(typeof ownerId!=='string'||!/^[a-f0-9]{32}$/.test(ownerId)))throw Error('Owner identity bound');
   // Passive presentation needs only the pure shared wire contract. Load the
@@ -33,7 +34,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
   // The sealed camera-only entry point must name its exact atlas explicitly.
   // Ordinary SoundMap startup uses the prepared workspace atlas, if present.
   // Minimal passive packages omit the installed-world modules altogether.
-  const atlasPointer=!viewOnlyMap&&fs.lstatSync(path.resolve(root,'.local','soundmap','world-atlas.json'),{throwIfNoEntry:false});
+  const atlasPointer=!viewOnlyMap&&!renderedReplay&&fs.lstatSync(path.resolve(root,'.local','soundmap','world-atlas.json'),{throwIfNoEntry:false});
   const atlasModule=worldAtlas||atlasPointer?await import('./world-atlas01.mjs'):null;
   const atlasConfig=worldAtlas??(atlasPointer?await atlasModule.configuredWorldAtlas01(root):null);
   const atlas=atlasConfig?await atlasModule.openWorldAtlas01({...atlasConfig,installedContext,sourceReceipt,now,
@@ -66,6 +67,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
       if(req.headers.host!=='127.0.0.1:'+boundPort||req.headers.origin&&req.headers.origin!==origin||route.startsWith('/api/')&&req.headers['sec-fetch-site']==='cross-site'){send({error:'Same-origin localhost only'},403);return;}
       if(route==='/api/session'&&req.method==='GET'){send({token});return;}
       if(route.startsWith('/api/')&&!equal(req.headers['x-richaudio-token'],token)){send({error:'Session capability required'},403);return;}
+      if(renderedReplay&&req.method==='POST'&&!['/api/replay/open','/api/replay/close'].includes(route)){send({error:'Rendered replay only'},403);return;}
       if((viewOnlyMap||viewOnly&&atlas)&&route.startsWith('/api/')&&!['GET /api/status','GET /api/frame','GET /api/world-context','POST /api/passive','POST /api/service/stop'].includes(req.method+' '+route)&&
        !(atlas&&req.method==='GET'&&['/api/atlas/index','/api/atlas/page','/api/atlas/coverage'].includes(route))&&
        !(operator&&req.method==='POST'&&['/api/atlas/metrics','/api/operator/stop'].includes(route))){send({error:'Map qualification accepts camera observations only'},403);return;}
@@ -161,10 +163,11 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
         const bytes=await body(req,LIMITS.pcmBytes+16384);if(bytes.length<4)throw Error('PCM envelope');const length=bytes.readUInt32LE(0);if(length>16384||length+4>bytes.length)throw Error('PCM metadata bound');
         const metadata=JSON.parse(bytes.subarray(4,length+4).toString('utf8')),pcm=bytes.subarray(length+4);
         const accepted=recorder.active?recorder.pcm(metadata,pcm):false;send({accepted});
-      }else if(route==='/api/recordings'&&req.method==='GET')send({recordings:recorder.list()});
+      }else if(route==='/api/recordings'&&req.method==='GET')send({recordings:renderedReplay?[renderedReplay.manifest]:recorder.list()});
       else if(route==='/api/replay/open'&&req.method==='POST'){
-        replay=recorder.open(value.id);send({id:replay.id,durationMs:replay.durationMs,startTimeMs:0,events:replay.events,
-          timeline:{basis:'original-engine-audioFrame',originFrame:replay.originFrame,sampleRate:48000},audio:{available:replay.manifest.audio.capturedFrames>0&&replay.audioPlayable,url:'/api/replay/audio',sampleRate:48000,channels:2,format:'wav-float32',gaps:replay.manifest.audio.gaps,startTimeMs:replay.audioStartTimeMs,clockUncertainty:replay.manifest.audio.clockUncertainty},manifest:replay.manifest});
+        if(renderedReplay&&value.id!==renderedReplay.id)throw Error('Rendered replay identity differs');
+        replay=renderedReplay??recorder.open(value.id);send({id:replay.id,durationMs:replay.durationMs,startTimeMs:0,events:replay.events,
+          timeline:{basis:replay.manifest.timelineBasis??'original-engine-audioFrame',originFrame:replay.originFrame,sampleRate:48000},audio:{available:replay.manifest.audio.capturedFrames>0&&replay.audioPlayable,url:'/api/replay/audio',sampleRate:48000,channels:2,format:'wav-float32',gaps:replay.manifest.audio.gaps,startTimeMs:replay.audioStartTimeMs,clockUncertainty:replay.manifest.audio.clockUncertainty,kind:replay.manifest.audio.kind},manifest:replay.manifest});
       }else if(route==='/api/replay/frame'&&req.method==='GET'){
         if(!replay)throw Error('Open a recording first');const result=replayFrame(replay,Number(url.searchParams.get('timeMs')??0));
         if(result.geometry?.generation===url.searchParams.get('geometryGeneration'))result.geometry=null;send(result);
@@ -172,6 +175,7 @@ export async function startSoundMap({root=path.resolve('.'),port=17833,now=Date.
       else if(route==='/api/replay/audio'&&req.method==='GET'){
         if(!replay||!replay.manifest.audio.capturedFrames)throw Error('No recorded owned PCM');
         if(!replay.audioPlayable){send({error:'Recording contains gaps or incomplete PCM/index evidence. No repaired WAV produced.',gaps:replay.manifest.audio.gaps},409);return;}
+        if(replay.wav){res.setHeader('Content-Type','audio/wav');res.setHeader('Content-Length',replay.wav.length);res.end(replay.wav);return;}
         const bytes=fs.statSync(path.join(replay.dir,'owned-output.f32le')).size,header=Buffer.alloc(44);
         header.write('RIFF');header.writeUInt32LE(bytes+36,4);header.write('WAVEfmt ',8);header.writeUInt32LE(16,16);header.writeUInt16LE(3,20);header.writeUInt16LE(2,22);header.writeUInt32LE(48000,24);header.writeUInt32LE(384000,28);header.writeUInt16LE(8,32);header.writeUInt16LE(32,34);header.write('data',36);header.writeUInt32LE(bytes,40);
         res.setHeader('Content-Type','audio/wav');res.setHeader('Content-Disposition','attachment; filename="owned-output.wav"');res.write(header);fs.createReadStream(path.join(replay.dir,'owned-output.f32le')).pipe(res);
