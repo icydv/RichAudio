@@ -7,6 +7,8 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & node --test tests/Test-VehicleSynthesis.mjs tests/Test-VehicleState.mjs tests/Test-VehicleEnvironment.mjs tests/Test-VehiclePropagation.mjs tests/Test-VehiclePipeline.mjs tests/Test-VehicleDemo.mjs
+    if($LASTEXITCODE-ne0){throw 'Original vehicle sources, state ownership, propagation or private offline demo failed.'}
     & node --test tests/Test-ListeningOperator.mjs
     if($LASTEXITCODE-ne0){throw 'Focused listening operator orchestration failed.'}
     & (Join-Path $repo 'tools\Build-AcousticGpu.ps1') -Tests
