@@ -3,7 +3,7 @@ import path from 'node:path';
 import {replayMappedPaths} from './mapped-drive-render.mjs';
 import {writeStereoWave} from './powertrain-drive.mjs';
 
-export function measureTrafficReflections(take,directory) {
+export function measureTrafficReflections(take,directory,{requireBoth=true}={}) {
  const lead = take.receipt.voices['lead-pass@1'];
  const candidates = {}, eligible = {};
  let faces;
@@ -31,7 +31,7 @@ export function measureTrafficReflections(take,directory) {
    if (!candidates[kind] || candidates[kind].proxy<proxy) candidates[kind]=candidate;
   }
  }
- assert.equal(Object.keys(candidates).length,2,'Retain both distinct multi-wall routes on the primary vehicle');
+ if(requireBoth) assert.equal(Object.keys(candidates).length,2,'Retain both distinct multi-wall routes on the primary vehicle');
  const result = {};
  for (const [kind,chosen] of Object.entries(candidates)) {
   const id=chosen.ray.id;

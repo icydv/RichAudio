@@ -36,10 +36,10 @@ export function describeRenderer(r) {
   continuousTransitions: r.continuousTransitions };
 }
 
-export async function renderMappedPerformance({ directory, name, file, windows, drive, inputs, blocks, session, fleet, record }) {
+export async function renderMappedPerformance({ directory, name, file, windows, drive, inputs, blocks, session, fleet, record, fleetReflectionPolicy }) {
  let now = 0, maxActive = 0, npcLastBlock = null, lastObservation = -1;
  const engine = new StockGameplay({ registry: inputs.registry, profiles: inputs.profiles, session, now: () => now,
-  continuityPolicy: 'camera-source-01', latencyProfile: 'street-01', vehicleSourcePolicy: 'catalogue-fleet-01' });
+  continuityPolicy: 'camera-source-01', latencyProfile: 'street-01', vehicleSourcePolicy: 'catalogue-fleet-01', fleetReflectionPolicy });
  engine.setSettings({ ...engine.settings, quality: 'quality', acceleration: 'cpu', volume: .8 });
  engine.telemetry = new SoundMapTelemetry({ enabled: true });
  const renderer = engine.pipeline.renderer, settings = describeRenderer(renderer);
