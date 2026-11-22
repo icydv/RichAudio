@@ -5,7 +5,11 @@ param(
     [string]$NodeExecutable = (Get-Command node.exe -CommandType Application | Select-Object -First 1).Source,
     [ValidateRange(256, 13440)][int]$Blocks = 13440,
     [ValidateRange(1, 25)][int]$Population = 25,
-    [switch]$Legacy
+    [switch]$Legacy,
+    [string]$RetainedSourceManifest,
+    [string]$RetainedWorld,
+    [string]$WallPose,
+    [switch]$WarmWall
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
@@ -20,6 +24,13 @@ for ($parent = Split-Path -Parent $out; $parent; $parent = Split-Path -Parent $p
     }
 }
 if ($Legacy -and $Population -ne 1) { throw 'Legacy comparison uses one vehicle' }
+$retained = @($RetainedSourceManifest, $RetainedWorld, $WallPose | Where-Object { $_ }).Count
+if ($retained -and ($retained -ne 3 -or $Legacy -or $Population -notin 1, 2, 5)) {
+    throw 'The retained case needs the source manifest, world binding, wall pose, and one, two or five vehicles'
+}
+if ($WarmWall -and (!$retained -or $Population -eq 1 -or $Blocks -lt 768)) {
+    throw 'The wall warm-up needs a retained two- or five-vehicle case with at least 768 blocks'
+}
 $node = (Get-Item -LiteralPath $NodeExecutable).FullName
 [IO.Directory]::CreateDirectory($out) | Out-Null
 $owner = & (Join-Path $PSScriptRoot 'Test-Gameplay.ps1') -CompileObservationOwner (Join-Path $out 'authored-owner')
@@ -33,7 +44,12 @@ $compiler = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
 & $compiler /nologo /target:library ('/out:' + $identity) $rphSource
 if ($LASTEXITCODE) { throw 'Authored runtime identity compilation failed' }
 $mode = if ($Legacy) { 'legacy' } else { 'fleet' }
-$prepared = & $node (Join-Path $repo 'tests/fixtures/PrepareClockedFleet02.mjs') $out $owner $node $audioHost $mode
+$prepareArguments = @($out, $owner, $node, $audioHost, $mode)
+if ($retained) {
+    $prepareArguments += @($RetainedSourceManifest, $RetainedWorld, $WallPose | ForEach-Object { (Resolve-Path -LiteralPath $_).Path })
+    if ($WarmWall) { $prepareArguments += 'warm-wall' }
+}
+$prepared = & $node (Join-Path $repo 'tests/fixtures/PrepareClockedFleet02.mjs') @prepareArguments
 if ($LASTEXITCODE) { throw 'Benchmark package preparation failed' }
 $package = $prepared | ConvertFrom-Json -DateKind String
 $files = @('src/acoustics/host','src/acoustics/recording','src/acoustics/observation','src/acoustics/geometry') |
@@ -43,7 +59,7 @@ $files += @('tests/host/TestGameplay.cs','tests/fixtures/PrepareClockedFleet02.m
     ForEach-Object { Get-Item -LiteralPath (Join-Path $repo $_) }
 [ordered]@{
     sourceCommit = (& git -C $repo rev-parse HEAD)
-    mode = $mode; requestedBlocks = $Blocks; requestedPopulation = $Population
+    mode = $mode; requestedBlocks = $Blocks; requestedPopulation = $Population; warmWall = [bool]$WarmWall
     package = $package; node = (& $node --version)
     compiledAndRuntime = @($owner,$identity,$audioHost,$node,$compiler) | ForEach-Object { Get-FileHash -LiteralPath $_ }
     sources = $files | Get-FileHash
@@ -67,6 +83,8 @@ try {
         $_.population.discovered -eq $Population -and $_.active -eq [Math]::Min(5, $Population)
     } | Select-Object -First 1)
     $sceneQualified = $counters.firstActivations -gt 0 -and $counters.replacements -gt 0
+    $reflected = if ($retained) { $producer.byActiveWithReflection."$Population" } else { $null }
+    if ($retained) { $sceneQualified = $sceneQualified -and $reflected.selectedWallBlocks -gt 0 }
     $passed = $driver.reason -eq 'workload-complete' -and $driver.closed -and !$driver.final.failure -and
         $sustained -and $populationQualified -and $sceneQualified -and $producer.hardMisses -eq 0 -and
         $producer.overflowBlocks -eq 0 -and $driver.final.underflowFrames -eq 0 -and $driver.final.discardCadence.deferredCallbacks -eq 0
@@ -75,7 +93,8 @@ try {
         blocks = $producer.blocks; nonzeroBlocks = $producer.nonzeroBlocks
         sustained = $sustained; populationQualified = [bool]$populationQualified; sceneQualified = $sceneQualified
         hardMisses = $producer.hardMisses; underflowFrames = $driver.final.underflowFrames
-    } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $out 'benchmark-result.json')
+        expiredSnapshots = $driver.final.expiredSnapshots; reflectedActivePopulation = $reflected
+    } | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $out 'benchmark-result.json')
     if (!$passed) { throw 'Clocked benchmark failed its workload, render deadline, or ring delivery gate' }
 } finally {
     $env:RICHAUDIO_CLOCKED_FLEET_EVIDENCE02 = $previous

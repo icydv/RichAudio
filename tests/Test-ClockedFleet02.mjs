@@ -160,6 +160,7 @@ test('a fresh contributor cannot extend the lease of another vehicle',async()=>{
   assert.deepEqual(g.vehiclesAt(target).map(v=>v.id),['a','b']);
   e.at(106);
   assert.deepEqual(g.vehiclesAt(target).map(v=>v.id),['a']);
+  assert.deepEqual(g.staleContributors,{frameLease:0,latestVehicle:1,leftBracket:0,rightBracket:0});
 
   const expired=g.snapshots.at(-1).vehiclesById.get('b').acquisition01;
   const second=frame(19,[['a'],['b']]);
@@ -169,7 +170,35 @@ test('a fresh contributor cannot extend the lease of another vehicle',async()=>{
   assert.deepEqual(g.vehiclesAt(between).map(v=>v.id),['a']);
   assert.notEqual(g.snapshots.at(-1).vehiclesById.get('b').acquisition01,expired,
     'a new observation after the contributor lease expired starts a fresh history');
+  e.at(356);
+  assert.deepEqual(g.vehiclesAt(g.snapshots.at(-1).time),[]);
+  assert.deepEqual(g.staleContributors,{frameLease:2,latestVehicle:1,leftBracket:0,rightBracket:0});
  }finally{await g.close();}
+});
+
+test('fleet expiry counters identify the selected interpolation endpoint',async()=>{
+ const e=engine(true),g=e.g,f=engine(true),h=f.g;
+ try{
+  const first=frame(0,[['a'],['b']]);
+  first.vehicles[1].observationTicks-=45*first.listener.clockFrequency/1000;
+  g.accept(first,100,150);
+  const target=g.snapshots.at(-1).time+.01;
+  e.at(104);g.accept(frame(19,[['a'],['b']]),2,248);
+  e.at(106);
+  assert.deepEqual(g.vehiclesAt(target).map(v=>v.id),['a']);
+  assert.deepEqual(g.staleContributors,{frameLease:0,latestVehicle:0,leftBracket:1,rightBracket:0});
+  h.accept(frame(0,[['a'],['b']]),0,250);
+  // Conservatively age the second pair on receipt. B predates A in that
+  // pair, so B's right bracket expires first even though both lefts and
+  // the latest pair still carry a live lease.
+  const delayed=frame(19,[['a'],['b']]);
+  delayed.vehicles[1].observationTicks-=45*delayed.listener.clockFrequency/1000;
+  f.at(200);h.accept(delayed,176,74);
+  f.at(205);h.accept(frame(20,[['a'],['b']]),0,250);
+  f.at(230);
+  assert.deepEqual(h.vehiclesAt(h.snapshots[0].time+.01).map(v=>v.id),['a']);
+  assert.deepEqual(h.staleContributors,{frameLease:0,latestVehicle:0,leftBracket:0,rightBracket:1});
+ }finally{await Promise.all([g.close(),h.close()]);}
 });
 
 test('retiring a repeated fleet observation releases its wall paths while the other voice continues',async()=>{

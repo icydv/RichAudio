@@ -55,6 +55,8 @@ export class StockGameplay {
   this.voiceLimit=this.catalogueFleet?5:MAX;
   this.vehicleLimit=this.catalogueFleet?32:8;
   this.fleetPopulation=null;this.fleetAcquisition=0;
+  // Count candidates declined at the source selector before mixing and voice budgeting.
+  this.staleContributors=this.catalogueFleet?{frameLease:0,latestVehicle:0,leftBracket:0,rightBracket:0}:null;
   this.registry=registry;this.profiles=profiles;this.now=now;this.session=session;this.settings={quality:'auto',acceleration:'auto',enabled:true,volume:1,reflections:true,mode:'experimental-additive',airflowEnabled:false,airflowLevel:.35};
   // Fixed common observation clock: camera-stationary calibration cannot
   // relabel time while an independently moving vehicle is producing Doppler.
@@ -365,14 +367,18 @@ export class StockGameplay {
   return Math.min(time,latest.time+offset);
  }
  vehiclesAt(time){
-  const now=this.now();
-  if(!this.snapshots.length||now>=this.snapshots.at(-1).wallExpires)return [];
+  const now=this.now(),latest=this.snapshots.at(-1),stale=this.staleContributors;
+  if(!latest)return [];
+  if(now>=latest.wallExpires){
+   if(stale)for(const v of latest.frame.vehicles)if(v.valid)stale.frameLease++;
+   return [];
+  }
   let a=null,b=null;for(const s of this.snapshots){if(s.time<=time)a=s;else{b=s;break;}}
   if(!a||time-a.time>.25||!a.frame.listener.valid||a.frame.listener.paused)return [];
-  const result=[];for(const identity of this.snapshots.at(-1).frame.vehicles){if(!identity.valid)continue;
+  const result=[];for(const identity of latest.frame.vehicles){if(!identity.valid)continue;
    let left=null,right=null;
    if(this.catalogueFleet){
-    if(now>=identity.sourceExpiresAt)continue;
+    if(now>=identity.sourceExpiresAt){stale.latestVehicle++;continue;}
     // Search only this contiguous acquisition. An invalid or absent sample
     // closes its history even when a later sender reuses the same identity.
     for(let i=this.snapshots.length-1;i>=0;i--){
@@ -386,7 +392,10 @@ export class StockGameplay {
     const at=snapshot.time+(v.observationTicks-snapshot.frame.listener.observationTicks)/snapshot.frame.listener.clockFrequency;
     if(at<=time)left={time:at,v,sequence:snapshot.frame.listener.sequence};else{right={time:at,v,sequence:snapshot.frame.listener.sequence};break;}}
    if(!left)continue;const old=left.v,next=right?.v;a={time:left.time};b=right;
-   if(this.catalogueFleet&&(now>=old.sourceExpiresAt||next&&now>=next.sourceExpiresAt))continue;
+   if(stale){
+    if(now>=old.sourceExpiresAt){stale.leftBracket++;continue;}
+    if(next&&now>=next.sourceExpiresAt){stale.rightBracket++;continue;}
+   }
    if(b&&!next)continue;
    const dt=next?b.time-a.time:0,u=dt>0?(time-a.time)/dt:0;
    if(next&&(dt>.25||distance(old.position,next.position)/dt>100))continue;

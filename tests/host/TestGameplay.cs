@@ -5,6 +5,8 @@ using System;using System.Collections.Generic;using System.Diagnostics;using Sys
 internal static class TestGameplay {
  static GameplayRuntime runtime;static long sequence,generation=1;static bool wasPaused;static readonly JavaScriptSerializer Json=new JavaScriptSerializer();static string root;static int checks;static readonly List<int> owned=new List<int>();
  static bool environmentFixture,deliveryFixture,deliveryViewerFixture;
+ static double[] wallListener,wallSource,wallTangent;
+ static bool warmWall;
  static void Check(bool x,string why){checks++;if(!x)throw new Exception(why);}
  static Dictionary<string,object> Read(string f){try{using(var s=new FileStream(f,FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete))
   using(var r=new StreamReader(s))return Json.DeserializeObject(r.ReadToEnd()) as Dictionary<string,object>;}catch(IOException){return null;}}
@@ -25,7 +27,7 @@ internal static class TestGameplay {
  static void Feed(int count,bool pause=false,bool valid=true){if(pause!=wasPaused){generation++;wasPaused=pause;}long now=Stopwatch.GetTimestamp();var vehicles=new List<GameplayVehicle>();for(int i=0;i<count;i++)vehicles.Add(new GameplayVehicle{Id="actual-component-fixture-"+i,Generation=deliveryFixture?1:(int)(sequence/160)+1,ObservationTicks=now,Model=i==0?0xf9300cc5u:0xa774b5a6u,Context=i==0&&!environmentFixture?"npc":"player",Position=deliveryFixture?new[]{1d,-3d,1.3}:new[]{2d+i*4,3d,0d},Velocity=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},OperatingPoint=.1+.7*(.5+.5*Math.Sin(sequence*.02)),Running=true,Valid=true,RiderAttached=deliveryFixture});
   runtime.Publish(new GameplayFrame{Session=runtime.Session,WorldPreparationStartedUtc=deliveryViewerFixture?Environment.GetEnvironmentVariable("RICHAUDIO_AUTHORED_WORLD_EPOCH01"):null,Listener=new ListenerState{Version=1,Session=runtime.Session,Generation=generation,Sequence=sequence++,ObservationTicks=now,ClockFrequency=Stopwatch.Frequency,GameTimeMs=(long)(sequence*50),Position=deliveryFixture?new[]{0d,-3d,1.6}:new[]{0d,0d,1d},Velocity=new[]{0d,0d,0d},Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},ListenerKind="camera",VelocityKind="estimated-camera-difference",Paused=pause,Valid=valid,Reason=valid?"valid":"not-ready",Coordinates="gta-native-unscaled",Units="native-unverified",SourceId=null},Vehicles=vehicles.ToArray()});
  }
- static void Until(Func<bool> condition,int milliseconds,int count=1,bool pause=false){var clock=Stopwatch.StartNew();while(!condition()){if(clock.ElapsedMilliseconds>milliseconds)throw new TimeoutException(runtime.State+"; "+(Evidence()==null?"no host status":Json.Serialize(Evidence())));Feed(count,pause);Thread.Sleep(50);}}
+ static void Until(Func<bool> condition,int milliseconds,int count=1,bool pause=false){var clock=Stopwatch.StartNew();while(!condition()){if(clock.ElapsedMilliseconds>milliseconds)throw new TimeoutException(runtime.State+"; "+(Evidence()==null?"no host status":Json.Serialize(Evidence())));if(wallListener!=null)FleetFrame(0,count,false);else Feed(count,pause);Thread.Sleep(50);}}
  static void For(int milliseconds,int count=1,bool pause=false,bool valid=true){var clock=Stopwatch.StartNew();while(clock.ElapsedMilliseconds<milliseconds){Feed(count,pause,valid);Thread.Sleep(50);}}
  static void Settings(long revision,bool enabled=true,double volume=1){AcousticSettingsStore.Save(root,AcousticSettingsStore.DefaultPath(root),new AcousticSettings("performance","cpu",Math.Max(revision,File.Exists(AcousticSettingsStore.DefaultPath(root))?AcousticSettingsStore.Load(root,AcousticSettingsStore.DefaultPath(root)).Revision+1:1),enabled,volume,true,false,"experimental-additive",deliveryViewerFixture));}
  static float Marker(int frame){return .1f*(frame%251)/251;}
@@ -108,20 +110,31 @@ internal static class TestGameplay {
   long now=Stopwatch.GetTimestamp();double x=8*(1-Math.Cos(time*.28)),vx=8*.28*Math.Sin(time*.28);
   var vehicles=new List<GameplayVehicle>();
   for(int i=0;i<population;i++){
-   if(i==1&&time>=18&&time<19)continue;
+   if(wallListener==null&&i==1&&time>=18&&time<19)continue;
    double speed=i==0?0:.5+i*.04,phase=time*speed+i,offset=i==0?0:Math.Sin(phase)*.6;
    double px=i==0?1:x+1+i*.4+offset,py=i%2==0?-3:2;
-   vehicles.Add(new GameplayVehicle{Id="authored-fleet-"+i,Generation=i==1&&time>=19?2:1,ObservationTicks=now,
+   vehicles.Add(new GameplayVehicle{Id="authored-fleet-"+i,Generation=wallListener==null&&i==1&&time>=19?2:1,ObservationTicks=now,
     Model=i>=22?0xA0010055u:i%3==2?0xA774B5A6u:0xF9300CC5u,Context=legacy||i%3==2?"player":"npc",
     Position=new[]{px,py,1.3},Velocity=new[]{i==0?0:vx+.6*speed*Math.Cos(phase),0,0},
     Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},OperatingPoint=.08+.7*(.5+.5*Math.Sin(time*(.45+i*.1)+i)),
     Running=true,Valid=true});
   }
+  if(wallListener!=null)for(int i=0;i<vehicles.Count;i++){
+   GameplayVehicle v=vehicles[i];
+   double phase=time*(.5+i*.07)+i*.82, along=1.15*Math.Sin(phase), across=.18*i;
+   v.Model=0xF9300CC5u;v.Context=i==0?"player":"npc";
+   v.Position=new[]{wallSource[0]+wallTangent[0]*along-wallTangent[1]*across,
+    wallSource[1]+wallTangent[1]*along+wallTangent[0]*across,wallSource[2]};
+   double tangentSpeed=1.15*(.5+i*.07)*Math.Cos(phase);
+   v.Velocity=new[]{wallTangent[0]*tangentSpeed,wallTangent[1]*tangentSpeed,0d};
+   v.Forward=wallTangent;
+  }
   var frame=new GameplayFrame{Session=runtime.Session,ValidThroughTicks=now+Stopwatch.Frequency/4,
    WorldPreparationStartedUtc=Environment.GetEnvironmentVariable("RICHAUDIO_AUTHORED_WORLD_EPOCH01"),
    Listener=new ListenerState{Version=1,Session=runtime.Session,Generation=generation,Sequence=sequence++,ObservationTicks=now,
-    ClockFrequency=Stopwatch.Frequency,GameTimeMs=sequence*50,Position=new[]{x,-3,1.6},Velocity=new[]{vx,0,0},
-    Forward=new[]{0d,1d,0d},Up=new[]{0d,0d,1d},ListenerKind="camera",VelocityKind="estimated-camera-difference",
+    ClockFrequency=Stopwatch.Frequency,GameTimeMs=sequence*50,Position=wallListener??new[]{x,-3,1.6},
+    Velocity=wallListener==null?new[]{vx,0,0}:new[]{0d,0d,0d},
+    Forward=wallTangent??new[]{0d,1d,0d},Up=new[]{0d,0d,1d},ListenerKind="camera",VelocityKind="estimated-camera-difference",
     Valid=true,Reason="valid",Coordinates="gta-native-unscaled",Units="native-unverified"},Vehicles=vehicles.ToArray()};
   if(time<.01)GameplayWire.Decode(GameplayWire.Encode(frame,runtime.Session),runtime.Session);
   runtime.Publish(frame);
@@ -135,7 +148,7 @@ internal static class TestGameplay {
   int nextSample=0;string reason="workload-complete";
   do{
    double time=run.Elapsed.TotalSeconds;
-   int n=time<1?1:time<3?2:time<6?3:time<9?5:time<12?10:25;
+   int n=wallListener!=null?(warmWall&&time<6?1:limit):time<1?1:time<3?2:time<6?3:time<9?5:time<12?10:25;
    FleetFrame(time,Math.Min(limit,n),legacy);
    if(run.ElapsedMilliseconds>=nextSample){
     var host=Evidence();var worker=host!=null&&host.ContainsKey("worker")?host["worker"]as Dictionary<string,object>:null;
@@ -163,6 +176,11 @@ internal static class TestGameplay {
   return closed&&runtime.Attempts==1&&final!=null&&false.Equals(Value(final,"endpointOpened"))?0:1;
  }
  static object Value(Dictionary<string,object> d,string key){object value;return d!=null&&d.TryGetValue(key,out value)?value:null;}
+ static double[] WallVector(Dictionary<string,object> pose,string key){
+  var values=Value(pose,key) as object[];
+  Check(values!=null&&values.Length==3,"wall observation vector");
+  return Array.ConvertAll(values,Convert.ToDouble);
+ }
  static int OwnFleet(string[] args){
   int blocks=int.Parse(args[3]),population=int.Parse(args[4]);
   Check(blocks>=256&&blocks<=13440&&population>=1&&population<=25,"owned benchmark bounds");
@@ -188,11 +206,21 @@ internal static class TestGameplay {
    if(!fleet){RingTests();PipeTimeoutTests();}
    if(args.Length==1&&args[0]=="--ring-only"){Console.WriteLine("PASS "+checks+" exact PCM reserve / native callback / retained starvation guard / real pipe timeout checks; no endpoint");return 0;}
    root=Path.GetFullPath(args[0]);string manifest=Path.Combine(root,"playable.json");var raw=fleet?Read(manifest):null;
+   string wallPath=Path.Combine(root,"installed-wall-drive.json");
+   bool retainedWall=fleet&&File.Exists(wallPath);
    if(fleet)Check(root.IndexOf(Path.DirectorySeparatorChar+".local"+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase)>=0&&
-    String.Equals(Value(raw,"gameExecutable")as string,Process.GetCurrentProcess().MainModule.FileName,StringComparison.OrdinalIgnoreCase)&&
+    (retainedWall||String.Equals(Value(raw,"gameExecutable")as string,Process.GetCurrentProcess().MainModule.FileName,StringComparison.OrdinalIgnoreCase))&&
     "environment-observation".Equals(Value(raw,"outputSink")),"private authored self-owner and discard sink required before package verification");
    var c=PlayableConfiguration.Load(manifest);environmentFixture=c.DiscardEnvironmentalOutput;deliveryFixture=fleet||args.Length==3&&args[2].StartsWith("--delivery-",StringComparison.Ordinal);deliveryViewerFixture=deliveryFixture&&args[2]=="--delivery-world-viewer";Settings(1);string pointer=Path.Combine(root,".local","fixture-pointer.json");Directory.CreateDirectory(Path.GetDirectoryName(pointer));File.WriteAllText(pointer,Json.Serialize(new{schema=1,packageRoot=root,manifestSha256=PlayableConfiguration.Digest(c.Manifest)}));
-   runtime=new GameplayRuntime(!environmentFixture);runtime.Start(pointer,c.GameExecutable,args[1]);Until(()=>runtime.Configuration!=null,5000,0);Thread.Sleep(250);Check(runtime.Attempts==0,"no host before Story readiness");runtime.SetStoryReady(true);
+   if(retainedWall){
+    Check(c.CatalogueFleet&&Array.Exists(c.Bindings,b=>b.File=="installed-wall-drive.json"),"bound genuine wall case");
+    var wall=Read(wallPath);
+    wallListener=WallVector(wall,"listener");wallSource=WallVector(wall,"source");wallTangent=WallVector(wall,"tangent");
+    warmWall=true.Equals(Value(wall,"warmWall"));
+    double tangentLength=Math.Sqrt(wallTangent[0]*wallTangent[0]+wallTangent[1]*wallTangent[1]);
+    Check(Math.Abs(tangentLength-1)<.00001&&wallTangent[2]==0,"horizontal unit drive tangent");
+   }
+   runtime=new GameplayRuntime(retainedWall||!environmentFixture);runtime.Start(pointer,c.GameExecutable,args[1]);Until(()=>runtime.Configuration!=null,5000,0);Thread.Sleep(250);Check(runtime.Attempts==0,"no host before Story readiness");runtime.SetStoryReady(true);
    Until(()=>runtime.HostPid>0,5000,fleet?0:1);owned.Add(runtime.HostPid);
    if(fleet){var parts=args[2].Substring("--fleet-".Length).Split('-');return FleetBenchmark(int.Parse(parts[0]),int.Parse(parts[1]),!raw.ContainsKey("vehicleSourcePolicy"));}
    if(deliveryFixture)return DeliveryCase(args[2]);

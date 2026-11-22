@@ -24,6 +24,12 @@ export class ClockedFleetEvidence02 {
   this.population=new Uint8Array(maximumBlocks);
   this.nonzero=new Uint8Array(maximumBlocks);
   this.pathCount=new Uint16Array(maximumBlocks);
+  this.activeWithReflection=new Uint8Array(maximumBlocks);
+  this.mappedWithReflection=new Uint8Array(maximumBlocks);
+  this.reflectionCount=new Uint16Array(maximumBlocks);
+  this.selectedWall=new Uint8Array(maximumBlocks);
+  const poseFile=path.join(root,'installed-wall-drive.json');
+  this.expectedSurfaceId=fs.existsSync(poseFile)?JSON.parse(fs.readFileSync(poseFile,'utf8')).surfaceId:null;
   this.blocks=0;
   this.excess=0;
   this.creditHighWater=0;
@@ -54,6 +60,7 @@ export class ClockedFleetEvidence02 {
  }
  begin(at){this.wakeMs=at-this.creditTimes[this.creditRead++%8];}
  block(engine,framingMs,controlIngressMs,nonzero,packet){
+  this.staleContributors=engine.staleContributors;
   if(this.blocks===maximumBlocks){this.excess++;return;}
   const index=this.blocks++,stages=engine.lastRenderStages01;
   this.data.completeRenderMs[index]=engine.lastCompleteRenderMs;
@@ -65,6 +72,22 @@ export class ClockedFleetEvidence02 {
   this.population[index]=population;
   this.nonzero[index]=Number(nonzero);
   this.pathCount[index]=engine.pipeline.lastControl.paths.length;
+  if(engine.pipeline.simulation.scene.observationModel?.kind==='conditional-installed-static-model'){
+   let reflections=0,mapped=0;
+   for(const propagation of engine.pipeline.lastControl.paths){
+    const slot=/^stock:slot([0-4]):/.exec(propagation.sourceId);
+    if(slot&&engine.slots[Number(slot[1])]?.source)mapped|=1<<Number(slot[1]);
+    if(propagation.order>0){
+     reflections++;
+     if(this.expectedSurfaceId&&propagation.id.includes(this.expectedSurfaceId))this.selectedWall[index]=1;
+    }
+   }
+   if(reflections){
+    this.activeWithReflection[index]=engine.slots.filter(slot=>slot.source).length;
+    this.reflectionCount[index]=reflections;
+    for(;mapped;mapped&=mapped-1)this.mappedWithReflection[index]++;
+   }
+  }
   if(index%128===0)this.maxRss=Math.max(this.maxRss,process.memoryUsage.rss());
   const slow=engine.lastCompleteRenderMs>deadline&&this.misses.length<256;
   const worst=!this.worst||engine.lastCompleteRenderMs>this.worst.completeRenderMs;
@@ -81,15 +104,29 @@ export class ClockedFleetEvidence02 {
  }
  close(reason,error){
   this.gcObserver.disconnect();
-  const groups=new Map();
+  const groups=new Map(),reflectedGroups=new Map();
   for(let i=0;i<this.blocks;i++){
    const key=this.population[i];
    if(!groups.has(key))groups.set(key,[]);
    groups.get(key).push(i);
+   const reflected=this.activeWithReflection[i];
+   if(reflected){
+    if(!reflectedGroups.has(reflected))reflectedGroups.set(reflected,[]);
+    reflectedGroups.get(reflected).push(i);
+   }
   }
   const byPopulation=Object.fromEntries([...groups].map(([count,indices])=>[count,{
    blocks:indices.length,nonzeroBlocks:indices.filter(i=>this.nonzero[i]).length,
    maximumPaths:indices.reduce((n,i)=>Math.max(n,this.pathCount[i]),0),
+   hardMisses:indices.filter(i=>this.data.completeRenderMs[i]>deadline).length,
+   stages:Object.fromEntries(fields.map(f=>[f,summary(indices.map(i=>this.data[f][i]))]))
+  }]));
+  const byActiveWithReflection=Object.fromEntries([...reflectedGroups].map(([count,indices])=>[count,{
+   blocks:indices.length,nonzeroBlocks:indices.filter(i=>this.nonzero[i]).length,
+   mappedVoiceCounts:Object.fromEntries(Array.from({length:count+1},(_,mapped)=>[
+    mapped,indices.filter(i=>this.mappedWithReflection[i]===mapped).length])),
+   maximumReflectedPaths:indices.reduce((n,i)=>Math.max(n,this.reflectionCount[i]),0),
+   ...(this.expectedSurfaceId?{selectedWallBlocks:indices.filter(i=>this.selectedWall[i]).length}:{}),
    hardMisses:indices.filter(i=>this.data.completeRenderMs[i]>deadline).length,
    stages:Object.fromEntries(fields.map(f=>[f,summary(indices.map(i=>this.data[f][i]))]))
   }]));
@@ -100,7 +137,9 @@ export class ClockedFleetEvidence02 {
   };
   const output={schema:1,scope:'authored inputs through normal clocked discard producer',node:process.version,reason,error:error?.message??null,
    deadlineMs:deadline,blocks:this.blocks,overflowBlocks:this.excess,nonzeroBlocks:this.nonzero.reduce((a,b)=>a+b,0),
-   processingMs:summary(all),hardMisses:all.filter(ms=>ms>deadline).length,byPopulation,
+   processingMs:summary(all),hardMisses:all.filter(ms=>ms>deadline).length,byPopulation,byActiveWithReflection,
+   expectedSurfaceId:this.expectedSurfaceId,
+   ...(this.staleContributors?{staleContributors:{...this.staleContributors}}:{}),
    missSamples:this.misses.map(withGc),worst:withGc(this.worst),gcIntervalsOmitted:Math.max(0,this.gc.count-this.gcIntervals.length),
    lifecycleMs:performance.now()-this.began,preCreditMs:this.readyAt-this.began,preparation:this.preparation,
    creditHighWater:this.creditHighWater,maxSampledRssBytes:this.maxRss,cpu:process.cpuUsage(),gc:this.gc,
