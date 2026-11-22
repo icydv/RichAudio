@@ -129,7 +129,7 @@ if(!config.demoProfile&&config.acousticWorld!==false){
  const worldConfig={manifestPath:worldInside(c.manifestPath??worldRoot+'/geometry/manifest.json'),catalogPath:worldInside(c.catalogPath??worldRoot+'/resolved/resolved-catalog.json'),expectedGameSHA256:config.gameSha256,
   ...retained,
   ...(c.catalogSHA256?{expectedCatalogSHA256:c.catalogSHA256}:{}),...(derivedCacheRoot?{privateRoot:derivedCacheRoot}:{}),...(!qualification&&(c.initialObservationPath!==undefined||c.privateCacheRoot===undefined)?{initialObservationPath:worldInside(c.initialObservationPath??worldRoot+'/geometry/initial-observation01.json')}:{ }),maximumResidentResources:16};
- installedScenes=new InstalledSceneService01({config:worldConfig,session,onStatus:s=>{
+ installedScenes=new InstalledSceneService01({config:worldConfig,session,includeStatusHistory:false,onStatus:s=>{
   worldStatus={stage:s.stage,installedWorldVerified:false,genuineResourceVerified:s.genuineResourceVerified===true,preparation:s.preparation??{completedEligibleTiles:0,eligibleTiles:0,totalTiles:0},
    reason:s.reason??s.failure??s.worker?.failure??null,residentResources:s.residentResources??0,resourceLoads:s.resourceLoads??0,controller:s.worker??s.controller??null,coverageStates:s.coverageStates??null,initialPreparationPriority:s.initialPreparationPriority??null,localReadiness:s.localReadiness??null,cacheTimings:s.cacheTimings??null};
   if(qualification&&s.worker?.failed&&!stopped)setImmediate(()=>finish(Error(s.worker.failure??'installed world worker failed'),'world-worker-fault'));
@@ -244,7 +244,10 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
      const sources=m.frame.vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-s.position[i])<=128)).slice(0,2).map(v=>v.position);
      installedScenes.observeInitial01({sequence:s.sequence,generation:s.generation,geometryTimeMs:now,sourceAgeMs:age,listener:s.position,sources});
      const cameraInterior01=bindCameraInterior01(m.frame,age,remaining,proofEpoch);
-     if(!installedScenes.failed)installedScenes.updateWindow({listener:s.position,sources:engine.installedCurrentSourcePositions01(m.frame),generation:s.generation,geometryTimeMs:now,durationMs:1000,cameraInterior01,surroundingWorkset01:true,maximumSurfaces:4096,localSurfaceTarget01:cameraInterior01?.durationMs<=250?192:640,prepareSoundMapGeometry01:soundMapRequired01(),engine:installedSceneEngine});
+     if(!installedScenes.failed){
+      const sourceLayout=[],positions=engine.installedCurrentSourcePositions01(m.frame,sourceLayout);
+      installedScenes.updateWindow({listener:s.position,sources:positions,sourceLayout,generation:s.generation,geometryTimeMs:now,durationMs:1000,cameraInterior01,surroundingWorkset01:true,maximumSurfaces:4096,localSurfaceTarget01:cameraInterior01?.durationMs<=250?192:640,prepareSoundMapGeometry01:soundMapRequired01(),engine:installedSceneEngine});
+     }
     }
    }
   }

@@ -12,13 +12,14 @@ import {loadCollisionResource,createCollisionResourceProfile01} from './collisio
 import {InstalledStaticComponents01} from './static-component-cache01.mjs';
 import {worldCoverageStates01} from './world-state-completion01.mjs';
 import {resolveInteriorCollisionPlacements01,interiorInstanceIdentities01} from './interior-placements-completion01.mjs';
-import {interiorObservationKey01,interiorWorksetAnchor01,exteriorWorksetAnchor01,surroundingInteriorHalfWidth01,matchInteriorInstance01,inverseInteriorTransform01,transformInteriorBounds01} from './interior-activation01.mjs';
+import {interiorObservationKey01,interiorWorksetAnchor01,exteriorWorksetAnchor01,exteriorTrafficWindow,surroundingInteriorHalfWidth01,matchInteriorInstance01,inverseInteriorTransform01,transformInteriorBounds01} from './interior-activation01.mjs';
 import {sha256,triangleNormal,queryChunkIds,queryUnknownRegions} from './collision-mesh.mjs';
-import {createTile,coordinateSpace,cross,dot,sub,inBox,onPatch,querySegment,preparedTileIndexTransfer01,adoptSourceBoundTileTransfer01,retimeInstalledStaticTile01,maximumInstalledUnknownRegions01} from '../research/local-geometry.mjs';
+import {prepareBatchVisibility,adoptSourceBoundBatchVisibility,createTile,coordinateSpace,cross,dot,sub,inBox,onPatch,querySegment,preparedTileIndexTransfer01,adoptSourceBoundTileTransfer01,retimeInstalledStaticTile01,maximumInstalledUnknownRegions01} from '../research/local-geometry.mjs';
 import {acousticScene,adoptSourceBoundAcousticScene01} from '../engine/contracts.mjs';
 import {prepareGpuGeometry01,adoptSourceBoundGpuGeometry01} from '../gpu/geometry.mjs';
 import {discoverInstalledReflectionTrains} from './installed-reflection-trains.mjs';
-import {digest,freeze,requireWorld,vector} from './contracts.mjs';
+import {byteDigest,canonical,digest,freeze,requireWorld,vector} from './contracts.mjs';
+const supportOwners=new WeakMap();
 const scenes=new WeakMap(),encodedScenes=new WeakMap(),triangleShapes01=new WeakMap(),hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x),touch=(a,b)=>a.min.every((v,i)=>v<=b.max[i]&&a.max[i]>=b.min[i]);
 function measured01(profile,key,operation){if(!profile)return operation();const began=performance.now();try{return operation();}finally{profile[key]+=performance.now()-began;}}
 function read01(file,profile){const bytes=measured01(profile,'fileReadMs',()=>fs.readFileSync(file));if(profile){profile.fileReadCalls++;profile.fileReadLogicalBytes+=bytes.length;}return bytes;}
@@ -318,10 +319,9 @@ export class InstalledStaticWorld01 {
  // An emitter at the exact outer face can leave before a prepared window is
  // adopted. Reuse a radius tier and request its successor while the current
  // scene still contains outward motion. Visibility uses only actual poses.
- const movingExterior=options.engine?.installedReflectionTrains===true&&surroundingWorkset01&&
-  !interiorActivation01&&localSurfaceTarget01&&sources.length>0;
- const localMinimum=movingExterior?8*Math.ceil((reach+4)/8):Math.max(Math.min(4,radius),reach);
- return {listener,sources,anchor,surrounding:!!anchor&&!!instance&&surroundingWorkset01,radius,maximumSurfaces,maximumResources,adaptiveRadius,localSurfaceTarget01:localSurfaceTarget01??null,requestedRadius:radius,minimumRadius:localSurfaceTarget01?Math.min(radius,localMinimum):minimumRadius,instance,interiorKey:instance?interiorObservationKey01(interiorActivation01):null};}
+ const movingExterior=exteriorTrafficWindow({...options,listener,sources,radius});
+ const localMinimum=movingExterior?.minimumRadius??Math.max(Math.min(4,radius),reach);
+ return {listener,sources,anchor,reuseExactBox:!!movingExterior,surrounding:!!anchor&&!!instance&&surroundingWorkset01,radius,maximumSurfaces,maximumResources,adaptiveRadius,localSurfaceTarget01:localSurfaceTarget01??null,requestedRadius:radius,minimumRadius:localSurfaceTarget01?Math.min(radius,localMinimum):minimumRadius,instance,interiorKey:instance?interiorObservationKey01(interiorActivation01):null};}
  #anchoredSelections01=new Map();
  #anchoredTiles01=new WeakMap();
  #selectAdaptive01(selection,explicitPaths=false,materialize=()=>{}){
@@ -345,7 +345,7 @@ export class InstalledStaticWorld01 {
   const adaptive=selection.adaptiveRadius&&(!selection.surrounding||!!selection.localSurfaceTarget01);
   while(true){
    const capacityProbe=adaptive&&radius>selection.minimumRadius&&!explicitPaths;
-   selected=this.#selectWindow01({...selection,listener:anchor??selection.listener,radius,stableAnchor:anchor!==null,capacityProbe});
+   selected=this.#selectWindow01({...selection,listener:anchor??selection.listener,radius,stableAnchor:anchor!==null||selection.reuseExactBox,capacityProbe});
    selected.pose=selection.listener;
    selected.worksetAnchored01=anchor!==null;
    attempts++;materialize(selected);
@@ -354,7 +354,7 @@ export class InstalledStaticWorld01 {
      // A smaller cube may sit entirely between surfaces or leave the
      // matched interior behind. Keep the nearest coherent portion of the
      // enclosing window, with explicit unknown regions for omitted surfaces.
-     const focus=focusRadius=>this.#selectWindow01({...selection,listener:anchor??selection.listener,radius:focusRadius,stableAnchor:anchor!==null,limitToLocalTarget:true});
+     const focus=focusRadius=>this.#selectWindow01({...selection,listener:anchor??selection.listener,radius:focusRadius,stableAnchor:anchor!==null||selection.reuseExactBox,limitToLocalTarget:true});
      radius=(radius+outer.radius)/2;
      selected=focus(radius);attempts++;
      if(!selected.surfaces.length){
@@ -382,7 +382,9 @@ export class InstalledStaticWorld01 {
   const explicitPaths=Array.isArray(engine?.higherOrderPaths)&&engine.higherOrderPaths.length>0;
   if(options.preparedSelection01!==undefined&&options.preparedSelection01!==null){requireWorld(pending&&pending.token===options.preparedSelection01&&pending.requestBinding===this.#requestBinding01(options,selection)&&pending.revision===this.#selectionRevision01&&pending.componentRevision===this.staticComponents01.revision01()&&!explicitPaths,'same original request and current source-bound one-shot selection required');({selected,attempts,radius}=pending);this.activeAdaptivePasses01=[...pending.adaptivePasses];this.activeProfile01.consumedPreparedSelection01=1;}
   else ({selected,attempts,radius}=this.#selectAdaptive01(selection,explicitPaths,explicitPaths?s=>{scene=this.#materializeWindow01(s,{session,generation,geometryTimeMs,durationMs,engine});}:undefined));
-  if(!explicitPaths)scene=this.#materializeWindow01(selected,{session,generation,geometryTimeMs,durationMs,engine});const metadata=freeze({...scenes.get(scene),requestedRadius:selection.requestedRadius,activeRadius:radius,worksetAnchored01:selected.worksetAnchored01,interiorWorksetAnchored01:selected.worksetAnchored01&&!!selection.instance,surroundingWorkset01:selected.surrounding===true,surroundingSurfaces01:selected.nearBox?selected.surfaces.filter(p=>!inBox(p.center,selected.nearBox)).length:0,worksetLimited:radius<selection.requestedRadius,adaptiveAttempts:attempts,preparationMilliseconds:performance.now()-began});scenes.set(scene,metadata);this.last=metadata;this.lastWindowProfile01=this.#finishPreparationProfile01(began,before,attempts,scene.tile.surfaces.length);this.profileTotals01.windows++;return scene;
+  if(!explicitPaths)scene=this.#materializeWindow01(selected,{session,generation,geometryTimeMs,durationMs,engine});
+  if(selected.reusableSupports) supportOwners.set(scene,this.#anchoredTiles01.get(selected.surfaces));
+  const metadata=freeze({...scenes.get(scene),requestedRadius:selection.requestedRadius,activeRadius:radius,worksetAnchored01:selected.worksetAnchored01,interiorWorksetAnchored01:selected.worksetAnchored01&&!!selection.instance,surroundingWorkset01:selected.surrounding===true,surroundingSurfaces01:selected.nearBox?selected.surfaces.filter(p=>!inBox(p.center,selected.nearBox)).length:0,worksetLimited:radius<selection.requestedRadius,adaptiveAttempts:attempts,preparationMilliseconds:performance.now()-began});scenes.set(scene,metadata);this.last=metadata;this.lastWindowProfile01=this.#finishPreparationProfile01(began,before,attempts,scene.tile.surfaces.length);this.profileTotals01.windows++;return scene;
  }
  profile01(){const components=this.staticComponents01.profile();return freeze({...this.profileTotals01,operations01:{...this.operations01},cacheDiagnostics01:{...this.cacheAuditTotals01},staticComponents01:components,residentResources:this.resident.size,queryViews:this.queryViews01.size,queryViewBytes:this.queryViewBytes01,aggregateRetainedGeometryBytes:components.accountedBytes+this.queryViewBytes01,maximumQueryViews:queryViewLimits01.views,maximumQueryViewBytes:queryViewLimits01.bytes,lastWindow:this.lastWindowProfile01});}
  #selectWindow01({listener,sources,radius,requestedRadius,maximumSurfaces,maximumResources,instance,interiorKey,localSurfaceTarget01,surrounding=false,stableAnchor=false,capacityProbe=false,limitToLocalTarget=false}){
@@ -419,7 +421,7 @@ export class InstalledStaticWorld01 {
   // Query inputs above have been verified for this request, including native
   // chunk bytes. Identical component identities and clip box produce the
   // same selection. Never reuse a failed query or its missing-region result.
-  const shapeKey=stableAnchor&&!unknown.length?digest([this.#selectionRevision01,box,requestedRadius,maximumSurfaces,maximumResources,capacityProbe,limitToLocalTarget,localSurfaceTarget01??null,surrounding,interiorKey,views.map(({row,placement,view})=>[row.Id,placement?.key??null,view.references.map(r=>[r.componentId,r.recordIndex]),view.unknownRegions,view.analytic??null])]):null;
+  const shapeKey=stableAnchor&&!unknown.length?digest([this.#selectionRevision01,listener,box,requestedRadius,maximumSurfaces,maximumResources,capacityProbe,limitToLocalTarget,localSurfaceTarget01??null,surrounding,interiorKey,views.map(({row,placement,view})=>[row.Id,placement?.key??null,view.references.map(r=>[r.componentId,r.recordIndex]),view.unknownRegions,view.analytic??null])]):null;
   const held=shapeKey&&this.#anchoredSelections01.get(shapeKey);
   if(held){
    this.#anchoredSelections01.delete(shapeKey);this.#anchoredSelections01.set(shapeKey,held);
@@ -442,7 +444,7 @@ export class InstalledStaticWorld01 {
   const probeLimit=capacityProbe||limitToLocalTarget?(localSurfaceTarget01??maximumSurfaces):maximumSurfaces;
   for(const {reference,resource,triangle:placed}of triangles){const triangle=placed??this.staticComponents01.triangle(reference,resource),id=triangleId01(resource,triangle),preparedPanel=panel(triangle,box,id,undefined,undefined,this.activeProfile01);if(!preparedPanel)continue;const {surface,key}=preparedPanel;if(keys.has(key))continue;keys.add(key);if(surfaces.length>=probeLimit){omitted++;if(capacityProbe){witness=probeLimit<maximumSurfaces?'dense-local-workset':'valid-unique-surface-overflow';break;}missingBounds.push({bounds:triangleShape01(triangle).bounds,reason:'surface-capacity'});continue;}surfaces.push(surface);if(placed)interiorSurfaces++;materials[id]={reflection:[.64,.49,.25],transmission:[0,0,0],basis:'authored-assumption',reference:'installed01-unmeasured-native-material'};}
   this.activeProfile01.panelConstructionMs+=performance.now()-panelBegan;const capacity=omitted>0||eligible.length>selected.length||unknown.some(s=>/query candidate limit/.test(s));if(capacityProbe&&capacity)this.activeProfile01.capacityProbePasses++;this.activeAdaptivePasses01.push({radius,selectedResources:selected.length,queriedTriangles:triangles.length,supportedSurfaces:surfaces.length,omittedSurfaces:omitted,omittedCountIsLowerBound:!!witness,capacity,witness:witness??(eligible.length>selected.length?'resource-capacity':unknown.some(s=>/query candidate limit/.test(s))?'query-candidate-limit':null),selectionMilliseconds:performance.now()-began});
-  const selection={listener,sources,radius,requestedRadius,maximumSurfaces,box,nearBox,region,defaultExcluded,candidates,eligible,selected,interiorKey,interiorSurfaces,possibleInteriorBounds,unresolvedInteriorBounds,missingBounds,geometryUnknown,successfulResources,analytic,unknown,surrounding,surfaces,materials,omitted,trianglesQueried:triangles.length,capacity};
+  const selection={reusableSupports:!!shapeKey,listener,sources,radius,requestedRadius,maximumSurfaces,box,nearBox,region,defaultExcluded,candidates,eligible,selected,interiorKey,interiorSurfaces,possibleInteriorBounds,unresolvedInteriorBounds,missingBounds,geometryUnknown,successfulResources,analytic,unknown,surrounding,surfaces,materials,omitted,trianglesQueried:triangles.length,capacity};
   if(shapeKey&&!unknown.length){
    // A rejected adaptive pass needs only its overflow witness. A focused
    // request may need both its narrow result and a bounded enclosing result.
@@ -457,7 +459,7 @@ export class InstalledStaticWorld01 {
   return selection;
  }
  #materializeWindow01(s,{session,generation,geometryTimeMs,durationMs,engine}){
-  const began=performance.now(),{listener,sources,radius,requestedRadius,region,box,candidates,eligible,selected,possibleInteriorBounds,unresolvedInteriorBounds,missingBounds,geometryUnknown,successfulResources,analytic,unknown,omitted,materials,defaultExcluded,interiorKey}=s,worldDigest=this.manifest.InputFingerprint,tileBegan=performance.now(),held=s.worksetAnchored01?this.#anchoredTiles01.get(s.surfaces):null,tile=held&&held.session===session&&held.version===generation?retimeInstalledStaticTile01(held,geometryTimeMs,geometryTimeMs+durationMs):createTile({schemaVersion:1,id:'installed01:'+worldDigest.slice(0,32),coordinateSpace,timeUnit:'monotonic-ms',bounds:region,listenerAnchor:listener,coverage:'partial',surfaces:s.surfaces.map(surface=>({...surface,observedAt:geometryTimeMs,validUntil:geometryTimeMs+durationMs})),missingRegions:unknownRegions01(missingBounds,box,s.nearBox),version:generation,createdAt:geometryTimeMs,validUntil:geometryTimeMs+durationMs,build:'installed-static-collision01',session,interior:selected.some(e=>e.placement)?'camera-proxy-bound-interior':'static-exterior-runtime-unverified',dynamicEpoch:generation},{maximumSurfaces:s.maximumSurfaces,maximumMissingRegions:maximumInstalledUnknownRegions01});if(s.worksetAnchored01&&(!held||held.session!==session||held.version!==generation))this.#anchoredTiles01.set(s.surfaces,tile);const surfaces=tile.surfaces;this.activeProfile01.tileValidationIndexMs+=performance.now()-tileBegan;const reflectionBegan=performance.now();
+  const began=performance.now(),{listener,sources,radius,requestedRadius,region,box,candidates,eligible,selected,possibleInteriorBounds,unresolvedInteriorBounds,missingBounds,geometryUnknown,successfulResources,analytic,unknown,omitted,materials,defaultExcluded,interiorKey}=s,worldDigest=this.manifest.InputFingerprint,tileBegan=performance.now(),held=s.reusableSupports?this.#anchoredTiles01.get(s.surfaces):null,tile=held&&held.session===session&&held.version===generation?retimeInstalledStaticTile01(held,geometryTimeMs,geometryTimeMs+durationMs):createTile({schemaVersion:1,id:'installed01:'+worldDigest.slice(0,32),coordinateSpace,timeUnit:'monotonic-ms',bounds:region,listenerAnchor:listener,coverage:'partial',surfaces:s.surfaces.map(surface=>({...surface,observedAt:geometryTimeMs,validUntil:geometryTimeMs+durationMs})),missingRegions:unknownRegions01(missingBounds,box,s.nearBox),version:generation,createdAt:geometryTimeMs,validUntil:geometryTimeMs+durationMs,build:'installed-static-collision01',session,interior:selected.some(e=>e.placement)?'camera-proxy-bound-interior':'static-exterior-runtime-unverified',dynamicEpoch:generation},{maximumSurfaces:s.maximumSurfaces,maximumMissingRegions:maximumInstalledUnknownRegions01});if(s.reusableSupports&&(!held||held.session!==session||held.version!==generation))this.#anchoredTiles01.set(s.surfaces,tile);const surfaces=tile.surfaces;this.activeProfile01.tileValidationIndexMs+=performance.now()-tileBegan;const reflectionBegan=performance.now();
   const {ids:reflectionSurfaceIds,sequences,report:reflectionSearch01}=engine.installedReflectionTrains===true
     ? discoverInstalledReflectionTrains(tile,sources,s.pose??listener,materials,engine)
     : finiteReflectors01(tile,sources,s.pose??listener);
@@ -467,17 +469,57 @@ export class InstalledStaticWorld01 {
 
  close(){this.#pendingSelection01=null;this.#selectionRevision01++;this.#anchoredSelections01.clear();this.#clearQueryViews01('world-close');this.staticComponents01.clear('world-close');this.resident.clear();}
 }
+// A common owner proves the ordered supports, material mapping, unknown
+// regions and indices came from the same verified selection and session.
+// Poses, routes and lease timestamps still belong to the new request.
+export function sharesInstalledStaticSupports(first, second) {
+ const owner=supportOwners.get(first);
+ return !!owner && owner===supportOwners.get(second);
+}
 export const isInstalledStaticScene01=scene=>scenes.has(scene);
 export function installedStaticSceneMetadata01(scene){requireWorld(scenes.has(scene),'branded installed static scene');return scenes.get(scene);}
+const encodedSupports=new WeakMap();
+function canonicalRecord(record,overrides) {
+ return '{'+Object.keys(record).sort().map(key=>JSON.stringify(key)+':'+(overrides[key]??canonical(record[key]))).join(',')+'}';
+}
+function canonicalInstalledBody(body,owner) {
+ if(!owner || owner.surfaces.length<512) return canonical(body);
+ let templates=encodedSupports.get(owner);
+ if(!templates){
+  // Keep the exact canonical spelling of the immutable portion of each
+  // face. The two time fields have a fixed order in canonical JSON.
+  const faces=owner.surfaces.map(face=>{
+   const parts=[''];
+   for(const [index,key] of Object.keys(face).sort().entries()){
+    const last=parts.length-1;
+    parts[last]+=(index?',':'{')+JSON.stringify(key)+':';
+    if(key==='observedAt'||key==='validUntil') parts.push('');
+    else parts[last]+=canonical(face[key]);
+   }
+   requireWorld(parts.length===3,'two finite installed face timestamps');
+   parts[2]+='}';
+   return parts;
+  });
+  templates={faces,materials:canonical(body.materials)};
+  encodedSupports.set(owner,templates);
+ }
+ const at=canonical(body.tile.createdAt),until=canonical(body.tile.validUntil);
+ const surfaces='['+templates.faces.map(([a,b,c])=>a+at+b+until+c).join(',')+']';
+ return canonicalRecord(body,{materials:templates.materials,tile:canonicalRecord(body.tile,{surfaces})});
+}
 export function encodeInstalledStaticScene01(scene){
- const metadata=installedStaticSceneMetadata01(scene),body={schema:1,kind:'RichAudioInstalledStaticSceneTransport01',tile:scene.tile,materials:scene.materials,engine:scene.config,model:scene.observationModel,metadata};const packet=Object.freeze({...body,packetDigest:digest(body)});encodedScenes.set(packet,scene);return packet;
+ const metadata=installedStaticSceneMetadata01(scene),body={schema:1,kind:'RichAudioInstalledStaticSceneTransport01',tile:scene.tile,materials:scene.materials,engine:scene.config,model:scene.observationModel,metadata};
+ const bytes=canonicalInstalledBody(body,supportOwners.get(scene)),packetDigest=byteDigest(bytes),packet=Object.freeze({...body,packetDigest});
+ // Key sorting changes only order. The byte count is also the JSON wire size.
+ encodedScenes.set(packet,{scene,wireBytes:Buffer.byteLength(bytes)+Buffer.byteLength(',"packetDigest":"'+packetDigest+'"')});
+ return packet;
 }
 // This validates a result from the source-bound trusted preparation worker. A
 // packet checksum provides transport integrity; it does not grant arbitrary
 // caller geometry independent authority or attest live resource activation.
 function validateInstalledPacket01(packet,{catalogSHA256,session,generation,geometryTimeMs,durationMs,interiorActivation01}={},verifyIntegrity=true){
  requireWorld(hex(catalogSHA256)&&/^[a-f0-9]{32}$/.test(session)&&Number.isSafeInteger(generation)&&generation>0&&Number.isFinite(geometryTimeMs)&&geometryTimeMs>=0&&Number.isFinite(durationMs)&&durationMs>0&&durationMs<=60000,'independently retained installed preparation request');
- requireWorld(packet?.schema===1&&packet.kind==='RichAudioInstalledStaticSceneTransport01'&&hex(packet.packetDigest)&&Buffer.byteLength(JSON.stringify(packet))<=16777216,'bounded installed static worker packet');const {packetDigest,...body}=packet;if(verifyIntegrity)requireWorld(digest(body)===packetDigest,'installed static transport integrity');const {tile,metadata,model}=packet;
+ requireWorld(packet?.schema===1&&packet.kind==='RichAudioInstalledStaticSceneTransport01'&&hex(packet.packetDigest)&&(encodedScenes.get(packet)?.wireBytes??Buffer.byteLength(JSON.stringify(packet)))<=16777216,'bounded installed static worker packet');const {packetDigest,...body}=packet;if(verifyIntegrity)requireWorld(digest(body)===packetDigest,'installed static transport integrity');const {tile,metadata,model}=packet;
  requireWorld(metadata?.kind==='RichAudioInstalledStaticScene01'&&metadata.sourceCatalogueSHA256===catalogSHA256&&metadata.session===session&&metadata.generation===generation&&metadata.geometryTimeMs===geometryTimeMs&&metadata.durationMs===durationMs&&metadata.coverage==='partial'&&metadata.installedWorldVerified===false&&metadata.runtimeActivationVerified===false&&metadata.pcmQueueFramesAdded===0&&hex(metadata.worldDigest),'installed static worker result matches request');
  requireWorld(tile?.session===session&&tile.version===generation&&tile.dynamicEpoch===generation&&tile.createdAt===geometryTimeMs&&tile.validUntil===geometryTimeMs+durationMs&&tile.coverage==='partial'&&tile.id==='installed01:'+metadata.worldDigest.slice(0,32)&&Array.isArray(tile.surfaces)&&tile.surfaces.length===metadata.activeSurfaces&&tile.surfaces.length<=4096&&tile.surfaces.every(s=>s.provenance?.kind==='derived'&&['installed-static-collision01','installed-analytic-approximation01'].includes(s.provenance.reference)&&s.id.startsWith('installed01:')),'installed static finite geometry and horizon binding');
  requireWorld(model?.kind==='conditional-installed-static-model'&&model.mode==='installed-static-model'&&model.sourceCatalogueSHA256===catalogSHA256&&model.installedWorldVerified===false&&model.runtimeActivationVerified===false&&model.staticGeometryOnly===true&&model.calibration?.metresPerNativeUnit===1&&model.calibration.physicalCalibration==='unverified'&&model.timing==='static-installation-model-not-live-observation'&&Number.isFinite(model.workset?.requestedRadius)&&model.workset.requestedRadius>=1&&model.workset.requestedRadius<=32&&Number.isFinite(model.workset.activeRadius)&&model.workset.activeRadius>=1&&model.workset.activeRadius<=model.workset.requestedRadius&&model.workset.outsideActiveWindow==='unknown-static-coverage'&&model.collisionLayerSelection?.actualGtaActivation==='unverified'&&JSON.stringify(model.collisionLayerSelection.activeSoftwareModelLayers)==='[0]'&&JSON.stringify(model.collisionLayerSelection.excludedSoftwareModelLayers)==='[1,2]'&&Array.isArray(model.reflectionSurfaceIds)&&model.reflectionSurfaceIds.length<=16&&new Set(model.reflectionSurfaceIds).size===model.reflectionSurfaceIds.length&&model.reflectionSurfaceIds.every(id=>tile.surfaces.some(s=>s.id===id))&&Array.isArray(model.evidence)&&model.evidence.length<=16&&model.evidence.every(e=>hex(e.indexSHA256)&&hex(e.receiptSHA256)&&e.runtimeActivation==='unverified'&&(e.interiorInstanceId===undefined?e.interiorKey===undefined:typeof e.interiorInstanceId==='string'&&hex(e.interiorKey)&&e.interiorKey===interiorObservationKey01(interiorActivation01)))&&Object.values(packet.materials).every(m=>m.basis==='authored-assumption'),'installed model cannot become observation or measured-material authority');
@@ -493,9 +535,9 @@ export function decodeInstalledStaticScene01(packet,expected={}){
 // a Worker boundary and cannot be minted by a checksum or caller flag.
 export function prepareInstalledStaticSceneTransfer01(packet,expected={}){
  const began=performance.now(),retained=encodedScenes.get(packet);let scene;
- if(retained){validateInstalledPacket01(packet,expected,false);scene=retained; }else scene=decodeInstalledStaticScene01(packet,expected);
- const validationMs=performance.now()-began,metadata=installedStaticSceneMetadata01(scene),indexBegan=performance.now(),tileIndex=preparedTileIndexTransfer01(scene.tile),indexTransferPreparationMs=performance.now()-indexBegan,gpuBegan=performance.now(),gpuGeometry=prepareGpuGeometry01(scene.tile),gpuPackingMs=performance.now()-gpuBegan;
- return {schema:1,kind:'RichAudioFullyValidatedInstalledScene01',validation:'full-installed-static-decoder01',packetDigest:packet.packetDigest,scene,metadata,tileIndex,gpuGeometry,profile01:freeze({validationMs,indexTransferPreparationMs,gpuPackingMs,totalMs:performance.now()-began,reusedValidatedFactoryScene:!!retained})};
+ if(retained){validateInstalledPacket01(packet,expected,false);scene=retained.scene; }else scene=decodeInstalledStaticScene01(packet,expected);
+ const validationMs=performance.now()-began,metadata=installedStaticSceneMetadata01(scene),indexBegan=performance.now(),tileIndex=preparedTileIndexTransfer01(scene.tile),batchVisibility=scene.config.installedReflectionTrains===true?prepareBatchVisibility(scene.tile):null,indexTransferPreparationMs=performance.now()-indexBegan,gpuBegan=performance.now(),gpuGeometry=prepareGpuGeometry01(scene.tile),gpuPackingMs=performance.now()-gpuBegan;
+ return {schema:1,kind:'RichAudioFullyValidatedInstalledScene01',validation:'full-installed-static-decoder01',packetDigest:packet.packetDigest,scene,metadata,tileIndex,batchVisibility,gpuGeometry,profile01:freeze({validationMs,indexTransferPreparationMs,gpuPackingMs,totalMs:performance.now()-began,reusedValidatedFactoryScene:!!retained})};
 }
 function freezeTransferred01(value){if(value&&typeof value==='object'&&!Object.isFrozen(value)){if(Array.isArray(value)){for(let n=0;n<value.length;n++)freezeTransferred01(value[n]);}else{for(const key of Object.keys(value))freezeTransferred01(value[key]);}Object.freeze(value);}return value;}
 // Capability = this exact private native Worker channel and message object.
@@ -503,13 +545,22 @@ function freezeTransferred01(value){if(value&&typeof value==='object'&&!Object.i
 // This is a trusted-code process boundary, not a sandbox against arbitrary
 // malicious JavaScript already executing inside the producer itself.
 export function bindInstalledStaticSceneWorker01(worker,{session}={}){
- requireWorld(worker instanceof Worker&&/^[a-f0-9]{32}$/.test(session),'actual owned installed scene Worker required');const received=new WeakSet();let closed=false;
+ requireWorld(worker instanceof Worker&&/^[a-f0-9]{32}$/.test(session),'actual owned installed scene Worker required');const received=new WeakSet();let closed=false,retained=null;
  const receive=message=>{if(message&&typeof message==='object'&&message.type==='scene')received.add(message);};worker.prependListener('message',receive);
  const claim=(message,{catalogSHA256,generation,geometryTimeMs,durationMs,requestId,bindingEpoch})=>{
   requireWorld(!closed&&received.has(message),'source-bound installed scene Worker capability');received.delete(message);
   requireWorld(hex(catalogSHA256)&&message.session===session&&message.catalogSHA256===catalogSHA256&&Number.isSafeInteger(requestId)&&requestId>0&&message.requestId===requestId&&Number.isSafeInteger(bindingEpoch)&&bindingEpoch>=0&&message.bindingEpoch===bindingEpoch&&Number.isSafeInteger(generation)&&generation>0&&Number.isFinite(geometryTimeMs)&&geometryTimeMs>=0&&Number.isFinite(durationMs)&&durationMs>0&&durationMs<=1000,'retained installed scene admission request');
  };
- return {async unpack(message,expected,isCurrent){
+ return {retainedSupportRequest(){return retained?.requestId??null;},
+  retainedTransfer(request,motion,poseKey){
+   if(!retained||!request.sourceLayoutKey)return null;
+   const window=exteriorTrafficWindow(request);
+   if(!window||retained.shape!==JSON.stringify([window,request.generation,request.radius,request.maximumSurfaces,
+     request.localSurfaceTarget01,request.adaptiveRadius]))return null;
+   const key=digest([retained.requestId,request.sourceLayoutKey,request.sources.length,request.engine,
+    request.prepareSoundMapGeometry01,motion?'moving':'stationary',motion?null:poseKey]);
+   return {key,base:retained.requestId,movingPoseKey:motion?poseKey:null};
+  },async unpack(message,expected,isCurrent){
   claim(message,expected);
   const packed=message.preparedScene,metadata=packed?.metadata,tile=packed?.scene?.tile;
   requireWorld(packed?.kind==='RichAudioFullyValidatedInstalledScene01'&&packed.validation==='full-installed-static-decoder01'&&
@@ -521,12 +572,38 @@ export function bindInstalledStaticSceneWorker01(worker,{session}={}){
   const result=await unpackInstalledSceneFaces(packed,{isCurrent:()=>!closed&&isCurrent()});
   if(!result||closed||!isCurrent())return null;
   message.preparedScene=result.prepared;received.add(message);return result.profile;
- },adopt(message,{catalogSHA256,generation,geometryTimeMs,durationMs,requestId,bindingEpoch}={}){
+ },adopt(message,expected={}){
+  const {catalogSHA256,generation,geometryTimeMs,durationMs,requestId,bindingEpoch}=expected;
   claim(message,{catalogSHA256,generation,geometryTimeMs,durationMs,requestId,bindingEpoch});
-  const prepared=message.preparedScene,scene=prepared?.scene,metadata=prepared?.metadata,tile=scene?.tile;
+  let prepared=message.preparedScene;
+  if(prepared?.supportReference) {
+   const base=retained,reference=prepared.supportReference,current=prepared.scene?.tile;
+   requireWorld(base && reference.requestId===base.requestId && reference.packetDigest===base.packetDigest &&
+    base.bindingEpoch===bindingEpoch && base.metadataVersion===message.metadataVersion01 && base.catalogSHA256===catalogSHA256 &&
+    current?.session===session && current.version===generation && generation===base.scene.tile.version &&
+    current.createdAt===geometryTimeMs && current.validUntil===geometryTimeMs+durationMs && current.id===base.scene.tile.id &&
+    prepared.metadata?.activeSurfaces===base.scene.tile.surfaces.length && Array.isArray(current.surfaces) &&
+    current.surfaces.length===0 && prepared.gpuGeometry===null && prepared.tileIndex===null && prepared.batchVisibility===null &&
+    Object.keys(prepared.scene.materials).length===0,'matching retained installed supports');
+   const surfaces=Object.freeze(base.scene.tile.surfaces.map(face=>Object.freeze({...face,observedAt:current.createdAt,validUntil:current.validUntil})));
+   prepared={...prepared,scene:{...prepared.scene,tile:{...current,surfaces},materials:base.scene.materials},
+    tileIndex:{...base.tileIndex,observationKey:current.observationKey},
+    gpuGeometry:{...base.gpuGeometry,observationKey:current.observationKey}};
+  }
+  const scene=prepared?.scene,metadata=prepared?.metadata,tile=scene?.tile;
   requireWorld(prepared?.schema===1&&prepared.kind==='RichAudioFullyValidatedInstalledScene01'&&prepared.validation==='full-installed-static-decoder01'&&hex(prepared.packetDigest)&&prepared.packetDigest===message.packetDigest,'complete worker-installed-scene proof');
   requireWorld(metadata?.kind==='RichAudioInstalledStaticScene01'&&metadata.sourceCatalogueSHA256===catalogSHA256&&metadata.session===session&&metadata.generation===generation&&metadata.geometryTimeMs===geometryTimeMs&&metadata.durationMs===durationMs&&metadata.coverage==='partial'&&metadata.installedWorldVerified===false&&metadata.runtimeActivationVerified===false&&metadata.pcmQueueFramesAdded===0&&hex(metadata.worldDigest),'source-bound prepared scene request identity');
   requireWorld(tile?.session===session&&tile.version===generation&&tile.dynamicEpoch===generation&&tile.createdAt===geometryTimeMs&&tile.validUntil===geometryTimeMs+durationMs&&tile.coverage==='partial'&&tile.id==='installed01:'+metadata.worldDigest.slice(0,32)&&Array.isArray(tile.surfaces)&&tile.surfaces.length===metadata.activeSurfaces&&tile.surfaces.length<=4096&&hex(tile.observationKey)&&scene.geometryKey===tile.observationKey&&scene.observationModel?.sourceCatalogueSHA256===catalogSHA256&&scene.observationModel.installedWorldVerified===false&&scene.observationModel.runtimeActivationVerified===false,'source-bound prepared finite scene header');
-  freezeTransferred01(scene);freezeTransferred01(prepared.tileIndex);freezeTransferred01(metadata);adoptSourceBoundTileTransfer01(tile,prepared.tileIndex);adoptSourceBoundGpuGeometry01(tile,prepared.gpuGeometry);adoptSourceBoundAcousticScene01(scene);scenes.set(scene,metadata);return scene;
- },close(){closed=true;worker.removeListener('message',receive);}};
+  freezeTransferred01(scene);freezeTransferred01(prepared.tileIndex);freezeTransferred01(metadata);adoptSourceBoundTileTransfer01(tile,prepared.tileIndex);
+  if(prepared.batchVisibility)adoptSourceBoundBatchVisibility(tile,prepared.batchVisibility);
+  adoptSourceBoundGpuGeometry01(tile,prepared.gpuGeometry);adoptSourceBoundAcousticScene01(scene);scenes.set(scene,metadata);
+  if(!prepared.supportReference){
+   retained=message.workerProfile01?.transfer?.packedFaces===tile.surfaces.length && tile.surfaces.length>=512
+    ? {requestId,packetDigest:prepared.packetDigest,shape:JSON.stringify([exteriorTrafficWindow(expected),generation,expected.radius,expected.maximumSurfaces,
+       expected.localSurfaceTarget01,expected.adaptiveRadius]),scene,tileIndex:prepared.tileIndex,bindingEpoch,catalogSHA256,
+       metadataVersion:message.metadataVersion01,gpuGeometry:{...prepared.gpuGeometry,bodyBytes:Uint8Array.from(prepared.gpuGeometry.bodyBytes)}}
+    : null;
+  }
+  return scene;
+ },close(){closed=true;retained=null;worker.removeListener('message',receive);}};
 }

@@ -225,7 +225,7 @@ export class StockGameplay {
   const offset=engine?(placement?.engineOffset??.35):(placement?.exhaustOffset??-.75);
   return vehicle.position.map((x,i)=>x+vehicle.forward[i]*offset+vehicle.up[i]*(engine?.65:.3));
  }
- installedCurrentSourcePositions01(frame){
+ installedCurrentSourcePositions01(frame,sourceLayout=null){
   const latest=this.snapshots.at(-1)?.frame;
   const vehicles=this.catalogueFleet?(latest?.listener.sequence===frame.listener.sequence?latest.vehicles:[]):frame.vehicles;
   const nearby=vehicles.filter(v=>v.valid&&v.position.every((x,i)=>Math.abs(x-frame.listener.position[i])<=128));

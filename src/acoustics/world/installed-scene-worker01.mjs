@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import {Worker} from 'node:worker_threads';
 import {PerformanceObserver} from 'node:perf_hooks';
 import {createMetadataStage01} from './prepared-world-metadata01.mjs';
-import {InstalledStaticWorld01,encodeInstalledStaticScene01,prepareInstalledStaticSceneTransfer01} from './installed-static-scene01.mjs';
+import {InstalledStaticWorld01,encodeInstalledStaticScene01,prepareInstalledStaticSceneTransfer01,sharesInstalledStaticSupports} from './installed-static-scene01.mjs';
 import {packInstalledSceneFaces} from './installed-scene-chunks.mjs';
 import {prepareInstalledSoundMapGeometry01} from '../streaming/soundmap-telemetry.mjs';
 import {createInitialWorldObservationWriter01} from './initial-observation01.mjs';
@@ -27,6 +27,7 @@ gcObserver01?.observe({entryTypes:['gc']});
 const clock01=Object.freeze({kind:'node-process-performance',processId:process.pid,timeOrigin:performance.timeOrigin});
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x),automatic=config?.catalogSHA256==null;
 let initialPriority=null,initialPriorityFailure=null;
+let previousFullScene=null;
 let validationEpochUtc01=null;
 let consumerProof01=null;let metadataWorker01=null,metadataBusy01=false,metadataSerial01=0,metadataVersion01=0,metadataStage01=null,metadataTarget01=null,metadataTimeout01=null,closing01=false;
 const cacheTimings={manifestLoads:0,manifestReadMilliseconds:0,manifestReadCallMilliseconds:0,manifestReadBytes:0,manifestParseMilliseconds:0,catalogueAndIndexMilliseconds:0,maximumRefreshMilliseconds:0};
@@ -150,10 +151,24 @@ try{
    const transfer=preparedSoundMapGeometry?[preparedSoundMapGeometry.bodyBytes.buffer]:[];
    if(message.request.engine?.installedReflectionTrains===true&&!message.request.interiorActivation01&&
       preparedScene.metadata.interiorSurfaceCount01===0&&preparedScene.metadata.activeSurfaces>=512){
-    const beganPacking=performance.now();publication=packInstalledSceneFaces(preparedScene);
-    const packed=publication.packedFaces;
-    if(packed)transfer.push(...packed.chunks.map(c=>c.buffer));
-    profile.transfer={...profile.transfer,packedFaces:packed?.count??0,packedChunks:packed?.chunks.length??0,packedBytes:packed?.bytes??0,packingMilliseconds:performance.now()-beganPacking};
+    const beganPacking=performance.now();
+    const held=previousFullScene;
+    if(held && message.retainedSupportRequest===held.requestId && held.bindingEpoch===bindingEpoch &&
+       held.metadataVersion===metadataVersion01 && sharesInstalledStaticSupports(held.scene,scene)){
+     // The receiver acknowledged one complete, source-bound workset. The
+     // current worker request independently verified its resource bytes and
+     // computed new paths and timestamps. Only the immutable supports recur.
+     publication={...preparedScene,scene:{...scene,tile:{...scene.tile,surfaces:[]},materials:{}},
+      tileIndex:null,batchVisibility:null,gpuGeometry:null,supportReference:{requestId:held.requestId,packetDigest:held.packetDigest}};
+     profile.transfer={...profile.transfer,reusedFaces:scene.tile.surfaces.length,reusedSupportRequest:held.requestId};
+    }else{
+     publication=packInstalledSceneFaces(preparedScene);
+     const packed=publication.packedFaces;
+     if(packed)transfer.push(...packed.chunks.map(c=>c.buffer));
+     previousFullScene=packed?{scene,requestId:message.requestId,packetDigest:packet.packetDigest,bindingEpoch,metadataVersion:metadataVersion01}:null;
+     profile.transfer={...profile.transfer,packedFaces:packed?.count??0,packedChunks:packed?.chunks.length??0,packedBytes:packed?.bytes??0};
+    }
+    profile.transfer.packingMilliseconds=performance.now()-beganPacking;
     if(performance.now()>=message.expiresAt){expired(message,profile,'surface-packing');return;}
    }
    const postMs=post('scene',{requestId:message.requestId,packetDigest:packet.packetDigest,preparedScene:publication,preparedSoundMapGeometry,soundMapGeometryRequested01,status:{...status,genuineResourceVerified:packet.metadata.genuineResourceVerified===true&&packet.metadata.activeSurfaces>0},...residencyEvidence01(profile),...finishProfile(profile),memory:{heapUsed:memory.heapUsed,external:memory.external,arrayBuffers:memory.arrayBuffers}},transfer);

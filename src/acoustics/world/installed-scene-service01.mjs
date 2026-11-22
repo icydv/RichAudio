@@ -5,7 +5,7 @@ import {Worker} from 'node:worker_threads';
 import {performance} from 'node:perf_hooks';
 import path from 'node:path';
 import {bindInstalledStaticSceneWorker01,installedStaticSceneMetadata01} from './installed-static-scene01.mjs';
-import {requireWorld,vector,freeze} from './contracts.mjs';
+import {digest,requireWorld,vector,freeze} from './contracts.mjs';
 import {InstalledSceneReadinessPolicy01,sceneReadinessScope01,sceneReadinessRequestClass01,sceneReadinessMode01,sceneDispatchCadence01} from './scene-readiness-policy01.mjs';
 import {createSceneWorkerProgress01,snapshotSceneWorkerProgress01} from './scene-worker-progress01.mjs';
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x),interval=500;
@@ -34,9 +34,11 @@ export class InstalledSceneService01 {
  #interiorKey01=null;#consumerInteriorKey01=null;
  #metadataResumeUrgent01=false;#metadataVersion01=0;#workerProgress01=null;#closingRequest01=null;
  #consumer01=null;#receipts01=new WeakMap();#readiness01=new InstalledSceneReadinessPolicy01();#expiryTimer01=null;#lastConsumerAt01=-Infinity;#consumerWorkloadKey01='default';#consumerWorkloadRevision01=0;
- constructor({config,session,onScene=()=>{},onStatus=()=>{},phaseDiagnostics01=false,unmanagedIntervalMs01=interval}={}){
+ constructor({config,session,onScene=()=>{},onStatus=()=>{},includeStatusHistory=true,phaseDiagnostics01=false,unmanagedIntervalMs01=interval}={}){
   requireWorld(Number.isInteger(unmanagedIntervalMs01)&&unmanagedIntervalMs01>=150&&unmanagedIntervalMs01<=interval,'bounded unmanaged viewer dispatch cadence');
   this.unmanagedIntervalMs01=unmanagedIntervalMs01;
+  requireWorld(typeof includeStatusHistory==='boolean','explicit installed status history demand');
+  this.includeStatusHistory=includeStatusHistory;
   requireWorld(typeof phaseDiagnostics01==='boolean','explicit optional worker phase diagnostics');if(phaseDiagnostics01)this.#workerProgress01=createSceneWorkerProgress01();
   requireWorld(config&&typeof config.manifestPath==='string'&&typeof config.catalogPath==='string'&&(hex(config.catalogSHA256)||config.catalogSHA256==null&&hex(config.expectedGameSHA256))&&(config.expectedGameSHA256===undefined||hex(config.expectedGameSHA256))&&/^[a-f0-9]{32}$/.test(session)&&typeof onScene==='function'&&typeof onStatus==='function','bound installed scene service configuration');
   const maximumResidentResources=config.maximumResidentResources??8;
@@ -62,7 +64,8 @@ export class InstalledSceneService01 {
    this.operationTimer=setTimeout(()=>this.#fail('worker-initialization-timeout'),10000);
   }catch(error){this.exited=true;this.joined(null);this.#fail('worker-start-failed: '+reason(error));}
  }
-  snapshot(){return {...this.baseStatus,environmentalReadiness01:this.#consumer01?this.#readiness01.snapshot():{schema:1,state:'unmanaged',managed:false,active:null},initialPreparationPriority:{configured:!!this.config.initialObservationPath,pending:this.priorityPending,accepted:this.priorityAccepted,rejections:this.priorityRejections,activationAuthority:false},stage:this.failed?'failed':this.closed?'stopped':this.baseStatus.stage,worker:{kind:'persistent-derived-cache-worker',state:this.state,ready:this.ready,closed:this.closed,failed:this.failed,failure:this.failure,inFlight:this.active!==null,pendingLatest:this.pending!==null,rateLimitHz:this.#consumer01?4:1000/this.unmanagedIntervalMs01,shortInteriorRateLimitHz:this.#consumer01?1000/sceneDispatchCadence01({interiorActivation01:true,durationMs:250}).minimum:null,defaultRateLimitHz:2,maxOldGenerationMiB:512,cacheIoOffProducer:true,archiveDecode:false,catalogSHA256:this.catalogBinding,bindingEpoch:this.bindingEpoch,workerExited:this.exited,...this.stats},cacheResidencyDiagnostics01:this.cacheResidencyDiagnostics01===null?null:structuredClone(this.cacheResidencyDiagnostics01),sceneDeliveryDiagnostics01:{schema:1,clock:{...this.clock01,verified:this.clockVerified01},historyLimit:diagnosticLimit01,recent:structuredClone(this.diagnostics01)}};}
+  statusSummary(){return {...this.baseStatus,environmentalReadiness01:this.readinessSnapshot01(),initialPreparationPriority:{configured:!!this.config.initialObservationPath,pending:this.priorityPending,accepted:this.priorityAccepted,rejections:this.priorityRejections,activationAuthority:false},stage:this.failed?'failed':this.closed?'stopped':this.baseStatus.stage,worker:{kind:'persistent-derived-cache-worker',state:this.state,ready:this.ready,closed:this.closed,failed:this.failed,failure:this.failure,inFlight:this.active!==null,pendingLatest:this.pending!==null,rateLimitHz:this.#consumer01?4:1000/this.unmanagedIntervalMs01,shortInteriorRateLimitHz:this.#consumer01?1000/sceneDispatchCadence01({interiorActivation01:true,durationMs:250}).minimum:null,defaultRateLimitHz:2,maxOldGenerationMiB:512,cacheIoOffProducer:true,archiveDecode:false,catalogSHA256:this.catalogBinding,bindingEpoch:this.bindingEpoch,workerExited:this.exited,...this.stats}};}
+  snapshot(){const summary=this.statusSummary();return {...summary,environmentalReadiness01:this.#consumer01?this.#readiness01.snapshot():summary.environmentalReadiness01,cacheResidencyDiagnostics01:this.cacheResidencyDiagnostics01===null?null:structuredClone(this.cacheResidencyDiagnostics01),sceneDeliveryDiagnostics01:{schema:1,clock:{...this.clock01,verified:this.clockVerified01},historyLimit:diagnosticLimit01,recent:structuredClone(this.diagnostics01)}};}
   readinessSnapshot01(){return this.#consumer01?this.#readiness01.summary():{schema:1,state:'unmanaged',managed:false,active:null};}
   bindConsumer01(consumer){requireWorld(consumer&&typeof consumer==='object'&&typeof consumer.invalidateInstalledScene01==='function'&&(!this.#consumer01||this.#consumer01===consumer),'one bound installed-scene consumer');requireWorld(!this.closed&&!this.failed,'active installed scene service');this.#consumer01=consumer;return this.#readiness01.snapshot();}
   #receipt01(receipt){const ticket=this.#receipts01.get(receipt);requireWorld(this.#consumer01&&ticket&&ticket.receipt===receipt&&this.clockVerified01&&receipt.clock01.kind===this.clock01.kind&&receipt.clock01.processId===this.clock01.processId&&receipt.clock01.timeOrigin===this.clock01.timeOrigin,'original source-bound installed consumer receipt');return ticket;}
@@ -86,7 +89,7 @@ export class InstalledSceneService01 {
   diagnostic.receivedAt=receivedAt;diagnostic.workerProfile01=profile;diagnostic.workerPreparationMilliseconds=message.workerPreparationMilliseconds;diagnostic.dispatchToWorkerMilliseconds=profile.startedAt-active.dispatchedAt;diagnostic.workerTransportMilliseconds=receivedAt-message.sentAt01;
   this.stats.maximumStaticPreparationMs=Math.max(this.stats.maximumStaticPreparationMs,profile.staticPreparationMilliseconds??0);this.stats.maximumWorkerPreparationMs=Math.max(this.stats.maximumWorkerPreparationMs,message.workerPreparationMilliseconds);this.stats.maximumDispatchToWorkerMs=Math.max(this.stats.maximumDispatchToWorkerMs,diagnostic.dispatchToWorkerMilliseconds);this.stats.maximumWorkerTransportMs=Math.max(this.stats.maximumWorkerTransportMs,diagnostic.workerTransportMilliseconds);return profile;
  }
- #emit(){this.#refreshReadiness01();try{this.onStatus(this.snapshot());}catch{this.stats.callbackFailures++;}}
+ #emit(){this.#refreshReadiness01();try{this.onStatus(this.includeStatusHistory?this.snapshot():this.statusSummary());}catch{this.stats.callbackFailures++;}}
  #fail(message){if(this.failed||this.closed)return;const failedActive=this.active,failedPending=this.pending;this.beginStop01(performance.now(),'reader-failed');this.failed=true;this.failure=reason(message);this.state='failed';this.stats.failures++;this.#finish(failedActive?.diagnostic01,'failed');this.#finish(failedPending?.diagnostic01,'failed');this.pending=null;this.active=null;this.priorityPending=false;clearTimeout(this.dispatchTimer);clearTimeout(this.operationTimer);this.dispatchTimer=this.operationTimer=null;this.adopter?.close();this.#emit();if(this.worker&&!this.exited)void this.worker.terminate().catch(()=>{});}
  bindPreparationEpoch01(value){
   if(this.closed||this.failed||this.config.catalogSHA256!==undefined||!epoch(value))return false;
@@ -105,10 +108,16 @@ export class InstalledSceneService01 {
   this.#interiorKey01=null;
   if(this.#consumerInteriorKey01)this.invalidateConsumer01('interior-observation-changed',at);
  }
- updateWindow({listener,sources=[],generation,geometryTimeMs,durationMs=1000,radius=32,maximumSurfaces=2048,adaptiveRadius=true,engine={},cameraInterior01,surroundingWorkset01=false,localSurfaceTarget01,prepareSoundMapGeometry01=!this.#consumer01}={}){
+ updateWindow({listener,sources=[],sourceLayout=null,generation,geometryTimeMs,durationMs=1000,radius=32,maximumSurfaces=2048,adaptiveRadius=true,engine={},cameraInterior01,surroundingWorkset01=false,localSurfaceTarget01,prepareSoundMapGeometry01=!this.#consumer01}={}){
   requireWorld(!this.closed&&!this.failed&&this.#readiness01.stopAt===null,'active installed scene service');listener=vector(listener);requireWorld(Array.isArray(sources)&&sources.length<=15,'bounded installed source window');sources=sources.map(vector);
   requireWorld(Number.isSafeInteger(generation)&&generation>0&&(this.latestGeneration===null||generation>=this.latestGeneration)&&Number.isFinite(geometryTimeMs)&&geometryTimeMs>=0&&Number.isFinite(durationMs)&&durationMs>0&&durationMs<=1000&&engine&&typeof engine==='object'&&!Array.isArray(engine),'fresh bounded installed scene request');
   requireWorld(Number.isFinite(radius)&&radius>=1&&radius<=32&&Number.isInteger(maximumSurfaces)&&maximumSurfaces>=1&&maximumSurfaces<=4096&&(localSurfaceTarget01===undefined||Number.isInteger(localSurfaceTarget01)&&localSurfaceTarget01>=64&&localSurfaceTarget01<=maximumSurfaces)&&typeof adaptiveRadius==='boolean'&&typeof prepareSoundMapGeometry01==='boolean'&&typeof surroundingWorkset01==='boolean','bounded installed acoustic workset');
+  requireWorld(sourceLayout===null || Array.isArray(sourceLayout)&&sourceLayout.length===sources.length&&
+   sourceLayout.every(id=>typeof id==='string'&&id.length>0&&id.length<=256)&&new Set(sourceLayout).size===sourceLayout.length,
+   'ordered source identity and emitter role for each position');
+  const sourceLayoutKey=sourceLayout===null?null:digest(sourceLayout),poseKey=sourceLayoutKey?digest(sources):null;
+  const moving=!!poseKey && this.lastLayoutKey===sourceLayoutKey && this.lastPoseKey!==poseKey;
+  this.lastLayoutKey=sourceLayoutKey;this.lastPoseKey=poseKey;
   const engineCopy=structuredClone(engine);requireWorld(Buffer.byteLength(JSON.stringify(engineCopy))<=16384,'bounded installed scene processing settings');
   const requestedAt=performance.now(),requestId=++this.serial;
   const interiorKey=interiorObservationKey01(cameraInterior01);
@@ -122,7 +131,9 @@ export class InstalledSceneService01 {
   }else this.withdrawCameraInterior01(requestedAt);
   if(interiorActivation01)durationMs=Math.min(durationMs,interiorActivation01.durationMs);
   if(this.latestGeneration!==null&&generation!==this.latestGeneration)this.invalidateConsumer01('source-generation-changed',requestedAt);this.#readiness01.observation(requestedAt,generation);this.latestGeneration=generation;this.stats.requests++;if(this.pending){this.stats.coalesced++;this.#finish(this.pending.diagnostic01,'coalesced-before-dispatch',requestedAt);}
-  this.pending={requestId,requestedAt,expiresAt:requestedAt+durationMs,request:{listener,sources,generation,geometryTimeMs,durationMs,radius,maximumSurfaces,adaptiveRadius,engine:engineCopy,interiorActivation01,surroundingWorkset01,localSurfaceTarget01,prepareSoundMapGeometry01}};this.pending.cadence01=sceneDispatchCadence01(this.pending.request);this.pending.requestClass01=sceneReadinessRequestClass01(this.pending.request);if(this.latestRequestClass01&&this.latestRequestClass01!==this.pending.requestClass01){this.#readiness01.resetWorkload(requestedAt);clearTimeout(this.dispatchTimer);this.dispatchTimer=null;}this.latestRequestClass01=this.pending.requestClass01;this.pending.consumerWorkloadKey=this.#consumerWorkloadKey01;this.pending.consumerWorkloadRevision=this.#consumerWorkloadRevision01;this.pending.diagnostic01=this.#record(this.pending);this.#schedule();
+  this.pending={requestId,requestedAt,expiresAt:requestedAt+durationMs,request:{listener,sources,sourceLayoutKey,generation,geometryTimeMs,durationMs,radius,maximumSurfaces,adaptiveRadius,engine:engineCopy,interiorActivation01,surroundingWorkset01,localSurfaceTarget01,prepareSoundMapGeometry01}};this.pending.transfer=this.adopter.retainedTransfer(this.pending.request,moving,poseKey);
+  this.pending.supportTransferKey=this.pending.transfer?.key??null;
+  this.pending.cadence01=sceneDispatchCadence01(this.pending.request);this.pending.requestClass01=this.pending.supportTransferKey??sceneReadinessRequestClass01(this.pending.request);if(this.latestRequestClass01&&this.latestRequestClass01!==this.pending.requestClass01){this.#readiness01.resetWorkload(requestedAt);clearTimeout(this.dispatchTimer);this.dispatchTimer=null;}this.latestRequestClass01=this.pending.requestClass01;this.pending.consumerWorkloadKey=this.#consumerWorkloadKey01;this.pending.consumerWorkloadRevision=this.#consumerWorkloadRevision01;this.pending.diagnostic01=this.#record(this.pending);this.#schedule();
   return {requestId,requestedAt,expiresAt:requestedAt+durationMs,coalescedLatest:true};
  }
  #schedule(){const now=performance.now();this.#refreshReadiness01(now);if(this.closed||this.failed||this.#readiness01.stopAt!==null||!this.ready||this.active||!this.pending||this.dispatchTimer!==null)return;const eligible=this.#metadataResumeUrgent01&&this.#consumer01?Math.max(now,this.lastDispatch+this.pending.cadence01.minimum):this.#consumer01?this.#readiness01.dispatchAt(now,this.lastDispatch,this.pending):Math.max(now,this.lastDispatch+this.unmanagedIntervalMs01);this.scheduledEligibility01=eligible;const delay=eligible-now;if(delay>0){this.dispatchTimer=setTimeout(()=>{this.dispatchTimer=null;this.#dispatch();},Math.ceil(delay));}else this.#dispatch();}
@@ -133,7 +144,9 @@ export class InstalledSceneService01 {
   pending.dispatchedAt=now;pending.diagnostic01.dispatchedAt=now;pending.diagnostic01.dispatchEligibleAt=this.scheduledEligibility01;pending.diagnostic01.requestWaitMilliseconds=now-pending.requestedAt;pending.diagnostic01.outcome='dispatched';this.stats.maximumRequestWaitMs=Math.max(this.stats.maximumRequestWaitMs,now-pending.requestedAt);
   this.#refreshReadiness01(now);
   this.operationTimer=setTimeout(()=>this.#fail('worker-window-timeout'),5000);
-  try{this.worker.postMessage({schema:1,type:'window',session:this.session,catalogSHA256:this.catalogBinding,requestId:pending.requestId,requestedAt:pending.requestedAt,expiresAt:pending.expiresAt,dispatchedAt:now,request:pending.request});}catch(error){this.#fail('worker-command-failed: '+reason(error));}
+  // Keep the original classification of the observed request. A new full
+  // publication can supersede the retained base before this dispatch.
+  try{this.worker.postMessage({schema:1,type:'window',session:this.session,catalogSHA256:this.catalogBinding,requestId:pending.requestId,retainedSupportRequest:this.adopter.retainedSupportRequest(),requestedAt:pending.requestedAt,expiresAt:pending.expiresAt,dispatchedAt:now,request:pending.request});}catch(error){this.#fail('worker-command-failed: '+reason(error));}
  }
  async #message(message){
   if(this.closed){this.#retainClosingProfile01(message);return;}if(this.failed)return;
@@ -171,7 +184,7 @@ export class InstalledSceneService01 {
    }
    requireWorld((message.type==='scene'||message.type==='expired'||message.type==='static-prepared')&&this.ready&&this.active&&message.requestId===this.active.requestId,'matching installed scene worker request');
    const diagnostic=this.active.diagnostic01;processingDiagnostic=diagnostic;const profile=this.#profile(this.active,message,receivedAt);
-   if(message.bindingEpoch!==this.bindingEpoch||message.catalogSHA256!==this.catalogBinding){this.stats.generationDiscards++;this.#finish(diagnostic,'binding-discarded',receivedAt);this.active=null;clearTimeout(this.operationTimer);this.operationTimer=null;this.#emit();this.#schedule();return;}
+   if(message.bindingEpoch!==this.bindingEpoch||message.catalogSHA256!==this.catalogBinding||message.preparedScene?.supportReference&&message.metadataVersion01!==this.#metadataVersion01){this.stats.generationDiscards++;this.#finish(diagnostic,'binding-discarded',receivedAt);this.active=null;clearTimeout(this.operationTimer);this.operationTimer=null;this.#emit();this.#schedule();return;}
    if(message.preparedScene?.packedFaces){
     const owner=this.active, request=owner.request, epoch=this.validationEpochUtc01;
     requireWorld(!owner.unpackingFaces&&message.type==='scene'&&request.engine?.installedReflectionTrains===true&&
@@ -216,7 +229,14 @@ export class InstalledSceneService01 {
    this.#finish(diagnostic,'published',admittedAt);
    const receipt=Object.freeze({requestedAt:active.requestedAt,admittedAt,admissionMs,validationMs,expiresAt:active.expiresAt,requestId:active.requestId,generation:active.request.generation,geometryTimeMs:active.request.geometryTimeMs,durationMs:active.request.durationMs,cameraInteriorKey01:interiorObservationKey01(active.request.interiorActivation01),catalogSHA256:this.catalogBinding,bindingEpoch:this.bindingEpoch,packetDigest:message.packetDigest,prepareSoundMapGeometry01:active.request.prepareSoundMapGeometry01,preparedSoundMapGeometry:message.preparedSoundMapGeometry,workerPreparationMilliseconds:message.workerPreparationMilliseconds,workerMemory:Object.freeze({...message.memory}),lifecycle01:freeze(structuredClone(diagnostic)),clock01:Object.freeze({...this.clock01,verified:true})});
    const metadata=installedStaticSceneMetadata01(scene),ticket={receipt,request:active.request,cadence01:active.cadence01,dispatchedAt:active.dispatchedAt,profile:freeze(structuredClone(profile)),evidence:freeze(structuredClone(scene.observationModel.evidence)),warm:metadata.activeSurfaces>0&&sceneReadinessMode01(profile)==='warm',sampled:false,outcome:false};ticket.interiorKey01=ticket.evidence.find(e=>e.interiorKey)?.interiorKey??null;
-   ticket.metadataVersion01=message.metadataVersion01??0;ticket.requestClass01=active.requestClass01;ticket.consumerWorkloadKey=active.consumerWorkloadKey;ticket.consumerWorkloadRevision=active.consumerWorkloadRevision;ticket.scopeId=sceneReadinessScope01({receipt,request:active.request,metadata,evidence:scene.observationModel.evidence,profile,worksetAnchor:scene.tile.listenerAnchor,consumerWorkloadKey:ticket.consumerWorkloadKey,consumerWorkloadRevision:ticket.consumerWorkloadRevision});this.#receipts01.set(receipt,ticket);if(metadata.activeSurfaces>0)this.#readiness01.candidate(ticket,admittedAt);
+   ticket.metadataVersion01=message.metadataVersion01??0;
+   const expectedTransfer=active.transfer;
+   const matchedTransfer=expectedTransfer&&expectedTransfer.base===message.preparedScene?.supportReference?.requestId;
+   ticket.supportTransferKey=matchedTransfer?expectedTransfer.key:null;
+   ticket.movingPoseKey=matchedTransfer?expectedTransfer.movingPoseKey:null;
+   ticket.requestClass01=expectedTransfer&&!matchedTransfer?sceneReadinessRequestClass01(active.request):active.requestClass01;
+   ticket.consumerWorkloadKey=active.consumerWorkloadKey;ticket.consumerWorkloadRevision=active.consumerWorkloadRevision;
+   ticket.scopeId=sceneReadinessScope01({receipt,supportTransferKey:ticket.supportTransferKey,request:active.request,metadata,evidence:scene.observationModel.evidence,profile,worksetAnchor:scene.tile.listenerAnchor,consumerWorkloadKey:ticket.consumerWorkloadKey,consumerWorkloadRevision:ticket.consumerWorkloadRevision});this.#receipts01.set(receipt,ticket);if(metadata.activeSurfaces>0)this.#readiness01.candidate(ticket,admittedAt);
    // Dispatch a useful successor before a potentially slow control callback.
    this.#schedule();const callbackAt=performance.now();this.onScene(scene,receipt);const callbackMs=performance.now()-callbackAt;diagnostic.publicationCallbackMilliseconds=callbackMs;this.stats.maximumPublicationCallbackMs=Math.max(this.stats.maximumPublicationCallbackMs,callbackMs);this.stats.publications++;this.stats.firstPublishedAt01??=admittedAt;if(profile.activeSurfaces>0)this.stats.firstPublishedNonemptyAt01??=admittedAt;this.#emit();this.#schedule();
   }catch(error){this.#finish(processingDiagnostic,'result-rejected');this.#fail('worker-result-rejected: '+reason(error));}

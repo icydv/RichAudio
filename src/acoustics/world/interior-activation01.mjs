@@ -38,6 +38,19 @@ export function exteriorWorksetAnchor01(listener,sources,radius){
  return sources.every(p=>p.every((v,i)=>Math.abs(v-anchor[i])<=2))?anchor:null;
 }
 
+// The same center and minimum radius drive every adaptive pass. Current
+// source coordinates still drive reflection discovery within those passes.
+export function exteriorTrafficWindow(request){
+ const {listener,sources,radius,engine,interiorActivation01,localSurfaceTarget01,surroundingWorkset01}=request;
+ if(!engine?.installedReflectionTrains||engine.higherOrderPaths?.length||!surroundingWorkset01||
+    interiorActivation01||!localSurfaceTarget01||!sources.length)return null;
+ const anchor=exteriorWorksetAnchor01(listener,sources,radius);
+ let reach=0;
+ for(const source of sources)reach=Math.max(reach,Math.hypot(...source.map((v,i)=>v-listener[i])));
+ if(anchor)for(const point of [listener,...sources])for(let i=0;i<3;i++)reach=Math.max(reach,Math.abs(point[i]-anchor[i]));
+ return {center:anchor??listener,minimumRadius:Math.min(radius,8*Math.ceil((reach+4)/8))};
+}
+
 export function matchInteriorInstance01(instances,sample,{session,generation,catalogSHA256,epoch}){
  if(!identity(sample)||sample.session!==session||sample.generation!==generation||
     sample.catalogSHA256!==catalogSHA256||!epoch||sample.epoch!==epoch)return null;

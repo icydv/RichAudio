@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {setImmediate as nextTurn} from 'node:timers/promises';
 import {deserialize, serialize} from 'node:v8';
 import {createHash} from 'node:crypto';
+import {digest} from '../src/acoustics/world/contracts.mjs';
 import {originalInstalledCache01} from './fixtures/InstalledStaticCache01.mjs';
 import {InstalledStaticWorld01, bindInstalledStaticSceneWorker01, encodeInstalledStaticScene01, prepareInstalledStaticSceneTransfer01}
   from '../src/acoustics/world/installed-static-scene01.mjs';
@@ -177,4 +178,75 @@ test('the owned worker publishes the same finite routes, stereo PCM and viewer g
     probe.close();
     await service.close();
   }
+});
+
+test('ten moving emitters renew an identical street cube from the admitted supports', async () => {
+  let delivery, lastStatus;
+  const service = new InstalledSceneService01({session:request.session, config:cache,
+    unmanagedIntervalMs01:150, includeStatusHistory:false,
+    onScene(scene, receipt) { delivery.resolve({scene, receipt}); },
+    onStatus(status) { lastStatus=status; if (status.worker?.failed) delivery.reject(Error(status.worker.failure)); }});
+  const read = async (i, options = {}) => {
+    const current = {...request, surroundingWorkset01:true, localSurfaceTarget01:640,
+      sources:Array.from({length:10}, (_,j)=>[-4 + i * .2, j * .09, 1]), geometryTimeMs:i * 160,
+      sourceLayout:Array.from({length:10},(_,j)=>'car-'+Math.floor(j/2)+'-'+(j%2?'exhaust':'engine')),
+      prepareSoundMapGeometry01:true, ...options};
+    delivery = Promise.withResolvers();
+    const timeout = setTimeout(() => delivery.reject(Error('No fresh workset')), 4500);
+    try {
+      service.updateWindow(current);
+      const {scene, receipt} = await delivery.promise;
+      const reference = world.window(current);
+      assert.deepEqual(scene, reference);
+      const packet=encodeInstalledStaticScene01(reference);
+      const {packetDigest,...body}=packet;
+      assert.equal(packetDigest,digest(body));
+      assert.deepEqual(preparedGpuGeometry01(scene.tile).bodyBytes,
+        prepareInstalledStaticSceneTransfer01(packet,
+          {...current,catalogSHA256:cache.catalogSHA256}).gpuGeometry.bodyBytes);
+      assert(registerPreparedSoundMapGeometry01(scene, receipt.preparedSoundMapGeometry, receipt).registered);
+      for (const [a,b] of [[[0,0,-1],[0,0,2]], [[-4,0,1],[4,0,1]]])
+        assert.deepEqual(querySegment(scene.tile,a,b),querySegment(reference.tile,a,b));
+      return {scene,receipt};
+    } finally { clearTimeout(timeout); }
+  };
+  try {
+    const first = await read(0);
+    const layout=Array.from({length:10},(_,j)=>'car-'+Math.floor(j/2)+'-'+(j%2?'exhaust':'engine'));
+    const poses=Array.from({length:10},(_,j)=>[-4,j*.09,1]);
+    const inputs={...request,surroundingWorkset01:true,localSurfaceTarget01:640,
+      sourceLayoutKey:digest(layout),sources:poses,prepareSoundMapGeometry01:true};
+    const moving=(options={})=>{
+      const value={...inputs,...options};
+      return service.adopter.retainedTransfer(value,true,digest(value.sources));
+    };
+    const originalCost=moving(), changedPose=moving({sources:poses.map(([x,y,z])=>[x-.5,y,z])});
+    assert.equal(originalCost.key,changedPose.key);
+    assert.notEqual(originalCost.movingPoseKey,changedPose.movingPoseKey);
+    assert.notEqual(service.adopter.retainedTransfer(inputs,false,digest(poses)).key,originalCost.key);
+    for(const changes of [
+      {sourceLayoutKey:digest([...layout].reverse())},
+      {sourceLayoutKey:digest([...layout.slice(0,-1),'car-4-aero'])},
+      {sources:poses.slice(0,-1),sourceLayoutKey:digest(layout.slice(0,-1))},
+      {engine:{...inputs.engine,maxReflectors:8}},{prepareSoundMapGeometry01:false}
+    ])assert.notEqual(moving(changes).key,originalCost.key);
+    for(const changes of [{radius:10},{maximumSurfaces:513},{listener:[4.01,0,1]},
+      {generation:2},{localSurfaceTarget01:512},{interiorActivation01:{}}])assert.equal(moving(changes),null);
+    const next = await read(1);
+    assert.equal(first.receipt.lifecycle01.workerProfile01.transfer.packedFaces, 513);
+    assert.equal(next.receipt.lifecycle01.workerProfile01.transfer.reusedFaces, 513);
+    assert.notEqual(next.scene.geometryKey, first.scene.geometryKey);
+    assert.notEqual(next.scene.tile.surfaces[0], first.scene.tile.surfaces[0]);
+    assert.equal(next.scene.tile.surfaces[0].footprint, first.scene.tile.surfaces[0].footprint);
+    assert.equal(next.scene.materials, first.scene.materials);
+    assert.equal(first.scene.tile.surfaces[0].validUntil, 1000);
+    assert.equal(next.scene.tile.surfaces[0].validUntil, 1160);
+    const moved = await read(2, {listener:[4.1,0,1]});
+    assert.equal(moved.receipt.lifecycle01.workerProfile01.transfer.packedFaces, 513);
+    const generation = await read(3, {listener:[4.1,0,1], generation:2});
+    assert.equal(generation.receipt.lifecycle01.workerProfile01.transfer.packedFaces, 513);
+    assert.equal(lastStatus.worker.publications,4);
+    assert.equal(lastStatus.sceneDeliveryDiagnostics01,undefined);
+    assert(service.snapshot().sceneDeliveryDiagnostics01.recent.some(row=>row.outcome==='published'));
+  } finally { await service.close(); }
 });

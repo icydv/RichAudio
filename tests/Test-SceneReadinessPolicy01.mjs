@@ -42,3 +42,34 @@ test('only a camera-interior request with a short original lease uses the faster
  expired.cadence01=cadence01;
  assert.equal(policy.evaluate(expired,345,{lastDispatch:100,active:null,pending:null}).reason,'expired-before-activation');
 });
+
+test('a retained stationary transfer budget needs the same base and poses in the next observed request', () => {
+ const p=trained(),t=ticket(4,1500);
+ t.supportTransferKey='same-worker-base-and-poses';
+ const pending={request:{generation:1},expiresAt:3000,supportTransferKey:t.supportTransferKey};
+ p.candidate(t,1700);
+ assert.equal(p.evaluate(t,1701,{lastDispatch:1500,pending,active:null}).permitted,true);
+ for(const changed of [null,{...pending,supportTransferKey:'moved-source-or-new-base'}]){
+  const decision=p.evaluate(t,1701,{lastDispatch:1500,pending:changed,active:null});
+  assert.equal(decision.permitted,false);
+ }
+});
+
+test('moving transfer timing needs three different poses and cannot outlive a stopped or expired request', () => {
+ const p=new InstalledSceneReadinessPolicy01();
+ for(let at=0;at<=2500;at+=50)p.observation(at,1);
+ for(const [i,pose] of ['pose-a','pose-b','pose-a','pose-c'].entries()){
+  const record=ticket(i+1,i*500);record.movingPoseKey=pose;record.supportTransferKey='moving-base';
+  p.candidate(record,record.receipt.admittedAt);
+  p.outcome(record,{completedAt:record.receipt.admittedAt+2,queueMilliseconds:1,applicationMilliseconds:1,
+    applied:false,reason:'collecting-warm-evidence'});
+  assert.equal(!!p.envelope(),i===3);
+ }
+ const record=ticket(5,2000);record.movingPoseKey='pose-d';record.supportTransferKey='moving-base';
+ const pending={request:{generation:1},expiresAt:3300,supportTransferKey:'moving-base'};
+ p.candidate(record,2200);
+ assert.equal(p.evaluate(record,2201,{active:null,pending,lastDispatch:2000}).permitted,true);
+ assert.equal(p.evaluate(record,2202,{active:null,pending:{...pending,expiresAt:2201},lastDispatch:2000}).permitted,false);
+ p.stop(2203,'stop');
+ assert.equal(p.evaluate(record,2204,{active:null,pending,lastDispatch:2000}).permitted,false);
+});
