@@ -135,7 +135,7 @@ export class InstalledSceneService01 {
   this.operationTimer=setTimeout(()=>this.#fail('worker-window-timeout'),5000);
   try{this.worker.postMessage({schema:1,type:'window',session:this.session,catalogSHA256:this.catalogBinding,requestId:pending.requestId,requestedAt:pending.requestedAt,expiresAt:pending.expiresAt,dispatchedAt:now,request:pending.request});}catch(error){this.#fail('worker-command-failed: '+reason(error));}
  }
- #message(message){
+ async #message(message){
   if(this.closed){this.#retainClosingProfile01(message);return;}if(this.failed)return;
   const receivedAt=performance.now();let processingDiagnostic=null;
   try{
@@ -172,6 +172,33 @@ export class InstalledSceneService01 {
    requireWorld((message.type==='scene'||message.type==='expired'||message.type==='static-prepared')&&this.ready&&this.active&&message.requestId===this.active.requestId,'matching installed scene worker request');
    const diagnostic=this.active.diagnostic01;processingDiagnostic=diagnostic;const profile=this.#profile(this.active,message,receivedAt);
    if(message.bindingEpoch!==this.bindingEpoch||message.catalogSHA256!==this.catalogBinding){this.stats.generationDiscards++;this.#finish(diagnostic,'binding-discarded',receivedAt);this.active=null;clearTimeout(this.operationTimer);this.operationTimer=null;this.#emit();this.#schedule();return;}
+   if(message.preparedScene?.packedFaces){
+    const owner=this.active, request=owner.request, epoch=this.validationEpochUtc01;
+    requireWorld(!owner.unpackingFaces&&message.type==='scene'&&request.engine?.installedReflectionTrains===true&&
+     profile.activeSurfaces===message.preparedScene.metadata.activeSurfaces,'one packed installed window per request');
+    owner.unpackingFaces=true;
+    const bindingCurrent=()=>this.ready&&message.bindingEpoch===this.bindingEpoch&&message.catalogSHA256===this.catalogBinding&&
+     epoch===this.validationEpochUtc01&&message.metadataVersion01===this.#metadataVersion01;
+    const current=()=>!this.closed&&!this.failed&&this.#readiness01.stopAt===null&&this.active===owner&&bindingCurrent()&&
+     performance.now()<owner.expiresAt&&request.generation===this.latestGeneration&&
+     (!request.interiorActivation01||interiorObservationKey01(request.interiorActivation01)===this.#interiorKey01);
+    const expected={catalogSHA256:this.catalogBinding,requestId:owner.requestId,bindingEpoch:this.bindingEpoch,...request};
+    const unpack=await this.adopter.unpack(message,expected,current);
+    if(this.closed||this.failed||this.active!==owner)return;
+    const stopped=this.#readiness01.stopAt!==null;
+    if(!unpack||stopped||!bindingCurrent()){
+     const at=performance.now(),expired=at>=owner.expiresAt;
+     const reason=stopped?'discarded-after-stop-intent':!bindingCurrent()?'binding-discarded':
+      expired?'expired-before-adoption':'generation-discarded';
+     if(stopped)this.#readiness01.totals.postStopResults++;
+     else if(reason==='expired-before-adoption'){this.stats.staleResults++;this.stats.expiredBeforeAdoption++;}
+     else this.stats.generationDiscards++;
+     this.#finish(diagnostic,reason,at);
+     this.active=null;clearTimeout(this.operationTimer);this.operationTimer=null;
+     this.#emit();this.#schedule();return;
+    }
+    diagnostic.surfaceUnpack=unpack;
+   }
    if(profile.qualifiedResourceCount>0&&Number.isFinite(profile.windowCompletedAt))this.stats.firstInternallyValidatedAt01??=profile.windowCompletedAt;
    if(profile.genuineResourceVerified&&profile.activeSurfaces>0&&Number.isFinite(profile.windowCompletedAt)){this.stats.firstInternalNonemptyAt01??=profile.windowCompletedAt;this.stats.firstInternalNonemptyRequestId01??=message.requestId;}
    clearTimeout(this.operationTimer);this.operationTimer=null;const active=this.active;this.active=null;this.state='idle';this.baseStatus=message.status;

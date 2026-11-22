@@ -65,15 +65,19 @@ export class ClockedFleetEvidence02 {
   this.gcObserver.observe({entryTypes:['gc']});
  }
  ready(preparation){this.preparation=preparation;this.readyAt=performance.now();}
- sceneCandidate(receipt,discovery){
+ sceneCandidate(receipt,metadata){
   if(this.sceneCandidates.length===1024){this.sceneCandidatesOmitted++;return;}
   const profile=receipt.lifecycle01.workerProfile01;
+  const transfer=profile?.transfer;
   this.sceneCandidates.push({requestId:receipt.requestId,block:this.blocks,
+   activeSurfaces:metadata.activeSurfaces,activeRadius:metadata.activeRadius,
    workerPreparationMs:receipt.workerPreparationMilliseconds,
    workerReflectionSelectionMs:profile?.world?.reflectionSelectionMs??null,
    workerTransportMs:receipt.lifecycle01.workerTransportMilliseconds,
    producerValidationMs:receipt.validationMs,requestToAdmissionMs:receipt.admissionMs,
-   discovery:discovery??null});
+   ...(transfer?.packedChunks?{packedFaces:transfer.packedFaces,packedChunks:transfer.packedChunks,
+    packedBytes:transfer.packedBytes,packingMs:transfer.packingMilliseconds,surfaceUnpack:receipt.lifecycle01.surfaceUnpack}:{}),
+   discovery:metadata.reflectionSearch01??null});
  }
  credit(blocks,at){
   for(let i=0;i<blocks;i++)this.creditTimes[this.creditWrite++%8]=at;

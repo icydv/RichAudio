@@ -135,7 +135,7 @@ if(!config.demoProfile&&config.acousticWorld!==false){
   if(qualification&&s.worker?.failed&&!stopped)setImmediate(()=>finish(Error(s.worker.failure??'installed world worker failed'),'world-worker-fault'));
  },onScene:(scene,receipt)=>{
   const metadata=installedStaticSceneMetadata01(scene),profile=receipt.lifecycle01.workerProfile01;
-  clockedEvidence?.sceneCandidate(receipt, metadata.reflectionSearch01);
+  clockedEvidence?.sceneCandidate(receipt, metadata);
   latestPreparedScene01={requestId:receipt.requestId,generation:receipt.generation,epoch:installedScenes.validationEpochUtc01,catalogue:receipt.catalogSHA256,
    interiorKey:receipt.cameraInteriorKey01,expiresAt:receipt.expiresAt,
    surfaces:metadata.activeSurfaces,reason:metadata.localReadiness.firstBlocker==='placement-or-activation-withheld'?

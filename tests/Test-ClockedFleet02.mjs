@@ -51,6 +51,10 @@ test('clocked receipts retain each render, mixer decision and completed pipe int
  const receipt=new ClockedFleetEvidence02(root,session),e=engine(true),g=e.g;
  g.pipeline.clockedStages={};g.captureCompleteRenderStages01=true;
  receipt.ready({});
+ const transfer={packedFaces:96,packedChunks:3,packedBytes:9000,packingMilliseconds:1.5};
+ const surfaceUnpack={chunks:3,bytes:9000,elapsedMilliseconds:2,activeSliceMilliseconds:1,maximumSliceMilliseconds:.5};
+ receipt.sceneCandidate({requestId:1,lifecycle01:{workerProfile01:{transfer},surfaceUnpack}},
+  {activeSurfaces:96,activeRadius:16});
  try{
   for(let block=0;block<40;block++){
    const began=performance.now();
@@ -62,6 +66,9 @@ test('clocked receipts retain each render, mixer decision and completed pipe int
   receipt.close('test-complete');
   const report=JSON.parse(fs.readFileSync(path.join(directory,'clocked-fleet-producer.json'),'utf8'));
   assert.equal(report.allBlocks.deliveredBlocks,40);
+  const [window]=report.sceneCandidates;
+  assert.deepEqual([window.activeSurfaces,window.activeRadius,window.packedChunks,window.packedBytes,window.packingMs],[96,16,3,9000,1.5]);
+  assert.deepEqual(window.surfaceUnpack,surfaceUnpack);
   assert(report.allBlocks.stages.candidatePreparationMs.max>0);
   assert(report.allBlocks.stages.pathApplicationMs.max>0);
   assert(report.allBlocks.stages.stereoMixMs.max>0);

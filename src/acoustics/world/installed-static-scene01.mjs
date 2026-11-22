@@ -1,3 +1,4 @@
+import {unpackInstalledSceneFaces} from './installed-scene-chunks.mjs';
 // Locally relevant finite surfaces from the EXISTING installed collision cache.
 // This reads private derived data only; archive decoding belongs to the existing
 // startup worker. Static installation modelling never observes live activation.
@@ -504,9 +505,24 @@ function freezeTransferred01(value){if(value&&typeof value==='object'&&!Object.i
 export function bindInstalledStaticSceneWorker01(worker,{session}={}){
  requireWorld(worker instanceof Worker&&/^[a-f0-9]{32}$/.test(session),'actual owned installed scene Worker required');const received=new WeakSet();let closed=false;
  const receive=message=>{if(message&&typeof message==='object'&&message.type==='scene')received.add(message);};worker.prependListener('message',receive);
- return {adopt(message,{catalogSHA256,generation,geometryTimeMs,durationMs,requestId,bindingEpoch}={}){
+ const claim=(message,{catalogSHA256,generation,geometryTimeMs,durationMs,requestId,bindingEpoch})=>{
   requireWorld(!closed&&received.has(message),'source-bound installed scene Worker capability');received.delete(message);
   requireWorld(hex(catalogSHA256)&&message.session===session&&message.catalogSHA256===catalogSHA256&&Number.isSafeInteger(requestId)&&requestId>0&&message.requestId===requestId&&Number.isSafeInteger(bindingEpoch)&&bindingEpoch>=0&&message.bindingEpoch===bindingEpoch&&Number.isSafeInteger(generation)&&generation>0&&Number.isFinite(geometryTimeMs)&&geometryTimeMs>=0&&Number.isFinite(durationMs)&&durationMs>0&&durationMs<=1000,'retained installed scene admission request');
+ };
+ return {async unpack(message,expected,isCurrent){
+  claim(message,expected);
+  const packed=message.preparedScene,metadata=packed?.metadata,tile=packed?.scene?.tile;
+  requireWorld(packed?.kind==='RichAudioFullyValidatedInstalledScene01'&&packed.validation==='full-installed-static-decoder01'&&
+   hex(packed.packetDigest)&&message.packetDigest===packed.packetDigest&&metadata?.session===session&&
+   metadata.sourceCatalogueSHA256===expected.catalogSHA256&&metadata.generation===expected.generation&&
+   metadata.geometryTimeMs===expected.geometryTimeMs&&metadata.durationMs===expected.durationMs&&tile?.session===session&&
+   tile.version===expected.generation&&tile.createdAt===expected.geometryTimeMs&&tile.validUntil===expected.geometryTimeMs+expected.durationMs,
+   'packed scene must match current installed request');
+  const result=await unpackInstalledSceneFaces(packed,{isCurrent:()=>!closed&&isCurrent()});
+  if(!result||closed||!isCurrent())return null;
+  message.preparedScene=result.prepared;received.add(message);return result.profile;
+ },adopt(message,{catalogSHA256,generation,geometryTimeMs,durationMs,requestId,bindingEpoch}={}){
+  claim(message,{catalogSHA256,generation,geometryTimeMs,durationMs,requestId,bindingEpoch});
   const prepared=message.preparedScene,scene=prepared?.scene,metadata=prepared?.metadata,tile=scene?.tile;
   requireWorld(prepared?.schema===1&&prepared.kind==='RichAudioFullyValidatedInstalledScene01'&&prepared.validation==='full-installed-static-decoder01'&&hex(prepared.packetDigest)&&prepared.packetDigest===message.packetDigest,'complete worker-installed-scene proof');
   requireWorld(metadata?.kind==='RichAudioInstalledStaticScene01'&&metadata.sourceCatalogueSHA256===catalogSHA256&&metadata.session===session&&metadata.generation===generation&&metadata.geometryTimeMs===geometryTimeMs&&metadata.durationMs===durationMs&&metadata.coverage==='partial'&&metadata.installedWorldVerified===false&&metadata.runtimeActivationVerified===false&&metadata.pcmQueueFramesAdded===0&&hex(metadata.worldDigest),'source-bound prepared scene request identity');

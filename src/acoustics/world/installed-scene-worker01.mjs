@@ -7,6 +7,7 @@ import {Worker} from 'node:worker_threads';
 import {PerformanceObserver} from 'node:perf_hooks';
 import {createMetadataStage01} from './prepared-world-metadata01.mjs';
 import {InstalledStaticWorld01,encodeInstalledStaticScene01,prepareInstalledStaticSceneTransfer01} from './installed-static-scene01.mjs';
+import {packInstalledSceneFaces} from './installed-scene-chunks.mjs';
 import {prepareInstalledSoundMapGeometry01} from '../streaming/soundmap-telemetry.mjs';
 import {createInitialWorldObservationWriter01} from './initial-observation01.mjs';
 import {recordSceneWorkerProgress01} from './scene-worker-progress01.mjs';
@@ -145,7 +146,17 @@ try{
    phase01('soundmap');const soundMapGeometryRequested01=message.request.prepareSoundMapGeometry01!==false;profile.soundMapGeometryRequested01=soundMapGeometryRequested01;profile.soundMapGeometryStatus01=soundMapGeometryRequested01?'prepared':'not-requested';let preparedSoundMapGeometry=null;if(soundMapGeometryRequested01){const soundMapAt=performance.now();preparedSoundMapGeometry=prepareInstalledSoundMapGeometry01(preparedScene.scene,{requestId:message.requestId,bindingEpoch,packetDigest:packet.packetDigest});profile.soundMapPreparationMilliseconds=performance.now()-soundMapAt;}
    if(performance.now()>=message.expiresAt){expired(message,profile,'soundmap-preparation');return;}
    phase01('status');const status=internalStatus(profile),memory=process.memoryUsage();
-   const postMs=post('scene',{requestId:message.requestId,packetDigest:packet.packetDigest,preparedScene,preparedSoundMapGeometry,soundMapGeometryRequested01,status:{...status,genuineResourceVerified:packet.metadata.genuineResourceVerified===true&&packet.metadata.activeSurfaces>0},...residencyEvidence01(profile),...finishProfile(profile),memory:{heapUsed:memory.heapUsed,external:memory.external,arrayBuffers:memory.arrayBuffers}},preparedSoundMapGeometry?[preparedSoundMapGeometry.bodyBytes.buffer]:[]);
+   let publication=preparedScene;
+   const transfer=preparedSoundMapGeometry?[preparedSoundMapGeometry.bodyBytes.buffer]:[];
+   if(message.request.engine?.installedReflectionTrains===true&&!message.request.interiorActivation01&&
+      preparedScene.metadata.interiorSurfaceCount01===0&&preparedScene.metadata.activeSurfaces>=512){
+    const beganPacking=performance.now();publication=packInstalledSceneFaces(preparedScene);
+    const packed=publication.packedFaces;
+    if(packed)transfer.push(...packed.chunks.map(c=>c.buffer));
+    profile.transfer={...profile.transfer,packedFaces:packed?.count??0,packedChunks:packed?.chunks.length??0,packedBytes:packed?.bytes??0,packingMilliseconds:performance.now()-beganPacking};
+    if(performance.now()>=message.expiresAt){expired(message,profile,'surface-packing');return;}
+   }
+   const postMs=post('scene',{requestId:message.requestId,packetDigest:packet.packetDigest,preparedScene:publication,preparedSoundMapGeometry,soundMapGeometryRequested01,status:{...status,genuineResourceVerified:packet.metadata.genuineResourceVerified===true&&packet.metadata.activeSurfaces>0},...residencyEvidence01(profile),...finishProfile(profile),memory:{heapUsed:memory.heapUsed,external:memory.external,arrayBuffers:memory.arrayBuffers}},transfer);
    post('delivery-timing',{requestId:message.requestId,postMessageMilliseconds:postMs});
   }catch(error){fail(error,'window',message?.requestId??null);}finally{if(progressRequest01)phase01('window-done');progressRequest01=0;}
  });
