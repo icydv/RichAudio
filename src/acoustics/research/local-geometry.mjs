@@ -41,7 +41,13 @@ export const scale=(v,s)=>v.map(x=>x*s);
 export const dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);
 export const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
 export const length=v=>Math.hypot(...v);
-export function unit(v){const a=vector(v),n=length(a);if(n<E)throw Error('degenerate direction');return scale(a,1/n);}
+export function unit(v){
+ const a=vector(v),n=Math.hypot(a[0],a[1],a[2]);
+ if(n<E)throw Error('degenerate direction');
+ const inv=1/n;
+ a[0]*=inv;a[1]*=inv;a[2]*=inv;
+ return a;
+}
 export function toSteamAudio(v){const [x,y,z]=vector(v);return [x,z,-y];}
 const finite=(n,label)=>{if(!Number.isFinite(n)||n<0)throw Error('invalid '+label);return n;};
 const identifier=s=>{if(typeof s!=='string'||!/^[A-Za-z0-9_.:-]{1,80}$/.test(s))throw Error('invalid research identifier');return s;};
@@ -241,9 +247,17 @@ function flatCandidates(boxes,items,start,delta){
  const found=[];
  const x=start[0],y=start[1],z=start[2],dx=delta[0],dy=delta[1],dz=delta[2];
  const px=Math.abs(dx)<E,py=Math.abs(dy)<E,pz=Math.abs(dz)<E;
+ // Reject wholly disjoint boxes before the slab divisions. The margin
+ // exceeds endpoint reconstruction roundoff over the bounded metre domain;
+ // all close contacts still go through the original interval predicates.
+ const minX=Math.min(x,x+dx)-E,maxX=Math.max(x,x+dx)+E;
+ const minY=Math.min(y,y+dy)-E,maxY=Math.max(y,y+dy)+E;
+ const minZ=Math.min(z,z+dz)-E,maxZ=Math.max(z,z+dz)+E;
  for(let i=0;i<boxes.length;){
   const row=i;
   i=boxes[row+6];
+  if(boxes[row]>maxX||boxes[row+3]<minX||boxes[row+1]>maxY||boxes[row+4]<minY||
+     boxes[row+2]>maxZ||boxes[row+5]<minZ)continue;
   let lo=0,hi=1;
   if(px){if(x<boxes[row]||x>boxes[row+3])continue;}
   else{

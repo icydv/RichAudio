@@ -57,7 +57,9 @@ test('large spatial worksets preserve exact predicates while the research defaul
   segments.push({a:s.corners[0],b:s.corners[1]});
   segments.push({a:s.center.map((x,i)=>x-s.normal[i]*1e-9),b:s.center.map((x,i)=>x+s.normal[i]*2)});
  }
- let indexedTests=0;for(const ray of segments){const got=querySegment(tile,ray.a,ray.b),reference=querySegment(tile,ray.a,ray.b,{surfaceIndices:all});assert.deepEqual(exact(got),exact(reference));indexedTests+=got.surfaceTests;}
+ geometry.prepareBatchVisibility(tile);
+ const batch=geometry.querySegments(tile,segments);
+ let indexedTests=0;for(const [i,ray] of segments.entries()){const got=querySegment(tile,ray.a,ray.b),reference=querySegment(tile,ray.a,ray.b,{surfaceIndices:all});assert.deepEqual(batch[i],got);assert.deepEqual(exact(got),exact(reference));indexedTests+=got.surfaceTests;}
  assert.ok(indexedTests<segments.length*tile.surfaces.length*.1,'index must avoid most exact finite-surface tests without losing contacts');
  assert.equal(Object.isFrozen(tile),true);assert.equal(tile.surfaces.length,1024);
 });

@@ -303,21 +303,35 @@ export function trackPosition(track, t) {
   return sampleTrack(track, t, true);
 }
 const sameAxis = (a, b) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
+const sampledIntervals=new WeakMap();
+const interpolateAxis=(a,b,u)=>[
+  a[0]+(b[0]-a[0])*u,
+  a[1]+(b[1]-a[1])*u,
+  a[2]+(b[2]-a[2])*u,
+];
 function sampleTrack(track, t, positionOnly) {
   const keys = track.keys;
-  let lo = 0,
-    hi = keys.length - 1;
-  while (lo < hi) {
-    const mid = Math.ceil((lo + hi) / 2);
-    if (keys[mid].time <= t) lo = mid;
-    else hi = mid - 1;
+  let hi=keys.length-1,lo=hi;
+  if(t<keys[hi].time||!Number.isFinite(t)){
+    // Successive retarded estimates usually land in the same interpolation
+    // interval. Recheck both endpoints before using the previous lookup.
+    lo=sampledIntervals.get(track)??0;
+    if(!(lo<hi&&keys[lo].time<=t&&t<keys[lo+1].time)){
+      lo=0;
+      while(lo<hi){
+        const mid=Math.ceil((lo+hi)/2);
+        if(keys[mid].time<=t)lo=mid;
+        else hi=mid-1;
+      }
+      sampledIntervals.set(track,lo);
+    }
   }
   const a = keys[lo],
     b = keys[lo + 1];
   const u = b ? Math.max(0, Math.min(1, (t - a.time) / (b.time - a.time))) : 0;
   const continuous = b && a.generation === b.generation;
   const position = continuous
-    ? a.position.map((x, i) => x + (b.position[i] - x) * u)
+    ? interpolateAxis(a.position,b.position,u)
     : [...a.position];
   // A fixed axis and a non-antipodal turn keep the basis nondegenerate.
   // A missing observation can leave an unchecked turn in raw source history.
@@ -329,10 +343,10 @@ function sampleTrack(track, t, positionOnly) {
         fixedForward && dot(a.up, b.up) > -.99) return position;
   }
   const forward = continuous
-    ? unit(a.forward.map((x, i) => x + (b.forward[i] - x) * u))
+    ? unit(interpolateAxis(a.forward,b.forward,u))
     : a.forward;
   const up = continuous
-    ? unit(a.up.map((x, i) => x + (b.up[i] - x) * u))
+    ? unit(interpolateAxis(a.up,b.up,u))
     : a.up;
   const right = unit(cross(forward, up));
   if (positionOnly) return position;
