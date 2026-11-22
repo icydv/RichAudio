@@ -122,22 +122,24 @@ test('a face group over its transfer budget falls back to the original envelope'
   assert.equal(packInstalledSceneFaces(prepared), prepared);
 });
 
-function renderReturns(scene) {
+function renderReturns(scene, positions=[request.sources[0]]) {
   const simulation = new CausalSimulation(scene);
-  const renderer = new StreamingRenderer({sourceIds:['tone'], masterGain:.175, continuousRates:true});
+  const sourceIds=positions.map((_,i)=>'tone-'+i);
+  const renderer = new StreamingRenderer({sourceIds, masterGain:.175, continuousRates:true});
   const dry = new Float32Array(512), left = new Float32Array(512), right = new Float32Array(512);
+  const buffers=Object.fromEntries(sourceIds.map(id=>[id,dry]));
   const pcm = createHash('sha256'), geometry = [];
   let highestOrder = 0;
   for (let block = 0; block < 24; block++) {
     const time = block * 512 / 48000;
     simulation.observe({time, session:request.session, generation:1, listener:{position:request.listener},
-      sources:[{id:'tone', position:request.sources[0]}]});
-    const control = simulation.update(time, {geometryTimeMs:time * 1000});
-    geometry.push(control.paths.map(p => [p.candidateId, p.delay, p.pan, p.bands]));
+      sources:positions.map((p,i)=>({id:sourceIds[i],position:p.map((v,axis)=>v+(axis===0?time*.03*(i+1):0))}))});
+    const control = simulation.update(time, {geometryTimeMs:scene.tile.createdAt+time * 1000});
+    geometry.push(control.paths.map(p => [p.sourceId,p.candidateId,p.points,p.delay,p.pan,p.bands]));
     for (const route of control.paths) highestOrder = Math.max(highestOrder, route.order);
     for (let i = 0; i < 512; i++) dry[i] = Math.sin((block * 512 + i) * .08) * .1;
     renderer.accept(control);
-    renderer.process({tone:dry}, left, right, 512);
+    renderer.process(buffers, left, right, 512);
     pcm.update(left).update(right);
   }
   assert(renderer.stats.sumSquares > 0 && highestOrder >= 2);
@@ -232,7 +234,12 @@ test('ten moving emitters renew an identical street cube from the admitted suppo
     ])assert.notEqual(moving(changes).key,originalCost.key);
     for(const changes of [{radius:10},{maximumSurfaces:513},{listener:[4.01,0,1]},
       {generation:2},{localSurfaceTarget01:512},{interiorActivation01:{}}])assert.equal(moving(changes),null);
-    const next = await read(1);
+    const priority=[8,9,2,3,6,7,0,1,4,5];
+    const rankedPoses=priority.map(j=>[-4.1,j*.09,1]);
+    const namedLayout=priority.map(j=>({vehicle:'car-'+Math.floor(j/2)+':1',role:j%2?'exhaust':'engine',moving:true}));
+    const next = await read(1,{sources:rankedPoses,sourceLayout:namedLayout});
+    const separate=world.window({...inputs,sources:rankedPoses,geometryTimeMs:160});
+    assert.deepEqual(renderReturns(next.scene,rankedPoses),renderReturns(separate,rankedPoses));
     assert.equal(first.receipt.lifecycle01.workerProfile01.transfer.packedFaces, 513);
     assert.equal(next.receipt.lifecycle01.workerProfile01.transfer.reusedFaces, 513);
     assert.notEqual(next.scene.geometryKey, first.scene.geometryKey);

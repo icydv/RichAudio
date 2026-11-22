@@ -9,6 +9,31 @@ export function sceneDispatchCadence01(request){
 }
 const push=(a,x)=>{a.push(x);if(a.length>sceneReadinessLimits01.maximumSamples)a.shift();};
 const span=a=>a.length?Math.max(...a)-Math.min(...a):0,max=a=>a.length?Math.max(...a):0;
+// Discovery still receives the original priority-ordered positions. For
+// timing, processing the same vehicles in a different priority order has the
+// same limits. Keep roles and their actual positions together in each group.
+export function emitterWorkloadSample(layout,positions){
+ requireWorld(Array.isArray(layout)&&layout.length===positions.length&&layout.length<=15,'one workload identity per emitter');
+ if(layout.every(id=>typeof id==='string')){
+  requireWorld(layout.every(id=>id.length>0&&id.length<=256)&&new Set(layout).size===layout.length,'unique ordered emitter identities');
+  return {layoutKey:digest(layout),poseKey:digest(positions),moving:false};
+ }
+ const groups=new Map();
+ let moving=false;
+ for(const [i,row] of layout.entries()){
+  requireWorld(typeof row?.vehicle==='string'&&row.vehicle.length>0&&row.vehicle.length<=256&&
+   ['engine','exhaust','aero'].includes(row.role)&&typeof row.moving==='boolean','identified vehicle and emitter role');
+  let group=groups.get(row.vehicle);
+  if(!group){group={vehicle:row.vehicle,roles:[],positions:[]};groups.set(row.vehicle,group);}
+  requireWorld(!group.roles.includes(row.role),'duplicate emitter in vehicle workload');
+  group.roles.push(row.role);
+  group.positions.push(positions[i]);
+  moving ||= row.moving;
+ }
+ const ordered=[...groups.values()].sort((a,b)=>a.vehicle<b.vehicle?-1:a.vehicle>b.vehicle?1:0);
+ return {layoutKey:digest(ordered.map(g=>[g.vehicle,g.roles])),
+  poseKey:digest(ordered.map(g=>[g.vehicle,g.roles,g.positions])),moving};
+}
 export function sceneReadinessMode01(profile){const p=profile.staticPreparation??{},d=p.staticComponentDelta01??{};if((d.nativeMisses??0)>0||(d.analyticMisses??0)>0)return 'cold';if(profile.refreshManifestOperations01?.logicalReadBytes>0)return 'refresh';return (p.panelTemplateMisses??0)>(p.panelTemplateHits??0)?'panel-prime':'warm';}
 export function sceneReadinessRequestClass01(request){
  const cell=Math.max(1,Math.min(4,request.radius/2)),spatial=p=>p.map(v=>Math.floor(v/cell));

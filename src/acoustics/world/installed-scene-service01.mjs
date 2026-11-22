@@ -5,8 +5,8 @@ import {Worker} from 'node:worker_threads';
 import {performance} from 'node:perf_hooks';
 import path from 'node:path';
 import {bindInstalledStaticSceneWorker01,installedStaticSceneMetadata01} from './installed-static-scene01.mjs';
-import {digest,requireWorld,vector,freeze} from './contracts.mjs';
-import {InstalledSceneReadinessPolicy01,sceneReadinessScope01,sceneReadinessRequestClass01,sceneReadinessMode01,sceneDispatchCadence01} from './scene-readiness-policy01.mjs';
+import {requireWorld,vector,freeze} from './contracts.mjs';
+import {emitterWorkloadSample,InstalledSceneReadinessPolicy01,sceneReadinessScope01,sceneReadinessRequestClass01,sceneReadinessMode01,sceneDispatchCadence01} from './scene-readiness-policy01.mjs';
 import {createSceneWorkerProgress01,snapshotSceneWorkerProgress01} from './scene-worker-progress01.mjs';
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x),interval=500;
 const epoch=x=>typeof x==='string'&&x.length<=40&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,7})?Z$/.test(x)&&Number.isFinite(Date.parse(x));
@@ -112,11 +112,9 @@ export class InstalledSceneService01 {
   requireWorld(!this.closed&&!this.failed&&this.#readiness01.stopAt===null,'active installed scene service');listener=vector(listener);requireWorld(Array.isArray(sources)&&sources.length<=15,'bounded installed source window');sources=sources.map(vector);
   requireWorld(Number.isSafeInteger(generation)&&generation>0&&(this.latestGeneration===null||generation>=this.latestGeneration)&&Number.isFinite(geometryTimeMs)&&geometryTimeMs>=0&&Number.isFinite(durationMs)&&durationMs>0&&durationMs<=1000&&engine&&typeof engine==='object'&&!Array.isArray(engine),'fresh bounded installed scene request');
   requireWorld(Number.isFinite(radius)&&radius>=1&&radius<=32&&Number.isInteger(maximumSurfaces)&&maximumSurfaces>=1&&maximumSurfaces<=4096&&(localSurfaceTarget01===undefined||Number.isInteger(localSurfaceTarget01)&&localSurfaceTarget01>=64&&localSurfaceTarget01<=maximumSurfaces)&&typeof adaptiveRadius==='boolean'&&typeof prepareSoundMapGeometry01==='boolean'&&typeof surroundingWorkset01==='boolean','bounded installed acoustic workset');
-  requireWorld(sourceLayout===null || Array.isArray(sourceLayout)&&sourceLayout.length===sources.length&&
-   sourceLayout.every(id=>typeof id==='string'&&id.length>0&&id.length<=256)&&new Set(sourceLayout).size===sourceLayout.length,
-   'ordered source identity and emitter role for each position');
-  const sourceLayoutKey=sourceLayout===null?null:digest(sourceLayout),poseKey=sourceLayoutKey?digest(sources):null;
-  const moving=!!poseKey && this.lastLayoutKey===sourceLayoutKey && this.lastPoseKey!==poseKey;
+  const sample=sourceLayout===null?null:emitterWorkloadSample(sourceLayout,sources);
+  const sourceLayoutKey=sample?.layoutKey??null,poseKey=sample?.poseKey??null;
+  const moving=!!sample && (sample.moving || this.lastLayoutKey===sourceLayoutKey && this.lastPoseKey!==poseKey);
   this.lastLayoutKey=sourceLayoutKey;this.lastPoseKey=poseKey;
   const engineCopy=structuredClone(engine);requireWorld(Buffer.byteLength(JSON.stringify(engineCopy))<=16384,'bounded installed scene processing settings');
   const requestedAt=performance.now(),requestId=++this.serial;

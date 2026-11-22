@@ -1,6 +1,6 @@
 // Deterministic scheduling correctness, not measured processing performance.
 import test from 'node:test';import assert from 'node:assert/strict';
-import {InstalledSceneReadinessPolicy01,sceneDispatchCadence01,sceneReadinessLimits01,sceneReadinessMode01} from '../src/acoustics/world/scene-readiness-policy01.mjs';
+import {emitterWorkloadSample,InstalledSceneReadinessPolicy01,sceneDispatchCadence01,sceneReadinessLimits01,sceneReadinessMode01} from '../src/acoustics/world/scene-readiness-policy01.mjs';
 const profile={staticPreparation:{staticComponentDelta01:{nativeMisses:0,analyticMisses:0},panelTemplateMisses:2,panelTemplateHits:8700},refreshManifestOperations01:{logicalReadBytes:0}};
 function ticket(id,requestedAt,{scope='a',generation=1,expiresAt=requestedAt+1000,dispatchedAt=requestedAt,admittedAt=dispatchedAt+200,warm=true}={}){return {receipt:{requestId:id,requestedAt,expiresAt,admittedAt,generation,bindingEpoch:1,catalogSHA256:'c'.repeat(64)},dispatchedAt,scopeId:scope,warm,profile,sampled:false};}
 function trained(){const p=new InstalledSceneReadinessPolicy01();for(let at=0;at<=1600;at+=200)p.observation(at,1);for(let i=0;i<3;i++){const t=ticket(i+1,i*500);p.candidate(t,t.receipt.admittedAt);p.outcome(t,{completedAt:t.receipt.admittedAt+2,queueMilliseconds:1,applicationMilliseconds:1,applied:false,reason:'collecting-warm-evidence'});}return p;}
@@ -72,4 +72,20 @@ test('moving transfer timing needs three different poses and cannot outlive a st
  assert.equal(p.evaluate(record,2202,{active:null,pending:{...pending,expiresAt:2201},lastDispatch:2000}).permitted,false);
  p.stop(2203,'stop');
  assert.equal(p.evaluate(record,2204,{active:null,pending,lastDispatch:2000}).permitted,false);
+});
+
+test('source priority can change without moving a pose to another vehicle or role', () => {
+ const layout=[{vehicle:'car-a:1',role:'engine',moving:false},{vehicle:'car-a:1',role:'exhaust',moving:false},
+  {vehicle:'car-b:1',role:'engine',moving:true},{vehicle:'car-b:1',role:'exhaust',moving:true}];
+ const coordinates=[[1,0,1],[.4,0,1],[-5,2,1],[-5.7,2,1]];
+ const original=emitterWorkloadSample(layout,coordinates),permutation=[2,3,0,1];
+ const permute=(rows,ix)=>ix.map(i=>rows[i]);
+ assert.deepEqual(emitterWorkloadSample(permute(layout,permutation),permute(coordinates,permutation)),original);
+ assert.notEqual(emitterWorkloadSample(permute(layout,permutation),coordinates).poseKey,original.poseKey);
+ const swapped=[1,0,2,3];
+ assert.notEqual(emitterWorkloadSample(permute(layout,swapped),permute(coordinates,swapped)).layoutKey,original.layoutKey);
+ assert.notEqual(emitterWorkloadSample(layout.map(r=>r.vehicle==='car-b:1'?{...r,vehicle:'car-b:2'}:r),coordinates).layoutKey,original.layoutKey);
+ assert.throws(()=>emitterWorkloadSample([...layout.slice(0,3),layout[2]],coordinates),/duplicate/);
+ assert.deepEqual(coordinates,[[1,0,1],[.4,0,1],[-5,2,1],[-5.7,2,1]]);
+ assert.deepEqual(layout.map(r=>r.vehicle),['car-a:1','car-a:1','car-b:1','car-b:1']);
 });
