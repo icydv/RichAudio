@@ -55,8 +55,8 @@ foreach($mode in @('passive','audible')){
  if($template.Count-ne$(if($mode-ceq'passive'){21}else{24})){throw 'Unexpected lease fields.'}
  $templatePath=Join-Path $dir 'session-lease-template.json';WriteNew $templatePath $template;$built[$mode]['leaseTemplatePath']=$templatePath;$built[$mode]['leaseTemplateSha256']=Hash $templatePath
 }
-# Reuse host, banks, Node, recorder and gains; update only existing JavaScript
-# bindings from source so the listener generation integration fix is included.
+# Reuse the host, banks, Node and gains. Rebuild the JavaScript bindings from
+# current source, including imports added after the retained package was built.
 $package=Join-Path $output 'package';[IO.Directory]::CreateDirectory($package)|Out-Null
 $currentCode=[Collections.Generic.List[object]]::new();$preserved=[Collections.Generic.List[object]]::new()
 foreach($binding in $old.bindings){
@@ -66,8 +66,19 @@ foreach($binding in $old.bindings){
  }else{$preserved.Add([ordered]@{file=$binding.file;sha256=$digest})}
  CopyNew $from (Join-Path $package $binding.file) $digest
 }
+$dependencies=@(Get-ChildItem -LiteralPath (Join-Path $repo 'src/acoustics') -Recurse -File -Filter '*.mjs')+
+ @(Get-ChildItem -LiteralPath (Join-Path $repo 'tools/soundmap') -Recurse -File -Filter '*.mjs')+
+ @(Get-Item -LiteralPath (Join-Path $repo 'docs/BINAURAL_OUTPUT.md'))
+foreach($file in $dependencies){
+ $relative=[IO.Path]::GetRelativePath($repo,$file.FullName).Replace('\','/')
+ $target=Join-Path $package $relative
+ if(Test-Path -LiteralPath $target){continue}
+ $digest=Hash $file.FullName;CopyNew $file.FullName $target $digest
+ $currentCode.Add([ordered]@{file=$relative;path=$file.FullName;sha256=$digest;previousSha256=$null})
+}
 $manifest=[ordered]@{};foreach($property in $old.PSObject.Properties){if($property.Name-cne'bindings'){$manifest[$property.Name]=$property.Value}}
 $manifest.bindings=@(Get-ChildItem -LiteralPath $package -Recurse -File|Sort-Object FullName|ForEach-Object{[ordered]@{file=[IO.Path]::GetRelativePath($package,$_.FullName).Replace('\','/');sha256=(Hash $_.FullName)}})
+if($manifest.bindings.Count-gt512){throw 'PLAYABLE-15 manifest binding limit.'}
 # demoProfile remains PLAYABLE-13: it is the existing host protocol, not the new
 # handoff lease profile. Changing it would bypass the preserved demo safeguards.
 $manifestPath=Join-Path $package 'playable.json';WriteNew $manifestPath $manifest

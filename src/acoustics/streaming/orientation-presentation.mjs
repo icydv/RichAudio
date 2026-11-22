@@ -1,5 +1,6 @@
 import { ListenerPlayout } from "./listener-playout.mjs";
 import { cross, unit, dot } from "../research/local-geometry.mjs";
+import { headArrivalDirection } from './binaural-output.mjs';
 const same = (a, b) =>
   a &&
   b &&
@@ -132,6 +133,8 @@ export class OrientationPresentation {
       return {
         ...p,
         pan: Math.max(-1, Math.min(1, dot(p.arrivalDirection, right))),
+        ...(p.arrivalHeadDirection && { arrivalHeadDirection: headArrivalDirection(p.arrivalDirection,
+          right, selection.state.forward, selection.state.up) }),
       };
     });
     return { control: { ...control, paths }, muteBlock: false, diagnostic: d };

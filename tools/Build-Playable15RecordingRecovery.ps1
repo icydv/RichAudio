@@ -45,13 +45,21 @@ foreach($pin in $previous.bindings){
  else{$preserved.Add([ordered]@{file=$pin.file;sha256=$pin.sha256})}
  CopyNew $from (Join-Path $package $pin.file) $sha
 }
-foreach($file in @('src/acoustics/recording/latency-analysis.mjs')){
- if($file-in$previous.bindings.file){throw 'Recovery addition already in retained manifest.'}
- $from=Join-Path $repo $file;$sha=Hash $from;CopyNew $from (Join-Path $package $file) $sha
- $current.Add([ordered]@{file=$file;path=$from;sha256=$sha;previousSha256=$null})
+# Include the recorder analysis and other module imports added since the
+# retained build. The new manifest still uses the existing PLAYABLE-13 schema.
+$dependencies=@(Get-ChildItem -LiteralPath (Join-Path $repo 'src/acoustics') -Recurse -File -Filter '*.mjs')+
+ @(Get-ChildItem -LiteralPath (Join-Path $repo 'tools/soundmap') -Recurse -File -Filter '*.mjs')+
+ @(Get-Item -LiteralPath (Join-Path $repo 'docs/BINAURAL_OUTPUT.md'))
+foreach($file in $dependencies){
+ $relative=[IO.Path]::GetRelativePath($repo,$file.FullName).Replace('\','/')
+ $target=Join-Path $package $relative
+ if(Test-Path -LiteralPath $target){continue}
+ $sha=Hash $file.FullName;CopyNew $file.FullName $target $sha
+ $current.Add([ordered]@{file=$relative;path=$file.FullName;sha256=$sha;previousSha256=$null})
 }
 $manifest=[ordered]@{};foreach($property in $previous.PSObject.Properties){if($property.Name-cne'bindings'){$manifest[$property.Name]=$property.Value}}
 $manifest.bindings=@(Get-ChildItem -LiteralPath $package -Recurse -File|Sort-Object FullName|ForEach-Object{[ordered]@{file=[IO.Path]::GetRelativePath($package,$_.FullName).Replace('\','/');sha256=(Hash $_.FullName)}})
+if($manifest.bindings.Count-gt512){throw 'PLAYABLE-15 manifest binding limit.'}
 $manifestPath=Join-Path $package 'playable.json';WriteNew $manifestPath $manifest
 # Exact prior isolated settings, including their revision; no new tuning.
 Check $old.package.isolatedSettingsPath $old.package.initialIsolatedSettingsSha256

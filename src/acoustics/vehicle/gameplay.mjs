@@ -77,7 +77,7 @@ export class StockGameplay {
  #installedApplicationPermit01=null;#installedSceneService01=null;#installedSceneStopped01=false;#installedStopAt01=null;
  get installedSceneService01(){return this.#installedSceneService01;}
  get installedSceneStopped01(){return this.#installedSceneStopped01;}
- constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled',vehicleSourcePolicy=null,privatePowertrain=false,roadScattering=privatePowertrain,fleetReflectionPolicy='full'}){
+ constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled',vehicleSourcePolicy=null,privatePowertrain=false,roadScattering=privatePowertrain,fleetReflectionPolicy='full',spatialOutput='speakers'}){
   if(!['disabled','explicit-control05'].includes(sourcePreparationPolicy))throw Error('Explicit source preparation policy required');
   if(!['baseline','camera-source-01'].includes(continuityPolicy))throw Error('Explicit vehicle continuity policy required');
   if(!['baseline','arrived-segments-50'].includes(continuousTimingPolicy))throw Error('Explicit continuous timing policy required');
@@ -113,7 +113,7 @@ export class StockGameplay {
   this.direct=conditionalStockScene(this.ids,session,vehicleDistanceSceneOptions('authored-detail-loss-v1'));
   this.pipeline=createStockVehiclePipeline({scene:this.direct,sourceIds:this.ids,masterGain:.175,continuousRates:true,validateSampledMotion:privatePowertrain,reuseStaticSegments:this.catalogueFleet,
     preserveSourceHistoryOnListenerCut:privatePowertrain,
-    roadScattering,
+    roadScattering,spatialOutput,
     controlFilter:(c,r)=>this.filter(c,r)});
   if (fleetReflectionPolicy !== 'full') {
     if (!vehicleSourcePolicy || privatePowertrain) throw Error('Ranked reflections require the ordinary vehicle fleet');

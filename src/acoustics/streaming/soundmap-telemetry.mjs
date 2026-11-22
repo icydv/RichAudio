@@ -61,7 +61,7 @@ function pathSnapshot(trace,selected){
   // Unavailable endpoints/contact points remain null. Never draw a guessed ray
   // from the current source in place of the solver's retarded emission pose.
   const vertices=plan.geometry?.vertices??(p.status==='renderable'?[plan.state.position,...p.points,plan.listener.position]:null);
-  const obstructed=/blocked|transmission/.test(p.status+' '+(p.visibility??''));
+  const obstructed=/blocked|transmission|small-capsule-obstruction/.test(p.status+' '+(p.visibility??''));
   return {id:identity??sourceId+':'+candidate.id,sourceId,candidateId:candidate.id,status,solverStatus:p.status,
     reason:chosen?null:reason,order:candidate.surfaces.length,surfaceIds:candidate.surfaces.map(s=>s.id),
     propagation:unknown(reason)&&!chosen?'unavailable':obstructed?'obstructed':candidate.surfaces.length?'reflected':'direct',

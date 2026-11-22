@@ -12,6 +12,7 @@ import {
   inBox,
 } from "../research/local-geometry.mjs";
 import { pose, trackPosition, requireValue } from "./contracts.mjs";
+import { capsuleObstruction } from "./capsule-obstruction.mjs";
 const E = 1e-8;
 const coherentBandFrequencies = [200, 1600, 6400];
 const tileLifetimes = new WeakMap();
@@ -386,8 +387,14 @@ export function finishPath(plan,queries=null,stats={queries:0,surfaceTests:0}) {
       reference: m.reference,
     });
   }
-  if (bands.every((x) => x === 0))
-    return { status: "blocked-no-modelled-path" };
+  let obstruction = null;
+  if (bands.every((x) => x === 0)) {
+    if (candidate.surfaces.length === 0) obstruction = capsuleObstruction(scene,g.hits,state.position,listener.position);
+    if (!obstruction) return { status: "blocked-no-modelled-path" };
+    bands = obstruction.pressure;
+    materialBasis = materialBasis.map(entry => ({...entry,kind:'obstruction',
+      basis:'authored-assumption',reference:'near-direct-capsule-fresnel-v1'}));
+  }
   const radiation =
     g.distance <= E
       ? 1
@@ -456,12 +463,13 @@ export function finishPath(plan,queries=null,stats={queries:0,surfaceTests:0}) {
     arrivalDirection: g.arrivalDirection,
     emissionDirection: g.emissionDirection,
     materialBasis,
+    ...(obstruction ? { obstruction } : {}),
     nearFieldRadius:source.nearFieldRadius??0,
     geometryEvidence: g.unknownDirectFallback?'conditional-direct-fallback-unmapped-regions':scene.directPath?'conditional-listener-only-no-geometry':scene.observationModel?.kind==='conditional-installed-static-model'?'conditional-genuine-installed-static-model':scene.observationModel ? 'conditional-finite-observed-model' : 'synthetic-model',
     visibilityAssumption:scene.directPath?.visibilityAssumption??scene.observationModel?.visibilityAssumption??null,
     generation: state.generation,
     visibility:
-      g.unknownDirectFallback?'conditional-direct-unknown-coverage':scene.directPath?'conditional-unobserved-space-assumed-clear':scene.observationModel
+      obstruction?'modelled-small-capsule-obstruction':g.unknownDirectFallback?'conditional-direct-unknown-coverage':scene.directPath?'conditional-unobserved-space-assumed-clear':scene.observationModel
         ? (g.status === 'blocked' ? 'authored-transmission-in-partial-model' : scene.observationModel.kind==='conditional-installed-static-model'?'conditional-installed-static-path':'conditional-observed-path')
         : g.status === "blocked" ? "authored-transmission" : "verified-synthetic-path",
     retardedResidual: residual,
@@ -474,6 +482,8 @@ export function finishPath(plan,queries=null,stats={queries:0,surfaceTests:0}) {
 const scatterEnergy = [.18, .33, .48];
 const scatterOffsets = [6, -4, 2];
 const extendedScatterOffsets = [...scatterOffsets, 3, -3];
+const lateFacadeScatterOffsets = [12, -12, 16, -16, 20, -20];
+const minimumLateFacadeExcess = .024;
 export const roadScatterLimit = 3;
 export const roadScatterDelayLimit = .13;
 
@@ -570,6 +580,19 @@ export function roadScatterFromReflection(plan, early, stats, maximumDelay=roadS
   for(const offset of offsets){
     const scatter=prepareScatter(plan,early,offset,stats,maximumDelay);
     if(scatter)return scatter;
+  }
+  return null;
+}
+
+export function roadScatterLaterFromReflection(plan, early, stats, maximumDelay=roadScatterDelayLimit) {
+  const face = plan.geometry?.surfaces.at(-1);
+  if (!face || Math.abs(face.normal[2]) >= .75 || maximumDelay - early.delay < minimumLateFacadeExcess)
+    return null;
+  // Search both directions on the actual frontage. A wider lateral sample
+  // still needs a finite surface and exact visibility of every retarded leg.
+  for (const offset of lateFacadeScatterOffsets) {
+    const scatter = prepareScatter(plan,early,offset,stats,maximumDelay);
+    if (scatter && scatter.response.delay - early.delay >= minimumLateFacadeExcess) return scatter;
   }
   return null;
 }

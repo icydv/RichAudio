@@ -20,19 +20,20 @@ export class VehicleAcousticPipeline {
   constructor({ scene, sourceIds = ['beacon'], quality = 'quality', acceleration = 'cpu', masterGain = 0.7,
     directStem = false, sourcePressureGains = {}, continuousRates = false, controlFilter = null,
     validateSampledMotion = false, reuseStaticSegments = false, preserveSourceHistoryOnListenerCut = false, roadScattering = false,
-    scatteredReflectionDelay, bandShape = 'legacy' } = {}) {
+    scatteredReflectionDelay, bandShape = 'legacy', spatialOutput = 'speakers' } = {}) {
     if (!(quality in qualityPresets)) throw Error('explicit acoustic quality required');
     // The initial validated scene sets the immutable capacity of both clocks.
     // Replacing geometry never reallocates a live emission ring.
     const historySeconds = Math.max(2.5, (scene?.config.maxDelay ?? 2) + streamingHistoryPadding);
     if(pcmHistoryBytes(historySeconds,sourceIds.length)*(directStem?2:1)>maximumPcmHistoryBytes)
       throw Error('vehicle pipeline PCM history budget');
-    this.simulation = new CausalSimulation(scene, {historySeconds,validateSampledMotion,preserveSourceHistoryOnListenerCut,roadScattering,scatteredReflectionDelay});
+    this.simulation = new CausalSimulation(scene, {historySeconds,validateSampledMotion,preserveSourceHistoryOnListenerCut,
+      roadScattering,scatteredReflectionDelay,headDirections:spatialOutput!=='speakers'});
     this.backend = new AcousticAcceleration({ mode: acceleration, reuseStaticSegments });
     this.renderer = new StreamingRenderer({ sourceIds, maxPathsPerSource: qualityPresets[quality],
-      pathCapacityPerSource: 64, masterGain, historySeconds, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains, continuousRates, bandShape });
+      pathCapacityPerSource: 64, masterGain, historySeconds, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains, continuousRates, bandShape, spatialOutput });
     this.directRenderer = directStem ? new StreamingRenderer({ sourceIds, maxPathsPerSource: 1,
-      masterGain, historySeconds, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains, bandShape }) : null;
+      masterGain, historySeconds, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains, bandShape, spatialOutput }) : null;
     this.setQuality(quality);
     this.lastControl = null;
     if(controlFilter!==null&&typeof controlFilter!=='function')throw Error('control filter required');this.controlFilter=controlFilter;
@@ -42,10 +43,19 @@ export class VehicleAcousticPipeline {
     this.quality = quality;
     const pathBudget=qualityPresets[quality];
     this.simulation.setProcessingSettings({pathBudget,maxReflectors,earlyReflections});
-    this.renderer.setPathBudget(this.simulation.roadScattering&&pathBudget<=64-roadScatterLimit?pathBudget+roadScatterLimit:pathBudget);
+    const scatterCapacity = roadScatterLimit + Number(this.simulation.scene?.config.lateFacadeScatter === true);
+    this.renderer.setPathBudget(this.simulation.roadScattering && pathBudget <= 64 - scatterCapacity
+      ? pathBudget + scatterCapacity : pathBudget);
   }
   setAcceleration(mode) { this.backend.setMode(mode); }
-  replaceScene(scene, options) { this.simulation.replaceScene(scene, options); }
+  replaceScene(scene, options) {
+    const previousLateScatter = this.simulation.scene?.config.lateFacadeScatter === true;
+    this.simulation.replaceScene(scene, options);
+    if (this.simulation.roadScattering && previousLateScatter !== (this.simulation.scene?.config.lateFacadeScatter === true)) {
+      const {maxReflectors, earlyReflections} = this.simulation.processingSettings;
+      this.setQuality(this.quality, {maxReflectors, earlyReflections});
+    }
+  }
   // Called on the source/control worker. GPU preparation is never in process().
   async prepare(snapshot, options = {}, acceptControl = () => true, beforeApply = null) {
     if(this.clockedStages)Object.assign(this.clockedStages,{
@@ -91,6 +101,7 @@ export class VehicleAcousticPipeline {
       history: this.renderer.historyDiagnostics, sourceHistoryBytes: this.renderer.ownedArrayBytes,
       backend: this.backend.diagnostics(), directStemHistoryBytes: this.directRenderer?.ownedArrayBytes ?? 0,
       sourcePressureGains: this.renderer.sourcePressureGains,
+      ...(this.renderer.binaural && { spatialOutput: this.renderer.spatialOutput }),
       ...(this.renderer.bandShape && {bandShape:this.renderer.bandShape}) };
   }
   close() { this.backend.close(); }

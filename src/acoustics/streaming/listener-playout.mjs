@@ -1,4 +1,5 @@
 import { validateNeutralEnvelope } from "./listener-control.mjs";
+import { headArrivalDirection } from './binaural-output.mjs';
 
 const norm = (v) => Math.hypot(...v);
 const dot = (a, b) => a.reduce((n, x, i) => n + x * b[i], 0);
@@ -440,15 +441,17 @@ export class ListenerPlayout {
       // Reconstruct only the presentation endpoint of this already qualified
       // retarded arrival. Visibility, distance, delay, gain and source history
       // are unchanged; this creates no additional acoustic path.
-      const panAt=(at,rightAt)=>{
+      const directionAt=at=>{
         let direction=p.arrivalDirection;
         if(p.arrivalOrigin){const delta=p.arrivalOrigin.map((x,i)=>x-at[i]);if(norm(delta)>1e-8)direction=unit(delta);}
-        return Math.max(-1,Math.min(1,dot(direction,rightAt)));
+        return direction;
       };
-      const pan=panAt(position,right);
+      const direction=directionAt(position),pan=Math.max(-1,Math.min(1,dot(direction,right)));
       const {panTrajectory:discarded,...path}=p;
-      return {...path,pan,...(endPose?{panTrajectory:{frame:control.frame,frames:panFrames,start:pan,
-        end:panAt(endPose.position,endRight),basis:'arrived-observation-brackets'}}:{})};
+      return {...path,pan,
+        ...(p.arrivalHeadDirection && { arrivalHeadDirection: headArrivalDirection(direction, right, forward, up) }),
+        ...(endPose?{panTrajectory:{frame:control.frame,frames:panFrames,start:pan,
+          end:Math.max(-1,Math.min(1,dot(directionAt(endPose.position),endRight))),basis:'arrived-observation-brackets'}}:{})};
     });
     this.stats.presentationBlocks++;
     return {control:{...control,paths},muteBlock:false,diagnostic:{...diagnostic,mode}};

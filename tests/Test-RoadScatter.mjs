@@ -92,10 +92,10 @@ test('a qualified farther facade uses opt-in scatter travel time and reaches the
  const distant={id:'motor',position:[-8,14,1],forward:[0,1,0],roadScatter:true};
  const pedestrian={position:[0,0,1],forward:[0,1,0]};
  const pulseFrame=8192;
- async function playback(scatteredReflectionDelay, stem){
+ async function playback(scatteredReflectionDelay, stem, quality){
   let selected=null;
   const within=path=>stem==='direct'?path.order===0:path.scatter;
-  const pipeline=new VehicleAcousticPipeline({scene,sourceIds:['motor'],masterGain:1,roadScattering:true,
+  const pipeline=new VehicleAcousticPipeline({scene,sourceIds:['motor'],masterGain:1,roadScattering:true,quality,
    scatteredReflectionDelay,continuousRates:true,controlFilter(control){
     const paths=control.paths.filter(within);
     if(paths.length)selected=paths[0];
@@ -117,7 +117,7 @@ test('a qualified farther facade uses opt-in scatter travel time and reaches the
  const restricted=await playback(undefined,'scatter');
  assert.equal(restricted.first,-1,'the existing near-space scatter cap withholds this return');
  const direct=await playback(.36,'direct');
- const late=await playback(.36,'scatter');
+ const late=await playback(.36,'scatter', 'max');
  assert(late.selected?.delay>.13&&late.selected.delay<.36,'qualified far return should survive the longer cap');
  assert.equal(direct.selected.order,0);
  assert(late.selected.distance>100);
@@ -145,4 +145,68 @@ test('the extended flight window finds an intermediate contact on a finite facad
  assert(!older.some(p=>p.scatter));
  assert(scattered&&scattered.delay>.13,'an intermediate finite contact supports the later return');
  assert(scattered.distance-specular.distance>.25);
+});
+
+test('extended facade scattering carries a separately directed later arrival inside the max-quality budget', () => {
+ const wall = patch('wall', [0, 10, 5], [0, -1, 0], [1, 0, 0], [28, 5]);
+ const tile = createTile({...sceneInput(), bounds:{min:[-37,-30,-2],max:[37,22,16]}, surfaces:[wall]});
+ const materials = {wall:{reflection:[.81,.64,.36],reference:'finite-test-wall'}};
+ function solve(roadScattering, lateFacadeScatter) {
+  const scene = acousticScene(tile, materials, {order:1,maxPaths:64,lateFacadeScatter});
+  const sim = new CausalSimulation(scene, {roadScattering, ...(roadScattering && {scatteredReflectionDelay:.65})});
+  for (const time of [0,.2,.4]) sim.observe({session:'late-facade', time, listener, sources:[source]});
+  return sim.update(.4).paths;
+ }
+ const paths = solve(true,true);
+ const clear = solve(false,false);
+ const reflected = paths.find(p => p.order===1 && !p.scatter);
+ const scattered = paths.filter(p => p.scatter).sort((a,b) => a.delay-b.delay);
+ assert.equal(scattered.length,2);
+ assert(scattered[1].delay > reflected.delay+.024);
+ assert(scattered[1].delay > scattered[0].delay);
+ assert.notDeepEqual(scattered[1].arrivalDirection,scattered[0].arrivalDirection);
+ assert.deepEqual(paths.find(p => p.order===0), clear.find(p => p.order===0));
+ for (let i=0;i<3;i++){
+  assert(reflected.bands[i]**2+scattered.reduce((sum,p)=>sum+p.bands[i]**2,0) <= clear.find(p=>p.order===1).bands[i]**2+1e-12);
+ }
+ assert(paths.length<=64);
+});
+
+test('a vehicle pipeline can withdraw its scene after using the extended scatter budget', () => {
+ const base = wallScene();
+ const scene = acousticScene(base.tile, base.materials, {...base.config,lateFacadeScatter:true});
+ const pipeline = new VehicleAcousticPipeline({scene,sourceIds:['motor'],roadScattering:true});
+ try {
+  assert.equal(pipeline.renderer.maxPathsPerSource,36);
+  assert.equal(scene.geometryKey,base.geometryKey);
+  pipeline.replaceScene(base);
+  assert.equal(pipeline.renderer.maxPathsPerSource,35);
+  pipeline.replaceScene(scene);
+  assert.equal(pipeline.renderer.maxPathsPerSource,36);
+  pipeline.replaceScene(null);
+  assert.equal(pipeline.renderer.maxPathsPerSource,35);
+  pipeline.replaceScene(scene);
+  assert.equal(pipeline.renderer.maxPathsPerSource,36);
+ } finally {
+  pipeline.close();
+ }
+});
+
+test('an unaccompanied later facade tap keeps its own headphone direction and map vertices', () => {
+ const sourceWall = patch('wall',[-1.6,6,4],[0,-1,0],[1,0,0],[.4,4]);
+ const distantWall = patch('farther',[10.4,6,4],[0,-1,0],[1,0,0],[.5,4]);
+ const tile = createTile({...sceneInput(),surfaces:[sourceWall,distantWall]});
+ const material = {reflection:[.81,.64,.36],reference:'finite-test-wall'};
+ const scene = acousticScene(tile,{wall:material,farther:material},{order:1,lateFacadeScatter:true});
+ const sim = new CausalSimulation(scene,{roadScattering:true,scatteredReflectionDelay:.2,headDirections:true});
+ for (const time of [0,.2,.4]) sim.observe({session:'isolated-late-facade',time,listener,sources:[source]});
+ sim.captureSoundMap=true;
+ const paths = sim.update(.4).paths;
+ const [later,...others] = paths.filter(p=>p.scatter);
+ assert.equal(others.length,0);
+ assert(later.delay>paths.find(p=>p.order && !p.scatter).delay+.024);
+ assert(later.arrivalHeadDirection[0]>.5);
+ assert(later.arrivalOrigin[0]>10);
+ const trace = sim.soundMapState.candidates.find(x=>x.identity===later.id);
+ assert.deepEqual(trace.plan.geometry.vertices.at(-2),later.arrivalOrigin);
 });

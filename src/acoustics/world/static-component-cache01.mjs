@@ -3,6 +3,7 @@
 import {performance} from 'node:perf_hooks';
 import {decodeChunk,encodeChunk,transformPoint,triangleNormal,sha256} from './collision-mesh.mjs';
 import {tessellateAnalyticPrimitive01} from './analytic-primitives01.mjs';
+import {circularCapsule} from '../engine/capsule-obstruction.mjs';
 import {digest,freeze,requireWorld} from './contracts.mjs';
 const limits01=Object.freeze({bytes:64*1024*1024,descriptorReserveBytes:8*512,componentOverhead:4096,boxedRecordBytes:4096});
 const measured=(profile,key,operation)=>{const began=performance.now();try{return operation();}finally{if(profile)profile[key]+=performance.now()-began;}};
@@ -45,7 +46,7 @@ export class InstalledStaticComponents01 {
   const ownerToken=this.#owner(owner),key=digest([owner,'analytic-primitive',primitive,controls]),held=this.#touch(key);
   if(held){this.#totals.analyticHits++;this.#event({action:'hit',reason:'same-source-and-exact-approximation-controls',id:key,ownerId:owner,kind:'analytic',entryBytes:held.charge,records:held.data.count});return {handle:held.data.count?this.#handle(key,held):null,metadata:held.data.metadata};}
   this.#totals.analyticMisses++;this.#miss(key,owner,'analytic');if(profile)profile.analyticTessellationCalls++;
-  const approximation=measured(profile,'analyticTessellationMs',()=>tessellateAnalyticPrimitive01(primitive,controls)),records=approximation.triangles??[],metadata=freeze({...approximation,triangles:undefined,triangleCount:records.length}),data=packed01(encodeChunk(records),records,metadata),entry={owner,ownerToken,kind:'analytic',data,charge:data.bytes.byteLength+data.bounds.byteLength+limits01.componentOverhead};this.#admit(key,entry);return {handle:records.length?this.#handle(key,entry):null,metadata};
+  const approximation=measured(profile,'analyticTessellationMs',()=>tessellateAnalyticPrimitive01(primitive,controls)),records=approximation.triangles??[],metadata=freeze({...approximation,triangles:undefined,triangleCount:records.length,capsule:records.length?circularCapsule(primitive):null}),data=packed01(encodeChunk(records),records,metadata),entry={owner,ownerToken,kind:'analytic',data,charge:data.bytes.byteLength+data.bounds.byteLength+limits01.componentOverhead};this.#admit(key,entry);return {handle:records.length?this.#handle(key,entry):null,metadata};
  }
  select(handle,box){const held=this.#handles.get(handle);requireWorld(held,'owned static component handle');const refs=[];for(let index=0;index<held.entry.data.count;index++)if(intersects(held.entry.data.bounds,index,box)){const ref=Object.freeze({componentId:held.key,recordIndex:index});this.#references.set(ref,{...held,index});refs.push(ref);}return refs;}
  distance(ref,point){const held=this.#references.get(ref);requireWorld(held,'owned static triangle reference');const {bytes}=held.entry.data,at=24+held.index*96;let best=Infinity;for(let vertex=0;vertex<3;vertex++)best=Math.min(best,Math.hypot(...[0,1,2].map(axis=>bytes.readDoubleLE(at+vertex*24+axis*8)-point[axis])));return best;}
@@ -55,7 +56,9 @@ export class InstalledStaticComponents01 {
   const held=this.#references.get(ref);requireWorld(held,'owned static triangle reference');const key=digest([held.key,'boxed-static-record',held.index,resourceId,...(placement?[placement.key]:[])]),active=held.entry.ownerToken.active&&this.#owners.get(held.entry.owner)===held.entry.ownerToken,cached=active?this.#touch(key):null;if(cached){this.#totals.recordHits++;return cached.data;}
   this.#totals.recordMisses++;this.#miss(key,held.entry.owner,'boxed-record-and-panel-template');const {bytes,metadata}=held.entry.data,at=24+held.index*96,local=[0,1,2].map(v=>[0,1,2].map(axis=>bytes.readDoubleLE(at+v*24+axis*8))),
    positions=placement?local.map(v=>transformPoint(v,placement.matrix)):local,record={positions,normal:triangleNormal(positions)};for(const [i,name]of ['materialType','node','polygon','data1','data2','materialSlot'].entries())record[name]=bytes.readUInt32LE(at+72+i*4);
-  if(metadata?.state==='approximated-analytic'){record.primitiveFamily=metadata.family;record.analyticFace=held.index;record.approximationErrorMetres=metadata.maximumErrorMetres;}
+  if(metadata?.state==='approximated-analytic'){record.primitiveFamily=metadata.family;record.analyticFace=held.index;record.approximationErrorMetres=metadata.maximumErrorMetres;
+   if(!placement&&metadata.capsule)record.capsule=metadata.capsule;
+  }
   freeze(record);if(active)this.#admit(key,{owner:held.entry.owner,ownerToken:held.entry.ownerToken,kind:'boxed-record-and-panel-template',data:record,charge:limits01.boxedRecordBytes});return record;
  }
  clearOwner(owner,reason='owner-binding-invalidated'){this.#revision++;const token=this.#owners.get(owner);if(token)token.active=false;this.#owners.delete(owner);const keys=[...this.#entries].filter(([,e])=>e.owner===owner).map(([key])=>key);if(keys.length)this.#totals.ownerInvalidations++;for(const key of keys)this.#drop(key,reason);}

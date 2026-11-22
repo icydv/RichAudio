@@ -11,6 +11,7 @@ import {
   isValidatedTileSnapshot01,
   isDeeplyFrozenTileSnapshot01,
 } from "../research/local-geometry.mjs";
+import { validateCapsuleObstructions } from "./capsule-obstruction.mjs";
 export const bounds = Object.freeze({
   sources: 16,
   // Absolute opt-in ceilings. Scene defaults below retain the original budget.
@@ -123,6 +124,10 @@ function engineConfiguration(engineOptions) {
   if (config.surfaceRoughnessRmsMetres !== undefined)
     requireValue(Number.isFinite(config.surfaceRoughnessRmsMetres) && config.surfaceRoughnessRmsMetres >= 0,
       'surface roughness must be a finite nonnegative RMS height');
+  if (config.lateFacadeScatter !== undefined)
+    requireValue(typeof config.lateFacadeScatter === 'boolean', 'late facade scattering setting');
+  if (config.smallCapsuleObstruction !== undefined)
+    requireValue(typeof config.smallCapsuleObstruction === 'boolean', 'small capsule obstruction setting');
   requireValue(Number.isFinite(config.referenceDistance)&&config.referenceDistance>0&&config.referenceDistance<=10,'reference distance');
   requireValue([0,1,2].includes(config.order)&&Number.isInteger(config.maxPaths)&&config.maxPaths>=1&&config.maxPaths<=bounds.paths,'path/order budget');
   requireValue(Number.isInteger(config.maxReflectors)&&config.maxReflectors>=1&&config.maxReflectors<=bounds.reflectors,'reflector budget');
@@ -203,6 +208,11 @@ export function acousticScene(tile, materials = {}, options = {}) {
   );
   const config=engineConfiguration(engineOptions);
   const surfaceIds = new Set(tile.surfaces.map(s => s.id));
+  if (observationModel?.capsuleObstructions !== undefined) {
+    requireValue(config.smallCapsuleObstruction === true &&
+      observationModel.kind === 'conditional-installed-static-model', 'installed capsule obstruction model');
+    validateCapsuleObstructions(observationModel.capsuleObstructions,tile);
+  }
   if (config.installedReflectionTrains === true) {
     const supports = observationModel?.reflectionSurfaceIds, routes = observationModel?.reflectionSequences;
     requireValue(observationModel?.kind==='conditional-installed-static-model' && config.order===2 &&

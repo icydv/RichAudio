@@ -2,8 +2,9 @@
 import { bounds, copyRadiationByBand, requireValue, validated } from "../engine/contracts.mjs";
 import { vector, unit, length, dot } from "../research/local-geometry.mjs";
 import { candidatePaths, prepareReceiver, finishPath, pathSegments,
-  roadScatterLimit, roadScatterFromReflection, roadScatterEarlyBands, roadScatterSupport } from "../engine/paths.mjs";
+  roadScatterLimit, roadScatterFromReflection, roadScatterLaterFromReflection, roadScatterEarlyBands, roadScatterSupport } from "../engine/paths.mjs";
 import {fleetReflectionSelector} from '../engine/fleet-reflections.mjs';
+import { BinauralOutput, headArrivalDirection } from './binaural-output.mjs';
 const FS = 48000;
 export const streamingHistoryPadding = .5;
 const largestHistorySeconds = bounds.delay + streamingHistoryPadding;
@@ -79,7 +80,7 @@ export class CausalSimulation {
     scene,
     { staleAfter = 0.25, extrapolationLimit = 0.05, historySeconds = 2.5, allowMissingScene = false,
       validateSampledMotion = false, preserveSourceHistoryOnListenerCut = false, roadScattering = false,
-      scatteredReflectionDelay } = {},
+      scatteredReflectionDelay, headDirections = false } = {},
   ) {
     requireValue(validated.scene(scene) || (allowMissingScene && scene === null), "validated A06 scene required");
     requireValue(
@@ -92,6 +93,7 @@ export class CausalSimulation {
       "history/age budgets",
     );
     this.scene = scene;
+    if (headDirections) this.headDirections = true;
     this.validateSampledMotion = validateSampledMotion;
     if(preserveSourceHistoryOnListenerCut)this.preserveSourceHistoryOnListenerCut=true;
     if(roadScattering)this.roadScattering=true;
@@ -141,7 +143,9 @@ export class CausalSimulation {
         JSON.stringify(this.scene.config)===JSON.stringify(scene.config)&&this.scene.coordinateSpace===scene.coordinateSpace,
         'coverage-only preservation requires exactly identical complete finite reflectors, materials and propagation settings');
     }
-    if (scene?.geometryKey === this.scene?.geometryKey) return;
+    if (scene?.geometryKey === this.scene?.geometryKey &&
+      !!scene?.config.lateFacadeScatter === !!this.scene?.config.lateFacadeScatter &&
+      !!scene?.config.smallCapsuleObstruction === !!this.scene?.config.smallCapsuleObstruction) return;
     const stableInstalledWorld=this.scene?.observationModel?.kind==='conditional-installed-static-model'&&
       scene?.observationModel?.kind==='conditional-installed-static-model'&&
       this.scene.observationModel.sourceCatalogueSHA256===scene.observationModel.sourceCatalogueSHA256&&
@@ -469,6 +473,8 @@ export class CausalSimulation {
           bands: p.bands,
           pan: p.pan,
           arrivalDirection: p.arrivalDirection,
+          ...(this.headDirections && { arrivalHeadDirection: headArrivalDirection(p.arrivalDirection,
+            plan.listener.right, plan.listener.forward, plan.listener.up) }),
           ...(this.scene.directPath||this.scene.observationModel?{arrivalOrigin:p.points.at(-1)??plan.state.position}:{}),
           ...(evidence&&p.order?{diagnosticReflection:{source:plan.state.position,listener:plan.listener.position,
             bouncePoints:p.points,materialBasis:evidenceMaterialBasis(p.materialBasis)}}:{}),
@@ -487,17 +493,23 @@ export class CausalSimulation {
       );
       availablePaths=Math.max(availablePaths,eligible.length);
       const budget=this.processingSettings?.pathBudget??this.scene.config.maxPaths;
+      // An explicitly extended scatter window reserves its taps inside the
+      // maximum path capacity. Lower settings already have room for them.
+      const lateFacadeScatter = !!parents && this.scene.config.lateFacadeScatter === true;
+      const reserveScatter = parents && (budget <= 64 - roadScatterLimit ||
+        this.scatteredReflectionDelay !== undefined || lateFacadeScatter);
+      const specularBudget = reserveScatter ? Math.min(budget, 64 - roadScatterLimit - Number(lateFacadeScatter)) : budget;
       // Explicit quality selection reserves a valid direct contribution rather
       // than allowing stronger reflections to evict its continuous identity.
       if(this.processingSettings){const direct=eligible.findIndex(p=>p.order===0);if(direct>0)eligible.unshift(...eligible.splice(direct,1));}
       this.stats.prunedPaths += Math.max(
         0,
-        eligible.length - budget,
+        eligible.length - specularBudget,
       );
-      const chosen=eligible.slice(0,budget);
-      if(parents&&budget<=64-roadScatterLimit){
-        // The base path budget is unchanged. Prefer one early and the deeper
-        // routes as finite supports for quiet later arrivals.
+      const chosen=eligible.slice(0,specularBudget);
+      if(reserveScatter){
+        // Prefer one early and the deeper routes as finite supports for
+        // quiet later arrivals.
         const reflected=chosen.filter(x=>parents.has(x.id));
         const firstOrder=reflected.find(x=>x.order===1);
         const supports=[...(firstOrder?[firstOrder]:[]),
@@ -510,26 +522,37 @@ export class CausalSimulation {
           // be unqualified. Neither case restores it to the sharp return.
           parent.scatterReferenceBand=parent.bands[0];
           parent.bands=roadScatterEarlyBands(parent.bands);
-          if(!result)continue;
-          const {response,candidate}=result;
-          const identity=parent.id+':scatter:'+candidate.id.split(':').at(-1);
-          const previous=this.previous.get(identity);
-          const rate=previous&&now>previous.time?
-            (response.emissionTime-previous.emissionTime)/(now-previous.time):1;
-          if(!Number.isFinite(rate)||rate<.25||rate>3)continue;
-          this.previous.set(identity,{time:now,emissionTime:response.emissionTime,
-            candidateId:candidate.continuityId??plan.candidate.id});
-          chosen.push({
-            id:identity,candidateId:candidate.id,sourceId:id,generation:response.generation,
-            emissionFrame:response.emissionTime*FS,rate,bands:response.bands,pan:response.pan,
-            arrivalDirection:response.arrivalDirection,arrivalOrigin:response.points.at(-1),
-            distance:response.distance,delay:response.delay,order:response.order,
-            scatter:true,scatterReferenceBand:parent.scatterReferenceBand,
-            ...(evidence?{diagnosticReflection:{source:result.plan.state.position,listener:result.plan.listener.position,
-              bouncePoints:response.points,materialBasis:evidenceMaterialBasis(response.materialBasis)}}:{})
-          });
-          if(frame.soundMap)frame.soundMap.candidates.push({sourceId:id,plan:result.plan,candidate,result:response,
-            reason:'path-budget',identity});
+          const later = lateFacadeScatter && parent === firstOrder
+            ? roadScatterLaterFromReflection(plan, p, this.stats, this.scatteredReflectionDelay)
+            : null;
+          const returns = result ? [result] : [];
+          if (later) returns.push(later);
+          for (const arrival of returns) {
+            const {response,candidate,plan:arrivalPlan}=arrival;
+            // Related arrivals share the parent surface scattering allocation.
+            const bands = result && later ? response.bands.map(band =>
+              band * (arrival === later ? .5 : Math.sqrt(.75))) : response.bands;
+            const identity=parent.id+':scatter:'+candidate.id.split(':').at(-1);
+            const previous=this.previous.get(identity);
+            const rate=previous&&now>previous.time?
+              (response.emissionTime-previous.emissionTime)/(now-previous.time):1;
+            if(!Number.isFinite(rate)||rate<.25||rate>3)continue;
+            this.previous.set(identity,{time:now,emissionTime:response.emissionTime,
+              candidateId:candidate.continuityId??plan.candidate.id});
+            chosen.push({
+              id:identity,candidateId:candidate.id,sourceId:id,generation:response.generation,
+              emissionFrame:response.emissionTime*FS,rate,bands,pan:response.pan,
+              arrivalDirection:response.arrivalDirection,arrivalOrigin:response.points.at(-1),
+              ...(this.headDirections && { arrivalHeadDirection: headArrivalDirection(response.arrivalDirection,
+                arrivalPlan.listener.right, arrivalPlan.listener.forward, arrivalPlan.listener.up) }),
+              distance:response.distance,delay:response.delay,order:response.order,
+              scatter:true,scatterReferenceBand:parent.scatterReferenceBand,
+              ...(evidence?{diagnosticReflection:{source:arrivalPlan.state.position,listener:arrivalPlan.listener.position,
+                bouncePoints:response.points,materialBasis:evidenceMaterialBasis(response.materialBasis)}}:{})
+            });
+            if(frame.soundMap)frame.soundMap.candidates.push({sourceId:id,plan:arrivalPlan,candidate,result:response,
+              reason:'path-budget',identity});
+          }
         }
       }
       if(evidence)for(const p of chosen)if(p.order&&evidence.reflected.length<6)evidence.reflected.push({
@@ -586,6 +609,7 @@ export class StreamingRenderer {
     continuousRates = false,
     continuousTransitions = continuousRates,
     bandShape = 'legacy',
+    spatialOutput = 'speakers',
   } = {}) {
     requireValue(
       sourceIds.length >= 1 &&
@@ -610,6 +634,11 @@ export class StreamingRenderer {
     requireValue(sourcePressureGains && typeof sourcePressureGains === "object" && !Array.isArray(sourcePressureGains) && Object.entries(sourcePressureGains).every(([id,gain]) => sourceIds.includes(id) && Number.isFinite(gain) && gain >= .25 && gain <= 4), "explicit bounded source pressure calibration");
     this.sourcePressureGains = Object.freeze(Object.fromEntries(sourceIds.map(id => [id,sourcePressureGains[id] ?? 1])));
     requireValue(bandShape==='legacy'||bandShape==='steep-four-pole','supported band shape');
+    requireValue(['speakers', 'binaural', 'binaural-reference'].includes(spatialOutput), 'supported spatial output');
+    if (spatialOutput !== 'speakers') {
+      this.spatialOutput = spatialOutput;
+      this.binaural = new BinauralOutput(spatialOutput);
+    }
     const steeperBands=bandShape==='steep-four-pole';
     if(steeperBands)this.bandShape=bandShape;
     this.frame = 0;
@@ -687,6 +716,7 @@ export class StreamingRenderer {
       attackLeft: 0,
       attackTotal: 0,
       attackTarget: this.continuousTransitions?new Float64Array(3):null,
+      ...(this.binaural && { binaural: this.binaural.createPath() }),
     }));
     // Quality-capable instances reserve their maximum release banks once. The
     // sample loop visits only occupied slots; changing quality never reallocates
@@ -727,6 +757,8 @@ export class StreamingRenderer {
       firstCausalRateBoundFrame: -1,
       lastCausalRateBoundFrame: -1,
       maximumCausalRateReduction: 0,
+      ...(this.binaural && { headResponseSupportFrames: this.binaural.extraLatencyFrames,
+        headResponseArrayBytes: this.binaural.arrayBytes(this.slots.length) }),
     };
     this.controlFrame = -Infinity;
     this.ownedArrayBytes =
@@ -835,6 +867,7 @@ export class StreamingRenderer {
       slot.present = false;
     }
     let firstFree=0;
+    if (this.binaural) this.binaural.choosePaths(control.paths, this.sources);
     for (const p of control.paths) {
       requireValue(
         this.sources.has(p.sourceId) &&
@@ -853,6 +886,11 @@ export class StreamingRenderer {
           Number.isFinite(p.pan) &&
           Math.abs(p.pan) <= 1,
         "invalid path control",
+      );
+      if (this.binaural && p.arrivalHeadDirection !== undefined) requireValue(
+        Array.isArray(p.arrivalHeadDirection) && p.arrivalHeadDirection.length === 3 &&
+        p.arrivalHeadDirection.every(x => Number.isFinite(x) && Math.abs(x) <= 1 + 1e-6),
+        'invalid head-relative arrival direction',
       );
       if(p.panTrajectory)requireValue(p.panTrajectory.frame===control.frame&&Number.isInteger(p.panTrajectory.frames)&&
         p.panTrajectory.frames>=2&&p.panTrajectory.frames<=512&&
@@ -913,6 +951,7 @@ export class StreamingRenderer {
         if(replacement)slot.attackTarget.set(p.bands);
       }
       const error = desired - slot.cursor;
+      if (this.binaural) this.binaural.setPath(slot.binaural, p, fresh || Math.abs(error) > FS * 0.05);
       if (Math.abs(error) > FS * 0.05) {
         slot.gain.fill(0);
         slot.cursor = desired;
@@ -1006,8 +1045,9 @@ export class StreamingRenderer {
       highK = 1 - Math.exp((-2 * Math.PI * 4000) / FS);
     const measureSpatialSteps=this.continuousRates||this.continuousTransitions;
     const sampleStride=this.pcmWitness?.sampleStride;
+    const binaural = this.binaural;
     for (let j = 0; j < frames; j++) {
-      const witness = (j === 0 || (sampleStride === 16 && j % 16 === 0)) && this.pcmWitness;
+      const witness = (sampleStride === 1 || j === 0 || (sampleStride === 16 && j % 16 === 0)) && this.pcmWitness;
       let affected = false;
       const frame = this.frame + j,
         write = frame % this.historyFrames;
@@ -1102,7 +1142,13 @@ export class StreamingRenderer {
           slot.target[1] === 0 &&
           slot.target[2] === 0
         ) {
-          slot.active = false;
+          if (binaural && slot.binaural.mix > 0 && slot.binaural.filter.residual > 1) {
+            binaural.stepPath(slot.binaural, 0);
+            const { left, right } = slot.binaural;
+            l += left;
+            r += right;
+            if (witness) witness.path(slot, left, right, frame);
+          } else slot.active = false;
           continue;
         }
         if(this.continuousRates)requireValue(slot.cursor<=frame,'non-causal source-history cursor');
@@ -1149,8 +1195,15 @@ export class StreamingRenderer {
               highBand[at] * highGain);
         }
         x *= s.pressureGain;
-        const pathLeft = x * Math.sqrt((1 - slot.pan) / 2);
-        const pathRight = x * Math.sqrt((1 + slot.pan) / 2);
+        let pathLeft, pathRight;
+        if (binaural) {
+          binaural.stepPath(slot.binaural, x);
+          pathLeft = slot.binaural.left;
+          pathRight = slot.binaural.right;
+        } else {
+          pathLeft = x * Math.sqrt((1 - slot.pan) / 2);
+          pathRight = x * Math.sqrt((1 + slot.pan) / 2);
+        }
         l += pathLeft;
         r += pathRight;
         if (witness) witness.path(slot, pathLeft, pathRight, frame);
@@ -1174,6 +1227,12 @@ export class StreamingRenderer {
         slot.previousReadRate=readRate;
         slot.cursor = this.continuousRates?Math.min(frame+1,slot.cursor+readRate):slot.cursor+readRate;
         if (slot.correctionLeft > 0) slot.correctionLeft--;
+      }
+      if (binaural && !binaural.reference) {
+        binaural.stepLate();
+        l += binaural.left;
+        r += binaural.right;
+        if (witness) witness.late?.(binaural.left, binaural.right, frame);
       }
       // Rider turbulence is pressure at the listener. It shares the final
       // output envelope/headroom check, with no world path, delay or Doppler.
