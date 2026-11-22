@@ -12,6 +12,22 @@ test('source playback is block-partition invariant and only applies declared lin
   assert.deepEqual(a.out,b.out);for(let i=0;i<a.out.length;i++){assert.equal(d.out[i],a.out[i]*2);assert.equal(calibrated.out[i],a.out[i]*8);}
   assert.ok(Math.abs(a.out.at(-1)-.0625)<1e-8);assert.equal(a.p.stats.oscillatorSamples,0);
 });
+test('optional load pressure distinguishes equal revs without changing the grain clock',()=>{
+  function held(load,options){
+    const player=new StockVehicleSource(fixture(),options),engine=new Float32Array(512),exhaust=new Float32Array(512);
+    for(let i=0;i<80;i++)player.renderInto({...c,load},engine,exhaust);
+    return {engine,exhaust,rate:player.commonRates};
+  }
+  const oldLow=held(.25),oldHigh=held(.95);
+  assert.deepEqual(oldLow,oldHigh);
+  const options={loadPressure:{engine:.75,exhaust:.4}};
+  const low=held(.25,options),high=held(.95,options);
+  assert.deepEqual(low.rate,high.rate);
+  assert.deepEqual(high,oldHigh);
+  assert.ok(Math.abs(low.engine.at(-1)-high.engine.at(-1)*.75)<1e-6);
+  assert.ok(Math.abs(low.exhaust.at(-1)-high.exhaust.at(-1)*.4)<1e-6);
+  assert.throws(()=>new StockVehicleSource(fixture(),{loadPressure:{engine:1.01,exhaust:.5}}),/load pressure/);
+});
 test('aliased outputs, fractional frames and invalid state reject before mutating playback',()=>{
   const p=new StockVehicleSource(fixture()),buffer=new Float32Array(1024),a=buffer.subarray(0,512),b=buffer.subarray(256,768);
   assert.throws(()=>p.renderInto(c,a,b));assert.equal(p.frame,0);

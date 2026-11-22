@@ -99,7 +99,7 @@ function readStockAssetLibrary(manifestFile,{sustainAtlasFile},allowedModels,con
 }
 
 export class StockVehicleSource {
-  constructor(vehicle,{sourceGain=1,atlas=null,pressureShares={engine:.5,exhaust:.5},pressureSharesByState=null,exhaustEvents=null,preparation10=null,smoothTextureFallback=false}={}){
+  constructor(vehicle,{sourceGain=1,atlas=null,pressureShares={engine:.5,exhaust:.5},pressureSharesByState=null,exhaustEvents=null,preparation10=null,smoothTextureFallback=false,loadPressure=null}={}){
     check((verifiedVehicleBanks.has(vehicle)||analyticFixture(vehicle))&&Number.isFinite(sourceGain)&&sourceGain>0&&sourceGain<=2,'verified model or explicit analytical fixture and bounded shared source calibration');
     const prepared=preparation10===null?null:sourcePreparations10.get(preparation10);
     check(preparation10===null||prepared&&prepared.vehicle===vehicle&&prepared.model===vehicle.model&&prepared.audioContext===vehicle.audioContext&&prepared.atlas===atlas&&prepared.entries.every(e=>vehicle.layers[e.role][e.mode]===e.asset&&e.asset.nativePeak===e.nativePeak),'exact branded source preparation required');
@@ -107,6 +107,11 @@ export class StockVehicleSource {
     const shareStates=pressureSharesByState?[pressureSharesByState.idle,pressureSharesByState.load,pressureSharesByState.lift]:[pressureShares,pressureShares,pressureShares];
     check(shareStates.every(s=>s&&stockRoles.every(role=>Number.isFinite(s[role])&&s[role]>0&&s[role]<1)&&Math.abs(s.engine+s.exhaust-1)<1e-12),'explicit pressure shares must sum to one');
     this.shareStates=shareStates.map(s=>Object.freeze({...s}));
+    if(loadPressure!==null){
+      check(loadPressure&&stockRoles.every(role=>Number.isFinite(loadPressure[role])&&loadPressure[role]>0&&loadPressure[role]<=1),
+        'bounded unloaded engine/exhaust load pressure required');
+      this.loadPressure={unloaded:stockRoles.map(role=>loadPressure[role]),position:1};
+    }
     this.pressureShares=Object.freeze({...pressureShares});
     this.pressureSharesByState=pressureSharesByState?Object.freeze({idle:this.shareStates[0],load:this.shareStates[1],lift:this.shareStates[2]}):null;
     this.inputBounds=Object.fromEntries(stockRoles.map(role=>{
@@ -145,6 +150,12 @@ export class StockVehicleSource {
     for(const plan of this.events?.plans??[])for(const output of [engine,exhaust]){const s=plan.asset.samples;
       check(output.buffer!==s.buffer||output.byteOffset+frames*4<=s.byteOffset||s.byteOffset+s.byteLength<=output.byteOffset,'output must not overwrite verified finite event PCM');}
     const idle=1-clamp((control.operatingPoint-.08)/.2),decel=control.lift?1:clamp((.25-control.load)/.2),target=this.npc?[idle,1-idle]:[idle,(1-idle)*(1-decel),(1-idle)*decel];
+    const loadPressure=this.loadPressure;
+    // Load above the existing decel crossover previously selected the same
+    // accel layer at identical revs. Shape its excitation independently of
+    // grain rate. Full load keeps the original pressure bound.
+    const effort=loadPressure?clamp((control.load-.25)/.60):0;
+    const targetLoad=effort*effort*(3-2*effort);
     const a=1-Math.exp(-1/(FS*.04)),e=1-Math.exp(-1/(FS*.025));
     // The target is constant within this block. A weight at zero can enter
     // only on its first sample, so preserve the old weights just once.
@@ -162,6 +173,7 @@ export class StockVehicleSource {
     }));
     for(let i=0;i<frames;i++){
       this.position+=a*(control.operatingPoint-this.position);this.envelope+=e*((control.running?1:0)-this.envelope);
+      if(loadPressure)loadPressure.position+=a*(targetLoad-loadPressure.position);
       let weightTotal=0;
       for(let m=0;m<weights.length;m++){
         weights[m]+=a*(target[m]-weights[m]);
@@ -193,9 +205,11 @@ export class StockVehicleSource {
           for(const m of entering){transition.alignmentRequests++;this.stats.transitions.alignmentRequests++;
             if(voices[m].alignTo(reference,addresses[m],rate)){transition.alignments++;this.stats.transitions.phaseAlignments++;}}
         }
+        const unloaded=loadPressure?.unloaded[roleIndex];
+        const accelerationPressure=loadPressure?unloaded+(1-unloaded)*loadPressure.position:1;
         let sum=0,expected=0;for(let m=0;m<this.modes.length;m++){
           if(this.weights[m]===0){transition.skippedVoiceFrames++;continue;}
-          const voice=voices[m],share=shares[roleIndex][m];
+          const voice=voices[m],share=shares[roleIndex][m]*(m===1?accelerationPressure:1);
           sum+=this.weights[m]*share*voice.next(addresses[m],rate);expected+=this.weights[m]*share*share*voice.lastExpectedEnergy;
         }
         // Declared pressure shares retain an explicit two-emitter budget.
