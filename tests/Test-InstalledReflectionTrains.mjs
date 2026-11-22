@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {originalInstalledCache01} from './fixtures/InstalledStaticCache01.mjs';
 import {InstalledStaticWorld01, installedStaticSceneMetadata01, encodeInstalledStaticScene01,
   decodeInstalledStaticScene01} from '../src/acoustics/world/installed-static-scene01.mjs';
-import {candidatePaths, pathGeometry} from '../src/acoustics/engine/paths.mjs';
+import {candidatePaths, pathGeometry, solvePath} from '../src/acoustics/engine/paths.mjs';
+import {trajectory} from '../src/acoustics/engine/contracts.mjs';
 
 // The north wall has an opening centred on its single-bounce point. Its two
 // remaining panels support distinct bounces on a three-leg reflection train.
@@ -93,5 +94,29 @@ test('nearby slivers leave room for larger supporting walls in the bounded train
   try {
     const scene=world.window(request),paths=candidatePaths(scene);
     assert.ok(paths.some(p=>centres(p)==='3,-3,3'));
+  } finally {world.close();cache.close();}
+});
+
+test('one worker pose follows a retarded bounce across a shared edge during the same lease',()=>{
+  const cache=originalInstalledCache01({distantWall:true}),world=new InstalledStaticWorld01(cache);
+  try {
+    const receiver=[2,-2,2], start=[-2,-2,1.75], end=[-2,-2,2.25];
+    const sceneAt=maxReflectors=>world.window({...request,listener:receiver,sources:[start],radius:32,
+      engine:{...request.engine,maxReflectors}});
+    const track=position=>trajectory([{time:0,position}]);
+    const solve=(scene,position)=>{
+      const seed=candidatePaths(scene).find(c=>c.surfaces.length===1);
+      return solvePath(scene,{track:track(position),directivity:0},track(receiver),1,seed);
+    };
+    const scene=sceneAt(2), before=solve(scene,start), after=solve(scene,end);
+    assert.equal(before.status,'renderable');
+    assert.equal(after.status,'renderable','the renderer can reach the adjacent face before the next worker window');
+    assert.notEqual(before.id,after.id);
+    assert.equal(after.id,'r:'+after.materialBasis[0].surface);
+    assert.deepEqual(after.points,[[0,0,2.125]]);
+    assert.ok(Math.abs(after.delay-Math.hypot(4,4,.25)/343)<1e-10);
+    assert.equal(candidatePaths(scene).length,2,'one reflection work item before and after the crossing');
+    assert.equal(solve(sceneAt(1),end).status,'outside-finite-patch-or-opening','respects a one-face quality budget');
+    assert.equal(solve(scene,[24,-2,2]).status,'outside-finite-patch-or-opening','disconnected coplanar panels are separate');
   } finally {world.close();cache.close();}
 });

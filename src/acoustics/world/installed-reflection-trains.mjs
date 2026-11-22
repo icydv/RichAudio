@@ -1,5 +1,5 @@
-import {onPatch} from '../research/local-geometry.mjs';
-import {preparePathGeometry, finishPathGeometry, reflectionPlaneId} from '../engine/paths.mjs';
+import {dot,onPatch,sub} from '../research/local-geometry.mjs';
+import {preparePathGeometry, finishPathGeometry, reflectionPlaneId, sharedReflectionEdge} from '../engine/paths.mjs';
 
 // Fixed worker-side ceilings. Plane sequences are tested before any face is
 // admitted to the existing 16-reflector workset. No triangle permutation tree.
@@ -81,6 +81,12 @@ function estimatedPressure(faces, materials, distance, air) {
   return Math.max(...bands.map((gain,i)=>gain * 10 ** (-air[i]*distance/20))) / Math.max(1,distance);
 }
 
+function distanceToEdge(point, [a,b]) {
+  const axis=sub(b,a), delta=sub(point,a);
+  const t=Math.max(0,Math.min(1,dot(delta,axis)/dot(axis,axis)));
+  return Math.hypot(...delta.map((x,i)=>x-t*axis[i]));
+}
+
 export function discoverInstalledReflectionTrains(tile, poses, listener, materials, engine) {
   const sources = poses.length ? poses : [listener], ranked = rankedPlanes(tile,sources,listener);
   const pairs = shortlist(ranked,pairPlanes), triples = shortlist(ranked,triplePlanes);
@@ -146,7 +152,7 @@ export function discoverInstalledReflectionTrains(tile, poses, listener, materia
   stats.visibilitySegments=visibility.queries;
   stats.surfaceTests=visibility.surfaceTests;
   report.finiteCandidates=stats.finite[1]; report.testedCandidates=stats.tested[1]; report.qualified=stats.qualified[1];
-  const ids = new Set(), sequences = [];
+  const ids = new Set(), sequences = [], admitted = [];
   const available=[...routes.values()].sort(compare);
   for (const route of available) {
     const order=route.ids.length;
@@ -156,7 +162,31 @@ export function discoverInstalledReflectionTrains(tile, poses, listener, materia
     if (ids.size+new Set(added).size>(engine.maxReflectors??8)) continue;
     for (const id of added) ids.add(id);
     sequences.push(route.ids);
+    admitted.push(route);
     stats.admitted[order]++;
+  }
+  // A moving bounce can cross a shared mesh edge within this worker lease.
+  // Spend spare support capacity only. A neighbour creates no new path and
+  // becomes audible only when the retarded solver finds its finite footprint.
+  const limit=engine.maxReflectors??8;
+  stats.continuitySupports=0;
+  if(ids.size<limit && admitted.length) {
+    const byPlane=new Map(ranked.map(plane=>[plane.id,plane.faces])), neighbours=new Map();
+    for(const {plan,pressure} of admitted) {
+      for(const [i,face] of plan.surfaces.entries()) {
+        for(const other of byPlane.get(reflectionPlaneId(face))) {
+          if(ids.has(other.id)) continue;
+          const edge=sharedReflectionEdge(face,other);
+          if(!edge) continue;
+          const score=distanceToEdge(plan.points[i],edge)/pressure;
+          neighbours.set(other.id,Math.min(score,neighbours.get(other.id)??Infinity));
+        }
+      }
+    }
+    for(const [id] of [...neighbours].sort(([a,x],[b,y])=>x-y||a.localeCompare(b))) {
+      if(ids.size===limit) break;
+      ids.add(id); stats.continuitySupports++;
+    }
   }
   return {ids:[...ids],sequences,report};
 }

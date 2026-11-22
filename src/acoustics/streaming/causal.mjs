@@ -117,7 +117,7 @@ export class CausalSimulation {
     this.geometryEpoch++;
     // A geometry replacement changes reflector identity, not the existing
     // direct arrival history. Preserve its retarded-time rate/smoothing.
-    if(!preserveIdenticalReflectors){const candidates=stableInstalledWorld?new Set(this.candidates.map(c=>c.id)):null;
+    if(!preserveIdenticalReflectors){const candidates=stableInstalledWorld?new Set(this.candidates.map(c=>c.continuityId??c.id)):null;
       for(const [id,value] of this.previous)if(!id.includes(':direct:g')&&(!candidates||!candidates.has(value.candidateId)))this.previous.delete(id);}
     this.stats.sceneReplacements++;
   }
@@ -306,7 +306,10 @@ export class CausalSimulation {
       for (const candidate of this.candidates) {
         if(this.processingSettings?.earlyReflections===false&&candidate.surfaces.length)continue;
         const plan=preparePath(this.scene,source,listener,now,candidate,geometryTimeMs),queries=pathSegments(plan),offset=segments.length;
-        segments.push(...queries);plans.push({plan,candidate,offset,count:queries.length});
+        segments.push(...queries);
+        // A worker-selected support can reach the adjacent finite face as
+        // the emitter moves. Report the ordered faces used for this solution.
+        plans.push({plan,candidate:plan.candidate??candidate,offset,count:queries.length});
       }
       sources.push({id,track,plans});
     }
@@ -330,6 +333,7 @@ export class CausalSimulation {
       observedMaterialId:frame.scene.tile.surfaces.find(s=>s.id===m.surface)?.material.observedId??null}))??null:null;
     for(const {id,track,plans} of sources){
       const eligible=[];
+      let solvedSupports;
       for(const {plan,candidate,offset,count} of plans){
         const p=finishPath(plan,queries?queries.slice(offset,offset+count):null,this.stats);
         if(evidence&&candidate.surfaces.length===0&&evidence.direct.length<6){
@@ -357,7 +361,16 @@ export class CausalSimulation {
           if(visual)visual.reason='source-history-unavailable';
           continue;
         }
-        const identity = id + ":" + candidate.id + ":g" + p.generation +
+        // Adjacent finite faces can carry the same acoustic arrival. Preserve
+        // the read cursor across their shared edge, while reporting the face
+        // that actually passed this block's geometry and visibility checks.
+        const support = candidate.continuityId;
+        if (support && solvedSupports?.has(support)) {
+          this.stats.rejectedPaths++;
+          if (visual) visual.reason = 'duplicate-support-arrival';
+          continue;
+        }
+        const identity = id + ":" + (support ?? candidate.id) + ":g" + p.generation +
             (this.scene.observationModel && p.order ? this.scene.observationModel.kind==='conditional-installed-static-model'?
               ':world'+this.scene.observationModel.sourceCatalogueSHA256.slice(0,24):':geometry' + this.geometryEpoch : ''),
           previous = this.previous.get(identity);
@@ -373,11 +386,13 @@ export class CausalSimulation {
         this.previous.set(identity, {
           time: now,
           emissionTime: p.emissionTime,
-          ...(this.scene.observationModel?.kind==='conditional-installed-static-model'?{candidateId:candidate.id}:{}),
+          ...(this.scene.observationModel?.kind==='conditional-installed-static-model'?{candidateId:support??candidate.id}:{}),
         });
+        if (support) (solvedSupports ??= new Set()).add(support);
         if(visual){visual.identity=identity;visual.reason='path-budget';}
         eligible.push({
           id: identity,
+          ...(support ? {candidateId: candidate.id} : {}),
           sourceId: id,
           generation: p.generation,
           emissionFrame: p.emissionTime * FS,

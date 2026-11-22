@@ -30,6 +30,33 @@ export function reflectionPlaneId(surface) {
   components.push(Math.round(dot(surface.normal, surface.center) * sign * 1e4));
   return 'plane.' + components.map(n => n.toString(36)).join('.');
 }
+
+const supportVertices = new WeakMap();
+function finiteVertices(s) {
+  let points = supportVertices.get(s.corners);
+  if (!points) {
+    points = s.footprint?.map(([u,v])=>s.center.map((x,i)=>x+u*s.u[i]+v*s.v[i])) ?? s.corners;
+    supportVertices.set(s.corners,points);
+  }
+  return points;
+}
+
+export function sharedReflectionEdge(a,b) {
+  if (a===b || reflectionPlaneId(a)!==reflectionPlaneId(b)) return null;
+  const av=finiteVertices(a), bv=finiteVertices(b);
+  // Numeric plane buckets alone cannot establish connectivity or coplanarity.
+  if (!av.every(p=>Math.abs(dot(sub(p,b.center),b.normal))<=E) ||
+      !bv.every(p=>Math.abs(dot(sub(p,a.center),a.normal))<=E)) return null;
+  const same=(p,q)=>p.every((x,i)=>Math.abs(x-q[i])<=E);
+  for (let i=0;i<av.length;i++) {
+    const start=av[i],end=av[(i+1)%av.length];
+    for (let j=0;j<bv.length;j++) {
+      const p=bv[j],q=bv[(j+1)%bv.length];
+      if (same(start,p)&&same(end,q) || same(start,q)&&same(end,p)) return [start,end];
+    }
+  }
+  return null;
+}
 // Explicit finite-emitter calibration, opt-in per source. Outside the declared
 // radius the original inverse-distance calculation is exactly unchanged. Inside,
 // pressure and its first derivative join 1/d at the boundary, with a finite
@@ -191,10 +218,13 @@ export function candidatePaths(scene, {maxReflectors=scene.config.maxReflectors}
     result = [{ id: "direct", surfaces: [] }];
   if (scene.config.installedReflectionTrains === true && installedIds) {
     const selected = new Map(s.map(surface => [surface.id, surface]));
+    const neighbours = new Map(s.map(face=>[face,s.filter(other=>sharedReflectionEdge(face,other))]));
     for (const sequence of scene.observationModel.reflectionSequences) {
       if (!sequence.every(id => selected.has(id))) continue;
       const surfaces = sequence.map(id => selected.get(id));
+      const adjacentFaces = surfaces.map(face=>neighbours.get(face));
       result.push({id:'r:' + sequence.join('>'), surfaces,
+        ...(adjacentFaces.some(faces=>faces.length)?{adjacentFaces}:{}),
         continuityId:'r:' + surfaces.map(reflectionPlaneId).join('>')});
     }
     return result;
@@ -260,6 +290,18 @@ export function preparePath(scene,source,listenerTrack,arrivalTime,candidate,
   if (!state.valid || residual > 1e-7)
     return { status: "source-unavailable-or-retarded-time-unconverged" };
   const geometry=preparePathGeometry(scene,state.position,listener.position,candidate.surfaces);
+  if (geometry.status==='outside-finite-patch-or-opening' && candidate.adjacentFaces) {
+    // Rebuild on the real neighbouring face, including its retarded emission
+    // time, material and every visibility leg. Try this only on a finite miss.
+    const next=preparePathGeometry(scene,state.position,listener.position,candidate.surfaces,(i,point)=>
+      onPatch(candidate.surfaces[i],point) ? candidate.surfaces[i] :
+        candidate.adjacentFaces[i].find(face=>onPatch(face,point)));
+    if (next.status==='prepared-geometry') {
+      const surfaces=next.surfaces;
+      return preparePath(scene,source,listenerTrack,arrivalTime,{surfaces,
+        id:'r:'+surfaces.map(s=>s.id).join('>'),continuityId:candidate.continuityId},geometryTimeMs);
+    }
+  }
   return {status:'prepared-path',scene,source,listener,arrivalTime,candidate,state,emission,residual,geometry};
 }
 export function pathSegments(plan) {
