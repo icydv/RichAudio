@@ -104,3 +104,11 @@ The matched cinematic comparison preserves the old rendered bearing. At the obse
 The mixer reserves pressure for ordinary paths before sharing the remaining headroom across boosted exhaust returns. A bounded producer report records each retained firing cut and catch with its source and producer sample positions. This makes the limiter schedule observable beyond the initial high-rev diagnostic window.
 
 In the covered reconstruction all three mixes admitted every path across 18,443 offers. At the held rev the exhaust retained four first-order returns, four second-order returns and two third-order returns. The road mix also blends some original exhaust pressure back in as a hard rev settles, giving the opening blip more contrast against the held note.
+
+## Live road mix test
+
+The one-car road mix was prominent during the covered blip and audible from the high cinematic camera. The listener found the playback choppy and unnatural, with smoother sound as the camera receded. The limiter was difficult to distinguish by ear.
+
+The farthest rendered camera sample was about 174 model metres from the corrected tailpipe at 11 degrees off its rear axis, with a selected normalized rev ratio of 0.873. The nearby producer sample measured −27.4 dBFS direct with no admitted reflection. Under cover the mixer applied paths through third order. The producer recorded 37 firing cuts and 37 catches. The live recording has a single mixed audio track, so it cannot isolate the replacement or identify the cause of the choppiness.
+
+Road stayed active for 112.8 seconds. The endpoint peaked at −8.2 dBFS, with zero renderer limiting, ring underflow and stale PCM frames. The output gate substituted 58,880 frames. Its longest reported run was 9,216 untagged frames, or 192 ms. The switch withdrew Road after host output progress expired and restored the stock ADDER once on the same car. The timeout and the driver's report of unnatural playback remain unresolved.
