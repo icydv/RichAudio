@@ -186,9 +186,22 @@ for(const capacity of [6,64])test(`occupied PCM keeps exact PR92 state through o
  assert(attacks>0);assert(releases>0);assert(unoccupied>2);assert.equal(current.ownedArrayBytes,parent.ownedArrayBytes);
 });
 
+// These authored poses omit measured motion. The current observation format
+// records that absence explicitly on listener and source states, including
+// their copies inside a prepared path. Keep all historical values in the oracle.
+function withAbsentMotion(value){
+ if(Array.isArray(value))return value.map(withAbsentMotion);
+ if(value===null||typeof value!=='object'||Object.getPrototypeOf(value)!==Object.prototype)return value;
+ const expected=Object.fromEntries(Object.entries(value).map(([key,item])=>[key,withAbsentMotion(item)]));
+ if(Object.hasOwn(value,'nearFieldRadius')&&Object.hasOwn(value,'generation')&&Object.hasOwn(value,'emitting')){
+  Object.assign(expected,{motionIdentity:null,motionObservation:null,motionTime:null});
+ }
+ return expected;
+}
+
 test('repeated control settings preserve exact PR92 preparation, paths, supersession and complete simulation state',()=>{
  const fixture=originalCase('ground'),replacement=originalCase('canyon'),current=new CausalSimulation(fixture.scene),parent=new ParentSimulation(fixture.scene);
- const compare=()=>assert.deepEqual({...current},{...parent});
+ const compare=()=>assert.deepEqual({...current},{...parent,validateSampledMotion:false,reflectionPolicy:'full',records:withAbsentMotion(parent.records)});
  let reflected=0,terminal=0;
  for(let block=0;block<48;block++){
   const time=block/48,settings={pathBudget:block<16?12:block<24?6:12,maxReflectors:block<32?8:16,earlyReflections:block<20||block>=28};
@@ -197,7 +210,7 @@ test('repeated control settings preserve exact PR92 preparation, paths, superses
   const snapshot=observationAt(fixture,time);if(block>=36)snapshot.session='new-authored-session';if(block>=20)snapshot.sources[0].generation=2;
   if(block===8||block===9)snapshot.paused=true;if(block===40)snapshot.sources=[];
   current.observe(snapshot);parent.observe(snapshot);compare();
-  const currentPrepared=current.prepareUpdate(time),parentPrepared=parent.prepareUpdate(time);assert.deepEqual(currentPrepared,parentPrepared);compare();
+  const currentPrepared=current.prepareUpdate(time),parentPrepared=parent.prepareUpdate(time);assert.deepEqual(currentPrepared,withAbsentMotion(parentPrepared));compare();
   // Equal settings must not invalidate an already prepared frame. A genuine
   // setting change retains the existing supersession rejection instead.
   current.setProcessingSettings(settings);parent.setProcessingSettings(settings);compare();
@@ -225,6 +238,6 @@ test('equal control updates preserve PR92 detached-settings reference semantics'
  // A previously exposed settings object is detached by the next setter call.
  // Reusing it would silently let a retained caller reference change live quality.
  retainedCurrent.pathBudget=1;retainedParent.pathBudget=1;retainedCurrent.earlyReflections=false;retainedParent.earlyReflections=false;
- assert.deepEqual({...current},{...parent});assert.equal(current.processingSettings.pathBudget,12);
+ assert.deepEqual({...current},{...parent,validateSampledMotion:false,reflectionPolicy:'full'});assert.equal(current.processingSettings.pathBudget,12);
  assert.equal(current.processingSettings.earlyReflections,true);
 });
