@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { acousticScene, trajectory } from '../src/acoustics/engine/contracts.mjs';
 import { candidatePaths, solvePath } from '../src/acoustics/engine/paths.mjs';
+import * as finite from '../src/acoustics/engine/paths.mjs';
 import { createTile, coordinateSpace, timeUnit } from '../src/acoustics/research/local-geometry.mjs';
 import { CausalSimulation, StreamingRenderer } from '../src/acoustics/streaming/causal.mjs';
 import { patch } from './fixtures/acoustics-scenes.mjs';
@@ -38,6 +39,51 @@ function solve(scene, ids, { time = 2, sourceTrack = track([-4, 0, 1.5]) } = {})
   assert.ok(candidate, 'authored candidate exists');
   return solvePath(scene, { track: sourceTrack, directivity: 0 }, track([4, 0, 1.5]), time, candidate);
 }
+
+test('one receiver pose serves every independently solved emitter in an arrival block', () => {
+  const {scene}=fixture({paths:[]}),simulation=new CausalSimulation(scene);
+  for(const time of [0,.05])simulation.observe({session:'shared-listener',time,
+    listener:{position:[4,0,1.5]},sources:[
+      {id:'one',position:[-3+time,0,1.5],velocity:[1,0,0]},
+      {id:'two',position:[-1,-1+time,1.5],velocity:[0,1,0]}]});
+  const frame=simulation.prepareUpdate(.05);
+  const listener=frame.sources[0].plans[0].plan.listener;
+  for(const {plans} of frame.sources)for(const {plan} of plans)assert.equal(plan.listener,listener);
+  assert.notDeepEqual(frame.sources[0].plans[0].plan.state.position,frame.sources[1].plans[0].plan.state.position);
+  const next=simulation.prepareUpdate(.06);
+  assert.notEqual(next.sources[0].plans[0].plan.listener,listener);
+});
+test('retained emitter keys survive successive blocks without crossing a missing or recycled identity',()=>{
+ const {scene}=fixture({paths:[]}),simulation=new CausalSimulation(scene);
+ const observe=(time,sources,session='keys')=>simulation.observe({time,session,
+  listener:{position:[0,0,1]},sources:sources.map(([id,generation])=>({id,generation,position:[1,2,1]}))});
+ observe(0,[['car',1],['other',1]]);
+ observe(.05,[['car',1],['other',1]]);
+ const old=simulation.prepareUpdate(.05).sources.find(s=>s.id==='car').track;
+ observe(.1,[['other',1]]);
+ observe(.15,[['car',2],['other',1]]);
+ const current=simulation.prepareUpdate(.15).sources.find(s=>s.id==='car').track;
+ assert.equal(old.keys[0],current.keys[0]);
+ assert.ok(Object.isFrozen(current.keys[0]));
+ assert.deepEqual(current.keys.map(k=>k.time),[0,.05,.15]);
+ assert.notEqual(current.keys.at(-1).generation,old.keys.at(-1).generation);
+ const external=simulation.track('source','car',.15);external.keys[0].time=22;
+ assert.equal(simulation.track('source','car',.15).keys[0].time,0);
+ observe(.2,[['car',1]],'new-session');
+ assert.deepEqual(simulation.track('source','car',.2).keys.map(k=>k.time),[.2]);
+});
+test('delay iteration matches the full image construction at every reflection order',()=>{
+ const {scene}=fixture(),faces=scene.tile.surfaces;
+ for(let i=0;i<25;i++){
+  const point=[i/7-1,-5.6+i*.32,i*.07+1],receiver=[2.4-i*.1,3+i*.12,2.03];
+  for(let order=0;order<=10;order++){
+   const route=Array.from({length:order},(_,j)=>faces[(j+i)%2]);
+   const image=finite.imageFor(point,route);
+   assert.equal(finite.imageDistance(point,route,receiver),
+     Math.hypot(...image.map((v,axis)=>v-receiver[axis])));
+  }
+ }
+});
 
 test('default configuration and zero-to-second-order enumeration stay identical', () => {
   const { tile, materials } = fixture({ paths: [] });

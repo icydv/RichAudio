@@ -139,7 +139,20 @@ export function cacheStatus(tile,c){
   if(!inBox(listener,tile.bounds)||length(sub(listener,tile.listenerAnchor))>movement)reasons.push('listener_moved');
   return {valid:reasons.length===0,reasons,coverage:tile.coverage,missingRegions:tile.missingRegions.length};
 }
-export function onPatch(s,p){const d=sub(p,s.center),u=dot(d,s.u),v=dot(d,s.v);return Math.abs(dot(d,s.normal))<=E&&Math.abs(u)<=s.half[0]+E&&Math.abs(v)<=s.half[1]+E&&(!s.footprint||s.footprint.every((a,i)=>{const b=s.footprint[(i+1)%s.footprint.length];return (b[0]-a[0])*(v-a[1])-(b[1]-a[1])*(u-a[0])>=-E;}))&&!s.openings.some(h=>u>=h.min[0]-E&&u<=h.max[0]+E&&v>=h.min[1]-E&&v<=h.max[1]+E);}
+export function onPatch(s,p){
+  const x=p[0]-s.center[0],y=p[1]-s.center[1],z=p[2]-s.center[2],n=s.normal;
+  if(!(Math.abs(0+x*n[0]+y*n[1]+z*n[2])<=E))return false;
+  const u=0+x*s.u[0]+y*s.u[1]+z*s.u[2],v=0+x*s.v[0]+y*s.v[1]+z*s.v[2];
+  if(!(Math.abs(u)<=s.half[0]+E&&Math.abs(v)<=s.half[1]+E))return false;
+  if(s.footprint){
+    for(let i=0;i<s.footprint.length;i++){
+      const a=s.footprint[i],b=s.footprint[(i+1)%s.footprint.length];
+      if(!((b[0]-a[0])*(v-a[1])-(b[1]-a[1])*(u-a[0])>= -E))return false;
+    }
+  }
+  for(const h of s.openings)if(u>=h.min[0]-E&&u<=h.max[0]+E&&v>=h.min[1]-E&&v<=h.max[1]+E)return false;
+  return true;
+}
 function hitsBox(start,delta,box){
   let lo=0,hi=1;
   for(let i=0;i<3;i++){
@@ -166,25 +179,137 @@ function buildBoundsIndex(entries){
   return node(entries);
 }
 function indexedCandidates(root,items,start,delta){const found=[],pending=[root];while(pending.length){const n=pending.pop();if(!hitsBox(start,delta,n))continue;if(n.entries){for(const e of n.entries)if(hitsBox(start,delta,e))found.push(e.index);}else{pending.push(n.left,n.right);}}found.sort((x,y)=>x-y);return found.map(i=>items[i]);}
+// One depth-first layout of the validated boxes serves every emitter. The
+// skip offset passes over a whole missed branch. Coordinates stay Float64 and
+// the slab divisions use the same tolerances as the scalar reference.
+const flatIndices=new WeakMap();
+function flatIndex(root,count){
+ if(!root)return null;
+ let flat=flatIndices.get(root);
+ if(flat)return flat;
+ const nodes=n=>n.entries?1:1+nodes(n.left)+nodes(n.right);
+ flat=new Float64Array(8*(count+nodes(root)));
+ let cursor=0;
+ function write(n){
+  const i=cursor;
+  cursor+=8;
+  for(let axis=0;axis<3;axis++){flat[i+axis]=n.min[axis];flat[i+axis+3]=n.max[axis];}
+  flat[i+7]=n.index??-1;
+  if(n.entries)for(const entry of n.entries)write(entry);
+  else if(n.left){write(n.left);write(n.right);}
+  flat[i+6]=cursor;
+ }
+ write(root);flatIndices.set(root,flat);return flat;
+}
+export function prepareBatchVisibility(tile){
+ requireTile(tile);
+ const prepare=(root,count)=>root?flatIndex(root,count).slice():null;
+ return {schema:1,observationKey:tile.observationKey,
+  surfaces:prepare(surfaceIndicesByTile.get(tile),tile.surfaces.length),
+  regions:prepare(unknownIndicesByTile.get(tile),tile.missingRegions.length)};
+}
+// Called only after the owned worker result and its conservative tree have
+// been adopted. Take private copies. A held immutable tree can subsequently
+// share its prepared layout across finite request leases.
+export function adoptSourceBoundBatchVisibility(tile,packet){
+ requireTile(tile);
+ if(packet?.schema!==1||packet.observationKey!==tile.observationKey)throw Error('source-bound batch visibility context');
+ function copy(root,source,count){
+  if(!root&&source===null)return null;
+  if(!root||!(source instanceof Float64Array)||!(source.buffer instanceof ArrayBuffer)||
+     source.byteOffset!==0||source.byteLength!==source.buffer.byteLength||source.length%8||
+     source.length<=count*8||source.length>count*24||source[6]!==source.length)
+   throw Error('source-bound batch visibility storage');
+  const flat=source.slice();
+  // Skip offsets govern traversal. Every visited box must advance the
+  // cursor and every leaf must refer to an item of this exact workset.
+  for(let row=0;row<flat.length;row+=8){
+   const skip=flat[row+6],index=flat[row+7];
+   if(!Number.isSafeInteger(skip)||skip%8||skip<=row||skip>flat.length||
+      !Number.isSafeInteger(index)||index< -1||index>=count||index>=0&&skip!==row+8)
+    throw Error('source-bound batch visibility offsets');
+  }
+  return flat;
+ }
+ const roots=[surfaceIndicesByTile.get(tile),unknownIndicesByTile.get(tile)];
+ const surfaces=copy(roots[0],packet.surfaces,tile.surfaces.length);
+ const regions=copy(roots[1],packet.regions,tile.missingRegions.length);
+ if(surfaces)flatIndices.set(roots[0],surfaces);
+ if(regions)flatIndices.set(roots[1],regions);
+}
+function flatCandidates(boxes,items,start,delta){
+ const found=[];
+ const x=start[0],y=start[1],z=start[2],dx=delta[0],dy=delta[1],dz=delta[2];
+ const px=Math.abs(dx)<E,py=Math.abs(dy)<E,pz=Math.abs(dz)<E;
+ for(let i=0;i<boxes.length;){
+  const row=i;
+  i=boxes[row+6];
+  let lo=0,hi=1;
+  if(px){if(x<boxes[row]||x>boxes[row+3])continue;}
+  else{
+   const a=(boxes[row]-x)/dx,b=(boxes[row+3]-x)/dx;
+   lo=Math.max(lo,Math.min(a,b));hi=Math.min(hi,Math.max(a,b));if(lo>hi)continue;
+  }
+  if(py){if(y<boxes[row+1]||y>boxes[row+4])continue;}
+  else{
+   const a=(boxes[row+1]-y)/dy,b=(boxes[row+4]-y)/dy;
+   lo=Math.max(lo,Math.min(a,b));hi=Math.min(hi,Math.max(a,b));if(lo>hi)continue;
+  }
+  if(pz){if(z<boxes[row+2]||z>boxes[row+5])continue;}
+  else{
+   const a=(boxes[row+2]-z)/dz,b=(boxes[row+5]-z)/dz;
+   if(Math.max(lo,Math.min(a,b))>Math.min(hi,Math.max(a,b)))continue;
+  }
+  i=row+8;
+  if(boxes[row+7]>=0)found.push(boxes[row+7]);
+ }
+ found.sort((a,b)=>a-b);
+ return found.map(i=>items[i]);
+}
 function planeDistance(point,surface){
   const c=surface.center,n=surface.normal;
   // Match the existing dot product's zero-initialised sum, including signed zero.
   return 0+(point[0]-c[0])*n[0]+(point[1]-c[1])*n[1]+(point[2]-c[2])*n[2];
 }
+const coplanarBoxes=new WeakMap();
+function coplanarBox(surface){
+  let box=coplanarBoxes.get(surface.corners);
+  if(!box){
+    box={min:[0,1,2].map(i=>Math.min(...surface.corners.map(p=>p[i]))-E),
+      max:[0,1,2].map(i=>Math.max(...surface.corners.map(p=>p[i]))+E)};
+    if(Object.isFrozen(surface.corners)&&surface.corners.every(Object.isFrozen))coplanarBoxes.set(surface.corners,box);
+  }
+  return box;
+}
 export function querySegment(tile,start,end,{reflectorId=null,surfaceIndices=null}={}){
-  requireTile(tile);const a=vector(start),b=vector(end),delta=sub(b,a);if(!inBox(a,tile.bounds)||!inBox(b,tile.bounds)||length(delta)<=E)throw Error('segment extent');
+  requireTile(tile);return finiteSegment(tile,start,end,reflectorId,surfaceIndices,null,null);
+}
+export function querySegments(tile,segments){
+  requireTile(tile);
+  if(!segments.length)return [];
+  // Preparation belongs to the scene worker. An ordinary or older tile can
+  // use its original conservative tree immediately, including on first use.
+  const surfaces=flatIndices.get(surfaceIndicesByTile.get(tile));
+  const regions=flatIndices.get(unknownIndicesByTile.get(tile));
+  return segments.map(({a,b})=>finiteSegment(tile,a,b,null,null,surfaces,regions));
+}
+function finiteSegment(tile,start,end,reflectorId,surfaceIndices,flatSurfaces,flatRegions){
+  const a=vector(start),b=vector(end),delta=sub(b,a);if(!inBox(a,tile.bounds)||!inBox(b,tile.bounds)||length(delta)<=E)throw Error('segment extent');
   const surfaceIndex=surfaceIndicesByTile.get(tile);
-  let selected=surfaceIndices===null&&surfaceIndex?indexedCandidates(surfaceIndex,tile.surfaces,a,delta):tile.surfaces;
+  let selected=flatSurfaces?flatCandidates(flatSurfaces,tile.surfaces,a,delta):
+    surfaceIndices===null&&surfaceIndex?indexedCandidates(surfaceIndex,tile.surfaces,a,delta):tile.surfaces;
   if(surfaceIndices!==null){if(!Array.isArray(surfaceIndices)||surfaceIndices.length>tile.surfaces.length||surfaceIndices.some((n,i)=>!Number.isSafeInteger(n)||n<0||n>=tile.surfaces.length||(i>0&&n<=surfaceIndices[i-1])))throw Error('invalid conservative surface indices');selected=surfaceIndices.map(i=>tile.surfaces[i]);}
   const hits=[],ambiguous=[];let surfaceTests=0;
   for(const s of selected){surfaceTests++;const d0=planeDistance(a,s),d1=planeDistance(b,s),den=d0-d1;
-    if(Math.abs(den)<E){if(Math.abs(d0)<E&&hitsBox(a,delta,{min:[0,1,2].map(i=>Math.min(...s.corners.map(p=>p[i]))-E),max:[0,1,2].map(i=>Math.max(...s.corners.map(p=>p[i]))+E)}))ambiguous.push(s.id);continue;}
-    const t=d0/den;if(t< -E||t>1+E)continue;const p=add(a,scale(delta,t));if(!onPatch(s,p))continue;
+    if(Math.abs(den)<E){if(Math.abs(d0)<E&&hitsBox(a,delta,coplanarBox(s)))ambiguous.push(s.id);continue;}
+    const t=d0/den;if(t< -E||t>1+E)continue;
+    const p=[a[0]+delta[0]*t,a[1]+delta[1]*t,a[2]+delta[2]*t];if(!onPatch(s,p))continue;
     if(s.id===reflectorId&&(Math.abs(t)<=E||Math.abs(t-1)<=E))continue;
     hits.push({id:s.id,t,point:p});
   }
   hits.sort((a,b)=>a.t-b.t||a.id.localeCompare(b.id,'en'));
   const unknownIndex=unknownIndicesByTile.get(tile);
-  const unknown=(unknownIndex?indexedCandidates(unknownIndex,tile.missingRegions,a,delta):tile.missingRegions.filter(m=>hitsBox(a,delta,m.bounds))).map(m=>m.id);
+  const unknown=(flatRegions?flatCandidates(flatRegions,tile.missingRegions,a,delta):
+    unknownIndex?indexedCandidates(unknownIndex,tile.missingRegions,a,delta):tile.missingRegions.filter(m=>hitsBox(a,delta,m.bounds))).map(m=>m.id);
   return {visibility:hits.length?'blocked':ambiguous.length||unknown.length||tile.coverage==='partial'?'unknown':'clear',hits,ambiguous,unknown,surfaceTests,claim:'Visibility within represented geometry only'};
 }

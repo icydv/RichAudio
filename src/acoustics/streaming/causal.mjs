@@ -1,7 +1,8 @@
 // Causal adaptation around the unchanged A06 finite-path solver. No future trajectory input.
 import { requireValue, validated } from "../engine/contracts.mjs";
 import { vector, unit, length, dot } from "../research/local-geometry.mjs";
-import { candidatePaths, preparePath, finishPath, pathSegments } from "../engine/paths.mjs";
+import { candidatePaths, prepareReceiver, finishPath, pathSegments } from "../engine/paths.mjs";
+import {fleetReflectionSelector} from '../engine/fleet-reflections.mjs';
 const FS = 48000;
 function state(s) {
   requireValue(s && typeof s === "object", "state required");
@@ -47,6 +48,18 @@ function state(s) {
   };
 }
 export class CausalSimulation {
+  #listenerKeys=[];
+  #sourceKeys=new Map();
+  #rankedCandidates=null;
+  #rankedSelector=null;
+  reflectionPolicy='full';
+  setReflectionPolicy(policy){
+    requireValue(['full','fleet-ranked-reflections'].includes(policy),'installed reflection policy');
+    if(this.reflectionPolicy===policy)return;
+    this.reflectionPolicy=policy;
+    this.#rankedCandidates=this.#rankedSelector=null;
+    this.prepareSequence++;
+  }
   #installedPropagation01={directBlocks:0,directWithheldWithKnownHit:0,selectedReflections:0};
   get installedPropagation01(){return {...this.#installedPropagation01};}
   constructor(
@@ -208,33 +221,47 @@ export class CausalSimulation {
     requireValue(this.epoch < 1000000, "session restart budget");
     if (changing) {
       this.records = [];
+      this.#listenerKeys=[];
+      this.#sourceKeys.clear();
+      this.#rankedCandidates=this.#rankedSelector=null;
       this.previous.clear();
       this.session = session;
       this.epoch++;
       this.stats.resets++;
     }
     this.records.push({ time: snapshot.time, listener, sources });
+    // The time and generation of an accepted observation are fixed. Each
+    // emitter keeps its own sparse history, including gaps and generation cuts.
+    const key=s=>Object.freeze({...s,time:snapshot.time,generation:this.epoch*4294967296+s.generation});
+    this.#listenerKeys.push(key(listener));
+    for(const [id,s] of Object.entries(sources)){
+      let history=this.#sourceKeys.get(id);
+      if(!history){history=[];this.#sourceKeys.set(id,history);}
+      history.push(key(s));
+    }
     while (
       this.records.length > 1024 ||
       (this.records.length > 2 &&
         this.records[1].time < snapshot.time - this.historySeconds)
-    )
-      this.records.shift();
+    ){
+      const expired=this.records.shift();
+      this.#listenerKeys.shift();
+      for(const id of Object.keys(expired.sources)){
+        const history=this.#sourceKeys.get(id);
+        history.shift();
+        if(!history.length)this.#sourceKeys.delete(id);
+      }
+    }
     this.stats.observations++;
   }
   track(kind, id, now) {
-    const keys = [];
-    for (const record of this.records) {
-      const s = kind === "listener" ? record.listener : record.sources[id];
-      if (s)
-        keys.push({
-          ...s,
-          time: record.time,
-          generation: this.epoch * 4294967296 + s.generation,
-        });
-    }
-    if (!keys.length) return null;
-    const last = keys.at(-1),
+    const track=this.#retainedTrack(kind,id,now);
+    return track?{...track,keys:track.keys.map(k=>({...k}))}:null;
+  }
+  #retainedTrack(kind,id,now){
+    const history=kind==='listener'?this.#listenerKeys:this.#sourceKeys.get(id);
+    if(!history?.length)return null;
+    const last = history.at(-1),
       age = now - last.time;
     if (age < -1e-8) throw Error("future observation rejected");
     if (
@@ -243,6 +270,7 @@ export class CausalSimulation {
       !last.valid
     )
       return null;
+    const keys=history.slice();
     if (age > 1e-9)
       keys.push({
         ...last,
@@ -275,13 +303,13 @@ export class CausalSimulation {
       sourceGenerations[id] = this.epoch * 4294967296 + current.generation;
     requireValue(age >= -1e-8, "future observation rejected");
     this.stats.maximumAgeSeconds = Math.max(this.stats.maximumAgeSeconds, age);
-    const listener = this.track("listener", null, now);
+    const listener = this.#retainedTrack("listener", null, now);
     if(soundMap)soundMap.listener=listener?.keys.at(-1)??null;
     if (!listener || !this.scene) {
       if(soundMap){
         soundMap.reason=!listener?'listener-unavailable':'geometry-unavailable';
         for(const id of Object.keys(latest.sources)){
-          const track=this.track('source',id,now);
+          const track=this.#retainedTrack('source',id,now);
           if(track)soundMap.sources.push({id,...track.keys.at(-1)});
           else soundMap.unavailableSources.push({id,reason:'source-history-unavailable'});
         }
@@ -297,15 +325,23 @@ export class CausalSimulation {
       }};
     }
     const sources=[],segments=[];
+    const preparePath=prepareReceiver(this.scene,listener,now,geometryTimeMs);
+    const ranked=this.reflectionPolicy==='fleet-ranked-reflections'&&this.processingSettings?.earlyReflections!==false&&
+      this.scene.config.installedReflectionTrains===true&&this.scene.observationModel?.kind==='conditional-installed-static-model';
+    if(ranked&&this.#rankedCandidates!==this.candidates){
+      this.#rankedCandidates=this.candidates;
+      this.#rankedSelector=fleetReflectionSelector(this.scene,this.candidates);
+    }
     for (const [id, current] of Object.entries(latest.sources)) {
-      const track = this.track("source", id, now);
+      const track = this.#retainedTrack("source", id, now);
       sourceGenerations[id] = this.epoch * 4294967296 + current.generation;
       if (!track) {if(soundMap)soundMap.unavailableSources.push({id,reason:'source-history-unavailable'});continue;}
       if(soundMap)soundMap.sources.push({id,...track.keys.at(-1)});
       const source = { track, directivity: current.directivity, nearFieldRadius: current.nearFieldRadius }, plans=[];
-      for (const candidate of this.candidates) {
+      const candidates=ranked?this.#rankedSelector(id,current.generation,track.keys.at(-1).position,listener.keys.at(-1).position,now):this.candidates;
+      for (const candidate of candidates) {
         if(this.processingSettings?.earlyReflections===false&&candidate.surfaces.length)continue;
-        const plan=preparePath(this.scene,source,listener,now,candidate,geometryTimeMs),queries=pathSegments(plan),offset=segments.length;
+        const plan=preparePath(source,candidate),queries=pathSegments(plan),offset=segments.length;
         segments.push(...queries);
         // A worker-selected support can reach the adjacent finite face as
         // the emitter moves. Report the ordered faces used for this solution.
@@ -706,7 +742,10 @@ export class StreamingRenderer {
       control.sourceGenerations ?? {},
     ))
       if (this.sources.has(id)) this.setSourceGeneration(id, generation);
-    for (const slot of this.slots) {
+    let lastOccupied=-1;
+    for (let index=0;index<this.slots.length;index++) {
+      const slot=this.slots[index];
+      if(slot.active)lastOccupied=index;
       // Every target is exactly three bands. Keep clearing every slot (even
       // inactive signed-zero targets) without a native fill call per slot.
       const target = slot.target;
@@ -715,6 +754,7 @@ export class StreamingRenderer {
       target[2] = 0;
       slot.present = false;
     }
+    let firstFree=0;
     for (const p of control.paths) {
       requireValue(
         this.sources.has(p.sourceId) &&
@@ -742,22 +782,28 @@ export class StreamingRenderer {
       // per-path search callbacks. Stable arrivals need no new suffix removal:
       // pathKey is only consumed when a genuinely fresh slot is introduced.
       let slot;
-      for (let i = 0; i < this.slots.length; i++) {
+      for (let i = 0; i <= lastOccupied; i++) {
         const candidate = this.slots[i];
         if (candidate.active && candidate.id === p.id) { slot = candidate; break; }
       }
       const fresh = !slot,
         pathKey = fresh ? p.id.replace(/:g\d+(?::geometry\d+)?$/,'') : null;
       let replacement = false;
-      if (this.continuousTransitions && fresh) for (let i = 0; i < this.slots.length; i++) {
+      if (this.continuousTransitions && fresh) for (let i = 0; i <= lastOccupied; i++) {
         const candidate = this.slots[i];
         if (candidate.active && candidate.id !== p.id && candidate.source?.id === p.sourceId && candidate.pathKey === pathKey) {
           replacement = true;
           break;
         }
       }
-      if (!slot) for (let i = 0; i < this.slots.length; i++) {
-        if (!this.slots[i].active) { slot = this.slots[i]; break; }
+      if (!slot) {
+        // Slots can only be acquired during this control update. Resume the
+        // first-free search where the preceding acquisition left off.
+        while(firstFree<this.slots.length&&this.slots[firstFree].active)firstFree++;
+        if(firstFree<this.slots.length){
+          lastOccupied=Math.max(lastOccupied,firstFree);
+          slot=this.slots[firstFree++];
+        }
       }
       if (!slot) {
         this.stats.pathOverflow++;
@@ -818,9 +864,11 @@ export class StreamingRenderer {
         if(p.panTrajectory.frames<512)this.stats.panPartialBlocks++;
       }
       slot.present = true;
+      if (this.pcmWitness) slot.witnessOrder = p.order ?? 0;
       slot.releaseLeft = 0;
     }
-    for (const slot of this.slots)
+    for (let index=0;index<=lastOccupied;index++){
+      const slot=this.slots[index];
       if (slot.active && !slot.present) {
         slot.panTrajectoryLeft=0;
         if (!slot.releaseLeft) slot.releaseLeft = 960;
@@ -834,9 +882,10 @@ export class StreamingRenderer {
             Math.floor((slot.source.generationFrame-slot.cursor-1)/rate)));
         }
       }
+    }
     if (this.activeSlotIndices) {
       this.activeSlotCount = 0;
-      for (let i = 0; i < this.slots.length; i++)
+      for (let i = 0; i <= lastOccupied; i++)
         if (this.slots[i].active) this.activeSlotIndices[this.activeSlotCount++] = i;
     }
   }
@@ -874,6 +923,7 @@ export class StreamingRenderer {
       highK = 1 - Math.exp((-2 * Math.PI * 4000) / FS);
     const measureSpatialSteps=this.continuousRates||this.continuousTransitions;
     for (let j = 0; j < frames; j++) {
+      const witness = j === 0 && this.pcmWitness;
       let affected = false;
       const frame = this.frame + j,
         write = frame % this.historyFrames;
@@ -909,17 +959,23 @@ export class StreamingRenderer {
           slot.target.fill(0);
           slot.releaseLeft = 960;
         }
-        let gainMax = 0;
-        for (let b = 0; b < 3; b++) {
-          const before = gain[b];
-          if (slot.releaseLeft)
-            gain[b] *= (slot.releaseLeft - 1) / slot.releaseLeft;
-          else if(slot.attackLeft)
-            gain[b]=slot.attackTarget[b]*(1-(slot.attackLeft-1)/slot.attackTotal);
-          else gain[b] += this.smooth * (target[b] - gain[b]);
-          gainMax = Math.max(gainMax, gain[b]);
-          if(measureSpatialSteps)this.stats.maximumGainStep = Math.max(this.stats.maximumGainStep, Math.abs(gain[b] - before));
+        // The attack or release envelope is shared by all three bands.
+        const oldLow=gain[0], oldMid=gain[1], oldHigh=gain[2];
+        let lowGain, midGain, highGain;
+        if (slot.releaseLeft) {
+          const release=(slot.releaseLeft-1)/slot.releaseLeft;
+          lowGain=oldLow*release; midGain=oldMid*release; highGain=oldHigh*release;
+        } else if (slot.attackLeft) {
+          const attack=1-(slot.attackLeft-1)/slot.attackTotal;
+          lowGain=slot.attackTarget[0]*attack; midGain=slot.attackTarget[1]*attack; highGain=slot.attackTarget[2]*attack;
+        } else {
+          lowGain=oldLow+this.smooth*(target[0]-oldLow);
+          midGain=oldMid+this.smooth*(target[1]-oldMid);
+          highGain=oldHigh+this.smooth*(target[2]-oldHigh);
         }
+        gain[0]=lowGain; gain[1]=midGain; gain[2]=highGain;
+        if(measureSpatialSteps)this.stats.maximumGainStep=Math.max(this.stats.maximumGainStep,
+          Math.abs(lowGain-oldLow),Math.abs(midGain-oldMid),Math.abs(highGain-oldHigh));
         if (slot.releaseLeft) slot.releaseLeft--;
         if(slot.attackLeft)slot.attackLeft--;
         const previousPan = slot.pan;
@@ -946,7 +1002,7 @@ export class StreamingRenderer {
         }else slot.pan += this.smooth * (slot.panTarget - slot.pan);
         if(measureSpatialSteps)this.stats.maximumPanStep = Math.max(this.stats.maximumPanStep, Math.abs(slot.pan - previousPan));
         if (
-          gainMax < 1e-9 &&
+          lowGain < 1e-9 && midGain < 1e-9 && highGain < 1e-9 &&
           slot.target[0] === 0 &&
           slot.target[1] === 0 &&
           slot.target[2] === 0
@@ -962,7 +1018,13 @@ export class StreamingRenderer {
         const firstAt = k >= 0 ? k % this.historyFrames : -1;
         const nextAt = firstAt + 1 === this.historyFrames ? 0 : firstAt + 1;
         let x = 0;
-        for (let tap = 0; tap < 2; tap++) {
+        // The normal travelling path has two available causal samples.
+        // Preserve the original two additions and signed-zero behavior.
+        if (k >= 0 && k < frame && s.frames[firstAt]===k && s.frames[nextAt]===k+1 &&
+            s.generations[firstAt]===slot.generation && s.generations[nextAt]===slot.generation) {
+          x += (1-f)*(lowBand[firstAt]*lowGain + midBand[firstAt]*midGain + highBand[firstAt]*highGain);
+          x += f*(lowBand[nextAt]*lowGain + midBand[nextAt]*midGain + highBand[nextAt]*highGain);
+        } else for (let tap = 0; tap < 2; tap++) {
           const index = k + tap,
             weight = tap ? f : 1 - f;
           const diag = this.historyDiagnostics;
@@ -987,13 +1049,16 @@ export class StreamingRenderer {
           }
           x +=
             weight *
-            (lowBand[at] * gain[0] +
-              midBand[at] * gain[1] +
-              highBand[at] * gain[2]);
+            (lowBand[at] * lowGain +
+              midBand[at] * midGain +
+              highBand[at] * highGain);
         }
         x *= s.pressureGain;
-        l += x * Math.sqrt((1 - slot.pan) / 2);
-        r += x * Math.sqrt((1 + slot.pan) / 2);
+        const pathLeft = x * Math.sqrt((1 - slot.pan) / 2);
+        const pathRight = x * Math.sqrt((1 + slot.pan) / 2);
+        l += pathLeft;
+        r += pathRight;
+        if (witness) witness.path(slot, pathLeft, pathRight, frame);
         const previousRate = slot.previousReadRate;
         if(this.continuousRates){
           slot.rate += this.smooth * (slot.rateTarget - slot.rate);
@@ -1034,6 +1099,8 @@ export class StreamingRenderer {
       }
       left[j] = l;
       right[j] = r;
+      if (witness) witness.output(frame, this.outputGain, this.masterGain, peak > .98 ? .98 / peak : 1,
+        localStereo?.[0][j] ?? 0, localStereo?.[1][j] ?? 0);
       this.stats.sumSquares += l * l + r * r;
       if (affected && this.historyDiagnostics) {
         const d = this.historyDiagnostics;

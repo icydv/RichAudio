@@ -3,7 +3,8 @@
 // surface tests; candidate contacts still use the original double-precision CPU
 // geometry, openings, uncertainty and missing-region rules.
 import {performance} from 'node:perf_hooks';
-import {querySegment} from '../research/local-geometry.mjs';
+import {querySegment,querySegments} from '../research/local-geometry.mjs';
+import {StaticSegmentReuse} from './static-segment-reuse.mjs';
 import {AcousticGpuClient,gpuLimits,gpuMaskWords,gpuMaskLayout} from '../gpu/client.mjs';
 import {preparedGpuGeometry01,prepareGpuGeometry01} from '../gpu/geometry.mjs';
 const modes=['auto','cpu','gpu'];
@@ -22,12 +23,13 @@ function packedTile(tile){
 
 export class AcousticAcceleration {
   constructor({mode='cpu',clientFactory=()=>new AcousticGpuClient(),now=()=>performance.now(),deadlineMs=8,
-    minimumPairs=2048,cooldownMs=2000}={}){
+    minimumPairs=2048,cooldownMs=2000,reuseStaticSegments=false}={}){
     if(!modes.includes(mode)||typeof clientFactory!=='function'||typeof now!=='function'||
       !Number.isFinite(deadlineMs)||deadlineMs<1||deadlineMs>10||!Number.isInteger(minimumPairs)||minimumPairs<1||
       !Number.isFinite(cooldownMs)||cooldownMs<100)throw Error('Acoustic acceleration policy');
     this.requested=mode;this.factory=clientFactory;this.now=now;this.deadlineMs=deadlineMs;this.minimumPairs=minimumPairs;this.cooldownMs=cooldownMs;
     this.client=null;this.capability=null;this.initializing=null;this.initializationMs=null;this.warmupMs=null;
+    this.staticSegments=reuseStaticSegments?new StaticSegmentReuse():null;
     this.attempts=0;this.closed=false;this.busy=false;this.active='cpu';this.fallbackReason=mode==='cpu'?null:'gpu-initializing';
     this.cooldownUntil=0;this.nextProbeAt=0;this.probeAttempts=0;this.autoGpu=false;this.lastSwitch=-Infinity;this.wins=0;this.losses=0;this.samples=new Map();this.lastHelperCpu=null;
     this.totals={requests:0,gpuAcousticDispatches:0,gpuCompletedBatches:0,gpuResultsApplied:0,calibrationCpuSurfaceTests:0,cpuFallbacks:0,deadlineMisses:0,
@@ -60,7 +62,7 @@ export class AcousticAcceleration {
   setMode(mode){if(!modes.includes(mode))throw Error('Acoustic acceleration value');if(mode===this.requested)return;
     this.revision++;this.requested=mode;this.autoGpu=false;this.wins=this.losses=this.probeAttempts=0;this.nextProbeAt=0;this.lastSwitch=this.now();
     if(mode==='gpu')this.start();else if(mode==='cpu')this.fallbackReason=null;}
-  cpu(tile,segments){return measure(()=>segments.map(s=>querySegment(tile,s.a,s.b)));}
+  cpu(tile,segments){return measure(()=>this.staticSegments?this.staticSegments.query(tile,segments):querySegments(tile,segments));}
   recordCpu(key,m){let sample=this.samples.get(key);if(!sample){sample={cpuWall:null,cpuCpu:null,gpuWall:null,gpuCpu:null,gpuSamples:0,gpuCpuTotal:0};this.samples.set(key,sample);}
     sample.cpuWall=ewma(sample.cpuWall,m.wallMs);sample.cpuCpu=ewma(sample.cpuCpu,m.cpuMs);return sample;}
   useCpu(tile,segments,reason,key){const m=this.cpu(tile,segments);this.recordCpu(key,m);this.active='cpu';this.fallbackReason=reason;
@@ -174,7 +176,7 @@ export class AcousticAcceleration {
     }
     return pending;
   }
-  diagnostics(){return {requestedAcceleration:this.requested,activeAcceleration:this.active,gpuDevice:this.capability?.device??null,
+  diagnostics(){return {requestedAcceleration:this.requested,activeAcceleration:this.active,gpuDevice:this.capability?.device??null,reusedCpuVisibilitySegments:this.staticSegments?.reused??0,
     gpuCapability:!this.capability?'unverified':this.capability.supported&&this.capability.hardware?'hardware-directcompute':'unsupported',
     gpuApi:this.capability?.api??null,usesHardwareRayTracing:false,rayTracingCapability:'not-probed',rayTracingBackend:'not-implemented',helperCumulativeCpuMs:this.lastHelperCpu,
     fallbackReason:this.fallbackReason,initializationMs:this.initializationMs,warmupMs:this.warmupMs,initializationAttempts:this.attempts,
@@ -184,5 +186,5 @@ export class AcousticAcceleration {
     avoidedCpuSurfaceTestsDeprecated:true,avoidedCpuSurfaceTestsScope:'Deprecated alias of unindexedReferencePairsExcludedByGpu; never actual avoided indexed CPU predicates',
     actualAvoidedIndexedCpuSurfaceTests:null,cpuAccounting:typeof process.threadCpuUsage==='function'?'Node thread CPU plus helper request CPU':'Node process CPU plus helper request CPU',
     cpuAccountingNote:'Per-task counters may be quantized; use aggregate Node plus helper CPU deltas for savings'};}
-  close(){this.closed=true;this.client?.close();this.client=null;}
+  close(){this.closed=true;this.client?.close();this.client=null;this.staticSegments?.clear();}
 }

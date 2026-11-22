@@ -4,6 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createTile,querySegment,coordinateSpace,timeUnit,maximumIndexedSurfaces} from '../src/acoustics/research/local-geometry.mjs';
 import {AcousticAcceleration} from '../src/acoustics/streaming/acoustic-backend.mjs';
+import * as geometry from '../src/acoustics/research/local-geometry.mjs';
 function input(count=1024){return {schemaVersion:1,id:'indexed-original-world01',coordinateSpace,timeUnit,
  bounds:{min:[-128,-128,-8],max:[128,128,8]},listenerAnchor:[0,0,1],coverage:'complete-synthetic',
  surfaces:Array.from({length:count},(_,i)=>({id:'surface-'+i.toString().padStart(5,'0'),coordinateSpace,
@@ -13,6 +14,39 @@ function input(count=1024){return {schemaVersion:1,id:'indexed-original-world01'
  missingRegions:[{id:'explicit-unknown',bounds:{min:[-2,-2,-2],max:[2,2,2]},reason:'original-unknown-region'}],
  version:1,createdAt:0,validUntil:60000,build:'original-v1',session:'indexed-world01',interior:'outside',dynamicEpoch:0};}
 const exact=({surfaceTests,...rest})=>rest;
+test('a fleet visibility batch preserves each leg, endpoint contact and unknown independently',()=>{
+ const data=input(256);
+ data.missingRegions=Array.from({length:40},(_,i)=>({id:'gap-'+i,
+  bounds:{min:[i-20,-1,-1],max:[i-19,1,1]},reason:'test-gap'}));
+ const tile=createTile(data,{maximumSurfaces:512,maximumMissingRegions:64});
+ const source=[-100,-92,1],listener=[8,4,0],legs=[];
+ for(const surface of tile.surfaces.slice(0,60)){
+  legs.push({a:source,b:surface.center},{a:surface.center,b:listener},
+   {a:surface.corners[0],b:surface.corners[1]});
+ }
+ const reference=legs.map(({a,b})=>querySegment(tile,a,b));
+ geometry.prepareBatchVisibility(tile);
+ assert.deepEqual(geometry.querySegments(tile,legs),reference);
+ assert.deepEqual(geometry.querySegments(tile,[...legs].reverse()),reference.reverse());
+ assert.deepEqual(geometry.querySegments(tile,[]),[]);
+ assert.throws(()=>geometry.querySegments(tile,[{a:source,b:source}]),/segment extent/);
+});
+test('prepared batch indices are context bound and own their finite work storage',()=>{
+ const data=input(256),tile=createTile(data,{maximumSurfaces:512});
+ const received=structuredClone(tile),tree=structuredClone(geometry.preparedTileIndexTransfer01(tile));
+ function freeze(value){if(value&&typeof value==='object'){Object.values(value).forEach(freeze);Object.freeze(value);}}
+ freeze(received);freeze(tree);geometry.adoptSourceBoundTileTransfer01(received,tree);
+ const first=geometry.prepareBatchVisibility(tile),second=geometry.prepareBatchVisibility(tile);
+ assert.ok(first.surfaces instanceof Float64Array);
+ first.surfaces.fill(0);
+ assert.notDeepEqual(first.surfaces,second.surfaces);
+ assert.throws(()=>geometry.adoptSourceBoundBatchVisibility(received,{...second,observationKey:'wrong'}),/batch visibility/);
+ assert.throws(()=>geometry.adoptSourceBoundBatchVisibility(received,first),/batch visibility/);
+ geometry.adoptSourceBoundBatchVisibility(received,second);
+ second.surfaces.fill(0);
+ const face=tile.surfaces[0],legs=[{a:face.corners[0],b:face.corners[1]}];
+ assert.deepEqual(geometry.querySegments(received,legs),legs.map(({a,b})=>querySegment(tile,a,b)));
+});
 test('large spatial worksets preserve exact predicates while the research default remains bounded',()=>{
  const original=input();assert.throws(()=>createTile(original),/surface limit/);assert.throws(()=>createTile(original,{maximumSurfaces:maximumIndexedSurfaces+1}));
  const tile=createTile(original,{maximumSurfaces:2048}),all=tile.surfaces.map((_,i)=>i),segments=[];

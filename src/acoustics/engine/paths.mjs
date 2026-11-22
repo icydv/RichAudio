@@ -1,6 +1,5 @@
 // Finite image-source extension. Reuses the validated research geometry and visibility queries.
 import {
-  add,
   sub,
   scale,
   dot,
@@ -9,12 +8,23 @@ import {
   unit,
   onPatch,
   querySegment,
+  isValidatedTileSnapshot01,
   inBox,
 } from "../research/local-geometry.mjs";
 import { pose, trackPosition, requireValue } from "./contracts.mjs";
 const E = 1e-8;
 const coherentBandFrequencies = [200, 1600, 6400];
 const tileLifetimes = new WeakMap();
+const surfacesByTile=new WeakMap();
+function surfaceLookup(tile){
+  let index=surfacesByTile.get(tile);
+  if(!index){
+    index=new Map();
+    for(const face of tile.surfaces)index.set(face.id,face);
+    if(isValidatedTileSnapshot01(tile))surfacesByTile.set(tile,index);
+  }
+  return index;
+}
 function validUntil(tile) {
   let until = tileLifetimes.get(tile);
   if (until === undefined) {
@@ -83,11 +93,29 @@ export function spreadingDistance(distance,referenceDistance,nearFieldRadius=0){
   const u=distance/nearFieldRadius;
   return nearFieldRadius/(1.5-.5*u*u);
 }
-export const mirror = (p, s) =>
-  add(p, scale(s.normal, -2 * dot(sub(p, s.center), s.normal)));
+function differenceDot(a,b,n){
+  return 0+(a[0]-b[0])*n[0]+(a[1]-b[1])*n[1]+(a[2]-b[2])*n[2];
+}
+export function mirror(point,surface){
+  const n=surface.normal,offset=-2*differenceDot(point,surface.center,n);
+  return [point[0]+n[0]*offset,point[1]+n[1]*offset,point[2]+n[2]*offset];
+}
+const separation=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
 export function imageFor(p, surfaces) {
   for (const s of surfaces) p = mirror(p, s);
   return p;
+}
+// The retarded-time iteration needs only the final distance. Carry the three
+// coordinates through the same ordered reflections without allocating the
+// intermediate vectors at every iteration of every emitter.
+export function imageDistance(point,surfaces,listener){
+  let x=point[0],y=point[1],z=point[2];
+  for(const s of surfaces){
+    const c=s.center,n=s.normal;
+    const offset=-2*(0+(x-c[0])*n[0]+(y-c[1])*n[1]+(z-c[2])*n[2]);
+    x+=n[0]*offset;y+=n[1]*offset;z+=n[2]*offset;
+  }
+  return Math.hypot(x-listener[0],y-listener[1],z-listener[2]);
 }
 export function pathGeometry(
   scene,
@@ -112,7 +140,7 @@ export function preparePathGeometry(scene,source,listener,surfaces,faceAtPoint=n
   const conditional = scene.observationModel?.visibilityAssumption === 'unobserved-space-assumed-clear';
   if (!inBox(source, tile.bounds) || !inBox(listener, tile.bounds))
     return { status: "outside-tile" };
-  if (!surfaces.length && length(sub(source, listener)) <= E)
+  if (!surfaces.length && separation(source, listener) <= E)
     return tile.coverage === "complete-synthetic" &&
       !tile.missingRegions.some((m) => inBox(source, m.bounds)) &&
       !tile.surfaces.some((s) => onPatch(s, source))
@@ -127,21 +155,22 @@ export function preparePathGeometry(scene,source,listener,surfaces,faceAtPoint=n
       : { status: "unknown" };
   const images = [source];
   for (const s of surfaces) images.push(mirror(images.at(-1), s));
-  if(faceAtPoint) surfaces = [...surfaces];
+  const originalSurfaces=surfaces;
   const points = new Array(surfaces.length);
   let end = listener;
   for (let i = surfaces.length - 1; i >= 0; i--) {
-    const s = surfaces[i],
-      delta = sub(images[i + 1], end),
-      den = dot(delta, s.normal);
+    const s = surfaces[i],image=images[i+1],den=differenceDot(image,end,s.normal);
     if (Math.abs(den) < E) return { status: "parallel" };
-    const t = -dot(sub(end, s.center), s.normal) / den;
+    const t = -differenceDot(end,s.center,s.normal) / den;
     if (t <= E || t >= 1 - E) return { status: "wrong-reflection-order" };
-    const p = add(end, scale(delta, t));
+    const p=[end[0]+(image[0]-end[0])*t,end[1]+(image[1]-end[1])*t,end[2]+(image[2]-end[2])*t];
     if (faceAtPoint) {
       const face = faceAtPoint(i, p);
       if (!face) return { status: "outside-finite-patch-or-opening" };
-      surfaces[i] = face;
+      if(face!==s){
+        if(surfaces===originalSurfaces)surfaces=[...surfaces];
+        surfaces[i]=face;
+      }
     } else if (!onPatch(s, p)) return { status: "outside-finite-patch-or-opening" };
     points[i] = p;
     end = p;
@@ -149,7 +178,7 @@ export function preparePathGeometry(scene,source,listener,surfaces,faceAtPoint=n
   const vertices = [source, ...points, listener];
   let distance = 0;
   for (let i = 1; i < vertices.length; i++) {
-    const leg = length(sub(vertices[i], vertices[i - 1]));
+    const leg = separation(vertices[i], vertices[i - 1]);
     if (leg <= E) return { status: "degenerate" };
     distance += leg;
   }
@@ -157,8 +186,8 @@ export function preparePathGeometry(scene,source,listener,surfaces,faceAtPoint=n
   // before querying the tile or putting their legs in the GPU visibility batch.
   for (let i = 0; i < surfaces.length; i++) {
     const s = surfaces[i],
-      a = dot(sub(vertices[i], s.center), s.normal),
-      b = dot(sub(vertices[i + 2], s.center), s.normal);
+      a = differenceDot(vertices[i], s.center, s.normal),
+      b = differenceDot(vertices[i + 2], s.center, s.normal);
     if (a * b <= E || (s.reflectiveSide === "front" && (a <= E || b <= E)))
       return { status: "wrong-reflecting-side" };
   }
@@ -178,7 +207,7 @@ export function finishPathGeometry(plan,queries=null,stats={queries:0,surfaceTes
     const sharedEndpoint = (hit, face) => {
       if (hit.id === face.id) return true;
       if (scene.config?.installedReflectionTrains !== true) return false;
-      const neighbour = tile.surfaces.find(s => s.id === hit.id);
+      const neighbour = surfaceLookup(tile).get(hit.id);
       // Only an actual contact on both finite footprints at this endpoint.
       // A non-coplanar neighbour or an intervening hit still blocks the leg.
       const edge=neighbour && sharedReflectionEdge(face,neighbour);
@@ -225,20 +254,22 @@ export function candidatePaths(scene, {maxReflectors=scene.config.maxReflectors}
   if(scene.directPath)return [{id:'direct',surfaces:[]}];
   // Stable deterministic cap by ID. No hidden change of material or invented echo when pruned.
   const installedIds=scene.observationModel?.kind==='conditional-installed-static-model'?scene.observationModel.reflectionSurfaceIds:null;
-  if(installedIds!==undefined&&installedIds!==null)requireValue(Array.isArray(installedIds)&&installedIds.length<=16&&new Set(installedIds).size===installedIds.length&&installedIds.every(id=>scene.tile.surfaces.some(s=>s.id===id)),'finite installed reflection candidates');
-  const s = (installedIds?installedIds.map(id=>scene.tile.surfaces.find(s=>s.id===id)):[...scene.tile.surfaces].sort((a, b) => a.id.localeCompare(b.id, "en")))
+  const byId=installedIds?surfaceLookup(scene.tile):null;
+  if(installedIds!==undefined&&installedIds!==null)requireValue(Array.isArray(installedIds)&&installedIds.length<=16&&new Set(installedIds).size===installedIds.length&&installedIds.every(id=>byId.has(id)),'finite installed reflection candidates');
+  const s = (installedIds?installedIds.map(id=>byId.get(id)):[...scene.tile.surfaces].sort((a, b) => a.id.localeCompare(b.id, "en")))
       .slice(0, maxReflectors),
     result = [{ id: "direct", surfaces: [] }];
   if (scene.config.installedReflectionTrains === true && installedIds) {
     const selected = new Map(s.map(surface => [surface.id, surface]));
-    const neighbours = new Map(s.map(face=>[face,s.filter(other=>sharedReflectionEdge(face,other))]));
+    const planes=new Map(s.map(face=>[face,reflectionPlaneId(face)]));
+    const neighbours = new Map(s.map(face=>[face,s.filter(other=>planes.get(other)===planes.get(face)&&sharedReflectionEdge(face,other))]));
     for (const sequence of scene.observationModel.reflectionSequences) {
       if (!sequence.every(id => selected.has(id))) continue;
       const surfaces = sequence.map(id => selected.get(id));
       const adjacentFaces = surfaces.map(face=>neighbours.get(face));
       result.push({id:'r:' + sequence.join('>'), surfaces,
         ...(adjacentFaces.some(faces=>faces.length)?{adjacentFaces}:{}),
-        continuityId:'r:' + surfaces.map(reflectionPlaneId).join('>')});
+        continuityId:'r:' + surfaces.map(face=>planes.get(face)).join('>')});
     }
     return result;
   }
@@ -277,22 +308,29 @@ export function solvePath(
 }
 export function preparePath(scene,source,listenerTrack,arrivalTime,candidate,
   geometryTimeMs=(scene.tile?.createdAt??0)+arrivalTime*1000) {
+  return prepareReceiver(scene,listenerTrack,arrivalTime,geometryTimeMs)(source,candidate);
+}
+// Geometry lifetime and the receiver belong to the arrival block. Retarded
+// emission, finite faces, visibility and radiation are solved for each source.
+export function prepareReceiver(scene,listenerTrack,arrivalTime,
+  geometryTimeMs=(scene.tile?.createdAt??0)+arrivalTime*1000) {
   if (
     !Number.isFinite(arrivalTime) ||
     arrivalTime < 0 ||
     (!scene.directPath && (!Number.isFinite(geometryTimeMs) || geometryTimeMs < scene.tile.createdAt ||
     geometryTimeMs >= validUntil(scene.tile)))
   )
-    return { status: "geometry-time-unavailable" };
+    return () => ({ status: "geometry-time-unavailable" });
   const listener = pose(listenerTrack, arrivalTime);
-  if (!listener.valid) return { status: "listener-unavailable" };
+  if (!listener.valid) return () => ({ status: "listener-unavailable" });
+  return (source,candidate)=>prepareEmission(scene,source,listener,arrivalTime,candidate);
+}
+function prepareEmission(scene,source,listener,arrivalTime,candidate) {
   let emission = arrivalTime,
     residual = Infinity;
   for (let i = 0; i < 20; i++) {
     const position = trackPosition(source.track, emission);
-    const d = length(
-      sub(imageFor(position, candidate.surfaces), listener.position),
-    );
+    const d = imageDistance(position, candidate.surfaces, listener.position);
     const next = arrivalTime - d / scene.config.soundSpeed;
     residual = Math.abs(next - emission);
     emission = next;
@@ -301,18 +339,23 @@ export function preparePath(scene,source,listenerTrack,arrivalTime,candidate,
   const state = pose(source.track, emission);
   if (!state.valid || residual > 1e-7)
     return { status: "source-unavailable-or-retarded-time-unconverged" };
-  const geometry=preparePathGeometry(scene,state.position,listener.position,candidate.surfaces);
-  if (geometry.status==='outside-finite-patch-or-opening' && candidate.adjacentFaces) {
-    // Rebuild on the real neighbouring face, including its retarded emission
-    // time, material and every visibility leg. Try this only on a finite miss.
-    const next=preparePathGeometry(scene,state.position,listener.position,candidate.surfaces,(i,point)=>
-      onPatch(candidate.surfaces[i],point) ? candidate.surfaces[i] :
-        candidate.adjacentFaces[i].find(face=>onPatch(face,point)));
-    if (next.status==='prepared-geometry') {
-      const surfaces=next.surfaces;
-      return preparePath(scene,source,listenerTrack,arrivalTime,{surfaces,
-        id:'r:'+surfaces.map(s=>s.id).join('>'),continuityId:candidate.continuityId},geometryTimeMs);
+  let crossedEdge=false;
+  const faceAtPoint=candidate.adjacentFaces?(i,point)=>{
+    const face=candidate.surfaces[i];
+    if(onPatch(face,point))return face;
+    crossedEdge=true;
+    return candidate.adjacentFaces[i].find(other=>onPatch(other,point));
+  }:null;
+  let geometry=preparePathGeometry(scene,state.position,listener.position,candidate.surfaces,faceAtPoint);
+  if(crossedEdge){
+    // A different finite face needs its own retarded emission time and
+    // complete solve. If it fails, keep the original finite-miss reason.
+    if(geometry.status==='prepared-geometry'){
+      const surfaces=geometry.surfaces;
+      return prepareEmission(scene,source,listener,arrivalTime,{surfaces,
+        id:'r:'+surfaces.map(s=>s.id).join('>'),continuityId:candidate.continuityId});
     }
+    geometry={status:'outside-finite-patch-or-opening'};
   }
   return {status:'prepared-path',scene,source,listener,arrivalTime,candidate,state,emission,residual,geometry};
 }

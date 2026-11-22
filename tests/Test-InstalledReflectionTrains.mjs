@@ -5,6 +5,7 @@ import {InstalledStaticWorld01, installedStaticSceneMetadata01, encodeInstalledS
   decodeInstalledStaticScene01} from '../src/acoustics/world/installed-static-scene01.mjs';
 import {candidatePaths, pathGeometry, solvePath} from '../src/acoustics/engine/paths.mjs';
 import {trajectory} from '../src/acoustics/engine/contracts.mjs';
+import {CausalSimulation} from '../src/acoustics/streaming/causal.mjs';
 import {createTile} from '../src/acoustics/research/local-geometry.mjs';
 import {sceneInput, patch} from './fixtures/acoustics-scenes.mjs';
 
@@ -29,6 +30,30 @@ const source=[-6,0,1.1], listener=[6,0,1.1];
 const request={listener,sources:[source],session:'b'.repeat(32),generation:1,durationMs:3000,
   radius:20,maximumSurfaces:128,engine:{order:2,maxReflectors:16,installedReflectionTrains:true}};
 const centres=path=>path.surfaces.map(s=>Math.round(s.center[1])).join(',');
+
+test('opt-in fleet proposals retain direct and all three finite orders independently for each emitter',()=>{
+  const cache=street(),world=new InstalledStaticWorld01(cache);
+  try{
+    const scene=world.window(request),sim=new CausalSimulation(scene);
+    for(const time of [0,.05,.1])sim.observe({time,session:'fleet-policy',listener:{position:listener},
+      sources:[{id:'engine',position:source},{id:'exhaust',position:[-5.99,0,1.1]}]});
+    const full=sim.prepareUpdate(.1);
+    sim.setReflectionPolicy('fleet-ranked-reflections');
+    assert.throws(()=>sim.completeUpdate(full),/superseded/);
+    assert.throws(()=>sim.setReflectionPolicy('unbounded'),/reflection policy/);
+    const frame=sim.prepareUpdate(.1),result=sim.completeUpdate(frame);
+    for(const {id,plans} of frame.sources){
+      const orders=plans.map(p=>p.candidate.surfaces.length);
+      assert.deepEqual([...new Set(orders)].sort(),[0,1,2,3]);
+      assert.ok(orders.length<=6);
+      const rendered=result.paths.filter(p=>p.sourceId===id);
+      assert.ok(rendered.some(p=>p.order===0)&&rendered.some(p=>p.order===3));
+    }
+    sim.setReflectionPolicy('full');
+    assert.deepEqual(sim.prepareUpdate(.1).sources.map(s=>s.plans.map(p=>p.candidate.id)),
+      full.sources.map(s=>s.plans.map(p=>p.candidate.id)));
+  }finally{world.close();cache.close();}
+});
 
 test('installed discovery finds finite intermediate walls absent from the single-bounce set',()=>{
   const cache=street(), world=new InstalledStaticWorld01(cache);
