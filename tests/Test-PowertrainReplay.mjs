@@ -47,7 +47,9 @@ test('traffic replay seeks exact PCM blocks between sparse map observations and 
     const reused = life(4, 2);
     const voices = [traffic, traffic, [...traffic.slice(0,4), reused], []];
     const records = [0,2,3].map(i => ({sampleFrame:i*512, voices:voices[i], appliedPaths:[],
-      soundMapFrame:{...soundMapFrame('traffic'), sequence:i+1, audioFrame:512+i*512}}));
+      soundMapFrame:{...soundMapFrame('traffic'), sequence:i+1, audioFrame:512+i*512,
+        sources:voices[i].flatMap(v => [v.engine, v.exhaust].map(id => ({
+          id, generation:4294967296 + v.renderGeneration, position:[0,0,0]})))}}));
     const timeline = records.map(row => JSON.stringify(row)).join('\n') + '\n';
     fs.writeFileSync(path.join(root,'soundmap-traffic.jsonl'),timeline);
     const ledger = {schema:1, sampleRate:48000, blockFrames:512, blocks:voices.map((active,i) => ({

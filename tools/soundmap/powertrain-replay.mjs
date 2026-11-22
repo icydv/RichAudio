@@ -320,6 +320,10 @@ export async function openPowertrainReplay(root, take = 'comparison') {
       for (const {frame} of timeline) {
         const block = contributions[frame.takeSampleFrame / 512];
         need(block, 'Mapped frame is outside the PCM block grid');
+        for (const voice of frame.renderedVoices)
+          need([voice.engine, voice.exhaust].every(id => frame.sources.some(source => source.id === id &&
+            Number.isSafeInteger(source.generation) && source.generation % 4294967296 === voice.renderGeneration)),
+          'Mapped emitter generation differs from its recorded vehicle lifetime');
         for (const voice of block.voices.filter(v => !v.releasing))
           need(frame.renderedVoices.some(v => v.vehicle === voice.vehicle && v.engine === voice.engine && v.exhaust === voice.exhaust &&
             v.observedGeneration === voice.generation && v.renderGeneration === voice.renderGeneration),

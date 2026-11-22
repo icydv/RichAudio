@@ -36,8 +36,8 @@ export function describeRenderer(r) {
   continuousTransitions: r.continuousTransitions };
 }
 
-export async function renderMappedPerformance({ directory, name, windows, drive, inputs, blocks, session, fleet, record }) {
- let now = 0, maxActive = 0, npcLastBlock = null;
+export async function renderMappedPerformance({ directory, name, file, windows, drive, inputs, blocks, session, fleet, record }) {
+ let now = 0, maxActive = 0, npcLastBlock = null, lastObservation = -1;
  const engine = new StockGameplay({ registry: inputs.registry, profiles: inputs.profiles, session, now: () => now,
   continuityPolicy: 'camera-source-01', latencyProfile: 'street-01', vehicleSourcePolicy: 'catalogue-fleet-01' });
  engine.setSettings({ ...engine.settings, quality: 'quality', acceleration: 'cpu', volume: .8 });
@@ -63,7 +63,16 @@ export async function renderMappedPerformance({ directory, name, windows, drive,
     engine.telemetry.resetGeometry();
     lastWorkset = scene;
    }
-   if (block % 4 === 0) engine.accept({ version: 1, session, listener: listenerPacket(session, block, ticks, drive.listener, forward), vehicles }, 0, 250);
+   if (drive.observationStepMs) {
+    const step = Math.floor((now + .00001) / drive.observationStepMs);
+    if (step !== lastObservation) {
+     lastObservation = step;
+     const observedAt = step * drive.observationStepMs, observedTicks = 10_000_000 + Math.round(observedAt * 10_000);
+     const observed = drive.at(observedAt / 1000, observedTicks, fleet);
+     const listener = {...listenerPacket(session, block, observedTicks, drive.listener, observed.forward), sequence:step, gameTimeMs:observedAt};
+     engine.accept({version:1, session, listener, vehicles:observed.vehicles}, now-observedAt, 250-(now-observedAt));
+    }
+   } else if (block % 4 === 0) engine.accept({ version: 1, session, listener: listenerPacket(session, block, ticks, drive.listener, forward), vehicles }, 0, 250);
    const output = await engine.render();
    const first = block * blockFrames;
    output.forEach((ch, i) => channels[i].set(ch, first));
@@ -74,14 +83,17 @@ export async function renderMappedPerformance({ directory, name, windows, drive,
    const pcm = record ? {} : null;
    const dryLevels = {};
    for (const slot of active) {
-    const { id, model, context, generation } = slot.vehicle;
+    const { model, context, generation } = slot.vehicle;
+    const id = drive.observationStepMs ? slot.vehicle.id+'@'+generation : slot.vehicle.id;
     if (!dry.has(id)) {
      dry.set(id, createHash('sha256'));
      const bank = inputs.registry.resolve(model, context).bank;
      evidence[id] = { model, context, generation, donor: bank.model, bankSHA256: bank.provenance.awcSha256,
       firstBlock: block, lastBlock: block, source: [], maxObservationAgeMs: 0, maxRpm: 0, byOrder: {} };
+     if (drive.observationStepMs) Object.assign(evidence[id], {vehicle:slot.vehicle.id,renderGeneration:slot.generation,slot:slot.index});
     }
     const voice = evidence[id];
+    if (drive.observationStepMs) assert(slot.index === voice.slot && slot.generation === voice.renderGeneration, 'Continuous lifetime changed voice slots');
     voice.lastBlock = block;
     voice.maxRpm = Math.max(voice.maxRpm, slot.vehicle.operatingPoint);
     voice.maxObservationAgeMs = Math.max(voice.maxObservationAgeMs, (ticks - slot.vehicle.observationTicks) / 10_000);
@@ -109,6 +121,7 @@ export async function renderMappedPerformance({ directory, name, windows, drive,
      const slot = active[i];
      voice.observationAgeMs = (ticks - slot.vehicle.observationTicks) / 10_000;
      voice.renderGeneration = slot.generation;
+     if (drive.observationStepMs) Object.assign(voice,{position:[...slot.vehicle.position],velocity:[...slot.vehicle.velocity]});
     });
     for (const [key, value] of Object.entries(packet.soundMapFrame.diagnostics.candidateTotals)) candidateTotals[key] = (candidateTotals[key] ?? 0) + value;
     rows.push(packet);
@@ -121,7 +134,7 @@ export async function renderMappedPerformance({ directory, name, windows, drive,
   assert(channels.every(ch => ch.subarray(-blockFrames).every(x => x === 0)), 'The finite source release must finish before the WAV edit');
   census.headroomOmitted = engine.stats.headroomPathsOmitted;
   for (const [id, hash] of dry) evidence[id].drySHA256 = hash.digest('hex');
-  const take = saveMappedTake(directory, name, channels, rows);
+  const take = saveMappedTake(directory, name, channels, rows, file);
   return { ...take, records, settings, rows, receipt: { ...take.receipt, maxActive, npcLastBlock, voices: evidence,
    candidateTotalsAtTelemetryFrames: candidateTotals, controlsAcrossAllBlocks: census, worksetSurfaceCounts: worksetCounts,
    mixer: { limitedFrames: renderer.stats.limited, pathOverflow: renderer.stats.pathOverflow, peak: renderer.stats.peak },
@@ -187,11 +200,11 @@ export function replayMappedPaths(solo, directory, name, include, { save = true 
   drySHA256: solo.receipt.voices['adder-pass'].drySHA256, mixer: { peak: renderer.stats.peak, limitedFrames: renderer.stats.limited } } };
 }
 
-function saveMappedTake(directory, name, channels, rows) {
- const wavSHA256 = writeStereoWave(path.join(directory, name + '.wav'), channels);
+function saveMappedTake(directory, name, channels, rows, file = name + '.wav') {
+ const wavSHA256 = writeStereoWave(path.join(directory, file), channels);
  const timeline = rows.map(row => JSON.stringify(row)).join('\n') + '\n';
  fs.writeFileSync(path.join(directory, 'soundmap-' + name + '.jsonl'), timeline, { flag: 'wx' });
- console.log(name + '.wav ready');
+ console.log(file + ' ready');
  return { channels, receipt: { name, frames: channels[0].length, soundMapFrames: rows.length,
   wavSHA256, timelineSHA256: sha256(timeline) } };
 }
