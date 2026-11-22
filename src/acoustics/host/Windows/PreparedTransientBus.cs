@@ -14,12 +14,16 @@ namespace RichAudio.Beacon.Windows {
   public long EventId,ObservationAfterQpc,IngressQpc,IdealEmissionFrame,ScheduledEmissionFrame,FirstOutputFrame,SubmissionBeforeQpc,SubmissionAfterQpc;
   public long AcknowledgedFrontierAtIngress,ReservedThroughFrameAtIngress,FirstWritableFrameAtConsumer,ClockQualifiedQpc;
   public int MappingUncertaintyFrames;
+  public int MappingClockModel,MappingReason,MappingExtraUncertaintyFrames;
+  public long MappingLowerFrame,MappingUpperFrame,MappingLeftRawQpc100ns,MappingRightRawQpc100ns;
   public int LatenessFrames,Status;
  }
  sealed class TransientReceiptState {
   public long EventId,ObservationAfterQpc,IngressQpc,IdealEmissionFrame,ScheduledEmissionFrame,FirstOutputFrame=-1;
   public long SubmissionBeforeQpc,SubmissionAfterQpc;
   public long AcknowledgedFrontierAtIngress,ReservedThroughFrameAtIngress,FirstWritableFrameAtConsumer,ClockQualifiedQpc;public int MappingUncertaintyFrames;
+  public int MappingClockModel,MappingReason,MappingExtraUncertaintyFrames;
+  public long MappingLowerFrame=-1,MappingUpperFrame=-1,MappingLeftRawQpc100ns=-1,MappingRightRawQpc100ns=-1;
   public int LatenessFrames;public volatile int Status; //1queued,2mixed,3submitted,negative rejection/cancellation
  }
  public sealed class PreparedTransientKernel {
@@ -42,6 +46,12 @@ namespace RichAudio.Beacon.Windows {
   long Frequency {get;}bool MapOnConsumer {get;}long QualifiedQpc {get;}int MappingUncertaintyFrames {get;}
   //1=mapped,0=wait for a genuinely arrived device-clock bracket,-1=unavailable.
   int MapLatest(long ticks,int extraUncertainty,out long frame);
+ }
+ public interface ITransientFrameIntervalDiagnostics {
+  bool ConservativeIntervals031 {get;}
+  long LastMappingLowerFrame {get;}long LastMappingUpperFrame {get;}
+  long LastMappingLeftRawQpc100ns {get;}long LastMappingRightRawQpc100ns {get;}
+  int LastMappingExtraUncertaintyFrames {get;}int LastMappingReason {get;}
  }
  public sealed class SyntheticPresentationClock : ITransientFrameClock {
   public readonly long EpochQpc;public long Frequency {get;private set;}public readonly int UncertaintyFrames;
@@ -90,7 +100,7 @@ namespace RichAudio.Beacon.Windows {
   public bool ClockReady {get{return Thread.VolatileRead(ref sealedState)==1;}}
   public long NextUncommittedFrame {get{return Interlocked.Read(ref writeFence);}}
   public int Queued {get{return clock!=null&&clock.MapOnConsumer?Thread.VolatileRead(ref unmappedOutstanding):high.Count+normal.Count;}}
-  public TransientReceipt Receipt(int eventId){if(eventId<1||eventId>MaximumEvents)throw new ArgumentOutOfRangeException("eventId");var r=receipts[eventId];return new TransientReceipt{Status=r.Status,EventId=r.EventId,ObservationAfterQpc=r.ObservationAfterQpc,IngressQpc=r.IngressQpc,IdealEmissionFrame=r.IdealEmissionFrame,ScheduledEmissionFrame=r.ScheduledEmissionFrame,FirstOutputFrame=r.FirstOutputFrame,SubmissionBeforeQpc=r.SubmissionBeforeQpc,SubmissionAfterQpc=r.SubmissionAfterQpc,LatenessFrames=r.LatenessFrames,AcknowledgedFrontierAtIngress=r.AcknowledgedFrontierAtIngress,ReservedThroughFrameAtIngress=r.ReservedThroughFrameAtIngress,FirstWritableFrameAtConsumer=r.FirstWritableFrameAtConsumer,ClockQualifiedQpc=r.ClockQualifiedQpc,MappingUncertaintyFrames=r.MappingUncertaintyFrames};}
+  public TransientReceipt Receipt(int eventId){if(eventId<1||eventId>MaximumEvents)throw new ArgumentOutOfRangeException("eventId");var r=receipts[eventId];return new TransientReceipt{Status=r.Status,EventId=r.EventId,ObservationAfterQpc=r.ObservationAfterQpc,IngressQpc=r.IngressQpc,IdealEmissionFrame=r.IdealEmissionFrame,ScheduledEmissionFrame=r.ScheduledEmissionFrame,FirstOutputFrame=r.FirstOutputFrame,SubmissionBeforeQpc=r.SubmissionBeforeQpc,SubmissionAfterQpc=r.SubmissionAfterQpc,LatenessFrames=r.LatenessFrames,AcknowledgedFrontierAtIngress=r.AcknowledgedFrontierAtIngress,ReservedThroughFrameAtIngress=r.ReservedThroughFrameAtIngress,FirstWritableFrameAtConsumer=r.FirstWritableFrameAtConsumer,ClockQualifiedQpc=r.ClockQualifiedQpc,MappingUncertaintyFrames=r.MappingUncertaintyFrames,MappingClockModel=r.MappingClockModel,MappingReason=r.MappingReason,MappingExtraUncertaintyFrames=r.MappingExtraUncertaintyFrames,MappingLowerFrame=r.MappingLowerFrame,MappingUpperFrame=r.MappingUpperFrame,MappingLeftRawQpc100ns=r.MappingLeftRawQpc100ns,MappingRightRawQpc100ns=r.MappingRightRawQpc100ns};}
   public bool TryAdmit(PreparedTransientEvent e,long ingressQpc) {
    if(Thread.VolatileRead(ref admissionClosed)!=0){Rejected++;return false;}Interlocked.Increment(ref inFlight);
    try{if(Thread.VolatileRead(ref admissionClosed)!=0){Rejected++;return false;}return AdmitCore(e,ingressQpc);}finally{Interlocked.Decrement(ref inFlight);}
@@ -123,7 +133,10 @@ namespace RichAudio.Beacon.Windows {
   }
   void AdmitOnConsumer(PreparedTransientEvent e,long frame) {
    PreparedTransientKernel k=kernels[e.KernelSlot];TransientReceiptState r=receipts[(int)e.EventId];
-   if(r.IdealEmissionFrame<0){long mapped=0;int outcome=(clock.QualifiedQpc-e.ObservationAfterQpc>e.Frequency/4||clock.QualifiedQpc-e.OccurrenceUpperQpc>e.Frequency/4)?-1:clock.MapLatest(e.OccurrenceUpperQpc,e.UncertaintyFrames,out mapped);if(outcome==0){if(clockPendingCount<clockPending.Length){clockPending[clockPendingCount++]=e;ClockDeferred++;PeakClockPending=Math.Max(PeakClockPending,clockPendingCount);}else{r.Status=-8;ClockMappingRejected++;Interlocked.Decrement(ref unmappedOutstanding);}return;}Interlocked.Decrement(ref unmappedOutstanding);if(outcome<0){r.Status=-8;ClockMappingRejected++;return;}r.IdealEmissionFrame=mapped;r.ClockQualifiedQpc=clock.QualifiedQpc;r.MappingUncertaintyFrames=clock.MappingUncertaintyFrames;}
+   if(r.IdealEmissionFrame<0){long mapped=0;bool fresh=clock.QualifiedQpc-e.ObservationAfterQpc<=e.Frequency/4&&clock.QualifiedQpc-e.OccurrenceUpperQpc<=e.Frequency/4;int outcome=fresh?clock.MapLatest(e.OccurrenceUpperQpc,e.UncertaintyFrames,out mapped):-1;
+    var diagnostics=clock as ITransientFrameIntervalDiagnostics;
+    if(diagnostics!=null&&diagnostics.ConservativeIntervals031){r.MappingClockModel=31;r.MappingReason=fresh?diagnostics.LastMappingReason:-10;r.MappingLowerFrame=fresh?diagnostics.LastMappingLowerFrame:-1;r.MappingUpperFrame=fresh?diagnostics.LastMappingUpperFrame:-1;r.MappingLeftRawQpc100ns=fresh?diagnostics.LastMappingLeftRawQpc100ns:-1;r.MappingRightRawQpc100ns=fresh?diagnostics.LastMappingRightRawQpc100ns:-1;r.MappingExtraUncertaintyFrames=fresh?diagnostics.LastMappingExtraUncertaintyFrames:e.UncertaintyFrames;}
+    if(outcome==0){if(clockPendingCount<clockPending.Length){clockPending[clockPendingCount++]=e;ClockDeferred++;PeakClockPending=Math.Max(PeakClockPending,clockPendingCount);}else{r.Status=-8;ClockMappingRejected++;Interlocked.Decrement(ref unmappedOutstanding);}return;}Interlocked.Decrement(ref unmappedOutstanding);if(outcome<0){r.Status=-8;ClockMappingRejected++;return;}r.IdealEmissionFrame=mapped;r.ClockQualifiedQpc=clock.QualifiedQpc;r.MappingUncertaintyFrames=clock.MappingUncertaintyFrames;}
    r.FirstWritableFrameAtConsumer=frame;
    long conservativeGuard=Math.Max(0,(long)Math.Ceiling(k.DirectDelayFrames)-k.FirstNonzero);
    long original=r.IdealEmissionFrame+conservativeGuard,start=Math.Max(original,frame-k.FirstNonzero),late=start-original;

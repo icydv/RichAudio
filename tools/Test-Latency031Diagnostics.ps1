@@ -1,0 +1,10 @@
+#requires -Version 7.0
+[CmdletBinding()]param()
+$ErrorActionPreference='Stop';$repo=Split-Path -Parent $PSScriptRoot;$out=Join-Path $repo ('.local/latency-03-1/diagnostics-tests-'+[guid]::NewGuid().ToString('N'));[IO.Directory]::CreateDirectory($out)|Out-Null
+$files=@('PcmRing.cs','PreparedTransientBus.cs','SharedPeriodPlan.cs','WasapiInterop.cs','WasapiOutput.cs','OwnedOutputTap.cs','Latency03PresentationClock.cs','Latency03Interop.cs','Latency03OutputSession.cs')|ForEach-Object{'src/acoustics/host/Windows/'+$_};$files+=@('tests/host/TestLatency031Diagnostics.cs','tools/Test-Latency031Diagnostics.ps1');$pins=@($files|ForEach-Object{[ordered]@{file=$_;sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $repo $_)).Hash.ToLowerInvariant()}})
+$compiler=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe';$exe=Join-Path $out 'Latency031Diagnostics.Tests.exe'
+& $compiler /nologo /optimize+ /unsafe+ /warnaserror+ /platform:x64 /r:System.Web.Extensions.dll ('/out:'+$exe) @($files|Where-Object{$_-like'*.cs'}|ForEach-Object{Join-Path $repo $_})
+if($LASTEXITCODE-ne0){throw 'LATENCY-03.1 diagnostic fixture compilation failed.'};$raw=@(& $exe $out);if($LASTEXITCODE-ne0){throw 'LATENCY-03.1 diagnostic fixture failed; preserve output.'};$raw|Set-Content -LiteralPath (Join-Path $out 'stdout.txt') -Encoding utf8
+foreach($p in $pins){if((Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $repo $p.file)).Hash.ToLowerInvariant()-cne$p.sha256){throw 'Source changed during diagnostic fixture.'}}
+[ordered]@{schema=1;passed=$true;sourcePins=$pins;resultSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $out 'result.json')).Hash.ToLowerInvariant();compilerSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $compiler).Hash.ToLowerInvariant();endpointOpened=$false;realComInstantiated=$false;gameLaunched=$false;scope='Managed fake output clients/clocks only; no real endpoint query, activation or playback.'}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $out 'validation.json') -Encoding utf8
+Write-Output ('PASS LATENCY-03.1 managed-fake diagnostics; '+(Join-Path $out 'validation.json'))

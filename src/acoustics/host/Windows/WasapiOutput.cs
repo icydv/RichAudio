@@ -49,6 +49,7 @@ namespace RichAudio.Beacon.Windows
         internal bool StopRequested { get { return stop; } }
         public long ConsumerFrame { get { return Interlocked.Read(ref ring.ConsumedFrames); } }
         public void Dispose() { if(Interlocked.Exchange(ref disposed,1)!=0)return; Stop(); if (thread.IsAlive && !thread.Join(3000)) throw new TimeoutException("Audio thread did not stop");if(isolatedExperiment!=null)isolatedExperiment.MarkJoined(); Ready.Dispose(); }
+        internal static void RequireExactSharedFloat32(int supported){if(supported!=0)throw new NotSupportedException("Endpoint did not accept exact shared 48000 Hz stereo Float32; no implicit format substitution. HRESULT="+supported.ToString("X8"));}
         public static string[] ListDevices()
         {
             IMMDeviceEnumerator enumerator = null; IMMDeviceCollection collection = null; var names = new List<string>();
@@ -90,8 +91,9 @@ namespace RichAudio.Beacon.Windows
                 client = Native.Client(device);DeviceOpened=true;
                 Native.Check(client.GetMixFormat(out mix)); WaveFormat mf = (WaveFormat)Marshal.PtrToStructure(mix, typeof(WaveFormat)); MixRate = mf.SamplesPerSecond; MixChannels = mf.Channels;
                 WaveFormat format = WaveFormat.FloatStereo48k(); requested = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(WaveFormat))); Marshal.StructureToPtr(format, requested, false);
-                int supported = client.IsFormatSupported(0, requested, out closest);
-                if (supported != 0) throw new NotSupportedException("Endpoint did not accept exact shared 48000 Hz stereo Float32; no implicit format substitution. HRESULT=" + supported.ToString("X8"));
+                long supportBefore=isolatedExperiment==null?0:Stopwatch.GetTimestamp();int supported = client.IsFormatSupported(0, requested, out closest);
+                if(isolatedExperiment!=null)isolatedExperiment.CaptureFormatSupport(mix,requested,supported,supportBefore,Stopwatch.GetTimestamp());
+                RequireExactSharedFloat32(supported);
                 FormatResult = "Exact shared 48000 Hz stereo Float32 accepted; Windows endpoint mix format recorded separately";
                 if(isolatedExperiment==null)Native.Check(client.Initialize(0, 0x40000, 200000, 0, requested, IntPtr.Zero));else isolatedExperiment.Initialize(client,requested);
                 Native.Check(client.GetBufferSize(out BufferFrames)); if (BufferFrames < 1 || BufferFrames > 2048) throw new NotSupportedException("Endpoint buffer exceeds validated four-block startup bound");

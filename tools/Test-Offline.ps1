@@ -7,6 +7,11 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & (Join-Path $repo 'tools\Test-Latency031Clock.ps1')
+    & (Join-Path $repo 'tools\Test-Latency031Process.ps1')
+    & (Join-Path $repo 'tools\Test-Latency031Supervision.ps1')
+    & (Join-Path $repo 'tools\Test-Latency031SupervisionIntegration.ps1')
+    & (Join-Path $repo 'tools\Test-Latency031Diagnostics.ps1')
     & node --test tests/Test-VehicleComponents02.mjs tests/Test-CollisionAcoustics02.mjs tests/Test-WorldRuntime02.mjs tests/Test-PreparedWaveform02.mjs tests/Test-Latency03Kernels.mjs
     if($LASTEXITCODE-ne0){throw 'Complete component/collision authored sources, unknown-world boundaries or original transient waveform regressions failed.'}
     & (Join-Path $repo 'tools\Test-Latency03Output.ps1')

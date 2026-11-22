@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "kind": "retained-exact-latency-03-clock-rejection-fixture",
+  "sourceResultSha256": "3585fc93e5dcff4984046cde5fa13815cc7d72e0c7c406d3392c7292845b8a32",
+  "qpcFrequency": 10000000,
+  "deviceFrequency": 384000,
+  "observedStreamStartBeforeQpc": 1508940582206,
+  "constructorEpochBasis": "The test uses retained StreamStartBeforeQpc as an admitted epoch before the first retained sample; original BindClock construction QPC was not serialized, so this is not an exact recovered constructor epoch.",
+  "legacyFailureReason": 4,
+  "rows": [
+    {
+      "BeforeQpc": 1508940599141,
+      "AfterQpc": 1508940600944,
+      "RawQpc100ns": 1508940600938,
+      "SubmittedFrames": 1056,
+      "PaddingBeforeQpc": 1508940595327,
+      "PaddingAfterQpc": 1508940595348,
+      "DevicePosition": 0,
+      "PaddingFrames": 576,
+      "HResult": 0,
+      "UncertaintyFrames": 9,
+      "Accepted": 0
+    },
+    {
+      "BeforeQpc": 1508940694174,
+      "AfterQpc": 1508940694226,
+      "RawQpc100ns": 1508940694184,
+      "SubmittedFrames": 1536,
+      "PaddingBeforeQpc": 1508940694135,
+      "PaddingAfterQpc": 1508940694154,
+      "DevicePosition": 16,
+      "PaddingFrames": 576,
+      "HResult": 0,
+      "UncertaintyFrames": 1,
+      "Accepted": 1
+    },
+    {
+      "BeforeQpc": 1508940794073,
+      "AfterQpc": 1508940794085,
+      "RawQpc100ns": 1508940794080,
+      "SubmittedFrames": 2016,
+      "PaddingBeforeQpc": 1508940794049,
+      "PaddingAfterQpc": 1508940794071,
+      "DevicePosition": 3848,
+      "PaddingFrames": 576,
+      "HResult": 0,
+      "UncertaintyFrames": 1,
+      "Accepted": 1
+    },
+    {
+      "BeforeQpc": 1508940894078,
+      "AfterQpc": 1508940894090,
+      "RawQpc100ns": 1508940894085,
+      "SubmittedFrames": 2496,
+      "PaddingBeforeQpc": 1508940894052,
+      "PaddingAfterQpc": 1508940894075,
+      "DevicePosition": 7688,
+      "PaddingFrames": 576,
+      "HResult": 0,
+      "UncertaintyFrames": 1,
+      "Accepted": 1
+    },
+    {
+      "BeforeQpc": 1508940993996,
+      "AfterQpc": 1508940994007,
+      "RawQpc100ns": 1508940994002,
+      "SubmittedFrames": 2976,
+      "PaddingBeforeQpc": 1508940993976,
+      "PaddingAfterQpc": 1508940993994,
+      "DevicePosition": 11528,
+      "PaddingFrames": 576,
+      "HResult": 0,
+      "UncertaintyFrames": 1,
+      "Accepted": 1
+    },
+    {
+      "BeforeQpc": 1508941101005,
+      "AfterQpc": 1508941101020,
+      "RawQpc100ns": 1508941101015,
+      "SubmittedFrames": 3456,
+      "PaddingBeforeQpc": 1508941100981,
+      "PaddingAfterQpc": 1508941101002,
+      "DevicePosition": 15368,
+      "PaddingFrames": 576,
+      "HResult": 0,
+      "UncertaintyFrames": 1,
+      "Accepted": 0
+    }
+  ]
+}
