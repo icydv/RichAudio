@@ -100,8 +100,9 @@ export function checkFrame(f) {
   }
   for(const p of f.paths){
     fail(['selected','rejected','unknown','pruned'].includes(p.status),'Unknown solver path state');
-    fail(p.vertices===null||p.vertices===undefined||(Array.isArray(p.vertices)&&p.vertices.length>=2&&p.vertices.length<=4&&p.vertices.every(isPoint)),'Invalid solver path vertices');
-    fail(p.points==null||(Array.isArray(p.points)&&p.points.length<=2&&p.points.every(isPoint)),'Invalid solver contact points');
+    // The solver accepts explicit sequences of up to ten surfaces.
+    fail(p.vertices==null||(Array.isArray(p.vertices)&&p.vertices.length>=2&&p.vertices.length<=12&&p.vertices.every(isPoint)),'Invalid solver path vertices');
+    fail(p.points==null||(Array.isArray(p.points)&&p.points.length<=10&&p.points.every(isPoint)),'Invalid solver contact points');
   }
   return immutable(f);
 }
@@ -170,7 +171,9 @@ export function pathStyle(path){
   if(path.status==='unknown')return {color:'#e4cc80',dash:[8,6],label:'Unknown / unavailable propagation'};
   if(path.propagation==='obstructed')return {color:'#ffabb0',dash:[12,4],label:'Selected obstructed / transmission'};
   return path.order===0?{color:'#63e8d3',dash:[],label:'Selected direct'}:
-    path.order===1?{color:'#ffbc80',dash:[],label:'Selected first reflection'}:{color:'#c6adff',dash:[],label:'Selected second reflection'};
+    path.order===1?{color:'#ffbc80',dash:[],label:'Selected first reflection'}:
+    path.order===2?{color:'#c6adff',dash:[],label:'Selected second reflection'}:
+    {color:'#ff9ac8',dash:[],label:'Selected order '+path.order+' reflection'};
 }
 export function alignsWithWorldAtlas01(frame,identity){
   if(!identity?.catalogSHA256||frame?.worldContext01?.catalogue!==identity.catalogSHA256)return false;

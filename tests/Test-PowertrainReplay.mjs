@@ -24,6 +24,66 @@ const soundMapFrame = (take, geometryGeneration = null, paths = []) => ({
   schemaVersion: 1, sessionId: session + ':' + take, streamId: take, sequence: 1, audioFrame: 512,
   geometryGeneration, paths, sources: [{id: 'engine', position: [0, 0, 0]}], listener: {position: [1, 0, 0], valid: true}
 });
+
+test('three matched takes bind ordered reflections and withheld controls to the original mixer block', async () => {
+  const {openPowertrainReplay} = await import('../tools/soundmap/powertrain-replay.mjs');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'RichAudio-reflections-'));
+  const names = ['direct', 'single', 'multi'];
+  const pcm = Array.from({length: 1024}, (_, n) => n % 2 ? -.125 : .25);
+  const wave = wav(pcm), stages = {}, comparison = {file: 'comparison.wav', takes: []};
+  const mixed = [], contacts = [[0, 1, 0], [1, -1, 0], [2, 1, 0]];
+  const ids = ['north', 'south', 'north'];
+  try {
+    for (const [index, take] of [...names, 'withheld'].entries()) {
+      const generation = take + '-walls';
+      const geometry = {schemaVersion: 1, generation, sessionId: session + ':' + take, streamId: take,
+        coordinateSpace: 'research-rh-z-up-metres-v1', surfaces: ['north','south'].map((id,i) => ({
+          id, vertices: [[0, 1-2*i, -1], [3, 1-2*i, -1], [0, 1-2*i, 2]]}))};
+      const paths = (take === 'multi' ? [0, 1, 3] : take === 'direct' ? [0] : [0, 1]).map(order => ({
+        id: 'engine-' + order, sourceId: 'engine', status: 'selected', order, surfaceIds: ids.slice(0, order),
+        points: contacts.slice(0, order), vertices: [[0,0,0], ...contacts.slice(0,order), [3,0,0]],
+        delay: .01 * (1 + order), distance: 3 * (1 + order), arrivalDirection: [-1,0,0], bands: [.5,.4,.3]}));
+      const appliedPaths = paths.map(({id,sourceId,order}) => ({id,sourceId,order,atFrame: 1024,
+        gainBands: [.45,.35,.25], delayMs: (1 + order) * 10.1, pan: -.4}));
+      const timeline = JSON.stringify({sampleFrame: 0, soundMapFrame: soundMapFrame(take, generation, paths),
+        soundMapGeometry: geometry, appliedPaths}) + '\n';
+      fs.writeFileSync(path.join(root, 'soundmap-' + take + '.jsonl'), timeline);
+      fs.writeFileSync(path.join(root, take + '.wav'), wave);
+      stages[take] = {frames: 512, soundMapFrames: 1, timelineSHA256: sha256(timeline), wavSHA256: sha256(wave)};
+      if (take === 'multi') stages.multi.witness = {sampleFrame: 0, reflected: paths[2], direct: paths[0]};
+      if (index < 3) {
+        if (index) mixed.push(0,0);
+        comparison.takes.push({take, firstFrame: mixed.length/2, frames: 512});
+        mixed.push(...pcm);
+      }
+    }
+    const file = wav(mixed);
+    comparison.sha256 = sha256(file);
+    fs.writeFileSync(path.join(root, comparison.file), file);
+    fs.writeFileSync(path.join(root, 'result.json'), JSON.stringify({session, comparison, stages}));
+    const replay = await openPowertrainReplay(root);
+    const event = replay.events.find(e => e.detail?.pathId === 'engine-3');
+    assert.equal(event.timeMs, 1026 / 48);
+    assert.deepEqual(event.detail.surfaceIds, ids);
+    const frame = replay.frames.find(row => row.timeMs === event.timeMs).frame;
+    assert.deepEqual(frame.paths.find(p => p.id === event.detail.pathId).points, contacts);
+    assert.equal(frame.appliedPaths.find(p => p.id === event.detail.pathId).atFrame, 1024);
+    assert.equal(frame.takeSampleFrame, 0);
+    const withheld = await openPowertrainReplay(root, 'withheld');
+    assert(withheld.events.some(e => e.detail?.withheldPathId === 'engine-3'));
+    assert.equal(withheld.frames[0].frame.appliedPaths.length, 2);
+    const timelineFile = path.join(root,'soundmap-multi.jsonl');
+    const packet = JSON.parse(fs.readFileSync(timelineFile));
+    packet.appliedPaths.at(-1).sourceId = 'another-engine';
+    const changed = JSON.stringify(packet) + '\n';
+    stages.multi.timelineSHA256 = sha256(changed);
+    fs.writeFileSync(timelineFile, changed);
+    fs.writeFileSync(path.join(root, 'result.json'), JSON.stringify({session, comparison, stages}));
+    await assert.rejects(() => openPowertrainReplay(root), /applied.*source|source.*applied/i);
+  } finally {
+    fs.rmSync(root, {recursive: true, force: true});
+  }
+});
 test('match original engine frames to both WAV takes and leave silent comparison gap clear', async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'RichAudio-drive-'));
   const module = await import('../tools/soundmap/powertrain-replay.mjs').catch(() => ({}));

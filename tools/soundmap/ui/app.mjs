@@ -1,5 +1,6 @@
 import {VisualState,PassiveState,presentation,DisplayCadence,RateMeter,TELEMETRY_POLL_FPS,ReplayClock,project,pathStyle,parseVisualContext,visibleContext,clampFps,isPoint,LIMITS,CachedWorldState041,cachedWorldPresentation041,InstalledContextState01} from './model.mjs';
 import {AtlasRenderer01} from './atlas-renderer01.mjs';
+import {MixedRoutes} from './mixed-routes.mjs';
 import {alignsWithWorldAtlas01} from './model.mjs';
 const $=id=>document.getElementById(id),state=new VisualState(),passive=new PassiveState(),replay=new ReplayClock(),cacheWorld=new CachedWorldState041();
 const displayCadence=new DisplayCadence(20),displayRate=new RateMeter(),solverRate=new RateMeter(),passiveRate=new RateMeter();
@@ -13,6 +14,7 @@ let atlas=null,atlasShown=true,atlasPoseInitialised=false,atlasFirstFollow=true,
 const operatorFrames={frames:0,emptyCoveredFrames:0,detailFallbackFrames:0,frameIntervalMs:null,maximumFrameIntervalMs:null};
 let operatorLastDraw=null,operatorLastPublish=-Infinity,operatorSending=false;
 const player=$('replay-audio');
+const mixedRoutes=new MixedRoutes();
 const format=n=>Number.isFinite(n)?n.toFixed(2):'unavailable';
 const vehicleName=v=>v.model===0xb779a091?'ADDER':v.model===0xf9300cc5?'Bati':v.vehicle;
 const time=n=>{const ms=Math.max(0,Math.round(n||0));return `${String(Math.floor(ms/60000)).padStart(2,'0')}:${String(Math.floor(ms/1000)%60).padStart(2,'0')}.${String(ms%1000).padStart(3,'0')}`;};
@@ -129,6 +131,18 @@ function draw(now){
     }
     camera.target=[...view.listener.position];
   }
+  if(mixedRoutes.enabled){
+    mixedRoutes.refresh(f);
+    const ray=mixedRoutes.ray;
+    if(mixedRoutes.fit&&ray?.id===mixedRoutes.want&&ray.vertices?.length){
+      // Fit the selected route in either projection, anchored on the listener.
+      const distances=ray.vertices.map(point=>project(point,{...camera,scale:1}));
+      const extentX=Math.max(1,...distances.map(p=>Math.abs(p.x-camera.width/2)));
+      const extentY=Math.max(1,...distances.map(p=>Math.abs(p.y-camera.height/2)));
+      camera.scale=Math.min(60,camera.width*.37/extentX,camera.height*.31/extentY);
+      mixedRoutes.fit=false;
+    }
+  }
   if(usingAtlas){
     const glCanvas=atlas.canvas,w=Math.round(bounds.width*Math.min(dpr,1.5)),h=Math.round(bounds.height*Math.min(dpr,1.5));
     if(glCanvas.width!==w||glCanvas.height!==h){glCanvas.width=w;glCanvas.height=h;}
@@ -152,19 +166,21 @@ function draw(now){
     // before using even-odd holes so no exterior part of a hole becomes a face.
     ctx.save();ctx.beginPath();facePath(face.vertices);ctx.clip();
     ctx.beginPath();facePath(face.vertices);for(const opening of face.openings)facePath(opening.vertices);
-    const shade=face.normal?Math.round(43+16*Math.abs(face.normal[2]||0)):35;
+    const shade=mixedRoutes.enabled?20+Math.round(7*Math.abs(face.normal?.[2]??0)):face.normal?Math.round(43+16*Math.abs(face.normal[2]||0)):35;
     ctx.fillStyle=face.installedContext?'#172e35':face.context?'#18212f':face.cached?'#1d3545':health.expired?'#242b38':`rgb(${shade},${shade+7},${shade+16})`;
     ctx.fill('evenodd');ctx.restore();
     // Stroke outside the clipped fill so the full 2.2 CSS-pixel outline survives
     // at high DPI and along a finite support edge. Holes stay clipped inside it.
-    ctx.beginPath();facePath(face.vertices);ctx.lineWidth=face.context?1.8:2.2;ctx.strokeStyle=face.installedContext?'#78b7bf':face.context?'#97a8c2':face.cached?'#8fcbe8':health.expired?'#b0bed2':replayAudioInfo?.kind==='offline-rendered-file'?'#8796a5':'#f5f7fc';ctx.setLineDash(face.context?[7,5]:face.expired||health.expired?[5,5]:view.kind==='replay'?[12,3]:[]);ctx.stroke();ctx.setLineDash([]);
+    ctx.beginPath();facePath(face.vertices);ctx.lineWidth=mixedRoutes.enabled?1:face.context?1.8:2.2;ctx.strokeStyle=face.installedContext?'#78b7bf':face.context?'#97a8c2':face.cached?'#8fcbe8':health.expired?'#b0bed2':mixedRoutes.enabled?'#435464':replayAudioInfo?.kind==='offline-rendered-file'?'#8796a5':'#f5f7fc';ctx.setLineDash(face.context?[7,5]:face.expired||health.expired?[5,5]:view.kind==='replay'&&!mixedRoutes.enabled?[12,3]:[]);ctx.stroke();ctx.setLineDash([]);
     if(face.openings.length){ctx.save();ctx.beginPath();facePath(face.vertices);ctx.clip();ctx.beginPath();for(const opening of face.openings)facePath(opening.vertices);ctx.stroke();ctx.restore();}
   }
   if(isReplay && replayAudioInfo?.kind === 'offline-rendered-file' && f?.paths && g && !health.expired){
-    const reflectedFaces=new Set(f.paths.filter(ray=>ray.status==='selected'&&ray.order===1).flatMap(ray=>ray.surfaceIds));
+    const focus=mixedRoutes.enabled?mixedRoutes.ray:null;
+    const reflectedFaces=new Set(mixedRoutes.enabled?focus?.surfaceIds??[]:f.paths.filter(ray=>ray.status==='selected'&&ray.order===1).flatMap(ray=>ray.surfaceIds));
     for(const face of geometryFaces){
       if(!reflectedFaces.has(face.id))continue;
-      line([...face.vertices,face.vertices[0]],'#ffab61',4);
+      line([...face.vertices,face.vertices[0]],focus?pathStyle(focus).color:'#ffab61',4);
+      if(mixedRoutes.enabled)continue;
       const points=face.vertices.map(vertex=>project(vertex,camera));
       const edge=points.reduce((left,p)=>p.x<left.x?p:left);
       const label='Reflecting wall';
@@ -184,9 +200,24 @@ function draw(now){
   }
   // Missing-region wire boxes are evidence, never an invented city boundary.
   for(const r of g?.missingRegions||[]){if(!isPoint(r.bounds?.min)||!isPoint(r.bounds?.max))continue;const [lo,hi]=[r.bounds.min,r.bounds.max];const a=[[lo[0],lo[1],lo[2]],[hi[0],lo[1],lo[2]],[hi[0],hi[1],lo[2]],[lo[0],hi[1],lo[2]]];line([...a,a[0]],unknownColor(r),2,[7,5]);}
-  ctx.globalAlpha=health.expired?.7:1;
+  ctx.globalAlpha=mixedRoutes.enabled && mixedRoutes.ray?.order>0 ? .36 : health.expired ? .7 : 1;
   for(const p of f?.paths||[]){if(!$('show-rejected').checked&&p.status!=='selected')continue;const style=pathStyle(p);if(!p.vertices)continue;const selected=p.status==='selected',dash=health.expired?[4,6]:view.kind==='replay'&&selected?[13,3]:style.dash;line(p.vertices,selected?'#0a0e14':style.color,selected?5.6:1.6,dash);if(selected)line(p.vertices,style.color,3.2,dash);for(const point of p.points||[])dot(point,style.color,selected?4.5:2.5);}
   ctx.globalAlpha=1;
+  if(mixedRoutes.enabled&&mixedRoutes.ray?.vertices){
+    const focus=mixedRoutes.ray,color=pathStyle(focus).color;
+    line(focus.vertices,'#0a0e14',7);
+    line(focus.vertices,color,3.8);
+    for(let i=1;i<focus.vertices.length;i++){
+      const a=project(focus.vertices[i-1],camera),b=project(focus.vertices[i],camera);
+      const dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy);
+      if(length<35)continue;
+      const x=a.x+.53*dx,y=a.y+.53*dy,ux=dx/length,uy=dy/length;
+      ctx.beginPath();ctx.moveTo(x+ux*5,y+uy*5);
+      ctx.lineTo(x-ux*5-uy*4,y-uy*5+ux*4);ctx.lineTo(x-ux*5+uy*4,y-uy*5-ux*4);ctx.closePath();
+      ctx.fillStyle=color;ctx.fill();
+    }
+    focus.points?.forEach((point,i)=>dot(point,color,5,'Bounce '+(i+1)));
+  }
   const renderedVoices=f?.renderedVoices??[];
   for(const source of f?.sources||[]){
     if(source.valid===false)continue;
@@ -226,12 +257,15 @@ function metadata(now){
   const conditional=f?.readiness?.mode==='listener-only-conditional-direct',inspectionOnly=!g&&context?.inspection05?.mode==='unqualified-xml05';
   const mode=inspectionOnly?'UNQUALIFIED XML':renderedDrive?'AUTHORED DRIVE':isReplay?'HISTORICAL':isCached?'CACHED FIXTURE':serviceStatus.viewOnlyMap?'VIEW-ONLY WORLD':isPassive?'PASSIVE CAMERA':conditional?'CONDITIONAL DIRECT':view.kind==='acoustic'?'ACOUSTIC SOLVER':h.state.toUpperCase();
   safeText($('mode-chip'),mode);safeText($('mode-label'),viewPaused?'VISUAL UPDATES PAUSED':mode);
-  safeText($('scene-title'),isCached?'Cached acoustic geometry.':isPassive?'Your listener, live.':f?renderedDrive?'Vehicle pass at a cached wall.':isReplay?'A recorded acoustic moment.':'Sound, mapped.':'Ready when Story Mode is.');
+  safeText($('scene-title'),mixedRoutes.enabled?f?'Mapped exterior reflections':'Between takes':isCached?'Cached acoustic geometry.':isPassive?'Your listener, live.':f?renderedDrive?'Vehicle pass at a cached wall.':isReplay?'A recorded acoustic moment.':'Sound, mapped.':'Ready when Story Mode is.');
   if(!g&&context?.inspection05?.mode==='unqualified-xml05')safeText($('scene-title'),'Unqualified XML inspection.');
   if(isPassive&&h.expired)safeText($('scene-title'),'Camera tracking unavailable.');
   const coverage=g?`${g.surfaces.length} finite surfaces · ${g.coverage}. `:'No accepted geometry. ';
   safeText($('knowledge'),isCached?'Original authored cache fixtures only. Tile and room boxes are bounds, not invented walls. Unsupported, unprepared and outside space remain unknown. Runtime doors and activation are unavailable.':isPassive?'Passive camera telemetry only. Acoustic processing is inactive. The reference grid is not world geometry.':conditional?'Listener-only conditional direct path. Unobserved space is assumed clear for the owned beacon; this is not verified unobstructed geometry.':coverage+(h.expired?'Geometry unavailable or expired at this moment. ':'')+'Unobserved space remains unknown.');
   if(inspectionOnly)safeText($('knowledge'),'Unqualified XML inspection only. Source identity and placement remain unverified; no acoustic surfaces or solver paths are authorized. Outside coverage is unknown.');
+  if(mixedRoutes.enabled)safeText($('knowledge'),g?
+    g.surfaces.length+' finite collision faces · partial exterior coverage. Material losses are assumed.':
+    'The comparison keeps the original silence between takes.');
   const contextFrame=installedContextFrame(now);
   if(!atlas&&serviceStatus.viewOnlyMap&&!isReplay){
     safeText($('knowledge'),'Teal surfaces are verified collision context. The audio renderer is off. Conditional groups, higher layers and portal state can remain unknown.');
@@ -403,13 +437,38 @@ bind('refresh-recordings',refreshRecordings);
 async function openReplay(id){
   if(!id)throw Error('Select a local recording first.');
   const result=await api('/api/replay/open',{id});clearAudio();replayAudioInfo={...result.audio,timeline:result.timeline};requestEpoch++;isReplay=true;replay.open(result.durationMs);state.reset();pendingSeek=true;lastReplayRequest=-1;
+  mixedRoutes.enable(result.manifest?.mixerPathsRecorded===true);
+  if(mixedRoutes.enabled)$('show-rejected').checked=false;
+  document.getElementById('match-takes')?.remove();
+  if(mixedRoutes.enabled && result.manifest.takes.length===3){
+    const takes=result.manifest.takes,group=document.createElement('div');
+    group.id='match-takes';
+    group.setAttribute('role','group');group.setAttribute('aria-label','Compare at the same take sample');
+    const hint=document.createElement('span');hint.textContent='At this instant';group.append(hint);
+    for(const [i,destination] of takes.entries()){
+      const button=document.createElement('button');
+      button.textContent=['Direct','Single','Full'][i];
+      button.title='Seek to this instant in take '+(i+1);
+      button.addEventListener('click',()=>{
+        const sample=Math.round((audioObjectUrl?player.currentTime*1000:replay.timeMs)*48);
+        const from=takes.find(s=>sample>=s.firstFrame&&sample<s.firstFrame+s.frames);
+        mixedRoutes.focus(null);
+        seekReplay((destination.firstFrame+(from?sample-from.firstFrame:0))/48);
+      });
+      group.append(button);
+    }
+    $('replay-audio').after(group);
+  }
   if(result.audio?.kind==='offline-rendered-file'){camera.topDown=true;$('topdown').classList.add('active');$('isometric').classList.remove('active');}
   $('scrubber').max=String(replay.durationMs);$('scrubber').disabled=false;$('play-pause').disabled=false;$('close-replay').disabled=result.audio?.kind==='offline-rendered-file';recordingStatus();
-  $('events').replaceChildren();for(const event of (result.events||[]).slice(0,2000)){const button=document.createElement('button');safeText(button,`${time(event.timeMs)} ${event.type}`);button.title=typeof event.detail==='string'?event.detail:JSON.stringify(event.detail??{});if(/fail|gap|expiry|expired|spike|missing|discontinu|invalid|stale/i.test(event.type))button.className='anomaly';button.addEventListener('click',()=>seekReplay(event.timeMs));$('events').append(button);}
+  $('events').replaceChildren();for(const event of (result.events||[]).slice(0,2000)){const button=document.createElement('button');safeText(button,`${time(event.timeMs)} ${event.type}`);button.title=typeof event.detail==='string'?event.detail:JSON.stringify(event.detail??{});if(/fail|gap|expiry|expired|spike|missing|discontinu|invalid|stale/i.test(event.type))button.className='anomaly';button.addEventListener('click',()=>{
+    if(mixedRoutes.enabled)mixedRoutes.focus(event.detail?.pathId??null);
+    seekReplay(event.timeMs);
+  });$('events').append(button);}
   $('load-audio').disabled=!result.audio?.available||!Number.isFinite(result.audio?.startTimeMs);
   safeText($('audio-evidence'),result.audio?.available?'Visual replay · audio is opt-in':'PCM unavailable / discontinuous');
   safeText($('load-audio'),result.audio?.kind==='offline-rendered-file'?'Load rendered audio':'Load owned PCM');
-  notice('Historical replay opened. Observation timestamps and failed events are preserved.');
+  if(!mixedRoutes.enabled)notice('Historical replay opened. Observation timestamps and failed events are preserved.');
 }
 bind('open-replay',()=>openReplay($('recordings').value));
 function clearAudio(){player.pause();player.removeAttribute('src');player.hidden=true;if(audioObjectUrl)URL.revokeObjectURL(audioObjectUrl);audioObjectUrl=null;$('load-audio').disabled=true;}
@@ -428,7 +487,7 @@ async function loadReplayAudio(){
   safeText($('audio-evidence'),engineClock?'Engine frame sync':'Audio sync approximate');$('audio-evidence').title=replayAudioInfo.clockUncertainty||'Original submitted PCM lineage; not speaker presentation time';
   if(rendered){
     seekReplay(replay.timeMs);
-    notice('Rendered PCM is ready. Press Play to hear it with the acoustic timeline.');
+    if(!mixedRoutes.enabled)notice('Rendered PCM is ready. Press Play to hear it with the acoustic timeline.');
   }else notice('Owned PCM is ready. Press its audio Play control to hear it. '+(engineClock?'The acoustic timeline uses original engine frames.':'Timeline alignment uses the approximate host UTC/QPC anchor.'));
 }
 bind('load-audio',loadReplayAudio);

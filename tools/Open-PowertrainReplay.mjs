@@ -35,13 +35,25 @@ try {
       const browserTimeMs = Math.floor(event.timeMs * 1000) / 1000;
       const response = await fetch(url + '/api/replay/frame?timeMs=' + browserTimeMs, {headers});
       if (!response.ok) throw Error('Replay timeline seek failed');
-      if (event.type === 'Selected wall bounce') {
+      if (event.detail?.pathId || event.detail?.withheldPathId || event.detail?.retiredVehicle) {
         const sample = await response.json();
-        if (!sample.geometry || sample.frame?.sequence !== event.detail.sequence ||
-          sample.frame?.streamId !== event.detail.streamId || !sample.frame.paths.some(ray =>
-            ray.id === event.detail.pathId && ray.status === 'selected' &&
-            JSON.stringify(ray.vertices) === JSON.stringify(event.detail.vertices)))
-          throw Error('Selected reflection or admitted geometry missing from replay');
+        const frame = sample.frame, detail = event.detail;
+        if (!sample.geometry || frame?.sequence !== detail.sequence || frame.streamId !== detail.streamId)
+          throw Error('Original witness frame or its geometry is missing');
+        if (detail.pathId) {
+          const ray = frame.paths.find(ray => ray.id === detail.pathId && ray.status === 'selected');
+          if (JSON.stringify(ray?.vertices) !== JSON.stringify(detail.vertices) ||
+            JSON.stringify(ray?.surfaceIds) !== JSON.stringify(detail.surfaceIds) ||
+            !ray?.surfaceIds?.every(id => sample.geometry.surfaces.some(surface => surface.id === id)))
+            throw Error('Selected reflection or ordered wall geometry differs from the witness');
+          if (frame.appliedPaths && !frame.appliedPaths.some(tap => tap.id === ray.id && tap.sourceId === ray.sourceId))
+            throw Error('Witness route absent from the mixer');
+        }
+        if (detail.withheldPathId && (frame.appliedPaths.some(tap => tap.id === detail.withheldPathId) ||
+          frame.paths.some(ray => ray.id === detail.withheldPathId && ray.status === 'selected')))
+          throw Error('Withheld witness route present in the mixer or selection');
+        if (detail.retiredVehicle && frame.renderedVoices.some(voice => voice.vehicle === detail.retiredVehicle))
+          throw Error('Retired vehicle present at the withdrawal marker');
       }
     }
     console.log(JSON.stringify({verified: true, manifest: replay.manifest, mappedFrames: replay.frames.filter(f => f.frame).length,
