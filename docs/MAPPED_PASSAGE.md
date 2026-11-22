@@ -24,19 +24,23 @@ A second version adds an independently revving NPC with its own Bati traffic ban
 
 ## Clocked measurements
 
-The device-free Windows host used 48 kHz stereo, 512 frames and a 10.67 ms deadline. Times below cover whole producer blocks with installed geometry and the requested voice count. The misses column counts every producer block in the run, including startup and workset changes. These measurements used source revision `411789e`.
+The Windows host used a clocked discard sink, 48 kHz stereo and 512-frame blocks. The deadline was 10.67 ms. The timing column below is complete render time for blocks with installed geometry at the requested voice count. The miss column includes startup and every other block in the run. These measurements used the renderer at `4766edb`.
 
 | Route and voices | Installed blocks | Median / p95 / maximum, ms | Whole-run render misses | Ring underflow frames |
 | --- | ---: | --- | ---: | ---: |
-| Covered, one | 2,465 | 2.74 / 3.77 / 18.63 | 1 / 2,700 | 0 |
-| Covered, two | 2,459 | 5.98 / 7.63 / 20.11 | 7 / 2,696 | 0 |
-| Covered, five | 5 | 13.79 / 33.22 / 33.22 | 3 / 237 | 192 |
-| Passage exit, two | 727 | 4.81 / 7.30 / 20.64 | 3 / 969 | 320 |
-| Passage exit, two, repeat | 705 | 4.81 / 7.14 / 20.11 | 3 / 947 | 64 |
+| Covered, one | 2,461 | 2.65 / 3.73 / 19.45 | 1 / 2,698 | 0 |
+| Covered, two | 2,227 | 5.81 / 7.51 / 18.98 | 6 / 2,696 | 0 |
+| Covered, five | 11 | 13.33 / 28.72 / 28.72 | 6 / 247 | 384 |
+| Passage exit, two | 2,404 | 4.37 / 6.12 / 21.65 | 3 / 2,651 | 0 |
+| Passage exit, two, repeat | 2,450 | 4.66 / 6.52 / 21.37 | 3 / 2,700 | 0 |
 
-One moving voice met the deadline on all 569 covered blocks, with a 7.47 ms maximum. Two moving voices missed two of 569. The two-voice covered run completed without starvation. In both exit attempts the ring ran short around a larger geometry publication. The respective worker-to-producer handoffs took 42.50 and 50.69 ms. How much time went to scheduling, deserialization and garbage collection within that interval remains unresolved. Two staged five-voice attempts also ended before five moving voices reached the installed scene. An earlier build rendered 27 five-voice moving blocks with third-order paths at a median 11.81 ms. Five-voice real-time playback remains unqualified.
+One moving voice met the deadline on all 568 covered blocks, with an 8.37 ms maximum. Two moving voices missed two of 569. Both two-voice exit runs finished with installed geometry throughout movement, zero ring underflow and three whole-run render misses. Five active voices had a 13.33 ms median on the eleven covered blocks before the sink starved. The staged five-voice attempt starved before all five reached the installed scene. Five remain unqualified for sustained playback.
 
-On the moving covered two-voice workload, median stage times were 1.54 ms for synthesis, 0.84 ms for candidate geometry, 1.83 ms for visibility, 0.23 ms for path selection, 0.16 ms for application and 1.15 ms for stereo mixing. Across that interval there were at most 104 proposals, 47 eligible paths, 45 selected and 45 applied. Those values are maxima across blocks.
+Earlier two-car exit runs had lost 320 and 64 frames as larger scenes arrived. The worker now sends large validated exterior windows in groups of up to 96 faces. The producer yields between groups and adopts only a complete window that still matches the original request and lease. On the two successful exits, the largest publication contained 2,122 faces in 23 groups. The maximum measured reconstruction slice was 2.39 ms in one run and 3.81 ms in the other. The callback continued consuming its original audio buffer.
+
+The clocked workload holds independent Bati player and traffic voices through the end of the route and uses a fixed camera. Over the last metre the player had zero third-order paths in both trials. One second-order path remained on 21 of 65 and 21 of 66 moving blocks respectively. The traffic voice continued to reflect. The listening file has its own camera motion and removes the NPC for the solo comparison.
+
+On the moving covered two-voice workload, median stage times were 1.35 ms for synthesis, 0.87 ms for candidate geometry, 1.99 ms for visibility, 0.24 ms for selection, 0.12 ms for path application and 1.48 ms for stereo mixing. Across that interval the maxima were 100 proposals, 49 eligible paths, 46 selected and 46 applied. At five covered voices, visibility was the largest measured median stage at 3.07 ms, followed by synthesis at 2.82 ms. These five-voice figures cover eleven stationary blocks.
 
 Reusing each segment direction across the spatial index preserved the hit and uncertainty records on 1,650 measured queries. Sampling position during emission-time iteration reduced median candidate preparation from 1.944 to 1.293 ms in a paired ten-emitter test. The accepted emission still uses the full pose and the existing discontinuity checks. All 15,000 compared preparations matched.
 
