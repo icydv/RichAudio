@@ -6,6 +6,7 @@ internal static class TestGameplay {
  static GameplayRuntime runtime;static long sequence,generation=1;static bool wasPaused;static readonly JavaScriptSerializer Json=new JavaScriptSerializer();static string root;static int checks;static readonly List<int> owned=new List<int>();
  static bool environmentFixture,deliveryFixture,deliveryViewerFixture;
  static double[] wallListener,wallSource,wallTangent;
+ static double[] playerStart,playerEnd,npcStart,npcEnd;
  static bool warmWall,multiWall;
  static double multiWallMotionStart=Double.PositiveInfinity;
  static void Check(bool x,string why){checks++;if(!x)throw new Exception(why);}
@@ -135,6 +136,17 @@ internal static class TestGameplay {
     wallSource[1]+wallTangent[1]*along+wallTangent[0]*across,wallSource[2]};
    v.Velocity=new[]{wallTangent[0]*tangentSpeed,wallTangent[1]*tangentSpeed,0d};
    v.Forward=wallTangent;
+   if(playerStart!=null){
+    double t=Math.Max(0,Math.Min(1,(time-multiWallMotionStart)/6)),fraction=t*t*(3-2*t),rate=t*(1-t);
+    var from=i%2==0?playerStart:npcStart;var to=i%2==0?playerEnd:npcEnd;
+    double laneOffset=(i/2)*.5,sign=i%2==0?1:-1;
+    v.Position=new double[3];v.Velocity=new double[3];
+    for(int axis=0;axis<3;axis++){
+     double span=to[axis]-from[axis];v.Position[axis]=from[axis]+span*fraction;v.Velocity[axis]=span*rate;
+    }
+    v.Position[0]-=wallTangent[1]*laneOffset;v.Position[1]+=wallTangent[0]*laneOffset;
+    v.Forward=new[]{wallTangent[0]*sign,wallTangent[1]*sign,0d};
+   }
   }
   var frame=new GameplayFrame{Session=runtime.Session,ValidThroughTicks=now+Stopwatch.Frequency/4,
    WorldPreparationStartedUtc=Environment.GetEnvironmentVariable("RICHAUDIO_AUTHORED_WORLD_EPOCH01"),
@@ -160,7 +172,7 @@ internal static class TestGameplay {
    FleetFrame(time,Math.Min(limit,n),legacy);
    if(run.ElapsedMilliseconds>=nextSample){
     var host=Evidence();var worker=host!=null&&host.ContainsKey("worker")?host["worker"]as Dictionary<string,object>:null;
-    if(multiWall&&Double.IsPositiveInfinity(multiWallMotionStart)&&Number(worker,"reflectionPathsSelected")>0&&Number(worker,"activeSources")== (warmWall?1:limit))
+    if(multiWall&&Double.IsPositiveInfinity(multiWallMotionStart)&&(Number(worker,"reflectionPathsSelected")>0||time>=8)&&Number(worker,"activeSources")== (warmWall?1:limit))
      multiWallMotionStart=time+2;
     samples.Add(new{seconds=time,requestedPopulation=Math.Min(limit,n),receivedBlocks=Number(host,"receivedBlocks"),
      consumedFrames=Number(host,"consumedFrames"),active=Number(worker,"activeSources"),paths=Number(worker,"selectedPaths"),
@@ -230,6 +242,10 @@ internal static class TestGameplay {
     wallListener=WallVector(wall,"listener");wallSource=WallVector(wall,"source");wallTangent=WallVector(wall,"tangent");
     warmWall=true.Equals(Value(wall,"warmWall"));
     Check(multiWall==true.Equals(Value(wall,"multiWall")),"bound wall motion and train request agree");
+    if(multiWall&&wall.ContainsKey("sourceStart")){
+     playerStart=WallVector(wall,"sourceStart");playerEnd=WallVector(wall,"sourceEnd");
+     npcStart=WallVector(wall,"npcStart");npcEnd=WallVector(wall,"npcEnd");
+    }
     double tangentLength=Math.Sqrt(wallTangent[0]*wallTangent[0]+wallTangent[1]*wallTangent[1]);
     Check(Math.Abs(tangentLength-1)<.00001&&wallTangent[2]==0,"horizontal unit drive tangent");
    }

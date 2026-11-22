@@ -26,6 +26,7 @@ export class ClockedFleetEvidence02 {
   this.data=Object.fromEntries(fields.map(f=>[f,new Float64Array(maximumBlocks)]));
   this.data.throughPipeWriteMs.fill(NaN);
   this.counts=Object.fromEntries(counts.map(f=>[f,new Uint32Array(maximumBlocks)]));
+  this.playerPositions=new Float64Array(3*maximumBlocks).fill(NaN);
   this.previousPaths=new Set();
   this.gpuSamples=[];
   this.gpuSampleCount=0;
@@ -69,7 +70,7 @@ export class ClockedFleetEvidence02 {
   const profile=receipt.lifecycle01.workerProfile01;
   this.sceneCandidates.push({requestId:receipt.requestId,block:this.blocks,
    workerPreparationMs:receipt.workerPreparationMilliseconds,
-   workerReflectionSelectionMs:profile?.staticPreparation?.reflectionSelectionMs??null,
+   workerReflectionSelectionMs:profile?.world?.reflectionSelectionMs??null,
    workerTransportMs:receipt.lifecycle01.workerTransportMilliseconds,
    producerValidationMs:receipt.validationMs,requestToAdmissionMs:receipt.admissionMs,
    discovery:discovery??null});
@@ -109,6 +110,7 @@ export class ClockedFleetEvidence02 {
   const current=new Set(),renderer=engine.pipeline.renderer;
   for(const slot of engine.slots)if(slot.source){
    c.active[index]++;
+   if(slot.vehicle?.context==='player')this.playerPositions.set(slot.vehicle.position,index*3);
    if(slot.vehicle?.velocity?.some(component=>Math.abs(component)>.00001))c.moving[index]=1;
   }
   const byVoice=new Set(),byId=new Map(engine.pipeline.lastControl.paths.map(p=>[p.id,p]));
@@ -229,8 +231,10 @@ export class ClockedFleetEvidence02 {
    fs.writeFileSync(path.join(this.directory,'authored-fleet-excerpt.wav'),Buffer.concat([wav,pcm]),{flag:'wx'});
   }
   fs.writeFileSync(path.join(this.directory,'clocked-fleet-producer.json'),JSON.stringify(output,null,2),{flag:'wx'});
-  const columns=['block',...counts,...fields];
-  const csv=indices.map(i=>[i,...counts.map(k=>c[k][i]),...fields.map(k=>Number.isFinite(this.data[k][i])?this.data[k][i].toFixed(6):'')].join(','));
+  const columns=['block','nonzero','playerX','playerY','playerZ',...counts,...fields];
+  const csv=indices.map(i=>[i,this.nonzero[i],...[0,1,2].map(axis=>{
+   const p=this.playerPositions[3*i+axis];return Number.isFinite(p)?p.toFixed(6):'';
+  }),...counts.map(k=>c[k][i]),...fields.map(k=>Number.isFinite(this.data[k][i])?this.data[k][i].toFixed(6):'')].join(','));
   fs.writeFileSync(path.join(this.directory,'clocked-blocks.csv'),[columns.join(','),...csv,''].join('\n'),{flag:'wx'});
  }
 }

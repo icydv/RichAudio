@@ -51,8 +51,15 @@ if(retainedSourceManifest){
   copy(from,inside(root,binding.file));
  }
  if(phases.some(phase=>!['multi-wall','warm-wall'].includes(phase)))throw Error('Unknown wall fixture phase');
+ const route={};
+ if(multiWall&&pose.sourceStart){
+  for(const key of ['sourceStart','sourceEnd','npcStart','npcEnd']){
+   if(!validVector(pose[key])||Math.hypot(...pose[key].map((v,i)=>v-pose.listener[i]))>128)throw Error('Bounded fleet drive route required');
+   route[key]=pose[key];
+  }
+ }
  fs.writeFileSync(path.join(root,'installed-wall-drive.json'),JSON.stringify({listener:pose.listener,source:pose.source,
-  tangent:validVector(pose.forward)?pose.forward:[1,0,0],surfaceId:pose.surfaceId,resourceId,
+  tangent:validVector(pose.forward)?pose.forward:[1,0,0],surfaceId:pose.surfaceId,resourceId,...route,
   warmWall:phases.includes('warm-wall'),...(multiWall?{multiWall:true}: {})}),{flag:'wx'});
  const cacheRoot=path.resolve(path.dirname(geometry.catalogPath),'..');
  const relativeCache=file=>{const rel=path.relative(cacheRoot,file);inside(cacheRoot,rel);return rel;};
