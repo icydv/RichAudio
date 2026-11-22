@@ -208,10 +208,11 @@ function metadata(now){
   const view=currentPresentation(now),f=view.frame,g=view.geometry,h=view.health,d=f?.diagnostics,isPassive=view.kind==='passive',isCached=view.kind==='cached-world',cached=view.cacheLayer;
   safeText($('connection'),viewPaused?'View paused · recording is independent':atlas&&atlasShown&&(!view.listener?.valid||h.expired)?'Retained atlas · camera unavailable':h.message);
   $('status-dot').style.background=h.state==='live'?'#63e8d3':h.state==='passive'?'#73bcff':h.state==='historical'?'#c6adff':'#e4cc80';
+  const renderedDrive = isReplay && replayAudioInfo?.kind === 'offline-rendered-file';
   const conditional=f?.readiness?.mode==='listener-only-conditional-direct',inspectionOnly=!g&&context?.inspection05?.mode==='unqualified-xml05';
-  const mode=inspectionOnly?'UNQUALIFIED XML':isReplay?'HISTORICAL':isCached?'CACHED FIXTURE':serviceStatus.viewOnlyMap?'VIEW-ONLY WORLD':isPassive?'PASSIVE CAMERA':conditional?'CONDITIONAL DIRECT':view.kind==='acoustic'?'ACOUSTIC SOLVER':h.state.toUpperCase();
+  const mode=inspectionOnly?'UNQUALIFIED XML':renderedDrive?'AUTHORED DRIVE':isReplay?'HISTORICAL':isCached?'CACHED FIXTURE':serviceStatus.viewOnlyMap?'VIEW-ONLY WORLD':isPassive?'PASSIVE CAMERA':conditional?'CONDITIONAL DIRECT':view.kind==='acoustic'?'ACOUSTIC SOLVER':h.state.toUpperCase();
   safeText($('mode-chip'),mode);safeText($('mode-label'),viewPaused?'VISUAL UPDATES PAUSED':mode);
-  safeText($('scene-title'),isCached?'Cached acoustic geometry.':isPassive?'Your listener, live.':f?isReplay?'A recorded acoustic moment.':'Sound, mapped.':'Ready when Story Mode is.');
+  safeText($('scene-title'),isCached?'Cached acoustic geometry.':isPassive?'Your listener, live.':f?renderedDrive?'Vehicle pass at a cached wall.':isReplay?'A recorded acoustic moment.':'Sound, mapped.':'Ready when Story Mode is.');
   if(!g&&context?.inspection05?.mode==='unqualified-xml05')safeText($('scene-title'),'Unqualified XML inspection.');
   if(isPassive&&h.expired)safeText($('scene-title'),'Camera tracking unavailable.');
   const coverage=g?`${g.surfaces.length} finite surfaces · ${g.coverage}. `:'No accepted geometry. ';

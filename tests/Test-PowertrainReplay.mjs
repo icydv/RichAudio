@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 import {startSoundMap} from '../tools/soundmap/server.mjs';
 
 function wav(samples) {
@@ -17,8 +18,10 @@ function wav(samples) {
   samples.forEach((value, index) => pcm.writeFloatLE(value, index * 4));
   return Buffer.concat([header, pcm]);
 }
+const session = '0547bc5b0e254afabd4f2385fd6d1623';
+const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const soundMapFrame = (take, geometryGeneration = null, paths = []) => ({
-  schemaVersion: 1, sessionId: take, streamId: take, sequence: 1, audioFrame: 512,
+  schemaVersion: 1, sessionId: session + ':' + take, streamId: take, sequence: 1, audioFrame: 512,
   geometryGeneration, paths, sources: [{id: 'engine', position: [0, 0, 0]}], listener: {position: [1, 0, 0], valid: true}
 });
 test('match original engine frames to both WAV takes and leave silent comparison gap clear', async () => {
@@ -30,20 +33,25 @@ test('match original engine frames to both WAV takes and leave silent comparison
     const names = ['wall-off', 'wall-on'];
     const samples = [[.25, -.25, .5, -.5], [.125, -.125, .375, -.375]];
     const comparison = {file: 'PLAY FIRST.wav', takes: names.map((take, index) => ({take, firstFrame: index * 3, frames: 2}))};
-    const geometry = {schemaVersion: 1, generation: 'wall-1', sessionId: 'wall-on', streamId: 'wall-on',
+    const geometry = {schemaVersion: 1, generation: 'wall-1', sessionId: session + ':wall-on', streamId: 'wall-on',
       coordinateSpace: 'research-rh-z-up-metres-v1', surfaces: [{id: 'finite-wall', vertices: [[0, 1, 0], [1, 1, 0], [1, 1, 2]]}]};
     const reflection = {id: 'engine-reflection', sourceId: 'engine', status: 'selected', surfaceIds: ['finite-wall'], order: 1,
       vertices: [[0, 0, 0], [.5, 1, 0], [1, 0, 0]], points: [[.5, 1, 0]]};
     const voices = [{vehicle: 'stock-adder', model: 0xb779a091, context: 'player', observedGeneration: 1,
       voice: 'Bati development', operatingPoint: .75, engine: 'engine', exhaust: 'exhaust'}];
-    fs.writeFileSync(path.join(root, 'result.json'), JSON.stringify({comparison}));
+    const stages = {};
     names.forEach((name, index) => {
-      fs.writeFileSync(path.join(root, name + '.wav'), wav(samples[index]));
+      const wave = wav(samples[index]);
+      fs.writeFileSync(path.join(root, name + '.wav'), wave);
       const frame = soundMapFrame(name, index ? geometry.generation : null, index ? [reflection] : []);
-      fs.writeFileSync(path.join(root, 'soundmap-' + name + '.jsonl'),
-        JSON.stringify({sampleFrame: 0, soundMapFrame: frame, voices, ...(index ? {soundMapGeometry: geometry} : {})}) + '\n');
+      const timeline = JSON.stringify({sampleFrame: 0, soundMapFrame: frame, voices, ...(index ? {soundMapGeometry: geometry} : {})}) + '\n';
+      fs.writeFileSync(path.join(root, 'soundmap-' + name + '.jsonl'), timeline);
+      stages[name] = {frames: 2, soundMapFrames: 1, wavSHA256: sha256(wave), timelineSHA256: sha256(timeline)};
     });
     const exactWav = wav([...samples[0], 0, 0, ...samples[1]]);
+    comparison.sha256 = sha256(exactWav);
+    const result = {session, comparison, stages};
+    fs.writeFileSync(path.join(root, 'result.json'), JSON.stringify(result));
     fs.writeFileSync(path.join(root, comparison.file), exactWav);
     const recording = await module.openPowertrainReplay(root);
     service = await startSoundMap({root, port: 0, renderedReplay: recording});
@@ -55,17 +63,17 @@ test('match original engine frames to both WAV takes and leave silent comparison
     assert.equal(opened.audio.available, true);
     assert.equal(opened.durationMs, 5 / 48);
     const getFrame = sample => request('/api/replay/frame?timeMs=' + sample / 48).then(res => res.json());
-    assert.equal((await getFrame(1)).frame.sessionId, 'wall-off');
+    assert.equal((await getFrame(1)).frame.sessionId, session + ':wall-off');
     assert.equal((await getFrame(2)).frame, null);
     const second = await getFrame(3);
-    assert.equal(second.frame.sessionId, 'wall-on');
+    assert.equal(second.frame.sessionId, session + ':wall-on');
     assert.equal(second.frame.audioFrame, 512);
     assert.deepEqual(second.frame.renderedVoices, voices);
     assert.deepEqual(second.frame.paths[0].points, [[.5, 1, 0]]);
     assert.equal(second.geometry.surfaces[0].id, 'finite-wall');
     const roundedBrowserTimeMs = Math.floor(3 * 1000000 / 48000) / 1000;
     const witness = await request('/api/replay/frame?timeMs=' + roundedBrowserTimeMs).then(res => res.json());
-    assert.equal(witness.frame?.sessionId, 'wall-on', 'a browser seek within half a sample resolves the intended take');
+    assert.equal(witness.frame?.sessionId, session + ':wall-on', 'a browser seek within half a sample resolves the intended take');
     assert.equal(witness.frame.sequence, second.frame.sequence);
     assert.deepEqual(witness.frame.paths[0].vertices, reflection.vertices);
     const event = opened.events.find(e => e.type === 'Selected wall bounce');
@@ -74,8 +82,26 @@ test('match original engine frames to both WAV takes and leave silent comparison
     const audio = await request('/api/replay/audio');
     assert.deepEqual(Buffer.from(await audio.arrayBuffer()), exactWav);
     assert.equal((await request('/api/telemetry', {method: 'POST', body: '{}'})).status, 403);
-    fs.writeFileSync(path.join(root, comparison.file), wav([...samples[0], .1, 0, ...samples[1]]));
+    const wallWave = path.join(root, 'wall-on.wav');
+    fs.writeFileSync(wallWave, wav([.625, -.625, .875, -.875]));
+    await assert.rejects(() => module.openPowertrainReplay(root, 'wall-on'), /WAV digest/i);
+    fs.writeFileSync(wallWave, wav(samples[1]));
+    const changed = wav([...samples[0], .1, 0, ...samples[1]]);
+    fs.writeFileSync(path.join(root, comparison.file), changed);
+    comparison.sha256 = sha256(changed);
+    fs.writeFileSync(path.join(root, 'result.json'), JSON.stringify(result));
     await assert.rejects(() => module.openPowertrainReplay(root), /silence/i);
+    fs.writeFileSync(path.join(root, comparison.file), exactWav);
+    await assert.rejects(() => module.openPowertrainReplay(root), /comparison.*digest/i);
+    comparison.sha256 = sha256(exactWav);
+    fs.writeFileSync(path.join(root, 'result.json'), JSON.stringify(result));
+    const timelineFile = path.join(root, 'soundmap-wall-on.jsonl');
+    const swapped = fs.readFileSync(timelineFile, 'utf8').replaceAll(session, 'b'.repeat(32));
+    fs.writeFileSync(timelineFile, swapped);
+    await assert.rejects(() => module.openPowertrainReplay(root), /timeline.*digest/i);
+    stages['wall-on'].timelineSHA256 = sha256(swapped);
+    fs.writeFileSync(path.join(root, 'result.json'), JSON.stringify(result));
+    await assert.rejects(() => module.openPowertrainReplay(root), /render session/i);
   } finally {
     await service?.close();
     fs.rmSync(root, {recursive: true, force: true});

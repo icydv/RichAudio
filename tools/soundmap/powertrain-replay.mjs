@@ -9,6 +9,7 @@ const sampleRate = 48000;
 const headerBytes = 44;
 const frameBytes = 8;
 const maximumSamples = sampleRate * 120;
+const sha256 = value => createHash('sha256').update(value).digest('hex');
 const takeNames = ['wall-off', 'wall-on', 'two-vehicles', 'solo-vehicle'];
 const labels = {'wall-off': 'Direct path', 'wall-on': 'Direct and reflected paths',
   'two-vehicles': 'Two independently driven vehicles', 'solo-vehicle': 'One vehicle'};
@@ -39,14 +40,15 @@ async function readWave(root, name) {
   const pcm = wav.subarray(headerBytes);
   for (let at = 0; at < pcm.length; at += 4)
     need(Number.isFinite(pcm.readFloatLE(at)), 'Nonfinite PCM in replay WAV');
-  return {wav, pcm, frames: pcm.length / frameBytes};
+  return {wav, pcm, frames: pcm.length / frameBytes, sha256: sha256(wav)};
 }
 
-async function readTimeline(root, segment, geometries) {
+async function readTimeline(root, segment, geometries, session, receipt) {
   const {take, firstFrame, frames} = segment;
   const text = await localFile(root, 'soundmap-' + take + '.jsonl', LIMITS.maxBytes);
+  need(sha256(text) === receipt.timelineSHA256, 'Timeline digest differs from the render receipt for ' + take);
   const rows = text.toString('utf8').trimEnd().split('\n');
-  need(rows.length <= 3601, 'Replay frame count exceeds the render sampling budget');
+  need(rows.length === receipt.soundMapFrames && rows.length <= 3601, 'Replay frame count differs from the render receipt');
   let previous = -1, engineOrigin, streamTag;
   return rows.map(line => {
     need(Buffer.byteLength(line) <= SOUND_MAP_WIRE.telemetryBytes + SOUND_MAP_WIRE.installedGeometryBytes + 512,
@@ -59,6 +61,9 @@ async function readTimeline(root, segment, geometries) {
     engineOrigin ??= soundMapFrame.audioFrame - sampleFrame;
     need(soundMapFrame.audioFrame - sampleFrame === engineOrigin, 'Viewer sample position differs from the engine clock');
     const frame = checkFrame({...soundMapFrame, renderedVoices: voices});
+    need(frame.sessionId.startsWith(session + ':') &&
+      (frame.listenerSessionId === undefined || frame.listenerSessionId.startsWith(session + ':')),
+    'Timeline belongs to another render session');
     const tag = frame.sessionId + '/' + (frame.streamId ?? frame.sessionId);
     streamTag ??= tag;
     need(streamTag === tag, 'Viewer stream changed inside a take');
@@ -80,14 +85,16 @@ export async function openPowertrainReplay(root, take = 'comparison') {
   need(take === 'comparison' || takeNames.includes(take), 'Choose a rendered replay take');
   root = await fs.realpath(root);
   const result = JSON.parse(await localFile(root, 'result.json', LIMITS.frameBytes));
+  need(typeof result.session === 'string' && /^[a-f0-9]{32}$/.test(result.session), 'Render session identity missing');
   const comparison = result.comparison;
   const takeWave = await readWave(root, take === 'comparison' ? comparison?.file : take + '.wav');
+  if (take === 'comparison') need(takeWave.sha256 === comparison.sha256, 'Comparison WAV digest differs from the render receipt');
   const segments = take === 'comparison' ? comparison?.takes : [{take, firstFrame: 0, frames: takeWave.frames}];
   need(Array.isArray(segments) && (take !== 'comparison' ||
     segments.length === 2 && segments[0].take === 'wall-off' && segments[1].take === 'wall-on'),
   'Expected two comparison takes in listening order');
 
-  const geometries = new Map(), events = [], frames = [];
+  const geometries = new Map(), events = [], frames = [], bindings = [];
   let endFrame = 0, strongestReflection;
   for (const segment of segments) {
     const {take, firstFrame, frames: length} = segment;
@@ -96,12 +103,15 @@ export async function openPowertrainReplay(root, take = 'comparison') {
     'Invalid replay take placement');
     const startMs = firstFrame / 48;
     const individual = segments.length === 1 ? takeWave : await readWave(root, take + '.wav');
+    const receipt = result.stages?.[take];
+    need(receipt?.frames === length && individual.sha256 === receipt.wavSHA256, 'WAV digest or length differs from the render receipt for ' + take);
     const slice = takeWave.pcm.subarray(firstFrame * frameBytes, (firstFrame + length) * frameBytes);
     need(length === individual.frames && slice.equals(individual.pcm), 'Comparison audio differs from the recorded take');
     for (let at = endFrame * frameBytes; at < firstFrame * frameBytes; at += 4)
       need(takeWave.pcm.readFloatLE(at) === 0, 'Comparison spacer must contain only silence');
     if (firstFrame > endFrame) frames.push({timeMs: endFrame / 48, frame: null});
-    const timeline = await readTimeline(root, segment, geometries);
+    const timeline = await readTimeline(root, segment, geometries, result.session, receipt);
+    bindings.push({...segment, timelineSHA256: receipt.timelineSHA256, wavSHA256: receipt.wavSHA256});
     // Samples before the first telemetry tick have no available solver frame.
     if (timeline[0].timeMs > startMs) frames.push({timeMs: startMs, frame: null});
     frames.push(...timeline);
@@ -129,14 +139,13 @@ export async function openPowertrainReplay(root, take = 'comparison') {
     events.push({timeMs, type: 'Selected wall bounce', detail: {sequence, streamId, pathId: ray.id,
       sourceId: ray.sourceId, surfaceIds: ray.surfaceIds, vertices: ray.vertices}});
   }
-  const sha256 = createHash('sha256').update(takeWave.wav).digest('hex');
-  const id = 'drive-' + take + '-' + sha256.slice(0, 16);
+  const id = 'drive-' + take + '-' + takeWave.sha256.slice(0, 16);
   const durationMs = takeWave.frames / 48;
   return {id, frames, geometries, events, durationMs, originFrame: 0, audioStartTimeMs: 0,
     wav: takeWave.wav, audioPlayable: true,
-    manifest: {id, title: take === 'comparison' ? 'PLAY FIRST · wall comparison' : labels[take],
+    manifest: {id, session: result.session, title: take === 'comparison' ? 'PLAY FIRST · wall comparison' : labels[take],
       state: 'stopped', durationMs, timelineBasis: 'rendered-engine-audioFrame',
-      audio: {kind: 'offline-rendered-file', sampleRate, channels: 2, format: 'wav-float32', sha256,
+      audio: {kind: 'offline-rendered-file', sampleRate, channels: 2, format: 'wav-float32', sha256: takeWave.sha256,
         capturedFrames: takeWave.frames, gaps: [], clockUncertainty: 'The viewer follows the original rendered PCM sample positions.'},
-      takes: segments}};
+      takes: bindings}};
 }

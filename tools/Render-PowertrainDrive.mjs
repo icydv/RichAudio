@@ -247,9 +247,11 @@ async function renderTake({ name, directory, world, placement, inputs, session, 
   if (reflected) assert(wallBlocks > 20 && witness, 'The chosen wall did not contribute to enough rendered blocks');
   if (name === 'two-vehicles') assert(maxActive === 2 && firstWithoutSecond !== null && maxBOperatingPoint > .5, 'Independent second voice did not accelerate and retire');
   const wavSHA256 = writeStereoWave(path.join(directory, name + '.wav'), channels);
-  fs.writeFileSync(path.join(directory, 'soundmap-' + name + '.jsonl'), replay.map(packet => JSON.stringify(packet)).join('\n') + '\n', { flag: 'wx' });
+  const timeline = replay.map(packet => JSON.stringify(packet)).join('\n') + '\n';
+  const timelineSHA256 = sha256(timeline);
+  fs.writeFileSync(path.join(directory, 'soundmap-' + name + '.jsonl'), timeline, { flag: 'wx' });
   return { channels, receipt: {
-   name, frames, soundMapFrames: replay.length, wavSHA256, peak, distinctWorksets: [...scenes].map(JSON.parse),
+   name, frames, soundMapFrames: replay.length, wavSHA256, timelineSHA256, peak, distinctWorksets: [...scenes].map(JSON.parse),
    dryADDER: dry.digest('hex'), directPathSHA256: direct.digest('hex'), maxActive, wallBlocks, witness, retainedWall,
    maxAOperatingPoint, maxBOperatingPoint, secondLastBlock, firstWithoutSecond,
    completeRenderMs: { maximum: Math.max(...timings), mean: timings.reduce((total, value) => total + value, 0) / timings.length,
