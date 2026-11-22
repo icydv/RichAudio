@@ -376,14 +376,42 @@ export class StockGrainVoice {
     for(let k=0;k<n;k++)referenceEnergy+=target[k]*target[k];
     // Scores are consumed immediately by this search. Retain scalar results
     // instead of a result per probe and a copy of each improved best.
-    let correlation=0;
+    // The coarse phase probes are 1/32 of an interval apart. With a full
+    // interval horizon their 64 sample coordinates overlap exactly. Reuse
+    // only identical reads within this search on a prepared, standard reader.
+    const canShareGrid=horizon===1&&this.#preparation&&
+      this.sampleHead===StockGrainVoice.prototype.sampleHead&&this.read===StockGrainVoice.prototype.read;
+    const grid=canShareGrid?new Float64Array(matchSamples*2):null;
+    let gridStart=0,gridEnd=0,correlation=0;
     const score=q=>{let diff=0,energy=0,xy=0,yy=0;
       if(q<0||q+horizon>this.intervals.length){correlation=0;return Infinity;}
       const room=this.available(q,plan);
       if(room<requiredRoom){correlation=0;return Infinity;}
       if(sameVoice&&longestRun>=3&&room<selfRoom){correlation=0;return Infinity;}
       if(sameVoice&&longestRun>=8&&room<longestRun*.5){correlation=0;return Infinity;}
-      for(let k=0;k<n;k++){const x=target[k],y=this.sampleHead(q+horizon*k/n);diff+=(x-y)**2;energy+=x*x+y*y;xy+=x*y;yy+=y*y;}
+      const interval=Math.floor(q),start=q*n,shared=grid!==null&&Number.isInteger(start),offset=start-interval*n;
+      if(shared){
+        const end=start+n,base=interval*n;
+        if(gridStart<base||gridStart>=base+n)gridEnd=gridStart=start;
+        let at=start;
+        while(at<end){
+          if(at>=gridStart&&at<gridEnd){
+            // These exact coordinates have already updated the original
+            // reader's extrema. Account for all logical reads in the overlap.
+            const through=Math.min(end,gridEnd);
+            this.stats.reads+=through-at;
+            at=through;
+          }else{
+            grid[at-base]=this.sampleHead(at/n);
+            at++;
+          }
+        }
+        gridStart=start;gridEnd=end;
+      }
+      for(let k=0;k<n;k++){
+        const x=target[k],y=shared?grid[offset+k]:this.sampleHead(q+horizon*k/n);
+        diff+=(x-y)**2;energy+=x*x+y*y;xy+=x*y;yy+=y*y;
+      }
       const error=diff/Math.max(energy,1e-20);correlation=xy/Math.sqrt(Math.max(referenceEnergy*yy,1e-30));return error;};
     // First test the existing phase: identical periodic inputs need no shift.
     let bestQ=null,bestError=Infinity,bestCorrelation=0;const phase=((reference.q%1)+1)%1;
