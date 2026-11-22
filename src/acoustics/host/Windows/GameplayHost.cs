@@ -272,6 +272,7 @@ namespace RichAudio.Beacon.Windows {
      long now=Stopwatch.GetTimestamp();bool leased=f.ValidThroughTicks<=0||now<f.ValidThroughTicks;
      if(powertrain!=null){
       if(f.PowertrainGate=="withdraw"){powertrain.Accept(f,now);TransportStop.Write(pipe,new[]{TransportStop.Accepted});wake.Set();continue;}
+      if(powertrain.ExpiredBeforeFirstPrepare(f,now)){Interlocked.Increment(ref expired);TransportStop.Write(pipe,new[]{TransportStop.Accepted});continue;}
       if(age>250||age< -2||!leased)throw new InvalidDataException("expired powertrain observation");
       powertrain.Accept(f,now);
      }

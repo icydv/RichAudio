@@ -34,6 +34,13 @@ namespace RichAudio.Beacon.Windows
         internal Command Requested { get { return Volatile.Read(ref requested); } }
         internal bool NeedsBoundary(Command next) { return sink!=next; }
         internal bool Withdrawn { get { return Volatile.Read(ref applied).Mode=="withdraw"; } }
+        // A cold host can receive an observation queued during its own startup.
+        // Consume it without admitting any source or extending its deadline.
+        internal bool ExpiredBeforeFirstPrepare(GameplayFrame frame, long now)
+        {
+            return Requested.Revision == 0 && frame.PowertrainGate == "prepare" &&
+                frame.PowertrainRevision == 1 && frame.ValidThroughTicks > 0 && frame.ValidThroughTicks <= now;
+        }
         internal bool Expired(long now)
         {
             long deadline=Interlocked.Read(ref expires);

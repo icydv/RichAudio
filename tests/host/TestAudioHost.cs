@@ -33,7 +33,10 @@ namespace RichAudio.Beacon.Tests
                 ValidThroughTicks=now+System.Diagnostics.Stopwatch.Frequency/4,
                 OperatingPointEvidence="shvdne-enhanced-native-F9DDA40BC293A61E",PowertrainRevision=1,PowertrainGate="prepare"
             };
+            Check(gate.ExpiredBeforeFirstPrepare(frame,frame.ValidThroughTicks),"expired cold frame is dropped without starting a lease");
+            Check(!gate.ExpiredBeforeFirstPrepare(frame,now),"a fresh cold frame is eligible");
             gate.Accept(frame,now);
+            Check(!gate.ExpiredBeforeFirstPrepare(frame,frame.ValidThroughTicks),"after admission expiry follows the original recovery policy");
             frame.PowertrainRevision=3;frame.PowertrainGate="voice";
             Throws(delegate{gate.Accept(frame,now);},"lost gain command cannot enable a later revision");
             // A newer terminal command may replace an unconsumed voice command in the sender's one-slot mailbox.
