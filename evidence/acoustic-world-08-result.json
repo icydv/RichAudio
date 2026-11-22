@@ -1,0 +1,290 @@
+{
+  "schema": 1,
+  "kind": "RichAudioAcousticWorld08Result",
+  "baseCommit": "a376ba6b1690ec4a528cc74ac9f108e1f9ed3c8a",
+  "source": "public-CodeWalker-code-and-original-authored-native-resources-only",
+  "dependency": {
+    "credit": "CodeWalker by dexyfex",
+    "sourceCommit": "485d56bec00262ed7fa472261cce7bbc6202b96e",
+    "sourceFiles": 114,
+    "coreSHA256": "fe0d324858a5d9b35936e9dee28550b60b36c19d2beeb44223f15fd8e60c66d4",
+    "workerSourceSHA256": "6695020b93cd8e092aaa5794a9fe50cbd015ca959e65c4b12b41e0b9c0215fd9",
+    "workerExeSHA256": "025ad9c05125fad7b2e0c292768e903c9c257374eb299324fb64ddaa9c5556da",
+    "supervisorSourceSHA256": "bbeccfc5a68233b62ddaa639a4c05598775b34ec45273dc989d8137bc95e69e3",
+    "supervisorExeSHA256": "4d5b896eae3fa8304859fe8c2e3c4b3ef50676b0967049269df565869fd74314",
+    "node": {
+      "mode": "bundled-current-official-Node-win-x64",
+      "bundled": true,
+      "relativePath": "runtime/node.exe",
+      "version": "v24.19.0",
+      "sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237",
+      "officialChecksumsUrl": "https://nodejs.org/dist/v24.19.0/SHASUMS256.txt",
+      "officialChecksumMatched": true,
+      "licenseUrl": "https://raw.githubusercontent.com/nodejs/node/v24.19.0/LICENSE"
+    },
+    "blanketRedistributionLicenceVerified": false,
+    "proprietaryPayloadIncluded": false,
+    "protectedBootstrapAvailable": false
+  },
+  "localValidation": {
+    "schema": 1,
+    "kind": "RichAudioOffline08Validation",
+    "passed": true,
+    "tests": 37,
+    "testFiles": 9,
+    "skipped": 0,
+    "freshPublicPreparation": true,
+    "freshCoreReproducibility": true,
+    "coreOriginalApiControls": 23,
+    "freshWorkerBuild": true,
+    "freshOriginalFixtures": true,
+    "freshPackage": true,
+    "testLogSHA256": "fc77e6281075837e65be3b26332870676041bab06c17d26da323e4dcf6fd2b2f",
+    "actualPipelineSHA256": "541e25ea3cd0479aa6381a1b9ce14737cf2dd1dc6e3d7bf3aeea3d3c7a87fe34",
+    "coreSourceCommit": "485d56bec00262ed7fa472261cce7bbc6202b96e",
+    "packageManifestSHA256": "72731b5e09c41116d8af797178c682a501a968f4499534fc492e8756b805a6a0",
+    "packageZIP_SHA256": "de9e9cd36601f005ef1184ecc4c0df7b570d52d9eaad9f94484fbe934f0f25b8",
+    "actualBinaryResources": 3,
+    "cacheHitsOnRestart": 1,
+    "conversionsOnRestart": 0,
+    "dryPcmIdentical": true,
+    "stereoPcmDifferent": true,
+    "inheritedOffline06Passed": true,
+    "protectedBootstrapAvailable": false,
+    "privateInputsRead": false,
+    "installedResourcesRead": false,
+    "endpointOpened": false,
+    "gameLaunched": false,
+    "deployed": false,
+    "merged": false,
+    "resultSHA256": "d7d0b1cb12da15e73c4e13d5247f80fc35e128c736af33b777e5572986b30e33",
+    "fullLogSHA256": "0950363090170b0981f3c67cbff009f476995e234a1dbb0358b60c2b86f8b179",
+    "actualPipeline": {
+      "schema": 1,
+      "kind": "RichAudioActualCodeWalkerPipeline08",
+      "passed": true,
+      "resources": 3,
+      "metadata": 5,
+      "surfaces": 2,
+      "coordinateControls": 4,
+      "reflections": [
+        {
+          "distance": 4.079215610874228,
+          "delaySeconds": 0.011892756883015242,
+          "order": 1
+        }
+      ],
+      "dryPcmIdentical": true,
+      "stereoPcmDifferent": true,
+      "renderedFrames": 49152,
+      "cacheHitsOnRestart": 1,
+      "conversionsOnRestart": 0,
+      "freshReaderInvocations": 2,
+      "supervisionReceiptSHA256": "a6acd86005ab12748ac7e2ff165ddd3fbf33c591ce9d77e5f7aaf77637563241",
+      "restartSupervisionReceiptSHA256": "2daf19f305d8e5b43e2ba18da0c660f78f622ac4d824e4c3ee9aca370e48e7de",
+      "sourceReads": 7714,
+      "progressRecords": 1,
+      "pcmQueueFramesAdded": 0,
+      "sourceGenerationsModified": 0,
+      "installedWorldVerified": false,
+      "genuineResourceVerified": false,
+      "endpointOpened": false,
+      "privateInputsRead": false,
+      "fixtureEvidenceSHA256": "264b0aa506ac8f967572b9d10be087b2a3ac79f073408658d760fbd896db157a"
+    }
+  },
+  "processing": {
+    "originalProfileSHA256": "c2b32243c52210e2d91b1753e9d51db3a17fe4e7c77f554ea52c7f288e85a3f7",
+    "trials": [
+      {
+        "repetition": 0,
+        "variant": "reference-direct",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.715299999999985,
+          "p99Ms": 4.435299999999998,
+          "maximumMs": 18.248200000000004,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.6836999999999875,
+          "p99Ms": 1.5060999999999893,
+          "maximumMs": 1.5737000000000023,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "sourceConstructionMaximumMs": null
+      },
+      {
+        "repetition": 0,
+        "variant": "instrumented-direct",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.7107000000000028,
+          "p99Ms": 4.723500000000001,
+          "maximumMs": 19.146600000000007,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.6467000000000098,
+          "p99Ms": 1.597999999999999,
+          "maximumMs": 1.6037000000000035,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "sourceConstructionMaximumMs": 11.884799999999998
+      },
+      {
+        "repetition": 0,
+        "variant": "instrumented-scene-churn",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.7386999999999944,
+          "p99Ms": 4.628299999999996,
+          "maximumMs": 19.84899999999999,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.7273999999999887,
+          "p99Ms": 1.84699999999998,
+          "maximumMs": 2.722500000000025,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "sourceConstructionMaximumMs": 12.323799999999991
+      },
+      {
+        "repetition": 1,
+        "variant": "instrumented-scene-churn",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.7377999999999929,
+          "p99Ms": 5.481599999999986,
+          "maximumMs": 18.748500000000007,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.7284999999999968,
+          "p99Ms": 1.9060999999999808,
+          "maximumMs": 2.716700000000003,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "sourceConstructionMaximumMs": 11.4191
+      },
+      {
+        "repetition": 1,
+        "variant": "instrumented-direct",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.637599999999992,
+          "p99Ms": 5.086799999999997,
+          "maximumMs": 18.4347,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.6271999999999878,
+          "p99Ms": 1.6529000000000025,
+          "maximumMs": 1.7445999999999913,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "sourceConstructionMaximumMs": 11.527699999999996
+      },
+      {
+        "repetition": 1,
+        "variant": "reference-direct",
+        "all": {
+          "calls": 144,
+          "p50Ms": 0.7216999999999985,
+          "p99Ms": 4.758799999999994,
+          "maximumMs": 18.392399999999995,
+          "overBudget": 1,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "later": {
+          "calls": 120,
+          "p50Ms": 0.6576000000000022,
+          "p99Ms": 1.655699999999996,
+          "maximumMs": 1.9936000000000007,
+          "overBudget": 0,
+          "blockBudgetMs": 10.666666666666666
+        },
+        "sourceConstructionMaximumMs": null
+      }
+    ],
+    "freshInheritedContinuity": {
+      "calls": 144,
+      "p50Ms": 0.8062,
+      "p99Ms": 3.2187,
+      "maximumMs": 58.3668,
+      "overBudget": 1,
+      "blockBudgetMs": 10.666666666666666,
+      "causeAttributed": false
+    },
+    "endpointLatencyMeasured": false,
+    "historicalSpikesExplained": false
+  },
+  "review": {
+    "rootProviderIndependentReceiptSHA256": "1f3d05ad660e917a57f1d2c86303c3324dad7e0bb1c94fbcf6ecf050c15a81b5",
+    "nativeIdentityIndependentReceiptSHA256": "12103536579b790aa572abc3df94f2d4f67ee96a7470f265ba4c94ec514a90d2",
+    "workerAuthorValidationReceiptSHA256": "136e79a8ae7a300c9cf3c005cd00f31e4500ba9485a114982b449858cd865034",
+    "publicClaimsIndependentReceiptSHA256": "2674983a4fc25f90badfee27ba044749108d96f7b36b2ea7ffdf955fbaf904c7",
+    "headerAndDocsAddendum": {
+      "receiptSHA256": "953955978e95b6c61cf01e7bcd63777089542c9d728fc2eb22e92296307fdd57",
+      "reviewedPublicEvidenceSnapshotSHA256": "a28b41c6b0b2031d044ac6153a6c9e930916830dc8e3dcc67e5e86240f7fa1b0",
+      "referenceAppendOnly": true,
+      "scope": "Final worker prefix and binary-size guards, public documentation, final wrapper evidence and retained processing findings; prior evidence snapshot before these review references were appended"
+    },
+    "scopes": {
+      "rootProvider": "Independent provider admission, DTO/source binding, stable cache identity and actual CLI integration review",
+      "nativeIdentity": "Independent native receipt identity, stale scope and mount controls",
+      "workerAuthorValidation": "Author validation, not independent review of author-owned worker or fixtures",
+      "publicClaims": "Independent root-authored result/proposal/evidence review, excluding reviewer-owned worker implementation"
+    }
+  },
+  "qualification": {
+    "originalNativeArchivesDecoded": true,
+    "actualCodeWalkerUsed": true,
+    "genuineResourceVerified": false,
+    "installedWorldVerified": false,
+    "fullInstalledCoverageVerified": false,
+    "automaticRetailBootstrapImplemented": false,
+    "nativeLoadingScreenGateImplemented": false,
+    "automaticProtectedCheckpointHandoffImplemented": false,
+    "realMloRoomPortalCompatibilityVerified": false
+  },
+  "nextReadOnlyProposal": {
+    "state": "blocked-unsealed",
+    "invocationCommand": null,
+    "approvalRequested": false,
+    "missing": [
+      "private-capability-availability-and-identities",
+      "source-handle-header-and-selected-member-identities",
+      "genuine-placement-ownership-and-coverage-controls",
+      "outer-one-shot-capability-staging-and-private-profile-containment-qualification"
+    ]
+  },
+  "boundaries": {
+    "installedResourcesRead": false,
+    "oldPrivateCapturesRead": false,
+    "realKeysRead": false,
+    "gameExecutablesInspected": false,
+    "gtaOrRphLaunched": false,
+    "audioEndpointOpened": false,
+    "recorded": false,
+    "deployed": false,
+    "nativeSuppressionEnabled": false,
+    "merged": false
+  }
+}

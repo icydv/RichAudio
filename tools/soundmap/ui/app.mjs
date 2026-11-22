@@ -57,7 +57,7 @@ function draw(now){
   if(lastCoordinateKey!==view.coordinateKey){lastCoordinateKey=view.coordinateKey;camera.target=view.listener?.valid?[...view.listener.position]:cached.visible?[...cached.target]:[0,0,0];camera.scale=13;contextSelectionKey='';}
   if(follow&&view.listener?.valid&&isPoint(view.listener.position))camera.target=[...view.listener.position];
   grid();compileGeometry(g);compileContext(view);for(const box of contextBoxes)wireBox(box.bounds,box.unknown?'#efc46c':'#95b9df',[7,5]);
-  const cachedFaces=cached.visible?cached.tiles.flatMap(tile=>tile.surfaces.map(surface=>({...surface,context:false,cached:true,expired:['expired-fixture','future-fixture'].includes(tile.state)}))):[];
+  const cachedFaces=cached.visible?cached.tiles.flatMap(tile=>tile.surfaces.map(surface=>({...surface,context:false,cached:true,expired:['expired-fixture','future-fixture','expired-static-native','future-static-native'].includes(tile.state)}))):[];
   const faces=[...contextFaces,...cachedFaces,...geometryFaces].map(face=>({...face,depth:face.vertices.reduce((n,p)=>n+project(p,camera).depth,0)/face.vertices.length})).sort((a,b)=>a.depth-b.depth);
   for(const face of faces){
     // Openings can overlap a convex footprint edge. Clip to the actual footprint

@@ -9,7 +9,7 @@ const contexts=new WeakSet(),metadata=new WeakMap();
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x);
 const overlap=(a,b)=>a.min.every((n,i)=>n<b.max[i]&&a.max[i]>b.min[i]);
 const contains=(a,b)=>a.min.every((n,i)=>n<=b.min[i]&&a.max[i]>=b.max[i]);
-function supportedContext03(layout,authority){return authority==='original-parser-resource-fixture'&&['legacy-rsc7','gen9-rsc7'].includes(layout)||['original-reference-xml-fixture05','review-policy-static-xml05'].includes(authority)&&['legacy-codewalker-xml05','gen9-codewalker-xml05'].includes(layout);}
+function supportedContext03(layout,authority){return authority==='original-parser-resource-fixture'&&['legacy-rsc7','gen9-rsc7'].includes(layout)||['original-reference-xml-fixture05','review-policy-static-xml05'].includes(authority)&&['legacy-codewalker-xml05','gen9-codewalker-xml05'].includes(layout)||authority==='review-policy-static-native08'&&layout==='gen9-codewalker-native08';}
 
 export function createSceneTileContext03({tileId,worldDigest,scene,sourceBindings,layout='legacy-rsc7',authority='original-parser-resource-fixture'}={}){
  requireWorld(hex(worldDigest)&&validated.scene(scene)&&scene.tile&&scene.coordinateSpace===coordinateSpace&&!scene.observationModel,
@@ -17,6 +17,7 @@ export function createSceneTileContext03({tileId,worldDigest,scene,sourceBinding
  requireWorld(supportedContext03(layout,authority),
   'resource-layout fixtures confer no installed-world authority');
  if(layout.endsWith('-codewalker-xml05'))requireWorld(scene.tile.surfaces.every(s=>s.provenance.kind===(authority==='review-policy-static-xml05'?'derived':'synthetic'))&&(authority!=='review-policy-static-xml05'||scene.tile.coverage==='partial'),'XML context provenance/partial coverage cannot promote reviewed exports');
+ if(layout==='gen9-codewalker-native08')requireWorld(scene.tile.coverage==='partial'&&scene.tile.surfaces.every(s=>s.provenance.kind==='derived'),'native static context cannot promote unverified runtime coverage');
  requireWorld(Array.isArray(sourceBindings)&&sourceBindings.length>0&&sourceBindings.length<=256,'bounded explicit resource dependencies');
  const seen=new Set(),sources=sourceBindings.map(b=>{identifier(b.id);requireWorld(!seen.has(b.id)&&hex(b.sha256),'unique resource dependency/digest');seen.add(b.id);return {id:b.id,sha256:b.sha256};}).sort((a,b)=>a.id.localeCompare(b.id));
  const contentDigest=digest({tileId,worldDigest,geometryKey:scene.geometryKey,materials:scene.materials,engine:scene.config,sources,layout,authority});
