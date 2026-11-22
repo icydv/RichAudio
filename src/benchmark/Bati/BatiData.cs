@@ -78,31 +78,46 @@ namespace RichAudio.BatiResearch
         public bool Same(Identity x){return Valid&&x.Valid&&Handle==x.Handle&&Model==x.Model&&Generation==x.Generation&&Session==x.Session&&Creation==x.Creation;}
     }
     public enum Presence {Unknown,Present,Absent,Reused}
-    public enum Stage {MarkersLoaded,Ready,SpawnRequested,VehicleVerified,TuningApplied,RiderVerified,Armed,Accelerating,Traversing,FinishReached,Complete,Failed,Stopped,CleanupPending,Cleaned}
+    public enum Stage {MarkersLoaded,Ready,SpawnRequested,VehicleVerified,TuningApplied,RiderVerified,Armed,Accelerating,Traversing,FinishReached,Stopping,Complete,Failed,Stopped,CleanupPending,Cleaned}
     [DataContract] public sealed class Policy
     {
         [DataMember]public double MaxRunSeconds=120,MaxGapSeconds=.25,ListenerTolerance=.25,StartTolerance=1,StartSpeed=.25,DeviationTolerance=3,FinishRadius=2,StallSeconds=5;
         [DataMember]public double RequestedTaskSpeed=60,SteadySeconds=3,SteadySpanAbsolute=.5,SteadySpanFraction=.02,SteadySlope=.15;
+        [DataMember]public double MaximumStoppingSeconds=20,MaximumStoppingDistance=150,StationarySpeed=.25,StationaryHoldSeconds=1,WaypointLookahead=25;
         [DataMember]public double[] Thresholds={10,20,30,40,50};
         [DataMember]public int MaxSamples=2500,DrivingStyle=63;
         public Policy Copy(){var c=(Policy)MemberwiseClone();c.Thresholds=(double[])Thresholds.Clone();return c;}
-        public void Validate(){foreach(double d in new[]{MaxRunSeconds,MaxGapSeconds,ListenerTolerance,StartTolerance,StartSpeed,DeviationTolerance,FinishRadius,StallSeconds,RequestedTaskSpeed,SteadySeconds,SteadySpanAbsolute,SteadySpanFraction,SteadySlope})Check.That(Check.Finite(d)&&d>0,"positive policy required");Check.That(MaxRunSeconds<=120&&MaxGapSeconds<=.25&&MaxSamples>=2&&MaxSamples<=2500&&RequestedTaskSpeed<=100&&SteadySeconds>=2&&SteadySeconds<MaxRunSeconds&&Thresholds!=null&&Thresholds.Length<=16&&DrivingStyle==63,"policy bound");double last=0;foreach(var t in Thresholds){Check.That(Check.Finite(t)&&t>last&&t<=200,"ordered speed thresholds");last=t;}}
+        public void Validate(){foreach(double d in new[]{MaxRunSeconds,MaxGapSeconds,ListenerTolerance,StartTolerance,StartSpeed,DeviationTolerance,FinishRadius,StallSeconds,RequestedTaskSpeed,SteadySeconds,SteadySpanAbsolute,SteadySpanFraction,SteadySlope,MaximumStoppingSeconds,MaximumStoppingDistance,StationarySpeed,StationaryHoldSeconds,WaypointLookahead})Check.That(Check.Finite(d)&&d>0,"positive policy required");Check.That(MaxRunSeconds<=120&&MaxGapSeconds<=.25&&MaxSamples>=2&&MaxSamples<=2500&&RequestedTaskSpeed<=100&&SteadySeconds>=2&&SteadySeconds<MaxRunSeconds&&Thresholds!=null&&Thresholds.Length<=16&&(DrivingStyle==63||DrivingStyle==(63|16777216))&&MaximumStoppingSeconds<=20&&MaximumStoppingDistance<=150&&StationarySpeed<=.25&&StationaryHoldSeconds>=1&&StationaryHoldSeconds<=3&&WaypointLookahead>=FinishRadius&&WaypointLookahead<=25,"policy bound");double last=0;foreach(var t in Thresholds){Check.That(Check.Finite(t)&&t>last&&t<=200,"ordered speed thresholds");last=t;}}
+    }
+    [DataContract]public sealed class AirportRouteCandidate
+    {
+        [DataMember]public int Version=1,MarkerRevision,Queries=30;
+        [DataMember]public string Domain,SurveySession,MarkerFingerprint,Revision,RouteCoverage="PARTIAL_SAMPLED",Navigation="CANDIDATE_ONLY",Interference="HISTORICAL_NOT_CURRENT";
+        [DataMember]public string[] StopNames,RecordFingerprints;
+        [DataMember]public MarkerPoint[] Points;
+        [DataMember]public MarkerPoint StartSupport;
+        [DataMember]public bool RunoutRequired=false,ContinuousClearanceVerified=false,LiveStartApproved=false;
+        public void Validate(MarkerSet markers){Check.That(Version==1&&Queries==30&&MarkerRevision==markers.Revision&&Domain==markers.Domain&&MarkerFingerprint==markers.Fingerprint&&!string.IsNullOrEmpty(SurveySession)&&!string.IsNullOrEmpty(Revision)&&!RunoutRequired&&!ContinuousClearanceVerified&&!LiveStartApproved,"candidate provenance/uncertainty");Check.That(StopNames!=null&&StopNames.SequenceEqual(new[]{"Start","Mid1","Mid2","Mid3","Finish"})&&Points!=null&&Points.Length==5&&RecordFingerprints!=null&&RecordFingerprints.Length==6&&RecordFingerprints.All(h=>h!=null&&System.Text.RegularExpressions.Regex.IsMatch(h,"^[A-Fa-f0-9]{64}$")),"five observed stops and six pinned record hashes");foreach(var p in Points)Check.Point(p);Check.Point(StartSupport);Check.That(Check.Distance(Points[0],markers.Start)<1e-8&&Check.Distance(Points[4],markers.Finish)<1e-8,"historical endpoints unchanged");for(int i=1;i<5;i++)Check.That(Check.Distance(Points[i-1],Points[i])>=1,"distinct observed stops");Check.That(Math.Abs(StartSupport.X-markers.Start.X)<=1&&Math.Abs(StartSupport.Y-markers.Start.Y)<=1,"start support remains separately sampled");}
+        public AirportRouteCandidate Copy(){var c=(AirportRouteCandidate)MemberwiseClone();c.Points=Points==null?null:(MarkerPoint[])Points.Clone();c.StopNames=StopNames==null?null:(string[])StopNames.Clone();c.RecordFingerprints=RecordFingerprints==null?null:(string[])RecordFingerprints.Clone();return c;}
     }
     public sealed class RouteEvidence
     {
         public string Domain,Session,MarkerFingerprint,Revision;
         public MarkerPoint[] Points;
         public bool SurfaceSpawnVerified,TrafficIsolationVerified,CoverageComplete,CleanupReviewed;
+        public bool BoundedResearch,CurrentScopeReviewed,BrakingReviewed,SpawnPlacementReviewed;
+        public AirportRouteCandidate Candidate;
         public void Validate(MarkerSet markers,string session)
         {
-            Check.That(Domain=="original-synthetic-fixture"&&markers.Domain==Domain,"no runtime route-readiness producer exists");
+            Check.That(markers.Domain==Domain&&(Domain=="original-synthetic-fixture"||BoundedResearch&&Domain=="runtime-observation"),"no runtime route-readiness producer exists");
             Check.That(Session==session&&MarkerFingerprint==markers.Fingerprint&&!string.IsNullOrEmpty(Revision),"route provenance");
-            Check.That(SurfaceSpawnVerified&&TrafficIsolationVerified&&CoverageComplete&&CleanupReviewed,"route readiness incomplete");
+            if(BoundedResearch){Check.That(Candidate!=null&&CurrentScopeReviewed&&BrakingReviewed&&SpawnPlacementReviewed&&CleanupReviewed,"current bounded experiment preflight incomplete");Candidate.Validate(markers);Check.That(Points!=null&&Points.Length==5&&Points.Zip(Candidate.Points,(a,b)=>Check.Distance(a,b)<1e-8).All(x=>x),"candidate points must remain exact; no RUNOUT dependency");}
+            else Check.That(SurfaceSpawnVerified&&TrafficIsolationVerified&&CoverageComplete&&CleanupReviewed,"route readiness incomplete");
             Check.That(Points!=null&&Points.Length>=2&&Points.Length<=32,"surveyed path required");
             foreach(var p in Points)Check.Point(p);Check.That(Check.Distance(Points[0],markers.Start)<1e-8&&Check.Distance(Points[Points.Length-1],markers.Finish)<1e-8,"route cannot relocate markers");
             for(int i=1;i<Points.Length;i++)Check.That(Check.Distance(Points[i-1],Points[i])>=1,"distinct checkpoints required");
         }
-        public RouteEvidence Copy(){var c=(RouteEvidence)MemberwiseClone();if(Points!=null)c.Points=(MarkerPoint[])Points.Clone();return c;}
+        public RouteEvidence Copy(){var c=(RouteEvidence)MemberwiseClone();if(Points!=null)c.Points=(MarkerPoint[])Points.Clone();if(Candidate!=null)c.Candidate=Candidate.Copy();return c;}
     }
     [DataContract] public sealed class Reading
     {
@@ -142,6 +157,18 @@ namespace RichAudio.BatiResearch
         [DataMember]public string[] Lifecycle;
         [DataMember]public SpeedSummary Summary;
         [DataMember]public double? FailureAt;
+        [DataMember]public StoppingSummary Stopping;
+        [DataMember]public bool RunoutRequired=false;
+        [DataMember]public string Coverage="not certified";
         [DataMember]public bool FullThrottleProven=false,MechanicalTopSpeedProven=false,LiveStartSupported=false;
+    }
+    [DataContract]public sealed class StoppingSummary
+    {
+        [DataMember]public bool FinishObserved,BrakeRequested,StationaryConfirmed;
+        [DataMember]public double? FinishObservedAt,FinishSpeed,StopObservedAt,StoppingSeconds,StationarySince,StationaryObservedSeconds;
+        [DataMember]public MarkerPoint? FinishObservationPosition,StopPosition;
+        [DataMember]public double SampledDistanceAfterFinishDetection,IntegratedDistanceAfterFinishDetection,DistanceFromFinishMarker;
+        [DataMember]public string DistanceBoundary="after first accepted FINISH-detection sample; sub-sample crossing unmeasured";
+        public StoppingSummary Copy(){return (StoppingSummary)MemberwiseClone();}
     }
 }
