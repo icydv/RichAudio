@@ -265,7 +265,9 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality,
 function finish(error,reason=error?'producer-fault':'graceful-stop'){if(stopped)return;const stopAt=performance.now();stopped=true;engine.beginStopInstalledScene01(stopAt,error?'producer-error':'stop-intent');engine.close();
  const world=installedScenes;installedScenes=null;
  if(viewerClient){viewerClient.close().catch(()=>{});viewerClient=null;}viewer=false;soundMapRecordingRequest01=false;soundMapBackgroundRequest01=false;status();if(error){log({type:'gameplay-error',code:error.message});process.exitCode=1;}if(qualification)log({type:'producer-terminal',reason,error:error?.message??null,worldWorkerOwned:world!==null});input.close();process.stdin.pause();
- void (async()=>{try{if(clockedMap)await clockedMap.close();if(world){const r=await world.close();log({type:'installed-world-worker-closed',stopAt,...r});if(!r.workerJoined)process.exitCode=1;}}
+ void (async()=>{if(clockedMap)try{await clockedMap.close();}
+ catch(e){log({type:'clocked-map-close-failed',reason:e.message});process.exitCode=1;}
+ try{if(world){const r=await world.close();log({type:'installed-world-worker-closed',stopAt,...r});if(!r.workerJoined)process.exitCode=1;}}
  catch(e){log({type:'installed-world-worker-close-failed',stopAt,reason:e.message});process.exitCode=1;}
  finally{evidence?.close();try{clockedEvidence?.close(reason,error);}catch(e){process.exitCode=1;log({type:'gameplay-error',code:e.message});}}})();
 }
