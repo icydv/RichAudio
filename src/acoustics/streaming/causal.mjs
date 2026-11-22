@@ -27,6 +27,10 @@ function state(s) {
     "directivity",
   );
   requireValue(Number.isFinite(nearFieldRadius) && nearFieldRadius >= 0 && nearFieldRadius <= 10, 'finite source radius');
+  const motionObservation = Number.isSafeInteger(s.observationTicks) ? s.observationTicks : null;
+  const identity = s.motionIdentity ?? s.listenerKind;
+  const motionIdentity = typeof identity === "string" && /^[\w:-]{1,64}$/.test(identity) ? identity : null;
+  const motionTime = Number.isFinite(s.motionTime) ? s.motionTime : null;
   return {
     position,
     velocity,
@@ -37,6 +41,9 @@ function state(s) {
     directivity,
     nearFieldRadius,
     emitting: s.emitting !== false,
+    motionObservation,
+    motionIdentity,
+    motionTime,
   };
 }
 export class CausalSimulation {
@@ -44,7 +51,8 @@ export class CausalSimulation {
   get installedPropagation01(){return {...this.#installedPropagation01};}
   constructor(
     scene,
-    { staleAfter = 0.25, extrapolationLimit = 0.05, historySeconds = 2.5, allowMissingScene = false } = {},
+    { staleAfter = 0.25, extrapolationLimit = 0.05, historySeconds = 2.5, allowMissingScene = false,
+      validateSampledMotion = false } = {},
   ) {
     requireValue(validated.scene(scene) || (allowMissingScene && scene === null), "validated A06 scene required");
     requireValue(
@@ -57,6 +65,7 @@ export class CausalSimulation {
       "history/age budgets",
     );
     this.scene = scene;
+    this.validateSampledMotion = validateSampledMotion;
     this.staleAfter = staleAfter;
     this.extrapolationLimit = extrapolationLimit;
     this.historySeconds = historySeconds;
@@ -163,7 +172,7 @@ export class CausalSimulation {
     const listener = state(snapshot.listener);
     if (snapshot.paused) listener.valid = false;
     if (previous) {
-      const check = (old, next) => {
+      const check = (track, old, next) => {
         if (
           !old ||
           !next ||
@@ -172,19 +181,29 @@ export class CausalSimulation {
           old.generation !== next.generation
         )
           return;
-        const speed =
-          length(next.position.map((x, i) => x - old.position[i])) /
-          (snapshot.time - previous.time);
-        requireValue(speed <= 100 + 1e-6, "undeclared position discontinuity");
+        // The private powertrain adapter validates raw acquisitions on their
+        // own clocks. The render reserve can fill five 10.67 ms blocks in
+        // one burst, so their frame index does not measure observed motion.
+        const sampled = this.validateSampledMotion && old.motionTime !== null && next.motionTime !== null;
+        const elapsed = sampled ? next.motionTime - old.motionTime : snapshot.time - previous.time;
+        const distance = length(next.position.map((x, i) => x - old.position[i]));
+        const speed = elapsed > 0 ? distance / elapsed : distance <= 1e-9 ? 0 : Infinity;
+        if (elapsed < 0 || speed > 100 + 1e-6) {
+          const identity = next.motionIdentity ? ` id=${next.motionIdentity}` : "";
+          const render = `${previous.time.toFixed(5)}->${snapshot.time.toFixed(5)}`;
+          const observation = `${old.motionObservation ?? "?"}->${next.motionObservation ?? "?"}`;
+          const query = `${old.motionTime?.toFixed(5) ?? "?"}->${next.motionTime?.toFixed(5) ?? "?"}`;
+          throw Error(`undeclared position discontinuity: causal-render ${track}${identity} g=${next.generation} render=${render} obs=${observation} query=${query} speed=${speed.toFixed(2)} basis=${sampled ? "sample" : "frame"}`);
+        }
         requireValue(
           dot(old.forward, next.forward) > -0.99 &&
             dot(old.up, next.up) > -0.99,
           "orientation discontinuity requires generation",
         );
       };
-      check(previous.listener, listener);
+      check("listener", previous.listener, listener);
       for (const [id, next] of Object.entries(sources))
-        check(previous.sources[id], next);
+        check(`source ${id}`, previous.sources[id], next);
     }
     requireValue(this.epoch < 1000000, "session restart budget");
     if (changing) {

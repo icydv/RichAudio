@@ -31,6 +31,10 @@ function axes([x,y,z,w]) {
   return {forward:[2*(x*y-z*w),1-2*(x*x+z*z),2*(y*z+x*w)],up:[2*(x*z+y*w),2*(y*z-x*w),1-2*(x*x+y*y)]};
 }
 const same=(a,b)=>a&&b&&['session','generation','coordinates','units','listenerKind'].every(k=>a[k]===b[k]);
+function motionError(stage, a, b, speed) {
+  const first = a.state.observationTicks, last = b.state.observationTicks;
+  return Error(`undeclared position discontinuity: ${stage} listener ${b.state.listenerKind} g=${b.state.generation} obs=${first}->${last} map=${a.time.toFixed(5)}->${b.time.toFixed(5)} speed=${speed.toFixed(2)}`);
+}
 // Retrospective presentation permits interpolation between observations which
 // have ALREADY arrived. The interactive delay is measured and converges only
 // while the pose is stationary. This is control latency, not acoustic distance.
@@ -132,13 +136,10 @@ export class ListenerPlayout {
         dot(s.up, previous.state.up) < -0.99
       )
         throw Error("Listener orientation discontinuity needs generation");
-      if (
-        s.units === "metres" &&
-        norm(s.position.map((x, i) => x - previous.state.position[i])) /
-          (time - previous.time) >
-          100 + 1e-6
-      )
-        throw Error("Listener position discontinuity needs generation");
+      if (s.units === "metres") {
+        const speed = norm(s.position.map((x, i) => x - previous.state.position[i])) / (time - previous.time);
+        if (speed > 100 + 1e-6) throw motionError("listener-receipt", previous, {state: s, time}, speed);
+      }
     }
     if (changed) {
       if(!retainGeneration)this.records = [];
@@ -289,7 +290,7 @@ export class ListenerPlayout {
       // cuts were separated above; no new generation or clamped pose is made.
       if(this.recoveryPolicy==='arrived-segments-01'){
         const speed=norm(b.state.position.map((v,i)=>v-a.state.position[i]))/(b.time-a.time);
-        if(speed>100+1e-6){this.stats.rejectedObservedSegments++;throw Error('undeclared position discontinuity');}
+        if(speed>100+1e-6){this.stats.rejectedObservedSegments++;throw motionError("listener-interpolation", a, b, speed);}
         this.stats.qualifiedObservedSegmentBlocks++;
       }
       const u = (targetTime - a.time) / (b.time - a.time),

@@ -17,6 +17,14 @@ const FS=48000,BLOCK=512,MAX=2,unit=v=>{const n=Math.hypot(...v);if(n<1e-8)throw
 const sameVehicle01=(a,b)=>a?.valid&&b.valid&&a.generation===b.generation&&a.model===b.model&&a.context===b.context;
 const voiceIdentity01=v=>`${v.id}:${v.generation}:${v.model}:${v.context}`+(v.acquisition01===undefined?'':':'+v.acquisition01);
 const mix=(a,b,u)=>a.map((x,i)=>x+(b[i]-x)*u),distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
+function validatePowertrainMotion(track, old, current, frequency) {
+ if(!old?.valid||!current.valid||old.generation!==current.generation)return;
+ const elapsed=(current.observationTicks-old.observationTicks)/frequency;
+ if(!(elapsed>0))throw Error(`non-advancing powertrain observation: ${track} g=${current.generation} obs=${old.observationTicks}->${current.observationTicks} qpcHz=${frequency}`);
+ const speed=distance(old.position,current.position)/elapsed;
+ if(speed>100+1e-6)
+  throw Error(`undeclared position discontinuity: input ${track} g=${current.generation} obs=${old.observationTicks}->${current.observationTicks} qpcHz=${frequency} speed=${speed.toFixed(2)}`);
+}
 const pcmCounters=()=>({nonzeroBlocks:0,peak:0,sumSquares:0});
 // Fixed-size diagnostics only: observe the original PCM without changing it.
 function observePcmBlock(left,counters,right=null){let peak=0,energy=0;
@@ -56,7 +64,7 @@ export class StockGameplay {
   // its own history and enters the same finite propagation/path solver.
   this.ids=this.slots.flatMap(s=>['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`)).concat(this.slots.map(s=>`stock:slot${s.index}:aero`));
   this.direct=conditionalStockScene(this.ids,session,vehicleDistanceSceneOptions('authored-detail-loss-v1'));
-  this.pipeline=createStockVehiclePipeline({scene:this.direct,sourceIds:this.ids,masterGain:.175,continuousRates:true,
+  this.pipeline=createStockVehiclePipeline({scene:this.direct,sourceIds:this.ids,masterGain:.175,continuousRates:true,validateSampledMotion:privatePowertrain,
     controlFilter:(c,r)=>this.filter(c,r)});
   this.inputs=Object.fromEntries(this.ids.map(id=>[id,new Float32Array(BLOCK)]));this.left=new Float32Array(BLOCK);this.right=new Float32Array(BLOCK);
   this.localAirflow=[new Float32Array(BLOCK),new Float32Array(BLOCK)];
@@ -132,7 +140,14 @@ export class StockGameplay {
    if(frame.vehicles.filter(v=>v.riderAttached===true).length>1)throw Error('one observed local rider');
    this.operatingEmission?.observe(frame);
    const previous=this.playout.lastState;
-   this.playout.add({type:'listener',state,receiptAgeMs:ageMs},this.pipeline.renderer.frame/FS,this.now());this.playout.delayTarget=this.controlDelayMs/1000;
+   const receivedAt=this.now();
+   this.playout.add({type:'listener',state,receiptAgeMs:ageMs},this.pipeline.renderer.frame/FS,receivedAt);this.playout.delayTarget=this.controlDelayMs/1000;
+   if(this.privatePowertrain){
+    validatePowertrainMotion("listener camera",previous,state,state.clockFrequency);
+    const oldVehicles=this.snapshots.at(-1)?.frame.vehicles;
+    for(const vehicle of frame.vehicles)
+     validatePowertrainMotion(`source ${vehicle.id}`,oldVehicles?.find(old=>old.id===vehicle.id&&sameVehicle01(old,vehicle)),vehicle,state.clockFrequency);
+   }
    const time=this.playout.records.at(-1).time;
    if(this.privatePowertrain&&this.powertrainClock?.listenerGeneration!==state.generation){
     const receipt=this.playout.records.at(-1);
@@ -446,7 +461,9 @@ export class StockGameplay {
   const afterAdmission=this.now();
   this.captureTiming=this.latencyDiagnostics&&this.stats.blocks%8===0;this.lastTiming=null;if(this.captureTiming)this.latencyBrackets=[];
   if(this.pipeline.simulation.scene!==this.direct&&this.now()>=this.sceneExpiry){this.pipeline.replaceScene(this.direct);this.staticSceneBinding=null;this.stats.geometryFallbacks++;}
-  const listener=this.sample.state??{position:[0,0,0],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],valid:false,generation:this.lastGeneration||1};
+  const listener=this.sample.state&&this.privatePowertrain
+   ?{...this.sample.state,motionTime:this.sample.targetTime}
+   :this.sample.state??{position:[0,0,0],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],valid:false,generation:this.lastGeneration||1};
   const independentSource=this.continuityPolicy==='camera-source-01'&&!['missing','stale-wall-clock','clock-invalid','invalid-or-paused','invalid-interval','observation-gap'].includes(this.sample.mode);
   const vehicleTarget=this.privatePowertrain?this.capPowertrainTarget(target,true):this.sample.targetTime;
   let offered=this.sample.state||independentSource?this.vehiclesAt(vehicleTarget):[];
@@ -502,11 +519,12 @@ export class StockGameplay {
    const profile=this.profiles?.profiles?.[s.source.vehicle.model];
    for(const [i,role]of ['engine','exhaust'].entries()){
     sources.push({id:ids[i],generation:s.generation,position:this.stockEmitterPosition01(v,role,s.source.vehicle.model),velocity:v.velocity,
+     observationTicks:v.observationTicks,motionIdentity:v.id,motionTime:vehicleTarget,
      forward:v.forward.map(x=>i?-x:x),up:v.up,directivity:profile?.directivity?.[role]??(i?.65:.1),valid:true,emitting:true});}
    if(v.model===0xf9300cc5){const at=this.now(),flow=s.airflow.renderInto({velocity:v.velocity,enabled:this.settings.airflowEnabled,level:this.settings.airflowLevel,riderAttached:v.riderAttached===true,riderViewAttached:v.riderViewAttached===true&&!!this.sample.state,valid:!!this.sample.state},this.inputs[aeroId],...s.local);
     this.airflowState.maximumSynthesisMs=Math.max(this.airflowState.maximumSynthesisMs,this.now()-at);this.airflowState.riderActive||=flow.riderActive;
     if(this.settings.airflowEnabled)for(let c=0;c<2;c++)for(let i=0;i<BLOCK;i++)this.localAirflow[c][i]+=s.local[c][i];
-    if(this.settings.airflowEnabled){sources.push({id:aeroId,generation:s.generation,position:this.stockEmitterPosition01(v,'aero'),velocity:v.velocity,forward:v.forward,up:v.up,directivity:.15,valid:true,emitting:flow.exteriorActive});this.airflowState.exteriorSources++;}
+    if(this.settings.airflowEnabled){sources.push({id:aeroId,generation:s.generation,position:this.stockEmitterPosition01(v,'aero'),velocity:v.velocity,forward:v.forward,up:v.up,directivity:.15,valid:true,emitting:flow.exteriorActive,observationTicks:v.observationTicks,motionIdentity:v.id,motionTime:vehicleTarget});this.airflowState.exteriorSources++;}
    }
   }
   this.stats.maximumActive=Math.max(this.stats.maximumActive,selected.length);
