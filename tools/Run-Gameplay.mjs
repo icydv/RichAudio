@@ -202,9 +202,12 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality,
     unpreparedExterior:d.installedGeometry.unpreparedExterior01}:{} )},
   outputPeak:d.outputPeak,sourceStates:d.sourceStates,stageCounters:d.stageCounters,...(fleet?{fleetPopulation:d.fleetPopulation,lifecycle:d.lifecycle}:{}),
   ...(privatePowertrain?{playoutTiming:engine.powertrainTiming()}:{}),
-  ...(powertrainVoiceEvidence?{powertrainVoiceEvidence:powertrainVoiceEvidence.report()}:{}),
+  ...(powertrainVoiceEvidence?{powertrainEvidenceFrame:sequence}:{}),
   fallbackReason:d.geometry==='conditional-direct-unobserved-space-assumed-clear'?'Additive; conditional direct sound without collision coverage':b.fallbackReason,
   controlDelayMs:d.controlDelayMs,propagationLimitSeconds:2,arrivals:d.arrivals,retired:d.retired,latencyRows,latencyRowsOmitted,...(latencyProfile.id==='baseline'?{}:{latencyProfile:latencyProfile.id,producerCreditBlocks:latencyProfile.producerCreditBlocks})}});
+ // A full high-rev trace and a mapped reflection snapshot can exceed the
+ // diagnostic pipe's per-record bound together. Both belong to this status.
+ if(powertrainVoiceEvidence)log({type:'powertrain-voice-evidence',frame:sequence,voice:powertrainVoiceEvidence.report()});
 }
 function finish(error,reason=error?'producer-fault':'graceful-stop'){if(stopped)return;const stopAt=performance.now();stopped=true;engine.beginStopInstalledScene01(stopAt,error?'producer-error':'stop-intent');engine.close();
  const world=installedScenes;installedScenes=null;

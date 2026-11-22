@@ -230,11 +230,27 @@ namespace RichAudio.Beacon.Windows {
    }
    delivery.Node(row,dropped);
   }
-  void ReadDiagnostics(){try{string line;while((!stop||drainProducer)&&(line=child.StandardError.ReadLine())!=null){long receivedAt=Stopwatch.GetTimestamp();if(line.Length>32768)throw new InvalidDataException("producer diagnostic size");
+  void ReadDiagnostics(){try{string line;Dictionary<string,object> pendingPowertrainStatus=null;while((!stop||drainProducer)&&(line=child.StandardError.ReadLine())!=null){long receivedAt=Stopwatch.GetTimestamp();if(line.Length>32768)throw new InvalidDataException("producer diagnostic size");
    if(delivery!=null&&line.StartsWith("delivery01|",StringComparison.Ordinal)){ReadDelivery(line,receivedAt);continue;}
    var d=Json.DeserializeObject(line)as Dictionary<string,object>;object type;
    if(d==null||!d.TryGetValue("type",out type))continue;
-   if(powertrain!=null&&(string)type=="gameplay-status")RetainPowertrainSourceEvidence(d,receivedAt);
+   if(powertrain!=null&&(string)type=="gameplay-status"){
+    object raw;
+    pendingPowertrainStatus=d.TryGetValue("status",out raw)?raw as Dictionary<string,object>:null;
+    object legacyVoice;
+    if(pendingPowertrainStatus!=null&&pendingPowertrainStatus.TryGetValue("powertrainVoiceEvidence",out legacyVoice)){
+     RetainPowertrainSourceEvidence(pendingPowertrainStatus,legacyVoice,receivedAt);
+     pendingPowertrainStatus=null;
+    }
+   }
+   if(powertrain!=null&&(string)type=="powertrain-voice-evidence"){
+    object statusFrame,voiceFrame,voice;
+    if(pendingPowertrainStatus!=null&&pendingPowertrainStatus.TryGetValue("powertrainEvidenceFrame",out statusFrame)&&
+       d.TryGetValue("frame",out voiceFrame)&&Object.Equals(statusFrame,voiceFrame)&&d.TryGetValue("voice",out voice))
+     RetainPowertrainSourceEvidence(pendingPowertrainStatus,voice,receivedAt);
+    pendingPowertrainStatus=null;
+    continue;
+   }
    lock(sync){if(d!=null){
     string kind=(string)type;
     object hardMiss;
@@ -248,11 +264,8 @@ namespace RichAudio.Beacon.Windows {
     }
     if(kind=="producer-terminal"||kind=="installed-world-worker-closed"||kind=="installed-world-worker-close-failed"||kind=="gameplay-error")Record("producer-evidence",kind,d);
     if((string)type=="gameplay-status"){workerStatus=line;if(latencyProfile.Id!="baseline"&&!creditWindow.SourcePrepared&&PreparedSource(d)){preparedSourceAtQpc=receivedAt;creditWindow.SourcePrepared=true;}}if((string)type=="gameplay-error"){object code;workerFailure=d.TryGetValue("code",out code)?Convert.ToString(code):"unspecified worker failure";}if((string)type=="gameplay-ready"){workerReady=true;wake.Set();}if((string)type=="producer-block-timing"){if(fixtureLatency!=null){fixtureLatency.Producer(d,receivedAt);object nodeDone;if(d.TryGetValue("stdoutCompletedNodeMs",out nodeDone))fixtureLatency.Progress("node-output",Convert.ToInt64(d["producerFrameStart"])/512,receivedAt,0,ring.BufferedFrames,512,0,Convert.ToDouble(nodeDone));}var capture=recording;if(capture!=null&&line.Length<=1900&&Interlocked.Read(ref producerTimingRows)<1500){if(capture.Event("producer-block-timing",receivedAt,d))Interlocked.Increment(ref producerTimingRows);else Interlocked.Increment(ref producerTimingRowsRejected);}else Interlocked.Increment(ref producerTimingRowsRejected);}}}}}catch(Exception e){if(!stop)Fail(e);}}
-  void RetainPowertrainSourceEvidence(Dictionary<string,object> report,long receivedAt){
-   object raw,voice,playout,geometry=null,reflectionPaths=null,provenance=null;
-   if(!report.TryGetValue("status",out raw))return;
-   var status=raw as Dictionary<string,object>;
-   if(status==null||!status.TryGetValue("powertrainVoiceEvidence",out voice))return;
+  void RetainPowertrainSourceEvidence(Dictionary<string,object> status,object voice,long receivedAt){
+   object raw,playout,geometry=null,reflectionPaths=null,provenance=null;
    status.TryGetValue("playoutTiming",out playout);
    if(config.PowertrainWorld){
     status.TryGetValue("installedScene",out geometry);

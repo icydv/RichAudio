@@ -53,7 +53,7 @@ async function runMotion(check) {
     const began = performance.now();
     let sequence = 0;
     async function pose({listenerShift = 0, sourceShift = 0, generation = 1,
-      sourceGeneration = 1, vehicle = true, listenerSpeed = 0, sourceSpeed = 0} = {}) {
+      sourceGeneration = 1, vehicle = true, listenerSpeed = 0, sourceSpeed = 0, operatingPoint = .55} = {}) {
       const ms = performance.now() - began;
       const observationTicks = Math.round((1000 + ms) * frequency / 1000);
       const listener = {
@@ -67,7 +67,7 @@ async function runMotion(check) {
       const vehicles = vehicle ? [{
         id: playerId, model: 0xb779a091, generation: sourceGeneration, context: 'player',
         observationTicks: observationTicks + 1000, position: [sourceShift + sourceSpeed * ms / 1000, 8, 1],
-        velocity: [sourceSpeed, 0, 0], ...directions, valid: true, running: true, operatingPoint: .55,
+        velocity: [sourceSpeed, 0, 0], ...directions, valid: true, running: true, operatingPoint,
       }] : [];
       write({type: 'snapshot', ageMs: 0, validForMs: 220, frame: {
         version: 1, session, listener, vehicles, validThroughTicks: observationTicks + frequency / 4,
@@ -110,6 +110,19 @@ test('one-car producer keeps ordinary observed motion through PCM credit bursts'
       assert.equal(rig.rows.some(row => row.type === 'gameplay-error'), false);
     });
   });
+
+test('high-rev diagnostics have a separate bounded record paired with their gameplay status', {skip: !manifest}, async () => {
+  await runMotion(async rig => {
+    await warm(rig, {operatingPoint:.91});
+    await rig.waitFor(() => rig.rows.some(row => row.type === 'powertrain-voice-evidence' && row.voice.highRev?.rendered.length));
+    const index = rig.rows.findIndex(row => row.type === 'powertrain-voice-evidence' && row.voice.highRev?.rendered.length);
+    const status = rig.rows[index - 1];
+    assert.equal(status.type, 'gameplay-status');
+    assert.equal(status.status.powertrainEvidenceFrame, rig.rows[index].frame);
+    assert.equal(status.status.powertrainVoiceEvidence, undefined);
+    assert.ok(JSON.stringify(status).length <= 32768 && JSON.stringify(rig.rows[index]).length <= 32768);
+  });
+});
 
 test('one-car producer accepts declared camera and source generations and retires a removed source',
   {skip: !manifest}, async () => {
