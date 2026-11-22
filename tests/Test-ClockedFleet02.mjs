@@ -149,6 +149,62 @@ test('fleet dry sources remain sample-exact and stereo agrees with separate rend
  }finally{await Promise.all([fleet,left,right].map(e=>e.g.close()));}
 });
 
+test('a fresh contributor cannot extend the lease of another vehicle',async()=>{
+ const e=engine(true),g=e.g;
+ try{
+  const first=frame(0,[['a'],['b']]);
+  first.vehicles[1].observationTicks-=45*first.listener.clockFrequency/1000;
+  g.accept(first,100,150);
+  const target=g.snapshots.at(-1).time;
+  e.at(104);
+  assert.deepEqual(g.vehiclesAt(target).map(v=>v.id),['a','b']);
+  e.at(106);
+  assert.deepEqual(g.vehiclesAt(target).map(v=>v.id),['a']);
+
+  const expired=g.snapshots.at(-1).vehiclesById.get('b').acquisition01;
+  const second=frame(19,[['a'],['b']]);
+  // Selecting an older left interpolation bracket cannot renew its lease.
+  g.accept(second,0,250);
+  const between=target+0.01;
+  assert.deepEqual(g.vehiclesAt(between).map(v=>v.id),['a']);
+  assert.notEqual(g.snapshots.at(-1).vehiclesById.get('b').acquisition01,expired,
+    'a new observation after the contributor lease expired starts a fresh history');
+ }finally{await g.close();}
+});
+
+test('retiring a repeated fleet observation releases its wall paths while the other voice continues',async()=>{
+ const e=engine(true),g=e.g;
+ const cars=[['a',1,model,.32,-5,-3],['b',1,other,.72,-8,-3]];
+ try{
+  const {scene}=composeSceneUnion03({contexts:budgetContexts042({wall:true,until:9000}),
+   listenerAnchor:[-2,-3,1],session:budgetSession042,worldDigest:budgetWorld042,generation:1,geometryTimeMs:0});
+  g.setPreparedResourceScene03(scene,{worldDigest:budgetWorld042,generation:1});
+  for(let b=0;b<50;b++)await step(e,b,cars);
+  const a=slot(g,'a').source,b=slot(g,'b'),oldSource=b.source,oldGeneration=b.generation;
+  const oldEmitters=new Set(['engine','exhaust'].map(role=>'stock:slot'+b.index+':'+role));
+  assert(g.pipeline.lastControl.paths.some(p=>p.order===1&&oldEmitters.has(p.sourceId)));
+
+  const frozenTick=frame(49,cars).vehicles[1].observationTicks;
+  const repeated=frame(50,cars);
+  repeated.vehicles[1].observationTicks=frozenTick;
+  e.at(50*512/48);g.accept(repeated,0,250);await g.render();
+  assert.equal(slot(g,'a').source,a);
+  assert.equal(slot(g,'b'),undefined);
+  const releasing=g.pipeline.renderer.slots.filter(path=>path.active&&oldEmitters.has(path.source.id));
+  assert(releasing.some(path=>path.releaseLeft>0&&path.releaseLeft<=960));
+
+  for(let i=51;i<78;i++)await step(e,i,[cars[0]]);
+  assert.equal(slot(g,'a').source,a);
+  assert(!g.pipeline.renderer.slots.some(path=>path.active&&oldEmitters.has(path.source.id)));
+  for(let i=78;i<94;i++)await step(e,i,[cars[0],['b',2,other,.17,-8,-3]]);
+  const acquired=slot(g,'b');
+  assert.notEqual(acquired.source,oldSource);
+  assert(acquired.generation>oldGeneration);
+  assert.equal(acquired.vehicle.generation,2);
+  assert.equal(slot(g,'a').source,a);
+ }finally{await g.close();}
+});
+
 test('qualified authored geometry can renew and expire without replacing active source owners',async()=>{
  const e=engine(true),g=e.g,vehicles=[['a'],['b',1,other,.7,2,2]];
  try{

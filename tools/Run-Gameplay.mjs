@@ -17,14 +17,10 @@ import {normalQualification01,openNormalQualificationEvidence01} from '../src/ac
 import {ClockedFleetEvidence02} from '../src/acoustics/vehicle/clocked-fleet-evidence02.mjs';
 import {enableStockGrainTiming04} from '../src/acoustics/vehicle/stock-grain.mjs';
 import {PowertrainVoiceEvidence} from '../src/acoustics/vehicle/powertrain-voice-evidence.mjs';
+import {powertrainRegistry,validatePowertrainWorld} from '../src/acoustics/vehicle/powertrain-registry.mjs';
 const args=process.argv.slice(2);if(args.length!==4||args[0]!=='--manifest'||args[2]!=='--session')throw Error('owned manifest/session required');
 const manifest=path.resolve(args[1]),root=path.dirname(manifest),config=JSON.parse(fs.readFileSync(manifest,'utf8')),session=args[3];
-const privatePowertrain=config.powertrainVoice==='bati-player-on-adder';
-const adderModel=0xb779a091,batiModel=0xf9300cc5;
-if(config.powertrainVoice!==undefined&&(!privatePowertrain||
-  config.eligible?.length!==1||config.eligible[0].model!==adderModel||config.eligible[0].context!=='player'||
-  config.acousticWorld!==false||config.demoProfile||config.vehicleSourcePolicy))
- throw Error('one stock ADDER player and a dedicated private powertrain package required');
+const privatePowertrain=validatePowertrainWorld(config);
 const latencyProfile=resolveLatencyProfile(config.latencyProfile);
 if(latencyProfile.id==='low-latency-01'&&(config.demoProfile!=='PLAYABLE-13'||config.eligible?.length!==1||config.eligible[0].model!==0xf9300cc5||config.eligible[0].context!=='player'))throw Error('LOW-LATENCY-01 requires the Bati-player demonstration package');
 validateStreetLatencySelection01(config);
@@ -40,23 +36,8 @@ const stockRegistry=loadInstalledStockRegistry({catalogFile:inside(config.catalo
 const profiles=JSON.parse(fs.readFileSync(inside(config.profiles),'utf8'));
 // Resolve the donor at the bank boundary. Every gameplay frame and voice
 // identity retains the observed ADDER model and generation.
-const privateTarget=(model,context)=>model===adderModel&&context==='player';
-const batiVoice=privatePowertrain?stockRegistry.resolve(batiModel,'player'):null;
-if(privatePowertrain&&(batiVoice?.status!=='available'||batiVoice.bank.model!=='bati'))
- throw Error('verified six-layer Bati player bank unavailable');
-const registry=privatePowertrain?{
- resolve:(model,context)=>privateTarget(model,context)?{...batiVoice,model:'adder',modelHash:model}:
-  {status:'unavailable',reason:'unbound-private-powertrain-vehicle'},
- createSource(model,context,options){
-  if(!privateTarget(model,context))throw Error('unbound private powertrain vehicle');
-  return stockRegistry.createSource(batiModel,context,options);
- },
- prepareSource10(model,context){
-  if(!privateTarget(model,context))throw Error('unbound private powertrain vehicle');
-  return stockRegistry.prepareSource10(batiModel,context);
- },
- preparationDiagnostics10:()=>stockRegistry.preparationDiagnostics10(),
-}:stockRegistry;
+const registry=privatePowertrain?powertrainRegistry(stockRegistry):stockRegistry;
+const privateVoice=privatePowertrain?registry.resolve(config.eligible[0].model,'player'):null;
 // Prepare pure bank data and bounded untouched voices before host readiness.
 // The normal eligibility selection still controls when any voice is acquired.
 const startupBegan=performance.now(),startupPairs=fleet?registry.fleetPreparationPairs():config.eligible;
@@ -125,6 +106,9 @@ let processingOverrunRows=0,processingOverrunRowsOmitted=0,worldAdmissionRows=0,
 // archive decode or cache read is performed by pump() or an audio callback.
 if(!config.demoProfile&&config.acousticWorld!==false){
  const c=config.acousticWorld??{},worldRoot=c.cacheRoot??'.local/plugin-world-warmup';
+ const retained=c.retainedManifestSHA256===undefined?{}:{
+  expectedManifestSHA256:c.retainedManifestSHA256,catalogSHA256:c.catalogSHA256,resourceIds:c.resourceIds,
+ };
  // A prepared package can explicitly reuse its supervisor's private cache.
  // Its two relative metadata paths cannot escape that declared cache root.
  const privateCacheRoot=c.privateCacheRoot===undefined?root:path.resolve(c.privateCacheRoot);
@@ -135,6 +119,7 @@ if(!config.demoProfile&&config.acousticWorld!==false){
  // Match the bounded query's maximum resource count so a repeated dense
  // workset can warm instead of evicting its own sources on every scan.
  const worldConfig={manifestPath:worldInside(c.manifestPath??worldRoot+'/geometry/manifest.json'),catalogPath:worldInside(c.catalogPath??worldRoot+'/resolved/resolved-catalog.json'),expectedGameSHA256:config.gameSha256,
+  ...retained,
   ...(c.catalogSHA256?{expectedCatalogSHA256:c.catalogSHA256}:{}),...(derivedCacheRoot?{privateRoot:derivedCacheRoot}:{}),...(!qualification&&(c.initialObservationPath!==undefined||c.privateCacheRoot===undefined)?{initialObservationPath:worldInside(c.initialObservationPath??worldRoot+'/geometry/initial-observation01.json')}:{ }),maximumResidentResources:16};
  installedScenes=new InstalledSceneService01({config:worldConfig,session,onStatus:s=>{
   worldStatus={stage:s.stage,installedWorldVerified:false,genuineResourceVerified:s.genuineResourceVerified===true,preparation:s.preparation??{completedEligibleTiles:0,eligibleTiles:0,totalTiles:0},
@@ -185,7 +170,8 @@ function checkMeasurementReadiness(d){
 function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality,readiness=d.environmentalReadiness01;
  checkMeasurementReadiness(d);
  const consumerWorldStage=readiness.state==='active'?(readiness.renewalQualified?'active-conditional-local-scene':'active-local-scene-renewal-at-risk'):readiness.state==='lost'?'local-scene-continuity-lost':['stopping','stopped'].includes(readiness.state)?readiness.state:readiness.managed?'preparing-local-scene':worldStatus.stage;
- try{if(soundMapRequired01()&&(!viewerClient||viewerClient.closed))viewerClient=new SoundMapClient(path.join(root,'.local/soundmap/service.json'));if(!soundMapRequired01()&&viewerClient){viewerClient.close().catch(()=>{});viewerClient=null;}}catch{}
+ const descriptor=path.join(root,'.local/soundmap/service.json');
+ try{if(soundMapRequired01()&&(!viewerClient||viewerClient.closed)&&fs.existsSync(descriptor))viewerClient=new SoundMapClient(descriptor);if(!soundMapRequired01()&&viewerClient){viewerClient.close().catch(()=>{});viewerClient=null;}}catch{}
  log({type:'gameplay-status',status:{featureProfile:'STREET-01-main',requestedQuality:q.requestedQuality,activeQuality:q.activeQuality,pathBudget:engine.pipeline.renderer.maxPathsPerSource,
   requestedAcceleration:b.requestedAcceleration,activeAcceleration:b.activeAcceleration,gpuDevice:b.gpuDevice,gpuCapability:b.gpuResultsApplied>0?'hardware-directcompute':'unestablished',gpuResultsApplied:b.gpuResultsApplied??b.totals?.gpuResultsApplied??0,
   droppedResults:b.droppedResults??b.totals?.droppedResults??0,qualityDeadlineMisses:d.deadlineMisses,activeSources:d.active,activeVehicles:d.active,activeEmitters:d.active*2+(d.airflow?.exteriorSources??0),sourceBudget:d.activeLimit,
@@ -293,7 +279,12 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
     {state:'prepared',reason:decision?.requestId===candidate.requestId?decision.reason:'awaiting-consumer-decision',remainingMs:candidate.expiresAt-now}:null;
    const worldContext01=current?{epoch,catalogue,ownerSession:session,generation:listener.generation,position:listener.position,ageMs,
     interior,interiorKey,rendererDecision01}:null;
-   viewerClient.offer({...frame,worldContext01},visual.soundMapGeometry);
+   const renderedVoices=config.powertrainWorld?engine.slots.filter(slot=>slot.source&&slot.vehicle).map(slot=>({
+    vehicle:'ADDER',model:slot.vehicle.model,context:slot.vehicle.context,observedGeneration:slot.vehicle.generation,
+    voice:'Bati development',operatingPoint:slot.vehicle.operatingPoint,
+    engine:'stock:slot'+slot.index+':engine',exhaust:'stock:slot'+slot.index+':exhaust',
+   })):undefined;
+   viewerClient.offer({...frame,worldContext01,renderedVoices},visual.soundMapGeometry);
   }catch{}
   if(engine.lastTiming){
    // The host's existing bounded diagnostic writer receives this on its stderr
@@ -330,6 +321,6 @@ input.on('close',()=>{if(!stopped)finish(null,'host-control-eof');});process.on(
 const timer=setInterval(()=>{if(!stopped)status();},500);timer.unref();
 if(qualification)setTimeout(()=>finish(Error('normal qualification cutoff reached'),'coordinator-cutoff'),Math.max(1,qualification.stopBy-Date.now())).unref();
 log({type:'gameplay-ready',featureProfile:'STREET-01-main',...(privatePowertrain?{
- powertrainVoice:config.powertrainVoice,observedModel:adderModel,voiceModel:batiVoice.bank.model,
- voiceAwcSha256:batiVoice.bank.provenance.awcSha256
+ powertrainVoice:config.powertrainVoice,observedModel:privateVoice.modelHash,voiceModel:privateVoice.bank.model,
+ voiceAwcSha256:privateVoice.bank.provenance.awcSha256
 }:{}),...sourceStartupPreparation10,startupVoices,normalControlWarmup,mode:'experimental-additive',nativeSuppression:false,airflowImplemented:true,airflowEnabled:engine.settings.airflowEnabled,installedWorldQualified:false});

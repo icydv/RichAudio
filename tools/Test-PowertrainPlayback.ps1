@@ -3,7 +3,8 @@
 param(
     [Parameter(Mandatory)][string]$Manifest,
     [Parameter(Mandatory)][string]$OutputRoot,
-    [switch]$ObserveBaselineExpiry
+    [switch]$ObserveBaselineExpiry,
+    [string]$WorldPose
 )
 
 $ErrorActionPreference = 'Stop'
@@ -49,5 +50,11 @@ if ((Get-FileHash -LiteralPath $sdk).Hash -ne '1e4d0bc4d34d05a6038fc87eede492d3d
 if ($LASTEXITCODE -ne 0) { throw 'Powertrain playback fixture compilation failed' }
 $testArguments = @($manifestPath, (Join-Path $output 'result.json'))
 if ($ObserveBaselineExpiry) { $testArguments += '--observe-baseline-expiry' }
+if ($WorldPose) {
+    if ($ObserveBaselineExpiry) { throw 'World admission and baseline expiry are separate fixture modes.' }
+    $fixturePose = [IO.Path]::GetFullPath($WorldPose)
+    if (!$fixturePose.StartsWith($private, [StringComparison]::OrdinalIgnoreCase)) { throw 'Retain the authored pose under the private audio-switch directory.' }
+    $testArguments += @('--world-pose',$fixturePose)
+}
 & $binary @testArguments 2>&1 | Tee-Object -FilePath (Join-Path $output 'fixture.log')
 if ($LASTEXITCODE -ne 0) { throw 'Device-free powertrain playback fixture failed' }

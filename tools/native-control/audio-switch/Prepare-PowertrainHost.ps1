@@ -3,10 +3,17 @@
 param(
     [string]$HostExecutable,
     [string]$OutputRoot,
-    [string]$RetainedManifest = 'C:\Users\Libby\Documents\RichAudio-SHVDNE01\.local\migration-shvdne-01\final-private-package-02\scripts\RichAudio\payload\playable.json'
+    [string]$InstalledWorldManifest,
+    [string]$InstalledWorldCatalog,
+    [string]$InstalledWorldCacheRoot,
+    [string[]]$InstalledWorldResourceId,
+    [string]$RetainedManifest
 )
 $ErrorActionPreference = 'Stop'
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
+if (!$RetainedManifest) {
+    $RetainedManifest = Join-Path (Split-Path -Parent $repo) 'RichAudio-SHVDNE01/.local/migration-shvdne-01/final-private-package-02/scripts/RichAudio/payload/playable.json'
+}
 $privateRoot = Join-Path $repo '.local/audio-switch'
 if (!$HostExecutable) { $HostExecutable = Join-Path $repo 'build/acoustics-host/RichAudio.Acoustics.Host.exe' }
 if (!$OutputRoot) { $OutputRoot = Join-Path $privateRoot 'powertrain-host' }
@@ -45,6 +52,42 @@ if (![IO.File]::Exists($HostExecutable)) { throw 'Build the current external aco
 $oldRoot = [IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($RetainedManifest))
 $old = Get-Content -LiteralPath $RetainedManifest -Raw | ConvertFrom-Json -AsHashtable
 if ((Hash $old.gameExecutable) -cne $old.gameSha256) { throw 'The installed Enhanced executable differs.' }
+$world = $false
+if ($InstalledWorldManifest -or $InstalledWorldCatalog -or $InstalledWorldCacheRoot -or $InstalledWorldResourceId) {
+    if (!$InstalledWorldManifest -or !$InstalledWorldCatalog -or !$InstalledWorldCacheRoot -or
+        !$InstalledWorldResourceId -or $InstalledWorldResourceId.Count -gt 32 -or
+        @($InstalledWorldResourceId | Sort-Object -Unique).Count -ne $InstalledWorldResourceId.Count -or
+        ($InstalledWorldResourceId | Where-Object { $_ -cnotmatch '^[a-f0-9]{24}$' })) {
+        throw 'Provide the retained manifest, catalogue, cache root and a bounded exterior resource selection.'
+    }
+    $cache = [IO.Path]::GetFullPath($InstalledWorldCacheRoot)
+    $geometry = [IO.Path]::GetFullPath($InstalledWorldManifest)
+    $catalogue = [IO.Path]::GetFullPath($InstalledWorldCatalog)
+    if ($cache -notmatch '(?i)(?:^|[\\/])\.local(?:[\\/]|$)' -or
+        !$geometry.StartsWith($cache + '\', [StringComparison]::OrdinalIgnoreCase) -or
+        !$catalogue.StartsWith($cache + '\', [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'World metadata must reside under the retained private cache root.'
+    }
+    Unlinked $geometry
+    Unlinked $catalogue
+    if ((Get-Item -LiteralPath $geometry).Length -gt 64MB) { throw 'Retained geometry manifest exceeds the reader bound.' }
+    $geometryHash = Hash $geometry
+    $retained = Get-Content -LiteralPath $geometry -Raw | ConvertFrom-Json
+    $catalogueHash = Hash $catalogue
+    if ($retained.InputBinding.GameExecutableSHA256 -cne $old.gameSha256 -or
+        $retained.ResolvedCatalogSHA256 -cne $catalogueHash -or
+        $geometryHash -cne (Hash $geometry)) { throw 'Retained game or catalogue geometry binding differs.' }
+    $selected = @($retained.Resources | Where-Object { $_.Id -cin $InstalledWorldResourceId -and $_.Status -ceq 'imported-exterior-incomplete-surfaces' })
+    if ($selected.Count -ne $InstalledWorldResourceId.Count) { throw 'Retained exterior resource selection is incomplete.' }
+    $world = @{
+        privateCacheRoot = $cache; derivedCacheRoot = $cache
+        manifestPath = [IO.Path]::GetRelativePath($cache,$geometry)
+        catalogPath = [IO.Path]::GetRelativePath($cache,$catalogue)
+        retainedManifestSHA256 = $geometryHash; catalogSHA256 = $catalogueHash
+        resourceIds = $InstalledWorldResourceId
+    }
+    $old.geometryCoverage = 'conditional static geometry from a bounded retained exterior selection'
+}
 function VerifiedRetained([string]$Relative) {
     $pins = @($old.bindings | Where-Object file -CEQ $Relative)
     $source = [IO.Path]::GetFullPath((Join-Path $oldRoot $Relative))
@@ -83,7 +126,11 @@ foreach ($module in $modules) {
 }
 $manifest = $old
 $manifest.powertrainVoice = 'bati-player-on-adder'
-$manifest.acousticWorld = $false
+$manifest.acousticWorld = $world
+if ($world) {
+    $manifest.powertrainWorld = $true
+    $manifest.acousticPathEvidence01 = $true
+}
 $manifest.eligible = @(@{model = [uint32]0xb779a091L; context = 'player'; name = 'adder'})
 $manifest.sourcePolicy = 'Bati development voice on ADDER telemetry'
 $manifest.bindings = @(Get-ChildItem -LiteralPath $output -Recurse -File | Sort-Object FullName | ForEach-Object {
@@ -102,5 +149,6 @@ WriteJson $pointer @{Schema = 1; Manifest = $path; ManifestSha256 = $manifestHas
     manifest = $path; manifestSha256 = $manifestHash; retainedManifestSha256 = $expectedManifest
     hostSha256 = $hostHash; optIn = $pointer; optInSha256 = Hash $pointer
     donor = $manifest.sourcePolicy; voiceAwcSha256 = $bati[0].provenance.awcSha256
+    installedWorld = [bool]$world
     bindings = $manifest.bindings.Count
 }

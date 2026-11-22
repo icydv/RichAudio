@@ -96,6 +96,19 @@ namespace RichAudio.Beacon.Transport {
     foreach(var a in new[]{v.Position,v.Velocity,v.Forward,v.Up}){Protocol.Check(a!=null&&a.Length==3,"vehicle vector");foreach(double x in a)Protocol.Check(Protocol.Finite(x)&&Math.Abs(x)<=100000,"vehicle vector bounds");}
     double speed=Norm(v.Velocity),dot=0;for(int i=0;i<3;i++)dot+=v.Forward[i]*v.Up[i];Protocol.Check(speed<=100&&Math.Abs(Norm(v.Forward)-1)<1e-4&&Math.Abs(Norm(v.Up)-1)<1e-4&&Math.Abs(dot)<1e-4,"vehicle basis/speed");
    }
+   if(f.PowertrainGate!=null||f.PowertrainRevision!=0){
+    Protocol.Check(f.PowertrainRevision>0,"powertrain revision");
+    if(f.PowertrainGate=="withdraw")Protocol.Check(f.Vehicles.Length==0,"powertrain withdrawal must carry no audio contributors");
+    else{
+     Protocol.Check((f.PowertrainGate=="prepare"||f.PowertrainGate=="voice"||f.PowertrainGate=="mute")&&f.Vehicles.Length==1,
+       "single ADDER contributor required for private powertrain PCM");
+     var car=f.Vehicles[0];
+     long earliest=Math.Min(f.Listener.ObservationTicks,car.ObservationTicks);
+     Protocol.Check(car.Model==0xb779a091u&&car.Context=="player"&&car.Running&&car.Valid&&
+       f.ValidThroughTicks>0&&(decimal)f.ValidThroughTicks-earliest<=Stopwatch.Frequency/4m,
+       "powertrain original contributor expiry");
+    }
+   }
    if(f.VehicleObservations02!=null){Protocol.Check(f.VehicleObservations02.Length<=MaximumVehicles,"diagnostic observation budget");
    var seenObservations=new HashSet<string>();foreach(var v in f.VehicleObservations02){Protocol.Check(v!=null&&v.Valid&&v.Model!=0&&v.Id!=null&&System.Text.RegularExpressions.Regex.IsMatch(v.Id,"\\A[\\w:-]{1,64}\\z")&&seenObservations.Add(v.Id)&&v.Generation>0&&(v.Context=="player"||v.Context=="npc"),"vehicle identity/context");
     Protocol.Check(!v.OperatingPoint.HasValue&&v.OperatingPointEvidence=="unavailable","transport mechanical signal must remain unavailable");

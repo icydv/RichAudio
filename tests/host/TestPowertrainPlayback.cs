@@ -16,6 +16,9 @@ internal sealed class TestPowertrainPlayback
     {
         readonly Stopwatch clock = Stopwatch.StartNew();
         internal double? RevRatio = 0.22;
+        internal double[] CameraPosition = { 0d, 0d, 1d };
+        internal double[] VehiclePosition = { 0d, 2d, 0d };
+        internal double[] Forward = { 0d, 1d, 0d };
         public bool StoryReady { get { return true; } }
         public int PlayerVehicleHandle { get { return 19; } }
 
@@ -24,7 +27,7 @@ internal sealed class TestPowertrainPlayback
             long now = Stopwatch.GetTimestamp();
             return new CameraObservation {
                 Before = now, After = now, Observed = now, GameTime = (uint)clock.ElapsedMilliseconds,
-                Position = new[] { 0d, 0d, 1d }, Forward = new[] { 0d, 1d, 0d }, Up = new[] { 0d, 0d, 1d }
+                Position = CameraPosition, Forward = Forward, Up = new[] { 0d, 0d, 1d }
             };
         }
 
@@ -35,8 +38,8 @@ internal sealed class TestPowertrainPlayback
                 Handle = handle, Model = 0xB779A091, Exists = true, PlayerDriver = true, VehicleView = true,
                 Running = true, RpmRatio = RevRatio,
                 OperatingPointEvidence = "candidate-public-native-unqualified-shvdne",
-                Position = new[] { 0d, 2d, 0d }, Velocity = new[] { 0d, 0d, 0d },
-                Forward = new[] { 0d, 1d, 0d }, Up = new[] { 0d, 0d, 1d }
+                Position = VehiclePosition, Velocity = new[] { 0d, 0d, 0d },
+                Forward = Forward, Up = new[] { 0d, 0d, 1d }
             };
             do { observation.After = Stopwatch.GetTimestamp(); } while (observation.After == observation.Before);
             observation.Observed = observation.Before + (observation.After - observation.Before) / 2;
@@ -73,9 +76,14 @@ internal sealed class TestPowertrainPlayback
 
     Dictionary<string, object> ReadStatus()
     {
+        return ReadSharedJson(statusFile);
+    }
+
+    Dictionary<string, object> ReadSharedJson(string file)
+    {
         try
         {
-            using (var stream = new FileStream(statusFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+            using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
             using (var reader = new StreamReader(stream))
                 return json.Deserialize<Dictionary<string, object>>(reader.ReadToEnd());
         }
@@ -237,9 +245,16 @@ internal sealed class TestPowertrainPlayback
             ". Host report: " + json.Serialize(ReadStatus()));
     }
 
-    object Run(string manifestPath, string fixtureRoot, string termination, bool observeExpiry = false)
+    object Run(string manifestPath, string fixtureRoot, string termination, bool observeExpiry = false, WorldPose pose = null)
     {
         var configuration = PlayableConfiguration.Load(manifestPath);
+        if (pose != null)
+        {
+            Require(configuration.PowertrainWorld, "Expected retained-world private producer configuration");
+            source.CameraPosition = pose.listener;
+            source.VehiclePosition = pose.source;
+            source.Forward = pose.forward;
+        }
         string root = configuration.Root;
         directory = Path.Combine(root, ".local", "gameplay", session);
         statusFile = Path.Combine(directory, "powertrain.json");
@@ -284,7 +299,32 @@ internal sealed class TestPowertrainPlayback
             var playing = Drive("real renderer readiness admitted one authored native quiet request", r =>
                 handoff.Phase == "Active" && assignments.Count == 1 && Number(r, "appliedRevision") == 2 &&
                 Number(r, "outputPeak") > 0 && Math.Abs(Number(r, "submittedOperatingPoint") - observed) < .00001);
-            if (termination == "disconnect")
+            object reflectionEvidence = null;
+            if (pose != null)
+            {
+                string proof = Path.Combine(directory, "powertrain-source.json");
+                Drive("retained exterior contributed a reflection to tagged Bati output on the ADDER", r =>
+                {
+                    var row = ReadSharedJson(proof);
+                    if (row == null || Number(row, "reflectionPaths") <= 0 || row["geometry"] == null ||
+                        row["provenance"] == null || Number(r, "submittedFrames") <= Number(playing, "submittedFrames") ||
+                        Number(r, "outputPeak") <= 0 || handoff.Phase != "Active") return false;
+                    var paths = (Dictionary<string,object>)row["provenance"];
+                    if (!paths.ContainsKey("reflected")) return false;
+                    bool selectedSurface = false;
+                    foreach (Dictionary<string,object> path in (System.Collections.IList)paths["reflected"])
+                    {
+                        foreach (Dictionary<string,object> basis in (System.Collections.IList)path["materialBasis"])
+                            selectedSurface |= pose.surfaceId.Equals(basis["surface"]);
+                    }
+                    if (!selectedSurface) return false;
+                    reflectionEvidence = row;
+                    return true;
+                });
+                WaitForStock();
+                Require(IsExpiredRelease(), "Expired world-aware telemetry did not withdraw the voice");
+            }
+            else if (termination == "disconnect")
             {
                 using (var owner = Process.GetCurrentProcess())
                 using (var stop = EventWaitHandle.OpenExisting(GameplayStopSignal.Name(owner.Id, session), EventWaitHandleRights.Modify))
@@ -337,7 +377,7 @@ internal sealed class TestPowertrainPlayback
                 Console.WriteLine("PASS withdrawal retired source and reached silent output before stock return");
             }
             return new {
-                session, termination, stages, assignments, handoffJournal, evidenceDirectory = directory,
+                session, termination, stages, assignments, handoffJournal, evidenceDirectory = directory, reflectionEvidence,
                 observationCount, minimumCallbackIntervalMs, maximumCallbackIntervalMs,
                 transportReceipt = Path.Combine(linkDirectory, "powertrain-transport.json"), finalHost = ReadStatus()
             };
@@ -354,12 +394,34 @@ internal sealed class TestPowertrainPlayback
         }
     }
 
+    sealed class WorldPose
+    {
+        public double[] listener { get; set; }
+        public double[] source { get; set; }
+        public double[] forward { get; set; }
+        public string surfaceId { get; set; }
+    }
+
     static int Main(string[] args)
     {
-        if (args.Length != 2 && (args.Length != 3 || args[2] != "--observe-baseline-expiry")) return 2;
+        bool world = args.Length == 4 && args[2] == "--world-pose";
+        if (!world && args.Length != 2 && (args.Length != 3 || args[2] != "--observe-baseline-expiry")) return 2;
         try
         {
             string root = Path.GetDirectoryName(args[1]);
+            if (world)
+            {
+                var serializer = new JavaScriptSerializer { MaxJsonLength = 1048576 };
+                var pose = serializer.Deserialize<WorldPose>(File.ReadAllText(args[3]));
+                Require(pose != null && pose.listener != null && pose.listener.Length == 3 &&
+                    pose.source != null && pose.source.Length == 3 && pose.forward != null && pose.forward.Length == 3 &&
+                    !String.IsNullOrEmpty(pose.surfaceId),
+                    "Authored listener, vehicle and forward vectors and target surface required");
+                var playbackWorld = new TestPowertrainPlayback().Run(args[0], root, "world-expiry", pose:pose);
+                File.WriteAllText(args[1], serializer.Serialize(new { passed=true, fixture="device-free", authoredObservations=true,
+                    nativeAssignmentsAreFixtureActions=true, playbackWorld }));
+                return 0;
+            }
             bool observeBaselineExpiry = args.Length == 3;
             var playback = new TestPowertrainPlayback().Run(args[0], root, "restore", observeBaselineExpiry);
             var disconnect = new TestPowertrainPlayback().Run(args[0], root, "disconnect");

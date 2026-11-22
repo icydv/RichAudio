@@ -37,7 +37,7 @@ namespace RichAudio.Beacon.Windows {
     demo=config.DemoProfile=="PLAYABLE-13";if(demo)demoPermit=GameplayDemoPermit.Load(permit,session,fixture);
     directory=Path.Combine(config.Root,".local","gameplay",session);Directory.CreateDirectory(directory);
     using(var self=Process.GetCurrentProcess())Record("host-started","owner-permit-verified",new{host=GameplayLifecycle01.Identity(self),ownerPid=ownerId,ownerStartUtcTicks=ownerStart});
-    string settingFile=AcousticSettingsStore.DefaultPath(config.Root);settings=powertrain==null?AcousticSettingsStore.Load(config.Root,settingFile):new AcousticSettings("performance","cpu",1,true,.8,false,false,"experimental-additive");
+    string settingFile=AcousticSettingsStore.DefaultPath(config.Root);settings=powertrain==null?AcousticSettingsStore.Load(config.Root,settingFile):new AcousticSettings("performance","cpu",1,true,.8,config.PowertrainWorld,false,"experimental-additive",soundMapVisible:config.PowertrainWorld);
     if(config.TransportValidationOnly){code=RunTransportOnly();}
     else {
     if(config.DiscardEnvironmentalOutput)delivery=new GameplayDeliveryTrace01();latencyProfile=GameplayLatencyProfile.Resolve(config.LatencyProfile,powertrain!=null);ring=new PcmRing(latencyProfile.StartupBlocks);creditWindow=new GameplayCreditWindow(latencyProfile);credits=latencyProfile.StartupBlocks;
@@ -249,14 +249,20 @@ namespace RichAudio.Beacon.Windows {
     if(kind=="producer-terminal"||kind=="installed-world-worker-closed"||kind=="installed-world-worker-close-failed"||kind=="gameplay-error")Record("producer-evidence",kind,d);
     if((string)type=="gameplay-status"){workerStatus=line;if(latencyProfile.Id!="baseline"&&!creditWindow.SourcePrepared&&PreparedSource(d)){preparedSourceAtQpc=receivedAt;creditWindow.SourcePrepared=true;}}if((string)type=="gameplay-error"){object code;workerFailure=d.TryGetValue("code",out code)?Convert.ToString(code):"unspecified worker failure";}if((string)type=="gameplay-ready"){workerReady=true;wake.Set();}if((string)type=="producer-block-timing"){if(fixtureLatency!=null){fixtureLatency.Producer(d,receivedAt);object nodeDone;if(d.TryGetValue("stdoutCompletedNodeMs",out nodeDone))fixtureLatency.Progress("node-output",Convert.ToInt64(d["producerFrameStart"])/512,receivedAt,0,ring.BufferedFrames,512,0,Convert.ToDouble(nodeDone));}var capture=recording;if(capture!=null&&line.Length<=1900&&Interlocked.Read(ref producerTimingRows)<1500){if(capture.Event("producer-block-timing",receivedAt,d))Interlocked.Increment(ref producerTimingRows);else Interlocked.Increment(ref producerTimingRowsRejected);}else Interlocked.Increment(ref producerTimingRowsRejected);}}}}}catch(Exception e){if(!stop)Fail(e);}}
   void RetainPowertrainSourceEvidence(Dictionary<string,object> report,long receivedAt){
-   object raw,voice,playout;
+   object raw,voice,playout,geometry=null,reflectionPaths=null,provenance=null;
    if(!report.TryGetValue("status",out raw))return;
    var status=raw as Dictionary<string,object>;
    if(status==null||!status.TryGetValue("powertrainVoiceEvidence",out voice))return;
    status.TryGetValue("playoutTiming",out playout);
+   if(config.PowertrainWorld){
+    status.TryGetValue("installedScene",out geometry);
+    status.TryGetValue("reflectionPathsSelected",out reflectionPaths);
+    var propagation=status.TryGetValue("installedPropagation",out raw)?raw as Dictionary<string,object>:null;
+    if(propagation!=null)propagation.TryGetValue("paths",out provenance);
+   }
    string file=Path.Combine(directory,"powertrain-source.json"),pending=file+".pending";
    try{
-    File.WriteAllText(pending,Json.Serialize(new{session,receivedQpc=receivedAt,qpcFrequency=Stopwatch.Frequency,voice,playout}),new UTF8Encoding(false));
+    File.WriteAllText(pending,Json.Serialize(new{session,receivedQpc=receivedAt,qpcFrequency=Stopwatch.Frequency,voice,playout,geometry,reflectionPaths,provenance}),new UTF8Encoding(false));
     if(File.Exists(file))File.Replace(pending,file,null);else File.Move(pending,file);
    }catch(IOException){ }catch(UnauthorizedAccessException){ }
   }

@@ -39,10 +39,17 @@ parentPort.on('message',m=>{try{
  const began=performance.now();
  for(let at=path.resolve(config.manifestPath);;at=path.dirname(at)){if(fs.lstatSync(at).isSymbolicLink())throw Error('Linked metadata input');if(path.dirname(at)===at)break;}const stat=fs.statSync(config.manifestPath);if(stat.size<=0||stat.size>67108864)throw Error('Bounded manifest');const bytes=fs.readFileSync(config.manifestPath);
  if(bytes.length<=0||bytes.length>67108864)throw Error('Bounded manifest bytes');
- const fast=installed?readAuthorityView(bytes):null;
+ if(config.expectedManifestSHA256&&sha256(bytes)!==config.expectedManifestSHA256)throw Error('Retained geometry manifest digest differs');
+ const fast=installed&&!config.resourceIds?readAuthorityView(bytes):null;
  if(fast)postProof(m,began,fast.binding,id=>fast.rows.get(id),'manifest-bound-driver-view');
  const manifest=JSON.parse(bytes.toString('utf8').replace(/^\uFEFF/,''));
  const sha=manifest.ResolvedCatalogSHA256;if(!/^[a-f0-9]{64}$/.test(sha??'')||config.catalogSHA256&&sha!==config.catalogSHA256||config.expectedCatalogSHA256&&sha!==config.expectedCatalogSHA256||config.expectedGameSHA256&&manifest.InputBinding?.GameExecutableSHA256!==config.expectedGameSHA256)throw Error('Metadata game/catalogue identity');
+ if(config.resourceIds){
+  const selected=new Set(config.resourceIds);
+  manifest.Resources=manifest.Resources.filter(row=>selected.has(row.Id)&&row.Status==='imported-exterior-incomplete-surfaces');
+  if(manifest.Resources.length!==selected.size)throw Error('Retained exterior resource set is incomplete');
+  manifest.FullPlacementIndexComplete=false;
+ }
  parentPort.postMessage({type:'manifest-read',serial,milliseconds:performance.now()-began,bytes:bytes.length});
  if(m.epoch&&manifest.ValidationEpochUtc01!==m.epoch){parentPort.postMessage({type:'waiting',serial});return;}
  const binding=sceneAuthorityBinding01(manifest);

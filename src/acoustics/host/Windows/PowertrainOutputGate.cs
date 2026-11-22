@@ -45,6 +45,7 @@ namespace RichAudio.Beacon.Windows
             long revision=frame.PowertrainRevision;
             string mode=frame.PowertrainGate;
             bool withdraw=mode=="withdraw";
+            if(withdraw&&frame.Vehicles.Length!=0)throw new InvalidDataException("powertrain withdrawal must carry no audio contributors");
             if(revision!=command.Revision||mode!=command.Mode){
                 bool allowed=withdraw || (command.Mode==null ? mode=="prepare" :
                     command.Mode=="prepare"||command.Mode=="mute" ? mode=="voice" : command.Mode=="voice" && mode=="mute");

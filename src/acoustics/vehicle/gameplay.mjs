@@ -129,6 +129,8 @@ export class StockGameplay {
  accept(frame,ageMs,validForMs=null){
   try{
    const state=frame.listener;if(frame.version!==1||frame.session!==this.session||!Array.isArray(frame.vehicles)||frame.vehicles.length>this.vehicleLimit||!Number.isFinite(ageMs)||ageMs< -2||ageMs>250||validForMs!==null&&(!Number.isFinite(validForMs)||validForMs<=0||validForMs>252))throw Error('gameplay frame');
+   if(this.privatePowertrain&&(frame.vehicles.length>1||frame.vehicles.some(v=>v?.model!==0xb779a091||v?.context!=='player')))
+    throw Error('single ADDER contributor required for private powertrain PCM');
    if(state.session!==this.session||state.sequence<=this.lastFrame||state.generation<this.lastGeneration)throw Error('gameplay identity');
    const ids=new Set();for(const v of frame.vehicles){
     if(typeof v.id!=='string'||!/^[\w:-]{1,64}$/.test(v.id)||ids.has(v.id)||!Number.isInteger(v.generation)||v.generation<1||!Number.isInteger(v.model)||v.model<0||v.model>0xffffffff||!['player','npc'].includes(v.context)||typeof v.running!=='boolean'||typeof v.valid!=='boolean'||!Number.isFinite(v.operatingPoint)||v.operatingPoint<0||v.operatingPoint>1)throw Error('vehicle identity/state');
@@ -160,7 +162,7 @@ export class StockGameplay {
    // Doppler history still have an explicit generation boundary.
    const sameRepresentation=previous&&state.clockFrequency===previous.clockFrequency&&state.coordinates===previous.coordinates&&state.units===previous.units&&state.listenerKind===previous.listenerKind;
    if(this.lastGeneration&&state.generation!==this.lastGeneration&&(this.continuityPolicy==='baseline'||!sameRepresentation))this.snapshots=[];
-   const copy=structuredClone(frame),snapshot={time,frame:copy,wallExpires:validForMs===null?Infinity:this.now()+validForMs};
+   const copy=structuredClone(frame),snapshot={time,frame:copy,wallExpires:validForMs===null?Infinity:receivedAt+validForMs};
    if(this.catalogueFleet){
     const previousSnapshot=this.snapshots.at(-1);
     snapshot.vehiclesById=new Map();
@@ -171,9 +173,13 @@ export class StockGameplay {
      const trusted=old?.valid?old:this.snapshots.findLast(s=>s.vehiclesById.get(v.id)?.valid)?.vehiclesById.get(v.id);
      if(v.valid&&trusted&&(v.generation<trusted.generation||
        v.generation===trusted.generation&&v.observationTicks<=trusted.observationTicks))v.valid=false;
-     const continuous=sameVehicle01(old,v)&&this.now()<previousSnapshot.wallExpires&&v.observationTicks>=old.observationTicks&&
+     const continuous=sameVehicle01(old,v)&&receivedAt<previousSnapshot.wallExpires&&receivedAt<old.sourceExpiresAt&&v.observationTicks>=old.observationTicks&&
       v.observationTicks-old.observationTicks<=state.clockFrequency/4;
      v.acquisition01=continuous?old.acquisition01:++this.fleetAcquisition;
+     const sourceAgeMs=ageMs+(state.observationTicks-v.observationTicks)*1000/state.clockFrequency;
+     // The accepted snapshot has an aggregate listener lease. Each source also
+     // has its own absolute deadline in the producer's elapsed-time clock.
+     v.sourceExpiresAt=receivedAt+250-sourceAgeMs;
      snapshot.vehiclesById.set(v.id,v);
     }
    }
@@ -359,12 +365,14 @@ export class StockGameplay {
   return Math.min(time,latest.time+offset);
  }
  vehiclesAt(time){
-  if(!this.snapshots.length||this.now()>=this.snapshots.at(-1).wallExpires)return [];
+  const now=this.now();
+  if(!this.snapshots.length||now>=this.snapshots.at(-1).wallExpires)return [];
   let a=null,b=null;for(const s of this.snapshots){if(s.time<=time)a=s;else{b=s;break;}}
   if(!a||time-a.time>.25||!a.frame.listener.valid||a.frame.listener.paused)return [];
   const result=[];for(const identity of this.snapshots.at(-1).frame.vehicles){if(!identity.valid)continue;
    let left=null,right=null;
    if(this.catalogueFleet){
+    if(now>=identity.sourceExpiresAt)continue;
     // Search only this contiguous acquisition. An invalid or absent sample
     // closes its history even when a later sender reuses the same identity.
     for(let i=this.snapshots.length-1;i>=0;i--){
@@ -378,6 +386,7 @@ export class StockGameplay {
     const at=snapshot.time+(v.observationTicks-snapshot.frame.listener.observationTicks)/snapshot.frame.listener.clockFrequency;
     if(at<=time)left={time:at,v,sequence:snapshot.frame.listener.sequence};else{right={time:at,v,sequence:snapshot.frame.listener.sequence};break;}}
    if(!left)continue;const old=left.v,next=right?.v;a={time:left.time};b=right;
+   if(this.catalogueFleet&&(now>=old.sourceExpiresAt||next&&now>=next.sourceExpiresAt))continue;
    if(b&&!next)continue;
    const dt=next?b.time-a.time:0,u=dt>0?(time-a.time)/dt:0;
    if(next&&(dt>.25||distance(old.position,next.position)/dt>100))continue;

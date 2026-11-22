@@ -37,10 +37,11 @@ namespace RichAudio.Beacon.Tests
             frame.PowertrainRevision=3;frame.PowertrainGate="voice";
             Throws(delegate{gate.Accept(frame,now);},"lost gain command cannot enable a later revision");
             // A newer terminal command may replace an unconsumed voice command in the sender's one-slot mailbox.
-            frame.PowertrainGate="withdraw";gate.Accept(frame,now);
+            var car=frame.Vehicles[0];
+            frame.PowertrainGate="withdraw";frame.Vehicles=new RichAudio.Beacon.Transport.GameplayVehicle[0];gate.Accept(frame,now);
             gate.BoundaryComplete(gate.Requested);
             Check(gate.Withdrawn,"conflated terminal withdrawal acknowledged");
-            frame.PowertrainRevision=4;frame.PowertrainGate="voice";
+            frame.PowertrainRevision=4;frame.PowertrainGate="voice";frame.Vehicles=new[]{car};
             Throws(delegate{gate.Accept(frame,now);},"withdrawal is terminal");
 
             // Resetting the endpoint makes it silent immediately. The owner
@@ -67,6 +68,55 @@ namespace RichAudio.Beacon.Tests
             var after = gate.Status(session,1,true,true,0,null);
             Check((long)after.GetType().GetProperty("appliedRevision").GetValue(after) == 3,
                 "same-revision muted PCM completes mute acknowledgement");
+        }
+        static void CheckSinglePowertrainContributor()
+        {
+            string session = Guid.NewGuid().ToString("N");
+            var listener = RichAudio.Beacon.Transport.Protocol.Synthetic(session, 1, 0);
+            var car = new RichAudio.Beacon.Transport.GameplayVehicle {
+                Id = "one", Model = 0xb779a091, Context = "player", Generation = 1, Running = true, Valid = true,
+                ObservationTicks = listener.ObservationTicks - listener.ClockFrequency / 25,
+                Position = listener.Position, Velocity = listener.Velocity, Forward = listener.Forward, Up = listener.Up
+            };
+            var frame = new RichAudio.Beacon.Transport.GameplayFrame {
+                Session = session, Listener = listener, Vehicles = new[]{car, car}, PowertrainRevision = 1,
+                PowertrainGate = "prepare", ValidThroughTicks = car.ObservationTicks + listener.ClockFrequency / 4,
+                OperatingPointEvidence = "shvdne-enhanced-native-F9DDA40BC293A61E"
+            };
+            var gate = new PowertrainOutputGate();
+            long now = listener.ObservationTicks;
+            Throws(delegate { gate.Accept(frame, now); }, "mixed contributors cannot use a single RA07 tag");
+            frame.Vehicles = new[]{car};
+            gate.Accept(frame, now);
+            RichAudio.Beacon.Transport.GameplayWire.Validate(frame, session);
+            frame.ValidThroughTicks = listener.ObservationTicks + listener.ClockFrequency / 4;
+            Throws(delegate { RichAudio.Beacon.Transport.GameplayWire.Validate(frame, session); },
+                "a later camera observation cannot extend the older car's deadline");
+            frame.PowertrainRevision = 2; frame.PowertrainGate = "withdraw";
+            Throws(delegate { gate.Accept(frame, now); }, "withdrawal must carry no contributors");
+            frame.Vehicles = new RichAudio.Beacon.Transport.GameplayVehicle[0];
+            gate.Accept(frame, now);
+            gate.BoundaryComplete(gate.Requested);
+            Check(gate.Withdrawn, "empty terminal withdrawal remains accepted");
+
+            var config = new RichAudio.Beacon.Transport.PlayableConfiguration {
+                Schema = 1, GameVersion = "1.0.1158.16", IntegrationFramework = "shvdne", IntegrationVersion = "1.1.0.6",
+                IntegrationAssemblySha256 = RichAudio.Beacon.Transport.PlayableConfiguration.ShvdneApi3Sha256,
+                PowertrainVoice = "bati-player-on-adder", PowertrainWorld = true, VehicleSourcePolicy = "catalogue-fleet-01",
+                Eligible = new[]{new RichAudio.Beacon.Transport.PlayableModel{ Model = 0xb779a091, Context = "player" }},
+                Bindings = new RichAudio.Beacon.Transport.PlayableBinding[0]
+            };
+            string manifest = Path.Combine(Path.GetTempPath(), "RichAudio-manifest-"+session+".json");
+            try
+            {
+                using (var file = new FileStream(manifest, FileMode.CreateNew))
+                    new System.Runtime.Serialization.Json.DataContractJsonSerializer(config.GetType()).WriteObject(file,config);
+                bool rejected = false;
+                try { RichAudio.Beacon.Transport.PlayableConfiguration.Load(manifest, false); }
+                catch (InvalidDataException e) { rejected = e.Message.Contains("requires one player ADDER"); }
+                Check(rejected, "private world cannot enable the fleet on a one-contributor tag");
+            }
+            finally { File.Delete(manifest); }
         }
         static unsafe void CheckPowertrainOutputTiming()
         {
@@ -170,6 +220,7 @@ namespace RichAudio.Beacon.Tests
                 if(args.Length!=0)throw new ArgumentException("Unsupported test option");
                 CheckPrivatePowertrainCredits();
                 CheckPowertrainWithdrawal();
+                CheckSinglePowertrainContributor();
                 CheckPowertrainOutputTiming();
                 CheckPowertrainGateCauses();
                 Check(HostProgram.BeaconFrequencyArguments(95,"harmonic",false)=="","default producer invocation preserved");

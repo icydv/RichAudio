@@ -2,6 +2,22 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';import {loadStockCatalogAssets,loadStockNpcAssets} from '../src/acoustics/vehicle/stock-source.mjs';import {loadInstalledStockRegistry} from '../src/acoustics/vehicle/installed-stock-registry.mjs';
 import {observedAcousticScene,observationCoordinates} from '../src/acoustics/engine/observed-geometry.mjs';import {observedInput,demonstrationCoordinates} from './fixtures/ObservedGeometry.mjs';
 const root=process.env.PLAYABLE01_CANDIDATE,session='b'.repeat(32),skip=!root;
+test('the private producer refuses mixed vehicles before assigning a PCM source tag',async()=>{
+ const engine=new StockGameplay({registry:{},session,privatePowertrain:true});
+ try{
+  const motion={position:[0,0,0],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1]};
+  const listener={version:1,session,sequence:0,generation:1,observationTicks:10000000,clockFrequency:10000000,gameTimeMs:0,
+    ...motion,listenerKind:'camera',velocityKind:'estimated-camera-difference',paused:false,valid:true,reason:'valid',
+    coordinates:'gta-native-unscaled',units:'native-unverified',sourceId:null};
+  const vehicle={id:'a',model:0xb779a091,context:'player',generation:1,observationTicks:10000000,
+    ...motion,operatingPoint:.2,running:true,valid:true};
+  assert.throws(()=>engine.accept({version:1,session,listener,vehicles:[vehicle,{...vehicle,id:'b'}]},0,250),
+    /single ADDER contributor/);
+  assert.equal(engine.snapshots.length,0);
+  engine.accept({version:1,session,listener,vehicles:[]},0,250);
+  assert.deepEqual(engine.vehiclesAt(engine.snapshots[0].time),[]);
+ }finally{await engine.close();}
+});
 test('one-car powertrain follows elapsed control time across a silent output prime',async()=>{
  let nodeMs=0;
  const options={registry:{},session,now:()=>nodeMs};
