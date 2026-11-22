@@ -86,6 +86,7 @@ export class StockGameplay {
   this.continuousTimingPolicy=continuousTimingPolicy;if(continuousTimingPolicy==='arrived-segments-50')this.controlDelayMs=50;
   this.privatePowertrain=privatePowertrain;
   this.powertrainClock=null;
+  this.powertrainCameraCut=null;
   this.powertrainTimingByPhase=privatePowertrain?new Map():null;
   if(privatePowertrain)this.controlDelayMs=50;
   if(!['baseline','authored-stationary-emission-01'].includes(operatingStatePolicy)||operatingStatePolicy==='baseline'&&stationaryEmissionContract!==null)throw Error('Explicit authored stationary emission policy required');
@@ -212,6 +213,22 @@ export class StockGameplay {
    const sameRepresentation=previous&&state.clockFrequency===previous.clockFrequency&&state.coordinates===previous.coordinates&&state.units===previous.units&&state.listenerKind===previous.listenerKind;
    if(this.lastGeneration&&state.generation!==this.lastGeneration&&(this.continuityPolicy==='baseline'||!sameRepresentation))this.snapshots=[];
    const copy=structuredClone(frame),snapshot={time,frame:copy,wallExpires:validForMs===null?Infinity:receivedAt+validForMs};
+   if(this.privatePowertrain&&this.continuityPolicy==='camera-source-01'){
+    const prior=this.snapshots.at(-1),old=prior?.frame.vehicles[0],car=copy.vehicles[0];
+    const continuing=sameRepresentation&&prior&&receivedAt<prior.wallExpires&&
+      prior.frame.listener.valid&&!prior.frame.listener.paused&&state.valid&&!state.paused&&
+      old?.running&&car?.running&&old.id===car.id&&sameVehicle01(old,car)&&
+      prior.frame.powertrainRevision===copy.powertrainRevision&&prior.frame.powertrainGate===copy.powertrainGate;
+    if(!continuing)this.powertrainCameraCut=null;
+    else if(state.generation!==this.lastGeneration){
+     // Use the first genuinely arrived receiver and vehicle observation
+     // immediately at a cut. While retrospective playout reaches it, retain
+     // their exact sampled times, coordinates and original lease.
+     const vehicleTime=time+(car.observationTicks-state.observationTicks)/state.clockFrequency;
+     this.powertrainCameraCut={time,vehicleTime,listener:copy.listener,receivedAt,ageMs,
+       expiresAt:Math.min(snapshot.wallExpires,receivedAt+250-ageMs)};
+    }
+   }
    if(this.catalogueFleet){
     const previousSnapshot=this.snapshots.at(-1);
     snapshot.vehiclesById=new Map();
@@ -581,8 +598,16 @@ export class StockGameplay {
   const sampleAt=this.now();
   const controlTime=this.controlTime(time,sampleAt);
   const target=controlTime-this.playout.delay;
+  let cut=this.powertrainCameraCut;
+  if(cut&&(sampleAt<cut.receivedAt||sampleAt>=cut.expiresAt||target>=Math.max(cut.time,cut.vehicleTime))){
+   this.powertrainCameraCut=null;
+   cut=null;
+  }
   const listenerTime=this.privatePowertrain?this.capPowertrainTarget(target)+this.playout.delay:controlTime;
-  this.sample=listenerTime<0?{state:null,mode:'warming',targetTime:null}:this.playout.sample(listenerTime,sampleAt);
+  this.sample=cut&&target<cut.time?{
+   state:cut.listener,mode:'arrived-camera-cut',targetTime:cut.time,playoutSeconds:this.playout.delay,
+   newestAgeSeconds:controlTime-cut.time,receiptAgeMs:cut.ageMs,extrapolationSeconds:0,
+  }:listenerTime<0?{state:null,mode:'warming',targetTime:null}:this.playout.sample(listenerTime,sampleAt);
   this.applyPendingInstalledStaticScene01();
   const afterAdmission=this.now();
   this.captureTiming=this.latencyDiagnostics&&this.stats.blocks%8===0;this.lastTiming=null;if(this.captureTiming)this.latencyBrackets=[];
@@ -591,7 +616,7 @@ export class StockGameplay {
    ?{...this.sample.state,motionTime:this.sample.targetTime}
    :this.sample.state??{position:[0,0,0],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],valid:false,generation:this.lastGeneration||1};
   const independentSource=this.continuityPolicy==='camera-source-01'&&!['missing','stale-wall-clock','clock-invalid','invalid-or-paused','invalid-interval','observation-gap'].includes(this.sample.mode);
-  const vehicleTarget=this.privatePowertrain?this.capPowertrainTarget(target,true):this.sample.targetTime;
+  const vehicleTarget=this.privatePowertrain?this.capPowertrainTarget(Math.max(target,cut?.vehicleTime??target),true):this.sample.targetTime;
   let offered=this.sample.state||independentSource?this.vehiclesAt(vehicleTarget):[];
   const emissionOperating=this.operatingEmission?.select(this.snapshots,this.pipeline.renderer.frame,this.now());
   if(this.operatingEmission)offered=emissionOperating&&(this.sample.state||independentSource)?[emissionOperating.vehicle]:[];

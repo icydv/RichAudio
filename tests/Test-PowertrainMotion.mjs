@@ -7,6 +7,8 @@ import {setTimeout as delay} from 'node:timers/promises';
 import test from 'node:test';
 import {fileURLToPath} from 'node:url';
 import {VehicleAcousticPipeline} from '../src/acoustics/vehicle/pipeline.mjs';
+import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';
+import {authoredStartupBank10} from '../src/acoustics/vehicle/stock-source-preparation10.mjs';
 import {distanceProbeScene} from './fixtures/vehicle-distance-probe.mjs';
 
 const manifest = process.env.POWERTRAIN_MOTION_MANIFEST;
@@ -105,6 +107,71 @@ async function warm({pose, render}, options) {
     for (let b = 0; b < 5; b++) { await render(1); await delay(9); }
   }
 }
+
+test('an arrived camera cut selects its real pose and independent source time once', async () => {
+  const bank = authoredStartupBank10();
+  let now=0, sequence=0;
+  const registry={
+    resolve:()=>({status:'available',bank}),
+    createSource:()=>({vehicle:bank,stats:{peak:0},renderInto(_,engine,exhaust){
+      engine.fill(.2);exhaust.fill(.3);
+    }}),
+  };
+  const game = new StockGameplay({registry,session,now:()=>now,privatePowertrain:true,
+    continuityPolicy:'camera-source-01'});
+  game.setSettings({...game.settings,acceleration:'cpu'});
+  const blockMs=512/48;
+  const sourceOffsetMs=4;
+  function accept(generation, metres, revision=1) {
+    const observationTicks=Math.round(now*frequency/1000);
+    const listener={version:1,session,generation,sequence:sequence++,observationTicks,clockFrequency:frequency,
+      gameTimeMs:Math.floor(now),position:[metres,0,1],velocity:[0,0,0],...directions,valid:true,paused:false,
+      coordinates:'gta-native-unscaled',units:'native-unverified',listenerKind:'camera',
+      velocityKind:'estimated-camera-difference',reason:'valid',sourceId:null};
+    const vehicle={id:playerId,model:0xb779a091,generation:1,context:'player',observationTicks:observationTicks+40000,
+      position:[now*.03+sourceOffsetMs*.03,8,1],velocity:[30,0,0],...directions,valid:true,running:true,
+      operatingPoint:generation===1?.55:.8,powertrainSequence:listener.sequence,powertrainRevision:revision};
+    game.accept({version:1,session,listener,vehicles:[vehicle],powertrainRevision:revision,powertrainGate:'voice'},0,220);
+    return {listener,vehicle};
+  }
+  try {
+    for(let block=0;block<80;block++){
+      now=block*blockMs;
+      if(block%5===0)accept(1,0);
+      await game.render();
+    }
+    // A camera cut was declared, but the new observation did not arrive for
+    // several blocks. Only the first real pose can open the new receiver.
+    for(let block=80;block<87;block++){now=block*blockMs;await game.render();}
+    now=87*blockMs;
+    const cut=accept(2,174);
+    const [left,right]=await game.render();
+    const voice=()=>game.slots.find(slot=>slot.source)?.vehicle;
+    assert.equal(game.sample.state?.generation,2);
+    assert.equal(game.sample.state.observationTicks,cut.listener.observationTicks);
+    assert.equal(voice()?.powertrainSequence,cut.listener.sequence);
+    assert.equal(voice().observationTicks,cut.vehicle.observationTicks);
+    assert.equal(voice().position[0],cut.vehicle.position[0]);
+    assert([...left,...right].some(x=>Math.abs(x)>1e-6),'continuing acoustic source pressure');
+    let lastTime=game.sample.targetTime, lastSource=voice().position[0];
+    for(let block=88;block<98;block++){
+      now=block*blockMs;
+      if(block===90||block===95)accept(2,174);
+      await game.render();
+      assert(game.sample.targetTime>=lastTime-1e-9,'receiver does not move backward on its actual clock');
+      assert(voice().position[0]>=lastSource-1e-9,'independent vehicle control phase must not replay');
+      lastTime=game.sample.targetTime;
+      lastSource=voice().position[0];
+    }
+    now=98*blockMs;
+    accept(3,169,2);
+    await game.render();
+    assert.notEqual(game.sample.state?.generation,3,'a camera cut across a gain revision keeps ordinary boundaries');
+    assert.notEqual(voice()?.powertrainRevision,2);
+  } finally {
+    await game.close();
+  }
+});
 
 test('a single emitted pulse arrives after the camera cut even though the continuing source is now quiet', async () => {
   const pipeline = new VehicleAcousticPipeline({
