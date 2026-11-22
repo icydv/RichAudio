@@ -786,6 +786,9 @@ export class StreamingRenderer {
       for (let p = 0; p < slotCount; p++) {
         const slot = this.slots[this.activeSlotIndices ? this.activeSlotIndices[p] : p];
         if (!slot.active) continue;
+        // These existing typed arrays are stable throughout this synchronous
+        // sample step. Cache their references without changing operation order.
+        const gain = slot.gain, target = slot.target;
         const controlAge = frame - this.controlFrame;
         this.stats.maximumControlAgeFrames = Math.max(
           this.stats.maximumControlAgeFrames,
@@ -797,14 +800,14 @@ export class StreamingRenderer {
         }
         let gainMax = 0;
         for (let b = 0; b < 3; b++) {
-          const before = slot.gain[b];
+          const before = gain[b];
           if (slot.releaseLeft)
-            slot.gain[b] *= (slot.releaseLeft - 1) / slot.releaseLeft;
+            gain[b] *= (slot.releaseLeft - 1) / slot.releaseLeft;
           else if(slot.attackLeft)
-            slot.gain[b]=slot.attackTarget[b]*(1-(slot.attackLeft-1)/slot.attackTotal);
-          else slot.gain[b] += this.smooth * (slot.target[b] - slot.gain[b]);
-          gainMax = Math.max(gainMax, slot.gain[b]);
-          if(measureSpatialSteps)this.stats.maximumGainStep = Math.max(this.stats.maximumGainStep, Math.abs(slot.gain[b] - before));
+            gain[b]=slot.attackTarget[b]*(1-(slot.attackLeft-1)/slot.attackTotal);
+          else gain[b] += this.smooth * (target[b] - gain[b]);
+          gainMax = Math.max(gainMax, gain[b]);
+          if(measureSpatialSteps)this.stats.maximumGainStep = Math.max(this.stats.maximumGainStep, Math.abs(gain[b] - before));
         }
         if (slot.releaseLeft) slot.releaseLeft--;
         if(slot.attackLeft)slot.attackLeft--;
@@ -843,7 +846,8 @@ export class StreamingRenderer {
         if(this.continuousRates)requireValue(slot.cursor<=frame,'non-causal source-history cursor');
         const k = Math.floor(slot.cursor),
           f = slot.cursor - k,
-          s = slot.source;
+          s = slot.source,
+          lowBand = s.bands[0], midBand = s.bands[1], highBand = s.bands[2];
         let x = 0;
         for (let tap = 0; tap < 2; tap++) {
           const index = k + tap,
@@ -870,9 +874,9 @@ export class StreamingRenderer {
           }
           x +=
             weight *
-            (s.bands[0][at] * slot.gain[0] +
-              s.bands[1][at] * slot.gain[1] +
-              s.bands[2][at] * slot.gain[2]);
+            (lowBand[at] * gain[0] +
+              midBand[at] * gain[1] +
+              highBand[at] * gain[2]);
         }
         x *= s.pressureGain;
         l += x * Math.sqrt((1 - slot.pan) / 2);
