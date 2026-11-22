@@ -9,8 +9,9 @@ const [folder, ...options] = process.argv.slice(2);
 const takeIndex = options.indexOf('--take');
 const take = takeIndex < 0 ? 'comparison' : options[takeIndex + 1];
 const check = options.includes('--check');
-if (!folder || !take || options.filter((_, i) => takeIndex < 0 || i !== takeIndex && i !== takeIndex + 1).some(v => v !== '--check'))
-  throw Error('Use node tools/Open-PowertrainReplay.mjs <private demo folder> [--take <name>] [--check]');
+const witness = options.includes('--witness');
+if (!folder || !take || options.filter((_, i) => takeIndex < 0 || i !== takeIndex && i !== takeIndex + 1).some(v => !['--check','--witness'].includes(v)))
+  throw Error('Use node tools/Open-PowertrainReplay.mjs <private demo folder> [--take <name>] [--witness] [--check]');
 
 const repo = fileURLToPath(new URL('..', import.meta.url));
 const local = path.join(await fs.realpath(repo), '.local');
@@ -20,9 +21,12 @@ if (!relative || relative === '..' || relative.startsWith('..' + path.sep) || pa
   throw Error('Choose a demo folder within this worktree’s .local directory');
 
 const replay = await openPowertrainReplay(root, take);
+const marker = take === 'two-vehicles' ? replay.events.findIndex(e => e.type === 'Both vehicles · NPC reflection') :
+  replay.events.findIndex(e => e.type === '2-bounce route' || e.type === 'Selected wall bounce' || take === 'withheld' && e.detail?.withheldPathId);
+if (witness && marker < 0) throw Error('No mapped witness marker for this take');
 const service = await startSoundMap({root, port: 0, renderedReplay: replay});
 const {token, url} = service.descriptor;
-const viewer = url + '/?replay=' + encodeURIComponent(replay.id);
+const viewer = url + '/?replay=' + encodeURIComponent(replay.id) + (witness ? '&marker=' + marker : '');
 try {
   if (check) {
     const headers = {'Content-Type': 'application/json', 'X-RichAudio-Token': token};

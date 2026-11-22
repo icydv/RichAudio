@@ -54,7 +54,7 @@ export class MixedRoutes {
     if (focused) this.select.value = focused.tap.id;
     else if (this.want) this.select.add(new Option('Selected route absent at this block', '', true, true));
     $('mixed-take').textContent = takeLabels[frame?.take] ?? 'Gap';
-    $('mixed-position').textContent = frame ? 'Take sample ' + frame.takeSampleFrame.toLocaleString('en') +
+    $('mixed-position').textContent = frame ? 'Block start · take sample ' + frame.takeSampleFrame.toLocaleString('en') +
       ' · file sample ' + frame.comparisonSampleFrame.toLocaleString('en') : 'Waiting for the next sampled block.';
     const walls = new Set(routes.flatMap(r => r.ray?.surfaceIds ?? []));
     $('mixed-status').textContent = frame ? routes.length + ' mixer taps · ' + walls.size + ' distinct reflecting faces' : '';

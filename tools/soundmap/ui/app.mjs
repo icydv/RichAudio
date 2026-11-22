@@ -469,6 +469,7 @@ async function openReplay(id){
   safeText($('audio-evidence'),result.audio?.available?'Visual replay · audio is opt-in':'PCM unavailable / discontinuous');
   safeText($('load-audio'),result.audio?.kind==='offline-rendered-file'?'Load rendered audio':'Load owned PCM');
   if(!mixedRoutes.enabled)notice('Historical replay opened. Observation timestamps and failed events are preserved.');
+  return result;
 }
 bind('open-replay',()=>openReplay($('recordings').value));
 function clearAudio(){player.pause();player.removeAttribute('src');player.hidden=true;if(audioObjectUrl)URL.revokeObjectURL(audioObjectUrl);audioObjectUrl=null;$('load-audio').disabled=true;}
@@ -535,10 +536,17 @@ canvas.addEventListener('wheel',e=>{e.preventDefault();if(atlas){atlasPoseInitia
 document.addEventListener('visibilitychange',()=>{replay.lastNow=null;operatorLastDraw=null;pendingSeek=true;displayCadence.reset();displayRate.reset();});
 async function loadReplayLink(){
   await refreshRecordings();
-  const id=new URLSearchParams(location.search).get('replay');
+  const query=new URLSearchParams(location.search),id=query.get('replay');
   if(!id)return;
   $('recordings').value=id;
-  await openReplay(id);
-  if(replayAudioInfo?.kind==='offline-rendered-file')await loadReplayAudio();
+  const recording=await openReplay(id);
+  if(replayAudioInfo?.kind==='offline-rendered-file'){
+    await loadReplayAudio();
+    const marker=query.get('marker');
+    if(marker!==null&&/^\d{1,4}$/.test(marker)){
+      const event=recording.events?.[Number(marker)];
+      if(event){mixedRoutes.focus(event.detail?.pathId??null);seekReplay(event.timeMs);}
+    }
+  }
 }
 loadReplayLink().catch(error=>notice(error.message,true));statusLoop();telemetryLoop().catch(error=>notice(error.message,true));installedContextLoop();requestAnimationFrame(animationLoop);
