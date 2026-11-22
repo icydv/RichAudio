@@ -20,6 +20,17 @@ namespace RichAudio.Beacon.Tests
             Check(credit.Return(1) == 0 && credit.Return(3) == 2 && credit.Retired == 2,
                 "prepared powertrain retires only two credits");
             Check(credit.Return(3) == 3, "steady powertrain keeps returning available credits");
+            var road = GameplayLatencyProfile.Resolve(null, true, "bati-road");
+            var roadCredit = new GameplayCreditWindow(road);
+            Check(road.StartupBlocks == 8 && road.ProducerBlocks == 4 && road.ControlDelayMilliseconds == 50,
+                "Road spends less of the original observation lease in the steady ring");
+            Check(roadCredit.Return(4) == 4 && roadCredit.Retired == 0, "Road keeps the cold reserve");
+            roadCredit.SourcePrepared = true;
+            Check(roadCredit.Return(3) == 0 && roadCredit.Return(2) == 1 && roadCredit.Retired == 4,
+                "Road retires four credits exactly once after preparation");
+            Check(roadCredit.Return(5) == 5, "Road keeps returning credits once steady");
+            Check(GameplayLatencyProfile.Resolve(null, true, "bati-bold").ProducerBlocks == 6,
+                "The separate Bold comparison keeps its existing credit window");
         }
         static void CheckPowertrainWithdrawal()
         {

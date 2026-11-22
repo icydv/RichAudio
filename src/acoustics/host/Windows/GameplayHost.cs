@@ -47,7 +47,7 @@ namespace RichAudio.Beacon.Windows {
     else {
     if(config.DiscardEnvironmentalOutput||powertrain!=null)delivery=new GameplayDeliveryTrace01();
     if(powertrain!=null&&config.PowertrainWorld)powertrainPathTrace=new List<string>(512);
-    latencyProfile=GameplayLatencyProfile.Resolve(config.LatencyProfile,powertrain!=null);ring=new PcmRing(latencyProfile.StartupBlocks);creditWindow=new GameplayCreditWindow(latencyProfile);credits=latencyProfile.StartupBlocks;
+    latencyProfile=GameplayLatencyProfile.Resolve(config.LatencyProfile,powertrain!=null,config.PowertrainVoicing);ring=new PcmRing(latencyProfile.StartupBlocks);creditWindow=new GameplayCreditWindow(latencyProfile);credits=latencyProfile.StartupBlocks;
     if(fixture&&powertrain!=null){
      string frames=Environment.GetEnvironmentVariable(PowertrainFixtureCapture.EnvironmentName);
      if(frames!=null){
@@ -225,7 +225,7 @@ namespace RichAudio.Beacon.Windows {
   // Credits belong to the existing control worker, independent of settings/status IO.
   void ReturnCredits01(){
    int returned=ring.TakeCredits(),n=creditWindow.Return(returned);
-   if(delivery!=null&&returned>0)delivery.Control.Add(GameplayDeliveryTrace01.Row("credits-returned",creditBatch,Stopwatch.GetTimestamp(),0,0,returned,creditWindow.Retired,n,creditWindow.SourcePrepared?1:0));if(latencyProfile.Id!="baseline"&&creditWindow.Retired==2&&steadyWindowAtQpc==0){steadyWindowAtQpc=Stopwatch.GetTimestamp();if(fixtureLatency!=null)fixtureLatency.EnterSteady(steadyWindowAtQpc);}if(n>0){if(fixtureLatency!=null)fixtureLatency.Progress("credits-returned",-1,Stopwatch.GetTimestamp(),0,ring.BufferedFrames,n);Interlocked.Add(ref credits,n);}}
+   if(delivery!=null&&returned>0)delivery.Control.Add(GameplayDeliveryTrace01.Row("credits-returned",creditBatch,Stopwatch.GetTimestamp(),0,0,returned,creditWindow.Retired,n,creditWindow.SourcePrepared?1:0));if(latencyProfile.Id!="baseline"&&creditWindow.Retired==latencyProfile.StartupBlocks-latencyProfile.ProducerBlocks&&steadyWindowAtQpc==0){steadyWindowAtQpc=Stopwatch.GetTimestamp();if(fixtureLatency!=null)fixtureLatency.EnterSteady(steadyWindowAtQpc);}if(n>0){if(fixtureLatency!=null)fixtureLatency.Progress("credits-returned",-1,Stopwatch.GetTimestamp(),0,ring.BufferedFrames,n);Interlocked.Add(ref credits,n);}}
   void WriteControls(){try{AcousticSettings sent=null;bool sentShutdown=false;while(!stop){wake.WaitOne(20);if(stop)break;ReturnCredits01();int n=Interlocked.Exchange(ref credits,0);if(n>0&&fixtureLatency!=null)fixtureLatency.Progress("credits-sent",-1,Stopwatch.GetTimestamp(),0,ring.BufferedFrames,n);if(n>0){
     long id=++creditBatch;
     if(delivery!=null)delivery.Control.Add(GameplayDeliveryTrace01.Row("credit-write-start",id,Stopwatch.GetTimestamp(),0,0,ring.BufferedFrames,ring.PendingCredits,n,creditWindow.Retired));

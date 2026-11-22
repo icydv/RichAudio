@@ -5,10 +5,12 @@ namespace RichAudio.Beacon.Windows {
  internal sealed class GameplayLatencyProfile {
   internal readonly string Id;internal readonly int ControlDelayMilliseconds,StartupBlocks,ProducerBlocks;
   GameplayLatencyProfile(string id,int delay,int startup,int blocks){Id=id;ControlDelayMilliseconds=delay;StartupBlocks=startup;ProducerBlocks=blocks;}
-  internal static GameplayLatencyProfile Resolve(string id,bool privatePowertrain=false){
+  internal static GameplayLatencyProfile Resolve(string id,bool privatePowertrain=false,string powertrainVoicing=null){
    if(privatePowertrain) {
     if(id!=null&&id!="baseline")throw new ArgumentException("Private powertrain timing requires the baseline package");
-    return new GameplayLatencyProfile("private-powertrain",50,8,6);
+    // Road's longer acoustic reach uses the original source lease. Reduce
+    // steady queue residence so an observation survives until submission.
+    return new GameplayLatencyProfile("private-powertrain",50,8,powertrainVoicing=="bati-road"?4:6);
    }
    if(id==null||id=="baseline")return new GameplayLatencyProfile("baseline",100,8,8);
    if(id=="low-latency-01")return new GameplayLatencyProfile(id,75,8,6);
