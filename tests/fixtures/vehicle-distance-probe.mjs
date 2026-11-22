@@ -28,12 +28,12 @@ export function originalDistanceProbe(){
   }
   return pcm;
 }
-export async function renderHeldDistance(pcm,{distance,profile='physical-default',masterGain=.7}={}){
+export async function renderHeldDistance(pcm,{distance,profile='physical-default',masterGain=.7,bandShape='legacy'}={}){
   assert.ok(pcm instanceof Float32Array&&pcm.length>FS&&pcm.length<=FS*10);
   assert.ok(pcm.every(v=>Number.isFinite(v)&&Math.abs(v)<=1));
   assert.ok(distanceProbeMetres.includes(distance));
   const scene=distanceProbeScene(profile),sourceId='held-distance-source';
-  const pipeline=new VehicleAcousticPipeline({scene,sourceIds:[sourceId],acceleration:'cpu',masterGain});
+ const pipeline=new VehicleAcousticPipeline({scene,sourceIds:[sourceId],acceleration:'cpu',masterGain,bandShape});
   const left=new Float32Array(pcm.length),right=new Float32Array(pcm.length),input=new Float32Array(512),l=new Float32Array(512),r=new Float32Array(512);
   let maximumRetardedFrameError=0,maximumRateError=0,lastPath=null;
   try{

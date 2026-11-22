@@ -18,7 +18,7 @@ export const bounds = Object.freeze({
   reflectors: 16,
   keys: 4096,
   duration: 60,
-  delay: 2,
+  delay: 8,
   speed: 100,
   pcmFrames: 4000000,
 });
@@ -43,6 +43,12 @@ export function adoptSourceBoundAcousticScene01(scene){
 export const requireValue = (ok, message) => {
   if (!ok) throw Error(message);
 };
+export function copyRadiationByBand(bands) {
+  requireValue(Array.isArray(bands)&&bands.length===3&&
+    bands.every(v=>Number.isFinite(v)&&v>=0&&v<=1)&&
+    bands[0]<=bands[1]&&bands[1]<=bands[2], 'radiation directivity must be three ordered pressure coefficients');
+  return Object.freeze([...bands]);
+}
 export const freeze = (x) => {
   if (x && typeof x === "object" && !deeplyFrozenValues01.has(x)) {
     // createTile already proved this exact complete graph deeply immutable.
@@ -261,6 +267,7 @@ export function trajectory(keys, { discontinuityGuard = 0.05 } = {}) {
     );
     return {
       ...k,
+      ...(k.radiationByBand !== undefined && {radiationByBand:copyRadiationByBand(k.radiationByBand)}),
       position: vector(k.position),
       forward,
       up,
@@ -365,6 +372,8 @@ function sampleTrack(track, t, positionOnly) {
     right,
     valid,
     generation: a.generation,
+    ...(a.radiationByBand && {radiationByBand:continuous&&b.radiationByBand?
+      interpolateAxis(a.radiationByBand,b.radiationByBand,u):a.radiationByBand}),
   };
 }
 export function ownedSource({

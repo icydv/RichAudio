@@ -1,5 +1,6 @@
 // Offline/source-worker adapter. No endpoint, listener transport or host changes.
-import { CausalSimulation, StreamingRenderer } from '../streaming/causal.mjs';
+import { CausalSimulation, StreamingRenderer, maximumPcmHistoryBytes,
+  pcmHistoryBytes, streamingHistoryPadding } from '../streaming/causal.mjs';
 import { AcousticAcceleration } from '../streaming/acoustic-backend.mjs';
 import { qualityPresets, qualityReflectors } from '../streaming/acoustic-quality.mjs';
 import { stockExteriorPressureGains } from './stock-pressure.mjs';
@@ -16,17 +17,22 @@ export function createStockVehiclePipeline(options = {}) {
 }
 
 export class VehicleAcousticPipeline {
-  constructor({ scene, sourceIds, quality = 'quality', acceleration = 'cpu', masterGain = 0.7,
+  constructor({ scene, sourceIds = ['beacon'], quality = 'quality', acceleration = 'cpu', masterGain = 0.7,
     directStem = false, sourcePressureGains = {}, continuousRates = false, controlFilter = null,
     validateSampledMotion = false, reuseStaticSegments = false, preserveSourceHistoryOnListenerCut = false, roadScattering = false,
-    scatteredReflectionDelay } = {}) {
+    scatteredReflectionDelay, bandShape = 'legacy' } = {}) {
     if (!(quality in qualityPresets)) throw Error('explicit acoustic quality required');
-    this.simulation = new CausalSimulation(scene, {validateSampledMotion,preserveSourceHistoryOnListenerCut,roadScattering,scatteredReflectionDelay});
+    // The initial validated scene sets the immutable capacity of both clocks.
+    // Replacing geometry never reallocates a live emission ring.
+    const historySeconds = Math.max(2.5, (scene?.config.maxDelay ?? 2) + streamingHistoryPadding);
+    if(pcmHistoryBytes(historySeconds,sourceIds.length)*(directStem?2:1)>maximumPcmHistoryBytes)
+      throw Error('vehicle pipeline PCM history budget');
+    this.simulation = new CausalSimulation(scene, {historySeconds,validateSampledMotion,preserveSourceHistoryOnListenerCut,roadScattering,scatteredReflectionDelay});
     this.backend = new AcousticAcceleration({ mode: acceleration, reuseStaticSegments });
     this.renderer = new StreamingRenderer({ sourceIds, maxPathsPerSource: qualityPresets[quality],
-      pathCapacityPerSource: 64, masterGain, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains, continuousRates });
+      pathCapacityPerSource: 64, masterGain, historySeconds, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains, continuousRates, bandShape });
     this.directRenderer = directStem ? new StreamingRenderer({ sourceIds, maxPathsPerSource: 1,
-      masterGain, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains }) : null;
+      masterGain, historySeconds, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains, bandShape }) : null;
     this.setQuality(quality);
     this.lastControl = null;
     if(controlFilter!==null&&typeof controlFilter!=='function')throw Error('control filter required');this.controlFilter=controlFilter;
@@ -84,7 +90,8 @@ export class VehicleAcousticPipeline {
     return { quality: this.quality, simulation: { ...this.simulation.stats }, renderer: { ...this.renderer.stats },
       history: this.renderer.historyDiagnostics, sourceHistoryBytes: this.renderer.ownedArrayBytes,
       backend: this.backend.diagnostics(), directStemHistoryBytes: this.directRenderer?.ownedArrayBytes ?? 0,
-      sourcePressureGains: this.renderer.sourcePressureGains };
+      sourcePressureGains: this.renderer.sourcePressureGains,
+      ...(this.renderer.bandShape && {bandShape:this.renderer.bandShape}) };
   }
   close() { this.backend.close(); }
 }

@@ -1,10 +1,19 @@
 // Causal adaptation around the unchanged A06 finite-path solver. No future trajectory input.
-import { bounds, requireValue, validated } from "../engine/contracts.mjs";
+import { bounds, copyRadiationByBand, requireValue, validated } from "../engine/contracts.mjs";
 import { vector, unit, length, dot } from "../research/local-geometry.mjs";
 import { candidatePaths, prepareReceiver, finishPath, pathSegments,
   roadScatterLimit, roadScatterFromReflection, roadScatterEarlyBands, roadScatterSupport } from "../engine/paths.mjs";
 import {fleetReflectionSelector} from '../engine/fleet-reflections.mjs';
 const FS = 48000;
+export const streamingHistoryPadding = .5;
+const largestHistorySeconds = bounds.delay + streamingHistoryPadding;
+const observationRateLimit = 240;
+export const maximumPcmHistoryBytes = 128 * 1024 * 1024;
+export function pcmHistoryBytes(historySeconds, sourceCount) {
+  // Three float band samples, an int sample address and a float64 generation.
+  return Math.ceil(historySeconds * FS) * sourceCount *
+    (3 * Float32Array.BYTES_PER_ELEMENT + Int32Array.BYTES_PER_ELEMENT + Float64Array.BYTES_PER_ELEMENT);
+}
 function state(s) {
   requireValue(s && typeof s === "object", "state required");
   const position = vector(s.position),
@@ -41,6 +50,7 @@ function state(s) {
     valid: s.valid !== false,
     generation,
     directivity,
+    ...(s.radiationByBand !== undefined && {radiationByBand:copyRadiationByBand(s.radiationByBand)}),
     ...(s.roadExhaust === true ? {roadExhaust: true} : {}),
     ...(s.roadScatter === true ? {roadScatter: true} : {}),
     nearFieldRadius,
@@ -78,7 +88,7 @@ export class CausalSimulation {
         staleAfter >= extrapolationLimit &&
         staleAfter <= 1 &&
         historySeconds >= (scene?.config.maxDelay ?? 2) + 0.1 &&
-        historySeconds <= 3,
+        historySeconds <= largestHistorySeconds,
       "history/age budgets",
     );
     this.scene = scene;
@@ -177,7 +187,7 @@ export class CausalSimulation {
     const cameraCut = changing && this.preserveSourceHistoryOnListenerCut && this.sourceSession === snapshot.session;
     const previous = !changing || cameraCut ? this.records.at(-1) : null;
     requireValue(
-      !previous || snapshot.time - previous.time >= 1 / 240 - 1e-9,
+      !previous || snapshot.time - previous.time >= 1 / observationRateLimit - 1e-9,
       "duplicate/out-of-order or excessive-rate observation",
     );
     requireValue(
@@ -258,7 +268,7 @@ export class CausalSimulation {
       history.push(key(s,this.sourceEpoch??this.epoch));
     }
     while (
-      this.records.length > 1024 ||
+      this.records.length > Math.max(1024,Math.ceil(this.historySeconds*observationRateLimit)+2) ||
       (this.records.length > 2 &&
         this.records[1].time < snapshot.time - this.historySeconds)
     ){
@@ -575,6 +585,7 @@ export class StreamingRenderer {
     sourcePressureGains = {},
     continuousRates = false,
     continuousTransitions = continuousRates,
+    bandShape = 'legacy',
   } = {}) {
     requireValue(
       sourceIds.length >= 1 &&
@@ -590,13 +601,17 @@ export class StreamingRenderer {
         pathCapacityPerSource >= maxPathsPerSource &&
         pathCapacityPerSource <= 64 &&
         historySeconds >= 2.1 &&
-        historySeconds <= 3 &&
+        historySeconds <= largestHistorySeconds &&
+        pcmHistoryBytes(historySeconds,sourceIds.length) <= maximumPcmHistoryBytes &&
         masterGain >= 0 &&
         masterGain <= 1,
       "DSP budgets",
     );
     requireValue(sourcePressureGains && typeof sourcePressureGains === "object" && !Array.isArray(sourcePressureGains) && Object.entries(sourcePressureGains).every(([id,gain]) => sourceIds.includes(id) && Number.isFinite(gain) && gain >= .25 && gain <= 4), "explicit bounded source pressure calibration");
     this.sourcePressureGains = Object.freeze(Object.fromEntries(sourceIds.map(id => [id,sourcePressureGains[id] ?? 1])));
+    requireValue(bandShape==='legacy'||bandShape==='steep-four-pole','supported band shape');
+    const steeperBands=bandShape==='steep-four-pole';
+    if(steeperBands)this.bandShape=bandShape;
     this.frame = 0;
     this.generationReleaseGuard = generationReleaseGuard;
     requireValue(typeof continuousRates==='boolean','continuous rate policy');
@@ -640,6 +655,7 @@ export class StreamingRenderer {
           generations: new Float64Array(this.historyFrames),
           low: 0,
           upper: 0,
+          ...(steeperBands && {additionalBandPoles:new Float64Array(6)}),
         },
       ]),
     );
@@ -719,7 +735,7 @@ export class StreamingRenderer {
           n +
           s.bands.reduce((a, b) => a + b.byteLength, 0) +
           s.frames.byteLength +
-          s.generations.byteLength,
+          s.generations.byteLength + (s.additionalBandPoles?.byteLength ?? 0),
         0,
       ) +
       this.slots.length * (this.continuousTransitions?72:48) + (this.activeSlotIndices?.byteLength ?? 0);
@@ -766,6 +782,7 @@ export class StreamingRenderer {
     requireValue(source, "known source history");
     source.frames.fill(-1);
     source.low = source.upper = 0;
+    source.additionalBandPoles?.fill(0);
   }
   setSourceGeneration(id, generation) {
     const s = this.sources.get(id);
@@ -778,6 +795,7 @@ export class StreamingRenderer {
       s.generationFrame = this.frame;
       s.low = 0;
       s.upper = 0;
+      s.additionalBandPoles?.fill(0);
     }
   }
   accept(control) {
@@ -999,9 +1017,20 @@ export class StreamingRenderer {
         requireValue(Number.isFinite(x) && Math.abs(x) <= 1, "invalid dry PCM");
         s.low += lowK * (x - s.low);
         s.upper += highK * (x - s.upper);
-        s.bands[0][write] = s.low;
-        s.bands[1][write] = s.upper - s.low;
-        s.bands[2][write] = x - s.upper;
+        let low=s.low, upper=s.upper;
+        const poles=s.additionalBandPoles;
+        if(poles){
+          // Cascaded causal low-passes narrow the high-frequency leakage
+          // from strongly weighted lower bands over long routes. Keep the
+          // telescoping low + (upper-low) + (dry-upper) reconstruction.
+          for(let k=0;k<poles.length;k+=2){
+            low=poles[k]+=lowK*(low-poles[k]);
+            upper=poles[k+1]+=highK*(upper-poles[k+1]);
+          }
+        }
+        s.bands[0][write] = low;
+        s.bands[1][write] = upper - low;
+        s.bands[2][write] = x - upper;
         s.frames[write] = frame;
         s.generations[write] = s.generation;
       }
