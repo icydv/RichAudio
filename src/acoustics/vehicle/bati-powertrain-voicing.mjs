@@ -92,7 +92,7 @@ export function voiceBatiPowertrain(source, voicing = batiVoicing) {
   source.batiVoicing = voicing;
   source.roadMix = Boolean(mix);
   const idle = mix ? .78 / mix.nearPressure : idlePressure;
-  let lowMid = 0, lowBass = 0, fastEnvelope = 0, slowEnvelope = 0, dryShare = 0;
+  let lowMid = 0, lowBass = 0, fastEnvelope = 0, slowEnvelope = 0, dryShare = 0, shapingDrive = 0;
   const bodyPole = 1 - Math.exp(-2*Math.PI*580/FS);
   const bassPole = 1 - Math.exp(-2*Math.PI*85/FS);
   const fastPole = 1 - Math.exp(-1/(FS*.002));
@@ -145,8 +145,12 @@ export function voiceBatiPowertrain(source, voicing = batiVoicing) {
       fastEnvelope += fastPole * (Math.abs(dry) - fastEnvelope);
       slowEnvelope += slowPole * (Math.abs(dry) - slowEnvelope);
       const attack = Math.min(1, Math.max(0, (fastEnvelope - slowEnvelope) / (.06 + slowEnvelope)));
-      const body = (lowMid - lowBass) * mix.body * drive;
-      const pulse = (dry + body) * pressure * (1 + .20 * mix.attack * attack * drive);
+      // Apply load changes to the running filters without stepping the
+      // existing pressure waveform when the observed lift becomes qualified.
+      if (qualifyRoadLift) shapingDrive += cutSlew * (drive - shapingDrive);
+      const textureDrive = qualifyRoadLift ? shapingDrive : drive;
+      const body = (lowMid - lowBass) * mix.body * textureDrive;
+      const pulse = (dry + body) * pressure * (1 + .20 * mix.attack * attack * textureDrive);
       // Smooth knee only at large individual pulses. Preserve polarity and
       // leave the beginning of the transient linear up through 0.80 FS.
       const over = Math.max(0, Math.abs(pulse) - .80);

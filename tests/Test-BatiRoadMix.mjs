@@ -112,3 +112,25 @@ test('a small reported rev oscillation stays loaded and a sustained fall enters 
   wobbling.renderInto({operatingPoint:.80, running:true, load:.9, lift:false},e2,x2);
   assert.equal(wobbling.renderedControl.lift,false);
 });
+
+test('a real Road lift does not step the body gain at the control boundary', () => {
+  const e = new Float32Array(512), x = new Float32Array(512);
+  for (let phase = 0; phase < 12; phase++) {
+    let sample = 0;
+    const road = voiceBatiPowertrain({vehicle:{model:'bati'}, renderInto(_, engine, exhaust) {
+      engine.fill(0);
+      for (let i = 0; i < exhaust.length; i++, sample++) {
+        exhaust[i] = .17 * Math.sin(sample * 2 * Math.PI * 190 / 48000 + phase * Math.PI / 6);
+      }
+    }}, 'bati-road');
+    const load = {operatingPoint:.88, running:true, load:.9, lift:false};
+    for (let block = 0; block < 40; block++) road.renderInto(load,e,x);
+    const boundary = x.at(-1);
+    const before = Array.from(x.subarray(-24));
+    road.renderInto({...load,operatingPoint:.84,load:.05,lift:true},e,x);
+    const after = Array.from(x.subarray(0,24));
+    const step = values => Math.max(...values.slice(1).map((v,i) => Math.abs(v-values[i])));
+    const neighborhood = Math.max(step(before),step(after));
+    assert(Math.abs(x[0]-boundary) <= neighborhood + .002, 'lift must not add an isolated load-control impulse');
+  }
+});
