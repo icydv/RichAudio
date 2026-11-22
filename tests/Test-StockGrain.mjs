@@ -40,6 +40,27 @@ test('held state keeps deterministic interval phase without neighbour hopping or
   assert.equal(starts.size,1);assert.equal(a.stats.stateSwitches,0);
   assert.ok(a.stats.texture.uniqueIntervals>2);assert.ok(a.stats.texture.maximumMaterialRateDifference<=.05+1e-12);
 });
+test('opt-in sparse texture transitions do not jump between two actual reader levels',()=>{
+  const samples=new Float32Array(3600);samples.fill(.6,0,1200);samples.fill(-.6,1200);
+  const regions=Array.from({length:3},(_,i)=>({startFrame:i*1200,endFrame:(i+1)*1200}));
+  const exercise=smoothTextureFallback=>{
+    const v=new StockGrainVoice(asset(samples),{regions,smoothTextureFallback});
+    let sparse=true;
+    v.pool=p=>({...StockGrainVoice.prototype.pool.call(v,p),count:sparse?1:2,
+      start:sparse?0:1,allowed:new Set(sparse?[0]:[1,2]),runs:sparse?[[0,1]]:[[1,3]]});
+    for(let i=0;i<64;i++)assert(Math.abs(v.next(0)-.6)<1e-7);
+    sparse=false;
+    v.texturePlan=null;
+    const opening=v.next(0);
+    let ending=opening;
+    for(let i=0;i<180;i++)ending=v.next(0);
+    return {opening,ending};
+  };
+  assert(exercise(false).opening<-.59);
+  const {opening,ending}=exercise(true);
+  assert(opening>.59,'preserve the old reader level at the transition');
+  assert(ending<-.59,'new reader is not softened beyond the short boundary');
+});
 test('source validation rejects malformed intervals, nonfinite input and invalid operating controls',()=>{
   const a=asset(new Float32Array(1000));
   for(const regions of [[{startFrame:-1,endFrame:20}],[{startFrame:10,endFrame:1001}],[{startFrame:0,endFrame:4}],

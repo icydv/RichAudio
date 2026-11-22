@@ -99,7 +99,7 @@ function readStockAssetLibrary(manifestFile,{sustainAtlasFile},allowedModels,con
 }
 
 export class StockVehicleSource {
-  constructor(vehicle,{sourceGain=1,atlas=null,pressureShares={engine:.5,exhaust:.5},pressureSharesByState=null,exhaustEvents=null,preparation10=null}={}){
+  constructor(vehicle,{sourceGain=1,atlas=null,pressureShares={engine:.5,exhaust:.5},pressureSharesByState=null,exhaustEvents=null,preparation10=null,smoothTextureFallback=false}={}){
     check((verifiedVehicleBanks.has(vehicle)||analyticFixture(vehicle))&&Number.isFinite(sourceGain)&&sourceGain>0&&sourceGain<=2,'verified model or explicit analytical fixture and bounded shared source calibration');
     const prepared=preparation10===null?null:sourcePreparations10.get(preparation10);
     check(preparation10===null||prepared&&prepared.vehicle===vehicle&&prepared.model===vehicle.model&&prepared.audioContext===vehicle.audioContext&&prepared.atlas===atlas&&prepared.entries.every(e=>vehicle.layers[e.role][e.mode]===e.asset&&e.asset.nativePeak===e.nativePeak),'exact branded source preparation required');
@@ -122,7 +122,7 @@ export class StockVehicleSource {
     this.previous={engine:0,exhaust:0};this.commonRates={engine:null,exhaust:null};
     if(exhaustEvents){check(!this.npc&&vehicle.model==='prototipo','verified native pops must not be substituted across vehicles or contexts');
       this.events=new StockExhaustEvents({...exhaustEvents,bedPeakBound:this.inputBounds.exhaust,roleGainBound:sourceGain*Math.max(...this.shareStates.map(s=>s.exhaust))});this.stats.events=this.events.stats;}
-    for(const role of stockRoles)this.voices[role]=Object.fromEntries(this.modes.map(mode=>[mode,new StockGrainVoice(vehicle.layers[role][mode],{regions:atlas?.[role]?.[mode],
+    for(const role of stockRoles)this.voices[role]=Object.fromEntries(this.modes.map(mode=>[mode,new StockGrainVoice(vehicle.layers[role][mode],{regions:atlas?.[role]?.[mode],smoothTextureFallback,
       ...(prepared?{preparation10:prepared.entries.find(e=>e.role===role&&e.mode===mode).preparation10}:{})})]));
     if(this.npc)this.stats.transitionPolicy='authored: follow operating point through accel PCM on lift; blend to recorded idle below .28; no decel voice or native scheduling claim';
   }

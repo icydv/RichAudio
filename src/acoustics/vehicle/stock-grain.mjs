@@ -120,7 +120,7 @@ export class StockGrainVoice {
   #nextOutput={value:0,energy:0};
   #firstCycle={value:0,energy:0};
   #secondCycle={value:0,energy:0};
-  constructor(asset,{regions=null,texture=true,preparation10=null}={}){
+  constructor(asset,{regions=null,texture=true,preparation10=null,smoothTextureFallback=false}={}){
     const prepared=preparation10===null?null:preparations10.get(preparation10);
     if(preparation10!==null)validateStockGrainPreparation10(asset,{regions,texture,preparation10});
     this.samples=prepared?.samples??validated(asset);this.asset=asset;this.increment=asset.sampleRate/FS;
@@ -150,6 +150,8 @@ export class StockGrainVoice {
       maximumSelectedInterval:null,maximumConcurrentHeads:2,sourceBoundViolations:0,stateSwitches:0,
       minimumIntervalRateHz:Infinity,maximumIntervalRateHz:0,clock:'full interval phase; no overlap-hop rate or neighbour pattern'};
     this.textureEnabled=Boolean(texture&&supplied?.length>1);
+    if(smoothTextureFallback&&this.textureEnabled)
+      this.fallbackSplice={sparse:null,start:0,remaining:0};
     const features=asset.sustain?.intervals;
     if(features&&!prepared)check(features.length===this.intervals.length&&features.every((f,i)=>f.index===i&&f.startFrame===this.intervals[i].start&&f.endFrame===this.intervals[i].end),'sustain features must bind exact source intervals');
     this.features=prepared?prepared.features.map(f=>({...f,...(f.bandFractions?{bandFractions:{...f.bandFractions}}:{})})):features??this.intervals.map(r=>{let e=0,peak=0,detail=0;for(let i=r.start;i<r.end;i++){
@@ -517,7 +519,27 @@ export class StockGrainVoice {
     const rate=externalRateHz??this.asset.sampleRate/((1-p.w)*a.length+p.w*b.length);
     check(Number.isFinite(rate)&&rate>0&&rate<=FS/8,'bounded source interval clock');
     this.lastRate=rate;
-    if(this.textureEnabled){const x=this.continuous(p,rate,this.#nextOutput);value=x.value;energy=x.energy;}
+    if(this.textureEnabled){
+      const x=this.continuous(p,rate,this.#nextOutput);value=x.value;energy=x.energy;
+      const splice=this.fallbackSplice;
+      if(splice){
+        const sparse=this.texturePlan.count<2;
+        // A sparse phase pair can be at a different phase than the first
+        // chronological grain. Join from the last rendered pressure without
+        // changing either reader clock or smoothing the rest of the recording.
+        if(splice.sparse!==null&&splice.sparse!==sparse){
+          splice.start=this.previous;
+          splice.remaining=144;
+        }
+        splice.sparse=sparse;
+        if(splice.remaining>0){
+          const weight=smooth(1-splice.remaining/144);
+          value=splice.start*(1-weight)+value*weight;
+          energy=splice.start**2*(1-weight)+energy*weight;
+          splice.remaining--;
+        }
+      }
+    }
     else{const x=this.cycle(a,this.#firstCycle),y=p.a===p.b?x:this.cycle(b,this.#secondCycle);value=(1-p.w)*x.value+p.w*y.value;energy=(1-p.w)*x.energy+p.w*y.energy;}
     if(this.pendingBoundary)this.maximumBoundaryStep=Math.max(this.maximumBoundaryStep,Math.abs(value-this.previous));
     this.stats.minimumIntervalRateHz=Math.min(this.stats.minimumIntervalRateHz,rate);this.stats.maximumIntervalRateHz=Math.max(this.stats.maximumIntervalRateHz,rate);
