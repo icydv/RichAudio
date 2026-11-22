@@ -28,6 +28,8 @@ const latencyProfile=resolveLatencyProfile(config.latencyProfile);
 if(latencyProfile.id==='low-latency-01'&&(config.demoProfile!=='PLAYABLE-13'||config.eligible?.length!==1||config.eligible[0].model!==0xf9300cc5||config.eligible[0].context!=='player'))throw Error('LOW-LATENCY-01 requires the Bati-player demonstration package');
 validateStreetLatencySelection01(config);
 const fleet=config.vehicleSourcePolicy==='catalogue-fleet-01';
+const useNpcBlockWorker=config.fleetNpcSynthesis==='same-block-worker';
+if(config.fleetNpcSynthesis!==undefined&&(!useNpcBlockWorker||!fleet||latencyProfile.id!=='street-01'||privatePowertrain))throw Error('Same-block NPC synthesis requires the street fleet');
 const clockedEvidence=config.outputSink==='environment-observation'&&config.clockedFleetEvidence02===true&&process.env.RICHAUDIO_CLOCKED_FLEET_EVIDENCE02==='1'?
  new ClockedFleetEvidence02(root,session):null;
 const qualification=normalQualification01(config,root,session);
@@ -117,8 +119,17 @@ if(fleetReflectionTrains&&['auto','gpu'].includes(startupAcceleration)){
  engine.pipeline.setAcceleration(startupAcceleration);
  engine.pipeline.backend.start();
 }
+let npcBlockReady=null;
+if(useNpcBlockWorker){
+ const pairs=preparedPairs.filter(pair=>pair.context==='npc');
+ if(pairs.length!==1||npcAssets?.vehicles.size!==1)throw Error('Same-block synthesis requires one prepared NPC bank');
+ const bank=registry.resolve(pairs[0].model,'npc').bank;
+ const {NpcBlockWorker}=await import('../src/acoustics/vehicle/npc-block-worker.mjs');
+ engine.npcBlockWorker=new NpcBlockWorker({session,npcManifest:inside(config.npcManifest),bank,options:engine.stockSourceOptions01(bank)});
+ npcBlockReady=await engine.npcBlockWorker.ready;
+}
 const normalControlWarmup=latencyProfile.id==='street-01'?await warmNormalControl01():null;
-const startupVoicePairs=fleet?preparedPairs:sourceStartupPreparation10.unpreparedBanks.length?[]:startupPairs;
+const startupVoicePairs=fleet?(useNpcBlockWorker?preparedPairs.filter(p=>p.context!=='npc'):preparedPairs):sourceStartupPreparation10.unpreparedBanks.length?[]:startupPairs;
 const startupVoices=latencyProfile.id==='street-01'&&startupVoicePairs.length?engine.prepareStartupVoices01(startupVoicePairs):0;
 const powertrainVoiceEvidence=privatePowertrain?new PowertrainVoiceEvidence():null;
 const startupDevice=fleetReflectionTrains?{
@@ -132,7 +143,7 @@ const installedSceneEngine={
   ?{installedReflectionTrains:true}:{}),
 };
 let taggedPowertrainPaths=null;
-clockedEvidence?.ready({milliseconds:performance.now()-startupBegan,startupVoices,...sourceStartupPreparation10,normalControlWarmup,startupDevice});
+clockedEvidence?.ready({...(npcBlockReady?{npcBlockReady}:{}),milliseconds:performance.now()-startupBegan,startupVoices,...sourceStartupPreparation10,normalControlWarmup,startupDevice});
 engine.pipeline.simulation.captureInstalledPaths01=config.acousticPathEvidence01===true;
 let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,pendingSettings=null,pendingGeometry=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
 const traceDelivery=config.outputSink==='environment-observation'&&process.env.RICHAUDIO_DISCARD_DELIVERY_TRACE01==='1';
@@ -262,10 +273,12 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality,
  // diagnostic pipe's per-record bound together. Both belong to this status.
  if(powertrainVoiceEvidence)log({type:'powertrain-voice-evidence',frame:sequence,voice:powertrainVoiceEvidence.report()});
 }
-function finish(error,reason=error?'producer-fault':'graceful-stop'){if(stopped)return;const stopAt=performance.now();stopped=true;engine.beginStopInstalledScene01(stopAt,error?'producer-error':'stop-intent');engine.close();
+function finish(error,reason=error?'producer-fault':'graceful-stop'){if(stopped)return;const stopAt=performance.now();stopped=true;engine.beginStopInstalledScene01(stopAt,error?'producer-error':'stop-intent');const closingEngine=engine.close();
  const world=installedScenes;installedScenes=null;
  if(viewerClient){viewerClient.close().catch(()=>{});viewerClient=null;}viewer=false;soundMapRecordingRequest01=false;soundMapBackgroundRequest01=false;status();if(error){log({type:'gameplay-error',code:error.message});process.exitCode=1;}if(qualification)log({type:'producer-terminal',reason,error:error?.message??null,worldWorkerOwned:world!==null});input.close();process.stdin.pause();
- void (async()=>{if(clockedMap)try{await clockedMap.close();}
+ void (async()=>{if(closingEngine)try{await closingEngine;if(useNpcBlockWorker)log({type:'npc-render-worker-joined'});}
+ catch(e){log({type:'producer-close-failed',reason:e.message});process.exitCode=1;}
+ if(clockedMap)try{await clockedMap.close();}
  catch(e){log({type:'clocked-map-close-failed',reason:e.message});process.exitCode=1;}
  try{if(world){const r=await world.close();log({type:'installed-world-worker-closed',stopAt,...r});if(!r.workerJoined)process.exitCode=1;}}
  catch(e){log({type:'installed-world-worker-close-failed',stopAt,reason:e.message});process.exitCode=1;}

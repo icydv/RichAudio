@@ -39,20 +39,24 @@ export class VehicleAcousticPipeline {
   setAcceleration(mode) { this.backend.setMode(mode); }
   replaceScene(scene, options) { this.simulation.replaceScene(scene, options); }
   // Called on the source/control worker. GPU preparation is never in process().
-  async prepare(snapshot, options = {}, acceptControl = () => true) {
+  async prepare(snapshot, options = {}, acceptControl = () => true, beforeApply = null) {
     if(this.clockedStages)Object.assign(this.clockedStages,{
       candidatePreparationMs:0,visibilityMs:0,pathSelectionMs:0,pathApplicationMs:0,stereoMixMs:0,
       proposed:0,segments:0,eligible:0,selected:0
     });
     this.simulation.observe(snapshot);
-    return this.prepareObserved(snapshot.time, options, acceptControl);
+    return this.prepareObserved(snapshot.time, options, acceptControl, beforeApply);
   }
   // Re-evaluate geometry for the already observed block after an asynchronous
   // invalidation. Do not append another source observation or advance grains.
-  async prepareObserved(time, options = {}, acceptControl = () => true) {
+  async prepareObserved(time, options = {}, acceptControl = () => true, beforeApply = null) {
     const stages=this.clockedStages;
     let control = await this.simulation.updateAccelerated(time, options, this.backend, stages);
     if (!acceptControl()) return false;
+    if(beforeApply){
+      control=await beforeApply(control);
+      if(!acceptControl())return false;
+    }
     const began=stages?performance.now():0;
     if(this.controlFilter)control=this.controlFilter(control,this.renderer);
     this.renderer.accept(control);

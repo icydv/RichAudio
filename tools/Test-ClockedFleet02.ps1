@@ -15,6 +15,7 @@ param(
     [string]$TrafficRoute,
     [switch]$WarmWall,
     [switch]$RankedReflections,
+    [switch]$NpcSynthesisWorker,
     [switch]$CpuOnly,
     [switch]$MultiWall
 )
@@ -36,10 +37,13 @@ if ($retained -and ($retained -ne 3 -or $Legacy -or $Population -gt 5)) {
     throw 'The retained case needs the source manifest, world binding, wall pose, and one to five vehicles'
 }
 if ($RankedReflections -and !$MultiWall) { throw 'Ranked reflections require the multi-wall fleet fixture' }
+if ($NpcSynthesisWorker -and (!$retained -or !$MultiWall -or $Population -ne 5)) {
+    throw 'The NPC synthesis worker comparison needs five vehicles and the retained multi-wall sources'
+}
 if ($CpuOnly -and !$MultiWall) { throw 'The explicit CPU comparison needs the multi-wall fixture' }
 if ($TrafficRoute -and !$MultiWall) { throw 'The traffic route needs the retained multi-wall fixture' }
 if ($WarmWall -and (!$retained -or (!$TrafficRoute -and $Population -eq 1) -or $Blocks -lt 768)) {
-    throw 'The wall warm-up needs a retained two- or five-vehicle case with at least 768 blocks'
+    throw 'The wall warm-up needs a retained fleet with at least 768 blocks. A single vehicle needs a traffic route.'
 }
 if ($MultiWall -and (!$retained -or $Blocks -lt 768)) {
     throw 'Multi-wall measurement needs retained inputs and at least 768 blocks for the stationary and moving phases'
@@ -63,6 +67,7 @@ if ($retained) {
     if ($WarmWall) { $prepareArguments += 'warm-wall' }
     if ($TrafficRoute) { $prepareArguments += ('traffic-route=' + (Resolve-Path -LiteralPath $TrafficRoute).Path) }
     if ($RankedReflections) { $prepareArguments += 'ranked-reflections' }
+    if ($NpcSynthesisWorker) { $prepareArguments += 'npc-synthesis-worker' }
     if ($CpuOnly) { $prepareArguments += 'cpu-only' }
     if ($MultiWall) {
         & (Join-Path $PSScriptRoot 'Build-AcousticGpu.ps1') -OutputDirectory (Join-Path $out 'gpu-build') | Out-Host
@@ -87,6 +92,7 @@ $witnessRequested = $CaptureSoundMap -or $PcmWitness -or $env:RICHAUDIO_CLOCKED_
     captureClockedOutput = [bool]($CaptureOutput -or $witnessRequested)
     sampleContributorPcm = $witnessRequested
     rankedReflections = [bool]$RankedReflections
+    npcSynthesisWorker = [bool]$NpcSynthesisWorker
     requestedAcceleration = if ($MultiWall -and !$CpuOnly) { 'auto' } else { 'cpu' }
     captureSoundMap = [bool]$CaptureSoundMap
     mode = $mode; requestedBlocks = $Blocks; requestedPopulation = $Population; warmWall = [bool]$WarmWall; multiWall = [bool]$MultiWall
@@ -146,6 +152,11 @@ try {
         $sustained -and $populationQualified -and $sceneQualified -and $producer.hardMisses -eq 0 -and
         $producer.overflowBlocks -eq 0 -and $driver.final.underflowFrames -eq 0 -and $driver.final.discardCadence.deferredCallbacks -eq 0
     if ($MultiWall) { $passed = $passed -and $producer.allBlocks.throughPipeWriteMisses -eq 0 -and $producer.allBlocks.deliveredBlocks -eq $producer.blocks }
+    $workerQualified = $null
+    if ($NpcSynthesisWorker) {
+        $workerQualified = $producer.preparation.npcBlockReady.ready -and $producer.preparation.npcBlockReady.session -eq $driver.session -and $producer.npcSynthesisWorker.blocks -gt 0
+        $passed = $passed -and $workerQualified
+    }
     if ($witnessRequested) {
         $voices = [Math]::Min(5, $Population)
         $witnessQualified = $witness.exactPacketSamples -gt 0 -and !$witness.sinkPcmMismatches -and !$witness.unboundSamples -and $witness.maximum.active -eq $voices
@@ -163,6 +174,7 @@ try {
         deferredCallbacks = $driver.final.discardCadence.deferredCallbacks; endpointOpened = $driver.final.endpointOpened
         installedAtRequestedPopulation = $phases
         trafficMotionCoverage = $trafficMotion
+        npcSynthesisWorkerQualified = $workerQualified
         pcmWitnessQualified = $witnessQualified
     } | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $out 'benchmark-result.json')
     if (!$passed) { throw 'Clocked benchmark failed its workload, render deadline, or ring delivery gate' }

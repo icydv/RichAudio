@@ -7,7 +7,8 @@ import {performance,PerformanceObserver} from 'node:perf_hooks';
 import {ClockedFleetPcmWitness} from './clocked-fleet-pcm-witness.mjs';
 
 const maximumBlocks=16384,frames=512,deadline=frames/48;
-const renderStageFields=['admissionMs','sourceSelectionMs','stockSynthesisMs','propagationMs','pcmMs','bookkeepingMs'];
+const workerFields=['npcDispatchMs','npcWorkerMs','npcJoinMs','npcResultAgeMs'];
+const renderStageFields=['admissionMs','sourceSelectionMs','stockSynthesisMs',...workerFields,'propagationMs','pcmMs','bookkeepingMs'];
 const pathStageFields=['candidatePreparationMs','visibilityMs','pathSelectionMs','pathApplicationMs','stereoMixMs'];
 const fields=['completeRenderMs',...renderStageFields,...pathStageFields,'framingMs','producerWakeMs','controlIngressMs','throughPipeWriteMs'];
 const counts=['active','moving','movingVoices','installed','proposed','segments','eligible','selected','applied','releasing',
@@ -246,10 +247,14 @@ export class ClockedFleetEvidence02 {
    const start=row.tail?.renderStartedAt??row.at-row.completeRenderMs,end=start+row.completeRenderMs;
    return {...row,gcOverlapMs:this.gcIntervals.reduce((ms,g)=>ms+Math.max(0,Math.min(end,g.startTime+g.duration)-Math.max(start,g.startTime)),0)};
   };
+  const workerBlocks=indices.filter(i=>this.data.npcWorkerMs[i]>0);
   const output={schema:1,scope:'authored inputs through normal clocked discard producer',node:process.version,reason,error:error?.message??null,
    deadlineMs:deadline,blocks:this.blocks,overflowBlocks:this.excess,nonzeroBlocks:this.nonzero.reduce((a,b)=>a+b,0),
    processingMs:summary(all),hardMisses:all.filter(ms=>ms>deadline).length,byPopulation,byActiveWithReflection,
    installedByActive,trafficMotionCoverage,allBlocks:phaseSummary(indices),blockTimesFile:'clocked-blocks.csv',
+   ...(this.preparation?.npcBlockReady?{npcSynthesisWorker:{blocks:workerBlocks.length,
+    stages:Object.fromEntries(workerFields.map(f=>[f,summary(workerBlocks.map(i=>this.data[f][i]))])),
+    timingBasis:'Dispatch is send to worker start. Execution overlaps producer work. Join is producer wait. Result age is worker completion to producer adoption. Stock synthesis includes worker execution.'}}:{}),
    acceleration:this.backend?.diagnostics(),gpuSamples:this.gpuSamples,gpuSamplesOmitted:this.gpuSampleCount-this.gpuSamples.length,
    sceneCandidates:this.sceneCandidates,sceneCandidatesOmitted:this.sceneCandidatesOmitted,
    timingBasis:'Complete render encloses synthesis, propagation, stereo processing and bookkeeping. Candidate preparation includes history sampling, retarded-time and finite-face geometry. Visibility is the awaited backend query. Selection includes finishing routes and per-source ranking. Application includes headroom filtering and mixer slot updates. Through-pipe time includes ingress, render, framing, diagnostics and write completion. Producer wake is measured separately.',

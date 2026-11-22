@@ -415,7 +415,7 @@ export class StockGameplay {
     leftObservationTicks:old.observationTicks,rightObservationTicks:next?.observationTicks??null,clockFrequency:this.snapshots.at(-1).frame.listener.clockFrequency,
     observationClockDomain:'host-Stopwatch-QPC',observationBasis:'gameplay-vehicle-pose; native operating interval remains in journal',
     interpolation:next?u:null,operatingPoint:next?old.operatingPoint+(next.operatingPoint-old.operatingPoint)*u:old.operatingPoint});
-   result.push({...old,position,forward,up,velocity:next?mix(old.velocity,next.velocity,u):old.velocity,
+   result.push({...old,...(this.npcBlockWorker?{mixExpiresAt:Math.min(latest.wallExpires,identity.sourceExpiresAt,old.sourceExpiresAt,next?.sourceExpiresAt??Infinity)}:{}),position,forward,up,velocity:next?mix(old.velocity,next.velocity,u):old.velocity,
     operatingPoint:next?old.operatingPoint+(next.operatingPoint-old.operatingPoint)*u:old.operatingPoint,
     running:this.continuityPolicy==='camera-source-01'?old.running:old.running&&(!next||next.running),lift:next?next.operatingPoint<old.operatingPoint-.002:false,
     riderAttached:old.riderAttached===true&&(!next||next.riderAttached===true),riderViewAttached:old.riderViewAttached===true&&(!next||next.riderViewAttached===true)});
@@ -479,6 +479,20 @@ export class StockGameplay {
   d[accepted?'accepted':withheld?'withheld':this.#installedSceneStopped01?'postStopDiscarded':'rejected']++;if(accepted)d[wasActive?'renewals':'activations']++;d.maximumApplicationMilliseconds=Math.max(d.maximumApplicationMilliseconds,record.transactionMilliseconds);this.recordInstalledSceneDiagnostic01(record);
   return accepted;
  }
+ retireSlot(s,reason){
+   this.lifecycle.scopeRetirements++;this.lifecycle.lastRetirements.push({reason,sourceFrame:s.source?.frame??null,lastQualifiedRunning:s.vehicle?.running??null,engineShutdownInferred:false});if(this.lifecycle.lastRetirements.length>this.voiceLimit)this.lifecycle.lastRetirements.shift();
+   s.identity=null;s.source=null;s.vehicle=null;s.airflow=null;this.stats.retired++;
+ }
+ finishLocalAirflow(){
+  // Loss of a source/listener cannot chop the last local pressure sample. A
+  // finite residual release uses only the last mixed sample, not a fabricated
+  // motion/wind observation, and ends within 960 frames without another queue.
+  const release=this.localAirflowRelease;
+  if(this.settings.airflowEnabled&&!release.remaining&&release.last.some(x=>x!==0)&&
+     !this.localAirflow.some(channel=>channel.some(x=>x!==0))){release.remaining=960;release.from=[...release.last];}
+  for(let i=0;i<BLOCK&&release.remaining;i++){release.remaining--;for(let c=0;c<2;c++)this.localAirflow[c][i]+=release.from[c]*release.remaining/960;}
+  release.last[0]=this.localAirflow[0][BLOCK-1];release.last[1]=this.localAirflow[1][BLOCK-1];this.airflowState.localResidualReleaseFrames=release.remaining;
+ }
  async render(){
   const preparation=this.sourcePreparation05;
   if(preparation){if(preparation.rendering)throw Error('One opt-in gameplay render at a time');preparation.rendering=true;}
@@ -524,18 +538,20 @@ export class StockGameplay {
    const current=latest?.frame.vehicles.find(v=>voiceIdentity01(v)===s.identity||
     (!v.valid&&v.id===s.vehicle?.id&&v.generation===s.vehicle.generation&&v.model===s.vehicle.model&&v.context===s.vehicle.context));
    const reason=latest&&this.now()>=latest.wallExpires?'source-expiry':!current?'source-absent-or-identity-change':!current.valid?'source-invalid':!this.sample.state&&!independentSource?'listener-unavailable':this.catalogueFleet&&eligible.some(item=>item.identity===s.identity)?'voice-budget-virtualized':'source-pose-unavailable';
-   this.lifecycle.scopeRetirements++;this.lifecycle.lastRetirements.push({reason,sourceFrame:s.source?.frame??null,lastQualifiedRunning:s.vehicle?.running??null,engineShutdownInferred:false});if(this.lifecycle.lastRetirements.length>this.voiceLimit)this.lifecycle.lastRetirements.shift();
-   s.identity=null;s.source=null;s.vehicle=null;s.airflow=null;this.stats.retired++;
+   this.retireSlot(s,reason);
   }
   for(const item of selected){let slot=this.slots.find(s=>s.identity===item.identity);if(!slot){slot=this.slots.find(s=>!s.identity);slot.identity=item.identity;slot.generation++;
     const sourceOptions=this.stockSourceOptions01(item.resolved.bank),startupKey=this.catalogueFleet?item.resolved.bank:item.v.model+':'+item.v.context;
     const startupVoice=this.startupVoices01.get(startupKey);this.startupVoices01.delete(startupKey);
-    slot.source=startupVoice??this.sourcePreparation05?.take({identity:item.identity,session:this.session,bank:item.resolved.bank,options:sourceOptions})??this.registry.createSource(item.v.model,item.v.context,sourceOptions);slot.airflow=new AirflowSourceStreet01({seed:airflowSeedStreet01(this.session+':'+item.identity)});this.stats.arrivals++;this.stageCounters.sourceCreations++;}
+    slot.source=this.npcBlockWorker?.source(item.resolved.bank)??startupVoice??this.sourcePreparation05?.take({identity:item.identity,session:this.session,bank:item.resolved.bank,options:sourceOptions})??this.registry.createSource(item.v.model,item.v.context,sourceOptions);slot.airflow=new AirflowSourceStreet01({seed:airflowSeedStreet01(this.session+':'+item.identity)});this.stats.arrivals++;this.stageCounters.sourceCreations++;}
    slot.vehicle=item.v;slot.score=item.score;
   }
   const afterSelection=this.captureCompleteRenderStages01?this.now():0;
   const sourceCpuStart=threadCpu?threadCpu():null;
-  let stockSynthesisMs=0,stockInitialMatchReuses=0;
+  let stockSynthesisMs=0,stockInitialMatchReuses=0,npcWorkerMs=0,npcDispatchMs=0,npcJoinMs=0,npcResultAgeMs=0;
+  const remote=this.npcBlockWorker?.begin(this.slots,s=>!!this.sample.state||independentSource&&selected.some(item=>item.identity===s.identity));
+  const rendered=remote?[]:null;
+  const flows=remote&&this.settings.airflowEnabled?new Map():null;
   for(const c of this.localAirflow)c.fill(0);this.airflowState.riderActive=false;this.airflowState.exteriorSources=0;
   const sources=[];for(const s of this.slots){const ids=['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`),aeroId=`stock:slot${s.index}:aero`;for(const id of [...ids,aeroId])this.inputs[id].fill(0);
    if(!s.source||!this.sample.state&&(!independentSource||!selected.some(item=>item.identity===s.identity)))continue;const v=s.vehicle;
@@ -546,32 +562,27 @@ export class StockGameplay {
     s.powertrainRevision=v.powertrainRevision;
    }
    const stockStart=this.captureCompleteRenderStages01?this.now():0;
-   s.source.renderInto({operatingPoint:v.operatingPoint,load:v.lift ? .05 : .9,lift:v.lift,running:v.running},this.inputs[ids[0]],this.inputs[ids[1]]);
+   if(!s.source.detachedNpc)s.source.renderInto({operatingPoint:v.operatingPoint,load:v.lift ? .05 : .9,lift:v.lift,running:v.running},this.inputs[ids[0]],this.inputs[ids[1]]);
    if(this.captureCompleteRenderStages01){
     stockSynthesisMs+=this.now()-stockStart;
     if(sourceBlocksBefore===0)stockInitialMatchReuses+=s.source.initialMatchReuses01?.()??0;
    }
-   this.stageCounters.sourcePlaybackBlocks++;observePcmBlock(this.inputs[ids[0]],this.stageCounters.engine);observePcmBlock(this.inputs[ids[1]],this.stageCounters.exhaust);
+   this.stageCounters.sourcePlaybackBlocks++;if(remote)rendered.push(s);
+   else{observePcmBlock(this.inputs[ids[0]],this.stageCounters.engine);observePcmBlock(this.inputs[ids[1]],this.stageCounters.exhaust);}
    const profile=this.profiles?.profiles?.[s.source.vehicle.model];
    for(const [i,role]of ['engine','exhaust'].entries()){
     sources.push({id:ids[i],generation:s.generation,position:this.stockEmitterPosition01(v,role,s.source.vehicle.model),velocity:v.velocity,
      observationTicks:v.observationTicks,motionIdentity:v.id,motionTime:vehicleTarget,
      forward:v.forward.map(x=>i?-x:x),up:v.up,directivity:profile?.directivity?.[role]??(i?.65:.1),valid:true,emitting:true});}
    if(v.model===0xf9300cc5){const at=this.now(),flow=s.airflow.renderInto({velocity:v.velocity,enabled:this.settings.airflowEnabled,level:this.settings.airflowLevel,riderAttached:v.riderAttached===true,riderViewAttached:v.riderViewAttached===true&&!!this.sample.state,valid:!!this.sample.state},this.inputs[aeroId],...s.local);
+    if(flows)flows.set(s,flow);
     this.airflowState.maximumSynthesisMs=Math.max(this.airflowState.maximumSynthesisMs,this.now()-at);this.airflowState.riderActive||=flow.riderActive;
     if(this.settings.airflowEnabled)for(let c=0;c<2;c++)for(let i=0;i<BLOCK;i++)this.localAirflow[c][i]+=s.local[c][i];
     if(this.settings.airflowEnabled){sources.push({id:aeroId,generation:s.generation,position:this.stockEmitterPosition01(v,'aero'),velocity:v.velocity,forward:v.forward,up:v.up,directivity:.15,valid:true,emitting:flow.exteriorActive,observationTicks:v.observationTicks,motionIdentity:v.id,motionTime:vehicleTarget});this.airflowState.exteriorSources++;}
    }
   }
   this.stats.maximumActive=Math.max(this.stats.maximumActive,selected.length);
-  // Loss of a source/listener cannot chop the last local pressure sample. A
-  // finite residual release uses only the last mixed sample, not a fabricated
-  // motion/wind observation, and ends within 960 frames without another queue.
-  const release=this.localAirflowRelease;
-  if(this.settings.airflowEnabled&&!release.remaining&&release.last.some(x=>x!==0)&&
-     !this.localAirflow.some(channel=>channel.some(x=>x!==0))){release.remaining=960;release.from=[...release.last];}
-  for(let i=0;i<BLOCK&&release.remaining;i++){release.remaining--;for(let c=0;c<2;c++)this.localAirflow[c][i]+=release.from[c]*release.remaining/960;}
-  release.last[0]=this.localAirflow[0][BLOCK-1];release.last[1]=this.localAirflow[1][BLOCK-1];this.airflowState.localResidualReleaseFrames=release.remaining;
+  if(!remote)this.finishLocalAirflow();
   const currentScene=this.pipeline.simulation.scene,installed=this.staticSceneBinding?.mode==='installed-static-conditional-partial';
   // A warming playout has no rendered pose. The placeholder origin must not
   // revoke a workset already qualified against the real control observation.
@@ -579,11 +590,55 @@ export class StockGameplay {
   this.telemetry?.begin(this.pipeline.simulation,this.now());
   const beforePrepare=this.now();
   const sourceCpu=sourceCpuStart?threadCpu(sourceCpuStart):null;
+  let received=false,localFinished=false,expiredIds=null;
+  const priorRelease=flows?{last:[...this.localAirflowRelease.last],from:[...this.localAirflowRelease.from],remaining:this.localAirflowRelease.remaining}:null;
+  // Join before the first headroom calculation or path application. If one
+  // lease expires while geometry is being solved, its old paths release
+  // normally while every other emitter keeps its original PCM and controls.
+  const beforeApply=remote?async control=>{
+   if(!received){
+    const waitAt=this.now(),receipt=await this.npcBlockWorker.join(remote,this.slots,this.inputs);
+    received=true;npcJoinMs=this.now()-waitAt;npcWorkerMs=receipt.finished-receipt.began;
+    npcDispatchMs=receipt.began-remote.sent;npcResultAgeMs=this.now()-receipt.finished;stockSynthesisMs+=npcWorkerMs;
+    if(sourceBlocksBefore===0)stockInitialMatchReuses+=receipt.voices.reduce((n,v)=>n+v.initialReuses,0);
+   }
+   const cutoff=this.now();let removed=false;
+   for(const slot of rendered){
+    if(!slot.source||cutoff<slot.vehicle.mixExpiresAt)continue;
+    expiredIds??=new Set();
+    for(const role of ['engine','exhaust','aero']){const id='stock:slot'+slot.index+':'+role;this.inputs[id].fill(0);expiredIds.add(id);}
+    this.retireSlot(slot,'source-expiry');removed=true;
+   }
+   if(!localFinished||removed&&flows){
+    if(flows&&expiredIds){
+     // Rebuild listener-local pressure in the same slot order and apply the
+     // preceding block's residual exactly once, even after a scene fallback.
+     for(const channel of this.localAirflow)channel.fill(0);
+     this.airflowState.riderActive=false;this.airflowState.exteriorSources=0;
+     for(const [s,flow] of flows)if(s.source){
+      this.airflowState.riderActive||=flow.riderActive;this.airflowState.exteriorSources++;
+      for(let c=0;c<2;c++)for(let i=0;i<BLOCK;i++)this.localAirflow[c][i]+=s.local[c][i];
+     }
+     Object.assign(this.localAirflowRelease,{last:[...priorRelease.last],from:[...priorRelease.from],remaining:priorRelease.remaining});
+    }
+    this.finishLocalAirflow();localFinished=true;
+   }
+   if(!expiredIds)return control;
+   return {...control,paths:control.paths.filter(p=>!expiredIds.has(p.sourceId)),
+    sourceGenerations:Object.fromEntries(Object.entries(control.sourceGenerations??{}).filter(([id])=>!expiredIds.has(id)))};
+  }:null;
   const installedBefore=this.staticSceneBinding?.mode==='installed-static-conditional-partial';this.installedRenderPreparing01=true;
-  try{await this.pipeline.prepare({time,session:this.session,generation:listener.generation,listener,sources},this.pipeline.simulation.scene===this.direct?{}:{geometryTimeMs:this.geometryAnchor.observationMs+this.now()-this.geometryAnchor.at},()=>{this.tickInstalledScene01();return !this.#installedSceneStopped01&&!this.installedFallbackPending01&&(!installedBefore||this.staticSceneBinding?.mode==='installed-static-conditional-partial');});}finally{this.installedRenderPreparing01=false;}
+  try{await this.pipeline.prepare({time,session:this.session,generation:listener.generation,listener,sources},this.pipeline.simulation.scene===this.direct?{}:{geometryTimeMs:this.geometryAnchor.observationMs+this.now()-this.geometryAnchor.at},()=>{this.tickInstalledScene01();return !this.#installedSceneStopped01&&!this.installedFallbackPending01&&(!installedBefore||this.staticSceneBinding?.mode==='installed-static-conditional-partial');},beforeApply);}finally{this.installedRenderPreparing01=false;}
   this.tickInstalledScene01();if(this.#installedSceneStopped01)return [this.left,this.right];
-  if(installedBefore&&this.pipeline.simulation.scene===this.direct)await this.pipeline.prepareObserved(time,{},()=>!this.#installedSceneStopped01);
+  if(installedBefore&&this.pipeline.simulation.scene===this.direct)await this.pipeline.prepareObserved(time,{},()=>!this.#installedSceneStopped01,beforeApply);
   if(this.#installedSceneStopped01)return [this.left,this.right];
+  if(remote){
+   if(!received)throw Error('NPC audio lacks a qualified geometry result');
+   for(const s of rendered)if(s.source){
+    observePcmBlock(this.inputs['stock:slot'+s.index+':engine'],this.stageCounters.engine);
+    observePcmBlock(this.inputs['stock:slot'+s.index+':exhaust'],this.stageCounters.exhaust);
+   }
+  }
   const beforePcm=this.now();
   if(this.pipeline.lastControl.paths.length>0)this.stageCounters.acousticPathBlocks++;
   const before=this.pipeline.renderer.stats.limited;this.pipeline.process(this.inputs,this.left,this.right,BLOCK,null,null,this.settings.airflowEnabled?this.localAirflow:null);
@@ -613,7 +668,7 @@ export class StockGameplay {
   this.lastRenderStages01=this.captureCompleteRenderStages01||this.lastCompleteRenderMs>8?{admissionMs:afterAdmission-start,
    sourceAndControlMs:beforePrepare-afterAdmission,propagationMs:beforePcm-beforePrepare,
    pcmMs:elapsed-(beforePcm-start),bookkeepingMs:this.lastCompleteRenderMs-elapsed,
-   ...(this.captureCompleteRenderStages01?{sourceSelectionMs:afterSelection-afterAdmission,stockSynthesisMs,stockInitialMatchReuses}:{}),
+   ...(this.captureCompleteRenderStages01?{sourceSelectionMs:afterSelection-afterAdmission,stockSynthesisMs,stockInitialMatchReuses,npcWorkerMs,npcDispatchMs,npcJoinMs,npcResultAgeMs}:{}),
    firstSourceBlock:sourceBlocksBefore===0&&this.stageCounters.sourcePlaybackBlocks>0}:null;
   this.stats.maximumCompleteRenderMs=Math.max(this.stats.maximumCompleteRenderMs??0,this.lastCompleteRenderMs);
   if(this.lastCompleteRenderMs>8)this.stats.completeRenderHeadroomMisses=(this.stats.completeRenderHeadroomMisses??0)+1;
@@ -665,5 +720,5 @@ export class StockGameplay {
     listenerDistance:this.sample?.state&&s.vehicle?distance(s.vehicle.position,this.sample.state.position):null})),
    geometry:this.pipeline.simulation.scene===this.direct?'conditional-direct-unobserved-space-assumed-clear':this.staticSceneBinding?.mode==='installed-static-conditional-partial'?'installed-static-conditional-partial':this.staticSceneBinding?.mode==='offline-resource-subset'?'qualified-original-resource-subset':this.staticSceneBinding?'qualified-static-authored-fixture':'qualified-observed-partial',installedGeometry:this.staticSceneBinding?.mode==='installed-static-conditional-partial'?this.staticSceneBinding:null,controlDelayMs:this.controlDelayMs,latencyProfile:this.latencyProfile.id,continuityPolicy:this.continuityPolicy,...(this.continuousTimingPolicy==='baseline'?{}:{continuousTimingPolicy:this.continuousTimingPolicy}),...(this.operatingEmission?{operatingEmission:this.operatingEmission.diagnostics()}:{}),sourceHistoryLimitSeconds:2.5,propagationLimitSeconds:2,
    quality:this.quality.diagnostics(),pipeline:this.pipeline.diagnostics(),playout:this.playout.stats,memory:process.memoryUsage(),...(this.sourcePreparation05?{sourcePreparation05:this.sourcePreparation05.diagnostics()}:{})};}
- close(){this.beginStopInstalledScene01();const pending=this.sourcePreparation05?.close();this.pipeline.close();return pending;}
+ close(){const worker=this.npcBlockWorker?.close();this.beginStopInstalledScene01();const pending=this.sourcePreparation05?.close();this.pipeline.close();return worker?Promise.all([worker,pending]):pending;}
 }
