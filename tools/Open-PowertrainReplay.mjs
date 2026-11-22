@@ -21,7 +21,8 @@ if (!relative || relative === '..' || relative.startsWith('..' + path.sep) || pa
   throw Error('Choose a demo folder within this worktree’s .local directory');
 
 const replay = await openPowertrainReplay(root, take);
-let marker = take === 'two-vehicles' ? replay.events.findIndex(e => e.type === 'Both vehicles · NPC reflection') :
+let marker = take === 'traffic' ? replay.events.findIndex(e => e.type === 'Five voices in the mix') :
+  take === 'two-vehicles' ? replay.events.findIndex(e => e.type === 'Both vehicles · NPC reflection') :
   replay.events.findIndex(e => e.type === '2-bounce route' || e.type === 'Selected wall bounce' || take === 'withheld' && e.detail?.withheldPathId);
 if (marker < 0) marker = replay.events.findIndex(e => e.detail?.pathId);
 if (witness && marker < 0) throw Error('No mapped witness marker for this take');
@@ -40,6 +41,12 @@ try {
       const browserTimeMs = Math.floor(event.timeMs * 1000) / 1000;
       const response = await fetch(url + '/api/replay/frame?timeMs=' + browserTimeMs, {headers});
       if (!response.ok) throw Error('Replay timeline seek failed');
+      if (take === 'traffic' && event.detail) {
+        const {pcmBlock, frame} = await response.clone().json();
+        if (frame?.sequence !== event.detail.sequence || pcmBlock?.sampleFrame !== event.detail.sampleFrame ||
+          JSON.stringify(pcmBlock) !== JSON.stringify(replay.contributions[pcmBlock.sampleFrame / 512]))
+          throw Error('WAV seek differs from the bound PCM contribution block');
+      }
       if (event.detail?.pathId || event.detail?.withheldPathId || event.detail?.retiredVehicle) {
         const sample = await response.json();
         const frame = sample.frame, detail = event.detail;

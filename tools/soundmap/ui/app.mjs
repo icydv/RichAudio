@@ -1,6 +1,6 @@
 import {VisualState,PassiveState,presentation,DisplayCadence,RateMeter,TELEMETRY_POLL_FPS,ReplayClock,project,pathStyle,parseVisualContext,visibleContext,clampFps,isPoint,LIMITS,CachedWorldState041,cachedWorldPresentation041,InstalledContextState01} from './model.mjs';
 import {AtlasRenderer01} from './atlas-renderer01.mjs';
-import {MixedRoutes} from './mixed-routes.mjs';
+import {MixedRoutes,trafficColor} from './mixed-routes.mjs';
 import {alignsWithWorldAtlas01} from './model.mjs';
 const $=id=>document.getElementById(id),state=new VisualState(),passive=new PassiveState(),replay=new ReplayClock(),cacheWorld=new CachedWorldState041();
 const displayCadence=new DisplayCadence(20),displayRate=new RateMeter(),solverRate=new RateMeter(),passiveRate=new RateMeter();
@@ -223,8 +223,13 @@ function draw(now){
     if(source.valid===false)continue;
     const index=renderedVoices.findIndex(voice=>source.id===voice.engine||source.id===voice.exhaust);
     const voice=renderedVoices[index];
-    const label=voice?vehicleName(voice)+' '+(source.id===voice.engine?'engine':'exhaust'):source.id;
-    dot(source.position,index===1?'#8fd8ff':'#ffbc80',8,label,true);
+    if (f.take === 'traffic' && voice) {
+      const engine = source.id === voice.engine;
+      dot(source.position,trafficColor(voice.engine),engine?7:3,engine?voice.vehicle:undefined,true);
+    } else {
+      const label=voice?vehicleName(voice)+' '+(source.id===voice.engine?'engine':'exhaust'):source.id;
+      dot(source.position,index===1?'#8fd8ff':'#ffbc80',8,label,true);
+    }
   }
   if(view.listener?.valid&&(!usingAtlas||freshAtlasCamera)){const l=view.listener;dot(l.position,health.expired?'#8897af':'#73bcff',8,view.kind==='passive'?'Camera · passive':'Listener');if(isPoint(l.forward)){const end=l.position.map((n,i)=>n+l.forward[i]*2.5);line([l.position,end],'#b6dcff',3.5,health.expired?[5,4]:[]);dot(end,'#b6dcff',3);}if(isPoint(l.up))line([l.position,l.position.map((n,i)=>n+l.up[i]*1.2)],'#a9c7e9',2);}
   // Fixed-scale axes indicate the model basis only.
@@ -395,6 +400,7 @@ async function telemetryLoop(){
             atlasLive=interior?{sample:interior,until:received+Math.max(0,interior.remainingMs-(received-requestStarted))}:null;
           }
           if(!isReplay)cacheWorld.ingest(envelope.cacheWorld,received,timing);
+          if(isReplay && 'pcmBlock' in envelope)mixedRoutes.showContributors(envelope.pcmBlock);
           if(state.ingest(envelope,received,timing))solverRate.mark(received);
           lastReplayRequest=playbackTime;pendingSeek=false;
         }

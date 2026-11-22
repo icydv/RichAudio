@@ -1,17 +1,26 @@
 const $ = id => document.getElementById(id);
 const takeLabels = {direct: 'Direct only', single: 'Single reflections', multi: 'Full mix',
-  withheld: 'Route withheld', 'two-vehicles': 'Two vehicles'};
+  withheld: 'Route withheld', 'two-vehicles': 'Two vehicles', traffic: 'Five-vehicle traffic'};
 const fixed = (value, places = 2) => Number.isFinite(value) ? value.toFixed(places) : '—';
 const vector = (value, places) => value?.map(n => fixed(n, places)).join(', ') ?? '—';
 
-function sourceLabel(frame, sourceId) {
-  const voice = frame.renderedVoices.find(v => sourceId === v.engine || sourceId === v.exhaust);
-  return voice ? voice.vehicle + ' · ' + (sourceId === voice.engine ? 'engine' : 'exhaust') : sourceId;
+const trafficColors = ['#ffbc80', '#8fd8ff', '#b9e19a', '#deabff', '#ffa9bb'];
+export function trafficColor(engine) {
+  const slot = /^stock:slot([0-4]):engine$/.exec(engine)?.[1];
+  return trafficColors[slot] ?? '#d8e0ed';
+}
+function tapVoice(frame, tap) {
+  return frame.renderedVoices.find(v => (tap.sourceId === v.engine || tap.sourceId === v.exhaust) &&
+    (frame.take !== 'traffic' || tap.generation % 4294967296 === v.renderGeneration));
+}
+function sourceLabel(frame, tap) {
+  const voice = tapVoice(frame, tap);
+  return voice ? voice.vehicle + ' · ' + (tap.sourceId === voice.engine ? 'engine' : 'exhaust') : tap.sourceId;
 }
 
 function describe(frame) {
   const selected = new Map(frame.paths.filter(ray => ray.status === 'selected').map(ray => [ray.id,ray]));
-  return frame.appliedPaths.map(tap => ({tap, ray: selected.get(tap.id), source: sourceLabel(frame, tap.sourceId)}));
+  return frame.appliedPaths.map(tap => ({tap, ray: selected.get(tap.id), source: sourceLabel(frame, tap)}));
 }
 
 export class MixedRoutes {
@@ -24,6 +33,24 @@ export class MixedRoutes {
     this.focus(null);
     $('mixed-routes').hidden = $('higher-key').hidden = !active;
     document.body.classList.toggle('street-replay', Boolean(active));
+    this.showContributors(undefined);
+  }
+  showContributors(block) {
+    $('pcm-panel').hidden = block === undefined;
+    if (block === undefined) return;
+    const voices = block?.voices ?? [];
+    $('pcm-count').textContent = voices.length + ' PCM contributor' + (voices.length === 1 ? '' : 's');
+    $('pcm-block').textContent = block ? 'Isolated stereo output · block starting at file sample ' +
+      block.sampleFrame.toLocaleString('en') : 'End of audio';
+    $('pcm-voices').replaceChildren(...voices.map(voice => {
+      const li = document.createElement('li');
+      li.style.borderColor = trafficColor(voice.engine);
+      li.textContent = voice.vehicle + ' · g' + voice.generation + ' · ' + voice.nonzeroFrames + ' frames' +
+        (voice.releasing ? ' · release' : '');
+      li.title = 'Slot ' + voice.engine.split(':')[1] + ' · render generation ' + voice.renderGeneration +
+        ' · peak ' + voice.pcmPeak.toPrecision(4) + ' full scale';
+      return li;
+    }));
   }
   focus(id) {
     this.want = id;
@@ -91,7 +118,7 @@ export class MixedRoutes {
     field('Applied bands · L / M / H', vector(tap.gainBands, 4));
     field('Applied stereo pan', fixed(tap.pan, 3));
     field('Mixer block end', tap.atFrame.toLocaleString('en') + ' frames');
-    const voice = frame.renderedVoices.find(v => v.engine === tap.sourceId || v.exhaust === tap.sourceId);
+    const voice = tapVoice(frame, tap);
     if (voice) {
       $('mixed-voice').hidden = false;
       const add = (label, value) => field(label, value, 'mixed-voice-values');

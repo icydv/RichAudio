@@ -12,11 +12,11 @@ const maximumSamples = sampleRate * 120;
 const sha256 = value => createHash('sha256').update(value).digest('hex');
 const wallComparison = ['wall-off', 'wall-on'];
 const streetComparison = ['direct', 'single', 'multi'];
-const takeNames = [...wallComparison, ...streetComparison, 'withheld', 'two-vehicles', 'solo-vehicle'];
+const takeNames = [...wallComparison, ...streetComparison, 'withheld', 'two-vehicles', 'solo-vehicle', 'traffic'];
 const labels = {'wall-off': 'Direct path', 'wall-on': 'Direct and reflected paths',
   'two-vehicles': 'Two independently driven vehicles', 'solo-vehicle': 'One vehicle',
   direct: '1 · Direct only', single: '2 · Single reflections', multi: '3 · Full mix',
-  withheld: 'One route withheld'};
+  withheld: 'One route withheld', traffic: 'Traffic in the passage'};
 
 function need(condition, message) {
   if (!condition) throw Error(message);
@@ -63,6 +63,91 @@ function checkMixerPaths(applied, frame) {
   }
 }
 
+async function readContributors(root, result, frames) {
+  const binding = result.contributions;
+  const bytes = await localFile(root, binding?.file, 24 * 1024 * 1024);
+  need(sha256(bytes) === binding.sha256, 'PCM contribution digest differs from the render receipt');
+  const data = JSON.parse(bytes);
+  need(data.schema === 1 && data.sampleRate === sampleRate && data.blockFrames === 512 &&
+    Array.isArray(data.blocks) && data.blocks.length === Math.ceil(frames / data.blockFrames),
+  'PCM contribution record must cover every output block');
+  for (const [index, block] of data.blocks.entries()) {
+    const available = Math.min(data.blockFrames, frames - index * data.blockFrames);
+    need(block.sampleFrame === index * data.blockFrames && Array.isArray(block.voices) && block.voices.length <= 10,
+      'PCM contribution clock or voice budget differs');
+    const identities = new Set();
+    for (const voice of block.voices) {
+      const donor = result.stages.traffic.voices[voice.vehicle + '@' + voice.generation];
+      const id = [voice.vehicle, voice.generation, voice.renderGeneration].join('/');
+      need(donor?.vehicle === voice.vehicle && donor.generation === voice.generation &&
+        donor.renderGeneration === voice.renderGeneration && donor.source.includes(voice.engine) && donor.source.includes(voice.exhaust) &&
+        Number.isInteger(donor.slot) && donor.slot >= 0 && donor.slot < 5 &&
+        voice.engine === 'stock:slot' + donor.slot + ':engine' && voice.exhaust === 'stock:slot' + donor.slot + ':exhaust' &&
+        Number.isSafeInteger(voice.generation) && voice.generation >= 0 &&
+        Number.isSafeInteger(voice.renderGeneration) && voice.renderGeneration >= 0 && !identities.has(id) &&
+        typeof voice.releasing === 'boolean' && Number.isInteger(voice.nonzeroFrames) &&
+        voice.nonzeroFrames > 0 && voice.nonzeroFrames <= available &&
+        Number.isFinite(voice.pcmPeak) && voice.pcmPeak > 0, 'Invalid isolated PCM contribution or slot identity');
+      identities.add(id);
+      need(Number.isSafeInteger(donor.firstBlock) && Number.isSafeInteger(donor.lastBlock) &&
+        donor.firstBlock >= 0 && donor.firstBlock <= donor.lastBlock && index >= donor.firstBlock &&
+        voice.releasing === (index > donor.lastBlock), 'PCM contribution differs from its source lifetime or release');
+    }
+  }
+  return data.blocks;
+}
+
+function addTrafficEvents(events, timeline, blocks, result) {
+  function add(row, type, detail = {}) {
+    events.push({type, timeMs: row.timeMs, detail: {take: 'traffic', sampleFrame: row.frame.takeSampleFrame,
+      sequence: row.frame.sequence, streamId: row.frame.streamId, ...detail}});
+  }
+  function voices(row) { return blocks[row.frame.takeSampleFrame / 512].voices; }
+  const allFive = timeline.filter(row => {
+    const active = voices(row).filter(v => !v.releasing);
+    return active.length === 5 && new Set(active.map(v => v.vehicle)).size === 5 &&
+      active.reduce((sum, v) => sum + v.nonzeroFrames, 0) > 4 * 512;
+  });
+  // Seek near the middle of the measured overlap, while the cars are moving.
+  const midpoint = result.overlap ? (result.overlap.firstFrame + result.overlap.lastFrame) / 2 : 0;
+  const overlap = allFive.sort((a, b) => Math.abs(a.frame.takeSampleFrame - midpoint) -
+    Math.abs(b.frame.takeSampleFrame - midpoint))[0];
+  need(overlap, 'Missing five simultaneous nonzero voices at a mapped block');
+  add(overlap, 'Five voices in the mix');
+  const labels = {'right-hand-two-wall-engine':'Right-ear two-wall engine return',
+    'wall-canopy-opposite-wall-exhaust':'Wall–canopy–wall exhaust return'};
+  for (const [kind, witness] of Object.entries(result.reflections ?? {})) {
+    const row = timeline.find(row => row.frame.takeSampleFrame === witness.sampleFrame);
+    const ray = row?.frame.paths.find(p => p.id === witness.pathId && p.status === 'selected');
+    const tap = row?.frame.appliedPaths.find(p => p.id === witness.pathId && p.present);
+    need(labels[kind] && tap && ray && ray.sourceId === witness.source && ray.order === witness.order &&
+      Array.isArray(witness.peak) && witness.peak.some(n => Number.isFinite(n) && n > 0) &&
+      JSON.stringify(witness.bouncePoints) === JSON.stringify(ray.points) &&
+      JSON.stringify(witness.surfaceIds) === JSON.stringify(ray.surfaceIds) &&
+      voices(row).some(v => !v.releasing && (v.engine === ray.sourceId || v.exhaust === ray.sourceId) &&
+        tap.generation % 4294967296 === v.renderGeneration), 'Traffic reflection differs from its measured route');
+    add(row, labels[kind], {pathId:ray.id, sourceId:ray.sourceId, surfaceIds:ray.surfaceIds, vertices:ray.vertices});
+  }
+  const lives = voices(overlap).filter(v => !v.releasing);
+  const sameLife = (a, b) => a.vehicle === b.vehicle && a.generation === b.generation && a.renderGeneration === b.renderGeneration;
+  const release = timeline.find(row => row.timeMs > overlap.timeMs && voices(row).some(v =>
+    v.releasing && lives.some(life => sameLife(life, v))) && voices(row).some(v => !v.releasing));
+  if (release) add(release, 'One vehicle releases · others continue');
+  const withdrawn = timeline.find(row => row.timeMs > overlap.timeMs && voices(row).length > 0 &&
+    lives.some(life => !voices(row).some(v => sameLife(life, v)) &&
+      !row.frame.renderedVoices.some(v => v.vehicle === life.vehicle && v.observedGeneration === life.generation)));
+  if (withdrawn) {
+    const life = lives.find(life => !voices(withdrawn).some(v => sameLife(life, v)) &&
+      !withdrawn.frame.renderedVoices.some(v => v.vehicle === life.vehicle && v.observedGeneration === life.generation));
+    add(withdrawn, 'Traffic continues after withdrawal', {withdrawnLifetime: {vehicle: life.vehicle,
+      generation: life.generation, renderGeneration: life.renderGeneration}});
+    const recycled = timeline.find(row => row.timeMs > withdrawn.timeMs && voices(row).some(v =>
+      v.vehicle === life.vehicle && v.engine === life.engine && v.generation > life.generation &&
+      v.renderGeneration !== life.renderGeneration && !v.releasing));
+    if (recycled) add(recycled, 'Recycled slot · new lifetime');
+  }
+}
+
 async function readTimeline(root, segment, geometries, session, receipt, street) {
   const {take, firstFrame, frames} = segment;
   const text = await localFile(root, 'soundmap-' + take + '.jsonl', LIMITS.maxBytes);
@@ -82,7 +167,7 @@ async function readTimeline(root, segment, geometries, session, receipt, street)
     need(soundMapFrame.audioFrame - sampleFrame === engineOrigin, 'Viewer sample position differs from the engine clock');
     if (street) checkMixerPaths(appliedPaths, soundMapFrame);
     const renderedVoices = street && receipt.voices ? voices.map(voice => {
-      const source = receipt.voices[voice.vehicle];
+      const source = receipt.voices[take === 'traffic' ? voice.vehicle + '@' + voice.observedGeneration : voice.vehicle];
       need(source?.model === voice.model && source.context === voice.context &&
         source.source.includes(voice.engine) && source.source.includes(voice.exhaust) &&
         /^[0-9a-f]{64}$/i.test(source.bankSHA256), 'Recorded vehicle and donor source differ');
@@ -204,8 +289,9 @@ export async function openPowertrainReplay(root, take = 'comparison') {
   const result = JSON.parse(await localFile(root, 'result.json', LIMITS.frameBytes));
   need(typeof result.session === 'string' && /^[a-f0-9]{32}$/.test(result.session), 'Render session identity missing');
   const comparison = result.comparison;
-  const street = result.kind === 'mapped-installed-vehicle-drive' || comparison?.takes?.[0]?.take === 'direct';
-  const takeWave = await readWave(root, take === 'comparison' ? comparison?.file : take + '.wav');
+  const street = take === 'traffic' || result.kind === 'mapped-installed-vehicle-drive' || comparison?.takes?.[0]?.take === 'direct';
+  const takeWave = await readWave(root, take === 'comparison' ? comparison?.file : take === 'traffic' ? result.stages?.traffic?.file : take + '.wav');
+  const contributions = take === 'traffic' ? await readContributors(root, result, takeWave.frames) : undefined;
   if (take === 'comparison') need(takeWave.sha256 === comparison.sha256, 'Comparison WAV digest differs from the render receipt');
   const segments = take === 'comparison' ? comparison?.takes : [{take, firstFrame: 0, frames: takeWave.frames}];
   const expected = street ? streetComparison : wallComparison;
@@ -230,6 +316,17 @@ export async function openPowertrainReplay(root, take = 'comparison') {
       need(takeWave.pcm.readFloatLE(at) === 0, 'Comparison spacer must contain only silence');
     if (firstFrame > endFrame) frames.push({timeMs: endFrame / 48, frame: null});
     const timeline = await readTimeline(root, segment, geometries, result.session, receipt, street);
+    if (contributions) {
+      for (const {frame} of timeline) {
+        const block = contributions[frame.takeSampleFrame / 512];
+        need(block, 'Mapped frame is outside the PCM block grid');
+        for (const voice of block.voices.filter(v => !v.releasing))
+          need(frame.renderedVoices.some(v => v.vehicle === voice.vehicle && v.engine === voice.engine && v.exhaust === voice.exhaust &&
+            v.observedGeneration === voice.generation && v.renderGeneration === voice.renderGeneration),
+          'PCM contributor differs from the original vehicle lifetime at the mapped block');
+      }
+      addTrafficEvents(events, timeline, contributions, result);
+    }
     bindings.push({...segment, timelineSHA256: receipt.timelineSHA256, wavSHA256: receipt.wavSHA256});
     // Samples before the first telemetry tick have no available solver frame.
     if (timeline[0].timeMs > startMs) frames.push({timeMs: startMs, frame: null});
@@ -261,7 +358,8 @@ export async function openPowertrainReplay(root, take = 'comparison') {
   }
   const id = 'drive-' + take + '-' + takeWave.sha256.slice(0, 16);
   const durationMs = takeWave.frames / 48;
-  return {id, frames, geometries, events, durationMs, originFrame: 0, audioStartTimeMs: 0,
+  if (contributions) events.sort((a,b) => a.timeMs - b.timeMs);
+  return {id, frames, geometries, events, durationMs, originFrame: 0, audioStartTimeMs: 0, contributions,
     wav: takeWave.wav, audioPlayable: true,
     manifest: {id, session: result.session, ...(street && {mixerPathsRecorded: true}),
       title: take === 'comparison' ? street ? 'PLAY FIRST · mapped reflections' : 'PLAY FIRST · wall comparison' : labels[take],

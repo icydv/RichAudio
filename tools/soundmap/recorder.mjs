@@ -128,5 +128,9 @@ export function replayFrame(replay,timeMs) {
   // short. Align file-render seeks to the nearest actual PCM sample position.
   if(replay.manifest.timelineBasis==='rendered-engine-audioFrame')timeMs=Math.round(timeMs*48)/48;
   let lo=0,hi=replay.frames.length-1,index=-1;while(lo<=hi){const mid=(lo+hi)>>1;if(replay.frames[mid].timeMs<=timeMs){index=mid;lo=mid+1;}else hi=mid-1;}
-  const row=index<0?null:replay.frames[index];return {mode:'replay',playbackTimeMs:timeMs,frame:row?.frame??null,geometry:row?.frame?replay.geometries.get(row.frame.geometryGeneration)??null:null,status:{connected:false,historical:true,originalFrameTimeMs:row?.timeMs??null,ageMs:row?timeMs-row.timeMs:null}};
+  const sample = Math.round(timeMs * 48);
+  const pcmBlock = replay.contributions?.[Math.floor(sample / 512)];
+  const row=index<0?null:replay.frames[index];return {mode:'replay',playbackTimeMs:timeMs,frame:row?.frame??null,
+    ...(replay.contributions && {pcmBlock: sample < replay.manifest.audio.capturedFrames ? pcmBlock : null}),
+    geometry:row?.frame?replay.geometries.get(row.frame.geometryGeneration)??null:null,status:{connected:false,historical:true,originalFrameTimeMs:row?.timeMs??null,ageMs:row?timeMs-row.timeMs:null}};
 }

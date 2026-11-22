@@ -25,6 +25,62 @@ const soundMapFrame = (take, geometryGeneration = null, paths = []) => ({
   geometryGeneration, paths, sources: [{id: 'engine', position: [0, 0, 0]}], listener: {position: [1, 0, 0], valid: true}
 });
 
+test('traffic replay seeks exact PCM blocks between sparse map observations and after slot reuse', async () => {
+  const {openPowertrainReplay} = await import('../tools/soundmap/powertrain-replay.mjs');
+  const {replayFrame} = await import('../tools/soundmap/recorder.mjs');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'RichAudio-traffic-'));
+  try {
+    const wave = wav(Array(4 * 512 * 2).fill(.125));
+    const file = 'traffic in the passage.wav';
+    fs.writeFileSync(path.join(root, file), wave);
+    const bank = {};
+    function life(index, generation) {
+      const vehicle = 'car-' + index, engine = 'stock:slot' + index + ':engine', exhaust = engine.replace('engine', 'exhaust');
+      const voice = {vehicle, engine, exhaust, voice:'Bati', model:1, context:'npc', observedGeneration:generation,
+        operatingPoint:.5, renderGeneration:generation + 1};
+      bank[vehicle + '@' + generation] = {vehicle, model:1, context:'npc', generation, renderGeneration:generation + 1,
+        slot:index, firstBlock:generation === 2 ? 2 : 0, lastBlock:index === 4 && generation === 1 ? 0 : 2,
+        donor:'Bati traffic', bankSHA256:'1'.repeat(64), source:[engine, exhaust]};
+      return voice;
+    }
+    const traffic = Array.from({length:5}, (_, i) => life(i, 1));
+    const reused = life(4, 2);
+    const voices = [traffic, traffic, [...traffic.slice(0,4), reused], []];
+    const records = [0,2,3].map(i => ({sampleFrame:i*512, voices:voices[i], appliedPaths:[],
+      soundMapFrame:{...soundMapFrame('traffic'), sequence:i+1, audioFrame:512+i*512}}));
+    const timeline = records.map(row => JSON.stringify(row)).join('\n') + '\n';
+    fs.writeFileSync(path.join(root,'soundmap-traffic.jsonl'),timeline);
+    const ledger = {schema:1, sampleRate:48000, blockFrames:512, blocks:voices.map((active,i) => ({
+      sampleFrame:i*512, voices:active.map(v => ({vehicle:v.vehicle, engine:v.engine, exhaust:v.exhaust,
+        generation:v.observedGeneration,renderGeneration:v.renderGeneration,nonzeroFrames:512,pcmPeak:.05,
+        releasing:i===1 && v===traffic[4]}))}))};
+    const result = {session, stages:{traffic:{file, frames:2048, soundMapFrames:3, wavSHA256:sha256(wave),
+      timelineSHA256:sha256(timeline), voices:bank}},contributions:{file:'contributions.json'}};
+    const writeLedger = () => {
+      const json = JSON.stringify(ledger);
+      fs.writeFileSync(path.join(root,'contributions.json'),json);
+      result.contributions.sha256=sha256(json);
+      fs.writeFileSync(path.join(root,'result.json'),JSON.stringify(result));
+    };
+    writeLedger();
+    const replay=await openPowertrainReplay(root,'traffic');
+    const tail=replayFrame(replay,513/48);
+    assert.equal(tail.frame.takeSampleFrame,0);
+    assert.equal(tail.pcmBlock.sampleFrame,512);
+    assert.equal(tail.pcmBlock.voices[4].releasing,true);
+    const recycled=replayFrame(replay,1024/48);
+    assert.equal(recycled.pcmBlock.voices[4].generation,2);
+    assert.deepEqual(replayFrame(replay,1700/48).pcmBlock.voices,[]);
+    assert.equal(replayFrame(replay,2048/48).pcmBlock,null);
+    ledger.blocks[2].voices[4].generation=1;
+    ledger.blocks[2].voices[4].renderGeneration=2;
+    writeLedger();
+    await assert.rejects(() => openPowertrainReplay(root,'traffic'), /source lifetime or release/);
+    fs.appendFileSync(path.join(root,'contributions.json'),' ');
+    await assert.rejects(() => openPowertrainReplay(root,'traffic'), /digest differs/);
+  } finally {fs.rmSync(root,{recursive:true,force:true});}
+});
+
 test('three matched takes bind ordered reflections and withheld controls to the original mixer block', async () => {
   const {openPowertrainReplay} = await import('../tools/soundmap/powertrain-replay.mjs');
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'RichAudio-reflections-'));
