@@ -150,6 +150,12 @@ export class StockVehicleSource {
     // Refill in the original order so source history and floating-point sums
     // stay exact without allocating mode arrays for every emitted sample.
     const entering=[],previousWeights=new Array(this.weights.length),addresses=[.5,0,0];
+    // Resolve the current readers and pressure shares once per block. Keep
+    // sample updates and accumulation in their original mode and role order.
+    const readers=stockRoles.map(role=>this.modes.map(mode=>this.voices[role][mode]));
+    const shares=stockRoles.map(role=>this.shareStates.map(state=>state[role]));
+    const roleEnergy=stockRoles.map(role=>this.stats.energy[role]);
+    const transitions=stockRoles.map(role=>this.stats.transitions.roles[role]);
     const fixedRates=stockRoles.map(role=>this.modes.map((mode,index)=>{
       const voice=this.voices[role][mode];
       return index===0||voice.intervals.length===1&&voice.rateAt===StockGrainVoice.prototype.rateAt?
@@ -169,27 +175,27 @@ export class StockVehicleSource {
       let weightTotal=0;for(let m=0;m<this.weights.length;m++)weightTotal+=this.weights[m];
       for(let roleIndex=0;roleIndex<2;roleIndex++){
         const role=stockRoles[roleIndex],output=roleIndex?exhaust:engine;
-        const voices=this.voices[role];
+        const voices=readers[roleIndex];
         let weightedRate=this.weights[0]*fixedRates[roleIndex][0];
         for(let m=1;m<this.weights.length;m++){
-          if(this.weights[m]>0)weightedRate+=this.weights[m]*(fixedRates[roleIndex][m]??voices[this.modes[m]].rateAt(addresses[m]));
+          if(this.weights[m]>0)weightedRate+=this.weights[m]*(fixedRates[roleIndex][m]??voices[m].rateAt(addresses[m]));
         }
-        const rate=weightedRate/weightTotal,transition=this.stats.transitions.roles[role];
+        const rate=weightedRate/weightTotal,transition=transitions[roleIndex];
         transition.minimumCommonRateHz=Math.min(transition.minimumCommonRateHz,rate);
         transition.maximumCommonRateHz=Math.max(transition.maximumCommonRateHz,rate);
         if(this.commonRates[role]!==null)transition.maximumRateStepHz=Math.max(transition.maximumRateStepHz,Math.abs(rate-this.commonRates[role]));
         this.commonRates[role]=rate;
         if(entering.length){
           let dominant=0;for(let m=0;m<previousWeights.length;m++)if(previousWeights[m]>previousWeights[dominant])dominant=m;
-          const reference=voices[this.modes[dominant]];
+          const reference=voices[dominant];
           // Register before rendering this sample. Every active head then
           // consumes the same interval-rate increment, independently per role.
           for(const m of entering){transition.alignmentRequests++;this.stats.transitions.alignmentRequests++;
-            if(voices[this.modes[m]].alignTo(reference,addresses[m],rate)){transition.alignments++;this.stats.transitions.phaseAlignments++;}}
+            if(voices[m].alignTo(reference,addresses[m],rate)){transition.alignments++;this.stats.transitions.phaseAlignments++;}}
         }
         let sum=0,expected=0;for(let m=0;m<this.modes.length;m++){
           if(this.weights[m]===0){transition.skippedVoiceFrames++;continue;}
-          const voice=voices[this.modes[m]],share=this.shareStates[m][role];
+          const voice=voices[m],share=shares[roleIndex][m];
           sum+=this.weights[m]*share*voice.next(addresses[m],rate);expected+=this.weights[m]*share*share*voice.lastExpectedEnergy;
         }
         // Declared pressure shares retain an explicit two-emitter budget.
@@ -203,7 +209,7 @@ export class StockVehicleSource {
         }
         const value=sum*this.gain*this.envelope;check(Number.isFinite(value)&&Math.abs(value)<=.98+1e-12,'source PCM bound');
         output[i]=value;this.stats.peak=Math.max(this.stats.peak,Math.abs(value));
-        this.stats.energy[role].actual+=value*value;this.stats.energy[role].reference+=expected*(this.gain*this.envelope)**2;
+        roleEnergy[roleIndex].actual+=value*value;roleEnergy[roleIndex].reference+=expected*(this.gain*this.envelope)**2;
         this.stats.maximumStep=Math.max(this.stats.maximumStep,Math.abs(value-this.previous[role]));this.previous[role]=value;
       }
       this.frame++;
