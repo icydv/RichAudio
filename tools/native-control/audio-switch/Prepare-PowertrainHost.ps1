@@ -1,5 +1,5 @@
 #requires -Version 7.0
-[CmdletBinding()]
+[CmdletBinding(DefaultParameterSetName='LegacyVoicing')]
 param(
     [string]$HostExecutable,
     [string]$OutputRoot,
@@ -8,7 +8,8 @@ param(
     [string]$InstalledWorldCacheRoot,
     [string[]]$InstalledWorldResourceId,
     [string]$RetainedManifest,
-    [switch]$BatiVoicing
+    [Parameter(ParameterSetName='LegacyVoicing')][switch]$BatiVoicing,
+    [Parameter(ParameterSetName='NamedVoicing')][ValidateSet('bati-exhaust-limiter-v1','bati-road','bati-bold',IgnoreCase=$false)][string]$PowertrainVoicing
 )
 $ErrorActionPreference = 'Stop'
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
@@ -127,7 +128,8 @@ foreach ($module in $modules) {
 }
 $manifest = $old
 $manifest.powertrainVoice = 'bati-player-on-adder'
-if ($BatiVoicing) { $manifest.powertrainVoicing = 'bati-exhaust-limiter-v1' }
+if ($BatiVoicing) { $PowertrainVoicing = 'bati-exhaust-limiter-v1' }
+if ($PowertrainVoicing) { $manifest.powertrainVoicing = $PowertrainVoicing }
 $manifest.acousticWorld = $world
 if ($world) {
     $manifest.powertrainWorld = $true

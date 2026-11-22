@@ -40,6 +40,7 @@ function state(s) {
     valid: s.valid !== false,
     generation,
     directivity,
+    ...(s.roadExhaust === true ? {roadExhaust: true} : {}),
     nearFieldRadius,
     emitting: s.emitting !== false,
     motionObservation,
@@ -338,6 +339,7 @@ export class CausalSimulation {
       if (!track) {if(soundMap)soundMap.unavailableSources.push({id,reason:'source-history-unavailable'});continue;}
       if(soundMap)soundMap.sources.push({id,...track.keys.at(-1)});
       const source = { track, directivity: current.directivity, nearFieldRadius: current.nearFieldRadius }, plans=[];
+      if (current.roadExhaust) source.roadExhaust = true;
       const candidates=ranked?this.#rankedSelector(id,current.generation,track.keys.at(-1).position,listener.keys.at(-1).position,now):this.candidates;
       for (const candidate of candidates) {
         if(this.processingSettings?.earlyReflections===false&&candidate.surfaces.length)continue;

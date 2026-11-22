@@ -81,7 +81,7 @@ namespace RichAudio.Beacon.Transport {
    if(c.LatencyProfile!=null&&c.LatencyProfile!="baseline"&&c.LatencyProfile!="low-latency-01"&&c.LatencyProfile!="street-01")throw new InvalidDataException("Unknown immutable gameplay latency profile");
    if(c.ContinuityPolicy!=null&&c.ContinuityPolicy!="baseline"&&c.ContinuityPolicy!="camera-source-01")throw new InvalidDataException("Unknown immutable gameplay continuity policy");
    ValidateIntegration(c);
-   if(c.PowertrainVoicing!=null&&(c.PowertrainVoicing!="bati-exhaust-limiter-v1"||c.PowertrainVoice!="bati-player-on-adder"))
+   if(c.PowertrainVoicing!=null&&((c.PowertrainVoicing!="bati-exhaust-limiter-v1"&&c.PowertrainVoicing!="bati-road"&&c.PowertrainVoicing!="bati-bold")||c.PowertrainVoice!="bati-player-on-adder"))
     throw new InvalidDataException("Bati voicing requires the dedicated ADDER powertrain package");
    if(c.PowertrainWorld&&c.PowertrainVoice==null)
     throw new InvalidDataException("Private powertrain world requires the single-car powertrain voice");

@@ -2,6 +2,7 @@ const maximumPhases = 8;
 const maximumHighRevSamples = 96;
 const sampleEveryBlocks = 8;
 const highRevSampleEveryBlocks = 3;
+const maximumFiringEdges = 64;
 
 const meter = () => ({samples: 0, energy: 0, peak: 0});
 function measure(result, pcm) {
@@ -54,11 +55,15 @@ export class PowertrainVoiceEvidence {
   phases = new Map();
   highRev = null;
   rendererLimitedSamples = 0;
+  firingEdges = [];
+  firingEdgeCount = 0;
+  qpcFrequency = null;
 
   accept(frame) {
     const {powertrainRevision: revision, powertrainGate: mode, listener} = frame;
     const vehicle = frame.vehicles[0];
     if (!vehicle) return;
+    this.qpcFrequency = listener.clockFrequency;
     if (!this.phases.has(revision)) {
       if (this.phases.size === maximumPhases) this.phases.delete(this.phases.keys().next().value);
       this.phases.set(revision, {revision, mode, blocks: 0, inputRange: null, engineDistance: null, exhaustDistance: null,
@@ -84,6 +89,17 @@ export class PowertrainVoiceEvidence {
     const slot = gameplay.slots.find(slot => slot.source);
     if (!slot) return;
     const {powertrainRevision, powertrainSequence, observationTicks, operatingPoint} = slot.vehicle;
+    const firing = slot.source.batiFiring;
+    if (firing?.lastEdge) {
+      const {kind, reason, sourceFrame} = firing.lastEdge;
+      // The engine has just finished this block. A voice can begin later
+      // than the producer or pause while the producer clock keeps advancing.
+      const producerFrame = gameplay.pipeline.renderer.frame - (firing.renderedFrames - sourceFrame);
+      this.firingEdgeCount++;
+      if (this.firingEdges.length === maximumFiringEdges) this.firingEdges.shift();
+      this.firingEdges.push([kind, reason, sourceFrame, producerFrame, powertrainSequence,
+        observationTicks, operatingPoint, powertrainRevision, slot.index, slot.generation]);
+    }
     const phase = this.phases.get(powertrainRevision);
     if (!phase) return;
     const block = phase.blocks++;
@@ -114,6 +130,10 @@ export class PowertrainVoiceEvidence {
         dryEngine: level(p.dryEngine), dryExhaust: level(p.dryExhaust), renderedOutput: level(p.renderedOutput)})),
       inputColumns: ['sequence', 'vehicleObservationQpc', 'rawRatio'],
       renderedColumns: ['sourceSequence', 'sourceObservationQpc', 'selectedRatio', 'smoothedRatio', 'engineIntervalHz', 'exhaustIntervalHz'],
+      firingEdges: {sampleRate: 48000, qpcFrequency: this.qpcFrequency, total: this.firingEdgeCount,
+        omitted: this.firingEdgeCount - this.firingEdges.length,
+        columns: ['kind', 'reason', 'sourceFrame', 'producerFrame', 'sourceSequence', 'sourceObservationQpc',
+          'selectedRatio', 'revision', 'slotIndex', 'slotGeneration'], rows: this.firingEdges.slice()},
       highRev: this.highRev,
     };
   }

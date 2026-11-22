@@ -1,5 +1,6 @@
 import { batiVoicing, voiceBatiPowertrain } from './bati-powertrain-voicing.mjs';
 
+const batiVoicings = new Set([batiVoicing, 'bati-road', 'bati-bold']);
 const adder = 0xb779a091;
 const bati = 0xf9300cc5;
 const isAdderPlayer = (model, context) => model === adder && context === 'player';
@@ -7,7 +8,7 @@ const digest = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value
 
 export function validatePowertrainWorld(config) {
   if (config.powertrainVoicing !== undefined &&
-      (config.powertrainVoicing !== batiVoicing || config.powertrainVoice !== 'bati-player-on-adder'))
+      (!batiVoicings.has(config.powertrainVoicing) || config.powertrainVoice !== 'bati-player-on-adder'))
     throw Error('Bati voicing requires the dedicated ADDER powertrain package');
   if (config.powertrainWorld !== undefined && typeof config.powertrainWorld !== 'boolean')
     throw Error('Boolean private powertrain world opt-in required');
@@ -30,7 +31,7 @@ export function validatePowertrainWorld(config) {
 }
 
 export function powertrainRegistry(stockRegistry, voicing) {
-  if (voicing !== undefined && voicing !== batiVoicing) throw Error('Unknown Bati voicing');
+  if (voicing !== undefined && !batiVoicings.has(voicing)) throw Error('Unknown Bati voicing');
   const voice = stockRegistry.resolve(bati,'player');
   if (voice?.status !== 'available' || voice.bank.model !== 'bati')
     throw Error('verified six-layer Bati player bank unavailable');
@@ -42,7 +43,7 @@ export function powertrainRegistry(stockRegistry, voicing) {
     createSource(model, context, options) {
       if (!isAdderPlayer(model, context)) throw Error('unbound private powertrain vehicle');
       const source=stockRegistry.createSource(bati, context, options);
-      return voicing===batiVoicing ? voiceBatiPowertrain(source) : source;
+      return voicing === undefined ? source : voiceBatiPowertrain(source, voicing);
     },
     prepareSource10(model, context) {
       if (!isAdderPlayer(model, context)) throw Error('unbound private powertrain vehicle');

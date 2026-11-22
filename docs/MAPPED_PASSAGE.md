@@ -92,3 +92,11 @@ The revised voice stayed active for about 123 seconds through a covered rev, an 
 The rendered camera reached about 132 model metres from the exhaust at 80 degrees off the rearward exhaust axis. Close to that point the host sampled the direct replacement near −56.5 dBFS with no reflected signal. This shot reached well beyond the 45-metre offline audition. Under cover the selected rev ratio reached the limiter range for several seconds and fell below it afterward. The live trace did not retain individual firing transitions, and the listener gave no separate verdict on the limiter rhythm.
 
 The endpoint reported zero ring underflow and the stock return was requested once after normal withdrawal. The output gate separately substituted 52,416 frames in the audible revision. The longest reported run was 6,656 untagged frames, or about 139 ms. That counter is separate from underruns and does not establish how many interruptions the listener heard.
+
+## Exhaust balance at cinematic distances
+
+The one-car development package can select the previous Bati voicing, a road mix or a louder alternative. Both new mixes shape the loaded exhaust from the existing grain waveform. A band-pass contribution gives the firing pulses more body, and a fast envelope adds attack when a pulse rises above its local average. The body radiates more broadly than the upper exhaust note. For reflections the solver uses the direction of the first leg leaving the tailpipe. Distance still reduces level and high-frequency detail.
+
+In a reconstruction of the high cinematic shot, the camera was about 132 model metres from the exhaust, 80 degrees off its rear axis. At the observed rev ratio of 0.945, settled exhaust RMS measured −58.0 dBFS with the previous voicing, −25.1 with the road mix and −17.5 with the louder alternative. All three used the same source performance and playback gain. Headphone balance against live game traffic still needs an attended drive.
+
+The mixer reserves pressure for ordinary paths before sharing the remaining headroom across boosted exhaust returns. A bounded producer report records each retained firing cut and catch with its source and producer sample positions. This makes the limiter schedule observable beyond the initial high-rev diagnostic window.

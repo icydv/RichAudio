@@ -17,6 +17,43 @@ import {batiExhaustPathGain} from './bati-powertrain-voicing.mjs';
 const FS=48000,BLOCK=512,MAX=2,unit=v=>{const n=Math.hypot(...v);if(n<1e-8)throw Error('orientation discontinuity');return v.map(x=>x/n);};
 const sameVehicle01=(a,b)=>a?.valid&&b.valid&&a.generation===b.generation&&a.model===b.model&&a.context===b.context;
 const voiceIdentity01=v=>`${v.id}:${v.generation}:${v.model}:${v.context}`+(v.acquisition01===undefined?'':':'+v.acquisition01);
+
+// Reserve the ordinary paths before spending spare pressure on the stronger
+// exhaust. In a tight passage this keeps the late wall returns in the mix.
+function admitRoadExhaust(offered, floor, occupied, weight, reserved, stats) {
+ const admitted = [];
+ const requests = [];
+ let extraWanted = 0;
+ const baseGain = path => floor.get(path) ?? path.bands[0];
+ offered.sort((a,b) => a.order-b.order || baseGain(b)-baseGain(a));
+ for (const path of offered) {
+  const w = weight(path);
+  const previous = occupied.get(path.id) ?? 0;
+  const minimum = baseGain(path) * w;
+  const cost = Math.max(0, minimum - previous);
+  if (reserved + cost > .95) {
+   stats.headroomPathsOmitted++;
+   continue;
+  }
+  reserved += cost;
+  const desired = path.bands[0] * w;
+  const funded = Math.min(desired, Math.max(previous, minimum));
+  const extra = desired - funded;
+  if (extra > 0) {
+   requests.push({index:admitted.length, path, desired, funded, extra});
+   extraWanted += extra;
+  }
+  admitted.push(path);
+ }
+ // Leave five percent for newly visible paths during camera movement. Old
+ // release tails already count in the per-slot reservation above.
+ const fraction = extraWanted ? Math.min(1, Math.max(0, .90-reserved)/extraWanted) : 1;
+ if (fraction < 1) for (const {index,path,desired,funded,extra} of requests) {
+  const scale = (funded + fraction*extra) / desired;
+  admitted[index] = {...path, bands:path.bands.map(x => x*scale)};
+ }
+ return admitted;
+}
 const mix=(a,b,u)=>a.map((x,i)=>x+(b[i]-x)*u),distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
 function validatePowertrainMotion(track, old, current, frequency) {
  if(!old?.valid||!current.valid||old.generation!==current.generation)return;
@@ -353,18 +390,32 @@ export class StockGameplay {
   for(const slot of renderer.slots)if(slot.active){const bound=Math.max(slot.gain[0],slot.releaseLeft?0:slot.target[0])*weights(slot.source);occupied.set(slot.id,bound);total+=bound;}
   let calibrated;
   for(const s of this.slots)if(s.source?.batiExhaustDemand!==undefined)
-   (calibrated??=new Map()).set('stock:slot'+s.index+':exhaust',s.source.batiExhaustDemand);
+   (calibrated??=new Map()).set('stock:slot'+s.index+':exhaust',s.source);
   const directDistances=calibrated&&new Map(control.paths.filter(p=>p.order===0).map(p=>[p.sourceId,p.distance]));
+  if (calibrated && this.sample?.state) for (const slot of this.slots) {
+   const id = 'stock:slot'+slot.index+':exhaust';
+   if (slot.source?.roadMix && slot.vehicle && !directDistances.has(id)) {
+    const emitter = this.stockEmitterPosition01(slot.vehicle,'exhaust',slot.source.vehicle.model);
+    directDistances.set(id,distance(emitter,this.sample.state.position));
+   }
+  }
+  let floor;
   const offered=calibrated?control.paths.map(p=>{
    // Keep the existing passive tap bound at very close camera distances.
    // One multiplier keeps the path's spectral balance and direction intact.
-   const demand=calibrated.get(p.sourceId);
-   if(demand===undefined)return p;
-   const pressure=batiExhaustPathGain(directDistances.get(p.sourceId)??0,demand);
+   const source=calibrated.get(p.sourceId);
+   if(!source)return p;
+   const distance=directDistances.get(p.sourceId)??0;
+   const pressure=batiExhaustPathGain(distance,source.batiExhaustDemand,source.batiVoicing);
    const gain=Math.min(pressure,1/p.bands[0]);
-   return {...p,bands:p.bands.map(b=>Math.min(1,b*gain))};
+   const result={...p,bands:p.bands.map(b=>Math.min(1,b*gain))};
+   if (source.roadMix) {
+    (floor??=new Map()).set(result,Math.min(result.bands[0],p.bands[0]));
+   }
+   return result;
   }):[...control.paths];
-  const paths=[];for(const p of offered.sort((a,b)=>a.order-b.order||b.bands[0]-a.bands[0])){
+  const paths=floor ? admitRoadExhaust(offered,floor,occupied,p=>weights(renderer.sources.get(p.sourceId)),total,this.stats) : [];
+  if(!floor)for(const p of offered.sort((a,b)=>a.order-b.order||b.bands[0]-a.bands[0])){
    const bound=p.bands[0]*weights(renderer.sources.get(p.sourceId)),extra=Math.max(0,bound-(occupied.get(p.id)??0));
    if(total+extra>.95){this.stats.headroomPathsOmitted++;continue;}total+=extra;paths.push(p);
   }
@@ -587,7 +638,8 @@ export class StockGameplay {
    for(const [i,role]of ['engine','exhaust'].entries()){
     sources.push({id:ids[i],generation:s.generation,position:this.stockEmitterPosition01(v,role,s.source.vehicle.model),velocity:v.velocity,
      observationTicks:v.observationTicks,motionIdentity:v.id,motionTime:vehicleTarget,
-     forward:v.forward.map(x=>i?-x:x),up:v.up,directivity:profile?.directivity?.[role]??(i?.65:.1),valid:true,emitting:true});}
+     forward:v.forward.map(x=>i?-x:x),up:v.up,directivity:profile?.directivity?.[role]??(i?.65:.1),
+     roadExhaust:i===1 && s.source.roadMix,valid:true,emitting:true});}
    if(v.model===0xf9300cc5){const at=this.now(),flow=s.airflow.renderInto({velocity:v.velocity,enabled:this.settings.airflowEnabled,level:this.settings.airflowLevel,riderAttached:v.riderAttached===true,riderViewAttached:v.riderViewAttached===true&&!!this.sample.state,valid:!!this.sample.state},this.inputs[aeroId],...s.local);
     if(flows)flows.set(s,flow);
     this.airflowState.maximumSynthesisMs=Math.max(this.airflowState.maximumSynthesisMs,this.now()-at);this.airflowState.riderActive||=flow.riderActive;

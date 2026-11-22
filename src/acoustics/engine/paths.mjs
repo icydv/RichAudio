@@ -418,9 +418,17 @@ export function finishPath(plan,queries=null,stats={queries:0,surfaceTests:0}) {
     const exponent = -2 * incidenceSum * phase * phase;
     bands = coherentBandFrequencies.map((frequency,i) => bands[i] * Math.exp(exponent * frequency * frequency));
   }
+  if (source.roadExhaust && g.distance > E) {
+    // Authored tailpipe radiation. Use the departing leg, including for
+    // reflections whose arrival direction points away from the vehicle.
+    const cosine = Math.max(-1, Math.min(1, dot(state.forward, g.emissionDirection)));
+    const cardioid = (1 + cosine) / 2;
+    const polar = [.76 + .24 * cardioid, .24 + .76 * cardioid ** 2, .07 + .93 * cardioid ** 3];
+    bands = bands.map((band,i) => band * polar[i]);
+  }
   bands = bands.map(
     (x, i) =>
-      ((x * radiation * scene.config.referenceDistance) /
+      ((x * (source.roadExhaust ? 1 : radiation) * scene.config.referenceDistance) /
         spreading) *
       10 ** ((-scene.config.airDbPerMetre[i] * g.distance) / 20),
   );

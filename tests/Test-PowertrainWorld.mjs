@@ -31,8 +31,23 @@ test('the development donor preserves the observed ADDER identity and slot bound
 });
 
 test('Bati voicing requires the one-car opt-in', () => {
-  assert.equal(validatePowertrainWorld({...base,powertrainVoicing:batiVoicing}),true);
+  for (const powertrainVoicing of [batiVoicing, 'bati-road', 'bati-bold']) {
+    assert.equal(validatePowertrainWorld({...base,powertrainVoicing}),true);
+    assert.throws(() => validatePowertrainWorld({...base,powertrainVoicing,eligible:[]}), /one stock ADDER/);
+  }
   assert.throws(() => validatePowertrainWorld({...base,powertrainVoice:undefined,powertrainVoicing:batiVoicing}), /dedicated/);
   assert.throws(() => validatePowertrainWorld({...base,powertrainVoicing:'unknown'}), /dedicated/);
   assert.throws(() => validatePowertrainWorld({...base,powertrainVoicing:batiVoicing,vehicleSourcePolicy:'catalogue-fleet-01'}), /one stock ADDER/);
+});
+
+test('the selected Bati voicing reaches the replacement source', () => {
+  const bank = {
+    resolve: () => ({status:'available', bank:{model:'bati'}}),
+    createSource: () => ({vehicle:{model:'bati'}, renderInto() {}}),
+  };
+  for (const voicing of [undefined, batiVoicing, 'bati-road', 'bati-bold']) {
+    const source = powertrainRegistry(bank, voicing).createSource(0xb779a091, 'player');
+    assert.equal(source.batiVoicing, voicing);
+  }
+  assert.throws(() => powertrainRegistry(bank, 'unknown'), /Unknown Bati voicing/);
 });
