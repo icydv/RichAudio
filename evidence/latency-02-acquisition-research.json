@@ -1,0 +1,183 @@
+{
+  "schema": 1,
+  "kind": "latency-02-primary-interface-and-offline-capability-research",
+  "reviewDate": "2026-11-02",
+  "target": {
+    "game": "GTA V Enhanced",
+    "gameVersion": "1.0.1158.16",
+    "rphVersion": "1.132.1428.17748",
+    "exactStackEventRuntimeVerified": false
+  },
+  "production": {
+    "status": "BLOCKED",
+    "nativePrimary": true,
+    "gunshotEmissionAdapter": "unavailable",
+    "directReplacementAllowed": false,
+    "reflectedNativeEventAugmentationAllowed": false,
+    "sourceEventTimestamp": "unavailable",
+    "sampleAccurateNativeSync": false,
+    "selectiveNativeSuppressionVerified": false,
+    "restorationVerified": false
+  },
+  "fixture": {
+    "authority": "authored-fixture-only",
+    "eventKind": "authored-impulse",
+    "explicitSessionBrandRequired": true,
+    "occurrenceAndReceiptSeparate": true,
+    "occurrenceClock": "authored-fixture-QPC",
+    "nativeSampleAccuracyClaim": false
+  },
+  "nativeDeclarations": {
+    "repository": "citizenfx/natives",
+    "commit": "c00e0ed83d06dcba2457424ba254fbaa7a05bf7e",
+    "files": [
+      "PED/IsPedShooting.md",
+      "WEAPON/GetPedLastWeaponImpactCoord.md",
+      "FIRE/IsExplosionInSphere.md",
+      "SCRIPT/GetEventAtIndex.md",
+      "SCRIPT/GetEventData.md"
+    ],
+    "scope": "Community-maintained native declarations; not Enhanced/RPH implementation certification"
+  },
+  "sdkMetadata": {
+    "sdkSha256": "5d439745604a5fedbf8fa401520d4f296c1b6800d77e2923ba3bf9772182c7e0",
+    "sdkFileVersion": "1.124.1393.17586",
+    "metadataReceiptSha256": "969a234f5f684d6bd2cfc3ce31a297dc344a2e2a109e33a3de1d4dee61893a64",
+    "rageTypesInspected": 178,
+    "managedEventDeclarations": 7,
+    "selectedMethodDeclarations": 40,
+    "selectedMethodsAllRvaZero": true,
+    "relevantEvents": [
+      {
+        "type": "Rage.Ped",
+        "name": "Shot"
+      },
+      {
+        "type": "Rage.World",
+        "name": "PedShot"
+      }
+    ],
+    "relevantPayloadProperties": [
+      {
+        "type": "Rage.SpatialEventArgs",
+        "name": "Position",
+        "signatureBlob": "28001110"
+      },
+      {
+        "type": "Rage.PedShotEventArgs",
+        "name": "Shooter",
+        "signatureBlob": "28001280b8"
+      },
+      {
+        "type": "Rage.PedShotEventArgs",
+        "name": "Victim",
+        "signatureBlob": "28001280b8"
+      }
+    ],
+    "officialDescriptionUrl": "https://docs.ragepluginhook.net/html/T_Rage_PedShotEventArgs.htm",
+    "officialDescriptionScope": "Peds getting shot; preliminary0.56 ALPHA documentation, not current runtime proof",
+    "eventOccurrenceTimestampDeclared": false,
+    "assemblyExecuted": false,
+    "nativeCalled": false
+  },
+  "primaryRepositories": {
+    "fivem": "9f0e34e1cbdfc34fd05079416791f01938279097",
+    "fivemDocs": "ff11fcbf392b97f87fd5701b8c9a787ffaec2aa4",
+    "microsoftSdkApi": "656e9656bfaef34dd29cd7ee9e1146aec17e924c",
+    "microsoftWin32": "ca8274decead49403d70ceeed4af8d4ca74eaf11"
+  },
+  "primarySourceSnapshots": [
+    {
+      "name": "cfx-server-events",
+      "url": "https://raw.githubusercontent.com/citizenfx/fivem/9f0e34e1cbdfc34fd05079416791f01938279097/code/components/citizen-server-impl/src/state/ServerGameState.cpp",
+      "bytes": 208815,
+      "sha256": "35b1ed694a5811840ac1e1020515f5ea2133a9474e85cda54508168d9264a64c"
+    },
+    {
+      "name": "client3-period",
+      "url": "https://raw.githubusercontent.com/MicrosoftDocs/sdk-api/656e9656bfaef34dd29cd7ee9e1146aec17e924c/sdk-api-src/content/audioclient/nf-audioclient-iaudioclient3-getsharedmodeengineperiod.md",
+      "bytes": 5136,
+      "sha256": "4ff4845ad336ea592a80f64d35d9a56b11cd8aae085dbe63d2f573f4c86ab619"
+    },
+    {
+      "name": "client3-init",
+      "url": "https://raw.githubusercontent.com/MicrosoftDocs/sdk-api/656e9656bfaef34dd29cd7ee9e1146aec17e924c/sdk-api-src/content/audioclient/nf-audioclient-iaudioclient3-initializesharedaudiostream.md",
+      "bytes": 12147,
+      "sha256": "adc7129c919ea2d4f3b4dc2dfb890cf41f0fa6e4dc617c366b87afb2b3103119"
+    },
+    {
+      "name": "mmcss",
+      "url": "https://raw.githubusercontent.com/MicrosoftDocs/win32/ca8274decead49403d70ceeed4af8d4ca74eaf11/desktop-src/ProcThread/multimedia-class-scheduler-service.md",
+      "bytes": 8415,
+      "sha256": "f8a20c838c1f19585debc83244a48c2b29728b7bc5b7280310422883f5fa502b"
+    },
+    {
+      "name": "cfx-gameevent-doc",
+      "url": "https://raw.githubusercontent.com/citizenfx/fivem-docs/ff11fcbf392b97f87fd5701b8c9a787ffaec2aa4/content/docs/scripting-reference/events/list/gameEventTriggered.md",
+      "bytes": 1212,
+      "sha256": "706606b201e4a0f40b3a8dcad15444b5b2336a24143dffaf3615481c8d8c6373"
+    }
+  ],
+  "sourcePins": [
+    {
+      "file": "src/acoustics/events/acquisition-capability.mjs",
+      "sha256": "d02aca32860f029bec5d7f2cc51e29d42ab457645f8d3b3553a6976d9e89bbed"
+    },
+    {
+      "file": "tests/Test-EventAcquisitionCapability.mjs",
+      "sha256": "503101ca97298c525f88284d73479619743a91ea1e4fe0c6042992010bf39ca2"
+    },
+    {
+      "file": "tools/Inspect-EventSourceSurface02.ps1",
+      "sha256": "74ff4a29c6589fe38a573e7072d686b106e585f2c334b205fbbd5570c7d95ff9"
+    },
+    {
+      "file": "docs/LATENCY_02_SOURCE_EVENT_CAPABILITIES.md",
+      "sha256": "38f213860ace98495c46f94ae5ba9f42b43ecce2bde516b22b9135b1cc7dae45"
+    },
+    {
+      "file": "docs/LATENCY_02_AUDIO_PERIOD_RESEARCH.md",
+      "sha256": "9ddcf72a5dfa533c704bf2e2531424c1032a904b552e4c8cdc34799103b513e1"
+    }
+  ],
+  "focusedValidation": {
+    "command": "node --test tests/Test-EventAcquisitionCapability.mjs",
+    "tests": 9,
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "Pure capability/timing contracts and original synthetic fixture only"
+  },
+  "audioResearch": {
+    "endpointQueried": false,
+    "endpointActivated": false,
+    "periodCapability": "unavailable",
+    "periodChanged": false,
+    "existingSharedModeRetained": true,
+    "existingMmcssTask": "Audio",
+    "newMmcssTaskSelected": false,
+    "observationToSubmissionTargetMs": [
+      20,
+      30
+    ],
+    "targetMeasured": false,
+    "physicalLatencyMeasured": false
+  },
+  "actions": {
+    "gameLaunched": false,
+    "gameFilesWritten": false,
+    "installedAssetsRead": false,
+    "thirdPartyArchiveDownloaded": false,
+    "newRecording": false,
+    "vendorContacted": false,
+    "suppressionCalled": false
+  },
+  "limitations": [
+    "RPH victim-hit notifications are not every muzzle emission, missed shot or material impact; callback semantics and clock are unverified on the target runtime.",
+    "Polling state or last coordinates do not identify every event; acquisition/receipt brackets are not source occurrence timestamps.",
+    "FiveM-specific game/network events and network damage time do not establish an RPH adapter, host-QPC mapping, sample accuracy or selective native audio control.",
+    "No real event is synthesized, reflected, muted, canceled or replaced. Native GTA remains primary.",
+    "Shared period eligibility depends on endpoint, format, client properties and runtime state; no minimum period or lower-latency endpoint behavior is measured.",
+    "Authored fixture timing is explicitly synthetic. No speaker or native-input-to-ear result is claimed."
+  ]
+}

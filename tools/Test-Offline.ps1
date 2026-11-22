@@ -7,6 +7,10 @@ $output=Join-Path $repo ('.local\offline-validation-'+[guid]::NewGuid().ToString
 [IO.Directory]::CreateDirectory($output) | Out-Null
 Push-Location $repo
 try {
+    & node --test tests/Test-Latency02Continuous.mjs tests/Test-EventAcquisitionCapability.mjs tests/Test-TransientEventPath.mjs
+    if($LASTEXITCODE-ne0){throw 'LATENCY-02 continuous timing, event acquisition gates or prepared acoustic kernels failed.'}
+    & node tools/Test-TransientEventTransport.mjs
+    if($LASTEXITCODE-ne0){throw 'Bounded synthetic event pipe failed.'}
     & node --test tests/Test-AudioOwnershipLegacy.mjs tests/Test-NativeAudioOwnership01.mjs tests/Test-AcousticWorld01.mjs tests/Test-AcousticWorld01Continuity.mjs tests/Test-AcousticWorld01Ablation.mjs tests/Test-LowLatency01.mjs
     if($LASTEXITCODE-ne0){throw 'Offline ownership policy, static-world fixtures or camera/source continuity failed.'}
     & node tests/Test-InstalledCollision.mjs
@@ -75,6 +79,7 @@ try {
     & (Join-Path $repo 'tools\Prepare-Beacon600.ps1') -Output ('.local/beacon-ci-'+[guid]::NewGuid().ToString('N'))
     # Original PCM, bounded queues and local transport only: these tests never open an audio endpoint.
     & (Join-Path $repo 'tools\Build-AcousticsHost.ps1') -Tests
+    & (Join-Path $repo 'tools\Test-TransientBus02.ps1')
     & (Join-Path $repo 'tools\Test-LowLatencyProfile.ps1')
     & (Join-Path $repo 'tools\Test-SynchronizedRecording.ps1')
     & (Join-Path $repo 'tools\Test-GameplayRecording13.ps1')

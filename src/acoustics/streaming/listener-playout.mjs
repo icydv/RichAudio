@@ -35,7 +35,7 @@ const same=(a,b)=>a&&b&&['session','generation','coordinates','units','listenerK
 // have ALREADY arrived. The interactive delay is measured and converges only
 // while the pose is stationary. This is control latency, not acoustic distance.
 export class ListenerPlayout {
-  constructor({ delayMs = 100, interactive = false, anchoredClock = false, preserveGenerationHistory = false } = {}) {
+  constructor({ delayMs = 100, interactive = false, anchoredClock = false, preserveGenerationHistory = false, recoveryPolicy = 'baseline' } = {}) {
     if (![100, 75, 50].includes(delayMs))
       throw Error("Experimental listener delay");
     this.delay = delayMs / 1000;
@@ -44,6 +44,8 @@ export class ListenerPlayout {
     if(typeof anchoredClock!=='boolean')throw Error('Explicit observation clock policy');this.anchoredClock=anchoredClock;
     if(typeof preserveGenerationHistory!=='boolean'||preserveGenerationHistory&&(!anchoredClock||interactive))throw Error('Piecewise generation history requires the fixed anchored clock');
     this.preserveGenerationHistory=preserveGenerationHistory;
+    if(!['baseline','arrived-segments-01'].includes(recoveryPolicy)||recoveryPolicy!=='baseline'&&(!anchoredClock||interactive||delayMs!==50))throw Error('Explicit fixed50ms arrived-segment policy required');
+    this.recoveryPolicy=recoveryPolicy;
     this.delayMaximum=this.delay;
     this.delayTarget=this.delay;
     this.lastRenderTime=null;
@@ -70,6 +72,7 @@ export class ListenerPlayout {
       startupClockSkipped:0,
       startupClockMaximumShiftMs:0,
     };
+    if(recoveryPolicy!=='baseline')Object.assign(this.stats,{awaitingObservedSegment:0,qualifiedObservedSegmentBlocks:0,rejectedObservedSegments:0});
   }
   add(envelope, audioTime, hostMs) {
     if (
@@ -281,6 +284,14 @@ export class ListenerPlayout {
       extrapolationSeconds = 0;
     if (b) {
       if (b.time - a.time > 0.25) return missing("observation-gap");
+      // A missing interval must not hide an invalid raw segment on recovery.
+      // The bound matches the unchanged causal renderer. Actual generation
+      // cuts were separated above; no new generation or clamped pose is made.
+      if(this.recoveryPolicy==='arrived-segments-01'){
+        const speed=norm(b.state.position.map((v,i)=>v-a.state.position[i]))/(b.time-a.time);
+        if(speed>100+1e-6){this.stats.rejectedObservedSegments++;throw Error('undeclared position discontinuity');}
+        this.stats.qualifiedObservedSegmentBlocks++;
+      }
       const u = (targetTime - a.time) / (b.time - a.time),
         mix = (x, y) => x.map((v, i) => v + (y[i] - v) * u);
       const {forward,up}=this.interactive?axes(slerp(a.rotation,b.rotation,u)):(()=>{
@@ -298,6 +309,11 @@ export class ListenerPlayout {
       this.stats.interpolated++;
     } else {
       extrapolationSeconds = targetTime - a.time;
+      // Keep the SAME observation/audio clock and target. When its right
+      // endpoint has not arrived, geometry is explicitly unavailable and the
+      // existing renderer releases paths. Do not hold a false physical pose,
+      // slew time during motion, forecast, or snap a prediction back to data.
+      if(this.recoveryPolicy==='arrived-segments-01'&&extrapolationSeconds>1e-9){this.stats.awaitingObservedSegment++;return missing(generationGap?'generation-gap':'awaiting-observed-segment');}
       if (extrapolationSeconds > this.extrapolation + 1e-9)
         return missing(generationGap?"generation-gap":"prediction-expired");
       state = {
@@ -307,7 +323,7 @@ export class ListenerPlayout {
         ),
       };
       mode = extrapolationSeconds > 1e-9 ? "predicted" : "exact";
-      this.stats.predicted++;
+      if(this.recoveryPolicy==='baseline')this.stats.predicted++;else this.stats.qualifiedObservedSegmentBlocks++;
     }
     return { ...result, state, mode, extrapolationSeconds };
   }

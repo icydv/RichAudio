@@ -23,7 +23,7 @@ foreach($p in $old.bindings){
  elseif($p.file.EndsWith('.mjs',[StringComparison]::Ordinal)){$from=Join-Path $repo $p.file;$replaced+=$p.file;$currentCodePins+=@([ordered]@{file=$p.file;sha256=(Hash $from)})}else{$preserved++}
  Unlinked $from;$target=Join-Path $package $p.file;[IO.Directory]::CreateDirectory((Split-Path -Parent $target))|Out-Null;[IO.File]::Copy($from,$target,$false)
 }
-$newModules=@('src/acoustics/vehicle/latency-profile.mjs')
+$newModules=@('src/acoustics/vehicle/latency-profile.mjs','src/acoustics/vehicle/stationary-emission.mjs')
 # StockGameplay's independently reviewed static-scene qualification imports are
 # code dependencies even when geometry is disabled. Bind them in this NEW copy.
 $world=Join-Path $repo 'src/acoustics/world';if(Test-Path -LiteralPath $world){$newModules+=@(Get-ChildItem -LiteralPath $world -Filter '*.mjs' -File|ForEach-Object{[IO.Path]::GetRelativePath($repo,$_.FullName).Replace('\','/')})}

@@ -1,0 +1,1926 @@
+{
+  "schema": 1,
+  "kind": "latency-02-continuous-state-offline-evidence",
+  "implementationCommit": "51efefeea391d1061bb0274d1e4a750d27fc8853",
+  "initialImplementationCommit": "b364d3ff07d7334156cc1fa82458139ea91233ac",
+  "originalBranchBase": "d8f82c578d3819569b2e7d198fc469e6517a86b4",
+  "gameLaunched": false,
+  "endpointOpened": false,
+  "installedAssetsWritten": false,
+  "newRecording": false,
+  "oldWorktreesWritten": false,
+  "sourceBanksOrCalibrationChanged": false,
+  "liveSelectorAdded": false,
+  "physicalLatencyMeasured": false,
+  "policies": {
+    "reviewed75Unchanged": true,
+    "namedLatencyRegistryUnchanged": true,
+    "arrivedSegments50": {
+      "constructorOption": "continuousTimingPolicy=arrived-segments-50",
+      "requiredContinuity": "camera-source-01",
+      "liveQualified": false,
+      "clock": "Fixed S=T-50ms, no listener prediction or clock slew. Only arrived qualified raw interpolation and exact knots; explicit geometry unavailability otherwise.",
+      "speedGuardModelUnitsPerSecond": 100,
+      "originalForecastCeilingUnchangedMs": 50,
+      "sourceFreshnessUnchangedMs": 250
+    },
+    "stationaryEmission": {
+      "constructorOption": "operatingStatePolicy=authored-stationary-emission-01",
+      "authority": "authored-offline-fixture",
+      "liveQualified": false,
+      "movingQualified": false,
+      "required": "Branded immutable source/listener geometry, zero velocities, fixed orientations/session/generations, finite horizon for whole 512-sample block; original finite lease and 250 ms maximum age through block end",
+      "timeBasis": "Newest delivered state q<=current PCM emission T, applied to dry samples T and later only. Because authored geometry is constant, P(T)=P(S). Moving geometry is not approximated.",
+      "violation": "Terminal experimental rejection; no fallback to delayed older operating state."
+    }
+  },
+  "baselinePreservation": {
+    "retainedReceiptSha256": "4a4c9ac5d3a943605de626a866e78a2d3471dfdec5d48c37e67d975d6f3d07fa",
+    "originalModuleSha256": "33ebf6ce5ba322c27d2795767f5e2355f50e8ac4224d747e3ea112bc2ebd6984",
+    "originalPackageManifestSha256": "68217b8b15a24f1ad395a39ed3a29938ffd579e6e2fecf082bf8f1c2a1ea52cb",
+    "originalBindingsReverified": 133,
+    "default100PcmSha256": "be5d36be1d842ef47be8ea3b5d48496ac125b687518b550d07156654b5516e92",
+    "reviewed75CameraPcmSha256": "f0fc0b292d4becc25a7250b85ee90db21d499af332fbd3ef2dbd69f0b337da08",
+    "original100EqualsCurrent": true,
+    "original75EqualsCurrent": true,
+    "legacy50ReproducedBothContinuityPolicies": true
+  },
+  "retainedReplay": {
+    "sourcePins": [
+      {
+        "file": "src/acoustics/vehicle/gameplay.mjs",
+        "sha256": "0a510bde9610e63c4f21b61e07b2cda8458da3d9ff20273959834dbad1a638a6"
+      },
+      {
+        "file": "src/acoustics/streaming/listener-playout.mjs",
+        "sha256": "c7c68c2e93beb40dc2cb46e8beef369fcced8f08cfc629b31e70c73de8a65dfa"
+      },
+      {
+        "file": "src/acoustics/vehicle/stationary-emission.mjs",
+        "sha256": "430e35db04d4da99ee4d406baf98996cb151b4e0ce84642a814d7c7e40cffb9f"
+      },
+      {
+        "file": "src/acoustics/vehicle/latency-profile.mjs",
+        "sha256": "fc3d1c224b8d25926b262ceb69fdbde4d48bf1f8f6c8c7243f6e1c422a6a056e"
+      },
+      {
+        "file": "src/acoustics/vehicle/stock-source.mjs",
+        "sha256": "78d29a58e5ffb898a11e0397417fde721477a418fccfb97cb8a18b5bfa3a575a"
+      },
+      {
+        "file": "src/acoustics/vehicle/stock-grain.mjs",
+        "sha256": "b231876fdc0e5a828009cab1956be602f71ec3d656a7ec72c416e25c9fa39545"
+      },
+      {
+        "file": "src/acoustics/vehicle/pipeline.mjs",
+        "sha256": "0336c5ffe72df7352596743475d1a1fba5f95f044f6ff7f009df1b3ed47af85d"
+      },
+      {
+        "file": "src/acoustics/streaming/causal.mjs",
+        "sha256": "d01fcd54dba17faa1048f52b99e8c9eefed1c5f31535ccaa6deadef4a8003105"
+      },
+      {
+        "file": "tools/audio/acoustic-world-continuity-replay.mjs",
+        "sha256": "145a9d7ebe64e8a8010ec1703ec181e34c43950dcc12d8fc3a41235120b94927"
+      },
+      {
+        "file": "tools/Run-Latency02ContinuousReplay.mjs",
+        "sha256": "b078ab271b4adc21cbe5328081e2d3812c53246172778be558bc357b983bdc0d"
+      }
+    ],
+    "codeCommit": "b364d3ff07d7334156cc1fa82458139ea91233ac",
+    "currentDefaultExecutedModulesStillMatch": true,
+    "optInModuleChangeScope": "Only unused-by-default stationary selector was hardened; raw retained receipt is preserved, while final stationary receipt pins hardened current code.",
+    "scope": "Genuine retained sourcebits/host deliveries, explicitly constructed producer acceptance phase. Not exact original live PCM reconstruction; no sink or underflow measurement.",
+    "provenance": {
+      "kind": "retained-observations-with-explicitly-constructed-host-delivery-schedule",
+      "exactLiveNodeAcceptanceScheduleAvailable": false,
+      "schedule": "Recorded host write-after times, mapped using original generation1 clock offset; delivered before first following512-frame block. No unseen live acceptance times or PCM samples invented.",
+      "journalSha256": "646a1de702d30323d1ffea30ce5a1ababbf9c7618a753cd396fdf7677a20d980",
+      "diagnosticsSha256": "13dbe9b62bd7553eaab3df7196ddafa2b902f6f76745aa72415929185c6d235f",
+      "packageManifestSha256": "68217b8b15a24f1ad395a39ed3a29938ffd579e6e2fecf082bf8f1c2a1ea52cb"
+    },
+    "runs": [
+      {
+        "id": "original-100",
+        "completed": true,
+        "frames": 1594368,
+        "error": null,
+        "failure": null,
+        "modes": {
+          "missing": 6,
+          "warming": 24,
+          "interpolated": 3010,
+          "predicted": 9,
+          "prediction-expired": 9,
+          "stale-wall-clock": 56
+        },
+        "listenerForecastMs": {
+          "count": 9,
+          "median": 11.744300004068009,
+          "p95": 41.95459999593254,
+          "p99": 45.3679333292655,
+          "maximum": 46.22126666259874,
+          "minimum": 0.9803999959316911,
+          "mean": 16.654340738480634
+        },
+        "sourceCreations": 1,
+        "sourceObjectChanges": 0,
+        "sourceFrameRegressions": 0,
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 3114,
+          "median": 2.066000000000031,
+          "p95": 4.177929999999696,
+          "p99": 5.13650899999981,
+          "maximum": 74.54079999999999,
+          "minimum": 0.061300000000301225,
+          "mean": 2.3127519267822696
+        },
+        "externalDeadlineMisses": 1,
+        "costScope": "All 3114 offline blocks, metric collection/shared process included",
+        "nearSilentWindows": [
+          {
+            "startFrame": 0,
+            "frames": 7168,
+            "durationMs": 149.33333333333334
+          },
+          {
+            "startFrame": 604977,
+            "frames": 4303,
+            "durationMs": 89.64583333333333
+          },
+          {
+            "startFrame": 659748,
+            "frames": 4316,
+            "durationMs": 89.91666666666667
+          },
+          {
+            "startFrame": 1561710,
+            "frames": 32658,
+            "durationMs": 680.375
+          }
+        ],
+        "sampledMaximumRssBytes": 355282944
+      },
+      {
+        "id": "current-100",
+        "completed": true,
+        "frames": 1594368,
+        "error": null,
+        "failure": null,
+        "modes": {
+          "missing": 6,
+          "warming": 24,
+          "interpolated": 3010,
+          "predicted": 9,
+          "prediction-expired": 9,
+          "stale-wall-clock": 56
+        },
+        "listenerForecastMs": {
+          "count": 9,
+          "median": 11.744300004068009,
+          "p95": 41.95459999593254,
+          "p99": 45.3679333292655,
+          "maximum": 46.22126666259874,
+          "minimum": 0.9803999959316911,
+          "mean": 16.654340738480634
+        },
+        "sourceCreations": 1,
+        "sourceObjectChanges": 0,
+        "sourceFrameRegressions": 0,
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 3114,
+          "median": 2.877900000000409,
+          "p95": 5.18334499999919,
+          "p99": 6.314397000000117,
+          "maximum": 25.287000000000262,
+          "minimum": 0.06370000000060827,
+          "mean": 3.0249394026974987
+        },
+        "externalDeadlineMisses": 1,
+        "costScope": "All 3114 offline blocks, metric collection/shared process included",
+        "nearSilentWindows": [
+          {
+            "startFrame": 0,
+            "frames": 7168,
+            "durationMs": 149.33333333333334
+          },
+          {
+            "startFrame": 604977,
+            "frames": 4303,
+            "durationMs": 89.64583333333333
+          },
+          {
+            "startFrame": 659748,
+            "frames": 4316,
+            "durationMs": 89.91666666666667
+          },
+          {
+            "startFrame": 1561710,
+            "frames": 32658,
+            "durationMs": 680.375
+          }
+        ],
+        "sampledMaximumRssBytes": 385073152
+      },
+      {
+        "id": "original-75-camera",
+        "completed": true,
+        "frames": 1594368,
+        "error": null,
+        "failure": null,
+        "modes": {
+          "missing": 6,
+          "warming": 4,
+          "interpolated": 3010,
+          "predicted": 15,
+          "generation-gap": 12,
+          "prediction-expired": 11,
+          "stale-wall-clock": 56
+        },
+        "listenerForecastMs": {
+          "count": 15,
+          "median": 26.07763332926538,
+          "p95": 48.1540566625986,
+          "p99": 49.541157995932785,
+          "maximum": 49.88793332926633,
+          "minimum": 4.647066662599286,
+          "mean": 26.87087777370879
+        },
+        "sourceCreations": 1,
+        "sourceObjectChanges": 0,
+        "sourceFrameRegressions": 0,
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 3114,
+          "median": 2.8474999999998545,
+          "p95": 5.058634999999958,
+          "p99": 5.950281999998184,
+          "maximum": 17.57510000000184,
+          "minimum": 0.11689999999725842,
+          "mean": 2.9571851316634663
+        },
+        "externalDeadlineMisses": 1,
+        "costScope": "All 3114 offline blocks, metric collection/shared process included",
+        "nearSilentWindows": [
+          {
+            "startFrame": 0,
+            "frames": 6144,
+            "durationMs": 128
+          },
+          {
+            "startFrame": 605487,
+            "frames": 2257,
+            "durationMs": 47.020833333333336
+          },
+          {
+            "startFrame": 660267,
+            "frames": 2261,
+            "durationMs": 47.104166666666664
+          },
+          {
+            "startFrame": 1560687,
+            "frames": 33681,
+            "durationMs": 701.6875
+          }
+        ],
+        "sampledMaximumRssBytes": 368218112
+      },
+      {
+        "id": "current-75-camera",
+        "completed": true,
+        "frames": 1594368,
+        "error": null,
+        "failure": null,
+        "modes": {
+          "missing": 6,
+          "warming": 4,
+          "interpolated": 3010,
+          "predicted": 15,
+          "generation-gap": 12,
+          "prediction-expired": 11,
+          "stale-wall-clock": 56
+        },
+        "listenerForecastMs": {
+          "count": 15,
+          "median": 26.07763332926538,
+          "p95": 48.1540566625986,
+          "p99": 49.541157995932785,
+          "maximum": 49.88793332926633,
+          "minimum": 4.647066662599286,
+          "mean": 26.87087777370879
+        },
+        "sourceCreations": 1,
+        "sourceObjectChanges": 0,
+        "sourceFrameRegressions": 0,
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 3114,
+          "median": 2.8999000000003434,
+          "p95": 5.113185000003067,
+          "p99": 5.97221100000337,
+          "maximum": 22.497699999999895,
+          "minimum": 0.11269999999785796,
+          "mean": 3.001904816955712
+        },
+        "externalDeadlineMisses": 1,
+        "costScope": "All 3114 offline blocks, metric collection/shared process included",
+        "nearSilentWindows": [
+          {
+            "startFrame": 0,
+            "frames": 6144,
+            "durationMs": 128
+          },
+          {
+            "startFrame": 605487,
+            "frames": 2257,
+            "durationMs": 47.020833333333336
+          },
+          {
+            "startFrame": 660267,
+            "frames": 2261,
+            "durationMs": 47.104166666666664
+          },
+          {
+            "startFrame": 1560687,
+            "frames": 33681,
+            "durationMs": 701.6875
+          }
+        ],
+        "sampledMaximumRssBytes": 394358784
+      },
+      {
+        "id": "legacy-50-baseline",
+        "completed": false,
+        "frames": 612352,
+        "error": "undeclared position discontinuity",
+        "failure": {
+          "producerFrame": 612352,
+          "renderAudioTimeSeconds": 12.757333333333333,
+          "message": "undeclared position discontinuity",
+          "listenerGeneration": 2,
+          "listenerStepModelUnitsPerSecond": 113.70350002524043,
+          "previousMode": "predicted",
+          "currentMode": "interpolated"
+        },
+        "modes": {
+          "missing": 6,
+          "warming": 6,
+          "predicted": 185,
+          "interpolated": 997,
+          "prediction-expired": 2
+        },
+        "listenerForecastMs": {
+          "count": 185,
+          "median": 4.395099995930352,
+          "p95": 19.311359995930026,
+          "p99": 22.34284666259768,
+          "maximum": 40.31373332926336,
+          "minimum": 0.08853332926417323,
+          "mean": 5.964612788811667
+        },
+        "sourceCreations": 2,
+        "sourceObjectChanges": null,
+        "sourceFrameRegressions": null,
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 1197,
+          "median": 3.076200000003155,
+          "p95": 5.211320000000706,
+          "p99": 6.01880000000441,
+          "maximum": 18.539700000001176,
+          "minimum": 0.06009999999514548,
+          "mean": 3.276937844611606
+        },
+        "externalDeadlineMisses": 2,
+        "costScope": "Truncated 1196 successful blocks plus failing block exception capture; not a full-run throughput comparison",
+        "nearSilentWindows": null,
+        "sampledMaximumRssBytes": null
+      },
+      {
+        "id": "legacy-50-camera-source-01",
+        "completed": false,
+        "frames": 612352,
+        "error": "undeclared position discontinuity",
+        "failure": {
+          "producerFrame": 612352,
+          "renderAudioTimeSeconds": 12.757333333333333,
+          "message": "undeclared position discontinuity",
+          "listenerGeneration": 2,
+          "listenerStepModelUnitsPerSecond": 113.70349996490452,
+          "previousMode": "predicted",
+          "currentMode": "interpolated"
+        },
+        "modes": {
+          "missing": 6,
+          "warming": 2,
+          "predicted": 185,
+          "interpolated": 997,
+          "prediction-expired": 2,
+          "generation-gap": 4
+        },
+        "listenerForecastMs": {
+          "count": 185,
+          "median": 4.395099995930352,
+          "p95": 19.311359995930026,
+          "p99": 22.34284666259768,
+          "maximum": 40.31373332926336,
+          "minimum": 0.08853332926417323,
+          "mean": 5.9646127887236835
+        },
+        "sourceCreations": 2,
+        "sourceObjectChanges": null,
+        "sourceFrameRegressions": null,
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 1197,
+          "median": 3.3774000000048545,
+          "p95": 6.045700000000943,
+          "p99": 7.125688000004154,
+          "maximum": 17.352099999996426,
+          "minimum": 0.06139999999868451,
+          "mean": 3.5958624895572266
+        },
+        "externalDeadlineMisses": 2,
+        "costScope": "Truncated 1196 successful blocks plus failing block exception capture; not a full-run throughput comparison",
+        "nearSilentWindows": null,
+        "sampledMaximumRssBytes": null
+      },
+      {
+        "id": "arrived-50-camera-source-01",
+        "completed": true,
+        "frames": 1594368,
+        "error": null,
+        "failure": null,
+        "modes": {
+          "missing": 6,
+          "warming": 2,
+          "awaiting-observed-segment": 476,
+          "interpolated": 2566,
+          "generation-gap": 8,
+          "stale-wall-clock": 56
+        },
+        "listenerForecastMs": null,
+        "sourceCreations": 3,
+        "sourceObjectChanges": 2,
+        "sourceFrameRegressions": 0,
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 3114,
+          "median": 2.9905499999986205,
+          "p95": 5.179615000002377,
+          "p99": 6.2261799999991485,
+          "maximum": 22.163000000000466,
+          "minimum": 0.05909999999857973,
+          "mean": 3.0713964675657315
+        },
+        "externalDeadlineMisses": 3,
+        "costScope": "All 3114 offline blocks, metric collection/shared process included",
+        "nearSilentWindows": [
+          {
+            "startFrame": 0,
+            "frames": 5632,
+            "durationMs": 117.33333333333333
+          },
+          {
+            "startFrame": 602047,
+            "frames": 5185,
+            "durationMs": 108.02083333333333
+          },
+          {
+            "startFrame": 656831,
+            "frames": 5185,
+            "durationMs": 108.02083333333333
+          },
+          {
+            "startFrame": 1556927,
+            "frames": 37441,
+            "durationMs": 780.0208333333334
+          }
+        ],
+        "sampledMaximumRssBytes": 374374400
+      },
+      {
+        "id": "jitter-reviewed-75",
+        "completed": true,
+        "frames": 1594368,
+        "error": null,
+        "failure": null,
+        "modes": {
+          "missing": 7,
+          "warming": 3,
+          "interpolated": 2988,
+          "predicted": 37,
+          "generation-gap": 12,
+          "prediction-expired": 11,
+          "stale-wall-clock": 56
+        },
+        "listenerForecastMs": {
+          "count": 37,
+          "median": 4.744299991861212,
+          "p95": 47.33317999186184,
+          "p99": 48.99622532519501,
+          "maximum": 49.88793332519492,
+          "minimum": 0.19826665852917813,
+          "mean": 12.735652244113705
+        },
+        "sourceCreations": 1,
+        "sourceObjectChanges": 0,
+        "sourceFrameRegressions": 0,
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 3114,
+          "median": 2.872800000001007,
+          "p95": 5.04158500000085,
+          "p99": 5.877679000000353,
+          "maximum": 17.253599999996368,
+          "minimum": 0.09569999999803258,
+          "mean": 2.9995882787411627
+        },
+        "externalDeadlineMisses": 1,
+        "costScope": "All 3114 offline blocks, metric collection/shared process included",
+        "nearSilentWindows": [
+          {
+            "startFrame": 0,
+            "frames": 6144,
+            "durationMs": 128
+          },
+          {
+            "startFrame": 605489,
+            "frames": 2255,
+            "durationMs": 46.979166666666664
+          },
+          {
+            "startFrame": 660266,
+            "frames": 2262,
+            "durationMs": 47.125
+          },
+          {
+            "startFrame": 1560683,
+            "frames": 33685,
+            "durationMs": 701.7708333333334
+          }
+        ],
+        "sampledMaximumRssBytes": 354660352
+      },
+      {
+        "id": "jitter-arrived-50",
+        "completed": true,
+        "frames": 1594368,
+        "error": null,
+        "failure": null,
+        "modes": {
+          "missing": 7,
+          "warming": 1,
+          "awaiting-observed-segment": 870,
+          "interpolated": 2173,
+          "generation-gap": 7,
+          "stale-wall-clock": 56
+        },
+        "listenerForecastMs": null,
+        "sourceCreations": 3,
+        "sourceObjectChanges": 2,
+        "sourceFrameRegressions": 0,
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 3114,
+          "median": 2.9090500000020256,
+          "p95": 5.072845000000962,
+          "p99": 5.9021060000023855,
+          "maximum": 21.288899999999558,
+          "minimum": 0.05249999999796273,
+          "mean": 3.031763359023763
+        },
+        "externalDeadlineMisses": 3,
+        "costScope": "All 3114 offline blocks, metric collection/shared process included",
+        "nearSilentWindows": [
+          {
+            "startFrame": 0,
+            "frames": 5632,
+            "durationMs": 117.33333333333333
+          },
+          {
+            "startFrame": 128447,
+            "frames": 1089,
+            "durationMs": 22.6875
+          },
+          {
+            "startFrame": 602047,
+            "frames": 5185,
+            "durationMs": 108.02083333333333
+          },
+          {
+            "startFrame": 656831,
+            "frames": 5697,
+            "durationMs": 118.6875
+          },
+          {
+            "startFrame": 725439,
+            "frames": 1089,
+            "durationMs": 22.6875
+          },
+          {
+            "startFrame": 883647,
+            "frames": 1089,
+            "durationMs": 22.6875
+          },
+          {
+            "startFrame": 1556927,
+            "frames": 37441,
+            "durationMs": 780.0208333333334
+          }
+        ],
+        "sampledMaximumRssBytes": 380641280
+      },
+      {
+        "id": "missing-reviewed-75",
+        "completed": true,
+        "frames": 1594368,
+        "error": null,
+        "failure": null,
+        "modes": {
+          "missing": 6,
+          "warming": 4,
+          "interpolated": 2807,
+          "predicted": 215,
+          "prediction-expired": 14,
+          "generation-gap": 12,
+          "stale-wall-clock": 56
+        },
+        "listenerForecastMs": {
+          "count": 215,
+          "median": 21.241299995928387,
+          "p95": 41.685619995928896,
+          "p99": 49.11412199593058,
+          "maximum": 49.88793332926633,
+          "minimum": 0.17166666259749164,
+          "mean": 20.801731468798955
+        },
+        "sourceCreations": 4,
+        "sourceObjectChanges": 3,
+        "sourceFrameRegressions": 0,
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 3114,
+          "median": 2.828400000005786,
+          "p95": 4.914105000004201,
+          "p99": 5.819076999998213,
+          "maximum": 17.37070000001404,
+          "minimum": 0.045700000002398156,
+          "mean": 2.9574527938343067
+        },
+        "externalDeadlineMisses": 4,
+        "costScope": "All 3114 offline blocks, metric collection/shared process included",
+        "nearSilentWindows": [
+          {
+            "startFrame": 0,
+            "frames": 6144,
+            "durationMs": 128
+          },
+          {
+            "startFrame": 131808,
+            "frames": 1312,
+            "durationMs": 27.333333333333332
+          },
+          {
+            "startFrame": 605491,
+            "frames": 2253,
+            "durationMs": 46.9375
+          },
+          {
+            "startFrame": 660267,
+            "frames": 2261,
+            "durationMs": 47.104166666666664
+          },
+          {
+            "startFrame": 1167467,
+            "frames": 1430,
+            "durationMs": 29.791666666666668
+          },
+          {
+            "startFrame": 1412242,
+            "frames": 1393,
+            "durationMs": 29.020833333333332
+          },
+          {
+            "startFrame": 1560680,
+            "frames": 33688,
+            "durationMs": 701.8333333333334
+          }
+        ],
+        "sampledMaximumRssBytes": 356241408
+      },
+      {
+        "id": "missing-arrived-50",
+        "completed": true,
+        "frames": 1594368,
+        "error": null,
+        "failure": null,
+        "modes": {
+          "missing": 6,
+          "warming": 2,
+          "awaiting-observed-segment": 707,
+          "interpolated": 2335,
+          "generation-gap": 8,
+          "stale-wall-clock": 56
+        },
+        "listenerForecastMs": null,
+        "sourceCreations": 54,
+        "sourceObjectChanges": 53,
+        "sourceFrameRegressions": 0,
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 3114,
+          "median": 2.989950000002864,
+          "p95": 5.130734999995911,
+          "p99": 16.1516290000033,
+          "maximum": 22.251599999988684,
+          "minimum": 0.055699999997159466,
+          "mean": 3.235916570327673
+        },
+        "externalDeadlineMisses": 54,
+        "costScope": "All 3114 offline blocks, metric collection/shared process included",
+        "nearSilentWindows": [
+          {
+            "startFrame": 0,
+            "frames": 5632,
+            "durationMs": 117.33333333333333
+          },
+          {
+            "startFrame": 7615,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 37816,
+            "frames": 3656,
+            "durationMs": 76.16666666666667
+          },
+          {
+            "startFrame": 68031,
+            "frames": 4161,
+            "durationMs": 86.6875
+          },
+          {
+            "startFrame": 98239,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 128447,
+            "frames": 4673,
+            "durationMs": 97.35416666666667
+          },
+          {
+            "startFrame": 159679,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 190399,
+            "frames": 4161,
+            "durationMs": 86.6875
+          },
+          {
+            "startFrame": 221119,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 251839,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 282047,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 313279,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 343487,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 374718,
+            "frames": 3650,
+            "durationMs": 76.04166666666667
+          },
+          {
+            "startFrame": 404927,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 435647,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 465343,
+            "frames": 4161,
+            "durationMs": 86.6875
+          },
+          {
+            "startFrame": 496575,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 526783,
+            "frames": 4161,
+            "durationMs": 86.6875
+          },
+          {
+            "startFrame": 557503,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 587711,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 602047,
+            "frames": 5185,
+            "durationMs": 108.02083333333333
+          },
+          {
+            "startFrame": 617919,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 648639,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 656831,
+            "frames": 5185,
+            "durationMs": 108.02083333333333
+          },
+          {
+            "startFrame": 678335,
+            "frames": 3137,
+            "durationMs": 65.35416666666667
+          },
+          {
+            "startFrame": 708543,
+            "frames": 3137,
+            "durationMs": 65.35416666666667
+          },
+          {
+            "startFrame": 739775,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 771007,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 802239,
+            "frames": 3137,
+            "durationMs": 65.35416666666667
+          },
+          {
+            "startFrame": 832447,
+            "frames": 3137,
+            "durationMs": 65.35416666666667
+          },
+          {
+            "startFrame": 862143,
+            "frames": 3137,
+            "durationMs": 65.35416666666667
+          },
+          {
+            "startFrame": 892351,
+            "frames": 3137,
+            "durationMs": 65.35416666666667
+          },
+          {
+            "startFrame": 922559,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 952767,
+            "frames": 3137,
+            "durationMs": 65.35416666666667
+          },
+          {
+            "startFrame": 982975,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 1013695,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 1043391,
+            "frames": 3650,
+            "durationMs": 76.04166666666667
+          },
+          {
+            "startFrame": 1073087,
+            "frames": 4161,
+            "durationMs": 86.6875
+          },
+          {
+            "startFrame": 1103295,
+            "frames": 3650,
+            "durationMs": 76.04166666666667
+          },
+          {
+            "startFrame": 1134015,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 1164223,
+            "frames": 4674,
+            "durationMs": 97.375
+          },
+          {
+            "startFrame": 1195455,
+            "frames": 3650,
+            "durationMs": 76.04166666666667
+          },
+          {
+            "startFrame": 1225151,
+            "frames": 3651,
+            "durationMs": 76.0625
+          },
+          {
+            "startFrame": 1255871,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 1287615,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 1317311,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 1349055,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 1379263,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 1408959,
+            "frames": 4678,
+            "durationMs": 97.45833333333333
+          },
+          {
+            "startFrame": 1439679,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 1469887,
+            "frames": 3653,
+            "durationMs": 76.10416666666667
+          },
+          {
+            "startFrame": 1499583,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 1530303,
+            "frames": 3649,
+            "durationMs": 76.02083333333333
+          },
+          {
+            "startFrame": 1556927,
+            "frames": 37441,
+            "durationMs": 780.0208333333334
+          }
+        ],
+        "sampledMaximumRssBytes": 381960192
+      }
+    ]
+  },
+  "stationaryFixture": {
+    "rawReceiptSha256": "4e1819db8fa6e0b342f9c4553f3d21aababf11aaff3cd40494f6d63aee8b8a18",
+    "derivedControlTraceReceiptSha256": "b48dbc3a6124cc6b22cf24d83301a6d459fa59c37860ce33c480368b809494c8",
+    "closedTracePins": [
+      {
+        "file": ".local/latency-02/stationary-emission-03/steady20Hz-reviewed75.json",
+        "sha256": "729ab74730ad5dddbc6008f89e8d9ba5dd23c0144aab39c3a363c879f56daa44",
+        "controlApplications": 274
+      },
+      {
+        "file": ".local/latency-02/stationary-emission-03/steady20Hz-authored-stationary-emission-01.json",
+        "sha256": "270921d7ce2371f6429ebcd3be60db7670d900aab6fcab295b34c977c9729ab9",
+        "controlApplications": 274
+      },
+      {
+        "file": ".local/latency-02/stationary-emission-03/jitter0to15ms-reviewed75.json",
+        "sha256": "5192522eccd93ef54be11bc74d05fb7e3ee082d3d8789c36744ecdfcbfd209db",
+        "controlApplications": 274
+      },
+      {
+        "file": ".local/latency-02/stationary-emission-03/jitter0to15ms-authored-stationary-emission-01.json",
+        "sha256": "73b654ba5338f50dedecc14004af72d25b4299e54998afd08406d77e02e56de8",
+        "controlApplications": 274
+      },
+      {
+        "file": ".local/latency-02/stationary-emission-03/missingEvery11-reviewed75.json",
+        "sha256": "3723c24d720fa36db45a674607cfae7bcc156eb1a18dcc87ef5f3b22b50bb34f",
+        "controlApplications": 274
+      },
+      {
+        "file": ".local/latency-02/stationary-emission-03/missingEvery11-authored-stationary-emission-01.json",
+        "sha256": "11e2aa6140dfd473d5ac6c2b873955eee95f3d023a990b8fd3d0466fb1253ace",
+        "controlApplications": 274
+      }
+    ],
+    "originalPackageManifestSha256": "68217b8b15a24f1ad395a39ed3a29938ffd579e6e2fecf082bf8f1c2a1ea52cb",
+    "observations": "AUTHORED 20 Hz stationary poses and normalized operating steps, genuine private Bati PCM/profiles. Not native live operating acquisition or in-game response.",
+    "scope": "Authored observation to argument passed to source generation renderInto at PCM EMISSION; before source/grain response, TOF, ring/submission/output.",
+    "horizon": "Positive stationary geometry covers padded 3.008 s including the last 512-sample block.",
+    "rawFieldNameNote": "The raw poseBoundEmissionObservationAgeMs key denotes authored state/vehicle time in this fixture only; it is not a native getter timing bound.",
+    "runs": [
+      {
+        "schedule": "steady20Hz",
+        "policy": "reviewed75",
+        "frames": 144384,
+        "pcmSha256": "f7a7f6d84e0dcd191487ce030b1f19052b3baf62ad71422e87abbf68955f00fc",
+        "pcmBeforeFirstOperatingChangeSha256": "1fa0bd15182148e43de65bd78609c897b8139e94f086a40885ff165da213ba43",
+        "firstControlDepartureMs": {
+          "count": 7,
+          "median": 29.333333333333435,
+          "p95": 32.9333333333333,
+          "p99": 33.25333333333332,
+          "maximum": 33.33333333333333,
+          "minimum": 25.333333333333652
+        },
+        "firstExactNewControlValueMs": {
+          "count": 7,
+          "median": 81.33333333333348,
+          "p95": 84.93333333333324,
+          "p99": 85.25333333333326,
+          "maximum": 85.33333333333326,
+          "minimum": 75.99999999999996
+        },
+        "sourceControlApplications": [
+          {
+            "authoredObservationSequence": 10,
+            "authoredTimeSeconds": 0.5,
+            "delivered": true,
+            "firstExactControlFrame": 27648,
+            "observationToExactControlMs": 75.99999999999996
+          },
+          {
+            "authoredObservationSequence": 16,
+            "authoredTimeSeconds": 0.8,
+            "delivered": true,
+            "firstExactControlFrame": 42496,
+            "observationToExactControlMs": 85.33333333333326
+          },
+          {
+            "authoredObservationSequence": 22,
+            "authoredTimeSeconds": 1.1,
+            "delivered": true,
+            "firstExactControlFrame": 56832,
+            "observationToExactControlMs": 83.99999999999986
+          },
+          {
+            "authoredObservationSequence": 28,
+            "authoredTimeSeconds": 1.4,
+            "delivered": true,
+            "firstExactControlFrame": 71168,
+            "observationToExactControlMs": 82.66666666666667
+          },
+          {
+            "authoredObservationSequence": 34,
+            "authoredTimeSeconds": 1.7,
+            "delivered": true,
+            "firstExactControlFrame": 85504,
+            "observationToExactControlMs": 81.33333333333348
+          },
+          {
+            "authoredObservationSequence": 40,
+            "authoredTimeSeconds": 2,
+            "delivered": true,
+            "firstExactControlFrame": 99840,
+            "observationToExactControlMs": 80.00000000000007
+          },
+          {
+            "authoredObservationSequence": 46,
+            "authoredTimeSeconds": 2.3,
+            "delivered": true,
+            "firstExactControlFrame": 114176,
+            "observationToExactControlMs": 78.66666666666688
+          }
+        ],
+        "authoredStateObservationAgeAtEmissionMs": null,
+        "sourceObjects": 1,
+        "sourceIdentityStable": true,
+        "sourceFrameGaps": 0,
+        "pathDopplerRate": {
+          "count": 542,
+          "median": 1,
+          "p95": 1,
+          "p99": 1.0000000000000009,
+          "maximum": 1.0000000000000209,
+          "minimum": 0.9999999999999896
+        },
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 282,
+          "median": 2.541099999999915,
+          "p95": 5.391285000000003,
+          "p99": 7.202791000000053,
+          "maximum": 70.18359999999996,
+          "minimum": 0.15809999999999036
+        },
+        "externalDeadlineMisses": 1,
+        "memoryBeforeBytes": 171331584,
+        "sampledMaximumRssBytes": 187908096,
+        "memoryAfterBytes": 187998208
+      },
+      {
+        "schedule": "steady20Hz",
+        "policy": "authored-stationary-emission-01",
+        "frames": 144384,
+        "pcmSha256": "50ba1d137e7d19b6011210a64b9a1882e56f5bf0f6ae353b2d0b0bc65f5f0412",
+        "pcmBeforeFirstOperatingChangeSha256": "1fa0bd15182148e43de65bd78609c897b8139e94f086a40885ff165da213ba43",
+        "firstControlDepartureMs": {
+          "count": 7,
+          "median": 5.33333333333319,
+          "p95": 8.933333333333236,
+          "p99": 9.253333333333202,
+          "maximum": 9.333333333333194,
+          "minimum": 0
+        },
+        "firstExactNewControlValueMs": {
+          "count": 7,
+          "median": 5.33333333333319,
+          "p95": 8.933333333333236,
+          "p99": 9.253333333333202,
+          "maximum": 9.333333333333194,
+          "minimum": 0
+        },
+        "sourceControlApplications": [
+          {
+            "authoredObservationSequence": 10,
+            "authoredTimeSeconds": 0.5,
+            "delivered": true,
+            "firstExactControlFrame": 24064,
+            "observationToExactControlMs": 1.3333333333332975
+          },
+          {
+            "authoredObservationSequence": 16,
+            "authoredTimeSeconds": 0.8,
+            "delivered": true,
+            "firstExactControlFrame": 38400,
+            "observationToExactControlMs": 0
+          },
+          {
+            "authoredObservationSequence": 22,
+            "authoredTimeSeconds": 1.1,
+            "delivered": true,
+            "firstExactControlFrame": 53248,
+            "observationToExactControlMs": 9.333333333333194
+          },
+          {
+            "authoredObservationSequence": 28,
+            "authoredTimeSeconds": 1.4,
+            "delivered": true,
+            "firstExactControlFrame": 67584,
+            "observationToExactControlMs": 8.000000000000007
+          },
+          {
+            "authoredObservationSequence": 34,
+            "authoredTimeSeconds": 1.7,
+            "delivered": true,
+            "firstExactControlFrame": 81920,
+            "observationToExactControlMs": 6.666666666666821
+          },
+          {
+            "authoredObservationSequence": 40,
+            "authoredTimeSeconds": 2,
+            "delivered": true,
+            "firstExactControlFrame": 96256,
+            "observationToExactControlMs": 5.33333333333319
+          },
+          {
+            "authoredObservationSequence": 46,
+            "authoredTimeSeconds": 2.3,
+            "delivered": true,
+            "firstExactControlFrame": 110592,
+            "observationToExactControlMs": 4.0000000000000036
+          }
+        ],
+        "authoredStateObservationAgeAtEmissionMs": {
+          "count": 274,
+          "median": 25.00000000000013,
+          "p95": 47.333333333333265,
+          "p99": 49.33333333333326,
+          "maximum": 49.33333333333345,
+          "minimum": 0
+        },
+        "sourceObjects": 1,
+        "sourceIdentityStable": true,
+        "sourceFrameGaps": 0,
+        "pathDopplerRate": {
+          "count": 542,
+          "median": 1,
+          "p95": 1,
+          "p99": 1.0000000000000009,
+          "maximum": 1.0000000000000209,
+          "minimum": 0.9999999999999896
+        },
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 282,
+          "median": 3.1357499999999163,
+          "p95": 5.824615000000165,
+          "p99": 6.9354750000000145,
+          "maximum": 20.223600000000033,
+          "minimum": 0.1225000000001728
+        },
+        "externalDeadlineMisses": 1,
+        "memoryBeforeBytes": 188104704,
+        "sampledMaximumRssBytes": 201658368,
+        "memoryAfterBytes": 200241152
+      },
+      {
+        "schedule": "jitter0to15ms",
+        "policy": "reviewed75",
+        "frames": 144384,
+        "pcmSha256": "f7a7f6d84e0dcd191487ce030b1f19052b3baf62ad71422e87abbf68955f00fc",
+        "pcmBeforeFirstOperatingChangeSha256": "1fa0bd15182148e43de65bd78609c897b8139e94f086a40885ff165da213ba43",
+        "firstControlDepartureMs": {
+          "count": 7,
+          "median": 29.333333333333435,
+          "p95": 32.9333333333333,
+          "p99": 33.25333333333332,
+          "maximum": 33.33333333333333,
+          "minimum": 25.333333333333652
+        },
+        "firstExactNewControlValueMs": {
+          "count": 7,
+          "median": 81.33333333333348,
+          "p95": 84.93333333333324,
+          "p99": 85.25333333333326,
+          "maximum": 85.33333333333326,
+          "minimum": 75.99999999999996
+        },
+        "sourceControlApplications": [
+          {
+            "authoredObservationSequence": 10,
+            "authoredTimeSeconds": 0.5,
+            "delivered": true,
+            "firstExactControlFrame": 27648,
+            "observationToExactControlMs": 75.99999999999996
+          },
+          {
+            "authoredObservationSequence": 16,
+            "authoredTimeSeconds": 0.8,
+            "delivered": true,
+            "firstExactControlFrame": 42496,
+            "observationToExactControlMs": 85.33333333333326
+          },
+          {
+            "authoredObservationSequence": 22,
+            "authoredTimeSeconds": 1.1,
+            "delivered": true,
+            "firstExactControlFrame": 56832,
+            "observationToExactControlMs": 83.99999999999986
+          },
+          {
+            "authoredObservationSequence": 28,
+            "authoredTimeSeconds": 1.4,
+            "delivered": true,
+            "firstExactControlFrame": 71168,
+            "observationToExactControlMs": 82.66666666666667
+          },
+          {
+            "authoredObservationSequence": 34,
+            "authoredTimeSeconds": 1.7,
+            "delivered": true,
+            "firstExactControlFrame": 85504,
+            "observationToExactControlMs": 81.33333333333348
+          },
+          {
+            "authoredObservationSequence": 40,
+            "authoredTimeSeconds": 2,
+            "delivered": true,
+            "firstExactControlFrame": 99840,
+            "observationToExactControlMs": 80.00000000000007
+          },
+          {
+            "authoredObservationSequence": 46,
+            "authoredTimeSeconds": 2.3,
+            "delivered": true,
+            "firstExactControlFrame": 114176,
+            "observationToExactControlMs": 78.66666666666688
+          }
+        ],
+        "authoredStateObservationAgeAtEmissionMs": null,
+        "sourceObjects": 1,
+        "sourceIdentityStable": true,
+        "sourceFrameGaps": 0,
+        "pathDopplerRate": {
+          "count": 542,
+          "median": 1,
+          "p95": 1,
+          "p99": 1.0000000000000009,
+          "maximum": 1.0000000000000209,
+          "minimum": 0.9999999999999896
+        },
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 282,
+          "median": 3.0446999999999207,
+          "p95": 5.705525000000033,
+          "p99": 6.829571000000109,
+          "maximum": 16.17119999999977,
+          "minimum": 0.0498000000002321
+        },
+        "externalDeadlineMisses": 1,
+        "memoryBeforeBytes": 200257536,
+        "sampledMaximumRssBytes": 214110208,
+        "memoryAfterBytes": 214265856
+      },
+      {
+        "schedule": "jitter0to15ms",
+        "policy": "authored-stationary-emission-01",
+        "frames": 144384,
+        "pcmSha256": "c471b94910fd6c02d8c167164a9120801120b4087d22c08705b6683e7fb86272",
+        "pcmBeforeFirstOperatingChangeSha256": "1fa0bd15182148e43de65bd78609c897b8139e94f086a40885ff165da213ba43",
+        "firstControlDepartureMs": {
+          "count": 7,
+          "median": 12.00000000000001,
+          "p95": 19.20000000000004,
+          "p99": 19.84000000000002,
+          "maximum": 20.000000000000018,
+          "minimum": 0
+        },
+        "firstExactNewControlValueMs": {
+          "count": 7,
+          "median": 12.00000000000001,
+          "p95": 19.20000000000004,
+          "p99": 19.84000000000002,
+          "maximum": 20.000000000000018,
+          "minimum": 0
+        },
+        "sourceControlApplications": [
+          {
+            "authoredObservationSequence": 10,
+            "authoredTimeSeconds": 0.5,
+            "delivered": true,
+            "firstExactControlFrame": 24576,
+            "observationToExactControlMs": 12.00000000000001
+          },
+          {
+            "authoredObservationSequence": 16,
+            "authoredTimeSeconds": 0.8,
+            "delivered": true,
+            "firstExactControlFrame": 38400,
+            "observationToExactControlMs": 0
+          },
+          {
+            "authoredObservationSequence": 22,
+            "authoredTimeSeconds": 1.1,
+            "delivered": true,
+            "firstExactControlFrame": 53760,
+            "observationToExactControlMs": 20.000000000000018
+          },
+          {
+            "authoredObservationSequence": 28,
+            "authoredTimeSeconds": 1.4,
+            "delivered": true,
+            "firstExactControlFrame": 67584,
+            "observationToExactControlMs": 8.000000000000007
+          },
+          {
+            "authoredObservationSequence": 34,
+            "authoredTimeSeconds": 1.7,
+            "delivered": true,
+            "firstExactControlFrame": 82432,
+            "observationToExactControlMs": 17.33333333333342
+          },
+          {
+            "authoredObservationSequence": 40,
+            "authoredTimeSeconds": 2,
+            "delivered": true,
+            "firstExactControlFrame": 96768,
+            "observationToExactControlMs": 16.000000000000014
+          },
+          {
+            "authoredObservationSequence": 46,
+            "authoredTimeSeconds": 2.3,
+            "delivered": true,
+            "firstExactControlFrame": 110592,
+            "observationToExactControlMs": 4.0000000000000036
+          }
+        ],
+        "authoredStateObservationAgeAtEmissionMs": {
+          "count": 274,
+          "median": 31.66666666666662,
+          "p95": 56.66666666666664,
+          "p99": 59.333333333333236,
+          "maximum": 59.33333333333346,
+          "minimum": 0
+        },
+        "sourceObjects": 1,
+        "sourceIdentityStable": true,
+        "sourceFrameGaps": 0,
+        "pathDopplerRate": {
+          "count": 542,
+          "median": 1,
+          "p95": 1,
+          "p99": 1.0000000000000009,
+          "maximum": 1.0000000000000209,
+          "minimum": 0.9999999999999896
+        },
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 282,
+          "median": 2.9822999999998956,
+          "p95": 5.81555499999972,
+          "p99": 6.484882000000155,
+          "maximum": 15.731000000000222,
+          "minimum": 0.0510999999996784
+        },
+        "externalDeadlineMisses": 1,
+        "memoryBeforeBytes": 214265856,
+        "sampledMaximumRssBytes": 229519360,
+        "memoryAfterBytes": 229629952
+      },
+      {
+        "schedule": "missingEvery11",
+        "policy": "reviewed75",
+        "frames": 144384,
+        "pcmSha256": "91bb7811525d1210e10c67d560ece96c2d14c2798532e25d92ff4bf3e020cf98",
+        "pcmBeforeFirstOperatingChangeSha256": "1fa0bd15182148e43de65bd78609c897b8139e94f086a40885ff165da213ba43",
+        "firstControlDepartureMs": {
+          "count": 6,
+          "median": 28.000000000000135,
+          "p95": 32.99999999999998,
+          "p99": 33.26666666666666,
+          "maximum": 33.33333333333333,
+          "minimum": 6.666666666666821
+        },
+        "firstExactNewControlValueMs": {
+          "count": 6,
+          "median": 80.66666666666677,
+          "p95": 84.66666666666661,
+          "p99": 85.19999999999993,
+          "maximum": 85.33333333333326,
+          "minimum": 75.99999999999996
+        },
+        "sourceControlApplications": [
+          {
+            "authoredObservationSequence": 10,
+            "authoredTimeSeconds": 0.5,
+            "delivered": true,
+            "firstExactControlFrame": 27648,
+            "observationToExactControlMs": 75.99999999999996
+          },
+          {
+            "authoredObservationSequence": 16,
+            "authoredTimeSeconds": 0.8,
+            "delivered": true,
+            "firstExactControlFrame": 42496,
+            "observationToExactControlMs": 85.33333333333326
+          },
+          {
+            "authoredObservationSequence": 22,
+            "authoredTimeSeconds": 1.1,
+            "delivered": false,
+            "firstExactControlFrame": 58880,
+            "observationToExactControlMs": 126.66666666666649
+          },
+          {
+            "authoredObservationSequence": 28,
+            "authoredTimeSeconds": 1.4,
+            "delivered": true,
+            "firstExactControlFrame": 71168,
+            "observationToExactControlMs": 82.66666666666667
+          },
+          {
+            "authoredObservationSequence": 34,
+            "authoredTimeSeconds": 1.7,
+            "delivered": true,
+            "firstExactControlFrame": 85504,
+            "observationToExactControlMs": 81.33333333333348
+          },
+          {
+            "authoredObservationSequence": 40,
+            "authoredTimeSeconds": 2,
+            "delivered": true,
+            "firstExactControlFrame": 99840,
+            "observationToExactControlMs": 80.00000000000007
+          },
+          {
+            "authoredObservationSequence": 46,
+            "authoredTimeSeconds": 2.3,
+            "delivered": true,
+            "firstExactControlFrame": 114176,
+            "observationToExactControlMs": 78.66666666666688
+          }
+        ],
+        "authoredStateObservationAgeAtEmissionMs": null,
+        "sourceObjects": 1,
+        "sourceIdentityStable": true,
+        "sourceFrameGaps": 0,
+        "pathDopplerRate": {
+          "count": 542,
+          "median": 1,
+          "p95": 1,
+          "p99": 1.0000000000000009,
+          "maximum": 1.0000000000000209,
+          "minimum": 0.9999999999999896
+        },
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 282,
+          "median": 3.387750000000324,
+          "p95": 6.178564999999708,
+          "p99": 7.413813000000072,
+          "maximum": 15.802999999999884,
+          "minimum": 0.047599999999874854
+        },
+        "externalDeadlineMisses": 1,
+        "memoryBeforeBytes": 229629952,
+        "sampledMaximumRssBytes": 242626560,
+        "memoryAfterBytes": 242724864
+      },
+      {
+        "schedule": "missingEvery11",
+        "policy": "authored-stationary-emission-01",
+        "frames": 144384,
+        "pcmSha256": "5a3c6abf75b34c903f730c1344e34c301424c20bf118e33abdfc6852b13cf165",
+        "pcmBeforeFirstOperatingChangeSha256": "1fa0bd15182148e43de65bd78609c897b8139e94f086a40885ff165da213ba43",
+        "firstControlDepartureMs": {
+          "count": 6,
+          "median": 4.666666666666597,
+          "p95": 7.6666666666667105,
+          "p99": 7.933333333333348,
+          "maximum": 8.000000000000007,
+          "minimum": 0
+        },
+        "firstExactNewControlValueMs": {
+          "count": 6,
+          "median": 4.666666666666597,
+          "p95": 7.6666666666667105,
+          "p99": 7.933333333333348,
+          "maximum": 8.000000000000007,
+          "minimum": 0
+        },
+        "sourceControlApplications": [
+          {
+            "authoredObservationSequence": 10,
+            "authoredTimeSeconds": 0.5,
+            "delivered": true,
+            "firstExactControlFrame": 24064,
+            "observationToExactControlMs": 1.3333333333332975
+          },
+          {
+            "authoredObservationSequence": 16,
+            "authoredTimeSeconds": 0.8,
+            "delivered": true,
+            "firstExactControlFrame": 38400,
+            "observationToExactControlMs": 0
+          },
+          {
+            "authoredObservationSequence": 22,
+            "authoredTimeSeconds": 1.1,
+            "delivered": false,
+            "firstExactControlFrame": 55296,
+            "observationToExactControlMs": 51.99999999999982
+          },
+          {
+            "authoredObservationSequence": 28,
+            "authoredTimeSeconds": 1.4,
+            "delivered": true,
+            "firstExactControlFrame": 67584,
+            "observationToExactControlMs": 8.000000000000007
+          },
+          {
+            "authoredObservationSequence": 34,
+            "authoredTimeSeconds": 1.7,
+            "delivered": true,
+            "firstExactControlFrame": 81920,
+            "observationToExactControlMs": 6.666666666666821
+          },
+          {
+            "authoredObservationSequence": 40,
+            "authoredTimeSeconds": 2,
+            "delivered": true,
+            "firstExactControlFrame": 96256,
+            "observationToExactControlMs": 5.33333333333319
+          },
+          {
+            "authoredObservationSequence": 46,
+            "authoredTimeSeconds": 2.3,
+            "delivered": true,
+            "firstExactControlFrame": 110592,
+            "observationToExactControlMs": 4.0000000000000036
+          }
+        ],
+        "authoredStateObservationAgeAtEmissionMs": {
+          "count": 274,
+          "median": 27.333333333333265,
+          "p95": 69.1333333333333,
+          "p99": 92.23333333333318,
+          "maximum": 97.33333333333339,
+          "minimum": 0
+        },
+        "sourceObjects": 1,
+        "sourceIdentityStable": true,
+        "sourceFrameGaps": 0,
+        "pathDopplerRate": {
+          "count": 542,
+          "median": 1,
+          "p95": 1,
+          "p99": 1.0000000000000009,
+          "maximum": 1.0000000000000209,
+          "minimum": 0.9999999999999896
+        },
+        "historyFaults": {
+          "beforeStart": 0,
+          "future": 0,
+          "frameTag": 0,
+          "generationTag": 0,
+          "zeroWeightUnavailable": 0,
+          "affectedFrames": 0,
+          "firstFrame": -1,
+          "lastFrame": -1
+        },
+        "rendererMissingHistory": 0,
+        "limiting": 0,
+        "externalRenderMs": {
+          "count": 282,
+          "median": 3.4079999999999018,
+          "p95": 6.654595000000153,
+          "p99": 8.254314000000358,
+          "maximum": 16.510400000000118,
+          "minimum": 0.10190000000056898
+        },
+        "externalDeadlineMisses": 1,
+        "memoryBeforeBytes": 242724864,
+        "sampledMaximumRssBytes": 255598592,
+        "memoryAfterBytes": 255684608
+      }
+    ]
+  },
+  "tests": {
+    "focusedNewTests": 9,
+    "newTestsPassed": true,
+    "testModule": "tests/Test-Latency02Continuous.mjs"
+  },
+  "limits": [
+    "Arrived50 avoids the mathematical snap but increases geometry gaps/source recreations; it is not an audible improvement or lower-latency production recommendation.",
+    "Current emission operating updates are qualified only by authored stationary-world truth. Live or moving trajectories require new geometry/time evidence; merely q <= T is insufficient.",
+    "First departure and first exact value are distinct metrics because reviewed 75 ms interpolates operating state. Exact 81 to 5 ms does not mean 76 ms audible latency was removed.",
+    "Original 40 ms position/weight smoothing, 25 ms envelope, 10 ms grain response and all source calibration are unchanged.",
+    "State time is authored at vehicle ticks here. A native getter interval is independent/unavailable; pose proximity does not establish ordering or live acquisition causality.",
+    "Original native 146/204 ms software endpoint ages already include 62.695 ms ring mean. Do not add those results to these control-generation metrics or infer speaker latency.",
+    "Costs/RSS are offline shared-process measurements with metric storage/previous runs; not sink deadlines, peak allocations or heavy-contention safety.",
+    "No new live deployment, native suppression, endpoint query, recording or approval is implied."
+  ],
+  "sourcePins": [
+    {
+      "file": "src/acoustics/vehicle/gameplay.mjs",
+      "sha256": "0a510bde9610e63c4f21b61e07b2cda8458da3d9ff20273959834dbad1a638a6"
+    },
+    {
+      "file": "src/acoustics/vehicle/stationary-emission.mjs",
+      "sha256": "73ae1088fee751476e39c8e840785362d23532263931f8887484d45abfefeb5e"
+    },
+    {
+      "file": "src/acoustics/streaming/listener-playout.mjs",
+      "sha256": "c7c68c2e93beb40dc2cb46e8beef369fcced8f08cfc629b31e70c73de8a65dfa"
+    },
+    {
+      "file": "src/acoustics/vehicle/stock-source.mjs",
+      "sha256": "78d29a58e5ffb898a11e0397417fde721477a418fccfb97cb8a18b5bfa3a575a"
+    },
+    {
+      "file": "src/acoustics/vehicle/stock-grain.mjs",
+      "sha256": "b231876fdc0e5a828009cab1956be602f71ec3d656a7ec72c416e25c9fa39545"
+    },
+    {
+      "file": "src/acoustics/streaming/causal.mjs",
+      "sha256": "d01fcd54dba17faa1048f52b99e8c9eefed1c5f31535ccaa6deadef4a8003105"
+    },
+    {
+      "file": "tools/Measure-Latency02Stationary.mjs",
+      "sha256": "ff162180d9a055d9b51da41d17d5734337bc84d76e629fcc06fe9b056f76017b"
+    }
+  ],
+  "historicalMetadataErrata": [
+    {
+      "receiptSha256": "b1e5cb24600244549ae7c37072ce19670a1526446ddef0961301df80e2ca983d",
+      "correction": "Native getter ordering is not generally established by a vehicle pose tick; only authored state time is qualified. Raw bytes preserved."
+    },
+    {
+      "receiptSha256": "5d2d334f0edd577082e60c95d05ea57d78299f27d7237520a33e4cd51f8abe80",
+      "correction": "Same authored-only timing correction; raw bytes preserved."
+    }
+  ]
+}

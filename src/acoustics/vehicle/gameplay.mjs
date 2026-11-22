@@ -7,6 +7,7 @@ import {AcousticQualityController} from '../streaming/acoustic-quality.mjs';
 import {inBox} from '../research/local-geometry.mjs';
 import {resolveLatencyProfile} from './latency-profile.mjs';
 import {isQualifiedStaticScene,staticSceneMetadata} from '../world/scene.mjs';
+import {StationaryEmissionController} from './stationary-emission.mjs';
 const FS=48000,BLOCK=512,MAX=2,unit=v=>{const n=Math.hypot(...v);if(n<1e-8)throw Error('orientation discontinuity');return v.map(x=>x/n);};
 const mix=(a,b,u)=>a.map((x,i)=>x+(b[i]-x)*u),distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
 const pcmCounters=()=>({nonzeroBlocks:0,peak:0,sumSquares:0});
@@ -16,13 +17,18 @@ function observePcmBlock(left,counters,right=null){let peak=0,energy=0;
  if(peak>0)counters.nonzeroBlocks++;counters.peak=Math.max(counters.peak,peak);counters.sumSquares+=energy;
 }
 export class StockGameplay {
- constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline'}){
+ constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null}){
   if(!['baseline','camera-source-01'].includes(continuityPolicy))throw Error('Explicit vehicle continuity policy required');
+  if(!['baseline','arrived-segments-50'].includes(continuousTimingPolicy))throw Error('Explicit continuous timing policy required');
+  if(continuousTimingPolicy==='arrived-segments-50'&&continuityPolicy!=='camera-source-01')throw Error('Arrived-segment research requires independent camera/source continuity');
   this.continuityPolicy=continuityPolicy;this.latencyProfile=resolveLatencyProfile(latencyProfile);this.controlDelayMs=this.latencyProfile.controlDelayMs;
+  this.continuousTimingPolicy=continuousTimingPolicy;if(continuousTimingPolicy==='arrived-segments-50')this.controlDelayMs=50;
+  if(!['baseline','authored-stationary-emission-01'].includes(operatingStatePolicy)||operatingStatePolicy==='baseline'&&stationaryEmissionContract!==null)throw Error('Explicit authored stationary emission policy required');
+  this.operatingEmission=operatingStatePolicy==='baseline'?null:new StationaryEmissionController(stationaryEmissionContract);
   this.registry=registry;this.profiles=profiles;this.now=now;this.session=session;this.settings={quality:'auto',acceleration:'auto',enabled:true,volume:1,reflections:true,mode:'experimental-additive'};
   // Fixed common observation clock: camera-stationary calibration cannot
   // relabel time while an independently moving vehicle is producing Doppler.
-  this.playout=new ListenerPlayout({anchoredClock:true,delayMs:this.controlDelayMs,preserveGenerationHistory:continuityPolicy==='camera-source-01'});this.snapshots=[];this.sample=null;this.quality=new AcousticQualityController({now});
+  this.playout=new ListenerPlayout({anchoredClock:true,delayMs:this.controlDelayMs,preserveGenerationHistory:continuityPolicy==='camera-source-01',recoveryPolicy:continuousTimingPolicy==='arrived-segments-50'?'arrived-segments-01':'baseline'});this.snapshots=[];this.sample=null;this.quality=new AcousticQualityController({now});
   this.slots=Array.from({length:MAX},(_,i)=>({index:i,identity:null,generation:1,source:null,vehicle:null,score:0}));
   this.ids=this.slots.flatMap(s=>['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`));
   this.direct=conditionalStockScene(this.ids,session,vehicleDistanceSceneOptions('authored-detail-loss-v1'));
@@ -48,6 +54,7 @@ export class StockGameplay {
     if(!Number.isSafeInteger(v.observationTicks)||Math.abs(v.observationTicks-state.observationTicks)/state.clockFrequency>.05)throw Error('source observation clock');
     if(Math.hypot(...v.velocity)>100||Math.abs(Math.hypot(...v.forward)-1)>1e-4||Math.abs(Math.hypot(...v.up)-1)>1e-4||Math.abs(v.forward.reduce((n,x,i)=>n+x*v.up[i],0))>1e-4)throw Error('vehicle orientation/speed');
    }
+   this.operatingEmission?.observe(frame);
    const previous=this.playout.lastState;
    this.playout.add({type:'listener',state,receiptAgeMs:ageMs},this.pipeline.renderer.frame/FS,this.now());this.playout.delayTarget=this.controlDelayMs/1000;
    const time=this.playout.records.at(-1).time;
@@ -130,8 +137,10 @@ export class StockGameplay {
   if(this.pipeline.simulation.scene!==this.direct&&this.now()>=this.sceneExpiry){this.pipeline.replaceScene(this.direct);this.staticSceneBinding=null;this.stats.geometryFallbacks++;}
   const listener=this.sample.state??{position:[0,0,0],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],valid:false,generation:this.lastGeneration||1};
   const independentSource=this.continuityPolicy==='camera-source-01'&&!['missing','stale-wall-clock','clock-invalid','invalid-or-paused','invalid-interval','observation-gap'].includes(this.sample.mode);
-  const offered=this.sample.state||independentSource?this.vehiclesAt(this.sample.targetTime):[];
-  const eligible=[];for(const v of offered){const resolved=this.registry.resolve(v.model,v.context);if(resolved.status!=='available'){this.stats.unsupported++;continue;}
+  let offered=this.sample.state||independentSource?this.vehiclesAt(this.sample.targetTime):[];
+  const emissionOperating=this.operatingEmission?.select(this.snapshots,this.pipeline.renderer.frame,this.now());
+  if(this.operatingEmission)offered=emissionOperating&&(this.sample.state||independentSource)?[emissionOperating.vehicle]:[];
+  const eligible=[];for(const spatialVehicle of offered){if(this.operatingEmission&&!emissionOperating)continue;const v=this.operatingEmission?{...spatialVehicle,operatingPoint:emissionOperating.operatingPoint,running:emissionOperating.running,lift:emissionOperating.lift}:spatialVehicle;const resolved=this.registry.resolve(v.model,v.context);if(resolved.status!=='available'){this.stats.unsupported++;continue;}
    const prior=this.slots.find(s=>s.identity===`${v.id}:${v.generation}:${v.model}:${v.context}`);
    // Do not create a new source without a qualified listener. A still-valid
    // existing source can advance its dry/grain history through a listener-only
@@ -179,7 +188,7 @@ export class StockGameplay {
   if(this.captureTiming){const selectedIds=new Set(selected.map(s=>s.v.id));this.lastTiming={producerFrameStart:Math.round(time*FS),frames:BLOCK,
    nodeClockDomain:'node-performance-ms',nodeFrequency:1000,renderStartedNodeMs:start,renderCompletedNodeMs:this.now(),processingMs:elapsed,
    sourceTargetTimeSeconds:this.sample.targetTime??null,latestAcceptedSequence:this.lastFrame,controlDelayMs:this.controlDelayMs,
-   sourceBrackets:this.latencyBrackets.filter(s=>selectedIds.has(s.id)).slice(0,MAX)};}
+   sourceBrackets:this.latencyBrackets.filter(s=>selectedIds.has(s.id)).slice(0,MAX),...(this.operatingEmission?{emissionOperatingState:this.operatingEmission.selected,sourceBracketsScope:'Spatial query history; current emission geometry separately qualified by authored stationary world contract'}:{})};}
   return [this.left,this.right];
  }
  diagnostics(){return {...this.stats,active:this.slots.filter(s=>s.identity).length,activeLimit:this.activeLimit,mode:this.settings.mode,nativeReplacement:false,
@@ -190,7 +199,7 @@ export class StockGameplay {
    sourceStates:this.slots.filter(s=>s.source).map(s=>({bank:s.source.vehicle.model,context:s.source.npc?'npc':'player',running:s.vehicle?.running??false,
     operatingPoint:s.vehicle?.operatingPoint??null,sourceFrame:s.source.frame,dryPeak:s.source.stats.peak,
     listenerDistance:this.sample?.state&&s.vehicle?distance(s.vehicle.position,this.sample.state.position):null})),
-   geometry:this.pipeline.simulation.scene===this.direct?'conditional-direct-unobserved-space-assumed-clear':this.staticSceneBinding?'qualified-static-authored-fixture':'qualified-observed-partial',controlDelayMs:this.controlDelayMs,latencyProfile:this.latencyProfile.id,continuityPolicy:this.continuityPolicy,sourceHistoryLimitSeconds:2.5,propagationLimitSeconds:2,
+   geometry:this.pipeline.simulation.scene===this.direct?'conditional-direct-unobserved-space-assumed-clear':this.staticSceneBinding?'qualified-static-authored-fixture':'qualified-observed-partial',controlDelayMs:this.controlDelayMs,latencyProfile:this.latencyProfile.id,continuityPolicy:this.continuityPolicy,...(this.continuousTimingPolicy==='baseline'?{}:{continuousTimingPolicy:this.continuousTimingPolicy}),...(this.operatingEmission?{operatingEmission:this.operatingEmission.diagnostics()}:{}),sourceHistoryLimitSeconds:2.5,propagationLimitSeconds:2,
    quality:this.quality.diagnostics(),pipeline:this.pipeline.diagnostics(),playout:this.playout.stats,memory:process.memoryUsage()};}
  close(){this.pipeline.close();}
 }

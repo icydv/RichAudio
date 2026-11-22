@@ -1,0 +1,892 @@
+{
+  "schema": 1,
+  "kind": "latency-02-sanitized-device-free-measurements",
+  "runtimeSourceCommit": "84af203",
+  "scope": "Original fixed-pose synthetic event kernels, existing ring, unscaled privately retained continuous Bati PCM; fake endpoint only. Separate actual Node/Bati source-chain regression below.",
+  "wasapiSubmissionMeasured": false,
+  "physicalSpeakerLatencyMeasured": false,
+  "nativeEventAcquired": false,
+  "productionEventPathEnabled": false,
+  "transient": {
+    "node": {
+      "version": "v24.19.0",
+      "sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"
+    },
+    "continuousFrames": 1594176,
+    "preparedPayloadSha256": "2b12e5858098e8a42517402e916b973643094e8f3069285702452923e012228b",
+    "results": [
+      {
+        "name": "nominal-automatic-fire-and-impacts",
+        "basis": "deterministic authored clock and fake22ms endpoint padding",
+        "clockFrequency": 10000000,
+        "observationToFakeSubmissionMs": {
+          "count": 152,
+          "mean": 4.896757236842105,
+          "median": 4.9001,
+          "p95": 9.3,
+          "p99": 9.6001,
+          "maximum": 9.8001,
+          "minimum": 0
+        },
+        "observationToIngressMs": {
+          "count": 152,
+          "mean": 4.896757236842105,
+          "median": 4.9001,
+          "p95": 9.3,
+          "p99": 9.6001,
+          "maximum": 9.8001,
+          "minimum": 0
+        },
+        "additionalSoftwareOnsetLatenessMs": {
+          "count": 152,
+          "mean": 8.037828947368425,
+          "median": 7.875,
+          "p95": 14.479166666666666,
+          "p99": 17.875,
+          "maximum": 18.083333333333332,
+          "minimum": 2
+        },
+        "physicalPlusSoftwareOnsetMs": {
+          "count": 152,
+          "mean": 16.888432017543863,
+          "median": 16.895833333333332,
+          "p95": 21.291666666666668,
+          "p99": 21.583333333333332,
+          "maximum": 21.791666666666668,
+          "minimum": 12
+        },
+        "callbackWorkMs": {
+          "count": 501,
+          "mean": 0.01803233532934134,
+          "median": 0.0123,
+          "p95": 0.0136,
+          "p99": 0.0171,
+          "maximum": 2.6782,
+          "minimum": 0.0063
+        },
+        "callbackDeadlineBudgetMs": 10,
+        "callbackDeadlineMisses": 0,
+        "sent": 152,
+        "submitted": 152,
+        "neverSubmitted": 0,
+        "negativeTerminal": 0,
+        "postSubmissionRetirements": 0,
+        "pending": 0,
+        "callbacks": 501,
+        "deviceStarvationFrames": 0,
+        "continuousUnderflowFrames": 0,
+        "Accepted": 152,
+        "Rejected": 0,
+        "QueueFull": 0,
+        "VoiceCapacityRejected": 0,
+        "Expired": 0,
+        "EvictedLowPriority": 0,
+        "PeakActive": 7,
+        "MaximumMixedPeak": 0.04414740577340126,
+        "CallbackFaults": 0,
+        "MaximumCallbackWork": 3360,
+        "CallbackIterations": 1180654,
+        "managedBytes": 28869688,
+        "allocatedBytesDuringCallbackMeasurement": 0,
+        "extra": {
+          "jitterMilliseconds": 0,
+          "ingressDelayMilliseconds": 0,
+          "flood": false,
+          "producerStall": false,
+          "deviceStall": false,
+          "queueMinimumFrames": 3616
+        }
+      },
+      {
+        "name": "callback-jitter4ms",
+        "basis": "deterministic authored clock and fake22ms endpoint padding",
+        "clockFrequency": 10000000,
+        "observationToFakeSubmissionMs": {
+          "count": 152,
+          "mean": 5.234442763157894,
+          "median": 5.1,
+          "p95": 9.8333,
+          "p99": 9.9666,
+          "maximum": 9.9666,
+          "minimum": 0.1334
+        },
+        "observationToIngressMs": {
+          "count": 152,
+          "mean": 5.234442763157894,
+          "median": 5.1,
+          "p95": 9.8333,
+          "p99": 9.9666,
+          "maximum": 9.9666,
+          "minimum": 0.1334
+        },
+        "additionalSoftwareOnsetLatenessMs": {
+          "count": 152,
+          "mean": 8.046600877192986,
+          "median": 7.6875,
+          "p95": 14.479166666666666,
+          "p99": 18,
+          "maximum": 18.083333333333332,
+          "minimum": 1.5
+        },
+        "physicalPlusSoftwareOnsetMs": {
+          "count": 152,
+          "mean": 16.89720394736841,
+          "median": 17.416666666666668,
+          "p95": 21.166666666666668,
+          "p99": 21.291666666666668,
+          "maximum": 21.291666666666668,
+          "minimum": 11.458333333333334
+        },
+        "callbackWorkMs": {
+          "count": 501,
+          "mean": 0.011382435129740501,
+          "median": 0.0125,
+          "p95": 0.0144,
+          "p99": 0.0154,
+          "maximum": 0.0187,
+          "minimum": 0.0038
+        },
+        "callbackDeadlineBudgetMs": 10,
+        "callbackDeadlineMisses": 0,
+        "sent": 152,
+        "submitted": 152,
+        "neverSubmitted": 0,
+        "negativeTerminal": 0,
+        "postSubmissionRetirements": 0,
+        "pending": 0,
+        "callbacks": 501,
+        "deviceStarvationFrames": 0,
+        "continuousUnderflowFrames": 0,
+        "Accepted": 152,
+        "Rejected": 0,
+        "QueueFull": 0,
+        "VoiceCapacityRejected": 0,
+        "Expired": 0,
+        "EvictedLowPriority": 0,
+        "PeakActive": 7,
+        "MaximumMixedPeak": 0.04414740577340126,
+        "CallbackFaults": 0,
+        "MaximumCallbackWork": 3584,
+        "CallbackIterations": 1180654,
+        "managedBytes": 31388488,
+        "allocatedBytesDuringCallbackMeasurement": 0,
+        "extra": {
+          "jitterMilliseconds": 4,
+          "ingressDelayMilliseconds": 0,
+          "flood": false,
+          "producerStall": false,
+          "deviceStall": false,
+          "queueMinimumFrames": 3616
+        }
+      },
+      {
+        "name": "ingress-contention18ms",
+        "basis": "deterministic authored clock and fake22ms endpoint padding",
+        "clockFrequency": 10000000,
+        "observationToFakeSubmissionMs": {
+          "count": 152,
+          "mean": 22.905501315789465,
+          "median": 22.8666,
+          "p95": 27.7,
+          "p99": 28.6334,
+          "maximum": 28.6334,
+          "minimum": 18.0001
+        },
+        "observationToIngressMs": {
+          "count": 152,
+          "mean": 22.905501315789465,
+          "median": 22.8666,
+          "p95": 27.7,
+          "p99": 28.6334,
+          "maximum": 28.6334,
+          "minimum": 18.0001
+        },
+        "additionalSoftwareOnsetLatenessMs": {
+          "count": 152,
+          "mean": 25.8404605263158,
+          "median": 25.5,
+          "p95": 32.375,
+          "p99": 34.666666666666664,
+          "maximum": 37.041666666666664,
+          "minimum": 19.333333333333332
+        },
+        "physicalPlusSoftwareOnsetMs": {
+          "count": 152,
+          "mean": 34.6910635964912,
+          "median": 35.1875,
+          "p95": 39.020833333333336,
+          "p99": 39.958333333333336,
+          "maximum": 39.958333333333336,
+          "minimum": 29.333333333333332
+        },
+        "callbackWorkMs": {
+          "count": 501,
+          "mean": 0.01137245508982035,
+          "median": 0.0125,
+          "p95": 0.0143,
+          "p99": 0.015,
+          "maximum": 0.018,
+          "minimum": 0.0039
+        },
+        "callbackDeadlineBudgetMs": 10,
+        "callbackDeadlineMisses": 0,
+        "sent": 152,
+        "submitted": 152,
+        "neverSubmitted": 0,
+        "negativeTerminal": 0,
+        "postSubmissionRetirements": 0,
+        "pending": 0,
+        "callbacks": 501,
+        "deviceStarvationFrames": 0,
+        "continuousUnderflowFrames": 0,
+        "Accepted": 152,
+        "Rejected": 0,
+        "QueueFull": 0,
+        "VoiceCapacityRejected": 0,
+        "Expired": 0,
+        "EvictedLowPriority": 0,
+        "PeakActive": 7,
+        "MaximumMixedPeak": 0.04414740577340126,
+        "CallbackFaults": 0,
+        "MaximumCallbackWork": 3584,
+        "CallbackIterations": 1180654,
+        "managedBytes": 28924344,
+        "allocatedBytesDuringCallbackMeasurement": 0,
+        "extra": {
+          "jitterMilliseconds": 4,
+          "ingressDelayMilliseconds": 18,
+          "flood": false,
+          "producerStall": false,
+          "deviceStall": false,
+          "queueMinimumFrames": 3616
+        }
+      },
+      {
+        "name": "normal-priority-impact-flood",
+        "basis": "deterministic authored clock and fake22ms endpoint padding",
+        "clockFrequency": 10000000,
+        "observationToFakeSubmissionMs": {
+          "count": 860,
+          "mean": 4.946021395348837,
+          "median": 5.0001,
+          "p95": 9.8333,
+          "p99": 9.9666,
+          "maximum": 9.9666,
+          "minimum": 0.1334
+        },
+        "observationToIngressMs": {
+          "count": 860,
+          "mean": 4.946021395348837,
+          "median": 5.0001,
+          "p95": 9.8333,
+          "p99": 9.9666,
+          "maximum": 9.9666,
+          "minimum": 0.1334
+        },
+        "additionalSoftwareOnsetLatenessMs": {
+          "count": 860,
+          "mean": 6.917635658914743,
+          "median": 7.416666666666667,
+          "p95": 11.229166666666666,
+          "p99": 14.395833333333334,
+          "maximum": 14.708333333333334,
+          "minimum": 1.4583333333333333
+        },
+        "physicalPlusSoftwareOnsetMs": {
+          "count": 860,
+          "mean": 16.618265503876,
+          "median": 16.520833333333332,
+          "p95": 21.166666666666668,
+          "p99": 21.291666666666668,
+          "maximum": 21.291666666666668,
+          "minimum": 11.458333333333334
+        },
+        "callbackWorkMs": {
+          "count": 501,
+          "mean": 0.03331956087824351,
+          "median": 0.036,
+          "p95": 0.0446,
+          "p99": 0.0478,
+          "maximum": 0.0514,
+          "minimum": 0.0038
+        },
+        "callbackDeadlineBudgetMs": 10,
+        "callbackDeadlineMisses": 0,
+        "sent": 2812,
+        "submitted": 860,
+        "neverSubmitted": 1952,
+        "negativeTerminal": 2119,
+        "postSubmissionRetirements": 167,
+        "pending": 0,
+        "callbacks": 501,
+        "deviceStarvationFrames": 0,
+        "continuousUnderflowFrames": 0,
+        "Accepted": 2812,
+        "Rejected": 0,
+        "QueueFull": 0,
+        "VoiceCapacityRejected": 1952,
+        "Expired": 0,
+        "EvictedLowPriority": 167,
+        "PeakActive": 32,
+        "MaximumMixedPeak": 0.04414740577340126,
+        "CallbackFaults": 0,
+        "MaximumCallbackWork": 16384,
+        "CallbackIterations": 6291848,
+        "managedBytes": 31460152,
+        "allocatedBytesDuringCallbackMeasurement": 0,
+        "extra": {
+          "jitterMilliseconds": 4,
+          "ingressDelayMilliseconds": 0,
+          "flood": true,
+          "producerStall": false,
+          "deviceStall": false,
+          "queueMinimumFrames": 3616
+        }
+      },
+      {
+        "name": "device-stall40ms-negative",
+        "basis": "deterministic authored clock and fake22ms endpoint padding",
+        "clockFrequency": 10000000,
+        "observationToFakeSubmissionMs": {
+          "count": 57,
+          "mean": 4.92280701754386,
+          "median": 4.6,
+          "p95": 9.3,
+          "p99": 9.5,
+          "maximum": 9.5,
+          "minimum": 0.4
+        },
+        "observationToIngressMs": {
+          "count": 57,
+          "mean": 4.92280701754386,
+          "median": 4.6,
+          "p95": 9.3,
+          "p99": 9.5,
+          "maximum": 9.5,
+          "minimum": 0.4
+        },
+        "additionalSoftwareOnsetLatenessMs": {
+          "count": 57,
+          "mean": 7.768640350877193,
+          "median": 7.6875,
+          "p95": 13.0625,
+          "p99": 14.770833333333334,
+          "maximum": 14.770833333333334,
+          "minimum": 2.3958333333333335
+        },
+        "physicalPlusSoftwareOnsetMs": {
+          "count": 57,
+          "mean": 16.914108187134506,
+          "median": 16.583333333333332,
+          "p95": 21.291666666666668,
+          "p99": 21.5,
+          "maximum": 21.5,
+          "minimum": 12.395833333333334
+        },
+        "callbackWorkMs": {
+          "count": 180,
+          "mean": 0.011536111111111112,
+          "median": 0.0125,
+          "p95": 0.0136,
+          "p99": 0.0154,
+          "maximum": 0.0175,
+          "minimum": 0.0056
+        },
+        "callbackDeadlineBudgetMs": 10,
+        "callbackDeadlineMisses": 0,
+        "sent": 58,
+        "submitted": 57,
+        "neverSubmitted": 1,
+        "negativeTerminal": 0,
+        "postSubmissionRetirements": 0,
+        "pending": 1,
+        "callbacks": 180,
+        "deviceStarvationFrames": 1344,
+        "continuousUnderflowFrames": 0,
+        "Accepted": 58,
+        "Rejected": 0,
+        "QueueFull": 0,
+        "VoiceCapacityRejected": 0,
+        "Expired": 0,
+        "EvictedLowPriority": 0,
+        "PeakActive": 7,
+        "MaximumMixedPeak": 0.04414740577340126,
+        "CallbackFaults": 0,
+        "MaximumCallbackWork": 3360,
+        "CallbackIterations": 432552,
+        "managedBytes": 29050584,
+        "allocatedBytesDuringCallbackMeasurement": 0,
+        "extra": {
+          "jitterMilliseconds": 0,
+          "ingressDelayMilliseconds": 0,
+          "flood": false,
+          "producerStall": false,
+          "deviceStall": true,
+          "queueMinimumFrames": 3616
+        }
+      },
+      {
+        "name": "continuous-producer-stall140ms-negative",
+        "basis": "deterministic authored clock and fake22ms endpoint padding",
+        "clockFrequency": 10000000,
+        "observationToFakeSubmissionMs": {
+          "count": 58,
+          "mean": 4.958620689655173,
+          "median": 5.5,
+          "p95": 9.3,
+          "p99": 9.5,
+          "maximum": 9.5,
+          "minimum": 0.4
+        },
+        "observationToIngressMs": {
+          "count": 58,
+          "mean": 4.958620689655173,
+          "median": 5.5,
+          "p95": 9.3,
+          "p99": 9.5,
+          "maximum": 9.5,
+          "minimum": 0.4
+        },
+        "additionalSoftwareOnsetLatenessMs": {
+          "count": 58,
+          "mean": 7.789870689655173,
+          "median": 7.895833333333333,
+          "p95": 13.0625,
+          "p99": 14.770833333333334,
+          "maximum": 14.770833333333334,
+          "minimum": 2.3958333333333335
+        },
+        "physicalPlusSoftwareOnsetMs": {
+          "count": 58,
+          "mean": 16.95007183908046,
+          "median": 17.5,
+          "p95": 21.291666666666668,
+          "p99": 21.5,
+          "maximum": 21.5,
+          "minimum": 12.395833333333334
+        },
+        "callbackWorkMs": {
+          "count": 188,
+          "mean": 0.01136170212765957,
+          "median": 0.0123,
+          "p95": 0.0134,
+          "p99": 0.0154,
+          "maximum": 0.0171,
+          "minimum": 0.0042
+        },
+        "callbackDeadlineBudgetMs": 10,
+        "callbackDeadlineMisses": 0,
+        "sent": 62,
+        "submitted": 58,
+        "neverSubmitted": 4,
+        "negativeTerminal": 6,
+        "postSubmissionRetirements": 2,
+        "pending": 0,
+        "callbacks": 188,
+        "deviceStarvationFrames": 0,
+        "continuousUnderflowFrames": 192,
+        "Accepted": 62,
+        "Rejected": 0,
+        "QueueFull": 0,
+        "VoiceCapacityRejected": 0,
+        "Expired": 0,
+        "EvictedLowPriority": 0,
+        "PeakActive": 7,
+        "MaximumMixedPeak": 0.04414740577340126,
+        "CallbackFaults": 0,
+        "MaximumCallbackWork": 3360,
+        "CallbackIterations": 442864,
+        "managedBytes": 31525880,
+        "allocatedBytesDuringCallbackMeasurement": 0,
+        "extra": {
+          "jitterMilliseconds": 0,
+          "ingressDelayMilliseconds": 0,
+          "flood": false,
+          "producerStall": true,
+          "deviceStall": false,
+          "queueMinimumFrames": 3616
+        }
+      },
+      {
+        "name": "actual-node-pipe-nominal",
+        "basis": "real QPC and Node/native pipe; authored fake22ms endpoint padding",
+        "clockFrequency": 10000000,
+        "observationToFakeSubmissionMs": {
+          "count": 80,
+          "mean": 15.566937500000003,
+          "median": 15.5493,
+          "p95": 16.1683,
+          "p99": 16.5009,
+          "maximum": 16.5009,
+          "minimum": 14.6523
+        },
+        "observationToIngressMs": {
+          "count": 80,
+          "mean": 0.3606400000000002,
+          "median": 0.2965,
+          "p95": 0.504,
+          "p99": 4.6371,
+          "maximum": 4.6371,
+          "minimum": 0.1825
+        },
+        "additionalSoftwareOnsetLatenessMs": {
+          "count": 80,
+          "mean": 13.760416666666675,
+          "median": 12.020833333333334,
+          "p95": 19.104166666666668,
+          "p99": 19.104166666666668,
+          "maximum": 19.104166666666668,
+          "minimum": 11.958333333333334
+        },
+        "physicalPlusSoftwareOnsetMs": {
+          "count": 80,
+          "mean": 22.005208333333307,
+          "median": 22,
+          "p95": 22.020833333333332,
+          "p99": 22.729166666666668,
+          "maximum": 22.729166666666668,
+          "minimum": 21.958333333333332
+        },
+        "callbackWorkMs": {
+          "count": 310,
+          "mean": 0.018152903225806455,
+          "median": 0.0213,
+          "p95": 0.0312,
+          "p99": 0.0341,
+          "maximum": 0.7468,
+          "minimum": 0.0002
+        },
+        "callbackDeadlineBudgetMs": 10,
+        "callbackDeadlineMisses": 0,
+        "sent": 80,
+        "submitted": 80,
+        "neverSubmitted": 0,
+        "negativeTerminal": 0,
+        "postSubmissionRetirements": 0,
+        "pending": 0,
+        "callbacks": 310,
+        "deviceStarvationFrames": 0,
+        "continuousUnderflowFrames": 0,
+        "Accepted": 80,
+        "Rejected": 0,
+        "QueueFull": 0,
+        "VoiceCapacityRejected": 0,
+        "Expired": 0,
+        "EvictedLowPriority": 0,
+        "PeakActive": 6,
+        "MaximumMixedPeak": 0.04414740577340126,
+        "CallbackFaults": 0,
+        "MaximumCallbackWork": 4734,
+        "CallbackIterations": 623730,
+        "managedBytes": 30534416,
+        "allocatedBytesDuringCallbackMeasurement": -1,
+        "extra": {
+          "contention": false,
+          "exitCode": 0,
+          "callbackPeriodTargetMs": 10,
+          "observedCallbackIntervalMs": {
+            "count": 309,
+            "mean": 10.01836504854369,
+            "median": 15.2764,
+            "p95": 15.9939,
+            "p99": 16.2644,
+            "maximum": 16.4372,
+            "minimum": 0.0198
+          },
+          "callbackWorkScope": "Fill/Mix only, excludes commit/refill/fixture bookkeeping"
+        }
+      },
+      {
+        "name": "actual-node-pipe-map-contention",
+        "basis": "real QPC and Node/native pipe; authored fake22ms endpoint padding",
+        "clockFrequency": 10000000,
+        "observationToFakeSubmissionMs": {
+          "count": 80,
+          "mean": 15.70465625,
+          "median": 15.7321,
+          "p95": 16.1523,
+          "p99": 16.5526,
+          "maximum": 16.5526,
+          "minimum": 15.0316
+        },
+        "observationToIngressMs": {
+          "count": 80,
+          "mean": 0.2917725000000001,
+          "median": 0.2619,
+          "p95": 0.4278,
+          "p99": 1.7407,
+          "maximum": 1.7407,
+          "minimum": 0.1557
+        },
+        "additionalSoftwareOnsetLatenessMs": {
+          "count": 80,
+          "mean": 13.751822916666672,
+          "median": 12.020833333333334,
+          "p95": 19.083333333333332,
+          "p99": 19.104166666666668,
+          "maximum": 19.104166666666668,
+          "minimum": 11.958333333333334
+        },
+        "physicalPlusSoftwareOnsetMs": {
+          "count": 80,
+          "mean": 21.99661458333331,
+          "median": 22,
+          "p95": 22.020833333333332,
+          "p99": 22.041666666666668,
+          "maximum": 22.041666666666668,
+          "minimum": 21.958333333333332
+        },
+        "callbackWorkMs": {
+          "count": 310,
+          "mean": 0.015865483870967742,
+          "median": 0.0211,
+          "p95": 0.0314,
+          "p99": 0.036,
+          "maximum": 0.116,
+          "minimum": 0.0002
+        },
+        "callbackDeadlineBudgetMs": 10,
+        "callbackDeadlineMisses": 0,
+        "sent": 80,
+        "submitted": 80,
+        "neverSubmitted": 0,
+        "negativeTerminal": 0,
+        "postSubmissionRetirements": 0,
+        "pending": 0,
+        "callbacks": 310,
+        "deviceStarvationFrames": 0,
+        "continuousUnderflowFrames": 0,
+        "Accepted": 80,
+        "Rejected": 0,
+        "QueueFull": 0,
+        "VoiceCapacityRejected": 0,
+        "Expired": 0,
+        "EvictedLowPriority": 0,
+        "PeakActive": 6,
+        "MaximumMixedPeak": 0.04414740577340126,
+        "CallbackFaults": 0,
+        "MaximumCallbackWork": 4668,
+        "CallbackIterations": 623730,
+        "managedBytes": 33913552,
+        "allocatedBytesDuringCallbackMeasurement": -1,
+        "extra": {
+          "contention": true,
+          "exitCode": 0,
+          "callbackPeriodTargetMs": 10,
+          "observedCallbackIntervalMs": {
+            "count": 309,
+            "mean": 9.996058252427186,
+            "median": 15.268,
+            "p95": 16.0773,
+            "p99": 16.246,
+            "maximum": 16.5269,
+            "minimum": 0.0178
+          },
+          "callbackWorkScope": "Fill/Mix only, excludes commit/refill/fixture bookkeeping"
+        }
+      }
+    ],
+    "resultSha256": "3bdca77ae8c46bf0761a424f83c00352204df92e0faaae652b16053535ca0fd6",
+    "validationSha256": "5b26b723cb7c22d3ec83d7e4bafa7be41baab19bfb430f431b6ddfe8660ae1eb",
+    "memoryScope": "Managed process snapshots including retained PCM, old banks, harness and receipts; not peak or isolated bus memory.",
+    "decodedContinuousPcmSha256": "9114d699cdc0a0188e5f73cc2618bc6672219c292f7e2f0748d4a157ecec3c0c",
+    "retainedWavSha256": "e86d54d9f305b24dd86264d456f3f8786e741c0aaaaeab42a82bd70016a021fe",
+    "callbackCostScope": "OwnedPcmSubmission.Fill including ring/mix; excludes fake commit, refill and bookkeeping. Deterministic per-thread allocation counter measured zero in this region; actual-pipe allocation was not measured.",
+    "sourcePins": [
+      {
+        "file": "src/acoustics/host/Windows/PcmRing.cs",
+        "sha256": "70069ca231812c26900d89c9829fe78da18b57963bf64cedbd70b1ce342c531c"
+      },
+      {
+        "file": "src/acoustics/host/Windows/PreparedTransientBus.cs",
+        "sha256": "5320944a181f967c245112eb9bae58c3ed60fbcfb46b99c0bfb617cd4873f750"
+      },
+      {
+        "file": "src/acoustics/host/Windows/TransientEventProtocol.cs",
+        "sha256": "a66cf7323559acbc64cdd70fc6589efbd9220fc2dbf9b20a4be4080cabe6655f"
+      },
+      {
+        "file": "tests/host/TestTransientTiming02.cs",
+        "sha256": "ac7f754941fded91600d4bb1302ece1e2ebf5b83ca8bf05ec18f2e6d4bab7f98"
+      },
+      {
+        "file": "tools/Test-TransientTiming02.ps1",
+        "sha256": "33e5b856cda55542c6a0050105730f2ab92c6e78dcbff036df60cb161357f1bf"
+      },
+      {
+        "file": "tools/Run-TransientEventFixture.mjs",
+        "sha256": "48b8b26189daeedf46eddc841374a23ba5f1332fb77d9e88f000afeba88d391c"
+      },
+      {
+        "file": "src/acoustics/events/contracts.mjs",
+        "sha256": "78ffe68d34b264c7737fb26577c7bfb16c9beb753242ce8acc68c61f023af586"
+      },
+      {
+        "file": "src/acoustics/events/wire.mjs",
+        "sha256": "76de519ecbd1504761500cf705f9b5b79856acd7e026daff81051fa40d312fc9"
+      },
+      {
+        "file": "src/acoustics/events/acquisition-capability.mjs",
+        "sha256": "d02aca32860f029bec5d7f2cc51e29d42ab457645f8d3b3553a6976d9e89bbed"
+      }
+    ],
+    "preparationSha256": "7831252b4c156f394bd865d63944f07db4edda71203ff1201886385b462f3635",
+    "rawRowsRetainedPrivately": true,
+    "classification": "First submission acknowledgements remain counted after later tail eviction/cancellation. Negative terminal outcomes and post-submission retirements can overlap submitted counts."
+  },
+  "bati": {
+    "negativeArms": [
+      {
+        "profile": "baseline",
+        "qualified": false,
+        "workers": 4,
+        "ownedProcessAffinityCores": 2,
+        "underflowFrames": 64,
+        "terminalFailure": "Producer starvation: stopped to prevent renderer/device clock drift; no automatic resume",
+        "scope": "Severe CPU contention is a retained failing outcome, not a candidate pass."
+      },
+      {
+        "profile": "low-latency-01",
+        "qualified": false,
+        "workers": 4,
+        "ownedProcessAffinityCores": 2,
+        "underflowFrames": 64,
+        "terminalFailure": "Producer starvation: stopped to prevent renderer/device clock drift; no automatic resume",
+        "scope": "Severe CPU contention is a retained failing outcome, not a candidate pass."
+      }
+    ],
+    "clockScope": "Authored observations and real fixture host QPC; pose ages are not live native getter ages or speaker latency.",
+    "nominalResultSha256": "b52485aff88ecae2d1e3e6a04a01a8d0dfc0dcb8ac8650d719aff1140230c103",
+    "sourceSnapshotNote": "These two source-chain comparisons precede the final authored-only stationary-selector guard/wording correction. That option is not selected in either arm. Final runtime regression covers the guarded option separately.",
+    "nominalValidationSha256": "6f270cf15a9434b59c93e94818aad1a601b6ce5e59b3ae5dcae766eb7aea3224",
+    "severeContentionResultSha256": "9b3d0ae32daeb823518ef68c6150455f274c0b77eeea17e3fd33d83ef5151957",
+    "arms": [
+      {
+        "profile": "baseline",
+        "input": "120 authored stationary/rev/moving observations at20Hz; genuine unchanged retained Bati banks",
+        "coldStartupToNonzeroStatusMs": 1427.6028000000001,
+        "newerPoseAge": {
+          "count": 76,
+          "minimumMs": 108.7399,
+          "medianMs": 155.4033,
+          "p95Ms": 172.43355,
+          "p99Ms": 187.06529999999998,
+          "maximumMs": 187.668,
+          "meanMs": 154.54740131578944
+        },
+        "olderPoseAge": {
+          "count": 76,
+          "minimumMs": 171.1095,
+          "medianMs": 201.94535,
+          "p95Ms": 233.01545000000002,
+          "p99Ms": 238.362225,
+          "maximumMs": 249.9138,
+          "meanMs": 203.8939881578948
+        },
+        "ring": {
+          "count": 692,
+          "minimumMs": 10.6396,
+          "medianMs": 72.47579999999999,
+          "p95Ms": 88.92981999999999,
+          "p99Ms": 91.642291,
+          "maximumMs": 93.1118,
+          "meanMs": 71.11345722543345
+        },
+        "steadyRing": null,
+        "underflowFrames": 0,
+        "hostCpuMs": 781.25,
+        "hostMemoryBytes": 41304064,
+        "sourceWorkerRssBytes": 184975360,
+        "sourceWorkerMaximumProcessingMs": 26.49989999999991,
+        "sourceWorkerDeadlineMisses": 1,
+        "sourceHistoryBytes": 11558912,
+        "sourceCreations": 1,
+        "missingHistory": 0,
+        "clippedSamples": 0,
+        "limitedSamples": 0,
+        "nativeSuppression": false
+      },
+      {
+        "profile": "low-latency-01",
+        "input": "120 authored stationary/rev/moving observations at20Hz; genuine unchanged retained Bati banks",
+        "coldStartupToNonzeroStatusMs": 1423.8600000000001,
+        "newerPoseAge": {
+          "count": 76,
+          "minimumMs": 92.5745,
+          "medianMs": 126.32894999999999,
+          "p95Ms": 154.41325,
+          "p99Ms": 159.28785,
+          "maximumMs": 168.3459,
+          "meanMs": 129.4047276315789
+        },
+        "olderPoseAge": {
+          "count": 77,
+          "minimumMs": 139.9544,
+          "medianMs": 173.5634,
+          "p95Ms": 201.81048,
+          "p99Ms": 217.02366799999996,
+          "maximumMs": 219.6918,
+          "meanMs": 178.55508571428572
+        },
+        "ring": {
+          "count": 690,
+          "minimumMs": 12.7323,
+          "medianMs": 55.4033,
+          "p95Ms": 62.194784999999996,
+          "p99Ms": 76.53891,
+          "maximumMs": 93.004,
+          "meanMs": 51.195794057971035
+        },
+        "steadyRing": {
+          "count": 637,
+          "minimumMs": 12.7323,
+          "medianMs": 55.1086,
+          "p95Ms": 61.17274,
+          "p99Ms": 62.032204,
+          "maximumMs": 63.1215,
+          "meanMs": 49.969920565149124
+        },
+        "underflowFrames": 0,
+        "hostCpuMs": 937.5,
+        "hostMemoryBytes": 41218048,
+        "sourceWorkerRssBytes": 192864256,
+        "sourceWorkerMaximumProcessingMs": 27.10699999999997,
+        "sourceWorkerDeadlineMisses": 1,
+        "sourceHistoryBytes": 11558912,
+        "sourceCreations": 1,
+        "missingHistory": 0,
+        "clippedSamples": 0,
+        "limitedSamples": 0,
+        "nativeSuppression": false
+      }
+    ]
+  },
+  "reviews": {
+    "nodeCode": "9af35209c58053b63baf599f94dbed9fd7927111bdab27de1148a6de16651ccc",
+    "nodeDocumentation": "68c8520f955406ce1e786448043afc8dd93d18f4d20715beb664ef6ea1ecbac2",
+    "nativeTiming": "70f7334a9c16c5f7a8baefac357b7c437243c448d7fefafc46a647db9805c831",
+    "nativeCore": "bc74a1c58f263a7ebb83468742f98e9eb5970f210e1e9b49b1704921a409c23d",
+    "finalFirstAcknowledgementCdf": "f10536be9e964c27bb7225aa3a13e20acf92da5a52ccaad0c1212b67b173a7df"
+  },
+  "timingHarnessCommit": "2aaf8ad",
+  "regression": {
+    "fullOfflineHarnessPassed": true,
+    "fullOfflineLogSha256": "a64da1d49d9924ce40c8d7f4d1dd837059dd13cd475788d2548b08781e633212",
+    "nodeFiles": 72,
+    "nodeTests": 779,
+    "nodePassed": 775,
+    "nodeFailed": 0,
+    "nodeSkipped": 4,
+    "nodeSkipScope": "Older private catalogue/NPC report inputs absent; new LATENCY-02 and eight genuine-package gameplay tests ran.",
+    "nodeLogSha256": "a3cc03c270fd0c97e376ddf1b435734951942d4e2ce27c4c6d827098d6b29366",
+    "originalRingChecks": 69087,
+    "originalRingScenarios": 16,
+    "queueExplorations": 64,
+    "ringValidationSha256": "309c58603843038cb2032e1071dd016f26d01498fdf8915a59d6c5a804b67bc0",
+    "nativeCameraCases": 11,
+    "nativeCameraAssertions": 37,
+    "nativeCameraLogSha256": "dd5945c5f1bbf84cf8d1d728cffca5c249519e861a3f786d164d4d6f4de2643c",
+    "cancellationConcurrentRounds": 16,
+    "groupsOverlap": true
+  }
+}
