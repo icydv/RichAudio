@@ -922,8 +922,9 @@ export class StreamingRenderer {
     const lowK = 1 - Math.exp((-2 * Math.PI * 400) / FS),
       highK = 1 - Math.exp((-2 * Math.PI * 4000) / FS);
     const measureSpatialSteps=this.continuousRates||this.continuousTransitions;
+    const sampleStride=this.pcmWitness?.sampleStride;
     for (let j = 0; j < frames; j++) {
-      const witness = j === 0 && this.pcmWitness;
+      const witness = (j === 0 || (sampleStride === 16 && j % 16 === 0)) && this.pcmWitness;
       let affected = false;
       const frame = this.frame + j,
         write = frame % this.historyFrames;

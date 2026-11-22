@@ -11,6 +11,9 @@ namespace RichAudio.Beacon.Windows {
   PlayableConfiguration config;string session,pipeName;int ownerId;long ownerStart;AcousticSettings settings;WasapiOutput audio;Thread writer,reader,diagnostics,receiver,sink;bool fixture;long fixtureCallbacks;string directory;int childId;
   readonly object transportGate=new object();readonly TransportObservationState02 transport=new TransportObservationState02();Thread ownerCommand;long transportConnections;
   PowertrainOutputGate powertrain;int hostPid;
+  int blockedPowertrainPublications;
+  object firstPowertrainFileFault, firstPowertrainEvidenceFault;
+  List<string> powertrainPathTrace;
   bool demo;long admittedLease;GameplayRecording recording;GameplayDemoPermit demoPermit;string recordingFailure,recordingDirectory;object lastRecordingMetrics;readonly GameplayShutdownFade shutdownFade=new GameplayShutdownFade();
   GameplayDeliveryTrace01 delivery;long creditBatch,issuedCredits;
   ClockedOutputCapture clockedOutput;
@@ -41,7 +44,9 @@ namespace RichAudio.Beacon.Windows {
     string settingFile=AcousticSettingsStore.DefaultPath(config.Root);settings=powertrain==null?AcousticSettingsStore.Load(config.Root,settingFile):new AcousticSettings("performance","cpu",1,true,.8,config.PowertrainWorld,false,"experimental-additive",soundMapVisible:config.PowertrainWorld);
     if(config.TransportValidationOnly){code=RunTransportOnly();}
     else {
-    if(config.DiscardEnvironmentalOutput)delivery=new GameplayDeliveryTrace01();latencyProfile=GameplayLatencyProfile.Resolve(config.LatencyProfile,powertrain!=null);ring=new PcmRing(latencyProfile.StartupBlocks);creditWindow=new GameplayCreditWindow(latencyProfile);credits=latencyProfile.StartupBlocks;
+    if(config.DiscardEnvironmentalOutput||powertrain!=null)delivery=new GameplayDeliveryTrace01();
+    if(powertrain!=null&&config.PowertrainWorld)powertrainPathTrace=new List<string>(512);
+    latencyProfile=GameplayLatencyProfile.Resolve(config.LatencyProfile,powertrain!=null);ring=new PcmRing(latencyProfile.StartupBlocks);creditWindow=new GameplayCreditWindow(latencyProfile);credits=latencyProfile.StartupBlocks;
     string captureLimit=Environment.GetEnvironmentVariable("RICHAUDIO_CLOCKED_CAPTURE_FRAMES");
     if(config.DiscardEnvironmentalOutput&&powertrain==null&&captureLimit!=null&&
        Environment.GetEnvironmentVariable("RICHAUDIO_CLOCKED_FLEET_EVIDENCE02")=="1")
@@ -75,7 +80,7 @@ namespace RichAudio.Beacon.Windows {
     }
     if(shutdownRequested||stop||readerEnded||!OwnerAlive()||child.HasExited||startup.ElapsedMilliseconds>=5000)throw new InvalidOperationException("producer preparation ended before output startup");
     if(fixture||config.DiscardEnvironmentalOutput){sink=new Thread(ConsumeDeviceFree){IsBackground=true};sink.Start();}
-    else{audio=new WasapiOutput(ring,-1,true);audio.Powertrain=powertrain;audio.Volume=1;audio.Muted=false;if(recording!=null)audio.OwnedRecorder=recording.Tap;audio.Start();if(!audio.Ready.WaitOne(5000)||audio.Error!=null)throw new InvalidOperationException("playback endpoint unavailable: "+(audio.Error??"preparation timed out"));if(recording!=null)recording.StartLoopback(audio.SelectedEndpointId);}
+    else{audio=new WasapiOutput(ring,-1,true);audio.Powertrain=powertrain;audio.PowertrainDelivery=powertrain==null?null:delivery;audio.Volume=1;audio.Muted=false;if(recording!=null)audio.OwnedRecorder=recording.Tap;audio.Start();if(!audio.Ready.WaitOne(5000)||audio.Error!=null)throw new InvalidOperationException("playback endpoint unavailable: "+(audio.Error??"preparation timed out"));if(recording!=null)recording.StartLoopback(audio.SelectedEndpointId);}
     var command=new Thread(ReadOwnerCommands){IsBackground=true};command.Start();
     long lastPowertrainStatus=-40,lastSettings=0,lastStatus=0,fadeAt=-1,lastGeometry=0;DateTime geometryModified=DateTime.MinValue;var clock=Stopwatch.StartNew();
     while(!stop){
@@ -136,7 +141,14 @@ namespace RichAudio.Beacon.Windows {
       output.Write(bytes,0,bytes.Length);output.Flush(true);
      }
     }catch(Exception e){Record("delivery-receipt-fault",e.GetType().Name,e.Message);code=1;}
-    if(powertrain!=null&&directory!=null)try{PublishPowertrainStatus(failureDetail??failure);}catch(IOException){code=1;}
+    if(powertrain!=null&&directory!=null){
+     try{PublishPowertrainStatus(failureDetail??failure);}catch(IOException){code=1;}catch(UnauthorizedAccessException){code=1;}
+     try{
+      File.WriteAllText(Path.Combine(directory,"powertrain-file-io.json"),Json.Serialize(new{blockedPowertrainPublications,firstPowertrainFileFault,firstPowertrainEvidenceFault}),new UTF8Encoding(false));
+      if(powertrainPathTrace!=null)
+       File.WriteAllLines(Path.Combine(directory,"powertrain-path-trace.jsonl"),powertrainPathTrace,new UTF8Encoding(false));
+     }catch(IOException){}catch(UnauthorizedAccessException){}
+    }
     if(powertrain==null&&config!=null&&directory!=null)try{if(fixtureLatency!=null){var first=fixtureLatency.FirstUnderflow01();if(first!=null&&delivery==null)File.WriteAllText(Path.Combine(directory,"first-underflow.json"),Json.Serialize(first),new UTF8Encoding(false));}PublishStatus("stopped");}catch(Exception e){Record("terminal-status-fault",e.GetType().Name,e.Message);code=1;}
     Record("host-closed",stopReason??(failure==null?"host-ended":"host-fault"),new{exitCode=failure==null?code:1,failure,failureDetail});
    }
@@ -289,11 +301,13 @@ namespace RichAudio.Beacon.Windows {
     var propagation=status.TryGetValue("installedPropagation",out raw)?raw as Dictionary<string,object>:null;
     if(propagation!=null)propagation.TryGetValue("paths",out provenance);
    }
-   string file=Path.Combine(directory,"powertrain-source.json"),pending=file+".pending";
-   try{
-    File.WriteAllText(pending,Json.Serialize(new{session,receivedQpc=receivedAt,qpcFrequency=Stopwatch.Frequency,voice,playout,geometry,reflectionPaths,provenance}),new UTF8Encoding(false));
-    if(File.Exists(file))File.Replace(pending,file,null);else File.Move(pending,file);
-   }catch(IOException){ }catch(UnauthorizedAccessException){ }
+   if(powertrainPathTrace!=null && powertrainPathTrace.Count<512){
+    object trace;
+    status.TryGetValue("passageSample",out trace);
+    if(trace!=null)powertrainPathTrace.Add(Json.Serialize(new{receivedQpc=receivedAt,sample=trace,geometry,reflectionPaths,provenance}));
+   }
+   try{WritePowertrainPublication("powertrain-source.json",Json.Serialize(new{session,receivedQpc=receivedAt,qpcFrequency=Stopwatch.Frequency,voice,playout,geometry,reflectionPaths,provenance}),false);}
+   catch(IOException){}catch(UnauthorizedAccessException){}
   }
   static bool PreparedSource(Dictionary<string,object> row){object raw;var status=row.TryGetValue("status",out raw)?raw as Dictionary<string,object>:null;var stages=status!=null&&status.TryGetValue("stageCounters",out raw)?raw as Dictionary<string,object>:null;if(stages==null)return false;foreach(string key in new[]{"engine","exhaust","stereo"}){var stage=stages.TryGetValue(key,out raw)?raw as Dictionary<string,object>:null;if(stage==null||!stage.TryGetValue("nonzeroBlocks",out raw)||Convert.ToInt64(raw)<=0)return false;}return true;}
   void Receive(){try{var validator=new StateValidator();while(!stop){pipe=GameplayWire.Server(pipeName);pipe.WaitForConnection();GameplayWire.Peer(pipe,ownerId,true);
@@ -331,10 +345,29 @@ namespace RichAudio.Beacon.Windows {
   }catch(Exception e){if(!stop)Fail(e);}}
   void PublishPowertrainStatus(string error){
    bool startedSink=fixture?Thread.VolatileRead(ref started)!=0:audio!=null&&audio.Started;
-   string file=Path.Combine(directory,"powertrain.json"),tmp=file+".pending";
    string json=Json.Serialize(powertrain.Status(session,hostPid,fixture,startedSink,ring==null?0:Interlocked.Read(ref ring.UnderflowFrames),error));
-   File.WriteAllText(tmp,json,new UTF8Encoding(false));
-   if(File.Exists(file))File.Replace(tmp,file,null);else File.Move(tmp,file);
+   if(!WritePowertrainPublication("powertrain.json",json,true))
+    WritePowertrainPublication("powertrain-alternate.json",json,true);
+  }
+  bool WritePowertrainPublication(string name,string body,bool control){
+   string file=Path.Combine(directory,name),tmp=file+".pending",operation="write-pending";
+   try{
+    File.WriteAllText(tmp,body,new UTF8Encoding(false));
+    operation=File.Exists(file)?"replace":"move";
+    if(operation=="replace")File.Replace(tmp,file,null);else File.Move(tmp,file);
+    return true;
+   }catch(Exception e){
+    if(!(e is IOException)&&!(e is UnauthorizedAccessException))throw;
+    int native=e.HResult&0xffff;
+    var note=new{operation,path=operation=="write-pending"?tmp:file,pending=tmp,
+      exception=e.GetType().FullName,message=e.Message,hresult=e.HResult,windowsError=native,qpc=Stopwatch.GetTimestamp()};
+    if(!control){firstPowertrainEvidenceFault=firstPowertrainEvidenceFault??note;return false;}
+    firstPowertrainFileFault=firstPowertrainFileFault??note;
+    // Preserve the prior report and its original timestamps. The link still
+    // enforces its existing progress timeout if publication cannot recover.
+    if(e is IOException && (native==32 || native==33)){blockedPowertrainPublications++;return false;}
+    throw new IOException("Powertrain "+operation+" failed for "+file+" (Windows "+native+"): "+e.Message,e);
+   }
   }
   void PublishStatus(string state){
    if(config.TransportValidationOnly){PublishTransportStatus(state);return;}

@@ -20,6 +20,7 @@ internal sealed class TestPowertrainPlayback
         internal double[] CameraPosition = { 0d, 0d, 1d };
         internal double[] VehiclePosition = { 0d, 2d, 0d };
         internal double[] Forward = { 0d, 1d, 0d };
+        internal double[] Velocity = { 0d, 0d, 0d };
         public bool StoryReady { get { return true; } }
         public int PlayerVehicleHandle { get { return 19; } }
 
@@ -39,7 +40,7 @@ internal sealed class TestPowertrainPlayback
                 Handle = handle, Model = 0xB779A091, Exists = true, PlayerDriver = true, VehicleView = true,
                 Running = true, RpmRatio = RevRatio,
                 OperatingPointEvidence = "candidate-public-native-unqualified-shvdne",
-                Position = VehiclePosition, Velocity = new[] { 0d, 0d, 0d },
+                Position = VehiclePosition, Velocity = Velocity,
                 Forward = Forward, Up = new[] { 0d, 0d, 1d }
             };
             do { observation.After = Stopwatch.GetTimestamp(); } while (observation.After == observation.Before);
@@ -74,10 +75,56 @@ internal sealed class TestPowertrainPlayback
     int observationCount;
     double minimumCallbackIntervalMs = Double.PositiveInfinity;
     double maximumCallbackIntervalMs;
+    PassageRoute passage;
+    int passageSeconds;
+    bool contendStatus;
+    long routeStarted;
+    int contentionCount;
+    volatile bool stopStatusContention;
+    Thread statusContender;
+
+    void ContendWithPublication()
+    {
+        while(!stopStatusContention)
+        {
+            // Run independently of the observation callback. Holding a
+            // snapshot must not also starve the fixture's telemetry.
+            try
+            {
+                using(var held=new FileStream(statusFile,FileMode.Open,FileAccess.Read,FileShare.ReadWrite))
+                {
+                    Interlocked.Increment(ref contentionCount);
+                    Thread.Sleep(52);
+                }
+            }
+            catch(IOException) {}
+            for(int i=0;i<20&&!stopStatusContention;i++)Thread.Sleep(30);
+        }
+    }
+
+    void MoveCameraAndCar()
+    {
+        if (passage == null || routeStarted == 0) return;
+        double t = (Stopwatch.GetTimestamp() - routeStarted) / (double)Stopwatch.Frequency % 42;
+        // Fifteen seconds under cover with a stationary car and a drifting camera.
+        // Return to the north opening, then traverse the same measured lane again.
+        double leg = t < 8 ? t / 8 : t < 23 ? 1 : t < 35 ? 1 - (t-23)/12 : 0;
+        double eased=leg*leg*(3-2*leg);
+        double speed=6*leg*(1-leg)*(t<8?1d/8:t<35&&t>=23?-1d/12:0);
+        double wobble=0.6*Math.Sin(t*.37);
+        source.Forward=passage.forward;
+        source.VehiclePosition=passage.outside.Select((x,i)=>x+eased*(passage.inside[i]-x)).ToArray();
+        source.Velocity=passage.outside.Select((x,i)=>speed*(passage.inside[i]-x)).ToArray();
+        source.CameraPosition=new[]{source.VehiclePosition[0]-4.9*source.Forward[0]+wobble*source.Forward[1],
+            source.VehiclePosition[1]-4.9*source.Forward[1]-wobble*source.Forward[0],source.VehiclePosition[2]+1.4};
+        source.RevRatio=t>=8&&t<23?.84:.33+.2*Math.Sin(t*.67);
+    }
 
     Dictionary<string, object> ReadStatus()
     {
-        return ReadSharedJson(statusFile);
+        var primary=ReadSharedJson(statusFile);
+        var alternate=ReadSharedJson(Path.Combine(directory,"powertrain-alternate.json"));
+        return alternate!=null && (primary==null || Number(alternate,"publicationQpc")>Number(primary,"publicationQpc"))?alternate:primary;
     }
 
     Dictionary<string, object> ReadSharedJson(string file)
@@ -148,6 +195,7 @@ internal sealed class TestPowertrainPlayback
         }
         previousObservation = now;
         observationCount++;
+        MoveCameraAndCar();
         link.SubmitObservation(source.PlayerVehicleHandle, vehicle);
         return spacing;
     }
@@ -188,6 +236,12 @@ internal sealed class TestPowertrainPlayback
     {
         var clock = Stopwatch.StartNew();
         var before = ReadStatus();
+        for (int tries=0; before==null && tries<3; tries++)
+        {
+            SubmitObservation();
+            Advance();
+            before=ReadStatus();
+        }
         Require(before != null, "No starting status for " + stage);
         var after = before;
         int tick = 0;
@@ -275,6 +329,10 @@ internal sealed class TestPowertrainPlayback
             source.VehiclePosition = pose.source;
             source.Forward = pose.forward;
         }
+        if(passage!=null){
+            Require(configuration.PowertrainWorld,"Passage requires the one-car installed-world configuration");
+            routeStarted=Stopwatch.GetTimestamp();MoveCameraAndCar();routeStarted=0;
+        }
         string root = configuration.Root;
         directory = Path.Combine(root, ".local", "gameplay", session);
         statusFile = Path.Combine(directory, "powertrain.json");
@@ -319,6 +377,11 @@ internal sealed class TestPowertrainPlayback
             var playing = Drive("real renderer readiness admitted one authored native quiet request", r =>
                 handoff.Phase == "Active" && assignments.Count == 1 && Number(r, "appliedRevision") == 2 &&
                 Number(r, "outputPeak") > 0 && Math.Abs(Number(r, "submittedOperatingPoint") - observed) < .00001);
+            if(contendStatus)
+            {
+                statusContender=new Thread(ContendWithPublication){IsBackground=true};
+                statusContender.Start();
+            }
             object reflectionEvidence = null;
             object reflectionSinkInterval = null;
             if (pose != null)
@@ -378,7 +441,8 @@ internal sealed class TestPowertrainPlayback
             }
             else
             {
-                DriveWindow("initial audible playback", 3800, "Active", 2);
+                if(passage!=null)routeStarted=Stopwatch.GetTimestamp();
+                DriveWindow("initial audible playback", passage==null?3800:12000, "Active", 2);
                 Require(handoff.Mute(Stopwatch.GetTimestamp()) == "accepted", "Mute refused");
                 var muted = Drive("mute acknowledged only with silent output", r =>
                     handoff.Phase == "Muted" && Number(r, "appliedRevision") == 3 && Number(r, "outputPeak") == 0 &&
@@ -387,14 +451,16 @@ internal sealed class TestPowertrainPlayback
                 Drive("fresh telemetry continued while output stayed muted", r =>
                     handoff.Phase == "Muted" && Number(r, "appliedRevision") == 3 && Number(r, "outputPeak") == 0 &&
                     Number(r, "submittedObservationSequence") > Number(muted, "submittedObservationSequence") &&
-                    Math.Abs(Number(r, "submittedOperatingPoint") - 0.83) < .00001);
+                    (passage!=null || Math.Abs(Number(r, "submittedOperatingPoint") - 0.83) < .00001));
                 DriveWindow("muted tracking", 2400, "Muted", 3);
                 Require(handoff.Resume(Stopwatch.GetTimestamp()) == "accepted", "Resume refused");
                 Drive("resume submitted current rev ratio in the new output revision", r =>
                     handoff.Phase == "Active" && Number(r, "appliedRevision") == 4 && Number(r, "outputPeak") > 0 &&
-                    Math.Abs(Number(r, "submittedOperatingPoint") - 0.83) < .00001 &&
+                    (passage!=null || Math.Abs(Number(r, "submittedOperatingPoint") - 0.83) < .00001) &&
                     Number(r, "submittedObservationSequence") > Number(playing, "submittedObservationSequence"));
-                bool returnedEarly = DriveWindow("resumed audible playback", 7600, "Active", 4, observeExpiry);
+                bool returnedEarly = DriveWindow("resumed audible playback", passage==null?7600:Math.Max(1000,(passageSeconds-12)*1000), "Active", 4, observeExpiry);
+                stopStatusContention=true;
+                if(statusContender!=null)Require(statusContender.Join(1000),"Status contender did not stop");
                 Require(assignments.Count <= (returnedEarly ? 2 : 1), "Mute or resume performed a native assignment");
                 if (!returnedEarly)
                     Require(handoff.Restore(Stopwatch.GetTimestamp()) == "accepted", "Stock return refused");
@@ -411,7 +477,7 @@ internal sealed class TestPowertrainPlayback
             }
             return new {
                 session, termination, stages, assignments, handoffJournal, evidenceDirectory = directory, reflectionEvidence, reflectionSinkInterval,
-                observationCount, minimumCallbackIntervalMs, maximumCallbackIntervalMs,
+                observationCount, minimumCallbackIntervalMs, maximumCallbackIntervalMs, contentionCount,
                 transportReceipt = Path.Combine(linkDirectory, "powertrain-transport.json"), finalHost = ReadStatus()
             };
         }
@@ -423,6 +489,8 @@ internal sealed class TestPowertrainPlayback
         }
         finally
         {
+            stopStatusContention=true;
+            if(statusContender!=null)statusContender.Join(1000);
             if (!link.Snapshot.Ended) link.Abort();
         }
     }
@@ -435,14 +503,34 @@ internal sealed class TestPowertrainPlayback
         public string surfaceId { get; set; }
         public string[] orderedSurfaces { get; set; }
     }
+    sealed class PassageRoute
+    {
+        public double[] outside { get; set; }
+        public double[] inside { get; set; }
+        public double[] forward { get; set; }
+    }
 
     static int Main(string[] args)
     {
         bool world = args.Length == 4 && args[2] == "--world-pose";
-        if (!world && args.Length != 2 && (args.Length != 3 || args[2] != "--observe-baseline-expiry")) return 2;
+        bool moving = (args.Length==5 || args.Length==6) && args[2]=="--passage";
+        if (!moving && !world && args.Length != 2 && (args.Length != 3 || args[2] != "--observe-baseline-expiry")) return 2;
         try
         {
             string root = Path.GetDirectoryName(args[1]);
+            if(moving)
+            {
+                var serializer=new JavaScriptSerializer{MaxJsonLength=1048576};
+                var route=serializer.Deserialize<PassageRoute>(File.ReadAllText(args[3]));
+                Require(route!=null && new[]{route.outside,route.inside,route.forward}.All(v=>v!=null&&v.Length==3&&v.All(x=>!Double.IsInfinity(x)&&!Double.IsNaN(x))),"Reconstructed XYZ route required");
+                var test=new TestPowertrainPlayback{passage=route,passageSeconds=Int32.Parse(args[4]),contendStatus=args.Length==6&&args[5]=="--contend-status"};
+                var playbackPassage=test.Run(args[0],root,"restore");
+                object loss=null;
+                if(!test.contendStatus)
+                    loss=new TestPowertrainPlayback{passage=route}.Run(args[0],root,"disconnect");
+                File.WriteAllText(args[1],serializer.Serialize(new{passed=true,reconstructed=true,fixture="device-free",playbackPassage,loss}));
+                return 0;
+            }
             if (world)
             {
                 var serializer = new JavaScriptSerializer { MaxJsonLength = 1048576 };

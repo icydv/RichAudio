@@ -16,6 +16,8 @@ namespace RichAudio.Beacon.Windows
         private uint experimentPadding;
 #if STATE_TRANSPORT
         internal PowertrainOutputGate Powertrain;
+        internal GameplayDeliveryTrace01 PowertrainDelivery;
+        long powertrainCallback;
 #endif
         public OwnedOutputTap OwnedRecorder;
         private int startState, disposed;
@@ -166,11 +168,21 @@ namespace RichAudio.Beacon.Windows
             MaximumCallbackFrames=Math.Max(MaximumCallbackFrames,frames);MinimumCallbackFrames=Math.Min(MinimumCallbackFrames,frames);
 #if STATE_TRANSPORT
             if(Powertrain!=null){
+                long before=ring.ConsumedFrames, under=ring.UnderflowFrames, end=ring.EndSilenceFrames;
+                long startedAt=Stopwatch.GetTimestamp();
+                int buffered=ring.BufferedFrames;
                 PowertrainSubmission submission;
-                try{Powertrain.Fill(ring,(float*)data,(int)frames,out submission);}
+                int supplied;
+                try{supplied=Powertrain.Fill(ring,(float*)data,(int)frames,out submission);}
                 catch{Native.Check(renderer.ReleaseBuffer(frames,2));throw;}
                 Native.Check(renderer.ReleaseBuffer(frames,0));
-                SubmittedFrames+=frames;Powertrain.Submitted(submission);ring.RequireContinuousProducer();
+                SubmittedFrames+=frames;Powertrain.Submitted(submission);
+                // WASAPI supplies an event, without an independently scheduled
+                // due time. The trace uses the actual start for both fields.
+                if(PowertrainDelivery!=null)PowertrainDelivery.Callback(powertrainCallback++,startedAt,startedAt,
+                    Stopwatch.GetTimestamp(),(int)frames,supplied,(int)(ring.UnderflowFrames-under),buffered,
+                    ring.BufferedFrames,ring.FirstUnderflowFrame,before-under-end,ring.PendingCredits);
+                ring.RequireContinuousProducer();
                 return;
             }
 #endif

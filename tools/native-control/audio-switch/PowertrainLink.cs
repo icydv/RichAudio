@@ -317,13 +317,9 @@ namespace RichAudio.AudioSwitch
                     if (publisher != null && frame != null && (!withdrawing || frame.PowertrainGate == "withdraw"))
                         publisher.Publish(frame);
                     if (withdrawing && withdrawnAt == 0) withdrawnAt = Stopwatch.GetTimestamp();
-                    HostReport report = null;
-                    try { if (File.Exists(hostStatus)) report = Read<HostReport>(hostStatus); }
-                    catch (IOException) { } // Host atomically replaces its small report.
+                    HostReport report = ReadProgress(hostStatus, host.Id, launchMode != liveMode);
                     if (report != null)
                     {
-                        if (report.session != session || report.hostPid != host.Id || report.fixture != (launchMode != liveMode))
-                            throw new InvalidDataException("powertrain host report identity changed");
                         if (report.failure != null) { last = report; failure = report.failure; break; }
                         long now = Stopwatch.GetTimestamp();
                         if (lastProgressReport == null) lastProgressReport = report;
@@ -353,8 +349,8 @@ namespace RichAudio.AudioSwitch
                 }
                 if (!withdrawing && failure == null)
                 {
-                    try { if (File.Exists(hostStatus)) failure = Read<HostReport>(hostStatus).failure; }
-                    catch (IOException) {}
+                    var terminal = ReadProgress(hostStatus, host.Id, launchMode != liveMode, true);
+                    if(terminal != null) failure=terminal.failure;
                     failure = failure ?? "powertrain host exited";
                 }
             }
@@ -404,6 +400,29 @@ namespace RichAudio.AudioSwitch
         }
 
         static bool DigestText(string value) { return value != null && Regex.IsMatch(value, "\\A[0-9a-f]{64}\\z"); }
+
+        HostReport ReadProgress(string primary,int hostPid,bool fixture,bool terminal=false)
+        {
+            HostReport report=ReadProgressSlot(primary,hostPid,fixture);
+            // Keep the original polling cadence. Consult the alternate when
+            // the main publication may have missed a write or at shutdown.
+            if(terminal || report==null || Stopwatch.GetTimestamp()-report.publicationQpc>=Stopwatch.Frequency*6/100)
+            {
+                var alternate=ReadProgressSlot(Path.Combine(Path.GetDirectoryName(primary),"powertrain-alternate.json"),hostPid,fixture);
+                if(alternate!=null && (report==null || alternate.publicationQpc>report.publicationQpc))report=alternate;
+            }
+            return report;
+        }
+
+        HostReport ReadProgressSlot(string path,int hostPid,bool fixture)
+        {
+            HostReport row;
+            try { row=Read<HostReport>(path); }
+            catch(IOException) {return null;}
+            if(row.session!=session || row.hostPid!=hostPid || row.fixture!=fixture)
+                throw new InvalidDataException("powertrain host report identity changed");
+            return row;
+        }
 
         static long ProgressDeadline(HostReport report, long progress, long now)
         {

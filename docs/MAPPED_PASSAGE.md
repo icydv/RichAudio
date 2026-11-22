@@ -55,3 +55,16 @@ The [five-vehicle traffic measurements](FIVE_VEHICLE_TRAFFIC.md) follow the same
 On a stock ADDER with the Bati replacement active, the listener heard a tunnel-like reflection under cover and found the replacement too quiet. A retained live-camera mixer snapshot near the passage mouth confirmed four single reflections and a two-bounce exhaust path. The exhaust return arrived about 44.3 ms after its direct path. The available snapshots leave the mid-pass change in reflections unresolved.
 
 Playback continuity did not pass. The first takeover returned to stock after producer starvation. The second returned to stock near the exit after a file-sharing error. Each return was issued once to the same vehicle. Both intervals had low sampled replacement levels, around −37 dBFS RMS in the producer's voice-mode stereo output. Those levels establish the replacement's digital output only. Relative loudness against the stock engine remains unmeasured.
+
+## One-car continuity retest
+
+Holding the progress file open without delete sharing reproduced a playback failure on the staged host. The updated host preserves the original freshness deadline and publishes atomically to an alternate slot when a sharing violation blocks the primary slot. The switch verifies the session and host identity on both slots. Optional evidence failures are recorded separately from control publication failures. The callback records a bounded in-memory trace of credits, delivered blocks, and ring depth. File and trace evidence is retained off the callback.
+
+The original 224-frame live underflow could not be reproduced on the reconstructed moving-camera route. A development run did expose a separate cold producer stall before the first geometry publication. The previous callback left 64 frames, and the next producer block missed that callback. The one-car source and renderer now warm before playback, and the producer prepares optional SoundMap geometry only when a viewer is available. The acoustic path solver, gain, latency budget and freshness limit are unchanged.
+
+| Device-free reconstructed drive | Time in timed phases | Underflow frames | Longest gap after fresh resume | Render misses at 10.67 ms | Unexpected stock returns |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Cold | 128.48 s | 0 | 0 frames | 0 | 0 |
+| Warm with file contention | 128.50 s | 0 | 0 frames | 2 | 0 |
+
+The warm run survived 247 blocked primary publications with Windows error 32. Both runs sampled separate direct and reflected pressure and confirmed applied paths through third order while the camera moved. A separate owned-host disconnect restored stock exactly once. The reconstructed fixture crossed the same mapped opening in both directions. The root cause of the earlier live underflow and continuity on an actual WASAPI endpoint still require a live drive.

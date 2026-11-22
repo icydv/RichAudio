@@ -69,20 +69,21 @@ function authoredFleetPassage(){
 async function warmNormalControl01(){
  const bank=authoredStartupBank10(),plan=prepareStockSource10(bank),began=performance.now();
  let now=0;
- const fixture=new StockGameplay({registry:{resolve:()=>({status:'available',bank}),
-  createSource:()=>new StockVehicleSource(bank,{preparation10:plan})},session,now:()=>now,
-  latencyProfile:latencyProfile.id,continuityPolicy,latencyDiagnostics:true,vehicleSourcePolicy:config.vehicleSourcePolicy});
+ const fixtureRegistry=privatePowertrain?registry:{resolve:()=>({status:'available',bank}),
+  createSource:()=>new StockVehicleSource(bank,{preparation10:plan})};
+ const fixture=new StockGameplay({registry:fixtureRegistry,profiles:privatePowertrain?profiles:undefined,session,now:()=>now,
+  latencyProfile:latencyProfile.id,continuityPolicy,latencyDiagnostics:true,vehicleSourcePolicy:config.vehicleSourcePolicy,privatePowertrain});
  fixture.setSettings({...fixture.settings,acceleration:'cpu'});
  // Run the finite solver and stereo path mixer before the first real workset
  // arrives. Only this throwaway engine sees the authored passage.
- if(fleet){
+ if(fleet||config.powertrainWorld){
   const scene=authoredFleetPassage();
   prepareBatchVisibility(scene.tile);
   fixture.pipeline.replaceScene(scene);
   fixture.sceneExpiry=scene.tile.validUntil;
   fixture.geometryAnchor={at:0,observationMs:0};
  }
- const blocks=fleet?48:24;
+ const blocks=fleet?48:privatePowertrain?64:24;
  let maximumReflectedPaths=0,highestReflectionOrder=0;
  try{
   for(let i=0;i<blocks;i++){
@@ -94,12 +95,15 @@ async function warmNormalControl01(){
      valid:true,paused:false,reason:'valid',coordinates:'gta-native-unscaled',units:'native-unverified',listenerKind:'camera',velocityKind:'unavailable',sourceId:null},
      vehicles:Array.from({length:fleet?fixture.voiceLimit:1},(_,voice)=>{
       const speed=fleet?1+voice:0;
-      return {id:'authored-warmup-'+voice,model:0xf9300cc5,context:'player',generation:1,observationTicks,
+      return {id:'authored-warmup-'+voice,model:privatePowertrain?config.eligible[0].model:0xf9300cc5,context:'player',generation:1,observationTicks,
        position:[1-voice*.45,1+voice+speed*now/1000,1],velocity:[0,speed,0],forward:[0,1,0],up:[0,0,1],
-       operatingPoint:.5+voice*.04,valid:true,running:true};
+       operatingPoint:privatePowertrain?(i<24?.22:i<48?.84:.40):.5+voice*.04,valid:true,running:true};
      })},0);
    }
-   await fixture.render();
+   // Prime the first diagnostic sample before the owned ring is running.
+   if(config.powertrainWorld&&i%32===0)fixture.pipeline.renderer.pcmWitness=passageLevelProbe();
+   try{await fixture.render();}
+   finally{if(config.powertrainWorld)fixture.pipeline.renderer.pcmWitness=null;}
    const paths=fixture.pipeline.lastControl.paths;
    maximumReflectedPaths=Math.max(maximumReflectedPaths,paths.filter(p=>p.order>0).length);
    for(const p of paths)highestReflectionOrder=Math.max(highestReflectionOrder,p.order);
@@ -128,9 +132,9 @@ if(useNpcBlockWorker){
  engine.npcBlockWorker=new NpcBlockWorker({session,npcManifest:inside(config.npcManifest),bank,options:engine.stockSourceOptions01(bank)});
  npcBlockReady=await engine.npcBlockWorker.ready;
 }
-const normalControlWarmup=latencyProfile.id==='street-01'?await warmNormalControl01():null;
+const normalControlWarmup=latencyProfile.id==='street-01'||privatePowertrain?await warmNormalControl01():null;
 const startupVoicePairs=fleet?(useNpcBlockWorker?preparedPairs.filter(p=>p.context!=='npc'):preparedPairs):sourceStartupPreparation10.unpreparedBanks.length?[]:startupPairs;
-const startupVoices=latencyProfile.id==='street-01'&&startupVoicePairs.length?engine.prepareStartupVoices01(startupVoicePairs):0;
+const startupVoices=(latencyProfile.id==='street-01'||privatePowertrain)&&startupVoicePairs.length?engine.prepareStartupVoices01(startupVoicePairs):0;
 const powertrainVoiceEvidence=privatePowertrain?new PowertrainVoiceEvidence():null;
 const startupDevice=fleetReflectionTrains?{
  hostSelection:startupAcceleration??null,initializationAttempts:engine.pipeline.backend.attempts,
@@ -143,10 +147,26 @@ const installedSceneEngine={
   ?{installedReflectionTrains:true}:{}),
 };
 let taggedPowertrainPaths=null;
+let passageLevels=null;
+// Sample 32 stereo instants in one block per ~0.5 s. Each group sums the
+// actual mixed terms, including release tails, before calculating RMS.
+function passageLevelProbe(){
+ const pressure=new Float64Array(4),energy=new Float64Array(2);
+ let count=0;
+ return {sampleStride:16,path(slot,left,right){
+  const index=slot.id.includes(':direct:g')?0:2;
+  pressure[index]+=left;pressure[index+1]+=right;
+ },output(_frame,gain,master,limiter){
+  const scale=gain*master*limiter;
+  for(let i=0;i<2;i++)energy[i]+=(pressure[2*i]**2+pressure[2*i+1]**2)*scale**2;
+  pressure.fill(0);count++;
+ },levels(){return {samples:count,directStereoRms:Math.sqrt(energy[0]/Math.max(1,2*count)),
+  reflectedStereoRms:Math.sqrt(energy[1]/Math.max(1,2*count))};}};
+}
 clockedEvidence?.ready({...(npcBlockReady?{npcBlockReady}:{}),milliseconds:performance.now()-startupBegan,startupVoices,...sourceStartupPreparation10,normalControlWarmup,startupDevice});
 engine.pipeline.simulation.captureInstalledPaths01=config.acousticPathEvidence01===true;
 let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,pendingSettings=null,pendingGeometry=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
-const traceDelivery=config.outputSink==='environment-observation'&&process.env.RICHAUDIO_DISCARD_DELIVERY_TRACE01==='1';
+const traceDelivery=(privatePowertrain||config.outputSink==='environment-observation')&&process.env.RICHAUDIO_DISCARD_DELIVERY_TRACE01==='1';
 engine.captureCompleteRenderStages01=qualification!==null||traceDelivery||clockedEvidence!==null;
 if(clockedEvidence)engine.pipeline.clockedStages={};
 if(clockedEvidence&&process.env.RICHAUDIO_CLOCKED_PCM_WITNESS==='1')clockedEvidence.enablePcmWitness(engine.pipeline.renderer);
@@ -158,7 +178,8 @@ function delivery(phase,id,at,began=0,render=0){
  process.stderr.write(`delivery01|${phase}|${id}|${at}|${began}|${render}|${credits}|${deliveryDrops}\n`);
 }
 let viewer=false,viewerClient=null,soundMapRecordingRequest01=false,soundMapBackgroundRequest01=false;engine.telemetry=new SoundMapTelemetry({enabled:!!clockedMap});
-const soundMapRequired01=()=>viewer||soundMapRecordingRequest01||soundMapBackgroundRequest01||!!clockedMap;
+let privateMapAvailable=false;
+const soundMapRequired01=()=>(viewer&&(!privatePowertrain||privateMapAvailable))||soundMapRecordingRequest01||soundMapBackgroundRequest01||!!clockedMap;
 const soundMapDemandStatus01=()=>({viewer,recordingRequested:soundMapRecordingRequest01,backgroundRequested:soundMapBackgroundRequest01,required:soundMapRequired01(),geometry:soundMapRequired01()?installedSoundMapGeometryState01(engine.pipeline.simulation.scene):'not-requested',recordingStartedByProducer:false});
 const evidence=qualification?openNormalQualificationEvidence01(root,session,error=>{process.exitCode=1;setImmediate(()=>finish(error));}):null;
 let latestSceneDecision01=null,latestPreparedScene01=null;
@@ -247,6 +268,14 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality,
   taggedPowertrainPaths.observationKey===engine.pipeline.simulation.scene?.tile?.observationKey?taggedPowertrainPaths:null;
  const consumerWorldStage=readiness.state==='active'?(readiness.renewalQualified?'active-conditional-local-scene':'active-local-scene-renewal-at-risk'):readiness.state==='lost'?'local-scene-continuity-lost':['stopping','stopped'].includes(readiness.state)?readiness.state:readiness.managed?'preparing-local-scene':worldStatus.stage;
  const descriptor=path.join(root,'.local/soundmap/service.json');
+ if(privatePowertrain){
+  const available=fs.existsSync(descriptor);
+  if(privateMapAvailable!==available){
+   privateMapAvailable=available;
+   engine.telemetry.enabled=soundMapRequired01();
+   engine.updateInstalledConsumerWorkload01();
+  }
+ }
  try{if(soundMapRequired01()&&(!viewerClient||viewerClient.closed)&&fs.existsSync(descriptor))viewerClient=new SoundMapClient(descriptor);if(!soundMapRequired01()&&viewerClient){viewerClient.close().catch(()=>{});viewerClient=null;}}catch{}
  log({type:'gameplay-status',status:{featureProfile:'STREET-01-main',requestedQuality:q.requestedQuality,activeQuality:q.activeQuality,pathBudget:engine.pipeline.renderer.maxPathsPerSource,
   requestedAcceleration:b.requestedAcceleration,activeAcceleration:b.activeAcceleration,gpuDevice:b.gpuDevice,gpuCapability:b.gpuResultsApplied>0?'hardware-directcompute':'unestablished',gpuResultsApplied:b.gpuResultsApplied??b.totals?.gpuResultsApplied??0,
@@ -266,6 +295,11 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality,
     unpreparedExterior:d.installedGeometry.unpreparedExterior01}:{} )},
   outputPeak:d.outputPeak,sourceStates:d.sourceStates,stageCounters:d.stageCounters,...(fleet?{fleetPopulation:d.fleetPopulation,lifecycle:d.lifecycle}:{}),
   ...(privatePowertrain?{playoutTiming:engine.powertrainTiming()}:{}),
+  ...(config.powertrainWorld?{passageSample:{producerBlock:sequence,nodeMs:performance.now(),
+   camera:engine.sample?.state?.position??null,revRatio:taggedVehicle?.operatingPoint??null,
+   outputRevision:taggedVehicle?.powertrainRevision??null,reflectedOrders:currentTaggedPaths?.selectedByOrder??null,
+   observationKey:engine.pipeline.simulation.scene?.tile?.observationKey??null,
+   stage:consumerWorldStage,completeRenderHardMisses:d.completeRenderHardMisses??0,levels:passageLevels}}:{}),
   ...(powertrainVoiceEvidence?{powertrainEvidenceFrame:sequence}:{}),
   fallbackReason:d.geometry==='conditional-direct-unobserved-space-assumed-clear'?'Additive; conditional direct sound without collision coverage':b.fallbackReason,
   controlDelayMs:d.controlDelayMs,propagationLimitSeconds:2,arrivals:d.arrivals,retired:d.retired,latencyRows,latencyRowsOmitted,...(latencyProfile.id==='baseline'?{}:{latencyProfile:latencyProfile.id,producerCreditBlocks:latencyProfile.producerCreditBlocks})}});
@@ -324,7 +358,18 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
   const controlIngressMs=clockedEvidence?performance.now()-startedAt:0;
   if(clockedMap)engine.telemetry.skipSample=!viewer&&!soundMapRecordingRequest01&&!soundMapBackgroundRequest01&&
     (sequence%16!==0||clockedMap.busy||clockedMap.full);
-  const channels=await engine.render();if(stopped)return;
+  const probe=config.powertrainWorld&&sequence%32===0?passageLevelProbe():null;
+  if(probe)engine.pipeline.renderer.pcmWitness=probe;
+  let channels;
+  try{channels=await engine.render();}
+  finally{if(probe)engine.pipeline.renderer.pcmWitness=null;}
+  if(stopped)return;
+  if(probe){
+   const v=engine.slots.find(slot=>slot.source)?.vehicle;
+   passageLevels={producerBlock:sequence,revRatio:v?.operatingPoint??null,outputRevision:v?.powertrainRevision??null,
+    camera:engine.sample?.state?.position??null,observationKey:engine.pipeline.simulation.scene?.tile?.observationKey??null,
+    ...probe.levels()};
+  }
   if(powertrainVoiceEvidence&&engine.stageCounters.sourcePlaybackBlocks>playbackBefore)powertrainVoiceEvidence.render(engine,channels);
   const beforeFraming=clockedEvidence?performance.now():0;
   credits--;encodeVehicleRa07(...channels,sequence,packet);sequence=(sequence+1)>>>0;

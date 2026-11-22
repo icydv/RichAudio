@@ -420,7 +420,7 @@ export class StockGameplay {
     running:this.continuityPolicy==='camera-source-01'?old.running:old.running&&(!next||next.running),lift:next?next.operatingPoint<old.operatingPoint-.002:false,
     riderAttached:old.riderAttached===true&&(!next||next.riderAttached===true),riderViewAttached:old.riderViewAttached===true&&(!next||next.riderViewAttached===true)});
    const witness=this.pipeline.renderer.pcmWitness;
-   if(witness){
+   if(witness?.controlDeadline){
     const observed=result.at(-1);
     observed.clockedDryDeadlineQpc=witness.controlDeadline(this.snapshots,left.sequence,right?.sequence,old.observationTicks);
     if(this.catalogueFleet){

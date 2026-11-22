@@ -4,7 +4,10 @@ param(
     [Parameter(Mandatory)][string]$Manifest,
     [Parameter(Mandatory)][string]$OutputRoot,
     [switch]$ObserveBaselineExpiry,
-    [string]$WorldPose
+    [string]$WorldPose,
+    [string]$PassageRoute,
+    [switch]$ContendStatus,
+    [ValidateRange(10,180)][int]$PassageSeconds=126
 )
 
 $ErrorActionPreference = 'Stop'
@@ -55,6 +58,13 @@ if ($WorldPose) {
     $fixturePose = [IO.Path]::GetFullPath($WorldPose)
     if (!$fixturePose.StartsWith($private, [StringComparison]::OrdinalIgnoreCase)) { throw 'Retain the authored pose under the private audio-switch directory.' }
     $testArguments += @('--world-pose',$fixturePose)
+}
+if ($PassageRoute) {
+    if ($WorldPose -or $ObserveBaselineExpiry) { throw 'Select one playback fixture mode.' }
+    $routePath=(Resolve-Path -LiteralPath $PassageRoute).Path
+    if (!$routePath.StartsWith($private,[StringComparison]::OrdinalIgnoreCase)) { throw 'Keep reconstructed route data private.' }
+    $testArguments += @('--passage',$routePath,[string]$PassageSeconds)
+    if ($ContendStatus) { $testArguments += '--contend-status' }
 }
 & $binary @testArguments 2>&1 | Tee-Object -FilePath (Join-Path $output 'fixture.log')
 if ($LASTEXITCODE -ne 0) { throw 'Device-free powertrain playback fixture failed' }
