@@ -313,7 +313,13 @@ export class InstalledStaticWorld01 {
   interiorWorksetAnchor01(interiorActivation01,listener,sources,radius,surroundingWorkset01,!!localSurfaceTarget01):
   surroundingWorkset01&&!interiorActivation01?exteriorWorksetAnchor01(listener,sources,radius):null;
  const anchorReach=anchor?Math.max(...[listener,...sources].flatMap(p=>p.map((v,i)=>Math.abs(v-anchor[i])))):0;
- const localMinimum=Math.max(Math.min(4,radius),sourceDistance,anchorReach);
+ const reach=Math.max(sourceDistance,anchorReach);
+ // An emitter at the exact outer face can leave before a prepared window is
+ // adopted. Reuse a radius tier and request its successor while the current
+ // scene still contains outward motion. Visibility uses only actual poses.
+ const movingExterior=options.engine?.installedReflectionTrains===true&&surroundingWorkset01&&
+  !interiorActivation01&&localSurfaceTarget01&&sources.length>0;
+ const localMinimum=movingExterior?8*Math.ceil((reach+4)/8):Math.max(Math.min(4,radius),reach);
  return {listener,sources,anchor,surrounding:!!anchor&&!!instance&&surroundingWorkset01,radius,maximumSurfaces,maximumResources,adaptiveRadius,localSurfaceTarget01:localSurfaceTarget01??null,requestedRadius:radius,minimumRadius:localSurfaceTarget01?Math.min(radius,localMinimum):minimumRadius,instance,interiorKey:instance?interiorObservationKey01(interiorActivation01):null};}
  #anchoredSelections01=new Map();
  #anchoredTiles01=new WeakMap();

@@ -148,3 +148,24 @@ test('the installed search reports each obstacle against the corresponding order
     assert.ok(report.multiBounce.knownHit[3]>0,'the screen obstructs the middle of a triple');
   } finally {world.close();cache.close();}
 });
+
+test('a moving exterior emitter retains room inside an adaptive multiwall workset',()=>{
+  const vertices=[],polygons=[];
+  for(let x=0;x<10;x++)for(let z=0;z<8;z++){
+    const at=vertices.length, left=x*.2, bottom=z*.2;
+    vertices.push([left,1,bottom],[left+.19,1,bottom],[left,1,bottom+.19]);
+    polygons.push({family:'Triangle',indices:[at,at+1,at+2],materialSlot:0});
+  }
+  const cache=originalInstalledCache01({mesh:{vertices,polygons}}), world=new InstalledStaticWorld01(cache);
+  try{
+    const window=(distance,{radius=32,trains=true}={})=>world.window({...request,
+      listener:[0,-1,1],sources:[[distance,-1,1]],radius,maximumSurfaces:128,localSurfaceTarget01:64,
+      surroundingWorkset01:true,engine:{...request.engine,installedReflectionTrains:trains}});
+    const first=window(9.1), next=window(9.5);
+    assert.equal(installedStaticSceneMetadata01(first).activeRadius,16);
+    assert.equal(installedStaticSceneMetadata01(next).activeRadius,16);
+    assert.deepEqual(first.tile.surfaces.map(s=>s.id),next.tile.surfaces.map(s=>s.id));
+    assert.equal(installedStaticSceneMetadata01(window(9.5,{radius:10})).activeRadius,10);
+    assert.equal(installedStaticSceneMetadata01(window(9.5,{trains:false})).activeRadius,9.5);
+  }finally{world.close();cache.close();}
+});
