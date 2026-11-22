@@ -91,7 +91,7 @@ namespace RichAudio.Beacon.Windows
                 signal = new AutoResetEvent(false); Native.Check(client.SetEventHandle(signal.SafeWaitHandle.DangerousGetHandle()));
                 Ready.Set();
                 long deadline = Stopwatch.GetTimestamp() + Stopwatch.Frequency * 5;
-                int startupBlocks=calibratedGameplay?PcmRing.GameplayStartupBlocks:4;
+                int startupBlocks=calibratedGameplay?ring.GameplayPrefillBlocks:4;
                 while (!stop && ring.Count < startupBlocks && Stopwatch.GetTimestamp() < deadline) Thread.Sleep(2);
                 if (stop) return;
                 if (ring.Count < startupBlocks) throw new TimeoutException("No "+startupBlocks+"-block prefill; device was not started");
@@ -146,7 +146,7 @@ namespace RichAudio.Beacon.Windows
             return new Dictionary<string, object> {
                 {"endpointName",EndpointName},{"format",FormatResult},{"mixSampleRate",MixRate},{"mixChannels",MixChannels},{"processingSampleRate",48000},{"processingChannels",2},
                 {"endpointBufferFrames",BufferFrames},{"endpointBufferMilliseconds",BufferFrames/48.0},{"streamLatencyMilliseconds",StreamLatency100ns/10000.0},{"devicePeriodMilliseconds",DevicePeriod100ns/10000.0},
-                {"producerStartupBlocks",calibratedGameplay?PcmRing.GameplayStartupBlocks:4},{"producerReserveMilliseconds",calibratedGameplay?PcmRing.GameplayReserveMilliseconds:4*512/48.0},{"bufferedFrames",ring.BufferedFrames},{"maximumCallbackFrames",MaximumCallbackFrames},{"minimumCallbackFrames",MinimumCallbackFrames==UInt32.MaxValue?0:MinimumCallbackFrames},
+                {"producerStartupBlocks",calibratedGameplay?ring.GameplayPrefillBlocks:4},{"producerReserveMilliseconds",calibratedGameplay?ring.SelectedGameplayReserveMilliseconds:4*512/48.0},{"bufferedFrames",ring.BufferedFrames},{"maximumCallbackFrames",MaximumCallbackFrames},{"minimumCallbackFrames",MinimumCallbackFrames==UInt32.MaxValue?0:MinimumCallbackFrames},
                 {"mmcssTask","Audio"},{"mmcssRegistered",MmcssRegistered},{"mmcssReverted",MmcssReverted},{"mmcssError",MmcssError},
                 {"submittedFrames",SubmittedFrames},{"consumedFrames",ring.ConsumedFrames},{"underflowFrames",ring.UnderflowFrames},{"firstUnderflowFrame",ring.FirstUnderflowFrame},{"endOfStreamSilenceFrames",ring.EndSilenceFrames},{"emptyPaddingEvents",EmptyPaddingEvents},{"wakeTimeouts",WakeTimeouts},
                 {"submissionMeasurements",count},{"submissionMedianMs",Percentile(duration,.5)},{"submissionP99Ms",Percentile(duration,.99)},{"submissionMaxMs",MaximumSubmissionTicks*1000.0/Stopwatch.Frequency},

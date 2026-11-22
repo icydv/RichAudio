@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "kind": "first-acoustic-world-low-latency-and-native-ownership-offline-increment",
+  "baselineCommit": "d9fdc902f42d8f3a3c58103be2f7d19b782f33c8",
+  "runtimeImplementationCommit": "be5ed5c484dcd5ad54c7dba9f14415952d0735df",
+  "defaultProfilePreserved": true,
+  "defaultRetrospectiveMilliseconds": 100,
+  "defaultStartupAndSteadyCredits": 8,
+  "candidate": {
+    "latencyProfile": "low-latency-01",
+    "continuityPolicy": "camera-source-01",
+    "retrospectiveMilliseconds": 75,
+    "startupCredits": 8,
+    "preparedSteadyCredits": 6,
+    "eligibility": "single-player-context-Bati-PLAYABLE-13-only",
+    "newPcmQueue": false,
+    "physicalLatencyEstablished": false,
+    "stableSubmissionAgeImprovementEstablished": false
+  },
+  "validation": {
+    "broadOfflineSuite": {
+      "exitCode": 0,
+      "nodeExecutions": 644,
+      "nodeFailures": 0,
+      "nodeSkipped": 0,
+      "logSha256": "33300ae40213c1c572cf3ee4fadc3f94698700d565e491c380dd6bd58729ca11"
+    },
+    "latestFocusedChecks": {
+      "nativeHostAssertions": 1702,
+      "nativeHostShutdownModes": 8,
+      "cameraCases": 11,
+      "cameraAssertions": 37,
+      "journalProfiles": 4,
+      "journalAssertions": 56,
+      "frameAdapterCases": 15,
+      "frameAdapterAssertions": 74,
+      "genuinePackageGameplayAndSourceNodeTests": 55,
+      "finalIntegratedNodeTests": 69,
+      "nodeFailures": 0,
+      "nodeSkipped": 0,
+      "overlapWithBroadSuite": true
+    },
+    "originalRingComparison": {
+      "exactOriginalCommit": "d9fdc902f42d8f3a3c58103be2f7d19b782f33c8",
+      "namespaceOnlyRename": true,
+      "matchedScenarios": 16,
+      "additionalQueueExplorationScenarios": 64,
+      "defaultPcmCreditsDepthAndFatalFaultsMatch": true
+    },
+    "privateInputFailure": "Journal executable cases passed but first report write lacked an old private diagnosis input in the new checkout. Exact retained input was copied with hash verification; no historical receipt, proposal or threshold was modified. The complete fixture then passed."
+  },
+  "independentReviews": {
+    "worldRoot": "813b9de8ff7dddf8a8291b2b89e53d5b68843bd2beb4d61405fe11df8353ed4e",
+    "worldRecorder": "2adf8a3b01990a743704214251cc767956b074ca8c3ed5219c3847fbaaad68b0",
+    "continuity": "b9fa06d0616a7725bfd65406e274399a7c3b8b7b9e68c7680ba883761fe89e3a",
+    "ownershipInitial": "6a4797ae9bd2aea210346783f6956094808e06adc1e0a8f145abef5c86e61b29",
+    "ownershipEligibilityCorrection": "45e8130733bb900135b50c70cc986f4af0903e73681197fd459e106990b94758",
+    "finalClockAndFixtureBindings": "18389288e366b67a339fffd5c599f7491188fd428e2fff48d6bd9be580cf3a97"
+  },
+  "closedEvidencePreservation": {
+    "files": 15,
+    "bytes": 31926034,
+    "manifestSha256": "62efb00fa7f5972e3d9211f8f135d1957e2f87e50f3c854b20766de4fc80c001",
+    "allPreservedHashesStillMatch": true,
+    "playable15ResultAndProposalDiffers": false,
+    "comparisonBasis": "Git content and original preserved checkout; not byte identity across checkouts",
+    "originalApprovedProposalSha256": "11d6dab69ed6d5cfa44b68f1e2a7001bc48c0ca371b62e86495dd712050a3ddf",
+    "newCheckoutProposalSha256": "08316ab7e050e63ffb50e3e684f0fc1539817ce21508e6d24fc20c118d09c4f6",
+    "newCheckoutProposalIsApprovedArtifact": false,
+    "checkoutDifference": "Existing core.autocrlf materialised CRLF instead of original LF; no original bytes or approval binding modified or substituted",
+    "ownedFixtureProcessesRemaining": 0
+  },
+  "scope": {
+    "gameLaunched": false,
+    "deployed": false,
+    "realAudioEndpointOpened": false,
+    "liveRecordingStarted": false,
+    "privateInstalledMapAssetsAccessed": false,
+    "installedArchiveModified": false,
+    "nativeSuppressionCalled": false,
+    "merged": false,
+    "nativeTakeoverStatus": "BLOCKED"
+  },
+  "limitations": [
+    "Recorded quiet intervals are exact; full live Node acceptance scheduling was not retained, so controlled replay is not an exact live WAV reconstruction.",
+    "Selection-age, ring residence and submission endpoint ages are distinct scopes and cannot be summed as independent latency savings.",
+    "Final authored-pose submission medians are not native operating acquisition or speaker latency; prior cold pairs varied in both directions.",
+    "Both profiles failed actual severe CPU contention; residual camera gaps, natural post-dismount behaviour and installed building acoustics remain unverified.",
+    "Static resources and geometry are original authored fixtures; existing installed-import tools were not run.",
+    "The historical broad matched-render source snapshot also pins an unused ownership module. Its later eligibility correction is separately tested and reviewed, with no renderer import or DSP change. EOF-only source cleanup has a separate unchanged-code supplement."
+  ]
+}

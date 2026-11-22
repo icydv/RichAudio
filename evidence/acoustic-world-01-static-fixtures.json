@@ -1,0 +1,243 @@
+{
+  "schema": 1,
+  "kind": "AW01-fixture-static-foundations-and-private-matched-Bati-reflections",
+  "passed": true,
+  "fixtureTests": 25,
+  "preservedWorldSuites": 4,
+  "actualInstalledScanPerformed": false,
+  "binaryYmapYtypYbnDecoderAdded": false,
+  "existingCollisionFoundationPreserved": true,
+  "existingInstanceTransformReused": true,
+  "geometryOrigin": "wholly-original-authored-metre-panels",
+  "cacheAuthority": "authored-fixture-only",
+  "historicalRayCachePromoted": false,
+  "effectiveMountOrder": "explicit-fixture-precedence-only-not-actual-GTA-loader-proof",
+  "runtimeDoorInteriorActivation": "unknown",
+  "limits": {
+    "resources": 128,
+    "resourceBytes": 262144,
+    "totalResourceBytes": 4194304,
+    "expandedPlacements": 512,
+    "panelsPerTile": 64,
+    "indexedTiles": 64,
+    "tileBodyBytes": 262144,
+    "residentCachedTiles": 8,
+    "queuedTileJobs": 16,
+    "workerOldGenerationMiB": 64,
+    "workerYoungGenerationMiB": 16
+  },
+  "actualWorkerThreadTested": true,
+  "workerPauseCancelBudgetAndJoinTested": true,
+  "unexpectedWorkerExitCannotComplete": true,
+  "crossInstanceWriterLeaseQuotaTested": true,
+  "cacheChecksumValidTamperTested": true,
+  "matchedPrivateBati": {
+    "durationSeconds": 4,
+    "sampleRate": 48000,
+    "frames": 192000,
+    "source": "unchanged-retained-private-Bati-banks",
+    "operatingAndPoseTimeline": "same-authored-offline-timeline-in-every-case",
+    "privatePackageManifestSha256": "68217b8b15a24f1ad395a39ed3a29938ffd579e6e2fecf082bf8f1c2a1ea52cb",
+    "privateRunReceiptSha256": "5c87c9603a2ef6e75c45584d9396979209454a72671fe5fea59ecac58e1031ef",
+    "stereoAnalysisSha256": "ea943891eecc7b444deb95002a20a732f91481f7956ea29d16377bb47d3c9dc8",
+    "matchedDryPcmBitExact": true,
+    "drySha256": "9d089450b53478bcb07393ba362282ebccd6d2f075c24c8e81ee6f88c071e290",
+    "emptyFixtureBaselinePcmBitExact": true,
+    "engine": "existing-StockGameplay-CausalSimulation-StreamingRenderer",
+    "calibration": {
+      "enginePressureGain": 0.25,
+      "exhaustPressureGain": 2.5,
+      "masterGain": 0.175,
+      "commonHeadroom": 0.25,
+      "exhaustToEngine": 10
+    },
+    "cases": [
+      {
+        "kind": "conditional-baseline",
+        "pcmSha256": "b854fda720bcfa27403c4b669da9c941099f9d2e96bed4e17d4a086110fffb66",
+        "paths": 2,
+        "reflectionPathDelayMs": [],
+        "directPathDelayMs": [
+          11.9222021752725,
+          12.321880734113215
+        ],
+        "peak": 0.050302136689424515,
+        "rms": 0.016702550644907933,
+        "complementaryAnalysisBandEnergy": [
+          88.40816963937104,
+          14.829304825072143,
+          0.30261420313598125
+        ],
+        "bandAnalysisIsNotRenderEQ": true,
+        "stereo": {
+          "leftRms": 0.015365712244241412,
+          "rightRms": 0.017940046915172113,
+          "leftRightRmsDb": -1.3454175719946373,
+          "leftRightCorrelation": 0.9999550566809755,
+          "physicalSpatialCorrectnessEstablished": false
+        },
+        "reflectionDifferenceRms": 0,
+        "sourceCreations": 1,
+        "rendererSourceHistoryBytes": 11558912,
+        "limitedSamples": 0,
+        "missingHistory": 0,
+        "headroomPathsOmitted": 0,
+        "processingMs": {
+          "mean": 2.3400591999999953,
+          "p95": 3.880999999999972,
+          "maximum": 74.94050000000004,
+          "deadlineMs": 10.666666666666666,
+          "observedDeadlineMisses": 1
+        }
+      },
+      {
+        "kind": "open",
+        "pcmSha256": "b854fda720bcfa27403c4b669da9c941099f9d2e96bed4e17d4a086110fffb66",
+        "paths": 2,
+        "reflectionPathDelayMs": [],
+        "directPathDelayMs": [
+          11.9222021752725,
+          12.321880734113215
+        ],
+        "peak": 0.050302136689424515,
+        "rms": 0.016702550644907933,
+        "complementaryAnalysisBandEnergy": [
+          88.40816963937104,
+          14.829304825072143,
+          0.30261420313598125
+        ],
+        "bandAnalysisIsNotRenderEQ": true,
+        "stereo": {
+          "leftRms": 0.015365712244241412,
+          "rightRms": 0.017940046915172113,
+          "leftRightRmsDb": -1.3454175719946373,
+          "leftRightCorrelation": 0.9999550566809755,
+          "physicalSpatialCorrectnessEstablished": false
+        },
+        "reflectionDifferenceRms": 0,
+        "sourceCreations": 1,
+        "rendererSourceHistoryBytes": 11558912,
+        "limitedSamples": 0,
+        "missingHistory": 0,
+        "headroomPathsOmitted": 0,
+        "processingMs": {
+          "mean": 2.617414933333345,
+          "p95": 3.9857999999999265,
+          "maximum": 21.44249999999988,
+          "deadlineMs": 10.666666666666666,
+          "observedDeadlineMisses": 1
+        }
+      },
+      {
+        "kind": "wall",
+        "pcmSha256": "b976acca271e7236335fd4e213fead5e232946a151c9cf4ac8f84ecb4b781583",
+        "paths": 4,
+        "reflectionPathDelayMs": [
+          26.194081943373657,
+          28.003898128615567
+        ],
+        "directPathDelayMs": [
+          11.9222021752725,
+          12.321880734113215
+        ],
+        "peak": 0.0553387776017189,
+        "rms": 0.017374365377720146,
+        "complementaryAnalysisBandEnergy": [
+          95.94762787635165,
+          15.82601593342597,
+          0.31892512749381097
+        ],
+        "bandAnalysisIsNotRenderEQ": true,
+        "stereo": {
+          "leftRms": 0.016693251401429927,
+          "rightRms": 0.01802976711457096,
+          "leftRightRmsDb": -0.6689836633092312,
+          "leftRightCorrelation": 0.9555377304690564,
+          "physicalSpatialCorrectnessEstablished": false
+        },
+        "reflectionDifferenceRms": 0.00446249174546593,
+        "sourceCreations": 1,
+        "rendererSourceHistoryBytes": 11558912,
+        "limitedSamples": 0,
+        "missingHistory": 0,
+        "headroomPathsOmitted": 0,
+        "processingMs": {
+          "mean": 2.615403466666667,
+          "p95": 3.9615999999996347,
+          "maximum": 16.960399999999936,
+          "deadlineMs": 10.666666666666666,
+          "observedDeadlineMisses": 1
+        }
+      },
+      {
+        "kind": "passage",
+        "pcmSha256": "ca8e0fdac3a32c79676c26e8b31d06d5ebb525a713e40e6a8915554c01625e84",
+        "paths": 6,
+        "reflectionPathDelayMs": [
+          19.786985365157765,
+          21.16917229821184,
+          21.16917229821184,
+          22.89372407401354
+        ],
+        "directPathDelayMs": [
+          11.9222021752725,
+          12.321880734113215
+        ],
+        "peak": 0.07221899181604385,
+        "rms": 0.02044496025864159,
+        "complementaryAnalysisBandEnergy": [
+          131.7905896015581,
+          22.741792874611477,
+          0.46447112561896536
+        ],
+        "bandAnalysisIsNotRenderEQ": true,
+        "stereo": {
+          "leftRms": 0.017959578023752504,
+          "rightRms": 0.02265935473846429,
+          "leftRightRmsDb": -2.019028203078681,
+          "leftRightCorrelation": 0.8532406323745326,
+          "physicalSpatialCorrectnessEstablished": false
+        },
+        "reflectionDifferenceRms": 0.011141250419271038,
+        "sourceCreations": 1,
+        "rendererSourceHistoryBytes": 11558912,
+        "limitedSamples": 0,
+        "missingHistory": 0,
+        "headroomPathsOmitted": 0,
+        "processingMs": {
+          "mean": 2.7647853333333345,
+          "p95": 4.149800000000141,
+          "maximum": 20.129099999999653,
+          "deadlineMs": 10.666666666666666,
+          "observedDeadlineMisses": 1
+        }
+      }
+    ],
+    "sourceWhitespaceOnlyRebindSha256": "25f1d9a7637630a77460f52e2b2b8cfe36ec499bcd2052d5b5e304356d110df4",
+    "sourceWhitespaceRebindAlgorithmChanged": false
+  },
+  "gameLaunched": false,
+  "endpointOpened": false,
+  "liveRecordingStarted": false,
+  "additionalAudioBuffers": 0,
+  "sourceBanksChanged": false,
+  "gainsCalibrationChanged": false,
+  "dspChanged": false,
+  "bufferTuningChanged": false,
+  "proprietarySamplesPublished": false,
+  "privateRenderWavsPublished": false,
+  "installedBuildingReflectionsEstablished": false,
+  "physicalListeningEstablished": false,
+  "universalDeadlineSafetyEstablished": false,
+  "limitations": [
+    "Only original fixture resource and panel schema is decoded; actual effective installation precedence remains unproven.",
+    "Positive uniform fixture scale/quaternion/nested placements are not GTA MLO, portal, LOD or binary-map support.",
+    "Unsupported winning resources, missing/scope-invalid archetypes and tile-crossing panels remain explicit unknowns; no fabricated clipping.",
+    "Static scene horizon is an offline experiment bound, not live observation freshness or current runtime-world authority.",
+    "Four-second serial offline renders retain all cold/scheduling misses and do not prove GTA/runtime output timing.",
+    "Further live deployment, capture or audition requires a separate exact reviewed proposal and fresh approval."
+  ],
+  "converterRevision": "authored-panel-transform-v1",
+  "converterRevisionIncludedInWorldFingerprint": true,
+  "unknownOrOldConverterRevisionRejected": true
+}

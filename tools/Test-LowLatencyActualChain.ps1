@@ -1,0 +1,16 @@
+#requires -Version 7.0
+[CmdletBinding()]
+param([Parameter(Mandatory)][string]$Baseline,[Parameter(Mandatory)][string]$Candidate,[ValidateRange(0,4)][int]$CpuWorkers=0)
+$ErrorActionPreference='Stop';$repo=Split-Path -Parent $PSScriptRoot;$out=Join-Path $repo ('.local/low-latency-01/actual-chain-'+[Guid]::NewGuid().ToString('N'));[IO.Directory]::CreateDirectory($out)|Out-Null
+$sources=@('src/acoustics/host/Windows','src/acoustics/host/Transport','src/acoustics/recording','src/acoustics/geometry')|ForEach-Object{Get-ChildItem -LiteralPath (Join-Path $repo $_) -File -Filter '*.cs'|ForEach-Object FullName}
+$sources+=@('GeometryObservation.cs','SurfaceAcquisition.cs','DiagnosticTile.cs')|ForEach-Object{Join-Path $repo ('src/acoustics/observation/'+$_)};$sources+=Join-Path $repo 'tests/host/TestLowLatencyActualChain.cs';$pins=@($sources|ForEach-Object{[ordered]@{path=$_;sha256=(Get-FileHash -LiteralPath $_).Hash.ToLowerInvariant()}})
+$compiler=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe';$binary=Join-Path $out 'LowLatencyActualChain.Tests.exe'
+& $compiler /nologo /optimize+ /warnaserror+ /unsafe+ /platform:x64 /define:STATE_TRANSPORT,GEOMETRY_LIVE /r:System.Web.Extensions.dll /r:System.Runtime.Serialization.dll /main:TestLowLatencyActualChain ('/out:'+$binary) @sources
+if($LASTEXITCODE-ne0){throw 'Actual chain fixture compilation failed.'}
+function VerifyPrepared([string]$p){$receipt=Join-Path (Split-Path -Parent ([IO.Path]::GetFullPath($p))) "preparation.json";$r=Get-Content -LiteralPath $receipt -Raw|ConvertFrom-Json;if(!$r.passed-or!$r.hostSourcePins-or!$r.currentCodeSourcePins-or$r.deploymentCandidate){throw "Pinned device-free preparation receipt required."};foreach($pin in @($r.hostSourcePins)+@($r.currentCodeSourcePins)){if((Get-FileHash -LiteralPath (Join-Path $repo $pin.file)).Hash.ToLowerInvariant()-cne$pin.sha256){throw "Prepared fixture source changed; make a fresh private fixture."}};if((Get-FileHash -LiteralPath (Join-Path $p "playable.json")).Hash.ToLowerInvariant()-cne$r.manifestSha256-or(Get-FileHash -LiteralPath (Join-Path $p "runtime/RichAudio.Acoustics.Host.exe")).Hash.ToLowerInvariant()-cne$r.hostSha256){throw "Prepared fixture binding mismatch."};return [ordered]@{receipt=$receipt;sha256=(Get-FileHash -LiteralPath $receipt).Hash.ToLowerInvariant();manifestSha256=$r.manifestSha256;hostSha256=$r.hostSha256}}
+$preparations=@((VerifyPrepared $Baseline),(VerifyPrepared $Candidate))
+$result=Join-Path $out 'actual-chain.json';& $binary ([IO.Path]::GetFullPath($Baseline)) ([IO.Path]::GetFullPath($Candidate)) $result $CpuWorkers
+if($LASTEXITCODE-ne0){throw 'Actual low-latency chain failed.'}
+foreach($pin in $pins){if((Get-FileHash -LiteralPath $pin.path).Hash.ToLowerInvariant()-cne$pin.sha256){throw 'Source changed during actual chain fixture.'}}
+[ordered]@{schema=1;passed=$true;sourcePins=$pins;fixturePreparations=$preparations;resultSha256=(Get-FileHash -LiteralPath $result).Hash.ToLowerInvariant();endpointOpened=$false;recordingStarted=$false;physicalLatencyMeasured=$false}|ConvertTo-Json -Depth 7|Set-Content -LiteralPath (Join-Path $out 'validation.json') -Encoding utf8
+Write-Output ('PASS actual low-latency chain fixture; '+(Join-Path $out 'validation.json'))

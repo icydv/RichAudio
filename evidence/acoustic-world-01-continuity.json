@@ -1,0 +1,203 @@
+{
+  "schema": 1,
+  "kind": "AW-01-offline-camera-source-continuity",
+  "passed": true,
+  "scope": "Authored fixtures and private retained-observation replay with explicit constructed delivery schedule",
+  "defaultPolicy": "baseline",
+  "optInPolicy": "camera-source-01",
+  "gameLaunched": false,
+  "endpointOpened": false,
+  "installedGameWritten": false,
+  "proprietaryAssetsPublished": false,
+  "originalCapturedWaveSha256": "e86d54d9f305b24dd86264d456f3f8786e741c0aaaaeab42a82bd70016a021fe",
+  "exactRetainedCameraQuietWindows": [
+    {
+      "startFrame": 605491,
+      "frames": 4301,
+      "durationMs": 89.60416666666667
+    },
+    {
+      "startFrame": 659229,
+      "frames": 4835,
+      "durationMs": 100.72916666666667
+    }
+  ],
+  "replaySchedule": "Recorded host write-after times, mapped using original generation1 clock offset; delivered before first following512-frame block. No unseen live acceptance times or PCM samples invented.",
+  "exactLiveNodeAcceptanceScheduleAvailable": false,
+  "exactLivePcmReconstructionClaimed": false,
+  "defaultReplayBitExactToSealedOriginal": true,
+  "baselinePcmSha256": "be5d36be1d842ef47be8ea3b5d48496ac125b687518b550d07156654b5516e92",
+  "optInPcmSha256": "f9d1c527dfd14b3cc947c270e63c9a248ff8d49179d14b10eeaff0a3a0ec8beb",
+  "replayCameraQuietWindows": {
+    "baseline": [
+      [
+        {
+          "startFrame": 604977,
+          "frames": 4303,
+          "durationMs": 89.64583333333333
+        }
+      ],
+      [
+        {
+          "startFrame": 659748,
+          "frames": 4316,
+          "durationMs": 89.91666666666667
+        }
+      ]
+    ],
+    "optIn": [
+      [
+        {
+          "startFrame": 606504,
+          "frames": 2264,
+          "durationMs": 47.166666666666664
+        }
+      ],
+      [
+        {
+          "startFrame": 661285,
+          "frames": 2267,
+          "durationMs": 47.229166666666664
+        }
+      ]
+    ]
+  },
+  "optInSourceChanges": 0,
+  "optInSourceFrameRegressions": 0,
+  "optInSourceCreations": 1,
+  "optInHistoryFaults": 0,
+  "originalPredictionCeilingMs": 50,
+  "originalSourceExpiryMs": 250,
+  "sourceIdentityPreserved": true,
+  "spatialDopplerEpochResetRetained": true,
+  "scopeLossNotLabeledEngineShutdown": true,
+  "naturalEngineRundownClaimed": false,
+  "uninterruptedCameraAudioClaimed": false,
+  "authoredAblations": {
+    "baseline": {
+      "policy": "baseline",
+      "sourceCreations": 1,
+      "pausedSourceBlocks": 9,
+      "unavailableListenerBlocks": 9,
+      "quiet": [
+        {
+          "startFrame": 51647,
+          "frames": 7233,
+          "durationMs": 150.6875
+        }
+      ],
+      "historyFaults": 0
+    },
+    "source-history-only": {
+      "policy": "source-history-only",
+      "sourceCreations": 1,
+      "pausedSourceBlocks": 0,
+      "unavailableListenerBlocks": 9,
+      "quiet": [
+        {
+          "startFrame": 51647,
+          "frames": 3649,
+          "durationMs": 76.02083333333333
+        }
+      ],
+      "historyFaults": 0
+    },
+    "listener-history-only": {
+      "policy": "listener-history-only",
+      "sourceCreations": 2,
+      "pausedSourceBlocks": 0,
+      "unavailableListenerBlocks": 4,
+      "quiet": [
+        {
+          "startFrame": 51647,
+          "frames": 7234,
+          "durationMs": 150.70833333333334
+        }
+      ],
+      "historyFaults": 0
+    },
+    "camera-source-01": {
+      "policy": "camera-source-01",
+      "sourceCreations": 1,
+      "pausedSourceBlocks": 0,
+      "unavailableListenerBlocks": 4,
+      "quiet": [
+        {
+          "startFrame": 54207,
+          "frames": 2625,
+          "durationMs": 54.6875
+        }
+      ],
+      "historyFaults": 0
+    }
+  },
+  "tests": {
+    "focused": 8,
+    "ablation": 1,
+    "combinedExistingAndFocused": 80,
+    "failed": 0,
+    "skipped": 0,
+    "regressionLogSha256": "3e8aea8b80496b597cdfd962146e7b0aa73638c7937d1004f78931d646cc4b0f"
+  },
+  "privateValidationSha256": "03835524b6b12c25b9c78f6d7235ef066f0321197f0b98fdcfc2d1c3e6b4fa35",
+  "sourcePins": [
+    {
+      "file": "src/acoustics/vehicle/gameplay.mjs",
+      "sha256": "33ebf6ce5ba322c27d2795767f5e2355f50e8ac4224d747e3ea112bc2ebd6984"
+    },
+    {
+      "file": "src/acoustics/streaming/listener-playout.mjs",
+      "sha256": "d53c847eb67802513c5653f5d1ecb3f4be6ca0d6a0adc059e2226a20993a99af"
+    },
+    {
+      "file": "src/acoustics/vehicle/pipeline.mjs",
+      "sha256": "0336c5ffe72df7352596743475d1a1fba5f95f044f6ff7f009df1b3ed47af85d"
+    },
+    {
+      "file": "src/acoustics/vehicle/stock-source.mjs",
+      "sha256": "78d29a58e5ffb898a11e0397417fde721477a418fccfb97cb8a18b5bfa3a575a"
+    },
+    {
+      "file": "src/acoustics/streaming/causal.mjs",
+      "sha256": "d01fcd54dba17faa1048f52b99e8c9eefed1c5f31535ccaa6deadef4a8003105"
+    },
+    {
+      "file": "src/acoustics/vehicle/latency-profile.mjs",
+      "sha256": "68bdbc6659c1d3eae5736f955ff1a1e03cd82ab013275bc073570fdc68d56e92"
+    },
+    {
+      "file": "tools/audio/acoustic-world-continuity-replay.mjs",
+      "sha256": "03e4e8dbdb18e50a0124dd0e29ecae65527a9d35a2c77b072572d81fc0060611"
+    },
+    {
+      "file": "tools/Run-AcousticWorld01Continuity.mjs",
+      "sha256": "78c23c4ec2a061148e6ecc51c9afdfb11b5a0681ebfca1ffb152a6842ba1a20e"
+    },
+    {
+      "file": "tests/Test-AcousticWorld01Continuity.mjs",
+      "sha256": "a0390f62636eec84b51448dfc55cb71950f976f63b322f6c7398c3cb601f1d98"
+    }
+  ],
+  "artifactPins": [
+    {
+      "file": "baseline.wav",
+      "bytes": 12754988,
+      "sha256": "4efeb4f3df2f14125f9dc6eb326db68c1d556d4d0105294d1a152067676e5c90"
+    },
+    {
+      "file": "camera-source-01.wav",
+      "bytes": 12754988,
+      "sha256": "4d3868b3591c2b9ed149da2ff4e405520258dc0cfd28060d9d10415c6fd043f4"
+    },
+    {
+      "file": "original.wav",
+      "bytes": 12754988,
+      "sha256": "4efeb4f3df2f14125f9dc6eb326db68c1d556d4d0105294d1a152067676e5c90"
+    }
+  ],
+  "limits": [
+    "Live89.604/100.729ms windows are exact retained PCM; replay89.646/89.917ms windows use a constructed arrival schedule.",
+    "Remaining47.167/47.229ms replay windows retain unavailable listener time; no invented pose or wider forecast.",
+    "No live audibility, speaker latency, driver-loss causality or natural shutdown proof."
+  ]
+}
