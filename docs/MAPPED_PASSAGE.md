@@ -49,3 +49,9 @@ A separate hardware test on the RTX 2080 Super measured the existing DirectCompu
 The offline comparison establishes which paths changed PCM. Audibility on headphones, placement in the running game, default-output latency and sustained Story Mode playback still need a drive.
 
 The [five-vehicle traffic measurements](FIVE_VEHICLE_TRAFFIC.md) follow the same exit with independent vehicle lifetimes and a clocked output recording.
+
+## First Story Mode listening pass
+
+On a stock ADDER with the Bati replacement active, the listener heard a tunnel-like reflection under cover and found the replacement too quiet. A retained live-camera mixer snapshot near the passage mouth confirmed four single reflections and a two-bounce exhaust path. The exhaust return arrived about 44.3 ms after its direct path. The available snapshots leave the mid-pass change in reflections unresolved.
+
+Playback continuity did not pass. The first takeover returned to stock after producer starvation. The second returned to stock near the exit after a file-sharing error. Each return was issued once to the same vehicle. Both intervals had low sampled replacement levels, around −37 dBFS RMS in the producer's voice-mode stereo output. Those levels establish the replacement's digital output only. Relative loudness against the stock engine remains unmeasured.
