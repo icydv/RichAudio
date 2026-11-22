@@ -25,6 +25,48 @@ const soundMapFrame = (take, geometryGeneration = null, paths = []) => ({
   geometryGeneration, paths, sources: [{id: 'engine', position: [0, 0, 0]}], listener: {position: [1, 0, 0], valid: true}
 });
 
+test('an offline audition replays bound PCM and marks the compared positions', async () => {
+  const {openAuditionReplay} = await import('../tools/soundmap/powertrain-replay.mjs');
+  const {replayFrame} = await import('../tools/soundmap/recorder.mjs');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'RichAudio-audition-'));
+  try {
+    const wave = wav(Array(2 * 512 * 2).fill(.1));
+    const vertices=[[0,0,0],[1,2,0],[1,0,0]];
+    const pathRecord={id:'wall-return',sourceId:'engine',status:'selected',order:1,
+      surfaceIds:['facade'],vertices,points:[vertices[1]],delay:.012,pan:.7};
+    const map = {
+      sampleFrame:512,
+      soundMapFrame:{...soundMapFrame('audition','square',[pathRecord]),audioFrame:512},
+      soundMapGeometry:{schemaVersion:1,generation:'square',sessionId:session+':audition',
+        streamId:'audition',coordinateSpace:'research-rh-z-up-metres-v1',
+        surfaces:[{id:'facade',vertices:[[0,2,0],[2,2,0],[2,2,2]]}]},
+      appliedPaths:[{id:pathRecord.id,sourceId:pathRecord.sourceId,order:1,atFrame:1024,
+        gainBands:[.4,.3,.2],delayMs:12,pan:.7}]
+    };
+    const timeline = JSON.stringify(map)+'\n';
+    const positions=[
+      {label:'Source kerb',position:[0,0,0]},
+      {label:'Opposite kerb',position:[1,0,0]},
+      {label:'Farther down the block',position:[1,10,0]},
+    ];
+    fs.writeFileSync(path.join(root,'audition.wav'),wave);
+    fs.writeFileSync(path.join(root,'soundmap-audition.jsonl'),timeline);
+    fs.writeFileSync(path.join(root,'audition-replay.json'),JSON.stringify({
+      session,title:'Mapped exterior audition',file:'audition.wav',frames:1024,wavSHA256:sha256(wave),
+      soundMapFrames:1,timelineSHA256:sha256(timeline),positions,
+      markers:[{sampleFrame:512,label:'Matched arrival',pathId:pathRecord.id}]
+    }));
+    const replay=await openAuditionReplay(root);
+    assert.deepEqual(replay.wav,wave);
+    assert.equal(replayFrame(replay,0).frame,null);
+    assert.deepEqual(replayFrame(replay,512/48).frame.auditionPositions,positions);
+    assert.deepEqual(replay.events,[{timeMs:512/48,type:'Matched arrival',
+      detail:{sequence:1,streamId:'audition',pathId:pathRecord.id,surfaceIds:['facade'],vertices}}]);
+    fs.appendFileSync(path.join(root,'soundmap-audition.jsonl'),' ');
+    await assert.rejects(()=>openAuditionReplay(root),/digest differs/);
+  } finally {fs.rmSync(root,{recursive:true,force:true});}
+});
+
 test('traffic replay seeks exact PCM blocks between sparse map observations and after slot reuse', async () => {
   const {openPowertrainReplay} = await import('../tools/soundmap/powertrain-replay.mjs');
   const {replayFrame} = await import('../tools/soundmap/recorder.mjs');

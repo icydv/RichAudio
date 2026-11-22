@@ -114,7 +114,22 @@ function draw(now){
   const f=usingAtlas&&!aligned?null:view.frame,g=usingAtlas&&!aligned?null:view.geometry,cached=usingAtlas?{visible:false}:view.cacheLayer;
   if(atlas)atlas.canvas.hidden=!usingAtlas;
   camera.northUpAtlas=Boolean(usingAtlas);
-  if(lastCoordinateKey!==view.coordinateKey){lastCoordinateKey=view.coordinateKey;if(!usingAtlas){camera.target=view.listener?.valid?[...view.listener.position]:cached.visible?[...cached.target]:[0,0,0];camera.scale=isReplay&&fileReplay(replayAudioInfo)?Math.min(65,Math.max(24,Math.min(bounds.width,bounds.height)/13)):13;}contextSelectionKey='';}
+  if(lastCoordinateKey!==view.coordinateKey){
+    lastCoordinateKey=view.coordinateKey;
+    if(!usingAtlas){
+      const positions=view.kind==='replay'&&Array.isArray(f?.auditionPositions)
+        ? f.auditionPositions.slice(0,8).map(marker=>marker?.position).filter(isPoint) : [];
+      if(positions.length>1){
+        camera.target=[0,1,2].map(i=>(Math.min(...positions.map(p=>p[i]))+Math.max(...positions.map(p=>p[i])))/2);
+        const span=2*Math.max(...positions.map(p=>Math.hypot(...p.map((v,i)=>v-camera.target[i]))));
+        camera.scale=Math.min(48,.75*Math.min(bounds.width,bounds.height)/Math.max(10,span));
+      }else{
+        camera.target=view.listener?.valid?[...view.listener.position]:cached.visible?[...cached.target]:[0,0,0];
+        camera.scale=isReplay&&fileReplay(replayAudioInfo)?Math.min(65,Math.max(24,Math.min(bounds.width,bounds.height)/13)):13;
+      }
+    }
+    contextSelectionKey='';
+  }
   const freshAtlasCamera=!isReplay&&!health.expired&&view.listener?.valid&&isPoint(view.listener.position)&&
     (view.kind==='passive'||aligned);
   if(usingAtlas&&atlas.index&&!atlasPoseInitialised){
@@ -219,6 +234,12 @@ function draw(now){
     }
     focus.points?.forEach((point,i)=>dot(point,color,5,'Bounce '+(i+1)));
   }
+  if(view.kind==='replay'&&Array.isArray(f?.auditionPositions)){
+    for(const marker of f.auditionPositions.slice(0,8)){
+      if(isPoint(marker?.position)&&typeof marker.label==='string'&&marker.label.length<=72)
+        dot(marker.position,'#e4cc80',4,marker.label,true);
+    }
+  }
   const renderedVoices=f?.renderedVoices??[];
   for(const source of f?.sources||[]){
     if(source.valid===false)continue;
@@ -263,7 +284,7 @@ function metadata(now){
   const conditional=f?.readiness?.mode==='listener-only-conditional-direct',inspectionOnly=!g&&context?.inspection05?.mode==='unqualified-xml05';
   const mode=inspectionOnly?'UNQUALIFIED XML':replayAudioInfo?.kind==='clocked-discard-file'?'CLOCKED OUTPUT':renderedDrive?'AUTHORED DRIVE':isReplay?'HISTORICAL':isCached?'CACHED FIXTURE':serviceStatus.viewOnlyMap?'VIEW-ONLY WORLD':isPassive?'PASSIVE CAMERA':conditional?'CONDITIONAL DIRECT':view.kind==='acoustic'?'ACOUSTIC SOLVER':h.state.toUpperCase();
   safeText($('mode-chip'),mode);safeText($('mode-label'),viewPaused?'VISUAL UPDATES PAUSED':mode);
-  safeText($('scene-title'),mixedRoutes.enabled?f?'Mapped exterior reflections':replayAudioInfo?.kind==='clocked-discard-file'?'No map observation at this cursor':'Between takes':isCached?'Cached acoustic geometry.':isPassive?'Your listener, live.':f?renderedDrive?'Vehicle pass at a cached wall.':isReplay?'A recorded acoustic moment.':'Sound, mapped.':'Ready when Story Mode is.');
+  safeText($('scene-title'),replayAudioInfo?.auditionTitle??(mixedRoutes.enabled?f?'Mapped exterior reflections':replayAudioInfo?.kind==='clocked-discard-file'?'No map observation at this cursor':'Between takes':isCached?'Cached acoustic geometry.':isPassive?'Your listener, live.':f?renderedDrive?'Vehicle pass at a cached wall.':isReplay?'A recorded acoustic moment.':'Sound, mapped.':'Ready when Story Mode is.'));
   if(!g&&context?.inspection05?.mode==='unqualified-xml05')safeText($('scene-title'),'Unqualified XML inspection.');
   if(isPassive&&h.expired)safeText($('scene-title'),'Camera tracking unavailable.');
   const coverage=g?`${g.surfaces.length} finite surfaces · ${g.coverage}. `:'No accepted geometry. ';
@@ -444,10 +465,15 @@ bind('refresh-recordings',refreshRecordings);
 async function openReplay(id){
   if(!id)throw Error('Select a local recording first.');
   const result=await api('/api/replay/open',{id});clearAudio();replayAudioInfo={...result.audio,timeline:result.timeline};requestEpoch++;isReplay=true;replay.open(result.durationMs);state.reset();pendingSeek=true;lastReplayRequest=-1;
+  if(id.startsWith('audition-')){
+    replayAudioInfo.auditionTitle=result.manifest?.title;
+    follow=false;
+    $('follow').classList.remove('active');
+  }
   mixedRoutes.enable(result.manifest?.mixerPathsRecorded===true);
   if(mixedRoutes.enabled)$('show-rejected').checked=false;
   document.getElementById('match-takes')?.remove();
-  if(mixedRoutes.enabled && result.manifest.takes.length===3){
+  if(mixedRoutes.enabled && result.manifest.takes?.length===3){
     const takes=result.manifest.takes,group=document.createElement('div');
     group.id='match-takes';
     group.setAttribute('role','group');group.setAttribute('aria-label','Compare at the same take sample');

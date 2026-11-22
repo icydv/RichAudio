@@ -2,7 +2,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import fs from 'node:fs/promises';
-import {openPowertrainReplay} from './soundmap/powertrain-replay.mjs';
+import {openAuditionReplay, openPowertrainReplay} from './soundmap/powertrain-replay.mjs';
 import {openClockedTrafficReplay} from './soundmap/clocked-traffic-replay.mjs';
 import {startSoundMap} from './soundmap/server.mjs';
 
@@ -21,7 +21,8 @@ const relative = path.relative(local, root);
 if (!relative || relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative))
   throw Error('Choose a demo folder within this worktree’s .local directory');
 
-const replay = take === 'clocked' ? await openClockedTrafficReplay(root) : await openPowertrainReplay(root, take);
+const replay = take === 'clocked' ? await openClockedTrafficReplay(root) :
+  take === 'audition' ? await openAuditionReplay(root) : await openPowertrainReplay(root, take);
 let marker = take === 'clocked' ? replay.events.findIndex(e => e.type === 'Five sampled PCM contributors') :
   take === 'traffic' ? replay.events.findIndex(e => e.type === 'Five voices in the mix') :
   take === 'two-vehicles' ? replay.events.findIndex(e => e.type === 'Both vehicles · NPC reflection') :

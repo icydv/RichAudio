@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {checkFrame, checkGeometry} from './ui/model.mjs';
+import {checkFrame, checkGeometry, isPoint} from './ui/model.mjs';
 import {LIMITS} from './recorder.mjs';
 import {SOUND_MAP_WIRE} from './ui/wire-limits.mjs';
 
@@ -292,6 +292,51 @@ function addStreetEvents(events, timeline, take, fullReceipt) {
       if (after) eventAt(after, 'Player continues · NPC withdrawn', {retiredVehicle: npc.vehicle});
     }
   }
+}
+
+// A single file render can carry a production solver timeline without
+// fitting the named wall demonstration or recorded traffic presets.
+export async function openAuditionReplay(root) {
+  root = await fs.realpath(root);
+  const receipt = JSON.parse(await localFile(root, 'audition-replay.json', LIMITS.frameBytes));
+  const label = value => typeof value === 'string' && value.length > 0 && value.length <= 72;
+  need(typeof receipt.session === 'string' && /^[a-f0-9]{32}$/.test(receipt.session) &&
+    label(receipt.title), 'Audition session and title required');
+  const wave = await readWave(root, receipt.file);
+  need(wave.frames === receipt.frames && wave.sha256 === receipt.wavSHA256, 'Audition WAV digest or length differs');
+  const positions = receipt.positions ?? [];
+  need(Array.isArray(positions) && positions.length <= 8 &&
+    positions.every(point => label(point?.label) && isPoint(point.position)), 'Invalid map positions');
+  const geometries = new Map();
+  const frames = await readTimeline(root, {take: 'audition', firstFrame: 0, frames: wave.frames},
+    geometries, receipt.session, receipt, true);
+  for (const row of frames) row.frame = {...row.frame, auditionPositions: positions};
+  if (frames[0].timeMs > 0) frames.unshift({timeMs: 0, frame: null});
+  const markers = receipt.markers ?? [];
+  need(Array.isArray(markers) && markers.length <= 32, 'Invalid audition marker bound');
+  const events = markers.map(marker => {
+    need(Number.isSafeInteger(marker?.sampleFrame) && marker.sampleFrame >= 0 &&
+      marker.sampleFrame < wave.frames && label(marker.label), 'Invalid audition marker');
+    const timeMs = marker.sampleFrame / 48;
+    if (!marker.pathId) return {timeMs, type: marker.label, detail: {}};
+    const frame = frames.find(row => row.timeMs === timeMs)?.frame;
+    const ray = frame?.paths.find(p => p.id === marker.pathId && p.status === 'selected');
+    need(ray && ray.order > 0 && ray.vertices &&
+      frame.appliedPaths.some(tap => tap.id === ray.id && tap.sourceId === ray.sourceId),
+    'Audition marker has no selected and applied return at its sample');
+    const faces = new Set(geometries.get(frame.geometryGeneration)?.surfaces.map(s => s.id));
+    need(ray.surfaceIds?.length === ray.order && ray.surfaceIds.every(id => faces.has(id)),
+      'Audition marker has no bound reflecting surface');
+    return {timeMs, type: marker.label, detail:{sequence: frame.sequence, streamId: frame.streamId,
+      pathId:ray.id, surfaceIds:ray.surfaceIds, vertices:ray.vertices}};
+  }).sort((a,b) => a.timeMs-b.timeMs);
+  const id = 'audition-' + wave.sha256.slice(0,16);
+  const durationMs = wave.frames / 48;
+  return {id,frames,geometries,events,durationMs,originFrame:0,audioStartTimeMs:0,wav:wave.wav,audioPlayable:true,
+    manifest:{id,session:receipt.session,title:receipt.title,state:'stopped',durationMs,mixerPathsRecorded:true,
+      timelineBasis:'rendered-engine-audioFrame',
+      audio:{kind:'offline-rendered-file',sampleRate,channels:2,format:'wav-float32',sha256:wave.sha256,
+        capturedFrames:wave.frames,gaps:[],clockUncertainty:'The viewer follows the original rendered PCM sample positions.'}}};
 }
 
 export async function openPowertrainReplay(root, take = 'comparison') {
