@@ -109,6 +109,7 @@ export class StockGameplay {
   this.ids=this.slots.flatMap(s=>['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`)).concat(this.slots.map(s=>`stock:slot${s.index}:aero`));
   this.direct=conditionalStockScene(this.ids,session,vehicleDistanceSceneOptions('authored-detail-loss-v1'));
   this.pipeline=createStockVehiclePipeline({scene:this.direct,sourceIds:this.ids,masterGain:.175,continuousRates:true,validateSampledMotion:privatePowertrain,reuseStaticSegments:this.catalogueFleet,
+    preserveSourceHistoryOnListenerCut:privatePowertrain,
     controlFilter:(c,r)=>this.filter(c,r)});
   if (fleetReflectionPolicy !== 'full') {
     if (!vehicleSourcePolicy || privatePowertrain) throw Error('Ranked reflections require the ordinary vehicle fleet');
@@ -549,6 +550,12 @@ export class StockGameplay {
   return accepted;
  }
  retireSlot(s,reason){
+   if(this.privatePowertrain){
+    // A listener cut can keep a continuing emitter's pressure. Ending
+    // the emitter's own acquisition cannot: remove its PCM before any
+    // slot reuse or old path release reaches the private output gate.
+    for(const role of ['engine','exhaust'])this.pipeline.renderer.discardSourcePcm('stock:slot'+s.index+':'+role);
+   }
    this.lifecycle.scopeRetirements++;this.lifecycle.lastRetirements.push({reason,sourceFrame:s.source?.frame??null,lastQualifiedRunning:s.vehicle?.running??null,engineShutdownInferred:false});if(this.lifecycle.lastRetirements.length>this.voiceLimit)this.lifecycle.lastRetirements.shift();
    s.identity=null;s.source=null;s.vehicle=null;s.airflow=null;this.stats.retired++;
  }
@@ -754,12 +761,18 @@ export class StockGameplay {
   if(!phases.has(key)&&phases.size<12)phases.set(key,{listenerGeneration:generation,revision,untaggedBlocks:{}});
   return phases.get(key);
  }
- noteUntaggedPowertrainBlock(sourceRendered){
+ noteUntaggedPowertrainBlock(){
   const phase=this.powertrainPhase();
   if(!phase)return;
-  const reason=sourceRendered?'zero-stereo-after-source':this.sample?.state?'no-eligible-source':'listener-'+(this.sample?.mode??'unavailable');
+  const reason=this.sample?.state?'no-eligible-source':'listener-'+(this.sample?.mode??'unavailable');
   const counts=phase.untaggedBlocks;
   counts[reason]=(counts[reason]??0)+1;
+ }
+ noteSilentPowertrainBlock(){
+  // This is a transport/content observation, not a diagnosis of why the
+  // renderer was silent. Distinguish flight time from a missing path offline.
+  const phase=this.powertrainPhase();
+  if(phase)phase.silentAuthorizedBlocks=(phase.silentAuthorizedBlocks??0)+1;
  }
  powertrainTiming(){
   const phases=this.powertrainTimingByPhase,phase=this.powertrainPhase();

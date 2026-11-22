@@ -17,6 +17,7 @@ namespace RichAudio.Beacon.Windows {
   bool demo;long admittedLease;GameplayRecording recording;GameplayDemoPermit demoPermit;string recordingFailure,recordingDirectory;object lastRecordingMetrics;readonly GameplayShutdownFade shutdownFade=new GameplayShutdownFade();
   GameplayDeliveryTrace01 delivery;long creditBatch,issuedCredits;
   ClockedOutputCapture clockedOutput;
+  PowertrainFixtureCapture powertrainCapture;
   int ringHighWaterFrames;long maximumAdmissionIntervalTicks;
   string stopReason;object producerIdentity;bool drainProducer;
   long fixtureTrailingSilentFrames;double fixtureLastPeak,fixtureLastSumSquares;
@@ -47,6 +48,13 @@ namespace RichAudio.Beacon.Windows {
     if(config.DiscardEnvironmentalOutput||powertrain!=null)delivery=new GameplayDeliveryTrace01();
     if(powertrain!=null&&config.PowertrainWorld)powertrainPathTrace=new List<string>(512);
     latencyProfile=GameplayLatencyProfile.Resolve(config.LatencyProfile,powertrain!=null);ring=new PcmRing(latencyProfile.StartupBlocks);creditWindow=new GameplayCreditWindow(latencyProfile);credits=latencyProfile.StartupBlocks;
+    if(fixture&&powertrain!=null){
+     string frames=Environment.GetEnvironmentVariable(PowertrainFixtureCapture.EnvironmentName);
+     if(frames!=null){
+      powertrainCapture=new PowertrainFixtureCapture(int.Parse(frames,CultureInfo.InvariantCulture));
+      ring.PowertrainPcmObserver=powertrainCapture;
+     }
+    }
     string captureLimit=Environment.GetEnvironmentVariable("RICHAUDIO_CLOCKED_CAPTURE_FRAMES");
     if(config.DiscardEnvironmentalOutput&&powertrain==null&&captureLimit!=null&&
        Environment.GetEnvironmentVariable("RICHAUDIO_CLOCKED_FLEET_EVIDENCE02")=="1")
@@ -124,6 +132,9 @@ namespace RichAudio.Beacon.Windows {
     if(recording!=null){try{recording.Event("host-audio-stopped",Stopwatch.GetTimestamp(),new{underflowFrames=ring.UnderflowFrames,consumedFrames=ring.ConsumedFrames,fadeReserveConsumed=shutdownFade.FullyConsumed(ring.ConsumedFrames)});recording.Dispose();}catch(Exception e){recordingFailure=e.GetType().Name;}}
     CloseProducer();
     foreach(var t in new[]{writer,reader,diagnostics,receiver,sink,ownerCommand})if(t!=null&&t.IsAlive&&!t.Join(1500)){failure="cleanup-timeout";code=1;}
+    if(powertrainCapture!=null&&sink!=null&&!sink.IsAlive)try{
+     powertrainCapture.Save(directory,session,ring.ConsumedFrames);
+    }catch(Exception e){failure=failure??"fixture-pcm-witness-failed";Console.Error.WriteLine(e.Message);code=1;}
     if(clockedOutput!=null&&sink!=null&&!sink.IsAlive)try{
      if(clockedOutput.Frames!=ring.ConsumedFrames)throw new InvalidDataException("Clocked capture differs from sink frame count");
      using(var file=new FileStream(Path.Combine(directory,"clocked-output.wav"),FileMode.CreateNew,FileAccess.Write,FileShare.None))
@@ -235,7 +246,7 @@ namespace RichAudio.Beacon.Windows {
     if(delivery!=null)delivery.Pcm.Add(GameplayDeliveryTrace01.Row("pcm-header-read",blockSequence,Stopwatch.GetTimestamp()));
     if(!BlockProtocol.ReadExact(child.StandardOutput.BaseStream,payload,n*8))throw new EndOfStreamException();if(stop)continue;long readAfter=Stopwatch.GetTimestamp();
     if(delivery!=null)delivery.Payload(blockSequence,readBefore,readAfter,ring.BufferedFrames);
-    var stamp=powertrain==null?null:powertrain.Rendered(tag);Buffer.BlockCopy(payload,0,samples,0,n*8);while(!stop&&!ring.TryWrite(samples,n,stamp,readAfter,blockSequence))Thread.Sleep(1);long admitted=Stopwatch.GetTimestamp();
+    var stamp=powertrain==null?null:powertrain.Rendered(tag);Buffer.BlockCopy(payload,0,samples,0,n*8);while(!stop&&!ring.TryWrite(samples,n,stamp,readAfter,blockSequence,tag))Thread.Sleep(1);long admitted=Stopwatch.GetTimestamp();
     if(delivery!=null&&!stop){
      int depth=ring.BufferedFrames;delivery.Admit(blockSequence,readAfter,admitted,depth,n);
      ringHighWaterFrames=Math.Max(ringHighWaterFrames,depth);
@@ -335,12 +346,13 @@ namespace RichAudio.Beacon.Windows {
      // Model the real endpoint's silent reset prime as one fixture period.
      // Like WASAPI, this does not consume ring PCM on the boundary callback.
      var next=powertrain.Requested;
-     if(powertrain.NeedsBoundary(next)){powertrain.BoundaryComplete(next);block++;continue;}
+     if(powertrain.NeedsBoundary(next)){powertrain.BoundaryComplete(next);if(powertrainCapture!=null)powertrainCapture.Reset(ring.ConsumedFrames,Stopwatch.GetTimestamp(),next.Revision);block++;continue;}
     }
     int bufferedBefore=ring.BufferedFrames;long callbackBefore=Stopwatch.GetTimestamp();int callbackSupplied=0;long before=ring.ConsumedFrames,under=ring.UnderflowFrames,end=ring.EndSilenceFrames;fixed(float* p=buffer){int supplied;if(powertrain==null)supplied=ring.FillCalibrated(p,callbackFrames,1);else{
     PowertrainSubmission result;supplied=powertrain.Fill(ring,p,callbackFrames,out result);powertrain.Submitted(result);
    }callbackSupplied=supplied;var capture=recording;if(capture!=null){int slot=capture.Tap.Prepare(p,callbackFrames,before,ring.ConsumedFrames,before-under-end,supplied,ring.UnderflowFrames-under,ring.EndSilenceFrames-end);capture.Tap.Commit(slot);}}if(delivery!=null)delivery.Callback(block,due,callbackBefore,Stopwatch.GetTimestamp(),callbackFrames,callbackSupplied,(int)(ring.UnderflowFrames-under),bufferedBefore,ring.BufferedFrames,ring.FirstUnderflowFrame,before-under-end,ring.UnderflowFrames>under?ring.PendingCredits:0);
    if(clockedOutput!=null)clockedOutput.Append(buffer,callbackFrames,before,before-under-end,callbackSupplied,callbackBefore,Stopwatch.GetTimestamp());
+   if(powertrainCapture!=null)powertrainCapture.Submit(buffer,callbackFrames,before);
    if(fixtureLatency!=null){fixtureLatency.Submission(before-under-end,callbackFrames,Stopwatch.GetTimestamp());fixtureLatency.Callback01(block,due,callbackBefore,Stopwatch.GetTimestamp(),callbackFrames,callbackSupplied,bufferedBefore,ring.BufferedFrames,ring.UnderflowFrames>under,ring.FirstUnderflowFrame,shutdownRequested,Interlocked.Read(ref admittedLease),Interlocked.Read(ref lastSnapshotTicks));}double peak=0,energy=0;long silent=Interlocked.Read(ref fixtureTrailingSilentFrames);for(int i=0;i<callbackFrames;i++){float l=buffer[i*2],r=buffer[i*2+1];peak=Math.Max(peak,Math.Max(Math.Abs(l),Math.Abs(r)));energy+=(double)l*l+(double)r*r;silent=l==0&&r==0?silent+1:0;}Interlocked.Exchange(ref fixtureTrailingSilentFrames,silent);Interlocked.Exchange(ref fixtureLastPeak,peak);Interlocked.Exchange(ref fixtureLastSumSquares,energy);ring.RequireContinuousProducer();Interlocked.Increment(ref fixtureCallbacks);block++;wake.Set();}
   }catch(Exception e){if(!stop)Fail(e);}}
   void PublishPowertrainStatus(string error){

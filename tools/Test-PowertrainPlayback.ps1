@@ -6,8 +6,10 @@ param(
     [switch]$ObserveBaselineExpiry,
     [string]$WorldPose,
     [string]$PassageRoute,
+    [string]$PerformanceRoute,
     [switch]$ContendStatus,
-    [ValidateRange(10,180)][int]$PassageSeconds=126
+    [ValidateRange(10,300)][int]$PassageSeconds=126,
+    [ValidateRange(0,60)][int]$WarmupSeconds=0
 )
 
 $ErrorActionPreference = 'Stop'
@@ -65,6 +67,15 @@ if ($PassageRoute) {
     if (!$routePath.StartsWith($private,[StringComparison]::OrdinalIgnoreCase)) { throw 'Keep reconstructed route data private.' }
     $testArguments += @('--passage',$routePath,[string]$PassageSeconds)
     if ($ContendStatus) { $testArguments += '--contend-status' }
+    if ($WarmupSeconds) { $testArguments += "--warmup=$WarmupSeconds" }
+}
+if ($PerformanceRoute) {
+    if ($WorldPose -or $ObserveBaselineExpiry -or $PassageRoute -or $WarmupSeconds -or $ContendStatus) {
+        throw 'Select one playback fixture mode.'
+    }
+    $routePath=(Resolve-Path -LiteralPath $PerformanceRoute).Path
+    if (!$routePath.StartsWith($private,[StringComparison]::OrdinalIgnoreCase)) { throw 'Keep performance route data private.' }
+    $testArguments += @('--performance',$routePath)
 }
 & $binary @testArguments 2>&1 | Tee-Object -FilePath (Join-Path $output 'fixture.log')
 if ($LASTEXITCODE -ne 0) { throw 'Device-free powertrain playback fixture failed' }

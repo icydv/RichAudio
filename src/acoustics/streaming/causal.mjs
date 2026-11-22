@@ -66,7 +66,7 @@ export class CausalSimulation {
   constructor(
     scene,
     { staleAfter = 0.25, extrapolationLimit = 0.05, historySeconds = 2.5, allowMissingScene = false,
-      validateSampledMotion = false } = {},
+      validateSampledMotion = false, preserveSourceHistoryOnListenerCut = false } = {},
   ) {
     requireValue(validated.scene(scene) || (allowMissingScene && scene === null), "validated A06 scene required");
     requireValue(
@@ -80,6 +80,7 @@ export class CausalSimulation {
     );
     this.scene = scene;
     this.validateSampledMotion = validateSampledMotion;
+    if(preserveSourceHistoryOnListenerCut)this.preserveSourceHistoryOnListenerCut=true;
     this.staleAfter = staleAfter;
     this.extrapolationLimit = extrapolationLimit;
     this.historySeconds = historySeconds;
@@ -163,8 +164,9 @@ export class CausalSimulation {
       "adapter generation",
     );
     const session = snapshot.session + ":" + generation;
-    const changing = this.session !== session,
-      previous = changing ? null : this.records.at(-1);
+    const changing = this.session !== session;
+    const cameraCut = changing && this.preserveSourceHistoryOnListenerCut && this.sourceSession === snapshot.session;
+    const previous = !changing || cameraCut ? this.records.at(-1) : null;
     requireValue(
       !previous || snapshot.time - previous.time >= 1 / 240 - 1e-9,
       "duplicate/out-of-order or excessive-rate observation",
@@ -215,15 +217,21 @@ export class CausalSimulation {
           "orientation discontinuity requires generation",
         );
       };
-      check("listener", previous.listener, listener);
+      if(!changing)check("listener", previous.listener, listener);
       for (const [id, next] of Object.entries(sources))
         check(`source ${id}`, previous.sources[id], next);
     }
     requireValue(this.epoch < 1000000, "session restart budget");
     if (changing) {
-      this.records = [];
+      if(!cameraCut){
+        this.records = [];
+        this.#sourceKeys.clear();
+        if(this.preserveSourceHistoryOnListenerCut){
+          this.sourceSession=snapshot.session;
+          this.sourceEpoch=this.epoch+1;
+        }
+      }
       this.#listenerKeys=[];
-      this.#sourceKeys.clear();
       this.#rankedCandidates=this.#rankedSelector=null;
       this.previous.clear();
       this.session = session;
@@ -233,12 +241,12 @@ export class CausalSimulation {
     this.records.push({ time: snapshot.time, listener, sources });
     // The time and generation of an accepted observation are fixed. Each
     // emitter keeps its own sparse history, including gaps and generation cuts.
-    const key=s=>Object.freeze({...s,time:snapshot.time,generation:this.epoch*4294967296+s.generation});
-    this.#listenerKeys.push(key(listener));
+    const key=(s,epoch)=>Object.freeze({...s,time:snapshot.time,generation:epoch*4294967296+s.generation});
+    this.#listenerKeys.push(key(listener,this.epoch));
     for(const [id,s] of Object.entries(sources)){
       let history=this.#sourceKeys.get(id);
       if(!history){history=[];this.#sourceKeys.set(id,history);}
-      history.push(key(s));
+      history.push(key(s,this.sourceEpoch??this.epoch));
     }
     while (
       this.records.length > 1024 ||
@@ -246,7 +254,7 @@ export class CausalSimulation {
         this.records[1].time < snapshot.time - this.historySeconds)
     ){
       const expired=this.records.shift();
-      this.#listenerKeys.shift();
+      if(this.#listenerKeys[0]?.time===expired.time)this.#listenerKeys.shift();
       for(const id of Object.keys(expired.sources)){
         const history=this.#sourceKeys.get(id);
         history.shift();
@@ -301,7 +309,7 @@ export class CausalSimulation {
     // Source history identity exists even while the listener presentation buffer
     // warms. Delaying this tag until a listener becomes valid discards real PCM.
     for (const [id, current] of Object.entries(latest.sources))
-      sourceGenerations[id] = this.epoch * 4294967296 + current.generation;
+      sourceGenerations[id] = (this.sourceEpoch??this.epoch) * 4294967296 + current.generation;
     requireValue(age >= -1e-8, "future observation rejected");
     this.stats.maximumAgeSeconds = Math.max(this.stats.maximumAgeSeconds, age);
     const listener = this.#retainedTrack("listener", null, now);
@@ -335,7 +343,6 @@ export class CausalSimulation {
     }
     for (const [id, current] of Object.entries(latest.sources)) {
       const track = this.#retainedTrack("source", id, now);
-      sourceGenerations[id] = this.epoch * 4294967296 + current.generation;
       if (!track) {if(soundMap)soundMap.unavailableSources.push({id,reason:'source-history-unavailable'});continue;}
       if(soundMap)soundMap.sources.push({id,...track.keys.at(-1)});
       const source = { track, directivity: current.directivity, nearFieldRadius: current.nearFieldRadius }, plans=[];
@@ -408,7 +415,10 @@ export class CausalSimulation {
           if (visual) visual.reason = 'duplicate-support-arrival';
           continue;
         }
-        const identity = id + ":" + (support ?? candidate.id) + ":g" + p.generation +
+        // Receiver cuts start new arrival cursors. The old cursor releases
+        // through the mixer while both still refer to the same emission.
+        const receiver = this.preserveSourceHistoryOnListenerCut ? ":receiver" + this.epoch : "";
+        const identity = id + receiver + ":" + (support ?? candidate.id) + ":g" + p.generation +
             (this.scene.observationModel && p.order ? this.scene.observationModel.kind==='conditional-installed-static-model'?
               ':world'+this.scene.observationModel.sourceCatalogueSHA256.slice(0,24):':geometry' + this.geometryEpoch : ''),
           previous = this.previous.get(identity);

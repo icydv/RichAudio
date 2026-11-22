@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -95,12 +96,30 @@ namespace RichAudio.AudioSwitch
             public double outputPeak { get; set; }
             public string failure { get; set; }
         }
+        sealed class ProgressRead
+        {
+            public long readQpc { get; set; }
+            public long publicationQpc { get; set; }
+            public long observedQpc { get; set; }
+            public long lastSubmittedQpc { get; set; }
+            public long jointProgressQpc { get; set; }
+            public long validThroughQpc { get; set; }
+            public long observationSequence { get; set; }
+            public long renderedObservationSequence { get; set; }
+            public long submittedObservationSequence { get; set; }
+            public long renderedBlocks { get; set; }
+            public long submittedFrames { get; set; }
+            public long revision { get; set; }
+            public string mode { get; set; }
+            public string waitingFor { get; set; }
+        }
         readonly string session, sessionDirectory;
         readonly PowertrainFrames frames;
         readonly JavaScriptSerializer json = new JavaScriptSerializer { MaxJsonLength = 8192 };
         volatile PowertrainStatus status = new PowertrainStatus(null, null, null, 0, 0, 0, 0, 0, false, false);
         volatile string sampleFailure;
         volatile bool withdrawing;
+        long withdrawRequestedQpc;
         string mode = "prepare";
         long revision = 1;
         string vehicleId;
@@ -206,6 +225,7 @@ namespace RichAudio.AudioSwitch
             if (withdrawing) return revision;
             ++revision;
             Interlocked.Exchange(ref latest, frames.Withdraw(revision));
+            Interlocked.Exchange(ref withdrawRequestedQpc, Stopwatch.GetTimestamp());
             withdrawing = true;
             return revision;
         }
@@ -251,6 +271,8 @@ namespace RichAudio.AudioSwitch
             HostReport last = null, lastProgressReport = null;
             bool ended = false;
             long lastProgress = 0, withdrawnAt = 0, maxSubmissionAge = 0;
+            var progressReads = new Queue<ProgressRead>(40);
+            long newestObservedPublication = 0;
             try
             {
                 Directory.CreateDirectory(sessionDirectory);
@@ -322,8 +344,18 @@ namespace RichAudio.AudioSwitch
                     {
                         if (report.failure != null) { last = report; failure = report.failure; break; }
                         long now = Stopwatch.GetTimestamp();
+                        // The evidence lists blocked legs independently. The
+                        // handoff keeps its existing joint freshness rule.
+                        string waitingFor = null;
                         if (lastProgressReport == null) lastProgressReport = report;
-                        else if (report.publicationQpc > lastProgressReport.publicationQpc &&
+                        else if (report.publicationQpc > newestObservedPublication)
+                        {
+                            if (report.publicationQpc <= lastProgressReport.publicationQpc) waitingFor += "publication ";
+                            if (report.renderedBlocks <= lastProgressReport.renderedBlocks) waitingFor += "renderedBlocks ";
+                            if (report.submittedFrames <= lastProgressReport.submittedFrames) waitingFor += "submittedFrames ";
+                            if (report.submittedObservationSequence <= lastProgressReport.submittedObservationSequence) waitingFor += "submittedObservationSequence ";
+                        }
+                        if (report.publicationQpc > lastProgressReport.publicationQpc &&
                             report.renderedBlocks > lastProgressReport.renderedBlocks &&
                             report.submittedFrames > lastProgressReport.submittedFrames &&
                             report.submittedObservationSequence > lastProgressReport.submittedObservationSequence)
@@ -333,6 +365,21 @@ namespace RichAudio.AudioSwitch
                         }
                         last = report;
                         long through = ProgressDeadline(report, lastProgress, now);
+                        if (report.publicationQpc > newestObservedPublication)
+                        {
+                            newestObservedPublication = report.publicationQpc;
+                            if (progressReads.Count == 40) progressReads.Dequeue();
+                            progressReads.Enqueue(new ProgressRead
+                            {
+                                readQpc=now, publicationQpc=report.publicationQpc, observedQpc=report.observedQpc,
+                                lastSubmittedQpc=report.lastSubmittedQpc, jointProgressQpc=lastProgress,
+                                validThroughQpc=through, observationSequence=report.observationSequence,
+                                renderedObservationSequence=report.renderedObservationSequence,
+                                submittedObservationSequence=report.submittedObservationSequence,
+                                renderedBlocks=report.renderedBlocks, submittedFrames=report.submittedFrames,
+                                revision=report.appliedRevision, mode=report.mode, waitingFor=waitingFor
+                            });
+                        }
                         // The audio and receive threads publish separate
                         // counters. A torn report cannot replace coherent
                         // evidence; the latter still expires in its own time.
@@ -373,7 +420,13 @@ namespace RichAudio.AudioSwitch
                 var job = Volatile.Read(ref containment);
                 if (host != null)
                 {
-                    ended = host.WaitForExit(300);
+                    int exitWaitMs = 300;
+#if POWERTRAIN_FIXTURE
+                    // A device-free witness flushes bounded offline PCM
+                    // after output withdrawal. Live ownership stays at 300 ms.
+                    if (fixtureConfig != null) exitWaitMs = 5000;
+#endif
+                    ended = host.WaitForExit(exitWaitMs);
                     if (!ended)
                     {
                         if (job != null) job.RequestContainmentClose();
@@ -396,6 +449,15 @@ namespace RichAudio.AudioSwitch
                             clockFrequency = Stopwatch.Frequency, publisher = publisher == null ? null : publisher.Metrics() }));
                 }
                 catch (IOException) { }
+                try
+                {
+                    var diagnostic = new JavaScriptSerializer { MaxJsonLength = 65536 };
+                    File.WriteAllText(Path.Combine(sessionDirectory, "powertrain-progress.json"),
+                        diagnostic.Serialize(new { session, clockFrequency=Stopwatch.Frequency,
+                            withdrawRequestedQpc=Interlocked.Read(ref withdrawRequestedQpc), reads=progressReads.ToArray() }));
+                }
+                catch (IOException) { }
+                catch (UnauthorizedAccessException) { }
             }
         }
 

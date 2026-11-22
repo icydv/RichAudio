@@ -373,15 +373,21 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
   if(powertrainVoiceEvidence&&engine.stageCounters.sourcePlaybackBlocks>playbackBefore)powertrainVoiceEvidence.render(engine,channels);
   const beforeFraming=clockedEvidence?performance.now():0;
   credits--;encodeVehicleRa07(...channels,sequence,packet);sequence=(sequence+1)>>>0;
-  if(config.powertrainVoice&&engine.stageCounters.stereo.nonzeroBlocks>nonzeroBefore&&engine.stageCounters.sourcePlaybackBlocks>playbackBefore){
+  if(config.powertrainVoice&&engine.stageCounters.sourcePlaybackBlocks>playbackBefore){
    const vehicle=engine.slots.find(slot=>slot.source)?.vehicle,used=vehicle?.powertrainSequence;
    if(!Number.isInteger(used)||used<0||used>=0xffffffff)throw Error('powertrain PCM missing source observation');
+   // This tag is the selected live control lease for the rendered block,
+   // not the emission time of delayed acoustic pressure. The renderer
+   // reads only its matching source generation and flushes on revision or
+   // acquisition changes. A bounded block of actual silence can advance
+   // the transport; the endpoint still requires nonzero PCM to engage.
    packet.writeUInt32LE(used+1,12);
-   if(config.powertrainWorld&&config.acousticPathEvidence01){
+   if(engine.stageCounters.stereo.nonzeroBlocks===nonzeroBefore)engine.noteSilentPowertrainBlock();
+   else if(config.powertrainWorld&&config.acousticPathEvidence01){
     const sample=powertrainPathBlock(engine.pipeline,packet.readUInt32LE(4),vehicle);
     if(sample)taggedPowertrainPaths=sample;
    }
-  }else if(privatePowertrain)engine.noteUntaggedPowertrainBlock(engine.stageCounters.sourcePlaybackBlocks>playbackBefore);
+  }else if(privatePowertrain)engine.noteUntaggedPowertrainBlock();
   clockedEvidence?.block(engine,performance.now()-beforeFraming,controlIngressMs,engine.stageCounters.stereo.nonzeroBlocks>nonzeroBefore,packet);
   evidence?.record({type:'complete-render-block',sequence:(sequence-1)>>>0,completeRenderMs:engine.lastCompleteRenderMs,
    stages:engine.lastRenderStages01});

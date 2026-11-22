@@ -5,6 +5,8 @@ const batiExhaustPressure = 1.55;
 const FS = 48000;
 const idlePressure = 1 / batiExhaustPressure;
 const ceiling = .995;
+const roadLiftDrop = .018;
+const roadLoadedControl = .9;
 const qualifyFrames = .10 * FS;
 const patterns = [[.044,.090],[.034,.081],[.053,.077]].map(pair=>pair.map(t=>Math.round(t*FS)));
 const blend = x => {
@@ -86,6 +88,7 @@ export function voiceBatiPowertrain(source, voicing = batiVoicing) {
   const render=source.renderInto.bind(source);
   const firing=new BatiFiringEnvelope();
   const mix = roadMixes[voicing];
+  const qualifyRoadLift = voicing === 'bati-road';
   source.batiVoicing = voicing;
   source.roadMix = Boolean(mix);
   const idle = mix ? .78 / mix.nearPressure : idlePressure;
@@ -97,11 +100,24 @@ export function voiceBatiPowertrain(source, voicing = batiVoicing) {
   const drySharePole = 1 - Math.exp(-1/(FS*.004));
   const attackDecaySeconds = mix ? .028 : .076;
   let previousRatio=null,transient=0,engineCut=1,exhaustCut=1,pressure=idle;
+  let fallingFrom = null;
   const cutSlew=1-Math.exp(-1/(FS*.003)),pressureSlew=1-Math.exp(-1/(FS*.020));
   source.batiExhaustDemand=0;
   source.batiFiring=firing;
   source.renderInto=(control,engine,exhaust,frames=engine.length)=>{
-    const {operatingPoint:ratio,lift,running}=control;
+    const {operatingPoint:ratio,running}=control;
+    let grainControl = control;
+    if (qualifyRoadLift && control.lift && running) {
+      // The bridge infers lift from any falling rev bracket. Require a
+      // meaningful cumulative drop before withdrawing the loaded pressure
+      // and switching grains. Preserve the original rev and firing controls.
+      fallingFrom = Math.max(fallingFrom ?? previousRatio ?? ratio, ratio);
+      if (fallingFrom - ratio < roadLiftDrop)
+        grainControl = {...control,lift:false,load:roadLoadedControl};
+    } else {
+      fallingFrom = null;
+    }
+    const {lift} = grainControl;
     const rise=previousRatio===null?0:ratio-previousRatio;
     previousRatio=ratio;
     transient=lift||!running?0:Math.max(transient*Math.exp(-frames/(FS*attackDecaySeconds)),blend((rise-.007)/.065));
@@ -112,7 +128,7 @@ export function voiceBatiPowertrain(source, voicing = batiVoicing) {
                        : idlePressure+.55*demand+.24*transient*demand;
     const heldDryShare = .32 * drive * (1 - transient);
     const target=firing.select(control,frames);
-    const result=render(target===ratio?control:{...control,operatingPoint:target},engine,exhaust,frames);
+    const result=render(target===ratio?grainControl:{...grainControl,operatingPoint:target},engine,exhaust,frames);
     const engineTarget=firing.cutting?.33:1,exhaustTarget=firing.cutting?.15:1;
     for(let i=0;i<frames;i++){
       engineCut+=cutSlew*(engineTarget-engineCut);

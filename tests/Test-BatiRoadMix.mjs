@@ -84,3 +84,31 @@ test('the road body follows existing pulses and releases to silence', () => {
   for (let block=0; block<20; block++) voice.renderInto({...control,lift:true},e,x);
   assert(x.every(sample => Math.abs(sample)<1e-8));
 });
+
+test('a small reported rev oscillation stays loaded and a sustained fall enters the lift layer', () => {
+  function source() {
+    return voiceBatiPowertrain({vehicle:{model:'bati'}, renderInto(control, engine, exhaust) {
+      this.renderedControl = control;
+      engine.fill(control.load * .32);
+      exhaust.fill(control.lift ? .19 : .4);
+    }}, 'bati-road');
+  }
+  const reference = source(), wobbling = source();
+  const e = new Float32Array(512), x = new Float32Array(512);
+  const e2 = new Float32Array(512), x2 = new Float32Array(512);
+  for (let i=0; i<120; i++) {
+    const ratio = i%10<5 ? .832 : .824;
+    const control = {operatingPoint:ratio, running:true, load:.9, lift:false};
+    reference.renderInto(control,e,x);
+    wobbling.renderInto(i%10>=5 ? {...control,load:.05,lift:true} : control,e2,x2);
+    assert.deepEqual(x2,x);
+    assert.equal(wobbling.renderedControl.operatingPoint,ratio);
+  }
+  wobbling.renderInto({operatingPoint:.81, running:true, load:.05, lift:true},e2,x2);
+  wobbling.renderInto({operatingPoint:.79, running:true, load:.05, lift:true},e2,x2);
+  assert.equal(wobbling.renderedControl.lift,true);
+  assert.equal(wobbling.renderedControl.load,.05);
+  assert.equal(wobbling.renderedControl.operatingPoint,.79);
+  wobbling.renderInto({operatingPoint:.80, running:true, load:.9, lift:false},e2,x2);
+  assert.equal(wobbling.renderedControl.lift,false);
+});

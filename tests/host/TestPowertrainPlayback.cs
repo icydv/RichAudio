@@ -20,6 +20,9 @@ internal sealed class TestPowertrainPlayback
         internal double[] CameraPosition = { 0d, 0d, 1d };
         internal double[] VehiclePosition = { 0d, 2d, 0d };
         internal double[] Forward = { 0d, 1d, 0d };
+        internal double[] CameraForward;
+        internal double[] CameraUp;
+        internal double[] VehicleUp;
         internal double[] Velocity = { 0d, 0d, 0d };
         public bool StoryReady { get { return true; } }
         public int PlayerVehicleHandle { get { return 19; } }
@@ -29,7 +32,7 @@ internal sealed class TestPowertrainPlayback
             long now = Stopwatch.GetTimestamp();
             return new CameraObservation {
                 Before = now, After = now, Observed = now, GameTime = (uint)clock.ElapsedMilliseconds,
-                Position = CameraPosition, Forward = Forward, Up = new[] { 0d, 0d, 1d }
+                Position = CameraPosition, Forward = CameraForward ?? Forward, Up = CameraUp ?? new[] { 0d, 0d, 1d }
             };
         }
 
@@ -41,7 +44,7 @@ internal sealed class TestPowertrainPlayback
                 Running = true, RpmRatio = RevRatio,
                 OperatingPointEvidence = "candidate-public-native-unqualified-shvdne",
                 Position = VehiclePosition, Velocity = Velocity,
-                Forward = Forward, Up = new[] { 0d, 0d, 1d }
+                Forward = Forward, Up = VehicleUp ?? new[] { 0d, 0d, 1d }
             };
             do { observation.After = Stopwatch.GetTimestamp(); } while (observation.After == observation.Before);
             observation.Observed = observation.Before + (observation.After - observation.Before) / 2;
@@ -76,12 +79,17 @@ internal sealed class TestPowertrainPlayback
     double minimumCallbackIntervalMs = Double.PositiveInfinity;
     double maximumCallbackIntervalMs;
     PassageRoute passage;
+    PerformanceFrame[] performance;
     int passageSeconds;
+    int warmupSeconds;
     bool contendStatus;
     long routeStarted;
     int contentionCount;
     volatile bool stopStatusContention;
     Thread statusContender;
+    int performanceIndex;
+    string shot;
+    readonly List<object> routeEvents = new List<object>();
 
     void ContendWithPublication()
     {
@@ -104,8 +112,18 @@ internal sealed class TestPowertrainPlayback
 
     void MoveCameraAndCar()
     {
-        if (passage == null || routeStarted == 0) return;
-        double t = (Stopwatch.GetTimestamp() - routeStarted) / (double)Stopwatch.Frequency % 42;
+        if (routeStarted == 0) return;
+        long now = Stopwatch.GetTimestamp();
+        double elapsed = (now - routeStarted) / (double)Stopwatch.Frequency;
+        if (performance != null)
+        {
+            while (performanceIndex + 1 < performance.Length && performance[performanceIndex+1].seconds <= elapsed)
+                performanceIndex++;
+            ApplyPerformanceFrame(performance[performanceIndex]);
+            return;
+        }
+        if (passage == null) return;
+        double t = elapsed % 42;
         // Fifteen seconds under cover with a stationary car and a drifting camera.
         // Return to the north opening, then traverse the same measured lane again.
         double leg = t < 8 ? t / 8 : t < 23 ? 1 : t < 35 ? 1 - (t-23)/12 : 0;
@@ -118,6 +136,54 @@ internal sealed class TestPowertrainPlayback
         source.CameraPosition=new[]{source.VehiclePosition[0]-4.9*source.Forward[0]+wobble*source.Forward[1],
             source.VehiclePosition[1]-4.9*source.Forward[1]-wobble*source.Forward[0],source.VehiclePosition[2]+1.4};
         source.RevRatio=t>=8&&t<23?.84:.33+.2*Math.Sin(t*.67);
+        if (passageSeconds >= 180)
+        {
+            bool highCamera = t >= 36 && t < 40;
+            string current = highCamera ? "high-camera" : t < 8 ? "enter" : t < 23 ? "covered" : "exit";
+            if (shot != current)
+            {
+                shot = current;
+                routeEvents.Add(new { shot, elapsedSeconds = elapsed, qpc = now });
+            }
+            if (highCamera)
+                source.CameraPosition = new[]{source.VehiclePosition[0]-171*source.Forward[0],
+                    source.VehiclePosition[1]-171*source.Forward[1],source.VehiclePosition[2]+23};
+            // Use the short audition's ratio landmarks in each covered leg.
+            if (t >= 8 && t < 23)
+            {
+                double revTime = t - 8;
+                if (revTime <= 8) source.RevRatio = AuditionRatio(revTime);
+                else source.RevRatio = .74;
+                if (revTime >= 1.85 && revTime < 3.7)
+                    source.RevRatio = ((int)Math.Floor(revTime*20) % 2 == 0) ? .826 : .834;
+            }
+            if (highCamera) source.RevRatio = .88;
+        }
+    }
+
+    static double AuditionRatio(double seconds)
+    {
+        for (int i=1; i<RevTimes.Length; i++)
+            if (seconds <= RevTimes[i])
+            {
+                double part = (seconds-RevTimes[i-1])/(RevTimes[i]-RevTimes[i-1]);
+                return RevRatios[i-1]+part*(RevRatios[i]-RevRatios[i-1]);
+            }
+        return RevRatios[RevRatios.Length-1];
+    }
+    static readonly double[] RevTimes={0,.5,.62,.79,.92,1.05,1.6,3.8,5.1,6.6,6.72,7.5,15};
+    static readonly double[] RevRatios={.20,.20,.88,.88,.31,.30,.72,.72,1,1,.28,.24,.24};
+
+    void ApplyPerformanceFrame(PerformanceFrame frame)
+    {
+        source.CameraPosition = frame.camera;
+        source.CameraForward = frame.cameraForward;
+        source.CameraUp = frame.cameraUp;
+        source.VehiclePosition = frame.vehicle;
+        source.Forward = frame.forward;
+        source.VehicleUp = frame.up;
+        source.Velocity = frame.velocity ?? new[]{0d,0d,0d};
+        source.RevRatio = frame.rev;
     }
 
     Dictionary<string, object> ReadStatus()
@@ -300,7 +366,7 @@ internal sealed class TestPowertrainPlayback
     void WaitForStock()
     {
         var clock = Stopwatch.StartNew();
-        while (clock.ElapsedMilliseconds < 6000)
+        while (clock.ElapsedMilliseconds < 8000)
         {
             // Keep ticking the original vehicle while real host receipts or
             // process-exit evidence reach the SHVDNE worker.
@@ -332,7 +398,9 @@ internal sealed class TestPowertrainPlayback
         if(passage!=null){
             Require(configuration.PowertrainWorld,"Passage requires the one-car installed-world configuration");
             routeStarted=Stopwatch.GetTimestamp();MoveCameraAndCar();routeStarted=0;
+            routeEvents.Clear();shot=null;
         }
+        if (performance != null) ApplyPerformanceFrame(performance[0]);
         string root = configuration.Root;
         directory = Path.Combine(root, ".local", "gameplay", session);
         statusFile = Path.Combine(directory, "powertrain.json");
@@ -439,9 +507,18 @@ internal sealed class TestPowertrainPlayback
                     "Expired telemetry did not cause withdrawal: " + releaseReason);
                 Console.WriteLine("PASS lost observation lease withdrew playback and restored stock exactly once");
             }
+            else if (performance != null)
+            {
+                routeStarted=Stopwatch.GetTimestamp();
+                DriveWindow("matched clocked performance", (int)Math.Ceiling(performance.Last().seconds*1000), "Active", 2);
+                Require(handoff.Restore(Stopwatch.GetTimestamp()) == "accepted", "Stock return refused");
+                WaitForStock();
+            }
             else
             {
                 if(passage!=null)routeStarted=Stopwatch.GetTimestamp();
+                if(warmupSeconds>0)
+                    DriveWindow("in-process warm-up", warmupSeconds*1000, "Active", 2);
                 DriveWindow("initial audible playback", passage==null?3800:12000, "Active", 2);
                 Require(handoff.Mute(Stopwatch.GetTimestamp()) == "accepted", "Mute refused");
                 var muted = Drive("mute acknowledged only with silent output", r =>
@@ -470,7 +547,10 @@ internal sealed class TestPowertrainPlayback
                     Number(withdrawn, "appliedRevision") == 5 && Number(withdrawn, "outputPeak") == 0 &&
                     Number(withdrawn, "underflowFrames") == 0,
                     "Stale output remained after withdrawal");
-                if (!observeExpiry)
+                // Long runs also contain deliberate listener cuts. The
+                // private pre-gate/submitted capture classifies their PCM
+                // independently of this older all-substitutions assertion.
+                if (!observeExpiry && passageSeconds < 180)
                     Require(Number(withdrawn, "resumedSteadyLongestGapFrames") == 0,
                         "Substituted output interrupted qualified resumed playback");
                 Console.WriteLine("PASS withdrawal retired source and reached silent output before stock return");
@@ -478,11 +558,23 @@ internal sealed class TestPowertrainPlayback
             return new {
                 session, termination, stages, assignments, handoffJournal, evidenceDirectory = directory, reflectionEvidence, reflectionSinkInterval,
                 observationCount, minimumCallbackIntervalMs, maximumCallbackIntervalMs, contentionCount,
-                transportReceipt = Path.Combine(linkDirectory, "powertrain-transport.json"), finalHost = ReadStatus()
+                warmupSeconds, routeStartedQpc = routeStarted, routeEvents,
+                transportReceipt = Path.Combine(linkDirectory, "powertrain-transport.json"),
+                progressReceipt = Path.Combine(linkDirectory, "powertrain-progress.json"), finalHost = ReadStatus()
             };
         }
-        catch
+        catch (Exception error)
         {
+            // Keep the controller alive long enough for an automatic
+            // withdrawal to finish so a failing run still emits evidence.
+            if (handoff.Phase == "Releasing")
+            {
+                try { WaitForStock(); }
+                catch (Exception cleanup) { Console.Error.WriteLine("Failure cleanup: " + cleanup.Message); }
+            }
+            File.WriteAllText(Path.Combine(linkDirectory,"fixture-failure.json"),
+                json.Serialize(new { error=error.Message, session, evidenceDirectory=directory, stages,
+                    assignments, handoffJournal, routeStartedQpc=routeStarted, routeEvents, finalHost=ReadStatus() }));
             Console.Error.WriteLine("Private host evidence: " + directory);
             Console.Error.WriteLine("Handoff journal: " + json.Serialize(handoffJournal));
             throw;
@@ -508,22 +600,66 @@ internal sealed class TestPowertrainPlayback
         public double[] outside { get; set; }
         public double[] inside { get; set; }
         public double[] forward { get; set; }
+        public PerformanceFrame[] performance { get; set; }
+    }
+
+    sealed class PerformanceFrame
+    {
+        public double seconds { get; set; }
+        public double[] camera { get; set; }
+        public double[] cameraForward { get; set; }
+        public double[] cameraUp { get; set; }
+        public double[] vehicle { get; set; }
+        public double[] forward { get; set; }
+        public double[] up { get; set; }
+        public double[] velocity { get; set; }
+        public double rev { get; set; }
+    }
+
+    static bool Vector(double[] values)
+    {
+        return values!=null && values.Length==3 && values.All(x=>!Double.IsInfinity(x)&&!Double.IsNaN(x));
     }
 
     static int Main(string[] args)
     {
         bool world = args.Length == 4 && args[2] == "--world-pose";
-        bool moving = (args.Length==5 || args.Length==6) && args[2]=="--passage";
-        if (!moving && !world && args.Length != 2 && (args.Length != 3 || args[2] != "--observe-baseline-expiry")) return 2;
+        bool moving = args.Length>=5 && args[2]=="--passage";
+        bool matched = args.Length==4 && args[2]=="--performance";
+        if (!moving && !matched && !world && args.Length != 2 && (args.Length != 3 || args[2] != "--observe-baseline-expiry")) return 2;
         try
         {
             string root = Path.GetDirectoryName(args[1]);
+            if(matched)
+            {
+                var serializer=new JavaScriptSerializer{MaxJsonLength=1048576};
+                var replay=serializer.Deserialize<PassageRoute>(File.ReadAllText(args[3]));
+                var authored=replay==null ? null : replay.performance;
+                Require(authored!=null && authored.Length>1 && authored[0].seconds==0 && authored.Last().seconds>=1
+                    && authored.Last().seconds<=180
+                    && authored.All(f=>Vector(f.camera)&&Vector(f.vehicle)&&Vector(f.forward)&&f.rev>0&&f.rev<=1
+                        &&(f.cameraForward==null||Vector(f.cameraForward))&&(f.cameraUp==null||Vector(f.cameraUp))
+                        &&(f.velocity==null||Vector(f.velocity))&&(f.up==null||Vector(f.up)))
+                    && authored.Zip(authored.Skip(1),(a,b)=>a.seconds<b.seconds).All(x=>x),
+                    "Ordered performance frames with valid poses and rev ratios required");
+                var playbackPerformance=new TestPowertrainPlayback{performance=authored}.Run(args[0],root,"restore");
+                File.WriteAllText(args[1],serializer.Serialize(new{passed=true,fixture="device-free",playbackPerformance}));
+                return 0;
+            }
             if(moving)
             {
                 var serializer=new JavaScriptSerializer{MaxJsonLength=1048576};
                 var route=serializer.Deserialize<PassageRoute>(File.ReadAllText(args[3]));
-                Require(route!=null && new[]{route.outside,route.inside,route.forward}.All(v=>v!=null&&v.Length==3&&v.All(x=>!Double.IsInfinity(x)&&!Double.IsNaN(x))),"Reconstructed XYZ route required");
-                var test=new TestPowertrainPlayback{passage=route,passageSeconds=Int32.Parse(args[4]),contendStatus=args.Length==6&&args[5]=="--contend-status"};
+                Require(route!=null && new[]{route.outside,route.inside,route.forward}.All(Vector),"Reconstructed XYZ route required");
+                var test=new TestPowertrainPlayback{passage=route,passageSeconds=Int32.Parse(args[4])};
+                foreach(string option in args.Skip(5))
+                {
+                    if(option=="--contend-status") test.contendStatus=true;
+                    else if(option.StartsWith("--warmup=", StringComparison.Ordinal)) test.warmupSeconds=Int32.Parse(option.Substring("--warmup=".Length));
+                    else throw new ArgumentException("Unknown passage test option");
+                }
+                Require(test.passageSeconds>=10 && test.passageSeconds<=300 && test.warmupSeconds>=0 && test.warmupSeconds<=60,
+                    "Passage fixture timing outside its declared bounds");
                 var playbackPassage=test.Run(args[0],root,"restore");
                 object loss=null;
                 if(!test.contendStatus)

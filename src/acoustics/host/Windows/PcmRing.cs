@@ -73,6 +73,14 @@ namespace RichAudio.Beacon.Windows
             Causes |= cause;
         }
     }
+    // Optional device-free witness, assigned before either ring thread starts.
+    internal interface IPowertrainPcmObserver
+    {
+        void Observe(long sinkFrame, int frames, float[] input, int offset, long block,
+            uint wireTag, PowertrainStamp stamp, long revision, bool audible,
+            long arrival, long enqueue, long decision, PowertrainGapCause cause);
+        void UnobservedArrival(long sinkFrame);
+    }
     // Exactly one producer and one consumer. Slot publication uses volatile ordering.
     public sealed class PcmRing
     {
@@ -90,7 +98,9 @@ namespace RichAudio.Beacon.Windows
         private readonly float[][] data = new float[Slots][];
         private readonly PowertrainStamp[] stamps = new PowertrainStamp[Slots];
         private readonly long[] arrivedAt = new long[Slots], enqueuedAt = new long[Slots], pcmBlocks = new long[Slots];
+        private readonly uint[] wireTags = new uint[Slots];
         private readonly int[] lengths = new int[Slots];
+        internal IPowertrainPcmObserver PowertrainPcmObserver { get; set; }
         private int write, read, offset, credits;
         public long UnderflowFrames, ConsumedFrames, ConsumedBlocks, EndSilenceFrames;
         public long FirstUnderflowFrame = -1;
@@ -107,7 +117,7 @@ namespace RichAudio.Beacon.Windows
         public int TakeCredits() { return Interlocked.Exchange(ref credits, 0); }
         public bool TryWrite(float[] samples, int frames)
         { return TryWrite(samples, frames, null); }
-        internal bool TryWrite(float[] samples, int frames, PowertrainStamp stamp, long arrival = 0, long block = -1)
+        internal bool TryWrite(float[] samples, int frames, PowertrainStamp stamp, long arrival = 0, long block = -1, uint wireTag = 0)
         {
             if (samples == null || frames < 1 || frames > MaximumFrames || samples.Length < frames * 2) throw new ArgumentException("PCM block bounds");
             for (int i = 0; i < frames * 2; i++) if (float.IsNaN(samples[i]) || float.IsInfinity(samples[i]) || Math.Abs(samples[i]) > 1) throw new InvalidDataException("Invalid PCM sample");
@@ -116,12 +126,13 @@ namespace RichAudio.Beacon.Windows
             int index = cursor % Slots;
             Array.Copy(samples, 0, data[index], 0, frames * 2);
             lengths[index] = frames; stamps[index] = stamp;
-            if (stamp != null)
+            if (stamp != null || PowertrainPcmObserver != null)
             {
                 arrivedAt[index] = arrival;
                 enqueuedAt[index] = arrival == 0 ? 0 : Stopwatch.GetTimestamp();
                 pcmBlocks[index] = block;
             }
+            if (PowertrainPcmObserver != null) wireTags[index] = wireTag;
             Thread.VolatileWrite(ref write, cursor + 1); return true;
         }
         public unsafe int Fill(float* output, int frames, float gain)
@@ -145,10 +156,11 @@ namespace RichAudio.Beacon.Windows
                 int chunk=available?Math.Min(frames-done,lengths[index]-offset):frames-done;
                 bool stale=stamp!=null&&stamp.Deadline<=now;
                 bool qualified=suppression==PowertrainGapCause.None&&stamp!=null&&stamp.Revision==revision&&!stale;
-                if (audible)
+                var observer=PowertrainPcmObserver;
+                if (audible || observer != null)
                 {
                     long arrival = arrivedAt[index], enqueue = enqueuedAt[index];
-                    if (stamp != null && stamp.Revision == revision && arrival > 0 && arrival <= enqueue)
+                    if (audible && stamp != null && stamp.Revision == revision && arrival > 0 && arrival <= enqueue)
                     {
                         submission.MaxArrivalAge = Math.Max(submission.MaxArrivalAge, arrival - stamp.ObservedAt);
                         submission.MaxEnqueueAge = Math.Max(submission.MaxEnqueueAge, enqueue - stamp.ObservedAt);
@@ -165,7 +177,7 @@ namespace RichAudio.Beacon.Windows
                     else if (arrival >= stamp.Deadline) cause = PowertrainGapCause.StaleOnArrival;
                     else if (enqueue >= stamp.Deadline) cause = PowertrainGapCause.StaleBeforeEnqueue;
                     else cause = PowertrainGapCause.StaleInRing;
-                    if (stamp != null && stamp.Revision == revision && arrival > 0)
+                    if (audible && stamp != null && stamp.Revision == revision && arrival > 0)
                     {
                         var timing = new PowertrainPcmTiming {
                             ObservationSequence=stamp.Sequence, ObservationQpc=stamp.ObservedAt, DeadlineQpc=stamp.Deadline,
@@ -174,10 +186,18 @@ namespace RichAudio.Beacon.Windows
                         if (submission.FirstTiming.ArrivalQpc == 0) submission.FirstTiming = timing;
                         submission.LastTiming = timing;
                     }
-                    submission.Output(chunk, cause);
+                    if (audible) submission.Output(chunk, cause);
+                    if (observer != null) observer.Observe(ConsumedFrames, chunk,
+                        available ? data[index] : null, available ? offset : 0,
+                        available ? pcmBlocks[index] : -1, available ? wireTags[index] : 0,
+                        stamp, revision, audible, available ? arrival : 0, available ? enqueue : 0, now, cause);
                 }
                 float* target=output+done*2;
                 int taken=FillCore(target,chunk,qualified?gain:0,1);
+                // FillCore can discover a slot published after our no-slot
+                // decision. Its contents were not observed at the gate.
+                if (observer != null && !available && taken > 0)
+                    observer.UnobservedArrival(ConsumedFrames-chunk);
                 if(qualified){
                     submission.Qualified+=taken;
                     submission.Source=stamp;

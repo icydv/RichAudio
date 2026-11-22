@@ -6,6 +6,8 @@ import {createInterface} from 'node:readline';
 import {setTimeout as delay} from 'node:timers/promises';
 import test from 'node:test';
 import {fileURLToPath} from 'node:url';
+import {VehicleAcousticPipeline} from '../src/acoustics/vehicle/pipeline.mjs';
+import {distanceProbeScene} from './fixtures/vehicle-distance-probe.mjs';
 
 const manifest = process.env.POWERTRAIN_MOTION_MANIFEST;
 const producer = fileURLToPath(new URL('../tools/Run-Gameplay.mjs', import.meta.url));
@@ -18,6 +20,7 @@ async function runMotion(check) {
   const child = spawn(process.execPath, [producer, '--manifest', manifest, '--session', session],
     {windowsHide: true, stdio: ['pipe', 'pipe', 'pipe']});
   const rows = [];
+  const pcm = [];
   let pending = Buffer.alloc(0), blocks = 0, peak = 0, tagged = 0;
   const output = createInterface({input: child.stderr});
   const exited = once(child, 'exit');
@@ -34,8 +37,12 @@ async function runMotion(check) {
       assert.equal(pending.toString('ascii', 0, 4), 'RA07');
       assert.equal(pending.readUInt32LE(4), blocks++);
       assert.equal(pending.readUInt32LE(8), 512);
-      if (pending.readUInt32LE(12) > 0) tagged++;
-      for (let i = 16; i < 4112; i += 4) peak = Math.max(peak, Math.abs(pending.readFloatLE(i)));
+      const tag = pending.readUInt32LE(12);
+      if (tag > 0) tagged++;
+      let blockPeak = 0;
+      for (let i = 16; i < 4112; i += 4) blockPeak = Math.max(blockPeak, Math.abs(pending.readFloatLE(i)));
+      peak = Math.max(peak, blockPeak);
+      pcm.push({tag, peak: blockPeak});
       pending = pending.subarray(4112);
     }
   });
@@ -53,7 +60,8 @@ async function runMotion(check) {
     const began = performance.now();
     let sequence = 0;
     async function pose({listenerShift = 0, sourceShift = 0, generation = 1,
-      sourceGeneration = 1, vehicle = true, listenerSpeed = 0, sourceSpeed = 0, operatingPoint = .55} = {}) {
+      sourceGeneration = 1, vehicle = true, listenerSpeed = 0, sourceSpeed = 0, operatingPoint = .55,
+      revision = 1, gate = 'voice'} = {}) {
       const ms = performance.now() - began;
       const observationTicks = Math.round((1000 + ms) * frequency / 1000);
       const listener = {
@@ -71,15 +79,16 @@ async function runMotion(check) {
       }] : [];
       write({type: 'snapshot', ageMs: 0, validForMs: 220, frame: {
         version: 1, session, listener, vehicles, validThroughTicks: observationTicks + frequency / 4,
-        powertrainRevision: 1, powertrainGate: 'voice',
+        powertrainRevision: revision, powertrainGate: gate,
       }});
+      return listener.sequence;
     }
     async function render(count = 5) {
       const due = blocks + count;
       write({type: 'credit', blocks: count});
       await waitFor(() => blocks === due);
     }
-    return await check({pose, render, waitFor, rows, exited, write, counters: () => ({blocks, peak, tagged})});
+    return await check({pose, render, waitFor, rows, pcm, exited, write, counters: () => ({blocks, peak, tagged})});
   } finally {
     if (child.exitCode === null) {
       child.stdin.end(JSON.stringify({type: 'stop'}) + '\n');
@@ -96,6 +105,91 @@ async function warm({pose, render}, options) {
     for (let b = 0; b < 5; b++) { await render(1); await delay(9); }
   }
 }
+
+test('a single emitted pulse arrives after the camera cut even though the continuing source is now quiet', async () => {
+  const pipeline = new VehicleAcousticPipeline({
+    scene: distanceProbeScene('authored-detail-loss-v1'),
+    sourceIds: ['tailpipe'],
+    continuousRates: true,
+    preserveSourceHistoryOnListenerCut: true,
+  });
+  const listener = {position:[0,0,1], velocity:[0,0,0], ...directions, valid:true};
+  const emitter = {...listener, id:'tailpipe', generation:1, position:[174,0,1]};
+  const input = new Float32Array(512), left = new Float32Array(512), right = new Float32Array(512);
+  const emission = 22*512+32;
+  let arrival = -1;
+  try {
+    for (let block=0; block<90; block++) {
+      const frame = block*512;
+      await pipeline.prepare({time:frame/48000, session:'single-quiet-flight', generation:block<35?1:2,
+        listener, sources:[emitter]});
+      input.fill(0);
+      if (block===22) input[emission-frame]=.9;
+      pipeline.process({tailpipe:input}, left, right);
+      const first = right.findIndex((v,i)=>Math.max(Math.abs(v),Math.abs(left[i]))>1e-8);
+      if (first>=0 && arrival===-1) arrival=frame+first;
+    }
+    assert(Math.abs(arrival-(emission+174*48000/343))<=2, 'physical arrival retains original emission frame');
+  } finally {
+    pipeline.close();
+  }
+});
+
+test('a far camera cut hears the moving vehicle\'s already-emitted pressure under the same lease', {skip: !manifest}, async () => {
+  await runMotion(async rig => {
+    const movement = {listenerSpeed:30,sourceSpeed:30};
+    await warm(rig, movement);
+    const cut = rig.pcm.length;
+    await warm(rig, {...movement,generation: 2, listenerShift: 174});
+    const heard = rig.pcm.slice(cut);
+    const longSilence = heard.slice(8, 35)
+      .filter(block => block.peak <= 1e-6 || block.tag === 0).length;
+    assert.equal(longSilence, 0, 'a receiver cut must not restart half a second of source flight');
+    const distant = Math.max(...heard.slice(20, 35).map(block => block.peak));
+    const near = Math.max(...rig.pcm.slice(cut-10, cut).map(block => block.peak));
+    assert(distant < near/2, 'the new receiver hears lower distant pressure');
+  });
+});
+
+test('a new emitter lifetime cannot reuse the old pressure across a receiver cut', {skip: !manifest}, async () => {
+  await runMotion(async rig => {
+    const far = {listenerShift:174};
+    await warm(rig, far);
+    assert(rig.pcm.slice(-8).some(block=>block.peak>1e-6), 'the old emitter has arrived');
+    const replaced = rig.pcm.length;
+    const newSequence = await rig.pose({...far,generation:2,sourceGeneration:2});
+    for(let i=0;i<12;i++){
+      if(i)await rig.pose({...far,generation:2,sourceGeneration:2});
+      for(let b=0;b<5;b++){await rig.render(1);await delay(9);}
+    }
+    assert(rig.pcm.slice(replaced,replaced+30).every(block=>block.peak===0), 'slot reuse cannot replay past emission');
+    assert(rig.pcm.slice(replaced+10,replaced+30).every(block=>block.tag>=newSequence+1), 'qualification belongs to the new lifetime');
+  });
+});
+
+test('authorized flight silence is tagged after a gain boundary without replaying old pressure', {skip: !manifest}, async () => {
+  await runMotion(async rig => {
+    const far = {listenerShift:174};
+    await warm(rig, far);
+    await warm(rig, {...far,revision:2,gate:'mute'});
+    assert(rig.pcm.slice(-8).some(block=>block.peak>1e-6), 'there is retained pressure before resume');
+    const before = rig.pcm.length;
+    const resumeSequence = await rig.pose({...far,revision:3,gate:'voice'});
+    for(let i=0;i<10;i++){
+      if(i)await rig.pose({...far,revision:3,gate:'voice'});
+      for (let b=0;b<5;b++){await rig.render(1);await delay(9);}
+    }
+    const flight = rig.pcm.slice(before+10,before+30);
+    assert(flight.every(block=>block.peak===0), 'the old revision cannot arrive through the new gain boundary');
+    assert(flight.every(block=>block.tag>=resumeSequence+1), 'actual silence has current authorized transport progress');
+    const removed = rig.pcm.length;
+    for(let i=0;i<3;i++){
+      await rig.pose({...far,revision:3,gate:'voice',vehicle:false});
+      for(let b=0;b<5;b++){await rig.render(1);await delay(9);}
+    }
+    assert(rig.pcm.slice(removed).every(block=>block.tag===0&&block.peak===0), 'removed source tails are not qualified or replayed');
+  });
+});
 
 test('one-car producer keeps ordinary observed motion through PCM credit bursts',
   {skip: !manifest}, async () => {
