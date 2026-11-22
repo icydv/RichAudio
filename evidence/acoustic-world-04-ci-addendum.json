@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "kind": "RichAudioWorld04SyntheticCiEnvironmentCorrection",
+  "implementationCommit": "9fd184266ca9439cff3614d87355cf0c6d685143",
+  "failedHostedRun": 41560583971,
+  "failedLogSHA256": "b6ee6656da328c52b9dbdab7e9299b15dedf7e2a552bc7dc1bbfe9105a4a9d45",
+  "failedRunPortablePasses": 33,
+  "correctedSyntheticControls": 8,
+  "inheritedFlag": "DOTNET_SKIP_FIRST_TIME_EXPERIENCE",
+  "restoredOnSuccessAndFailure": true,
+  "negativeStartupHookStillRejected": true,
+  "productionHelperAndPreparationUnchanged": true,
+  "candidate03AllFilesUnchanged": true,
+  "candidateManifestSHA256": "fbd75133759a06b034b7a6d94dc920f8a4311ef06ec7a9437e576afc1d868e1f",
+  "candidateInvoked": false,
+  "gameFilesRead": false,
+  "endpointOpened": false,
+  "independentReviewSHA256": "328bcc0067f9f0e009152c18531ee741cf3bf04b3195792dd1e54837805ef1fa",
+  "privateReproductionResultSHA256": "9bfe24666496260e8fa0419aa19c31d282212b36fc9064993a8585ebe6da4185",
+  "correctedTestCheckoutSHA256": "cf3b10b76a024574747e00dbd7c5eb3e374d1c1c323741fda80983fdbf8464a9",
+  "hostedProcessing": {
+    "basis": "authored device-free render-call processing, not output latency",
+    "calls": 144,
+    "p50Ms": 1.3316,
+    "p99Ms": 20.3405,
+    "maximumMs": 26.2615,
+    "callsOver10_6667Ms": 2
+  }
+}

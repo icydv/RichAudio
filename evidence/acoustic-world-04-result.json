@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "kind": "RichAudioAcousticWorld04OfflineResult",
+  "baseCommit": "879a9c8d395512b0784b9abb51bd273834120cab",
+  "installedResourcesRead": false,
+  "installedPathsStatted": false,
+  "gameLaunched": false,
+  "endpointOpened": false,
+  "recordingPerformed": false,
+  "deployed": false,
+  "nativeSuppression": false,
+  "merged": false,
+  "privateBanksRead": false,
+  "existingVehicleStreamingEngineUnchanged": true,
+  "installedWorldVerified": false,
+  "actualInteriorCompatibilityVerified": false,
+  "interiorRoutingApplied": false,
+  "pcmFramesAdded": 0,
+  "validation": {
+    "independentWindowsSynthetic": {
+      "consumedReuseRejected": true,
+      "passed": 8,
+      "logSHA256": "76b348c003593c78460abf196626edbd2c1235dbccc93315dc52a34579324e5a"
+    },
+    "fullOffline": {
+      "beforeFinalHardening": true,
+      "passed": true,
+      "logSHA256": "2905ec90f3ed7290f60de13c121a35f30570575eff4618656d68ed9cf48a08e6"
+    },
+    "finalPortableFocused": {
+      "failed": 0,
+      "passed": 33,
+      "logSHA256": "82e4e3d704895628ebc2e4d1a3056a032cca68e37360f3612eb8a9eb552b1d11"
+    }
+  },
+  "reviews": {
+    "interiorProposalSHA256": "d5a000eeafd257d39e24fdbea8cca0435bceb5c3bfed3f26a2bdb2283f4f7791",
+    "cacheContinuitySHA256": "aafc0fec1535d86c0b4f8ed4298499d8c794ae04155eba21eb26d0a488fedfb6",
+    "exactCandidateSHA256": "284f161e874bdb0f89b3445d6e520c0351edf3124ff679d3db52ccf252d99533"
+  },
+  "processing": {
+    "calls": 144,
+    "p50Ms": 0.7639,
+    "blockBudgetMs": 10.666666666666666,
+    "basis": "device-free authored PCM, observational render processing, not output latency",
+    "otherRetainedMaximaMs": [
+      55.9741,
+      55.0036,
+      58.737,
+      59.4602,
+      56.1945,
+      62.07
+    ],
+    "maximumMs": 56.766,
+    "callsOverBudget": 1,
+    "p99Ms": 3.0831
+  },
+  "nextCandidate": {
+    "identity": "world04-metadata-candidate-03",
+    "exeSHA256": "59c69fa18976a820028a14a90e8f1817c7cd422c0ab561e2127198168536ff0a",
+    "maximumContentBytes": 16,
+    "memberAllowlist": [],
+    "manifestSHA256": "fbd75133759a06b034b7a6d94dc920f8a4311ef06ec7a9437e576afc1d868e1f",
+    "runtimePins": 55,
+    "state": "reviewed-unapproved-unconsumed",
+    "sourceArchiveIdentity": "unknown-not-inspected",
+    "retryAllowed": false
+  },
+  "files": [
+    {
+      "path": "src/acoustics/world/resource-inventory04.mjs",
+      "checkoutSHA256": "abd7f89561e971a4aaa840adf997f451099ca0500966f1d7c9e96469a5a5c0c2",
+      "checkoutBytes": 8478,
+      "publishedSHA256": "abd7f89561e971a4aaa840adf997f451099ca0500966f1d7c9e96469a5a5c0c2",
+      "publishedBytes": 8478
+    },
+    {
+      "path": "src/acoustics/world/cache-builder04.mjs",
+      "checkoutSHA256": "d7258af3e1591fbe76ddaa5a8224f86653875e8606a609485e7ce7b89732f3af",
+      "checkoutBytes": 10193,
+      "publishedSHA256": "d7258af3e1591fbe76ddaa5a8224f86653875e8606a609485e7ce7b89732f3af",
+      "publishedBytes": 10193
+    },
+    {
+      "path": "src/acoustics/world/cache-worker04.mjs",
+      "checkoutSHA256": "0187cca0d252fca4f4b96e809f6819864acf65b98f5802ac8bb079215cee5eca",
+      "checkoutBytes": 765,
+      "publishedSHA256": "0187cca0d252fca4f4b96e809f6819864acf65b98f5802ac8bb079215cee5eca",
+      "publishedBytes": 765
+    },
+    {
+      "path": "src/acoustics/world/resource-tile-store04.mjs",
+      "checkoutSHA256": "6309643db510adc9d2eec269f3a900cbff02a7a6561ad00f332cd05cbcee7aff",
+      "checkoutBytes": 7988,
+      "publishedSHA256": "6309643db510adc9d2eec269f3a900cbff02a7a6561ad00f332cd05cbcee7aff",
+      "publishedBytes": 7988
+    },
+    {
+      "path": "src/acoustics/world/interior04.mjs",
+      "checkoutSHA256": "3bd0a1b389ec98afcfb52dc8383b11d6e452e878addbc816aa7028ac8b418631",
+      "checkoutBytes": 14748,
+      "publishedSHA256": "3bd0a1b389ec98afcfb52dc8383b11d6e452e878addbc816aa7028ac8b418631",
+      "publishedBytes": 14748
+    },
+    {
+      "path": "tools/world04-header-candidate.cs",
+      "checkoutSHA256": "c2f2187dc47636d87975ff97e208fa11fd5356215199d3c5e9cc6099f756734b",
+      "checkoutBytes": 16257,
+      "publishedSHA256": "c2f2187dc47636d87975ff97e208fa11fd5356215199d3c5e9cc6099f756734b",
+      "publishedBytes": 16257
+    },
+    {
+      "path": "tools/world04-prepare-header-candidate.ps1",
+      "checkoutSHA256": "ae6d69fd0fe9e6f06ef45521e578021d55b5721a5c174a925ab3f1ad71584f06",
+      "checkoutBytes": 3694,
+      "publishedSHA256": "ae6d69fd0fe9e6f06ef45521e578021d55b5721a5c174a925ab3f1ad71584f06",
+      "publishedBytes": 3694
+    },
+    {
+      "path": "tools/world04-metadata-inventory.mjs",
+      "checkoutSHA256": "fccb426a7a00691c5f26623c59ec40c2c1f962202a268ea20a7a3a0019ecb58e",
+      "checkoutBytes": 5366,
+      "publishedSHA256": "fccb426a7a00691c5f26623c59ec40c2c1f962202a268ea20a7a3a0019ecb58e",
+      "publishedBytes": 5366
+    },
+    {
+      "path": "tests/Test-CacheBuilder04.mjs",
+      "checkoutSHA256": "973be6a928155008475677f7ffca70d6e38e9e3f6f242306c53cea90ea6a4900",
+      "checkoutBytes": 9909,
+      "publishedSHA256": "973be6a928155008475677f7ffca70d6e38e9e3f6f242306c53cea90ea6a4900",
+      "publishedBytes": 9909
+    },
+    {
+      "path": "tests/Test-HeaderCandidate04.ps1",
+      "checkoutSHA256": "4b14c239b8938afc9bf38f7ed19772b18431167c63d7563867756db85cb573f6",
+      "checkoutBytes": 3852,
+      "publishedSHA256": "4b14c239b8938afc9bf38f7ed19772b18431167c63d7563867756db85cb573f6",
+      "publishedBytes": 3852
+    },
+    {
+      "path": "tests/Test-Interior04.mjs",
+      "checkoutSHA256": "1f3c89ed84c755ca174d1da9639bb23f551e735fc18e408b4daaa779573b3e94",
+      "checkoutBytes": 9597,
+      "publishedSHA256": "1f3c89ed84c755ca174d1da9639bb23f551e735fc18e408b4daaa779573b3e94",
+      "publishedBytes": 9597
+    },
+    {
+      "path": "tests/Test-ResourceProposal04.mjs",
+      "checkoutSHA256": "6e83bb57f1599c354107a5fcd9fac3f98225f8cac7d41364bb68847378cfa2dc",
+      "checkoutBytes": 3695,
+      "publishedSHA256": "6e83bb57f1599c354107a5fcd9fac3f98225f8cac7d41364bb68847378cfa2dc",
+      "publishedBytes": 3695
+    },
+    {
+      "path": "tests/Test-World04Review.mjs",
+      "checkoutSHA256": "40416352ed369033dd2b964b4d1c61c9dfb6ad3c33c6e6cac45ba818e8cb3f4d",
+      "checkoutBytes": 7713,
+      "publishedSHA256": "40416352ed369033dd2b964b4d1c61c9dfb6ad3c33c6e6cac45ba818e8cb3f4d",
+      "publishedBytes": 7713
+    },
+    {
+      "path": "tests/Test-WorldContinuity04.mjs",
+      "checkoutSHA256": "db571d9a00fd75ca8f1f80c238727ad42f2e21727b5d16e3b7b482ae221c4904",
+      "checkoutBytes": 11284,
+      "publishedSHA256": "db571d9a00fd75ca8f1f80c238727ad42f2e21727b5d16e3b7b482ae221c4904",
+      "publishedBytes": 11284
+    },
+    {
+      "path": "tests/fixtures/Interior04.mjs",
+      "checkoutSHA256": "6bcd38a4edeb28f058aeffc9b7d4201fc8c7736f851d8a8dd4fc397ad6627c07",
+      "checkoutBytes": 3201,
+      "publishedSHA256": "6bcd38a4edeb28f058aeffc9b7d4201fc8c7736f851d8a8dd4fc397ad6627c07",
+      "publishedBytes": 3201
+    },
+    {
+      "path": "tests/fixtures/WorldResources04.mjs",
+      "checkoutSHA256": "77c236098f786ef30ff88a84f053e9268ee12b26b9a0051e279ed2b416cb9318",
+      "checkoutBytes": 3453,
+      "publishedSHA256": "77c236098f786ef30ff88a84f053e9268ee12b26b9a0051e279ed2b416cb9318",
+      "publishedBytes": 3453
+    },
+    {
+      "path": "docs/ACOUSTIC_WORLD_04_ARCHITECTURE.md",
+      "checkoutSHA256": "e31cd43fd61bb44f64c8f17094ecfe37cb3e2ec92225ee3af713140fd5850d4f",
+      "checkoutBytes": 8584,
+      "publishedSHA256": "e31cd43fd61bb44f64c8f17094ecfe37cb3e2ec92225ee3af713140fd5850d4f",
+      "publishedBytes": 8584
+    },
+    {
+      "path": "docs/ACOUSTIC_WORLD_04_READ_ONLY_PROPOSAL.md",
+      "checkoutSHA256": "fb99ba71ab4a004cbcf52a9927eefa1709de57c2418e64fdcdc6f80b985487b4",
+      "checkoutBytes": 10096,
+      "publishedSHA256": "fb99ba71ab4a004cbcf52a9927eefa1709de57c2418e64fdcdc6f80b985487b4",
+      "publishedBytes": 10096
+    },
+    {
+      "path": "docs/ACOUSTIC_WORLD_04_RESULT.md",
+      "checkoutSHA256": "b3d0c85416b5fb4ac7a336477cc7f351159f484eab0f5a1d4ee6f4025b41fee5",
+      "checkoutBytes": 6530,
+      "publishedSHA256": "b3d0c85416b5fb4ac7a336477cc7f351159f484eab0f5a1d4ee6f4025b41fee5",
+      "publishedBytes": 6530
+    },
+    {
+      "path": "tools/Test-Offline.ps1",
+      "checkoutSHA256": "4ac9b3708f886cd66f05fc9bc69656625d48d4cb2134484dbb669d1e1372693b",
+      "checkoutBytes": 13478,
+      "publishedSHA256": "a6cd7f392c1c1b58e558d82af417d3e0d7fe651ddc4119e4224e8c29cbe4978f",
+      "publishedBytes": 13319
+    }
+  ],
+  "fileBindingBasis": "Separate local checkout bytes and canonical published Git index bytes; Windows line ending normalization is explicit."
+}

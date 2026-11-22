@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "kind": "RichAudioWorld04SyntheticRuntimeEnvironmentIsolation",
+  "preservedFailedRuns": [41560583971, 41561401758],
+  "secondFailedLogSHA256": "9a220fd45f1624d76bbbebc4650537fc0091e0c8aa6450e9aa1a0a220980f550",
+  "failedRunsPortablePassesEach": 33,
+  "syntheticControlsPassed": 8,
+  "scope": "Synthetic harness only; snapshot/remove/restore runtime override namespaces; strict helper unchanged",
+  "restoreSuccessFailureAndAbsence": true,
+  "startupHookRejectionPreserved": true,
+  "productionHelperAndSealedCandidateUnchanged": true,
+  "installedCandidateInvoked": false,
+  "installedGameFilesRead": false,
+  "endpointOpened": false,
+  "correctedTestCheckoutSHA256": "a0a560b7d39cca7f1d17421ddb166917ebdbc50cb8b6564d8ea6fa81fcc14b85",
+  "privateReproductionResultSHA256": "23109c61658a65f3a3496174559d9f8897ca80a716ea97ebaf2bb4cf70be8ff2",
+  "independentCorrectionReviewSHA256": "184c3974f20a8e6acc6d4c88ffcbe9dac25d1422bf4631a7024372285891790f",
+  "failedRunReadbackReviewSHA256": "61ee24aff3725928545064c9c5fa0f17c7b62dceea7289d8f258d764ac66885d",
+  "secondHostedProcessing": {
+    "basis": "authored device-free render-call processing, not output latency",
+    "calls": 144,
+    "p50Ms": 1.845,
+    "p99Ms": 10.5904,
+    "maximumMs": 25.4399,
+    "callsOver10_6667Ms": 1
+  }
+}
