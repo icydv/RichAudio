@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {StockVehicleSource} from '../src/acoustics/vehicle/stock-source.mjs';
+import {StockExhaustEvents} from '../src/acoustics/vehicle/stock-events.mjs';
 
 const rate = 48000;
 const running = {operatingPoint: .79, load: .92, lift: false, running: true, gear: 2};
@@ -62,12 +63,95 @@ test('X80 upshift cuts and recovers exhaust pressure without changing reader clo
   assert.deepEqual(shifted.commonRates, held.commonRates);
 });
 
+test('X80 light throttle retains acceleration material until the controls indicate lift', () => {
+  const bank = fixture();
+  const silentOverrun = {...bank.layers.exhaust.decel, samples: new Float32Array(rate)};
+  bank.layers.exhaust = {...bank.layers.exhaust, decel: silentOverrun};
+  const cruise = new StockVehicleSource(bank, {x80LoadResponse: true});
+  const coast = new StockVehicleSource(bank, {x80LoadResponse: true});
+  const control = {...running, load: .05};
+  const cruisePcm = render(cruise, control, rate).exhaust.subarray(rate / 2);
+  const coastPcm = render(coast, {...control, lift: true}, rate).exhaust.subarray(rate / 2);
+  assert.ok(rms(cruisePcm) > .015, 'light throttle must keep the recorded running voice');
+  assert.ok(rms(coastPcm) < .0001, 'an explicit lift must select the recorded overrun voice');
+});
+
 function popAssets() {
   return {model: 'prototipo', variants: [32005, 32001, 32002, 32001].map((sampleRate, variant) => ({
     samples: Float32Array.from({length: 3200}, (_, i) =>
       .8 * Math.sin(2 * Math.PI * (450 + variant * 130) * i / sampleRate)), frames: 3200, sampleRate,
   }))};
 }
+
+test('X80 event PCM can be routed separately and its finite tail survives a stop', () => {
+  const preRoll = 1024;
+  const atFrame = preRoll + 19;
+  const variant = 2;
+  const make = () => new StockVehicleSource(fixture(), {
+    sourceGain: 1.2,
+    pressureSharesByState: {idle:{engine:.5,exhaust:.5}, load:{engine:.3,exhaust:.7}, lift:{engine:.6,exhaust:.4}},
+    exhaustEvents: {assets: popAssets(), preserveTail: true, triggers: [{atFrame, variant, basis: 'authored-offline-lift'}]},
+  });
+  const split = make();
+  const summed = make();
+  const continuing = make();
+  const event = new Float32Array(512);
+  const otherEvent = new Float32Array(512);
+  const engine = new Float32Array(512);
+  const exhaust = new Float32Array(512);
+  for (const source of [split, summed, continuing]) render(source, running, preRoll);
+
+  split.renderInto(running, engine, exhaust, 512, event);
+  const mixed = render(summed, running, 512);
+  continuing.renderInto(running, engine, new Float32Array(512), 512, otherEvent);
+  assert.ok(rms(event) > .001);
+  assert.deepEqual(event, otherEvent);
+  assert.deepEqual(engine, mixed.engine);
+  for (let i = 0; i < 512; i++) assert.ok(Math.abs(mixed.exhaust[i] - exhaust[i] - event[i]) < 6e-8);
+  assert.equal(split.stats.events.lastTrigger.atFrame, atFrame);
+  assert.equal(split.stats.events.lastTrigger.variant, variant);
+  assert.equal(split.stats.events.lastTrigger.basis, 'authored-offline-lift');
+  assert.ok(split.stats.events.lastTrigger.emitterGain > 0);
+
+  for (let i = 0; i < 11; i++) {
+    split.renderInto({...running, running: false, operatingPoint:.1, lift:true}, engine, exhaust, 512, event);
+    continuing.renderInto(running, engine, exhaust, 512, otherEvent);
+    assert.deepEqual(event, otherEvent, 'the recording tail belongs to the event clock');
+  }
+  assert.ok(event.every(value => value === 0));
+  assert.equal(split.stats.events.completed, 1);
+  assert.equal(split.stats.events.activeFrames, Math.ceil(3200 * rate / 32002));
+  assert.ok(split.stats.events.maximumCombinedInputBound <= .98 + 1e-12);
+});
+
+test('X80 event PCM cannot alias another bus or the bank before rendering', () => {
+  const bank = fixture();
+  const assets = popAssets();
+  const source = new StockVehicleSource(bank, {
+    exhaustEvents: {assets, triggers: [{atFrame: 4096, variant: 0, basis: 'authored-offline-lift'}]},
+  });
+  const engine = new Float32Array(512);
+  const exhaust = new Float32Array(512);
+  const incompatibleOutputs = [engine, exhaust, bank.layers.engine.idle.samples,
+    assets.variants[0].samples.subarray(31), assets.variants[3].samples.subarray(31)];
+  for (const event of incompatibleOutputs) {
+    assert.throws(() => source.renderInto(running, engine, exhaust, 512, event), /alias|overwrite/);
+    assert.equal(source.frame, 0);
+  }
+});
+
+test('the fixed-rate X80 event reserves only its reachable resampled peak', () => {
+  const assets = popAssets();
+  for (const variant of assets.variants) {
+    for (let i = 0; i < variant.frames; i++) variant.samples[i] = .8 * Math.sin(2 * Math.PI * .44 * i);
+  }
+  const events = new StockExhaustEvents({
+    assets, bedPeakBound: .82, roleGainBound: .6, resampling: 'bandlimited',
+    triggers: [{atFrame: 0, variant: 0, basis: 'authored-offline-lift'}],
+  });
+  assert.equal(events.stats.gain, .25);
+  assert.ok(events.stats.maximumCombinedInputBound <= .98 + 1e-12);
+});
 
 test('a hard lift emits one finite native event at the exhaust on the source clock', () => {
   const make = () => new StockVehicleSource(fixture(), {

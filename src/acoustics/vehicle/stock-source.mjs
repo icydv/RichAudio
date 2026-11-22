@@ -3,7 +3,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {StockGrainVoice,prepareStockGrain10,grainPreparationLimits10} from './stock-grain.mjs';
+import {StockGrainVoice,prepareStockGrain10,grainPreparationLimits10,stockResamplingPeakBound} from './stock-grain.mjs';
+import {retainVerifiedStockResamplingAsset} from './stock-resampler.mjs';
 import {StockExhaustEvents,stockPopsMatchBank} from './stock-events.mjs';
 import {SourcePreparationBudgetError10} from './source-preparation-budget10.mjs';
 export {loadStockExhaustPops} from './stock-events.mjs';
@@ -91,6 +92,7 @@ function readStockAssetLibrary(manifestFile,{sustainAtlasFile},allowedModels,con
         if(texture)check(texture.intervals?.length===spans.length&&texture.intervals.every((r,i)=>r.index===i&&r.startFrame===spans[i].startFrame&&r.endFrame===spans[i].endFrame),'idle sustain atlas must bind retained source offsets exactly');
       }
       layers[role][mode]={...record,samples,nativePeak,intervals:spans,sustain:texture,...(npc?{playbackState:mode}:{})};
+      retainVerifiedStockResamplingAsset(layers[role][mode]);
     }}
     const bank=Object.freeze({...v,layers});verifiedVehicleBanks.add(bank);vehicles.set(v.model,bank);
   }
@@ -99,7 +101,7 @@ function readStockAssetLibrary(manifestFile,{sustainAtlasFile},allowedModels,con
 }
 
 export class StockVehicleSource {
-  constructor(vehicle,{sourceGain=1,atlas=null,pressureShares={engine:.5,exhaust:.5},pressureSharesByState=null,exhaustEvents=null,preparation10=null,smoothTextureFallback=false,loadPressure=null,x80LoadResponse=false}={}){
+  constructor(vehicle,{sourceGain=1,atlas=null,pressureShares={engine:.5,exhaust:.5},pressureSharesByState=null,exhaustEvents=null,preparation10=null,smoothTextureFallback=false,loadPressure=null,x80LoadResponse=false,resampling='linear',retainNativePhrases=false}={}){
     check((verifiedVehicleBanks.has(vehicle)||analyticFixture(vehicle))&&Number.isFinite(sourceGain)&&sourceGain>0&&sourceGain<=2,'verified model or explicit analytical fixture and bounded shared source calibration');
     const prepared=preparation10===null?null:sourcePreparations10.get(preparation10);
     check(preparation10===null||prepared&&prepared.vehicle===vehicle&&prepared.model===vehicle.model&&prepared.audioContext===vehicle.audioContext&&prepared.atlas===atlas&&prepared.entries.every(e=>vehicle.layers[e.role][e.mode]===e.asset&&e.asset.nativePeak===e.nativePeak),'exact branded source preparation required');
@@ -117,7 +119,8 @@ export class StockVehicleSource {
     this.pressureShares=Object.freeze({...pressureShares});
     this.pressureSharesByState=pressureSharesByState?Object.freeze({idle:this.shareStates[0],load:this.shareStates[1],lift:this.shareStates[2]}):null;
     this.inputBounds=Object.fromEntries(stockRoles.map(role=>{
-      const peak=prepared?.peaks[role]??Math.max(...this.modes.map(mode=>{const a=vehicle.layers[role][mode];return a.nativePeak??a.samples.reduce((p,v)=>Math.max(p,Math.abs(v)),0);}));
+      const peak=(resampling==='linear'?prepared?.peaks[role]:null)??
+        Math.max(...this.modes.map(mode=>stockResamplingPeakBound(vehicle.layers[role][mode],resampling)));
       const bound=sourceGain*Math.max(...this.shareStates.map(s=>s[role]))*peak;
       check(bound<=.98,'calibrated native PCM exceeds declared individual input budget');return [role,bound];}));
     this.vehicle=vehicle;this.gain=sourceGain;this.frame=0;this.envelope=0;this.position=.1;
@@ -126,13 +129,13 @@ export class StockVehicleSource {
       transitions:{basis:'role-local weighted native-interval rate; entering PCM waveform alignment; not crank RPM or native state semantics',
         phaseAlignments:0,alignmentRequests:0,roles:Object.fromEntries(stockRoles.map(role=>[role,{alignments:0,alignmentRequests:0,skippedVoiceFrames:0,
           minimumCommonRateHz:Infinity,maximumCommonRateHz:0,maximumRateStepHz:0}]))}};
-    if(this.x80LoadResponse)this.stats.energyReferenceBasis='pre-colour weighted grain energy with the applied load pressure and one-shot';
+    if(this.x80LoadResponse)this.stats.energyReferenceBasis='pre-colour weighted grain energy with the applied load pressure, plus any one-shot mixed into exhaust';
     this.previous={engine:0,exhaust:0};this.commonRates={engine:null,exhaust:null};
     if(exhaustEvents){check(!this.npc&&vehicle.model==='prototipo','verified native pops must not be substituted across vehicles or contexts');
-      if(exhaustEvents.inferFromControls&&verifiedVehicleBanks.has(vehicle))
-        check(stockPopsMatchBank(exhaustEvents.assets,vehicle),'control-derived native pops must match the decoded X80 archive and container');
-      this.events=new StockExhaustEvents({...exhaustEvents,bedPeakBound:this.inputBounds.exhaust,roleGainBound:sourceGain*Math.max(...this.shareStates.map(s=>s.exhaust))});this.stats.events=this.events.stats;}
-    for(const role of stockRoles)this.voices[role]=Object.fromEntries(this.modes.map(mode=>[mode,new StockGrainVoice(vehicle.layers[role][mode],{regions:atlas?.[role]?.[mode],smoothTextureFallback,
+      if((exhaustEvents.inferFromControls||exhaustEvents.preserveTail)&&verifiedVehicleBanks.has(vehicle))
+        check(stockPopsMatchBank(exhaustEvents.assets,vehicle),'native pops must match the decoded X80 archive and container');
+      this.events=new StockExhaustEvents({...exhaustEvents,resampling,bedPeakBound:this.inputBounds.exhaust,roleGainBound:sourceGain*Math.max(...this.shareStates.map(s=>s.exhaust))});this.stats.events=this.events.stats;}
+    for(const role of stockRoles)this.voices[role]=Object.fromEntries(this.modes.map(mode=>[mode,new StockGrainVoice(vehicle.layers[role][mode],{regions:atlas?.[role]?.[mode],smoothTextureFallback,resampling,retainNativePhrases,
       ...(prepared?{preparation10:prepared.entries.find(e=>e.role===role&&e.mode===mode).preparation10}:{})})]));
     if(this.npc)this.stats.transitionPolicy='authored: follow operating point through accel PCM on lift; blend to recorded idle below .28; no decel voice or native scheduling claim';
   }
@@ -144,21 +147,29 @@ export class StockVehicleSource {
     for(const role of stockRoles)for(const mode of this.modes)if(this.voices[role][mode].reusedInitialMatch01)total++;
     return total;
   }
-  renderInto(control,engine,exhaust,frames=engine.length){
+  // The optional event buffer separates the calibrated one-shot from the
+  // continuous tailpipe. The caller owns vehicle/emitter identity and lifetime.
+  renderInto(control,engine,exhaust,frames=engine.length,eventOutput=null){
     check(Number.isFinite(control.operatingPoint)&&control.operatingPoint>=0&&control.operatingPoint<=1&&
       Number.isFinite(control.load)&&control.load>=0&&control.load<=1&&typeof control.running==='boolean'&&
       (control.lift===undefined||typeof control.lift==='boolean'),'authored normalized operating state');
     const x80Response=this.x80LoadResponse;
     if(x80Response)check(control.gear===undefined||Number.isInteger(control.gear)&&control.gear>=-1&&control.gear<=12,'bounded X80 gear observation');
-    check(engine instanceof Float32Array&&exhaust instanceof Float32Array&&Number.isInteger(frames)&&frames>0&&frames<=512&&engine.length>=frames&&exhaust.length>=frames,'caller-owned source buffers');
-    check(engine.buffer!==exhaust.buffer||engine.byteOffset+frames*4<=exhaust.byteOffset||exhaust.byteOffset+frames*4<=engine.byteOffset,'source outputs must not alias');
+    const outputs=eventOutput===null?[engine,exhaust]:[engine,exhaust,eventOutput];
+    check(Number.isInteger(frames)&&frames>0&&frames<=512&&outputs.every(output=>output instanceof Float32Array&&output.length>=frames),'caller-owned source buffers');
+    const overlaps=(left,right,bytes)=>left.buffer===right.buffer&&left.byteOffset+frames*4>right.byteOffset&&right.byteOffset+bytes>left.byteOffset;
+    check(!overlaps(engine,exhaust,frames*4)&&
+      (eventOutput===null||!overlaps(eventOutput,engine,frames*4)&&!overlaps(eventOutput,exhaust,frames*4)),'source outputs must not alias');
     for(const role of stockRoles)for(const mode of this.modes){const samples=this.voices[role][mode].samples;
-      for(const output of [engine,exhaust])check(output.buffer!==samples.buffer||output.byteOffset+frames*4<=samples.byteOffset||samples.byteOffset+samples.byteLength<=output.byteOffset,'source output must not overwrite verified PCM');}
-    for(const plan of this.events?.boundPlans??[])for(const output of [engine,exhaust]){const s=plan.asset.samples;
-      check(output.buffer!==s.buffer||output.byteOffset+frames*4<=s.byteOffset||s.byteOffset+s.byteLength<=output.byteOffset,'output must not overwrite verified finite event PCM');}
+      for(const output of outputs)check(!overlaps(output,samples,samples.byteLength),'source output must not overwrite verified PCM');}
+    for(const asset of this.events?.boundAssets??[])for(const output of outputs){const samples=asset.samplesFloat32??asset.samples;
+      check(!overlaps(output,samples,samples.byteLength),'output must not overwrite verified finite event PCM');}
+    if(eventOutput!==null&&!this.events)eventOutput.fill(0,0,frames);
     this.events?.observe(control,this.frame,frames);
     x80Response?.observe(control);
-    const idle=1-clamp((control.operatingPoint-.08)/.2),decel=control.lift?1:clamp((.25-control.load)/.2),target=this.npc?[idle,1-idle]:[idle,(1-idle)*(1-decel),(1-idle)*decel];
+    const idle=1-clamp((control.operatingPoint-.08)/.2);
+    const decel=control.lift?1:x80Response&&control.lift===false?0:clamp((.25-control.load)/.2);
+    const target=this.npc?[idle,1-idle]:[idle,(1-idle)*(1-decel),(1-idle)*decel];
     const loadPressure=this.loadPressure;
     // Load above the existing decel crossover previously selected the same
     // accel layer at identical revs. Shape its excitation independently of
@@ -227,16 +238,27 @@ export class StockVehicleSource {
         // Declared pressure shares retain an explicit two-emitter budget.
         // Native REL numeric fields are not interpreted as amplitude gains.
         if(x80Response)sum=x80Response.colour(roleIndex,sum,weights[1]);
-        // The one-shot enters the tailpipe pressure after the sustained
-        // load filter. Its original attack travels through the same paths.
+        const sourceEnvelope=this.gain*this.envelope;
+        let value=sum*this.gain*this.envelope;
+        let referenceEnergy=expected*sourceEnvelope**2;
         if(role==='exhaust'&&this.events){
           let eventShare=0;for(let m=0;m<this.weights.length;m++)eventShare+=this.weights[m]*this.shareStates[m][role];
-          const event=this.events.next(this.frame)*eventShare;
-          expected+=2*sum*event+event*event;sum+=event;
+          if(this.events.preserveTail){
+            const event=this.events.next(this.frame,eventShare*this.gain);
+            if(eventOutput!==null)eventOutput[i]=event;
+            else{referenceEnergy+=2*value*event+event*event;value+=event;}
+          }else{
+            const event=this.events.next(this.frame)*eventShare;
+            if(eventOutput!==null)eventOutput[i]=event*this.gain*this.envelope;
+            else{
+              value=(sum+event)*this.gain*this.envelope;
+              referenceEnergy=(expected+(2*sum*event+event*event))*sourceEnvelope**2;
+            }
+          }
         }
-        const value=sum*this.gain*this.envelope;check(Number.isFinite(value)&&Math.abs(value)<=.98+1e-12,'source PCM bound');
+        check(Number.isFinite(value)&&Math.abs(value)<=.98+1e-12,'source PCM bound');
         output[i]=value;this.stats.peak=Math.max(this.stats.peak,Math.abs(value));
-        roleEnergy[roleIndex].actual+=value*value;roleEnergy[roleIndex].reference+=expected*(this.gain*this.envelope)**2;
+        roleEnergy[roleIndex].actual+=value*value;roleEnergy[roleIndex].reference+=referenceEnergy;
         const previousPressure=roleIndex?this.previous.exhaust:this.previous.engine;
         this.stats.maximumStep=Math.max(this.stats.maximumStep,Math.abs(value-previousPressure));
         if(roleIndex)this.previous.exhaust=value;else this.previous.engine=value;

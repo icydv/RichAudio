@@ -5,7 +5,7 @@ test('the actual cold NPC comparison retains its first exact history failure and
  const base=path.join(root,'.local','street01');fs.mkdirSync(base,{recursive:true});
  const fixture=fs.mkdtempSync(path.join(base,'cold-npc-observer-fixture-'));
  const copy=(relative,text)=>{const target=path.join(fixture,relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,text??fs.readFileSync(path.join(root,relative)));};
- for(const name of ['stock-source.mjs','stock-grain.mjs','stock-events.mjs','stock-source-preparation10.mjs','source-preparation-budget10.mjs'])copy('src/acoustics/vehicle/'+name);
+ for(const name of ['stock-source.mjs','stock-grain.mjs','stock-events.mjs','stock-resampler.mjs','stock-source-preparation10.mjs','source-preparation-budget10.mjs'])copy('src/acoustics/vehicle/'+name);
  copy('tools/cold-npc-history01.mjs');
  const original=fs.readFileSync(path.join(root,'tests/Test-Synthesis12.mjs'),'utf8');
  const marker='sources.push(source);if(diagnose)constructors.push(inspectColdSource01(source));';

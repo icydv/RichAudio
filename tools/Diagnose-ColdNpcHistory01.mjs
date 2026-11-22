@@ -5,7 +5,8 @@ import fs from 'node:fs';import path from 'node:path';import assert from 'node:a
 import {execFileSync,spawnSync} from 'node:child_process';import {fileURLToPath,pathToFileURL} from 'node:url';
 import {coldHistoryHash01 as sha,coldHistoryBytes01 as bytes,coldHistorySnapshot01 as snapshot,firstColdHistoryDifference01 as difference,inspectColdSource01 as inspect} from './cold-npc-history01.mjs';
 const repo=fileURLToPath(new URL('../',import.meta.url)),parentCommit='3d0642df9588aa46721efd85712fd2ba07446345';
-const members=['stock-source.mjs','stock-grain.mjs','stock-events.mjs','stock-source-preparation10.mjs','source-preparation-budget10.mjs'];
+const parentMembers=['stock-source.mjs','stock-grain.mjs','stock-events.mjs','stock-source-preparation10.mjs','source-preparation-budget10.mjs'];
+const currentMembers=[...parentMembers,'stock-resampler.mjs'];
 const args=process.argv.slice(2),fail=(ok,why)=>{if(!ok)throw Error(why);};
 function originalFunctions(text){
  const between=(a,b)=>{const first=text.indexOf(a),end=text.indexOf(b,first+1);fail(first>=0&&end>first,'Exact original fixture source markers required');return text.slice(first,end).trim();};
@@ -50,7 +51,7 @@ if(args[0]==='--child'){
  for(let at=path.dirname(output);;at=path.dirname(at)){if(fs.existsSync(at))fail(!fs.lstatSync(at).isSymbolicLink(),'Linked diagnostic output refused');if(path.dirname(at)===at)break;}
  fs.mkdirSync(output,{recursive:true});const root=path.join(output,'source'),pins=[];fs.mkdirSync(root);
  const fixture=fs.readFileSync(path.join(repo,'tests/Test-Synthesis12.mjs'));fs.writeFileSync(path.join(root,'Test-Synthesis12.mjs'),fixture,{flag:'wx'});pins.push({path:'tests/Test-Synthesis12.mjs',sha256:sha(fixture)});
- for(const implementation of ['parent','current']){fs.mkdirSync(path.join(root,implementation));for(const member of members){const relative='src/acoustics/vehicle/'+member,data=implementation==='parent'?execFileSync('git',['show',parentCommit+':'+relative],{cwd:repo,windowsHide:true}):fs.readFileSync(path.join(repo,relative));fs.writeFileSync(path.join(root,implementation,member),data,{flag:'wx'});pins.push({implementation,path:relative,sha256:sha(data)});}}
+ for(const [implementation,members] of [['parent',parentMembers],['current',currentMembers]]){fs.mkdirSync(path.join(root,implementation));for(const member of members){const relative='src/acoustics/vehicle/'+member,data=implementation==='parent'?execFileSync('git',['show',parentCommit+':'+relative],{cwd:repo,windowsHide:true}):fs.readFileSync(path.join(repo,relative));fs.writeFileSync(path.join(root,implementation,member),data,{flag:'wx'});pins.push({implementation,path:relative,sha256:sha(data)});}}
  for(const relative of ['tools/Diagnose-ColdNpcHistory01.mjs','tools/cold-npc-history01.mjs'])pins.push({path:relative,sha256:sha(fs.readFileSync(path.join(repo,relative)))});
  const runtimes=[node22,process.execPath],results=[];
  for(const runtime of runtimes){const version=execFileSync(runtime,['--version'],{encoding:'utf8',windowsHide:true}).trim();fail(['v22.23.4','v24.19.0'].includes(version),'Explicit supported actual Node runtime required');for(const control of ['historical-order','separate-banks','current-first','jitless']){

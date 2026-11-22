@@ -14,9 +14,45 @@ import {AirflowSourceStreet01,airflowSeedStreet01} from './airflow-street01.mjs'
 import {isInstalledStaticScene01,installedStaticSceneMetadata01} from '../world/installed-static-scene01.mjs';
 import {registerPreparedSoundMapGeometry01} from '../streaming/soundmap-telemetry.mjs';
 import {batiExhaustPathGain} from './bati-powertrain-voicing.mjs';
+import {isVerifiedStockBank} from './stock-source.mjs';
 const FS=48000,BLOCK=512,MAX=2,unit=v=>{const n=Math.hypot(...v);if(n<1e-8)throw Error('orientation discontinuity');return v.map(x=>x/n);};
+const stockX80Model=0x7e8f677f;
+const stockX80AwcSha256='e58e4cffcdc7becca9c4db718b5be4837a4c70eda612090945b4a95855d0b4c4';
 const sameVehicle01=(a,b)=>a?.valid&&b.valid&&a.generation===b.generation&&a.model===b.model&&a.context===b.context;
 const voiceIdentity01=v=>`${v.id}:${v.generation}:${v.model}:${v.context}`+(v.acquisition01===undefined?'':':'+v.acquisition01);
+const stockStartupKey=(fleet,bank,model,context,options)=>fleet&&!options.x80LoadResponse?bank:model+':'+context;
+
+function freshVelocitySample(bracket,now){
+ const {snapshot,v}=bracket,listener=snapshot.frame.listener;
+ const expiry=snapshot.observationExpiresAt+(v.observationTicks-listener.observationTicks)*1000/listener.clockFrequency;
+ return v.running&&listener.valid&&!listener.paused&&now<Math.min(expiry,snapshot.wallExpires);
+}
+function x80SpeedTrend(left,right,now,allowCoalesced){
+ if(!right||!freshVelocitySample(left,now)||!freshVelocitySample(right,now))return;
+ const gap=right.sequence-left.sequence;
+ // Coalesced fleet snapshots can still bracket the same certified vehicle
+ // acquisition. Without that identity, require consecutive observations.
+ const sameAcquisition=allowCoalesced&&Number.isSafeInteger(left.v.acquisition01)&&left.v.acquisition01===right.v.acquisition01;
+ if(gap!==1&&!(sameAcquisition&&gap>1&&gap<=8))return;
+ const clock=left.snapshot.frame.listener.clockFrequency;
+ if(right.snapshot.frame.listener.clockFrequency!==clock)return;
+ const dt=(right.v.observationTicks-left.v.observationTicks)/clock;
+ if(dt<.010||dt>.25)return;
+ return (Math.hypot(...right.v.velocity)-Math.hypot(...left.v.velocity))/dt;
+}
+function smoothRange(value,start,end){
+ const u=Math.max(0,Math.min(1,(value-start)/(end-start)));
+ return u*u*(3-2*u);
+}
+function x80Excitation(v){
+ if(v.lift)return {amount:.05,basis:'inferred-lift-from-rev-ratio'};
+ if(v.x80SpeedTrend===undefined)return {amount:.34,basis:'velocity-bracket-unavailable'};
+ // An authored excitation cue from motion in native units. The rolling
+ // factor suppresses the acceleration cue while the vehicle is stationary.
+ const rolling=smoothRange(Math.hypot(...v.velocity),.5,5);
+ const rising=smoothRange(v.x80SpeedTrend,.8,4);
+ return {amount:.34+rolling*(.26+.30*rising),basis:'estimated-from-native-velocity-bracket'};
+}
 
 // Reserve the ordinary paths before spending spare pressure on the stronger
 // exhaust. In a tight passage this keeps the late wall returns in the mix.
@@ -77,8 +113,10 @@ export class StockGameplay {
  #installedApplicationPermit01=null;#installedSceneService01=null;#installedSceneStopped01=false;#installedStopAt01=null;
  get installedSceneService01(){return this.#installedSceneService01;}
  get installedSceneStopped01(){return this.#installedSceneStopped01;}
- constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled',vehicleSourcePolicy=null,privatePowertrain=false,roadScattering=privatePowertrain,fleetReflectionPolicy='full',spatialOutput='speakers'}){
+ constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled',vehicleSourcePolicy=null,privatePowertrain=false,roadScattering=privatePowertrain,fleetReflectionPolicy='full',spatialOutput='speakers',x80SourceQuality='legacy'}){
   if(!['disabled','explicit-control05'].includes(sourcePreparationPolicy))throw Error('Explicit source preparation policy required');
+  if(!['legacy','bandlimited'].includes(x80SourceQuality))throw Error('Unsupported X80 source quality');
+  this.x80SourceQuality=x80SourceQuality;
   if(!['baseline','camera-source-01'].includes(continuityPolicy))throw Error('Explicit vehicle continuity policy required');
   if(!['baseline','arrived-segments-50'].includes(continuousTimingPolicy))throw Error('Explicit continuous timing policy required');
   if(continuousTimingPolicy==='arrived-segments-50'&&continuityPolicy!=='camera-source-01')throw Error('Arrived-segment research requires independent camera/source continuity');
@@ -142,9 +180,24 @@ export class StockGameplay {
   if(this.pipeline.quality===this.quality.active&&settings?.maxReflectors===16&&settings.earlyReflections===this.settings.reflections)return;
   this.pipeline.setQuality(this.quality.active,{maxReflectors:16,earlyReflections:this.settings.reflections});
  }
- stockSourceOptions01(bank){
+ stockSourceOptions01(bank,model,context){
   const profile=this.profiles?.profiles?.[bank.model];
-  return {sourceGain:profile?.sourceGain??1,...(profile?.pressureSharesByState?{pressureSharesByState:profile.pressureSharesByState}:{})};
+  const stockX80=this.x80SourceQuality==='bandlimited'&&model===stockX80Model&&context==='player'&&bank.model==='prototipo'&&(bank.audioContext??'player')==='player'&&isVerifiedStockBank(bank)&&
+   bank.provenance?.awcSha256?.toLowerCase()===stockX80AwcSha256;
+  return {sourceGain:profile?.sourceGain??1,...(profile?.pressureSharesByState?{pressureSharesByState:profile.pressureSharesByState}:{}),
+   ...(stockX80?{smoothTextureFallback:true,x80LoadResponse:true,resampling:'bandlimited',retainNativePhrases:true}:{})};
+ }
+ stockResamplingStartup01(startupPairs){
+  if(this.x80SourceQuality!=='bandlimited')return null;
+  // Fleet data plans are shared by bank, so an alias may have represented
+  // this bank during preparation. The tuned voice still has its own identity.
+  const pair=startupPairs.find(({model,context})=>model===stockX80Model&&context==='player')??
+   (this.catalogueFleet?{model:stockX80Model,context:'player'}:null);
+  if(!pair)return null;
+  const {model,context}=pair,{status,bank}=this.registry.resolve(model,context);
+  if(status!=='available')return null;
+  const {resampling}=this.stockSourceOptions01(bank,model,context);
+  return resampling?{pair,bank,resampling}:null;
  }
  prepareStartupVoices01(eligible){
   if(this.lastFrame!==-1||this.pipeline.renderer.frame!==0||this.startupVoices01.size||eligible.length>(this.catalogueFleet?8:2))
@@ -152,7 +205,7 @@ export class StockGameplay {
   const engine=new Float32Array(BLOCK),exhaust=new Float32Array(BLOCK);
   for(const {model,context} of eligible){
    const {bank}=this.registry.resolve(model,context);
-   const options=this.stockSourceOptions01(bank);
+   const options=this.stockSourceOptions01(bank,model,context);
    // Exercise fresh role registrations on the prepared bank before credits
    // begin. Continuing one voice exercises steady synthesis, but skips the
    // first engine and exhaust waveform searches on each new source lifetime.
@@ -164,7 +217,7 @@ export class StockGameplay {
      for(let block=0;block<3;block++)disposable.renderInto(control,engine,exhaust);
     }
    }
-   this.startupVoices01.set(this.catalogueFleet?bank:model+':'+context,this.registry.createSource(model,context,options));
+   this.startupVoices01.set(stockStartupKey(this.catalogueFleet,bank,model,context,options),this.registry.createSource(model,context,options));
   }
   return this.startupVoices01.size;
  }
@@ -175,7 +228,7 @@ export class StockGameplay {
   const latest=this.snapshots.at(-1);if(!latest||this.now()>=latest.wallExpires||!latest.frame.listener.valid||latest.frame.listener.paused)return [];
   return latest.frame.vehicles.filter(v=>v.valid&&!this.slots.some(s=>s.identity===stockSourceIdentity05(v))).flatMap(v=>{
    const resolved=this.registry.resolve(v.model,v.context);if(resolved.status!=='available')return [];
-   const profile=this.profiles?.profiles?.[resolved.bank.model],options={sourceGain:profile?.sourceGain??1,...(profile?.pressureSharesByState?{pressureSharesByState:profile.pressureSharesByState}:{})};
+   const options=this.stockSourceOptions01(resolved.bank,v.model,v.context);
    return [{identity:stockSourceIdentity05(v),vehicleId:v.id,session:this.session,model:v.model,context:v.context,bank:resolved.bank,options,expiresAt:latest.wallExpires}];
   });
  }
@@ -215,7 +268,7 @@ export class StockGameplay {
    // Doppler history still have an explicit generation boundary.
    const sameRepresentation=previous&&state.clockFrequency===previous.clockFrequency&&state.coordinates===previous.coordinates&&state.units===previous.units&&state.listenerKind===previous.listenerKind;
    if(this.lastGeneration&&state.generation!==this.lastGeneration&&(this.continuityPolicy==='baseline'||!sameRepresentation))this.snapshots=[];
-   const copy=structuredClone(frame),snapshot={time,frame:copy,wallExpires:validForMs===null?Infinity:receivedAt+validForMs};
+   const copy=structuredClone(frame),snapshot={time,frame:copy,wallExpires:validForMs===null?Infinity:receivedAt+validForMs,observationExpiresAt:receivedAt+250-ageMs};
    if(this.privatePowertrain&&this.continuityPolicy==='camera-source-01'){
     const prior=this.snapshots.at(-1),old=prior?.frame.vehicles[0],car=copy.vehicles[0];
     const continuing=sameRepresentation&&prior&&receivedAt<prior.wallExpires&&
@@ -484,12 +537,12 @@ export class StockGameplay {
      const snapshot=this.snapshots[i],v=snapshot.vehiclesById.get(identity.id);
      if(!v?.valid||v.acquisition01!==identity.acquisition01)break;
      const at=snapshot.time+(v.observationTicks-snapshot.frame.listener.observationTicks)/snapshot.frame.listener.clockFrequency;
-     if(at<=time){left={time:at,v,sequence:snapshot.frame.listener.sequence};break;}
-     right={time:at,v,sequence:snapshot.frame.listener.sequence};
+     if(at<=time){left={time:at,v,sequence:snapshot.frame.listener.sequence,snapshot};break;}
+     right={time:at,v,sequence:snapshot.frame.listener.sequence,snapshot};
     }
    }else for(const snapshot of this.snapshots){const v=snapshot.frame.vehicles.find(v=>v.id===identity.id&&v.generation===identity.generation&&v.model===identity.model&&v.context===identity.context&&v.valid);if(!v)continue;
     const at=snapshot.time+(v.observationTicks-snapshot.frame.listener.observationTicks)/snapshot.frame.listener.clockFrequency;
-    if(at<=time)left={time:at,v,sequence:snapshot.frame.listener.sequence};else{right={time:at,v,sequence:snapshot.frame.listener.sequence};break;}}
+    if(at<=time)left={time:at,v,sequence:snapshot.frame.listener.sequence,snapshot};else{right={time:at,v,sequence:snapshot.frame.listener.sequence,snapshot};break;}}
    if(!left)continue;const old=left.v,next=right?.v;a={time:left.time};b=right;
    if(stale){
     if(now>=old.sourceExpiresAt){stale.leftBracket++;continue;}
@@ -509,6 +562,8 @@ export class StockGameplay {
     operatingPoint:next?old.operatingPoint+(next.operatingPoint-old.operatingPoint)*u:old.operatingPoint,
     running:this.continuityPolicy==='camera-source-01'?old.running:old.running&&(!next||next.running),lift:next?next.operatingPoint<old.operatingPoint-.002:false,
     riderAttached:old.riderAttached===true&&(!next||next.riderAttached===true),riderViewAttached:old.riderViewAttached===true&&(!next||next.riderViewAttached===true)});
+   if(this.x80SourceQuality==='bandlimited'&&old.model===stockX80Model&&old.context==='player')
+    result.at(-1).x80SpeedTrend=x80SpeedTrend(left,right,now,this.catalogueFleet);
    const witness=this.pipeline.renderer.pcmWitness;
    if(witness?.controlDeadline){
     const observed=result.at(-1);
@@ -645,7 +700,8 @@ export class StockGameplay {
    this.retireSlot(s,reason);
   }
   for(const item of selected){let slot=this.slots.find(s=>s.identity===item.identity);if(!slot){slot=this.slots.find(s=>!s.identity);slot.identity=item.identity;slot.generation++;
-    const sourceOptions=this.stockSourceOptions01(item.resolved.bank),startupKey=this.catalogueFleet?item.resolved.bank:item.v.model+':'+item.v.context;
+    const {model,context}=item.v,bank=item.resolved.bank;
+    const sourceOptions=this.stockSourceOptions01(bank,model,context),startupKey=stockStartupKey(this.catalogueFleet,bank,model,context,sourceOptions);
     const startupVoice=this.startupVoices01.get(startupKey);this.startupVoices01.delete(startupKey);
     slot.source=this.npcBlockWorker?.source(item.resolved.bank)??startupVoice??this.sourcePreparation05?.take({identity:item.identity,session:this.session,bank:item.resolved.bank,options:sourceOptions})??this.registry.createSource(item.v.model,item.v.context,sourceOptions);slot.airflow=new AirflowSourceStreet01({seed:airflowSeedStreet01(this.session+':'+item.identity)});this.stats.arrivals++;this.stageCounters.sourceCreations++;}
    slot.vehicle=item.v;slot.score=item.score;
@@ -666,7 +722,11 @@ export class StockGameplay {
     s.powertrainRevision=v.powertrainRevision;
    }
    const stockStart=this.captureCompleteRenderStages01?this.now():0;
-   if(!s.source.detachedNpc)s.source.renderInto({operatingPoint:v.operatingPoint,load:v.lift ? .05 : .9,lift:v.lift,running:v.running},this.inputs[ids[0]],this.inputs[ids[1]]);
+   if(!s.source.detachedNpc){
+    const excitation=s.source.x80LoadResponse?x80Excitation(v):null;
+    if(excitation)v.sourceExcitation=excitation;
+    s.source.renderInto({operatingPoint:v.operatingPoint,load:excitation?.amount??(v.lift?.05:.9),lift:v.lift,running:v.running},this.inputs[ids[0]],this.inputs[ids[1]]);
+   }
    if(this.captureCompleteRenderStages01){
     stockSynthesisMs+=this.now()-stockStart;
     if(sourceBlocksBefore===0)stockInitialMatchReuses+=s.source.initialMatchReuses01?.()??0;
@@ -829,6 +889,7 @@ export class StockGameplay {
    listenerState:this.sample?.mode??'not-observed',
    sourceStates:this.slots.filter(s=>s.source).map(s=>({id:s.vehicle?.id,generation:s.vehicle?.generation,...(this.catalogueFleet?{model:s.vehicle?.model,renderGeneration:s.generation,effectiveProfileObserved:false}:{}),bank:s.source.vehicle.model,context:s.source.npc?'npc':'player',running:s.vehicle?.running??false,
     operatingPoint:s.vehicle?.operatingPoint??null,sourceFrame:s.source.frame,dryPeak:s.source.stats.peak,
+    ...(s.source.x80LoadResponse&&s.vehicle?.sourceExcitation?{sourceExcitation:{...s.vehicle.sourceExcitation}}:{}),
     listenerDistance:this.sample?.state&&s.vehicle?distance(s.vehicle.position,this.sample.state.position):null})),
    geometry:this.pipeline.simulation.scene===this.direct?'conditional-direct-unobserved-space-assumed-clear':this.staticSceneBinding?.mode==='installed-static-conditional-partial'?'installed-static-conditional-partial':this.staticSceneBinding?.mode==='offline-resource-subset'?'qualified-original-resource-subset':this.staticSceneBinding?'qualified-static-authored-fixture':'qualified-observed-partial',installedGeometry:this.staticSceneBinding?.mode==='installed-static-conditional-partial'?this.staticSceneBinding:null,controlDelayMs:this.controlDelayMs,latencyProfile:this.latencyProfile.id,continuityPolicy:this.continuityPolicy,...(this.continuousTimingPolicy==='baseline'?{}:{continuousTimingPolicy:this.continuousTimingPolicy}),...(this.operatingEmission?{operatingEmission:this.operatingEmission.diagnostics()}:{}),sourceHistoryLimitSeconds:2.5,propagationLimitSeconds:2,
    quality:this.quality.diagnostics(),pipeline:this.pipeline.diagnostics(),playout:this.playout.stats,memory:process.memoryUsage(),...(this.sourcePreparation05?{sourcePreparation05:this.sourcePreparation05.diagnostics()}:{})};}

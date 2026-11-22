@@ -8,6 +8,18 @@ const liftWindowFrames=Math.round(.12*FS), cooldownFrames=Math.round(.34*FS);
 const inferredBasis='estimated-afterfire-from-load-revs-and-lift';
 const variantOrder=[1,3,0,2];
 const verifiedPops=new WeakMap();
+
+function eventPeak(asset,resampling){
+  if(resampling==='linear')return asset.samples.reduce((peak,sample)=>Math.max(peak,Math.abs(sample)),0);
+  // A one-shot always follows the same fixed source clock. Measure every
+  // reachable output sample, including the edges, before admitting a voice.
+  const voice=new NativePcmVoice(asset,{resampling});
+  const frames=Math.ceil(asset.frames*FS/asset.sampleRate);
+  let peak=0;
+  for(let frame=0;frame<frames;frame++)peak=Math.max(peak,Math.abs(voice.next()));
+  return peak;
+}
+
 export function stockPopsMatchBank(assets,bank){
   const binding=verifiedPops.get(assets),archive=bank.provenance?.archiveSha256,container=bank.provenance?.awcSha256;
   return !!binding&&/^[0-9a-f]{64}$/i.test(archive)&&/^[0-9a-f]{64}$/i.test(container)&&
@@ -31,30 +43,36 @@ export function loadStockExhaustPops(manifestFile){
 }
 
 export class StockExhaustEvents {
-  constructor({assets,triggers,inferFromControls=false,bedPeakBound,roleGainBound,maximumGain=inferFromControls ? .65 : .25}){
+  #assets;
+  constructor({assets,triggers,inferFromControls=false,bedPeakBound,roleGainBound,maximumGain=inferFromControls ? .65 : .25,preserveTail=false,resampling='linear'}){
     check(assets?.model==='prototipo'&&Array.isArray(assets.variants)&&assets.variants.length===4,'verified X80 event library only');
     check(Number.isFinite(bedPeakBound)&&bedPeakBound>=0&&bedPeakBound<.98&&Number.isFinite(roleGainBound)&&roleGainBound>0,'explicit source bed/event pressure budget');
     check(typeof inferFromControls==='boolean'&&(inferFromControls?triggers===undefined:Array.isArray(triggers)&&triggers.length<=4)&&
       Number.isFinite(maximumGain)&&maximumGain>0&&maximumGain<=(inferFromControls?1:.25),'bounded authored or control-derived one-shot plan');
-    const peak=Math.max(...assets.variants.map(a=>a.samples.reduce((p,x)=>Math.max(p,Math.abs(x)),0)));
+    check(typeof preserveTail==='boolean','explicit finite event tail policy');
+    if(preserveTail)this.preserveTail=true;
+    this.#assets=Object.freeze(assets.variants.slice());
+    const peak=Math.max(...this.#assets.map(asset=>eventPeak(asset,resampling)));
     this.gain=Math.min(maximumGain,(.98-bedPeakBound)/(roleGainBound*peak));
     this.plans=(triggers??[]).map((t,i)=>{
       check(Number.isSafeInteger(t.atFrame)&&t.atFrame>=0&&Number.isInteger(t.variant)&&t.variant>=0&&t.variant<4&&t.basis==='authored-offline-lift','explicit sample-clock trigger and provenance required');
       const asset=assets.variants[t.variant],frames=Math.ceil(asset.frames*FS/asset.sampleRate);
       if(i)check(t.atFrame>=triggers[i-1].atFrame+Math.ceil(assets.variants[triggers[i-1].variant].frames*FS/assets.variants[triggers[i-1].variant].sampleRate),'one-shots may not overlap or retrigger');
-      return {...t,asset,frames,voice:new NativePcmVoice(asset)};
+      return {...t,asset,frames,voice:new NativePcmVoice(asset,{resampling})};
     });
     this.cursor=0;this.active=null;
     if(inferFromControls)this.inference={plans:assets.variants.map((asset,variant)=>({asset,variant,
-      frames:Math.ceil(asset.frames*FS/asset.sampleRate),voice:new NativePcmVoice(asset),basis:inferredBasis})),
+      frames:Math.ceil(asset.frames*FS/asset.sampleRate),voice:new NativePcmVoice(asset,{resampling}),basis:inferredBasis})),
       pullFrames:0,pullPeak:0,armedUntil:-1,nextAllowedFrame:0};
     this.stats={planned:this.plans.length,triggered:0,completed:0,activeFrames:0,peak:0,
       gain:this.gain,bedPeakBound,roleGainBound,maximumCombinedInputBound:bedPeakBound+roleGainBound*peak*this.gain,
       edgeEnvelope:{attackFrames:inferFromControls?8:24,tailFrames:144,basis:'explicit finite-PCM edge treatment; originals unchanged'},
       triggerBasis:inferFromControls?inferredBasis:'authored-offline-lift; native ECU/conditions unverified'};
-    if(inferFromControls)this.stats.lastTrigger=null;
+    if(inferFromControls||preserveTail)this.stats.lastTrigger=null;
+    if(preserveTail)this.stats.sampleRate=FS;
   }
   get boundPlans(){return this.inference?.plans??this.plans;}
+  get boundAssets(){return this.#assets;}
   observe(control,frame,frames){
     const inferred=this.inference;
     if(!inferred)return;
@@ -72,21 +90,31 @@ export class StockExhaustEvents {
     if(frame<inferred.nextAllowedFrame||this.active)return;
     const variant=variantOrder[this.stats.triggered%variantOrder.length],plan=inferred.plans[variant];
     const gain=this.gain*(.76+.24*(inferred.pullPeak-loadToArm)/(1-loadToArm));
-    this.start(plan,gain);
+    this.start(plan,gain,frame);
     inferred.nextAllowedFrame=frame+cooldownFrames;
-    this.stats.lastTrigger={atFrame:frame,variant,basis:plan.basis,gain};
+    if(!this.preserveTail)this.stats.lastTrigger={atFrame:frame,variant,basis:plan.basis,gain};
   }
-  start(plan,gain){
+  start(plan,gain,atFrame){
     check(!this.active,'no repeated/overlapping event');
     this.active={plan,age:0};this.stats.triggered++;
     if(this.inference){plan.voice.position=0;this.active.gain=gain;}
+    if(this.preserveTail){
+      const {variant,basis,asset}=plan;
+      this.stats.lastTrigger={atFrame,variant,basis,gain,...(asset.graphFileHash&&{graphFileHash:asset.graphFileHash})};
+    }
   }
-  next(frame){
-    const next=this.plans[this.cursor];if(next&&frame===next.atFrame){this.start(next,this.gain);this.cursor++;}
+  next(frame,outputGain=1){
+    const next=this.plans[this.cursor];if(next&&frame===next.atFrame){this.start(next,this.gain,frame);this.cursor++;}
     if(!this.active)return 0;
     const active=this.active,plan=active.plan,age=active.age;
+    // Capture the emitter pressure when the event starts. A subsequent
+    // change to the continuous engine state doesn't shorten this recording.
+    if(this.preserveTail&&age===0){
+      active.outputGain=outputGain;
+      this.stats.lastTrigger.emitterGain=(active.gain??this.gain)*outputGain;
+    }
     const edge=Math.min(1,age/(this.inference?8:24),(plan.frames-1-age)/144);
-    const value=plan.voice.next()*(active.gain??this.gain)*smooth(Math.max(0,edge));
+    const value=plan.voice.next()*(active.gain??this.gain)*smooth(Math.max(0,edge))*(active.outputGain??1);
     active.age++;this.stats.activeFrames++;this.stats.peak=Math.max(this.stats.peak,Math.abs(value));
     if(active.age>=plan.frames){this.active=null;this.stats.completed++;}return value;
   }

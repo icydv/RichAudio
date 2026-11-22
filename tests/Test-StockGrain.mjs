@@ -61,6 +61,25 @@ test('opt-in sparse texture transitions do not jump between two actual reader le
   assert(opening>.59,'preserve the old reader level at the transition');
   assert(ending<-.59,'new reader is not softened beyond the short boundary');
 });
+test('bandlimited interval fallback stays continuous at the final native sample and loop start',()=>{
+  const samples=Float32Array.from({length:128},(_,i)=>.35*Math.sin(2*Math.PI*17000*i/48000));
+  const epsilon=1e-6;
+  for(const [startFrame,endFrame,hasContext] of [[0,48,false],[24,71,true]]){
+    for(const resampling of ['bandlimited','reference']){
+      const v=new StockGrainVoice(asset(samples),{regions:[{startFrame,endFrame}],resampling});
+      const r=v.intervals[0];
+      assert.equal(r.seam>0,hasContext);
+      v.lastRate=2000;
+      const read=position=>{v.phase=position/r.length;return v.cycle(r);};
+      const beforeEndSample=read(r.length-1-epsilon);
+      const endSample=read(r.length-1);
+      assert.ok(Math.abs(beforeEndSample.value-endSample.value)<1e-5,resampling+' must use one filter through the last sample');
+      const end=read(r.length-epsilon),start=read(0);
+      assert.ok(Math.abs(end.value-start.value)<1e-5,resampling+' must meet the same filtered start at wrap');
+      assert.ok(Math.abs(end.energy-start.energy)<1e-5);
+    }
+  }
+});
 test('source validation rejects malformed intervals, nonfinite input and invalid operating controls',()=>{
   const a=asset(new Float32Array(1000));
   for(const regions of [[{startFrame:-1,endFrame:20}],[{startFrame:10,endFrame:1001}],[{startFrame:0,endFrame:4}],

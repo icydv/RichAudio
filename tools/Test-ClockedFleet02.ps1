@@ -16,6 +16,7 @@ param(
     [switch]$WarmWall,
     [switch]$RankedReflections,
     [switch]$NpcSynthesisWorker,
+    [switch]$X80Bandlimited,
     [switch]$CpuOnly,
     [switch]$MultiWall
 )
@@ -37,6 +38,9 @@ if ($retained -and ($retained -ne 3 -or $Legacy -or $Population -gt 5)) {
     throw 'The retained case needs the source manifest, world binding, wall pose, and one to five vehicles'
 }
 if ($RankedReflections -and !$MultiWall) { throw 'Ranked reflections require the multi-wall fleet fixture' }
+if ($X80Bandlimited -and (!$retained -or !$TrafficRoute)) {
+    throw 'The X80 source comparison needs retained banks and a route with the X80 player'
+}
 if ($NpcSynthesisWorker -and (!$retained -or !$MultiWall -or $Population -ne 5)) {
     throw 'The NPC synthesis worker comparison needs five vehicles and the retained multi-wall sources'
 }
@@ -68,6 +72,7 @@ if ($retained) {
     if ($TrafficRoute) { $prepareArguments += ('traffic-route=' + (Resolve-Path -LiteralPath $TrafficRoute).Path) }
     if ($RankedReflections) { $prepareArguments += 'ranked-reflections' }
     if ($NpcSynthesisWorker) { $prepareArguments += 'npc-synthesis-worker' }
+    if ($X80Bandlimited) { $prepareArguments += 'x80-bandlimited' }
     if ($CpuOnly) { $prepareArguments += 'cpu-only' }
     if ($MultiWall) {
         & (Join-Path $PSScriptRoot 'Build-AcousticGpu.ps1') -OutputDirectory (Join-Path $out 'gpu-build') | Out-Host
@@ -93,6 +98,7 @@ $witnessRequested = $CaptureSoundMap -or $PcmWitness -or $env:RICHAUDIO_CLOCKED_
     sampleContributorPcm = $witnessRequested
     rankedReflections = [bool]$RankedReflections
     npcSynthesisWorker = [bool]$NpcSynthesisWorker
+    x80Bandlimited = [bool]$X80Bandlimited
     requestedAcceleration = if ($MultiWall -and !$CpuOnly) { 'auto' } else { 'cpu' }
     captureSoundMap = [bool]$CaptureSoundMap
     mode = $mode; requestedBlocks = $Blocks; requestedPopulation = $Population; warmWall = [bool]$WarmWall; multiWall = [bool]$MultiWall
@@ -152,6 +158,10 @@ try {
         $sustained -and $populationQualified -and $sceneQualified -and $producer.hardMisses -eq 0 -and
         $producer.overflowBlocks -eq 0 -and $driver.final.underflowFrames -eq 0 -and $driver.final.discardCadence.deferredCallbacks -eq 0
     if ($MultiWall) { $passed = $passed -and $producer.allBlocks.throughPipeWriteMisses -eq 0 -and $producer.allBlocks.deliveredBlocks -eq $producer.blocks }
+    if ($X80Bandlimited) {
+        $passed = $passed -and $producer.preparation.sourceResamplingPreparation.quality -ceq 'bandlimited' -and
+            ($driver.samples | Where-Object { $_.sourceStates | Where-Object { $_.sourceExcitation } } | Select-Object -First 1)
+    }
     $workerQualified = $null
     if ($NpcSynthesisWorker) {
         $workerQualified = $producer.preparation.npcBlockReady.ready -and $producer.preparation.npcBlockReady.session -eq $driver.session -and $producer.npcSynthesisWorker.blocks -gt 0

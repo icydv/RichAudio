@@ -52,7 +52,7 @@ if(retainedSourceManifest){
  }
  const traffic=phases.find(phase=>phase.startsWith('traffic-route='));
  let routeEndpoints;
- if(phases.some(phase=>phase!==traffic&&!['multi-wall','warm-wall','ranked-reflections','cpu-only','npc-synthesis-worker'].includes(phase)))throw Error('Unknown wall fixture phase');
+ if(phases.some(phase=>phase!==traffic&&!['multi-wall','warm-wall','ranked-reflections','cpu-only','npc-synthesis-worker','x80-bandlimited'].includes(phase)))throw Error('Unknown wall fixture phase');
  if(traffic){
   const file=path.resolve(traffic.slice('traffic-route='.length));
   if(!multiWall||!file.split(path.sep).includes('.local')||fs.statSync(file).size>16*1024*1024)
@@ -128,6 +128,7 @@ Object.assign(config,{gameVersion:'1.0.1158.16',rphVersion:'1.132.1428.17748',co
  outputSink:'environment-observation',clockedFleetEvidence02:true});
 if(mode==='fleet')Object.assign(config,{vehicleSourcePolicy:'catalogue-fleet-01',eligible:[]});
 if(phases.includes('ranked-reflections'))config.fleetReflectionPolicy='fleet-ranked-reflections';
+if(phases.includes('x80-bandlimited'))config.x80SourceQuality='bandlimited';
 if(phases.includes('npc-synthesis-worker')){
  if(mode!=='fleet'||!retainedSourceManifest||!config.npcManifest||!phases.includes('multi-wall'))
   throw Error('The clocked NPC worker requires a retained multi-wall fleet with an NPC manifest');

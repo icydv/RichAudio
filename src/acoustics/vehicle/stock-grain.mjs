@@ -1,6 +1,8 @@
 // Genuine PCM with a continuous interval-phase clock. Metadata spans are cycle-
 // rate evidence, not recovered crank RPM or a claim of GTA's native algorithm.
 import {SourcePreparationBudgetError10} from './source-preparation-budget10.mjs';
+import {resampleStockPcm,stockResampler,stockResamplingPeakBound} from './stock-resampler.mjs';
+export {stockResamplingPeakBound} from './stock-resampler.mjs';
 const FS=48000;
 const stateAlpha=1-Math.exp(-1/(FS*.01));
 const intervalRate=(sampleRate,intervals,p)=>sampleRate/((1-p.w)*intervals[p.a].length+p.w*intervals[p.b].length);
@@ -87,11 +89,29 @@ function linear(samples,position){
   return samples[k]*(1-f)+samples[next]*f;
 }
 
-/** Unmodified finite native-rate reference: no looping, state selection, gain or
- * grain scheduling. Linear rate conversion only; silence after the recording. */
+/** Finite native-rate reference without looping, state selection or gain. */
 export class NativePcmVoice {
-  constructor(asset){this.samples=validated(asset);this.increment=asset.sampleRate/FS;this.position=0;}
-  next(){if(this.position>=this.samples.length)return 0;const value=linear(this.samples,this.position);this.position+=this.increment;return value;}
+  #resampler=null;
+  #outputFrames=0;
+  #outputFrame=0;
+  constructor(asset,{resampling='linear'}={}){
+    this.samples=validated(asset);this.increment=asset.sampleRate/FS;this.position=0;
+    this.#resampler=stockResampler(resampling);
+    this.#outputFrames=Math.ceil(asset.frames*FS/asset.sampleRate);
+  }
+  next(){
+    if(this.#resampler){
+      // Use the exact output-frame duration. Repeated addition at a fractional
+      // native rate can report one extra sample at the end of a finite event.
+      if(this.position===0)this.#outputFrame=0;
+      if(this.#outputFrame>=this.#outputFrames)return 0;
+      const value=resampleStockPcm(this.#resampler,this.samples,this.position,this.increment,0,this.samples.length,true);
+      this.position=++this.#outputFrame*this.increment;
+      return value;
+    }
+    if(this.position>=this.samples.length)return 0;
+    const value=linear(this.samples,this.position);this.position+=this.increment;return value;
+  }
 }
 
 // Idle has no verified interval atlas. Find a long waveform-matched join, using
@@ -110,6 +130,9 @@ function idleLoop(samples,rate){
 }
 
 export class StockGrainVoice {
+  #resampler=null;
+  #peakBound=1;
+  #retainNativePhrases=false;
   #sourceTimeline=null;
   #preparation=null;
   #prepareInitialMatch=false;
@@ -120,10 +143,13 @@ export class StockGrainVoice {
   #nextOutput={value:0,energy:0};
   #firstCycle={value:0,energy:0};
   #secondCycle={value:0,energy:0};
-  constructor(asset,{regions=null,texture=true,preparation10=null,smoothTextureFallback=false}={}){
+  constructor(asset,{regions=null,texture=true,preparation10=null,smoothTextureFallback=false,resampling='linear',retainNativePhrases=false}={}){
     const prepared=preparation10===null?null:preparations10.get(preparation10);
     if(preparation10!==null)validateStockGrainPreparation10(asset,{regions,texture,preparation10});
     this.samples=prepared?.samples??validated(asset);this.asset=asset;this.increment=asset.sampleRate/FS;
+    this.#resampler=stockResampler(resampling);
+    if(this.#resampler)this.#peakBound=stockResamplingPeakBound(asset,resampling);
+    this.#retainNativePhrases=retainNativePhrases;
     const supplied=regions?.candidateIntervals??regions??asset.intervals;
     check(supplied==null||Array.isArray(supplied),'ordered source interval array required');
     this.intervalBasis=supplied?.length?'observed-offset-whole-interval-phase-approximation':'waveform-matched-long-idle-loop-approximation';
@@ -207,8 +233,34 @@ export class StockGrainVoice {
     const f=position-k;
     return this.samples[k]*(1-f)+this.samples[next]*f;
   }
+  resample(position,step,low,high){
+    const center=Math.floor(position),radius=this.#resampler.radius;
+    this.stats.reads++;
+    this.stats.minimumReadFrame=Math.min(this.stats.minimumReadFrame??center,Math.max(low,center+1-radius));
+    this.stats.maximumReadFrame=Math.max(this.stats.maximumReadFrame??center,Math.min(high-1,center+radius));
+    return resampleStockPcm(this.#resampler,this.samples,position,step,low,high);
+  }
+  #bandlimitedCycle(r,output,position,sourcePosition){
+    const step=r.length*this.lastRate/FS;
+    const low=Math.floor(r.start-r.seam),high=Math.ceil(r.end);
+    const first=this.resample(sourcePosition,step,low,high);
+    const seam=r.seam||Math.min(r.length/4,this.#resampler.radius);
+    if(position<=r.length-seam){
+      output.value=first;output.energy=first*first;
+    }else{
+      // The real preceding context and the start use the same tap bounds.
+      // With no context use the filtered start over a short end overlap.
+      const incoming=r.seam?Math.max(low,r.start+position-r.length):r.start;
+      const second=this.resample(incoming,step,low,high);
+      const w=smooth((position-(r.length-seam))/seam);
+      output.value=(1-w)*first+w*second;output.energy=(1-w)*first*first+w*second*second;
+    }
+    return output;
+  }
   cycle(r,output={value:0,energy:0}){
-    const position=this.phase*r.length,p=Math.min(r.start+position,r.end-1e-9),k=Math.floor(p);
+    const position=this.phase*r.length,p=Math.min(r.start+position,r.end-1e-9);
+    if(this.#resampler)return this.#bandlimitedCycle(r,output,position,p);
+    const k=Math.floor(p);
     // Interpolation at the final sample stays on this periodic span. Reading
     // the next state/file endpoint here would inject a boundary click.
     let first;
@@ -314,6 +366,21 @@ export class StockGrainVoice {
       this.stats.minimumSelectedInterval=Math.min(this.stats.minimumSelectedInterval??i,i);this.stats.maximumSelectedInterval=Math.max(this.stats.maximumSelectedInterval??i,i);
       if(this.features[i].transientRisk)this.stats.texture.transientRiskReads++;}
     if(track)this.stats.texture.maximumMaterialRateDifference=Math.max(this.stats.texture.maximumMaterialRateDifference,Math.abs(r.length*(this.lastRate??this.rateAt(this.state??.5))/this.asset.sampleRate-1));
+    if(track&&this.#resampler){
+      const at=Math.floor(position),timeline=this.#sourceTimeline;
+      const {radius}=this.#resampler,allowed=this.texturePlan?.allowed;
+      let low=r.start,high=r.end;
+      if(at+1-radius<low){
+        const previous=this.intervals[i-1];
+        if(previous?.end===low&&allowed?.has(i-1)&&!this.features[i-1].transientRisk)low=previous.start;
+      }
+      if(at+radius>=high){
+        const next=this.intervals[i+1];
+        if(next?.start===high&&allowed?.has(i+1)&&!this.features[i+1].transientRisk)high=next.end;
+      }
+      const nativeStep=this.lastRate/(FS*(timeline[at+1]-timeline[at]));
+      return this.resample(position,nativeStep,low,high);
+    }
     return this.read(position);
   }
   available(q,plan){
@@ -337,6 +404,12 @@ export class StockGrainVoice {
     const horizon=Math.min(1,longestRun/2,(reference.voice.intervals.length-reference.q)*.99),n=matchSamples;
     check(horizon>0,'outgoing source continuation must remain bounded');
     const previous=reference.voice,sameVoice=previous===this;
+    const preferNativePhrase=sameVoice&&this.#retainNativePhrases;
+    // The plain waveform minimum often chooses the adjacent cycle before the
+    // run end. Measure real contiguous PCM room so that an equally coherent
+    // splice can resume farther back and play the variation between markers.
+    const contiguousRoom=preferNativePhrase ? Math.max(...list.map(i=>this.available(i,plan))) : longestRun;
+    const phraseRoom=.7*contiguousRoom;
     const canReuse=!sameVoice&&this.#preparation&&previous.#preparation&&
       !this.frame&&!previous.frame&&!this.stats.reads&&!previous.stats.reads&&plan.runs.length<=16;
     const referenceSamples=()=>Float64Array.from({length:n},(_,k)=>previous.sampleHead(reference.q+horizon*k/n));
@@ -384,13 +457,15 @@ export class StockGrainVoice {
     const canShareGrid=horizon===1&&this.#preparation&&
       this.sampleHead===StockGrainVoice.prototype.sampleHead&&this.read===StockGrainVoice.prototype.read;
     const grid=canShareGrid?new Float64Array(matchSamples*2):null;
-    let gridStart=0,gridEnd=0,correlation=0;
+    let gridStart=0,gridEnd=0,correlation=0,longEnough=false;
     const score=q=>{let diff=0,energy=0,xy=0,yy=0;
+      longEnough=false;
       if(q<0||q+horizon>this.intervals.length){correlation=0;return Infinity;}
       const room=this.available(q,plan);
       if(room<requiredRoom){correlation=0;return Infinity;}
       if(sameVoice&&longestRun>=3&&room<selfRoom){correlation=0;return Infinity;}
-      if(sameVoice&&longestRun>=8&&room<longestRun*.5){correlation=0;return Infinity;}
+      if(sameVoice&&contiguousRoom>=8&&room<contiguousRoom*.5){correlation=0;return Infinity;}
+      longEnough=preferNativePhrase&&room>=phraseRoom;
       const interval=Math.floor(q),start=q*n,shared=grid!==null&&Number.isInteger(start),offset=start-interval*n;
       if(shared){
         const end=start+n,base=interval*n;
@@ -416,18 +491,34 @@ export class StockGrainVoice {
       }
       const error=diff/Math.max(energy,1e-20);correlation=xy/Math.sqrt(Math.max(referenceEnergy*yy,1e-30));return error;};
     // First test the existing phase: identical periodic inputs need no shift.
-    let bestQ=null,bestError=Infinity,bestCorrelation=0;const phase=((reference.q%1)+1)%1;
+    let bestQ=null,bestError=Infinity,bestCorrelation=0;
+    let phraseQ=null,phraseError=Infinity,phraseCorrelation=0;
+    const consider=q=>{
+      const error=score(q);
+      if(bestQ===null||error<bestError){bestQ=q;bestError=error;bestCorrelation=correlation;}
+      if(longEnough&&error<phraseError){phraseQ=q;phraseError=error;phraseCorrelation=correlation;}
+      return error;
+    };
+    const phase=((reference.q%1)+1)%1;
     const candidates=[];for(let k=0;k<Math.min(12,list.length);k++){
       const i=list[Math.min(list.length-1,Math.floor((k+this.random()*.5)*list.length/Math.min(12,list.length)))];
       if(!candidates.includes(i))candidates.push(i);
     }
     for(const i of candidates){
-      const q=i+phase,error=score(q);if(bestQ===null||error<bestError){bestQ=q;bestError=error;bestCorrelation=correlation;}
-      if(error<1e-12)break;
-      for(let j=0;j<32;j++){const q=i+j/32,error=score(q);if(error<bestError){bestQ=q;bestError=error;bestCorrelation=correlation;}}
+      const error=consider(i+phase);
+      if(error<1e-12&&(!preferNativePhrase||longEnough))break;
+      for(let j=0;j<32;j++)consider(i+j/32);
     }
-    for(const step of [1/256,1/2048]){const centre=bestQ;for(let k=-8;k<=8;k++){const q=centre+k*step,error=score(q);if(error<bestError){bestQ=q;bestError=error;bestCorrelation=correlation;}}}
+    for(const step of [1/256,1/2048]){
+      const centre=bestQ,phraseCentre=phraseQ;
+      for(let k=-8;k<=8;k++)consider(centre+k*step);
+      if(phraseCentre!==null&&Math.abs(phraseCentre-centre)>8*step)
+        for(let k=-8;k<=8;k++)consider(phraseCentre+k*step);
+    }
     check(Number.isFinite(bestError),'no bounded waveform continuation');
+    if(phraseQ!==null&&phraseError<=bestError+.07&&phraseCorrelation>=Math.max(.8,bestCorrelation-.10)){
+      bestQ=phraseQ;bestCorrelation=phraseCorrelation;
+    }
     if(byReference&&this.#prepareInitialMatch&&byReference.size<16){
       const reads=({reads,minimumReadFrame,maximumReadFrame})=>({reads,minimumReadFrame,maximumReadFrame});
       byReference.set(key,{q:bestQ,correlation:bestCorrelation,seed:this.textureSeed,referenceReads:reads(previous.stats),candidateReads:reads(this.stats)});
@@ -548,7 +639,7 @@ export class StockGrainVoice {
     this.phase+=rate/FS;
     this.pendingBoundary=this.phase>=1;
     if(this.pendingBoundary){const turns=Math.floor(this.phase);this.phase-=turns;this.clockCycles+=turns;this.stats.crossfades+=turns;}
-    check(Number.isFinite(value)&&Math.abs(value)<=1+1e-12,'bounded phase-clock source output');
+    check(Number.isFinite(value)&&Math.abs(value)<=this.#peakBound+1e-12,'bounded phase-clock source output');
     this.lastExpectedEnergy=energy;this.expectedEnergy+=energy;this.outputEnergy+=value*value;
     this.previous=value;this.frame++;return value;
   }

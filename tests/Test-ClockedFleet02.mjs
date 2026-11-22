@@ -162,6 +162,106 @@ test('a new NPC model maps by exact labelled graph channels and rejects role swa
  assert.equal(registry('swapped-catalog.json',swapped).resolve(0xa0010055,'npc').status,'unavailable');
 });
 
+test('only the exact verified X80 player receives the tuned source through preparation and slot creation',async()=>{
+ const parent=path.resolve('.local/street01');
+ fs.mkdirSync(parent,{recursive:true});
+ const dir=fs.mkdtempSync(path.join(parent,'fleet-x80-options-'));
+ const file=name=>path.join(dir,name),read=name=>JSON.parse(fs.readFileSync(file(name),'utf8'));
+ const save=(name,body)=>{const bytes=JSON.stringify(body);fs.writeFileSync(file(name),bytes);return createHash('sha256').update(bytes).digest('hex');};
+ const x80=0x7e8f677f,originalDigest='e58e4cffcdc7becca9c4db718b5be4837a4c70eda612090945b4a95855d0b4c4';
+ try{
+  writeOriginalGameplayPackageStreet01(dir,{fleet:true});
+  const player=read('player.json'),prototype=player.vehicles[1],catalogue=read('catalog.json'),alias=catalogue.Vehicles[1];
+  prototype.model='prototipo';
+  catalogue.Vehicles.push({...alias,ModelHash:'7e8f677f',Model:'prototipo'});
+  for(const name of ['analysis-intervals.json','atlas.json']){
+   const data=read(name);
+   for(const row of data.streams)if(row.model==='original_second')row.model='prototipo';
+   save(name,data);
+  }
+  for(const digest of [originalDigest,'e'.repeat(64)]){
+   prototype.provenance.awcSha256=digest;
+   for(const link of alias.Sounds.EngineAccel.ChannelLinks)link.AwcSHA256=digest;
+   save('player.json',player);
+   const catalogSha256=save('catalog.json',catalogue);
+   const assets=loadStockCatalogAssets(file('player.json'),{sustainAtlasFile:file('atlas.json')});
+   const registry=loadInstalledStockRegistry({catalogFile:file('catalog.json'),catalogSha256,assets,npcAssets:loadStockNpcAssets(file('npc.json'))});
+   const bank=registry.resolve(x80,'player').bank;
+   assert.equal(bank,registry.resolve(other,'player').bank);
+   const ordinary=new StockGameplay({session:budgetSession042,registry,vehicleSourcePolicy:'catalogue-fleet-01',latencyProfile:'street-01',continuityPolicy:'camera-source-01'});
+   try{
+    assert.deepEqual(ordinary.stockSourceOptions01(bank,x80,'player'),{sourceGain:1});
+    assert.equal(ordinary.stockResamplingStartup01(registry.fleetPreparationPairs()),null);
+   }finally{await ordinary.close();}
+   let wall=0;
+   const g=new StockGameplay({session:budgetSession042,registry,now:()=>wall,latencyProfile:'street-01',continuityPolicy:'camera-source-01',
+    vehicleSourcePolicy:'catalogue-fleet-01',x80SourceQuality:'bandlimited'});
+   const e={g,at(value){wall=value;}};
+   const original=digest===originalDigest;
+   try{
+    const deduplicated=registry.fleetPreparationPairs();
+    assert.ok(deduplicated.some(pair=>pair.model===other&&pair.context==='player'));
+    assert.ok(!deduplicated.some(pair=>pair.model===x80));
+    const tuned=g.stockResamplingStartup01(deduplicated);
+    assert.deepEqual(tuned?.pair??null,original?{model:x80,context:'player'}:null);
+    assert.deepEqual(g.stockSourceOptions01(bank,x80,'player'),original?
+     {sourceGain:1,smoothTextureFallback:true,x80LoadResponse:true,resampling:'bandlimited',retainNativePhrases:true}:{sourceGain:1});
+    assert.deepEqual(g.stockSourceOptions01(registry.resolve(model,'npc').bank,model,'npc'),{sourceGain:1});
+    assert.equal(registry.preparationDiagnostics10().banks,0);
+    assert.equal(g.prepareStartupVoices01([tuned?.pair??{model:x80,context:'player'}]),1);
+    const [startupVoice]=g.startupVoices01.values();
+    assert.equal(startupVoice.frame,0);
+    for(let block=0;block<20;block++)await step(e,block,[['alias',1,other]]);
+    assert.equal(slot(g,'alias').source.x80LoadResponse,undefined);
+    for(let block=20;block<40;block++)await step(e,block,[['alias',1,other],['original',1,x80]]);
+    const source=slot(g,'original').source;
+    assert.equal(!!source.x80LoadResponse,original);
+    assert.equal(!!source.voices.engine.accel.fallbackSplice,original);
+    if(original){
+     assert.equal(source,startupVoice);
+     for(let block=40;block<56;block++)await step(e,block,[['alias',1,other],['original',1,x80],['late',1,x80]]);
+     const late=slot(g,'late').source;
+     assert.notEqual(late,source);
+     assert.ok(late.x80LoadResponse);
+     for(let block=56;block<80;block++){
+      const f=frame(block,[['still',1,x80,.7],['cruise',1,x80,.7],['pull',1,x80,.7],['lift',1,x80,.9-(block-56)*.008],['alias',1,other,.7]]);
+      // The producer only receives every second accepted capture.
+      f.listener.sequence=56+2*(block-56);
+      const accelerating=8+(block-56)*.06;
+      for(const [i,speed] of [0,8,accelerating,accelerating,accelerating].entries())f.vehicles[i].velocity=[speed,0,0];
+      e.at(block*512/48);
+      g.accept(f,0,250);
+      await g.render();
+     }
+     const states=Object.fromEntries(g.diagnostics().sourceStates.map(state=>[state.id,state]));
+     for(const [id,amount] of [['still',.34],['cruise',.60],['pull',.90],['lift',.05]]){
+      assert.ok(Math.abs(states[id].sourceExcitation.amount-amount)<1e-10,id);
+      assert.equal(states[id].sourceExcitation.basis,id==='lift'?'inferred-lift-from-rev-ratio':'estimated-from-native-velocity-bracket');
+     }
+     assert.equal(states.still.operatingPoint,states.pull.operatingPoint);
+     assert.equal(states.alias.sourceExcitation,undefined);
+     assert.ok(slot(g,'still').source.x80LoadResponse.target<slot(g,'cruise').source.x80LoadResponse.target);
+     assert.ok(slot(g,'cruise').source.x80LoadResponse.target<slot(g,'pull').source.x80LoadResponse.target);
+    }
+   }finally{await g.close();}
+   if(original){
+    wall=0;
+    const g=new StockGameplay({session:budgetSession042,registry,now:()=>wall,sourcePreparationPolicy:'explicit-control05',x80SourceQuality:'bandlimited'});
+    try{
+     assert.equal(g.stockResamplingStartup01([{model:other,context:'player'}]),null);
+     assert.equal(g.stockResamplingStartup01([{model:x80,context:'player'}]).bank,bank);
+     const observed=[['prepared',1,x80]];
+     g.accept(frame(0,observed),0,250);
+     assert.equal((await g.prepareSources05()).prepared,1);
+     for(let block=1;block<20;block++)await step({g,at(value){wall=value;}},block,observed);
+     assert.equal(g.sourcePreparation05.diagnostics().consumed,1);
+     assert.ok(slot(g,'prepared').source.x80LoadResponse);
+    }finally{await g.close();}
+   }
+  }
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
 test('catalogue fleet keeps independent histories through late arrival, virtual population, expiry and entity reuse',async()=>{
  const e=engine(true),g=e.g;
  try{

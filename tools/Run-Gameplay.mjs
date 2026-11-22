@@ -2,7 +2,7 @@ import {bindCameraInterior01,interiorObservationKey01} from '../src/acoustics/wo
 // Continuous owned producer. Separate authored startup JIT PCM is discarded.
 // Playback uses verified stock banks; no WASAPI, game API or archive decode.
 import fs from 'node:fs';import path from 'node:path';import readline from 'node:readline';import {performance} from 'node:perf_hooks';
-import {loadStockCatalogAssets,loadStockNpcAssets,StockVehicleSource,prepareStockSource10} from '../src/acoustics/vehicle/stock-source.mjs';
+import {loadStockCatalogAssets,loadStockNpcAssets,StockVehicleSource,prepareStockSource10,stockRoles,stockModes} from '../src/acoustics/vehicle/stock-source.mjs';
 import {authoredStartupBank10,prepareStockSourcesForStartup10} from '../src/acoustics/vehicle/stock-source-preparation10.mjs';
 import {loadInstalledStockRegistry} from '../src/acoustics/vehicle/installed-stock-registry.mjs';
 import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';
@@ -19,6 +19,7 @@ import {installedStaticSceneMetadata01} from '../src/acoustics/world/installed-s
 import {normalQualification01,openNormalQualificationEvidence01} from '../src/acoustics/world/normal-qualification01.mjs';
 import {ClockedFleetEvidence02} from '../src/acoustics/vehicle/clocked-fleet-evidence02.mjs';
 import {enableStockGrainTiming04} from '../src/acoustics/vehicle/stock-grain.mjs';
+import {prepareStockResamplingPeakBound} from '../src/acoustics/vehicle/stock-resampler.mjs';
 import {PowertrainVoiceEvidence, powertrainPathBlock} from '../src/acoustics/vehicle/powertrain-voice-evidence.mjs';
 import {powertrainRegistry,validatePowertrainWorld} from '../src/acoustics/vehicle/powertrain-registry.mjs';
 const args=process.argv.slice(2);if(args.length!==4||args[0]!=='--manifest'||args[2]!=='--session')throw Error('owned manifest/session required');
@@ -113,7 +114,22 @@ async function warmNormalControl01(){
    actualSourceFramesAdvanced:0,pcmQueueFramesAdded:0,milliseconds:performance.now()-began};
  }finally{await fixture.close();}
 }
-const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true,latencyProfile:latencyProfile.id,continuityPolicy,vehicleSourcePolicy:config.vehicleSourcePolicy,privatePowertrain,fleetReflectionPolicy:config.fleetReflectionPolicy}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
+// The X80 source mode is opt-in until the full fleet meets the render deadline.
+const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true,latencyProfile:latencyProfile.id,continuityPolicy,vehicleSourcePolicy:config.vehicleSourcePolicy,privatePowertrain,fleetReflectionPolicy:config.fleetReflectionPolicy,x80SourceQuality:config.x80SourceQuality}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
+// The resampling bound scans the loaded PCM once, even when the separate
+// grain-data preparation has to fall back to a cold source constructor.
+const tunedStartup=engine.stockResamplingStartup01(startupPairs),tunedStartupPair=tunedStartup?.pair;
+let sourceResamplingPreparation;
+if(tunedStartup){
+ const {bank,resampling}=tunedStartup;
+ const began=performance.now(),targetPeakBounds={engine:.98,exhaust:.86},maximumPeakBounds={engine:0,exhaust:0};
+ for(const role of stockRoles)for(const mode of stockModes){
+  const bound=prepareStockResamplingPeakBound(bank.layers[role][mode],resampling,targetPeakBounds[role]);
+  if(!Number.isFinite(bound)||bound>targetPeakBounds[role])throw Error('certified X80 '+role+' resampling peak unavailable before source startup');
+  maximumPeakBounds[role]=Math.max(maximumPeakBounds[role],bound);
+ }
+ sourceResamplingPreparation={quality:resampling,layers:stockRoles.length*stockModes.length,maximumPeakBounds,milliseconds:performance.now()-began};
+}
 const fleetReflectionTrains=fleet&&config.acousticWorld?.installedReflectionTrains===true;
 // The host has already read the user's acceleration setting. Give device
 // discovery its own startup time, before a dense workset needs its first
@@ -133,8 +149,15 @@ if(useNpcBlockWorker){
  npcBlockReady=await engine.npcBlockWorker.ready;
 }
 const normalControlWarmup=latencyProfile.id==='street-01'||privatePowertrain?await warmNormalControl01():null;
-const startupVoicePairs=fleet?(useNpcBlockWorker?preparedPairs.filter(p=>p.context!=='npc'):preparedPairs):sourceStartupPreparation10.unpreparedBanks.length?[]:startupPairs;
-const startupVoices=(latencyProfile.id==='street-01'||privatePowertrain)&&startupVoicePairs.length?engine.prepareStartupVoices01(startupVoicePairs):0;
+const warmNormalVoices=latencyProfile.id==='street-01'||privatePowertrain;
+let startupVoicePairs=fleet?(useNpcBlockWorker?preparedPairs.filter(p=>p.context!=='npc'):preparedPairs):
+ warmNormalVoices&&!sourceStartupPreparation10.unpreparedBanks.length?startupPairs:[];
+// The tuned source still shares its bank's native timing tables when the
+// grain-plan budget is full. Warm one untouched voice within the same cap.
+if(tunedStartupPair&&!startupVoicePairs.includes(tunedStartupPair)&&startupVoicePairs.length<(fleet?8:2))
+ startupVoicePairs=[...startupVoicePairs,tunedStartupPair];
+const startupVoices=startupVoicePairs.length?engine.prepareStartupVoices01(startupVoicePairs):0;
+if(sourceResamplingPreparation)sourceResamplingPreparation.untouchedVoicePrepared=startupVoicePairs.includes(tunedStartupPair);
 const powertrainVoiceEvidence=privatePowertrain?new PowertrainVoiceEvidence():null;
 const startupDevice=fleetReflectionTrains?{
  hostSelection:startupAcceleration??null,initializationAttempts:engine.pipeline.backend.attempts,
@@ -163,7 +186,7 @@ function passageLevelProbe(){
  },levels(){return {samples:count,directStereoRms:Math.sqrt(energy[0]/Math.max(1,2*count)),
   reflectedStereoRms:Math.sqrt(energy[1]/Math.max(1,2*count))};}};
 }
-clockedEvidence?.ready({...(npcBlockReady?{npcBlockReady}:{}),milliseconds:performance.now()-startupBegan,startupVoices,...sourceStartupPreparation10,normalControlWarmup,startupDevice});
+clockedEvidence?.ready({...(npcBlockReady?{npcBlockReady}:{}),milliseconds:performance.now()-startupBegan,startupVoices,...sourceStartupPreparation10,sourceResamplingPreparation,normalControlWarmup,startupDevice});
 engine.pipeline.simulation.captureInstalledPaths01=config.acousticPathEvidence01===true;
 let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,pendingSettings=null,pendingGeometry=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
 const traceDelivery=(privatePowertrain||config.outputSink==='environment-observation')&&process.env.RICHAUDIO_DISCARD_DELIVERY_TRACE01==='1';
@@ -468,4 +491,4 @@ if(qualification)setTimeout(()=>finish(Error('normal qualification cutoff reache
 log({type:'gameplay-ready',featureProfile:'STREET-01-main',...(privatePowertrain?{
  powertrainVoice:config.powertrainVoice,observedModel:privateVoice.modelHash,voiceModel:privateVoice.bank.model,
  voiceAwcSha256:privateVoice.bank.provenance.awcSha256
-}:{}),...sourceStartupPreparation10,startupVoices,normalControlWarmup,startupDevice,mode:'experimental-additive',nativeSuppression:false,airflowImplemented:true,airflowEnabled:engine.settings.airflowEnabled,installedWorldQualified:false});
+}:{}),...sourceStartupPreparation10,sourceResamplingPreparation,startupVoices,normalControlWarmup,startupDevice,mode:'experimental-additive',nativeSuppression:false,airflowImplemented:true,airflowEnabled:engine.settings.airflowEnabled,installedWorldQualified:false});
