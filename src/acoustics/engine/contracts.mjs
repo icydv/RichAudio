@@ -80,6 +80,18 @@ export function material({
   });
 }
 export function acousticScene(tile, materials = {}, options = {}) {
+  const { observationModel = null, ...engineOptions } = options;
+  if (observationModel) {
+    requireValue(observationModel.kind === 'conditional-observed-model' &&
+      observationModel.visibilityAssumption === 'unobserved-space-assumed-clear' &&
+      observationModel.motionAssumption === 'static-during-snapshot' &&
+      observationModel.calibration?.basis === 'declared-demonstration-scale' &&
+      Number.isFinite(observationModel.calibration.metresPerNativeUnit) &&
+      observationModel.calibration.metresPerNativeUnit > 0 &&
+      ['live-snapshot','historical-replay'].includes(observationModel.mode),
+    'explicit observed-model assumptions required');
+    requireValue(tile.coverage === 'partial', 'observed coverage must remain partial');
+  }
   const c = {
     ...tile,
     now: tile.createdAt,
@@ -99,7 +111,7 @@ export function acousticScene(tile, materials = {}, options = {}) {
     maxReflectors: 8,
     maxDelay: 2,
     updateHz: 40,
-    ...options,
+    ...engineOptions,
   };
   requireValue(
     Number.isFinite(config.soundSpeed) &&
@@ -147,7 +159,7 @@ export function acousticScene(tile, materials = {}, options = {}) {
   for (const s of tile.surfaces)
     checked[s.id] = materials[s.id] ? material(materials[s.id]) : null;
   requireValue(
-    tile.surfaces.every((s) => s.motion === "static"),
+    tile.surfaces.every((s) => s.motion === "static" || (observationModel && s.motion === "unknown")),
     "moving reflectors require another propagation model",
   );
   const result = freeze({
@@ -158,6 +170,7 @@ export function acousticScene(tile, materials = {}, options = {}) {
     coordinateSpace,
     geometryKey: tile.observationKey,
     generation: tile.version,
+    observationModel: observationModel ? structuredClone(observationModel) : null,
   });
   scenes.add(result);
   return result;

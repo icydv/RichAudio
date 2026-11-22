@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "scope": "bounded observed geometry to existing offline propagation and DSP",
+  "calibration": "declared demonstration only; physical GTA scale unverified",
+  "inputFixture": "original analytic observations",
+  "localValidation": {
+    "focusedTests": 9,
+    "focusedPassed": 9,
+    "fullOfflineSuite": "passed",
+    "audioEndpointsOpenedByOfflineSuite": false,
+    "gitDiffCheck": "passed"
+  },
+  "demos": [
+    {
+      "file": "01_direct.wav",
+      "sha256": "dfdccbefba2becfdde424248708fe8784c4d6f6204196930a2c7da37b0960bbf",
+      "paths": 1,
+      "peak": 0.027470774948596954,
+      "rms": 0.007711367203952543,
+      "clippedSamples": 0,
+      "nonfiniteSamples": 0,
+      "limitedFrames": 0,
+      "delaysSeconds": [
+        0.017734001546058947
+      ]
+    },
+    {
+      "file": "02_reflections_only.wav",
+      "sha256": "f447e34937ca30dd545431f97b8dae599e56ac733f6afa9f04d823a6fd11d60a",
+      "paths": 3,
+      "peak": 0.027905916795134544,
+      "rms": 0.006494927874555472,
+      "clippedSamples": 0,
+      "nonfiniteSamples": 0,
+      "limitedFrames": 0,
+      "delaysSeconds": [
+        0.02277040721838675,
+        0.0292999289245507,
+        0.03259574311224184
+      ]
+    },
+    {
+      "file": "03_direct_and_reflections.wav",
+      "sha256": "da9d168719ce51a49f41212954f775c757fadc1b08ef71657423290b8b06140f",
+      "paths": 4,
+      "peak": 0.03428247943520546,
+      "rms": 0.005651922855525658,
+      "clippedSamples": 0,
+      "nonfiniteSamples": 0,
+      "limitedFrames": 0,
+      "delaysSeconds": [
+        0.017734001546058947,
+        0.02277040721838675,
+        0.0292999289245507,
+        0.03259574311224184
+      ]
+    },
+    {
+      "file": "04_second_order_only.wav",
+      "sha256": "31eed6fdba6acfd7396ee3216deeab22e0bdb4f065f06f52d51faa7296ce19a9",
+      "paths": 1,
+      "peak": 0.0115939537063241,
+      "rms": 0.003086685436161749,
+      "clippedSamples": 0,
+      "nonfiniteSamples": 0,
+      "limitedFrames": 0,
+      "delaysSeconds": [
+        0.03259574311224184
+      ]
+    },
+    {
+      "file": "05_absorptive_surfaces.wav",
+      "sha256": "07ed5965a6a086b6b0f35c829c57218b5543f356a387f89092154c635a90a7a5",
+      "paths": 4,
+      "peak": 0.02807503566145897,
+      "rms": 0.00615684845092649,
+      "clippedSamples": 0,
+      "nonfiniteSamples": 0,
+      "limitedFrames": 0,
+      "delaysSeconds": [
+        0.017734001546058947,
+        0.02277040721838675,
+        0.0292999289245507,
+        0.03259574311224184
+      ]
+    },
+    {
+      "file": "06_open_reference.wav",
+      "sha256": "5bc2e250a1f18e3995f7b68227fefa57c66b1d9f8fcbcd2ec78c064c757ded72",
+      "paths": 1,
+      "peak": 0.024018894881010056,
+      "rms": 0.005089379903176151,
+      "clippedSamples": 0,
+      "nonfiniteSamples": 0,
+      "limitedFrames": 0,
+      "delaysSeconds": [
+        0.02687913835945448
+      ]
+    },
+    {
+      "file": "07_obstructed.wav",
+      "sha256": "bd042fa6f4235a1623006c3df45ea408cb8ae0248958bf22c455bc13a6635c1e",
+      "paths": 1,
+      "peak": 0.002740110969170928,
+      "rms": 0.0007478927197095434,
+      "clippedSamples": 0,
+      "nonfiniteSamples": 0,
+      "limitedFrames": 0,
+      "delaysSeconds": [
+        0.02687913835945448
+      ]
+    }
+  ],
+  "privateRecordedReplay": {
+    "groups": 2,
+    "renderedSeparately": true,
+    "pathsPerGroup": 2,
+    "contemporaneous": false,
+    "subjectiveListening": "not performed",
+    "rawEvidencePublished": false
+  },
+  "liveAddendum": {
+    "unchangedReviewedBuild": true,
+    "explorerActivations": 1,
+    "gtaProcessCreated": true,
+    "rphRenderingAndInteroperabilityInitialized": true,
+    "startupWindowSeconds": 300,
+    "stableStoryModeWithinWindow": false,
+    "bridgeLoaded": false,
+    "slimDxExceptionReproduced": false,
+    "outcome": "startup observation timeout while entering Story Mode; no observed crash",
+    "richAudioHostStarted": false,
+    "listeningResult": "none",
+    "normalQuit": true,
+    "all26DeployedHashesMatched": true,
+    "independentRestoration": "passed",
+    "approval": "closed; no retry authorized"
+  },
+  "historical": {
+    "originalCiCause": "unknown",
+    "acoustics079": "incomplete; failed Stop timing",
+    "acoustics0713": "failed at launch; no listening result",
+    "combinedMilestonePercent": 60
+  }
+}
