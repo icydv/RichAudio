@@ -47,3 +47,5 @@ Reusing each segment direction across the spatial index preserved the hit and un
 A separate hardware test on the RTX 2080 Super measured the existing DirectCompute path over 51 actual ray segments and 892 retained supports. All 48 dispatches matched the CPU result. Complete median times were 0.812 ms on CPU and 0.809 ms through DirectCompute. The GPU round trip took 0.464 ms, including 0.014 ms of shader execution. These measurements keep the existing automatic crossover in place.
 
 The offline comparison establishes which paths changed PCM. Audibility on headphones, placement in the running game, default-output latency and sustained Story Mode playback still need a drive.
+
+The [five-vehicle traffic measurements](FIVE_VEHICLE_TRAFFIC.md) follow the same exit with independent vehicle lifetimes and a clocked output recording.
