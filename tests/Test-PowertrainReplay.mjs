@@ -74,6 +74,12 @@ test('three matched takes bind ordered reflections and withheld controls to the 
     assert.equal(withheld.frames[0].frame.appliedPaths.length, 2);
     const timelineFile = path.join(root,'soundmap-multi.jsonl');
     const packet = JSON.parse(fs.readFileSync(timelineFile));
+    fs.copyFileSync(path.join(root,'soundmap-single.jsonl'),timelineFile);
+    fs.writeFileSync(path.join(root,'result.json'), JSON.stringify({
+      kind: 'mapped-installed-vehicle-drive', session, stages: {multi: stages.single}}));
+    const roadside = await openPowertrainReplay(root, 'multi');
+    assert.deepEqual(roadside.events.filter(e => e.detail).map(e => [e.type,e.detail.surfaceIds]),
+      [['Single reflection',['north']]]);
     packet.appliedPaths.at(-1).sourceId = 'another-engine';
     const changed = JSON.stringify(packet) + '\n';
     stages.multi.timelineSHA256 = sha256(changed);

@@ -15,7 +15,7 @@ const streetComparison = ['direct', 'single', 'multi'];
 const takeNames = [...wallComparison, ...streetComparison, 'withheld', 'two-vehicles', 'solo-vehicle'];
 const labels = {'wall-off': 'Direct path', 'wall-on': 'Direct and reflected paths',
   'two-vehicles': 'Two independently driven vehicles', 'solo-vehicle': 'One vehicle',
-  direct: '1 · Direct only', single: '2 · Single reflections', multi: '3 · Multiple reflections',
+  direct: '1 · Direct only', single: '2 · Single reflections', multi: '3 · Full mix',
   withheld: 'One route withheld'};
 
 function need(condition, message) {
@@ -164,15 +164,20 @@ function addStreetEvents(events, timeline, take, fullReceipt) {
   }
   // A releasing slot may remain in the mixer after withdrawal from the solver.
   const highest = new Map();
+  const standalone = take === 'multi' && !witness;
   for (const row of timeline) {
     const selected = new Set(row.frame.paths.filter(p => p.status === 'selected').map(p => p.id));
     for (const tap of row.frame.appliedPaths) {
-      if (tap.order < 2 || !selected.has(tap.id) || tap.present === false || marked.has(tap.order)) continue;
+      if ((!standalone && tap.order < 2) || !selected.has(tap.id) || tap.present === false || marked.has(tap.order)) continue;
       const gain = Math.max(...tap.gainBands.map(Math.abs));
       if (gain > (highest.get(tap.order)?.gain ?? 0)) highest.set(tap.order, {gain, row, tap});
     }
   }
-  for (const [order, {row, tap}] of highest) addPath(row, tap, order + '-bounce route');
+  for (const [order, {row, tap}] of highest) {
+    // A standalone setting may have only a floor return, or only a direct solve.
+    if (order < 2 && order !== Math.max(...highest.keys())) continue;
+    addPath(row, tap, order === 1 ? 'Single reflection' : order === 0 ? 'Direct path' : order + '-bounce route');
+  }
   if (take === 'two-vehicles') {
     const which = (row, context) => row.frame.renderedVoices.find(v => v.context === context);
     const overlap = timeline.filter(row => ['player','npc'].every(context => {

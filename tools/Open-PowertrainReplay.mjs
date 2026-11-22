@@ -21,8 +21,9 @@ if (!relative || relative === '..' || relative.startsWith('..' + path.sep) || pa
   throw Error('Choose a demo folder within this worktree’s .local directory');
 
 const replay = await openPowertrainReplay(root, take);
-const marker = take === 'two-vehicles' ? replay.events.findIndex(e => e.type === 'Both vehicles · NPC reflection') :
+let marker = take === 'two-vehicles' ? replay.events.findIndex(e => e.type === 'Both vehicles · NPC reflection') :
   replay.events.findIndex(e => e.type === '2-bounce route' || e.type === 'Selected wall bounce' || take === 'withheld' && e.detail?.withheldPathId);
+if (marker < 0) marker = replay.events.findIndex(e => e.detail?.pathId);
 if (witness && marker < 0) throw Error('No mapped witness marker for this take');
 const service = await startSoundMap({root, port: 0, renderedReplay: replay});
 const {token, url} = service.descriptor;
