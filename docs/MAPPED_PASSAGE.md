@@ -84,3 +84,11 @@ Some live rev observations held a normalized ceiling of 1.0, while others contai
 In a matched offline render, exhaust RMS rose by 4.8 dB on a covered blip at 3.35 model metres. On the open-road pass it rose 8.9 dB during the pull at 19–21 model metres, and 7.7 dB during held revs at 35–45 model metres. The measured idle level was unchanged at both camera placements. The covered comparison admitted the same number of paths before and after the change. Both the close render and a separate five-voice mix finished without clipping or mixer limiting, with peaks of −15.5 and −14.3 dBFS respectively. The five-voice mix skipped more paths to stay within its existing headroom budget.
 
 The one-car host also passed a short device-free moving-camera check with mute, resume and a separate same-car stock recovery after host loss. The relative balance against native game sounds, the limiter by ear in Story Mode and the earlier muted starvation remain open.
+
+## Live Bati voicing follow-up
+
+The revised voice stayed active for about 123 seconds through a covered rev, an open-road pull and a distant cinematic shot. The listener still found the replacement too quiet. The sampled replacement output was −30.7 dBFS RMS, with an endpoint peak of −12.2 dBFS and no renderer limiting. The recording had a single stereo mix, so the relative level against the stock powertrain remains unmeasured.
+
+The rendered camera reached about 132 model metres from the exhaust at 80 degrees off the rearward exhaust axis. Close to that point the host sampled the direct replacement near −56.5 dBFS with no reflected signal. This shot reached well beyond the 45-metre offline audition. Under cover the selected rev ratio reached the limiter range for several seconds and fell below it afterward. The live trace did not retain individual firing transitions, and the listener gave no separate verdict on the limiter rhythm.
+
+The endpoint reported zero ring underflow and the stock return was requested once after normal withdrawal. The output gate separately substituted 52,416 frames in the audible revision. The longest reported run was 6,656 untagged frames, or about 139 ms. That counter is separate from underruns and does not establish how many interruptions the listener heard.
