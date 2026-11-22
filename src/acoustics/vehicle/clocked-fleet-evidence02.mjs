@@ -10,7 +10,7 @@ const renderStageFields=['admissionMs','sourceSelectionMs','stockSynthesisMs','p
 const pathStageFields=['candidatePreparationMs','visibilityMs','pathSelectionMs','pathApplicationMs','stereoMixMs'];
 const fields=['completeRenderMs',...renderStageFields,...pathStageFields,'framingMs','producerWakeMs','controlIngressMs','throughPipeWriteMs'];
 const counts=['active','moving','installed','proposed','segments','eligible','selected','applied','releasing',
- 'reflectedVoices','order1','order2','order3Plus','added','removed'];
+ 'reflectedVoices','order1','order2','order3Plus','playerOrder1','playerOrder2','playerOrder3Plus','added','removed'];
 const summary=values=>{
  const sorted=values.sort((a,b)=>a-b);
  if(!sorted.length)return null;
@@ -122,8 +122,11 @@ export class ClockedFleetEvidence02 {
    if(!applied)throw Error('Occupied current mixer path missing its control');
    current.add(slot.id);c.applied[index]++;
    if(applied.order){
-    byVoice.add(applied.sourceId.split(':')[1]);
-    c[applied.order===1?'order1':applied.order===2?'order2':'order3Plus'][index]++;
+    const voice=applied.sourceId.split(':')[1];
+    byVoice.add(voice);
+    const order=applied.order===1?'1':applied.order===2?'2':'3Plus';
+    c['order'+order][index]++;
+    if(engine.slots[Number(voice.slice(4))]?.vehicle?.context==='player')c['playerOrder'+order][index]++;
    }
    if(!this.previousPaths.has(slot.id))c.added[index]++;
   }
