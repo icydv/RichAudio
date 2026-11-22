@@ -70,6 +70,27 @@ test('five gameplay voices contribute distinguishable stereo PCM through one ret
  }finally{await g.close();}
 });
 
+test('the traffic gate counts simultaneous movement and multi-bounce on the same installed block',()=>{
+ const parent=path.resolve('.local/street01');
+ fs.mkdirSync(parent,{recursive:true});
+ const root=fs.mkdtempSync(path.join(parent,'clocked-coverage-')),session='2'.repeat(32);
+ const directory=path.join(root,'.local/gameplay',session);
+ fs.mkdirSync(directory,{recursive:true});
+ const r=new ClockedFleetEvidence02(root,session);
+ try{
+  r.blocks=4;
+  r.counts.active.set([5,5,5,5]);
+  r.counts.movingVoices.set([5,4,5,5]);
+  r.counts.moving.set([1,1,1,1]);
+  r.counts.installed.set([1,1,0,1]);
+  r.counts.order2.set([0,2,0,1]);
+  r.nonzero.set([1,1,1,1]);
+  r.close('test-complete');
+  const report=JSON.parse(fs.readFileSync(path.join(directory,'clocked-fleet-producer.json'),'utf8'));
+  assert.deepEqual(report.trafficMotionCoverage['5'],{allMovingBlocks:3,installedMultiBounceBlocks:1});
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
 test('clocked receipts retain each render, mixer decision and completed pipe interval',async()=>{
  const parent=path.resolve('.local/street01');
  fs.mkdirSync(parent,{recursive:true});

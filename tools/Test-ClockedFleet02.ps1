@@ -139,7 +139,8 @@ try {
         $expectedEnds = @($producer.routeEndpoints | Where-Object { $_.track -lt $Population })
         $missedEnds = @($expectedEnds | Where-Object { !$_.observedBlocks -or $_.nearestStartMeters -gt .3 -or $_.nearestEndMeters -gt .3 })
         $routeQualified = $driver.routeCompleted -and $expectedEnds.Count -ge $Population -and !$missedEnds.Count
-        $sceneQualified = $sceneQualified -and $routeQualified -and $phases.moving.counts.movingVoices.max -eq $Population
+        $trafficMotion = $producer.trafficMotionCoverage."$Population"
+        $sceneQualified = $sceneQualified -and $routeQualified -and $trafficMotion.installedMultiBounceBlocks -gt 0
     }
     $passed = $driver.reason -eq 'workload-complete' -and $driver.closed -and !$driver.final.failure -and
         $sustained -and $populationQualified -and $sceneQualified -and $producer.hardMisses -eq 0 -and
@@ -161,6 +162,7 @@ try {
         throughPipeWriteMisses = $producer.allBlocks.throughPipeWriteMisses
         deferredCallbacks = $driver.final.discardCadence.deferredCallbacks; endpointOpened = $driver.final.endpointOpened
         installedAtRequestedPopulation = $phases
+        trafficMotionCoverage = $trafficMotion
         pcmWitnessQualified = $witnessQualified
     } | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $out 'benchmark-result.json')
     if (!$passed) { throw 'Clocked benchmark failed its workload, render deadline, or ring delivery gate' }

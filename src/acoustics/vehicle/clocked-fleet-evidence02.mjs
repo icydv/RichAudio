@@ -220,6 +220,14 @@ export class ClockedFleetEvidence02 {
   }]));
   const all=Array.from(this.data.completeRenderMs.subarray(0,this.blocks)),pcm=this.excerpt.subarray(0,this.excerptBytes);
   const indices=Array.from({length:this.blocks},(_,i)=>i),c=this.counts;
+  const trafficMotionCoverage={};
+  for(const i of indices){
+   const active=c.active[i];
+   if(!active || c.movingVoices[i]!==active)continue;
+   const group=trafficMotionCoverage[active]??={allMovingBlocks:0,installedMultiBounceBlocks:0};
+   group.allMovingBlocks++;
+   if(c.installed[i] && this.nonzero[i] && c.order2[i]+c.order3Plus[i]>0)group.installedMultiBounceBlocks++;
+  }
   const phaseSummary=rows=>({
    blocks:rows.length,renderMisses:rows.filter(i=>this.data.completeRenderMs[i]>deadline).length,
    throughPipeWriteMisses:rows.filter(i=>this.data.throughPipeWriteMs[i]>deadline).length,
@@ -241,7 +249,7 @@ export class ClockedFleetEvidence02 {
   const output={schema:1,scope:'authored inputs through normal clocked discard producer',node:process.version,reason,error:error?.message??null,
    deadlineMs:deadline,blocks:this.blocks,overflowBlocks:this.excess,nonzeroBlocks:this.nonzero.reduce((a,b)=>a+b,0),
    processingMs:summary(all),hardMisses:all.filter(ms=>ms>deadline).length,byPopulation,byActiveWithReflection,
-   installedByActive,allBlocks:phaseSummary(indices),blockTimesFile:'clocked-blocks.csv',
+   installedByActive,trafficMotionCoverage,allBlocks:phaseSummary(indices),blockTimesFile:'clocked-blocks.csv',
    acceleration:this.backend?.diagnostics(),gpuSamples:this.gpuSamples,gpuSamplesOmitted:this.gpuSampleCount-this.gpuSamples.length,
    sceneCandidates:this.sceneCandidates,sceneCandidatesOmitted:this.sceneCandidatesOmitted,
    timingBasis:'Complete render encloses synthesis, propagation, stereo processing and bookkeeping. Candidate preparation includes history sampling, retarded-time and finite-face geometry. Visibility is the awaited backend query. Selection includes finishing routes and per-source ranking. Application includes headroom filtering and mixer slot updates. Through-pipe time includes ingress, render, framing, diagnostics and write completion. Producer wake is measured separately.',
