@@ -467,6 +467,7 @@ export function finishPath(plan,queries=null,stats={queries:0,surfaceTests:0}) {
 // assumptions at 200 / 1600 / 6400 Hz, not a GTA surface measurement.
 const scatterEnergy = [.18, .33, .48];
 const scatterOffsets = [6, -4, 2];
+const extendedScatterOffsets = [...scatterOffsets, 3, -3];
 export const roadScatterLimit = 3;
 export const roadScatterDelayLimit = .13;
 
@@ -496,7 +497,7 @@ function scatterSurfaceAt(tile, surface, point, stats) {
   return chosen;
 }
 
-function prepareScatter(plan, early, offset, stats) {
+function prepareScatter(plan, early, offset, stats, maximumDelay) {
   const {scene, source, listener, arrivalTime}=plan;
   const surfaces=plan.geometry.surfaces;
   const parent=surfaces.at(-1);
@@ -531,8 +532,8 @@ function prepareScatter(plan, early, offset, stats) {
     (i,p)=>onPatch(preceding[i],p)?preceding[i]:plan.candidate.adjacentFaces[i].find(s=>onPatch(s,p)) : null);
   if(prefix.status!=='prepared-geometry')return null;
   const distance=prefix.distance+outgoing;
-  // At least an independently delayed arrival, within the bounded near room.
-  if(distance-early.distance<.25||distance/scene.config.soundSpeed>roadScatterDelayLimit)return null;
+  // Require an independently delayed arrival inside the configured flight window.
+  if(distance-early.distance<.25||distance/scene.config.soundSpeed>maximumDelay)return null;
   const from=prefix.vertices.at(-2);
   const a=differenceDot(from,contact,face.normal);
   const b=differenceDot(listener.position,contact,face.normal);
@@ -556,9 +557,12 @@ function prepareScatter(plan, early, offset, stats) {
   return {plan:scattered,candidate,response:{...response,bands,scatter:true}};
 }
 
-export function roadScatterFromReflection(plan, early, stats) {
-  for(const offset of scatterOffsets){
-    const scatter=prepareScatter(plan,early,offset,stats);
+export function roadScatterFromReflection(plan, early, stats, maximumDelay=roadScatterDelayLimit) {
+  // A longer flight can require a finite contact between the existing
+  // near-room probes. Keep the extra trials local and use the first valid one.
+  const offsets=maximumDelay>roadScatterDelayLimit?extendedScatterOffsets:scatterOffsets;
+  for(const offset of offsets){
+    const scatter=prepareScatter(plan,early,offset,stats,maximumDelay);
     if(scatter)return scatter;
   }
   return null;

@@ -18,9 +18,10 @@ export function createStockVehiclePipeline(options = {}) {
 export class VehicleAcousticPipeline {
   constructor({ scene, sourceIds, quality = 'quality', acceleration = 'cpu', masterGain = 0.7,
     directStem = false, sourcePressureGains = {}, continuousRates = false, controlFilter = null,
-    validateSampledMotion = false, reuseStaticSegments = false, preserveSourceHistoryOnListenerCut = false, roadScattering = false } = {}) {
+    validateSampledMotion = false, reuseStaticSegments = false, preserveSourceHistoryOnListenerCut = false, roadScattering = false,
+    scatteredReflectionDelay } = {}) {
     if (!(quality in qualityPresets)) throw Error('explicit acoustic quality required');
-    this.simulation = new CausalSimulation(scene, {validateSampledMotion,preserveSourceHistoryOnListenerCut,roadScattering});
+    this.simulation = new CausalSimulation(scene, {validateSampledMotion,preserveSourceHistoryOnListenerCut,roadScattering,scatteredReflectionDelay});
     this.backend = new AcousticAcceleration({ mode: acceleration, reuseStaticSegments });
     this.renderer = new StreamingRenderer({ sourceIds, maxPathsPerSource: qualityPresets[quality],
       pathCapacityPerSource: 64, masterGain, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains, continuousRates });

@@ -1,5 +1,5 @@
 // Causal adaptation around the unchanged A06 finite-path solver. No future trajectory input.
-import { requireValue, validated } from "../engine/contracts.mjs";
+import { bounds, requireValue, validated } from "../engine/contracts.mjs";
 import { vector, unit, length, dot } from "../research/local-geometry.mjs";
 import { candidatePaths, prepareReceiver, finishPath, pathSegments,
   roadScatterLimit, roadScatterFromReflection, roadScatterEarlyBands, roadScatterSupport } from "../engine/paths.mjs";
@@ -68,7 +68,8 @@ export class CausalSimulation {
   constructor(
     scene,
     { staleAfter = 0.25, extrapolationLimit = 0.05, historySeconds = 2.5, allowMissingScene = false,
-      validateSampledMotion = false, preserveSourceHistoryOnListenerCut = false, roadScattering = false } = {},
+      validateSampledMotion = false, preserveSourceHistoryOnListenerCut = false, roadScattering = false,
+      scatteredReflectionDelay } = {},
   ) {
     requireValue(validated.scene(scene) || (allowMissingScene && scene === null), "validated A06 scene required");
     requireValue(
@@ -84,6 +85,11 @@ export class CausalSimulation {
     this.validateSampledMotion = validateSampledMotion;
     if(preserveSourceHistoryOnListenerCut)this.preserveSourceHistoryOnListenerCut=true;
     if(roadScattering)this.roadScattering=true;
+    if(scatteredReflectionDelay!==undefined){
+      requireValue(roadScattering&&Number.isFinite(scatteredReflectionDelay)&&scatteredReflectionDelay>0&&
+        scatteredReflectionDelay<=bounds.delay,'scattered reflection flight window');
+      this.scatteredReflectionDelay=scatteredReflectionDelay;
+    }
     this.staleAfter = staleAfter;
     this.extrapolationLimit = extrapolationLimit;
     this.historySeconds = historySeconds;
@@ -488,7 +494,7 @@ export class CausalSimulation {
           ...reflected.filter(x=>x!==firstOrder).sort((a,b)=>b.order-a.order)].slice(0,roadScatterLimit);
         for(const parent of supports){
           const {plan,p}=parents.get(parent.id);
-          const result=roadScatterFromReflection(plan,p,this.stats);
+          const result=roadScatterFromReflection(plan,p,this.stats,this.scatteredReflectionDelay);
           // The material already allocates part of the reflected energy to
           // scatter. Geometry can let that energy escape, or the probes can
           // be unqualified. Neither case restores it to the sharp return.

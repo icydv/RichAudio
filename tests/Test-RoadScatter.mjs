@@ -3,6 +3,7 @@ import {test} from 'node:test';
 import {acousticScene} from '../src/acoustics/engine/contracts.mjs';
 import {createTile} from '../src/acoustics/research/local-geometry.mjs';
 import {CausalSimulation,StreamingRenderer} from '../src/acoustics/streaming/causal.mjs';
+import {VehicleAcousticPipeline} from '../src/acoustics/vehicle/pipeline.mjs';
 import {patch,sceneInput} from './fixtures/acoustics-scenes.mjs';
 
 function wallScene({width=16,centre=0,missing=false}={}){
@@ -82,4 +83,66 @@ test('withdrawing scatter at the aperture releases its tap without a sample step
  assert(Math.max(...steps)<peak/200,'release cannot drop the tap in one sample');
  assert(Math.max(...levels.slice(-512))===0);
  assert.equal(renderer.stats.limited,0);
+});
+
+test('a qualified farther facade uses opt-in scatter travel time and reaches the proper side of stereo', async()=>{
+ const face=patch('facade',[48,0,5],[-1,0,0],[0,1,0],[36,5]);
+ const scene=acousticScene(createTile({...sceneInput(),bounds:{min:[-20,-42,-2],max:[64,42,16]},
+  surfaces:[face]}),{facade:{reflection:[.81,.64,.36],reference:'original-test-facade'}},{order:1});
+ const distant={id:'motor',position:[-8,14,1],forward:[0,1,0],roadScatter:true};
+ const pedestrian={position:[0,0,1],forward:[0,1,0]};
+ const pulseFrame=8192;
+ async function playback(scatteredReflectionDelay, stem){
+  let selected=null;
+  const within=path=>stem==='direct'?path.order===0:path.scatter;
+  const pipeline=new VehicleAcousticPipeline({scene,sourceIds:['motor'],masterGain:1,roadScattering:true,
+   scatteredReflectionDelay,continuousRates:true,controlFilter(control){
+    const paths=control.paths.filter(within);
+    if(paths.length)selected=paths[0];
+    return {...control,paths};
+   }});
+  const block=new Float32Array(512),left=new Float32Array(32768),right=new Float32Array(32768);
+  try{
+   for(let frame=0;frame<left.length;frame+=512){
+    await pipeline.prepare({session:'facade-stereo',time:frame/48000,listener:pedestrian,sources:[distant]});
+    block.fill(0);
+    if(frame===pulseFrame)block[0]=.4;
+    pipeline.process({motor:block},left.subarray(frame,frame+512),right.subarray(frame,frame+512));
+   }
+  }finally{await pipeline.close();}
+  const first=left.findIndex((v,i)=>Math.max(Math.abs(v),Math.abs(right[i]))>1e-7);
+  const channelEnergy=channel=>channel.reduce((sum,v)=>sum+v*v,0);
+  return {selected,first,left:channelEnergy(left),right:channelEnergy(right)};
+ }
+ const restricted=await playback(undefined,'scatter');
+ assert.equal(restricted.first,-1,'the existing near-space scatter cap withholds this return');
+ const direct=await playback(.36,'direct');
+ const late=await playback(.36,'scatter');
+ assert(late.selected?.delay>.13&&late.selected.delay<.36,'qualified far return should survive the longer cap');
+ assert.equal(direct.selected.order,0);
+ assert(late.selected.distance>100);
+ for(const stem of [direct,late])assert(Math.abs(stem.first-(pulseFrame+stem.selected.delay*48000))<=2);
+ assert(direct.left>2*direct.right,'leftward direct source');
+ assert(late.right>8*late.left,'rightward finite contact');
+});
+
+test('the extended flight window finds an intermediate contact on a finite facade',()=>{
+ const face=patch('short-facade',[10,2,4],[-1,0,0],[0,1,0],[1.9,4]);
+ const scene=acousticScene(createTile({...sceneInput(),bounds:{min:[-32,-6,-2],max:[20,8,12]},
+  surfaces:[face]}),{[face.id]:{reflection:[.81,.64,.36],reference:'original-short-facade'}},{order:1});
+ const source={id:'motor',position:[-30,3,1],forward:[0,1,0],roadScatter:true};
+ const listener={position:[0,0,1],forward:[0,1,0]};
+ function solve(scatteredReflectionDelay){
+  const simulation=new CausalSimulation(scene,{roadScattering:true,scatteredReflectionDelay});
+  for(const time of [0,.2,.4])simulation.observe({session:'finite-facade',time,listener,sources:[source]});
+  return simulation.update(.4).paths;
+ }
+ const newer=solve(.36);
+ const older=solve(undefined);
+ const specular=newer.find(p=>p.order===1&&!p.scatter);
+ const scattered=newer.find(p=>p.scatter);
+ assert(specular&&older.find(p=>p.order===1));
+ assert(!older.some(p=>p.scatter));
+ assert(scattered&&scattered.delay>.13,'an intermediate finite contact supports the later return');
+ assert(scattered.distance-specular.distance>.25);
 });
