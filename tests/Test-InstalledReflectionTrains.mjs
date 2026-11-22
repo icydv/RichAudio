@@ -5,6 +5,8 @@ import {InstalledStaticWorld01, installedStaticSceneMetadata01, encodeInstalledS
   decodeInstalledStaticScene01} from '../src/acoustics/world/installed-static-scene01.mjs';
 import {candidatePaths, pathGeometry, solvePath} from '../src/acoustics/engine/paths.mjs';
 import {trajectory} from '../src/acoustics/engine/contracts.mjs';
+import {createTile} from '../src/acoustics/research/local-geometry.mjs';
+import {sceneInput, patch} from './fixtures/acoustics-scenes.mjs';
 
 // The north wall has an opening centred on its single-bounce point. Its two
 // remaining panels support distinct bounces on a three-leg reflection train.
@@ -118,5 +120,31 @@ test('one worker pose follows a retarded bounce across a shared edge during the 
     assert.equal(candidatePaths(scene).length,2,'one reflection work item before and after the crossing');
     assert.equal(solve(sceneAt(1),end).status,'outside-finite-patch-or-opening','respects a one-face quality budget');
     assert.equal(solve(scene,[24,-2,2]).status,'outside-finite-patch-or-opening','disconnected coplanar panels are separate');
+  } finally {world.close();cache.close();}
+});
+
+test('a second face at a bounce blocks the reflection unless the contact is on their shared edge',()=>{
+  const tilt=4e-7;
+  for(const [centre,normal,tangent,half,bounceX] of [
+    [[0,0,1],[Math.sin(tilt),Math.cos(tilt),0],[Math.cos(tilt),-Math.sin(tilt),0],[3,2],0],
+    [[.5,0,1],[0,1,0],[1,0,0],[3,2],0],
+    [[.5,0,1],[0,1,0],[1,0,0],[3,2],-2.5],
+  ]) {
+    const surfaces=[patch('first',[0,0,1],[0,1,0],[1,0,0],[2.5,2]),
+      patch('crossing',centre,normal,tangent,half)];
+    const tile=createTile({...sceneInput(),surfaces});
+    const scene={tile,config:{installedReflectionTrains:true}}, first=tile.surfaces.find(s=>s.id==='first');
+    const path=pathGeometry(scene,[bounceX-2,2,1],[bounceX+2,2,1],[first]);
+    assert.equal(path.status,'blocked-reflection');
+    assert.ok(path.hits.every(h=>h.id==='crossing'));
+  }
+});
+
+test('the installed search reports each obstacle against the corresponding order of proposals',()=>{
+  const cache=street({blocker:true}),world=new InstalledStaticWorld01(cache);
+  try {
+    const report=installedStaticSceneMetadata01(world.window(request)).reflectionSearch01;
+    assert.equal(report.knownHit,report.testedCandidates-report.qualified);
+    assert.ok(report.multiBounce.knownHit[3]>0,'the screen obstructs the middle of a triple');
   } finally {world.close();cache.close();}
 });

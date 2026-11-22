@@ -1,5 +1,6 @@
-import {dot,onPatch,sub} from '../research/local-geometry.mjs';
-import {preparePathGeometry, finishPathGeometry, reflectionPlaneId, sharedReflectionEdge} from '../engine/paths.mjs';
+import {onPatch} from '../research/local-geometry.mjs';
+import {preparePathGeometry, finishPathGeometry, reflectionPlaneId, sharedReflectionEdge,
+  distanceToReflectionEdge} from '../engine/paths.mjs';
 
 // Fixed worker-side ceilings. Plane sequences are tested before any face is
 // admitted to the existing 16-reflector workset. No triangle permutation tree.
@@ -81,12 +82,6 @@ function estimatedPressure(faces, materials, distance, air) {
   return Math.max(...bands.map((gain,i)=>gain * 10 ** (-air[i]*distance/20))) / Math.max(1,distance);
 }
 
-function distanceToEdge(point, [a,b]) {
-  const axis=sub(b,a), delta=sub(point,a);
-  const t=Math.max(0,Math.min(1,dot(delta,axis)/dot(axis,axis)));
-  return Math.hypot(...delta.map((x,i)=>x-t*axis[i]));
-}
-
 export function discoverInstalledReflectionTrains(tile, poses, listener, materials, engine) {
   const sources = poses.length ? poses : [listener], ranked = rankedPlanes(tile,sources,listener);
   const pairs = shortlist(ranked,pairPlanes), triples = shortlist(ranked,triplePlanes);
@@ -96,6 +91,7 @@ export function discoverInstalledReflectionTrains(tile, poses, listener, materia
     for (const c of triples) if (b!==c) proposals.push([a,b,c]);
   const stats = {planes:ranked.length,pairPlanes:pairs.length,triplePlanes:triples.length,
     proposed:[0,0,0,0],finite:[0,0,0,0],tested:[0,0,0,0],qualified:[0,0,0,0],admitted:[0,0,0,0],
+    knownHit:[0,0,0,0],ambiguous:[0,0,0,0],unknown:[0,0,0,0],unknownByReason:[{},{},{},{}],
     visibilitySegments:0,surfaceTests:0,geometryMs:0,visibilityMs:0};
   const report = {finiteCandidates:0,testedCandidates:0,knownHit:0,ambiguous:0,unknown:0,
     qualified:0,unknownByReason:{},multiBounce:stats};
@@ -133,12 +129,13 @@ export function discoverInstalledReflectionTrains(tile, poses, listener, materia
         stats.tested[order]++;
         const result = finishPathGeometry(route.plan,null,visibility);
         if (result.status!=='clear') {
-          if(result.hits?.length) report.knownHit++;
-          if(result.ambiguousContact) report.ambiguous++;
+          if(result.hits?.length) stats.knownHit[order]++;
+          if(result.ambiguousContact) stats.ambiguous[order]++;
           if(result.status==='unknown') {
-            report.unknown++;
+            stats.unknown[order]++;
+            const byReason=stats.unknownByReason[order];
             for(const reason of new Set(result.unmappedRegions.map(id=>reasons.get(id))))
-              report.unknownByReason[reason]=(report.unknownByReason[reason]??0)+1;
+              byReason[reason]=(byReason[reason]??0)+1;
           }
           continue;
         }
@@ -152,6 +149,8 @@ export function discoverInstalledReflectionTrains(tile, poses, listener, materia
   stats.visibilitySegments=visibility.queries;
   stats.surfaceTests=visibility.surfaceTests;
   report.finiteCandidates=stats.finite[1]; report.testedCandidates=stats.tested[1]; report.qualified=stats.qualified[1];
+  report.knownHit=stats.knownHit[1]; report.ambiguous=stats.ambiguous[1];
+  report.unknown=stats.unknown[1]; report.unknownByReason=stats.unknownByReason[1];
   const ids = new Set(), sequences = [], admitted = [];
   const available=[...routes.values()].sort(compare);
   for (const route of available) {
@@ -178,7 +177,7 @@ export function discoverInstalledReflectionTrains(tile, poses, listener, materia
           if(ids.has(other.id)) continue;
           const edge=sharedReflectionEdge(face,other);
           if(!edge) continue;
-          const score=distanceToEdge(plan.points[i],edge)/pressure;
+          const score=distanceToReflectionEdge(plan.points[i],edge)/pressure;
           neighbours.set(other.id,Math.min(score,neighbours.get(other.id)??Infinity));
         }
       }

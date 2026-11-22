@@ -4,6 +4,7 @@ import {
   sub,
   scale,
   dot,
+  cross,
   length,
   unit,
   onPatch,
@@ -52,10 +53,21 @@ export function sharedReflectionEdge(a,b) {
     const start=av[i],end=av[(i+1)%av.length];
     for (let j=0;j<bv.length;j++) {
       const p=bv[j],q=bv[(j+1)%bv.length];
-      if (same(start,p)&&same(end,q) || same(start,q)&&same(end,p)) return [start,end];
+      if (same(start,p)&&same(end,q) || same(start,q)&&same(end,p)) {
+        // Overlapping polygons can share an edge on the same side. Only
+        // opposing finite interiors meet as neighbours across the edge.
+        const across=cross(a.normal,sub(end,start));
+        const side=vertices=>vertices.reduce((sum,v)=>sum+dot(sub(v,start),across),0);
+        if(side(av)*side(bv)<0) return [start,end];
+      }
     }
   }
   return null;
+}
+export function distanceToReflectionEdge(point, [a,b]) {
+  const axis=sub(b,a), delta=sub(point,a);
+  const t=Math.max(0,Math.min(1,dot(delta,axis)/dot(axis,axis)));
+  return Math.hypot(...delta.map((x,i)=>x-t*axis[i]));
 }
 // Explicit finite-emitter calibration, opt-in per source. Outside the declared
 // radius the original inverse-distance calculation is exactly unchanged. Inside,
@@ -168,8 +180,8 @@ export function finishPathGeometry(plan,queries=null,stats={queries:0,surfaceTes
       const neighbour = tile.surfaces.find(s => s.id === hit.id);
       // Only an actual contact on both finite footprints at this endpoint.
       // A non-coplanar neighbour or an intervening hit still blocks the leg.
-      return neighbour && reflectionPlaneId(neighbour) === reflectionPlaneId(face) &&
-        onPatch(face, hit.point) && onPatch(neighbour, hit.point);
+      const edge=neighbour && sharedReflectionEdge(face,neighbour);
+      return edge && distanceToReflectionEdge(hit.point,edge)<=E;
     };
     const actual = q.hits.filter(
       (h) =>
