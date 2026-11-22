@@ -194,6 +194,17 @@ export function acousticScene(tile, materials = {}, options = {}) {
   );
   const config=engineConfiguration(engineOptions);
   const surfaceIds = new Set(tile.surfaces.map(s => s.id));
+  if (config.installedReflectionTrains === true) {
+    const supports = observationModel?.reflectionSurfaceIds, routes = observationModel?.reflectionSequences;
+    requireValue(observationModel?.kind==='conditional-installed-static-model' && config.order===2 &&
+      !config.higherOrderPaths?.length && Array.isArray(supports) && supports.length<=bounds.reflectors &&
+      new Set(supports).size===supports.length && supports.every(id=>surfaceIds.has(id)) &&
+      Array.isArray(routes) && routes.length<=bounds.paths-1 &&
+      routes.every(route=>Array.isArray(route) && route.length>=1 && route.length<=3 &&
+        route.every((id,i)=>supports.includes(id) && (i===0 || id!==route[i-1]))) &&
+      new Set(routes.map(route=>route.join('>'))).size===routes.length && routes.filter(r=>r.length===3).length<=16,
+      'bounded installed reflection trains require discovered finite supports');
+  }
   requireValue((config.higherOrderPaths ?? []).every(sequence => sequence.every(surfaceId => surfaceIds.has(surfaceId))),
     'higher-order paths require existing finite surface identities');
   const checked = {};
