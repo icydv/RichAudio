@@ -11,7 +11,7 @@ import {
   querySegment,
   inBox,
 } from "../research/local-geometry.mjs";
-import { pose, requireValue } from "./contracts.mjs";
+import { pose, trackPosition, requireValue } from "./contracts.mjs";
 const E = 1e-8;
 const tileLifetimes = new WeakMap();
 function validUntil(tile) {
@@ -286,19 +286,18 @@ export function preparePath(scene,source,listenerTrack,arrivalTime,candidate,
   const listener = pose(listenerTrack, arrivalTime);
   if (!listener.valid) return { status: "listener-unavailable" };
   let emission = arrivalTime,
-    residual = Infinity,
-    state;
+    residual = Infinity;
   for (let i = 0; i < 20; i++) {
-    state = pose(source.track, emission);
+    const position = trackPosition(source.track, emission);
     const d = length(
-      sub(imageFor(state.position, candidate.surfaces), listener.position),
+      sub(imageFor(position, candidate.surfaces), listener.position),
     );
     const next = arrivalTime - d / scene.config.soundSpeed;
     residual = Math.abs(next - emission);
     emission = next;
     if (residual < 1e-10) break;
   }
-  state = pose(source.track, emission);
+  const state = pose(source.track, emission);
   if (!state.valid || residual > 1e-7)
     return { status: "source-unavailable-or-retarded-time-unconverged" };
   const geometry=preparePathGeometry(scene,state.position,listener.position,candidate.surfaces);

@@ -294,6 +294,13 @@ export function trajectory(keys, { discontinuityGuard = 0.05 } = {}) {
   return result;
 }
 export function pose(track, t) {
+  return sampleTrack(track, t, false);
+}
+export function trackPosition(track, t) {
+  return sampleTrack(track, t, true);
+}
+const sameAxis = (a, b) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
+function sampleTrack(track, t, positionOnly) {
   const keys = track.keys;
   let lo = 0,
     hi = keys.length - 1;
@@ -305,17 +312,19 @@ export function pose(track, t) {
   const a = keys[lo],
     b = keys[lo + 1];
   const u = b ? Math.max(0, Math.min(1, (t - a.time) / (b.time - a.time))) : 0;
-  let valid = a.valid;
-  for (let i = Math.max(0, lo - 1); i <= Math.min(keys.length - 2, lo + 1); i++)
-    if (
-      keys[i].generation !== keys[i + 1].generation &&
-      Math.abs(t - keys[i + 1].time) <= track.discontinuityGuard
-    )
-      valid = false;
   const continuous = b && a.generation === b.generation;
   const position = continuous
     ? a.position.map((x, i) => x + (b.position[i] - x) * u)
     : [...a.position];
+  // A fixed axis and a non-antipodal turn keep the basis nondegenerate.
+  // A missing observation can leave an unchecked turn in raw source history.
+  // Preserve its full basis check. The accepted emission always uses pose().
+  if (positionOnly) {
+    if (!continuous) return position;
+    const fixedUp = sameAxis(a.up, b.up), fixedForward = sameAxis(a.forward, b.forward);
+    if (fixedUp && (fixedForward || dot(a.forward, b.forward) > -.99) ||
+        fixedForward && dot(a.up, b.up) > -.99) return position;
+  }
   const forward = continuous
     ? unit(a.forward.map((x, i) => x + (b.forward[i] - x) * u))
     : a.forward;
@@ -323,6 +332,14 @@ export function pose(track, t) {
     ? unit(a.up.map((x, i) => x + (b.up[i] - x) * u))
     : a.up;
   const right = unit(cross(forward, up));
+  if (positionOnly) return position;
+  let valid = a.valid;
+  for (let i = Math.max(0, lo - 1); i <= Math.min(keys.length - 2, lo + 1); i++)
+    if (
+      keys[i].generation !== keys[i + 1].generation &&
+      Math.abs(t - keys[i + 1].time) <= track.discontinuityGuard
+    )
+      valid = false;
   return {
     position,
     velocity: continuous ? a.velocity : [0, 0, 0],
