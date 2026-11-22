@@ -68,3 +68,9 @@ The original 224-frame live underflow could not be reproduced on the reconstruct
 | Warm with file contention | 128.50 s | 0 | 0 frames | 2 | 0 |
 
 The warm run survived 247 blocked primary publications with Windows error 32. Both runs sampled separate direct and reflected pressure and confirmed applied paths through third order while the camera moved. A separate owned-host disconnect restored stock exactly once. The reconstructed fixture crossed the same mapped opening in both directions. The root cause of the earlier live underflow and continuity on an actual WASAPI endpoint still require a live drive.
+
+## Live continuity retest
+
+The one-car candidate ran in Story Mode for about 265 seconds between the audible handoff and the mute request. The listener could hear a difference in reflections between the covered passage and the open side. Replacement loudness remained too low for the listener. The applied-path trace retained up to three bounces. It reached its 512-record limit before mute. No file-publication error was reported.
+
+The endpoint went short by 96 frames about 21.8 seconds after mute was confirmed. Two preceding 480-frame callbacks reduced the ring to 384 frames. The host flushed the next credit batch 13.33 ms before the failing callback, the producer observed it 5.15 ms before the callback, and the next block had not been admitted when the callback ran. The measured interval identifies a late delivery across the credit and render path. Its precise cause remains unresolved. Recovery returned stock exactly once on the same car. The run ended before resume.
