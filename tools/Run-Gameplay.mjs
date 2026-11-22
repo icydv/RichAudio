@@ -6,6 +6,9 @@ import {loadStockCatalogAssets,loadStockNpcAssets,StockVehicleSource,prepareStoc
 import {authoredStartupBank10,prepareStockSourcesForStartup10} from '../src/acoustics/vehicle/stock-source-preparation10.mjs';
 import {loadInstalledStockRegistry} from '../src/acoustics/vehicle/installed-stock-registry.mjs';
 import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';
+import {transientFixtureScene} from '../src/acoustics/events/fixture-scenes.mjs';
+import {acousticScene} from '../src/acoustics/engine/contracts.mjs';
+import {createTile,prepareBatchVisibility} from '../src/acoustics/research/local-geometry.mjs';
 import {resolveLatencyProfile,validateStreetLatencySelection01} from '../src/acoustics/vehicle/latency-profile.mjs';
 import {encodeVehicleRa07} from '../src/acoustics/vehicle/pipeline.mjs';
 import {observationCoordinates,observedAcousticScene} from '../src/acoustics/engine/observed-geometry.mjs';
@@ -28,6 +31,8 @@ const fleet=config.vehicleSourcePolicy==='catalogue-fleet-01';
 const clockedEvidence=config.outputSink==='environment-observation'&&config.clockedFleetEvidence02===true&&process.env.RICHAUDIO_CLOCKED_FLEET_EVIDENCE02==='1'?
  new ClockedFleetEvidence02(root,session):null;
 const qualification=normalQualification01(config,root,session);
+const clockedMap=clockedEvidence&&process.env.RICHAUDIO_CLOCKED_SOUNDMAP==='1'?
+ new (await import('./soundmap/clocked-map-recorder.mjs')).ClockedMapRecorder(clockedEvidence.directory,session):null;
 const inside=relative=>{const p=path.resolve(root,relative);if(!p.startsWith(root+path.sep))throw Error('package path escaped');return p;};
 const assets=loadStockCatalogAssets(inside(config.playerManifest),{sustainAtlasFile:inside(config.atlas)});
 const playerOnlyQualification=qualification&&!fleet&&!config.eligible.some(e=>e.context==='npc');
@@ -46,6 +51,19 @@ const {preparedPairs,...sourceStartupPreparation10}=prepareStockSourcesForStartu
 // Explicit immutable policy selections and closed demonstration profiles retain
 // their declared behavior; source expiry and listener-cut rejection still apply.
 const continuityPolicy=config.continuityPolicy??(config.demoProfile?'baseline':'camera-source-01');
+function authoredFleetPassage(){
+ const passage=transientFixtureScene('passage'),panel=passage.tile.surfaces[0];
+ const ceiling={...panel,id:'canopy',center:[0,1,5],normal:[0,0,-1],u:[1,0,0],half:[5,12]};
+ // The finite index switches on above 128 supports. A tiled floor also
+ // exercises triangular-footprint intersections on the same batch query.
+ const floor=Array.from({length:132},(_,i)=>({...panel,id:'z-floor-'+i,
+  center:[i%11-5,Math.floor(i/11)-5,0],normal:[0,0,1],u:[1,0,0],half:[.5,.5],
+  footprint:[[-.5,-.5],[.5,-.5],[-.5,.5]]}));
+ const surfaces=[...passage.tile.surfaces,ceiling,...floor];
+ const tile=createTile({...passage.tile,surfaces},{maximumSurfaces:surfaces.length});
+ return acousticScene(tile,{...passage.materials,canopy:passage.materials.east},{
+  order:2,maxReflectors:16,maxPaths:64,higherOrderPaths:[['east','canopy','west'],['west','canopy','east']]});
+}
 async function warmNormalControl01(){
  const bank=authoredStartupBank10(),plan=prepareStockSource10(bank),began=performance.now();
  let now=0;
@@ -53,40 +71,74 @@ async function warmNormalControl01(){
   createSource:()=>new StockVehicleSource(bank,{preparation10:plan})},session,now:()=>now,
   latencyProfile:latencyProfile.id,continuityPolicy,latencyDiagnostics:true,vehicleSourcePolicy:config.vehicleSourcePolicy});
  fixture.setSettings({...fixture.settings,acceleration:'cpu'});
+ // Run the finite solver and stereo path mixer before the first real workset
+ // arrives. Only this throwaway engine sees the authored passage.
+ if(fleet){
+  const scene=authoredFleetPassage();
+  prepareBatchVisibility(scene.tile);
+  fixture.pipeline.replaceScene(scene);
+  fixture.sceneExpiry=scene.tile.validUntil;
+  fixture.geometryAnchor={at:0,observationMs:0};
+ }
+ const blocks=fleet?48:24;
+ let maximumReflectedPaths=0,highestReflectionOrder=0;
  try{
-  for(let i=0;i<24;i++){
+  for(let i=0;i<blocks;i++){
    now=i*512/48;
    if(i%4===0){
     const observationTicks=Math.round(now*10000);
     fixture.accept({version:1,session,listener:{version:1,session,sequence:i,generation:1,observationTicks,
      clockFrequency:10000000,gameTimeMs:Math.round(now),position:[0,0,1],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],
      valid:true,paused:false,reason:'valid',coordinates:'gta-native-unscaled',units:'native-unverified',listenerKind:'camera',velocityKind:'unavailable',sourceId:null},
-     vehicles:[{id:'authored-warmup',model:0xf9300cc5,context:'player',generation:1,observationTicks,
-      position:[1,1,1],velocity:[0,0,0],forward:[0,1,0],up:[0,0,1],operatingPoint:.5,valid:true,running:true}]},0);
+     vehicles:Array.from({length:fleet?fixture.voiceLimit:1},(_,voice)=>{
+      const speed=fleet?1+voice:0;
+      return {id:'authored-warmup-'+voice,model:0xf9300cc5,context:'player',generation:1,observationTicks,
+       position:[1-voice*.45,1+voice+speed*now/1000,1],velocity:[0,speed,0],forward:[0,1,0],up:[0,0,1],
+       operatingPoint:.5+voice*.04,valid:true,running:true};
+     })},0);
    }
    await fixture.render();
+   const paths=fixture.pipeline.lastControl.paths;
+   maximumReflectedPaths=Math.max(maximumReflectedPaths,paths.filter(p=>p.order>0).length);
+   for(const p of paths)highestReflectionOrder=Math.max(highestReflectionOrder,p.order);
+   if(fleet&&i%8===7)await new Promise(resolve=>setImmediate(resolve));
   }
-  return {authoredBlocks:24,authoredSourceBlocks:fixture.stageCounters.sourcePlaybackBlocks,
+  return {authoredBlocks:blocks,authoredSourceBlocks:fixture.stageCounters.sourcePlaybackBlocks,maximumReflectedPaths,highestReflectionOrder,
    actualSourceFramesAdvanced:0,pcmQueueFramesAdded:0,milliseconds:performance.now()-began};
  }finally{await fixture.close();}
 }
+const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true,latencyProfile:latencyProfile.id,continuityPolicy,vehicleSourcePolicy:config.vehicleSourcePolicy,privatePowertrain,fleetReflectionPolicy:config.fleetReflectionPolicy}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
+const fleetReflectionTrains=fleet&&config.acousticWorld?.installedReflectionTrains===true;
+// The host has already read the user's acceleration setting. Give device
+// discovery its own startup time, before a dense workset needs its first
+// visibility query. The ordinary auto selector still measures actual batches.
+const startupAcceleration=process.env.RICHAUDIO_FLEET_STARTUP_ACCELERATION;
+if(fleetReflectionTrains&&['auto','gpu'].includes(startupAcceleration)){
+ engine.pipeline.setAcceleration(startupAcceleration);
+ engine.pipeline.backend.start();
+}
 const normalControlWarmup=latencyProfile.id==='street-01'?await warmNormalControl01():null;
-const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true,latencyProfile:latencyProfile.id,continuityPolicy,vehicleSourcePolicy:config.vehicleSourcePolicy,privatePowertrain}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
 const startupVoicePairs=fleet?preparedPairs:sourceStartupPreparation10.unpreparedBanks.length?[]:startupPairs;
 const startupVoices=latencyProfile.id==='street-01'&&startupVoicePairs.length?engine.prepareStartupVoices01(startupVoicePairs):0;
 const powertrainVoiceEvidence=privatePowertrain?new PowertrainVoiceEvidence():null;
+const startupDevice=fleetReflectionTrains?{
+ hostSelection:startupAcceleration??null,initializationAttempts:engine.pipeline.backend.attempts,
+ hardwareReady:engine.pipeline.backend.warmupMs!==null,initializationMs:engine.pipeline.backend.initializationMs,
+ warmupMs:engine.pipeline.backend.warmupMs
+}:null;
 const installedSceneEngine={
  order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1'),
- ...(config.powertrainWorld===true||clockedEvidence&&config.acousticWorld?.installedReflectionTrains===true
+ ...(config.powertrainWorld===true||fleetReflectionTrains||clockedEvidence&&config.acousticWorld?.installedReflectionTrains===true
   ?{installedReflectionTrains:true}:{}),
 };
 let taggedPowertrainPaths=null;
-clockedEvidence?.ready({milliseconds:performance.now()-startupBegan,startupVoices,...sourceStartupPreparation10,normalControlWarmup});
+clockedEvidence?.ready({milliseconds:performance.now()-startupBegan,startupVoices,...sourceStartupPreparation10,normalControlWarmup,startupDevice});
 engine.pipeline.simulation.captureInstalledPaths01=config.acousticPathEvidence01===true;
 let credits=0,busy=false,stopped=false,sequence=0,pendingSnapshot=null,pendingSettings=null,pendingGeometry=null,clock=null,lastFrame=null,latestGeometryRevision=0,latencyRows=0,latencyRowsOmitted=0;
 const traceDelivery=config.outputSink==='environment-observation'&&process.env.RICHAUDIO_DISCARD_DELIVERY_TRACE01==='1';
 engine.captureCompleteRenderStages01=qualification!==null||traceDelivery||clockedEvidence!==null;
 if(clockedEvidence)engine.pipeline.clockedStages={};
+if(clockedEvidence&&process.env.RICHAUDIO_CLOCKED_PCM_WITNESS==='1')clockedEvidence.enablePcmWitness(engine.pipeline.renderer);
 if(clockedEvidence&&process.env.RICHAUDIO_CLOCKED_TAIL04==='1')engine.tailLatency04=enableStockGrainTiming04();
 let deliveryDrops=0;
 function delivery(phase,id,at,began=0,render=0){
@@ -94,8 +146,8 @@ function delivery(phase,id,at,began=0,render=0){
  // A short best-effort record. Never await diagnostic backpressure.
  process.stderr.write(`delivery01|${phase}|${id}|${at}|${began}|${render}|${credits}|${deliveryDrops}\n`);
 }
-let viewer=false,viewerClient=null,soundMapRecordingRequest01=false,soundMapBackgroundRequest01=false;engine.telemetry=new SoundMapTelemetry();
-const soundMapRequired01=()=>viewer||soundMapRecordingRequest01||soundMapBackgroundRequest01;
+let viewer=false,viewerClient=null,soundMapRecordingRequest01=false,soundMapBackgroundRequest01=false;engine.telemetry=new SoundMapTelemetry({enabled:!!clockedMap});
+const soundMapRequired01=()=>viewer||soundMapRecordingRequest01||soundMapBackgroundRequest01||!!clockedMap;
 const soundMapDemandStatus01=()=>({viewer,recordingRequested:soundMapRecordingRequest01,backgroundRequested:soundMapBackgroundRequest01,required:soundMapRequired01(),geometry:soundMapRequired01()?installedSoundMapGeometryState01(engine.pipeline.simulation.scene):'not-requested',recordingStartedByProducer:false});
 const evidence=qualification?openNormalQualificationEvidence01(root,session,error=>{process.exitCode=1;setImmediate(()=>finish(error));}):null;
 let latestSceneDecision01=null,latestPreparedScene01=null;
@@ -213,7 +265,7 @@ function status(){const d=engine.diagnostics(),b=d.pipeline.backend,q=d.quality,
 function finish(error,reason=error?'producer-fault':'graceful-stop'){if(stopped)return;const stopAt=performance.now();stopped=true;engine.beginStopInstalledScene01(stopAt,error?'producer-error':'stop-intent');engine.close();
  const world=installedScenes;installedScenes=null;
  if(viewerClient){viewerClient.close().catch(()=>{});viewerClient=null;}viewer=false;soundMapRecordingRequest01=false;soundMapBackgroundRequest01=false;status();if(error){log({type:'gameplay-error',code:error.message});process.exitCode=1;}if(qualification)log({type:'producer-terminal',reason,error:error?.message??null,worldWorkerOwned:world!==null});input.close();process.stdin.pause();
- void (async()=>{try{if(world){const r=await world.close();log({type:'installed-world-worker-closed',stopAt,...r});if(!r.workerJoined)process.exitCode=1;}}
+ void (async()=>{try{if(clockedMap)await clockedMap.close();if(world){const r=await world.close();log({type:'installed-world-worker-closed',stopAt,...r});if(!r.workerJoined)process.exitCode=1;}}
  catch(e){log({type:'installed-world-worker-close-failed',stopAt,reason:e.message});process.exitCode=1;}
  finally{evidence?.close();try{clockedEvidence?.close(reason,error);}catch(e){process.exitCode=1;log({type:'gameplay-error',code:e.message});}}})();
 }
@@ -255,6 +307,8 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
   const nonzeroBefore=clockedEvidence||config.powertrainVoice?engine.stageCounters.stereo.nonzeroBlocks:0;
   const playbackBefore=engine.stageCounters.sourcePlaybackBlocks;
   const controlIngressMs=clockedEvidence?performance.now()-startedAt:0;
+  if(clockedMap)engine.telemetry.skipSample=!viewer&&!soundMapRecordingRequest01&&!soundMapBackgroundRequest01&&
+    (sequence%16!==0||clockedMap.busy||clockedMap.full);
   const channels=await engine.render();if(stopped)return;
   if(powertrainVoiceEvidence&&engine.stageCounters.sourcePlaybackBlocks>playbackBefore)powertrainVoiceEvidence.render(engine,channels);
   const beforeFraming=clockedEvidence?performance.now():0;
@@ -280,6 +334,7 @@ async function pump(){if(busy||stopped||credits<=0)return;busy=true;
   if(traceDelivery)delivery('w',outputSequence,outputAt,0,engine.lastCompleteRenderMs);
   await new Promise((resolve,reject)=>process.stdout.write(packet,e=>e?reject(e):resolve()));
   clockedEvidence?.delivered(performance.now());
+  if(clockedMap)clockedMap.offer(engine,outputSequence,packet);
   if(traceDelivery)delivery('d',outputSequence,performance.now(),outputAt);
   if(visual?.soundMapFrame&&viewerClient)try{
    const frame=visual.soundMapFrame,listener=lastFrame?.frame.listener;
@@ -347,4 +402,4 @@ if(qualification)setTimeout(()=>finish(Error('normal qualification cutoff reache
 log({type:'gameplay-ready',featureProfile:'STREET-01-main',...(privatePowertrain?{
  powertrainVoice:config.powertrainVoice,observedModel:privateVoice.modelHash,voiceModel:privateVoice.bank.model,
  voiceAwcSha256:privateVoice.bank.provenance.awcSha256
-}:{}),...sourceStartupPreparation10,startupVoices,normalControlWarmup,mode:'experimental-additive',nativeSuppression:false,airflowImplemented:true,airflowEnabled:engine.settings.airflowEnabled,installedWorldQualified:false});
+}:{}),...sourceStartupPreparation10,startupVoices,normalControlWarmup,startupDevice,mode:'experimental-additive',nativeSuppression:false,airflowImplemented:true,airflowEnabled:engine.settings.airflowEnabled,installedWorldQualified:false});

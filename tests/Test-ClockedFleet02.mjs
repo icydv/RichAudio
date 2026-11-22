@@ -6,6 +6,8 @@ import {pathToFileURL} from 'node:url';
 import test from 'node:test';
 import {StockGameplay} from '../src/acoustics/vehicle/gameplay.mjs';
 import {ClockedFleetEvidence02} from '../src/acoustics/vehicle/clocked-fleet-evidence02.mjs';
+import {ClockedFleetPcmWitness} from '../src/acoustics/vehicle/clocked-fleet-pcm-witness.mjs';
+import {encodeVehicleRa07} from '../src/acoustics/vehicle/pipeline.mjs';
 import {StockVehicleSource,prepareStockSource10,loadStockCatalogAssets,loadStockNpcAssets} from '../src/acoustics/vehicle/stock-source.mjs';
 import {loadInstalledStockRegistry} from '../src/acoustics/vehicle/installed-stock-registry.mjs';
 import {authoredStartupBank10} from '../src/acoustics/vehicle/stock-source-preparation10.mjs';
@@ -41,6 +43,32 @@ async function step(eng,block,vehicles,lease=250,generation=1){
  return eng.g.render();
 }
 const slot=(g,id)=>g.slots.find(s=>s.vehicle?.id===id);
+
+test('five gameplay voices contribute distinguishable stereo PCM through one retirement and reacquisition',async()=>{
+ const e=engine(true),g=e.g,r=g.pipeline.renderer,witness=new ClockedFleetPcmWitness(100,r.slots.length);
+ r.pcmWitness=witness;
+ const rows=[];
+ try{
+  for(let b=0;b<100;b++){
+   const vehicles=Array.from({length:5},(_,i)=>['traffic-'+i,i===4&&b>=72?2:1,i<3?model:other,
+    .1+i*.16+.04*Math.sin(b*.04+i),1+i*.8+(i-2)*b*.001,-2+i*.2]);
+   if(b>=60&&b<72)vehicles.pop();
+   const output=await step(e,b,vehicles);
+   rows.push(witness.record(g,encodeVehicleRa07(...output,b)));
+  }
+  assert(rows.every(row=>row.packetMatches&&row.unboundPaths===0));
+  assert(rows.slice(35,60).every(row=>row.activeContributors===5));
+  assert(rows.slice(63,72).every(row=>row.activeContributors===4&&!row.contributors.some(v=>v.id==='traffic-4')));
+  const old=rows[55].contributors.find(v=>v.id==='traffic-4');
+  const replacement=rows.at(-1).contributors.find(v=>v.id==='traffic-4');
+  assert.equal(replacement.generation,2);
+  assert.notEqual(old.rendererGeneration,replacement.rendererGeneration);
+  assert.notEqual(old.acquisition,replacement.acquisition);
+  assert.deepEqual(rows[55].contributors.filter(v=>v.id!=='traffic-4').map(v=>v.acquisition),
+   rows[68].contributors.map(v=>v.acquisition));
+  assert(rows.at(-1).contributors.every(v=>v.oldestDryObservationQpc>0&&v.unknownDryTaps===0));
+ }finally{await g.close();}
+});
 
 test('clocked receipts retain each render, mixer decision and completed pipe interval',async()=>{
  const parent=path.resolve('.local/street01');

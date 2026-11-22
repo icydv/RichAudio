@@ -50,7 +50,41 @@ if(retainedSourceManifest){
   if(hash(from)!==binding.sha256)throw Error('Retained audio package source changed');
   copy(from,inside(root,binding.file));
  }
- if(phases.some(phase=>!['multi-wall','warm-wall'].includes(phase)))throw Error('Unknown wall fixture phase');
+ const traffic=phases.find(phase=>phase.startsWith('traffic-route='));
+ let routeEndpoints;
+ if(phases.some(phase=>phase!==traffic&&!['multi-wall','warm-wall','ranked-reflections','cpu-only'].includes(phase)))throw Error('Unknown wall fixture phase');
+ if(traffic){
+  const file=path.resolve(traffic.slice('traffic-route='.length));
+  if(!multiWall||!file.split(path.sep).includes('.local')||fs.statSync(file).size>16*1024*1024)
+   throw Error('Bounded private multi-wall route required');
+  const input=read(file),point=v=>validVector(v)&&Math.hypot(...v.map((x,i)=>x-pose.listener[i]))<=128;
+  const unit=v=>validVector(v)&&Math.abs(Math.hypot(...v)-1)<.001;
+  if(input.schema!==1||!['exit','covered'].includes(input.route)||input.stepMs!==50||
+     !Number.isInteger(input.seconds)||input.seconds<4||input.seconds>120||
+     !validVector(input.listener)||input.listener.some((x,i)=>Math.abs(x-pose.listener[i])>.01)||
+     !Array.isArray(input.frames)||input.frames.length!==1+input.seconds*1000/input.stepMs)
+   throw Error('Invalid timed traffic route');
+  const endpoints=new Map();
+  for(const [index,frame] of input.frames.entries()){
+   if(frame.timeMs!==index*input.stepMs||!unit(frame.forward)||!Array.isArray(frame.vehicles)||frame.vehicles.length>5)
+    throw Error('Invalid traffic observation frame');
+   const ids=new Set(),tracks=new Set();
+   for(const v of frame.vehicles){
+    if(!Number.isInteger(v.track)||v.track<0||v.track>4||tracks.has(v.track)||typeof v.id!=='string'||v.id.length<1||v.id.length>64||
+       ids.has(v.id)||!Number.isSafeInteger(v.generation)||v.generation<1||v.generation>65535||
+       !Number.isInteger(v.model)||v.model<0||v.model>0xffffffff||
+       !['player','npc'].includes(v.context)||!point(v.position)||!validVector(v.velocity)||Math.hypot(...v.velocity)>80||
+       !unit(v.forward)||!unit(v.up)||!Number.isFinite(v.operatingPoint)||v.operatingPoint<0||v.operatingPoint>1||
+       v.valid!==true||v.running!==true)throw Error('Invalid traffic vehicle observation');
+    tracks.add(v.track);ids.add(v.id);
+    const key=JSON.stringify([v.id,v.generation]);
+    if(!endpoints.has(key))endpoints.set(key,{track:v.track,id:v.id,generation:v.generation,from:v.position,to:v.position});
+    else endpoints.get(key).to=v.position;
+   }
+  }
+  copy(file,path.join(root,'clocked-traffic-route.json'));
+  routeEndpoints=[...endpoints.values()];
+ }
  const route={};
  if(multiWall&&pose.sourceStart){
   for(const key of ['sourceStart','sourceEnd','npcStart','npcEnd']){
@@ -59,8 +93,8 @@ if(retainedSourceManifest){
   }
  }
  fs.writeFileSync(path.join(root,'installed-wall-drive.json'),JSON.stringify({listener:pose.listener,source:pose.source,
-  tangent:validVector(pose.forward)?pose.forward:[1,0,0],surfaceId:pose.surfaceId,resourceId,...route,
-  warmWall:phases.includes('warm-wall'),...(multiWall?{multiWall:true}: {})}),{flag:'wx'});
+  tangent:validVector(pose.forward)?pose.forward:[1,0,0],surfaceId:pose.surfaceId,resourceId,...route,...(routeEndpoints?{routeEndpoints}:{}),
+  warmWall:phases.includes('warm-wall'),...(multiWall?{multiWall:true}: {}),...(phases.includes('cpu-only')?{cpuOnly:true}:{})}),{flag:'wx'});
  const cacheRoot=path.resolve(path.dirname(geometry.catalogPath),'..');
  const relativeCache=file=>{const rel=path.relative(cacheRoot,file);inside(cacheRoot,rel);return rel;};
  config={
@@ -93,6 +127,7 @@ copy(host,path.join(root,'runtime/RichAudio.Acoustics.Host.exe'));
 Object.assign(config,{gameVersion:'1.0.1158.16',rphVersion:'1.132.1428.17748',continuityPolicy:'camera-source-01',
  outputSink:'environment-observation',clockedFleetEvidence02:true});
 if(mode==='fleet')Object.assign(config,{vehicleSourcePolicy:'catalogue-fleet-01',eligible:[]});
+if(phases.includes('ranked-reflections'))config.fleetReflectionPolicy='fleet-ranked-reflections';
 config.bindings=walk(root).filter(file=>file!==manifest).map(file=>({file:path.relative(root,file).replaceAll('\\','/'),sha256:hash(file)}));
 fs.writeFileSync(manifest,JSON.stringify(config,null,2));
 console.log(JSON.stringify({root,manifestSha256:hash(manifest),authoredOwnerSha256:gameHash,bindings:config.bindings.length,authoredWorldEpoch:epoch}));

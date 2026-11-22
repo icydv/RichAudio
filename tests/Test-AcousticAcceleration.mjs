@@ -21,6 +21,28 @@ function fixture({count=4,wall=true,origin=[0,0,0]}={}){
 }
 function reference(tile,segments){return segments.map(s=>querySegment(tile,s.a,s.b));}
 function parity(actual,expected){assert.deepEqual(actual.map(stripCost),expected.map(stripCost));}
+test('repeated fleet visibility uses exact endpoints from the same immutable tile',async()=>{
+  const backend=new AcousticAcceleration({mode:'cpu',reuseStaticSegments:true}),{tile,segments}=fixture();
+  try{
+    const ref=reference(tile,segments),first=await backend.query(tile,segments);
+    first[0].hits[0].point[0]=55;
+    first[0].unknown.length=0;
+    const again=await backend.query(tile,segments);
+    parity(again,ref);
+    assert.equal(again.reduce((n,q)=>n+q.surfaceTests,0),0);
+    const moved=structuredClone(segments);
+    moved[1].a[0]+=1e-12;
+    const mixed=await backend.query(tile,moved);
+    parity(mixed,reference(tile,moved));
+    assert.equal(mixed[0].surfaceTests,0);
+    assert.ok(mixed[1].surfaceTests>0);
+    assert.equal(mixed[2].surfaceTests,0);
+    const replacement=fixture({wall:false}).tile,renewed=await backend.query(replacement,moved);
+    parity(renewed,reference(replacement,moved));
+    assert.ok(renewed.every(q=>q.surfaceTests>0));
+    assert.equal(backend.diagnostics().reusedCpuVisibilitySegments,5);
+  }finally{backend.close();}
+});
 class ProtocolFixtureClient {
   constructor({supported=true,mask='all'}={}){this.supported=supported;this.mask=mask;this.closed=false;this.acousticCalls=0;this.calls=[];this.corruption=null;this.hold=null;this.extraCpu=0;this.totalCpu=0;}
   async capability(){return {schemaVersion:1,supported:this.supported,hardware:this.supported,device:'PROTOCOL-POLICY-FIXTURE-NOT-HARDWARE-PROOF',reason:'deliberately unsupported policy fixture'};}

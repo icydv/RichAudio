@@ -13,6 +13,7 @@ namespace RichAudio.Beacon.Windows {
   PowertrainOutputGate powertrain;int hostPid;
   bool demo;long admittedLease;GameplayRecording recording;GameplayDemoPermit demoPermit;string recordingFailure,recordingDirectory;object lastRecordingMetrics;readonly GameplayShutdownFade shutdownFade=new GameplayShutdownFade();
   GameplayDeliveryTrace01 delivery;long creditBatch,issuedCredits;
+  ClockedOutputCapture clockedOutput;
   int ringHighWaterFrames;long maximumAdmissionIntervalTicks;
   string stopReason;object producerIdentity;bool drainProducer;
   long fixtureTrailingSilentFrames;double fixtureLastPeak,fixtureLastSumSquares;
@@ -41,6 +42,11 @@ namespace RichAudio.Beacon.Windows {
     if(config.TransportValidationOnly){code=RunTransportOnly();}
     else {
     if(config.DiscardEnvironmentalOutput)delivery=new GameplayDeliveryTrace01();latencyProfile=GameplayLatencyProfile.Resolve(config.LatencyProfile,powertrain!=null);ring=new PcmRing(latencyProfile.StartupBlocks);creditWindow=new GameplayCreditWindow(latencyProfile);credits=latencyProfile.StartupBlocks;
+    string captureLimit=Environment.GetEnvironmentVariable("RICHAUDIO_CLOCKED_CAPTURE_FRAMES");
+    if(config.DiscardEnvironmentalOutput&&powertrain==null&&captureLimit!=null&&
+       Environment.GetEnvironmentVariable("RICHAUDIO_CLOCKED_FLEET_EVIDENCE02")=="1")
+     clockedOutput=new ClockedOutputCapture(int.Parse(captureLimit,CultureInfo.InvariantCulture),
+      fixture&&Environment.GetEnvironmentVariable("RICHAUDIO_CLOCKED_PCM_WITNESS")=="1");
     if(!fixture&&(!settings.RichAudioEnabled||settings.IntegrationMode!="experimental-additive"))throw new InvalidOperationException("stock fallback selected");
     nodeJob=new OwnedProcessJob(1024);
     string producerArgs=Q(PlayableConfiguration.Inside(config.Root,"tools/Run-Gameplay.mjs"))+" --manifest "+Q(config.Manifest)+" --session "+session;
@@ -49,6 +55,7 @@ namespace RichAudio.Beacon.Windows {
     // owned job keeps the existing producer memory limit.
     if(latencyProfile.Id=="street-01")producerArgs="--no-flush-bytecode "+producerArgs;
     child=new Process{StartInfo=new ProcessStartInfo{FileName=PlayableConfiguration.Inside(config.Root,"runtime/node.exe"),Arguments=producerArgs,WorkingDirectory=config.Root,UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true}};
+    if(config.CatalogueFleet)child.StartInfo.EnvironmentVariables["RICHAUDIO_FLEET_STARTUP_ACCELERATION"]=settings.Acceleration;
     if(delivery!=null)child.StartInfo.EnvironmentVariables["RICHAUDIO_DISCARD_DELIVERY_TRACE01"]="1";
     child.Start();childId=child.Id;nodeJob.Assign(child);
     drainProducer=config.DiscardEnvironmentalOutput;producerIdentity=GameplayLifecycle01.Identity(child);
@@ -112,6 +119,15 @@ namespace RichAudio.Beacon.Windows {
     if(recording!=null){try{recording.Event("host-audio-stopped",Stopwatch.GetTimestamp(),new{underflowFrames=ring.UnderflowFrames,consumedFrames=ring.ConsumedFrames,fadeReserveConsumed=shutdownFade.FullyConsumed(ring.ConsumedFrames)});recording.Dispose();}catch(Exception e){recordingFailure=e.GetType().Name;}}
     CloseProducer();
     foreach(var t in new[]{writer,reader,diagnostics,receiver,sink,ownerCommand})if(t!=null&&t.IsAlive&&!t.Join(1500)){failure="cleanup-timeout";code=1;}
+    if(clockedOutput!=null&&sink!=null&&!sink.IsAlive)try{
+     if(clockedOutput.Frames!=ring.ConsumedFrames)throw new InvalidDataException("Clocked capture differs from sink frame count");
+     using(var file=new FileStream(Path.Combine(directory,"clocked-output.wav"),FileMode.CreateNew,FileAccess.Write,FileShare.None))
+      clockedOutput.Save(file);
+     if(clockedOutput.HasCallbacks)using(var file=new FileStream(Path.Combine(directory,"clocked-callbacks.csv"),FileMode.CreateNew,FileAccess.Write,FileShare.None))
+      clockedOutput.SaveCallbacks(file);
+     if(clockedOutput.HasCallbacks)using(var file=new FileStream(Path.Combine(directory,"clocked-admissions.csv"),FileMode.CreateNew,FileAccess.Write,FileShare.None))
+      using(var text=new StreamWriter(file,new UTF8Encoding(false)))fixtureLatency.WriteAdmissions(text);
+    }catch(Exception e){failure=failure??"clocked-capture-failed";Record("clocked-capture-fault",e.GetType().Name,e.Message);code=1;}
     if(delivery!=null&&directory!=null)try{
      var receipt=delivery.Snapshot(session,Process.GetCurrentProcess().Id,childId,latencyProfile.StartupBlocks,latencyProfile.ProducerBlocks,Interlocked.Read(ref received),Interlocked.Read(ref ring.ConsumedFrames),issuedCredits,creditWindow.Retired,creditWindow.SourcePrepared);
      string file=Path.Combine(directory,delivery.Underflow?"first-underflow.json":"delivery-timing.json");
@@ -310,6 +326,7 @@ namespace RichAudio.Beacon.Windows {
     int bufferedBefore=ring.BufferedFrames;long callbackBefore=Stopwatch.GetTimestamp();int callbackSupplied=0;long before=ring.ConsumedFrames,under=ring.UnderflowFrames,end=ring.EndSilenceFrames;fixed(float* p=buffer){int supplied;if(powertrain==null)supplied=ring.FillCalibrated(p,callbackFrames,1);else{
     PowertrainSubmission result;supplied=powertrain.Fill(ring,p,callbackFrames,out result);powertrain.Submitted(result);
    }callbackSupplied=supplied;var capture=recording;if(capture!=null){int slot=capture.Tap.Prepare(p,callbackFrames,before,ring.ConsumedFrames,before-under-end,supplied,ring.UnderflowFrames-under,ring.EndSilenceFrames-end);capture.Tap.Commit(slot);}}if(delivery!=null)delivery.Callback(block,due,callbackBefore,Stopwatch.GetTimestamp(),callbackFrames,callbackSupplied,(int)(ring.UnderflowFrames-under),bufferedBefore,ring.BufferedFrames,ring.FirstUnderflowFrame,before-under-end,ring.UnderflowFrames>under?ring.PendingCredits:0);
+   if(clockedOutput!=null)clockedOutput.Append(buffer,callbackFrames,before,before-under-end,callbackSupplied,callbackBefore,Stopwatch.GetTimestamp());
    if(fixtureLatency!=null){fixtureLatency.Submission(before-under-end,callbackFrames,Stopwatch.GetTimestamp());fixtureLatency.Callback01(block,due,callbackBefore,Stopwatch.GetTimestamp(),callbackFrames,callbackSupplied,bufferedBefore,ring.BufferedFrames,ring.UnderflowFrames>under,ring.FirstUnderflowFrame,shutdownRequested,Interlocked.Read(ref admittedLease),Interlocked.Read(ref lastSnapshotTicks));}double peak=0,energy=0;long silent=Interlocked.Read(ref fixtureTrailingSilentFrames);for(int i=0;i<callbackFrames;i++){float l=buffer[i*2],r=buffer[i*2+1];peak=Math.Max(peak,Math.Max(Math.Abs(l),Math.Abs(r)));energy+=(double)l*l+(double)r*r;silent=l==0&&r==0?silent+1:0;}Interlocked.Exchange(ref fixtureTrailingSilentFrames,silent);Interlocked.Exchange(ref fixtureLastPeak,peak);Interlocked.Exchange(ref fixtureLastSumSquares,energy);ring.RequireContinuousProducer();Interlocked.Increment(ref fixtureCallbacks);block++;wake.Set();}
   }catch(Exception e){if(!stop)Fail(e);}}
   void PublishPowertrainStatus(string error){

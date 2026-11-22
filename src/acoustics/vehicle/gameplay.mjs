@@ -35,7 +35,7 @@ export class StockGameplay {
  #installedApplicationPermit01=null;#installedSceneService01=null;#installedSceneStopped01=false;#installedStopAt01=null;
  get installedSceneService01(){return this.#installedSceneService01;}
  get installedSceneStopped01(){return this.#installedSceneStopped01;}
- constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled',vehicleSourcePolicy=null,privatePowertrain=false}){
+ constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled',vehicleSourcePolicy=null,privatePowertrain=false,fleetReflectionPolicy='full'}){
   if(!['disabled','explicit-control05'].includes(sourcePreparationPolicy))throw Error('Explicit source preparation policy required');
   if(!['baseline','camera-source-01'].includes(continuityPolicy))throw Error('Explicit vehicle continuity policy required');
   if(!['baseline','arrived-segments-50'].includes(continuousTimingPolicy))throw Error('Explicit continuous timing policy required');
@@ -66,8 +66,12 @@ export class StockGameplay {
   // its own history and enters the same finite propagation/path solver.
   this.ids=this.slots.flatMap(s=>['engine','exhaust'].map(role=>`stock:slot${s.index}:${role}`)).concat(this.slots.map(s=>`stock:slot${s.index}:aero`));
   this.direct=conditionalStockScene(this.ids,session,vehicleDistanceSceneOptions('authored-detail-loss-v1'));
-  this.pipeline=createStockVehiclePipeline({scene:this.direct,sourceIds:this.ids,masterGain:.175,continuousRates:true,validateSampledMotion:privatePowertrain,
+  this.pipeline=createStockVehiclePipeline({scene:this.direct,sourceIds:this.ids,masterGain:.175,continuousRates:true,validateSampledMotion:privatePowertrain,reuseStaticSegments:this.catalogueFleet,
     controlFilter:(c,r)=>this.filter(c,r)});
+  if (fleetReflectionPolicy !== 'full') {
+    if (!vehicleSourcePolicy || privatePowertrain) throw Error('Ranked reflections require the ordinary vehicle fleet');
+    this.pipeline.simulation.setReflectionPolicy(fleetReflectionPolicy);
+  }
   this.inputs=Object.fromEntries(this.ids.map(id=>[id,new Float32Array(BLOCK)]));this.left=new Float32Array(BLOCK);this.right=new Float32Array(BLOCK);
   this.localAirflow=[new Float32Array(BLOCK),new Float32Array(BLOCK)];
   this.localAirflowRelease={last:[0,0],remaining:0,from:[0,0]};
@@ -236,8 +240,13 @@ export class StockGameplay {
   return selected.flatMap(v=>{
    const model=this.profiles?.emitters?this.registry.resolve(v.model,v.context).bank?.model:undefined;
    const roles=this.settings.airflowEnabled&&v.model===0xf9300cc5?['engine','exhaust','aero']:['engine','exhaust'];
-   return roles.map(role=>this.stockEmitterPosition01(v,role,model));
-  }).filter(p=>p.every((x,i)=>Math.abs(x-frame.listener.position[i])<=128));
+   return roles.flatMap(role=>{
+    const position=this.stockEmitterPosition01(v,role,model);
+    if(!position.every((x,i)=>Math.abs(x-frame.listener.position[i])<=128))return [];
+    sourceLayout?.push({vehicle:voiceIdentity01(v),role,moving:v.velocity.some(component=>component!==0)});
+    return [position];
+   });
+  });
  }
  recordInstalledSceneDiagnostic01(record){
   const recent=this.installedSceneDiagnostics01.recent;recent.push(record);if(recent.length>64)recent.shift();
@@ -410,6 +419,15 @@ export class StockGameplay {
     operatingPoint:next?old.operatingPoint+(next.operatingPoint-old.operatingPoint)*u:old.operatingPoint,
     running:this.continuityPolicy==='camera-source-01'?old.running:old.running&&(!next||next.running),lift:next?next.operatingPoint<old.operatingPoint-.002:false,
     riderAttached:old.riderAttached===true&&(!next||next.riderAttached===true),riderViewAttached:old.riderViewAttached===true&&(!next||next.riderViewAttached===true)});
+   const witness=this.pipeline.renderer.pcmWitness;
+   if(witness){
+    const observed=result.at(-1);
+    observed.clockedDryDeadlineQpc=witness.controlDeadline(this.snapshots,left.sequence,right?.sequence,old.observationTicks);
+    if(this.catalogueFleet){
+     observed.clockedSelectionAgeMs=250-(old.sourceExpiresAt-now);
+     observed.clockedSelectionMarginMs=Math.min(latest.wallExpires,identity.sourceExpiresAt,old.sourceExpiresAt,next?.sourceExpiresAt??Infinity)-now;
+    }
+   }
   }return result;
  }
  vehicleCandidate01(v,listener,listenerQualified,resolved){

@@ -3,6 +3,7 @@ import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import fs from 'node:fs/promises';
 import {openPowertrainReplay} from './soundmap/powertrain-replay.mjs';
+import {openClockedTrafficReplay} from './soundmap/clocked-traffic-replay.mjs';
 import {startSoundMap} from './soundmap/server.mjs';
 
 const [folder, ...options] = process.argv.slice(2);
@@ -20,11 +21,13 @@ const relative = path.relative(local, root);
 if (!relative || relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative))
   throw Error('Choose a demo folder within this worktree’s .local directory');
 
-const replay = await openPowertrainReplay(root, take);
-let marker = take === 'traffic' ? replay.events.findIndex(e => e.type === 'Five voices in the mix') :
+const replay = take === 'clocked' ? await openClockedTrafficReplay(root) : await openPowertrainReplay(root, take);
+let marker = take === 'clocked' ? replay.events.findIndex(e => e.type === 'Five sampled PCM contributors') :
+  take === 'traffic' ? replay.events.findIndex(e => e.type === 'Five voices in the mix') :
   take === 'two-vehicles' ? replay.events.findIndex(e => e.type === 'Both vehicles · NPC reflection') :
   replay.events.findIndex(e => e.type === '2-bounce route' || e.type === 'Selected wall bounce' || take === 'withheld' && e.detail?.withheldPathId);
 if (marker < 0) marker = replay.events.findIndex(e => e.detail?.pathId);
+if (take === 'clocked' && marker < 0) marker = 0;
 if (witness && marker < 0) throw Error('No mapped witness marker for this take');
 const service = await startSoundMap({root, port: 0, renderedReplay: replay});
 const {token, url} = service.descriptor;
@@ -41,7 +44,7 @@ try {
       const browserTimeMs = Math.floor(event.timeMs * 1000) / 1000;
       const response = await fetch(url + '/api/replay/frame?timeMs=' + browserTimeMs, {headers});
       if (!response.ok) throw Error('Replay timeline seek failed');
-      if (take === 'traffic' && event.detail) {
+      if ((take === 'traffic' || take === 'clocked') && event.detail) {
         const {pcmBlock, frame} = await response.clone().json();
         if (frame?.sequence !== event.detail.sequence || pcmBlock?.sampleFrame !== event.detail.sampleFrame ||
           JSON.stringify(pcmBlock) !== JSON.stringify(replay.contributions[pcmBlock.sampleFrame / 512]))

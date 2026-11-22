@@ -126,11 +126,18 @@ export function replayFrame(replay,timeMs) {
   if(!Number.isFinite(timeMs)||timeMs<0||timeMs>replay.durationMs+1)throw Error('Replay time outside recording');
   // Media elements can report their seek position a fraction of one sample
   // short. Align file-render seeks to the nearest actual PCM sample position.
-  if(replay.manifest.timelineBasis==='rendered-engine-audioFrame')timeMs=Math.round(timeMs*48)/48;
+  const clocked=replay.manifest.timelineBasis==='clocked-discard-output';
+  if(clocked||replay.manifest.timelineBasis==='rendered-engine-audioFrame')timeMs=Math.round(timeMs*48)/48;
   let lo=0,hi=replay.frames.length-1,index=-1;while(lo<=hi){const mid=(lo+hi)>>1;if(replay.frames[mid].timeMs<=timeMs){index=mid;lo=mid+1;}else hi=mid-1;}
   const sample = Math.round(timeMs * 48);
   const pcmBlock = replay.contributions?.[Math.floor(sample / 512)];
-  const row=index<0?null:replay.frames[index];return {mode:'replay',playbackTimeMs:timeMs,frame:row?.frame??null,
-    ...(replay.contributions && {pcmBlock: sample < replay.manifest.audio.capturedFrames ? pcmBlock : null}),
-    geometry:row?.frame?replay.geometries.get(row.frame.geometryGeneration)??null:null,status:{connected:false,historical:true,originalFrameTimeMs:row?.timeMs??null,ageMs:row?timeMs-row.timeMs:null}};
+  const row=index<0?null:replay.frames[index];
+  let frame=row?.frame??null;
+  if(clocked&&frame&&sample>=frame.audioFrame+512){
+    const age=sample-frame.audioFrame;
+    frame=age<12000&&sample<replay.mapPrefixFrames?{...frame,paths:[],appliedPaths:[],mapHeld:true}:null;
+  }
+  return {mode:'replay',playbackTimeMs:timeMs,frame,
+    ...(replay.contributions && {pcmBlock: sample < replay.manifest.audio.capturedFrames ? pcmBlock??null : null}),
+    geometry:frame?replay.geometries.get(frame.geometryGeneration)??null:null,status:{connected:false,historical:true,originalFrameTimeMs:row?.timeMs??null,ageMs:row?timeMs-row.timeMs:null}};
 }

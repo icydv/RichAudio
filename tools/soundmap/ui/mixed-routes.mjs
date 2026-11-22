@@ -1,6 +1,6 @@
 const $ = id => document.getElementById(id);
 const takeLabels = {direct: 'Direct only', single: 'Single reflections', multi: 'Full mix',
-  withheld: 'Route withheld', 'two-vehicles': 'Two vehicles', traffic: 'Five-vehicle traffic'};
+  withheld: 'Route withheld', 'two-vehicles': 'Two vehicles', traffic: 'Five-vehicle traffic', clocked: 'Clocked traffic'};
 const fixed = (value, places = 2) => Number.isFinite(value) ? value.toFixed(places) : '—';
 const vector = (value, places) => value?.map(n => fixed(n, places)).join(', ') ?? '—';
 
@@ -11,7 +11,7 @@ export function trafficColor(engine) {
 }
 function tapVoice(frame, tap) {
   return frame.renderedVoices.find(v => (tap.sourceId === v.engine || tap.sourceId === v.exhaust) &&
-    (frame.take !== 'traffic' || tap.generation % 4294967296 === v.renderGeneration));
+    (!['traffic','clocked'].includes(frame.take) || tap.generation % 4294967296 === v.renderGeneration));
 }
 function sourceLabel(frame, tap) {
   const voice = tapVoice(frame, tap);
@@ -39,13 +39,14 @@ export class MixedRoutes {
     $('pcm-panel').hidden = block === undefined;
     if (block === undefined) return;
     const voices = block?.voices ?? [];
-    $('pcm-count').textContent = voices.length + ' PCM contributor' + (voices.length === 1 ? '' : 's');
-    $('pcm-block').textContent = block ? 'Isolated stereo output · block starting at file sample ' +
-      block.sampleFrame.toLocaleString('en') : 'End of audio';
+    $('pcm-count').textContent = block ? voices.length + (block.sampled?' sampled':'') + ' PCM contributor' +
+      (voices.length === 1 ? '' : 's') + (block.uncertain?' · partial attribution':'') : 'No PCM witness at this cursor';
+    $('pcm-block').textContent = block ? (block.sampled?'First stereo sample in the clocked block · ':
+      'Isolated stereo output · block starting at file sample ') + block.sampleFrame.toLocaleString('en') : '';
     $('pcm-voices').replaceChildren(...voices.map(voice => {
       const li = document.createElement('li');
       li.style.borderColor = trafficColor(voice.engine);
-      li.textContent = voice.vehicle + ' · g' + voice.generation + ' · ' + voice.nonzeroFrames + ' frames' +
+      li.textContent = voice.vehicle + ' · g' + voice.generation + (block.sampled?'':' · '+voice.nonzeroFrames+' frames') +
         (voice.releasing ? ' · release' : '');
       li.title = 'Slot ' + voice.engine.split(':')[1] + ' · render generation ' + voice.renderGeneration +
         ' · peak ' + voice.pcmPeak.toPrecision(4) + ' full scale';
@@ -84,7 +85,8 @@ export class MixedRoutes {
     $('mixed-position').textContent = frame ? 'Block start · take sample ' + frame.takeSampleFrame.toLocaleString('en') +
       ' · file sample ' + frame.comparisonSampleFrame.toLocaleString('en') : 'Waiting for the next sampled block.';
     const walls = new Set(routes.flatMap(r => r.ray?.surfaceIds ?? []));
-    $('mixed-status').textContent = frame ? routes.length + ' mixer taps · ' + walls.size + ' distinct reflecting faces' : '';
+    $('mixed-status').textContent = frame?.mapHeld ? 'Previous observed positions. No ray observation for this audio block.' :
+      frame ? routes.length + ' mixer taps · ' + walls.size + ' distinct reflecting faces' : '';
     $('mixed-bounces').replaceChildren();
     $('mixed-values').replaceChildren();
     $('mixed-voice-values').replaceChildren();

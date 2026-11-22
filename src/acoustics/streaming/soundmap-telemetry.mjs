@@ -91,7 +91,7 @@ export class SoundMapTelemetry {
   }
   begin(simulation,monotonicMs=performance.now()){
     requireValue(Number.isFinite(monotonicMs),'SoundMap monotonic time');
-    const due=this.enabled&&monotonicMs-this.lastCaptureMs>=1000/this.fps-1e-7;
+    const due=this.enabled&&!this.skipSample&&monotonicMs-this.lastCaptureMs>=1000/this.fps-1e-7;
     simulation.captureSoundMap=due;
     if(due)this.lastCaptureMs=monotonicMs;else if(this.enabled)this.stats.throttled++;
     return due;

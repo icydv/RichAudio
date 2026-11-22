@@ -17,6 +17,7 @@ if($CompileObservationOwner){
     $sources+=$versionSource
     $binary=Join-Path $scope 'GTA5_Enhanced.exe'
 }
+$sources+=Join-Path $repo 'tests/host/ClockedTrafficRoute.cs'
 & $compiler /nologo /optimize+ /warnaserror+ /unsafe+ /langversion:5 /platform:x64 /define:STATE_TRANSPORT,GEOMETRY_LIVE /r:System.Web.Extensions.dll /r:System.Runtime.Serialization.dll /main:TestGameplay ('/out:'+$binary) @sources (Join-Path $repo 'tests/host/TestGameplay.cs')
 if($LASTEXITCODE -ne 0){throw 'Gameplay fixture compilation failed'}
 if($CompileObservationOwner){Write-Output $binary;return}

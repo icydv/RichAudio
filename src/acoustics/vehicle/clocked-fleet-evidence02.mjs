@@ -4,12 +4,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {performance,PerformanceObserver} from 'node:perf_hooks';
+import {ClockedFleetPcmWitness} from './clocked-fleet-pcm-witness.mjs';
 
 const maximumBlocks=16384,frames=512,deadline=frames/48;
 const renderStageFields=['admissionMs','sourceSelectionMs','stockSynthesisMs','propagationMs','pcmMs','bookkeepingMs'];
 const pathStageFields=['candidatePreparationMs','visibilityMs','pathSelectionMs','pathApplicationMs','stereoMixMs'];
 const fields=['completeRenderMs',...renderStageFields,...pathStageFields,'framingMs','producerWakeMs','controlIngressMs','throughPipeWriteMs'];
-const counts=['active','moving','installed','proposed','segments','eligible','selected','applied','releasing',
+const counts=['active','moving','movingVoices','installed','proposed','segments','eligible','selected','applied','releasing',
  'reflectedVoices','order1','order2','order3Plus','playerOrder1','playerOrder2','playerOrder3Plus','added','removed'];
 const summary=values=>{
  const sorted=values.sort((a,b)=>a-b);
@@ -40,7 +41,9 @@ export class ClockedFleetEvidence02 {
   this.reflectionCount=new Uint16Array(maximumBlocks);
   this.selectedWall=new Uint8Array(maximumBlocks);
   const poseFile=path.join(root,'installed-wall-drive.json');
-  this.expectedSurfaceId=fs.existsSync(poseFile)?JSON.parse(fs.readFileSync(poseFile,'utf8')).surfaceId:null;
+  const wall=fs.existsSync(poseFile)?JSON.parse(fs.readFileSync(poseFile,'utf8')):null;
+  this.expectedSurfaceId=wall?.surfaceId??null;
+  this.routeEndpoints=wall?.routeEndpoints?.map(row=>({...row,startDistanceSquared:Infinity,endDistanceSquared:Infinity,observedBlocks:0}));
   this.blocks=0;
   this.excess=0;
   this.creditHighWater=0;
@@ -65,6 +68,10 @@ export class ClockedFleetEvidence02 {
   this.gcObserver.observe({entryTypes:['gc']});
  }
  ready(preparation){this.preparation=preparation;this.readyAt=performance.now();}
+ enablePcmWitness(renderer){
+  this.pcmWitness=new ClockedFleetPcmWitness(maximumBlocks,renderer.slots.length);
+  renderer.pcmWitness=this.pcmWitness;
+ }
  sceneCandidate(receipt,metadata){
   if(this.sceneCandidates.length===1024){this.sceneCandidatesOmitted++;return;}
   const profile=receipt.lifecycle01.workerProfile01;
@@ -77,6 +84,7 @@ export class ClockedFleetEvidence02 {
    producerValidationMs:receipt.validationMs,requestToAdmissionMs:receipt.admissionMs,
    ...(transfer?.packedChunks?{packedFaces:transfer.packedFaces,packedChunks:transfer.packedChunks,
     packedBytes:transfer.packedBytes,packingMs:transfer.packingMilliseconds,surfaceUnpack:receipt.lifecycle01.surfaceUnpack}:{}),
+   ...(transfer?.reusedFaces?{reusedFaces:transfer.reusedFaces,reusedSupportRequest:transfer.reusedSupportRequest}:{}),
    discovery:metadata.reflectionSearch01??null});
  }
  credit(blocks,at){
@@ -89,6 +97,7 @@ export class ClockedFleetEvidence02 {
  }
  block(engine,framingMs,controlIngressMs,nonzero,packet){
   this.staleContributors=engine.staleContributors;
+  this.pcmWitness?.record(engine,packet);
   if(this.blocks===maximumBlocks){this.excess++;return;}
   const index=this.blocks++,stages=engine.lastRenderStages01;
   this.data.completeRenderMs[index]=engine.lastCompleteRenderMs;
@@ -114,8 +123,20 @@ export class ClockedFleetEvidence02 {
   const current=new Set(),renderer=engine.pipeline.renderer;
   for(const slot of engine.slots)if(slot.source){
    c.active[index]++;
+   if(this.routeEndpoints&&slot.vehicle){
+    const vehicle=slot.vehicle,point=vehicle.position;
+    const endpoint=this.routeEndpoints.find(row=>row.id===vehicle.id&&row.generation===vehicle.generation);
+    if(endpoint){
+     endpoint.observedBlocks++;
+     const a=endpoint.from,b=endpoint.to;
+     endpoint.startDistanceSquared=Math.min(endpoint.startDistanceSquared,(point[0]-a[0])**2+(point[1]-a[1])**2+(point[2]-a[2])**2);
+     endpoint.endDistanceSquared=Math.min(endpoint.endDistanceSquared,(point[0]-b[0])**2+(point[1]-b[1])**2+(point[2]-b[2])**2);
+    }
+   }
    if(slot.vehicle?.context==='player')this.playerPositions.set(slot.vehicle.position,index*3);
-   if(slot.vehicle?.velocity?.some(component=>Math.abs(component)>.00001))c.moving[index]=1;
+   if(slot.vehicle?.velocity?.some(component=>Math.abs(component)>.00001)){
+    c.moving[index]=1;c.movingVoices[index]++;
+   }
   }
   const byVoice=new Set(),byId=new Map(engine.pipeline.lastControl.paths.map(p=>[p.id,p]));
   for(let i=0;i<renderer.activeSlotCount;i++){
@@ -225,6 +246,9 @@ export class ClockedFleetEvidence02 {
    sceneCandidates:this.sceneCandidates,sceneCandidatesOmitted:this.sceneCandidatesOmitted,
    timingBasis:'Complete render encloses synthesis, propagation, stereo processing and bookkeeping. Candidate preparation includes history sampling, retarded-time and finite-face geometry. Visibility is the awaited backend query. Selection includes finishing routes and per-source ranking. Application includes headroom filtering and mixer slot updates. Through-pipe time includes ingress, render, framing, diagnostics and write completion. Producer wake is measured separately.',
    expectedSurfaceId:this.expectedSurfaceId,
+   ...(this.routeEndpoints?{routeEndpoints:this.routeEndpoints.map(row=>({track:row.track,id:row.id,generation:row.generation,
+    observedBlocks:row.observedBlocks,nearestStartMeters:row.observedBlocks?Math.sqrt(row.startDistanceSquared):null,
+    nearestEndMeters:row.observedBlocks?Math.sqrt(row.endDistanceSquared):null}))}:{}),
    ...(this.staleContributors?{staleContributors:{...this.staleContributors}}:{}),
    missSamples:this.misses.map(withGc),worst:withGc(this.worst),gcIntervalsOmitted:Math.max(0,this.gc.count-this.gcIntervals.length),
    lifecycleMs:performance.now()-this.began,preCreditMs:this.readyAt-this.began,preparation:this.preparation,
@@ -236,6 +260,14 @@ export class ClockedFleetEvidence02 {
    wav.writeUInt16LE(3,20);wav.writeUInt16LE(2,22);wav.writeUInt32LE(48000,24);wav.writeUInt32LE(384000,28);
    wav.writeUInt16LE(8,32);wav.writeUInt16LE(32,34);wav.write('data',36);wav.writeUInt32LE(pcm.length,40);
    fs.writeFileSync(path.join(this.directory,'authored-fleet-excerpt.wav'),Buffer.concat([wav,pcm]),{flag:'wx'});
+  }
+  if(this.pcmWitness){
+   output.pcmWitness=this.pcmWitness.summary();
+   const fd=fs.openSync(path.join(this.directory,output.pcmWitness.file),'wx');
+   try{
+    const rows=this.pcmWitness.rows;
+    for(let i=0;i<rows.length;i+=128)fs.writeFileSync(fd,rows.slice(i,i+128).map(r=>JSON.stringify(r)+'\n').join(''));
+   }finally{fs.closeSync(fd);}
   }
   fs.writeFileSync(path.join(this.directory,'clocked-fleet-producer.json'),JSON.stringify(output,null,2),{flag:'wx'});
   const columns=['block','nonzero','playerX','playerY','playerZ',...counts,...fields];

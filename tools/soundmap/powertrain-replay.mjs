@@ -128,6 +128,17 @@ function addTrafficEvents(events, timeline, blocks, result) {
         tap.generation % 4294967296 === v.renderGeneration), 'Traffic reflection differs from its measured route');
     add(row, labels[kind], {pathId:ray.id, sourceId:ray.sourceId, surfaceIds:ray.surfaceIds, vertices:ray.vertices});
   }
+  if (result.exit) {
+    const {vehicle, lastHigherOrderFrame, lastDirectFrame} = result.exit;
+    const row = timeline.find(row => row.frame.takeSampleFrame > lastHigherOrderFrame &&
+      row.frame.takeSampleFrame <= lastDirectFrame && voices(row).some(v => v.vehicle === vehicle && !v.releasing));
+    const owner = row?.frame.renderedVoices.find(v => v.vehicle === vehicle);
+    const direct = row?.frame.paths.find(p => p.sourceId === owner?.engine && p.order === 0 && p.status === 'selected');
+    need(direct && row.frame.appliedPaths.some(p => p.id === direct.id && p.present),
+      'Missing direct route after the measured higher-order withdrawal');
+    add(row, 'Lead car exits · direct engine continues', {
+      pathId:direct.id, sourceId:direct.sourceId, surfaceIds:direct.surfaceIds, vertices:direct.vertices});
+  }
   const lives = voices(overlap).filter(v => !v.releasing);
   const sameLife = (a, b) => a.vehicle === b.vehicle && a.generation === b.generation && a.renderGeneration === b.renderGeneration;
   const release = timeline.find(row => row.timeMs > overlap.timeMs && voices(row).some(v =>

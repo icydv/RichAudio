@@ -4,6 +4,25 @@ import {writeOriginalGameplayPackageStreet01} from './fixtures/StreetGameplayPac
 import {airflowFrameStreet01} from './fixtures/AirflowStreet01.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url)),session='6'.repeat(32),privateRoot=path.join(root,'.local','street01','worker-tests');
 const sha=x=>createHash('sha256').update(x).digest('hex');
+test('fleet startup exercises finite reflected paths without consuming real PCM or CPU-mode GPU work',()=>{
+ const folder=path.join(privateRoot,randomUUID()),pkg=writeOriginalGameplayPackageStreet01(folder,{fleet:true,latencyProfile:'street-01'});
+ Object.assign(pkg.config,{vehicleSourcePolicy:'catalogue-fleet-01',continuityPolicy:'camera-source-01',
+  eligible:[],acousticWorld:{installedReflectionTrains:true}});
+ fs.writeFileSync(pkg.manifest,JSON.stringify(pkg.config));
+ const child=spawnSync(process.execPath,[path.join(root,'tools/Run-Gameplay.mjs'),'--manifest',pkg.manifest,'--session',session],{
+  cwd:root,windowsHide:true,timeout:10000,input:'{"type":"stop"}\n',encoding:'utf8',
+  env:{...process.env,RICHAUDIO_FLEET_STARTUP_ACCELERATION:'cpu'}});
+ assert.equal(child.status,0,child.stderr);
+ assert.equal(child.stdout,'');
+ const ready=child.stderr.trim().split('\n').map(line=>JSON.parse(line)).find(row=>row.type==='gameplay-ready');
+ assert.equal(ready.normalControlWarmup.authoredSourceBlocks,200);
+ assert.equal(ready.normalControlWarmup.highestReflectionOrder,3);
+ assert.ok(ready.normalControlWarmup.maximumReflectedPaths>=5);
+ assert.equal(ready.normalControlWarmup.actualSourceFramesAdvanced,0);
+ assert.equal(ready.normalControlWarmup.pcmQueueFramesAdded,0);
+ assert.equal(ready.startupDevice.hostSelection,'cpu');
+ assert.equal(ready.startupDevice.initializationAttempts,0);
+});
 test('stop received while the main credit render awaits completion prevents post-stop PCM',{timeout:15000},async()=>{
  const folder=path.join(privateRoot,randomUUID());fs.mkdirSync(folder,{recursive:true});const pkg=writeOriginalGameplayPackageStreet01(folder),child=spawn(process.execPath,[path.join(root,'tools/Run-Gameplay.mjs'),'--manifest',pkg.manifest,'--session',session],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
  let bytes=0,buffer='',ready=false;const rows=[];

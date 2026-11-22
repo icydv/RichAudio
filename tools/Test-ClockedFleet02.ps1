@@ -5,11 +5,17 @@ param(
     [string]$NodeExecutable = (Get-Command node.exe -CommandType Application | Select-Object -First 1).Source,
     [ValidateRange(256, 13440)][int]$Blocks = 13440,
     [ValidateRange(1, 25)][int]$Population = 25,
+    [switch]$CaptureOutput,
+    [switch]$CaptureSoundMap,
+    [switch]$PcmWitness,
     [switch]$Legacy,
     [string]$RetainedSourceManifest,
     [string]$RetainedWorld,
     [string]$WallPose,
+    [string]$TrafficRoute,
     [switch]$WarmWall,
+    [switch]$RankedReflections,
+    [switch]$CpuOnly,
     [switch]$MultiWall
 )
 $ErrorActionPreference = 'Stop'
@@ -26,10 +32,13 @@ for ($parent = Split-Path -Parent $out; $parent; $parent = Split-Path -Parent $p
 }
 if ($Legacy -and $Population -ne 1) { throw 'Legacy comparison uses one vehicle' }
 $retained = @($RetainedSourceManifest, $RetainedWorld, $WallPose | Where-Object { $_ }).Count
-if ($retained -and ($retained -ne 3 -or $Legacy -or $Population -notin 1, 2, 5)) {
-    throw 'The retained case needs the source manifest, world binding, wall pose, and one, two or five vehicles'
+if ($retained -and ($retained -ne 3 -or $Legacy -or $Population -gt 5)) {
+    throw 'The retained case needs the source manifest, world binding, wall pose, and one to five vehicles'
 }
-if ($WarmWall -and (!$retained -or $Population -eq 1 -or $Blocks -lt 768)) {
+if ($RankedReflections -and !$MultiWall) { throw 'Ranked reflections require the multi-wall fleet fixture' }
+if ($CpuOnly -and !$MultiWall) { throw 'The explicit CPU comparison needs the multi-wall fixture' }
+if ($TrafficRoute -and !$MultiWall) { throw 'The traffic route needs the retained multi-wall fixture' }
+if ($WarmWall -and (!$retained -or (!$TrafficRoute -and $Population -eq 1) -or $Blocks -lt 768)) {
     throw 'The wall warm-up needs a retained two- or five-vehicle case with at least 768 blocks'
 }
 if ($MultiWall -and (!$retained -or $Blocks -lt 768)) {
@@ -52,6 +61,9 @@ $prepareArguments = @($out, $owner, $node, $audioHost, $mode)
 if ($retained) {
     $prepareArguments += @($RetainedSourceManifest, $RetainedWorld, $WallPose | ForEach-Object { (Resolve-Path -LiteralPath $_).Path })
     if ($WarmWall) { $prepareArguments += 'warm-wall' }
+    if ($TrafficRoute) { $prepareArguments += ('traffic-route=' + (Resolve-Path -LiteralPath $TrafficRoute).Path) }
+    if ($RankedReflections) { $prepareArguments += 'ranked-reflections' }
+    if ($CpuOnly) { $prepareArguments += 'cpu-only' }
     if ($MultiWall) {
         & (Join-Path $PSScriptRoot 'Build-AcousticGpu.ps1') -OutputDirectory (Join-Path $out 'gpu-build') | Out-Host
         $prepareArguments += 'multi-wall'
@@ -62,15 +74,21 @@ if ($LASTEXITCODE) { throw 'Benchmark package preparation failed' }
 $package = $prepared | ConvertFrom-Json -DateKind String
 $files = @('src/acoustics/host','src/acoustics/recording','src/acoustics/observation','src/acoustics/geometry') |
     ForEach-Object { Get-ChildItem -LiteralPath (Join-Path $repo $_) -File -Recurse -Filter '*.cs' }
-$files += @('tests/host/TestGameplay.cs','tests/fixtures/PrepareClockedFleet02.mjs','tests/fixtures/InstalledStaticCache01.mjs',
-    'tests/fixtures/StreetGameplayPackage01.mjs','tools/Test-ClockedFleet02.ps1','tools/Test-Gameplay.ps1','tools/Build-AcousticsHost.ps1') |
+$files += @('tests/host/TestGameplay.cs','tests/host/ClockedTrafficRoute.cs','tests/fixtures/PrepareClockedFleet02.mjs','tests/fixtures/InstalledStaticCache01.mjs',
+    'tests/fixtures/StreetGameplayPackage01.mjs','tools/Test-ClockedFleet02.ps1','tools/Analyze-ClockedContributors.mjs','tools/Test-Gameplay.ps1','tools/Build-AcousticsHost.ps1') |
     ForEach-Object { Get-Item -LiteralPath (Join-Path $repo $_) }
 if ($MultiWall) {
     $files += @('tools/Build-AcousticGpu.ps1','src/acoustics/gpu/AcousticGpu.cs','src/acoustics/gpu/FiniteCull.hlsl') |
         ForEach-Object { Get-Item -LiteralPath (Join-Path $repo $_) }
 }
+$witnessRequested = $CaptureSoundMap -or $PcmWitness -or $env:RICHAUDIO_CLOCKED_PCM_WITNESS -eq '1'
 [ordered]@{
     sourceCommit = (& git -C $repo rev-parse HEAD)
+    captureClockedOutput = [bool]($CaptureOutput -or $witnessRequested)
+    sampleContributorPcm = $witnessRequested
+    rankedReflections = [bool]$RankedReflections
+    requestedAcceleration = if ($MultiWall -and !$CpuOnly) { 'auto' } else { 'cpu' }
+    captureSoundMap = [bool]$CaptureSoundMap
     mode = $mode; requestedBlocks = $Blocks; requestedPopulation = $Population; warmWall = [bool]$WarmWall; multiWall = [bool]$MultiWall
     package = $package; node = (& $node --version)
     compiledAndRuntime = @($owner,$identity,$audioHost,$node,$compiler) | ForEach-Object { Get-FileHash -LiteralPath $_ }
@@ -78,7 +96,16 @@ if ($MultiWall) {
 } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $out 'benchmark-inputs.json')
 $previous = $env:RICHAUDIO_CLOCKED_FLEET_EVIDENCE02
 $previousEpoch = $env:RICHAUDIO_AUTHORED_WORLD_EPOCH01
+$previousCapture = $env:RICHAUDIO_CLOCKED_CAPTURE_FRAMES
+$previousWitness = $env:RICHAUDIO_CLOCKED_PCM_WITNESS
+$previousMap = $env:RICHAUDIO_CLOCKED_SOUNDMAP
 try {
+    $env:RICHAUDIO_CLOCKED_SOUNDMAP = if ($CaptureSoundMap) { '1' } else { $null }
+    if ($witnessRequested) { $env:RICHAUDIO_CLOCKED_PCM_WITNESS = '1' }
+    if ($CaptureOutput -or $witnessRequested) {
+        # Include the driver's startup and progress-timeout margins.
+        $env:RICHAUDIO_CLOCKED_CAPTURE_FRAMES = [string]($Blocks * 512 + 24 * 48000)
+    } else { $env:RICHAUDIO_CLOCKED_CAPTURE_FRAMES = $null }
     $env:RICHAUDIO_CLOCKED_FLEET_EVIDENCE02 = '1'
     $env:RICHAUDIO_AUTHORED_WORLD_EPOCH01 = $package.authoredWorldEpoch
     & $owner --own-fleet $package.root $identity $Blocks $Population
@@ -89,6 +116,13 @@ try {
     $driver = Get-Content -LiteralPath (Join-Path $package.root '.local/fleet-driver.json') -Raw | ConvertFrom-Json
     $producerFile = Join-Path $package.root ('.local/gameplay/' + $driver.session + '/clocked-fleet-producer.json')
     $producer = Get-Content -LiteralPath $producerFile -Raw | ConvertFrom-Json
+    $witness = $null
+    if ($witnessRequested) {
+        $sessionDirectory = Split-Path -Parent $producerFile
+        & $node (Join-Path $repo 'tools/Analyze-ClockedContributors.mjs') $sessionDirectory | Out-Host
+        if ($LASTEXITCODE) { throw 'Clocked contributor receipt could not be verified' }
+        $witness = Get-Content -LiteralPath (Join-Path $sessionDirectory 'clocked-contributor-result.json') -Raw | ConvertFrom-Json
+    }
     $counters = $driver.final.worker.acousticWorld.environmentalReadiness01.counters
     $sustained = ($driver.final.receivedBlocks - $driver.startBlocks) -ge $Blocks -and $producer.nonzeroBlocks -ge $Blocks
     $populationQualified = $Legacy -or ($driver.samples | Where-Object {
@@ -96,27 +130,44 @@ try {
     } | Select-Object -First 1)
     $sceneQualified = $counters.firstActivations -gt 0 -and $counters.replacements -gt 0
     $reflected = if ($retained) { $producer.byActiveWithReflection."$Population" } else { $null }
-    if ($retained) { $sceneQualified = $sceneQualified -and $reflected.selectedWallBlocks -gt 0 }
+    if ($retained -and !$TrafficRoute) { $sceneQualified = $sceneQualified -and $reflected.selectedWallBlocks -gt 0 }
     $phases = if ($MultiWall) { $producer.installedByActive."$Population" }
     if ($MultiWall) {
-        $sceneQualified = $sceneQualified -and ($WarmWall -or $phases.stationary.multiBounceBlocks -gt 0) -and $phases.moving.multiBounceBlocks -gt 0
+        $sceneQualified = $sceneQualified -and ($TrafficRoute -or $WarmWall -or $phases.stationary.multiBounceBlocks -gt 0) -and $phases.moving.multiBounceBlocks -gt 0
+    }
+    if ($TrafficRoute) {
+        $expectedEnds = @($producer.routeEndpoints | Where-Object { $_.track -lt $Population })
+        $missedEnds = @($expectedEnds | Where-Object { !$_.observedBlocks -or $_.nearestStartMeters -gt .3 -or $_.nearestEndMeters -gt .3 })
+        $routeQualified = $driver.routeCompleted -and $expectedEnds.Count -ge $Population -and !$missedEnds.Count
+        $sceneQualified = $sceneQualified -and $routeQualified -and $phases.moving.counts.movingVoices.max -eq $Population
     }
     $passed = $driver.reason -eq 'workload-complete' -and $driver.closed -and !$driver.final.failure -and
         $sustained -and $populationQualified -and $sceneQualified -and $producer.hardMisses -eq 0 -and
         $producer.overflowBlocks -eq 0 -and $driver.final.underflowFrames -eq 0 -and $driver.final.discardCadence.deferredCallbacks -eq 0
     if ($MultiWall) { $passed = $passed -and $producer.allBlocks.throughPipeWriteMisses -eq 0 -and $producer.allBlocks.deliveredBlocks -eq $producer.blocks }
+    if ($witnessRequested) {
+        $voices = [Math]::Min(5, $Population)
+        $witnessQualified = $witness.exactPacketSamples -gt 0 -and !$witness.sinkPcmMismatches -and !$witness.unboundSamples -and $witness.maximum.active -eq $voices
+        if ($TrafficRoute) { $witnessQualified = $witnessQualified -and $witness.fullyMovingMultiBounceSamplesByPopulation."$voices" -gt 0 }
+        $passed = $passed -and $witnessQualified
+    }
     [ordered]@{
         passed = $passed; reason = $driver.reason; closed = $driver.closed; producerReceipt = $producerFile
         blocks = $producer.blocks; nonzeroBlocks = $producer.nonzeroBlocks
         sustained = $sustained; populationQualified = [bool]$populationQualified; sceneQualified = $sceneQualified
+        routeCompleted = $driver.routeCompleted; renderedRouteEndpoints = $producer.routeEndpoints
         hardMisses = $producer.hardMisses; underflowFrames = $driver.final.underflowFrames
         expiredSnapshots = $driver.final.expiredSnapshots; reflectedActivePopulation = $reflected
         throughPipeWriteMisses = $producer.allBlocks.throughPipeWriteMisses
         deferredCallbacks = $driver.final.discardCadence.deferredCallbacks; endpointOpened = $driver.final.endpointOpened
         installedAtRequestedPopulation = $phases
+        pcmWitnessQualified = $witnessQualified
     } | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $out 'benchmark-result.json')
     if (!$passed) { throw 'Clocked benchmark failed its workload, render deadline, or ring delivery gate' }
 } finally {
+    $env:RICHAUDIO_CLOCKED_SOUNDMAP = $previousMap
+    $env:RICHAUDIO_CLOCKED_PCM_WITNESS = $previousWitness
+    $env:RICHAUDIO_CLOCKED_CAPTURE_FRAMES = $previousCapture
     $env:RICHAUDIO_CLOCKED_FLEET_EVIDENCE02 = $previous
     $env:RICHAUDIO_AUTHORED_WORLD_EPOCH01 = $previousEpoch
 }
