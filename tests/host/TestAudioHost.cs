@@ -32,6 +32,69 @@ namespace RichAudio.Beacon.Tests
             Check(GameplayLatencyProfile.Resolve(null, true, "bati-bold").ProducerBlocks == 6,
                 "The separate Bold comparison keeps its existing credit window");
         }
+        static unsafe void CheckEndpointCreditWake()
+        {
+            var cadence = new GameplayFixtureCadence01(0, 10000000, 480);
+            Check(cadence.Frames(0)==1056 && cadence.Due(1)==164000, "cold endpoint fill is followed by its first device period");
+            Check(cadence.Frames(3)==480 && cadence.Due(3)-cadence.Due(2)==100000, "480-frame fixture cadence is 10 ms per callback");
+            foreach (bool notify in new[]{false,true})
+            using (var writer = new AutoResetEvent(false))
+            using (var supervisor = new AutoResetEvent(false))
+            {
+                var ring = new PcmRing(8, notify ? writer : null);
+                var block = new float[1024];
+                for (int i = 0; i < block.Length; i++) block[i] = .125f;
+                var stamp = new PowertrainStamp(2, 1, 250, 0, .20);
+                for (int i = 0; i < 4; i++) Check(ring.TryWrite(block, 512, stamp), "four-block steady reserve");
+                var output = new float[960];
+                int producerCompletion = -1;
+                {
+                    // Startup/status activity uses its own waiter. An endpoint
+                    // retirement must still mark the writer ready.
+                    supervisor.Set();
+                    fixed (float* buffer = output)
+                    {
+                        PowertrainSubmission submitted;
+                        Check(ring.FillPowertrain(buffer,288,1,2,0,out submitted,true)==288 &&
+                            ring.PendingCredits==0 && !writer.WaitOne(0), "partial 512-slot does not return a credit");
+                        Check(ring.BufferedFrames==1760,"first 480-frame callback begins in a partly consumed slot");
+                        for (int at = 0; at <= 30; at += 10)
+                        {
+                            if (!notify && at==30)
+                            {
+                                Check(ring.PendingCredits==3 && ring.TakeCredits()==3, "detached writer only learns after multiple slots retire");
+                                producerCompletion=34;
+                            }
+                            if (producerCompletion >= 0 && producerCompletion <= at)
+                            {
+                                Check(ring.TryWrite(block,512,stamp), "replenishment fits a retired slot");
+                                producerCompletion=-1;
+                            }
+                            int supplied=ring.FillPowertrain(buffer,480,1,2,at,out submitted,true);
+                            if(at==0)Check(supervisor.WaitOne(0),"supervisor consumes only its own status pulse");
+                            if(writer.WaitOne(0))
+                            {
+                                Check(notify && ring.TakeCredits()==1, "writer wakes on slot retirement before the next 480-frame read");
+                                // Model fixed producer service within one device
+                                // period. The detached writer learns of all three
+                                // credits just before the fourth callback.
+                                producerCompletion=at+7;
+                            }
+                            Check(supplied==(at==30&&!notify?320:480), "returned credits keep the fourth endpoint read supplied");
+                        }
+                    }
+                    Check(ring.UnderflowFrames==(notify?0:160), "production ring distinguishes 160 missing frames and clean playback");
+                    if(notify)ring.RequireContinuousProducer();
+                    else
+                    {
+                        bool stopped = false;
+                        try { ring.RequireContinuousProducer(); }
+                        catch(InvalidOperationException) { stopped=true; }
+                        Check(stopped,"underflow still fails closed");
+                    }
+                }
+            }
+        }
         static void CheckPowertrainWithdrawal()
         {
             var gate=new PowertrainOutputGate();
@@ -233,6 +296,7 @@ namespace RichAudio.Beacon.Tests
                 }
                 if(args.Length!=0)throw new ArgumentException("Unsupported test option");
                 CheckPrivatePowertrainCredits();
+                CheckEndpointCreditWake();
                 CheckPowertrainWithdrawal();
                 CheckSinglePowertrainContributor();
                 CheckPowertrainOutputTiming();

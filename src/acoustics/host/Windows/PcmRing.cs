@@ -100,6 +100,7 @@ namespace RichAudio.Beacon.Windows
         private readonly long[] arrivedAt = new long[Slots], enqueuedAt = new long[Slots], pcmBlocks = new long[Slots];
         private readonly uint[] wireTags = new uint[Slots];
         private readonly int[] lengths = new int[Slots];
+        private readonly AutoResetEvent creditsReady;
         internal IPowertrainPcmObserver PowertrainPcmObserver { get; set; }
         private int write, read, offset, credits;
         public long UnderflowFrames, ConsumedFrames, ConsumedBlocks, EndSilenceFrames;
@@ -107,7 +108,14 @@ namespace RichAudio.Beacon.Windows
         public volatile bool EndOfStream;
         public double SumSquares, Peak;
         public PcmRing():this(GameplayStartupBlocks){}
-        public PcmRing(int gameplayPrefillBlocks) { if(gameplayPrefillBlocks<3||gameplayPrefillBlocks>Slots)throw new ArgumentOutOfRangeException("gameplayPrefillBlocks");GameplayPrefillBlocks=gameplayPrefillBlocks;for (int i = 0; i < Slots; i++) data[i] = new float[MaximumFrames * 2]; }
+        public PcmRing(int gameplayPrefillBlocks):this(gameplayPrefillBlocks,null){}
+        internal PcmRing(int gameplayPrefillBlocks,AutoResetEvent creditsReady)
+        {
+            if(gameplayPrefillBlocks<3||gameplayPrefillBlocks>Slots)throw new ArgumentOutOfRangeException("gameplayPrefillBlocks");
+            GameplayPrefillBlocks=gameplayPrefillBlocks;
+            this.creditsReady=creditsReady;
+            for (int i=0;i<Slots;i++) data[i]=new float[MaximumFrames*2];
+        }
         public int Count { get { return Thread.VolatileRead(ref write) - Thread.VolatileRead(ref read); } }
         public int BufferedFrames { get { int a=Thread.VolatileRead(ref read),b=Thread.VolatileRead(ref write),n=0;for(int i=a;i<b&&i<a+Slots;i++)n+=lengths[i%Slots];return Math.Max(0,n-Thread.VolatileRead(ref offset)); } }
         // Both real and device-free sinks enforce this same fatal integrity
@@ -222,7 +230,11 @@ namespace RichAudio.Beacon.Windows
                     offset++; supplied++;
                     if (offset == lengths[cursor % Slots])
                     {
-                        offset = 0; Thread.VolatileWrite(ref read, cursor + 1); Interlocked.Increment(ref credits); ConsumedBlocks++;
+                        offset = 0; Thread.VolatileWrite(ref read, cursor + 1);
+                        ConsumedBlocks++;
+                        // Publish the free slot and its credit before waking
+                        // the credit writer. Coalesce while credits are pending.
+                        if (Interlocked.Increment(ref credits)==1 && creditsReady!=null) creditsReady.Set();
                     }
                 }
                 else if(EndOfStream)afterEnd++;

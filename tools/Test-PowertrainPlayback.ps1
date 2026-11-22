@@ -9,7 +9,8 @@ param(
     [string]$PerformanceRoute,
     [switch]$ContendStatus,
     [ValidateRange(10,300)][int]$PassageSeconds=126,
-    [ValidateRange(0,60)][int]$WarmupSeconds=0
+    [ValidateRange(0,60)][int]$WarmupSeconds=0,
+    [ValidateSet(480,960)][int]$CallbackFrames=960
 )
 
 $ErrorActionPreference = 'Stop'
@@ -77,5 +78,15 @@ if ($PerformanceRoute) {
     if (!$routePath.StartsWith($private,[StringComparison]::OrdinalIgnoreCase)) { throw 'Keep performance route data private.' }
     $testArguments += @('--performance',$routePath)
 }
-& $binary @testArguments 2>&1 | Tee-Object -FilePath (Join-Path $output 'fixture.log')
-if ($LASTEXITCODE -ne 0) { throw 'Device-free powertrain playback fixture failed' }
+$callbackVariable = 'RICHAUDIO_POWERTRAIN_FIXTURE_CALLBACK_FRAMES'
+$previousCallbackFrames = [Environment]::GetEnvironmentVariable($callbackVariable)
+try {
+    if ($PSBoundParameters.ContainsKey('CallbackFrames')) {
+        [Environment]::SetEnvironmentVariable($callbackVariable, [string]$CallbackFrames)
+    }
+    & $binary @testArguments 2>&1 | Tee-Object -FilePath (Join-Path $output 'fixture.log')
+    if ($LASTEXITCODE -ne 0) { throw 'Device-free powertrain playback fixture failed' }
+}
+finally {
+    [Environment]::SetEnvironmentVariable($callbackVariable, $previousCallbackFrames)
+}

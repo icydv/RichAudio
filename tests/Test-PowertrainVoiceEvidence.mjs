@@ -45,6 +45,7 @@ const at = packetSequence * 512;
 const paths = ['engine','exhaust'].flatMap(role => [1,1,2,2,3,3].map((order, i) =>
   ({id: role + i, sourceId:role, order, generation:3, bands:[.4,.25,.1],
     diagnosticReflection:{materialBasis:Array.from({length:order}, (_, j) => ({surface:'wall-' + i + '-' + j}))}})));
+paths[0].scatter = true;
 const samplePipeline = {
   simulation:{lastInstalledPaths01:{frame:at, observationKey:'known'}, scene:{tile:{observationKey:'known'}}},
   lastControl:{frame:at, paths},
@@ -58,8 +59,11 @@ assert.equal(sample.sourceSequence, 7);
 assert.deepEqual(sample.reflected.map(p => [p.sourceId,p.order]), [
   ['engine',1],['engine',2],['engine',3],['exhaust',1],['exhaust',2],['exhaust',3]]);
 assert.deepEqual(sample.reflected[0].mixerEndBands, [.39,.24,.09]);
+assert.equal(sample.reflected[0].scatter, true);
+assert.equal(sample.scatteredMixerPaths, 1);
 samplePipeline.renderer.slots[0].generation++;
 assert.equal(powertrainPathBlock(samplePipeline, packetSequence, vehicle).reflected[0].mixerEndBands, null);
+assert.equal(powertrainPathBlock(samplePipeline, packetSequence, vehicle).scatteredMixerPaths, 0);
 assert.equal(powertrainPathBlock(samplePipeline, packetSequence+1, vehicle), null);
 samplePipeline.simulation.scene.tile.observationKey = 'replacement';
 assert.equal(powertrainPathBlock(samplePipeline, packetSequence, vehicle), null);

@@ -218,6 +218,38 @@ internal sealed class TestPowertrainPlayback
         return last == null ? -1 : (long)Number(last, "PcmBlock");
     }
 
+    object CallbackWitness()
+    {
+        const string key = "RICHAUDIO_POWERTRAIN_FIXTURE_CALLBACK_FRAMES";
+        string configured = Environment.GetEnvironmentVariable(key);
+        if (configured == null) return null;
+        int requested = Int32.Parse(configured, CultureInfo.InvariantCulture);
+        Require(requested == 480 || requested == 960, "Unrecognized fixture callback size");
+        string file = Path.Combine(directory, "delivery-timing.json");
+        var serializer = new JavaScriptSerializer { MaxJsonLength = 1048576 };
+        var receipt = serializer.Deserialize<Dictionary<string, object>>(File.ReadAllText(file));
+        var callbacks = ((System.Collections.IList)receipt["sink"]).Cast<Dictionary<string,object>>()
+            .Where(row => (string)row["Phase"] == "sink-callback").ToArray();
+        Require(callbacks.Length > 1 && callbacks.All(row => Number(row, "Amount") == requested ||
+            (requested == 480 && Number(row, "Sequence") == 0 && Number(row, "Amount") == 1056)),
+            "The sink trace did not verify the requested callback size");
+        bool initialFillRetained = Number(callbacks[0], "Sequence") == 0;
+        if (initialFillRetained && requested == 480)
+            Require(Number(callbacks[0], "Amount") == 1056, "The cold sink trace did not retain the 1056-frame initial fill");
+        double frequency = Number(receipt, "frequency");
+        Require(frequency > 0, "The sink trace has no clock frequency");
+        var intervals = callbacks.Zip(callbacks.Skip(1), (a,b) =>
+            (Number(b, "Qpc") - Number(a, "Qpc")) * 1000 / frequency).ToArray();
+        Require(intervals.All(x => x > 0), "The sink trace contains out-of-order callbacks");
+        Array.Sort(intervals);
+        double median = intervals[(intervals.Length-1)/2];
+        if (requested == 480)
+            Require(median >= 8 && median <= 12, "The 480-frame fixture did not sustain a 10 ms median callback interval");
+        return new { callbackFrames=requested, nominalPeriodMs=requested/48.0, retainedCallbacks=callbacks.Length, initialFillRetained,
+            minimumIntervalMs=intervals[0], medianIntervalMs=median,
+            p95IntervalMs=intervals[(int)Math.Ceiling(intervals.Length*.95)-1], maximumIntervalMs=intervals[intervals.Length-1], receipt=file };
+    }
+
     static bool TargetReflection(Dictionary<string,object> path, WorldPose pose)
     {
         var basis = (System.Collections.IList)path["materialBasis"];
@@ -560,7 +592,8 @@ internal sealed class TestPowertrainPlayback
                 observationCount, minimumCallbackIntervalMs, maximumCallbackIntervalMs, contentionCount,
                 warmupSeconds, routeStartedQpc = routeStarted, routeEvents,
                 transportReceipt = Path.Combine(linkDirectory, "powertrain-transport.json"),
-                progressReceipt = Path.Combine(linkDirectory, "powertrain-progress.json"), finalHost = ReadStatus()
+                progressReceipt = Path.Combine(linkDirectory, "powertrain-progress.json"), finalHost = ReadStatus(),
+                callbackWitness = CallbackWitness()
             };
         }
         catch (Exception error)
@@ -689,7 +722,7 @@ internal sealed class TestPowertrainPlayback
             File.WriteAllText(args[1], new JavaScriptSerializer().Serialize(new {
                 passed = true, fixture = "device-free", authoredObservations = true, observeBaselineExpiry,
                 authoredTiming = "One shared pacing schedule requests 50 ms between acquisitions, or 90 ms every ninth interval. Actual observed spacing is recorded. Operating ratios are held at 0.83 while muted and alternated in eight-observation runs during audible windows.",
-                authoredEndpointPrime = "One 20 ms fixture callback of silence without consuming the ring for each output revision; excluded from substituted-frame counters",
+                authoredEndpointPrime = "One fixture callback of silence without consuming the ring for each output revision, excluded from substituted-frame counters",
                 nativeAssignmentsAreFixtureActions = true, measuredSpeakerLatency = false, playback, disconnect, expiry
             }));
             return 0;

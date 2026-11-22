@@ -25,10 +25,13 @@ export function powertrainPathBlock(pipeline, packetSequence, vehicle) {
       sample.observationKey !== simulation.scene.tile.observationKey) return null;
 
   const selected = lastControl.paths.filter(p => p.order > 0 && p.diagnosticReflection);
+  const mixerSlot = p => renderer.slots.find(s => s.active && s.present && s.id === p.id && s.generation === p.generation);
   const byOrder = {};
   const groups = new Map();
+  let scatteredMixerPaths = 0;
   for (const route of selected) {
     byOrder[route.order] = (byOrder[route.order] ?? 0) + 1;
+    if (route.scatter && mixerSlot(route)) scatteredMixerPaths++;
     const key = route.sourceId + ':' + route.order;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(route);
@@ -40,10 +43,11 @@ export function powertrainPathBlock(pipeline, packetSequence, vehicle) {
   const representatives = Array.from(groups.values(), routes => routes[index % routes.length]);
   const rows = [...new Set([...representatives, ...selected])].slice(0, 6);
   return {...sample, packetSequence, sourceSequence: vehicle.powertrainSequence, revision: vehicle.powertrainRevision,
-    vehicleId: vehicle.id, vehicleGeneration: vehicle.generation, selectedByOrder: byOrder,
+    vehicleId: vehicle.id, vehicleGeneration: vehicle.generation, selectedByOrder: byOrder, scatteredMixerPaths,
     reflected: rows.map(p => {
-      const slot = renderer.slots.find(s => s.active && s.present && s.id === p.id && s.generation === p.generation);
-      return {sourceId:p.sourceId, order:p.order, ...p.diagnosticReflection, distance:p.distance, delay:p.delay,
+      const slot = mixerSlot(p);
+      return {sourceId:p.sourceId, order:p.order, ...(p.scatter ? {scatter:true} : {}),
+        ...p.diagnosticReflection, distance:p.distance, delay:p.delay,
         arrivalDirection:p.arrivalDirection, arrivalOrigin:p.arrivalOrigin, bands:p.bands,
         mixerEndBands:slot ? Array.from(slot.gain) : null};
     })};

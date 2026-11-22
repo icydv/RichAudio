@@ -1,4 +1,4 @@
-using System;using System.Collections.Generic;using System.Diagnostics;using System.Threading;
+using System;using System.Collections.Generic;using System.ComponentModel;using System.Diagnostics;using System.Runtime.InteropServices;using System.Threading;using Microsoft.Win32.SafeHandles;
 namespace RichAudio.Beacon.Windows {
  // One preallocated circular lane per writer. Publication is single-writer,
  // with no lock, allocation, pipe or disk access on the discard callback.
@@ -87,11 +87,43 @@ namespace RichAudio.Beacon.Windows {
  // a hardware device that consumed an arbitrary backlog while it was asleep.
  // Defer missed periods explicitly; never issue an unbounded catch-up burst.
  internal sealed class GameplayFixtureCadence01 {
-  long origin,deferred,maximumLate;readonly long period;int delayed;
-  internal GameplayFixtureCadence01(long start,long frequency){origin=start;period=frequency/50;}
-  internal long Due(long callback){return origin+callback*period;}
+  long origin,deferred,maximumLate;readonly long period,initialGap;readonly int callbackFrames;int delayed;
+  internal GameplayFixtureCadence01(long start,long frequency,int frames=960){
+   if(frames!=480&&frames!=960)throw new ArgumentOutOfRangeException("frames");
+   origin=start;callbackFrames=frames;period=frequency/(48000/frames);
+   // The short endpoint period follows a larger synchronous first fill.
+   initialGap=frames==480?frequency*164/10000:period;
+  }
+  internal int Frames(long callback){return callback==0&&callbackFrames==480?1056:callbackFrames;}
+  internal long Due(long callback){return callback==0?origin:origin+initialGap+(callback-1)*period;}
   internal long Begin(long callback,long now){long due=Due(callback),late=Math.Max(0,now-due);if(late>maximumLate)Interlocked.Exchange(ref maximumLate,late);if(late>=period){origin+=late;Interlocked.Add(ref deferred,late);Interlocked.Increment(ref delayed);}return due;}
-  internal object Snapshot(){return new{callbackFrames=960,nominalPeriodMilliseconds=20,deferredCallbacks=Thread.VolatileRead(ref delayed),deferredQpcTicks=Interlocked.Read(ref deferred),maximumLatenessQpcTicks=Interlocked.Read(ref maximumLate),scope="Device-free scheduled callbacks only; deferred wall time is not rendered audio or hardware underrun qualification"};}
+  internal object Snapshot(){return new{callbackFrames,initialFillFrames=Frames(0),initialGapQpcTicks=initialGap,nominalPeriodMilliseconds=callbackFrames/48,deferredCallbacks=Thread.VolatileRead(ref delayed),deferredQpcTicks=Interlocked.Read(ref deferred),maximumLatenessQpcTicks=Interlocked.Read(ref maximumLate),scope="Device-free scheduled callbacks only; deferred wall time is not rendered audio or hardware underrun qualification"};}
+ }
+ // The 10 ms device-free endpoint model needs a wait independent of the
+ // system timer's coarse default quantum. The real WASAPI thread still
+ // waits only on its audio-client event. No global timer change.
+ internal sealed class GameplayFixtureWait : WaitHandle {
+  const uint HighResolution=2, SynchronizeAndModify=0x100002;
+  [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)]
+  static extern SafeWaitHandle CreateWaitableTimerEx(IntPtr attributes,string name,uint flags,uint access);
+  [DllImport("kernel32.dll",SetLastError=true)]
+  [return: MarshalAs(UnmanagedType.Bool)]
+  static extern bool SetWaitableTimer(SafeWaitHandle timer,ref long due,int period,IntPtr routine,IntPtr argument,bool resume);
+  internal GameplayFixtureWait(){
+   var timer=CreateWaitableTimerEx(IntPtr.Zero,null,HighResolution,SynchronizeAndModify);
+   if(timer.IsInvalid){int code=Marshal.GetLastWin32Error();timer.Dispose();throw new Win32Exception(code);}
+   SafeWaitHandle=timer;
+  }
+  internal void Until(long deadline){
+   for(;;){
+    long remaining=deadline-Stopwatch.GetTimestamp();
+    if(remaining<=0)return;
+    long due=-Math.Max(1,(long)Math.Ceiling(10000000d*remaining/Stopwatch.Frequency));
+    if(!SetWaitableTimer(SafeWaitHandle,ref due,0,IntPtr.Zero,IntPtr.Zero,false))
+     throw new Win32Exception(Marshal.GetLastWin32Error());
+    WaitOne();
+   }
+  }
  }
  // Device-free sink measurements only. Never instantiated on the WASAPI route.
  // Bounded metadata, no PCM copy/WAV/endpoint, no lock on a real audio callback.
