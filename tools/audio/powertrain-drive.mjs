@@ -41,7 +41,7 @@ function parseArguments(args) {
  return values;
 }
 
-function voiceInputs(packageFile) {
+function voiceInputs(packageFile, { voicing, includeNpc = true } = {}) {
  const config = readJson(packageFile);
  const directory = path.dirname(packageFile);
  const inside = field => {
@@ -50,10 +50,10 @@ function voiceInputs(packageFile) {
   return file;
  };
  const assets = loadStockCatalogAssets(inside('playerManifest'), { sustainAtlasFile: inside('atlas') });
- const npcAssets = config.npcManifest ? loadStockNpcAssets(inside('npcManifest')) : null;
+ const npcAssets = includeNpc && config.npcManifest ? loadStockNpcAssets(inside('npcManifest')) : null;
  const installed = loadInstalledStockRegistry({ catalogFile: inside('catalog'), catalogSha256: config.catalogSha256, assets, npcAssets });
  // The production donor mapping keeps the game model and context in the snapshots.
- const player = powertrainRegistry(installed);
+ const player = powertrainRegistry(installed, voicing);
  const independent = installed.resolve(batiModel, 'npc').status === 'available' ? { model: batiModel, context: 'npc' } : { model: batiModel, context: 'player' };
  const registry = {
   resolve(model, context) { return model === adderModel ? player.resolve(model, context) : installed.resolve(model, context); },

@@ -7,7 +7,8 @@ param(
     [string]$InstalledWorldCatalog,
     [string]$InstalledWorldCacheRoot,
     [string[]]$InstalledWorldResourceId,
-    [string]$RetainedManifest
+    [string]$RetainedManifest,
+    [switch]$BatiVoicing
 )
 $ErrorActionPreference = 'Stop'
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
@@ -126,6 +127,7 @@ foreach ($module in $modules) {
 }
 $manifest = $old
 $manifest.powertrainVoice = 'bati-player-on-adder'
+if ($BatiVoicing) { $manifest.powertrainVoicing = 'bati-exhaust-limiter-v1' }
 $manifest.acousticWorld = $world
 if ($world) {
     $manifest.powertrainWorld = $true

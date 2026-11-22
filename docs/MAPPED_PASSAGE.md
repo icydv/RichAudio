@@ -74,3 +74,13 @@ The warm run survived 247 blocked primary publications with Windows error 32. Bo
 The one-car candidate ran in Story Mode for about 265 seconds between the audible handoff and the mute request. The listener could hear a difference in reflections between the covered passage and the open side. Replacement loudness remained too low for the listener. The applied-path trace retained up to three bounces. It reached its 512-record limit before mute. No file-publication error was reported.
 
 The endpoint went short by 96 frames about 21.8 seconds after mute was confirmed. Two preceding 480-frame callbacks reduced the ring to 384 frames. The host flushed the next credit batch 13.33 ms before the failing callback, the producer observed it 5.15 ms before the callback, and the next block had not been admitted when the callback ran. The measured interval identifies a late delivery across the credit and render path. Its precise cause remains unresolved. Recovery returned stock exactly once on the same car. The run ended before resume.
+
+## Bati exhaust and limiter
+
+The one-ADDER development voice now gives the Bati exhaust more pressure on a hard rev and more reach under load as the camera moves away. The exhaust still radiates toward the rear. Distance and air loss still reduce its level and high frequencies. The gameplay master and output level are the same in both comparison takes.
+
+Some live rev observations held a normalized ceiling of 1.0, while others contained genuine dips. The Bati voice follows those dips. A sustained ceiling now produces alternating firing cuts and recoveries with a small change in the grain target. Both engine and exhaust are shaped before propagation, so a wall return follows each cut at its existing path delay. The input is an observed rev ratio. Throttle demand and the firing schedule are inferred for this voice.
+
+In a matched offline render, exhaust RMS rose by 4.8 dB on a covered blip at 3.35 model metres. On the open-road pass it rose 8.9 dB during the pull at 19–21 model metres, and 7.7 dB during held revs at 35–45 model metres. The measured idle level was unchanged at both camera placements. The covered comparison admitted the same number of paths before and after the change. Both the close render and a separate five-voice mix finished without clipping or mixer limiting, with peaks of −15.5 and −14.3 dBFS respectively. The five-voice mix skipped more paths to stay within its existing headroom budget.
+
+The one-car host also passed a short device-free moving-camera check with mute, resume and a separate same-car stock recovery after host loss. The relative balance against native game sounds, the limiter by ear in Story Mode and the earlier muted starvation remain open.

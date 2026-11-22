@@ -1,9 +1,14 @@
+import { batiVoicing, voiceBatiPowertrain } from './bati-powertrain-voicing.mjs';
+
 const adder = 0xb779a091;
 const bati = 0xf9300cc5;
 const isAdderPlayer = (model, context) => model === adder && context === 'player';
 const digest = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 
 export function validatePowertrainWorld(config) {
+  if (config.powertrainVoicing !== undefined &&
+      (config.powertrainVoicing !== batiVoicing || config.powertrainVoice !== 'bati-player-on-adder'))
+    throw Error('Bati voicing requires the dedicated ADDER powertrain package');
   if (config.powertrainWorld !== undefined && typeof config.powertrainWorld !== 'boolean')
     throw Error('Boolean private powertrain world opt-in required');
   if (config.powertrainVoice === undefined && !config.powertrainWorld) return false;
@@ -24,7 +29,8 @@ export function validatePowertrainWorld(config) {
   return true;
 }
 
-export function powertrainRegistry(stockRegistry) {
+export function powertrainRegistry(stockRegistry, voicing) {
+  if (voicing !== undefined && voicing !== batiVoicing) throw Error('Unknown Bati voicing');
   const voice = stockRegistry.resolve(bati,'player');
   if (voice?.status !== 'available' || voice.bank.model !== 'bati')
     throw Error('verified six-layer Bati player bank unavailable');
@@ -35,7 +41,8 @@ export function powertrainRegistry(stockRegistry) {
     },
     createSource(model, context, options) {
       if (!isAdderPlayer(model, context)) throw Error('unbound private powertrain vehicle');
-      return stockRegistry.createSource(bati, context, options);
+      const source=stockRegistry.createSource(bati, context, options);
+      return voicing===batiVoicing ? voiceBatiPowertrain(source) : source;
     },
     prepareSource10(model, context) {
       if (!isAdderPlayer(model, context)) throw Error('unbound private powertrain vehicle');

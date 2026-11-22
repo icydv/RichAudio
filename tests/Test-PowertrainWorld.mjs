@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {validatePowertrainWorld, powertrainRegistry} from '../src/acoustics/vehicle/powertrain-registry.mjs';
+import {batiVoicing} from '../src/acoustics/vehicle/bati-powertrain-voicing.mjs';
 
 const base = {powertrainVoice:'bati-player-on-adder', eligible:[{model:0xb779a091,context:'player'}], acousticWorld:false};
 const retained = {privateCacheRoot:'./',derivedCacheRoot:'./',manifestPath:'geometry/manifest.json',
@@ -27,4 +28,11 @@ test('the development donor preserves the observed ADDER identity and slot bound
   assert.deepEqual(registry.createSource(0xb779a091,'player'),{model:0xf9300cc5,context:'player'});
   assert.equal(registry.resolve(0xb779a091,'npc').status,'unavailable');
   assert.throws(()=>registry.createSource(0xf9300cc5,'player'),/unbound/);
+});
+
+test('Bati voicing requires the one-car opt-in', () => {
+  assert.equal(validatePowertrainWorld({...base,powertrainVoicing:batiVoicing}),true);
+  assert.throws(() => validatePowertrainWorld({...base,powertrainVoice:undefined,powertrainVoicing:batiVoicing}), /dedicated/);
+  assert.throws(() => validatePowertrainWorld({...base,powertrainVoicing:'unknown'}), /dedicated/);
+  assert.throws(() => validatePowertrainWorld({...base,powertrainVoicing:batiVoicing,vehicleSourcePolicy:'catalogue-fleet-01'}), /one stock ADDER/);
 });

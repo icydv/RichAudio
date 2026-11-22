@@ -36,11 +36,12 @@ export function describeRenderer(r) {
   continuousTransitions: r.continuousTransitions };
 }
 
-export async function renderMappedPerformance({ directory, name, file, windows, drive, inputs, blocks, session, fleet, record, fleetReflectionPolicy }) {
+export async function renderMappedPerformance({ directory, name, file, windows, drive, inputs, blocks, session, fleet, record, fleetReflectionPolicy, privatePowertrain=false }) {
  let now = 0, maxActive = 0, npcLastBlock = null, lastObservation = -1;
  const engine = new StockGameplay({ registry: inputs.registry, profiles: inputs.profiles, session, now: () => now,
-  continuityPolicy: 'camera-source-01', latencyProfile: 'street-01', vehicleSourcePolicy: 'catalogue-fleet-01', fleetReflectionPolicy });
- engine.setSettings({ ...engine.settings, quality: 'quality', acceleration: 'cpu', volume: .8 });
+  continuityPolicy: 'camera-source-01', latencyProfile: privatePowertrain?'baseline':'street-01',
+  vehicleSourcePolicy: privatePowertrain?null:'catalogue-fleet-01', fleetReflectionPolicy, privatePowertrain });
+ engine.setSettings({ ...engine.settings, quality: privatePowertrain?'performance':'quality', acceleration: 'cpu', volume: .8 });
  engine.telemetry = new SoundMapTelemetry({ enabled: true });
  const renderer = engine.pipeline.renderer, settings = describeRenderer(renderer);
  const channels = stereo(blocks * blockFrames), rows = [], records = [], evidence = {}, identities = new Map();
@@ -56,7 +57,7 @@ export async function renderMappedPerformance({ directory, name, file, windows, 
   for (let block = 0; block < blocks; block++) {
    now = block * blockMs;
    const ticks = 10_000_000 + Math.round(now * 10_000);
-   const { vehicles, forward } = drive.at(now / 1000, ticks, fleet);
+   const { vehicles, forward, listener=drive.listener } = drive.at(now / 1000, ticks, fleet);
    const scene = windows.get(block);
    if (scene) {
     assert(engine.setInstalledStaticScene01(scene, { expiresAt: now + 1000 }), 'Worker scene failed sample-clock admission');
@@ -69,14 +70,14 @@ export async function renderMappedPerformance({ directory, name, file, windows, 
      lastObservation = step;
      const observedAt = step * drive.observationStepMs, observedTicks = 10_000_000 + Math.round(observedAt * 10_000);
      const observed = drive.at(observedAt / 1000, observedTicks, fleet);
-     const listener = {...listenerPacket(session, block, observedTicks, drive.listener, observed.forward), sequence:step, gameTimeMs:observedAt};
+     const listener = {...listenerPacket(session, block, observedTicks, observed.listener ?? drive.listener, observed.forward), sequence:step, gameTimeMs:observedAt};
      engine.accept({version:1, session, listener, vehicles:observed.vehicles}, now-observedAt, 250-(now-observedAt));
     }
-   } else if (block % 4 === 0) engine.accept({ version: 1, session, listener: listenerPacket(session, block, ticks, drive.listener, forward), vehicles }, 0, 250);
+   } else if (block % 4 === 0) engine.accept({ version: 1, session, listener: listenerPacket(session, block, ticks, listener, forward), vehicles }, 0, 250);
    const output = await engine.render();
    const first = block * blockFrames;
    output.forEach((ch, i) => channels[i].set(ch, first));
-   assert(engine.staticSceneBinding, 'Emitter or camera left the admitted installed workset at block ' + block);
+   if(windows.size)assert(engine.staticSceneBinding, 'Emitter or camera left the admitted installed workset at block ' + block);
    const control = engine.pipeline.lastControl;
    const active = engine.slots.filter(s => s.source);
    maxActive = Math.max(maxActive, active.length);
@@ -127,8 +128,10 @@ export async function renderMappedPerformance({ directory, name, file, windows, 
     rows.push(packet);
    }
    if (record) records.push({ control: { frame: control.frame, paths: control.paths, sourceGenerations: control.sourceGenerations },
-    pcm, applied, packet, dryLevels });
-   worksetCounts[lastWorkset.tile.surfaces.length] = (worksetCounts[lastWorkset.tile.surfaces.length] ?? 0) + 1;
+    pcm, applied, packet, dryLevels, ...(privatePowertrain?{firingCuts:active[0]?.source.batiFiring?.cuts??0,
+     exhaustDistance:control.paths.find(p=>p.order===0 && p.sourceId==='stock:slot0:exhaust')?.distance??null}: {}) });
+   const workset=lastWorkset?.tile.surfaces.length??0;
+   worksetCounts[workset] = (worksetCounts[workset] ?? 0) + 1;
   }
   assert(renderer.stats.peak > 0 && !renderer.stats.limited && !renderer.stats.pathOverflow);
   assert(channels.every(ch => ch.subarray(-blockFrames).every(x => x === 0)), 'The finite source release must finish before the WAV edit');

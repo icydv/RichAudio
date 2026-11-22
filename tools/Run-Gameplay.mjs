@@ -43,7 +43,7 @@ const stockRegistry=loadInstalledStockRegistry({catalogFile:inside(config.catalo
 const profiles=JSON.parse(fs.readFileSync(inside(config.profiles),'utf8'));
 // Resolve the donor at the bank boundary. Every gameplay frame and voice
 // identity retains the observed ADDER model and generation.
-const registry=privatePowertrain?powertrainRegistry(stockRegistry):stockRegistry;
+const registry=privatePowertrain?powertrainRegistry(stockRegistry,config.powertrainVoicing):stockRegistry;
 const privateVoice=privatePowertrain?registry.resolve(config.eligible[0].model,'player'):null;
 // Prepare pure bank data and bounded untouched voices before host readiness.
 // The normal eligibility selection still controls when any voice is acquired.

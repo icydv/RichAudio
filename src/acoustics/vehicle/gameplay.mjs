@@ -13,6 +13,7 @@ import {StockSourcePreparation05,stockSourceIdentity05} from './source-preparati
 import {AirflowSourceStreet01,airflowSeedStreet01} from './airflow-street01.mjs';
 import {isInstalledStaticScene01,installedStaticSceneMetadata01} from '../world/installed-static-scene01.mjs';
 import {registerPreparedSoundMapGeometry01} from '../streaming/soundmap-telemetry.mjs';
+import {batiExhaustPathGain} from './bati-powertrain-voicing.mjs';
 const FS=48000,BLOCK=512,MAX=2,unit=v=>{const n=Math.hypot(...v);if(n<1e-8)throw Error('orientation discontinuity');return v.map(x=>x/n);};
 const sameVehicle01=(a,b)=>a?.valid&&b.valid&&a.generation===b.generation&&a.model===b.model&&a.context===b.context;
 const voiceIdentity01=v=>`${v.id}:${v.generation}:${v.model}:${v.context}`+(v.acquisition01===undefined?'':':'+v.acquisition01);
@@ -350,7 +351,20 @@ export class StockGameplay {
   const weights=s=>.98*s.pressureGain*.175;
   const occupied=new Map();let localPeak=0;if(this.settings.airflowEnabled)for(const channel of this.localAirflow)for(const x of channel)localPeak=Math.max(localPeak,Math.abs(x));let total=localPeak*.175;
   for(const slot of renderer.slots)if(slot.active){const bound=Math.max(slot.gain[0],slot.releaseLeft?0:slot.target[0])*weights(slot.source);occupied.set(slot.id,bound);total+=bound;}
-  const paths=[];for(const p of [...control.paths].sort((a,b)=>a.order-b.order||b.bands[0]-a.bands[0])){
+  let calibrated;
+  for(const s of this.slots)if(s.source?.batiExhaustDemand!==undefined)
+   (calibrated??=new Map()).set('stock:slot'+s.index+':exhaust',s.source.batiExhaustDemand);
+  const directDistances=calibrated&&new Map(control.paths.filter(p=>p.order===0).map(p=>[p.sourceId,p.distance]));
+  const offered=calibrated?control.paths.map(p=>{
+   // Keep the existing passive tap bound at very close camera distances.
+   // One multiplier keeps the path's spectral balance and direction intact.
+   const demand=calibrated.get(p.sourceId);
+   if(demand===undefined)return p;
+   const pressure=batiExhaustPathGain(directDistances.get(p.sourceId)??0,demand);
+   const gain=Math.min(pressure,1/p.bands[0]);
+   return {...p,bands:p.bands.map(b=>Math.min(1,b*gain))};
+  }):[...control.paths];
+  const paths=[];for(const p of offered.sort((a,b)=>a.order-b.order||b.bands[0]-a.bands[0])){
    const bound=p.bands[0]*weights(renderer.sources.get(p.sourceId)),extra=Math.max(0,bound-(occupied.get(p.id)??0));
    if(total+extra>.95){this.stats.headroomPathsOmitted++;continue;}total+=extra;paths.push(p);
   }

@@ -17,6 +17,7 @@ namespace RichAudio.Beacon.Transport {
   public bool Shvdne {get{return IntegrationFramework=="shvdne";}}
   public const string ShvdneApi3Sha256="1e4d0bc4d34d05a6038fc87eede492d3dc4265522de473ec19cdf6746b5b0e48";
   [DataMember(Name="powertrainVoice",EmitDefaultValue=false)]public string PowertrainVoice;
+  [DataMember(Name="powertrainVoicing",EmitDefaultValue=false)]public string PowertrainVoicing;
   [DataMember(Name="powertrainWorld",EmitDefaultValue=false)]public bool PowertrainWorld;
   [DataMember(Name="demoProfile",EmitDefaultValue=false)]public string DemoProfile;
   [DataMember(Name="latencyProfile",EmitDefaultValue=false)]public string LatencyProfile;
@@ -80,6 +81,8 @@ namespace RichAudio.Beacon.Transport {
    if(c.LatencyProfile!=null&&c.LatencyProfile!="baseline"&&c.LatencyProfile!="low-latency-01"&&c.LatencyProfile!="street-01")throw new InvalidDataException("Unknown immutable gameplay latency profile");
    if(c.ContinuityPolicy!=null&&c.ContinuityPolicy!="baseline"&&c.ContinuityPolicy!="camera-source-01")throw new InvalidDataException("Unknown immutable gameplay continuity policy");
    ValidateIntegration(c);
+   if(c.PowertrainVoicing!=null&&(c.PowertrainVoicing!="bati-exhaust-limiter-v1"||c.PowertrainVoice!="bati-player-on-adder"))
+    throw new InvalidDataException("Bati voicing requires the dedicated ADDER powertrain package");
    if(c.PowertrainWorld&&c.PowertrainVoice==null)
     throw new InvalidDataException("Private powertrain world requires the single-car powertrain voice");
    if(c.PowertrainVoice!=null&&(c.PowertrainVoice!="bati-player-on-adder"||!c.Shvdne||c.DemoProfile!=null||c.TransportValidationOnly||
