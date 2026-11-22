@@ -111,7 +111,7 @@ function draw(now){
   const f=usingAtlas&&!aligned?null:view.frame,g=usingAtlas&&!aligned?null:view.geometry,cached=usingAtlas?{visible:false}:view.cacheLayer;
   if(atlas)atlas.canvas.hidden=!usingAtlas;
   camera.northUpAtlas=Boolean(usingAtlas);
-  if(lastCoordinateKey!==view.coordinateKey){lastCoordinateKey=view.coordinateKey;if(!usingAtlas){camera.target=view.listener?.valid?[...view.listener.position]:cached.visible?[...cached.target]:[0,0,0];camera.scale=13;}contextSelectionKey='';}
+  if(lastCoordinateKey!==view.coordinateKey){lastCoordinateKey=view.coordinateKey;if(!usingAtlas){camera.target=view.listener?.valid?[...view.listener.position]:cached.visible?[...cached.target]:[0,0,0];camera.scale=isReplay&&replayAudioInfo?.kind==='offline-rendered-file'?Math.min(65,Math.max(24,Math.min(bounds.width,bounds.height)/13)):13;}contextSelectionKey='';}
   const freshAtlasCamera=!isReplay&&!health.expired&&view.listener?.valid&&isPoint(view.listener.position)&&
     (view.kind==='passive'||aligned);
   if(usingAtlas&&atlas.index&&!atlasPoseInitialised){
@@ -157,8 +157,22 @@ function draw(now){
     ctx.fill('evenodd');ctx.restore();
     // Stroke outside the clipped fill so the full 2.2 CSS-pixel outline survives
     // at high DPI and along a finite support edge. Holes stay clipped inside it.
-    ctx.beginPath();facePath(face.vertices);ctx.lineWidth=face.context?1.8:2.2;ctx.strokeStyle=face.installedContext?'#78b7bf':face.context?'#97a8c2':face.cached?'#8fcbe8':health.expired?'#b0bed2':'#f5f7fc';ctx.setLineDash(face.context?[7,5]:face.expired||health.expired?[5,5]:view.kind==='replay'?[12,3]:[]);ctx.stroke();ctx.setLineDash([]);
+    ctx.beginPath();facePath(face.vertices);ctx.lineWidth=face.context?1.8:2.2;ctx.strokeStyle=face.installedContext?'#78b7bf':face.context?'#97a8c2':face.cached?'#8fcbe8':health.expired?'#b0bed2':replayAudioInfo?.kind==='offline-rendered-file'?'#8796a5':'#f5f7fc';ctx.setLineDash(face.context?[7,5]:face.expired||health.expired?[5,5]:view.kind==='replay'?[12,3]:[]);ctx.stroke();ctx.setLineDash([]);
     if(face.openings.length){ctx.save();ctx.beginPath();facePath(face.vertices);ctx.clip();ctx.beginPath();for(const opening of face.openings)facePath(opening.vertices);ctx.stroke();ctx.restore();}
+  }
+  if(isReplay && replayAudioInfo?.kind === 'offline-rendered-file' && f?.paths && g && !health.expired){
+    const reflectedFaces=new Set(f.paths.filter(ray=>ray.status==='selected'&&ray.order===1).flatMap(ray=>ray.surfaceIds));
+    for(const face of geometryFaces){
+      if(!reflectedFaces.has(face.id))continue;
+      line([...face.vertices,face.vertices[0]],'#ffab61',4);
+      const points=face.vertices.map(vertex=>project(vertex,camera));
+      const edge=points.reduce((left,p)=>p.x<left.x?p:left);
+      const label='Reflecting wall';
+      ctx.font='600 12px Segoe UI';
+      const width=ctx.measureText(label).width;
+      ctx.fillStyle='#0a0e14';ctx.fillRect(edge.x-width-12,edge.y-20,width+8,17);
+      ctx.fillStyle='#ffbc80';ctx.fillText(label,edge.x-width-8,edge.y-7);
+    }
   }
   if(cached.visible){
     for(const tile of cached.tiles){wireBox(tile.bounds,tile.state==='prepared-fixture'?'#53758b':'#e4cc80');const p=project(tile.bounds.min,camera);ctx.font='11px Segoe UI';ctx.fillStyle='#b7d9e8';ctx.fillText(`${tile.tileId} · ${tile.state}`,p.x+4,p.y-5);
@@ -389,6 +403,7 @@ bind('refresh-recordings',refreshRecordings);
 async function openReplay(id){
   if(!id)throw Error('Select a local recording first.');
   const result=await api('/api/replay/open',{id});clearAudio();replayAudioInfo={...result.audio,timeline:result.timeline};requestEpoch++;isReplay=true;replay.open(result.durationMs);state.reset();pendingSeek=true;lastReplayRequest=-1;
+  if(result.audio?.kind==='offline-rendered-file'){camera.topDown=true;$('topdown').classList.add('active');$('isometric').classList.remove('active');}
   $('scrubber').max=String(replay.durationMs);$('scrubber').disabled=false;$('play-pause').disabled=false;$('close-replay').disabled=result.audio?.kind==='offline-rendered-file';recordingStatus();
   $('events').replaceChildren();for(const event of (result.events||[]).slice(0,2000)){const button=document.createElement('button');safeText(button,`${time(event.timeMs)} ${event.type}`);button.title=typeof event.detail==='string'?event.detail:JSON.stringify(event.detail??{});if(/fail|gap|expiry|expired|spike|missing|discontinu|invalid|stale/i.test(event.type))button.className='anomaly';button.addEventListener('click',()=>seekReplay(event.timeMs));$('events').append(button);}
   $('load-audio').disabled=!result.audio?.available||!Number.isFinite(result.audio?.startTimeMs);
