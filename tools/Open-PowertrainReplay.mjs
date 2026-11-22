@@ -46,7 +46,7 @@ try {
       if (!response.ok) throw Error('Replay timeline seek failed');
       if ((take === 'traffic' || take === 'clocked') && event.detail) {
         const {pcmBlock, frame} = await response.clone().json();
-        if (frame?.sequence !== event.detail.sequence || pcmBlock?.sampleFrame !== event.detail.sampleFrame ||
+        if ((!event.detail.pcmOnly && frame?.sequence !== event.detail.sequence) || pcmBlock?.sampleFrame !== event.detail.sampleFrame ||
           JSON.stringify(pcmBlock) !== JSON.stringify(replay.contributions[pcmBlock.sampleFrame / 512]))
           throw Error('WAV seek differs from the bound PCM contribution block');
       }

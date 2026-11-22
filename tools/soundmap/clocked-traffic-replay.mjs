@@ -75,7 +75,6 @@ export async function openClockedTrafficReplay(root) {
       releasing:!v.active||!v.present,retired:!v.active,pcmPeak:Math.max(Math.abs(v.left),Math.abs(v.right))}))};
   }
   const frames=[],geometries=new Map(),events=[],paths=new Map(),passageRoutes=new Map(),overlap=[],releases=[];
-  let recycled;
   let stream,previous=-1,previousSequence=-1;
   for(const packet of parseLines(files['clocked-soundmap.jsonl'])){
     const {block,frame,geometry,renderedVoices,appliedPaths}=packet,at=block*512;
@@ -105,8 +104,6 @@ export async function openClockedTrafficReplay(root) {
     frames.push(row);
     if(!witness.uncertain&&mapped.geometryGeneration&&witness.voices.filter(v=>!v.releasing).length===5) overlap.push(row);
     if(witness.voices.some(v=>v.retired)&&witness.voices.some(v=>!v.releasing))releases.push(row);
-    if(!recycled && witness.voices.some(v=>!v.releasing && releases.some(old=>contributions[old.frame.audioFrame/512].voices.some(prior=>
-      prior.retired&&prior.vehicle===v.vehicle&&prior.engine===v.engine&&prior.generation!==v.generation&&prior.renderGeneration!==v.renderGeneration)))) recycled=row;
     const faces=new Map(geometries.get(mapped.geometryGeneration)?.surfaces.map(s=>[s.id,s]));
     for(const ray of mapped.paths){
       const tap=appliedPaths.find(t=>t.id===ray.id&&t.sourceId===ray.sourceId&&t.generation===ray.generation);
@@ -134,8 +131,16 @@ export async function openClockedTrafficReplay(root) {
     const {row,ray,label}=passageRoutes.get(order)??entry;
     event(row,label??order+'-bounce mixer route',{pathId:ray.id,sourceId:ray.sourceId,surfaceIds:ray.surfaceIds,vertices:ray.vertices});
   }
-  if(releases.length)event(releases[0],'Retired vehicle release');
-  if(recycled)event(recycled,'Recycled slot · new vehicle lifetime');
+  const tail=contributions.find(block=>block&&!block.uncertain&&block.voices.some(v=>v.retired)&&block.voices.some(v=>!v.releasing));
+  if(tail){
+    if(releases.length) event(releases[0],'Retired vehicle release');
+    else events.push({type:'Retired vehicle release · PCM sample',timeMs:tail.sampleFrame/48,
+      detail:{take:'clocked',sampleFrame:tail.sampleFrame,pcmOnly:true}});
+    const newLife=frames.find(row=>row.frame.audioFrame>tail.sampleFrame&&contributions[row.frame.audioFrame/512].voices.some(v=>
+      !v.releasing&&tail.voices.some(prior=>prior.retired&&prior.vehicle===v.vehicle&&prior.engine===v.engine&&
+        prior.generation!==v.generation&&prior.renderGeneration!==v.renderGeneration)));
+    if(newLife)event(newLife,'Recycled slot · new vehicle lifetime');
+  }
   if(!events.length)event(frames[0],'First matched map observation');
   events.sort((a,b)=>a.timeMs-b.timeMs);
   const id='drive-clocked-'+binding.files['clocked-output.wav'].slice(0,16),durationMs=extent/48;
