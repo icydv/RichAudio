@@ -22,7 +22,7 @@ Sharing a compact spatial index between emitters approximately halved median ful
 
 For a stationary roadside camera, renewals can also share the existing finite workset when its clipping cube, data bindings and uncertainty remain valid. The worker still computes the current emitter routes. Across paired workset renewals, median producer unpacking and adoption fell from approximately 29 ms to 0.6–0.8 ms. The first publication still pays for the full geometry. A moving driver camera can change the clipping cube and force another full publication.
 
-The automatic backend retained the CPU. On the RTX 2080 Super, one actual 208-leg, 1,380-face batch took a median 2.070 ms on the CPU and 1.816 ms on DirectCompute including submission, synchronization, readback and CPU refinement. The 95th percentile was slower on the GPU for each of the four measured windows. The audio callback remains independent of GPU completion.
+The automatic backend retained the CPU. On the RTX 2080 Super, one actual 208-leg, 1,380-face batch took a median 2.070 ms on the CPU and 1.816 ms on DirectCompute including submission, synchronization, readback and CPU refinement. On that batch the GPU submission was 0.113 ms, data transfer 0.018 ms, shader execution 0.055 ms, completion wait 0.117 ms and mapped readback 0.016 ms. The helper round trip was 0.706 ms. The complete 1.816 ms includes exact CPU refinement. The 95th percentile was slower on the GPU for each of the four measured windows. The audio callback remains independent of GPU completion.
 
 ## Listening to distance and surface finish
 
@@ -46,9 +46,27 @@ The table shows complete producer times for uninstrumented runs. The all-moving 
 
 On the 29 m exit the full renderer finished two cold and two warm runs without underflow. The clocked listening capture adds diagnostic work and is reported separately. On a continuously covered five-vehicle route the full renderer completed a 60-second cold run and a warm repeat. Another warm run starved at output frame 1,124,864. Seven consecutive over-budget render blocks included synthesis at 3.75–6.74 ms, propagation at 3.95–6.08 ms and stereo mixing at 2.38–3.04 ms. Scene adoption during those blocks took less than 0.05 ms. The callback requested 960 frames and found 704. That 256-frame shortfall was 5.33 ms.
 
-The full-detail path also completed a 120-second covered run with no underflow. Geometry stayed active on 11,015 blocks with all five vehicles moving. On 10,972 of those blocks, at least one second- or third-order path reached the mixer. There were 86 render and 109 through-write deadline misses. Four full-detail vehicles completed two shorter covered repeats without underflow as well. These are measured workload limits on this machine; an individual successful run does not certify hard real-time delivery.
+The full-detail path also completed a 120-second covered run with no underflow. Geometry stayed active on 11,015 blocks with all five vehicles moving. On 10,972 of those blocks, at least one second- or third-order path reached the mixer. There were 86 render and 109 through-write deadline misses. Four full-detail vehicles completed two shorter covered repeats without underflow as well. These measured workload limits apply to this machine. Deadline and underflow results are reported separately for each run.
 
 A separate traffic setting ranks a small number of candidate routes independently for each emitter and still validates the complete finite geometry and visibility of every selected route. It completed a warm 120-second covered run with zero underflow and 16 whole-run render misses. A cold covered attempt underflowed. In the matched five-car file comparison the ranked setting omitted the lead's right-hand two-wall engine route at 0.853 s, retained the wall–canopy–opposite-wall exhaust witness and ended the lead's higher-order tail 64 ms earlier. Direct playback ended at the same sample. The standard listening file and the headline clocked capture use full detail.
+
+## Rendering NPC sources on a worker
+
+The optional fleet worker synthesizes the verified four-layer Bati NPC bank while the producer solves the same block's acoustic paths. The producer retains the player voice and mixes after the requested NPC block arrives. There is one in-flight block and no extra frame of output buffering. Each result is bound to the session, round, vehicle slot, lifetime, generation and expected source frame. A source that expires during the join withdraws its current pressure, leaving the other vehicles and the existing finite release intact.
+
+For the five-car tests the separate isolate prepared 4,170,604 bytes of NPC bank data and used 20,480 bytes of shared output storage. Initialization added about 265–272 ms before the clocked host started. Two startup runs observed whole-process RSS increases of about 6.1 and 18.1 MB. Those figures include other threads in the process.
+
+| Full-detail workload with NPC worker | All-five-moving mapped blocks | Moving complete render p50 / p95, ms | Whole render / through-write misses | Longest consecutive render misses | Ring underflow frames |
+| --- | ---: | --- | ---: | ---: | ---: |
+| Cold 29 m exit | 474 | 4.97 / 6.64 | 2 / 2 | 1 | 0 |
+| Warm 29 m exit | 477 | 4.97 / 6.38 | 0 / 1 | 0 | 0 |
+| Warm covered, 60 s | 5389 | 5.76 / 8.12 | 28 / 37 | 1 | 0 |
+| Warm covered, 60 s repeat | 5387 | 5.50 / 7.12 | 5 / 8 | 1 | 0 |
+| Warm covered, 120 s | 11015 | 5.49 / 7.13 | 5 / 5 | 1 | 0 |
+
+The two 60-second repeats held all five moving vehicles and multi-bounce returns throughout movement. Both supplied every requested output frame. Their moving median/p95 were 5.76/8.12 ms and 5.50/7.12 ms. The successful warm serial repeat took 7.49/9.34 ms on the same route. On the 120-second run all 11,015 five-moving blocks retained installed geometry and 10,988 included multi-bounce. The longest render miss streak was one block. The worker produced five render and five through-write misses, compared with 86 and 109 on the serial path. Both runs had zero underflow. A deterministic render using the separate worker matched the entire 586,240-frame serial traffic WAV, all six isolated lifetime stems and both isolated multi-bounce cues byte for byte. A separate worker capture matched 1,853 first-frame output probes with zero mismatches or unbound samples. It contained 480 all-five-moving multi-bounce probes and up to 61 nonzero reflected terms at one sample.
+
+Enable the worker explicitly for the retained clocked fleet with `-NpcSynthesisWorker`. Serial rendering remains the default. The worker accepts one verified NPC bank, rejects ambiguous or out-of-order results, and ends its producer on an unrecoverable worker failure. The private single-ADDER switch continues on its own path.
 
 ## Scope
 
