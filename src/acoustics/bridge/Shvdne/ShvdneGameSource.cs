@@ -101,7 +101,7 @@ namespace RichAudio.Integration.Shvdne
             using (var up = new OutputArgument())
             using (var position = new OutputArgument())
             {
-                Function.Call(Hash.GET_ENTITY_MATRIX, handle, right, forward, up, position);
+                Function.Call(Hash.GET_ENTITY_MATRIX, handle, forward, right, up, position);
                 o.Position = V(position.GetResult<Vector3>()); o.Forward = V(forward.GetResult<Vector3>()); o.Up = V(up.GetResult<Vector3>());
             }
             o.Velocity = V(Function.Call<Vector3>(Hash.GET_ENTITY_VELOCITY, handle));

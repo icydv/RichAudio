@@ -13,8 +13,8 @@ const blend = x => {
 };
 
 const roadMixes = {
-  'bati-road': {nearPressure: 3.1, reachScale: 2.4, reachExponent: .75, body: 1.05, attack: .44},
-  'bati-bold': {nearPressure: 4.5, reachScale: 2.2, reachExponent: .84, body: 1.55, attack: .65},
+  'bati-road': {nearPressure: 3.1, reachScale: 2.4, reachExponent: .75, body: .95, attack: .50},
+  'bati-bold': {nearPressure: 4.5, reachScale: 2.2, reachExponent: .84, body: 1.40, attack: .74},
 };
 
 export function batiExhaustPathGain(distance, demand, voicing) {
@@ -89,11 +89,13 @@ export function voiceBatiPowertrain(source, voicing = batiVoicing) {
   source.batiVoicing = voicing;
   source.roadMix = Boolean(mix);
   const idle = mix ? .78 / mix.nearPressure : idlePressure;
-  let lowMid = 0, lowBass = 0, fastEnvelope = 0, slowEnvelope = 0;
+  let lowMid = 0, lowBass = 0, fastEnvelope = 0, slowEnvelope = 0, dryShare = 0;
   const bodyPole = 1 - Math.exp(-2*Math.PI*580/FS);
   const bassPole = 1 - Math.exp(-2*Math.PI*85/FS);
   const fastPole = 1 - Math.exp(-1/(FS*.002));
   const slowPole = 1 - Math.exp(-1/(FS*.035));
+  const drySharePole = 1 - Math.exp(-1/(FS*.004));
+  const attackDecaySeconds = mix ? .028 : .076;
   let previousRatio=null,transient=0,engineCut=1,exhaustCut=1,pressure=idle;
   const cutSlew=1-Math.exp(-1/(FS*.003)),pressureSlew=1-Math.exp(-1/(FS*.020));
   source.batiExhaustDemand=0;
@@ -102,12 +104,13 @@ export function voiceBatiPowertrain(source, voicing = batiVoicing) {
     const {operatingPoint:ratio,lift,running}=control;
     const rise=previousRatio===null?0:ratio-previousRatio;
     previousRatio=ratio;
-    transient=lift||!running?0:Math.max(transient*Math.exp(-frames/(FS*.076)),blend((rise-.007)/.065));
+    transient=lift||!running?0:Math.max(transient*Math.exp(-frames/(FS*attackDecaySeconds)),blend((rise-.007)/.065));
     const demand=running&&!lift?blend((ratio-.22)/.46):0;
     source.batiExhaustDemand+=(demand-source.batiExhaustDemand)*(1-Math.exp(-frames/(FS*.035)));
     const drive = mix ? (running && !lift ? blend((ratio-.28)/.55) : 0) : demand;
-    const wanted = mix ? idle + drive * (1.20 + mix.attack * transient)
+    const wanted = mix ? idle + drive * (1.26 + mix.attack * transient)
                        : idlePressure+.55*demand+.24*transient*demand;
+    const heldDryShare = .32 * drive * (1 - transient);
     const target=firing.select(control,frames);
     const result=render(target===ratio?control:{...control,operatingPoint:target},engine,exhaust,frames);
     const engineTarget=firing.cutting?.33:1,exhaustTarget=firing.cutting?.15:1;
@@ -127,12 +130,15 @@ export function voiceBatiPowertrain(source, voicing = batiVoicing) {
       slowEnvelope += slowPole * (Math.abs(dry) - slowEnvelope);
       const attack = Math.min(1, Math.max(0, (fastEnvelope - slowEnvelope) / (.06 + slowEnvelope)));
       const body = (lowMid - lowBass) * mix.body * drive;
-      const pulse = (dry + body) * pressure * (1 + mix.attack * attack * drive);
+      const pulse = (dry + body) * pressure * (1 + .20 * mix.attack * attack * drive);
       // Smooth knee only at large individual pulses. Preserve polarity and
       // leave the beginning of the transient linear up through 0.80 FS.
       const over = Math.max(0, Math.abs(pulse) - .80);
       const bounded = over ? Math.sign(pulse) * (.80 + .18 * over / (.18 + over)) : pulse;
-      exhaust[i] = bounded * exhaustCut;
+      // As a hard rev settles, restore some original grain pressure. The
+      // unboosted layer leaves room between the opening blip and the hold.
+      dryShare += drySharePole * (heldDryShare - dryShare);
+      exhaust[i] = (bounded + dryShare * (dry - bounded)) * exhaustCut;
     }
     return result;
   };

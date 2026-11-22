@@ -47,6 +47,16 @@ test('a loud covered exhaust keeps late returns inside the pressure budget', () 
   for (const p of admitted) assert(p.bands[0]>0 && p.bands[0]>=p.bands[1] && p.bands[1]>=p.bands[2]);
   const reserved=admitted.reduce((sum,p)=>sum+p.bands[0]*.98*2.5*.175,0);
   assert(reserved<=.95);
+
+  // The direct path and a first-order return can arrive before the rest
+  // of the wall paths. Their earlier gain must not lock out the canopy.
+  let field=StockGameplay.prototype.filter.call(game,{paths:paths.slice(0,2),geometry:{}},renderer).paths;
+  for(let i=0;i<6;i++) {
+    renderer.slots=field.map(p=>({active:true,id:p.id,source:{pressureGain:2.5},gain:p.bands,target:p.bands}));
+    field=StockGameplay.prototype.filter.call(game,{paths,geometry:{}},renderer).paths;
+  }
+  assert.deepEqual(field.map(p=>p.id),admitted.map(p=>p.id));
+  for(let i=0;i<field.length;i++)assert(Math.abs(field[i].bands[0]-admitted[i].bands[0])<1e-8);
 });
 
 test('road and bold keep distinct, falling pressure beyond the near field', () => {

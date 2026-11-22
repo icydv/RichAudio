@@ -20,37 +20,41 @@ const voiceIdentity01=v=>`${v.id}:${v.generation}:${v.model}:${v.context}`+(v.ac
 
 // Reserve the ordinary paths before spending spare pressure on the stronger
 // exhaust. In a tight passage this keeps the late wall returns in the mix.
-function admitRoadExhaust(offered, floor, occupied, weight, reserved, stats) {
- const admitted = [];
- const requests = [];
- let extraWanted = 0;
+function admitRoadExhaust(offered, floor, occupied, weight, reserved, localPressure, stats) {
+ const desired = [];
+ let baseTotal = localPressure, boostTotal = 0;
  const baseGain = path => floor.get(path) ?? path.bands[0];
  offered.sort((a,b) => a.order-b.order || baseGain(b)-baseGain(a));
  for (const path of offered) {
   const w = weight(path);
-  const previous = occupied.get(path.id) ?? 0;
   const minimum = baseGain(path) * w;
-  const cost = Math.max(0, minimum - previous);
-  if (reserved + cost > .95) {
+  if (baseTotal + minimum > .95) {
    stats.headroomPathsOmitted++;
    continue;
   }
-  reserved += cost;
-  const desired = path.bands[0] * w;
-  const funded = Math.min(desired, Math.max(previous, minimum));
-  const extra = desired - funded;
-  if (extra > 0) {
-   requests.push({index:admitted.length, path, desired, funded, extra});
-   extraWanted += extra;
-  }
-  admitted.push(path);
+  baseTotal += minimum;
+  const full = path.bands[0]*w;
+  boostTotal += full-minimum;
+  desired.push({path,minimum,full});
  }
- // Leave five percent for newly visible paths during camera movement. Old
- // release tails already count in the per-slot reservation above.
- const fraction = extraWanted ? Math.min(1, Math.max(0, .90-reserved)/extraWanted) : 1;
- if (fraction < 1) for (const {index,path,desired,funded,extra} of requests) {
-  const scale = (funded + fraction*extra) / desired;
-  admitted[index] = {...path, bands:path.bands.map(x => x*scale)};
+ // Choose the steady targets without granting permanent priority to taps
+ // that happened to arrive before their walls. Preserve five percent for motion.
+ const boost = boostTotal ? Math.min(1,Math.max(0,.90-baseTotal)/boostTotal) : 1;
+ let attackTotal = 0;
+ for (const entry of desired) {
+  const target = entry.minimum + boost*(entry.full-entry.minimum);
+  entry.funded = Math.min(target,occupied.get(entry.path.id)??0);
+  entry.attack = target-entry.funded;
+  attackTotal += entry.attack;
+ }
+ // Retiring and shrinking taps still consume real pressure until they fade.
+ // Ramp arriving taps into the space freed each block.
+ const attack = attackTotal ? Math.min(1,Math.max(0,.95-reserved)/attackTotal) : 1;
+ const admitted = [];
+ for (const {path,full,funded,attack:increment} of desired) {
+  const pressure = funded + attack*increment;
+  if (full > 0 && pressure === 0) { stats.headroomPathsOmitted++; continue; }
+  admitted.push(pressure < full ? {...path,bands:path.bands.map(x=>x*(pressure/full))} : path);
  }
  return admitted;
 }
@@ -414,7 +418,7 @@ export class StockGameplay {
    }
    return result;
   }):[...control.paths];
-  const paths=floor ? admitRoadExhaust(offered,floor,occupied,p=>weights(renderer.sources.get(p.sourceId)),total,this.stats) : [];
+  const paths=floor ? admitRoadExhaust(offered,floor,occupied,p=>weights(renderer.sources.get(p.sourceId)),total,localPeak*.175,this.stats) : [];
   if(!floor)for(const p of offered.sort((a,b)=>a.order-b.order||b.bands[0]-a.bands[0])){
    const bound=p.bands[0]*weights(renderer.sources.get(p.sourceId)),extra=Math.max(0,bound-(occupied.get(p.id)??0));
    if(total+extra>.95){this.stats.headroomPathsOmitted++;continue;}total+=extra;paths.push(p);

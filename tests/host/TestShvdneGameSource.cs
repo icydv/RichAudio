@@ -104,8 +104,9 @@ internal static class TestShvdneGameSource
             case Hash.GET_VEHICLE_ENGINE_HEALTH: return 950f;
             case Hash.GET_VEHICLE_BODY_HEALTH: return 900f;
             case Hash.GET_ENTITY_MATRIX:
-                ((OutputArgument)args[1]).Value = new GTA.Math.Vector3(1, 0, 0);
-                ((OutputArgument)args[2]).Value = new GTA.Math.Vector3(0, 1, 0);
+                // Native ABI returns forward, right, up, position. Face north.
+                ((OutputArgument)args[1]).Value = new GTA.Math.Vector3(0, 1, 0);
+                ((OutputArgument)args[2]).Value = new GTA.Math.Vector3(1, 0, 0);
                 ((OutputArgument)args[3]).Value = new GTA.Math.Vector3(0, 0, 1);
                 ((OutputArgument)args[4]).Value = new GTA.Math.Vector3(4, 5, 6); return null;
             case Hash.GET_INTERIOR_FROM_COLLISION: return Interior ? 5 : 0;
