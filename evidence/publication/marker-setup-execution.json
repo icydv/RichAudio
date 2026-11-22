@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "scope": "single-supervised-marker-setup",
+  "gameVersion": "1.0.1158.16",
+  "rphVersion": "1.132.1428.17748",
+  "testedSourceCommit": "7c335d39a9d208f6b35be6f81fd650c436c4a9d5",
+  "acceptedRevisions": 3,
+  "savedRecords": 5,
+  "startOnFoot": false,
+  "finishOnFoot": false,
+  "listenerOnFoot": true,
+  "stationaryChecksPassed": true,
+  "monotonicCaptureTimes": true,
+  "endpointsPreserved": true,
+  "horizontalSeparationNativeUnits": 793.8854618657283,
+  "maximumWorldPrimitives": 5,
+  "independentLineGeometryPassed": true,
+  "visibilityReviewAddedRecords": 0,
+  "footer": {
+    "DrawingDetached": true,
+    "Reason": "manual stop",
+    "Revisions": 3
+  },
+  "routeCoverage": "UNKNOWN",
+  "routeClear": false,
+  "benchmarkStartSupported": false,
+  "benchmarkRuns": 0,
+  "spawns": 0,
+  "trafficRequests": 0,
+  "collisionQueries": 0,
+  "audioOperations": 0,
+  "restoration": {
+    "passed": true,
+    "rootFiles": 32,
+    "archiveMetadata": 179,
+    "sampledArchiveHashes": 10,
+    "temporaryPathsAbsent": 27
+  },
+  "limitations": "Marker capture and cached drawing only. No route clearance, AI driving, full-speed result, traffic isolation or acoustic result is established."
+}
