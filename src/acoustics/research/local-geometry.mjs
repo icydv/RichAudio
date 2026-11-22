@@ -140,7 +140,20 @@ export function cacheStatus(tile,c){
   return {valid:reasons.length===0,reasons,coverage:tile.coverage,missingRegions:tile.missingRegions.length};
 }
 export function onPatch(s,p){const d=sub(p,s.center),u=dot(d,s.u),v=dot(d,s.v);return Math.abs(dot(d,s.normal))<=E&&Math.abs(u)<=s.half[0]+E&&Math.abs(v)<=s.half[1]+E&&(!s.footprint||s.footprint.every((a,i)=>{const b=s.footprint[(i+1)%s.footprint.length];return (b[0]-a[0])*(v-a[1])-(b[1]-a[1])*(u-a[0])>=-E;}))&&!s.openings.some(h=>u>=h.min[0]-E&&u<=h.max[0]+E&&v>=h.min[1]-E&&v<=h.max[1]+E);}
-function hitsBox(a,b,box){let lo=0,hi=1;const d=sub(b,a);for(let i=0;i<3;i++){if(Math.abs(d[i])<E){if(a[i]<box.min[i]||a[i]>box.max[i])return false;}else {let x=(box.min[i]-a[i])/d[i],y=(box.max[i]-a[i])/d[i];if(x>y)[x,y]=[y,x];lo=Math.max(lo,x);hi=Math.min(hi,y);if(lo>hi)return false;}}return true;}
+function hitsBox(start,delta,box){
+  let lo=0,hi=1;
+  for(let i=0;i<3;i++){
+    const origin=start[i],direction=delta[i];
+    if(Math.abs(direction)<E){
+      if(origin<box.min[i]||origin>box.max[i])return false;
+    }else{
+      const a=(box.min[i]-origin)/direction,b=(box.max[i]-origin)/direction;
+      lo=Math.max(lo,Math.min(a,b));hi=Math.min(hi,Math.max(a,b));
+      if(lo>hi)return false;
+    }
+  }
+  return true;
+}
 function buildSurfaceIndex(surfaces){
   // This padding conservatively covers the existing finite-patch/segment
   // tolerances, including contacts just beyond an endpoint (t within epsilon).
@@ -152,21 +165,26 @@ function buildBoundsIndex(entries){
     if(rows.length<=16)return {min,max,entries:rows};const widths=max.map((x,i)=>x-min[i]),axis=widths.indexOf(Math.max(...widths));rows.sort((a,b)=>(a.min[axis]+a.max[axis])-(b.min[axis]+b.max[axis])||a.index-b.index);const middle=rows.length>>>1;return {min,max,left:node(rows.slice(0,middle)),right:node(rows.slice(middle))};}
   return node(entries);
 }
-function indexedCandidates(root,items,a,b){const found=[],pending=[root];while(pending.length){const n=pending.pop();if(!hitsBox(a,b,n))continue;if(n.entries){for(const e of n.entries)if(hitsBox(a,b,e))found.push(e.index);}else{pending.push(n.left,n.right);}}found.sort((x,y)=>x-y);return found.map(i=>items[i]);}
+function indexedCandidates(root,items,start,delta){const found=[],pending=[root];while(pending.length){const n=pending.pop();if(!hitsBox(start,delta,n))continue;if(n.entries){for(const e of n.entries)if(hitsBox(start,delta,e))found.push(e.index);}else{pending.push(n.left,n.right);}}found.sort((x,y)=>x-y);return found.map(i=>items[i]);}
+function planeDistance(point,surface){
+  const c=surface.center,n=surface.normal;
+  // Match the existing dot product's zero-initialised sum, including signed zero.
+  return 0+(point[0]-c[0])*n[0]+(point[1]-c[1])*n[1]+(point[2]-c[2])*n[2];
+}
 export function querySegment(tile,start,end,{reflectorId=null,surfaceIndices=null}={}){
-  requireTile(tile);const a=vector(start),b=vector(end);if(!inBox(a,tile.bounds)||!inBox(b,tile.bounds)||length(sub(b,a))<=E)throw Error('segment extent');
+  requireTile(tile);const a=vector(start),b=vector(end),delta=sub(b,a);if(!inBox(a,tile.bounds)||!inBox(b,tile.bounds)||length(delta)<=E)throw Error('segment extent');
   const surfaceIndex=surfaceIndicesByTile.get(tile);
-  let selected=surfaceIndices===null&&surfaceIndex?indexedCandidates(surfaceIndex,tile.surfaces,a,b):tile.surfaces;
+  let selected=surfaceIndices===null&&surfaceIndex?indexedCandidates(surfaceIndex,tile.surfaces,a,delta):tile.surfaces;
   if(surfaceIndices!==null){if(!Array.isArray(surfaceIndices)||surfaceIndices.length>tile.surfaces.length||surfaceIndices.some((n,i)=>!Number.isSafeInteger(n)||n<0||n>=tile.surfaces.length||(i>0&&n<=surfaceIndices[i-1])))throw Error('invalid conservative surface indices');selected=surfaceIndices.map(i=>tile.surfaces[i]);}
   const hits=[],ambiguous=[];let surfaceTests=0;
-  for(const s of selected){surfaceTests++;const d0=dot(sub(a,s.center),s.normal),d1=dot(sub(b,s.center),s.normal),den=d0-d1;
-    if(Math.abs(den)<E){if(Math.abs(d0)<E&&hitsBox(a,b,{min:[0,1,2].map(i=>Math.min(...s.corners.map(p=>p[i]))-E),max:[0,1,2].map(i=>Math.max(...s.corners.map(p=>p[i]))+E)}))ambiguous.push(s.id);continue;}
-    const t=d0/den;if(t< -E||t>1+E)continue;const p=add(a,scale(sub(b,a),t));if(!onPatch(s,p))continue;
+  for(const s of selected){surfaceTests++;const d0=planeDistance(a,s),d1=planeDistance(b,s),den=d0-d1;
+    if(Math.abs(den)<E){if(Math.abs(d0)<E&&hitsBox(a,delta,{min:[0,1,2].map(i=>Math.min(...s.corners.map(p=>p[i]))-E),max:[0,1,2].map(i=>Math.max(...s.corners.map(p=>p[i]))+E)}))ambiguous.push(s.id);continue;}
+    const t=d0/den;if(t< -E||t>1+E)continue;const p=add(a,scale(delta,t));if(!onPatch(s,p))continue;
     if(s.id===reflectorId&&(Math.abs(t)<=E||Math.abs(t-1)<=E))continue;
     hits.push({id:s.id,t,point:p});
   }
   hits.sort((a,b)=>a.t-b.t||a.id.localeCompare(b.id,'en'));
   const unknownIndex=unknownIndicesByTile.get(tile);
-  const unknown=(unknownIndex?indexedCandidates(unknownIndex,tile.missingRegions,a,b):tile.missingRegions.filter(m=>hitsBox(a,b,m.bounds))).map(m=>m.id);
+  const unknown=(unknownIndex?indexedCandidates(unknownIndex,tile.missingRegions,a,delta):tile.missingRegions.filter(m=>hitsBox(a,delta,m.bounds))).map(m=>m.id);
   return {visibility:hits.length?'blocked':ambiguous.length||unknown.length||tile.coverage==='partial'?'unknown':'clear',hits,ambiguous,unknown,surfaceTests,claim:'Visibility within represented geometry only'};
 }
