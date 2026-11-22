@@ -461,3 +461,118 @@ export function finishPath(plan,queries=null,stats={queries:0,surfaceTests:0}) {
     retardedResidual: residual,
   };
 }
+
+// One resolved image path lends part of its last reflection to one finite
+// off-specular return. The three fractions are illustrative rough concrete
+// assumptions at 200 / 1600 / 6400 Hz, not a GTA surface measurement.
+const scatterEnergy = [.18, .33, .48];
+const scatterOffsets = [6, -4, 2];
+export const roadScatterLimit = 3;
+export const roadScatterDelayLimit = .13;
+
+function scatterSurfaceAt(tile, surface, point, stats) {
+  if(!inBox(point,tile.bounds))return null;
+  if(onPatch(surface,point))return {face:surface,point};
+  // Finite collision tessellation can change grade and normal across
+  // triangles. Intersect a short normal probe and use the actual hit, with
+  // bounded grade and tilt, rather than extending the original plane.
+  const delta=scale(surface.normal,.45);
+  const from=sub(point,delta),to=sub(point,scale(delta,-1));
+  if(!inBox(from,tile.bounds)||!inBox(to,tile.bounds))return null;
+  const q=querySegment(tile,from,to);
+  stats.queries++;
+  stats.surfaceTests+=q.surfaceTests;
+  if(q.unknown.length||q.ambiguous.length)return null;
+  const lookup=surfaceLookup(tile);
+  let chosen=null,distance=Infinity;
+  for(const hit of q.hits){
+    const face=lookup.get(hit.id);
+    const d=Math.abs(hit.t-.5);
+    if(d<distance&&face?.motion==='static'&&Math.abs(dot(face.normal,surface.normal))>=.97){
+      chosen={face,point:hit.point};
+      distance=d;
+    }
+  }
+  return chosen;
+}
+
+function prepareScatter(plan, early, offset, stats) {
+  const {scene, source, listener, arrivalTime}=plan;
+  const surfaces=plan.geometry.surfaces;
+  const parent=surfaces.at(-1);
+  if(parent.motion!=='static')return null;
+  // Horizontal tangent on wall faces. A fixed world direction on horizontal
+  // supports stays consistent across changes of finite triangle/winding.
+  const normal=parent.normal;
+  const heading=plan.state.forward;
+  const longitudinal=sub(heading,scale(normal,dot(heading,normal)));
+  const direction=Math.abs(normal[2])<.75 ? unit([-normal[1],normal[0],0]) :
+    unit(length(longitudinal)>1e-4 ? longitudinal : [1-normal[0]**2,-normal[0]*normal[1],-normal[0]*normal[2]]);
+  const tangent=direction.find(x=>Math.abs(x)>1e-6)<0?scale(direction,-1):direction;
+  const anchor=early.points.at(-1);
+  const sampled=scatterSurfaceAt(scene.tile,parent,anchor.map((x,i)=>x+offset*tangent[i]),stats);
+  if(!sampled)return null;
+  const {face,point:contact}=sampled;
+  const preceding=surfaces.slice(0,-1);
+  const outgoing=separation(contact,listener.position);
+  if(outgoing<=E)return null;
+  let emission=early.emissionTime,residual=Infinity;
+  for(let i=0;i<20;i++){
+    const position=trackPosition(source.track,emission);
+    const distance=imageDistance(position,preceding,contact)+outgoing;
+    const next=arrivalTime-distance/scene.config.soundSpeed;
+    residual=Math.abs(next-emission);
+    emission=next;
+    if(residual<1e-10)break;
+  }
+  const state=pose(source.track,emission);
+  if(!state.valid||state.generation!==early.generation||residual>1e-7||emission<source.track.keys[0].time-1e-9)return null;
+  const prefix=preparePathGeometry(scene,state.position,contact,preceding,plan.candidate.adjacentFaces ?
+    (i,p)=>onPatch(preceding[i],p)?preceding[i]:plan.candidate.adjacentFaces[i].find(s=>onPatch(s,p)) : null);
+  if(prefix.status!=='prepared-geometry')return null;
+  const distance=prefix.distance+outgoing;
+  // At least an independently delayed arrival, within the bounded near room.
+  if(distance-early.distance<.25||distance/scene.config.soundSpeed>roadScatterDelayLimit)return null;
+  const from=prefix.vertices.at(-2);
+  const a=differenceDot(from,contact,face.normal);
+  const b=differenceDot(listener.position,contact,face.normal);
+  if(a*b<=E||(face.reflectiveSide==='front'&&(a<=E||b<=E)))return null;
+  const active=[...prefix.surfaces,face];
+  const candidate={...plan.candidate,id:plan.candidate.id+':scatter:'+offset,surfaces:active};
+  const geometry={...prefix,listener:listener.position,distance,surfaces:active,points:[...prefix.points,contact],
+    vertices:[...prefix.vertices,listener.position]};
+  const scattered={...plan,candidate,geometry,state,emission,residual};
+  const response=finishPath(scattered,null,stats);
+  if(response.status!=='renderable')return null;
+  // Diffuse directional collection is deliberately lossy and bounded. A
+  // represented ray sees its actual surface, angle, air and distance loss.
+  // Uncollected energy is outside these taps and is intentionally absent.
+  const collection=.70*Math.abs(a)/separation(from,contact)*Math.abs(b)/outgoing;
+  const bands=response.bands.map((value,i)=>
+    Math.min(early.bands[i],value)*Math.sqrt(scatterEnergy[i]*Math.min(1,collection)));
+  bands[1]=Math.min(bands[0],bands[1]);
+  bands[2]=Math.min(bands[1],bands[2]);
+  if(bands[0]===0)return null;
+  return {plan:scattered,candidate,response:{...response,bands,scatter:true}};
+}
+
+export function roadScatterFromReflection(plan, early, stats) {
+  for(const offset of scatterOffsets){
+    const scatter=prepareScatter(plan,early,offset,stats);
+    if(scatter)return scatter;
+  }
+  return null;
+}
+
+// The calibration here is for represented wall and canopy returns. A road
+// surface below the listener retains its existing ground reflection.
+export function roadScatterSupport(plan, early) {
+  const parent=plan.geometry.surfaces.at(-1);
+  const anchor=early.points.at(-1);
+  return parent.motion==='static'&&(Math.abs(parent.normal[2])<.75||
+    anchor[2]>Math.max(plan.state.position[2],plan.listener.position[2]));
+}
+
+export function roadScatterEarlyBands(bands) {
+  return bands.map((band,i)=>band*Math.sqrt(1-scatterEnergy[i]));
+}

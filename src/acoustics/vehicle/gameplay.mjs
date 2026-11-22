@@ -24,7 +24,7 @@ function admitRoadExhaust(offered, floor, occupied, weight, reserved, localPress
  const desired = [];
  let baseTotal = localPressure, boostTotal = 0;
  const baseGain = path => floor.get(path) ?? path.bands[0];
- offered.sort((a,b) => a.order-b.order || baseGain(b)-baseGain(a));
+ offered.sort((a,b) => Number(a.scatter===true)-Number(b.scatter===true) || a.order-b.order || baseGain(b)-baseGain(a));
  for (const path of offered) {
   const w = weight(path);
   const minimum = baseGain(path) * w;
@@ -77,7 +77,7 @@ export class StockGameplay {
  #installedApplicationPermit01=null;#installedSceneService01=null;#installedSceneStopped01=false;#installedStopAt01=null;
  get installedSceneService01(){return this.#installedSceneService01;}
  get installedSceneStopped01(){return this.#installedSceneStopped01;}
- constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled',vehicleSourcePolicy=null,privatePowertrain=false,fleetReflectionPolicy='full'}){
+ constructor({registry,profiles,session,now=()=>performance.now(),latencyDiagnostics=false,latencyProfile='baseline',continuityPolicy='baseline',continuousTimingPolicy='baseline',operatingStatePolicy='baseline',stationaryEmissionContract=null,sourcePreparationPolicy='disabled',vehicleSourcePolicy=null,privatePowertrain=false,roadScattering=privatePowertrain,fleetReflectionPolicy='full'}){
   if(!['disabled','explicit-control05'].includes(sourcePreparationPolicy))throw Error('Explicit source preparation policy required');
   if(!['baseline','camera-source-01'].includes(continuityPolicy))throw Error('Explicit vehicle continuity policy required');
   if(!['baseline','arrived-segments-50'].includes(continuousTimingPolicy))throw Error('Explicit continuous timing policy required');
@@ -85,6 +85,8 @@ export class StockGameplay {
   this.continuityPolicy=continuityPolicy;this.latencyProfile=resolveLatencyProfile(latencyProfile);this.controlDelayMs=this.latencyProfile.controlDelayMs;
   this.continuousTimingPolicy=continuousTimingPolicy;if(continuousTimingPolicy==='arrived-segments-50')this.controlDelayMs=50;
   this.privatePowertrain=privatePowertrain;
+  if(roadScattering&&!privatePowertrain)throw Error('Road scattering requires the private one-car renderer');
+  this.roadScattering=roadScattering;
   this.powertrainClock=null;
   this.powertrainCameraCut=null;
   this.powertrainTimingByPhase=privatePowertrain?new Map():null;
@@ -111,6 +113,7 @@ export class StockGameplay {
   this.direct=conditionalStockScene(this.ids,session,vehicleDistanceSceneOptions('authored-detail-loss-v1'));
   this.pipeline=createStockVehiclePipeline({scene:this.direct,sourceIds:this.ids,masterGain:.175,continuousRates:true,validateSampledMotion:privatePowertrain,reuseStaticSegments:this.catalogueFleet,
     preserveSourceHistoryOnListenerCut:privatePowertrain,
+    roadScattering,
     controlFilter:(c,r)=>this.filter(c,r)});
   if (fleetReflectionPolicy !== 'full') {
     if (!vehicleSourcePolicy || privatePowertrain) throw Error('Ranked reflections require the ordinary vehicle fleet');
@@ -429,7 +432,7 @@ export class StockGameplay {
    if(!source)return p;
    const distance=directDistances.get(p.sourceId)??0;
    const pressure=batiExhaustPathGain(distance,source.batiExhaustDemand,source.batiVoicing);
-   const gain=Math.min(pressure,1/p.bands[0]);
+   const gain=Math.min(pressure,1/(p.scatterReferenceBand??p.bands[0]));
    const result={...p,bands:p.bands.map(b=>Math.min(1,b*gain))};
    if (source.roadMix) {
     (floor??=new Map()).set(result,Math.min(result.bands[0],p.bands[0]));
@@ -675,7 +678,8 @@ export class StockGameplay {
     sources.push({id:ids[i],generation:s.generation,position:this.stockEmitterPosition01(v,role,s.source.vehicle.model),velocity:v.velocity,
      observationTicks:v.observationTicks,motionIdentity:v.id,motionTime:vehicleTarget,
      forward:v.forward.map(x=>i?-x:x),up:v.up,directivity:profile?.directivity?.[role]??(i?.65:.1),
-     roadExhaust:i===1 && s.source.roadMix,valid:true,emitting:true});}
+     roadExhaust:i===1 && s.source.roadMix,roadScatter:i===1&&this.roadScattering&&s.source.batiVoicing==='bati-road',
+     valid:true,emitting:true});}
    if(v.model===0xf9300cc5){const at=this.now(),flow=s.airflow.renderInto({velocity:v.velocity,enabled:this.settings.airflowEnabled,level:this.settings.airflowLevel,riderAttached:v.riderAttached===true,riderViewAttached:v.riderViewAttached===true&&!!this.sample.state,valid:!!this.sample.state},this.inputs[aeroId],...s.local);
     if(flows)flows.set(s,flow);
     this.airflowState.maximumSynthesisMs=Math.max(this.airflowState.maximumSynthesisMs,this.now()-at);this.airflowState.riderActive||=flow.riderActive;

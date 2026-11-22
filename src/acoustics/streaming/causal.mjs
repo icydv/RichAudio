@@ -1,7 +1,8 @@
 // Causal adaptation around the unchanged A06 finite-path solver. No future trajectory input.
 import { requireValue, validated } from "../engine/contracts.mjs";
 import { vector, unit, length, dot } from "../research/local-geometry.mjs";
-import { candidatePaths, prepareReceiver, finishPath, pathSegments } from "../engine/paths.mjs";
+import { candidatePaths, prepareReceiver, finishPath, pathSegments,
+  roadScatterLimit, roadScatterFromReflection, roadScatterEarlyBands, roadScatterSupport } from "../engine/paths.mjs";
 import {fleetReflectionSelector} from '../engine/fleet-reflections.mjs';
 const FS = 48000;
 function state(s) {
@@ -41,6 +42,7 @@ function state(s) {
     generation,
     directivity,
     ...(s.roadExhaust === true ? {roadExhaust: true} : {}),
+    ...(s.roadScatter === true ? {roadScatter: true} : {}),
     nearFieldRadius,
     emitting: s.emitting !== false,
     motionObservation,
@@ -66,7 +68,7 @@ export class CausalSimulation {
   constructor(
     scene,
     { staleAfter = 0.25, extrapolationLimit = 0.05, historySeconds = 2.5, allowMissingScene = false,
-      validateSampledMotion = false, preserveSourceHistoryOnListenerCut = false } = {},
+      validateSampledMotion = false, preserveSourceHistoryOnListenerCut = false, roadScattering = false } = {},
   ) {
     requireValue(validated.scene(scene) || (allowMissingScene && scene === null), "validated A06 scene required");
     requireValue(
@@ -81,6 +83,7 @@ export class CausalSimulation {
     this.scene = scene;
     this.validateSampledMotion = validateSampledMotion;
     if(preserveSourceHistoryOnListenerCut)this.preserveSourceHistoryOnListenerCut=true;
+    if(roadScattering)this.roadScattering=true;
     this.staleAfter = staleAfter;
     this.extrapolationLimit = extrapolationLimit;
     this.historySeconds = historySeconds;
@@ -356,7 +359,7 @@ export class CausalSimulation {
         // the emitter moves. Report the ordered faces used for this solution.
         plans.push({plan,candidate:plan.candidate??candidate,offset,count:queries.length});
       }
-      sources.push({id,track,plans});
+      sources.push({id,track,plans,...(this.roadScattering&&current.roadScatter?{roadScatter:true}:{})});
     }
     requireValue(segments.length<=16384,'bounded prepared visibility workload');
     return {prepareSequence,observations,now,age,paths,sourceGenerations,sources,segments,scene:this.scene,geometryEpoch:this.geometryEpoch,soundMap};
@@ -376,8 +379,10 @@ export class CausalSimulation {
     const reasons=evidence?new Map(frame.scene.tile.missingRegions.map(r=>[r.id,r.reason])):null;
     const evidenceMaterialBasis=evidence?basis=>basis?.map(m=>({...m,
       observedMaterialId:frame.scene.tile.surfaces.find(s=>s.id===m.surface)?.material.observedId??null}))??null:null;
-    for(const {id,track,plans} of sources){
+    for(const {id,track,plans,roadScatter} of sources){
       const eligible=[];
+      const parents=roadScatter&&!frame.scene.directPath&&
+        (installed||frame.scene.tile.coverage==='complete-synthetic')?new Map():null;
       let solvedSupports;
       for(const {plan,candidate,offset,count} of plans){
         const p=finishPath(plan,queries?queries.slice(offset,offset+count):null,this.stats);
@@ -438,7 +443,7 @@ export class CausalSimulation {
         });
         if (support) (solvedSupports ??= new Set()).add(support);
         if(visual){visual.identity=identity;visual.reason='path-budget';}
-        eligible.push({
+        const entry={
           id: identity,
           ...(support ? {candidateId: candidate.id} : {}),
           sourceId: id,
@@ -455,7 +460,9 @@ export class CausalSimulation {
           delay: p.delay,
           order: p.order,
           ...(p.visibility==='conditional-direct-unknown-coverage'?{coverageFallback:'conditional-direct-unknown-coverage'}:{}),
-        });
+        };
+        eligible.push(entry);
+        if(parents&&p.order>0&&roadScatterSupport(plan,p))parents.set(identity,{plan,p});
       }
       eligible.sort(
         (a, b) =>
@@ -472,9 +479,46 @@ export class CausalSimulation {
         eligible.length - budget,
       );
       const chosen=eligible.slice(0,budget);
+      if(parents&&budget<=64-roadScatterLimit){
+        // The base path budget is unchanged. Prefer one early and the deeper
+        // routes as finite supports for quiet later arrivals.
+        const reflected=chosen.filter(x=>parents.has(x.id));
+        const firstOrder=reflected.find(x=>x.order===1);
+        const supports=[...(firstOrder?[firstOrder]:[]),
+          ...reflected.filter(x=>x!==firstOrder).sort((a,b)=>b.order-a.order)].slice(0,roadScatterLimit);
+        for(const parent of supports){
+          const {plan,p}=parents.get(parent.id);
+          const result=roadScatterFromReflection(plan,p,this.stats);
+          // The material already allocates part of the reflected energy to
+          // scatter. Geometry can let that energy escape, or the probes can
+          // be unqualified. Neither case restores it to the sharp return.
+          parent.scatterReferenceBand=parent.bands[0];
+          parent.bands=roadScatterEarlyBands(parent.bands);
+          if(!result)continue;
+          const {response,candidate}=result;
+          const identity=parent.id+':scatter:'+candidate.id.split(':').at(-1);
+          const previous=this.previous.get(identity);
+          const rate=previous&&now>previous.time?
+            (response.emissionTime-previous.emissionTime)/(now-previous.time):1;
+          if(!Number.isFinite(rate)||rate<.25||rate>3)continue;
+          this.previous.set(identity,{time:now,emissionTime:response.emissionTime,
+            candidateId:candidate.continuityId??plan.candidate.id});
+          chosen.push({
+            id:identity,candidateId:candidate.id,sourceId:id,generation:response.generation,
+            emissionFrame:response.emissionTime*FS,rate,bands:response.bands,pan:response.pan,
+            arrivalDirection:response.arrivalDirection,arrivalOrigin:response.points.at(-1),
+            distance:response.distance,delay:response.delay,order:response.order,
+            scatter:true,scatterReferenceBand:parent.scatterReferenceBand,
+            ...(evidence?{diagnosticReflection:{source:result.plan.state.position,listener:result.plan.listener.position,
+              bouncePoints:response.points,materialBasis:evidenceMaterialBasis(response.materialBasis)}}:{})
+          });
+          if(frame.soundMap)frame.soundMap.candidates.push({sourceId:id,plan:result.plan,candidate,result:response,
+            reason:'path-budget',identity});
+        }
+      }
       if(evidence)for(const p of chosen)if(p.order&&evidence.reflected.length<6)evidence.reflected.push({
        sourceId:id,distance:p.distance,delay:p.delay,arrivalDirection:p.arrivalDirection,arrivalOrigin:p.arrivalOrigin,
-       bands:p.bands,...p.diagnosticReflection});
+       bands:p.bands,...(p.scatter?{scatter:true}:{}),...p.diagnosticReflection});
       paths.push(...chosen);
       if(installed)for(const p of chosen)if(p.order>0)this.#installedPropagation01.selectedReflections++;
     }
@@ -876,7 +920,10 @@ export class StreamingRenderer {
         if(p.panTrajectory.frames<512)this.stats.panPartialBlocks++;
       }
       slot.present = true;
-      if (this.pcmWitness) slot.witnessOrder = p.order ?? 0;
+      if (this.pcmWitness) {
+        slot.witnessOrder = p.order ?? 0;
+        if(p.scatter===true||slot.witnessScatter)slot.witnessScatter = p.scatter === true;
+      }
       slot.releaseLeft = 0;
     }
     for (let index=0;index<=lastOccupied;index++){

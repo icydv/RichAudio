@@ -170,6 +170,7 @@ export function pathStyle(path){
   if(path.status==='pruned')return {color:'#92a0b5',dash:[2,6],label:'Valid candidate, not selected'};
   if(path.status==='unknown')return {color:'#e4cc80',dash:[8,6],label:'Unknown / unavailable propagation'};
   if(path.propagation==='obstructed')return {color:'#ffabb0',dash:[12,4],label:'Selected obstructed / transmission'};
+  if(path.scatter===true)return {color:'#9bafff',dash:[5,4],label:'Selected scattered return'};
   return path.order===0?{color:'#63e8d3',dash:[],label:'Selected direct'}:
     path.order===1?{color:'#ffbc80',dash:[],label:'Selected first reflection'}:
     path.order===2?{color:'#c6adff',dash:[],label:'Selected second reflection'}:

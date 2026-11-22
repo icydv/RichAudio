@@ -68,11 +68,12 @@ function pathSnapshot(trace,selected){
     vertices:copyPoints(vertices),points:copyPoints(p.points??plan.geometry?.points),obstructionHits:p.hits?.length?structuredClone(p.hits):[],
     sourceAtEmission:copyVector(plan.state?.position),listenerAtArrival:copyVector(plan.listener?.position),
     emissionTimeSeconds:p.emissionTime??plan.emission??null,arrivalTimeSeconds:p.arrivalTime??plan.arrivalTime??null,
-    delay:p.delay??null,distance:p.distance??null,bands:copyVector(p.bands),pan:p.pan??null,
+    delay:p.delay??null,distance:p.distance??null,bands:copyVector(selected.get(identity)?.scatterReferenceBand!==undefined?selected.get(identity).bands:p.bands),pan:p.pan??null,
     arrivalDirection:copyVector(p.arrivalDirection),emissionDirection:copyVector(p.emissionDirection),
     materialBasis:(p.materialBasis??[]).map(m=>({...m})),visibility:p.visibility??null,geometryEvidence:p.geometryEvidence??null,
     visibilityAssumption:p.visibilityAssumption??null,
-    generation:p.generation??null,rate:chosen?selected.get(identity).rate:null};
+    generation:p.generation??null,rate:chosen?selected.get(identity).rate:null,
+    ...(p.scatter?{scatter:true,reflectionBasis:'finite-off-specular-authored-concrete'}:{})};
 }
 
 export class SoundMapTelemetry {

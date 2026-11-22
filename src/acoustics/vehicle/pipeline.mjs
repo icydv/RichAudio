@@ -3,6 +3,7 @@ import { CausalSimulation, StreamingRenderer } from '../streaming/causal.mjs';
 import { AcousticAcceleration } from '../streaming/acoustic-backend.mjs';
 import { qualityPresets, qualityReflectors } from '../streaming/acoustic-quality.mjs';
 import { stockExteriorPressureGains } from './stock-pressure.mjs';
+import { roadScatterLimit } from '../engine/paths.mjs';
 
 export const vehicleSampleRate = 48000;
 export const vehicleBlockFrames = 512;
@@ -17,9 +18,9 @@ export function createStockVehiclePipeline(options = {}) {
 export class VehicleAcousticPipeline {
   constructor({ scene, sourceIds, quality = 'quality', acceleration = 'cpu', masterGain = 0.7,
     directStem = false, sourcePressureGains = {}, continuousRates = false, controlFilter = null,
-    validateSampledMotion = false, reuseStaticSegments = false, preserveSourceHistoryOnListenerCut = false } = {}) {
+    validateSampledMotion = false, reuseStaticSegments = false, preserveSourceHistoryOnListenerCut = false, roadScattering = false } = {}) {
     if (!(quality in qualityPresets)) throw Error('explicit acoustic quality required');
-    this.simulation = new CausalSimulation(scene, {validateSampledMotion,preserveSourceHistoryOnListenerCut});
+    this.simulation = new CausalSimulation(scene, {validateSampledMotion,preserveSourceHistoryOnListenerCut,roadScattering});
     this.backend = new AcousticAcceleration({ mode: acceleration, reuseStaticSegments });
     this.renderer = new StreamingRenderer({ sourceIds, maxPathsPerSource: qualityPresets[quality],
       pathCapacityPerSource: 64, masterGain, historyDiagnostics: true, generationReleaseGuard: true, sourcePressureGains, continuousRates });
@@ -34,7 +35,7 @@ export class VehicleAcousticPipeline {
     this.quality = quality;
     const pathBudget=qualityPresets[quality];
     this.simulation.setProcessingSettings({pathBudget,maxReflectors,earlyReflections});
-    this.renderer.setPathBudget(pathBudget);
+    this.renderer.setPathBudget(this.simulation.roadScattering&&pathBudget<=64-roadScatterLimit?pathBudget+roadScatterLimit:pathBudget);
   }
   setAcceleration(mode) { this.backend.setMode(mode); }
   replaceScene(scene, options) { this.simulation.replaceScene(scene, options); }
