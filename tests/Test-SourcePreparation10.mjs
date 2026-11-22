@@ -117,12 +117,26 @@ test('nine original accepted banks keep eight bounded prepared plans and an expl
  const banks=Array.from({length:9},()=>originalSourceBank05()),cache=new StockSourceDataPreparation10(),created=[];
  const registry={resolve:model=>({status:'available',bank:banks[model]}),prepareSource10:model=>cache.prepare(banks[model]),preparationDiagnostics10:()=>cache.diagnostics(),
   createSource:model=>{const preparation10=cache.get(banks[model]),source=new StockVehicleSource(banks[model],preparation10?{preparation10}:{});created.push(source);return source;}};
- const result=prepareStockSourcesForStartup10(registry,banks.map((_,model)=>({model,context:'player'})));
+ const eligible=banks.map((_,model)=>({model,context:'player'}));
+ const result=prepareStockSourcesForStartup10(registry,eligible);
  assert.equal(result.warmedBanks,8);assert.equal(result.sourcePreparation10.banks,8);assert(result.sourcePreparation10.bytes<=result.sourcePreparation10.maximumBytes);
+ assert.deepEqual(result.preparedPairs,eligible.slice(0,8));
  assert.equal(result.unpreparedBanks.length,1);assert.equal(result.unpreparedBanks[0].reason,'banks');assert.equal(result.unpreparedBanks[0].fallback,'immediate-cold-constructor');assert.equal(created.length,0);
  assert.equal(cache.get(banks[8]),null);const cold=registry.createSource(8),reference=new StockVehicleSource(banks[8]);assert.equal(cold.frame,0);
  const a=[new Float32Array(512),new Float32Array(512)],b=[new Float32Array(512),new Float32Array(512)],control={operatingPoint:.5,load:.9,running:true};
  for(let block=0;block<8;block++){cold.renderInto(control,...a);reference.renderInto(control,...b);assert.deepEqual(a,b);}
+ const gameplay=new StockGameplay({registry,session:budgetSession042,latencyProfile:'street-01',
+  continuityPolicy:'camera-source-01',vehicleSourcePolicy:'catalogue-fleet-01'});
+ try{
+  assert.equal(gameplay.prepareStartupVoices01(result.preparedPairs),8);
+  assert(!gameplay.startupVoices01.has(banks[8]));
+  for(const bank of banks.slice(0,8)){
+   const warm=gameplay.startupVoices01.get(bank),cold=new StockVehicleSource(bank);
+   assert.equal(warm.frame,0);
+   for(let block=0;block<8;block++){warm.renderInto(control,...a);cold.renderInto(control,...b);assert.deepEqual(a,b);}
+   assert.deepEqual(warm.stats,cold.stats);
+  }
+ }finally{gameplay.close();}
 });
 test('startup catches only typed preparation limits and leaves malformed bank/data errors fatal',()=>{
  const bank=originalSourceBank05(),eligible=[{model:0,context:'player'}],cache=new StockSourceDataPreparation10(),registry={resolve:()=>({status:'available',bank}),preparationDiagnostics10:()=>cache.diagnostics()};

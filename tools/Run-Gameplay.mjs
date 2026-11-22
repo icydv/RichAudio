@@ -41,7 +41,7 @@ const privateVoice=privatePowertrain?registry.resolve(config.eligible[0].model,'
 // Prepare pure bank data and bounded untouched voices before host readiness.
 // The normal eligibility selection still controls when any voice is acquired.
 const startupBegan=performance.now(),startupPairs=fleet?registry.fleetPreparationPairs():config.eligible;
-const sourceStartupPreparation10=prepareStockSourcesForStartup10(registry,startupPairs);
+const {preparedPairs,...sourceStartupPreparation10}=prepareStockSourcesForStartup10(registry,startupPairs);
 // Normal product camera changes retain independently observed vehicle history.
 // Explicit immutable policy selections and closed demonstration profiles retain
 // their declared behavior; source expiry and listener-cut rejection still apply.
@@ -72,7 +72,8 @@ async function warmNormalControl01(){
 }
 const normalControlWarmup=latencyProfile.id==='street-01'?await warmNormalControl01():null;
 const engine=new StockGameplay({registry,profiles,session,latencyDiagnostics:true,latencyProfile:latencyProfile.id,continuityPolicy,vehicleSourcePolicy:config.vehicleSourcePolicy,privatePowertrain}),allowed=new Set(config.eligible.map(p=>p.model+':'+p.context));
-const startupVoices=latencyProfile.id==='street-01'&&!sourceStartupPreparation10.unpreparedBanks.length?engine.prepareStartupVoices01(startupPairs):0;
+const startupVoicePairs=fleet?preparedPairs:sourceStartupPreparation10.unpreparedBanks.length?[]:startupPairs;
+const startupVoices=latencyProfile.id==='street-01'&&startupVoicePairs.length?engine.prepareStartupVoices01(startupVoicePairs):0;
 const powertrainVoiceEvidence=privatePowertrain?new PowertrainVoiceEvidence():null;
 const installedSceneEngine={
  order:2,maxPaths:64,maxReflectors:16,...vehicleDistanceSceneOptions('authored-detail-loss-v1'),

@@ -24,7 +24,7 @@ export class StockSourceDataPreparation10 {
 /** Existing accepted banks remain playable when preparation capacity is full.
  * Only typed preparation-budget exhaustion uses the original cold fallback. */
 export function prepareStockSourcesForStartup10(registry,eligible){
- const seen=new Set(),unpreparedBanks=[],sourceJitPreparation10=[];let warmedBanks=0;
+ const seen=new Set(),unpreparedBanks=[],preparedPairs=[],sourceJitPreparation10=[];
  for(const pair of eligible){
   const resolved=registry.resolve(pair.model,pair.context);if(resolved.status!=='available')throw Error('prepared eligible model no longer maps');
   if(seen.has(resolved.bank))continue;seen.add(resolved.bank);
@@ -32,9 +32,9 @@ export function prepareStockSourcesForStartup10(registry,eligible){
    if(!(error instanceof SourcePreparationBudgetError10))throw error;
    unpreparedBanks.push({bank:resolved.bank.model,context:pair.context,reason:error.kind,maximum:error.maximum,fallback:'immediate-cold-constructor'});continue;
   }
-  sourceJitPreparation10.push(warmStockSourceJit10(plan));warmedBanks++;
+  sourceJitPreparation10.push(warmStockSourceJit10(plan));preparedPairs.push(pair);
  }
- return {warmedBanks,unpreparedBanks,sourcePreparation10:registry.preparationDiagnostics10(),sourceJitPreparation10};
+ return {warmedBanks:preparedPairs.length,preparedPairs,unpreparedBanks,sourcePreparation10:registry.preparationDiagnostics10(),sourceJitPreparation10};
 }
 
 const jitResults10=new Map();
