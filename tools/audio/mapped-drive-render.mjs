@@ -20,7 +20,7 @@ function appliedSlots(renderer, identities) {
   masterGain: renderer.masterGain, outputGain: renderer.outputGain, sourcePressureGain: s.source.pressureGain }));
 }
 
-function listenerPacket(session, block, ticks, position, forward) {
+export function listenerPacket(session, block, ticks, position, forward) {
  return { version: 1, session, sequence: block / 4, generation: 1, observationTicks: ticks,
   clockFrequency: 10_000_000, gameTimeMs: Math.round(block * blockMs), position,
   velocity: [0, 0, 0], forward, up: [0, 0, 1], valid: true, paused: false, reason: 'valid',
@@ -28,7 +28,7 @@ function listenerPacket(session, block, ticks, position, forward) {
   velocityKind: 'unavailable', sourceId: null };
 }
 
-function describeRenderer(r) {
+export function describeRenderer(r) {
  return { sourceIds: [...r.sources.keys()], maxPathsPerSource: r.maxPathsPerSource,
   pathCapacityPerSource: r.pathCapacityPerSource, masterGain: r.masterGain,
   historyDiagnostics: true, generationReleaseGuard: r.generationReleaseGuard,

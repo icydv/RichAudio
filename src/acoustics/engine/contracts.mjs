@@ -114,6 +114,9 @@ function engineConfiguration(engineOptions) {
     order: 1, maxPaths: 12, maxReflectors: 8, maxDelay: 2, updateHz: 40, ...baseOptions,
   };
   requireValue(Number.isFinite(config.soundSpeed)&&config.soundSpeed>=250&&config.soundSpeed<=450,'sound speed');
+  if (config.surfaceRoughnessRmsMetres !== undefined)
+    requireValue(Number.isFinite(config.surfaceRoughnessRmsMetres) && config.surfaceRoughnessRmsMetres >= 0,
+      'surface roughness must be a finite nonnegative RMS height');
   requireValue(Number.isFinite(config.referenceDistance)&&config.referenceDistance>0&&config.referenceDistance<=10,'reference distance');
   requireValue([0,1,2].includes(config.order)&&Number.isInteger(config.maxPaths)&&config.maxPaths>=1&&config.maxPaths<=bounds.paths,'path/order budget');
   requireValue(Number.isInteger(config.maxReflectors)&&config.maxReflectors>=1&&config.maxReflectors<=bounds.reflectors,'reflector budget');

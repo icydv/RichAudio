@@ -57,7 +57,7 @@ export function mappedDrive(placement, independent) {
 
 // Prepare exactly the worker packets that will be replayed on the authored
 // sample clock. The live path retains its own wall clock and observation leases.
-export async function prepareDriveWindows({ config, session, drive, placement, inputs, blocks, blockMs }) {
+export async function prepareDriveWindows({ config, session, drive, placement, inputs, blocks, blockMs, surfaceRoughnessRmsMetres }) {
  let delivered = null;
  const service = new InstalledSceneService01({ config, session, unmanagedIntervalMs01: 150,
   onScene(scene, receipt) { delivered = { scene, receipt }; } });
@@ -75,6 +75,7 @@ export async function prepareDriveWindows({ config, session, drive, placement, i
     maximumSurfaces: 2048, adaptiveRadius: false, geometryTimeMs: now, durationMs: 1000,
     prepareSoundMapGeometry01: true,
     engine: { order: 2, installedReflectionTrains: true, maxPaths: 32, maxReflectors: 12,
+     ...(surfaceRoughnessRmsMetres === undefined ? {} : {surfaceRoughnessRmsMetres}),
      ...vehicleDistanceSceneOptions('authored-detail-loss-v1') } };
    delivered = null;
    const until = performance.now() + 30000;

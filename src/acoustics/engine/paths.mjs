@@ -13,6 +13,7 @@ import {
 } from "../research/local-geometry.mjs";
 import { pose, trackPosition, requireValue } from "./contracts.mjs";
 const E = 1e-8;
+const coherentBandFrequencies = [200, 1600, 6400];
 const tileLifetimes = new WeakMap();
 function validUntil(tile) {
   let until = tileLifetimes.get(tile);
@@ -357,6 +358,23 @@ export function finishPath(plan,queries=null,stats={queries:0,surfaceTests:0}) {
             ))) /
           2;
   const spreading=spreadingDistance(g.distance,scene.config.referenceDistance,source.nearFieldRadius??0);
+  if (scene.config.surfaceRoughnessRmsMetres > 0 && candidate.surfaces.length) {
+    // For Gaussian height variation the mean specular pressure at frequency f
+    // is multiplied by exp(-2 (k sigma cos(theta))²) at each contact. Use
+    // independent height variations and nominal frequencies for our three
+    // broad bands. Energy scattered in other directions is not synthesized.
+    let incidenceSum = 0;
+    let from = state.position;
+    for (let i = 0; i < candidate.surfaces.length; i++) {
+      const leg = sub(g.points[i], from);
+      const cosine = dot(leg, candidate.surfaces[i].normal) / length(leg);
+      incidenceSum += cosine * cosine;
+      from = g.points[i];
+    }
+    const phase = (2 * Math.PI / scene.config.soundSpeed) * scene.config.surfaceRoughnessRmsMetres;
+    const exponent = -2 * incidenceSum * phase * phase;
+    bands = coherentBandFrequencies.map((frequency,i) => bands[i] * Math.exp(exponent * frequency * frequency));
+  }
   bands = bands.map(
     (x, i) =>
       ((x * radiation * scene.config.referenceDistance) /
