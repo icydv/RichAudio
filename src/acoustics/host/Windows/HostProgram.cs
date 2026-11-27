@@ -13,19 +13,20 @@ using RichAudio.Beacon.Transport;
 
 namespace RichAudio.Beacon.Windows
 {
-    public static class HostProgram
+    public static partial class HostProgram
     {
         private static volatile bool stop, producerEnded;
         private static volatile string producerError;
         private static volatile string latestRendererStatus;
         private static readonly object inputLock = new object(), logLock = new object();
-        private sealed class ControlMessage { internal string Text, ListenerJson; internal long QueuedTicks, Sequence; internal double ReceiptAgeMs, ObservationQpc100ns; }
+        private sealed class ControlMessage { internal string Text, ListenerJson; internal long QueuedTicks, Sequence, ObservationTicks; internal double ObservationQpc100ns; }
         private static readonly Queue<ControlMessage> inputQueue = new Queue<ControlMessage>();
         private static readonly AutoResetEvent inputSignal = new AutoResetEvent(false);
         private static volatile bool inputStop;
         private static Thread inputWriter;
         private static double maxListenerHostQueueAgeMs;
         private static long listenerMessagesWritten;
+        private static int controlQueueHigh; private static double maximumControlWriteMs;
         private static readonly List<Dictionary<string,object>> listenerReceipts=new List<Dictionary<string,object>>();
         private static Process child;
         private static WasapiOutput output;
@@ -119,7 +120,7 @@ namespace RichAudio.Beacon.Windows
 #if STATE_TRANSPORT
                 if (listenerPipe)
                 {
-                    pipe = new StatePipeServer("RichAudio.Acoustics07.Listener.v1", delegate(ListenerState state, double age) { Enqueue(new ControlMessage{ListenerJson=Protocol.EncodeJson(state),ReceiptAgeMs=age,QueuedTicks=Stopwatch.GetTimestamp(),Sequence=state.Sequence,ObservationQpc100ns=state.ObservationTicks*(10000000.0/state.ClockFrequency)}); },true,ListenerEnded); pipe.Start();
+                    pipe = new StatePipeServer("RichAudio.Acoustics07.Listener.v1", ListenerReceived,true,ListenerEnded); pipe.Start();
                 }
 #else
                 if (listenerPipe) throw new NotSupportedException("Listener transport was not included in this build");
@@ -179,6 +180,8 @@ namespace RichAudio.Beacon.Windows
             return producerError != null || (output != null && output.Error != null) ? 1 : 0;
         }
         private static Dictionary<string, object> Action(string name, double ms, long frame) { return new Dictionary<string,object>{{"command",name},{"hostMs",ms},{"consumedFrame",frame},{"qpc100ns",Stopwatch.GetTimestamp()*(10000000.0/Stopwatch.Frequency)}}; }
+        internal static double ObservationAgeAtWrite(long observed,long now,long frequency){return Math.Max(0,(now-observed)*1000.0/frequency);}
+        internal static void ListenerReceived(ListenerState state,double age){Enqueue(new ControlMessage{ListenerJson=Protocol.EncodeJson(state),ObservationTicks=state.ObservationTicks,QueuedTicks=Stopwatch.GetTimestamp(),Sequence=state.Sequence,ObservationQpc100ns=state.ObservationTicks*(10000000.0/state.ClockFrequency)});}
         internal static void ListenerEnded(TransportResult ending){if(output!=null)output.Muted=true;stop=true;if(ending.Outcome!="deliberate-stop")producerError="Listener terminal: "+ending.Stage+"/"+ending.Code;Console.WriteLine("Listener terminal "+json.Serialize(ending)+"; owned output muted/stopping");stop=true;}
         private static void Control(string command)
         {
@@ -225,7 +228,7 @@ namespace RichAudio.Beacon.Windows
         private static void Enqueue(ControlMessage message)
         {
             if(child==null)return;
-            lock(inputLock){if(inputQueue.Count>=64){producerError="Bounded control queue overflow";return;}inputQueue.Enqueue(message);}inputSignal.Set();
+            lock(inputLock){if(inputQueue.Count>=64){producerError="Bounded control queue overflow";return;}inputQueue.Enqueue(message);controlQueueHigh=Math.Max(controlQueueHigh,inputQueue.Count);}inputSignal.Set();
         }
         private static void WriteControls()
         {
@@ -239,12 +242,11 @@ namespace RichAudio.Beacon.Windows
                     if(message.ListenerJson!=null)
                     {
                         long now=Stopwatch.GetTimestamp();double queueMs=(now-message.QueuedTicks)*1000.0/Stopwatch.Frequency;
-                        maxListenerHostQueueAgeMs=Math.Max(maxListenerHostQueueAgeMs,queueMs);double totalAge=message.ReceiptAgeMs+queueMs;
+                        maxListenerHostQueueAgeMs=Math.Max(maxListenerHostQueueAgeMs,queueMs);double totalAge=ObservationAgeAtWrite(message.ObservationTicks,now,Stopwatch.Frequency);
                         text="{\"type\":\"listener\",\"receiptAgeMs\":"+totalAge.ToString("R",CultureInfo.InvariantCulture)+",\"state\":"+message.ListenerJson+"}";
-                        listenerMessagesWritten++;
                         if(listenerReceipts.Count<128)listenerReceipts.Add(new Dictionary<string,object>{{"sequence",message.Sequence},{"observationQpc100ns",message.ObservationQpc100ns},{"writeQpc100ns",now*(10000000.0/Stopwatch.Frequency)},{"receiptAgeMs",totalAge},{"hostQueueAgeMs",queueMs}});
                     }
-                    child.StandardInput.WriteLine(text);child.StandardInput.Flush();
+                    long writeStart=Stopwatch.GetTimestamp();child.StandardInput.WriteLine(text);child.StandardInput.Flush();maximumControlWriteMs=Math.Max(maximumControlWriteMs,(Stopwatch.GetTimestamp()-writeStart)*1000.0/Stopwatch.Frequency);if(message.ListenerJson!=null)listenerMessagesWritten++;
                 }
             }
             catch (IOException ex) { if (!stop) producerError = "Control pipe closed: " + ex.GetType().Name; }
