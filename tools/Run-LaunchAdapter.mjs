@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import readline from 'node:readline';
 import {readFileSync,writeFileSync} from 'node:fs';
-import {preflight} from './operator/adapter.mjs';
+import {preflight,executedPaths} from './operator/adapter.mjs';
 import {approval,consume} from './operator/approval-gate.mjs';
 import {StopEvidence} from './operator/stop-evidence.mjs';
 const [mode,value,approvalFile]=process.argv.slice(2),root=fileURLToPath(new URL('..',import.meta.url));
@@ -15,10 +15,10 @@ else if(mode==='reconcile'){
  const e=new StopEvidence();e.receiver=r.stopEvidence.receiver;e.sender=r.stopEvidence.sender;e.confirmSender(confirmation);
  console.log(JSON.stringify({...aggregate,session:{...r,stopEvidence:e.result()},normalStop:r.state==='complete'&&e.result().onTimeAcknowledgedStop&&aggregate.ownership?.verifiedTreeExit===true&&!aggregate.ownership?.forcedTreeCleanup}));
 }else if(mode==='fixture'||mode==='live'){
- let p=null;if(mode==='fixture'){if(!['normal','orphan','unresponsive','producer-stuck'].includes(value))throw Error('Explicit disposable fixture required');}
+ let p=null;if(mode==='fixture'){if(!['normal','orphan','unresponsive','producer-stuck','startup-delayed','startup-duplicate','startup-missing','startup-late'].includes(value))throw Error('Explicit disposable fixture required');}
  else {p=preflight(value);approval(value,p,approvalFile);consume(p,'launch-consumed.json');}
- const broker=p?.broker??path.join(root,'.local/operator/OwnedTree.exe');
- const workerArgs=[mode==='fixture'?'1400':'65000',mode==='fixture'?'2000':'70000',process.execPath,path.join(root,'tools/operator/adapter-worker.mjs'),mode==='fixture'?'fixture':'approved-live',value];if(p)workerArgs.push(approvalFile);
+ const broker=p?.broker??executedPaths.broker;
+ const workerArgs=[mode==='fixture'?'1400':'65000',mode==='fixture'?'2000':'70000',process.execPath,executedPaths.worker,mode==='fixture'?'fixture':'approved-live',value];if(p)workerArgs.push(approvalFile);
  const child=spawn(broker,workerArgs,{cwd:root,env:p?.env,stdio:['pipe','pipe','pipe'],windowsHide:true});
  let output='';child.stdout.on('data',b=>{output+=b;if(output.length>2097152)output=output.slice(-2097152);process.stdout.write(b);});child.stderr.pipe(process.stderr);
  child.stdin.on('error',()=>{});
