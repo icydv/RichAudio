@@ -199,6 +199,10 @@ export class CausalSimulation {
         ageSeconds: null,
       };
     const age = now - latest.time;
+    // Source history identity exists even while the listener presentation buffer
+    // warms. Delaying this tag until a listener becomes valid discards real PCM.
+    for (const [id, current] of Object.entries(latest.sources))
+      sourceGenerations[id] = this.epoch * 4294967296 + current.generation;
     requireValue(age >= -1e-8, "future observation rejected");
     this.stats.maximumAgeSeconds = Math.max(this.stats.maximumAgeSeconds, age);
     const listener = this.track("listener", null, now);
@@ -295,6 +299,7 @@ export class StreamingRenderer {
     maxPathsPerSource = 12,
     historySeconds = 2.5,
     masterGain = 0.7,
+    historyDiagnostics = false,
   } = {}) {
     requireValue(
       sourceIds.length >= 1 &&
@@ -313,6 +318,18 @@ export class StreamingRenderer {
       "DSP budgets",
     );
     this.frame = 0;
+    this.historyDiagnostics = historyDiagnostics
+      ? {
+          beforeStart: 0,
+          future: 0,
+          frameTag: 0,
+          generationTag: 0,
+          zeroWeightUnavailable: 0,
+          affectedFrames: 0,
+          firstFrame: -1,
+          lastFrame: -1,
+        }
+      : null;
     this.masterGain = masterGain;
     this.historyFrames = Math.ceil(historySeconds * FS);
     this.pathLimit = sourceIds.length * maxPathsPerSource;
@@ -376,6 +393,26 @@ export class StreamingRenderer {
         0,
       ) +
       this.slots.length * 48;
+  }
+  historyReady(control) {
+    return (
+      control.paths.length > 0 &&
+      control.paths.every((p) => {
+        const s = this.sources.get(p.sourceId),
+          k = Math.floor(p.emissionFrame),
+          f = p.emissionFrame - k;
+        return (
+          s &&
+          [k, ...(f > 0 ? [k + 1] : [])].every(
+            (index) =>
+              index >= 0 &&
+              index < this.frame &&
+              s.frames[index % this.historyFrames] === index &&
+              s.generations[index % this.historyFrames] === p.generation,
+          )
+        );
+      })
+    );
   }
   setSourceGeneration(id, generation) {
     const s = this.sources.get(id);
@@ -497,6 +534,7 @@ export class StreamingRenderer {
     const lowK = 1 - Math.exp((-2 * Math.PI * 400) / FS),
       highK = 1 - Math.exp((-2 * Math.PI * 4000) / FS);
     for (let j = 0; j < frames; j++) {
+      let affected = false;
       const frame = this.frame + j,
         write = frame % this.historyFrames;
       for (let i = 0; i < this.sourceList.length; i++) {
@@ -548,14 +586,28 @@ export class StreamingRenderer {
           s = slot.source;
         let x = 0;
         for (let tap = 0; tap < 2; tap++) {
-          const index = k + tap;
-          if (index < 0 || index > frame) continue;
+          const index = k + tap,
+            weight = tap ? f : 1 - f;
+          const diag = this.historyDiagnostics;
+          if (index < 0 || index > frame) {
+            if (diag && weight > 0) {
+              diag[index < 0 ? "beforeStart" : "future"]++;
+              affected = true;
+            }
+            continue;
+          }
           const at = index % this.historyFrames;
           if (s.frames[at] !== index || s.generations[at] !== slot.generation) {
             this.stats.missingHistory++;
+            if (diag) {
+              if (weight === 0) diag.zeroWeightUnavailable++;
+              else {
+                diag[s.frames[at] !== index ? "frameTag" : "generationTag"]++;
+                affected = true;
+              }
+            }
             continue;
           }
-          const weight = tap ? f : 1 - f;
           x +=
             weight *
             (s.bands[0][at] * slot.gain[0] +
@@ -580,6 +632,12 @@ export class StreamingRenderer {
       left[j] = l;
       right[j] = r;
       this.stats.sumSquares += l * l + r * r;
+      if (affected && this.historyDiagnostics) {
+        const d = this.historyDiagnostics;
+        d.affectedFrames++;
+        if (d.firstFrame < 0) d.firstFrame = frame;
+        d.lastFrame = frame;
+      }
     }
     this.frame += frames;
     this.stats.frames += frames;

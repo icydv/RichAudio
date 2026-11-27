@@ -21,6 +21,8 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Causal acoustic streaming and independent oracle tests failed.'}
     & node --test tests/Test-AcousticsHostProducer.mjs tests/Test-ListenerPlayout.mjs
     if($LASTEXITCODE -ne 0){throw 'Actual synthetic host-producer framing and lifecycle tests failed.'}
+    & node --test tests/Test-OfflineContinuity.mjs
+    if($LASTEXITCODE -ne 0){throw 'Silent production streaming continuity and responsiveness tests failed.'}
     # Original PCM, bounded queues and local transport only: these tests never open an audio endpoint.
     & (Join-Path $repo 'tools\Build-AcousticsHost.ps1') -Tests
     & (Join-Path $repo 'tools\Test-BeaconTransport.ps1')
