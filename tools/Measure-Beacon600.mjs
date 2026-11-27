@@ -3,12 +3,12 @@ import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
-import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { runHeadless, measure } from "./audio/headless-stream.mjs";
 import { pcmHash, spatialSchedule, fundamentalPeak, envelope, verifyWav } from "./audio/beacon-analysis.mjs";
 import { wav, audioMetrics } from "../src/acoustics/engine/signals.mjs";
 import { privateStoragePath } from "../src/acoustics/research/research-private-storage.mjs";
+import { pcmRingGain } from "./audio/pcm-ring-replay.mjs";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const output = privateStoragePath(root, path.resolve(root, process.argv[2] ?? ".local/beacon-600hz-new"));
 const sink = process.argv[3];
@@ -23,19 +23,7 @@ function save(name, r) {
   return { sha256: createHash("sha256").update(bytes).digest("hex"), validation };
 }
 function gainPcm(name, r, gain) {
-  const input = Buffer.alloc(r.left.length * 8);
-  for (let i = 0; i < r.left.length; i++) { input.writeFloatLE(r.left[i], i * 8); input.writeFloatLE(r.right[i], i * 8 + 4); }
-  const source = path.join(output, name + "-input.f32"), dest = path.join(output, name + "-gain.f32");
-  fs.writeFileSync(source, input, { flag: "wx" });
-  execFileSync(sink, [source, dest, String(gain)], { windowsHide: true, timeout: 10000 });
-  const b = fs.readFileSync(dest); assert.equal(b.length, input.length);
-  const left = new Float32Array(r.left.length), right = left.slice();
-  for (let i = 0; i < left.length; i++) {
-    left[i] = b.readFloatLE(i * 8); right[i] = b.readFloatLE(i * 8 + 4);
-    assert.equal(left[i], Math.fround(r.left[i] * Math.fround(gain)));
-    assert.equal(right[i], Math.fround(r.right[i] * Math.fround(gain)));
-  }
-  return { left, right };
+  return pcmRingGain(sink, output, name, r, gain);
 }
 for (const name of ["stationary", "turn", "emission-stop"]) {
   const base = await runHeadless({ name, seconds: 4 });

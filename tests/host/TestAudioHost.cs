@@ -37,6 +37,13 @@ namespace RichAudio.Beacon.Tests
                 Check(HostProgram.BeaconLevelArguments(.44,"harmonic",false)==" --beacon-level 0.44","source level forwarded invariantly");
                 foreach(double level in new double[]{double.NaN,-.01,.51})Throws(delegate{HostProgram.BeaconLevelArguments(level,"harmonic",false);},"invalid source level rejected");
                 Throws(delegate{HostProgram.BeaconLevelArguments(.44,"harmonic",true);},"WAV custom level rejected");
+                Check(HostProgram.BeaconTrimArguments(0,"open-road","harmonic",1,95,.22,.08f,false,false)=="","default trim disabled");
+                Check(HostProgram.BeaconTrimArguments(24,"open-road","harmonic",1,600,.44,.20f,true,false)==" --beacon-output-trim-db 24","fixed trim profile forwarded");
+                foreach(double db in new double[]{double.NaN,23,25})Throws(delegate{HostProgram.BeaconTrimArguments(db,"open-road","harmonic",1,600,.44,.20f,true,false);},"unreviewed trim rejected");
+                Throws(delegate{HostProgram.BeaconTrimArguments(24,"open-road","harmonic",2,600,.44,.20f,true,false);},"multi-source trim rejected");
+                Throws(delegate{HostProgram.BeaconTrimArguments(24,"open-road","harmonic",1,600,.44,.25f,true,false);},"different master rejected");
+                Throws(delegate{HostProgram.BeaconTrimArguments(24,"open-road","harmonic",1,600,.44,.20f,false,false);},"listener fallback rejected");
+                Throws(delegate{HostProgram.BeaconTrimArguments(24,"open-road","harmonic",1,600,.44,.20f,true,true);},"mastered WAV trim rejected");
                 // Deterministic baseline: accepted age 5 ms, encoding 10 ms, queue wait 20 ms.
                 double legacyForwarded=5+20;
                 double corrected=HostProgram.ObservationAgeAtWrite(1000,1035,1000);

@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "scope": "silent pre-device audition-level match; not mixer/device/live validation",
+  "profile": {
+    "frequencyHz": 600,
+    "sourceLevel": 0.44,
+    "outputTrimDb": 24,
+    "masterGain": 0.2,
+    "preMasterPeakLimit": 0.5,
+    "masterGainMaximum": 0.25
+  },
+  "comparisonRules": {
+    "maximumSampleDifference": 0.00025720214430083825,
+    "maximumAbsoluteRmsLevelDifferenceDb": 0.1,
+    "noTimeAlignment": true,
+    "noNormalisation": true
+  },
+  "results": [
+    {
+      "name": "stationary",
+      "auditionSha256": "1A395EE8C25D56DF68A39DF4582573BFE54060FC47B7C9E478C3EE9240920EF5",
+      "candidateWavSha256": "65B17F48B49BF17C234E4FE2369BA478E644C904C769269AF670D6C6DCA7179F",
+      "frames": 192000,
+      "sampleRate": 48000,
+      "channels": 2,
+      "candidate": {
+        "peak": 0.05506742000579834,
+        "rms": 0.02821465407953591,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 10240,
+        "maximumAdjacentStep": 0.006587873212993145
+      },
+      "reference": {
+        "peak": 0.055146947503089905,
+        "rms": 0.028225591676605127,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 15068,
+        "maximumAdjacentStep": 0.006775109097361565
+      },
+      "levelDifferenceDb": -0.0033664900272965506,
+      "maximumSampleDifference": 0.00025542452931404114,
+      "differenceRms": 0.0001278360132766132,
+      "headroomDb": 25.182105408268942,
+      "fundamental": {
+        "frequencyHz": 600,
+        "windowSeconds": [
+          1,
+          2
+        ],
+        "binSpacingHz": 1,
+        "nominalBinUncertaintyHz": 0.5
+      },
+      "outputTrim": {
+        "db": 24,
+        "gain": 15.848931924611133,
+        "peakLimit": 0.5,
+        "peakBefore": 0.017372597008943558,
+        "peakAfter": 0.2753371000289917,
+        "blocks": 375,
+        "rejectedBlocks": 0
+      },
+      "missingHistory": 0,
+      "limiterSamples": 0,
+      "nonPcmScheduleIdentical": true,
+      "acceleratedWallMs": 277.53099999999995,
+      "dspMs": {
+        "count": 375,
+        "median": 0.045199999999994134,
+        "p95": 0.15339999999999065,
+        "max": 1.5369000000000028
+      }
+    },
+    {
+      "name": "turn",
+      "auditionSha256": "B7522B74E515CA404F765B68659B2B7EE0186A9D3792EA40E6CF3855129D8549",
+      "candidateWavSha256": "0045E72C2A0458D05197DF2C3AA137DF620C52026EC6DD7DFED75F3CFC895FB5",
+      "frames": 192000,
+      "sampleRate": 48000,
+      "channels": 2,
+      "candidate": {
+        "peak": 0.07351341098546982,
+        "rms": 0.028215190401571427,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 10240,
+        "maximumAdjacentStep": 0.008802935481071472
+      },
+      "reference": {
+        "peak": 0.07351908832788467,
+        "rms": 0.028216039719618776,
+        "clippedSamples": 0,
+        "nonfiniteSamples": 0,
+        "zeroSamples": 14732,
+        "maximumAdjacentStep": 0.009186070412397385
+      },
+      "levelDifferenceDb": -0.0002614539081143296,
+      "maximumSampleDifference": 0.0002569630742073059,
+      "differenceRms": 0.00013825657636071283,
+      "headroomDb": 22.672668514726535,
+      "fundamental": null,
+      "outputTrim": {
+        "db": 24,
+        "gain": 15.848931924611133,
+        "peakLimit": 0.5,
+        "peakBefore": 0.023191913962364197,
+        "peakAfter": 0.3675670623779297,
+        "blocks": 375,
+        "rejectedBlocks": 0
+      },
+      "missingHistory": 0,
+      "limiterSamples": 0,
+      "nonPcmScheduleIdentical": true,
+      "acceleratedWallMs": 273.0015000000001,
+      "dspMs": {
+        "count": 375,
+        "median": 0.04550000000000409,
+        "p95": 0.154200000000003,
+        "max": 1.8425000000000011
+      }
+    }
+  ],
+  "nativeOrientationSweep": {
+    "seconds": 6,
+    "observations": 120,
+    "listenerMode": "native-orientation-only-in-synthetic-scene",
+    "peak": 0.0778578668832779,
+    "rms": 0.028368960390210855,
+    "headroomDb": 22.173949981407258,
+    "preMasterPeak": 0.38928931951522827,
+    "preMasterCeiling": 0.5,
+    "clippedSamples": 0,
+    "nonfiniteSamples": 0,
+    "missingHistory": 0,
+    "rejectedTrimBlocks": 0
+  }
+}
